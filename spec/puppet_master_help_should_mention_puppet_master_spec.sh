@@ -1,2 +1,2 @@
 . local_setup.sh
-$BIN/puppet master | grep -w 'puppet master'
+$BIN/puppet master --help | grep -w 'puppet master'
