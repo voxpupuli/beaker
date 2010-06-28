@@ -1,7 +1,12 @@
 #!/bin/bash
 
 if ! [ -f local_setup.sh ] ; then
-        echo "You must create a local_setup.sh so we know where to find the puppet libs."
+        echo '
+You must create a local_setup.sh so we know where to find the puppet libs.
+
+Example:
+'
+        cat local_setup.example.sh
         exit 2
 fi
 
@@ -9,7 +14,6 @@ let FAILURES=0
 let TOTAL=0
 
 FAIL_LOG=/tmp/$$.failures.txt
-rm -f $FAIL_LOG
 touch $FAIL_LOG
 
 for SPEC in `find ./spec -name '*_spec.sh'` ; do
