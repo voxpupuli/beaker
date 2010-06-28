@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. `dirname $0`/util/start_puppet_master.sh
+. `dirname $0`/util.sh
 
 . local_setup.sh
 
@@ -10,7 +10,7 @@ mkdir -p /tmp/puppet-$$/manifests
 
 echo "file{'/tmp/hello.$$.txt': content => 'hello world'}" > /tmp/puppet-$$/manifests/site.pp
 
-$BIN/puppet agent --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize --onetime --server localhost --debug --masterport $MASTER_PORT
+start_puppet_agent
 
 kill $MASTER_PID
 

@@ -1,4 +1,8 @@
-#!/bin/bash
+function start_puppet_agent {
+        MASTER_PORT=18140
+        $BIN/puppet agent --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ \
+                --no-daemonize --onetime --server localhost --debug --masterport $MASTER_PORT "$@"
+}
 
 function start_puppet_master {
         MASTER_PORT=18140
