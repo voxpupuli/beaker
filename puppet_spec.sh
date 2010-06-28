@@ -13,3 +13,5 @@ for SPEC in `find ./spec -name '*_spec.sh'` ; do
 done  
 echo
 echo "$TOTAL tests, $FAILURES failures"
+
+[ $FAILURES -eq 0 ]
