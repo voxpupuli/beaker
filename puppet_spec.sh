@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if ! [ -f local_setup.sh ] ; then
+        echo "You must create a local_setup.sh so we know where to find the puppet libs."
+        exit 2
+fi
+
 let FAILURES=0
 let TOTAL=0
 
