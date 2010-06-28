@@ -10,6 +10,7 @@ let TOTAL=0
 
 FAIL_LOG=/tmp/$$.failures.txt
 rm -f $FAIL_LOG
+touch $FAIL_LOG
 
 for SPEC in `find ./spec -name '*_spec.sh'` ; do
         if bash $SPEC >& /dev/null ; then
