@@ -17,7 +17,7 @@ FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
 
 for SPEC in `find ./spec -name '*_spec.sh'` ; do
-        if bash $SPEC >& /dev/null ; then
+        if $SPEC >& /dev/null ; then
                 echo -n . 
         else
                 echo $SPEC > $FAIL_LOG
