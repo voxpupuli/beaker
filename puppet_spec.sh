@@ -21,7 +21,7 @@ for SPEC in `find ./spec -name '*_spec.sh' ` ; do
         if $SPEC >& /dev/null ; then
                 echo -n . 
         else
-                echo $SPEC > $FAIL_LOG
+                echo $SPEC >> $FAIL_LOG
                 let "FAILURES+=1"
                 echo -n F
         fi
