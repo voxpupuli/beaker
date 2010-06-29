@@ -16,7 +16,8 @@ let TOTAL=0
 FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
 
-for SPEC in `find ./spec -name '*_spec.sh' -perm +111 ` ; do
+for SPEC in `find ./spec -name '*_spec.sh' ` ; do
+        [ -x $SPEC ] || continue
         if $SPEC >& /dev/null ; then
                 echo -n . 
         else
