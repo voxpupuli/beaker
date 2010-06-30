@@ -6,6 +6,7 @@ function start_puppet_agent {
 
 function start_puppet_master {
         MASTER_PORT=18140
+        mkdir -p /tmp/puppet-$$/manifests/
         $BIN/puppet master --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ \
                 --no-daemonize --autosign=true --certname=localhost --masterport $MASTER_PORT "$@" &
         MASTER_PID=$!
@@ -18,4 +19,8 @@ function start_puppet_master {
                 fi
         done
 
+}
+
+function stop_puppet_master {
+        kill $MASTER_PID
 }
