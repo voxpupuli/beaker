@@ -12,14 +12,19 @@ fi
 
 let FAILURES=0
 let TOTAL=0
+let PENDING=0
 
 FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
 
 for SPEC in `find ./spec -name '*_spec.sh' ` ; do
-        [ -x $SPEC ] || continue
+        if ! [ -x $SPEC ] ; then
+                echo -n P
+                let "PENDING+=1"
+                continue
+        fi
         if $SPEC >& /dev/null ; then
-                echo -n . 
+                echo -n .
         else
                 echo $SPEC >> $FAIL_LOG
                 let "FAILURES+=1"
@@ -28,7 +33,12 @@ for SPEC in `find ./spec -name '*_spec.sh' ` ; do
         let "TOTAL+=1"
 done
 echo
-echo "$TOTAL tests, $FAILURES failures"
+echo -n "$TOTAL tests, $FAILURES failures"
+if [ "$PENDING" -ne 0 ] ; then
+        echo -n ", $PENDING pending"
+fi
+echo
+
 cat -n $FAIL_LOG
 
 [ $FAILURES -eq 0 ]
