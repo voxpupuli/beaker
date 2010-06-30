@@ -2,16 +2,26 @@
 
 function driver_standalone {
         function execute_manifest {
-                cat | $BIN/puppet apply
+                cat | $BIN/puppet apply --confdir /tmp/puppet-$$ --debug
+        }
+
+        function puppet_conf {
+                cat > /tmp/puppet-$$/puppet.conf
         }
 }
 
 function driver_master_and_agent_locally {
+        mkdir -p /tmp/puppet-$$/manifests/
+
         function execute_manifest {
                 start_puppet_master
                 cat > /tmp/puppet-$$/manifests/site.pp
                 start_puppet_agent
                 stop_puppet_master
+        }
+
+        function puppet_conf {
+                cat > /tmp/puppet-$$/puppet.conf
         }
 }
 
