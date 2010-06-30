@@ -9,15 +9,13 @@ puppet_conf <<CONF
   ssldir=\$vardir/ssl
 [puppetd]
   certname=puppetclient
-  server=puppetmaster
   report=true
 [puppetmasterd]
-  certname=puppetmaster
   reports=store
 CONF
 
 execute_manifest <<PP
-file{'/tmp/hello.$$.txt': content => 'hello world'}
+notify{'this is a notify':}
 PP
 
 ls /tmp/puppet-$$-master/reports/puppetclient/*.yaml
