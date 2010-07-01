@@ -2,4 +2,4 @@
 
 . `dirname $0`/drivers.sh
 env_driver
-. local_setup.sh
+. `dirname $0`/../local_setup.sh
