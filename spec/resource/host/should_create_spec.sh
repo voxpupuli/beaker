@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 
 if [ -f /tmp/hosts-$$ ]; then
   rm /tmp/hosts-$$

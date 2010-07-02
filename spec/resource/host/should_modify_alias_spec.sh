@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 
 FILE="/tmp/hosts-$$"
 
