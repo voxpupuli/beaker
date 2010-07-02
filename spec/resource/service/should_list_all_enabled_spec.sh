@@ -1,11 +1,11 @@
 #!/bin/bash
 
-. ../../../local_setup.sh
+. local_setup.sh
 # count ralshes enabled services
-RALSH_SERVICE_ENABLED_COUNT=`$BIN/puppet resource service | egrep "enable\s*=>\s*'true" | wc -l`
+RALSH_SERVICE_ENABLED_COUNT=$( $BIN/puppet resource service | egrep "enable\s*=>\s*'true" | wc -l )
 # chkconfigs enabled service count
 SERVICE_ENABLED_COUNT=0
-for service in `chkconfig --list | awk -F ' ' '{print $1}'`; do
+for service in $( chkconfig --list | awk -F ' ' '{print $1}' ); do
   chkconfig $service
   if [ $? == 0 ]; then
     SERVICE_ENABLED_COUNT=$(( $SERVICE_ENABLED_COUNT + 1 ))

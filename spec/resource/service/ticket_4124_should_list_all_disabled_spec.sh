@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 # find the total number of disabled service that ralsh reports
 RALSH_SERVICE_DISABLED_COUNT=$($BIN/puppet resource service | egrep "enable\s*=>\s*'false" | wc -l)
 # count the number of 
