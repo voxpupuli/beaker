@@ -39,7 +39,7 @@ function driver_master_and_agent_locally_using_old_executables {
 
 
 function env_driver {
-        if [ -z "$PUPPET_SPEC_DRIVER" ] ; then
+        if [ -z "${PUPPET_SPEC_DRIVER:-}" ] ; then
                 PUPPET_SPEC_DRIVER=standalone
         fi
         driver_$PUPPET_SPEC_DRIVER
