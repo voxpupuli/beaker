@@ -3,11 +3,11 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 
-if grep bozo /etc/group; then
+if getent group bozo; then
   groupdel bozo
 fi
 
 $BIN/puppet resource group bozo ensure=present
-grep bozo /etc/group
+getent group bozo

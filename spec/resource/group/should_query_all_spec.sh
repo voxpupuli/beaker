@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 
 SYSTEM_COUNT=$( wc -l /etc/group | awk '{print $1}' )
 RALSH_COUNT=$( $BIN/puppet resource group | grep 'present' | wc -l )

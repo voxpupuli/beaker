@@ -3,9 +3,9 @@
 set -e
 set -u
 
-. ../../../local_setup.sh
+. local_setup.sh
 
-if ! grep bozo /etc/group; then
+if ! getent group bozo; then
   groupadd bozo
 fi
 
