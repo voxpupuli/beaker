@@ -1,5 +1,8 @@
 #!/bin/bash
 
+TEST_DIR=$1
+: ${TEST_DIR:='./spec'}
+
 if ! [ -f local_setup.sh ] ; then
         echo '
 You must create a local_setup.sh so we know where to find the puppet libs.
@@ -17,13 +20,14 @@ let PENDING=0
 FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
 
-for SPEC in `find ./spec -name '*_spec.sh' ` ; do
+for SPEC in `find $TEST_DIR -name '*_spec.sh' ` ; do
         if ! [ -x $SPEC ] ; then
                 echo -n P
                 let "PENDING+=1"
                 continue
         fi
         if $SPEC >& /dev/null ; then
+        #if $SPEC ; then
                 echo -n .
         else
                 echo $SPEC >> $FAIL_LOG
