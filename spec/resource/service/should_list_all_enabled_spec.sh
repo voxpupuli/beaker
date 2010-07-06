@@ -15,6 +15,13 @@ done
 if [ "$RALSH_SERVICE_ENABLED_COUNT" == "$SERVICE_ENABLED_COUNT" ] ; then
   exit 0
 else
+  ralsh service | grep -B2 true | grep service | awk -F"'" '{print $2}' | sort > /tmp/sorted-ralsh-$$
+  for service in $(chkconfig --list | awk '{print $1}'); do
+    if chkconfig $service; then
+      echo $service >> /tmp/sorted-service-$$
+    fi
+  done
+  cat /tmp/sorted-service-$$ | sort > /tmp/sorted-service-$$
   echo "ralsh count ${RALSH_SERVICE_ENABLED_COUNT} services"
   echo "chkconfig --list counts ${SERVICE_ENABLED_COUNT} services"
   exit 1
