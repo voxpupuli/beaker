@@ -27,7 +27,6 @@ for SPEC in `find $TEST_DIR -name '*_spec.sh' ` ; do
                 continue
         fi
         if $SPEC >& /dev/null ; then
-        #if $SPEC ; then
                 echo -n .
         else
                 echo $SPEC >> $FAIL_LOG

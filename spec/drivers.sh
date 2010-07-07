@@ -1,13 +1,23 @@
+#!/bin/bash
 . `dirname $0`/util.sh
 
 function driver_standalone {
         function execute_manifest {
-                cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug
+                cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" 
         }
 
         function puppet_conf {
                 cat > /tmp/puppet-$$/puppet.conf
         }
+}
+
+function driver_standalone_using_files {
+        driver_standalone # sort of like inherits
+        function execute_manifest {
+                cat > /tmp/manifest-$$.pp
+                $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" /tmp/manifest-$$.pp
+        }
+
 }
 
 function driver_master_and_agent_locally {
@@ -17,7 +27,7 @@ function driver_master_and_agent_locally {
         function execute_manifest {
                 start_puppet_master
                 cat > /tmp/puppet-$$-master/manifests/site.pp
-                start_puppet_agent
+                start_puppet_agent "$@"
                 stop_puppet_master
         }
 
@@ -32,7 +42,7 @@ function driver_master_and_agent_locally_using_old_executables {
         function execute_manifest {
                 start_puppetmasterd
                 cat > /tmp/puppet-$$-master/manifests/site.pp
-                start_puppetd
+                start_puppetd "$@"
                 stop_puppetmasterd
         }
 }
