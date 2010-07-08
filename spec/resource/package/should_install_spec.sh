@@ -3,7 +3,9 @@
 set -e
 set -u
 
-source local_setup.sh
+source spec/setup.sh
+
+if ! which rpm ; then NOT_APPLICABLE ; fi
 
 PACKAGE='yum-cron'
 
