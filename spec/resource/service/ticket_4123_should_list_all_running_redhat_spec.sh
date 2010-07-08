@@ -1,6 +1,10 @@
 #!/bin/bash
 
-. local_setup.sh
+. spec/setup.sh
+
+if [ `facter operatingsystem` != "Redhat" ] ; then NOT_APPLICABLE ; fi
+
+
 #
 # this test is prone to failures because it uses process lookup to determine failures.
 #

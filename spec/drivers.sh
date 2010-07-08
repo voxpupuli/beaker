@@ -1,5 +1,5 @@
 #!/bin/bash
-. `dirname $0`/util.sh
+. spec/util.sh
 
 function driver_standalone {
         function execute_manifest {

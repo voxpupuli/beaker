@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function start_puppet_agent {
         MASTER_PORT=18140
         $BIN/puppet agent --vardir /tmp/puppet-$$-agent --confdir /tmp/puppet-$$-agent --rundir /tmp/puppet-$$-agent \
@@ -53,4 +55,8 @@ function start_puppetmasterd {
 
 function stop_puppetmasterd {
         kill $MASTER_PID
+}
+
+function NOT_APPLICABLE {
+        exit 11
 }
