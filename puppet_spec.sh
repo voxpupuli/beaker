@@ -32,7 +32,7 @@ for SPEC in `find $TEST_DIR -name '*_spec.sh' ` ; do
         else
                 let TEST_ERROR=$?
                 if [ $TEST_ERROR -eq 11 ] ; then
-                        echo -n ~
+                        echo -n '~'
                         let "SKIPPED+=1"
                 else
                         echo $SPEC >> $FAIL_LOG
