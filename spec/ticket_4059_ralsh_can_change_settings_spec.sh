@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. `dirname $0`/setup.sh
+source spec/setup.sh
 
 $BIN/puppet resource host example.com ensure=present ip=127.0.0.1 target=/tmp/hosts-$$ --trace
 
