@@ -9,7 +9,10 @@ set -u
 . local_setup.sh
 # preconditions:
 # 1. user bozo should exist
-if ! grep bozo /etc/passwd; then
+if ! getent passwd bozo; then
+  if getent group bozo; then
+    groupdel bozo
+  fi
   useradd bozo
 fi
 

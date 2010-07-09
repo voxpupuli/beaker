@@ -1,5 +1,5 @@
 #!/bin/bash
 
-. `dirname $0`/drivers.sh
+. spec/drivers.sh
 env_driver
-. `dirname $0`/../local_setup.sh
+. local_setup.sh

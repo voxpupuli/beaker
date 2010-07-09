@@ -1,13 +1,11 @@
 #!/bin/bash
 
-. `dirname $0`/util/start_puppet_master.sh
-
-. local_setup.sh
+source spec/setup.sh
 
 start_puppet_master
 
 $BIN/puppet agent --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize --onetime --server localhost --debug --masterport $MASTER_PORT
 
-kill $MASTER_PID
+stop_puppet_master
 
 exit 0

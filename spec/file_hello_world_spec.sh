@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. `dirname $0`/setup.sh
+source spec/setup.sh
 
 execute_manifest <<PP
 file{'/tmp/hello.$$.txt': content => 'hello world'}

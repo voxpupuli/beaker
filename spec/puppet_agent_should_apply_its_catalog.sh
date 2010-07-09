@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. `dirname $0`/drivers.sh
+source spec/drivers.sh
 driver_master_and_agent_locally
 . local_setup.sh
 
