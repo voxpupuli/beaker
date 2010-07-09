@@ -5,6 +5,8 @@ set -e
 #
 . local_setup.sh
 
+OUTFILE="/tmp/spec-$$.log"
+
 $BIN/puppet apply <<PP | tee $OUTFILE 
 if( 1 == 2) {
   notice('if')
