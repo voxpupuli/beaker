@@ -2,7 +2,7 @@
 
 . spec/setup.sh
 
-if [ `facter operatingsystem` != "Redhat" ] ; then NOT_APPLICABLE ; fi
+if [ `facter operatingsystem` != "Redhat" ] && [ `facter operatingsystem` != "CentOS" ] ; then NOT_APPLICABLE ; fi
 
 
 #
