@@ -10,6 +10,9 @@ set -u
 # preconditions:
 # 1. user bozo should exist
 if ! grep bozo /etc/passwd; then
+  if grep bozo /etc/groups; then
+    groupdel bozo
+  fi
   useradd bozo
 fi
 
