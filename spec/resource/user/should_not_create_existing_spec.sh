@@ -7,13 +7,16 @@ set -u
 
 . local_setup.sh
 # precondtions
-# 1. usrs group should exist
+# 1. user bozo should exist
+if ! getent passwd bozo ; then
+  if grep ^bozo: /etc/group; then
+    groupdel bozo
+  fi
+  useradd bozo
+fi
+# 2. usrs group should exist
 if ! getent group bozo ; then
   groupadd bozo
-fi
-# 2. user bozo should exist
-if ! getent passwd bozo ; then
-  useradd bozo
 fi
 
 # run puppet, and ensure that it does not report user creation
