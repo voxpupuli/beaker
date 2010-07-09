@@ -1,8 +1,8 @@
-set -e
+#!/bin/bash
 
-. local_setup.sh
+source local_setup.sh
 
-$BIN/puppet apply <<PP | grep notice | grep if
+$BIN/puppet apply <<PP | tee $OUTFILE
 if( 1 == 1) {
   notice('if')
 } elsif(2 == 2) {
@@ -11,3 +11,4 @@ if( 1 == 1) {
   notice('else')
 }
 PP
+grep 'if' $OUTFILE

@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# ensure that undefined variables evaluate as false
+#
+. local_setup.sh
+
+$BIN/puppet apply <<PP | tee $OUTFILE
+if \$undef_var {
+} else {
+  notice('undef')
+}
+PP
+grep 'undef' $OUTFILE
