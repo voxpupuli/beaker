@@ -10,15 +10,11 @@ DIRNAME="/tmp/test-$$"
 
 # preconditions:
 # 1. file should exist
-if [ ! -d $DIRNAME ]; then
-  if [ -e $DIRNAME ]; then
-    echo "file already exists and is not a directory"
-    exit 1 
-  fi
-  mkdir FILENAME
-fi
+echo $DIRNAME
+mkdir -p $DIRNAME
+[ -d $DIRNAME ]
 
 # run ralsh to create file
-$BIN/puppet resource file $FILENAME ensure=absent
+$BIN/puppet resource file $DIRNAME ensure=absent force=true
 # file should not exist
-[ ! -f $FILENAME ]
+[ ! -d $DIRNAME ]
