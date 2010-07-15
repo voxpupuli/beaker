@@ -4,6 +4,8 @@
 #
 source local_setup.sh
 
+OUTFILE="/tmp/spec-$$.log"
+
 $BIN/puppet <<PP | tee $OUTFILE
 if 'false' {
   notice('true')

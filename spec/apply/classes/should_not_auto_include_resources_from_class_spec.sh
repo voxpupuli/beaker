@@ -6,9 +6,9 @@ set -e
 
 $BIN/puppet apply <<PP | tee /tmp/class_not_include-$$
 class x {
-  notify{'a':}
+  notify{'NEVER':}
 }
 PP
 # postcondition - test that the file is empty
 # this assumes that we are running at notice level (not debug or verbose)
-[ ! -s /tmp/class_not_include-$$ ]
+! grep NEVER /tmp/class_not_include-$$
