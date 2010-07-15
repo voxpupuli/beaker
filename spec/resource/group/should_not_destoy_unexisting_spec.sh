@@ -2,11 +2,13 @@
 
 set -e
 set -u
-
+# PRECONDITION
 . local_setup.sh
-
-if getent group bozo; then
+GROUP=bozo$$ 
+if getent group $GROUP; then
   groupdel bozo
 fi
-
-! $BIN/puppet resource group bozo ensure=absent | grep 'notice: /Group[bozo]/ensure: removed'
+# TEST
+$BIN/puppet resource group $GROUP ensure=absent > $OUTFILE
+# VALIDATE
+! grep "notice: /Group[$GROUP]/ensure: removed" $OUTFILE
