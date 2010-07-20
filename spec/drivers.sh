@@ -4,7 +4,7 @@
 function driver_standalone {
     function execute_manifest {
         mkdir -p /tmp/puppet-$$-standalone/manifests
-        cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug --manifestdir /tmp/puppet-$$-standalone/manifests "$@" 
+        cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug --manifestdir /tmp/puppet-$$-standalone/manifests --modulepath /tmp/puppet-$$-standalone/modules "$@" 
     }
 
     function puppet_conf {
@@ -15,6 +15,11 @@ function driver_standalone {
         mkdir -p /tmp/puppet-$$-standalone/manifests
         cat > /tmp/puppet-$$-standalone/manifests/$1
     }
+
+    function module_file {
+        mkdir -p `dirname /tmp/puppet-$$-standalone/modules/$1`
+        cat > /tmp/puppet-$$-standalone/modules/$1
+    }
 }
 
 function driver_standalone_using_files {
@@ -23,7 +28,7 @@ function driver_standalone_using_files {
     function execute_manifest {
         cat > /tmp/manifest-$$.pp
         mkdir -p /tmp/puppet-$$-standalone/manifests
-        $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug  --manifestdir /tmp/puppet-$$-standalone/manifests "$@" /tmp/manifest-$$.pp
+        $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug  --manifestdir /tmp/puppet-$$-standalone/manifests --modulepath /tmp/puppet-$$-standalone/modules "$@" /tmp/manifest-$$.pp
     }
 
 }
@@ -44,8 +49,18 @@ function driver_master_and_agent_locally {
         cat > /tmp/puppet-$$-master/manifests/$1
     }
 
+    function module_file {
+        mkdir -p `dirname /tmp/puppet-$$-master/modules/$1`
+        cat > /tmp/puppet-$$-master/modules/$1
+    }
+
     function puppet_conf {
         cat | tee /tmp/puppet-$$-master/puppet.conf > /tmp/puppet-$$-agent/puppet.conf
+    }
+
+    function module_file {
+        mkdir -p `dirname /tmp/puppet-$$-master/modules/$1`
+        cat > /tmp/puppet-$$-master/modules/$1
     }
 }
 
