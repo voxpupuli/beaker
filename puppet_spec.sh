@@ -1,5 +1,20 @@
 #!/bin/bash
 
+function print_results {
+        echo
+        echo -n "$TOTAL tests, $FAILURES failures"
+        if [ "$PENDING" -ne 0 ] ; then
+                echo -n ", $PENDING pending"
+        fi
+        if [ "$SKIPPED" -ne 0 ] ; then
+                echo -n ", $SKIPPED skipped"
+        fi
+        echo
+        cat -n $FAIL_LOG
+}
+
+trap "print_results; exit" SIGINT
+
 TEST_DIR=$1
 : ${TEST_DIR:='./spec'}
 
@@ -42,16 +57,7 @@ for SPEC in `find $TEST_DIR -name '*_spec.sh' ` ; do
         fi
         let "TOTAL+=1"
 done
-echo
-echo -n "$TOTAL tests, $FAILURES failures"
-if [ "$PENDING" -ne 0 ] ; then
-        echo -n ", $PENDING pending"
-fi
-if [ "$SKIPPED" -ne 0 ] ; then
-        echo -n ", $SKIPPED skipped"
-fi
-echo
 
-cat -n $FAIL_LOG
+print_results
 
 [ $FAILURES -eq 0 ]
