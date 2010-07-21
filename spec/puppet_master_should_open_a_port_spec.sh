@@ -1,4 +1,4 @@
-. local_setup.sh
+source local_setup.sh
 
 PORT=18140
 

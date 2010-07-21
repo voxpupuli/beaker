@@ -5,7 +5,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 
 # predonctions:
 # 1. ensure that groups exists

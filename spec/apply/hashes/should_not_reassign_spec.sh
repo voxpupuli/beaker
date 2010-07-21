@@ -1,6 +1,6 @@
 set -e
 
-. local_setup.sh
+source local_setup.sh
 
 # hash reassignment should fail
 ! puppet apply <<PP | grep "Assigning to the hash 'my_hash' with an existing key 'one'"

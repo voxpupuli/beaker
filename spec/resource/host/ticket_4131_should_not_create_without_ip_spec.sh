@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 #
 # precondition - entry doesn't exist
 #

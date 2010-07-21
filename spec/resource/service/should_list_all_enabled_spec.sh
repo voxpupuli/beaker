@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. local_setup.sh
+source local_setup.sh
 # count ralshes enabled services
 RALSH_SERVICE_ENABLED_COUNT=$( puppet resource service | egrep "enable\s*=>\s*'true" | wc -l )
 # chkconfigs enabled service count

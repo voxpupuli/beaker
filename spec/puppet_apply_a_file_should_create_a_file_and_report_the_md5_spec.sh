@@ -1,6 +1,6 @@
 set -e
 
-. local_setup.sh
+source local_setup.sh
 
 rm -f /tmp/hello.world.$$.txt
 

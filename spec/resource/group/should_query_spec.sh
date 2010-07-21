@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 
 if ! getent group bozo; then
   groupadd bozo

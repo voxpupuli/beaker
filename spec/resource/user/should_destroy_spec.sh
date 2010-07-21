@@ -6,7 +6,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 # preconditions:
 # 1. user bozo should exist
 if ! getent passwd bozo; then

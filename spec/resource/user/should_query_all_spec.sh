@@ -5,7 +5,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 
 # count the lines in /etc/passwd
 SYSTEM_COUNT=$( wc -l /etc/passwd | awk '{print $1}')

@@ -3,7 +3,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 RALSH_FILE=/tmp/ralsh-disabled-list-$$
 SERVICE_FILE=/tmp/service-disabled-list-$$
 # collect all service namevars 

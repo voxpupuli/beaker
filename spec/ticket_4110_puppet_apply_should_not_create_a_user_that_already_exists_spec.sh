@@ -1,6 +1,6 @@
 set -e
 
-. local_setup.sh
+source local_setup.sh
 
 puppet apply --debug <<PP | tee /tmp/puppet-$$.log
 user{ "root":
