@@ -61,7 +61,7 @@ stop_puppet_master() {
 
 start_puppetd() {
   local master_port=${MASTER_PORT:=18140}
-  ../sbin/puppetd --vardir /tmp/puppet-$$-agent-var \
+  puppetd --vardir /tmp/puppet-$$-agent-var \
     --confdir /tmp/puppet-$$-agent \
     --rundir /tmp/puppet-$$-agent \
     --test --debug \
@@ -71,7 +71,7 @@ start_puppetd() {
 start_puppetmasterd() {
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests
-  ../sbin/puppetmasterd \
+  puppetmasterd \
     --vardir /tmp/puppet-$$-master-var \
     --confdir /tmp/puppet-$$-master \
     --rundir /tmp/puppet-$$-master \
