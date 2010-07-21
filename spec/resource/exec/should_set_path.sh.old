@@ -1,0 +1,20 @@
+#!/bin/bash
+# 
+# description:
+# author:
+set -e
+set -u
+source local_setup.sh
+TOUCHED_FILE=/tmp/touched-should-set-path$$
+# precondition:
+#
+if [ -e $TOUCHED_FILE ]; then
+  rm $TOUCHED_FILE
+fi
+# puppet test
+$BIN/puppet resource exec test command="touch $TOUCHED_FILE" path='/bin/' | tee $OUTFILE 	
+# check output
+grep 'executed successfully' $OUTFILE
+# validate
+[ -f $TOUCHED_FILE ]
+
