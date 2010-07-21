@@ -43,6 +43,7 @@ driver_master_and_agent_locally_using_old_executables() {
     start_puppetmasterd
     cat > /tmp/puppet-$$-master/manifests/site.pp
     start_puppetd "$@"
+    echo "DEBUG: puppetd finished..."
     stop_puppetmasterd
   }
 }

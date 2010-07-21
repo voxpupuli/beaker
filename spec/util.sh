@@ -56,6 +56,7 @@ start_puppet_master() {
 
 # JJM Stop the puppet master.  Expects ${MASTER_PID}
 stop_puppet_master() {
+  echo "Killing puppet master PID: ${MASTER_PID}"
   kill -TERM ${MASTER_PID}
 }
 
@@ -78,6 +79,7 @@ start_puppetmasterd() {
     --no-daemonize --autosign=true \
     --certname=localhost --masterport ${master_port} "$@" &
   MASTER_PID=$!
+  echo "puppet master started with PID: ${MASTER_PID}"
 
   # JJM Wait for puppet master to start and open up the TCP port.
   for i in $(seq 0 10); do
@@ -91,6 +93,7 @@ start_puppetmasterd() {
 }
 
 stop_puppetmasterd() {
+  echo "Killing puppetmasterd PID: ${MASTER_PID}"
   kill -TERM $MASTER_PID
 }
 
