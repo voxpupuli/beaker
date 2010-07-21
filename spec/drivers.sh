@@ -3,7 +3,7 @@
 
 function driver_standalone {
         function execute_manifest {
-                cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" 
+                cat | puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" 
         }
 
         function puppet_conf {
@@ -15,7 +15,7 @@ function driver_standalone_using_files {
         driver_standalone # sort of like inherits
         function execute_manifest {
                 cat > /tmp/manifest-$$.pp
-                $BIN/puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" /tmp/manifest-$$.pp
+                puppet apply --confdir /tmp/puppet-$$-standalone --debug "$@" /tmp/manifest-$$.pp
         }
 
 }

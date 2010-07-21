@@ -2,7 +2,7 @@
 
 PORT=18140
 
-$BIN/puppet master --masterport $PORT --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize &
+puppet master --masterport $PORT --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize &
 PUPPET_PID=$!
 
 for I in `seq 0 10` ; do

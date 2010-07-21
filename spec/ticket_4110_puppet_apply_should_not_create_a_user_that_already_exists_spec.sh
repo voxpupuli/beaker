@@ -2,7 +2,7 @@ set -e
 
 . local_setup.sh
 
-$BIN/puppet apply --debug <<PP | tee /tmp/puppet-$$.log
+puppet apply --debug <<PP | tee /tmp/puppet-$$.log
 user{ "root":
         ensure => "present",
 }

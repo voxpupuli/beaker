@@ -14,4 +14,4 @@ if ! getent passwd bozo; then
   useradd bozo
 fi
 # query for user, ensure that it is reported as present
-$BIN/puppet resource user bozo | grep present
+puppet resource user bozo | grep present

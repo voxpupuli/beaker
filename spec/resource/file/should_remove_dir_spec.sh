@@ -15,6 +15,6 @@ mkdir -p $DIRNAME
 [ -d $DIRNAME ]
 
 # run ralsh to create file
-$BIN/puppet resource file $DIRNAME ensure=absent force=true
+puppet resource file $DIRNAME ensure=absent force=true
 # file should not exist
 [ ! -d $DIRNAME ]

@@ -7,7 +7,7 @@ set -u
 RALSH_FILE=/tmp/ralsh-disabled-list-$$
 SERVICE_FILE=/tmp/service-disabled-list-$$
 # collect all service namevars 
-$BIN/puppet resource service | egrep -B2 "enable\s*=>\s*'false" | grep "service {" | awk -F"'" '{print $2}' | sort  > $RALSH_FILE
+puppet resource service | egrep -B2 "enable\s*=>\s*'false" | grep "service {" | awk -F"'" '{print $2}' | sort  > $RALSH_FILE
 
 if [ -e $SERVICE_FILE ]; then
  rm $SERVICE_FILE

@@ -15,7 +15,7 @@ if rpm -q $PACKAGE; then
 fi
 
 # run ralsh
-$BIN/puppet resource package yum-cron ensure=installed | grep 'ensure: created'
+puppet resource package yum-cron ensure=installed | grep 'ensure: created'
 
 # postcondition
 rpm -q $PACKAGE

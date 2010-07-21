@@ -9,4 +9,4 @@ if getent group bozo; then
   groupdel bozo
 fi
 
-! $BIN/puppet resource group bozo ensure=absent | grep 'notice: /Group[bozo]/ensure: removed'
+! puppet resource group bozo ensure=absent | grep 'notice: /Group[bozo]/ensure: removed'

@@ -15,5 +15,5 @@ if getent group bozo; then
   groupdel bozo
 fi
 
-$BIN/puppet resource user bozo ensure=present
+puppet resource user bozo ensure=present
 getent passwd bozo && getent group bozo

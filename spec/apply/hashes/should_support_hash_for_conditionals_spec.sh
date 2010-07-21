@@ -2,7 +2,7 @@ set -e
 
 . local_setup.sh
 
-$BIN/puppet apply <<PP | grep notice | grep if
+puppet apply <<PP | grep notice | grep if
 if( 1 == 1) {
   notice('if')
 } elsif(2 == 2) {

@@ -27,7 +27,7 @@ fi
 getent passwd bozo
 
 # user puppet resource to modify users primary group
-$BIN/puppet resource user bozo ensure=present gid=bozo_new_group
+puppet resource user bozo ensure=present gid=bozo_new_group
 # capture groups gid
 gid=$( getent group bozo_new_group | awk -F':' '{print $3}' )
 echo $gid

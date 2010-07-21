@@ -21,4 +21,4 @@ fi
 
 # run puppet, and ensure that it does not report user creation
 # (it might be better to ensure that it doesnt report anything
-! $BIN/puppet resource user bozo ensure=present | grep 'created'
+! puppet resource user bozo ensure=present | grep 'created'

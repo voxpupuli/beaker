@@ -17,5 +17,5 @@ if ! getent passwd bozo; then
 fi
 
 # puppet resource ensures user is absent
-$BIN/puppet resource user bozo ensure=absent
+puppet resource user bozo ensure=absent
 ! getent passwd bozo

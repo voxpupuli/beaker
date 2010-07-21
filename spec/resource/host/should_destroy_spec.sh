@@ -10,5 +10,5 @@ FILE="/tmp/hosts-$$"
 
 echo '127.0.0.2 test1' > $FILE
 
-$BIN/puppet resource host test1 ensure=absent ip=127.0.0.2 target="$FILE"
+puppet resource host test1 ensure=absent ip=127.0.0.2 target="$FILE"
 ! egrep $PATTERN $FILE

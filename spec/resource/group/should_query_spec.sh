@@ -9,4 +9,4 @@ if ! getent group bozo; then
   groupadd bozo
 fi
 
-$BIN/puppet resource group bozo | grep present
+puppet resource group bozo | grep present

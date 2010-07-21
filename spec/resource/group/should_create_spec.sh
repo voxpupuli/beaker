@@ -9,5 +9,5 @@ if getent group bozo; then
   groupdel bozo
 fi
 
-$BIN/puppet resource group bozo ensure=present
+puppet resource group bozo ensure=present
 getent group bozo

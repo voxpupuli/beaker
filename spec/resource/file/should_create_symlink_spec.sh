@@ -19,7 +19,7 @@ if [ ! -e $FILENAME2 ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $FILENAME ensure=$FILENAME2
+puppet resource file $FILENAME ensure=$FILENAME2
 
 # file should have copied the contents
 grep hello$$ $FILENAME

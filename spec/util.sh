@@ -11,7 +11,7 @@ set -u
 # JJM Start the puppet agent against port 18140
 start_puppet_agent() {
   local master_port=${MASTER_PORT:=18140}
-  $BIN/puppet agent --vardir /tmp/puppet-$$-agent-var \
+  puppet agent --vardir /tmp/puppet-$$-agent-var \
     --confdir /tmp/puppet-$$-agent \
     --rundir /tmp/puppet-$$-agent \
     --test --debug \
@@ -23,7 +23,7 @@ start_puppet_agent() {
 start_puppet_master() {
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests/
-  $BIN/puppet master --vardir \
+  puppet master --vardir \
     /tmp/puppet-$$-master-var \
     --confdir /tmp/puppet-$$-master \
     --rundir /tmp/puppet-$$-master \
@@ -55,7 +55,7 @@ stop_puppet_master() {
 
 start_puppetd() {
   local master_port=${MASTER_PORT:=18140}
-  $BIN/../sbin/puppetd --vardir /tmp/puppet-$$-agent-var \
+  ../sbin/puppetd --vardir /tmp/puppet-$$-agent-var \
     --confdir /tmp/puppet-$$-agent \
     --rundir /tmp/puppet-$$-agent \
     --test --debug \
@@ -65,7 +65,7 @@ start_puppetd() {
 start_puppetmasterd() {
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests
-  $BIN/../sbin/puppetmasterd \
+  ../sbin/puppetmasterd \
     --vardir /tmp/puppet-$$-master-var \
     --confdir /tmp/puppet-$$-master \
     --rundir /tmp/puppet-$$-master \

@@ -13,5 +13,5 @@ if ! getent group bozo; then
   groupadd bozo
 fi
 
-$BIN/puppet resource group bozo ensure=absent
+puppet resource group bozo ensure=absent
 ! getent group bozo

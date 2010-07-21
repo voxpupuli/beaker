@@ -14,4 +14,4 @@ if getent passwd bozo; then
 fi
 
 # ensure that puppet does not report removing a user that did not exist
-! $BIN/puppet resource user bozo ensure=absent | grep 'removed'
+! puppet resource user bozo ensure=absent | grep 'removed'

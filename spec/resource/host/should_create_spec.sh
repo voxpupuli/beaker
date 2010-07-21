@@ -9,5 +9,5 @@ if [ -f /tmp/hosts-$$ ]; then
   rm /tmp/hosts-$$
 fi
 
-$BIN/puppet resource host test1 ensure=present ip=127.0.0.2 target="/tmp/host-$$"
+puppet resource host test1 ensure=present ip=127.0.0.2 target="/tmp/host-$$"
 egrep '^127.0.0.2[[:space:]]+test1' /tmp/host-$$

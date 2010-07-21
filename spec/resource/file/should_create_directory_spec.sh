@@ -15,6 +15,6 @@ if [ -f $DIRNAME ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $DIRNAME ensure=directory
+puppet resource file $DIRNAME ensure=directory
 # file should have size zero
 [ -d $DIRNAME ]
