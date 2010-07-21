@@ -1,9 +1,15 @@
 #!/bin/bash
 
 ## JJM Variables for exit codes
+## NOTE: There is a distinction between test failure
+## and an error running the test.  Make sure to
+## exit $EXIT_FAILURE if the test failed.  Other non-
+## zero exit codes will be interpreted as an error
+## running the script.
+EXIT_FAILURE=10
 EXIT_NOT_APPLICABLE=11
 EXIT_OK=0
-EXIT_FAILURE=1
+EXIT_ERROR=1
 
 # JJM Raise an error when unbound variables are used.
 set -u
