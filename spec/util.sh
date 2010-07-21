@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function backup_file {
+        mv $1{,.backup}
+}
+
+function restore_file {
+        mv $1{.backup,}
+}
+
 function start_puppet_agent {
         MASTER_PORT=18140
         $BIN/puppet agent --vardir /tmp/puppet-$$-agent-var --confdir /tmp/puppet-$$-agent --rundir /tmp/puppet-$$-agent \
@@ -26,9 +34,6 @@ function start_puppet_master {
 function stop_puppet_master {
         kill $MASTER_PID
 }
-
-
-
 
 function start_puppetd {
         MASTER_PORT=18140
