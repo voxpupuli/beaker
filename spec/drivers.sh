@@ -36,6 +36,8 @@ driver_master_and_agent_locally() {
   }
 }
 
+# JJM FIXME: This execute_manifest function is broken,
+# apparently due to hanging file descriptors.
 driver_master_and_agent_locally_using_old_executables() {
   driver_master_and_agent_locally # sort of like inherits
 

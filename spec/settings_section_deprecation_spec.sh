@@ -12,6 +12,7 @@ source spec/util.sh
 driver_master_and_agent_locally_using_old_executables
 
 OUTPUT=/tmp/puppet-$$.output
+MANIFEST=/tmp/puppet-$$-master/manifests/site.pp
 
 puppet_conf <<'CONF'
 [main]
@@ -24,9 +25,12 @@ puppet_conf <<'CONF'
   reports=store
 CONF
 
-execute_manifest <<'PP' 2>&1 | tee ${OUTPUT}
-notify{'this is a notify':}
-PP
+# JJM Create the manifest file for puppet master
+echo 'notify{"this is a notify":}' > "${MANIFEST}"
+# Start puppetmasterd, redirect output to a file
+start_puppetmasterd 2>&1 >"${OUTPUT}"
+start_puppetd
+stop_puppetmasterd
 
 grep deprecated "${OUTPUT}" && exit $EXIT_OK || exit $EXIT_FAILURE
 
