@@ -1,0 +1,8 @@
+2010-07-21 Jeff McCune <jeff@puppetlabs.com>
+* local_setup.sh now expects the PATH and RUBYLIB to be set correctly.
+Please do not rely on the $BIN environment variable when writing
+acceptance tests.
+
+* Cleaned up spec/util.sh to be more readable and contain standard
+bourne shell syntax.
+
