@@ -3,6 +3,7 @@
 # 2010-07-21 Jeff McCune <jeff@puppetlabs.com>
 # Cleaned up
 
+set -e
 set -u
 
 source spec/setup.sh

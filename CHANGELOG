@@ -6,3 +6,6 @@ acceptance tests.
 * Cleaned up spec/util.sh to be more readable and contain standard
 bourne shell syntax.
 
+* Added killwait() function to help tear down the puppet master.
+
+* Fixed hanging puppet master process in settings_section_deprecation_spec.sh
