@@ -1,7 +1,5 @@
 #!/bin/bash
-
-
-source local_setup.sh
+source spec/setup.sh
 
 backup_file /etc/hosts
 
