@@ -123,7 +123,7 @@ killwait() {
     return 2
   fi
   kill -TERM ${pid}
-  for i in (seq 0 10); do
+  for i in $(seq 0 10) ; do
     test -d /proc/${pid} || return 0
     sleep 1
   done
