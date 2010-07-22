@@ -22,6 +22,6 @@ Fixed 2  ./spec/settings_section_deprecation_spec.sh
 Fixed 3  ./spec/puppet_master_should_open_a_port_spec.sh
 Fixed 4  ./spec/file_hello_world_spec.sh
 Fixed 5  ./spec/ticket_4287_undefined_method_evaluate_match_when_function_call_used_in_an_if_statement_spec.sh
-     6  ./spec/resource/user/should_create_with_gid_spec.sh
+Fixed 6  ./spec/resource/user/should_create_with_gid_spec.sh
       7  ./spec/resource/service/ticket_4123_should_list_all_running_redhat_spec.sh
 
