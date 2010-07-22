@@ -4,7 +4,7 @@
 
 set -e
 set -u
-. local_setup.sh
+source local_setup.sh
 
 FILENAME="/tmp/spec-$$-link"
 FILENAME2="/tmp/spec-$$-file"
@@ -19,7 +19,7 @@ if [ ! -e $FILENAME2 ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $FILENAME ensure=$FILENAME2
+puppet resource file $FILENAME ensure=$FILENAME2
 
 # file should have copied the contents
 grep hello$$ $FILENAME

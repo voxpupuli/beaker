@@ -1,0 +1,29 @@
+2010-07-21 Jeff McCune <jeff@puppetlabs.com>
+
+WARNING WARNING WARNING
+This suite of acceptance scripts will modify the system during testing.
+Make SURE you run this suite on a system you do not care about.
+
+It is recommended to run inside a Virtual Machine with a snapshot take
+to easily "undo" the changes made to the system.
+
+THESE SCRIPTS WILL LIKELY BREAK THINGS IF RUN ON AN SYSTEM YOU CARE ABOUT.
+
+Getting Started:
+
+1: Create a local_setup.sh script which sets RUBYLIB and PATH as you wish.
+An example is provided which assumes puppet and facter exist in /opt/puppetlabs
+2: run "make"
+
+Writing specifications:
+* specification scripts should be written in BASH
+* Expect the current working directory to be where the Makefile lives.
+* The script should source spec/util.sh
+* The script should source spec/setup.sh
+* They should return $EXIT_FAIL on a test failure.
+* The should return 0 or $EXIT_OK on test success.
+* Any other exit code is treated as a testing error (not failure)
+
+For an example of client / server testing, look at
+./spec/settings_section_deprecation_spec.sh
+

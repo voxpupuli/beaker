@@ -1,2 +1,2 @@
-. local_setup.sh
-$BIN/puppet master --help
+source local_setup.sh
+puppet master --help

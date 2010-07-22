@@ -3,10 +3,10 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 
 SYSTEM_COUNT=$( wc -l /etc/group | awk '{print $1}' )
-RALSH_COUNT=$( $BIN/puppet resource group | grep 'present' | wc -l )
+RALSH_COUNT=$( puppet resource group | grep 'present' | wc -l )
 if [ "$SYSTEM_COUNT" == "$RALSH_COUNT" ]; then
   exit 0
 fi

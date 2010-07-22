@@ -4,7 +4,7 @@
 
 set -e
 set -u
-. local_setup.sh
+source local_setup.sh
 
 DIRNAME="/tmp/test-$$"
 
@@ -15,6 +15,6 @@ if [ -f $DIRNAME ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $DIRNAME ensure=directory
+puppet resource file $DIRNAME ensure=directory
 # file should have size zero
 [ -d $DIRNAME ]

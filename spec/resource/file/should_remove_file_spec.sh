@@ -4,7 +4,7 @@
 
 set -e
 set -u
-. local_setup.sh
+source local_setup.sh
 
 FILENAME="/tmp/test-$$"
 
@@ -15,6 +15,6 @@ if [ ! -f $FILENAME ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $FILENAME ensure=absent
+puppet resource file $FILENAME ensure=absent
 # file should not exist
 [ ! -f $FILENAME ]

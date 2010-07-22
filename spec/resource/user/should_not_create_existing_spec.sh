@@ -5,7 +5,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 # precondtions
 # 1. user bozo should exist
 if ! getent passwd bozo ; then
@@ -21,4 +21,4 @@ fi
 
 # run puppet, and ensure that it does not report user creation
 # (it might be better to ensure that it doesnt report anything
-! $BIN/puppet resource user bozo ensure=present | grep 'created'
+! puppet resource user bozo ensure=present | grep 'created'

@@ -2,4 +2,4 @@
 
 . ../../local_setup.sh
 
-$BIN/puppet doc -r type
+puppet doc -r type

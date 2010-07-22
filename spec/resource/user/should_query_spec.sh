@@ -7,11 +7,11 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 # precondition
 # 1. user should exist
 if ! getent passwd bozo; then
   useradd bozo
 fi
 # query for user, ensure that it is reported as present
-$BIN/puppet resource user bozo | grep present
+puppet resource user bozo | grep present

@@ -5,7 +5,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source local_setup.sh
 
 if getent passwd bozo; then
   userdel bozo
@@ -15,5 +15,5 @@ if getent group bozo; then
   groupdel bozo
 fi
 
-$BIN/puppet resource user bozo ensure=present
+puppet resource user bozo ensure=present
 getent passwd bozo && getent group bozo

@@ -9,8 +9,8 @@ if [ `facter operatingsystem` != "Redhat" ] && [ `facter operatingsystem` != "Ce
 # this test is prone to failures because it uses process lookup to determine failures.
 #
 #
-#RALSH_RUNNING_COUNT=$( $BIN/puppet resource service | egrep -B1 "ensure\s*=>\s*'running" | grep 'service {' | wc -l )
-$BIN/puppet resource service | egrep -B1 "ensure\s*=>\s*'running" | grep 'service {' | gawk -F"\'" '{print $2}' | sort  > /tmp/ralsh-running-list-$$
+#RALSH_RUNNING_COUNT=$( puppet resource service | egrep -B1 "ensure\s*=>\s*'running" | grep 'service {' | wc -l )
+puppet resource service | egrep -B1 "ensure\s*=>\s*'running" | grep 'service {' | gawk -F"\'" '{print $2}' | sort  > /tmp/ralsh-running-list-$$
 # this totally doenst work, it returns subservice statuses
 #SERVICE_STATUS_RUNNING_COUNT=$( service --status-all | grep running | grep -v not | wc -l )
 # blatently stolen from /sbin/service
