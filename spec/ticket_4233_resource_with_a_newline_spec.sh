@@ -6,7 +6,7 @@ set -u
 source spec/setup.sh
 
 execute_manifest <<'PP'
-exec { '/bin/echo -e "\nHello World\n"'; }
+exec { '/bin/echo -e "\nHello World\n"': }
 PP
 rval=$?
 
