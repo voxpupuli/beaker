@@ -36,5 +36,7 @@ done
 
 killwait ${master_pid}
 
+# JJM Remove the exit trap since we're about to exit cleanly.
+trap '{}' EXIT
 exit $status
 
