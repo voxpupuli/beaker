@@ -35,6 +35,7 @@ puppetmasterd \
   --confdir /tmp/puppet-$$-master \
   --rundir /tmp/puppet-$$-master \
   --no-daemonize --autosign=true \
+  --verbose --debug \
   --certname=localhost --masterport 18140 2>&1 >"${OUTPUT}" &
 master_pid=$!
 
