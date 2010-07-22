@@ -3,6 +3,8 @@
 # 2010-07-21 Jeff McCune <jeff@puppetlabs.com>
 # Cleaned up this script
 
+EXIT_OK=0
+EXIT_FAILURE=10
 EXIT_NOT_APPLICABLE=11
 
 # Error on unbound variable access
@@ -10,6 +12,21 @@ set -u
 
 # JJM Set the TEST_DIR if it's not already set or passed as ARG 1
 : ${TEST_DIR:=${1:-'./spec'}}
+
+print_results() {
+  echo
+  echo -n "$TOTAL tests, $FAILURES failures"
+  if [ "$PENDING" -ne 0 ] ; then
+    echo -n ", $PENDING pending"
+  fi
+  if [ "$SKIPPED" -ne 0 ] ; then
+    echo -n ", $SKIPPED skipped"
+  fi
+  echo
+  cat -n $FAIL_LOG
+}
+
+trap "print_results; exit" SIGINT
 
 if ! [ -f local_setup.sh ] ; then
   echo 'You must create a local_setup.sh so we know where to find puppet.
@@ -51,17 +68,8 @@ for SPEC in $(find $TEST_DIR -name '*_spec.sh')  ; do
   ((TOTAL++))
 done
 
-echo
-echo -n "$TOTAL tests, $FAILURES failures"
-if [ "$PENDING" -ne 0 ] ; then
-  echo -n ", $PENDING pending"
-fi
-if [ "$SKIPPED" -ne 0 ] ; then
-  echo -n ", $SKIPPED skipped"
-fi
-echo
+print_results
 
-cat -n $FAIL_LOG
+# JJM Exit with FAILURE status if the number of failures are not zero.
+[ $FAILURES -eq 0 ] && exit $EXIT_OK || exit $EXIT_FAILURE
 
-# JJM Exit "false" if the number of failures are not zero.
-[ $FAILURES -eq 0 ]

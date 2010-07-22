@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# JJM Raise an error when unbound variables are used.
+set -u
+
 ## JJM Variables for exit codes
 ## NOTE: There is a distinction between test failure
 ## and an error running the test.  Make sure to
@@ -11,8 +14,32 @@ EXIT_NOT_APPLICABLE=11
 EXIT_OK=0
 EXIT_ERROR=1
 
-# JJM Raise an error when unbound variables are used.
-set -u
+backup_file() {
+  [ -z "$1" ] && return 1
+  mv "$1"{,.backup}
+}
+
+restore_file() {
+  [ -z "$1" ] && return 1
+  mv "$1"{.backup,}
+}
+
+# JJM This function takes a PID and PORT and waits until
+# that process is listening on that port.
+# example: wait_until_master_is_listening 3000 18140
+wait_until_master_is_listening() {
+  local pid=${1}
+  local port=${2:-18140}
+  [ -z "$pid" ] && (echo "Need a PID"; return 1)
+
+  # JJM Wait for puppet master to start and open up the TCP port.
+  for i in $(seq 0 20); do
+    ( lsof -i -n -P |\
+      awk 'BEGIN {r=1} $2 ~ /'${pid}'/ && $8 ~ /'${port}'/ {r=0} END {exit r}')\
+      && break || sleep 1
+  done
+  # JJM TODO: Add a return code if the time expires.
+}
 
 # JJM Start the puppet agent against port 18140
 start_puppet_agent() {
@@ -24,6 +51,15 @@ start_puppet_agent() {
     --server localhost \
     --masterport ${master_port} "$@"
   return $?
+}
+
+start_puppetd() {
+  local master_port=${MASTER_PORT:=18140}
+  puppetd --vardir /tmp/puppet-$$-agent-var \
+    --confdir /tmp/puppet-$$-agent \
+    --rundir /tmp/puppet-$$-agent \
+    --test --debug \
+    --server localhost --masterport ${master_port} "$@"
 }
 
 start_puppet_master() {
@@ -40,48 +76,7 @@ start_puppet_master() {
   # JJM Set the master PID available outside
   MASTER_PID=${master_pid}
 
-  # Watch for the puppet master port to come online
-  for x in $(seq 0 10); do
-    rval=2
-    if (lsof -i -n -P|grep '\*:'${master_port}|grep -q ${master_pid})
-    then
-      rval=${EXIT_OK}
-      break
-    else
-      sleep 1
-    fi
-  done
-  return ${rval}
-}
-
-# JJM Stop the puppet master.  Expects ${MASTER_PID}
-stop_puppet_master() {
-  echo "Killing puppet master PID: ${MASTER_PID}"
-  kill -TERM ${MASTER_PID}
-}
-
-start_puppetd() {
-  local master_port=${MASTER_PORT:=18140}
-  puppetd --vardir /tmp/puppet-$$-agent-var \
-    --confdir /tmp/puppet-$$-agent \
-    --rundir /tmp/puppet-$$-agent \
-    --test --debug \
-    --server localhost --masterport ${master_port} "$@"
-}
-
-# JJM This function takes a PID and PORT and waits until
-# that process is listening on that port.
-# example: wait_until_master_is_listening 3000 18140
-wait_until_master_is_listening() {
-  local pid=${1}
-  local port=${2:-18140}
-  # JJM Wait for puppet master to start and open up the TCP port.
-  for i in $(seq 0 20); do
-    ( lsof -i -n -P |\
-      awk 'BEGIN {r=1} $2 ~ /'${pid}'/ && $8 ~ /'${port}'/ {r=0} END {exit r}')\
-      && break || sleep 1
-  done
-  # JJM TODO: Add a return code if the time expires.
+  wait_until_master_is_listening ${master_pid} ${master_port}
 }
 
 start_puppetmasterd() {
@@ -96,20 +91,7 @@ start_puppetmasterd() {
   MASTER_PID=$!
   echo "puppet master started with PID: ${MASTER_PID}"
 
-  # JJM Wait for puppet master to start and open up the TCP port.
-  for i in $(seq 0 10); do
-    if lsof -i -n -P | grep '\*:'${master_port} | grep -q $MASTER_PID
-    then
-      break
-    else
-      sleep 1
-    fi
-  done
-}
-
-stop_puppetmasterd() {
-  echo "Killing puppetmasterd PID: ${MASTER_PID}"
-  kill -TERM $MASTER_PID
+  wait_until_master_is_listening ${MASTER_PID} ${master_port}
 }
 
 NOT_APPLICABLE() {
@@ -128,5 +110,18 @@ killwait() {
     sleep 1
   done
   return 1
+}
+
+# JJM Stop the puppet master.  Expects ${MASTER_PID}
+stop_puppet_master() {
+  local pid=${1:-${MASTER_PID}}
+  [ -z "$pid" ] && (echo "Give me a PID"; return 1)
+  killwait $pid
+}
+
+stop_puppetmasterd() {
+  local pid=${1:-${MASTER_PID}}
+  [ -z "$pid" ] && (echo "Give me a PID"; return 1)
+  killwait $pid
 }
 #
