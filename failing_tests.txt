@@ -1,4 +1,21 @@
 On CentOS 5.5 i386:
+
+After commit (5057594) only 4 tests are failing.
+- ./spec/ticket_4233_resource_with_a_newline_spec.sh
+  - JJM: verified spec fails on 2.6.0rc3 and passes on 2.6.0
+- Other tests that pass have not yet been verified as actually
+  failing on the RC's.
+
+Failing Tests: (5057594)
+78 tests, 4 failures, 2 pending, 1 skipped
+     1  ./spec/settings_section_deprecation_spec.sh
+     2  ./spec/puppet_master_should_open_a_port_spec.sh
+     3  ./spec/resource/user/should_create_with_gid_spec.sh
+     4  ./spec/resource/service/ticket_4123_should_list_all_running_redhat_spec.sh
+
+Original list of failing tests after JJM merge into master in:
+(e21d521d553c1218442c6a398199d07040b33e3d)
+
 78 tests, 7 failures, 2 pending, 1 skipped
      1  ./spec/ticket_4233_resource_with_a_newline_spec.sh
      2  ./spec/settings_section_deprecation_spec.sh
