@@ -20,7 +20,7 @@ Original list of failing tests after JJM merge into master in:
 Fixed 1  ./spec/ticket_4233_resource_with_a_newline_spec.sh
 Fixed 2  ./spec/settings_section_deprecation_spec.sh
 Fixed 3  ./spec/puppet_master_should_open_a_port_spec.sh
-     4  ./spec/file_hello_world_spec.sh
+Fixed 4  ./spec/file_hello_world_spec.sh
      5  ./spec/ticket_4287_undefined_method_evaluate_match_when_function_call_used_in_an_if_statement_spec.sh
      6  ./spec/resource/user/should_create_with_gid_spec.sh
       7  ./spec/resource/service/ticket_4123_should_list_all_running_redhat_spec.sh
