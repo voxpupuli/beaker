@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# 2010-07-22 Jeff McCune <jeff@puppetlabs.com>
+#
+# Marking this test as pending after discussion with Dan.
+#
+# FIXME: Enable this test and have it behave properly.
 
 . spec/setup.sh
 
