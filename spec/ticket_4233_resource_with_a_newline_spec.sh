@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -e
 set -u
 
 source spec/setup.sh
