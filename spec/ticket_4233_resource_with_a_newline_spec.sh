@@ -8,7 +8,7 @@ source spec/setup.sh
 # and 2.6.0 final to not return an error line.
 # Look for the line in the output and fail the test
 # if we find it.
-execute_manifest false <<'PP' | grep ^err:
+execute_manifest <<'PP' | grep ^err:
 exec { '/bin/echo -e "\nHello World\n"': }
 PP
 # rval is the exit status of grep
