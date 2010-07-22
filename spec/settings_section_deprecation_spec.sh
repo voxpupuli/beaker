@@ -26,10 +26,24 @@ CONF
 
 # JJM Create the manifest file for puppet master
 echo 'notify{"this is a notify":}' > "${MANIFEST}"
+
 # Start puppetmasterd, redirect output to a file
-start_puppetmasterd 2>&1 >"${OUTPUT}"
+# JJM Note, not using the start_puppetmasterd
+mkdir -p /tmp/puppet-$$-master/manifests
+puppetmasterd \
+  --vardir /tmp/puppet-$$-master-var \
+  --confdir /tmp/puppet-$$-master \
+  --rundir /tmp/puppet-$$-master \
+  --no-daemonize --autosign=true \
+  --certname=localhost --masterport 18140 2>&1 >"${OUTPUT}" &
+master_pid=$!
+
+# Wait for the master port to be availalbe
+wait_until_master_is_listening $master_pid
+
 start_puppetd
-stop_puppetmasterd
+
+killwait ${master_pid}
 
 grep deprecated "${OUTPUT}" && exit $EXIT_OK || exit $EXIT_FAILURE
 

@@ -69,6 +69,21 @@ start_puppetd() {
     --server localhost --masterport ${master_port} "$@"
 }
 
+# JJM This function takes a PID and PORT and waits until
+# that process is listening on that port.
+# example: wait_until_master_is_listening 3000 18140
+wait_until_master_is_listening() {
+  local pid=${1}
+  local port=${2:-18140}
+  # JJM Wait for puppet master to start and open up the TCP port.
+  for i in $(seq 0 20); do
+    ( lsof -i -n -P |\
+      awk 'BEGIN {r=1} $2 ~ /'${pid}'/ && $8 ~ /'${pid}'/ {r=0} END {exit r}')\
+      && break || sleep 1
+  done
+  # JJM TODO: Add a return code if the time expires.
+}
+
 start_puppetmasterd() {
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests
@@ -99,5 +114,19 @@ stop_puppetmasterd() {
 
 NOT_APPLICABLE() {
   exit $EXIT_NOT_APPLICABLE
+}
+
+killwait() {
+  local pid=${1}
+  if [ -z "${pid}" ]; then
+    echo "Must pass a pid to kill"
+    return 2
+  fi
+  kill -TERM ${pid}
+  for i in (seq 0 10); do
+    test -d /proc/${pid} || return 0
+    sleep 1
+  done
+  return 1
 }
 #
