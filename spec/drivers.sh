@@ -6,6 +6,7 @@ driver_standalone() {
     mkdir -p /tmp/puppet-$$-standalone/manifests
     cat | puppet apply --confdir /tmp/puppet-$$-standalone \
       --verbose --debug \
+      --color false \
       --manifestdir /tmp/puppet-$$-standalone/manifests \
       --modulepath /tmp/puppet-$$-standalone/modules "$@"
   }
