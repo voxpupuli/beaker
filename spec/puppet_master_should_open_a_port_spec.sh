@@ -1,4 +1,7 @@
-source local_setup.sh
+#!/bin/bash
+#
+set -u
+source spec/setup.sh
 
 PORT=18140
 
