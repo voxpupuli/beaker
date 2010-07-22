@@ -16,12 +16,12 @@ EXIT_ERROR=1
 
 backup_file() {
   [ -z "$1" ] && return 1
-  mv "$1"{,.backup}
+  cp "$1"{,.backup}
 }
 
 restore_file() {
   [ -z "$1" ] && return 1
-  mv "$1"{.backup,}
+  cp $1{.backup,} && rm $1.backup
 }
 
 # JJM This function takes a PID and PORT and waits until
