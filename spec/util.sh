@@ -78,7 +78,7 @@ wait_until_master_is_listening() {
   # JJM Wait for puppet master to start and open up the TCP port.
   for i in $(seq 0 20); do
     ( lsof -i -n -P |\
-      awk 'BEGIN {r=1} $2 ~ /'${pid}'/ && $8 ~ /'${pid}'/ {r=0} END {exit r}')\
+      awk 'BEGIN {r=1} $2 ~ /'${pid}'/ && $8 ~ /'${port}'/ {r=0} END {exit r}')\
       && break || sleep 1
   done
   # JJM TODO: Add a return code if the time expires.
