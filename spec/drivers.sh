@@ -4,7 +4,7 @@ source spec/util.sh
 driver_standalone() {
   execute_manifest() {
     mkdir -p /tmp/puppet-$$-standalone/manifests
-    cat | $BIN/puppet apply --confdir /tmp/puppet-$$-standalone \
+    cat | puppet apply --confdir /tmp/puppet-$$-standalone \
       --verbose --debug \
       --manifestdir /tmp/puppet-$$-standalone/manifests \
       --modulepath /tmp/puppet-$$-standalone/modules "$@"
