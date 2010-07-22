@@ -6,11 +6,15 @@
 
 set -e
 set -u
-
 source spec/setup.sh
-execute_manifest <<EOF
-\$foo = 'abc'
-if \$foo != regsubst(\$foo,'abc','def') {
-  notify { 'foo': }
+if execute_manifest <<'EOF'
+$foo='abc'
+if $foo != regsubst($foo,'abc','def') {
+  notify { 'No issue here...': }
 }
 EOF
+then
+  exit $EXIT_OK
+else
+  exit $EXIT_FAILURE
+fi

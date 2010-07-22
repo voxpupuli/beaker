@@ -1,20 +1,40 @@
-source local_setup.sh
+#!/bin/bash
+#
+set -u
+source spec/setup.sh
 
 PORT=18140
 
-puppet master --masterport $PORT --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize &
-PUPPET_PID=$!
+# JJM Note the use of a string literal.
+# The variable will be dereferenced when the trap fires.
+# "Idiom - If $master_pid length is nonzero, then kill $master_pid"
+trap '{ test -n "${master_pid:-}" && kill "${master_pid}" ; }' EXIT
 
-for I in `seq 0 10` ; do
-        if lsof -i -n -P | grep '\*:'$PORT | grep $PUPPET_PID ; then
-                let status=0
-                break
-        else
-                let status=1
-                sleep 1
-        fi
+mkdir -p /tmp/puppet-$$-master/manifests
+puppet master \
+  --vardir /tmp/puppet-$$-master-var \
+  --confdir /tmp/puppet-$$-master \
+  --rundir /tmp/puppet-$$-master \
+  --no-daemonize --autosign=true \
+  --verbose --debug --color false \
+  --certname=localhost --masterport ${PORT:-18140} &
+master_pid=$!
+
+# Wait for the master port to be availalbe
+wait_until_master_is_listening $master_pid
+
+# Only look for 4 seconds since we've already waited.
+for I in `seq 0 4` ; do
+  if lsof -i -n -P | grep '\*:'$PORT | grep $master_pid ; then
+    status=${EXIT_OK}
+    break
+  else
+    status=${EXIT_FAILURE}
+    sleep 1
+  fi
 done
 
-kill $PUPPET_PID
+killwait ${master_pid}
 
 exit $status
+
