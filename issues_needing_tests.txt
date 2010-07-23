@@ -1,0 +1,15 @@
+2010-07-22 Jeff McCune <jeff@puppetlabs.com>
+
+Issues to write tests for:
+From James:
+* #4233
+* #4235
+* #4288
+* #4293
+* #4294
+From Markus:
+* #4287
+* #4285
+* #4233
+* #4293
+
