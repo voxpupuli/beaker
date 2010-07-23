@@ -2,14 +2,15 @@
 
 Issues to write tests for:
 From James:
-* #4233
+* #4233 (JJM Verified)
 * #4235
 * #4288
 * #4293
 * #4294
 From Markus:
-* #4287
+* #4233 (JJM Verified)
+* #4270
 * #4285
-* #4233
+* #4287
 * #4293
 
