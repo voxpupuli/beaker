@@ -5,7 +5,7 @@
 set -e
 set -u
 
-source local_setup.sh
+source lib/setup.sh
 
 # precondition
 # 1. user should not exist

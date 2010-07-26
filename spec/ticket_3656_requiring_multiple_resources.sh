@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
 
 execute_manifest <<'PP'
 notify { 'foo':

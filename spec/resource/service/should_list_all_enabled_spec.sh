@@ -9,7 +9,7 @@
 # be marked pending.
 
 set -u
-source spec/setup.sh
+source lib/setup.sh
 set -e
 
 # count ralshes enabled services

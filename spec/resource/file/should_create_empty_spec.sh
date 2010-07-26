@@ -4,7 +4,7 @@
 
 set -e
 set -u
-source local_setup.sh
+source lib/setup.sh
 
 FILENAME="/tmp/$0-$$"
 

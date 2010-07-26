@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
 
 start_puppet_master
 

@@ -7,7 +7,7 @@
 
 set -u
 
-source spec/setup.sh
+source lib/setup.sh
 
 # JJM We expect 2.6.0rc3 to return an error
 # and 2.6.0 final to not return an error line.
