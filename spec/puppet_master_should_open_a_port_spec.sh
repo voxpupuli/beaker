@@ -8,7 +8,7 @@ PORT=18140
 # JJM Note the use of a string literal.
 # The variable will be dereferenced when the trap fires.
 # "Idiom - If $master_pid length is nonzero, then kill $master_pid"
-trap '{ test -n "${master_pid:-}" && kill "${master_pid}" ; }' EXIT
+add_cleanup '{ test -n "${master_pid:-}" && kill "${master_pid}" ; }'
 
 mkdir -p /tmp/puppet-$$-master/manifests
 puppet master \
@@ -36,7 +36,5 @@ done
 
 killwait ${master_pid}
 
-# JJM Remove the exit trap since we're about to exit cleanly.
-trap '' EXIT
 exit $status
 

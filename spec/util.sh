@@ -24,6 +24,18 @@ restore_file() {
   cp $1{.backup,} && rm $1.backup
 }
 
+CLEANUPS=(true) # having trouble pushing to an empty list - JesseW
+__do_cleanup__() {
+  for I in "${CLEANUPS[@]}" ; do
+    eval $I
+  done
+}
+trap __do_cleanup__ EXIT INT TERM
+
+add_cleanup() {
+  CLEANUPS=("${CLEANUPS[@]}" "$1")
+}
+
 # JJM This function takes a PID and PORT and waits until
 # that process is listening on that port.
 # example: wait_until_master_is_listening 3000 18140
@@ -63,6 +75,7 @@ start_puppetd() {
 }
 
 start_puppet_master() {
+  add_cleanup "stop_puppet_master"
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests/
   puppet master --vardir \
@@ -80,6 +93,7 @@ start_puppet_master() {
 }
 
 start_puppetmasterd() {
+  add_cleanup "stop_puppetmasterd"
   local master_port=${MASTER_PORT:=18140}
   mkdir -p /tmp/puppet-$$-master/manifests
   puppetmasterd \
