@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
 use_driver "master_and_agent_locally"
 
 module_file "ssh/manifests/init.pp" <<'INIT'

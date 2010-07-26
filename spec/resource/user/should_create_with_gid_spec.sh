@@ -3,7 +3,7 @@
 # verifies that puppet resource creates a user and assigns the correct group
 #
 set -u
-source spec/setup.sh
+source lib/setup.sh
 set -e
 
 # preconditions
