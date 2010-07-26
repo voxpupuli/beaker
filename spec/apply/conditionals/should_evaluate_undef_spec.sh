@@ -1,5 +1,5 @@
 #!/bin/bash
-source local_setup.sh
+source lib/setup.sh
 
 OUTFILE="/tmp/spec-$$.log"
 

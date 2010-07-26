@@ -3,7 +3,7 @@
 set -e
 set -u
 
-source local_setup.sh
+source lib/setup.sh
 
 # precondition:
 # this cron test unit is not portable 

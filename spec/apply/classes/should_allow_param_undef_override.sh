@@ -3,7 +3,7 @@ set -u
 set -e
 # we are testing that resources declared in a class
 # can be applied with an include statement
-source local_setup.sh
+source lib/setup.sh
 OUTFILE=/tmp/class_undef_override_out-$$
 echo 'hello world!' > /tmp/class_undef_override_test-$$
 puppet apply <<PP | tee $OUTFILE

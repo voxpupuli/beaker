@@ -2,7 +2,7 @@
 #
 #  test that the string 'false' evaluates to true
 #
-source local_setup.sh
+source lib/setup.sh
 
 OUTFILE="/tmp/spec-$$.log"
 

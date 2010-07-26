@@ -1,6 +1,6 @@
 set -e
 
-source local_setup.sh
+source lib/setup.sh
 
 puppet apply <<PP | grep notice | grep if
 if( 1 == 1) {

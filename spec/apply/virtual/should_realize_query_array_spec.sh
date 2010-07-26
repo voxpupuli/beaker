@@ -1,6 +1,6 @@
 set -e
 
-source local_setup.sh
+source lib/setup.sh
 
 HOSTFILE=/tmp/hosts-$$
 # precondition:
