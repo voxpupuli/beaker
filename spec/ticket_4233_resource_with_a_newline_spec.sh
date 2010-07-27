@@ -20,7 +20,7 @@ PP
 rval=$?
 
 # JJM Exit with a proper failure code if the line was found
-if [ $rval -eq 0 ]
+if [ $rval -eq 0 ]; then
   exit $EXIT_FAILURE
 else
   exit $EXIT_OK
