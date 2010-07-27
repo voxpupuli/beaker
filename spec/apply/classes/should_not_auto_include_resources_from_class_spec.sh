@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 set -e
-source local_setup.sh
+source lib/setup.sh
 
 # test that resource declared in classes are not applied without include
 puppet apply <<PP | tee /tmp/class_not_include-$$

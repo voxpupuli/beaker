@@ -6,7 +6,7 @@
 
 set -e
 set -u
-source spec/setup.sh
+source lib/setup.sh
 if execute_manifest <<'EOF'
 $foo='abc'
 if $foo != regsubst($foo,'abc','def') {

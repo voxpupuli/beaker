@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
         
 puppet kick hostname1 | tee /tmp/puppet-kick-$$.txt
 

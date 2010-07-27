@@ -3,7 +3,7 @@
 set -e
 set -u
 
-source local_setup.sh
+source lib/setup.sh
 
 PATTERN='^127.0.0.2[[:space:]]+test1'
 FILE="/tmp/hosts-$$"

@@ -1,5 +1,5 @@
 #!/bin/bash
-source spec/util.sh
+source lib/util.sh
 
 driver_standalone() {
   execute_manifest() {

@@ -18,7 +18,7 @@
 set -e
 set -u
 
-source spec/setup.sh
+source lib/setup.sh
 driver_standalone_using_files
 
 execute_manifest <<PP

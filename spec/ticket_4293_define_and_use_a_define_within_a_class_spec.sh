@@ -10,7 +10,7 @@
 #
 
 set -u
-source spec/setup.sh
+source lib/setup.sh
 
 OUTPUT="/tmp/puppet-$$.out"
 

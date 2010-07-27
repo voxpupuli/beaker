@@ -18,8 +18,7 @@ An example is provided which assumes puppet and facter exist in /opt/puppetlabs
 Writing specifications:
 * specification scripts should be written in BASH
 * Expect the current working directory to be where the Makefile lives.
-* The script should source spec/util.sh
-* The script should source spec/setup.sh
+* The script should source lib/setup.sh
 * They should return $EXIT_FAIL on a test failure.
 * The should return 0 or $EXIT_OK on test success.
 * Any other exit code is treated as a testing error (not failure)

@@ -1,5 +1,5 @@
 #!/bin/bash
-source spec/setup.sh
+source lib/setup.sh
 
 backup_file /etc/hosts
 add_cleanup 'restore_file /etc/hosts'

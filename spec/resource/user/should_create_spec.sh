@@ -5,7 +5,7 @@
 set -e
 set -u
 
-source local_setup.sh
+source lib/setup.sh
 
 if getent passwd bozo; then
   userdel bozo

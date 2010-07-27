@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source spec/drivers.sh
+source lib/drivers.sh
 env_driver
 source local_setup.sh
