@@ -38,3 +38,5 @@ should be considered as an error in the spec test itself.
 It's a good idea to run with set -u to catch undefined variables being
 used.  Where possible, set -e is also a good idea.
 
+= Bash Pitfalls =
+http://mywiki.wooledge.org/BashPitfalls 
