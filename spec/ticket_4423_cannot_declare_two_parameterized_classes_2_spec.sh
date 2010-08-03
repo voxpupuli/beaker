@@ -16,29 +16,30 @@ set -u
 source lib/setup.sh
 driver_standalone_using_files
 
-class1='class rainbow($color) {
+# JJM Putting both classes in the same manifest should work.
+execute_manifest<<'MANIFEST3' && exit $EXIT_OK || exit $EXIT_FAILURE
+class rainbow($color) {
   notify { "color": message => "Color is [${color}]" }
 }
-class { "rainbow": color => "green" }'
+class { "rainbow": color => "green" }
 
-class2='class planet($moons) {
+class planet($moons) {
   notify { "planet": message => "Moons are [${moons}]" }
 }
-class { "planet": moons => "1" }'
+class { "planet": moons => "1" }
 
-# Declaring one parameterized class works just fine
-execute_manifest<<MANIFEST1
-${class1}
-MANIFEST1
+class rainbow::location($prism=false, $water=true) {
+  notify { "${name}":
+    message => "prism:[${prism}] water:[${water}]";
+  }
+}
+class { "rainbow::location": prism => true, water => false; }
 
-# Make sure we try both classes stand-alone
-execute_manifest<<MANIFEST2
-${class2}
-MANIFEST2
-
-# JJM Putting both classes in the same manifest should work.
-execute_manifest<<MANIFEST3 && exit $EXIT_OK || exit $EXIT_FAILURE
-${class1}
-${class2}
+class rainbow::type($pretty=true, $ugly=false) {
+  notify { "${name}":
+    message => "pretty:[${pretty}] ugly:[${ugly}]";
+  }
+}
+class { "rainbow::type": pretty => false, ugly => true; }
 MANIFEST3
 
