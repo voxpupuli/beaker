@@ -7,7 +7,7 @@ source spec/setup.sh
 
 if ! which rpm ; then NOT_APPLICABLE ; fi
 
-PACKAGE='yum-cron'
+PACKAGE='spectest'
 
 # precondition
 if rpm -q $PACKAGE; then
@@ -15,7 +15,9 @@ if rpm -q $PACKAGE; then
 fi
 
 # run ralsh
-$BIN/puppet resource package yum-cron ensure=installed | grep 'ensure: created'
+$BIN/puppet resource package $PACKAGE ensure=installed | tee $OUTFILE
+ 
 
 # postcondition
+grep 'ensure: created' $OUTFILE
 rpm -q $PACKAGE
