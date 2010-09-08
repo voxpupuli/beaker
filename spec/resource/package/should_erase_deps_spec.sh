@@ -1,9 +1,12 @@
 #!/bin/bash
-
+#
+# author: Dan Bode
+# ensures that purge for yum resource
+# removed depending packages. (not working yet)
 set -e
 set -u
 
-source spec/setup.sh
+source lib/setup.sh
 
 if ! which rpm ; then NOT_APPLICABLE ; fi
 

@@ -8,10 +8,13 @@ source lib/setup.sh
 #
 # precondition
 #  - group should not exist
-GROUP=bozo$$
+GROUP=bozo
 if getent group $GROUP; then
   groupdel $GROUP
 fi
 
+# verify
 $BIN/puppet resource group $GROUP ensure=present gid=12768
 getent group $GROUP | grep 12768
+# postcondition
+groupdel $GROUP

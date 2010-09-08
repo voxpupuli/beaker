@@ -1,9 +1,13 @@
 #!/bin/bash
-
+#
+# author: Dan Bode
+#
+# tests that puppet yum provider can downgrade packages.
+#
 set -e
 set -u
 
-source spec/setup.sh
+source lib/setup.sh
 if ! which rpm ; then NOT_APPLICABLE ; fi
 
 PACKAGE='spectest'
@@ -22,4 +26,5 @@ $BIN/puppet resource package $PACKAGE ensure=$VERSION | tee $OUTFILE
 
 grep "ensure changed '${OLD_VERSION}' to '${VERSION}'" $OUTFILE
 # postcondition
+# package should have been downgraded.
 [ `rpm -q $PACKAGE` == "${PACKAGE}-${VERSION}" ] 
