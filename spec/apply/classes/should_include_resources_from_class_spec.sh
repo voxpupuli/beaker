@@ -1,10 +1,11 @@
+#!/bin/bash
+set -u
 set -e
-#
 # we are testing that resources declared in a class
 # can be applied with an include statement
-. local_setup.sh
+source lib/setup.sh
 
-$BIN/puppet apply <<PP | tee /tmp/class_include-$$
+puppet apply <<PP | tee /tmp/class_include-$$
 class x {
   notify{'a':}
 }

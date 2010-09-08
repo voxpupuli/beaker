@@ -2,11 +2,15 @@
 #
 # ensure that undefined variables evaluate as false
 #
-. local_setup.sh
+
+set -e
+set -u
+
+source lib/setup.sh
 
 OUTFILE="/tmp/spec-$$.log"
 
-$BIN/puppet apply <<PP | tee $OUTFILE
+puppet apply <<PP | tee $OUTFILE
 if \$undef_var {
 } else {
   notice('undef')

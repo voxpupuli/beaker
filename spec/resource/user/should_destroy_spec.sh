@@ -6,7 +6,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source lib/setup.sh
 # preconditions:
 # 1. user bozo should exist
 if ! getent passwd bozo; then
@@ -17,5 +17,5 @@ if ! getent passwd bozo; then
 fi
 
 # puppet resource ensures user is absent
-$BIN/puppet resource user bozo ensure=absent
+puppet resource user bozo ensure=absent
 ! getent passwd bozo

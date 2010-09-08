@@ -6,7 +6,7 @@
 set -e
 set -u
 
-. local_setup.sh
+source lib/setup.sh
 
 HOSTFILE=/tmp/hosts-$$
 # precondition:
@@ -15,7 +15,7 @@ if [ -e $HOSTFILE ]; then
   rm $HOSTFILE
 fi
 
-$BIN/puppet apply <<PP
+puppet apply <<PP
 @host { 'test$$1': 
   ip=>'127.0.0.2', 
   target=>'$HOSTFILE', 

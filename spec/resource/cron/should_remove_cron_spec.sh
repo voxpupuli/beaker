@@ -1,32 +1,25 @@
 #!/bin/bash
-# 
 set -e
 set -u
 
-source local_setup.sh
+source lib/setup.sh
 
-# precondition:
-# this cron test unit is not portable 
 TMPUSER=cron-$$
 TMPFILE=/tmp/cron-$$
-TMPCRON=/var/spool/cron/${TMPUSER}
+# other operating systems my store their crons in a different location
+# not sure this is the best general way to handle testing across multiple OS's
+# but it seems reasonable in this test case
+if [[ `facter operatingsystem` == 'Ubuntu' ]]; then
+  TMPCRON=/var/spool/cron/crontabs/${TMPUSER}
+else
+  TMPCRON=/var/spool/cron/${TMPUSER}
+fi
 
-# Per discussion with Dan, using linux useradd and removing /var/spool/cron/
-#$BIN/puppet resource user ${TMPUSER} ensure=present > /dev/null
-#$BIN/puppet resource cron crontest user=${TMPUSER} command=/bin/true ensure=absent >/dev/null
+add_cleanup '{ rm -f ${TMPCRON}; }'
+add_cleanup '{ userdel ${TMPUSER}; }'
+
 useradd ${TMPUSER}
-rm -f ${TMPCRON}
 echo -e "# Puppet Name: crontest\n* * * * * /bin/true" > ${TMPCRON}
 
-# validation: puppet does not create cron entry and it matches expectation 
-($BIN/puppet resource cron crontest user=${TMPUSER} command=/bin/true ensure=absent | grep removed ) && ((`crontab -l -u ${TMPUSER} | grep -c /bin/true` == 0))
-
-status=$? 
-
-# postcondition cleanup cron
-#$BIN/puppet resource user ${TMPUSER} ensure=absent > /dev/null
-#$BIN/puppet resource cron crontest user=${TMPUSER} command=/bin/true ensure=absent > /dev/null
-userdel ${TMPUSER}
-rm -f ${TMPCRON}
-
-exit ${status}
+# validation: puppet does not create cron entry and it matches expectation
+(puppet resource cron crontest user=${TMPUSER} command=/bin/true ensure=absent | grep removed ) && ((`crontab -l -u ${TMPUSER} | grep -c /bin/true` == 0))

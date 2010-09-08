@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
 driver_master_and_agent_locally_using_old_executables 
         
 puppet_conf <<'CONF'

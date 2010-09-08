@@ -5,12 +5,12 @@
 set -e
 set -u
 
-. local_setup.sh
+source lib/setup.sh
 
 # count the lines in /etc/passwd
 SYSTEM_COUNT=$( wc -l /etc/passwd | awk '{print $1}')
 # could the users that puppet knows exist
-RALSH_COUNT=$( $BIN/puppet resource user | grep 'present' | wc -l )
+RALSH_COUNT=$( puppet resource user | grep 'present' | wc -l )
 # the counts should be the same
 if [ "$SYSTEM_COUNT" == "$RALSH_COUNT" ]; then
   exit 0

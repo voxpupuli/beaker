@@ -1,10 +1,10 @@
+#!/bin/bash
+set -u
 set -e
-#
-# test that resource declared in classes are not applied without include
-#
-. local_setup.sh
+source lib/setup.sh
 
-$BIN/puppet apply <<PP | tee /tmp/class_not_include-$$
+# test that resource declared in classes are not applied without include
+puppet apply <<PP | tee /tmp/class_not_include-$$
 class x {
   notify{'NEVER':}
 }

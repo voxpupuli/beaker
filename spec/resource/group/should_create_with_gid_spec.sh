@@ -3,7 +3,7 @@
 # test that we can set a groups gid
 #
 
-. local_setup.sh
+source lib/setup.sh
 
 #
 # precondition

@@ -2,11 +2,11 @@
 #
 #  test that the string 'false' evaluates to true
 #
-source local_setup.sh
+source lib/setup.sh
 
 OUTFILE="/tmp/spec-$$.log"
 
-$BIN/puppet <<PP | tee $OUTFILE
+puppet <<PP | tee $OUTFILE
 if 'false' {
   notice('true')
 } else {

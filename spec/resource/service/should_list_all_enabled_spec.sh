@@ -1,17 +1,29 @@
 #!/bin/bash
+#
+# 2010-07-22 Jeff McCune <jeff@puppetlabs.com>
+# The goal of this test is to verify the list of enabled services
+# returned by puppet resource services matches the list of services
+# which are actually enabled.
+#
+# As per conversation with Dan, this test is a rabbit hole and should
+# be marked pending.
 
-. local_setup.sh
+set -u
+source lib/setup.sh
+set -e
+
 # count ralshes enabled services
-RALSH_SERVICE_ENABLED_COUNT=$( $BIN/puppet resource service | egrep "enable\s*=>\s*'true" | wc -l )
+RALSH_SERVICE_ENABLED_COUNT=$( puppet resource service | \
+  egrep --count 'enable\s*=>.*true' )
+
 # chkconfigs enabled service count
 SERVICE_ENABLED_COUNT=0
-for service in $( chkconfig --list | awk -F ' ' '{print $1}' ); do
-  chkconfig $service
-  if [ $? == 0 ]; then
-    SERVICE_ENABLED_COUNT=$(( $SERVICE_ENABLED_COUNT + 1 ))
+for service in $( chkconfig --list | awk '{print $1}' ); do
+  if chkconfig "$service"; then
+    ((SERVICE_ENABLED_COUNT++))
   fi
 done
-#SERVICE_ENABLED_COUNT=`chkconfig --list | grep ':on' | wc -l`
+
 if [ "$RALSH_SERVICE_ENABLED_COUNT" == "$SERVICE_ENABLED_COUNT" ] ; then
   exit 0
 else

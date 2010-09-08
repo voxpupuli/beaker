@@ -3,7 +3,7 @@
 set -e
 set -u
 
-source spec/setup.sh
+source lib/setup.sh
 
 if ! which rpm ; then NOT_APPLICABLE ; fi
 
@@ -17,7 +17,6 @@ fi
 # run ralsh
 $BIN/puppet resource package $PACKAGE ensure=installed | tee $OUTFILE
  
-
 # postcondition
 grep 'ensure: created' $OUTFILE
 rpm -q $PACKAGE

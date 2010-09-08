@@ -1,5 +1,5 @@
 #!/bin/bash
 
-. ../../local_setup.sh
+source lib/setup.sh
 
-$BIN/puppet doc -r function | grep 'Function Reference'
+puppet doc -r function | grep 'Function Reference'

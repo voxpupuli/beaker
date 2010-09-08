@@ -4,7 +4,7 @@
 
 set -e
 set -u
-. local_setup.sh
+source lib/setup.sh
 
 FILENAME="/tmp/$0-$$"
 
@@ -15,7 +15,7 @@ if [ -f $FILENAME ]; then
 fi
 
 # run ralsh to create file
-$BIN/puppet resource file $FILENAME ensure=present
+puppet resource file $FILENAME ensure=present
 # file should have size zero
 if [ ! -s $FILENAME ]; then
   exit 0

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-source spec/setup.sh
+source lib/setup.sh
 
 start_puppet_master
 
-$BIN/puppet agent --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize --onetime --server localhost --debug --masterport $MASTER_PORT
+puppet agent --vardir /tmp/puppet-$$ --confdir /tmp/puppet-$$ --rundir /tmp/puppet-$$ --no-daemonize --onetime --server localhost --debug --masterport $MASTER_PORT
 
 stop_puppet_master
 

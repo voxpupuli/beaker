@@ -1,5 +1,5 @@
 #!/bin/bash
 
-. ../../local_setup.sh
+source lib/setup.sh
 
-$BIN/puppet doc -r type
+puppet doc -r type
