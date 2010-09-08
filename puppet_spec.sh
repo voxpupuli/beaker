@@ -20,8 +20,8 @@ let SKIPPED=0
 
 FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
-
-for SPEC in `find $TEST_DIR -name '*_spec.sh' ` ; do
+# sorting so that before runs before should_
+for SPEC in `find $TEST_DIR -name '*_spec.sh' | sort ` ; do
         if ! [ -x $SPEC ] ; then
                 echo -n p
                 let "PENDING+=1"
