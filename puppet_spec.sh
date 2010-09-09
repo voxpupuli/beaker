@@ -45,7 +45,7 @@ SKIPPED=0
 FAIL_LOG=/tmp/$$.failures.txt
 touch $FAIL_LOG
 
-for SPEC in $(find $TEST_DIR -name '*_spec.sh')  ; do
+for SPEC in $(find $TEST_DIR -name '*_spec.sh' | sort)  ; do
   if ! [ -x $SPEC ] ; then
     echo -n p
     ((PENDING++))
