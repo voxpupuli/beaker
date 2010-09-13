@@ -51,16 +51,20 @@ for SPEC in $(find $TEST_DIR -name '*_spec.sh' | sort)  ; do
     ((PENDING++))
     continue
   fi
-  if $SPEC >& /dev/null ; then
+
+  result=$($spec 2>&1)
+  TEST_ERROR=$?
+
+  if [ $TEST_ERROR -eq $EXIT_OK ] then
     echo -n .
   else
-    TEST_ERROR=$?
     # JJM Detect if script exited with code $EXIT_NOT_APPLICABLE
     if [ $TEST_ERROR -eq $EXIT_NOT_APPLICABLE ] ; then
       echo -n '~'
       ((SKIPPED++))
     else
-      echo $SPEC >> $FAIL_LOG
+      echo $SPEC   >> $FAIL_LOG
+      echo $result >> $FAIL_LOG
       ((FAILURES++))
       echo -n F
     fi
@@ -72,4 +76,3 @@ print_results
 
 # JJM Exit with FAILURE status if the number of failures are not zero.
 [ $FAILURES -eq 0 ] && exit $EXIT_OK || exit $EXIT_FAILURE
-
