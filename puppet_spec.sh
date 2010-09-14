@@ -52,10 +52,10 @@ for SPEC in $(find $TEST_DIR -name '*_spec.sh' | sort)  ; do
     continue
   fi
 
-  result=$($spec 2>&1)
+  result=$($SPEC 2>&1)
   TEST_ERROR=$?
 
-  if [ $TEST_ERROR -eq $EXIT_OK ] then
+  if [ $TEST_ERROR -eq $EXIT_OK ] ; then
     echo -n .
   else
     # JJM Detect if script exited with code $EXIT_NOT_APPLICABLE
