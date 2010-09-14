@@ -15,6 +15,8 @@ set -u
 
 print_results() {
   echo
+  cat $FAIL_LOG
+  echo
   echo -n "$TOTAL tests, $FAILURES failures"
   if [ "$PENDING" -ne 0 ] ; then
     echo -n ", $PENDING pending"
@@ -23,7 +25,6 @@ print_results() {
     echo -n ", $SKIPPED skipped"
   fi
   echo
-  cat -n $FAIL_LOG
 }
 
 trap "print_results; exit" SIGINT
@@ -63,9 +64,10 @@ for SPEC in $(find $TEST_DIR -name '*_spec.sh' | sort)  ; do
       echo -n '~'
       ((SKIPPED++))
     else
-      echo $SPEC   >> $FAIL_LOG
-      echo $result >> $FAIL_LOG
       ((FAILURES++))
+      echo "$FAILURES) $SPEC" >> $FAIL_LOG
+      echo $result            >> $FAIL_LOG
+      echo                    >> $FAIL_LOG
       echo -n F
     fi
   fi
