@@ -8,6 +8,7 @@ class InstallPuppet
 
     host=""
     os=""
+    inst_path="/root/enterprise-dist/installer"
     test_name="Install Puppet"
     usr_home=ENV['HOME']
     
@@ -16,19 +17,17 @@ class InstallPuppet
       if /^PMASTER/ =~ os then         # Detect Puppet Master node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)
-        #result = runner.do_remote("./install.sh -foo -bar")
-        result = runner.do_remote("uname -a")
-        p result.output
+        result = runner.do_remote("#{inst_path}/puppet-enterprise-installer -a #{inst_path}/answers_master_only.sh")
+        #result = runner.do_remote("uname -a")
         @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.exit_code, result.output)
+        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       elsif /^AGENT/ =~ os then        # Detect Puppet Agent node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)
-        #result = runner.do_remote("./install.sh -foo -bar")
-        result = runner.do_remote("uname -a")
-        p result.output
+        result = runner.do_remote("#{inst_path}/puppet-enterprise-installer -a #{inst_path}/answers_client_only.sh")
+        #result = runner.do_remote("/bin/ls -l /var")
         @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.exit_code, result.output)
+        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       end
     end
   end

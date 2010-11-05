@@ -9,11 +9,12 @@ class RemoteExec
   end
 
   class Result
-    attr_accessor :host, :cmd, :output, :exit_code
-    def initialize(host=nil, cmd=nil, output=nil, exit_code=nil)
+    attr_accessor :host, :cmd, :stdout, :stderr, :exit_code
+    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, exit_code=nil)
       self.host      = host
       self.cmd       = cmd
-      self.output    = output
+      self.stdout    = stdout
+      self.stderr    = stderr
       self.exit_code = exit_code
 		end
   end
@@ -38,11 +39,11 @@ class RemoteExec
 					end
         end 
         channel.on_data do |ch, data|  # stdout
-          result.output = "#{data}"
+          result.stdout = "#{data}"
         end
         channel.on_extended_data do |ch, type, data|
           next unless type == 1  # only handle stderr
-          result.output = "#{data}"
+          result.stderr = "#{data}"
         end
         channel.on_request("exit-status") do |ch, data|
           result.exit_code = data.read_long

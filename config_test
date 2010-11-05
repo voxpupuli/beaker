@@ -1,6 +1,6 @@
 # ROLE(MASTER||AGENT):PLATFORM(RHEL||UBUNTU||OSX||SUN):HOSTNAME
 # Puppet Master
-PMASTER:RHEL:puppet
+PMASTER:RHEL:pmaster
 # List of Puppet Agents
 AGENT:RHEL:pagent
 # AGENT:OSX:foonode

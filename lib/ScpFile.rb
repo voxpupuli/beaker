@@ -6,11 +6,12 @@ class ScpFile
   end
 
   class Result
-    attr_accessor :host, :cmd, :output, :exit_code
-    def initialize(host=nil, cmd=nil, output=nil, exit_code=nil)
+    attr_accessor :host, :cmd, :stdout, :stderr, :exit_code
+    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, exit_code=nil)
       self.host      = host
       self.cmd       = cmd
-      self.output    = output
+      self.stdout    = stdout
+      self.stderr    = stderr
       self.exit_code = exit_code
 		end
   end
@@ -26,8 +27,11 @@ class ScpFile
       :user_known_hosts_file => "#{usr_home}/.ssh/known_hosts"
     }
     result = Result.new
-    result.output = "SCP'ed #{@host}/#{@source} #{@target}"
     # Net::Scp always returns 0, so just set the return code to 0
+    # Setting these values allows reporting via 
+    # ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    result.stdout = "SCP'ed #{@host}/#{@source} #{@target}"
+    result.stderr = nil
     result.exit_code = 0
 	
     if Net::SCP.start("#{@host}", "root", options) do |scp|
