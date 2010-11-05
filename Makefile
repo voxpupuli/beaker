@@ -1,6 +1,7 @@
 .PHONY: test
 .DEFAULT: test
-test:
+
+test: local_setup.sh
 	DATE=$( date +"%s" )
 	rm -f results/*.xml
 	/usr/bin/env perl report_tests.pl
