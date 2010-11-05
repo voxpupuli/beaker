@@ -1,0 +1,4 @@
+Refactored Test Harness
+Modified .rb scripts into full classes:
+  greatly increased modularity
+  much easier debugging
