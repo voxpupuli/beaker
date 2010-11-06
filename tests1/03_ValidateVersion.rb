@@ -16,17 +16,16 @@ class ValidateVersion
       if /^PMASTER/ =~ os then         # Detect Puppet Master node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)
-        result = runner.do_remote("/usr/bin/puppet --version")
-        p result.output
+        result = runner.do_remote("/opt/puppet/bin/puppet --version")
         @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.exit_code, result.output)
+        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       elsif /^AGENT/ =~ os then        # Detect Puppet Agent node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)
-        result = runner.do_remote("/usr/bin/puppet --version")
-        p result.output
+        result = runner.do_remote("/opt/puppet/bin/puppet --version")
+        #result = runner.do_remote("/usr/bin/puppet --version")
         @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.exit_code, result.output)
+        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       end
     end
   end

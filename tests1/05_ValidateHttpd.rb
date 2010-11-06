@@ -23,10 +23,8 @@ class ValidateHttpd
     BeginTest.new(pmaster, test_name)
     runner = RemoteExec.new(pmaster)
     result = runner.do_remote("service httpd start")
-    p result.output
     @fail_flag+=result.exit_code
-    ChkResult.new(pmaster, test_name, result.exit_code, result.output)
-
+    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
     # Check for HTTPD on PMASTER
     test_name="Connect to HTTPD server on Puppet Master"
@@ -41,8 +39,7 @@ class ValidateHttpd
       rescue Exception => se
          puts "Got socket error (#{se.type}): #{se}"
       end
-    ChkResult.new(pmaster, test_name, tmp_result, "none")
     @fail_flag+=tmp_result
-
+    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
   end
 end

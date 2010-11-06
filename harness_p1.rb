@@ -41,20 +41,19 @@ config = config_file.read_cfg
 ###################################
 
 # Call Test Setup 
-result = TestSetup.new(config)
+# result = TestSetup.new(config)
 
 # Call Puppet installer, passing config
-result = InstallPuppet.new(config)
+#result = InstallPuppet.new(config)
 
 # Run Validate Puppet Version
-# result = ValidateVersion.new(config)
+result = ValidateVersion.new(config)
 
 # Run Validate Signing CA Certs
 # result = ValidateSignCert.new(config)
 
 # Run Validate HTTPD functionality
 # result = ValidateHttpd.new(config)
-#p result.fail_flag
 
 
 # restore file descriptors

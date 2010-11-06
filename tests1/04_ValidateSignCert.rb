@@ -30,9 +30,8 @@ class ValidateSignCert
         runner = RemoteExec.new(host)
         #result = runner.do_remote("puppetd --server #{pmaster} --waitforcert 30")
         result = runner.do_remote("puppetd --server puppet.puppetlabs.lan --waitforcert 60 --test")
-        p result.output
         @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.exit_code, result.output)
+        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       end
     end
     sleep 3
@@ -42,10 +41,8 @@ class ValidateSignCert
     BeginTest.new(pmaster, test_name)
     runner = RemoteExec.new(pmaster)
     result = runner.do_remote("puppetca --sign pagent.puppetlabs.lan")
-    p result.output
     @fail_flag+=result.exit_code
-    ChkResult.new(host, test_name, result.exit_code, result.output)
-    ChkResult.new(host, test_name, result.exit_code, result.output)
+    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
   end
 end
