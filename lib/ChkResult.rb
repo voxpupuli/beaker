@@ -9,7 +9,7 @@ class ChkResult
       self.test_stderr = test_stderr
       self.test_exitcode = test_exitcode
      
-      puts "OUTPUT***"
+      puts "OUTPUT (stdout, stderr, exitcode):"
       puts @test_stdout
       puts @test_stderr
       puts @test_exitcode

@@ -44,10 +44,19 @@ config = config_file.read_cfg
 # result = TestSetup.new(config)
 
 # Call Puppet installer, passing config
-#result = InstallPuppet.new(config)
+# result = InstallPuppet.new(config)
 
-# Run Validate Puppet Version
-result = ValidateVersion.new(config)
+# Run Validate Ruby Install
+result = ValidateRuby.new(config)
+
+# Run Validate Gem Install
+result = ValidateGem.new(config)
+
+# Run Validate Facter Install
+result = ValidateFacter.new(config)
+
+# Run Validate Puppet Install
+result = ValidatePuppet.new(config)
 
 # Run Validate Signing CA Certs
 # result = ValidateSignCert.new(config)
@@ -61,3 +70,4 @@ result = ValidateVersion.new(config)
 #$stderr = STDERR
 ## Back to our top level dir
 #FileUtils.cd(work_dir)
+#
