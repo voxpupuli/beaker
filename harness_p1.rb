@@ -5,11 +5,25 @@ require 'net/ssh'
 require 'net/scp'
 require 'net/http'
 require 'socket'
+require 'optparse'
 require 'systemu'
 require 'require_all'
 
 # Import custom classes
 require_all './lib'
+
+# Command arg parsing
+options = {}
+optparse = OptionParser.new do|opts|
+  # Set a banner
+  options[:config] = nil
+  opts.on( '-c', '--config FILE', 'Use config FILE' ) do|file|
+    options[:config] = file
+  end
+end
+puts " #{options[:config]}"
+exit
+
 
 # Where was I called from
 work_dir=FileUtils.pwd
