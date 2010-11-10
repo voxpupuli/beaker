@@ -1,6 +1,6 @@
 # Read Config file
 # Accept filename as arg
-# Return hash of hostname => role
+# Return config object
 
 class ParseConfig
   attr_accessor :filename
@@ -8,7 +8,7 @@ class ParseConfig
       self.filename = filename
   end
 
-  class HostList
+  class Config
     attr_accessor :host_list
     def initialize(host_list={})
       self.host_list = host_list
@@ -17,18 +17,18 @@ class ParseConfig
 
   # Create hash of hostname => role
   def read_cfg
-    hosts = HostList.new
+    config = Config.new
     File.open("#{filename}") do |file|
       while line = file.gets
         #next if /^#/
         if /^(PMASTER):\w+:(\S+)/ =~ line then
-          hosts.host_list[$2] = $1
+          config.host_list[$2] = $1
         end
         if /^(AGENT):\w+:(\S+)/ =~ line then
-          hosts.host_list[$2] = $1
+          config.host_list[$2] = $1
         end
       end
     end
-    return hosts
+    return config
   end
 end
