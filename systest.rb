@@ -19,6 +19,7 @@ $work_dir=FileUtils.pwd
 def setup_logs
   time = Time.new
   logdir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"
+  puts "Test logs will be written here: #{logdir}"
   FileUtils.mkdir(logdir)
   FileUtils.cd(logdir)
   $stdout.reopen("run.log","w")
@@ -32,7 +33,7 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-d || --testdir] DIR"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-d || --testdir] DIR"
 
     options[:testdir] = nil
     opts.on( '-d', '--testdir DIR', 'Execute tests in DIR' ) do|dir|
@@ -83,8 +84,5 @@ test_list.each do |test|
   end
 end
 
-# restore file descriptors
-$stdout = STDOUT
-$stderr = STDERR
 ## Back to our top level dir
 FileUtils.cd($work_dir)
