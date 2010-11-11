@@ -12,34 +12,20 @@ require 'require_all'
 # Import custom classes
 require_all './lib'
 
-# Command arg parsing
-options = {}
-optparse = OptionParser.new do|opts|
-  # Set a banner
-  options[:config] = nil
-  opts.on( '-c', '--config FILE', 'Use config FILE' ) do|file|
-    options[:config] = file
-  end
-end
-puts " #{options[:config]}"
-exit
-
-
 # Where was I called from
-work_dir=FileUtils.pwd
-puts "#{work_dir}"
+$work_dir=FileUtils.pwd
 
 # Build list of tests
-def find_tests(work_dir)
-  test_list = Dir.entries "#{work_dir}/tests2/"
+def find_tests(testdir)
+  puts "Looking for tests in #{$work_dir}/#{testdir}"
+  test_list = Dir.entries "#{$work_dir}/#{testdir}"
   test_list.each do |test|
     next if test =~ /^\W/    # skip .hiddens and such
     puts "Found test #{test}"
-    require "#{work_dir}/tests2/#{test}"
+    require "#{$work_dir}/#{testdir}/#{test}"
   end
   return test_list 
 end
-
 
 # Setup log dir
 def setup_logs
@@ -53,21 +39,50 @@ def setup_logs
   return logdir
 end
 
+# Parse command line args
+def parse_args
+  options = {}
+  optparse = OptionParser.new do|opts|
+    # Set a banner
+    opts.banner = "Usage: harness.rb [-d || --testdir] DIR"
+
+    options[:testdir] = nil
+    opts.on( '-d', '--testdir DIR', 'Execute tests in DIR' ) do|dir|
+      options[:testdir] = dir
+    end
+    options[:config] = nil
+    opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
+      options[:config] = file
+    end
+
+    opts.on( '-h', '--help', 'Display this screen' ) do
+      puts opts
+      exit
+    end
+  end
+  optparse.parse!
+  return options
+end
 
 
 ###################################
 #  Main
 ###################################
 
-# Read config file
-config_file = ParseConfig.new("config_test")
-config = config_file.read_cfg
+# Parse commnand line args
+options=parse_args
+puts "Executing tests in #{options[:testdir]}" if options[:testdir]
+puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
 logdir = setup_logs
 
+# Read config file
+config_file = ParseConfig.new(options[:config])
+config = config_file.read_cfg
+
 # Search for tests
-test_list = find_tests(work_dir)
+test_list = find_tests("#{options[:testdir]}")
 
 # Iterate over test_list and execute
 test_list.each do |test|
@@ -117,4 +132,4 @@ result = ValidatePuppet.new(config)
 $stdout = STDOUT
 $stderr = STDERR
 ## Back to our top level dir
-FileUtils.cd(work_dir)
+FileUtils.cd($work_dir)
