@@ -8,10 +8,13 @@
 # -w  file has write permission (for the user running the test)
 # -x  file has execute permission (for the user running the test)
 
+fail_flag=0
+
 dir_list="dir1 dir2 dir3"
 for dir in $dir_list; do
-  if [ ! -f "$dir" ] ||  [ ! -s "$dir" ]; then
-    echo $dir
+  if [ ! -d "$dir" ]; then
+   absent=${dir}" "${absent}
+   let fail_flag++
   fi
 done
-
+echo "Directores missing: ${absent}"

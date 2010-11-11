@@ -23,11 +23,11 @@ class ParseConfig
         #next if /^#/
         if /^(PMASTER):\w+:(\S+)/ =~ line then
           config.host_list[$2] = $1
-          puts "Puppet Master: #{$1}"
+          puts "Puppet Master: #{$2}"
         end
         if /^(AGENT):\w+:(\S+)/ =~ line then
           config.host_list[$2] = $1
-          puts "Puppet Agent: #{$1}"
+          puts "Puppet Agent: #{$2}"
         end
       end
     end
