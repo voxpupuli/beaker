@@ -17,7 +17,7 @@ class InstallPuppet
       if /^PMASTER/ =~ os then         # Detect Puppet Master node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)
-        result = runner.do_remote("env q_puppetclient_certname=`hostname` #{inst_path}/puppet-enterprise-installer -a #{inst_path}/q_master_dashboard.sh")
+        result = runner.do_remote("env q_puppetmaster_certname=`hostname` #{inst_path}/puppet-enterprise-installer -a #{inst_path}/q_master_dashboard.sh")
         @fail_flag+=result.exit_code
         ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
       elsif /^AGENT/ =~ os then        # Detect Puppet Agent node
