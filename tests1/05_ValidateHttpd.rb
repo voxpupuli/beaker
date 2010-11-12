@@ -22,7 +22,7 @@ class ValidateHttpd
     test_name="Service Start HTTPD on Puppet Master"
     BeginTest.new(pmaster, test_name)
     runner = RemoteExec.new(pmaster)
-    result = runner.do_remote("service httpd start")
+    result = runner.do_remote("service edp-httpd start")
     @fail_flag+=result.exit_code
     ChkResult.new(pmaster, test_name, result.stdout, result.stderr, result.exit_code)
 
