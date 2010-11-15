@@ -16,16 +16,19 @@ require_all './lib'
 $work_dir=FileUtils.pwd
 
 # Setup log dir
-def setup_logs
-  time = Time.new
+def setup_logs(time)
   logdir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"
   puts "Test logs will be written here: #{logdir}"
+  puts
   FileUtils.mkdir(logdir)
   FileUtils.cd(logdir)
-  $stdout.reopen("run.log","w")
-  $stdout.sync = true
-  $stderr.reopen($stdout)
-  return logdir
+  runlog = File.new("run.log", "w")
+  $stdout = runlog                 # switch to logfile for output
+  $stderr = runlog
+  #$stdout.reopen("run.log","w")
+  #$stdout.sync = true
+  #$stderr.reopen($stdout)
+  return runlog
 end
 
 # Parse command line args
@@ -53,18 +56,61 @@ def parse_args
   return options
 end
 
+def summarize(test_summary, time, config)
+  puts "Test Pass Started: #{time}"
+  puts
+  puts "- Host Configuration Summary -" 
+  config.host_list.each do |host, os|
+    if /^PMASTER/ =~ os then         # Detect Puppet Master node
+      puts " Puppet Master: #{host}"
+      puts "Dashboard Host: #{host}"
+    elsif /^AGENT/ =~ os then 
+      puts "  Puppet Agent: #{host}"
+    end
+  end
+
+  test_count=0
+  test_failed=0
+  test_passed=0
+  test_summary.each do |test, result|
+    test_count+=1
+    test_passed+=1 if (result==0) 
+    test_failed+=1 if (result!=0) 
+  end
+  puts
+  puts "- Test Case Summary -" 
+  puts "Attmpted: #{test_count}"
+  puts "  Passed: #{test_passed}"
+  puts "  Failed: #{test_failed}"
+  puts
+  puts "- Specific Test Case Status -"
+  puts "Passed Tests Cases:"
+  test_summary.each do |test, result|
+    if ( result == 0 )
+      puts "  Test Case #{test} reported: #{result}"
+    end
+  end
+  puts "Failed Tests Cases:"
+  test_summary.each do |test, result|
+    if ( result != 0 )
+      puts "  Test Case #{test} reported: #{result}"
+    end
+  end
+end
 
 ###################################
 #  Main
 ###################################
-
+start_time = Time.new
+org_stdout = $stdout      # save stdout file descriptor
+test_summary={}           # hash to save test results
 # Parse commnand line args
 options=parse_args
 puts "Executing tests in #{options[:testdir]}" if options[:testdir]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
-logdir = setup_logs
+logdir = setup_logs(start_time)
 
 # Read config file
 config_file = ParseConfig.new(options[:config])
@@ -74,15 +120,24 @@ config = config_file.read_cfg
 list = FindTests.new("#{options[:testdir]}")
 test_list = list.read_dir
 
-
 # Iterate over test_list and execute
 test_list.each do |test|
   if /^\d.*_(\w.*)\.rb/ =~ test then
     puts "\n\nRunning Test #{$1}"
     result = eval($1).new(config)
     puts "Test #{$1} returned: #{result.fail_flag}"
+    test_summary[$1]=result.fail_flag
   end
 end
+
+$stdout = org_stdout
+summarize(test_summary, start_time, config)
+
+sum_log = File.new("summary.txt", "w")
+$stdout = sum_log     # switch to logfile for output
+$stderr = sum_log
+summarize(test_summary, start_time, config)
+$stdout = org_stdout
 
 ## Back to our top level dir
 FileUtils.cd($work_dir)

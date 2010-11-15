@@ -1,0 +1,1 @@
+../tests_post_install/06_ValidateDashboard.rb

@@ -2,7 +2,7 @@
 # Puppet Master
 PMASTER:RHEL:pmaster
 # Dashboard host
-#DASHBOARD:RHEL:pmaster
+DASHBOARD:RHEL:pmaster
 # List of Puppet Agents
 AGENT:RHEL:pagent
 # AGENT:OSX:foonode

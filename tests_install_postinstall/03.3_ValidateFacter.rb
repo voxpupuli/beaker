@@ -1,0 +1,1 @@
+../tests_post_install/03.3_ValidateFacter.rb
