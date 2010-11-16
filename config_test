@@ -1,8 +1,9 @@
-# ROLE(MASTER||AGENT||DASHBOARD):PLATFORM(RHEL||UBUNTU||OSX||SUN):HOSTNAME
-# Puppet Master
-PMASTER:RHEL:pmaster
-# Dashboard host
-DASHBOARD:RHEL:pmaster
-# List of Puppet Agents
-AGENT:RHEL:pagent
-# AGENT:OSX:foonode
+pmaster:
+  roles:
+    - master
+    - dashboard
+  platform: RHEL
+pagent:
+  roles:
+    - agent
+  platform: RHEL

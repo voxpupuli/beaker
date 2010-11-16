@@ -41,7 +41,3 @@ class ScpFile
     return result
   end
 end
-
-#self.source = source 
-#self.target = target 
-#self.exit_code = exit_code

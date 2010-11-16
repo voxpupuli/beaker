@@ -1,5 +1,5 @@
 # Check Result of Test
-# Standardized output of test results
+# Provides standard output for logging
 class ChkResult
   attr_accessor :host, :test_name, :test_stdout, :test_stderr, :test_exitcode
   def initialize(host, test_name, test_stdout, test_stderr, test_exitcode)

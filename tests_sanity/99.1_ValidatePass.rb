@@ -7,24 +7,26 @@ class ValidatePass
     self.fail_flag = 0
 
     host=""
-    os=""
-    test_name="Validate Positive Test"
+    role=""
     usr_home=ENV['HOME']
 
+    test_name="Validate Positive Test"
     # Execute validater on each node
-    @config.host_list.each do |host, os|
-      if /^PMASTER/ =~ os then         # Detect Puppet Master node
-        BeginTest.new(host, test_name)
-        runner = RemoteExec.new(host)
-        result = runner.do_remote("uname -a")
-        @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-      elsif /^AGENT/ =~ os then        # Detect Puppet Agent node
-        BeginTest.new(host, test_name)
-        runner = RemoteExec.new(host)
-        result = runner.do_remote("uname -a")
-        @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    @config.each_key do|host|
+      @config[host]['roles'].each do|role|
+        if /master/ =~ role then
+          BeginTest.new(host, test_name)
+          runner = RemoteExec.new(host)
+          result = runner.do_remote("uname -a")
+          @fail_flag+=result.exit_code
+          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+        elsif /agent/ =~ role then
+          BeginTest.new(host, test_name)
+          runner = RemoteExec.new(host)
+          result = runner.do_remote("uname -a")
+          @fail_flag+=result.exit_code
+          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+        end
       end
     end
   end

@@ -25,9 +25,6 @@ def setup_logs(time)
   runlog = File.new("run.log", "w")
   $stdout = runlog                 # switch to logfile for output
   $stderr = runlog
-  #$stdout.reopen("run.log","w")
-  #$stdout.sync = true
-  #$stderr.reopen($stdout)
   return runlog
 end
 
@@ -60,14 +57,7 @@ def summarize(test_summary, time, config)
   puts "Test Pass Started: #{time}"
   puts
   puts "- Host Configuration Summary -" 
-  config.host_list.each do |host, os|
-    if /^PMASTER/ =~ os then         # Detect Puppet Master node
-      puts " Puppet Master: #{host}"
-      puts "Dashboard Host: #{host}"
-    elsif /^AGENT/ =~ os then 
-      puts "  Puppet Agent: #{host}"
-    end
-  end
+  do_dump(config)
 
   test_count=0
   test_failed=0
@@ -110,11 +100,13 @@ puts "Executing tests in #{options[:testdir]}" if options[:testdir]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
-logdir = setup_logs(start_time)
+#logdir = setup_logs(start_time)
 
 # Read config file
-config_file = ParseConfig.new(options[:config])
-config = config_file.read_cfg
+config = YAML.load(File.read(File.join($work_dir,options[:config])))
+
+# Print dump config
+do_dump(config)
 
 # Search for tests
 list = FindTests.new("#{options[:testdir]}")
@@ -129,6 +121,7 @@ test_list.each do |test|
     test_summary[$1]=result.fail_flag
   end
 end
+
 
 $stdout = org_stdout
 summarize(test_summary, start_time, config)
