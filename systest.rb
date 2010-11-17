@@ -100,16 +100,13 @@ puts "Executing tests in #{options[:testdir]}" if options[:testdir]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
-#logdir = setup_logs(start_time)
+logdir = setup_logs(start_time)
 
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
-# Print dump config
-do_dump(config)
-
 # Search for tests
-list = FindTests.new("#{options[:testdir]}")
+list = FindTests.new(options[:testdir])
 test_list = list.read_dir
 
 # Iterate over test_list and execute
