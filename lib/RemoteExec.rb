@@ -9,12 +9,13 @@ class RemoteExec
   end
 
   class Result
-    attr_accessor :host, :cmd, :stdout, :stderr, :exit_code
-    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, exit_code=nil)
+    attr_accessor :host, :cmd, :stdout, :stderr, :combined, :exit_code
+    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, combined=nil, exit_code=nil)
       self.host      = host
       self.cmd       = cmd
       self.stdout    = stdout
       self.stderr    = stderr
+      self.combined  = combined
       self.exit_code = exit_code
 		end
   end
@@ -31,19 +32,24 @@ class RemoteExec
     }
     result = Result.new
 
-    Net::SSH.start("#{@host}", "root", options) do |ssh|
+    Net::SSH.start(@host, "root", options) do |ssh|
       ssh.open_channel do |channel|
         channel.exec(cmd) do |ch, success|
           unless success
             abort "FAILED: couldn't execute command (ssh.channel.exec failure)"
 					end
         end 
+        result.stdout = ''
+        result.stderr = ''
+				result.combined = ''
         channel.on_data do |ch, data|  # stdout
-          result.stdout = "#{data}"
+          result.stdout << data
+					result.combined << data
         end
         channel.on_extended_data do |ch, type, data|
           next unless type == 1  # only handle stderr
-          result.stderr = "#{data}"
+          result.stderr << data
+					result.combined << data
         end
         channel.on_request("exit-status") do |ch, data|
           result.exit_code = data.read_long
