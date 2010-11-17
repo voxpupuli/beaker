@@ -4,7 +4,7 @@
 test: local_setup.sh
 	DATE=$( date +"%s" )
 	rm -f results/*.xml
-	/usr/bin/env perl report_tests.pl
+	/usr/bin/env perl run_tests.pl
 	tar cvfz results/archive/results-$DATE.tar.gz results/*.xml
 
 old_test:
