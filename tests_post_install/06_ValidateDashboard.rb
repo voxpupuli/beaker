@@ -6,32 +6,30 @@ class ValidateDashboard
     self.config    = config
     self.fail_flag = 0
 
-    os=""
     host=""
-    dashboard=""
+    role=""
     usr_home=ENV['HOME']
 
-    @config.host_list.each do |host, os|
-      if /^PMASTER/ =~ os then         # Detect Dashboard host
-        dashboard=host
-        puts "#{dashboard}"
+    # Check for running dashboard on DASHBORD Host
+    tmp_result=0
+    test_name="Connect to Dashboard"
+    @config.each_key do|host|
+      @config[host]['roles'].each do|role|
+        if /dashboard/ =~ role then             # found dashboard host
+          BeginTest.new(host, test_name)
+          begin  
+            if ( Net::HTTP.get host, '*', '3000' )
+              tmp_result+=0
+            else
+              tmp_result+=1
+            end
+          rescue Exception => se
+            puts "Got socket error (#{se.type}): #{se}"
+          end
+          @fail_flag+=tmp_result
+          ChkResult.new(host, test_name, nil, nil, @fail_flag)
+        end
       end
     end
-
-    # Check for running dashboard on DASHBORD Host
-    test_name="Connect to Dashboard on #{dashboard}"
-    tmp_result=0
-    BeginTest.new(dashboard, test_name)
-      begin  
-        if ( Net::HTTP.get "#{dashboard}", '*', '3000' )
-          tmp_result+=0
-        else
-          tmp_result+=1
-        end
-      rescue Exception => se
-         puts "Got socket error (#{se.type}): #{se}"
-      end
-    @fail_flag+=tmp_result
-    ChkResult.new(dashboard, test_name, nil, nil, @fail_flag)
   end
 end

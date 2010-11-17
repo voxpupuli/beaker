@@ -7,26 +7,17 @@ class ValidateFacter
     self.fail_flag = 0
 
     host=""
-    os=""
-    test_name="Validate Facter Install"
     usr_home=ENV['HOME']
     binpath="/opt/puppet/bin"
 
-    # Execute validater on each node
-    @config.host_list.each do |host, os|
-      if /^PMASTER/ =~ os then         # Detect Puppet Master node
-        BeginTest.new(host, test_name)
-        runner = RemoteExec.new(host)
-        result = runner.do_remote("#{binpath}/facter --version")
-        @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-      elsif /^AGENT/ =~ os then        # Detect Puppet Agent node
-        BeginTest.new(host, test_name)
-        runner = RemoteExec.new(host)
-        result = runner.do_remote("#{binpath}/facter --version")
-        @fail_flag+=result.exit_code
-        ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-      end
+    test_name="Validate Facter Install"
+    # Validate correct facter bin path on each host
+    @config.each_key do|host|
+      BeginTest.new(host, test_name)
+      runner = RemoteExec.new(host)
+      result = runner.do_remote("#{binpath}/facter --version")
+      @fail_flag+=result.exit_code
+      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
     end
   end
 end
