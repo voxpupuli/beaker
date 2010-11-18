@@ -13,7 +13,9 @@ class ValidateDashboard
     # Check for running dashboard on DASHBORD Host
     tmp_result=0
     test_name="Connect to Dashboard"
+    # Seach each host
     @config.each_key do|host|
+      # for role 'dashboard'
       @config[host]['roles'].each do|role|
         if /dashboard/ =~ role then             # found dashboard host
           BeginTest.new(host, test_name)

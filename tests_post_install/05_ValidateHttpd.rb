@@ -12,7 +12,9 @@ class ValidateHttpd
 
     # Start HTTPD
     test_name="Service Start HTTPD on Puppet Master"
+    # Search all hosts...
     @config.each_key do|host|
+      # for the role 'master'
       @config[host]['roles'].each do|role|
         if /master/ =~ role then             # If the host is puppet master
           BeginTest.new(host, test_name)
@@ -27,7 +29,9 @@ class ValidateHttpd
     # Check for HTTPD on PMASTER hosts
     test_name="Connect to HTTPD server on Puppet Master"
     tmp_result=0
+    # Search all hosts...
     @config.each_key do|host|
+      # for the role 'master'
       @config[host]['roles'].each do|role|
         if /master/ =~ role then             # If the host is puppet master
           BeginTest.new(host, test_name)
