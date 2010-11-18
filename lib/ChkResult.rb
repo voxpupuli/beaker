@@ -8,7 +8,9 @@ class ChkResult
       self.test_stdout = test_stdout
       self.test_stderr = test_stderr
       self.test_exitcode = test_exitcode
-     
+    
+      @test_stdout="<empty>" if @test_stdout=="" 
+      @test_stderr="<empty>" if @test_stderr=="" 
       puts "OUTPUT (stdout, stderr, exitcode):"
       puts @test_stdout
       puts @test_stderr

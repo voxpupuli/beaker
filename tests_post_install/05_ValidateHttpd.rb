@@ -26,7 +26,7 @@ class ValidateHttpd
       end
     end
 
-    # Check for HTTPD on PMASTER hosts
+    # Check for running HTTPD on PMASTER hosts
     test_name="Connect to HTTPD server on Puppet Master"
     tmp_result=0
     # Search all hosts...
@@ -45,6 +45,7 @@ class ValidateHttpd
             puts "Got socket error (#{se.type}): #{se}"
           end
           @fail_flag+=tmp_result
+          # passing nil 2x as this test does not return stdout and stderr
           ChkResult.new(host, test_name, nil, nil, @fail_flag)
         end
       end

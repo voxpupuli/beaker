@@ -16,12 +16,13 @@ require_all './lib'
 $work_dir=FileUtils.pwd
 
 # Setup log dir
-def setup_logs(time)
-  logdir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"
-  puts "Test logs will be written here: #{logdir}"
+def setup_logs(time, config_file)
+  log_dir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"
+  puts "Test logs will be written here: #{log_dir}"
   puts
-  FileUtils.mkdir(logdir)
-  FileUtils.cd(logdir)
+  FileUtils.mkdir(log_dir)
+  FileUtils.cp(config_file,(File.join(log_dir,"config.yml")))
+  FileUtils.cd(log_dir)
   runlog = File.new("run.log", "w")
   $stdout = runlog                 # switch to logfile for output
   $stderr = runlog
@@ -54,6 +55,9 @@ def parse_args
 end
 
 def summarize(test_summary, time, config)
+  sum_log = File.new("summary.txt", "w")
+  $stdout = sum_log     # switch to logfile for output
+  $stderr = sum_log
   puts "Test Pass Started: #{time}"
   puts
   puts "- Host Configuration Summary -" 
@@ -100,7 +104,7 @@ puts "Executing tests in #{options[:testdir]}" if options[:testdir]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
-logdir = setup_logs(start_time)
+log_dir = setup_logs(start_time, options[:config])
 
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
@@ -112,22 +116,18 @@ test_list = list.read_dir
 # Iterate over test_list and execute
 test_list.each do |test|
   if /^\d.*_(\w.*)\.rb/ =~ test then
-    puts "\n\nRunning Test #{$1}"
+    puts "\n#{$1} executing..."
     result = eval($1).new(config)
-    puts "Test #{$1} returned: #{result.fail_flag}"
+    puts "#{$1} returned: #{result.fail_flag}"
     test_summary[$1]=result.fail_flag
   end
 end
 
 
-$stdout = org_stdout
-summarize(test_summary, start_time, config)
-
-sum_log = File.new("summary.txt", "w")
-$stdout = sum_log     # switch to logfile for output
-$stderr = sum_log
+# Dump summary of test results
 summarize(test_summary, start_time, config)
 $stdout = org_stdout
+puts "Tests complete"
 
 ## Back to our top level dir
 FileUtils.cd($work_dir)
