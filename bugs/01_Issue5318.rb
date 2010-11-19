@@ -34,7 +34,6 @@ class Issue5318
 		BeginTest.new(agent, test_name)
 		result = agent_run.do_remote("puppet agent --test --server #{master}")
 		config_ver_org = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-		puts "ORG VER match #{config_ver_org}"
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
 		# 3: modify site.pp on Masster
@@ -43,13 +42,14 @@ class Issue5318
 		result = master_run.do_remote('echo notify{\"issue5318 modified\":} > /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
+    sleep 20
+
 		# 4: invoke puppet agent -t again
 		config_ver_mod=""
 		test_name="Issue5318 - step 4"
 		BeginTest.new(agent, test_name)
 		result = agent_run.do_remote("puppet agent --test --server #{master}")
 		config_ver_mod = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-		puts "MOD VER match #{config_ver_mod}"
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
     # 5: comapre the results from steps 2 and 4
@@ -57,10 +57,10 @@ class Issue5318
 		test_name="Issue5318 - Compare Config Versions on Agent"
 		BeginTest.new(agent, test_name)
     if ( config_ver_org == config_ver_mod ) then 
-      msg="Agent did not receive updated config"
+      msg="Agent did not receive updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
       @fail_flag+=1
     elsif
-      msg="Agent received updated config"
+      msg="Agent received updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
     end
     ChkResult.new(host, test_name, msg, nil, @fail_flag)
   end

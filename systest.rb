@@ -34,21 +34,16 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-d || --testdir] DIR [-f || --testfile] FILE"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR"
 
-    options[:testdir] = nil
-    opts.on( '-d', '--testdir DIR', 'Execute tests in DIR' ) do|dir|
-      options[:testdir] = dir
+    options[:tests] = nil
+    opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE' ) do|dir|
+      options[:tests] = dir
     end
 
     options[:config] = nil
     opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
       options[:config] = file
-    end
-
-    options[:testfile] = nil
-    opts.on( '-f', '--testfile FILE', 'Execute single test FILE' ) do|file|
-      options[:testfile] = file
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do
@@ -117,14 +112,8 @@ log_dir = setup_logs(start_time, options[:config])
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
-# What list of tests will we run
-if (options[:testdir]) then
-  list = FindTests.new(options[:testdir])
-  test_list = list.read_dir
-elsif (options[:testfile]) then
-  list = FindTests.new(options[:testfile])
-  test_list = list.read_file
-end
+# Generate test list from test file or dir
+test_list=TestList.new(options[:tests])
 
 # Iterate over test_list and execute
 test_list.each do |test|
@@ -135,7 +124,6 @@ test_list.each do |test|
     test_summary[$1]=result.fail_flag
   end
 end
-
 
 # Dump summary of test results
 summarize(test_summary, start_time, config)
