@@ -21,7 +21,7 @@ class Issue5318
     end
 
 		master_run = RemoteExec.new(master)  # get remote exec obj to master
-		agent_run = RemoteExec.new(agent)    # get remote exec obj to master
+		agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
 		test_name="Issue5318 - step 1"
 		# 1: create site.pp file on Master
 		BeginTest.new(master, test_name)
@@ -52,6 +52,7 @@ class Issue5318
 		puts "MOD VER match #{config_ver_mod}"
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
+    # 5: comapre the results from steps 2 and 4
     msg=""
 		test_name="Issue5318 - Compare Config Versions on Agent"
 		BeginTest.new(agent, test_name)

@@ -34,15 +34,21 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-d || --testdir] DIR"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-d || --testdir] DIR [-f || --testfile] FILE"
 
     options[:testdir] = nil
     opts.on( '-d', '--testdir DIR', 'Execute tests in DIR' ) do|dir|
       options[:testdir] = dir
     end
+
     options[:config] = nil
     opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
       options[:config] = file
+    end
+
+    options[:testfile] = nil
+    opts.on( '-f', '--testfile FILE', 'Execute single test FILE' ) do|file|
+      options[:testfile] = file
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do
@@ -102,6 +108,7 @@ test_summary={}           # hash to save test results
 # Parse commnand line args
 options=parse_args
 puts "Executing tests in #{options[:testdir]}" if options[:testdir]
+puts "Executing test #{options[:testfile]}" if options[:testfile]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
@@ -110,9 +117,14 @@ log_dir = setup_logs(start_time, options[:config])
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
-# Search for tests
-list = FindTests.new(options[:testdir])
-test_list = list.read_dir
+# What list of tests will we run
+if (options[:testdir]) then
+  list = FindTests.new(options[:testdir])
+  test_list = list.read_dir
+elsif (options[:testfile]) then
+  list = FindTests.new(options[:testfile])
+  test_list = list.read_file
+end
 
 # Iterate over test_list and execute
 test_list.each do |test|
@@ -127,8 +139,8 @@ end
 
 # Dump summary of test results
 summarize(test_summary, start_time, config)
+log_dir.close
 $stdout = org_stdout
-puts "Tests complete"
 
 ## Back to our top level dir
 FileUtils.cd($work_dir)

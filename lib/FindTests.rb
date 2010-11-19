@@ -27,4 +27,14 @@ class FindTests
     end
     return test_list
   end
+
+  def read_file
+    test=""
+    test_list=[]
+    require "#{$work_dir}/#{testdir}"  # testdir is test file in this case
+    test = $1 if /\S+\/(\S+)$/ =~ testdir
+    test_list.push(test)
+    return test_list
+  end
+
 end
