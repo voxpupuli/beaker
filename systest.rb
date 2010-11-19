@@ -90,6 +90,7 @@ def summarize(test_summary, time, config)
       puts "  Test Case #{test} reported: #{result}"
     end
   end
+  sum_log.close
 end
 
 ###################################

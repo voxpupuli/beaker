@@ -1,9 +1,9 @@
-pmaster:
+puppet:
   roles:
     - master
     - dashboard
   platform: RHEL
-pagent:
+agent:
   roles:
     - agent
   platform: RHEL
