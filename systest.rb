@@ -102,8 +102,7 @@ org_stdout = $stdout      # save stdout file descriptor
 test_summary={}           # hash to save test results
 # Parse commnand line args
 options=parse_args
-puts "Executing tests in #{options[:testdir]}" if options[:testdir]
-puts "Executing test #{options[:testfile]}" if options[:testfile]
+puts "Executing tests in #{options[:tests]}" if options[:tests]
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
@@ -113,7 +112,7 @@ log_dir = setup_logs(start_time, options[:config])
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Generate test list from test file or dir
-test_list=TestList.new(options[:tests])
+test_list=TestList.new(File.join($work_dir,options[:tests]))
 
 # Iterate over test_list and execute
 test_list.each do |test|

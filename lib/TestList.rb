@@ -5,9 +5,11 @@
 class TestList
   attr_accessor :test_list
   def initialize(test_dir_or_file)
-    if File.directory? test_dir_or_file
+    if File.directory?(test_dir_or_file) then
+      puts "Detectd dir"
       self.test_list = read_dir(test_dir_or_file)
     else
+      puts "Detectd file"
       self.test_list = read_file(test_dir_or_file)
     end
   end
@@ -19,21 +21,21 @@ class TestList
   # read testdir, find tests
   def read_dir(testdir)
     list = []
-    puts "Looking for tests in #{$work_dir}/#{testdir}"
-    list = Dir.entries "#{$work_dir}/#{testdir}"
+    puts "Looking for tests in #{testdir}"
+    list = Dir.entries(testdir)
     list.each do |test|
         next if test =~ /^\W/    # skip .hiddens and such
-        puts "Found test #{test}"
-        require "#{$work_dir}/#{testdir}/#{test}"
+        puts "Found test test"
+        require (File.join(testdir,test))
     end
     return list
   end
 
-  def read_file(testdir)
+  def read_file(testfile)
     test=""
     list=[]
-    require "#{$work_dir}/#{testdir}"  # testdir is test file in this case
-    test = $1 if /\S+\/(\S+)$/ =~ testdir
+    require testfile  # testdir is test file in this case
+    test = $1 if /\S+\/(\S+)$/ =~ testfile
     list << test
     return list
   end
