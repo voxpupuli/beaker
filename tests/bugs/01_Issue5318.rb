@@ -25,7 +25,7 @@ class Issue5318
 		test_name="Issue5318 - step 1"
 		# 1: create site.pp file on Master
 		BeginTest.new(master, test_name)
-		result = master_run.do_remote('echo notify{\"issue5318 original\":} > /etc/puppetlabs/puppet/manifests/site.pp')
+		result = master_run.do_remote('echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
 		# 2: invoke puppet agent -t
@@ -39,9 +39,10 @@ class Issue5318
 		# 3: modify site.pp on Masster
 		test_name="Issue5318 - step 3"
 		BeginTest.new(master, test_name)
-		result = master_run.do_remote('echo notify{\"issue5318 modified\":} > /etc/puppetlabs/puppet/manifests/site.pp')
+		result = master_run.do_remote('echo notify{\"issue5318 modified\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
+    # TODO grab from master
     sleep 20
 
 		# 4: invoke puppet agent -t again
