@@ -1,5 +1,5 @@
 # Accepts hash of parsed config file as arg
-class FileServe
+class DirServe
   attr_accessor :config, :fail_flag
   def initialize(config)
     self.config    = config

@@ -26,13 +26,6 @@ file { "/root/lg_file":
     source => "puppet:///modules/file_serve/lg_file"
 }
 
-file { "/root/file_checks.sh":
-    mode => 750,
-    owner => root,
-    group => root,
-    source => "puppet:///modules/file_serve/file_checks.sh"
-}
-
 #file { "/root/many_files/":
 #    recurse => true,
 #    purge => true,
