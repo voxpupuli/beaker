@@ -14,14 +14,14 @@ absent_many=""
 cd $1
 
 # verify small, med, large files
-file_list="zero_file small_file med_file big_file"
+file_list="zd_file sm_file md_file lg_file"
 for file in $file_list; do
   if [ ! -f "$file" ]; then
    absent=${file}" "${absent}
    let fail_flag++
   fi
 done
-echo "Sized files missing (sm, med, lg): ${absent}"
+echo "Sized files missing (zd, sm, md, lg): ${absent}"
 
 # verify large file count dir
 
