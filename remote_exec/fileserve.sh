@@ -32,4 +32,5 @@ for n in {1..5003}; do
   fi
 done
 echo "High file count files missing: ${absent_many}"
+
 exit $fail_flag

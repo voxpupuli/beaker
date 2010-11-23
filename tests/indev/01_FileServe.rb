@@ -32,6 +32,8 @@ class FileServe
     result = scper.do_scp("#{$work_dir}/puppet.tgz", "/etc/puppetlabs")
     @fail_flag+=result.exit_code
     ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+  
+    sleep 17
 
     # 1: Now untar puppet.tgz 
     test_name="Fileserve(setup) step 2 -- untar puppet.tgz on Puppet Master"
@@ -50,6 +52,7 @@ class FileServe
 	  	    BeginTest.new(agent, test_name)
 		      result = agent_run.do_remote("puppet agent --test --server #{master}")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          @fail_flag+=result.exit_code
         end
       end
     end
@@ -62,11 +65,11 @@ class FileServe
           agent=host
 		      agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
 		      BeginTest.new(agent, test_name)
-		      result = agent_run.do_remote('if \[ ! -f \"/root/small_file\" \]; then echo \"not file\" ; fi')
+		      result = agent_run.do_remote('/root/remote_exec/fileserve.sh')
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          @fail_flag+=result.exit_code
         end
       end
     end
-
   end
 end
