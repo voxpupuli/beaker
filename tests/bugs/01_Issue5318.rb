@@ -10,20 +10,20 @@ class Issue5318
     agent=""
     usr_home=ENV['HOME']
 
-    @config.each_key do|host|
-      @config[host]['roles'].each do|role|
-        if /master/ =~ role then        # If the host is puppet master
+    @config["HOSTS"].each_key do|host|
+      @config["HOSTS"][host]['roles'].each do |role|
+        if /master/ =~ role then         # If the host is puppet master
           master=host
-        elsif /agent/ =~ role then      # If the host is puppet agent
+        elsif /agent/ =~ role then       # If the host is puppet agent
           agent=host
         end
-      end # /role
+      end
     end
 
 		master_run = RemoteExec.new(master)  # get remote exec obj to master
 		agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
 		test_name="Issue5318 - step 1"
-		# 1: create site.pp file on Master
+		# 1: Add notify to site.pp file on Master
 		BeginTest.new(master, test_name)
 		result = master_run.do_remote('echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
@@ -36,14 +36,14 @@ class Issue5318
 		config_ver_org = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
-		# 3: modify site.pp on Masster
+		# 3: 2nd modify site.pp on Masster
 		test_name="Issue5318 - step 3"
 		BeginTest.new(master, test_name)
 		result = master_run.do_remote('echo notify{\"issue5318 modified\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 
     # TODO grab from master
-    sleep 20
+    #sleep 20
 
 		# 4: invoke puppet agent -t again
 		config_ver_mod=""

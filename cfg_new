@@ -1,0 +1,15 @@
+HOSTS:
+  puppet:
+    roles:
+      - master
+      - dashboard
+    platform: RHEL
+  agent:
+    roles:
+      - agent
+    platform: RHEL
+CONFIG:
+  rubyver: ruby18
+  facterver: fact11
+  gemver: gem12
+  puppetbinpath: /opt/puppet/bin

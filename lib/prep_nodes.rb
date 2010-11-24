@@ -4,17 +4,15 @@ def prep_nodes(config)
   master=""
 
   # Extract Master from config
-  config.each_key do|host|
-    config[host]['roles'].each do|role|
-      if /master/ =~ role then        # If the host is puppet master
-        master=host
-      end
+  config["HOSTS"].each_key do|host|
+    config["HOSTS"][host]['roles'].each do |role|
+      master=host if /master/ =~ role
     end
   end
-
+  
   # 1: SCP ptest/bin code to all nodes
 	test_name="Copy remote executables to all hosts"
-  config.each_key do|host|
+  config["HOSTS"].each_key do|host|
 	  BeginTest.new(host, test_name)
     scper = ScpFile.new(host)
     result = scper.do_scp("#{$work_dir}/ptest.tgz", "/")
@@ -24,7 +22,7 @@ def prep_nodes(config)
 
   # Execute remote command on each node, regardless of role
 	test_name="Untar remote executables to all hosts"
-  config.each_key do|host|
+  config["HOSTS"].each_key do|host|
     BeginTest.new(host, test_name)
     runner = RemoteExec.new(host)
     result = runner.do_remote("cd / && tar xzf ptest.tgz")
