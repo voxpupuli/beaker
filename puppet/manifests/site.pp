@@ -26,12 +26,12 @@ file { "/root/lg_file":
     source => "puppet:///modules/file_serve/lg_file"
 }
 
-#file { "/root/many_files/":
-#    recurse => true,
-#    purge => true,
-#    force => true,
-#    mode => 750,
-#    owner => root,
-#    group => root,
-#    source => "puppet:///puppet/modules/file_serve/many_files/"
-#}
+file { "/root/many_files/":
+    recurse => true,
+    purge => true,
+    force => true,
+    mode => 750,
+    owner => root,
+    group => root,
+    source => "puppet:///modules/file_serve/many_files/"
+}
