@@ -1,16 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-# -f  file is a regular file (not a directory or device file)
-# -s  file is not zero size
-# -d  file is a directory
-#
-# -r  file has read permission (for the user running the test)
-# -w  file has write permission (for the user running the test)
-# -x  file has execute permission (for the user running the test)
-
-# takes two positional parameters: DIRECTORY and files||dir
+# takes two or three positional parameters: DIRECTORY and files||dir
 # DIRECTORY: is the file store where to look for Puppet served files/dirs
 # files||dir Look for served files or served dirs
+# $3 is the number of dirs to look for the given directory
 
 fail_flag=0
 absent_files=""
@@ -19,6 +12,7 @@ absent_dir=""
 cd $1
 
 # verify small, med, large files
+# args: directory_to_look_for_file files_flag
 if [ "${2}" == "files" ]; then
   file_list="zd_file sm_file md_file lg_file"
   for file in $file_list; do
@@ -31,8 +25,10 @@ if [ "${2}" == "files" ]; then
 fi
 
 # verify large file count dir
+# args: directory dir_flag dir_count
 if [ "${2}" == "dir" ]; then
-  for n in {1..5000}; do
+
+  for ((n=1; n <= ${3}; n++)); do
     if  [ ! -f many_files/"${n}.file" ]; then
      absent_dir=${n}.file" "${absent_dir}
      let fail_flag++

@@ -32,7 +32,7 @@ class DirServe
           agent=host
 		      agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
 		      BeginTest.new(agent, test_name)
-		      result = agent_run.do_remote('/ptest/bin/fileserve.sh /root dir')
+		      result = agent_run.do_remote('/ptest/bin/fileserve.sh /root dir 10')
           ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
           @fail_flag+=result.exit_code
         end
