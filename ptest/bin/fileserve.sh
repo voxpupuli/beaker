@@ -9,6 +9,7 @@ fail_flag=0
 absent_files=""
 absent_dir=""
 
+# Target dir to check fir files
 cd $1
 
 # verify small, med, large files

@@ -112,7 +112,7 @@ log_dir = setup_logs(start_time, options[:config])
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Pre-test setup on all nodes
-prep_nodes(config)
+# prep_nodes(config)
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))

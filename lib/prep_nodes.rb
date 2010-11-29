@@ -11,7 +11,7 @@ def prep_nodes(config)
   end
   
   # 1: SCP ptest/bin code to all nodes
-	test_name="Copy remote executables to all hosts"
+	test_name="Copy ptest.tgz executables to all hosts"
   config["HOSTS"].each_key do|host|
 	  BeginTest.new(host, test_name)
     scper = ScpFile.new(host)
@@ -21,7 +21,7 @@ def prep_nodes(config)
   end
 
   # Execute remote command on each node, regardless of role
-	test_name="Untar remote executables to all hosts"
+	test_name="Untar ptest.tgz executables to all hosts"
   config["HOSTS"].each_key do|host|
     BeginTest.new(host, test_name)
     runner = RemoteExec.new(host)
@@ -31,14 +31,14 @@ def prep_nodes(config)
   end
 
   # 1: SCP puppet code to master
-	test_name="Copy Puppet code to Master"
+	test_name="Copy puppet.tgz code to Master"
 	BeginTest.new(master, test_name)
   scper = ScpFile.new(master)
   result = scper.do_scp("#{$work_dir}/puppet.tgz", "/etc/puppetlabs")
   ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
   fail_flag+=result.exit_code
 
-  # Execute remote command  on each node, regardless of role
+  # untar puppet code on master
 	test_name="Untar Puppet code on Master"
   BeginTest.new(master, test_name)
   runner = RemoteExec.new(master)

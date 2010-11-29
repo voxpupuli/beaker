@@ -1,6 +1,6 @@
 # Accepts config object
 # Print out test configuration
-def do_dump(config)
+def do_dump_old(config)
   host=""
 
 # Config file format

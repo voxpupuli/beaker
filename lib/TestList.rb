@@ -25,7 +25,7 @@ class TestList
     list = Dir.entries(testdir)
     list.each do |test|
         next if test =~ /^\W/    # skip .hiddens and such
-        puts "Found test test"
+        puts "Found test #{test}"
         require (File.join(testdir,test))
     end
     return list

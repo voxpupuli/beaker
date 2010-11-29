@@ -12,7 +12,7 @@ class ValidateFail
 
     test_name="Validate Failed Test"
     # Execute remote command  on each node, regardless of role
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       BeginTest.new(host, test_name)
       runner = RemoteExec.new(host)
       result = runner.do_remote("foo command")

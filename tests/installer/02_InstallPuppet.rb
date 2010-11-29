@@ -13,9 +13,9 @@ class InstallPuppet
     
     test_name="Install Puppet"
     # Execute for every host
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       # Execute for every role per host
-      @config[host]['roles'].each do|role|
+      @config["HOSTS"][host]['roles'].each do |role|
         command=""
         if /master/ =~ role then        # If the host is puppet master
           command = "cd #{inst_path} && ./puppet-enterprise-installer -a q_master_only.sh"

@@ -14,7 +14,7 @@ class ValidateSignCert
     agent_list=""
 
     # Parse config for Master and Agents
-    @config.host_list.each do |host, os|
+    @config["HOSTS"].each_key do|host|
       if /^AGENT/ =~ os then           # Build flat list Agent Nodes
         agent_list = host + " " + agent_list
       end
@@ -24,7 +24,7 @@ class ValidateSignCert
     end
 
     # AGENT(s) intiate Cert Signing with PMASTER
-    @config.host_list.each do |host, os|
+    @config["HOSTS"].each_key do|host|
       if /^AGENT/ =~ os then        # Detect Puppet Agent node
         BeginTest.new(host, test_name)
         runner = RemoteExec.new(host)

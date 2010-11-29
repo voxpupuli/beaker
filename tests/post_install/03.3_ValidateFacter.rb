@@ -12,7 +12,7 @@ class ValidateFacter
 
     test_name="Validate Facter Install"
     # Validate correct facter bin path on each host
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       BeginTest.new(host, test_name)
       runner = RemoteExec.new(host)
       result = runner.do_remote("#{binpath}/facter --version")

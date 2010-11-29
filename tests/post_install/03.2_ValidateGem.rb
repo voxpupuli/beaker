@@ -12,7 +12,7 @@ class ValidateGem
 
     test_name="Validate Gem Install"
     # Validate correct gem bin path on each host
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       BeginTest.new(host, test_name)
       runner = RemoteExec.new(host)
       result = runner.do_remote("#{binpath}/gem --version")

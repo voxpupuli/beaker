@@ -11,14 +11,13 @@ class DirServe
 
 		# Initiate transfer: puppet agent -t
 		test_name="Initiate Directory Transfer on Agents"
-    @config.each_key do|host|
-      @config[host]['roles'].each do|role|
+    @config["HOSTS"].each_key do|host|
+      @config["HOSTS"][host]['roles'].each do |role|
         if /agent/ =~ role then      # If the host is puppet agent
-          agent=host
-   		    agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
-	  	    BeginTest.new(agent, test_name)
+   		    agent_run = RemoteExec.new(host)    # get remote exec obj to agent
+	  	    BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("puppet agent --test")
-          ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
+          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           @fail_flag+=result.exit_code
         end
       end
@@ -26,14 +25,13 @@ class DirServe
 
 		# verify files have been transfered to agents
 		test_name="Verify Directory Existence on Agents"
-    @config.each_key do|host|
-      @config[host]['roles'].each do|role|
+    @config["HOSTS"].each_key do|host|
+      @config["HOSTS"][host]['roles'].each do |role|
         if /agent/ =~ role then      # If the host is puppet agent
-          agent=host
-		      agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
-		      BeginTest.new(agent, test_name)
+		      agent_run = RemoteExec.new(host)    # get remote exec obj to agent
+		      BeginTest.new(host, test_name)
 		      result = agent_run.do_remote('/ptest/bin/fileserve.sh /root dir 10')
-          ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
+          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           @fail_flag+=result.exit_code
         end
       end

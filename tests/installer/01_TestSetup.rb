@@ -13,7 +13,7 @@ class TestSetup
 
     test_name="Pre Test Setup -- SCP installer to hosts"
     # SCP install file to each host
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       BeginTest.new(host, test_name)
       scper = ScpFile.new(host)
       result = scper.do_scp("#{usr_home}/install.tgz", "/root/install.tgz")
@@ -23,7 +23,7 @@ class TestSetup
 
     test_name="Pre Test Setup -- Untar installer on hosts"
     # Untar install packges on each host
-    @config.each_key do|host|
+    @config["HOSTS"].each_key do|host|
       BeginTest.new(host, test_name)
       runner = RemoteExec.new(host)
       result = runner.do_remote("tar xzf install.tgz")
