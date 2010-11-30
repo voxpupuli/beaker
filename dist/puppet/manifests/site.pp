@@ -19,12 +19,12 @@ file { "/root/file_100":
     source => "puppet:///modules/file_serve/file_100"
 }
 
-file { "/root/file_100000":
-    mode => 440,
-    owner => root,
-    group => root,
-    source => "puppet:///modules/file_serve/file_100000"
-}
+#file { "/root/file_100000":
+#    mode => 440,
+#    owner => root,
+#    group => root,
+#    source => "puppet:///modules/file_serve/file_100000"
+#}
 
 file { "/root/many_files/":
     recurse => true,
