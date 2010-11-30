@@ -1,9 +1,0 @@
-puppet:
-  roles:
-    - master
-    - dashboard
-  platform: RHEL
-agent:
-  roles:
-    - agent
-  platform: RHEL
