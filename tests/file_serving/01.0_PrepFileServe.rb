@@ -5,6 +5,7 @@ class PrepFileServe
     self.config    = config
     self.fail_flag = 0
 
+
     usr_home=ENV['HOME']
     @fail_flag=0
 
