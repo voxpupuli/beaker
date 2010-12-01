@@ -21,6 +21,7 @@ class PreUser
 
     initpp="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests"
     # Write new class to init.pp
+    prep_initpp(master, "group", "#{initpp}")
     prep_initpp(master, "user", "#{initpp}")
 
 		# Create test files/dir on Puppet Master
