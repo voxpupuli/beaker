@@ -15,7 +15,7 @@ def prep_nodes(config)
   config["HOSTS"].each_key do|host|
 	  BeginTest.new(host, test_name)
     scper = ScpFile.new(host)
-    result = scper.do_scp("#{$work_dir}/ptest.tgz", "/")
+    result = scper.do_scp("#{$work_dir}/dist/ptest.tgz", "/")
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
 		fail_flag+=result.exit_code
   end
@@ -34,7 +34,7 @@ def prep_nodes(config)
 	test_name="Copy puppet.tgz code to Master"
 	BeginTest.new(master, test_name)
   scper = ScpFile.new(master)
-  result = scper.do_scp("#{$work_dir}/puppet.tgz", "/etc/puppetlabs")
+  result = scper.do_scp("#{$work_dir}/dist/puppet.tgz", "/etc/puppetlabs")
   ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
   fail_flag+=result.exit_code
 

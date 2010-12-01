@@ -12,6 +12,8 @@ require 'require_all'
 # Import custom classes
 require_all './lib'
 
+system("rake dist")
+
 # Where was I called from
 $work_dir=FileUtils.pwd
 
@@ -34,7 +36,7 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist]"
 
     options[:tests] = nil
     opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE' ) do|dir|
@@ -112,7 +114,7 @@ log_dir = setup_logs(start_time, options[:config])
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Pre-test setup on all nodes
-# prep_nodes(config)
+prep_nodes(config)
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))
@@ -120,6 +122,7 @@ test_list=TestList.new(File.join($work_dir,options[:tests]))
 # Iterate over test_list and execute
 test_list.each do |test|
   if /^\d.*_(\w.*)\.rb/ =~ test then
+    puts
     puts "\n#{$1} executing..."
     result = eval($1).new(config)
     puts "#{$1} returned: #{result.fail_flag}"
