@@ -9,3 +9,8 @@ task :dist do
   echo "Completed building ptest.tgz and puppet.tgz"
   HERE
 end
+
+task :sync do
+  # Download binaries tarballs
+  sh "rsync -rltPzchi --stats --exclude=.gitignore --delete-after shell.puppetlabs.com:/home/enterprise/dists tarballs/ || true", :verbose => true
+end

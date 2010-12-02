@@ -3,11 +3,11 @@ HOSTS:
     roles:
       - master
       - dashboard
-    platform: RHEL
+    platform: CENT5-64
   agent:
     roles:
       - agent
-    platform: RHEL
+    platform: CENT5-64
 CONFIG:
   rubyver: ruby18
   facterver: fact11

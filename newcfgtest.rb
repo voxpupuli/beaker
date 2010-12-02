@@ -51,7 +51,6 @@ puts "Using Config #{options[:config]}" if options[:config]
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Print dump config
-#do_dump(config)
-do_dump2(config)
+do_dump(config)
 
 exit
