@@ -7,7 +7,7 @@ class ValidateSignCert
     self.fail_flag = 0
 
     host=""
-    pmaster=""
+    master=""
     agent_list=""
 
     # Parse config for Master and Agents
@@ -18,7 +18,7 @@ class ValidateSignCert
           agent_list = host + " " + agent_list
         end
         if /master/ =~ role then         # Detect Puppet Master node
-          pmaster = host
+          master = host
         end
       end
     end
@@ -29,7 +29,7 @@ class ValidateSignCert
         if /agent/ =~ role then               # If the host is puppet agent
           BeginTest.new(host, test_name)
           runner = RemoteExec.new(host)
-          result = runner.do_remote("puppet agent --server #{pmaster} --no-daemonize --verbose --onetime --test")
+          result = runner.do_remote("puppet agent --server #{master} --no-daemonize --verbose --onetime --test")
           @fail_flag+=result.exit_code
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
         end
@@ -39,8 +39,8 @@ class ValidateSignCert
 
     # Sign Agent Certs from PMASTER
     test_name="Puppet Master Sign Requested Agent Certs"
-    BeginTest.new(pmaster, test_name)
-    runner = RemoteExec.new(pmaster)
+    BeginTest.new(master, test_name)
+    runner = RemoteExec.new(master)
     result = runner.do_remote("puppet cert --sign #{agent_list}")
     @fail_flag+=result.exit_code
     ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)

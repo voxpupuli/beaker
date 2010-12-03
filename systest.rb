@@ -116,7 +116,7 @@ config = YAML.load(File.read(File.join($work_dir,options[:config])))
 # Pre-flight check
 preflight_check
 # Pre-test setup on all nodes
-#prep_nodes(config)
+prep_nodes(config)
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))
