@@ -39,7 +39,6 @@ class User
             puts "Error creating users"
             @fail_flag+=1
           end
-                
         end
       end
     end
