@@ -12,5 +12,5 @@ end
 
 task :sync do
   # Download binaries tarballs
-  sh "rsync -rltPzchi --stats --exclude=.gitignore --delete-after shell.puppetlabs.com:/home/enterprise/dists tarballs/ || true", :verbose => true
+  sh "rsync -rltPzchi --stats --exclude=.gitignore --delete-after shell.puppetlabs.com:/home/enterprise/dists/* tarballs/ || true", :verbose => true
 end
