@@ -113,10 +113,8 @@ log_dir = setup_logs(start_time, options[:config])
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
-# Pre-flight check
-preflight_check
-# Pre-test setup on all nodes
-prep_nodes(config)
+# Add Puppet version to config
+config["CONFIG"]["puppetver"]=puppet_version
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))
@@ -124,12 +122,12 @@ test_list=TestList.new(File.join($work_dir,options[:tests]))
 
 # Execute Tests Here
 test_list.each do |test|
-  if /^\d.*_(\w.*)\.rb/ =~ test then
+  if /^\d.*_(\w.*)\.rb/ =~ test then             # parse the filename for class to call
     puts
     puts "\n#{$1} executing..."
-    result = eval($1).new(config)
-    puts "#{$1} returned: #{result.fail_flag}"
-    test_summary[$1]=result.fail_flag
+    result = eval($1).new(config)                # Call the class, passing in ref to config
+    puts "#{$1} returned: #{result.fail_flag}" 
+    test_summary[$1]=result.fail_flag            # Add test result to test_summary hash for reporting
   end
 end
 

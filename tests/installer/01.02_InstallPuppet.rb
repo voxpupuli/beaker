@@ -15,7 +15,7 @@ class InstallPuppet
     @config["HOSTS"].each_key do|host|
       # Execute for every role per host
       @config["HOSTS"][host]['roles'].each do |role|
-        dist_dir="puppet-enterprise-#{$version}-rhel-5-x86_64" if  ( /RHEL5-64/ =~ @config["HOSTS"][host]['platform'] )
+        dist_dir="puppet-enterprise-#{$version}-rhel-5-x86_64" if   ( /RHEL5-64/ =~ @config["HOSTS"][host]['platform'] )
         dist_dir="puppet-enterprise-#{$version}-centos-5-x86_64" if ( /CENT5-64/ =~ @config["HOSTS"][host]['platform'] )
 
         scper = ScpFile.new(host)
@@ -34,8 +34,9 @@ class InstallPuppet
         result = runner.do_remote("#{command}")
         @fail_flag+=result.exit_code
         ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-        prep_nodes(config)
       end # /role
     end
+    # do post install test environment config
+    prep_nodes(config)
   end
 end
