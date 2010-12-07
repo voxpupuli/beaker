@@ -9,12 +9,13 @@ class TestSetup
 
     host=""
     dist_tar=""
+    version=config["CONFIG"]["puppetver"]
 
     test_name="Pre Test Setup -- SCP install package to hosts"
     # SCP install file to each host
     @config["HOSTS"].each_key do|host|
-      dist_tar="puppet-enterprise-#{$version}-rhel-5-x86_64.tar" if  ( /RHEL5-64/ =~ @config["HOSTS"][host]['platform'] )
-      dist_tar="puppet-enterprise-#{$version}-centos-5-x86_64.tar" if ( /CENT5-64/ =~ @config["HOSTS"][host]['platform'] )
+      dist_tar="puppet-enterprise-#{version}-rhel-5-x86_64.tar" if  ( /RHEL5-64/ =~ @config["HOSTS"][host]['platform'] )
+      dist_tar="puppet-enterprise-#{version}-centos-5-x86_64.tar" if ( /CENT5-64/ =~ @config["HOSTS"][host]['platform'] )
       BeginTest.new(host, test_name)
       scper = ScpFile.new(host)
       result = scper.do_scp("#{$work_dir}/tarballs/#{dist_tar}", "/root")

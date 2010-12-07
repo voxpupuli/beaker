@@ -36,7 +36,7 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist]"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ]"
 
     options[:tests] = nil
     opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE' ) do|dir|
@@ -46,6 +46,12 @@ def parse_args
     options[:config] = nil
     opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
       options[:config] = file
+    end
+
+    options[:mrpropper] = FALSE
+    opts.on( '--mrpropper', 'Clean hosts' ) do
+      puts "Cleaning Hosts of old install"
+      options[:mrpropper] = TRUE
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do
@@ -115,6 +121,9 @@ config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Add Puppet version to config
 config["CONFIG"]["puppetver"]=puppet_version
+
+# Clean-up old install
+clean_hosts(config) if options[:mrpropper]
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))
