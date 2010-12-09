@@ -12,8 +12,6 @@ require 'require_all'
 # Import custom classes
 require_all './lib'
 
-system("rake dist")
-
 # Where was I called from
 $work_dir=FileUtils.pwd
 
@@ -118,6 +116,12 @@ log_dir = setup_logs(start_time, options[:config])
 
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
+
+# Generate installer answers files based on config
+gen_answer_files(config)
+
+# Run rake task to prep code to be scp'd to hosts
+system("rake dist")
 
 # Add Puppet version to config
 config["CONFIG"]["puppetver"]=puppet_version

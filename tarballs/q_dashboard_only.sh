@@ -1,7 +1,0 @@
-q_install=y
-q_puppet_symlinks_install=y
-q_puppetclient_install=n
-q_puppetdashboard_database_install=y
-q_puppetdashboard_httpd_port=3000
-q_puppetdashboard_install=y
-q_puppetmaster_install=n

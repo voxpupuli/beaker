@@ -20,6 +20,8 @@ class TestSetup
       scper = ScpFile.new(host)
       result = scper.do_scp("#{$work_dir}/tarballs/#{dist_tar}", "/root")
       @fail_flag+=result.exit_code
+      result = scper.do_scp("#{$work_dir}/tarballs/answers.tar", "/root")
+      @fail_flag+=result.exit_code
       ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
     end
 
@@ -33,5 +35,6 @@ class TestSetup
       @fail_flag+=result.exit_code
       ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
     end
+
   end
 end
