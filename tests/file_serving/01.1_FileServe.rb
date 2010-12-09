@@ -18,24 +18,16 @@ class FileServe
       end
     end
 
-    # parse config file for file count
-    @config["CONFIG"].each_key do|cfg|
-      if cfg =~ /filecount/ then							#if the config hash key is filecount
-        file_count = @config["CONFIG"][cfg]		#then filecount value is num of files to create
-      end
-    end
-    puts "Creating #{file_count} files"
-
-		# Initiate transfer: puppet agent -t
+		# Initiate transfer: puppet agent
 		test_name="Initiate File Transfer on Agents"
     @config["HOSTS"].each_key do|host|
       @config["HOSTS"][host]['roles'].each do |role|
         if /agent/ =~ role then               # If the host is puppet agent
    		    agent_run = RemoteExec.new(host)    # get remote exec obj to agent
 	  	    BeginTest.new(host, test_name)
-		      result = agent_run.do_remote("puppet agent --server #{master} --no-daemonize --verbose --onetime --test")
+		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-          @fail_flag+=result.exit_code
+          #@fail_flag+=result.exit_code
         end
       end
     end

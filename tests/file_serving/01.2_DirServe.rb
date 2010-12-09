@@ -26,14 +26,14 @@ class DirServe
     end
     puts "Verifying #{file_count} files"
 
-		# Initiate transfer: puppet agent -t
+		# Initiate transfer: puppet agent
 		test_name="Initiate Directory Transfer on Agents"
     @config["HOSTS"].each_key do|host|
       @config["HOSTS"][host]['roles'].each do |role|
         if /agent/ =~ role then      # If the host is puppet agent
    		    agent_run = RemoteExec.new(host)    # get remote exec obj to agent
 	  	    BeginTest.new(host, test_name)
-		      result = agent_run.do_remote("puppet agent --server #{master} --no-daemonize --verbose --onetime --test")
+		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           @fail_flag+=result.exit_code
         end
@@ -47,7 +47,7 @@ class DirServe
         if /agent/ =~ role then      # If the host is puppet agent
 		      agent_run = RemoteExec.new(host)    # get remote exec obj to agent
 		      BeginTest.new(host, test_name)
-		      result = agent_run.do_remote('/ptest/bin/fileserve.sh /root dir 10')
+		      result = agent_run.do_remote("/ptest/bin/fileserve.sh /root dir #{file_count}")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           @fail_flag+=result.exit_code
         end

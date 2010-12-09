@@ -42,11 +42,11 @@ class Issue5318
 		result = master_run.do_remote('echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
     ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
 
-		# 2: invoke puppet agent -t
+		# 2: invoke puppet agent
 		config_ver_org=""
-		test_name="Issue5318 - invoke puppet agent -t"
+		test_name="Issue5318 - invoke puppet agent"
 		BeginTest.new(agent, test_name)
-		result = agent_run.do_remote("puppet agent --test --server #{master}")
+		result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		config_ver_org = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
     ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
 
@@ -60,11 +60,11 @@ class Issue5318
     filetimeout+=2
     sleep filetimeout
 
-		# 4: invoke puppet agent -t again
+		# 4: invoke puppet agent again
 		config_ver_mod=""
 		test_name="Issue5318 - step 4"
 		BeginTest.new(agent, test_name)
-		result = agent_run.do_remote("puppet agent --test --server #{master}")
+		result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		config_ver_mod = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
     ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
 

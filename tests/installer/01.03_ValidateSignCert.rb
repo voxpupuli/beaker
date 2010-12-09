@@ -1,5 +1,4 @@
 # Validate Cert Signing
-# Accepts hash of parsed config file as arg
 class ValidateSignCert
   attr_accessor :config, :fail_flag 
   def initialize(config)
@@ -23,19 +22,19 @@ class ValidateSignCert
       end
     end
 
+    # This step should not be req'd for PE edition -- agents req certs during install
     # AGENT(s) intiate Cert Signing with PMASTER
-    @config["HOSTS"].each_key do|host|
-      @config["HOSTS"][host]['roles'].each do |role|
-        if /agent/ =~ role then               # If the host is puppet agent
-          BeginTest.new(host, test_name)
-          runner = RemoteExec.new(host)
-          result = runner.do_remote("puppet agent --server #{master} --no-daemonize --verbose --onetime --test")
-          @fail_flag+=result.exit_code
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-        end
-      end
-    end
-    sleep 2
+    #@config["HOSTS"].each_key do|host|
+    #  @config["HOSTS"][host]['roles'].each do |role|
+    #    if /agent/ =~ role then               # If the host is puppet agent
+    #      BeginTest.new(host, test_name)
+    #      runner = RemoteExec.new(host)
+    #      result = runner.do_remote("puppet agent --no-daemonize --verbose --onetime --test --waitforcert 10 &")
+    #      @fail_flag+=result.exit_code
+    #      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    #    end
+    #  end
+    #end
 
     # Sign Agent Certs from PMASTER
     test_name="Puppet Master Sign Requested Agent Certs"

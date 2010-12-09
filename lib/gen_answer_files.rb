@@ -15,7 +15,7 @@ q_puppetclient_graph=y
 
 # Master base answers
 master_only_a = %w[
-q_apr_install=n
+q_apr_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetclient_install=n
@@ -30,7 +30,7 @@ q_puppetmaster_use_dashboard_reports=n
 
 # Master and Dashboard answers
 master_dashboard_a = %w[
-q_apr_install=n
+q_apr_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetclient_install=n
@@ -49,7 +49,7 @@ q_puppetmaster_use_dashboard_reports=y
 # # Agent and Dashboard answers
 # agent_dashboard_a = %w[
 # q_install=y
-# q_apr_install=n
+# q_apr_install=y
 # q_puppet_symlinks_install=y
 # q_puppetclient_certname=puppet
 # q_puppetclient_graph=y
