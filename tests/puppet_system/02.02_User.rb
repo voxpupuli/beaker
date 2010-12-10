@@ -30,8 +30,8 @@ class User
    		    agent_run = RemoteExec.new(host)    # get remote exec obj to agent
 	  	    BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
+		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-          @fail_flag+=result.exit_code
         end
       end
     end
@@ -47,7 +47,6 @@ class User
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           if (result.stdout =~ /3/ ) then
             puts "Users created correctly"
-            @fail_flag=0
           else
             puts "Error creating users"
             @fail_flag+=1

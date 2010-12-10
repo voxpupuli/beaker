@@ -38,6 +38,14 @@ def prep_nodes(config)
   ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
   fail_flag+=result.exit_code
 
+  # Set filetimeout= 0 in puppet.conf
+	test_name="Set filetimeout= 0 in puppet.conf"
+  BeginTest.new(master, test_name)
+  runner = RemoteExec.new(master)
+  result = runner.do_remote("cd /etc/puppetlabs/puppet; (grep filetimeout puppet.conf > /dev/null 2>&1) || sed -i \'s/\\[master\\]/\\[master\\]\\n    filetimeout = 0\/\' puppet.conf")
+  ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+  fail_flag+=result.exit_code
+
   # untar puppet code on master
 	test_name="Untar Puppet code on Master"
   BeginTest.new(master, test_name)
