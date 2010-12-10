@@ -31,7 +31,6 @@ class Group
 	  	    BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
-          @fail_flag+=result.exit_code
         end
       end
     end
@@ -47,7 +46,6 @@ class Group
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
           if (result.stdout =~ /3/ ) then
             puts "Group created correctly"
-            @fail_flag=0 # todo fix
           else
             puts "Error creating group"
             @fail_flag+=1

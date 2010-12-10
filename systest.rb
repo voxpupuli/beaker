@@ -52,6 +52,12 @@ def parse_args
       options[:mrpropper] = TRUE
     end
 
+    options[:dist] = FALSE
+    opts.on( '--dist', 'scp test code to nodes' ) do
+      puts "Will distributed upated remote test code"
+      options[:dist] = TRUE
+    end
+
     opts.on( '-h', '--help', 'Display this screen' ) do
       puts opts
       exit
@@ -128,6 +134,9 @@ config["CONFIG"]["puppetver"]=puppet_version
 
 # Clean-up old install
 clean_hosts(config) if options[:mrpropper]
+
+# SCP updated test code to nodes
+prep_nodes(config) if options[:dist]
 
 # Generate test list from test file or dir
 test_list=TestList.new(File.join($work_dir,options[:tests]))
