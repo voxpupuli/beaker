@@ -1,9 +1,0 @@
-q_install=y
-q_puppet_symlinks_install=y
-q_puppetclient_certname=`hostname`
-q_puppetclient_install=y
-q_puppetclient_pluginsync=y
-q_puppetclient_server=puppet
-q_puppetdashboard_install=n
-q_puppetmaster_install=n
-q_puppetclient_graph=y

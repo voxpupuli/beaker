@@ -4,13 +4,13 @@ def gen_answer_files(config)
 agent_only_a = %w[
 q_install=y
 q_puppet_symlinks_install=y
-q_puppetclient_certname=`hostname`
-q_puppetclient_install=y
-q_puppetclient_pluginsync=y
-q_puppetclient_server=MASTER
+q_puppetagent_certname=`hostname`
+q_puppetagent_install=y
+q_puppetagent_pluginsync=y
+q_puppetagent_server=MASTER
 q_puppetdashboard_install=n
 q_puppetmaster_install=n
-q_puppetclient_graph=y
+q_puppetagent_graph=y
 ]
 
 # Master base answers
@@ -18,7 +18,7 @@ master_only_a = %w[
 q_apr_install=y
 q_install=y
 q_puppet_symlinks_install=y
-q_puppetclient_install=n
+q_puppetagent_install=n
 q_puppetdashboard_install=n
 q_puppetmaster_certdnsnames=puppet:`hostname`
 q_puppetmaster_certname=`hostname`
@@ -33,7 +33,7 @@ master_dashboard_a = %w[
 q_apr_install=y
 q_install=y
 q_puppet_symlinks_install=y
-q_puppetclient_install=n
+q_puppetagent_install=n
 q_puppetdashboard_database_install=y
 q_puppetdashboard_httpd_port=3000
 q_puppetdashboard_install=y
@@ -51,11 +51,11 @@ q_puppetmaster_use_dashboard_reports=y
 # q_install=y
 # q_apr_install=y
 # q_puppet_symlinks_install=y
-# q_puppetclient_certname=puppet
-# q_puppetclient_graph=y
-# q_puppetclient_install=y
-# q_puppetclient_pluginsync=y
-# q_puppetclient_server=MASTER
+# q_puppetagent_certname=puppet
+# q_puppetagent_graph=y
+# q_puppetagent_install=y
+# q_puppetagent_pluginsync=y
+# q_puppetagent_server=MASTER
 # q_puppetdashboard_database_install=y
 # q_puppetdashboard_httpd_port=3000
 # q_puppetdashboard_install=y
@@ -65,7 +65,7 @@ q_puppetmaster_use_dashboard_reports=y
 # dashboard_only_a = %w[
 # q_install=y
 # q_puppet_symlinks_install=y
-# q_puppetclient_install=n
+# q_puppetagent_install=n
 # q_puppetdashboard_database_install=y
 # q_puppetdashboard_httpd_port=3000
 # q_puppetdashboard_install=y
@@ -100,7 +100,7 @@ config["HOSTS"].each_key do|host|
     puts 'host is agent only'
     fh = File.new("#{$work_dir}/tarballs/q_agent_only.sh", 'w')
     agent_only_a.each do |line|    # Insert Puppet master host name
-      if line =~ /(q_puppetclient_server=)MASTER/ then
+      if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
       end
       fh.puts line
