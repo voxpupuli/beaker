@@ -19,7 +19,7 @@ class ValidateHttpd
         if /master/ =~ role then             # If the host is puppet master
           BeginTest.new(host, test_name)
 			    runner = RemoteExec.new(host)
-					result = runner.do_remote("service edp-httpd start")
+					result = runner.do_remote("service pe-httpd start")
 					@fail_flag+=result.exit_code
           ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
         end
