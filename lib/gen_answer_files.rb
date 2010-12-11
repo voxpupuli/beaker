@@ -2,6 +2,7 @@ def gen_answer_files(config)
 
 # Agent base answers
 agent_only_a = %w[
+q_vendor_packages_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetagent_certname=`hostname`
@@ -15,7 +16,7 @@ q_puppetagent_graph=y
 
 # Master base answers
 master_only_a = %w[
-q_apr_install=y
+q_vendor_packages_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetagent_install=n
@@ -30,7 +31,7 @@ q_puppetmaster_use_dashboard_reports=n
 
 # Master and Dashboard answers
 master_dashboard_a = %w[
-q_apr_install=y
+q_vendor_packages_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetagent_install=n
@@ -49,7 +50,7 @@ q_puppetmaster_use_dashboard_reports=y
 # # Agent and Dashboard answers
 # agent_dashboard_a = %w[
 # q_install=y
-# q_apr_install=y
+# q_vendor_packages_install=y
 # q_puppet_symlinks_install=y
 # q_puppetagent_certname=puppet
 # q_puppetagent_graph=y
@@ -62,8 +63,9 @@ q_puppetmaster_use_dashboard_reports=y
 # q_puppetmaster_install=n
 # ]
 # Dashboard base answers
-# dashboard_only_a = %w[
+# pashboard_only_a = %w[
 # q_install=y
+# q_vendor_packages_install=y
 # q_puppet_symlinks_install=y
 # q_puppetagent_install=n
 # q_puppetdashboard_database_install=y
