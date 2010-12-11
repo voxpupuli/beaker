@@ -1,1 +1,0 @@
-../tests_post_install/03.2_ValidateGem.rb
