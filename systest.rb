@@ -34,7 +34,7 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ]"
+    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ] [-d || --dry-run]"
 
     options[:tests] = nil
     opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE' ) do|dir|
@@ -44,6 +44,10 @@ def parse_args
     options[:config] = nil
     opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
       options[:config] = file
+    end
+
+    opts.on( '-d', '--dry-run', "Report what would be done on the targets, but don't do it." ) do |file|
+      $dry_run = true
     end
 
     options[:mrpropper] = FALSE

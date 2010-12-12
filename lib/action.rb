@@ -28,7 +28,11 @@ class Action
       :user_known_hosts_file => "#{usr_home}/.ssh/known_hosts"
     }
     result = Result.new(host,args,'','','',0)
-    yield result,options
+    if $dry_run
+      puts "#{host}: #{self.class}(#{args.inspect})"
+    else
+      yield result,options
+    end
     result
   end
 end
