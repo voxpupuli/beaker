@@ -1,53 +1,21 @@
 # Validate HTTPD Functionality
-# Accepts hash of parsed config file as arg
-class ValidateHttpd
-  attr_accessor :config, :fail_flag 
-  def initialize(config)
-    self.config    = config
-    self.fail_flag = 0
 
-    host=""
-    role=""
-    usr_home=ENV['HOME']
+# Start HTTPD
+test_name="Service Start HTTPD on Puppet Master"
 
-    # Start HTTPD
-    test_name="Service Start HTTPD on Puppet Master"
-    # Seach each host
-    @config["HOSTS"].each_key do|host|
-      # for role 'master'
-      @config["HOSTS"][host]['roles'].each do |role|
-        if /master/ =~ role then             # If the host is puppet master
-          BeginTest.new(host, test_name)
-			    runner = RemoteExec.new(host)
-					result = runner.do_remote("service pe-httpd start")
-					@fail_flag+=result.exit_code
-          result.log(test_name)
-        end
-      end
-    end
+BeginTest.new(master, test_name)
+runner = RemoteExec.new(master)
+result = runner.do_remote("service pe-httpd start")
+@fail_flag+=result.exit_code
+result.log(test_name)
 
-    # Check for running HTTPD on PMASTER hosts
-    test_name="Connect to HTTPD server on Puppet Master"
-    tmp_result=0
-    # Seach each host
-    @config["HOSTS"].each_key do|host|
-      # for role 'master'
-      @config["HOSTS"][host]['roles'].each do |role|
-        if /master/ =~ role then             # If the host is puppet master
-          BeginTest.new(host, test_name)
-          begin  
-            if ( Net::HTTP.get "#{host}", '*', '80' )
-              tmp_result+=0
-            else
-              tmp_result+=1
-            end
-          rescue Exception => se
-            puts "Got socket error (#{se.type}): #{se}"
-          end
-          @fail_flag+=tmp_result
-          Action::Result.ad_hoc(host, nil, @fail_flag).log(test_name)
-        end
-      end
-    end
-  end
+# Check for running HTTPD on PMASTER hosts
+test_name="Connect to HTTPD server on Puppet Master"
+BeginTest.new(master, test_name)
+begin  
+  tmp_result = Net::HTTP.get("#{master}", '*', '80') ? 0 : 1
+rescue Exception => se
+  puts "Got socket error (#{se.class}): #{se}"
 end
+@fail_flag+=tmp_result
+Action::Result.ad_hoc(master, nil, @fail_flag).log(test_name)

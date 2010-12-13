@@ -1,37 +1,14 @@
 # Validate Dashboard Functionality
 # Accepts hash of parsed config file as arg
-class ValidateDashboard
-  attr_accessor :config, :fail_flag 
-  def initialize(config)
-    self.config    = config
-    self.fail_flag = 0
 
-    host=""
-    role=""
-    usr_home=ENV['HOME']
+# Check for running dashboard on DASHBORD Host
 
-    # Check for running dashboard on DASHBORD Host
-    tmp_result=0
-    test_name="Connect to Dashboard"
-    # Seach each host
-    @config["HOSTS"].each_key do|host|
-      # for role 'dashboard'
-      @config["HOSTS"][host]['roles'].each do |role|
-        if /dashboard/ =~ role then             # found dashboard host
-          BeginTest.new(host, test_name)
-          begin  
-            if ( Net::HTTP.get host, '*', '3000' )
-              tmp_result+=0
-            else
-              tmp_result+=1
-            end
-          rescue Exception => se
-            puts "Got socket error (#{se.type}): #{se}"
-          end
-          @fail_flag+=tmp_result
-          Action::Result.ad_hoc(host, nil, @fail_flag).log(test_name)
-        end
-      end
-    end
+test_name="Connect to Dashboard"
+BeginTest.new(dashboard, test_name)
+tmp_result = begin  
+    Net::HTTP.get(dashboard, '*', '3000')
+  rescue Exception => se
+    puts "Got socket error (#{se.class}): #{se}"
   end
-end
+@fail_flag += 1 unless tmp_result
+Action::Result.ad_hoc(dashboard, nil, @fail_flag).log(test_name)
