@@ -166,7 +166,7 @@ test_list(File.join($work_dir,options[:tests])).each do |path|
   if /\d.*_(\w.*)\.rb$/ =~ path then             # parse the filename for class to call
     puts
     puts "\n#{$1} executing..."
-    result = TestWrapper.new.run_test path,$1,config  # Call the class, passing in ref to config
+    result = TestWrapper.new(config,path).run_test
     puts "#{$1} returned: #{result.fail_flag}" 
     test_summary[$1]=result.fail_flag            # Add test result to test_summary hash for reporting
   end
