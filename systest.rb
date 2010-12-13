@@ -37,7 +37,7 @@ def parse_args
     opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ] [-d || --dry-run]"
 
     options[:tests] = nil
-    opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE' ) do|dir|
+    opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
       options[:tests] = dir
     end
 
@@ -118,7 +118,8 @@ org_stdout = $stdout      # save stdout file descriptor
 test_summary={}           # hash to save test results
 # Parse commnand line args
 options=parse_args
-puts "Executing tests in #{options[:tests]}" if options[:tests]
+options[:tests] ||= 'tests'
+puts "Executing tests in #{options[:tests]}"
 puts "Using Config #{options[:config]}" if options[:config]
 
 # Setup logging
@@ -142,12 +143,7 @@ clean_hosts(config) if options[:mrpropper]
 # SCP updated test code to nodes
 prep_nodes(config) if options[:dist]
 
-# Generate test list from test file or dir
-test_list=TestList.new(File.join($work_dir,options[:tests]))
-
-
-# Execute Tests Here
-test_list.each do |test|
+test_list(File.join($work_dir,options[:tests])).each do |test|
   if /^\d.*_(\w.*)\.rb/ =~ test then             # parse the filename for class to call
     puts
     puts "\n#{$1} executing..."
