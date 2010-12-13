@@ -110,6 +110,25 @@ def summarize(test_summary, time, config)
   sum_log.close
 end
 
+#
+# Return a list of .rb files in a directory tree
+#
+def test_list(path)
+  if File.basename(path) =~ /^\W/
+    [] # skip .hiddens and such
+  elsif File.directory?(path) then
+    puts "Looking for tests in #{path}"
+    Dir.entries(path).
+      collect { |entry| test_list(File.join(path,entry)) }.
+      flatten.
+      compact
+  elsif path =~ /\.rb$/
+    puts "Found #{path}"
+    [path]
+    #[path[/\S+\/(\S+)$/,1]]
+  end
+end
+
 ###################################
 #  Main
 ###################################
@@ -143,10 +162,11 @@ clean_hosts(config) if options[:mrpropper]
 # SCP updated test code to nodes
 prep_nodes(config) if options[:dist]
 
-test_list(File.join($work_dir,options[:tests])).each do |test|
-  if /^\d.*_(\w.*)\.rb/ =~ test then             # parse the filename for class to call
+test_list(File.join($work_dir,options[:tests])).each do |path|
+  if /\d.*_(\w.*)\.rb$/ =~ path then             # parse the filename for class to call
     puts
     puts "\n#{$1} executing..."
+    require path
     result = eval($1).new(config)                # Call the class, passing in ref to config
     puts "#{$1} returned: #{result.fail_flag}" 
     test_summary[$1]=result.fail_flag            # Add test result to test_summary hash for reporting
