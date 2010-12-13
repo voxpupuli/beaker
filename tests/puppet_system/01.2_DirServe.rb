@@ -35,7 +35,7 @@ class DirServe
 	  	    BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
           #@fail_flag+=result.exit_code
         end
       end
@@ -49,7 +49,7 @@ class DirServe
 		      agent_run = RemoteExec.new(host)    # get remote exec obj to agent
 		      BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("/ptest/bin/fileserve.sh /root dir #{file_count}")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
           @fail_flag+=result.exit_code
         end
       end

@@ -49,7 +49,7 @@ class InstallPuppet
       runner = RemoteExec.new(host)
       result = runner.do_remote("#{command}")
       @fail_flag+=result.exit_code
-      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      result.log(test_name)
 
     end # end HOST block
     # do post install test environment config

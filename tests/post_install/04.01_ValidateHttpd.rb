@@ -21,7 +21,7 @@ class ValidateHttpd
 			    runner = RemoteExec.new(host)
 					result = runner.do_remote("service pe-httpd start")
 					@fail_flag+=result.exit_code
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
         end
       end
     end
@@ -45,8 +45,7 @@ class ValidateHttpd
             puts "Got socket error (#{se.type}): #{se}"
           end
           @fail_flag+=tmp_result
-          # passing nil 2x as this test does not return stdout and stderr
-          ChkResult.new(host, test_name, nil, nil, @fail_flag)
+          Action::Result.ad_hoc(host, nil, @fail_flag).log(test_name)
         end
       end
     end

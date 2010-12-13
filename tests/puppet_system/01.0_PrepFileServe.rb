@@ -36,7 +36,7 @@ class PrepFileServe
 		master_run = RemoteExec.new(master)  # get remote exec obj to master
     BeginTest.new(master, test_name)
     result = master_run.do_remote("/ptest/bin/make_files.sh /etc/puppetlabs/puppet/modules/puppet_system_test/files #{file_count}")
-    ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
     @fail_flag+=result.exit_code
 
   end

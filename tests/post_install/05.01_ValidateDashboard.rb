@@ -29,7 +29,7 @@ class ValidateDashboard
             puts "Got socket error (#{se.type}): #{se}"
           end
           @fail_flag+=tmp_result
-          ChkResult.new(host, test_name, nil, nil, @fail_flag)
+          Action::Result.ad_hoc(host, nil, @fail_flag).log(test_name)
         end
       end
     end

@@ -17,7 +17,7 @@ class ValidateGem
       runner = RemoteExec.new(host)
       result = runner.do_remote("#{binpath}/gem --version")
       @fail_flag+=result.exit_code
-      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      result.log(test_name)
     end
   end
 end

@@ -49,7 +49,7 @@ config["HOSTS"].each_key do|host|
   BeginTest.new(host, test_name)
   runner = RemoteExec.new(host)
   result = runner.do_remote("rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs")
-  ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+  result.log(test_name)
 end
 
 exit

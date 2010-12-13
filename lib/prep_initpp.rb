@@ -11,7 +11,7 @@ def prep_initpp(host, entry, path)
   runner = RemoteExec.new(host)
   # result = runner.do_remote("cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp")
   result = runner.do_remote("cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp")
-  ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+  result.log(test_name)
   fail_flag+=result.exit_code
 
   return fail_flag

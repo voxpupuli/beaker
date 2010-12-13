@@ -31,7 +31,7 @@ class Host
 	  	    BeginTest.new(host, test_name)
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		      result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
         end
       end
     end
@@ -44,13 +44,13 @@ class Host
 		      BeginTest.new(host, test_name)
 		      agent_run = RemoteExec.new(host)     # get remote exec obj to agent
 		      result = agent_run.do_remote("grep -P '9.10.11.12\\W+puppethost3\\W+ph3.alias.1\\W+ph3.alias.2' /etc/hosts")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
           @fail_flag+=result.exit_code
 		      result = agent_run.do_remote("grep -P '5.6.7.8\\W+puppethost2\\W+ph2.alias.1' /etc/hosts")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
           @fail_flag+=result.exit_code
 		      result = agent_run.do_remote("grep -P '1.2.3.4\\W+puppethost1.name' /etc/hosts")
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
           @fail_flag+=result.exit_code
         end
       end

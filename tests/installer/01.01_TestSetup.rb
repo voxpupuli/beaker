@@ -22,7 +22,7 @@ class TestSetup
       @fail_flag+=result.exit_code
       result = scper.do_scp("#{$work_dir}/tarballs/answers.tar", "/root")
       @fail_flag+=result.exit_code
-      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      result.log(test_name)
     end
 
     test_name="Pre Test Setup -- Untar install package on hosts"
@@ -33,7 +33,7 @@ class TestSetup
       runner = RemoteExec.new(host)
       result = runner.do_remote("tar xf #{dist_tar}")
       @fail_flag+=result.exit_code
-      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      result.log(test_name)
     end
 
   end

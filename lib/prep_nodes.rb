@@ -16,7 +16,7 @@ def prep_nodes(config)
 	  BeginTest.new(host, test_name)
     scper = ScpFile.new(host)
     result = scper.do_scp("#{$work_dir}/dist/ptest.tgz", "/")
-    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 		fail_flag+=result.exit_code
   end
 
@@ -26,7 +26,7 @@ def prep_nodes(config)
     BeginTest.new(host, test_name)
     runner = RemoteExec.new(host)
     result = runner.do_remote("cd / && tar xzf ptest.tgz")
-    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
     fail_flag+=result.exit_code
   end
 
@@ -35,7 +35,7 @@ def prep_nodes(config)
 	BeginTest.new(master, test_name)
   scper = ScpFile.new(master)
   result = scper.do_scp("#{$work_dir}/dist/puppet.tgz", "/etc/puppetlabs")
-  ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+  result.log(test_name)
   fail_flag+=result.exit_code
 
   # Set filetimeout= 0 in puppet.conf
@@ -43,7 +43,7 @@ def prep_nodes(config)
   BeginTest.new(master, test_name)
   runner = RemoteExec.new(master)
   result = runner.do_remote("cd /etc/puppetlabs/puppet; (grep filetimeout puppet.conf > /dev/null 2>&1) || sed -i \'s/\\[master\\]/\\[master\\]\\n    filetimeout = 0\/\' puppet.conf")
-  ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+  result.log(test_name)
   fail_flag+=result.exit_code
 
   # untar puppet code on master
@@ -51,7 +51,7 @@ def prep_nodes(config)
   BeginTest.new(master, test_name)
   runner = RemoteExec.new(master)
   result = runner.do_remote("cd /etc/puppetlabs && tar xzf puppet.tgz")
-  ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+  result.log(test_name)
   fail_flag+=result.exit_code
 
   return fail_flag

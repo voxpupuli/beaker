@@ -6,7 +6,7 @@ class ScpFile < Action
     do_action(source,target) { |result,options|
       # Net::Scp always returns 0, so just set the return code to 0
       # Setting these values allows reporting via 
-      # ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      # result.log(test_name)
       result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
       result.stderr=nil
       result.exit_code=0

@@ -34,13 +34,13 @@ class Issue5318
     else 
       puts "Master file timeout value not reported!" 
     end
-    ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
 		# 1: Add notify to site.pp file on Master
 		test_name="Issue5318 - modify(1/2) site.pp file on Master"
 		BeginTest.new(master, test_name)
 		result = master_run.do_remote('echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
-    ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
 		# 2: invoke puppet agent
 		config_ver_org=""
@@ -48,13 +48,13 @@ class Issue5318
 		BeginTest.new(agent, test_name)
 		result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		config_ver_org = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-    ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
 		# 3: 2nd modify site.pp on Masster
 		test_name="Issue5318 - modify(2/2) site.pp on Master"
 		BeginTest.new(master, test_name)
 		result = master_run.do_remote('echo notify{\"issue5318 modified\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
-    ChkResult.new(master, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
     # sleep for filetimeout reported via master, plus 2 secs
     filetimeout+=2
@@ -66,18 +66,17 @@ class Issue5318
 		BeginTest.new(agent, test_name)
 		result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
 		config_ver_mod = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-    ChkResult.new(agent, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
     # 5: comapre the results from steps 2 and 4
-    msg=""
-		test_name="Issue5318 - Compare Config Versions on Agent"
-		BeginTest.new(agent, test_name)
+    test_name="Issue5318 - Compare Config Versions on Agent"
+    BeginTest.new(agent, test_name)
     if ( config_ver_org == config_ver_mod ) then 
       msg="Agent did not receive updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
-      @fail_flag+=1
+      @fail_flag=1
     elsif
       msg="Agent received updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
     end
-    ChkResult.new(host, test_name, msg, nil, @fail_flag)
+    Action::Result.ad_hoc(host,msg,@fail_flag).log(test_name)
   end
 end

@@ -17,7 +17,7 @@ class SimpleTest
       runner = RemoteExec.new(host)
       result = runner.do_remote("uname")
       @fail_flag+=result.exit_code
-      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+      result.log(test_name)
     end
 
     test_name="Perform specific action based on host's role"
@@ -29,19 +29,19 @@ class SimpleTest
           runner = RemoteExec.new(host)
           result = runner.do_remote("puppet master specific command")
           @fail_flag+=result.exit_code
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
         elsif /agent/ =~ role then           # The host is puppet agent
           BeginTest.new(host, test_name)
           runner = RemoteExec.new(host)
           result = runner.do_remote("puppet agent specific command")
           @fail_flag+=result.exit_code
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
         elsif /dashboard/ =~ role then       # If the host will run dashboard
           BeginTest.new(host, test_name)
           runner = RemoteExec.new(host)
           result = runner.do_remote("puppet dashboard specific command")
           @fail_flag+=result.exit_code
-          ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+          result.log(test_name)
         end
       end
     end

@@ -31,7 +31,7 @@ class ValidateSignCert
     #      runner = RemoteExec.new(host)
     #      result = runner.do_remote("puppet agent --no-daemonize --verbose --onetime --test --waitforcert 10 &")
     #      @fail_flag+=result.exit_code
-    #      ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    #      result.log(test_name)
     #    end
     #  end
     #end
@@ -42,7 +42,7 @@ class ValidateSignCert
     runner = RemoteExec.new(master)
     result = runner.do_remote("puppet cert --sign #{agent_list}")
     @fail_flag+=result.exit_code
-    ChkResult.new(host, test_name, result.stdout, result.stderr, result.exit_code)
+    result.log(test_name)
 
   end
 end
