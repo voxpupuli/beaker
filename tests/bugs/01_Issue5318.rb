@@ -1,60 +1,34 @@
 
+test_name "Issue5318"
+
 agent = agents.first
-master_run = RemoteExec.new(master)  # get remote exec obj to master
-agent_run = RemoteExec.new(agent)    # get remote exec obj to agent
 
-# 0: Query master for filetimeout value
-filetimeout=0
-test_name="Issue5318 - query Puppet master for filetimeout value"
-BeginTest.new(master, test_name)
-result = master_run.do_remote("puppet --configprint all | grep filetimeout")
-if ( result.exit_code == 0 ) then
-  filetimeout = $1 if /filetimeout \= \'(\d+)\'/ =~ result.stdout
-  puts "Master reported file timeout value of: #{filetimeout}"
-else 
-  puts "Master file timeout value not reported!" 
-end
-result.log(test_name)
+step 0,"Query Puppet master for filetimeout value"
+    on master,"puppet --configprint all | grep filetimeout"
+    if filetimeout = stdout[/filetimeout \= \'(\d+)\'/,1]
+      puts "Master reported file timeout value of: #{filetimeout}"
+    else 
+      fail_test "Master file timeout value not reported!" 
+    end
 
-# 1: Add notify to site.pp file on Master
-test_name="Issue5318 - modify(1/2) site.pp file on Master"
-BeginTest.new(master, test_name)
-result = master_run.do_remote('echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
-result.log(test_name)
+step 1,	"Add 'origina' notify to site.pp file on Master"
+    on master,'echo notify{\"issue5318 original\":} >> /etc/puppetlabs/puppet/manifests/site.pp'
 
-# 2: invoke puppet agent
-config_ver_org=""
-test_name="Issue5318 - invoke puppet agent"
-BeginTest.new(agent, test_name)
-result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
-config_ver_org = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-result.log(test_name)
+step 2, "Invoke puppet agent to get the config version"
+    on agent,"puppet agent --no-daemonize --verbose --onetime --test"
+    config_ver_org = stdout[/Applying configuration version \'(\d+)\'/,1]
 
-# 3: 2nd modify site.pp on Masster
-test_name="Issue5318 - modify(2/2) site.pp on Master"
-BeginTest.new(master, test_name)
-result = master_run.do_remote('echo notify{\"issue5318 modified\":} >> /etc/puppetlabs/puppet/manifests/site.pp')
-result.log(test_name)
+step 3, "Add 'modified' notify to site.pp on Master (and sleep for for file timeout+2 seconds)"
+    on master,'echo notify{\"issue5318 modified\":} >> /etc/puppetlabs/puppet/manifests/site.pp'
+    sleep (filetimeout || 0)+2
 
-# sleep for filetimeout reported via master, plus 2 secs
-filetimeout+=2
-sleep filetimeout
+step 4, "Invoke puppet agent again to get the new config version"
+    on agent, "puppet agent --no-daemonize --verbose --onetime --test"
+    config_ver_mod = stdout[/Applying configuration version \'(\d+)\'/,1]
 
-# 4: invoke puppet agent again
-config_ver_mod=""
-test_name="Issue5318 - step 4"
-BeginTest.new(agent, test_name)
-result = agent_run.do_remote("puppet agent --no-daemonize --verbose --onetime --test")
-config_ver_mod = $1 if /Applying configuration version \'(\d+)\'/ =~ result.stdout
-result.log(test_name)
-
-# 5: comapre the results from steps 2 and 4
-test_name="Issue5318 - Compare Config Versions on Agent"
-BeginTest.new(agent, test_name)
-if config_ver_org == config_ver_mod then 
-  msg="Agent did not receive updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
-  @fail_flag=1
-elsif
-  msg="Agent received updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
-end
-Action::Result.ad_hoc(agent,msg,@fail_flag).log(test_name)
+step 5, "Compare config versions from steps 2 & 4"
+    if config_ver_org == config_ver_mod then 
+      fail_test "Agent did not receive updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
+    else
+      pass_test "Agent received updated config: ORG #{config_ver_org} MOD #{config_ver_mod}"
+    end

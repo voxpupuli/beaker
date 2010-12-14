@@ -10,15 +10,9 @@ end
 
 puts "Creating #{file_count} files"
 
-initpp="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests"
 # Write new class to init.pp
-prep_initpp(master, "file", initpp)
+prep_initpp(master, "file")
 
-# Create test files/dir on Puppet Master
-test_name="Prep For File and Dir servering tests"
-master_run = RemoteExec.new(master)  # get remote exec obj to master
-BeginTest.new(master, test_name)
-result = master_run.do_remote("/ptest/bin/make_files.sh /etc/puppetlabs/puppet/modules/puppet_system_test/files #{file_count}")
-result.log(test_name)
-@fail_flag+=result.exit_code
+step "Prep For File and Dir servering tests"
+on master,"/ptest/bin/make_files.sh /etc/puppetlabs/puppet/modules/puppet_system_test/files #{file_count}"
 

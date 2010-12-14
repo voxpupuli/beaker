@@ -11,7 +11,7 @@ class TestWrapper
     class << self
       def run_test
         test = File.read(path)
-        eval test
+        eval test,nil,path,1
         classes = test.split(/\n/).collect { |l| l[/^ *class +(\w+) *$/,1]}.compact
         case classes.length
         when 0; self
@@ -21,6 +21,9 @@ class TestWrapper
       end
     end
   end
+  #
+  # Identify hosts
+  #
   def hosts(desired_role=nil)
     config["HOSTS"].
       keys.
@@ -41,73 +44,106 @@ class TestWrapper
     fail "There must be exactly one dashboard" unless dashboards.length == 1
     dashboards.first
   end
-  def prep_nodes
-    # 1: SCP ptest/bin code to all nodes
-    test_name="Copy ptest.tgz executables to all hosts"
-    hosts.each do |host|
-      BeginTest.new(host, test_name)
-      scper = ScpFile.new(host)
-      result = scper.do_scp("#{$work_dir}/dist/ptest.tgz", "/")
-      result.log(test_name)
-      @fail_flag+=result.exit_code
-    end
-
-    # Execute remote command on each node, regardless of role
-    test_name="Untar ptest.tgz executables to all hosts"
-    hosts.each do|host|
-      BeginTest.new(host, test_name)
+  #
+  # Annotations
+  #
+  attr_reader :step_name
+  def step(lable,description=lable)
+    @step_name = description
+    @step_lable = lable
+  end
+  def test_name(name)
+   step name
+  end
+  #
+  # Basic operations
+  #
+  attr_reader :result
+  def on(host,command,options={})
+    if host.is_a? Array
+      host.each { |h| on h,command,options }
+    elsif command.is_a? Array
+      command.each { |cmd| on host,cmd,options }
+    elsif command =~ /\n/
+      on host,command.split(/\n/).collect { |l| l.strip.chomp }.reject { |l| l.empty? },options
+    else
+      BeginTest.new(host, step_name) unless options[:silent]
       runner = RemoteExec.new(host)
-      result = runner.do_remote("cd / && tar xzf ptest.tgz")
-      result.log(test_name)
+      @result = runner.do_remote(command)
+      result.log(step_name) unless options[:silent]
+      @fail_flag+=result.exit_code unless options[:silent]
+     end
+  end
+  def scp_to(host,from_path,to_path,options={})
+    if host.is_a? Array
+      host.each { |h| scp_to h,from_path,to_path,options }
+    else
+      BeginTest.new(host, step_name)
+      scper = ScpFile.new(host)
+      @result = scper.do_scp(from_path, to_path)
+      result.log(step_name)
       @fail_flag+=result.exit_code
     end
+  end
+  def pass_test(msg)
+    puts msg
+  end
+  def fail_test(msg)
+    puts msg
+    @fail_flag += 1
+  end
+  #
+  # result access
+  #
+  def stdout
+    result.stdout
+  end
+  def stderr
+    result.stderr
+  end
+  #
+  # Macros
+  #
+  def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
+    if host.is_a? Array
+      host.each { |h| run_agent_on h }
+    elsif "ticket #5541 is a pain and hasn't been fixed"
+      BeginTest.new(host, step_name) unless options[:silent]
+      2.times { on host,"puppet agent #{options}",:silent => true }
+      result.log(step_name) unless options[:silent]
+      @fail_flag+=result.exit_code unless options[:silent]
+    else
+      on host,"puppet agent #{options}"
+    end
+  end
+  def prep_nodes
+    step "Copy ptest.tgz executables to all hosts"
+    scp_to hosts,"#{$work_dir}/dist/ptest.tgz", "/"
 
-    # 1: SCP puppet code to master
-    test_name="Copy puppet.tgz code to Master"
-    BeginTest.new(master, test_name)
-    scper = ScpFile.new(master)
-    result = scper.do_scp("#{$work_dir}/dist/puppet.tgz", "/etc/puppetlabs")
-    result.log(test_name)
-    @fail_flag+=result.exit_code
+    step "Untar ptest.tgz executables to all hosts"
+    on hosts,"cd / && tar xzf ptest.tgz"
 
-    # Set filetimeout= 0 in puppet.conf
-    test_name="Set filetimeout= 0 in puppet.conf"
-    BeginTest.new(master, test_name)
-    runner = RemoteExec.new(master)
-    result = runner.do_remote("cd /etc/puppetlabs/puppet; (grep filetimeout puppet.conf > /dev/null 2>&1) || sed -i \'s/\\[master\\]/\\[master\\]\\n    filetimeout = 0\/\' puppet.conf")
-    result.log(test_name)
-    @fail_flag+=result.exit_code
+    step "Copy puppet.tgz code to Master"
+    scp_to master,"#{$work_dir}/dist/puppet.tgz", "/etc/puppetlabs"
 
-    # untar puppet code on master
-    test_name="Untar Puppet code on Master"
-    BeginTest.new(master, test_name)
-    runner = RemoteExec.new(master)
-    result = runner.do_remote("cd /etc/puppetlabs && tar xzf puppet.tgz")
-    result.log(test_name)
-    @fail_flag+=result.exit_code
-    @fail_flag
+    step "Set filetimeout= 0 in puppet.conf"
+    on master,"cd /etc/puppetlabs/puppet; (grep filetimeout puppet.conf > /dev/null 2>&1) || sed -i \'s/\\[master\\]/\\[master\\]\\n    filetimeout = 0\/\' puppet.conf"
+
+    step "Untar Puppet code on Master"
+    on master,"cd /etc/puppetlabs && tar xzf puppet.tgz"
   end
   def clean_hosts
-    test_name="Clean Hosts"
-    hosts.each do |host|
-      BeginTest.new(host, test_name)
-      runner = RemoteExec.new(host)
-      result = runner.do_remote("rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs")
-      result.log(test_name)
-    end
+    step "Clean Hosts"
+    on hosts,"rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs"
   end
-  def prep_initpp(host, entry, path)
+  def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
     # eg: class puppet_system_test { 
     #  include group
     #  include user
     #}
-    test_name="Append new system_test_class to init.pp"
-    BeginTest.new(host, test_name)
-    runner = RemoteExec.new(host)
-    # result = runner.do_remote("cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp")
-    result = runner.do_remote("cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp")
-    result.log(test_name)
-    @fail_flag+=result.exit_code
+    step "Append new system_test_class to init.pp"
+    # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
+    on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
   end
 end

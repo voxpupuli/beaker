@@ -3,7 +3,7 @@
 
 version=config["CONFIG"]["puppetver"]
 
-test_name="Install Puppet"
+step "Install Puppet"
 
 hosts.each do |host|
   role_agent=false
@@ -16,9 +16,9 @@ hosts.each do |host|
 
   # What role(s) does this node serve?
   config["HOSTS"][host]['roles'].each do |role|
-    role_agent=TRUE if role =~ /agent/
-    role_master=TRUE if role =~ /master/
-    role_dashboard=TRUE if role =~ /dashboard/
+    role_agent=true if role =~ /agent/
+    role_master=true if role =~ /master/
+    role_dashboard=true if role =~ /dashboard/
   end 
 
   q_script = case
@@ -27,13 +27,7 @@ hosts.each do |host|
     when (role_master &&  role_dashboard); "q_master_and_dashboard.sh"
     else fail "#{host} has an unacceptable combination of roles."
     end
-  command = "cd #{dist_dir} && tar xf /root/answers.tar -C . && ./puppet-enterprise-installer -a #{q_script}"
-       
-  BeginTest.new(host, test_name)
-  runner = RemoteExec.new(host)
-  result = runner.do_remote("#{command}")
-  @fail_flag+=result.exit_code
-  result.log(test_name)
+  on host,"cd #{dist_dir} && tar xf /root/answers.tar -C . && ./puppet-enterprise-installer -a #{q_script}"
 end
 
 # do post install test environment config
