@@ -37,4 +37,4 @@ hosts.each do |host|
 end
 
 # do post install test environment config
-prep_nodes(config)
+prep_nodes

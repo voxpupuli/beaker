@@ -160,7 +160,7 @@ config["CONFIG"]["puppetver"]=puppet_version
 clean_hosts(config) if options[:mrpropper]
 
 # SCP updated test code to nodes
-prep_nodes(config) if options[:dist]
+TestWrapper.new(config).prep_nodes if options[:dist]
 
 test_list(File.join($work_dir,options[:tests])).each do |path|
   if /\d.*_(\w.*)\.rb$/ =~ path then             # parse the filename for class to call

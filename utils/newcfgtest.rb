@@ -52,6 +52,6 @@ config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
 # Print dump config
 do_dump(config)
-prep_nodes(config)
+TestWrapper.new(config).prep_nodes
 
 exit
