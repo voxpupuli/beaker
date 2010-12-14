@@ -6,17 +6,19 @@ class Action
   end
 
   class Result
-    attr_accessor :host, :cmd, :stdout, :stderr, :combined, :exit_code
-    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, combined=nil, exit_code=nil)
+    attr_accessor :host, :cmd, :stdout, :stderr, :exit_code
+    def initialize(host=nil, cmd=nil, stdout=nil, stderr=nil, exit_code=nil)
       @host      = host
       @cmd       = cmd
       @stdout    = stdout
       @stderr    = stderr
-      @combined  = combined
       @exit_code = exit_code
     end
     def self.ad_hoc(host,message,exit_code)
-      new(host,'',message,nil,nil,exit_code)
+      new(host,'',message,nil,exit_code)
+    end
+    def combined
+      "#{stdout}#{stderr}"
     end
     def explicit_empty(s)
       (s == '') ? "<empty>" : s
@@ -40,7 +42,7 @@ class Action
       :port                  => 22,
       :user_known_hosts_file => "#{usr_home}/.ssh/known_hosts"
     }
-    result = Result.new(host,args,'','','',0)
+    result = Result.new(host,args,'','',0)
     if $dry_run
       puts "#{host}: #{self.class}(#{args.inspect})"
     else

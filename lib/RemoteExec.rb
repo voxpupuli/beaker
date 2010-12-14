@@ -11,18 +11,9 @@ class RemoteExec < Action
           channel.exec(cmd) do |ch, success|
             abort "FAILED: couldn't execute command (ssh.channel.exec failure)" unless success
           end 
-          channel.on_data do |ch, data|  # stdout
-            result.stdout << data
-            result.combined << data
-          end
-          channel.on_extended_data do |ch, type, data|
-            next unless type == 1  # only handle stderr
-            result.stderr << data
-	    result.combined << data
-          end
-          channel.on_request("exit-status") do |ch, data|
-            result.exit_code = data.read_long
-          end
+          channel.on_data { |ch, data| result.stdout << data }
+          channel.on_extended_data { |ch, type, data| result.stderr << data if type == 1 }
+          channel.on_request("exit-status") { |ch, data| result.exit_code = data.read_long }
         end
       end
     }
