@@ -43,13 +43,5 @@ puts "Cleaning host is config #{options[:config]}" if options[:config]
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
-test_name="Clean Hosts"
-# clean up on each host
-config["HOSTS"].each_key do|host|
-  BeginTest.new(host, test_name)
-  runner = RemoteExec.new(host)
-  result = runner.do_remote("rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs")
-  result.log(test_name)
-end
+TestWrapper.new(config).clean_hosts
 
-exit

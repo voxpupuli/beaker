@@ -17,15 +17,3 @@ def puppet_version
   end
   return version
 end
-
-
-# clean up on each host
-def clean_hosts(config)
-  test_name="Clean Hosts"
-  config["HOSTS"].each_key do|host|
-    BeginTest.new(host, test_name)
-    runner = RemoteExec.new(host)
-    result = runner.do_remote("rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs")
-    result.log(test_name)
-  end
-end

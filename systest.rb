@@ -156,11 +156,11 @@ system("rake dist")
 # Add Puppet version to config
 config["CONFIG"]["puppetver"]=puppet_version
 
-# Clean-up old install
-clean_hosts(config) if options[:mrpropper]
-
-# SCP updated test code to nodes
-TestWrapper.new(config).prep_nodes if options[:dist]
+if options[:mrpropper] || options[:dist]
+  prepper = TestWrapper.new(config)
+  prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
+  prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
+end
 
 test_list(File.join($work_dir,options[:tests])).each do |path|
   if /\d.*_(\w.*)\.rb$/ =~ path then             # parse the filename for class to call
