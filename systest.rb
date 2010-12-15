@@ -139,7 +139,11 @@ test_summary={}           # hash to save test results
 options=parse_args
 options[:tests] ||= 'tests'
 puts "Executing tests in #{options[:tests]}"
-puts "Using Config #{options[:config]}" if options[:config]
+if options[:config]
+  puts "Using Config #{options[:config]}"
+else
+  fail "Argh!  There is no default for Config, specify one!"
+end
 
 # Setup logging
 log_dir = setup_logs(start_time, options[:config])
