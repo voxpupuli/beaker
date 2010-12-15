@@ -62,6 +62,12 @@ def parse_args
       options[:dist] = TRUE
     end
 
+    options[:stdout] = FALSE
+    opts.on('-s', '--stdout', 'log output to STDOUT') do
+      puts "Will log to STDOUT, not files..."
+      options[:stdout] = TRUE
+    end
+
     opts.on( '-h', '--help', 'Display this screen' ) do
       puts opts
       exit
@@ -71,10 +77,14 @@ def parse_args
   return options
 end
 
-def summarize(test_summary, time, config)
-  sum_log = File.new("summary.txt", "w")
-  $stdout = sum_log     # switch to logfile for output
-  $stderr = sum_log
+def summarize(test_summary, time, config, to_stdout)
+  if to_stdout then
+    puts "\n\n"
+  else
+    sum_log = File.new("summary.txt", "w")
+    $stdout = sum_log     # switch to logfile for output
+    $stderr = sum_log
+  end
   puts "Test Pass Started: #{time}"
   puts
   puts "- Host Configuration Summary -" 
@@ -107,7 +117,7 @@ def summarize(test_summary, time, config)
       puts "  Test Case #{test} reported: #{result}"
     end
   end
-  sum_log.close
+  to_stdout or sum_log.close
 end
 
 #
@@ -146,7 +156,9 @@ else
 end
 
 # Setup logging
-log_dir = setup_logs(start_time, options[:config])
+if ! options[:stdout] then
+  log_dir = setup_logs(start_time, options[:config])
+end
 
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
@@ -178,9 +190,12 @@ end
 
 
 # Dump summary of test results
-summarize(test_summary, start_time, config)
-log_dir.close
-$stdout = org_stdout
+summarize(test_summary, start_time, config, options[:stdout])
+
+if ! options[:stdout] then
+  log_dir.close
+  $stdout = org_stdout
+end
 
 ## Back to our top level dir
 FileUtils.cd($work_dir)
