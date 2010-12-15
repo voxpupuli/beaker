@@ -1,3 +1,5 @@
 
 step "Validate Facter Install"
-on hosts, "/opt/puppet/bin/facter --version"
+hosts.each { |host|
+  on host,"#{host['puppetbinpath']}/facter --version"
+}

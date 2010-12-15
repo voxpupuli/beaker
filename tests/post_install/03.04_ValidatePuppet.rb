@@ -1,3 +1,5 @@
 
-step "Validate Ruby Install"
-on hosts,"/opt/puppet/bin/puppet --version"
+step "Validate Puppet Install"
+hosts.each { |host|
+  on host,"#{host['puppetbinpath']}/puppet --version"
+}

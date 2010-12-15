@@ -1,7 +1,25 @@
 class TestWrapper
+  class Host
+    def initialize(name,overrides,defaults)
+      @name,@overrides,@defaults = name,overrides,defaults
+    end
+    def []=(k,v)
+      @overrides[k] = v
+    end
+    def [](k)
+      @overrides.has_key?(k) ? @overrides[k] : @defaults[k]
+    end
+    def to_str
+      @name
+    end
+    def to_s
+      @name
+    end
+  end
   attr_reader :config, :path, :fail_flag, :usr_home
   def initialize(config,path=nil)
-    @config = config
+    @config = config['CONFIG']
+    @hosts  = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @path = path
     @fail_flag = 0
     @usr_home = ENV['HOME']
@@ -25,22 +43,18 @@ class TestWrapper
   # Identify hosts
   #
   def hosts(desired_role=nil)
-    config["HOSTS"].
-      keys.
-      select { |host| 
-        desired_role.nil? or config["HOSTS"][host]['roles'].any? { |role| role =~ desired_role }
-      }
+    @hosts.select { |host| desired_role.nil? or host['roles'].include?(desired_role) }
   end
   def agents
-    hosts /agent/
+    hosts 'agent'
   end
   def master
-    masters = hosts /master/
+    masters = hosts 'master'
     fail "There must be exactly one master" unless masters.length == 1
     masters.first
   end
   def dashboard
-    dashboards = hosts /dashboard/
+    dashboards = hosts 'dashboard'
     fail "There must be exactly one dashboard" unless dashboards.length == 1
     dashboards.first
   end

@@ -1,3 +1,5 @@
 
 step "Validate Gem Install"
-on hosts,"/opt/puppet/bin/gem --version"
+hosts.each { |host|
+  on host,"#{host['puppetbinpath']}/gem --version"
+}

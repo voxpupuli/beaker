@@ -1,25 +1,18 @@
 # Puppet Installer
 # Run installer w/answer files
 
-version=config["CONFIG"]["puppetver"]
 
 step "Install Puppet"
 
 hosts.each do |host|
-  role_agent=false
-  role_master=false
-  role_dashboard=false
+  version        = host["puppetver"]
+  role_agent     = host['roles'].include? 'agent'
+  role_master    = host['roles'].include? 'master'
+  role_dashboard = host['roles'].include? 'dashboard'
 
   # What platform is this host?
-  dist_dir="puppet-enterprise-#{version}-rhel-5-x86_64" if   ( /RHEL5-64/ =~ @config["HOSTS"][host]['platform'] )
-  dist_dir="puppet-enterprise-#{version}-centos-5-x86_64" if ( /CENT5-64/ =~ @config["HOSTS"][host]['platform'] )
-
-  # What role(s) does this node serve?
-  config["HOSTS"][host]['roles'].each do |role|
-    role_agent=true if role =~ /agent/
-    role_master=true if role =~ /master/
-    role_dashboard=true if role =~ /dashboard/
-  end 
+  dist_dir="puppet-enterprise-#{version}-rhel-5-x86_64"   if /RHEL5-64/ =~ host['platform']
+  dist_dir="puppet-enterprise-#{version}-centos-5-x86_64" if /CENT5-64/ =~ host['platform']
 
   q_script = case
     when (role_agent  && !role_dashboard); "q_agent_only.sh"

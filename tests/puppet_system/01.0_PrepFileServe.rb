@@ -1,12 +1,5 @@
 
-file_count=10  # Default files to create
-
-# parse config file for file count
-@config["CONFIG"].each_key do|cfg|
-  if cfg =~ /filecount/ then              # if the config hash key is filecount
-    file_count = @config["CONFIG"][cfg]	  # then filecount value is num of files to create
-  end
-end
+file_count = config['filecount'] || 10  # Default files to create
 
 puts "Creating #{file_count} files"
 
