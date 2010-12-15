@@ -117,12 +117,44 @@ class TestWrapper
   def stderr
     result.stderr
   end
+  def exit_code
+    result.exit_code
+  end
   #
   # Macros
   #
+  def with_env(*args)
+    lib  = [config['puppet'] + '/lib', config['facter'] + '/lib'].join(':')
+    path = [config['puppet'] + '/bin', config['facter'] + '/bin'].join(':') + ':$PATH'
+    env  = "env RUBYLIB=\"#{lib}\" PATH=\"#{path}\""
+
+    cmd = "#{env} #{args.join(' ')}"
+    return cmd
+  end
+
+  def facter(host, *args)
+    on host, with_env('facter', *args)
+  end
+
+  def puppet(host, action, *extra, &block)
+    args    = ["--vardir=/tmp", "--confdir=/tmp", "--ssldir=/tmp"]
+    options = {}
+    while extra.length > 0 do
+      if extra[0].is_a? Symbol then
+        options[ extra.shift ] = extra.shift
+      elsif extra[0].is_a? Hash then
+        options.merge!(extra.shift)
+      else
+        args << extra.shift
+      end
+    end
+
+    on(host, with_env("puppet", action.to_s, *args), options, &block)
+  end
+
   def run_manifest(host,manifest,*extra,&block)
-    on(host, "puppet agent --verbose #{extra.join(' ')}",
-       :stdin => manifest, &block)
+    puppet(host, :apply, "--verbose",
+           :stdin => manifest + "\n", *extra, &block)
   end
 
   def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
