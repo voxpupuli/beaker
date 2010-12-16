@@ -81,7 +81,7 @@ class TestWrapper
     else
       BeginTest.new(host, step_name) unless options[:silent]
       runner = RemoteExec.new(host)
-      @result = runner.do_remote(command)
+      @result = runner.do_remote(command, options[:stdin])
       if block_given? then
         yield                   # ...and delegate checking to the caller
       else
