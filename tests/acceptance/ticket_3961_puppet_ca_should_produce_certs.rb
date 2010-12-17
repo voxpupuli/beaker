@@ -16,8 +16,6 @@ step "removing the SSL scratch directory..."
 on agents, "rm -rf #{scratch}"
 step "generate a certificate in #{scratch}"
 puppet(agents, :cert, '--trace', '--generate', target, *args) do
-  exit_code == 0 or fail_test("puppet cert returned a non-zero exit code")
-
   expect.each do |line|
     stdout.index(line) or fail_test("missing line in output: #{line}")
   end

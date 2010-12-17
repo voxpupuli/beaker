@@ -17,7 +17,6 @@ include foo
 PP
 
 run_manifest(agents, manifest) do
-  exit_code == 0 or fail_test("bad exit code")
   stdout =~ /notice.*?Foo::Do_notify.*?a_message_for_you/ or
     fail_test("the notification didn't show up in stdout")
 end

@@ -9,6 +9,5 @@ test_name "#4233: resource with a newline"
 # Look for the line in the output and fail the test
 # if we find it.
 run_manifest(agents, 'exec { \'/bin/echo -e "\nHello World\n"\': }') do
-  exit_code == 0 or fail_test('wrong exit code')
-  stdout =~ /^err:/ and fail_test("error report in output, sorry")
+  stdout =~ /err:/ and fail_test("error report in output, sorry")
 end

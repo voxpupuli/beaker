@@ -13,7 +13,6 @@ include parent::child
 '
 
 run_manifest(agents, manifest) do
-  exit_code == 0 or fail_test("bad exit code")
   stdout =~ /notice: parent array element/ or fail_test("parent missing")
   stdout =~ /notice: child array element/  or fail_test("child missing")
 end

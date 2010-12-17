@@ -131,6 +131,9 @@ class TestWrapper
     elsif command.is_a? Array
       command.each { |cmd| on host, cmd, options, &block }
     else
+      # Set our default options.
+      options = { :rc => 0 }.merge(options)
+
       BeginTest.new(host, step_name) unless options[:silent]
 
       if $dry_run then
@@ -140,13 +143,16 @@ class TestWrapper
         @result = host.exec(command, options[:stdin])
       end
 
-      # ...and handle the result.
-      if block_given? then
-        yield                   # ...and delegate checking to the caller
-      else
-        result.log(step_name) unless options[:silent]
-        @fail_flag+=result.exit_code unless options[:silent]
+      # Check the exit code is what is permitted.
+      unless options[:silent] then
+        result.log(step_name)
+        @fail_flag += 1 unless Array(options[:rc]).include?(result.exit_code)
       end
+
+      # Also, let additional checking be performed by the caller.
+      yield if block_given?
+
+      return @result
     end
   end
 
