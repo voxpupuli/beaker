@@ -11,4 +11,4 @@ tmp_result = begin
     puts "Got socket error (#{se.class}): #{se}"
   end
 @fail_flag += 1 unless tmp_result
-Action::Result.ad_hoc(master, nil, @fail_flag).log(step_name)
+Result.ad_hoc(master, nil, @fail_flag).log(step_name)
