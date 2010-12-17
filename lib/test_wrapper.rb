@@ -1,8 +1,6 @@
 class TestWrapper
   class Host
     # A cache for active SSH connections to our execution nodes.
-    @@ssh = {}
-
     def initialize(name, overrides, defaults)
       @name,@overrides,@defaults = name,overrides,defaults
     end
@@ -27,10 +25,10 @@ class TestWrapper
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
     def ssh
-      @@ssh[@name] ||= Net::SSH.start(@name, "root", @defaults['ssh'])
+      @ssh ||= Net::SSH.start(self, "root", self['ssh'])
     end
 
-    def exec (command, stdin)
+    def exec(command, stdin)
       result = Result.new(@name, command, '', '', 0)
 
       ssh.open_channel do |channel|
