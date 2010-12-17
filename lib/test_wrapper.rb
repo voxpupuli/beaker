@@ -67,26 +67,28 @@ class TestWrapper
     @step_lable = lable
   end
   def test_name(name)
-   step name
+    step name
   end
   #
   # Basic operations
   #
   attr_reader :result
-  def on(host,command,options={})
+  def on(host,command,options={},&block)
     if host.is_a? Array
-      host.each { |h| on h,command,options }
+      host.each { |h| on h, command, options, &block }
     elsif command.is_a? Array
-      command.each { |cmd| on host,cmd,options }
-    elsif command =~ /\n/
-      on host,command.split(/\n/).collect { |l| l.strip.chomp }.reject { |l| l.empty? },options
+      command.each { |cmd| on host, cmd, options, &block }
     else
       BeginTest.new(host, step_name) unless options[:silent]
       runner = RemoteExec.new(host)
       @result = runner.do_remote(command)
-      result.log(step_name) unless options[:silent]
-      @fail_flag+=result.exit_code unless options[:silent]
-     end
+      if block_given? then
+        yield                   # ...and delegate checking to the caller
+      else
+        result.log(step_name) unless options[:silent]
+        @fail_flag+=result.exit_code unless options[:silent]
+      end
+    end
   end
   def scp_to(host,from_path,to_path,options={})
     if host.is_a? Array
@@ -118,6 +120,11 @@ class TestWrapper
   #
   # Macros
   #
+  def run_manifest(host,manifest,*extra,&block)
+    on(host, "puppet agent --verbose #{extra.join(' ')}",
+       :stdin => manifest, &block)
+  end
+
   def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }
