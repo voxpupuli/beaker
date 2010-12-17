@@ -32,21 +32,12 @@ class Action
     end
   end
 
-  def do_action(*args)	
-    usr_home=ENV['HOME']
-    options={
-      :config                => false,
-      :paranoid              => false,
-      :auth_methods          => ["publickey"],
-      :keys                  => ["#{usr_home}/.ssh/id_rsa"],
-      :port                  => 22,
-      :user_known_hosts_file => "#{usr_home}/.ssh/known_hosts"
-    }
+  def do_action(*args)
     result = Result.new(host,args,'','',0)
     if $dry_run
       puts "#{host}: #{self.class}(#{args.inspect})"
     else
-      yield result,options
+      yield result
     end
     result
   end

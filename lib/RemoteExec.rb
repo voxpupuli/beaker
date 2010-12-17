@@ -5,8 +5,8 @@ require 'lib/action'
 
 class RemoteExec < Action
   def do_remote(cmd, stdin = '')
-    do_action(cmd) do |result,options|
-      host.exec(cmd, options) do |ch|
+    do_action(cmd) do |result|
+      host.exec(cmd) do |ch|
         ch.on_data { |ch, data| result.stdout << data }
         ch.on_extended_data { |ch, type, data| result.stderr << data if type == 1 }
         ch.on_request("exit-status") { |ch, data|

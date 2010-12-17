@@ -163,6 +163,18 @@ end
 # Read config file
 config = YAML.load(File.read(File.join($work_dir,options[:config])))
 
+# Merge our default SSH options into the configuration.
+ssh = {
+  :config                => false,
+  :paranoid              => false,
+  :auth_methods          => ["publickey"],
+  :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
+  :port                  => 22,
+  :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts"
+}
+ssh.merge! config['CONFIG']['ssh'] if config['CONFIG']['ssh']
+config['CONFIG']['ssh'] = ssh
+
 # Generate installer answers files based on config
 gen_answer_files(config)
 

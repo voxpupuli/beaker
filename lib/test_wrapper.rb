@@ -3,7 +3,7 @@ class TestWrapper
     # A cache for active SSH connections to our execution nodes.
     @@ssh = {}
 
-    def initialize(name,overrides,defaults)
+    def initialize(name, overrides, defaults)
       @name,@overrides,@defaults = name,overrides,defaults
     end
     def []=(k,v)
@@ -22,8 +22,11 @@ class TestWrapper
     # Wrap up the SSH connection process; this will cache the connection and
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
-    def exec (command, options={})
-      ssh = @@ssh[@name] ||= Net::SSH.start(@name, "root", options)
+    def ssh
+      @@ssh[@name] ||= Net::SSH.start(@name, "root", @defaults['ssh'])
+    end
+
+    def exec (command)
       ssh.open_channel do |channel|
         channel.exec(command) do |terminal, success|
           abort "FAILED: to execute command on a new channel on #{@name}" unless success
@@ -33,6 +36,13 @@ class TestWrapper
       # Process SSH activity until we stop doing that - which is when our
       # channel is finished with...
       ssh.loop
+    end
+
+    def scp
+      # This just makes available an scp channel available on the current login.
+      scp = ssh.scp
+      yield scp if block_given?
+      scp
     end
   end
 
