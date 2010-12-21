@@ -28,45 +28,50 @@ class TestWrapper
       @ssh ||= Net::SSH.start(self, "root", self['ssh'])
     end
 
-    def exec(command, stdin)
-      result = Result.new(@name, command, '', '', 0)
-
-      ssh.open_channel do |channel|
-        channel.exec(command) do |terminal, success|
-          abort "FAILED: to execute command on a new channel on #{@name}" unless success
-
-          terminal.on_data { |ch, data|
-            result.stdout << data
-          }
-          terminal.on_extended_data { |ch, type, data|
-            result.stderr << data if type == 1
-          }
-          terminal.on_request("exit-status") { |ch, data|
-            result.exit_code = data.read_long
-          }
-
-          # queue stdin data, force it to packets, and signal eof: this
-          # triggers action in many remote commands, notably including
-          # 'puppet apply'.  It must be sent at some point before the rest
-          # of the action.
-          terminal.send_data(stdin.to_s)
-          terminal.process
-          terminal.eof!
-        end
+    def do_action(verb,*args)
+      result = Result.new(self,args,'','',0)
+      if $dry_run
+        puts "#{self}: #{verb}(#{args.inspect})"
+      else
+        yield result
       end
-      # Process SSH activity until we stop doing that - which is when our
-      # channel is finished with...
-      ssh.loop
-
-      # ...and return our results.
-      return result
+      result
     end
 
-    def scp
-      # This just makes available an scp channel available on the current login.
-      scp = ssh.scp
-      yield scp if block_given?
-      scp
+
+    def exec(command, stdin)
+      do_action('RemoteExec',command) { |result|
+        ssh.open_channel do |channel|
+          channel.exec(command) do |terminal, success|
+            abort "FAILED: to execute command on a new channel on #{@name}" unless success
+            terminal.on_data                   { |ch, data|       result.stdout << data }
+            terminal.on_extended_data          { |ch, type, data| result.stderr << data if type == 1 }
+            terminal.on_request("exit-status") { |ch, data|       result.exit_code = data.read_long  }
+
+            # queue stdin data, force it to packets, and signal eof: this
+            # triggers action in many remote commands, notably including
+            # 'puppet apply'.  It must be sent at some point before the rest
+            # of the action.
+            terminal.send_data(stdin.to_s)
+            terminal.process
+            terminal.eof!
+          end
+        end
+        # Process SSH activity until we stop doing that - which is when our
+        # channel is finished with...
+        ssh.loop
+      }
+    end
+
+    def do_scp(source, target)
+      do_action("ScpFile",source,target) { |result|
+        # Net::Scp always returns 0, so just set the return code to 0 Setting
+        # these values allows reporting via result.log(test_name)
+        result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
+        result.stderr=nil
+        result.exit_code=0
+        ssh.scp.upload!(source, target)
+      }
     end
   end
 
@@ -134,21 +139,15 @@ class TestWrapper
       command.each { |cmd| on host, cmd, options, &block }
     else
       # Set our default options.
-      options = { :rc => 0 }.merge(options)
+      options = { :rc => [0] }.merge(options)
 
       BeginTest.new(host, step_name) unless options[:silent]
 
-      if $dry_run then
-        @result = Result.new(host, command, '', '', 0)
-        puts "#{host}: #{command} skipped..."
-      else
-        @result = host.exec(command, options[:stdin])
-      end
+      @result = host.exec(command, options[:stdin])
 
-      # Check the exit code is what is permitted.
       unless options[:silent] then
         result.log(step_name)
-        @fail_flag += 1 unless Array(options[:rc]).include?(result.exit_code)
+        @fail_flag += 1 unless options[:rc].include?(exit_code)
       end
 
       # Also, let additional checking be performed by the caller.
@@ -158,10 +157,14 @@ class TestWrapper
     end
   end
 
-  def scp_to(hosts, source, target)
-    Array(hosts).each do |host|
-      puts "transfer #{source} to #{host}:#{target}"
-      host.scp.upload!(source, target)
+  def scp_to(host,from_path,to_path,options={})
+    if host.is_a? Array
+      host.each { |h| scp_to h,from_path,to_path,options }
+    else
+      BeginTest.new(host, step_name)
+      @result = host.do_scp(from_path, to_path)
+      result.log(step_name)
+      @fail_flag+=result.exit_code
     end
   end
 
