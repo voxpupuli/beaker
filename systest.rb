@@ -191,7 +191,7 @@ if options[:mrpropper] || options[:dist]
 end
 
 test_list(File.join($work_dir,options[:tests])).each do |path|
-  name = File.basename(path, '.rb')
+  name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
   puts "", "", "#{name} executing..."
   result = TestWrapper.new(config,path).run_test
   puts "#{name} returned: #{result.fail_flag}"
