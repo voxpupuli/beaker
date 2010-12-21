@@ -16,7 +16,7 @@ class foo {
 include foo
 PP
 
-run_manifest(agents, manifest) do
+apply_manifest_on(agents, manifest) do
   stdout =~ /notice.*?Foo::Do_notify.*?a_message_for_you/ or
     fail_test("the notification didn't show up in stdout")
 end

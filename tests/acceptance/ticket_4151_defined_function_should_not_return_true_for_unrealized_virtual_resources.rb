@@ -14,8 +14,8 @@ test_name "#4151: defined function should not return true for unrealized virtual
 # be an error since Notify["goodbye"] will require a resource which has
 # not been realized.
 
-run_manifest agents, '
-@notify { "hello": }
-if (defined(Notify["hello"])) { $requires = [ Notify["hello"] ] }
-notify { "goodbye": require => $requires }
-'
+apply_manifest_on agents, %q{
+    @notify { "hello": }
+    if (defined(Notify["hello"])) { $requires = [ Notify["hello"] ] }
+    notify { "goodbye": require => $requires }
+}

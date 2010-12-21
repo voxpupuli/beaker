@@ -10,7 +10,7 @@ step "ensure we are clean before testing..."
 on agents, "rm -f #{filename}"
 
 step "run the manifest itself"
-run_manifest(agents, manifest) do
+apply_manifest_on(agents, manifest) do
   fail_test "the expected notice of action was missing" unless
     stdout.index 'File[/tmp/hello-world.txt]/ensure: defined content as'
 end

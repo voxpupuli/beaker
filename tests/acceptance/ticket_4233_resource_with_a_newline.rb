@@ -8,6 +8,6 @@ test_name "#4233: resource with a newline"
 # and 2.6.0 final to not return an error line.
 # Look for the line in the output and fail the test
 # if we find it.
-run_manifest(agents, 'exec { \'/bin/echo -e "\nHello World\n"\': }') do
+apply_manifest_on(agents, 'exec { \'/bin/echo -e "\nHello World\n"\': }') do
   stdout =~ /err:/ and fail_test("error report in output, sorry")
 end

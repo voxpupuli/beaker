@@ -8,14 +8,14 @@
 # Stage[main] -> Stage[last]
 # works as expected
 
-run_manifest agents, <<PP
-stage { [ "pre", "post" ]: }
-Stage["pre"] -> Stage["main"] -> Stage["post"]
-class one   { notify { "class one, first stage":   } }
-class two   { notify { "class two, second stage":  } }
-class three { notify { "class three, third stage": } }
-class { "one": stage => pre }
-class { "two": }
-class { "three": stage => post }
-PP
+apply_manifest_on agents, %q{
+  stage { [ "pre", "post" ]: }
+  Stage["pre"] -> Stage["main"] -> Stage["post"]
+  class one   { notify { "class one, first stage":   } }
+  class two   { notify { "class two, second stage":  } }
+  class three { notify { "class three, third stage": } }
+  class { "one": stage => pre }
+  class { "two": }
+  class { "three": stage => post }
+}
 

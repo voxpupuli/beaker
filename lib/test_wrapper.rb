@@ -196,9 +196,9 @@ class TestWrapper
     end
   end
 
-  def puppet(host, action, *extra, &block)
+  def run_puppet_on(host, action, *extra, &block)
     if host.is_a? Array
-      host.each { |h| puppet h, action, *extra, &block }
+      host.each { |h| run_puppet_on h, action, *extra, &block }
     else
       args    = ["--vardir=/tmp", "--confdir=/tmp", "--ssldir=/tmp"]
       options = {}
@@ -216,8 +216,12 @@ class TestWrapper
     end
   end
 
-  def run_manifest(host,manifest,*extra,&block)
-    puppet(host, :apply, "--verbose", :stdin => manifest + "\n", *extra, &block)
+  def apply_manifest_on(host,manifest,*extra,&block)
+    run_puppet_on(host, :apply, "--verbose", :stdin => manifest + "\n", *extra, &block)
+  end
+
+  def run_puppet_master_on(host,*extra,&block)
+    run_puppet_on(host, :master,*extra,&block)
   end
 
   def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
@@ -232,6 +236,7 @@ class TestWrapper
       on host,"puppet agent #{options}"
     end
   end
+
   def prep_nodes
     step "Copy ptest.tgz executables to all hosts"
     scp_to hosts,"#{$work_dir}/dist/ptest.tgz", "/"

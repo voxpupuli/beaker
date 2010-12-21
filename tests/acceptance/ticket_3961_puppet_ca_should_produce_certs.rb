@@ -14,8 +14,9 @@ expect = ['notice: Signed certificate request for ca',
 
 step "removing the SSL scratch directory..."
 on agents, "rm -rf #{scratch}"
+
 step "generate a certificate in #{scratch}"
-puppet(agents, :cert, '--trace', '--generate', target, *args) do
+run_puppet_on(agents,:cert,'--trace', '--generate', target, *args) do
   expect.each do |line|
     stdout.index(line) or fail_test("missing line in output: #{line}")
   end
