@@ -138,16 +138,13 @@ class TestWrapper
     elsif command.is_a? Array
       command.each { |cmd| on host, cmd, options, &block }
     else
-      # Set our default options.
-      options = { :rc => [0] }.merge(options)
-
       BeginTest.new(host, step_name) unless options[:silent]
 
       @result = host.exec(command, options[:stdin])
 
       unless options[:silent] then
         result.log(step_name)
-        @fail_flag += 1 unless options[:rc].include?(exit_code)
+        @fail_flag += 1 unless (options[:acceptable_exit_codes] || [0]).include?(exit_code)
       end
 
       # Also, let additional checking be performed by the caller.
