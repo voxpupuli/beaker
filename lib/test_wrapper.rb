@@ -16,6 +16,9 @@ class TestWrapper
     def to_s
       @name
     end
+    def +(other)
+      @name+other
+    end
 
     def puppet_env
       %Q{env RUBYLIB="#{self['puppetlibdir']||''}:#{self['facterlibdir']||''}" PATH="#{self['puppetbindir']||''}:#{self['facterbindir']||''}:$PATH"}
