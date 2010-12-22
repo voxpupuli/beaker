@@ -9,7 +9,7 @@ test_name "#4289: facter should recognize OEL operatingsystemrelease"
 
 # REVISIT: We don't actually have support for this yet - we need a "not
 # applicable" option, I guess, that can be based on detected stuff, which is
-# cleaner than this is...
+# cleaner than this is... --daniel 2010-12-22
 agents.each do |host|
   step "determine the operating system of #{host}"
   facter host, "operatingsystem"

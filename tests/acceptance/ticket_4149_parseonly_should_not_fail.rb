@@ -13,6 +13,6 @@ apply_manifest_on agents,'class someclass { notify("hello, world") }', '--parseo
 # REVISIT: This tests the current behaviour, which is IMO not actually the
 # correct behaviour.  On the other hand, if we change this we might
 # unexpectedly break things out in the wild, so better to be warned than to be
-# surprised by it.
+# surprised by it. --daniel 2010-12-22
 step "test with a class with an invalid attribute"
 apply_manifest_on agents, 'file { "/tmp/whatever": fooble => 1 }', '--parseonly'
