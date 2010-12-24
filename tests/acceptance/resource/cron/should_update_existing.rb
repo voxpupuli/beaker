@@ -1,7 +1,7 @@
 test_name "puppet should update existing crontab entry"
 
-tmpuser = "cron-test-#{$$}"
-tmpfile = "/tmp/cron-test-#{$$}"
+tmpuser = "cron-test-#{Time.new.to_i}"
+tmpfile = "/tmp/cron-test-#{Time.new.to_i}"
 
 cron = '# Puppet Name: crontest\n* * * * * /bin/true\n'
 

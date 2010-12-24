@@ -1,7 +1,7 @@
 test_name "puppet should remove a crontab entry based on command matching"
 
-tmpuser = "cron-test-#{$$}"
-tmpfile = "/tmp/cron-test-#{$$}"
+tmpuser = "cron-test-#{Time.new.to_i}"
+tmpfile = "/tmp/cron-test-#{Time.new.to_i}"
 
 cron = '# Puppet Name: crontest\n* * * * * /bin/true\n1 1 1 1 1 /bin/true\n'
 

@@ -1,6 +1,6 @@
 test_name "puppet apply should create a file and report an MD5"
 
-file = "/tmp/hello.world.#{$$}.txt"
+file = "/tmp/hello.world.#{Time.new.to_i}.txt"
 manifest = "file{'#{file}': content => 'test'}"
 
 step "clean up #{file} for testing"

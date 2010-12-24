@@ -13,7 +13,7 @@ expect = ['notice: Signed certificate request for ca',
 
 
 step "removing the SSL scratch directory..."
-on agents, "rm -rf #{scratch}"
+on agents, "rm -vrf #{scratch}"
 
 step "generate a certificate in #{scratch}"
 run_puppet_on(agents,:cert,'--trace', '--generate', target, *args) do

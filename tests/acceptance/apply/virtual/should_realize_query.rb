@@ -1,6 +1,6 @@
 test_name "should realize query"
-out  = "/tmp/hosts-#{$$}"
-name = "test-#{$$}-host"
+out  = "/tmp/hosts-#{Time.new.to_i}"
+name = "test-#{Time.new.to_i}-host"
 
 manifest = %Q{
   @host { '#{name}':

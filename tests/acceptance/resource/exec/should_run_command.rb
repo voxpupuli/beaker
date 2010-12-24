@@ -1,7 +1,7 @@
 test_name "tests that puppet correctly runs an exec."
 # original author: Dan Bode  --daniel 2010-12-23
 
-$touch = "/tmp/test-exec-#{$$}"
+$touch = "/tmp/test-exec-#{Time.new.to_i}"
 
 def before
     step "file to be touched should not exist."

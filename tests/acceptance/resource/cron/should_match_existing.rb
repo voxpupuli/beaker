@@ -1,7 +1,7 @@
 test_name "cron resource should match existing"
 
-tmpuser = "cron-test-#{$$}"
-tmpfile = "/tmp/cron-test-#{$$}"
+tmpuser = "cron-test-#{Time.new.to_i}"
+tmpfile = "/tmp/cron-test-#{Time.new.to_i}"
 
 create_user = "user { '#{tmpuser}': ensure => present, managehome => false }"
 delete_user = "user { '#{tmpuser}': ensure => absent,  managehome => false }"

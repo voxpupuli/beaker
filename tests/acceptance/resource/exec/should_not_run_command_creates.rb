@@ -1,10 +1,10 @@
 test_name "should not run command creates"
 
-touch      = "/tmp/touched-#{$$}"
-donottouch = "/tmp/not-touched-#{$$}"
+touch      = "/tmp/touched-#{Time.new.to_i}"
+donottouch = "/tmp/not-touched-#{Time.new.to_i}"
 
 manifest = %Q{
-  exec { "test#{$$}": command => '/bin/touch #{donottouch}', creates => "#{touch}"}
+  exec { "test#{Time.new.to_i}": command => '/bin/touch #{donottouch}', creates => "#{touch}"}
 }
 
 step "prepare the agents for the test"
@@ -23,7 +23,7 @@ step "prepare the agents for the second part of the test"
 on agents, "touch #{touch} ; rm -f #{donottouch}"
 
 step "test using puppet resource"
-run_puppet_on(agents, :resource, 'exec', "test#{$$}",
+run_puppet_on(agents, :resource, 'exec', "test#{Time.new.to_i}",
               "command='/bin/touch #{donottouch}'",
               "creates='#{touch}'") do
     fail_test "looks like the thing executed, which it shouldn't" if
