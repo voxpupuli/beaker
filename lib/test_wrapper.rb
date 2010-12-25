@@ -28,7 +28,7 @@ class TestWrapper
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
     def ssh
-      @ssh ||= Net::SSH.start(self, "root", self['ssh'])
+      @ssh ||= Net::SSH.start(self, self['user'] || "root" , self['ssh'])
     end
 
     def do_action(verb,*args)
@@ -40,7 +40,6 @@ class TestWrapper
       end
       result
     end
-
 
     def exec(command, stdin)
       do_action('RemoteExec',command) { |result|
