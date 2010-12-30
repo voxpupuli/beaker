@@ -77,13 +77,13 @@ while getopts  "hgsp:v:lrf:i:c" flag; do
         vmimages=`cat ${OPTARG}`
     ;;
     c)  # clean up hanging about lock files
-      /Library/Application\ Support/VMware\ Fusion/vmrun -T fusion list |  grep -c 'VMs: 1'
+      /Library/Application\ Support/VMware\ Fusion/vmrun -T fusion list |  grep -c 'VMs: 0'
       if [ $? != 0 ] ; then    # grep should rerturn non-zero as this regex should fail
         echo "VMs appear to be running.  Please stop VMs to clean lock files"
         exit 1
       else
-       echo "Cleaning lock files"
-       find . -type d -name *.lck | grep -v ajax | xargs rm -rf
+        echo "Cleaning lock files"
+        find . -type d -name *.lck | grep -v ajax | xargs rm -rf
       fi
       exit 0
     ;;
