@@ -36,9 +36,9 @@ def parse_args
     # Set a banner
     opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ] [-d || --dry-run]"
 
-    options[:tests] = nil
+    options[:tests] = []
     opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
-      options[:tests] = dir
+      options[:tests] << dir
     end
 
     options[:config] = nil
@@ -147,8 +147,8 @@ org_stdout = $stdout      # save stdout file descriptor
 test_summary={}           # hash to save test results
 # Parse commnand line args
 options=parse_args
-options[:tests] ||= 'tests'
-puts "Executing tests in #{options[:tests]}"
+if options[:tests].length < 1 then options[:tests] << 'tests' end
+puts "Executing tests in #{options[:tests].join(', ')}"
 if options[:config]
   puts "Using Config #{options[:config]}"
 else
@@ -190,12 +190,15 @@ if options[:mrpropper] || options[:dist]
   prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
 end
 
-test_list(File.join($work_dir,options[:tests])).each do |path|
-  name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
-  puts "", "", "#{name} executing..."
-  result = TestWrapper.new(config,path).run_test
-  puts "#{name} returned: #{result.fail_flag}"
-  test_summary[name]=result.fail_flag
+options[:tests].each do |root|
+  puts "consider #{File.join($work_dir,root)}"
+  test_list(File.join($work_dir,root)).each do |path|
+    name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
+    puts "", "", "#{name} executing..."
+    result = TestWrapper.new(config,path).run_test
+    puts "#{name} returned: #{result.fail_flag}"
+    test_summary[name]=result.fail_flag
+  end
 end
 
 
