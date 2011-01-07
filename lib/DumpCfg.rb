@@ -55,7 +55,7 @@ end
 
 # Access Config keys/values
 config["CONFIG"].each_key do|cfg|
-    puts "Config Key|Val: #{cfg} #{config["CONFIG"][cfg]}"
+    puts "Config Key|Val: #{cfg} #{config["CONFIG"][cfg].inspect}"
 end
 
 end
