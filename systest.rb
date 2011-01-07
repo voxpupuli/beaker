@@ -34,11 +34,40 @@ def parse_args
   options = {}
   optparse = OptionParser.new do|opts|
     # Set a banner
-    opts.banner = "Usage: harness.rb [-c || --config ] FILE [-t || --tests] FILE/DIR [-s || --skip-dist] [ --mrpropper ] [-d || --dry-run]"
+    opts.banner = "Usage: harness.rb [options...]"
 
     options[:tests] = []
     opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
       options[:tests] << dir
+    end
+
+    options[:type] = 'pe'
+    opts.on('--type TYPE', 'Select puppet install type (pe, git) - default "pe"') do
+      |type|
+      unless File.directory?("setup/#{type}") then
+        puts "Sorry, #{type} is not a known setup type!"
+        exit 1
+      end
+      options[:type] = type
+    end
+
+    options[:puppet] = 'git://github.com/puppetlabs/puppet.git#HEAD'
+    opts.on('-p', '--puppet URI', 'Select puppet git install URI',
+            "  #{options[:puppet]}",
+            "    - URI and revision, default HEAD",
+            "  just giving the revision is also supported"
+            ) do |value|
+      options[:type] = 'git'
+      options[:puppet] = value
+    end
+
+    options[:facter] = 'git://github.com/puppetlabs/facter.git#HEAD'
+    opts.on('-f', '--facter URI', 'Select facter git install URI',
+            "  #{options[:facter]}",
+            "    - otherwise, as per the puppet argument"
+            ) do |value|
+      options[:type] = 'git'
+      options[:facter] = value
     end
 
     options[:config] = nil
@@ -46,7 +75,7 @@ def parse_args
       options[:config] = file
     end
 
-    opts.on( '-d', '--dry-run', "Report what would be done on the targets, but don't do it." ) do |file|
+    opts.on( '-d', '--dry-run', "Just report what would be done on the targets" ) do |file|
       $dry_run = true
     end
 
@@ -139,6 +168,21 @@ def test_list(path)
   end
 end
 
+#
+# Run all tests discovered under a specific root - typically from test_list
+#
+def run_tests_under(config, options, root)
+  summary = {}
+  test_list(File.join($work_dir,root)).each do |path|
+    name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
+    puts "", "", "#{name} executing..."
+    result = TestWrapper.new(config,options,path).run_test
+    puts "#{name} returned: #{result.fail_flag}"
+    summary[name] = result.fail_flag
+  end
+  return summary
+end
+
 ###################################
 #  Main
 ###################################
@@ -190,17 +234,20 @@ if options[:mrpropper] || options[:dist]
   prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
 end
 
-options[:tests].each do |root|
-  puts "consider #{File.join($work_dir,root)}"
-  test_list(File.join($work_dir,root)).each do |path|
-    name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
-    puts "", "", "#{name} executing..."
-    result = TestWrapper.new(config,path).run_test
-    puts "#{name} returned: #{result.fail_flag}"
-    test_summary[name]=result.fail_flag
+puts '=' * 78, "Performing test setup steps", ''
+["setup/#{options[:type]}", "setup/common"].each do |root|
+  run_tests_under(config, options, root).each do |test, result|
+    unless result == 0 then
+      puts "Setup action #{test} failed, aborting"
+      exit 1
+    end
   end
 end
 
+options[:tests].each do |root|
+  puts nil, '=' * 78, nil, "Running tests from #{root}"
+  test_summary.merge! run_tests_under(config, options, root)
+end
 
 # Dump summary of test results
 summarize(test_summary, start_time, config, options[:stdout])

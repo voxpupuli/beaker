@@ -5,5 +5,6 @@ step "Validate Sign Cert"
 #
 # run_agent_on agents,"--no-daemonize --verbose --onetime --test --waitforcert 10 &"
 
-step "Puppet Master Sign Requested Agent Certs"
-on master,"puppet cert --sign #{agents.join(' ')}"
+step "Puppet Master clean and generate agent certs"
+on master,"puppet cert --clean #{agents.join(' ')}"
+on master,"puppet cert --generate #{agents.join(' ')}"

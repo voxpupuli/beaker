@@ -77,11 +77,12 @@ class TestWrapper
     end
   end
 
-  attr_reader :config, :path, :fail_flag, :usr_home
-  def initialize(config,path=nil)
-    @config = config['CONFIG']
-    @hosts  = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
-    @path = path
+  attr_reader :config, :options, :path, :fail_flag, :usr_home
+  def initialize(config,options,path=nil)
+    @config  = config['CONFIG']
+    @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
+    @options = options
+    @path    = path
     @fail_flag = 0
     @usr_home = ENV['HOME']
     #
