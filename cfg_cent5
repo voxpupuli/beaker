@@ -1,0 +1,16 @@
+HOSTS:
+  puppet:
+    roles:
+      - master
+      - dashboard
+    platform: CENT5-64
+  agent:
+    roles:
+      - agent
+    platform: CENT5-64
+CONFIG:
+  rubyver: ruby18
+  facterver: fact11
+  gemver: gem12
+  puppetbinpath: /opt/puppet/bin
+  filecount: 12
