@@ -235,7 +235,7 @@ if options[:mrpropper] || options[:dist]
 end
 
 puts '=' * 78, "Performing test setup steps", ''
-["setup/#{options[:type]}", "setup/common"].each do |root|
+["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
       puts "Setup action #{test} failed, aborting"
