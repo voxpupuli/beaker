@@ -1,7 +1,7 @@
 test_name "#4124: should list all disabled services"
 fail_test "this was 'pending' in the acceptance suite"
 
-%q{
+%q^
 
 #!/bin/bash
 
@@ -29,4 +29,4 @@ else
   exit 1
 fi
 
-}
+^

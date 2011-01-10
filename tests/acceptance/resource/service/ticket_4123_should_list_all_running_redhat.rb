@@ -1,7 +1,7 @@
 test_name "#4123: should list all running services on redhat"
 fail_test "this test was 'pending' in the acceptance suite"
 
-%q{
+%q^
 
 #!/bin/bash
 #
@@ -40,4 +40,4 @@ else
   exit 1
 fi
 
-}
+^
