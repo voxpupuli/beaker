@@ -7,13 +7,17 @@ def puppet_version
   parent_dir=""
   parent_dir=$1 if /^(\/\w.*)(\/\w.+)/ =~ $work_dir
 
-  File.open("#{parent_dir}/installer/VERSION") do |file|
-    while line = file.gets
-      if /(\w.*)/ =~ line then
-        version=$1
-        puts "Found: Puppet Version #{version}"
+  begin
+    File.open("#{parent_dir}/installer/VERSION") do |file|
+      while line = file.gets
+        if /(\w.*)/ =~ line then
+          version=$1
+          puts "Found: Puppet Version #{version}"
+        end
       end
     end
+  rescue
+    version = 'unknown'
   end
   return version
 end
