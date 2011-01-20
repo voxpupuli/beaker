@@ -6,8 +6,8 @@ step "set up the system for the test"
 on agents, "printf '127.0.0.2 test alias\n' > #{file}"
 
 step "tell puppet to ensure the host exists"
-run_puppet_on(agents, :resource, 'host', 'test', "target=#{file}",
-              'ensure=present', 'ip=127.0.0.2', 'host_aliases=alias') do
+on(agents, puppet_resource('host', 'test', "target=#{file}",
+              'ensure=present', 'ip=127.0.0.2', 'host_aliases=alias')) do
     fail_test "darn, we created the host record" if
         stdout.include? 'notice: /Host[test1]/ensure: created'
 end

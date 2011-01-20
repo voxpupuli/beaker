@@ -6,8 +6,8 @@ step "clean up the system for the test"
 on agents, "rm -f #{file}"
 
 step "invoke the exec resource with a path set"
-run_puppet_on(agents, :resource, 'exec', 'test',
-              "command='touch #{file}'", 'path="/bin:/usr/bin"')
+on(agents, puppet_resource('exec', 'test',
+              "command='touch #{file}'", 'path="/bin:/usr/bin"'))
 
 step "verify that the files were created"
 on agents, "test -f #{file}"

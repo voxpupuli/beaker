@@ -10,7 +10,7 @@ end
 cleanup(name)
 
 step "create the group #{name} with the resource agent"
-run_puppet_on(agents, :resource, 'group', name, 'ensure=present')
+on(agents, puppet_resource('group', name, 'ensure=present'))
 
 step "verify the group #{name} was created"
 on(agents, "getent group #{name}") do

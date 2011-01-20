@@ -3,7 +3,7 @@ test_name "#3961: puppet ca should produce certs spec"
 scratch = "/tmp/puppet-ssl-#3961"
 target  = "working3961.example.org"
 
-args = ["conf", "var", "ssl"].map { |s| "--#{s}dir=#{scratch}" } .join " "
+args = ["conf", "var", "ssl"].map { |s| "--#{s}dir=#{scratch}" }
 
 expect = ['notice: Signed certificate request for ca',
           'notice: Rebuilding inventory file',
@@ -16,7 +16,7 @@ step "removing the SSL scratch directory..."
 on agents, "rm -vrf #{scratch}"
 
 step "generate a certificate in #{scratch}"
-run_puppet_on(agents,:cert,'--trace', '--generate', target, *args) do
+on(agents,puppet_cert('--trace', '--generate', target, *args)) do
   expect.each do |line|
     stdout.index(line) or fail_test("missing line in output: #{line}")
   end

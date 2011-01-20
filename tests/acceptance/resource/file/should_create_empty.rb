@@ -6,7 +6,7 @@ step "clean up the system before we begin"
 on agents, "rm -vrf #{target}"
 
 step "verify we can create an empty file"
-run_puppet_on(agents, :resource, "file", target, 'ensure=present')
+on(agents, puppet_resource("file", target, 'ensure=present'))
 
 step "verify the target was created"
 on agents, "test -f #{target} && ! test -s #{target}"

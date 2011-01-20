@@ -11,8 +11,8 @@ agents.each do |host|
     apply_manifest_on host, create_user
 
     step "apply the resource on the host using puppet resource"
-    run_puppet_on(host, :resource, "cron", "crontest", "user=#{tmpuser}",
-                  "command=/bin/true", "ensure=present") do
+    on(host, puppet_resource("cron", "crontest", "user=#{tmpuser}",
+                  "command=/bin/true", "ensure=present")) do
         fail_test "didn't notice creation of the cron stuff" unless
             stdout.include? 'created'
     end

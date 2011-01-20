@@ -23,9 +23,9 @@ step "prepare the agents for the second part of the test"
 on agents, "touch #{touch} ; rm -f #{donottouch}"
 
 step "test using puppet resource"
-run_puppet_on(agents, :resource, 'exec', "test#{Time.new.to_i}",
+on(agents, puppet_resource('exec', "test#{Time.new.to_i}",
               "command='/bin/touch #{donottouch}'",
-              "creates='#{touch}'") do
+              "creates='#{touch}'")) do
     fail_test "looks like the thing executed, which it shouldn't" if
         stdout.include? 'executed successfully'
 end

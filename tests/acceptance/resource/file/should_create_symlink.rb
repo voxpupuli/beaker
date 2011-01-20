@@ -9,7 +9,7 @@ on agents, "rm -vrf #{target}"
 on agents, "echo '#{message}' > #{source}"
 
 step "verify we can create a symlink"
-run_puppet_on(agents, :resource, "file", target, "ensure=#{source}")
+on(agents, puppet_resource("file", target, "ensure=#{source}"))
 
 step "verify the symlink was created"
 on agents, "test -L #{target} && test -f #{target}"

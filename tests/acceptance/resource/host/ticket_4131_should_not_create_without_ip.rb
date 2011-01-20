@@ -9,8 +9,8 @@ step "try to create the host, which should fail"
 # REVISIT: This step should properly need to handle the non-zero exit code,
 # and #5668 has been filed to record that.  When it is fixed this test will
 # start to fail, and this comment will tell you why. --daniel 2010-12-24
-run_puppet_on(agents, :resource, 'host', 'test', "target=#{file}",
-              "host_aliases=alias") do
+on(agents, puppet_resource('host', 'test', "target=#{file}",
+              "host_aliases=alias")) do
     fail_test "puppet didn't complain about the missing attribute" unless
         stdout.include? 'ip is a required attribute for hosts'
 end

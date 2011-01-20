@@ -22,8 +22,8 @@ agents.each do |host|
     end
 
     step "apply the resource change on the host"
-    run_puppet_on(host, :resource, "cron", "crontest", "user=#{tmpuser}",
-                  "command=/bin/true", "ensure=present", "hour='0-6'") do
+    on(host, puppet_resource("cron", "crontest", "user=#{tmpuser}",
+                  "command=/bin/true", "ensure=present", "hour='0-6'")) do
         fail_test "didn't update the time as expected" unless
             stdout.include? "defined 'hour' as '0-6'"
     end

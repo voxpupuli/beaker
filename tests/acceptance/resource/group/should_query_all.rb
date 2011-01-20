@@ -9,7 +9,7 @@ agents.each do |host|
     end
 
     step "collect the list of groups on #{host} with puppet resource"
-    run_puppet_on(host, :resource, 'group') do
+    on(host, puppet_resource('group')) do
         stdout.each_line do |line|
             match = line.match(/^group \{ '([^']+)'/)
             if match then

@@ -24,7 +24,7 @@ end
 after
 
 before
-run_puppet_on(agents, :resource, '-d', 'exec', 'test', "command='/bin/touch #{$touch}'") do
+on(agents, puppet_resource('-d', 'exec', 'test', "command='/bin/touch #{$touch}'")) do
     fail_test "didn't seem to run the command" unless
         stdout.include? 'executed successfully'
 end

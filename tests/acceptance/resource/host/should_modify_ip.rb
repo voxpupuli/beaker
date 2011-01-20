@@ -6,8 +6,8 @@ step "set up files for the test"
 on agents, "printf '127.0.0.9 test alias\n' > #{file}"
 
 step "modify the resource"
-run_puppet_on(agents, :resource, 'host', 'test', "target=#{file}",
-              'ensure=present', 'ip=127.0.0.10', 'host_aliases=alias')
+on(agents, puppet_resource('host', 'test', "target=#{file}",
+              'ensure=present', 'ip=127.0.0.10', 'host_aliases=alias'))
 
 step "verify that the content was updated"
 on(agents, "cat #{file}; rm -f #{file}") do

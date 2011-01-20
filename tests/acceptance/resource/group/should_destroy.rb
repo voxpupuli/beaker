@@ -6,7 +6,7 @@ step "ensure the group exists on the target system"
 on agents, "getent group #{name} || groupadd #{name}"
 
 step "use puppet to remove the group"
-run_puppet_on agents, :resource, 'group', name, 'ensure=absent'
+on(agents, puppet_resource('group', name, 'ensure=absent'))
 
 step "verify that the group has been removed"
 # REVISIT: I /think/ that exit code 2 is standard across Linux, but I have no

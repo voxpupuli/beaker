@@ -14,8 +14,8 @@ agents.each do |host|
     on host, "printf '# Puppet Name: crontest\n* * * * * /bin/true\n' | crontab -u #{tmpuser} -"
 
     step "apply the resource on the host using puppet resource"
-    run_puppet_on(host, :resource, "cron", "crontest", "user=#{tmpuser}",
-                  "command=/bin/true", "ensure=absent") do
+    on(host, puppet_resource("cron", "crontest", "user=#{tmpuser}",
+                  "command=/bin/true", "ensure=absent")) do
         # REVISIT: This is ported from the original test, which seems to me a
         # weak test, but I don't want to improve it now.  --daniel 2010-12-23
         fail_test "didn't see the output we expected..." unless
