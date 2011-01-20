@@ -226,6 +226,10 @@ class TestWrapper
     PuppetCommand.new(:master,*args)
   end
 
+  def puppet_agent(*args)
+    PuppetCommand.new(:agent,*args)
+  end
+
   def apply_manifest_on(host,manifest,options={},&block)
     on_options = {:stdin => manifest + "\n"}
     on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
@@ -234,16 +238,16 @@ class TestWrapper
     on host, puppet_apply(*args), on_options, &block
   end
 
-  def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
+  def run_agent_on(host,arg='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }
     elsif "ticket #5541 is a pain and hasn't been fixed"
-      BeginTest.new(host, step_name) unless options[:silent]
-      2.times { on host,"puppet agent #{options}",:silent => true }
-      result.log(step_name) unless options[:silent]
-      @fail_flag+=result.exit_code unless options[:silent]
+      BeginTest.new(host, step_name)
+      2.times { on host,puppet_agent(arg),:silent => true }
+      result.log(step_name)
+      @fail_flag+=result.exit_code
     else
-      on host,"puppet agent #{options}"
+      on host,puppet_agent(arg)
     end
   end
 
