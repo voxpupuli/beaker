@@ -218,16 +218,20 @@ class TestWrapper
     PuppetCommand.new(:cert,*args)
   end
 
-  def run_puppet_on(host, action, *extra, &block)
-    on host, PuppetCommand.new(action, *extra), &block
+  def puppet_apply(*args)
+    PuppetCommand.new(:apply,*args)
   end
 
-  def apply_manifest_on(host,manifest,*extra,&block)
-    run_puppet_on(host, :apply, "--verbose", :stdin => manifest + "\n", *extra, &block)
+  def puppet_master(*args)
+    PuppetCommand.new(:master,*args)
   end
 
-  def run_puppet_master_on(host,*extra,&block)
-    run_puppet_on(host, :master,*extra,&block)
+  def apply_manifest_on(host,manifest,options={},&block)
+    on_options = {:stdin => manifest + "\n"}
+    on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
+    args = ["--verbose"]
+    args << "--parseonly" if options[:parseonly]
+    on host, puppet_apply(*args), on_options, &block
   end
 
   def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
