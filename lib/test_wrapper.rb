@@ -194,12 +194,8 @@ class TestWrapper
   # Macros
   #
 
-  def facter(host, *args)
-    if host.is_a? Array
-      host.each { |h| facter h, *args }
-    else
-      on host, "#{host.puppet_env} facter #{args.join(' ')}"
-    end
+  def facter(*args)
+    FacterCommand.new(*args)
   end
 
   def puppet_resource(*args)

@@ -10,6 +10,11 @@ class Command
   def cmd_line(host_info)
     @command_string
   end
+
+  # Determine the appropriate puppet env command for the given host.
+  def puppet_env_command(host_info)
+    %Q{env RUBYLIB="#{host_info['puppetlibdir']||''}:#{host_info['facterlibdir']||''}" PATH="#{host_info['puppetbindir']||''}:#{host_info['facterbindir']||''}:$PATH"}
+  end
 end
 
 class PuppetCommand < Command
@@ -23,11 +28,20 @@ class PuppetCommand < Command
   end
 
   def cmd_line(host_info)
-    puppet_env_command = %Q{env RUBYLIB="#{host_info['puppetlibdir']||''}:#{host_info['facterlibdir']||''}" PATH="#{host_info['puppetbindir']||''}:#{host_info['facterbindir']||''}:$PATH"}
     puppet_path = host_info[:puppetbinpath] || "/bin/puppet" # TODO: is this right?
 
     args_string = (@args + @options.map { |key, value| "--#{key}=#{value}" }).join(' ')
-    "#{puppet_env_command} puppet #{@sub_command} #{args_string}"
+    "#{puppet_env_command(host_info)} puppet #{@sub_command} #{args_string}"
   end
 end
 
+class FacterCommand < Command
+  def initialize(*args)
+    @args = args
+  end
+
+  def cmd_line(host_info)
+    args_string = @args.join(' ')
+    "#{puppet_env_command(host_info)} facter #{args_string}"
+  end
+end

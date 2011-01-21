@@ -12,10 +12,10 @@ test_name "#4289: facter should recognize OEL operatingsystemrelease"
 # cleaner than this is... --daniel 2010-12-22
 agents.each do |host|
   step "determine the operating system of #{host}"
-  facter host, "operatingsystem"
+  on host, facter("operatingsystem")
   if stdout =~ /oel/i then
     step "test operatingsystemrelease fact on OEL host #{host}"
-    facter host, "operatingsystemrelease"
+    on host, facter("operatingsystemrelease")
     stdout =~ /^\d\.\d$/ or fail_test "operatingsystemrelease not as expected"
   end
 end
