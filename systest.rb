@@ -174,7 +174,7 @@ end
 def run_tests_under(config, options, root)
   summary = {}
   test_list(File.join($work_dir,root)).each do |path|
-    name = File.basename(path, '.rb')[/[0-9.]*_?(.*)/,1]
+    name = path.sub("#{$work_dir}/", '')
     puts "", "", "#{name} executing..."
     result = TestWrapper.new(config,options,path).run_test
     puts "#{name} returned: #{result.fail_flag}"
