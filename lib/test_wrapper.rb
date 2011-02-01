@@ -132,7 +132,7 @@ class TestWrapper
   # Basic operations
   #
   attr_reader :result
-  def on(host,command,options={},&block)
+  def on(host, command, options={}, &block)
     if command.is_a? String
       command = Command.new(command)
     end
