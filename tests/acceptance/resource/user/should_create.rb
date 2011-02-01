@@ -10,7 +10,7 @@ on agents, "if getent passwd #{name}; then userdel #{name}; fi"
 on agents, "if getent group #{name}; then groupdel #{name}; fi"
 
 step "ask puppet to create the user"
-run_puppet_on agents, :resource, 'user', name, 'ensure=present'
+on(agents, puppet_resource('user', name, 'ensure=present'))
 
 step "verify that the user and group now exist"
 on agents, "getent passwd #{name} && getent group #{name}"

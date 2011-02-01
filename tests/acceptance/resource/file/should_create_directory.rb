@@ -6,7 +6,7 @@ step "clean up the system before we begin"
 on agents, "rm -vrf #{target}"
 
 step "verify we can create a directory"
-run_puppet_on(agents, :resource, "file", target, 'ensure=directory')
+on(agents, puppet_resource("file", target, 'ensure=directory'))
 
 step "verify the directory was created"
 on agents, "test -d #{target}"

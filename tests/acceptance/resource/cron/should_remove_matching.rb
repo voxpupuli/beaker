@@ -16,8 +16,8 @@ agents.each do |host|
     on host, "printf '#{cron}' | crontab -u #{tmpuser} -"
 
     step "apply the resource change on the host"
-    run_puppet_on(host, :resource, "cron", "bogus", "user=#{tmpuser}",
-                  "command=/bin/true", "ensure=absent") do
+    on(host, puppet_resource("cron", "bogus", "user=#{tmpuser}",
+                  "command=/bin/true", "ensure=absent")) do
         fail_test "didn't see the output we expected..." unless
             stdout.include? 'removed'
     end

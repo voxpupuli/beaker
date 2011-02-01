@@ -10,6 +10,6 @@ apply_manifest_on(agents, "notice 'Hello World'") do
 end
 
 step "verify help displays something for puppet master"
-run_puppet_master_on(master, "--help") do
+on master, puppet_master("--help") do
   stdout =~ /puppet master/ or fail_test("improper help output")
 end

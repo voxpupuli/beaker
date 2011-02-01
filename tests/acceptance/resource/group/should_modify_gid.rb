@@ -4,12 +4,12 @@ name = "test-group-#{Time.new.to_i}"
 gid  = 12345
 
 step "ensure that the group exists with gid #{gid}"
-run_puppet_on(agents, :resource, 'group', name, 'ensure=present', "gid=#{gid}") do
+on(agents, puppet_resource('group', name, 'ensure=present', "gid=#{gid}")) do
     fail_test "missing gid notice" unless stdout =~ /gid +=> +'#{gid}'/
 end
 
 step "ensure that we can modify the GID of the group to #{gid*2}"
-run_puppet_on(agents, :resource, 'group', name, 'ensure=present', "gid=#{gid*2}") do
+on(agents, puppet_resource('group', name, 'ensure=present', "gid=#{gid*2}")) do
     fail_test "missing gid notice" unless stdout =~ /gid +=> +'#{gid*2}'/
 end
 
@@ -20,4 +20,4 @@ on(agents, "getent group #{name}") do
 end
 
 step "clean up the system after the test run"
-run_puppet_on(agents, :resource, 'group', name, 'ensure=absent')
+on(agents, puppet_resource('group', name, 'ensure=absent'))

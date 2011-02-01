@@ -11,7 +11,7 @@ agents.each do |host|
     on host, "if ! getent group #{group}; then groupadd #{group}; fi"
 
     step "create user with group"
-    run_puppet_on host, :resource, 'user', user, 'ensure=present', "gid=#{group}"
+    on(host, puppet_resource('user', user, 'ensure=present', "gid=#{group}"))
 
     step "verify the group exists and find the gid"
     on(host, "getent group #{group}") do
@@ -25,6 +25,6 @@ agents.each do |host|
     end
 
     step "clean up after the test is done"
-    run_puppet_on host, :resource, 'user', user, 'ensure=absent'
-    run_puppet_on host, :resource, 'group', group, 'ensure=absent'
+    on(host, puppet_resource('user', user, 'ensure=absent'))
+    on(host, puppet_resource('group', group, 'ensure=absent'))
 end

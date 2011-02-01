@@ -6,11 +6,11 @@ group2 = "#{user}-new"
 
 agents.each do |host|
     step "ensure that the groups both exist"
-    run_puppet_on(host, :resource, 'group', group1, 'ensure=present')
-    run_puppet_on(host, :resource, 'group', group2, 'ensure=present')
+    on(host, puppet_resource('group', group1, 'ensure=present'))
+    on(host, puppet_resource('group', group2, 'ensure=present'))
 
     step "ensure the user exists and has the old group"
-    run_puppet_on(host, :resource, 'user', user, 'ensure=present', "gid=#{group1}")
+    on(host, puppet_resource('user', user, 'ensure=present', "gid=#{group1}"))
 
     step "verify that the user has the correct gid"
     on(host, "getent group #{group1}") do
@@ -22,7 +22,7 @@ agents.each do |host|
     end
 
     step "modify the GID of the user"
-    run_puppet_on(host, :resource, 'user', user, 'ensure=present', "gid=#{group2}")
+    on(host, puppet_resource('user', user, 'ensure=present', "gid=#{group2}"))
 
 
     step "verify that the user has the updated gid"
@@ -35,7 +35,7 @@ agents.each do |host|
     end
 
     step "ensure that we remove the things we made"
-    run_puppet_on(host, :resource, 'user',  user,   'ensure=absent')
-    run_puppet_on(host, :resource, 'group', group1, 'ensure=absent')
-    run_puppet_on(host, :resource, 'group', group2, 'ensure=absent')
+    on(host, puppet_resource('user',  user,   'ensure=absent'))
+    on(host, puppet_resource('group', group1, 'ensure=absent'))
+    on(host, puppet_resource('group', group2, 'ensure=absent'))
 end

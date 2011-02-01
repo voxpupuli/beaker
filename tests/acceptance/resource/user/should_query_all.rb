@@ -11,7 +11,7 @@ agents.each do |host|
     end
 
     step "collect the list of known users via puppet"
-    run_puppet_on(host, :resource, 'user') do
+    on(host, puppet_resource('user')) do
         stdout.each_line do |line|
             name = ( line.match(/^user { '([^']+)'/) or next )[1]
 

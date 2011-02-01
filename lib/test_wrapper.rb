@@ -33,11 +33,8 @@ class TestWrapper
 
     def do_action(verb,*args)
       result = Result.new(self,args,'','',0)
-      if $dry_run
-        puts "#{self}: #{verb}(#{args.inspect})"
-      else
-        yield result
-      end
+      puts "#{self}: #{verb}(#{args.inspect})"
+      yield result unless $dry_run
       result
     end
 
@@ -135,7 +132,10 @@ class TestWrapper
   # Basic operations
   #
   attr_reader :result
-  def on(host,command,options={},&block)
+  def on(host, command, options={}, &block)
+    if command.is_a? String
+      command = Command.new(command)
+    end
     if host.is_a? Array
       host.each { |h| on h, command, options, &block }
     elsif command.is_a? Array
@@ -143,7 +143,7 @@ class TestWrapper
     else
       BeginTest.new(host, step_name) unless options[:silent]
 
-      @result = host.exec(command, options[:stdin])
+      @result = host.exec(command.cmd_line(host), options[:stdin])
 
       unless options[:silent] then
         result.log(step_name)
@@ -191,52 +191,56 @@ class TestWrapper
   # Macros
   #
 
-  def facter(host, *args)
-    if host.is_a? Array
-      host.each { |h| facter h, *args }
-    else
-      on host, "#{host.puppet_env} facter #{args.join(' ')}"
-    end
+  def facter(*args)
+    FacterCommand.new(*args)
   end
 
-  def run_puppet_on(host, action, *extra, &block)
-    if host.is_a? Array
-      host.each { |h| run_puppet_on h, action, *extra, &block }
-    else
-      args    = ["--vardir=/tmp", "--confdir=/tmp", "--ssldir=/tmp"]
-      options = {}
-      while extra.length > 0 do
-        if extra[0].is_a? Symbol then
-          options[ extra.shift ] = extra.shift
-        elsif extra[0].is_a? Hash then
-          options.merge!(extra.shift)
-        else
-          args << extra.shift
-        end
-      end
-
-      on host, "#{host.puppet_env} puppet #{action} #{args.join(' ')}", options, &block
-    end
+  def puppet_resource(*args)
+    PuppetCommand.new(:resource,*args)
   end
 
-  def apply_manifest_on(host,manifest,*extra,&block)
-    run_puppet_on(host, :apply, "--verbose", :stdin => manifest + "\n", *extra, &block)
+  def puppet_doc(*args)
+    PuppetCommand.new(:doc,*args)
   end
 
-  def run_puppet_master_on(host,*extra,&block)
-    run_puppet_on(host, :master,*extra,&block)
+  def puppet_kick(*args)
+    PuppetCommand.new(:kick,*args)
   end
 
-  def run_agent_on(host,options='--no-daemonize --verbose --onetime --test')
+  def puppet_cert(*args)
+    PuppetCommand.new(:cert,*args)
+  end
+
+  def puppet_apply(*args)
+    PuppetCommand.new(:apply,*args)
+  end
+
+  def puppet_master(*args)
+    PuppetCommand.new(:master,*args)
+  end
+
+  def puppet_agent(*args)
+    PuppetCommand.new(:agent,*args)
+  end
+
+  def apply_manifest_on(host,manifest,options={},&block)
+    on_options = {:stdin => manifest + "\n"}
+    on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
+    args = ["--verbose"]
+    args << "--parseonly" if options[:parseonly]
+    on host, puppet_apply(*args), on_options, &block
+  end
+
+  def run_agent_on(host,arg='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }
     elsif "ticket #5541 is a pain and hasn't been fixed"
-      BeginTest.new(host, step_name) unless options[:silent]
-      2.times { on host,"puppet agent #{options}",:silent => true }
-      result.log(step_name) unless options[:silent]
-      @fail_flag+=result.exit_code unless options[:silent]
+      BeginTest.new(host, step_name)
+      2.times { on host,puppet_agent(arg),:silent => true }
+      result.log(step_name)
+      @fail_flag+=result.exit_code
     else
-      on host,"puppet agent #{options}"
+      on host,puppet_agent(arg)
     end
   end
 

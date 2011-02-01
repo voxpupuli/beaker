@@ -13,7 +13,7 @@ on agents, "cp /etc/hosts #{backup}"
 on agents, "cat > /etc/hosts", :stdin => content
 
 step "query all host records using puppet"
-run_puppet_on(agents, :resource, 'host') do
+on(agents, puppet_resource('host')) do
     found = stdout.scan(/host { '([^']+)'/).flatten.sort
     fail_test "the list of returned hosts was wrong: #{found.join(', ')}" unless
         found == %w{test1 test2 test3 test4}

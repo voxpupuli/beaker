@@ -7,7 +7,7 @@ step "cleanup the target file"
 on agents, "rm -f #{target}"
 
 step "run the resource agent"
-run_puppet_on(agents, :resource, content) do
+on(agents, puppet_resource(content)) do
   stdout.index('Host[example.com]/ensure: created') or
     fail_test("missing notice about host record creation")
 end
