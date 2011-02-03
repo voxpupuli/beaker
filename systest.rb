@@ -17,7 +17,7 @@ $work_dir=FileUtils.pwd
 
 # Setup log dir
 def setup_logs(time, config_file)
-  log_dir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"
+  log_dir="#{time.month}"+"#{time.day}"+"#{time.year}"+ "_"+"#{time.hour}"+"#{time.min}"+"_"+"#{puppet_version}"+"_"+"#{config_file}"
   puts "Test logs will be written here: #{log_dir}"
   puts
   FileUtils.mkdir(log_dir)
@@ -42,7 +42,7 @@ def parse_args
     end
 
     options[:type] = 'pe'
-    opts.on('--type TYPE', 'Select puppet install type (pe, git) - default "pe"') do
+    opts.on('--type TYPE', 'Select puppet install type (pe, git, skip) - default "pe"') do
       |type|
       unless File.directory?("setup/#{type}") then
         puts "Sorry, #{type} is not a known setup type!"
@@ -234,8 +234,10 @@ if options[:mrpropper] || options[:dist]
   prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
 end
 
+
 puts '=' * 78, "Performing test setup steps", ''
-["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
+#["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
+["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
       puts "Setup action #{test} failed, aborting"
