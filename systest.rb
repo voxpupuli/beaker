@@ -236,6 +236,7 @@ end
 
 
 puts '=' * 78, "Performing test setup steps", ''
+# DEBUG
 #["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
 ["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
