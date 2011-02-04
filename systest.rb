@@ -240,8 +240,9 @@ puts '=' * 78, "Performing test setup steps", ''
 ["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
-      puts "Setup action #{test} failed, aborting"
-      exit 1
+      #puts "Setup action #{test} failed, aborting"
+      #exit 1
+      puts "WARN: Setup action #{test} failed"
     end
   end
 end

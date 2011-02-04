@@ -1,13 +1,9 @@
 HOSTS:
-  puppet:
+  cent-55-64-1:
     roles:
       - master
       - dashboard
-    platform: CENT5-64
-  agent:
-    roles:
-      - agent
-    platform: CENT5-64
+    platform: centos-5-x86_64
 CONFIG:
   rubyver: ruby18
   facterver: fact11
