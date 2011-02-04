@@ -116,7 +116,7 @@ def summarize(test_summary, time, config, to_stdout)
   end
   puts "Test Pass Started: #{time}"
   puts
-  puts "- Host Configuration Summary -" 
+  puts "- Host Configuration Summary -"
   do_dump(config)
 
   test_count=0
@@ -124,11 +124,11 @@ def summarize(test_summary, time, config, to_stdout)
   test_passed=0
   test_summary.each do |test, result|
     test_count+=1
-    test_passed+=1 if (result==0) 
-    test_failed+=1 if (result!=0) 
+    test_passed+=1 if (result==0)
+    test_failed+=1 if (result!=0)
   end
   puts
-  puts "- Test Case Summary -" 
+  puts "- Test Case Summary -"
   puts "Attmpted: #{test_count}"
   puts "  Passed: #{test_passed}"
   puts "  Failed: #{test_failed}"
