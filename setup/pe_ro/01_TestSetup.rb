@@ -1,4 +1,4 @@
-# NFS mount distribution dir on all hosts
+# Puppet Enterprise install via NFS RO mount
 
 # Determine NFS server from config
 nfs_server = config['nfs_server']
@@ -24,7 +24,6 @@ disthash.map { |k,v| v }.uniq.each do |file|
   step "Pre Test Setup -- extract tarballs on NFS RW mount"
   on master, "tar xf /mnt/rw/pe/#{file} -C /mnt/rw/pe"
 end
-
 
 step "Pre Test Setup -- SCP answer.tgz to NFS RW mount"
 scp_to master,"#{$work_dir}/tarballs/answers.tar", "/tmp"
