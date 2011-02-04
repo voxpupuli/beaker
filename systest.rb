@@ -7,10 +7,7 @@ require 'net/http'
 require 'socket'
 require 'optparse'
 require 'systemu'
-require 'require_all'
-
-# Import custom classes
-require_all './lib'
+Dir.glob(File.dirname(__FILE__) + 'lib/*.rb') {|file| require file}
 
 # Where was I called from
 $work_dir=FileUtils.pwd
