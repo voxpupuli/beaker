@@ -1,16 +1,18 @@
 HOSTS:
-  puppet:
+  cent-55-64-1:
     roles:
       - master
       - dashboard
-    platform: RHEL5-64
-  agent:
+    platform: centos-5-x86_64
+  ubnt-1004-64-1:
     roles:
       - agent
-    platform: RHEL5-64
+    platform: ubuntu-10.04-amd64
 CONFIG:
   rubyver: ruby18
   facterver: fact11
   gemver: gem12
   puppetbinpath: /opt/puppet/bin
   filecount: 12
+  nfs_server: 192.168.97.1
+  pe_nfs_mount: /mnt/ro/pe
