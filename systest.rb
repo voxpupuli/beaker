@@ -38,8 +38,8 @@ def parse_args
       options[:tests] << dir
     end
 
-    options[:type] = 'pe'
-    opts.on('--type TYPE', 'Select puppet install type (pe, git) - default "pe"') do
+    options[:type] = 'skip'
+    opts.on('--type TYPE', 'Select puppet install type (pe, git, skip) - default "skip"') do
       |type|
       unless File.directory?("setup/#{type}") then
         puts "Sorry, #{type} is not a known setup type!"
@@ -231,12 +231,16 @@ if options[:mrpropper] || options[:dist]
   prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
 end
 
+
 puts '=' * 78, "Performing test setup steps", ''
-["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
+# DEBUG
+#["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
+["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
-      puts "Setup action #{test} failed, aborting"
-      exit 1
+      puts "Warn: Setup action #{test} returned non-zero"
+      #exit 1
+      puts "WARN: Setup action #{test} failed"
     end
   end
 end

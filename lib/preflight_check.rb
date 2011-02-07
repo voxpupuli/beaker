@@ -4,11 +4,13 @@
 # What version of Puppet are we installing?
 def puppet_version
   version=""
-  parent_dir=""
-  parent_dir=$1 if /^(\/\w.*)(\/\w.+)/ =~ $work_dir
+
+  unless File.file? "#{$work_dir}/tarballs/LATEST"
+    puts " Can not find: #{$work_dir}/tarballs/LATEST"
+  end
 
   begin
-    File.open("#{parent_dir}/installer/VERSION") do |file|
+    File.open("#{$work_dir}/tarballs/LATEST") do |file|
       while line = file.gets
         if /(\w.*)/ =~ line then
           version=$1
