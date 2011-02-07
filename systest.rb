@@ -41,8 +41,8 @@ def parse_args
       options[:tests] << dir
     end
 
-    options[:type] = 'pe'
-    opts.on('--type TYPE', 'Select puppet install type (pe, git, skip) - default "pe"') do
+    options[:type] = 'skip'
+    opts.on('--type TYPE', 'Select puppet install type (pe, git, skip) - default "skip"') do
       |type|
       unless File.directory?("setup/#{type}") then
         puts "Sorry, #{type} is not a known setup type!"
@@ -241,7 +241,7 @@ puts '=' * 78, "Performing test setup steps", ''
 ["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
-      #puts "Setup action #{test} failed, aborting"
+      puts "Warn: Setup action #{test} returned non-zero"
       #exit 1
       puts "WARN: Setup action #{test} failed"
     end

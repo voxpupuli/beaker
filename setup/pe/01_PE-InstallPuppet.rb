@@ -7,7 +7,7 @@ hosts.each do |host|
 
   # determine the distro dir
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
-  unless File.file? dist_tar
+  unless File.file? "#{$work_dir}/tarballs/#{dist_tar}"
     puts "PE #{dist_tar} not found, help!"
     puts ""
     puts "Make sure your configuration file uses the PE version string:"
