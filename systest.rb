@@ -14,7 +14,7 @@ $work_dir=FileUtils.pwd
 
 # Setup log dir
 def setup_logs(time, config_file)
-  log_dir=time.strftime("%F_%T")
+  log_dir="log/" + time.strftime("%F_%T")
   puts "Test logs will be written here: #{log_dir}"
   puts
   FileUtils.mkdir(log_dir)
