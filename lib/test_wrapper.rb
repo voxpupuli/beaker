@@ -261,8 +261,6 @@ class TestWrapper
 
     step "Untar puppet.tgz test code on master"
     on master," if [ -d /etc/puppetlabs ] ; then tar xzf /tmp/puppet.tgz -C /etc/puppetlabs ; fi"
-    #step "Set filetimeout= 0 in puppet.conf"
-    #on master,"cd /etc/puppetlabs/puppet; (grep filetimeout puppet.conf > /dev/null 2>&1) || sed -i \'s/\\[master\\]/\\[master\\]\\n    filetimeout = 0\/\' puppet.conf"
   end
 
   def clean_hosts

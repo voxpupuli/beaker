@@ -219,9 +219,6 @@ config['CONFIG']['ssh'] = ssh
 # Generate installer answers files based on config
 gen_answer_files(config)
 
-# Run rake task to prep code to be scp'd to hosts
-system("rake dist")
-
 # Add Puppet version to config
 config["CONFIG"]["puppetver"]=puppet_version
 
@@ -233,14 +230,17 @@ end
 
 
 puts '=' * 78, "Performing test setup steps", ''
-# DEBUG
-#["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
+# PE signs certs during install; after/ValidateSignCert is not required.
+# Not all test passes should exec after/*.  Need to another technique 
+# for post installer steps.
+# ["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
 ["setup/early", "setup/#{options[:type]}"].each do |root|
   run_tests_under(config, options, root).each do |test, result|
     unless result == 0 then
       puts "Warn: Setup action #{test} returned non-zero"
-      #exit 1
-      puts "WARN: Setup action #{test} failed"
+      # Installer often returns non-zero upon sucessful install and hence we should warn
+      # vs bailing at this stage.
+      # exit 1
     end
   end
 end

@@ -85,6 +85,10 @@ q_puppetdashboard_database_user=puppet
 # ]
 
 master=""
+
+# Clean up all answer files
+FileUtils.rm Dir.glob('$work_dir/q_*')
+
 # Parse config for Master 
 config["HOSTS"].each_key do|host|
   config["HOSTS"][host]['roles'].each do |role|
@@ -110,7 +114,7 @@ config["HOSTS"].each_key do|host|
   # Host is only an Agent
   if role_agent && !role_dashboard then
     puts 'host is agent only'
-    fh = File.new("#{$work_dir}/tarballs/q_agent_only.sh", 'w')
+    fh = File.new("#{$work_dir}/tarballs/q_agent_only", 'w')
     agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
       if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
@@ -123,7 +127,7 @@ config["HOSTS"].each_key do|host|
   # Host is a Master only - no Dashbord
   if role_master && !role_dashboard then
     puts 'host is master only'
-    fh = File.new("#{$work_dir}/tarballs/q_master_only.sh", 'w')
+    fh = File.new("#{$work_dir}/tarballs/q_master_only", 'w')
     master_only_a.split(/\n/).each do |line|
       fh.puts line
     end
@@ -133,7 +137,7 @@ config["HOSTS"].each_key do|host|
   # Host is a Master and Dashboard
   if role_master && role_dashboard then
     puts 'host is master and dashboard'
-    fh = File.new("#{$work_dir}/tarballs/q_master_and_dashboard.sh", 'w')
+    fh = File.new("#{$work_dir}/tarballs/q_master_and_dashboard", 'w')
     master_dashboard_a.split(/\n/).each do |line|
       fh.puts line
     end

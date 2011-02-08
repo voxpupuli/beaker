@@ -1,11 +1,10 @@
 # Pre Test Setup stage
 # SCP installer to host, Untar Installer
 hosts.each do |host|
-  step "Pre Test Setup -- SCP install package to hosts"
   version  = host["puppetver"]
   platform = host['platform']
 
-  # determine the distro dir
+  # determine the distro tar name
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
   unless File.file? "#{$work_dir}/tarballs/#{dist_tar}"
     puts "PE #{dist_tar} not found, help!"
@@ -15,16 +14,15 @@ hosts.each do |host|
     fail_test "Sorry, PE #{dist_tar} file not found."
   end
 
+  step "Pre Test Setup -- SCP install package to hosts"
   scp_to host, "#{$work_dir}/tarballs/#{dist_tar}", "/root"
-  scp_to host, "#{$work_dir}/tarballs/answers.tar", "/root"
-
   step "Pre Test Setup -- Untar install package on hosts"
   on host,"tar xf #{dist_tar}"
+
 end
 
 # Puppet Installer
 # Install Master first -- allows for auto cert signing
-step "Install Puppet Master"
 hosts.each do |host|
   next if host['roles'].include? 'agent'
   role_master    = host['roles'].include? 'master'
@@ -36,11 +34,15 @@ hosts.each do |host|
   dist_dir = "puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_master && !role_dashboard); "q_master_only.sh"
-    when (role_master &&  role_dashboard); "q_master_and_dashboard.sh"
+    when (role_master && !role_dashboard); "q_master_only"
+    when (role_master &&  role_dashboard); "q_master_and_dashboard"
     else fail "#{host} has an unacceptable combination of roles."
   end
-  on host,"cd #{dist_dir} && tar xf /root/answers.tar -C . && ./puppet-enterprise-installer -a #{q_script}"
+
+  step "SCP Answer file to dist tar dir"
+  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
+  step "Install Puppet Master"
+  on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
 end
 
 
@@ -57,12 +59,13 @@ hosts.each do |host|
   dist_dir = "puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_agent  && !role_dashboard); "q_agent_only.sh"
-    when (role_master && !role_dashboard); "q_master_only.sh"
+    when (role_agent  && !role_dashboard); "q_agent_only"
+    when (role_master && !role_dashboard); "q_master_only"
     else fail "#{host} has an unacceptable combination of roles."
   end
-  on host,"cd #{dist_dir} && tar xf /root/answers.tar -C . && ./puppet-enterprise-installer -a #{q_script}"
-end
 
-# do post install test environment config
-# prep_nodes
+  step "SCP Answer file to dist tar dir"
+  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
+  step "Install Puppet Agent"
+  on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
+end
