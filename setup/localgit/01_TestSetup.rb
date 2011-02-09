@@ -1,7 +1,7 @@
 test_name "Install puppet and facter on target machines..."
 
 SourcePath = "/opt/puppet-git-repos"
-RootPath = File.expand_path(File.join(Dir.getwd, '../..'))
+RootPath = File.expand_path(File.join(File.dirname(__FILE__), '/../../..'))
 FacterRepo = File.join(RootPath, 'facter')
 PuppetRepo = File.join(RootPath, 'puppet')
 
