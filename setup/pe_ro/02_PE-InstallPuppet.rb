@@ -16,8 +16,8 @@ hosts.each do |host|
   dist_dir = "#{nfs_mnt}/puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_master && !role_dashboard); "q_master_only.sh"
-    when (role_master &&  role_dashboard); "q_master_and_dashboard.sh"
+    when (role_master && !role_dashboard); "q_master_only"
+    when (role_master &&  role_dashboard); "q_master_and_dashboard"
     else fail "#{host} has an unacceptable combination of roles."
   end
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a /#{nfs_mnt}/#{q_script}"
@@ -36,12 +36,9 @@ hosts.each do |host|
   dist_dir = "#{nfs_mnt}/puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_agent  && !role_dashboard); "q_agent_only.sh"
-    when (role_master && !role_dashboard); "q_master_only.sh"
+    when (role_agent  && !role_dashboard); "q_agent_only"
+    when (role_master && !role_dashboard); "q_master_only"
     else fail "#{host} has an unacceptable combination of roles."
   end
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a /#{nfs_mnt}/#{q_script}"
 end
-
-# do post install test environment config
-#prep_nodes
