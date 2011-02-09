@@ -15,17 +15,14 @@ $work_dir=FileUtils.pwd
 
 # Setup log dir
 def setup_logs(time, options)
+  return if options[:stdout_only]
   log_dir="log/" + time.strftime("%F_%T")
   puts "Writing logs to #{log_dir}/run.log"
   puts
   FileUtils.mkdir(log_dir)
   FileUtils.cp(options[:config],(File.join(log_dir,"config.yml")))
 
-  if options[:stdout_only]
-    log_file = '/dev/null'
-  else
-    log_file = File.join(log_dir, "run.log")
-  end
+  log_file = File.join(log_dir, "run.log")
   run_log = File.new(log_file, "w")
 
   if ! options[:quiet]
@@ -34,7 +31,6 @@ def setup_logs(time, options)
 
   $stdout = run_log
   $stderr = run_log
-  return run_log
 end
 
 # Parse command line args
@@ -271,7 +267,6 @@ summarize(test_summary, start_time, config, options[:stdout])
 
 if ! options[:stdout] then
   $stdout = org_stdout
-  log_file.close
 end
 
 ## Back to our top level dir
