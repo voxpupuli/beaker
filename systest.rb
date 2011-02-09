@@ -7,23 +7,34 @@ require 'net/http'
 require 'socket'
 require 'optparse'
 require 'systemu'
+
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 
 # Where was I called from
 $work_dir=FileUtils.pwd
 
 # Setup log dir
-def setup_logs(time, config_file)
+def setup_logs(time, options)
   log_dir="log/" + time.strftime("%F_%T")
-  puts "Test logs will be written here: #{log_dir}"
+  puts "Writing logs to #{log_dir}/run.log"
   puts
   FileUtils.mkdir(log_dir)
-  FileUtils.cp(config_file,(File.join(log_dir,"config.yml")))
-  FileUtils.cd(log_dir)
-  runlog = File.new("run.log", "w")
-  $stdout = runlog                 # switch to logfile for output
-  $stderr = runlog
-  return runlog
+  FileUtils.cp(options[:config],(File.join(log_dir,"config.yml")))
+
+  if options[:stdout_only]
+    log_file = '/dev/null'
+  else
+    log_file = File.join(log_dir, "run.log")
+  end
+  run_log = File.new(log_file, "w")
+
+  if ! options[:quiet]
+    run_log = Tee.new(run_log)
+  end
+
+  $stdout = run_log
+  $stderr = run_log
+  return run_log
 end
 
 # Parse command line args
@@ -88,10 +99,15 @@ def parse_args
       options[:dist] = TRUE
     end
 
-    options[:stdout] = FALSE
-    opts.on('-s', '--stdout', 'log output to STDOUT') do
+    options[:stdout_only] = FALSE
+    opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
       puts "Will log to STDOUT, not files..."
-      options[:stdout] = TRUE
+      options[:stdout_only] = TRUE
+    end
+
+    options[:quiet] = false
+    opts.on('-q', '--quiet', 'don\'t log output to STDOUT') do
+      options[:quiet] = true
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do
@@ -197,8 +213,8 @@ else
 end
 
 # Setup logging
-if ! options[:stdout] then
-  log_dir = setup_logs(start_time, options[:config])
+if ! options[:stdout_only] then
+  log_file = setup_logs(start_time, options)
 end
 
 # Read config file
@@ -231,7 +247,7 @@ end
 
 puts '=' * 78, "Performing test setup steps", ''
 # PE signs certs during install; after/ValidateSignCert is not required.
-# Not all test passes should exec after/*.  Need to another technique 
+# Not all test passes should exec after/*.  Need to another technique
 # for post installer steps.
 # ["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
 ["setup/early", "setup/#{options[:type]}"].each do |root|
@@ -254,8 +270,8 @@ end
 summarize(test_summary, start_time, config, options[:stdout])
 
 if ! options[:stdout] then
-  log_dir.close
   $stdout = org_stdout
+  log_file.close
 end
 
 ## Back to our top level dir
