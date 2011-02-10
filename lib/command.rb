@@ -11,6 +11,10 @@ class Command
     @command_string
   end
 
+  def exec(host, options={})
+    host.exec(cmd_line(host), options[:stdin])
+  end
+
   # Determine the appropriate puppet env command for the given host.
   def puppet_env_command(host_info)
     %Q{env RUBYLIB="#{host_info['puppetlibdir']||''}:#{host_info['facterlibdir']||''}" PATH="#{host_info['puppetbindir']||''}:#{host_info['facterbindir']||''}:$PATH"}

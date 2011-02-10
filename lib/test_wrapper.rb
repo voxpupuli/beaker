@@ -138,12 +138,10 @@ class TestWrapper
     end
     if host.is_a? Array
       host.each { |h| on h, command, options, &block }
-    elsif command.is_a? Array
-      command.each { |cmd| on host, cmd, options, &block }
     else
       BeginTest.new(host, step_name) unless options[:silent]
 
-      @result = host.exec(command.cmd_line(host), options[:stdin])
+      @result = command.exec(host, options)
 
       unless options[:silent] then
         result.log(step_name)
