@@ -89,12 +89,6 @@ def parse_args
       options[:mrpropper] = TRUE
     end
 
-    options[:dist] = FALSE
-    opts.on( '--dist', 'scp test code to nodes' ) do
-      puts "Will distributed upated remote test code"
-      options[:dist] = TRUE
-    end
-
     options[:stdout_only] = FALSE
     opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
       puts "Will log to STDOUT, not files..."
@@ -234,10 +228,9 @@ gen_answer_files(config)
 # Add Puppet version to config
 config["CONFIG"]["puppetver"]=puppet_version
 
-if options[:mrpropper] || options[:dist]
+if options[:mrpropper] 
   prepper = TestWrapper.new(config)
   prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
-  prepper.prep_nodes          if options[:dist]       # SCP updated test code to nodes
 end
 
 
