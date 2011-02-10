@@ -16,7 +16,7 @@ $work_dir=FileUtils.pwd
 # Setup log dir
 def setup_logs(time, options)
   return if options[:stdout_only]
-  log_dir="log/" + time.strftime("%F_%T")
+  log_dir=File.join("log", time.strftime("%F_%T"))
   puts "Writing logs to #{log_dir}/run.log"
   puts
   FileUtils.mkdir(log_dir)
@@ -113,7 +113,7 @@ def summarize(test_summary, time, config, to_stdout)
   if to_stdout then
     puts "\n\n"
   else
-    sum_log = File.new("summary.txt", "w")
+    sum_log = File.new(File.join("log", time.strftime("%F_%T"), "/summary.txt"), "w")
     $stdout = sum_log     # switch to logfile for output
     $stderr = sum_log
   end
