@@ -13,16 +13,19 @@ Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 # Where was I called from
 $work_dir=FileUtils.pwd
 
+def log_dir(time)
+  File.join("log", time.strftime("%F_%T"))
+end
+
 # Setup log dir
 def setup_logs(time, options)
   return if options[:stdout_only]
-  log_dir=File.join("log", time.strftime("%F_%T"))
-  puts "Writing logs to #{log_dir}/run.log"
+  puts "Writing logs to #{log_dir(time)}/run.log"
   puts
-  FileUtils.mkdir(log_dir)
-  FileUtils.cp(options[:config],(File.join(log_dir,"config.yml")))
+  FileUtils.mkdir(log_dir(time))
+  FileUtils.cp(options[:config],(File.join(log_dir(time),"config.yml")))
 
-  log_file = File.join(log_dir, "run.log")
+  log_file = File.join(log_dir(time), "run.log")
   run_log = File.new(log_file, "w")
 
   if ! options[:quiet]
@@ -113,7 +116,7 @@ def summarize(test_summary, time, config, to_stdout)
   if to_stdout then
     puts "\n\n"
   else
-    sum_log = File.new(File.join("log", time.strftime("%F_%T"), "/summary.txt"), "w")
+    sum_log = File.new(File.join(log_dir(time), "/summary.txt"), "w")
     $stdout = sum_log     # switch to logfile for output
     $stderr = sum_log
   end
