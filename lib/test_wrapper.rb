@@ -249,20 +249,6 @@ class TestWrapper
     on hosts,"ntpdate pool.ntp.org"
   end
 
-  def prep_nodes
-    step "Copy ptest.tgz executables to all hosts"
-    scp_to hosts,"#{$work_dir}/dist/ptest.tgz", "/tmp"
-
-    step "Untar ptest.tgz executables to all hosts"
-    on hosts,"tar xzf /tmp/ptest.tgz -C /"
-
-    step "Copy puppet.tgz code to Master"
-    scp_to master,"#{$work_dir}/dist/puppet.tgz", "/tmp"
-
-    step "Untar puppet.tgz test code on master"
-    on master," if [ -d /etc/puppetlabs ] ; then tar xzf /tmp/puppet.tgz -C /etc/puppetlabs ; fi"
-  end
-
   def clean_hosts
     step "Clean Hosts"
     on hosts,"rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs"
