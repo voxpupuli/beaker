@@ -141,7 +141,7 @@ class TestWrapper
     else
       BeginTest.new(host, step_name) unless options[:silent]
 
-      @result = host.exec(command.cmd_line(host), options[:stdin])
+      @result = command.exec(host, options)
 
       unless options[:silent] then
         result.log(step_name)
