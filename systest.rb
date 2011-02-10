@@ -156,33 +156,13 @@ def summarize(test_summary, time, config, to_stdout)
 end
 
 #
-# Return a list of .rb files in a directory tree
-#
-def test_list(path)
-  if File.basename(path) =~ /^\W/
-    [] # skip .hiddens and such
-  elsif File.directory?(path) then
-    puts "Looking for tests in #{path}"
-    Dir.entries(path).
-      collect { |entry| test_list(File.join(path,entry)) }.
-      flatten.
-      compact
-  elsif path =~ /\.rb$/
-    puts "Found #{path}"
-    [path]
-    #[path[/\S+\/(\S+)$/,1]]
-  end
-end
-
-#
-# Run all tests discovered under a specific root - typically from test_list
+# Run all tests discovered under a specific root
 #
 def run_tests_under(config, options, root)
   summary = {}
-  test_list(File.join($work_dir,root)).each do |path|
-    name = path.sub("#{$work_dir}/", '')
+  Dir[File.join(root, "**/*.rb")].select { |f| File.file?(f) }.each do |name|
     puts "", "", "#{name} executing..."
-    result = TestWrapper.new(config,options,path).run_test
+    result = TestWrapper.new(config,options,name).run_test
     puts "#{name} returned: #{result.fail_flag}"
     summary[name] = result.fail_flag
   end
