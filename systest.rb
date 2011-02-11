@@ -31,7 +31,7 @@ end
 
 perform_test_setup_steps(options, config)
 test_summary = run_the_tests(options, config)
-summarize(test_summary, start_time, config, options[:stdout])
+summarize(test_summary, start_time, config, options[:stdout]) unless options[:stdout_only]
 
 if ! options[:stdout] then
   $stdout = org_stdout
