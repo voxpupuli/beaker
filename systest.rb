@@ -30,7 +30,7 @@ def setup_logs(time, options)
   if File.exists?(latest)
     puts "File log/latest is not a symlink; not overwriting"
   else
-    File.symlink(File.basename(logdir(time)), latest)
+    File.symlink(File.basename(log_dir(time)), latest)
   end
 
   log_file = File.join(log_dir(time), "run.log")
