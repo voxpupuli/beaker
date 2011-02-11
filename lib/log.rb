@@ -58,15 +58,15 @@ def summarize(test_summary, time, config, to_stdout)
   puts
   puts "- Specific Test Case Status -"
   puts "Passed Tests Cases:"
-  test_summary.each do |test, result|
-    if ( result == 0 )
-      puts "  Test Case #{test} reported: #{result}"
+  test_summary.each do |test|
+    if ( test[1] == 0 )
+      puts "  Test Case #{test[0]} reported: #{test[1]}"
     end
   end
   puts "Failed Tests Cases:"
-  test_summary.each do |test, result|
-    if ( result != 0 )
-      puts "  Test Case #{test} reported: #{result}"
+  test_summary.each do |test|
+    if ( test[1] != 0 )
+      puts "  Test Case #{test[0]} reported: #{test[1]}"
     end
   end
   to_stdout or sum_log.close
