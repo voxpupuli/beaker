@@ -25,6 +25,14 @@ def setup_logs(time, options)
   FileUtils.mkdir(log_dir(time))
   FileUtils.cp(options[:config],(File.join(log_dir(time),"config.yml")))
 
+  latest = File.join("log", "latest")
+  File.delete(latest) if File.symlink?(latest)
+  if File.exists?(latest)
+    puts "File log/latest is not a symlink; not overwriting"
+  else
+    File.symlink(File.basename(logdir(time)), latest)
+  end
+
   log_file = File.join(log_dir(time), "run.log")
   run_log = File.new(log_file, "w")
 
