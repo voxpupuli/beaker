@@ -29,6 +29,10 @@ def setup_logs(time, options)
   $stderr = run_log
 end
 
+def test_printer(test)
+  puts "  Test Case #{test[0]} reported: #{test[1]}"
+end
+
 def summarize(test_summary, time, config, to_stdout)
   if to_stdout then
     puts "\n\n"
@@ -37,9 +41,13 @@ def summarize(test_summary, time, config, to_stdout)
     $stdout = sum_log     # switch to logfile for output
     $stderr = sum_log
   end
-  puts "Test Pass Started: #{time}"
-  puts
-  puts "- Host Configuration Summary -"
+
+  puts <<-HEREDOC
+Test Pass Started: #{time}
+
+- Host Configuration Summary -
+  HEREDOC
+
   do_dump(config)
 
   test_count=0
@@ -50,25 +58,22 @@ def summarize(test_summary, time, config, to_stdout)
     test_passed+=1 if (result==0)
     test_failed+=1 if (result!=0)
   end
-  puts
-  puts "- Test Case Summary -"
-  puts "Attmpted: #{test_count}"
-  puts "  Passed: #{test_passed}"
-  puts "  Failed: #{test_failed}"
-  puts
-  puts "- Specific Test Case Status -"
-  puts "Passed Tests Cases:"
-  test_summary.each do |test|
-    if ( test[1] == 0 )
-      puts "  Test Case #{test[0]} reported: #{test[1]}"
-    end
-  end
+  grouped_summary = test_summary.group_by{|test| test[1] == 0}
+
+  puts <<-HEREDOC
+
+- Test Case Summary -
+Attempted: #{test_count}
+   Passed: #{test_passed}
+   Failed: #{test_failed}
+
+- Specific Test Case Status -
+Passed Tests Cases:
+HEREDOC
+
+  grouped_summary[true].each {|test| test_printer(test)}
   puts "Failed Tests Cases:"
-  test_summary.each do |test|
-    if ( test[1] != 0 )
-      puts "  Test Case #{test[0]} reported: #{test[1]}"
-    end
-  end
+  grouped_summary[false].each {|test| test_printer(test)}
   to_stdout or sum_log.close
 end
 
