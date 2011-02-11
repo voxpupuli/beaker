@@ -1,8 +1,8 @@
 step "Setup: Create remote test code tarballs"
 
 FileUtils.rm Dir.glob("#{$work_dir}/dist/*.tgz") if Dir.glob("#{$work_dir}/dist/*.tgz")
-system("tar czf #{$work_dir}/dist/ptest.tgz #{$work_dir}/dist/ptest/bin/*")
-system("tar czf #{$work_dir}/dist/puppet.tgz #{$work_dir}/dist/etc/*")
+system("cd #{$work_dir}/dist && tar czf ./ptest.tgz ptest/bin/* || echo tar cmd failed!; cd #{$work_dir}")
+system("cd #{$work_dir}/dist && tar czf ./puppet.tgz etc/*      || echo tar cmd failed!; cd #{$work_dir}")
 
 hosts.each do |host|
   unless File.file? "#{$work_dir}/dist/ptest.tgz"

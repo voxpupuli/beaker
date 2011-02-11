@@ -25,9 +25,10 @@ class PuppetCommand < Command
   def initialize(sub_command, *args)
     @sub_command = sub_command
     @options = args.last.is_a?(Hash) ? args.pop : {}
-    @options[:vardir] ||= '/tmp'
-    @options[:confdir] ||= '/tmp'
-    @options[:ssldir] ||= '/tmp'
+    # Dom: commenting these lines addressed bug #6920
+    # @options[:vardir] ||= '/tmp'
+    # @options[:confdir] ||= '/tmp'
+    # @options[:ssldir] ||= '/tmp'
     @args = args
   end
 
