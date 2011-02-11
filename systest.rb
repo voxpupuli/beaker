@@ -168,7 +168,7 @@ end
 #
 def run_tests_under(config, options, root)
   summary = {}
-  Dir[File.join(root, "**/*.rb")].select { |f| File.file?(f) }.each do |name|
+  (Dir[File.join(root, "**/*.rb")] + [root]).select { |f| File.file?(f) }.each do |name|
     puts "", "", "#{name} executing..."
     result = TestWrapper.new(config,options,name).run_test
     puts "#{name} returned: #{result.fail_flag}"
