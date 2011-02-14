@@ -71,9 +71,9 @@ Attempted: #{test_count}
 Passed Tests Cases:
 HEREDOC
 
-  grouped_summary[true].each {|test| test_printer(test)}
+  grouped_summary[true].each {|test| test_printer(test)} if grouped_summary[true]
   puts "Failed Tests Cases:"
-  grouped_summary[false].each {|test| test_printer(test)}
+  grouped_summary[false].each {|test| test_printer(test)} if grouped_summary[false]
   to_stdout or sum_log.close
 end
 
