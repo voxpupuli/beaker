@@ -59,9 +59,9 @@ class TestWrapper
   # Annotations
   #
   attr_reader :step_name
-  def step(lable,description=lable)
+  def step(label,description=label)
     @step_name = description
-    @step_lable = lable
+    @step_label = label
   end
   def test_name(name)
     step name
