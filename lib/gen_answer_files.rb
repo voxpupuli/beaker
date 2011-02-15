@@ -37,10 +37,6 @@ q_vendor_packages_install=y
 q_install=y
 q_puppet_symlinks_install=y
 q_puppetagent_install=n
-q_puppetdashboard_database_install=y
-q_puppetdashboard_database_password=puppet
-q_puppetdashboard_httpd_port=3000
-q_puppetdashboard_install=y
 q_puppetmaster_certdnsnames=puppet:`hostname -s`
 q_puppetmaster_certname=`hostname -s`
 q_puppetmaster_dashboard_hostname=localhost
@@ -52,24 +48,33 @@ q_rubydevelopment_install=y
 q_puppetdashboard_database_name=dbdb
 q_puppetdashboard_database_root_password=puppet
 q_puppetdashboard_database_user=puppet
+q_puppetdashboard_database_install=y
+q_puppetdashboard_database_password=puppet
+q_puppetdashboard_httpd_port=3000
+q_puppetdashboard_install=y
 ]
 
-# # Agent and Dashboard answers
-# agent_dashboard_a = %q[
-# q_install=y
-# q_vendor_packages_install=y
-# q_puppet_symlinks_install=y
-# q_puppetagent_certname=puppet
-# q_puppetagent_graph=y
-# q_puppetagent_install=y
-# q_puppetagent_pluginsync=y
-# q_puppetagent_server=MASTER
-# q_puppetdashboard_database_install=y
-# q_puppetdashboard_httpd_port=3000
-# q_puppetdashboard_install=y
-# q_puppetmaster_install=n
-# q_rubydevelopment_install=y
-# ]
+# Agent and Dashboard answers
+agent_dashboard_a = %q[
+q_puppetdashboard_database_install=y
+q_puppetdashboard_database_password=puppet
+q_puppetdashboard_httpd_port=3000
+q_puppetdashboard_install=y
+q_puppetdashboard_database_name=dbdb
+q_puppetdashboard_database_root_password=puppet
+q_puppetdashboard_database_user=puppet
+q_install=y
+q_vendor_packages_install=y
+q_puppet_symlinks_install=y
+q_puppetagent_certname=`hostname -s`
+q_puppetagent_install=y
+q_puppetagent_pluginsync=y
+q_puppetagent_server=MASTER
+q_puppetmaster_install=n
+q_puppetagent_graph=y
+q_rubydevelopment_install=y
+]
+
 # Dashboard base answers
 # pashboard_only_a = %q[
 # q_install=y
@@ -116,6 +121,19 @@ config["HOSTS"].each_key do|host|
     puts 'host is agent only'
     fh = File.new("#{$work_dir}/tarballs/q_agent_only", 'w')
     agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
+      if line =~ /(q_puppetagent_server=)MASTER/ then
+        line = $1+master
+      end
+      fh.puts line
+    end
+    fh.close
+  end
+
+  # Host is Agent and Dashboard
+  if role_agent && role_dashboard then
+    puts 'host is agent and dashboard'
+    fh = File.new("#{$work_dir}/tarballs/q_agent_and_dashboard", 'w')
+    agent_dashboard_a.split(/\n/).each do |line|
       if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
       end
