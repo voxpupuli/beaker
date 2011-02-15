@@ -46,7 +46,7 @@ class Log
   - Host Configuration Summary -
     HEREDOC
 
-    do_dump(config)
+    TestConfig.dump(config)
 
     test_count=0
     test_failed=0

@@ -23,7 +23,7 @@ org_stdout = $stdout      # save stdout file descriptor
 
 options=parse_args
 log = Log.new(options)
-config = read_config(options)
+config = TestConfig.load_file(options[:config])
 gen_answer_files(config)
 
 if options[:mrpropper]
