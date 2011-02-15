@@ -6,6 +6,7 @@ class Log
   # Setup log dir
   def initialize(options)
     @start_time = Time.now
+    @results = []
     return if options[:stdout_only]
     puts "Writing logs to #{log_dir}/run.log"
     puts
@@ -31,7 +32,11 @@ class Log
     $stderr = run_log
   end
 
-  def summarize(test_summary, config, to_stdout)
+  def record_result(name, result)
+    @results << [name, result]
+  end
+
+  def summarize(config, to_stdout)
     if to_stdout then
       puts "\n\n"
     else
@@ -52,7 +57,7 @@ class Log
     test_failed=0
     test_passed=0
     test_errored=0
-    test_summary.each do |test, result|
+    @results.each do |test, result|
       test_count += 1
       case result.test_status
       when :pass then test_passed += 1
@@ -60,7 +65,7 @@ class Log
       when :error then test_errored += 1
       end
     end
-    grouped_summary = test_summary.group_by{|test,result| result.test_status }
+    grouped_summary = @results.group_by{|test,result| result.test_status }
 
     puts <<-HEREDOC
 

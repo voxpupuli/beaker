@@ -31,9 +31,11 @@ if options[:mrpropper]
   prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
 end
 
-perform_test_setup_steps(options, config)
-test_summary = run_the_tests(options, config)
-log.summarize(test_summary, config, options[:stdout]) unless options[:stdout_only]
+perform_test_setup_steps(log, options, config)
+
+run_the_tests(log, options, config)
+
+log.summarize(config, options[:stdout]) unless options[:stdout_only]
 
 if ! options[:stdout] then
   $stdout = org_stdout
