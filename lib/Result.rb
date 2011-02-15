@@ -8,7 +8,7 @@ class Result
     @exit_code = exit_code
   end
 
-  def log(test_name)
+  def log
     puts "<STDOUT>\n#{stdout}\n</STDOUT>"
     puts "<STDERR>\n#{stderr}\n</STDERR>"
     puts "Exited with #{exit_code}"
