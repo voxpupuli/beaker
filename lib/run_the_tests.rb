@@ -12,8 +12,8 @@ def run_tests_under(config, options, root)
   (Dir[File.join(root, "**/*.rb")] + [root]).select { |f| File.file?(f) }.each do |name|
     puts "", "", "#{name} executing..."
     result = TestWrapper.new(config,options,name).run_test
-    puts "#{name} returned: #{result.fail_flag}"
-    summary << [name, result.fail_flag]
+    puts "#{name} #{result.test_status}ed"
+    summary << [name, result]
   end
   return summary
 end

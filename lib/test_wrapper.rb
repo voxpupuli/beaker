@@ -1,94 +1,32 @@
 class TestWrapper
-  class Host
-    # A cache for active SSH connections to our execution nodes.
-    def initialize(name, overrides, defaults)
-      @name,@overrides,@defaults = name,overrides,defaults
-    end
-    def []=(k,v)
-      @overrides[k] = v
-    end
-    def [](k)
-      @overrides.has_key?(k) ? @overrides[k] : @defaults[k]
-    end
-    def to_str
-      @name
-    end
-    def to_s
-      @name
-    end
-    def +(other)
-      @name+other
-    end
+  require 'lib/test_wrapper/host'
 
-    def puppet_env
-      %Q{env RUBYLIB="#{self['puppetlibdir']||''}:#{self['facterlibdir']||''}" PATH="#{self['puppetbindir']||''}:#{self['facterbindir']||''}:$PATH"}
-    end
+  include Test::Unit::Assertions
 
-    # Wrap up the SSH connection process; this will cache the connection and
-    # allow us to reuse it for each operation without needing to reauth every
-    # single time.
-    def ssh
-      @ssh ||= Net::SSH.start(self, self['user'] || "root" , self['ssh'])
-    end
-
-    def do_action(verb,*args)
-      result = Result.new(self,args,'','',0)
-      puts "#{self}: #{verb}(#{args.inspect})"
-      yield result unless $dry_run
-      result
-    end
-
-    def exec(command, stdin)
-      do_action('RemoteExec',command) { |result|
-        ssh.open_channel do |channel|
-          channel.exec(command) do |terminal, success|
-            abort "FAILED: to execute command on a new channel on #{@name}" unless success
-            terminal.on_data                   { |ch, data|       result.stdout << data }
-            terminal.on_extended_data          { |ch, type, data| result.stderr << data if type == 1 }
-            terminal.on_request("exit-status") { |ch, data|       result.exit_code = data.read_long  }
-
-            # queue stdin data, force it to packets, and signal eof: this
-            # triggers action in many remote commands, notably including
-            # 'puppet apply'.  It must be sent at some point before the rest
-            # of the action.
-            terminal.send_data(stdin.to_s)
-            terminal.process
-            terminal.eof!
-          end
-        end
-        # Process SSH activity until we stop doing that - which is when our
-        # channel is finished with...
-        ssh.loop
-      }
-    end
-
-    def do_scp(source, target)
-      do_action("ScpFile",source,target) { |result|
-        # Net::Scp always returns 0, so just set the return code to 0 Setting
-        # these values allows reporting via result.log(test_name)
-        result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
-        result.stderr=nil
-        result.exit_code=0
-        ssh.scp.upload!(source, target)
-      }
-    end
-  end
-
-  attr_reader :config, :options, :path, :fail_flag, :usr_home
+  attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
   def initialize(config,options,path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @options = options
     @path    = path
-    @fail_flag = 0
     @usr_home = ENV['HOME']
+    @test_status = :pass
+    @exception = nil
     #
     # We put this on each wrapper (rather than the class) so that methods
-    # defined in the tests don't leak out to other tests. 
+    # defined in the tests don't leak out to other tests.
     class << self
       def run_test
-        test = File.read(path)
-        eval test,nil,path,1
+        begin
+          test = File.read(path)
+          eval test,nil,path,1
+        rescue Test::Unit::AssertionFailedError => e
+          @test_status = :fail
+          @exception   = e
+        rescue => e
+          @test_status = :error
+          @exception   = e
+        end
         classes = test.split(/\n/).collect { |l| l[/^ *class +(\w+) *$/,1]}.compact
         case classes.length
         when 0; self
@@ -133,19 +71,27 @@ class TestWrapper
   #
   attr_reader :result
   def on(host, command, options={}, &block)
+    options[:acceptable_exit_codes] ||= [0]
+    options[:failing_exit_codes]    ||= []
     if command.is_a? String
       command = Command.new(command)
     end
     if host.is_a? Array
       host.each { |h| on h, command, options, &block }
     else
-      BeginTest.new(host, step_name) unless options[:silent]
+      announce_step(host, step_name) unless options[:silent]
 
       @result = command.exec(host, options)
 
       unless options[:silent] then
         result.log(step_name)
-        @fail_flag += 1 unless (options[:acceptable_exit_codes] || [0]).include?(exit_code)
+        if options[:acceptable_exit_codes].include?(exit_code)
+          # cool.
+        elsif options[:failing_exit_codes].include?(exit_code)
+          assert( false, "Exited with #{exit_code}" )
+        else
+          raise "Exited with #{exit_code}"
+        end
       end
 
       # Also, let additional checking be performed by the caller.
@@ -159,10 +105,10 @@ class TestWrapper
     if host.is_a? Array
       host.each { |h| scp_to h,from_path,to_path,options }
     else
-      BeginTest.new(host, step_name)
+      announce_step(host, step_name)
       @result = host.do_scp(from_path, to_path)
       result.log(step_name)
-      @fail_flag+=result.exit_code
+      raise "scp exited with #{result.exit_code}"
     end
   end
 
@@ -170,8 +116,7 @@ class TestWrapper
     puts msg
   end
   def fail_test(msg)
-    puts msg
-    @fail_flag += 1
+    assert(false, msg)
   end
   #
   # result access
@@ -232,11 +177,11 @@ class TestWrapper
   def run_agent_on(host,arg='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }
-    elsif "ticket #5541 is a pain and hasn't been fixed"
-      BeginTest.new(host, step_name)
+    elsif ["ticket #5541 is a pain and hasn't been fixed"] # XXX
+      announce_step(host, step_name)
       2.times { on host,puppet_agent(arg),:silent => true }
       result.log(step_name)
-      @fail_flag+=result.exit_code
+      raise "Error code from puppet agent" if result.exit_code != 0
     else
       on host,puppet_agent(arg)
     end
@@ -253,12 +198,16 @@ class TestWrapper
   end
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
-    # eg: class puppet_system_test { 
+    # eg: class puppet_system_test {
     #  include group
     #  include user
     #}
     step "Append new system_test_class to init.pp"
     # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
     on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
+  end
+
+  def announce_step(host, step_name)
+    puts "Running \"#{step_name}\" on #{host}"
   end
 end
