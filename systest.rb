@@ -19,11 +19,10 @@ $work_dir=FileUtils.pwd
 ###################################
 #  Main
 ###################################
-start_time = Time.new
 org_stdout = $stdout      # save stdout file descriptor
 
 options=parse_args
-setup_logs(start_time, options) unless options[:stdout_only]
+log = Log.new(options)
 config = read_config(options)
 gen_answer_files(config)
 
@@ -34,7 +33,7 @@ end
 
 perform_test_setup_steps(options, config)
 test_summary = run_the_tests(options, config)
-summarize(test_summary, start_time, config, options[:stdout]) unless options[:stdout_only]
+log.summarize(test_summary, config, options[:stdout]) unless options[:stdout_only]
 
 if ! options[:stdout] then
   $stdout = org_stdout
