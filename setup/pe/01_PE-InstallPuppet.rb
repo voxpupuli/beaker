@@ -60,7 +60,7 @@ hosts.each do |host|
 
   q_script = case
     when (role_agent  && !role_dashboard); "q_agent_only"
-    when (role_master && !role_dashboard); "q_master_only"
+    when (role_agent  && role_dashboard);  "q_agent_and_dashboard"
     else fail "#{host} has an unacceptable combination of roles."
   end
 
@@ -69,3 +69,5 @@ hosts.each do |host|
   step "Install Puppet Agent"
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
 end
+
+
