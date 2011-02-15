@@ -7,9 +7,6 @@ class Result
     @stderr    = stderr
     @exit_code = exit_code
   end
-  def self.ad_hoc(host,message,exit_code)
-    new(host,'',message,nil,exit_code)
-  end
 
   def log(test_name)
     puts "<STDOUT>\n#{stdout}\n</STDOUT>"

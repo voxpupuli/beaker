@@ -1,22 +1,32 @@
 class TestWrapper
   require 'lib/test_wrapper/host'
 
+  include Test::Unit::Assertions
 
-  attr_reader :config, :options, :path, :fail_flag, :usr_home
+  attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
   def initialize(config,options,path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @options = options
     @path    = path
-    @fail_flag = 0
     @usr_home = ENV['HOME']
+    @test_status = :pass
+    @exception = nil
     #
     # We put this on each wrapper (rather than the class) so that methods
-    # defined in the tests don't leak out to other tests. 
+    # defined in the tests don't leak out to other tests.
     class << self
       def run_test
-        test = File.read(path)
-        eval test,nil,path,1
+        begin
+          test = File.read(path)
+          eval test,nil,path,1
+        rescue Test::Unit::AssertionFailedError => e
+          @test_status = :fail
+          @exception   = e
+        rescue => e
+          @test_status = :error
+          @exception   = e
+        end
         classes = test.split(/\n/).collect { |l| l[/^ *class +(\w+) *$/,1]}.compact
         case classes.length
         when 0; self
@@ -61,6 +71,8 @@ class TestWrapper
   #
   attr_reader :result
   def on(host, command, options={}, &block)
+    options[:acceptable_exit_codes] ||= [0]
+    options[:failing_exit_codes]    ||= []
     if command.is_a? String
       command = Command.new(command)
     end
@@ -73,7 +85,13 @@ class TestWrapper
 
       unless options[:silent] then
         result.log(step_name)
-        @fail_flag += 1 unless (options[:acceptable_exit_codes] || [0]).include?(exit_code)
+        if options[:acceptable_exit_codes].include?(exit_code)
+          # cool.
+        elsif options[:failing_exit_codes].include?(exit_code)
+          assert( false, "Exited with #{exit_code}" )
+        else
+          raise "Exited with #{exit_code}"
+        end
       end
 
       # Also, let additional checking be performed by the caller.
@@ -90,7 +108,7 @@ class TestWrapper
       announce_step(host, step_name)
       @result = host.do_scp(from_path, to_path)
       result.log(step_name)
-      @fail_flag+=result.exit_code
+      raise "scp exited with #{result.exit_code}"
     end
   end
 
@@ -98,8 +116,7 @@ class TestWrapper
     puts msg
   end
   def fail_test(msg)
-    puts msg
-    @fail_flag += 1
+    assert(false, msg)
   end
   #
   # result access
@@ -164,7 +181,7 @@ class TestWrapper
       announce_step(host, step_name)
       2.times { on host,puppet_agent(arg),:silent => true }
       result.log(step_name)
-      @fail_flag+=result.exit_code
+      raise "Error code from puppet agent" if result.exit_code != 0
     else
       on host,puppet_agent(arg)
     end
@@ -181,7 +198,7 @@ class TestWrapper
   end
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
-    # eg: class puppet_system_test { 
+    # eg: class puppet_system_test {
     #  include group
     #  include user
     #}

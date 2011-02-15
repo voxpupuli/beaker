@@ -29,8 +29,8 @@ def setup_logs(time, options)
   $stderr = run_log
 end
 
-def test_printer(test)
-  puts "  Test Case #{test[0]} reported: #{test[1]}"
+def print_test_failure(test, result)
+  puts "  Test Case #{test} reported: #{result.exception.inspect}"
 end
 
 def summarize(test_summary, time, config, to_stdout)
@@ -53,12 +53,16 @@ Test Pass Started: #{time}
   test_count=0
   test_failed=0
   test_passed=0
+  test_errored=0
   test_summary.each do |test, result|
-    test_count+=1
-    test_passed+=1 if (result==0)
-    test_failed+=1 if (result!=0)
+    test_count += 1
+    case result.test_status
+    when :pass then test_passed += 1
+    when :fail then test_failed += 1
+    when :error then test_errored += 1
+    end
   end
-  grouped_summary = test_summary.group_by{|test| test[1] == 0}
+  grouped_summary = test_summary.group_by{|test,result| result.test_status }
 
   puts <<-HEREDOC
 
@@ -66,14 +70,17 @@ Test Pass Started: #{time}
 Attempted: #{test_count}
    Passed: #{test_passed}
    Failed: #{test_failed}
+   Errored: #{test_errored}
 
 - Specific Test Case Status -
-Passed Tests Cases:
 HEREDOC
 
-  grouped_summary[true].each {|test| test_printer(test)}
   puts "Failed Tests Cases:"
-  grouped_summary[false].each {|test| test_printer(test)}
-  to_stdout or sum_log.close
+  (grouped_summary[:fail] || []).each {|test, result| print_test_failure(test, result)}
+
+  puts "Errored Tests Cases:"
+  (grouped_summary[:error] || []).each {|test, result| print_test_failure(test, result)}
+
+  sum_log.close unless to_stdout
 end
 

@@ -7,6 +7,9 @@ require 'net/http'
 require 'socket'
 require 'optparse'
 require 'systemu'
+require 'test/unit'
+
+Test::Unit.run = true
 
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 
@@ -24,7 +27,7 @@ setup_logs(start_time, options) unless options[:stdout_only]
 config = read_config(options)
 gen_answer_files(config)
 
-if options[:mrpropper] 
+if options[:mrpropper]
   prepper = TestWrapper.new(config)
   prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
 end
