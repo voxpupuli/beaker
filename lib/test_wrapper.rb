@@ -108,7 +108,7 @@ class TestWrapper
       announce_step(host, step_name)
       @result = host.do_scp(from_path, to_path)
       result.log(step_name)
-      raise "scp exited with #{result.exit_code}"
+      raise "scp exited with #{result.exit_code}" if result.exit_code != 0
     end
   end
 
