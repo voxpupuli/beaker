@@ -67,7 +67,7 @@ class TestWrapper
     if host.is_a? Array
       host.each { |h| on h, command, options, &block }
     else
-      BeginTest.new(host, step_name) unless options[:silent]
+      announce_step(host, step_name) unless options[:silent]
 
       @result = command.exec(host, options)
 
@@ -87,7 +87,7 @@ class TestWrapper
     if host.is_a? Array
       host.each { |h| scp_to h,from_path,to_path,options }
     else
-      BeginTest.new(host, step_name)
+      announce_step(host, step_name)
       @result = host.do_scp(from_path, to_path)
       result.log(step_name)
       @fail_flag+=result.exit_code
@@ -160,8 +160,8 @@ class TestWrapper
   def run_agent_on(host,arg='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }
-    elsif "ticket #5541 is a pain and hasn't been fixed"
-      BeginTest.new(host, step_name)
+    elsif ["ticket #5541 is a pain and hasn't been fixed"] # XXX
+      announce_step(host, step_name)
       2.times { on host,puppet_agent(arg),:silent => true }
       result.log(step_name)
       @fail_flag+=result.exit_code
@@ -188,5 +188,9 @@ class TestWrapper
     step "Append new system_test_class to init.pp"
     # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
     on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
+  end
+
+  def announce_step(host, step_name)
+    puts "Running \"#{step_name}\" on #{host}"
   end
 end

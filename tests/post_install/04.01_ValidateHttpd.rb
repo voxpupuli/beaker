@@ -4,7 +4,6 @@ step "Service Start HTTPD on Puppet Master"
 on master,"service pe-httpd start"
 
 step "Connect to HTTPD server on Puppet Master"
-BeginTest.new(master, step_name)
 tmp_result = begin  
     Net::HTTP.get("#{master}", '*', '80')
   rescue Exception => se

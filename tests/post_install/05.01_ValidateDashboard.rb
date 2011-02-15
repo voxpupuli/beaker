@@ -2,7 +2,6 @@
 # Check for running dashboard on DASHBORD Host
 
 step "Connect to Dashboard"
-BeginTest.new(dashboard, step_name)
 tmp_result = begin  
     Net::HTTP.get(dashboard, '*', '3000')
   rescue Exception => se
