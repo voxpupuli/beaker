@@ -65,6 +65,11 @@ def parse_args
       options[:quiet] = true
     end
 
+    options[:random] = false
+    opts.on('-r', '--random [RANDOM_KEY]', 'Randomize ordering of test files') do |random_key|
+      options[:random] = random_key || true
+    end
+
     opts.on( '-h', '--help', 'Display this screen' ) do
       puts opts
       exit
