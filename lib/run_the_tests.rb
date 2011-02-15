@@ -9,12 +9,13 @@ end
 
 def run_tests_under(config, options, root)
   summary = []
-  (Dir[File.join(root, "**/*.rb")] + [root]).select { |f| File.file?(f) }.each do |name|
-    puts "", "", "#{name} executing..."
-    result = TestWrapper.new(config,options,name).run_test
-    puts "#{name} #{result.test_status}ed"
-    summary << [name, result]
+  suite = TestSuite.new(root, :random => options[:random])
+  puts "Using random seed #{suite.random_seed}" if suite.random_seed
+  suite.test_files.each do |test_file|
+    puts "", "", "#{test_file} executing..."
+    result = TestWrapper.new(config, options, test_file).run_test
+    puts "#{test_file} #{result.test_status}ed"
+    summary << [test_file, result]
   end
   return summary
 end
-
