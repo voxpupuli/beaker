@@ -1,8 +1,11 @@
 file_count = config['filecount'] || 10 
-puts "Verifying #{file_count} files"
+test_name "Verifying #{file_count} files" do
 
-step "Initiate Directory Transfer on Agents"
-run_agent_on agents
+  step "Initiate Directory Transfer on Agents" do
+    run_agent_on agents
+  end
 
-step "Verify Directory Existence on Agents"
-on agents,"/ptest/bin/fileserve.sh /root dir #{file_count}"
+  step "Verify Directory Existence on Agents" do
+    on agents,"/ptest/bin/fileserve.sh /root dir #{file_count}"
+  end
+end

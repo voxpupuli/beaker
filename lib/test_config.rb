@@ -22,7 +22,7 @@ module TestConfig
     version=""
 
     unless File.file? "#{$work_dir}/tarballs/LATEST"
-      puts " Can not find: #{$work_dir}/tarballs/LATEST"
+      Log.warn " Can not find: #{$work_dir}/tarballs/LATEST"
     end
 
     begin
@@ -30,7 +30,7 @@ module TestConfig
         while line = file.gets
           if /(\w.*)/ =~ line then
             version=$1
-            puts "Found: Puppet Version #{version}"
+            Log.debug "Found: Puppet Version #{version}"
           end
         end
       end
@@ -84,19 +84,19 @@ module TestConfig
 
     # Access "platform" for each host
     config["HOSTS"].each_key do|host|
-      puts "Platform for #{host} #{config["HOSTS"][host]['platform']}"
+      Log.notify "Platform for #{host} #{config["HOSTS"][host]['platform']}"
     end
 
     # Access "roles" for each host
     config["HOSTS"].each_key do|host|
       config["HOSTS"][host]['roles'].each do |role|
-        puts "Role for #{host} #{role}"
+        Log.notify "Role for #{host} #{role}"
       end
     end
 
     # Access Config keys/values
     config["CONFIG"].each_key do|cfg|
-        puts "Config Key|Val: #{cfg} #{config["CONFIG"][cfg].inspect}"
+        Log.notify "Config Key|Val: #{cfg} #{config["CONFIG"][cfg].inspect}"
     end
   end
 end

@@ -6,11 +6,9 @@ system("cd #{$work_dir}/dist && tar czf ./puppet.tgz etc/*      || echo tar cmd 
 
 hosts.each do |host|
   unless File.file? "#{$work_dir}/dist/ptest.tgz"
-    puts "ptest.tgz not found"
     fail_test "Sorry, ptest.tgz not found"
   end
   unless File.file? "#{$work_dir}/dist/puppet.tgz"
-    puts "puppet.tgz not found"
     fail_test "Sorry, puppet.tgz not found"
   end
 

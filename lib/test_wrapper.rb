@@ -59,12 +59,12 @@ class TestWrapper
   # Annotations
   #
   def step(step_name,&block)
-    puts "  * #{step_name}"
+    Log.notify "  * #{step_name}"
     yield if block
   end
 
   def test_name(test_name,&block)
-    puts test_name
+    Log.notify test_name
     yield if block
   end
   #
@@ -111,7 +111,7 @@ class TestWrapper
   end
 
   def pass_test(msg)
-    puts msg
+    Log.notify msg
   end
   def fail_test(msg)
     assert(false, msg)

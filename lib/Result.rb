@@ -9,9 +9,9 @@ class Result
   end
 
   def log
-    puts "<STDOUT>\n#{stdout}\n</STDOUT>"
-    puts "<STDERR>\n#{stderr}\n</STDERR>"
-    puts "Exited with #{exit_code}"
-    puts
+    Log.debug "<STDOUT>\n#{stdout}\n</STDOUT>"
+    Log.debug "<STDERR>\n#{stderr}\n</STDERR>"
+    Log.debug "Exited with #{exit_code}"
+    Log.debug
   end
 end

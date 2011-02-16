@@ -23,12 +23,20 @@ org_stdout = $stdout      # save stdout file descriptor
 
 options=parse_args
 log = Log.new(options)
+
+if options[:config]
+  Log.debug "Using Config #{options[:config]}"
+else
+  fail "Argh!  There is no default for Config, specify one!"
+end
+
 config = TestConfig.load_file(options[:config])
 gen_answer_files(config)
 
 if options[:mrpropper]
+  Log.debug "Cleaning Hosts of old install"
   prepper = TestWrapper.new(config)
-  prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
+  prepper.clean_hosts(config) # Clean-up old install
 end
 
 perform_test_setup_steps(log, options, config)
