@@ -39,8 +39,7 @@ end
 
 # Install Master first -- allows for auto cert signing
 hosts.each do |host|
-  next if host['roles'].include? 'agent'
-  role_master    = host['roles'].include? 'master'
+  next if !( host['roles'].include? 'master' )
   role_dashboard = host['roles'].include? 'dashboard'
   version        = host["puppetver"]
   platform       = host['platform']

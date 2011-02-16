@@ -1,10 +1,13 @@
 class TestWrapper
   require 'lib/test_wrapper/host'
+  require 'lib/gen_answer_files'
+
+	include GenAnswerFiles
 
   include Test::Unit::Assertions
 
   attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
-  def initialize(config,options,path=nil)
+  def initialize(config,options={},path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @options = options
