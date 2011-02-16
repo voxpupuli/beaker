@@ -20,10 +20,6 @@ class TestWrapper
       @name+other
     end
 
-    def puppet_env
-      %Q{env RUBYLIB="#{self['puppetlibdir']||''}:#{self['facterlibdir']||''}" PATH="#{self['puppetbindir']||''}:#{self['facterbindir']||''}:$PATH"}
-    end
-
     # Wrap up the SSH connection process; this will cache the connection and
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
