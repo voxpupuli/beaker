@@ -75,19 +75,19 @@ q_puppetagent_graph=y
 q_rubydevelopment_install=y
 ]
 
-# Dashboard base answers
-# pashboard_only_a = %q[
-# q_install=y
-# q_vendor_packages_install=y
-# q_puppet_symlinks_install=y
-# q_puppetagent_install=n
-# q_puppetdashboard_database_install=y
-# q_puppetdashboard_httpd_port=3000
-# q_puppetdashboard_install=y
-# q_puppetmaster_install=n
-# q_rubydevelopment_install=y
-# q_puppetdashboard_database_name=dbdb
-# ]
+# Dashboard only answers
+dashboard_only_a = %q[
+q_install=y
+q_vendor_packages_install=y
+q_puppet_symlinks_install=y
+q_puppetagent_install=n
+q_puppetdashboard_database_install=y
+q_puppetdashboard_httpd_port=3000
+q_puppetdashboard_install=y
+q_puppetmaster_install=n
+q_rubydevelopment_install=y
+q_puppetdashboard_database_name=dbdb
+]
 
 master=""
 
@@ -116,8 +116,21 @@ config["HOSTS"].each_key do|host|
     role_dashboard=TRUE if role =~ /dashboard/
   end 
 
+  # Host is only a Dashboard
+  if !role_agent && !role_master && role_dashboard then
+    Log.debug 'host is dashboard only'
+    fh = File.new("#{$work_dir}/tarballs/q_dashboard_only", 'w')
+    agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
+      if line =~ /(q_puppetagent_server=)MASTER/ then
+        line = $1+master
+      end
+      fh.puts line
+    end
+    fh.close
+  end
+
   # Host is only an Agent
-  if role_agent && !role_dashboard then
+  if role_agent && !role_master && !role_dashboard then
     Log.debug 'host is agent only'
     fh = File.new("#{$work_dir}/tarballs/q_agent_only", 'w')
     agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
@@ -130,7 +143,7 @@ config["HOSTS"].each_key do|host|
   end
 
   # Host is Agent and Dashboard
-  if role_agent && role_dashboard then
+  if role_agent && !role_master && role_dashboard then
     Log.debug 'host is agent and dashboard'
     fh = File.new("#{$work_dir}/tarballs/q_agent_and_dashboard", 'w')
     agent_dashboard_a.split(/\n/).each do |line|
@@ -143,7 +156,7 @@ config["HOSTS"].each_key do|host|
   end
 
   # Host is a Master only - no Dashbord
-  if role_master && !role_dashboard then
+  if !role_agent && role_master && !role_dashboard then
     Log.debug 'host is master only'
     fh = File.new("#{$work_dir}/tarballs/q_master_only", 'w')
     master_only_a.split(/\n/).each do |line|
@@ -153,7 +166,7 @@ config["HOSTS"].each_key do|host|
   end
 
   # Host is a Master and Dashboard
-  if role_master && role_dashboard then
+  if !role_agent && role_master && role_dashboard then
     Log.debug 'host is master and dashboard'
     fh = File.new("#{$work_dir}/tarballs/q_master_and_dashboard", 'w')
     master_dashboard_a.split(/\n/).each do |line|
