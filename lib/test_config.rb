@@ -22,7 +22,7 @@ module TestConfig
     version=""
 
     unless File.file? "#{$work_dir}/tarballs/LATEST"
-      Log.warn " Can not find: #{$work_dir}/tarballs/LATEST"
+      Log.warn "Can not find: #{$work_dir}/tarballs/LATEST"
     end
 
     begin

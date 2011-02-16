@@ -7,7 +7,7 @@ def perform_test_setup_steps(log, options, config)
   ["setup/early", "setup/#{options[:type]}"].each do |root|
     run_tests_under(log, config, options.merge({:random => false}), root).each do |test, result|
       unless result == 0 then
-        Log.warn "Warn: Setup action #{test} returned non-zero"
+        Log.warn "Setup action #{test} returned non-zero"
         # Installer often returns non-zero upon sucessful install and hence we should warn
         # vs bailing at this stage.
         # exit 1
