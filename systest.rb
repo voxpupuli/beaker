@@ -10,7 +10,6 @@ require 'systemu'
 require 'test/unit'
 
 Test::Unit.run = true
-
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 
 # Where was I called from
@@ -31,13 +30,14 @@ else
 end
 
 config = TestConfig.load_file(options[:config])
-gen_answer_files(config)
+prepper = TestWrapper.new(config)
 
 if options[:mrpropper]
   Log.debug "Cleaning Hosts of old install"
-  prepper = TestWrapper.new(config)
   prepper.clean_hosts(config) # Clean-up old install
 end
+
+prepper.gen_answer_files(config)
 
 perform_test_setup_steps(log, options, config)
 
