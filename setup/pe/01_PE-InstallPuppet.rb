@@ -22,20 +22,20 @@ hosts.each do |host|
 end
 
 # Install Dashboard only
-hosts.each do |host|
-  next if host['roles'].include? 'agent'
-  next if host['roles'].include? 'master'
-  role_dashboard = host['roles'].include? 'dashboard'
-  version        = host["puppetver"]
-  platform       = host['platform']
-  dist_dir       = "puppet-enterprise-#{version}-#{platform}"
-  q_script       = "q_dashboard_only"
-
-  step "SCP Dashboard answer file to dist tar dir"
-  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
-  step "Install Puppet Dashboard"
-  on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
-end
+#hosts.each do |host|
+#  next if host['roles'].include? 'agent'
+#  next if host['roles'].include? 'master'
+#  role_dashboard = host['roles'].include? 'dashboard'
+#  version        = host["puppetver"]
+#  platform       = host['platform']
+#  dist_dir       = "puppet-enterprise-#{version}-#{platform}"
+#  q_script       = "q_dashboard_only"
+#
+#  step "SCP Dashboard answer file to dist tar dir"
+#  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
+#  step "Install Puppet Dashboard"
+#  on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
+#end
 
 # Install Master first -- allows for auto cert signing
 hosts.each do |host|
@@ -46,8 +46,8 @@ hosts.each do |host|
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_master && !role_dashboard); "q_master_only"
-    when (role_master &&  role_dashboard); "q_master_and_dashboard"
+    when (!role_dashboard); "q_master_only"
+    when (role_dashboard); "q_master_and_dashboard"
     else puts "Master warn #{host} has an unacceptable combination of roles."
   end
 
@@ -70,6 +70,7 @@ hosts.each do |host|
   q_script = case
     when (role_agent  && !role_dashboard); "q_agent_only"
     when (role_agent  && role_dashboard);  "q_agent_and_dashboard"
+    when (!role_agent && role_dashboard);  "q_dashboard_only"
     else puts "Agent warn #{host} has an unacceptable combination of roles."
   end
 
@@ -78,4 +79,3 @@ hosts.each do |host|
   step "Install Puppet Agent"
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
 end
-
