@@ -19,22 +19,31 @@ $work_dir=FileUtils.pwd
 ###################################
 #  Main
 ###################################
-start_time = Time.new
 org_stdout = $stdout      # save stdout file descriptor
 
 options=parse_args
-setup_logs(start_time, options) unless options[:stdout_only]
-config = read_config(options)
+log = Log.new(options)
+
+if options[:config]
+  Log.debug "Using Config #{options[:config]}"
+else
+  fail "Argh!  There is no default for Config, specify one!"
+end
+
+config = TestConfig.load_file(options[:config])
 gen_answer_files(config)
 
 if options[:mrpropper]
+  Log.debug "Cleaning Hosts of old install"
   prepper = TestWrapper.new(config)
-  prepper.clean_hosts(config) if options[:mrpropper]  # Clean-up old install
+  prepper.clean_hosts(config) # Clean-up old install
 end
 
-perform_test_setup_steps(options, config)
-test_summary = run_the_tests(options, config)
-summarize(test_summary, start_time, config, options[:stdout]) unless options[:stdout_only]
+perform_test_setup_steps(log, options, config)
+
+run_the_tests(log, options, config)
+
+log.summarize(config, options[:stdout]) unless options[:stdout_only]
 
 if ! options[:stdout] then
   $stdout = org_stdout

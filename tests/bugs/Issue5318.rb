@@ -5,7 +5,7 @@ test_name "Issue5318" do
   step "Query Puppet master for filetimeout value" do
     on master,"puppet --configprint all | grep filetimeout"
     if filetimeout = stdout[/filetimeout \= \'(\d+)\'/,1]
-      puts "Master reported file timeout value of: #{filetimeout}"
+      Log.debug "Master reported file timeout value of: #{filetimeout}"
     else 
       fail_test "Master file timeout value not reported!" 
     end

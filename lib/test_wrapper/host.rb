@@ -33,7 +33,7 @@ class TestWrapper
 
     def do_action(verb,*args)
       result = Result.new(self,args,'','',0)
-      puts "#{self}: #{verb}(#{args.inspect})"
+      Log.debug "#{self}: #{verb}(#{args.inspect})"
       yield result unless $dry_run
       result
     end

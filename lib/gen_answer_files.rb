@@ -118,7 +118,7 @@ config["HOSTS"].each_key do|host|
 
   # Host is only an Agent
   if role_agent && !role_dashboard then
-    puts 'host is agent only'
+    Log.debug 'host is agent only'
     fh = File.new("#{$work_dir}/tarballs/q_agent_only", 'w')
     agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
       if line =~ /(q_puppetagent_server=)MASTER/ then
@@ -131,7 +131,7 @@ config["HOSTS"].each_key do|host|
 
   # Host is Agent and Dashboard
   if role_agent && role_dashboard then
-    puts 'host is agent and dashboard'
+    Log.debug 'host is agent and dashboard'
     fh = File.new("#{$work_dir}/tarballs/q_agent_and_dashboard", 'w')
     agent_dashboard_a.split(/\n/).each do |line|
       if line =~ /(q_puppetagent_server=)MASTER/ then
@@ -144,7 +144,7 @@ config["HOSTS"].each_key do|host|
 
   # Host is a Master only - no Dashbord
   if role_master && !role_dashboard then
-    puts 'host is master only'
+    Log.debug 'host is master only'
     fh = File.new("#{$work_dir}/tarballs/q_master_only", 'w')
     master_only_a.split(/\n/).each do |line|
       fh.puts line
@@ -154,7 +154,7 @@ config["HOSTS"].each_key do|host|
 
   # Host is a Master and Dashboard
   if role_master && role_dashboard then
-    puts 'host is master and dashboard'
+    Log.debug 'host is master and dashboard'
     fh = File.new("#{$work_dir}/tarballs/q_master_and_dashboard", 'w')
     master_dashboard_a.split(/\n/).each do |line|
       fh.puts line

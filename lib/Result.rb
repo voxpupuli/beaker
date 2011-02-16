@@ -8,10 +8,10 @@ class Result
     @exit_code = exit_code
   end
 
-  def log(test_name)
-    puts "<STDOUT>\n#{stdout}\n</STDOUT>"
-    puts "<STDERR>\n#{stderr}\n</STDERR>"
-    puts "Exited with #{exit_code}"
-    puts
+  def log
+    Log.debug "<STDOUT>\n#{stdout}\n</STDOUT>"
+    Log.debug "<STDERR>\n#{stderr}\n</STDERR>"
+    Log.debug "Exited with #{exit_code}"
+    Log.debug
   end
 end

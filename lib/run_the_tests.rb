@@ -1,21 +1,19 @@
-def run_the_tests(options, config)
-  test_summary=[]
+def run_the_tests(log,options, config)
+  Log.debug "Executing tests in #{options[:tests].join(', ')}"
   options[:tests].each do |root|
-    puts nil, '=' * 78, nil, "Running tests from #{root}"
-    test_summary += run_tests_under(config, options, root)
+    Log.debug nil, '=' * 78, nil, "Running tests from #{root}"
+    run_tests_under(log, config, options, root)
   end
-  test_summary
 end
 
-def run_tests_under(config, options, root)
+def run_tests_under(log, config, options, root)
   summary = []
   suite = TestSuite.new(root, :random => options[:random])
-  puts "Using random seed #{suite.random_seed}" if suite.random_seed
+  Log.notify "Using random seed #{suite.random_seed}" if suite.random_seed
   suite.test_files.each do |test_file|
-    puts "", "", "#{test_file} executing..."
+    Log.debug "", "", "#{test_file} executing..."
     result = TestWrapper.new(config, options, test_file).run_test
-    puts "#{test_file} #{result.test_status}ed"
-    summary << [test_file, result]
+    Log.notify "#{test_file} #{result.test_status}ed"
+    log.record_result(test_file, result)
   end
-  return summary
 end

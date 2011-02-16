@@ -58,15 +58,14 @@ class TestWrapper
   #
   # Annotations
   #
-  attr_reader :step_name
-  def step(name,&block)
-    @step_name = name
-    puts @step_name
+  def step(step_name,&block)
+    Log.notify "  * #{step_name}"
     yield if block
   end
 
-  def test_name(name,&block)
-    step(name, &block)
+  def test_name(test_name,&block)
+    Log.notify test_name
+    yield if block
   end
   #
   # Basic operations
@@ -84,7 +83,7 @@ class TestWrapper
       @result = command.exec(host, options)
 
       unless options[:silent] then
-        result.log(step_name)
+        result.log
         if options[:acceptable_exit_codes].include?(exit_code)
           # cool.
         elsif options[:failing_exit_codes].include?(exit_code)
@@ -106,13 +105,13 @@ class TestWrapper
       host.each { |h| scp_to h,from_path,to_path,options }
     else
       @result = host.do_scp(from_path, to_path)
-      result.log(step_name)
+      result.log
       raise "scp exited with #{result.exit_code}" if result.exit_code != 0
     end
   end
 
   def pass_test(msg)
-    puts msg
+    Log.notify msg
   end
   def fail_test(msg)
     assert(false, msg)
@@ -178,7 +177,7 @@ class TestWrapper
       host.each { |h| run_agent_on h }
     elsif ["ticket #5541 is a pain and hasn't been fixed"] # XXX
       2.times { on host,puppet_agent(arg),:silent => true }
-      result.log(step_name)
+      result.log
       raise "Error code from puppet agent" if result.exit_code != 0
     else
       on host,puppet_agent(arg)
