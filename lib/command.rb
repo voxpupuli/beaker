@@ -17,7 +17,9 @@ class Command
 
   # Determine the appropriate puppet env command for the given host.
   def puppet_env_command(host_info)
-    %Q{env RUBYLIB="#{host_info['puppetlibdir']||''}:#{host_info['facterlibdir']||''}" PATH="#{host_info['puppetbindir']||''}:#{host_info['facterbindir']||''}:$PATH"}
+    rubylib = [host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(':')
+    path    = [host_info['puppetbindir'], host_info['facterbindir'],'$PATH'   ].compact.join(':')
+    %Q{env RUBYLIB="#{rubylib}" PATH="#{path}"}
   end
 end
 
