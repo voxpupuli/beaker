@@ -10,7 +10,7 @@ def perform_test_setup_steps(log, options, config)
         Log.warn "Warn: Setup action #{test} returned non-zero"
         # Installer often returns non-zero upon sucessful install and hence we should warn
         # vs bailing at this stage.
-        # exit 1
+        exit 1
       end
     end
   end
