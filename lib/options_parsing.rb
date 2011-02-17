@@ -11,7 +11,7 @@ def parse_args
     end
 
     options[:type] = 'skip'
-    opts.on('--type TYPE', 'Select puppet install type (pe, git, skip) - default "skip"') do |type|
+    opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, skip) - default "skip"') do |type|
       unless File.directory?("setup/#{type}") then
         Log.error "Sorry, #{type} is not a known setup type!"
         exit 1
