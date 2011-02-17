@@ -26,7 +26,9 @@ disthash.map { |k,v| v }.uniq.each do |file|
 end
 
 step "Pre Test Setup -- SCP answer files to NFS RW mount"
-scp_to master,"#{$work_dir}/tarballs/q_\*", "/tmp"
+scp_to master,"#{$work_dir}/tarballs/answers.tar", "/tmp"
+step "Pre Test Setup -- extract answer.tar on NFS RW mount"
+on master, "tar xf /tmp/answers.tar -C /mnt/rw/pe"
 
 # Mount NFS RO mount point on all hosts
 hosts.each do |host|

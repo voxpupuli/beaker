@@ -98,6 +98,8 @@ q_vendor_packages_install='y'
   
   # Clean up all answer files
   FileUtils.rm Dir.glob('$work_dir/q_*')
+  FileUtils.rm("#{$work_dir}/tarballs/answers.tar") if File::exists?("#{$work_dir}/tarballs/answers.tar")
+  system("tar cf #{$work_dir}/tarballs/answers.tar #{$work_dir}/tarballs/q_*")
   
   # Parse config for Master 
   hosts.each do |host|
