@@ -56,6 +56,7 @@ class Log
     $stderr = run_log
   end
 
+  attr_reader :results
   def record_result(name, result)
     @results << [name, result]
   end

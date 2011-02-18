@@ -13,7 +13,9 @@ def run_tests_under(log, config, options, root)
   suite.test_files.each do |test_file|
     Log.debug "", "", "#{test_file} executing..."
     result = TestWrapper.new(config, options, test_file).run_test
+    puts "DEBUG result: #{result.test_status}"
     Log.notify "#{test_file} #{result.test_status}ed"
     log.record_result(test_file, result)
   end
+  log.results
 end
