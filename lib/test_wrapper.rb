@@ -26,7 +26,7 @@ class TestWrapper
         rescue Test::Unit::AssertionFailedError => e
           @test_status = :fail
           @exception   = e
-        rescue => e
+        rescue StandardError, ScriptError => e
           @test_status = :error
           @exception   = e
         end
