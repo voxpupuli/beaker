@@ -1,7 +1,5 @@
 def run_the_tests(log,options, config)
-  Log.debug "Executing tests in #{options[:tests].join(', ')}"
   options[:tests].each do |root|
-    Log.debug nil, '=' * 78, nil, "Running tests from #{root}"
     run_tests_under(log, config, options, root)
   end
 end
@@ -11,10 +9,17 @@ def run_tests_under(log, config, options, root)
   suite = TestSuite.new(root, :random => options[:random])
   Log.notify "Using random seed #{suite.random_seed}" if suite.random_seed
   suite.test_files.each do |test_file|
-    Log.debug "", "", "#{test_file} executing..."
+    Log.notify
     result = TestWrapper.new(config, options, test_file).run_test
-    puts "DEBUG result: #{result.test_status}"
-    Log.notify "#{test_file} #{result.test_status}ed"
+    status_color = case result.test_status
+                   when :pass
+                     Log::GREEN
+                   when :fail
+                     Log::RED
+                   when :error
+                     Log::YELLOW
+                   end
+    Log.notify "#{status_color}#{test_file} #{result.test_status}ed#{Log::NORMAL}"
     log.record_result(test_file, result)
   end
   log.results

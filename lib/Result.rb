@@ -9,9 +9,9 @@ class Result
   end
 
   def log
+    Log.debug
     Log.debug "<STDOUT>\n#{stdout}\n</STDOUT>"
     Log.debug "<STDERR>\n#{stderr}\n</STDERR>"
     Log.debug "Exited with #{exit_code}"
-    Log.debug
   end
 end
