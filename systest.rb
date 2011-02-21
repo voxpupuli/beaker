@@ -12,6 +12,11 @@ require 'test/unit'
 Test::Unit.run = true
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 
+trap(:INT) do
+  $stderr.puts "Exiting..."
+  exit(1)
+end
+
 # Where was I called from
 $work_dir=FileUtils.pwd
 
