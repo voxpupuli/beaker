@@ -76,7 +76,7 @@ class TestWrapper
   attr_reader :result
   def on(host, command, options={}, &block)
     options[:acceptable_exit_codes] ||= [0]
-    options[:failing_exit_codes]    ||= []
+    options[:failing_exit_codes]    ||= [1]
     if command.is_a? String
       command = Command.new(command)
     end
