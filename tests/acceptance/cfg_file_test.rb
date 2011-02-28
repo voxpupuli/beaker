@@ -19,5 +19,10 @@ on master, puppet_master("--configprint all | tr -d \" \"") do
     config_print_h[k]=v 
   end
   #puts config_print_h.inspect
-   #fail_test "puppet master wasn't mentioned" unless stdout.include? 'should fail'
+end
+
+step "compare puppet.conf to --configprint output"
+puppet_conf_h.each do |k,v|
+  puts "#{puppet_conf_h[k]}  #{config_print_h[k]}"
+  fail_test "puppet.conf: #{puppet_conf_h[k]} differs from --configprintall: #{config_print_h[k]}" if ( puppet_conf_h[k] != config_print_h[k] )
 end
