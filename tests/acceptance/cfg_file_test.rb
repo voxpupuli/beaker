@@ -1,4 +1,3 @@
-#require 'ruby-debug'; debugger; 1
 test_name "Validate puppet.conf vs.--configprint all"
 
 puppet_conf_h  = Hash.new 
@@ -20,15 +19,5 @@ on master, puppet_master("--configprint all | tr -d \" \"") do
     config_print_h[k]=v 
   end
   #puts config_print_h.inspect
+   #fail_test "puppet master wasn't mentioned" unless stdout.include? 'should fail'
 end
-
-#common_keys = puppet_conf_h.keys & config_print_h.keys
-
-puppet_conf_h.each { |k, v|
-  # unless config_print_h[k].include? v do
-     puts config_print_h[k] v
-     #unless ( config_print_h[k] =~ puppet_conf_h[k] )  do
-     #  puts "not matches"
-     #end
-    #puts config_print_h[k] puppet_conf_h[k]
-}
