@@ -3,7 +3,8 @@ test_name "Install puppet and facter on target machines..."
 SourcePath = "/opt/puppet-git-repos"
 GitHub     = 'git://github.com/puppetlabs'
 IsURI      = %r{^[^:]+://}
-
+ 
+step "Parse Opts"
 if options[:puppet] =~ IsURI then
   repo, rev = options[:puppet].split('#', 2)
   PuppetRepo = repo
@@ -30,7 +31,7 @@ hosts.each do |host|
   on host, "cd #{SourcePath} && git clone #{FacterRepo}"
 
   step "Check out the revision #{FacterRev}"
-  on host, "cd #{SourcePath}/facter && git checkout #{FacterRev}"
+  on host, "cd #{SourcePath}/facter && git checkout -b #{FacterRev}"
 
   step "Install facter on the system"
   on host, "cd #{SourcePath}/facter && ruby ./install.rb"
@@ -39,7 +40,7 @@ hosts.each do |host|
   on host, "cd #{SourcePath} && git clone #{PuppetRepo}"
 
   step "Check out the revision #{PuppetRev}"
-  on host, "cd #{SourcePath}/puppet && git checkout #{PuppetRev}"
+  on host, "cd #{SourcePath}/puppet && git checkout -b #{PuppetRev}"
 
   step "Install puppet on the system"
   on host, "cd #{SourcePath}/puppet && ruby ./install.rb"
