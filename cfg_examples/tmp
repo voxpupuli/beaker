@@ -1,11 +1,12 @@
 HOSTS:
-  cent-55-64-ci1:
-    roles:
-      - master
-    platform: centos-5-x86_64
-  cent-55-64-ci2:
+  rhel-55-64-1:
     roles:
       - agent
+    platform: rhel-5-x86_64
+  cent-55-64-1:
+    roles:
+      - dashboard
+      - master 
     platform: centos-5-x86_64
 CONFIG:
   rubyver: ruby18

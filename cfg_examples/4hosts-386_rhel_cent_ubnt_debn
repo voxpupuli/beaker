@@ -18,7 +18,6 @@ HOSTS:
     platform: debian-5-i386
 CONFIG:
   rubyver: ruby18
-  facterver: fact11
   gemver: gem12
   puppetbinpath: /opt/puppet/bin
   filecount: 12
