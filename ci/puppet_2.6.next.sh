@@ -13,6 +13,7 @@ sleep 10
 
 cd $workdir
 echo "Test Pass Start"
-# ./systest.rb -c ci/ci-64.cfg --type git -p 2.6.next -f 1.5.8 -t tests/acceptance --debug
-./systest.rb -c ci/ci-64.cfg --type git -p 2.6.next -f 1.5.8 -t tests/post_install/ValidatePuppet.rb
+./systest.rb -c ci/ci-64.cfg --type git -p 2.6.next -f 1.5.8 -t tests/acceptance --debug
 echo "Test Pass Complete"
+
+# mailx -s "CI Test"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com" < log/latest/summary.txt 
