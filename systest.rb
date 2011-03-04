@@ -25,7 +25,7 @@ $work_dir=FileUtils.pwd
 ###################################
 org_stdout = $stdout      # save stdout file descriptor
 
-options=parse_args
+options=Options.parse_args
 log = Log.new(options)
 
 if options[:config]
