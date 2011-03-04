@@ -14,16 +14,15 @@ module TestConfig
 
     # Merge our default SSH options into the configuration.
     config['CONFIG']['ssh'] = SSH_DEFAULTS.merge(config['CONFIG']['ssh'] || {})
-    config["CONFIG"]["puppetver"] = puppet_version
+    config["CONFIG"]["pe_ver"] = puppet_enterprise_version if puppet_enterprise_version 
+    config["CONFIG"]["puppet_ver"] = Options.parse_args[:puppet] unless puppet_enterprise_version
+    config["CONFIG"]["facter_ver"] = Options.parse_args[:facter] unless puppet_enterprise_version
     config
   end
 
-  def self.puppet_version
+  def self.puppet_enterprise_version
+    return unless Options.parse_args[:type] =~ /pe/
     version=""
-
-    unless File.file? "#{$work_dir}/tarballs/LATEST"
-      Log.warn "Can not find: #{$work_dir}/tarballs/LATEST"
-    end
 
     begin
       File.open("#{$work_dir}/tarballs/LATEST") do |file|
@@ -43,45 +42,6 @@ module TestConfig
   # Accepts conf
   # Print out test configuration
   def self.dump(config)
-    # Config file format
-    # HOSTS:
-    #   pmaster:
-    #     roles:
-    #       - master
-    #       - dashboard
-    #     platform: RHEL
-    #   pagent:
-    #     roles:
-    #       - agent
-    #     platform: RHEL
-    # CONFIG:
-    #   rubyver: ruby18
-    #   facterver: fact11
-    #   puppetbinpath: /opt/puppet/bin
-
-    # Print the main categories
-    #config.each_key do|category|
-    #  puts "Main Category: #{category}"
-    #end
-
-    # Print sub keys to main categories
-    #config.each_key do|category|
-    #  config["#{category}"].each_key do|subkey|
-    #    puts "1st Level Subkeys: #{subkey}"
-    #  end
-    #end
-
-    # Print out hosts
-    #config["HOSTS"].each_key do|host|
-    #    puts "Host Names: #{host}"
-    #end
-
-    # Print out hosts and all sub info
-    #config["HOSTS"].each_key do|host|
-    #    puts "Host Names: #{host} #{config["HOSTS"][host]}"
-    #
-    #end
-
     # Access "platform" for each host
     config["HOSTS"].each_key do|host|
       Log.notify "Platform for #{host} #{config["HOSTS"][host]['platform']}"

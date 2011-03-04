@@ -22,7 +22,6 @@ HOSTS:
     platform: rhel-5-x86_64
 CONFIG:
   rubyver: ruby18
-  facterver: fact11
   gemver: gem12
   puppetbinpath: /opt/puppet/bin
   filecount: 12
