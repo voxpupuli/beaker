@@ -27,6 +27,7 @@ class TestWrapper
           @test_status = :fail
           @exception   = e
         rescue StandardError, ScriptError => e
+          puts e
           @test_status = :error
           @exception   = e
         end
@@ -188,6 +189,17 @@ class TestWrapper
       raise "Error code from puppet agent" if result.exit_code != 0
     else
       on host,puppet_agent(arg)
+    end
+  end
+
+
+  def get_git_sha1
+  # config["CONFIG"]["puppet_ver"]
+  # # config["CONFIG"]["facter_sha"] = 'abc123'
+  step "Get puppet and facter sha1"
+    on master, "cd /opt/puppet-git-repos/puppet && git show-ref --heads 2.6.next" do
+      config["CONFIG"]["puppet_sha"] = stdout
+      puts stdout
     end
   end
 
