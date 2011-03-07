@@ -11,8 +11,7 @@ module TestConfig
 
   def self.load_file(config_file)
     config = YAML.load_file(config_file)
-
-    # Merge our default SSH options into the configuration.
+    # Merge some useful date into the config hash
     config['CONFIG']['ssh'] = SSH_DEFAULTS.merge(config['CONFIG']['ssh'] || {})
     config["CONFIG"]["pe_ver"] = puppet_enterprise_version if puppet_enterprise_version 
     config["CONFIG"]["puppet_ver"] = Options.parse_args[:puppet] unless puppet_enterprise_version
@@ -23,7 +22,6 @@ module TestConfig
   def self.puppet_enterprise_version
     return unless Options.parse_args[:type] =~ /pe/
     version=""
-
     begin
       File.open("#{$work_dir}/tarballs/LATEST") do |file|
         while line = file.gets
@@ -39,7 +37,6 @@ module TestConfig
     return version
   end
 
-  # Accepts conf
   # Print out test configuration
   def self.dump(config)
     # Access "platform" for each host
