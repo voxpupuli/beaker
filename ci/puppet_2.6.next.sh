@@ -16,7 +16,7 @@ run_test()  {
   ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $factor_ver -t tests/acceptance --debug
   echo "Test Pass Complete"
 
-  rm ci/log/latest
+  rm -f ci/log/latest
   cp -R log/* ci/log
 }
 
@@ -38,7 +38,16 @@ config='ci-64.cfg'
 test_type='git'
 puppet_ver='2.6.next'
 factor_ver='1.5.8'
+prep_vm
+run_test
+mail_result
 
+# puppet 2.6.next 
+# factor master (1.5.9)
+config='ci-64.cfg'
+test_type='git'
+puppet_ver='2.6.next'
+factor_ver='master'
 prep_vm
 run_test
 mail_result
