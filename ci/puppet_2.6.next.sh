@@ -16,9 +16,6 @@ run_test()  {
   ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $factor_ver -t tests/acceptance --debug
   echo "Test Pass Complete"
 
-  echo "Test source: $test_type" >> log/latest
-  echo "Puppet Version: $puppet_ver" >> log/latest
-  echo "Factor Version: $factor_ver" >> log/latest
   rm ci/log/latest
   cp -R log/* ci/log
 }
