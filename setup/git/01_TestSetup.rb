@@ -23,27 +23,32 @@ else
   FacterRev  = options[:facter]
 end
 
+def install_from_git(host, package, repo, revision)
+  step "Clone #{repo}"
+  on host, "cd #{SourcePath} && git clone #{repo}"
+
+  step "Check out the revision #{revision}"
+  on host, "cd #{SourcePath}/#{package} && git checkout -b #{revision}"
+
+  step "Install #{package} on the system"
+  on host, "cd #{SourcePath}/#{package} && ruby ./install.rb"
+end
+
 hosts.each do |host|
   step "Clean and create #{SourcePath}"
   on host, "rm -rf #{SourcePath} && mkdir -vp #{SourcePath}"
 
-  step "Clone #{FacterRepo}"
-  on host, "cd #{SourcePath} && git clone #{FacterRepo}"
+  install_from_git host, :facter, FacterRepo, FacterRev
+  install_from_git host, :puppet, PuppetRepo, PuppetRev
 
-  step "Check out the revision #{FacterRev}"
-  on host, "cd #{SourcePath}/facter && git checkout -b #{FacterRev}"
-
-  step "Install facter on the system"
-  on host, "cd #{SourcePath}/facter && ruby ./install.rb"
-
-  step "Clone #{PuppetRepo}"
-  on host, "cd #{SourcePath} && git clone #{PuppetRepo}"
-
-  step "Check out the revision #{PuppetRev}"
-  on host, "cd #{SourcePath}/puppet && git checkout -b #{PuppetRev}"
-
-  step "Install puppet on the system"
-  on host, "cd #{SourcePath}/puppet && ruby ./install.rb"
+  step "grab git repo versions"
+  version = {}
+  [:puppet, :facter].each do |package|
+    on master, "cd /opt/puppet-git-repos/#{package} && git describe" do
+      version[package] = stdout.chomp
+    end
+  end
+  config[:version] = version
 
   step "Create required users and groups"
   on host, "getent group puppet || groupadd puppet"
