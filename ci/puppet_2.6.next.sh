@@ -13,7 +13,7 @@ prep_vm() {
 run_test()  {
   cd $workdir
   echo "Test Pass Start"
-  ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $factor_ver -t tests/acceptance --debug
+  ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $facter_ver -t tests/acceptance --debug
   echo "Test Pass Complete"
 
   rm -f ci/log/latest
@@ -21,9 +21,10 @@ run_test()  {
 }
 
 mail_result() {
-mailx -s "Puppet Acceptance: 2.6.next, Factor 1.5.8"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com" < log/latest/summary.txt 
-#  mailx -s "Puppet Acceptance: Puppet ${puppet_ver}, Factor ${factor_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
+mailx -s "Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com, james@puppetlabs.com, luke@puppetlabs.com, zach@puppetlabs.com" < log/latest/summary.txt 
+#mailx -s "Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
 }
+
 
 #############
 # MAIN
@@ -37,7 +38,7 @@ workdir=`pwd`
 config='ci-64.cfg'
 test_type='git'
 puppet_ver='2.6.next'
-factor_ver='1.5.8'
+facter_ver='1.5.8'
 prep_vm
 run_test
 mail_result
@@ -47,7 +48,7 @@ mail_result
 config='ci-64.cfg'
 test_type='git'
 puppet_ver='2.6.next'
-factor_ver='master'
+facter_ver='master'
 prep_vm
 run_test
 mail_result
