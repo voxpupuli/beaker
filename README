@@ -1,0 +1,35 @@
+Running the Distributed Test Harness
+
+
+Pre-flight checks:
+
+  - You will need at least one host machine, physical or virtual is fine.  The machine will need properly configured network.
+
+  - On the your test host, you must configure pass through ssh auth for the root user.
+
+Prepare a config file:
+
+The test harness is configuration driven; the config file is yaml formated.  A basic config file sufficent for running tests against a single host:
+
+
+HOSTS:
+  hostname_of_test_machine:
+    roles:
+      - master
+      - agent
+    platform: centos-5-i386
+CONFIG:
+  rubyver: ruby18
+
+
+Here we have the machine "hostname_of_test_machine", a Centos 5.x 32 bit box,, that will serve as a Pupppet master and Agent.
+
+This represents a very basic config; more complex configs can be found under cfg_examples/.
+
+
+Steps to run the acceptance tests:
+
+
+./systest.rb -c your_cfg --type git -p 2.6.next  -f 1.5.8 -t tests/acceptance --debug
+
+Results will be written to log/latest/summary.txt and runlog
