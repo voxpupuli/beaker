@@ -201,6 +201,12 @@ class TestWrapper
     end
   end
 
+  def get_remote_option(hosts, subcommand, option)
+    on hosts, "puppet #{subcommand} --configprint #{option}" do
+      yield stdout.chomp
+    end
+  end
+
   def get_git_sha1
   # config["CONFIG"]["puppet_ver"]
   # # config["CONFIG"]["facter_sha"] = 'abc123'
