@@ -1,6 +1,7 @@
 class TestWrapper
   require 'lib/test_wrapper/host'
   require 'lib/gen_answer_files'
+  require 'tempfile'
 
   include GenAnswerFiles
 
@@ -192,6 +193,13 @@ class TestWrapper
     end
   end
 
+  def create_remote_file(hosts, file_path, file_content)
+    Tempfile.open 'puppet-acceptance' do |tempfile|
+      File.open(tempfile.path, 'w') { |file| file.puts file_content }
+
+      scp_to hosts, tempfile.path, file_path
+    end
+  end
 
   def get_git_sha1
   # config["CONFIG"]["puppet_ver"]
