@@ -2,7 +2,7 @@ class TestWrapper
   require 'lib/test_wrapper/host'
   require 'lib/gen_answer_files'
 
-	include GenAnswerFiles
+  include GenAnswerFiles
 
   include Test::Unit::Assertions
 
