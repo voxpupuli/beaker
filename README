@@ -3,15 +3,20 @@ Running the Distributed Test Harness
 
 Pre-flight checks:
 
-  - You will need at least one host machine, physical or virtual is fine.  The machine will need properly configured network.
+  - You will need at least one host machine, physical or virtual is fine.  The machine will need a properly configured network.
   - On the your test host, you must configure pass through ssh auth for the root user.
   - The harness need not be ran as root
   - If installing from a git repository then you must have git and ruby installed on your host.
+  - The machine that will drive the tests must have ruby installed, inclduing the following ruby gems:
+     rubygems
+     net-ssh 
+     net-scp
+     systemu
+
 
 Prepare a config file:
 
 The test harness is configuration driven; the config file is yaml formated.  A basic config file sufficent for running tests against a single host:
-
 
 HOSTS:
   hostname_of_test_machine:
