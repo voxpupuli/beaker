@@ -13,7 +13,7 @@ end
 
 hosts.each do |host|
   step "Install ruby"
-  on host, "apt-get install ruby -y"
+  on host, "apt-get install ruby-full -y"
 
   step "Clean and create #{SourcePath}"
   on host, "rm -rf #{SourcePath} && mkdir -vp #{SourcePath}"
