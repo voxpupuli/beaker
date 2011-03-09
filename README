@@ -1,12 +1,14 @@
 Running the Distributed Test Harness
 
-
 Pre-flight checks:
 
-  - You will need at least one host machine, physical or virtual is fine.  The machine will need a properly configured network.
-  - On the your test host, you must configure pass through ssh auth for the root user.
-  - The harness need not be ran as root
-  - If installing from a git repository then you must have git and ruby installed on your host.
+  - You will need at least one System Undet Test (SUT) host, physical or virtual is fine.  The machine will need a properly configured network.
+  - On the your SUT, you must configure pass through ssh auth for the root user.
+  - The SUT have have the "ntpdate" binary installed
+  - GIT installs: installing from a git repository then you must have git, ruby, rdoc installed on your SUT. 
+  - PE installs: PE will install git, ruby, rdoc.
+
+  - The harness need not be ran as root.
   - The machine that will drive the tests must have ruby installed, inclduing the following ruby gems:
      rubygems
      net-ssh 
