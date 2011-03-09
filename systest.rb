@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'pty'
+require 'expect'
 require 'rubygems'
 require 'net/ssh'
 require 'net/scp'
@@ -40,6 +42,12 @@ prepper = TestWrapper.new(config)
 if options[:mrpropper]
   Log.debug "Cleaning Hosts of old install"
   prepper.clean_hosts(config) # Clean-up old install
+end
+
+if options[:vmrun]
+  Log.debug "Reverting and starting VMs"
+  prepper.vmrun(config) 
+  exit 0 
 end
 
 prepper.gen_answer_files(config)
