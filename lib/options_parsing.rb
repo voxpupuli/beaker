@@ -59,6 +59,11 @@ class Options
         $dry_run = true
       end
 
+      @options[:vmrun] = FALSE
+      opts.on( '--vmrun', 'VM revert and start VMs' ) do
+        @options[:vmrun] = @options[:type]
+      end
+
       @options[:mrpropper] = FALSE
       opts.on( '--mrpropper', 'Clean hosts' ) do
         @options[:mrpropper] = TRUE
