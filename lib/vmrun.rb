@@ -41,5 +41,9 @@ module VmManage
     puts "KEY: #{key}  VAL: #{val}"
   }
 
+hosts.each do |host|
+  puts host
+end
+
   end
 end
