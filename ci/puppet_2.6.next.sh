@@ -13,16 +13,14 @@ prep_vm() {
 run_test()  {
   cd $workdir
   echo "Test Pass Start"
+  stime=`date`
   ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $facter_ver -t tests/acceptance --debug
   echo "Test Pass Complete"
-
-  rm -f ci/log/latest
-  cp -R log/* ci/log
 }
-
+time}
 mail_result() {
-mailx -s "Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com, james@puppetlabs.com, luke@puppetlabs.com, zach@puppetlabs.com" < log/latest/summary.txt 
-#mailx -s "Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
+mailx -s "${stime}  Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com, james@puppetlabs.com, luke@puppetlabs.com, zach@puppetlabs.com" < log/latest/summary.txt 
+#mailx -s "${stime}  Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
 }
 
 
