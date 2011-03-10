@@ -39,7 +39,7 @@ config='ci-64.cfg'
 test_type='git'
 puppet_ver='2.6.next'
 facter_ver='1.5.8'
-prep_vm
+#prep_vm
 run_test
 mail_result
 
@@ -49,6 +49,6 @@ config='ci-64.cfg'
 test_type='git'
 puppet_ver='2.6.next'
 facter_ver='master'
-prep_vm
+#prep_vm
 run_test
 mail_result

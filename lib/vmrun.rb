@@ -10,7 +10,7 @@ module VmManage
         w_f.print "Puppetmaster!\n"
       end
 
-      # Send command
+      # Send list command
       r_f.expect("virsh # ") do
         w_f.print "list\n"
       end
@@ -30,6 +30,18 @@ module VmManage
           end
         end
       end
+      vminfo_h.each { |key, val|
+        puts "KEY: #{key}  VAL: #{val}"
+      }
+
+      # Revert to snapshot
+      #vminfo_h.each { |key, val|
+      #  puts "reverting #{key}"
+      #  r_f.expect("virsh # ") do
+      #    w_f.print "snapshot-revert #{val} git\n"
+      #  end
+      #}
+
       begin
         w_f.print "quit\n"
       rescue

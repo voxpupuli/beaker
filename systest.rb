@@ -46,7 +46,7 @@ end
 
 if options[:vmrun]
   Log.debug "Reverting and starting VMs"
-  prepper.vmrun(config) 
+  prepper.vmrun(config)
   exit 0 
 end
 
