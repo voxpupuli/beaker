@@ -1,0 +1,20 @@
+#!/usr/bin/expect -f
+set timeout 10
+
+# Up to two args - a command and an arg
+set cmd [lindex $argv 0]
+set opt1 [lindex $argv 1]
+set opt2 [lindex $argv 2]
+
+# Login
+spawn virsh -c esx://root@soko/?no_verify=1
+expect "Enter root's password for soko: "
+send "Puppetmaster!\r";
+
+# Exec command
+expect "virsh # "
+send "$cmd $opt1 $opt2\r";
+
+# Ciao
+expect "virsh # "
+send "quit\r";
