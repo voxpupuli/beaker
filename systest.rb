@@ -26,13 +26,12 @@ $work_dir=FileUtils.pwd
 org_stdout = $stdout      # save stdout file descriptor
 
 options=Options.parse_args
-log = Log.new(options)
-
-if options[:config]
-  Log.debug "Using Config #{options[:config]}"
-else
+unless options[:config] then
   fail "Argh!  There is no default for Config, specify one!"
 end
+
+log = Log.new(options)
+Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
 prepper = TestWrapper.new(config)
