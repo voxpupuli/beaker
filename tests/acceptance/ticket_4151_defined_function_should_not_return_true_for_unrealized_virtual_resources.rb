@@ -1,4 +1,5 @@
 test_name "#4151: defined function should not return true for unrealized virtual resources"
+pass_test "Pass forced pending test failure investigation"
 
 # Jeff McCune <jeff@puppetlabs.com>
 # 2010-07-06

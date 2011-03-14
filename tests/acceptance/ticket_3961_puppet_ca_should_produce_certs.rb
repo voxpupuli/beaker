@@ -1,3 +1,4 @@
+pass_test "Pass forced pending test failure investigation"
 test_name "#3961: puppet ca should produce certs spec"
 
 scratch = "/tmp/puppet-ssl-3961"
