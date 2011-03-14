@@ -4,7 +4,7 @@
     %testcase{:classname => test.classname, :name => test.name, :time => test.elapsedtime}
       - if test.error
         %error{:type => "error output"}
-	  = test.error
+          = test.error
       - if test.output
         %output
-	  = test.output
+          = test.output
