@@ -5,7 +5,9 @@ def perform_test_setup_steps(log, options, config)
   # for post installer steps.
   # ["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
   ["setup/early", "setup/#{options[:type]}"].each do |root|
-    run_tests_under(log, config, options.merge({:random => false}), root).each do |test, result|
+    pass = options.merge({ :random => false, :tests => root })
+    suite = TestSuite.new(log, pass, config)
+    suite.run.each do |test, result|
       unless result.test_status == :pass then
         Log.error "Setup action #{test} failed, exiting..."
         exit 1

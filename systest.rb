@@ -50,7 +50,8 @@ prepper.gen_answer_files(config)
 
 perform_test_setup_steps(log, options, config)
 
-run_the_tests(log, options, config)
+TestSuite.new(log, options, config).run
+
 
 log.summarize(config, options[:stdout]) unless options[:stdout_only]
 test_state = log.sum_failed
