@@ -34,12 +34,7 @@ class TestWrapper
           @test_status = :error
           @exception   = e
         end
-        classes = test.split(/\n/).collect { |l| l[/^ *class +(\w+) *$/,1]}.compact
-        case classes.length
-        when 0; self
-        when 1; eval(classes[0]).new(config)
-        else fail "More than one class found in #{path}"
-        end
+        return self
       end
     end
   end
