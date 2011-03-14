@@ -6,7 +6,7 @@ hosts.each do |host|
 
   # determine the distro tar name
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
-  unless File.file? "#{$work_dir}/tarballs/#{dist_tar}"
+  unless File.file? "tarballs/#{dist_tar}"
     Log.error "PE #{dist_tar} not found, help!"
     Log.error ""
     Log.error "Make sure your configuration file uses the PE version string:"
@@ -15,7 +15,7 @@ hosts.each do |host|
   end
 
   step "Pre Test Setup -- SCP install package to hosts"
-  scp_to host, "#{$work_dir}/tarballs/#{dist_tar}", "/root"
+  scp_to host, "tarballs/#{dist_tar}", "/root"
   step "Pre Test Setup -- Untar install package on hosts"
   on host,"tar xf #{dist_tar}"
 
@@ -36,7 +36,7 @@ hosts.each do |host|
   end
 
   step "SCP Master Answer file to dist tar dir"
-  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
+  scp_to host, "tarballs/#{q_script}", "/root/#{dist_dir}"
   step "Install Puppet Master"
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
 end
@@ -59,7 +59,7 @@ hosts.each do |host|
   end
 
   step "SCP Answer file to dist tar dir"
-  scp_to host, "#{$work_dir}/tarballs/#{q_script}", "/root/#{dist_dir}"
+  scp_to host, "tarballs/#{q_script}", "/root/#{dist_dir}"
   step "Install Puppet Agent"
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
 end

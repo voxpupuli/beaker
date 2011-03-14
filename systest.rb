@@ -17,9 +17,6 @@ trap(:INT) do
   exit(1)
 end
 
-# Where was I called from
-$work_dir=FileUtils.pwd
-
 ###################################
 #  Main
 ###################################
@@ -30,7 +27,6 @@ unless options[:config] then
   fail "Argh!  There is no default for Config, specify one!"
 end
 
-log = Log.new(options)
 Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
@@ -48,6 +44,7 @@ end
 
 prepper.gen_answer_files(config)
 
+log = Log.new(options)
 perform_test_setup_steps(log, options, config)
 suite = TestSuite.new(log, options, config)
 suite.run
@@ -57,9 +54,6 @@ log.summarize(config, options[:stdout]) unless options[:stdout_only]
 if ! options[:stdout] then
   $stdout = org_stdout
 end
-
-## Back to our top level dir
-FileUtils.cd($work_dir)
 
 puts "Harness exited with: #{suite.success?}"
 exit suite.success?
