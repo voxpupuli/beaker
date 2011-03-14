@@ -39,7 +39,7 @@ puppet_ver='2.6.next'
 facter_ver='1.5.8'
 #prep_vm
 run_test
-mail_result
+#mail_result
 
 # puppet 2.6.next 
 # factor master (1.5.9)
@@ -49,4 +49,4 @@ puppet_ver='2.6.next'
 facter_ver='master'
 #prep_vm
 run_test
-mail_result
+#mail_result

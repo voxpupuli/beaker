@@ -28,7 +28,7 @@ test_type='git'
 puppet_ver='2.6.next'
 facter_ver='1.5.8'
 run_test
-mail_result
+#mail_result
 
 # puppet 2.6.next 
 # factor master (1.5.9)
@@ -37,4 +37,4 @@ test_type='git'
 puppet_ver='2.6.next'
 facter_ver='master'
 run_test
-mail_result
+#mail_result
