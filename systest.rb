@@ -34,7 +34,7 @@ log = Log.new(options)
 Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
-prepper = TestWrapper.new(config)
+prepper = TestCase.new(config)
 
 if options[:mrpropper]
   Log.debug "Cleaning Hosts of old install"
