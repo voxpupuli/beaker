@@ -2,11 +2,12 @@ class TestSuite
   attr_reader :test_files, :random_seed
   attr_reader :log, :options, :config
 
-  def initialize(log, options, config)
+  def initialize(options, config)
     @run     = false
-    @log     = log
     @options = options
     @config  = config
+
+    @log     = Log.new(options)
 
     @test_files = []
     Array(options[:tests] || 'tests').each do |root|
@@ -45,6 +46,9 @@ class TestSuite
       Log.notify "#{status_color}#{test_file} #{result.test_status}ed#{Log::NORMAL}"
       log.record_result(test_file, result)
     end
+
+    log.summarize(config, options[:stdout]) unless options[:stdout_only]
+
     log.results
   end
 

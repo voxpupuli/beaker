@@ -44,12 +44,9 @@ end
 
 prepper.gen_answer_files(config)
 
-log = Log.new(options)
-perform_test_setup_steps(log, options, config)
-suite = TestSuite.new(log, options, config)
+perform_test_setup_steps(options, config)
+suite = TestSuite.new(options, config)
 suite.run
-
-log.summarize(config, options[:stdout]) unless options[:stdout_only]
 
 if ! options[:stdout] then
   $stdout = org_stdout
