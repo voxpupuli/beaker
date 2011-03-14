@@ -89,7 +89,6 @@ class Log
   end
 
 
-  attr_reader :state
   def sum_failed
     test_count=0
     test_failed=0
@@ -103,7 +102,7 @@ class Log
       when :error then test_errored += 1
       end
     end
-    @state = test_failed + test_errored
+    test_failed + test_errored
   end
 
 
