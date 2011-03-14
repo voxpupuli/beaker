@@ -49,12 +49,10 @@ end
 prepper.gen_answer_files(config)
 
 perform_test_setup_steps(log, options, config)
-
-TestSuite.new(log, options, config).run
-
+suite = TestSuite.new(log, options, config)
+suite.run
 
 log.summarize(config, options[:stdout]) unless options[:stdout_only]
-test_state = log.sum_failed
 
 if ! options[:stdout] then
   $stdout = org_stdout
@@ -63,5 +61,5 @@ end
 ## Back to our top level dir
 FileUtils.cd($work_dir)
 
-puts "Harness exited with: #{test_state}"
-exit test_state
+puts "Harness exited with: #{suite.success?}"
+exit suite.success?

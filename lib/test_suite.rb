@@ -3,6 +3,7 @@ class TestSuite
   attr_reader :log, :options, :config
 
   def initialize(log, options, config)
+    @run     = false
     @log     = log
     @options = options
     @config  = config
@@ -27,6 +28,7 @@ class TestSuite
   end
 
   def run
+    @run = true
     summary = []
     Log.notify "Using random seed #{random_seed}" if random_seed
     test_files.each do |test_file|
@@ -44,5 +46,13 @@ class TestSuite
       log.record_result(test_file, result)
     end
     log.results
+  end
+
+  def success?
+    fail "you have not run the tests yet" unless @run
+    log.sum_failed == 0
+  end
+  def failed?
+    !success?
   end
 end
