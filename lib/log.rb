@@ -54,7 +54,7 @@ class Log
   # Setup log dir
   def initialize(options)
     @start_time = Time.now
-    @results = []
+    @testcases = []
     if options[:stdout_only]
       Log.debug "Will log to STDOUT, not files..."
       return
@@ -83,9 +83,9 @@ class Log
     $stderr = run_log
   end
 
-  attr_reader :results
-  def record_result(name, result)
-    @results << [name, result]
+  attr_reader :testcases
+  def record_testcase(name, testcase)
+    @testcases << [name, testcase]
   end
 
 
@@ -95,9 +95,9 @@ class Log
     test_failed=0
     test_passed=0
     test_errored=0
-    @results.each do |test, result|
+    @testcases.each do |test, testcase|
       test_count += 1
-      case result.test_status
+      case testcase.test_status
       when :pass then test_passed += 1
       when :fail then test_failed += 1
       when :error then test_errored += 1
@@ -128,15 +128,15 @@ class Log
     test_failed=0
     test_passed=0
     test_errored=0
-    @results.each do |test, result|
+    @testcases.each do |test, testcase|
       test_count += 1
-      case result.test_status
+      case testcase.test_status
       when :pass then test_passed += 1
       when :fail then test_failed += 1
       when :error then test_errored += 1
       end
     end
-    grouped_summary = @results.group_by{|test,result| result.test_status }
+    grouped_summary = @testcases.group_by{|test,testcase| testcase.test_status }
 
     Log.notify <<-HEREDOC
 
@@ -150,15 +150,15 @@ class Log
   HEREDOC
 
     Log.notify "Failed Tests Cases:"
-    (grouped_summary[:fail] || []).each {|test, result| print_test_failure(test, result)}
+    (grouped_summary[:fail] || []).each {|test, testcase| print_test_failure(test, testcase)}
 
     Log.notify "Errored Tests Cases:"
-    (grouped_summary[:error] || []).each {|test, result| print_test_failure(test, result)}
+    (grouped_summary[:error] || []).each {|test, testcase| print_test_failure(test, testcase)}
 
     sum_log.close unless to_stdout
   end
 
-  def print_test_failure(test, result)
-    Log.notify "  Test Case #{test} reported: #{result.exception.inspect}"
+  def print_test_failure(test, testcase)
+    Log.notify "  Test Case #{test} reported: #{testcase.exception.inspect}"
   end
 end

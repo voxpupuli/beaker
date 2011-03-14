@@ -34,8 +34,8 @@ class TestSuite
     Log.notify "Using random seed #{random_seed}" if random_seed
     test_files.each do |test_file|
       Log.notify
-      result = TestCase.new(config, options, test_file).run_test
-      status_color = case result.test_status
+      testcase = TestCase.new(config, options, test_file).run_test
+      status_color = case testcase.test_status
                      when :pass
                        Log::GREEN
                      when :fail
@@ -43,13 +43,13 @@ class TestSuite
                      when :error
                        Log::YELLOW
                      end
-      Log.notify "#{status_color}#{test_file} #{result.test_status}ed#{Log::NORMAL}"
-      log.record_result(test_file, result)
+      Log.notify "#{status_color}#{test_file} #{testcase.test_status}ed#{Log::NORMAL}"
+      log.record_testcase(test_file, testcase)
     end
 
     log.summarize(config, options[:stdout]) unless options[:stdout_only]
 
-    log.results
+    log.testcases
   end
 
   def success?
