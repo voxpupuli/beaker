@@ -9,7 +9,8 @@ run_test()  {
 }
 
 mail_result() {
-mailx -s "${stime}  Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
+mailx -s "${stime}  Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com, matt@puppetlabs.com, paul@puppetlabs.com, daniel@puppetlabs.com, jesse@puppetlabs.com, nigel@puppetlabs.com, markus@puppetlabs.com, jason@puppetlabs.com, max@puppetlabs.com, james@puppetlabs.com, luke@puppetlabs.com, zach@puppetlabs.com" < log/latest/summary.txt 
+#mailx -s "${stime}  Puppet Acceptance on Puppet ${puppet_ver}, Facter ${facter_ver}"  "dominic@puppetlabs.com" < log/latest/summary.txt 
 }
 
 
@@ -27,4 +28,3 @@ test_type='git'
 puppet_ver='2.6.next'
 facter_ver='1.5.8'
 run_test
-mail_result

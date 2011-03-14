@@ -88,6 +88,25 @@ class Log
     @results << [name, result]
   end
 
+
+  attr_reader :state
+  def sum_failed
+    test_count=0
+    test_failed=0
+    test_passed=0
+    test_errored=0
+    @results.each do |test, result|
+      test_count += 1
+      case result.test_status
+      when :pass then test_passed += 1
+      when :fail then test_failed += 1
+      when :error then test_errored += 1
+      end
+    end
+    @state = test_failed + test_errored
+  end
+
+
   def summarize(config, to_stdout)
     if to_stdout then
       Log.notify "\n\n"
@@ -125,7 +144,7 @@ class Log
   Attempted: #{test_count}
      Passed: #{test_passed}
      Failed: #{test_failed}
-     Errored: #{test_errored}
+    Errored: #{test_errored}
 
   - Specific Test Case Status -
   HEREDOC

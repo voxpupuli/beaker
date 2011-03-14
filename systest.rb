@@ -54,6 +54,7 @@ perform_test_setup_steps(log, options, config)
 run_the_tests(log, options, config)
 
 log.summarize(config, options[:stdout]) unless options[:stdout_only]
+test_state = log.sum_failed
 
 if ! options[:stdout] then
   $stdout = org_stdout
@@ -61,3 +62,6 @@ end
 
 ## Back to our top level dir
 FileUtils.cd($work_dir)
+
+puts "Harness exited with: #{test_state}"
+exit test_state
