@@ -204,25 +204,11 @@ class TestCase
     end
   end
 
-  def get_git_sha1
-  # config["CONFIG"]["puppet_ver"]
-  # # config["CONFIG"]["facter_sha"] = 'abc123'
-  step "Get puppet and facter sha1"
-    on master, "cd /opt/puppet-git-repos/puppet && git show-ref --heads 2.6.next" do
-      config["CONFIG"]["puppet_sha"] = stdout
-      puts stdout
-    end
-  end
-
-  def time_sync
-    step "Sync time via ntpdate"
-    on hosts,"ntpdate pool.ntp.org"
-  end
-
   def clean_hosts
     step "Clean Hosts"
     on hosts,"rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs"
   end
+
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
     # eg: class puppet_system_test {
