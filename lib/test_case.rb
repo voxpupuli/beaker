@@ -3,6 +3,7 @@ class TestCase
   require 'lib/gen_answer_files'
   require 'lib/vmrun'
   require 'tempfile'
+  require 'benchmark'
 
   include GenAnswerFiles
   include VmManage
@@ -10,6 +11,7 @@ class TestCase
   include Test::Unit::Assertions
 
   attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
+  attr_reader :runtime
   def initialize(config,options={},path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
@@ -18,21 +20,24 @@ class TestCase
     @usr_home = ENV['HOME']
     @test_status = :pass
     @exception = nil
+    @runtime = nil
     #
     # We put this on each wrapper (rather than the class) so that methods
     # defined in the tests don't leak out to other tests.
     class << self
       def run_test
-        begin
-          test = File.read(path)
-          eval test,nil,path,1
-        rescue Test::Unit::AssertionFailedError => e
-          @test_status = :fail
-          @exception   = e
-        rescue StandardError, ScriptError => e
-          puts e
-          @test_status = :error
-          @exception   = e
+        @runtime = Benchmark.realtime do
+          begin
+            test = File.read(path)
+            eval test,nil,path,1
+          rescue Test::Unit::AssertionFailedError => e
+            @test_status = :fail
+            @exception   = e
+          rescue StandardError, ScriptError => e
+            puts e
+            @test_status = :error
+            @exception   = e
+          end
         end
         return self
       end
