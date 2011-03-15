@@ -2,6 +2,7 @@ class TestCase
   require 'lib/test_case/host'
   require 'tempfile'
   require 'benchmark'
+  require 'stringio'
 
   include Test::Unit::Assertions
 
@@ -21,17 +22,19 @@ class TestCase
     # defined in the tests don't leak out to other tests.
     class << self
       def run_test
-        @runtime = Benchmark.realtime do
-          begin
-            test = File.read(path)
-            eval test,nil,path,1
-          rescue Test::Unit::AssertionFailedError => e
-            @test_status = :fail
-            @exception   = e
-          rescue StandardError, ScriptError => e
-            puts e
-            @test_status = :error
-            @exception   = e
+        with_standard_output_to_logs do
+          @runtime = Benchmark.realtime do
+            begin
+              test = File.read(path)
+              eval test,nil,path,1
+            rescue Test::Unit::AssertionFailedError => e
+              @test_status = :fail
+              @exception   = e
+            rescue StandardError, ScriptError => e
+              e.backtrace.each { |line| Log.error(line) }
+              @test_status = :error
+              @exception   = e
+            end
           end
         end
         return self
@@ -213,5 +216,26 @@ class TestCase
     step "Append new system_test_class to init.pp"
     # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
     on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
+  end
+
+
+  def with_standard_output_to_logs
+    stdout = ''
+    old_stdout = $stdout
+    $stdout = StringIO.new(stdout, 'w')
+
+    stderr = ''
+    old_stderr = $stderr
+    $stderr = StringIO.new(stderr, 'w')
+
+    result = yield
+
+    $stdout = old_stdout
+    $stderr = old_stderr
+
+    stdout.each { |line| Log.notify(line) }
+    stderr.each { |line| Log.warn(line) }
+
+    return result
   end
 end

@@ -69,13 +69,14 @@ class Options
         @options[:mrpropper] = TRUE
       end
 
-      @options[:stdout_only] = FALSE
+      @options[:stdout_only] = false
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
-        @options[:stdout_only] = TRUE
+        @options[:stdout_only] = true
       end
 
-      @options[:quiet] = false
+      Log.stdout = true
       opts.on('-q', '--quiet', 'don\'t log output to STDOUT') do
+        Log.stdout = false
         @options[:quiet] = true
       end
 

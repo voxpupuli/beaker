@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class TestSuite
   attr_reader :name, :options, :config
 
@@ -34,10 +35,6 @@ class TestSuite
 
     initialize_logfiles
 
-    summary = []
-
-    initialize_logfiles
-
     Log.notify "Using random seed #{@random_seed}" if @random_seed
     @test_files.each do |test_file|
       Log.notify
@@ -56,7 +53,10 @@ class TestSuite
       Log.notify "#{status_color}#{test_file} #{test_case.test_status}ed#{Log::NORMAL}"
     end
 
-    summarize(options[:stdout]) unless options[:stdout_only]
+    # REVISIT: This changes global state, breaking logging in any future runs
+    # of the suite – or, at least, making them highly confusing for anyone who
+    # has not studied the implementation in detail. --daniel 2011-03-14
+    summarize
 
     @test_cases
   end
@@ -91,15 +91,11 @@ class TestSuite
     test_failed + test_errored
   end
 
-  def summarize(to_stdout)
+  def summarize
     fail "you have not run the tests yet" unless @run
 
-    if to_stdout then
-      Log.notify "\n\n"
-    else
-      sum_log = File.new(log_path("#{name}-summary.txt"), "w")
-      $stdout = sum_log     # switch to logfile for output
-      $stderr = sum_log
+    if Log.file then
+      Log.file = log_path("#{name}-summary.txt")
     end
 
     Log.notify <<-HEREDOC
@@ -139,7 +135,7 @@ class TestSuite
     Log.notify "Errored Tests Cases:"
     (grouped_summary[:error] || []).each {|test, test_case| print_test_failure(test, test_case)}
 
-    sum_log.close unless to_stdout
+    Log.file = false
   end
 
   def print_test_failure(test, test_case)
@@ -165,14 +161,6 @@ class TestSuite
   # Setup log dir
   def initialize_logfiles
     return if options[:stdout_only]
-
-    run_log = File.new(log_path("run-#{name}.log"), "w")
-
-    if ! options[:quiet]
-      run_log = Tee.new(run_log)
-    end
-
-    $stdout = run_log
-    $stderr = run_log
+    Log.file = log_path("#{name}-run.log")
   end
 end

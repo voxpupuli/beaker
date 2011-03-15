@@ -22,28 +22,53 @@ class Log
     attr_accessor :log_level
     @log_level = :normal
 
+    # Should we send our logs to stdout?
+    attr_accessor :stdout
+
+    attr_reader :file
+    def file=(filename)
+      if filename then
+        @file = File.new(filename, "w")
+      else
+        @file = false
+      end
+    end
+
+    def write
+      yield $stdout if @stdout
+      yield @file if @file
+    end
+
     def debug(*args)
       return unless @log_level == :debug
-      print GREY
-      puts *args
-      print NORMAL
+      write do |to|
+        to.print GREY
+        to.puts *args
+        to.print NORMAL
+      end
     end
 
     def warn(*args)
       return unless @log_level == :debug
-      print YELLOW
-      puts *args.map {|msg| "Warning: #{msg}"}
-      print NORMAL
+      write do |to|
+        print YELLOW
+        puts *args.map {|msg| "Warning: #{msg}"}
+        print NORMAL
+      end
     end
 
     def notify(*args)
-      puts *args
+      write do |to|
+        to.puts *args
+      end
     end
 
     def error(*args)
-      print BRIGHT_RED
-      puts *args.map {|msg| "Error: #{msg}"}
-      print NORMAL
+      write do |to|
+        print BRIGHT_RED
+        puts *args.map {|msg| "Error: #{msg}"}
+        print NORMAL
+      end
     end
   end
 end

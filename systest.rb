@@ -13,7 +13,7 @@ Test::Unit.run = true
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
 
 trap(:INT) do
-  $stderr.puts "Exiting..."
+  Log.error "Interrupt received; exiting..."
   exit(1)
 end
 
