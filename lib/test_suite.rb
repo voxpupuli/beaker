@@ -61,6 +61,13 @@ class TestSuite
     @test_cases
   end
 
+  def run_and_exit_on_failure
+    return if success?
+    $org_stdout.puts "Failed while running the #{name} suite..."
+    Log.error "Failed while running the #{name} suite..."
+    exit 1
+  end
+
   def success?
     fail "you have not run the tests yet" unless @run
     sum_failed == 0

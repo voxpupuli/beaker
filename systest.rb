@@ -33,21 +33,8 @@ config = TestConfig.load_file(options[:config])
 
 setup_options = options.merge({ :random => false,
                                 :tests  => ["setup/early", "setup/#{options[:type]}"] })
-setup = TestSuite.new('setup', setup_options, config)
-setup.run
-unless setup.success? then
-  $org_stdout.puts "Setup suite failed, exiting..."
-  Log.error "Setup suite failed, exiting..."
-  exit 1
-end
-
-acceptance = TestSuite.new('acceptance', options, config)
-acceptance.run
-unless acceptance.success? then
-  $org_stdout.puts "Acceptance suite failed, exiting..."
-  Log.error "Acceptance suite failed, exiting..."
-  exit 1
-end
+TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
+TestSuite.new('acceptance', options, config).run_and_exit_on_failure
 
 $org_stdout.puts "systest completed successfully, thanks."
 Log.info "systest completed successfully, thanks."
