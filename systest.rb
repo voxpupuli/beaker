@@ -20,8 +20,6 @@ end
 ###################################
 #  Main
 ###################################
-$org_stdout = $stdout      # save stdout file descriptor
-
 options=Options.parse_args
 unless options[:config] then
   fail "Argh!  There is no default for Config, specify one!"
@@ -36,6 +34,5 @@ setup_options = options.merge({ :random => false,
 TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
 TestSuite.new('acceptance', options, config).run_and_exit_on_failure
 
-$org_stdout.puts "systest completed successfully, thanks."
 Log.info "systest completed successfully, thanks."
 exit 0

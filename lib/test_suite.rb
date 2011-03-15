@@ -63,7 +63,6 @@ class TestSuite
 
   def run_and_exit_on_failure
     return if success?
-    $org_stdout.puts "Failed while running the #{name} suite..."
     Log.error "Failed while running the #{name} suite..."
     exit 1
   end
@@ -98,7 +97,7 @@ class TestSuite
     if to_stdout then
       Log.notify "\n\n"
     else
-      sum_log = File.new(File.join(log_dir, "/#{name}-summary.txt"), "w")
+      sum_log = File.new(log_path("#{name}-summary.txt"), "w")
       $stdout = sum_log     # switch to logfile for output
       $stderr = sum_log
     end
@@ -149,14 +148,14 @@ class TestSuite
 
   def log_path(name)
     @@log_dir ||= File.join("log", @start_time.strftime("%F_%T"))
-    unless File.directory?(log_dir) then
-      FileUtils.mkdir(log_dir)
-      FileUtils.cp(options[:config],(File.join(log_dir,"config.yml")))
+    unless File.directory?(@@log_dir) then
+      FileUtils.mkdir(@@log_dir)
+      FileUtils.cp(options[:config],(File.join(@@log_dir,"config.yml")))
 
       latest = File.join("log", "latest")
-      if File.symlink?(latest) then
-        File.delete(latest)
-        File.symlink(File.basename(log_dir), latest)
+      if !File.exist?(latest) or File.symlink?(latest) then
+        File.delete(latest) if File.exist?(latest)
+        File.symlink(File.basename(@@log_dir), latest)
       end
     end
 
