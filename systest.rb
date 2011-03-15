@@ -20,7 +20,7 @@ end
 ###################################
 #  Main
 ###################################
-org_stdout = $stdout      # save stdout file descriptor
+$org_stdout = $stdout      # save stdout file descriptor
 
 options=Options.parse_args
 unless options[:config] then
@@ -45,12 +45,8 @@ end
 prepper.gen_answer_files(config)
 
 perform_test_setup_steps(options, config)
-suite = TestSuite.new(options, config)
+suite = TestSuite.new('acceptance', options, config)
 suite.run
 
-if ! options[:stdout] then
-  $stdout = org_stdout
-end
-
-puts "Harness exited with: #{suite.success?}"
+$org_stdout.puts "Harness exited with: #{suite.success?}"
 exit suite.success?

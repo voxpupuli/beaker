@@ -6,7 +6,7 @@ def perform_test_setup_steps(options, config)
   # ["setup/early", "setup/#{options[:type]}", "setup/late"].each do |root|
   pass = options.merge({ :random => false,
                          :tests  => ["setup/early", "setup/#{options[:type]}"] })
-  suite = TestSuite.new(pass, config).new
+  suite = TestSuite.new('setup', pass, config)
   suite.run
   unless suite.success? then
     Log.error "Setup suite failed, exiting..."

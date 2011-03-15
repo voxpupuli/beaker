@@ -12,7 +12,7 @@ class TestCase
 
   attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
   attr_reader :runtime
-  def initialize(config,options={},path=nil)
+  def initialize(config, options={}, path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @options = options
