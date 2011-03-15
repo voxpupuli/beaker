@@ -80,6 +80,11 @@ class Options
         @options[:quiet] = true
       end
 
+      Log.color = true
+      opts.on('--[no-]color', 'don\'t display color in log output') do |value|
+        Log.color = value
+      end
+
       @options[:random] = false
       opts.on('-r', '--random [RANDOM_KEY]', 'Randomize ordering of test files') do |random_key|
         @options[:random] = random_key || true

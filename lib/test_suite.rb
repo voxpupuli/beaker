@@ -42,15 +42,15 @@ class TestSuite
       test_case = TestCase.new(config, options, test_file).run_test
       @test_cases << [test_file, test_case]
 
-      status_color = case test_case.test_status
-                     when :pass
-                       Log::GREEN
-                     when :fail
-                       Log::RED
-                     when :error
-                       Log::YELLOW
-                     end
-      Log.notify "#{status_color}#{test_file} #{test_case.test_status}ed#{Log::NORMAL}"
+      msg = "#{test_file} #{test_case.test_status}ed"
+      case test_case.test_status
+      when :pass
+        Log.notify msg
+      when :fail
+        Log.error msg
+      when :error
+        Log.warn msg
+      end
     end
 
     # REVISIT: This changes global state, breaking logging in any future runs

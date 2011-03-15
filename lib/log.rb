@@ -24,8 +24,8 @@ class Log
 
     # Should we send our logs to stdout?
     attr_accessor :stdout
-
-    attr_reader :file
+    attr_accessor :color
+    attr_reader   :file
     def file=(filename)
       if filename then
         @file = File.new(filename, "w")
@@ -42,18 +42,26 @@ class Log
     def debug(*args)
       return unless @log_level == :debug
       write do |to|
-        to.print GREY
+        to.print GREY if color
         to.puts *args
-        to.print NORMAL
+        to.print NORMAL if color
       end
     end
 
     def warn(*args)
       return unless @log_level == :debug
       write do |to|
-        print YELLOW
-        puts *args.map {|msg| "Warning: #{msg}"}
-        print NORMAL
+        print YELLOW if color
+        to.puts *args.map {|msg| "Warning: #{msg}"}
+        print NORMAL if color
+      end
+    end
+
+    def success(*args)
+      write do |to|
+        print GREEN if color
+        to.puts *args.map {|msg| msg}
+        print NORMAL if color
       end
     end
 
@@ -65,9 +73,9 @@ class Log
 
     def error(*args)
       write do |to|
-        print BRIGHT_RED
-        puts *args.map {|msg| "Error: #{msg}"}
-        print NORMAL
+        print BRIGHT_RED if color
+        to.puts *args.map {|msg| "Error: #{msg}"}
+        print NORMAL if color
       end
     end
   end
