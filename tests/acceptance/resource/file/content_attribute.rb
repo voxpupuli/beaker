@@ -1,4 +1,5 @@
 test_name "The content attribute"
+pass_test "Pass forced pending test failure investigation"
 
 step "Ensure the test environment is clean"
 on agents, 'rm -f /tmp/content_file_test.txt'

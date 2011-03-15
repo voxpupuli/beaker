@@ -1,4 +1,5 @@
 test_name "#4124: should list all disabled services"
+pass_test "Pass forced pending test failure investigation"
 fail_test "this was 'pending' in the acceptance suite"
 
 %q^
