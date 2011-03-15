@@ -97,9 +97,10 @@ class TestSuite
     if Log.file then
       Log.file = log_path("#{name}-summary.txt")
     end
+    Log.stdout = true
 
     Log.notify <<-HEREDOC
-  Test Pass Started: #{@start_time}
+  Test Suite: #{name} @ #{@start_time}
 
   - Host Configuration Summary -
     HEREDOC
@@ -135,7 +136,10 @@ class TestSuite
     Log.notify "Errored Tests Cases:"
     (grouped_summary[:error] || []).each {|test, test_case| print_test_failure(test, test_case)}
 
-    Log.file = false
+    Log.notify("\n\n")
+
+    Log.stdout = !options[:quiet]
+    Log.file   = false
   end
 
   def print_test_failure(test, test_case)
