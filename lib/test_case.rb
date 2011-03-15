@@ -1,10 +1,7 @@
 class TestCase
   require 'lib/test_case/host'
-  require 'lib/gen_answer_files'
   require 'tempfile'
   require 'benchmark'
-
-  include GenAnswerFiles
 
   include Test::Unit::Assertions
 

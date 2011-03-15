@@ -30,9 +30,6 @@ end
 Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
-prepper = TestCase.new(config)
-
-prepper.gen_answer_files(config)
 
 perform_test_setup_steps(options, config)
 suite = TestSuite.new('acceptance', options, config)
