@@ -1,12 +1,10 @@
 class TestCase
   require 'lib/test_case/host'
   require 'lib/gen_answer_files'
-  require 'lib/vmrun'
   require 'tempfile'
   require 'benchmark'
 
   include GenAnswerFiles
-  include VmManage
 
   include Test::Unit::Assertions
 
@@ -207,11 +205,6 @@ class TestCase
     on hosts, "puppet #{subcommand} --configprint #{option}" do
       yield stdout.chomp
     end
-  end
-
-  def clean_hosts
-    step "Clean Hosts"
-    on hosts,"rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs"
   end
 
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")

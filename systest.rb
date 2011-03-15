@@ -32,16 +32,6 @@ Log.debug "Using Config #{options[:config]}"
 config = TestConfig.load_file(options[:config])
 prepper = TestCase.new(config)
 
-if options[:mrpropper]
-  Log.debug "Cleaning Hosts of old install"
-  prepper.clean_hosts(config) # Clean-up old install
-end
-
-if options[:vmrun]
-  Log.debug "Reverting and starting VMs"
-  prepper.vmrun(config)
-end
-
 prepper.gen_answer_files(config)
 
 perform_test_setup_steps(options, config)
