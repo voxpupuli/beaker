@@ -31,9 +31,24 @@ Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
 
-perform_test_setup_steps(options, config)
-suite = TestSuite.new('acceptance', options, config)
-suite.run
+setup_options = options.merge({ :random => false,
+                                :tests  => ["setup/early", "setup/#{options[:type]}"] })
+setup = TestSuite.new('setup', setup_options, config)
+setup.run
+unless setup.success? then
+  $org_stdout.puts "Setup suite failed, exiting..."
+  Log.error "Setup suite failed, exiting..."
+  exit 1
+end
 
-$org_stdout.puts "Harness exited with: #{suite.success?}"
-exit suite.success?
+acceptance = TestSuite.new('acceptance', options, config)
+acceptance.run
+unless acceptance.success? then
+  $org_stdout.puts "Acceptance suite failed, exiting..."
+  Log.error "Acceptance suite failed, exiting..."
+  exit 1
+end
+
+$org_stdout.puts "systest completed successfully, thanks."
+Log.info "systest completed successfully, thanks."
+exit 0
