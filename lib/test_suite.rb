@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+require 'rexml/document'
+
 class TestSuite
   attr_reader :name, :options, :config
 
@@ -57,11 +59,14 @@ class TestSuite
     # of the suite – or, at least, making them highly confusing for anyone who
     # has not studied the implementation in detail. --daniel 2011-03-14
     summarize
+    write_junit_xml if options[:xml]
 
-    @test_cases
+    # Allow chaining operations...
+    return self
   end
 
   def run_and_exit_on_failure
+    run
     return if success?
     Log.error "Failed while running the #{name} suite..."
     exit 1
@@ -73,6 +78,25 @@ class TestSuite
   end
   def failed?
     !success?
+  end
+
+  def test_count
+    fail "you have not run the tests yet" unless @run
+    @test_cases.length
+  end
+
+  def test_errors
+    fail "you have not run the tests yet" unless @run
+    @test_cases.select { |c| c[1].test_status == :error } .length
+  end
+
+  def test_failures
+    fail "you have not run the tests yet" unless @run
+    @test_cases.select { |c| c[1].test_status == :fail } .length
+  end
+
+  def test_skips
+    0                           # we don't do this yet.
   end
 
   private
@@ -89,6 +113,53 @@ class TestSuite
       end
     end
     test_failed + test_errored
+  end
+
+  def write_junit_xml
+    File.directory?('junit') or FileUtils.mkdir('junit')
+
+    begin
+      doc   = REXML::Document.new
+      doc.add(REXML::XMLDecl.new(1.0))
+
+      suite = REXML::Element.new('testsuite', doc)
+      suite.add_attribute('name',     name)
+      suite.add_attribute('tests',    test_count)
+      suite.add_attribute('errors',   test_errors)
+      suite.add_attribute('failures', test_failures)
+      suite.add_attribute('skip',     test_skips)
+
+      @test_cases.each do |test|
+        item = REXML::Element.new('testcase', suite)
+        item.add_attribute('classname', File.dirname(test.path))
+        item.add_attribute('name',      File.basename(test.path))
+        item.add_attribute('time',      test.runtime)
+
+        # Did we fail?  If so, report that.
+        unless test.test_status == :pass then
+          status = REXML::Element.new('failure', item)
+          status.add_attribute('type', test.test_status.to_s)
+          if test.exception then
+            status.add_attribute('message', test.exception.to_s)
+            status.text = test.exception.backtrace.join("\n")
+          end
+        end
+
+        if test.stdout then
+          REXML::Element.new('system-out', item).text =
+            test.stdout.gsub(/[\0-\011\013\014\016-\037]/) {|c| "&#{c[0]};" }
+        end
+
+        if test.stderr then
+          text = REXML::Element.new('system-err', item)
+          text.text = test.stderr.gsub(/[\0-\011\013\014\016-\037]/) {|c| "&#{c[0]};" }
+        end
+      end
+
+      File.open("junit/#{name}.xml", 'w') { |fh| doc.write(fh) }
+    rescue Exception => e
+      Log.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
+    end
   end
 
   def summarize
@@ -131,10 +202,10 @@ class TestSuite
   HEREDOC
 
     Log.notify "Failed Tests Cases:"
-    (grouped_summary[:fail] || []).each {|test, test_case| print_test_failure(test, test_case)}
+    (grouped_summary[:fail] || []).each {|test_case| print_test_failure(test_case)}
 
     Log.notify "Errored Tests Cases:"
-    (grouped_summary[:error] || []).each {|test, test_case| print_test_failure(test, test_case)}
+    (grouped_summary[:error] || []).each {|test_case| print_test_failure(test_case)}
 
     Log.notify("\n\n")
 
@@ -142,8 +213,8 @@ class TestSuite
     Log.file   = false
   end
 
-  def print_test_failure(test, test_case)
-    Log.notify "  Test Case #{test} reported: #{test_case.exception.inspect}"
+  def print_test_failure(test_case)
+    Log.notify "  Test Case #{test_case.path} reported: #{test_case.exception.inspect}"
   end
 
   def log_path(name)

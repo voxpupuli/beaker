@@ -125,12 +125,15 @@ class TestCase
   # result access
   #
   def stdout
+    return nil if result.nil?
     result.stdout
   end
   def stderr
+    return nil if result.nil?
     result.stderr
   end
   def exit_code
+    return nil if result.nil?
     result.exit_code
   end
   #

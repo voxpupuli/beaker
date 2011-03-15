@@ -2,3 +2,4 @@ local_setup.sh
 *.swp
 log/*
 !.gitignore
+/junit
