@@ -34,5 +34,5 @@ setup_options = options.merge({ :random => false,
 TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
 TestSuite.new('acceptance', options, config).run_and_exit_on_failure
 
-Log.info "systest completed successfully, thanks."
+Log.notify "systest completed successfully, thanks."
 exit 0

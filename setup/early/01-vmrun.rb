@@ -1,4 +1,4 @@
-if options[:vmrun]
+if options[:vmrun] = options[:type]
   require 'timeout'
 
   def virsh(*args)
