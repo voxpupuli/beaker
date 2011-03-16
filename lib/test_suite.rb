@@ -42,7 +42,7 @@ class TestSuite
       Log.notify
 
       test_case = TestCase.new(config, options, test_file).run_test
-      @test_cases << [test_file, test_case]
+      @test_cases << test_case
 
       msg = "#{test_file} #{test_case.test_status}ed"
       case test_case.test_status
@@ -67,7 +67,7 @@ class TestSuite
 
   def run_and_exit_on_failure
     run
-    return if success?
+    return self if success?
     Log.error "Failed while running the #{name} suite..."
     exit 1
   end
@@ -87,12 +87,12 @@ class TestSuite
 
   def test_errors
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c[1].test_status == :error } .length
+    @test_cases.select { |c| c.test_status == :error } .length
   end
 
   def test_failures
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c[1].test_status == :fail } .length
+    @test_cases.select { |c| c.test_status == :fail } .length
   end
 
   def test_skips
@@ -105,10 +105,10 @@ class TestSuite
     test_failed=0
     test_passed=0
     test_errored=0
-    @test_cases.each do |test, test_case|
+    @test_cases.each do |test_case|
       case test_case.test_status
-      when :pass then test_passed += 1
-      when :fail then test_failed += 1
+      when :pass  then test_passed += 1
+      when :fail  then test_failed += 1
       when :error then test_errored += 1
       end
     end
@@ -181,14 +181,14 @@ class TestSuite
     test_failed=0
     test_passed=0
     test_errored=0
-    @test_cases.each do |test, test_case|
+    @test_cases.each do |test_case|
       case test_case.test_status
-      when :pass then test_passed += 1
-      when :fail then test_failed += 1
+      when :pass  then test_passed += 1
+      when :fail  then test_failed += 1
       when :error then test_errored += 1
       end
     end
-    grouped_summary = @test_cases.group_by{|test,test_case| test_case.test_status }
+    grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
 
     Log.notify <<-HEREDOC
 
