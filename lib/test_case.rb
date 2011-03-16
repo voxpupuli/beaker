@@ -1,16 +1,14 @@
-class TestWrapper
-  require 'lib/test_wrapper/host'
-  require 'lib/gen_answer_files'
-  require 'lib/vmrun'
+class TestCase
+  require 'lib/test_case/host'
   require 'tempfile'
-
-  include GenAnswerFiles
-  include VmManage
+  require 'benchmark'
+  require 'stringio'
 
   include Test::Unit::Assertions
 
   attr_reader :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
-  def initialize(config,options={},path=nil)
+  attr_reader :runtime
+  def initialize(config, options={}, path=nil)
     @config  = config['CONFIG']
     @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
     @options = options
@@ -18,28 +16,28 @@ class TestWrapper
     @usr_home = ENV['HOME']
     @test_status = :pass
     @exception = nil
+    @runtime = nil
     #
     # We put this on each wrapper (rather than the class) so that methods
     # defined in the tests don't leak out to other tests.
     class << self
       def run_test
-        begin
-          test = File.read(path)
-          eval test,nil,path,1
-        rescue Test::Unit::AssertionFailedError => e
-          @test_status = :fail
-          @exception   = e
-        rescue StandardError, ScriptError => e
-          puts e
-          @test_status = :error
-          @exception   = e
+        with_standard_output_to_logs do
+          @runtime = Benchmark.realtime do
+            begin
+              test = File.read(path)
+              eval test,nil,path,1
+            rescue Test::Unit::AssertionFailedError => e
+              @test_status = :fail
+              @exception   = e
+            rescue StandardError, ScriptError => e
+              e.backtrace.each { |line| Log.error(line) }
+              @test_status = :error
+              @exception   = e
+            end
+          end
         end
-        classes = test.split(/\n/).collect { |l| l[/^ *class +(\w+) *$/,1]}.compact
-        case classes.length
-        when 0; self
-        when 1; eval(classes[0]).new(config)
-        else fail "More than one class found in #{path}"
-        end
+        return self
       end
     end
   end
@@ -127,12 +125,15 @@ class TestWrapper
   # result access
   #
   def stdout
+    return nil if result.nil?
     result.stdout
   end
   def stderr
+    return nil if result.nil?
     result.stderr
   end
   def exit_code
+    return nil if result.nil?
     result.exit_code
   end
   #
@@ -209,25 +210,6 @@ class TestWrapper
     end
   end
 
-  def get_git_sha1
-  # config["CONFIG"]["puppet_ver"]
-  # # config["CONFIG"]["facter_sha"] = 'abc123'
-  step "Get puppet and facter sha1"
-    on master, "cd /opt/puppet-git-repos/puppet && git show-ref --heads 2.6.next" do
-      config["CONFIG"]["puppet_sha"] = stdout
-      puts stdout
-    end
-  end
-
-  def time_sync
-    step "Sync time via ntpdate"
-    on hosts,"ntpdate pool.ntp.org"
-  end
-
-  def clean_hosts
-    step "Clean Hosts"
-    on hosts,"rpm -qa | grep puppet | xargs rpm -e; rpm -qa | grep pe- | xargs rpm -e; rm -rf puppet-enterprise*; rm -rf /etc/puppetlabs"
-  end
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
     # eg: class puppet_system_test {
@@ -237,5 +219,26 @@ class TestWrapper
     step "Append new system_test_class to init.pp"
     # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
     on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
+  end
+
+
+  def with_standard_output_to_logs
+    stdout = ''
+    old_stdout = $stdout
+    $stdout = StringIO.new(stdout, 'w')
+
+    stderr = ''
+    old_stderr = $stderr
+    $stderr = StringIO.new(stderr, 'w')
+
+    result = yield
+
+    $stdout = old_stdout
+    $stderr = old_stderr
+
+    stdout.each { |line| Log.notify(line) }
+    stderr.each { |line| Log.warn(line) }
+
+    return result
   end
 end

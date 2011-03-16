@@ -1,4 +1,4 @@
-class TestWrapper
+class TestCase
   class Host
     # A cache for active SSH connections to our execution nodes.
     def initialize(name, overrides, defaults)

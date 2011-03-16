@@ -69,19 +69,30 @@ class Options
         @options[:mrpropper] = TRUE
       end
 
-      @options[:stdout_only] = FALSE
+      @options[:stdout_only] = false
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
-        @options[:stdout_only] = TRUE
+        @options[:stdout_only] = true
       end
 
-      @options[:quiet] = false
+      Log.stdout = true
       opts.on('-q', '--quiet', 'don\'t log output to STDOUT') do
+        Log.stdout = false
         @options[:quiet] = true
+      end
+
+      Log.color = true
+      opts.on('--[no-]color', 'don\'t display color in log output') do |value|
+        Log.color = value
       end
 
       @options[:random] = false
       opts.on('-r', '--random [RANDOM_KEY]', 'Randomize ordering of test files') do |random_key|
         @options[:random] = random_key || true
+      end
+
+      @options[:xml] = false
+      opts.on('-x', '--[no-]xml', 'Emit JUnit XML reports on tests') do |value|
+        @options[:xml] = value
       end
 
       opts.on( '-h', '--help', 'Display this screen' ) do

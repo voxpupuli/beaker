@@ -14,7 +14,7 @@ run_test()  {
   cd $workdir
   echo "Test Pass Start"
   stime=`date`
-  ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $facter_ver -t tests/acceptance --debug
+  ./systest.rb -c ci/ci-64.cfg --type $test_type -p $puppet_ver -f $facter_ver -t tests/acceptance --debug --no-color
   echo "Test Pass Complete"
 }
 time}
