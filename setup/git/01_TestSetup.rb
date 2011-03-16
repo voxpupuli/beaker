@@ -61,3 +61,12 @@ hosts.each do |host|
   step "REVISIT: Work around bug #5794 not creating reports as required"
   on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
 end
+
+# Git based install assume puppet master named "puppet";
+# create an puppet.conf file with server= entry
+step "Agents: create basic puppet.conf"
+role_master=""
+hosts.each do |host|
+  role_master = host if host['roles'].include? 'master'
+end
+on agents, "echo [agent] >> /etc/puppet/puppet.conf && echo server=#{role_master} >> /etc/puppet/puppet.conf"

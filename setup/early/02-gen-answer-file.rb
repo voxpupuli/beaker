@@ -1,5 +1,3 @@
-test_name "Generate Puppet Enterprise answer files"
-
 # Agent base answers
 agent_only_a = %q[
 q_install=y
@@ -93,23 +91,22 @@ q_rubydevelopment_install='n'
 q_vendor_packages_install='y'
 ]
 
+test_name "Generate Puppet Enterprise answer files"
 master=""
 
+if options[:type] =~ /pe/
 # Clean up all answer files
 FileUtils.rm Dir.glob('tarballs/q_*')
 FileUtils.rm("tarballs/answers.tar") if File::exists?("tarballs/answers.tar")
 system("tar cf tarballs/answers.tar tarballs/q_*")
-
 # For all defined hosts...
 hosts.each do |host|
   role_agent=FALSE
   role_master=FALSE
   role_dashboard=FALSE
-
   role_agent=TRUE     if host['roles'].include? 'agent'
   role_master=TRUE    if host['roles'].include? 'master'
   role_dashboard=TRUE if host['roles'].include? 'dashboard'
-
   # Host is only a Dashboard
   if !role_agent && !role_master && role_dashboard then
     step "host #{host} is dashboard only"
@@ -122,7 +119,6 @@ hosts.each do |host|
       end
     end
   end
-
   # Host is only an Agent
   if role_agent && !role_master && !role_dashboard then
     step "host #{host} is agent only"
@@ -135,7 +131,6 @@ hosts.each do |host|
       end
     end
   end
-
   # Host is Agent and Dashboard
   if role_agent && !role_master && role_dashboard then
     step "host #{host} is agent and dashboard"
@@ -148,7 +143,6 @@ hosts.each do |host|
       end
     end
   end
-
   # Host is a Master only - no Dashboard
   if !role_agent && role_master && !role_dashboard then
     step "host #{host} is master only"
@@ -158,7 +152,6 @@ hosts.each do |host|
       end
     end
   end
-
   # Host is a Master and Dashboard
   if !role_agent && role_master && role_dashboard then
     step "host #{host} is master and dashboard"
@@ -168,5 +161,5 @@ hosts.each do |host|
       end
     end
   end
-
 end
+end #cond
