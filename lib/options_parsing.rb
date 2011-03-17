@@ -42,6 +42,12 @@ class Options
         @options[:facter] = value
       end
 
+      @options[:plugins] = []
+      opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
+        @options[:type] = 'git'
+        @options[:plugins] << value
+      end
+
       @options[:config] = nil
       opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
         @options[:config] = file
