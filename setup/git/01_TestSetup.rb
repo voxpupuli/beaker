@@ -31,15 +31,23 @@ def install_from_git(host, package, repo, revision)
   on host, "cd #{SourcePath}/#{package} && git checkout #{revision}"
 
   step "Install #{package} on the system"
-  on host, "cd #{SourcePath}/#{package} && ruby ./install.rb"
+  on host, "cd #{SourcePath}/#{package} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
 end
 
+package_names = options[:plugins].collect { |repo| repo[/([^\/]*)\.git/, 1] }
+pluginlibpath = package_names.map { |plugin| File.join(SourcePath, plugin, "lib") }
 hosts.each do |host|
+  host['pluginlibpath'] = pluginlibpath
+
   step "Clean and create #{SourcePath}"
   on host, "rm -rf #{SourcePath} && mkdir -vp #{SourcePath}"
 
   install_from_git host, :facter, FacterRepo, FacterRev
   install_from_git host, :puppet, PuppetRepo, PuppetRev
+
+  package_names.zip(options[:plugins]).each do |package, repo|
+    install_from_git host, package, repo, 'master'
+  end
 
   step "grab git repo versions"
   version = {}
