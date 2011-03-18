@@ -28,7 +28,7 @@ def install_from_git(host, package, repo, revision)
   on host, "cd #{SourcePath} && git clone #{repo}"
 
   step "Check out the revision #{revision}"
-  on host, "cd #{SourcePath}/#{package} && git checkout origin/#{revision}"
+  on host, "cd #{SourcePath}/#{package} && git checkout #{revision}"
 
   step "Install #{package} on the system"
   on host, "cd #{SourcePath}/#{package} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
