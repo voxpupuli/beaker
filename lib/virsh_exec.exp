@@ -7,9 +7,13 @@ set opt1 [lindex $argv 1]
 set opt2 [lindex $argv 2]
 
 # Login
+set load_fh [open "/etc/plharness/secret" r]
+set secret [read $load_fh]
+close $load_fh
+
 spawn virsh -c esx://root@soko/?no_verify=1
 expect "Enter root's password for soko: "
-send "Puppetmaster!\r";
+send "${secret}\r";
 
 # Exec command
 expect "virsh # "
