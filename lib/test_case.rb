@@ -184,6 +184,12 @@ class TestCase
     on host, puppet_apply(*args), on_options, &block
   end
 
+  def run_script_on(host,script)
+    remote_path=File.join("", "tmp", File.basename(script))
+    scp_to hosts, script, remote_path
+    on hosts, remote_path
+  end
+
   def run_agent_on(host,arg='--no-daemonize --verbose --onetime --test')
     if host.is_a? Array
       host.each { |h| run_agent_on h }

@@ -4,25 +4,24 @@
 # This will facilitate expansion of this tests to include
 # the ability to test other OSes
 
-if [ -z $1 ] ; then
-  echo "No platform specified"
-  exit 1
-fi
+#if [ -z $1 ] ; then
+#  echo "No platform specified"
+#  exit 1
+#fi
 
 # redhat or centos only
-if echo $1 | grep -e centos -e redhat
-  RALSH_FILE=/tmp/ralsh-disabled-list-$$
-  SERVICE_FILE=/tmp/service-disabled-list-$$
+#if echo $1 | grep -e centos -e redhat
+  RALSH_FILE=/tmp/ralsh-running-list-$$
+  SERVICE_FILE=/tmp/service-running-list-$$
 
-  # collect all service namevars 
-  puppet resource service | egrep -B2 "enable\s*=>\s*'false" | grep "service {" | awk -F"'" '{print $2}' | sort  > $RALSH_FILE
+  puppet resource service | egrep -B1 "ensure\s*=>\s*'running" | grep 'service {' | gawk -F"\'" '{print $2}' | sort  > $RALSH_FILE
 
   if [ -e $SERVICE_FILE ]; then
     rm $SERVICE_FILE
   fi
   SERVICEDIR='/etc/init.d'
   for SERVICE in $( ls $SERVICEDIR | sort | egrep -v "(functions|halt|killall|single|linuxconf)" ) ; do
-    if ! chkconfig $SERVICE; then
+    if env -i LANG="$LANG" PATH="$PATH" TERM="$TERM" "${SERVICEDIR}/${SERVICE}" status; then
       echo $SERVICE >> $SERVICE_FILE
     fi
   done
@@ -34,6 +33,4 @@ if echo $1 | grep -e centos -e redhat
     echo "Ralsh and system service count NOT in agreement"
     exit 1
   fi
-fi # end redhat/centos
-
-^
+#fi # end redhat/centos
