@@ -75,6 +75,11 @@ class Options
         @options[:mrpropper] = TRUE
       end
 
+      @options[:notimesync] = FALSE
+      opts.on( '--notimesync', 'skip ntpdate step' ) do
+        @options[:notimesync] = TRUE
+      end
+
       @options[:stdout_only] = false
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
         @options[:stdout_only] = true
