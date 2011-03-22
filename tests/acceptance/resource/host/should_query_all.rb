@@ -14,11 +14,11 @@ on agents, "cat > /etc/hosts", :stdin => content
 
 step "query all host records using puppet"
 on(agents, puppet_resource('host')) do
-    found = stdout.scan(/host { '([^']+)'/).flatten.sort
+    found = stdout.scan(/host \{ '([^']+)'/).flatten.sort
     fail_test "the list of returned hosts was wrong: #{found.join(', ')}" unless
         found == %w{test1 test2 test3 test4}
 
-    count = stdout.scan("ensure => 'present'").length
+    count = stdout.scan(/ensure\s+=>\s+'present'/).length
     fail_test "found #{count} records, wanted 4" unless count == 4
 end
 

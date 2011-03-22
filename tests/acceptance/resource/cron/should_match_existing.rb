@@ -1,5 +1,4 @@
-test_name "cron resource should match existing"
-pass_test "Pass forced pending test failure investigation"
+
 
 tmpuser = "cron-test-#{Time.new.to_i}"
 tmpfile = "/tmp/cron-test-#{Time.new.to_i}"
@@ -19,8 +18,12 @@ agents.each do |host|
                   "command=/bin/true", "ensure=present")) do
         # REVISIT: This is ported from the original test, which seems to me a
         # weak test, but I don't want to improve it now.  --daniel 2010-12-23
+        # 
+        # This is a weak/fragile test.  The output has changed
+        # causing this test to fail erronously.  Changed to the correct
+        # output to match, but this code should be re-feactored.
         fail_test "didn't see the output we expected..." unless
-            stdout.include? 'notice'
+            stdout.include? 'present'
     end
 
     step "verify that crontab -l contains what you expected"
