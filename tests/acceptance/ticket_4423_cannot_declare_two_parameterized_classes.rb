@@ -7,7 +7,6 @@
 # Make sure two parameterized classes are able to be declared.
 
 test_name "#4423: cannot declare two parameterized classes"
-pass_test "Pass forced pending test failure investigation"
 
 class1 = %q{
     class rainbow($color) {
@@ -20,14 +19,14 @@ class2 = %q{
     class planet($moons) {
       notify { "planet": message => "Moons are [${moons}]" }
     }
-    class { "planet": moons => "1" }'
+    class { "planet": moons => "1" }
 }
 
 step "Declaring one parameterized class works just fine"
-apply_manifest_on agents, class1
+apply_manifest_on(agents, class1)
 
 step "Make sure we try both classes stand-alone"
-apply_manifest_on agents, class2
+apply_manifest_on(agents, class2)
 
 step "Putting both classes in the same manifest should work."
 apply_manifest_on agents, class1 + class2
@@ -49,4 +48,3 @@ apply_manifest_on agents, class1+class2+%q{
     }
     class { "rainbow::type": pretty => false, ugly => true; }
 }
-
