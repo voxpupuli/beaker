@@ -1,5 +1,4 @@
 test_name "#4151: defined function should not return true for unrealized virtual resources"
-pass_test "Pass forced pending test failure investigation"
 
 # Jeff McCune <jeff@puppetlabs.com>
 # 2010-07-06
@@ -15,8 +14,11 @@ pass_test "Pass forced pending test failure investigation"
 # be an error since Notify["goodbye"] will require a resource which has
 # not been realized.
 
-apply_manifest_on agents, %q{
+
+manifest1 =  %q{
     @notify { "hello": }
     if (defined(Notify["hello"])) { $requires = [ Notify["hello"] ] }
     notify { "goodbye": require => $requires }
 }
+
+apply_manifest_on(agents, manifest1)
