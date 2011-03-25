@@ -91,10 +91,13 @@ q_rubydevelopment_install='n'
 q_vendor_packages_install='y'
 ]
 
-test_name "Generate Puppet Enterprise answer files"
+test_name="Generate Puppet Enterprise answer files"
 master=""
 
-if options[:type] =~ /pe/
+puts "Skipping #{test_name}" unless ( options[:type] =~ /pe/ )
+
+if ( options[:type] =~ /pe/ ) then
+
 # Clean up all answer files
 FileUtils.rm Dir.glob('tarballs/q_*')
 FileUtils.rm("tarballs/answers.tar") if File::exists?("tarballs/answers.tar")
