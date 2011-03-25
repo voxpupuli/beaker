@@ -24,6 +24,7 @@ step "when using a puppet:/// URI with puppet apply"
 
 on agents, 'puppet agent --configprint modulepath' do
   modulepath = stdout.split(':')[0]
+  modulepath = modulepath.chomp
   on agents, "mkdir -p #{modulepath}/test_module/files"
   on agents, "echo 'Yay, this is the puppet:/// file.' > #{modulepath}/test_module/files/test_file.txt"
 end
