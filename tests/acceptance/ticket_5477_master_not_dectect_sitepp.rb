@@ -28,14 +28,13 @@ agents.each { |agent|
  
 # Create a new site.pp
 step "Master: create basic site.pp file"
-on master, "echo 'notify{foo:}' > /etc/puppet/manifests/site.pp"
+on master, "echo 'notify{ticket_5477_notify:}' > /etc/puppet/manifests/site.pp"
 
 sleep 20
 
 step "Agent: puppet agent --test"
 agents.each { |agent|
   on agent, "puppet agent -t", :acceptable_exit_codes => [2]
+  fail_test "Site.pp not detect at Master?" unless
+    stdout.include? 'ticket_5477_notify'
 }
-
-#step "Agent #{agent}: agent --test"
-#on agents, "foo", :acceptable_exit_codes => [2]
