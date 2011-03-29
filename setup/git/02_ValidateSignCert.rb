@@ -1,14 +1,19 @@
 step "Validate Sign Cert"
 
-# This step should not be req'd for PE edition -- agents req certs during install
-# AGENT(s) intiate Cert Signing with PMASTER
-#
-# Note that this passes an ampersand as a final argument in an attempt
-# to get the agent to run in the background.  Not sure if this will
-# work now.
-#
-# run_agent_on agents,"--no-daemonize --verbose --onetime --test --waitforcert 10 &"
+step "Master: Start Puppet Master"
+on master,"puppet master --certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose"
 
-step "Puppet Master clean and generate agent certs"
-on master,"puppet cert --clean #{agents.join(' ')}"
-on master,"puppet cert --generate #{agents.join(' ')}"
+#step "Puppet Master clean and generate agent certs"
+#on master,"puppet cert --clean #{agents.join(' ')}"
+#on master,"puppet cert --generate #{agents.join(' ')}"
+#on master,"puppet cert --sign --all"
+
+sleep 1
+step "Agents: Run agent --test first time to gen CSR "
+agents.each { |agent|
+  on agent, "puppet agent -t", :acceptable_exit_codes => [1]
+}
+
+# Sign all waiting certs
+step "Master: sign all certs"
+on master,"puppet cert --sign --all"

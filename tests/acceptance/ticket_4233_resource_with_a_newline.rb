@@ -1,5 +1,4 @@
 test_name "#4233: resource with a newline"
-pass_test "Pass forced pending test failure investigation"
 
 # 2010-07-22 Jeff McCune <jeff@puppetlabs.com>
 # AffectedVersion: 2.6.0rc3
