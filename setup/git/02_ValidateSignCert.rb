@@ -1,7 +1,7 @@
 step "Validate Sign Cert"
 
 step "Master: Start Puppet Master"
-on master,"puppet master --certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose"
+on master, puppet_master("--certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose")
 
 #step "Puppet Master clean and generate agent certs"
 #on master,"puppet cert --clean #{agents.join(' ')}"
