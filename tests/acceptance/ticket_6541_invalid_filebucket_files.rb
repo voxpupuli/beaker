@@ -1,5 +1,4 @@
 test_name "start with a file"
-pass_test "Pass forced pending test failure investigation"
 manifest = "file { '/tmp/6541': content => 'some text' }"
 apply_manifest_on(agents, manifest)
 
