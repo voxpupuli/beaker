@@ -22,3 +22,6 @@ send "$cmd $opt1 $opt2\r";
 # Ciao
 expect "virsh # "
 send "quit\r";
+
+# Creating named snapshots
+# snapshot-create <domain> ./example_vmware_xml_snapshot.xml
