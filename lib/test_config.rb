@@ -13,9 +13,16 @@ module TestConfig
     config = YAML.load_file(config_file)
     # Merge some useful date into the config hash
     config['CONFIG']['ssh'] = SSH_DEFAULTS.merge(config['CONFIG']['ssh'] || {})
-    config["CONFIG"]["pe_ver"] = puppet_enterprise_version if puppet_enterprise_version 
-    config["CONFIG"]["puppet_ver"] = Options.parse_args[:puppet] unless puppet_enterprise_version
-    config["CONFIG"]["facter_ver"] = Options.parse_args[:facter] unless puppet_enterprise_version
+    config['CONFIG']['pe_ver'] = puppet_enterprise_version if puppet_enterprise_version 
+    config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless puppet_enterprise_version
+    config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless puppet_enterprise_version
+    unless puppet_enterprise_version then
+      config['CONFIG']["puppetpath"] = '/etc/puppet'
+      config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
+    else   # PE paths
+      config['CONFIG']['puppetpath'] = '/opt/puppet'
+      config['CONFIG']['puppetbin'] = '/opt/puppet'
+    end
     config
   end
 
