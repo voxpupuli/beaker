@@ -1,4 +1,4 @@
-step "Validate Sign Cert"
+test_name "Validate Sign Cert"
 
 step "Master: Start Puppet Master"
 on master, puppet_master("--certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose")
