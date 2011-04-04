@@ -17,7 +17,7 @@ step "Master: kill running Puppet Master"
 on master, "ps -U puppet | awk '/puppet/ { print \$1 }' | xargs kill || echo \"Puppet Master not running\""
 
 step "Master: Start Puppet Master"
-on master, puppet_master("--certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose --noop")
+on master, puppet_master("--certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose --noop")
 
 # SSL dir created?
 step "SSL dir created?"
