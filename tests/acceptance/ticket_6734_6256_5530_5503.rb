@@ -11,6 +11,6 @@ on master, "ps -ef | grep puppet"
     stdout.include? 'master'
 
 step "Check permissions on puppet/rrd/"
-on master, "ls -Z /var/lib/puppet | grep rrd"
-  fail_test "puppet/rrd does not exit/wrong permission" unless
+on master, "ls -l /var/lib/puppet | grep rrd | awk '{print $3\" \"$4}'"
+  fail_test "puppet/rrd does not exist/wrong permission" unless
     stdout.include? 'puppet puppet'
