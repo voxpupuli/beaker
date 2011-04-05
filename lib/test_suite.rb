@@ -48,6 +48,8 @@ class TestSuite
       case test_case.test_status
       when :pass
         Log.notify msg
+      when :skip
+        Log.notify msg
       when :fail
         Log.error msg
       when :error
@@ -96,7 +98,8 @@ class TestSuite
   end
 
   def test_skips
-    0                           # we don't do this yet.
+    fail "you have not run the tests yet" unless @run
+    @test_cases.select { |c| c.test_status == :skip} .length
   end
 
   private
@@ -105,11 +108,13 @@ class TestSuite
     test_failed=0
     test_passed=0
     test_errored=0
+    test_skips=0
     @test_cases.each do |test_case|
       case test_case.test_status
-      when :pass  then test_passed += 1
-      when :fail  then test_failed += 1
+      when :pass  then test_passed  += 1
+      when :fail  then test_failed  += 1
       when :error then test_errored += 1
+      when :skip  then test_skips   += 1
       end
     end
     test_failed + test_errored
@@ -181,11 +186,13 @@ class TestSuite
     test_failed=0
     test_passed=0
     test_errored=0
+    test_skips=0
     @test_cases.each do |test_case|
       case test_case.test_status
-      when :pass  then test_passed += 1
-      when :fail  then test_failed += 1
+      when :pass  then test_passed  += 1
+      when :fail  then test_failed  += 1
       when :error then test_errored += 1
+      when :skip  then test_skips   += 1
       end
     end
     grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
@@ -197,6 +204,7 @@ class TestSuite
      Passed: #{test_passed}
      Failed: #{test_failed}
     Errored: #{test_errored}
+    Skipped: #{test_skips}
 
   - Specific Test Case Status -
   HEREDOC

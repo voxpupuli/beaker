@@ -118,6 +118,10 @@ class TestCase
   def pass_test(msg)
     Log.notify msg
   end
+  def skip_test(msg)
+    Log.notify "Skip: #{msg}"
+    @test_status = :skip
+  end
   def fail_test(msg)
     assert(false, msg)
   end
