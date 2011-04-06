@@ -20,6 +20,9 @@ on master, "if [ -e  /etc/puppet/manifests/site.pp ] ; then mv /etc/puppet/manif
 step "Master: Start Puppet Master"
 on master, puppet_master("--certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose")
 
+# Allow puppet server to start accepting conections
+sleep 10
+
 # Run test on Agents
 step "Agent: agent --test"
 agents.each { |agent|
