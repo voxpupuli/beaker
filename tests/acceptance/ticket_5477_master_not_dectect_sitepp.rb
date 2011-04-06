@@ -18,7 +18,7 @@ on master, "if [ -e  /etc/puppet/manifests/site.pp ] ; then mv /etc/puppet/manif
 #step "Master: Run Puppet Master in verbose mode"
 #on master, puppet_master("--verbose")
 step "Master: Start Puppet Master"
-on master, puppet_master("--certdnsnames=\"puppet:$(hostname):$(hostname -f)\" --verbose")
+on master, puppet_master("--certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose")
 
 # Run test on Agents
 step "Agent: agent --test"
