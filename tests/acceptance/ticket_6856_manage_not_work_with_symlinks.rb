@@ -16,6 +16,6 @@ step "Verify existence of Symlink"
 on agents, "test -h /tmp/2/README"
 
 step "Verify Symlink links to non-existant file"
-on agents, "ll /tmp/2/README"
+on agents, "ls -l /tmp/2/README"
   fail_test "Symlink does not appear to be created" unless 
     stdout.include? '../README'
