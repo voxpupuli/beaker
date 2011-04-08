@@ -41,3 +41,7 @@ Steps to run the acceptance tests:
 ./systest.rb -c your_cfg --type git -p 2.6.next  -f 1.5.8 -t tests/acceptance --debug
 
 Results will be written to log/latest/summary.txt and runlog
+
+
+Special topic branch checkout:
+./systest.rb -c 2centos_64_386 --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 -t tests/acceptance/ticket_6856_manage_not_work_with_symlinks.rb
