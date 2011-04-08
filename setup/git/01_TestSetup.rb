@@ -1,11 +1,15 @@
 test_name "Install puppet and facter on target machines..."
 
-SourcePath = "/opt/puppet-git-repos"
-GitHub     = 'git://github.com/puppetlabs'
-IsURI      = %r{^[^:]+://}
- 
+SourcePath  = "/opt/puppet-git-repos"
+GitHub      = 'git://github.com/puppetlabs'
+IsURI       = %r{^[^:]+://}
+IsGitHubURI = %r{(https://github.com/[^/]+/[^/]+)(?:/tree/(.*))$}
+
 step "Parse Opts"
-if options[:puppet] =~ IsURI then
+if match = IsGitHubURI.match(options[:puppet]) then
+  PuppetRepo = match[1] + '.git'
+  PuppetRev  = match[2] || 'origin/master'
+elsif options[:puppet] =~ IsURI then
   repo, rev = options[:puppet].split('#', 2)
   PuppetRepo = repo
   PuppetRev  = rev || 'HEAD'
@@ -14,7 +18,10 @@ else
   PuppetRev  = options[:puppet]
 end
 
-if options[:facter] =~ IsURI then
+if match = IsGitHubURI.match(options[:facter]) then
+  FacterRepo = match[1] + '.git'
+  FacterRev  = match[2] || 'origin/master'
+elsif options[:facter] =~ IsURI then
   repo, rev = options[:facter].split('#', 2)
   FacterRepo = repo
   FacterRev  = rev || 'HEAD'
