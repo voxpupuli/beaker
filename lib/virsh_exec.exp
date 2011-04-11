@@ -1,18 +1,24 @@
 #!/usr/bin/expect -f
 set timeout 10
 
-# Up to two args - a command and an arg
-set cmd [lindex $argv 0]
-set opt1 [lindex $argv 1]
-set opt2 [lindex $argv 2]
+# Up to 4 positional args; first two are required:
+# vm_server: VM server
+# cmd to exec on VM serverA
+# 3rd, 4th needed for snapshoting:
+# opt1 ESX domain
+# opt2 snapshot name
+set vmserver [lindex $argv 0]
+set cmd [lindex $argv 1]
+set opt1 [lindex $argv 2]
+set opt2 [lindex $argv 3]
 
 # Login
 set load_fh [open "/etc/plharness/secret" r]
 set secret [read $load_fh]
 close $load_fh
 
-spawn virsh -c esx://root@soko/?no_verify=1
-expect "Enter root's password for soko: "
+spawn virsh -c esx://root@$vmserver/?no_verify=1
+expect "Enter root's password for $vmserver: "
 send "${secret}\r";
 
 # Exec command

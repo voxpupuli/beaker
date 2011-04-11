@@ -65,9 +65,9 @@ class Options
         $dry_run = true
       end
 
-      @options[:vmrun] = FALSE
-      opts.on( '--vmrun', 'VM revert and start VMs' ) do
-        @options[:vmrun] = @options[:type]
+      @options[:vmrun] = nil
+      opts.on( '--vmrun VM', 'VM revert and start VMs' ) do|vm|
+        @options[:vmrun] = vm
       end
 
       @options[:mrpropper] = FALSE
