@@ -23,6 +23,6 @@ apply_manifest_on agents, %q{
   include a
 }
 
-step "Verify deprication warning"
-fail_test "Deprication warning not issued" unless
+step "Verify deprecation warning"
+fail_test "Deprecation warning not issued" unless
   stdout.include? 'warning: Dynamic lookup of $bar will not be supported in future versions. Use a fully-qualified variable name or parameterized classes.'
