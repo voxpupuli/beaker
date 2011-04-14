@@ -13,7 +13,7 @@ agents.each do |host|
     step "collect the list of known users via puppet"
     on(host, puppet_resource('user')) do
         stdout.each_line do |line|
-            name = ( line.match(/^user { '([^']+)'/) or next )[1]
+            name = ( line.match(/^user \{ '([^']+)'/) or next )[1]
 
             # OK: Was this name found in the list of users?
             if users.member? name then
