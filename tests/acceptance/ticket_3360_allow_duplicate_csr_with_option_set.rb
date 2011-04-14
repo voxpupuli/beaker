@@ -46,5 +46,5 @@ step "Verify the certs have changed"
 # where certs might be signed with long names.
 old_certs.each_key { |key|
   next if key.include? master # skip the masters cert, only care about agents
-  fail_test("#{host} does not have a new signed certificate") if old_certs[key] == new_certs[key]
+  fail_test("#{key} does not have a new signed certificate") if old_certs[key] == new_certs[key]
 }
