@@ -10,7 +10,7 @@ step "Master: Start Puppet Master"
 on master, puppet_master("--allow_duplicate_certs --certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose --noop")
 
 step "Generate a certificate request for the agent"
-on agents, "puppet certificate generate `hostname` --ca-location remote --server #{master}"
+on agents, "puppet certificate generate `hostname -f` --ca-location remote --server #{master}"
 
 step "Collect the original certs"
 on master, puppet_cert("--sign --all")
@@ -25,7 +25,7 @@ original_certs.stdout.each_line do |line|
 end
 
 step "Make another request with the same certname"
-on agents, "puppet certificate generate `hostname` --ca-location remote --server #{master}"
+on agents, "puppet certificate generate `hostname -f` --ca-location remote --server #{master}"
 
 step "Collect the new certs"
 
