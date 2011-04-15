@@ -141,7 +141,7 @@ class TestSuite
         item.add_attribute('time',      test.runtime)
 
         # Did we fail?  If so, report that.
-        unless test.test_status == :pass then
+        unless test.test_status == :pass || test.test_status == :skip then
           status = REXML::Element.new('failure', item)
           status.add_attribute('type', test.test_status.to_s)
           if test.exception then
