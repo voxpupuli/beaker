@@ -83,7 +83,7 @@ class TestCase
       command = Command.new(command)
     end
     if host.is_a? Array
-      host.each { |h| on h, command, options, &block }
+      host.map { |h| on h, command, options, &block }
     else
       @result = command.exec(host, options)
 
