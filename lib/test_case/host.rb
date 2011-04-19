@@ -35,7 +35,7 @@ class TestCase
     end
 
     def exec(command, stdin)
-      do_action('RemoteExec',command) { |result|
+      do_action('RemoteExec',command) do |result|
         ssh.open_channel do |channel|
           channel.exec(command) do |terminal, success|
             abort "FAILED: to execute command on a new channel on #{@name}" unless success
@@ -55,7 +55,7 @@ class TestCase
         # Process SSH activity until we stop doing that - which is when our
         # channel is finished with...
         ssh.loop
-      }
+      end
     end
 
     def do_scp(source, target)
@@ -69,5 +69,4 @@ class TestCase
       }
     end
   end
-
 end
