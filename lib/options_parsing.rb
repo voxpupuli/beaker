@@ -13,6 +13,17 @@ class Options
       opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
         @options[:tests] << dir
       end
+      
+      valid_rubies = %w{skip system 1.8.6 1.8.7}
+      @options[:rvm] = 'skip'
+      opts.on('--rvm VERSION', 'Specify Ruby version: system, 1.8.6, 1.8.7') do |rvm|
+        unless valid_rubies.include? rvm
+          Log.error "Sorry #{rvm} is not a valid Ruby version"
+          exit 1
+        end
+        @options[:rvm] = rvm
+        puts "RVM: #{@options[:rvm]}"
+      end
 
       @options[:type] = 'skip'
       opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, skip) - default "skip"') do |type|
