@@ -47,8 +47,6 @@ module TestConfig
   # Print out test configuration
   def self.dump(config)
     # Access "platform" for each host
-    require 'pp'
-    pp config
     config["HOSTS"].each_key do|host|
       Log.notify "Platform for #{host} #{config["HOSTS"][host]['platform']}"
     end
