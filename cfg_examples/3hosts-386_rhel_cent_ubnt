@@ -13,9 +13,6 @@ HOSTS:
       - agent
     platform: ubuntu-10.04-i386
 CONFIG:
-  rubyver: ruby18
-  gemver: gem12
-  puppetbinpath: /opt/puppet/bin
   filecount: 12
   nfs_server: 192.168.97.1
   pe_nfs_mount: /mnt/ro/pe
