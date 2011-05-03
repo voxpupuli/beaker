@@ -17,7 +17,7 @@ module TestConfig
     config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless puppet_enterprise_version
     config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless puppet_enterprise_version
     unless puppet_enterprise_version then
-      config['CONFIG']["puppetpath"] = '/etc/puppet'
+      config['CONFIG']['puppetpath'] = '/etc/puppet'
       config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
     else   # PE paths
       config['CONFIG']['puppetpath'] = '/opt/puppet'
@@ -47,6 +47,8 @@ module TestConfig
   # Print out test configuration
   def self.dump(config)
     # Access "platform" for each host
+    require 'pp'
+    pp config
     config["HOSTS"].each_key do|host|
       Log.notify "Platform for #{host} #{config["HOSTS"][host]['platform']}"
     end
@@ -56,6 +58,11 @@ module TestConfig
       config["HOSTS"][host]['roles'].each do |role|
         Log.notify "Role for #{host} #{role}"
       end
+    end
+
+    # Print out Ruby versions
+    config["HOSTS"].each_key do|host|
+        Log.notify "Ruby version for #{host} #{config["HOSTS"][host][:ruby_ver]}"
     end
 
     # Access Config keys/values
