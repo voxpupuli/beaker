@@ -6,7 +6,7 @@ nfs_server = config['nfs_server']
 # Build hash hostname=>tarball
 disthash = Hash.new
 hosts.each do |host|
-  version  = host["puppetver"]
+  version  = config['pe_ver']
   platform = host['platform']
   # determine the distro file
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"

@@ -34,7 +34,7 @@ module TestConfig
         while line = file.gets
           if /(\w.*)/ =~ line then
             version=$1
-            Log.debug "Found: Puppet Version #{version}"
+            Log.debug "Found: LASTEST Puppet Enterprise Version #{version}"
           end
         end
       end

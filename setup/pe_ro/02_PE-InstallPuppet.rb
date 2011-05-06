@@ -1,6 +1,8 @@
 # Puppet Installer
 # Run installer w/answer files
 
+version  = config['pe_ver']
+
 # Determine NFS mount from config
 nfs_mnt = config['pe_nfs_mount']
 
@@ -8,7 +10,6 @@ step "NFS RO Install Puppet Master"
 hosts.each do |host|
   next if !( host['roles'].include? 'master' )
   role_dashboard = host['roles'].include? 'dashboard'
-  version        = host["puppetver"]
   platform       = host['platform']
   dist_dir       = "#{nfs_mnt}/puppet-enterprise-#{version}-#{platform}"
 
@@ -26,7 +27,6 @@ hosts.each do |host|
   next if host['roles'].include? 'master'
   role_agent     = host['roles'].include? 'agent'
   role_dashboard = host['roles'].include? 'dashboard'
-  version        = host["puppetver"]
   platform       = host['platform']
 
   # determine the distro dir - on the NFS server

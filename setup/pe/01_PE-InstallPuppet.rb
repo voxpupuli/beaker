@@ -1,7 +1,8 @@
 # Pre Test Setup stage
 # SCP installer to host, Untar Installer
+#
+version  = config['pe_ver']
 hosts.each do |host|
-  version  = host["puppetver"]
   platform = host['platform']
 
   # determine the distro tar name
@@ -25,7 +26,6 @@ end
 hosts.each do |host|
   next if !( host['roles'].include? 'master' )
   role_dashboard = host['roles'].include? 'dashboard'
-  version        = host["puppetver"]
   platform       = host['platform']
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
@@ -47,7 +47,6 @@ hosts.each do |host|
   next if host['roles'].include? 'master'
   role_agent     = host['roles'].include? 'agent'
   role_dashboard = host['roles'].include? 'dashboard'
-  version        = host["puppetver"]
   platform       = host['platform']
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
