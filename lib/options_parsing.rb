@@ -1,4 +1,4 @@
-class Options
+ass Options
   attr_reader :options
 
   def self.parse_args
@@ -25,8 +25,8 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
-      @options[:type] = 'skip'
-      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, skip) - default "skip"') do |type|
+      @options[:type] = 'git'
+      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git) - default "git"') do |type|
         unless File.directory?("setup/#{type}") then
           Log.error "Sorry, #{type} is not a known setup type!"
           exit 1
