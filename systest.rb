@@ -29,8 +29,14 @@ Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
 
-setup_options = options.merge({ :random => false,
-                                :tests  => ["setup/early", "setup/#{options[:type]}"] })
+if options[:noinstall] 
+  setup_options = options.merge({ :random => false,
+                                  :tests  => ["setup/early", "setup/post"] })
+else
+  setup_options = options.merge({ :random => false,
+                                  :tests  => ["setup/early", "setup/#{options[:type]}", "setup/post"] })
+end
+
 TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
 TestSuite.new('acceptance', options, config).run_and_exit_on_failure
 

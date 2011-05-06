@@ -86,6 +86,11 @@ class Options
         @options[:mrpropper] = TRUE
       end
 
+      @options[:noinstall] = FALSE
+      opts.on( '--noinstall', 'skip install step' ) do
+        @options[:noinstall] = TRUE
+      end
+
       @options[:notimesync] = FALSE
       opts.on( '--notimesync', 'skip ntpdate step' ) do
         @options[:notimesync] = TRUE

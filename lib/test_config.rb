@@ -21,7 +21,7 @@ module TestConfig
       config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
     else   # PE paths
       config['CONFIG']['puppetpath'] = '/opt/puppet'
-      config['CONFIG']['puppetbin'] = '/opt/puppet'
+      config['CONFIG']['puppetbin'] = '/usr/local/bin/puppet'
     end
     config
   end
