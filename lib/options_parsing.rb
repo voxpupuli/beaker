@@ -1,4 +1,4 @@
-ass Options
+class Options
   attr_reader :options
 
   def self.parse_args
