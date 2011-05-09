@@ -30,7 +30,7 @@ module TestConfig
     return unless Options.parse_args[:type] =~ /pe/
     version=""
     begin
-      File.open("tarballs/LATEST") do |file|
+      File.open("/opt/enterprise/dists/LATEST") do |file|
         while line = file.gets
           if /(\w.*)/ =~ line then
             version=$1
