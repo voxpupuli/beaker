@@ -99,9 +99,9 @@ puts "Skipping #{test_name}" unless ( options[:type] =~ /pe/ )
 if ( options[:type] =~ /pe/ ) then
 
 # Clean up all answer files
-FileUtils.rm Dir.glob('tarballs/q_*')
-FileUtils.rm("tarballs/answers.tar") if File::exists?("tarballs/answers.tar")
-system("tar cf tarballs/answers.tar tarballs/q_*")
+FileUtils.rm Dir.glob('tmp/q_*')
+FileUtils.rm("tmp/answers.tar") if File::exists?("tmp/answers.tar")
+system("tar cf tmp/answers.tar tmp/q_*")
 # For all defined hosts...
 hosts.each do |host|
   role_agent=FALSE
@@ -113,7 +113,7 @@ hosts.each do |host|
   # Host is only a Dashboard
   if !role_agent && !role_master && role_dashboard then
     step "host #{host} is dashboard only"
-    File.open("tarballs/q_dashboard_only", 'w') do |fh|
+    File.open("tmp/q_dashboard_only", 'w') do |fh|
       dashboard_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
         if line =~ /(q_puppetagent_server=)MASTER/ then
           line = $1+master
@@ -125,7 +125,7 @@ hosts.each do |host|
   # Host is only an Agent
   if role_agent && !role_master && !role_dashboard then
     step "host #{host} is agent only"
-    File.open("tarballs/q_agent_only", 'w') do |fh|
+    File.open("tmp/q_agent_only", 'w') do |fh|
       agent_only_a.split(/\n/).each do |line|    # Insert Puppet master host name
         if line =~ /(q_puppetagent_server=)MASTER/ then
           line = $1+master
@@ -137,7 +137,7 @@ hosts.each do |host|
   # Host is Agent and Dashboard
   if role_agent && !role_master && role_dashboard then
     step "host #{host} is agent and dashboard"
-    File.open("tarballs/q_agent_and_dashboard", 'w') do |fh|
+    File.open("tmp/q_agent_and_dashboard", 'w') do |fh|
       agent_dashboard_a.split(/\n/).each do |line|
         if line =~ /(q_puppetagent_server=)MASTER/ then
           line = $1+master
@@ -149,7 +149,7 @@ hosts.each do |host|
   # Host is a Master only - no Dashboard
   if !role_agent && role_master && !role_dashboard then
     step "host #{host} is master only"
-    File.open("tarballs/q_master_only", 'w') do |fh|
+    File.open("tmp/q_master_only", 'w') do |fh|
       master_only_a.split(/\n/).each do |line|
         fh.puts line
       end
@@ -158,7 +158,7 @@ hosts.each do |host|
   # Host is a Master and Dashboard
   if !role_agent && role_master && role_dashboard then
     step "host #{host} is master and dashboard"
-    File.open("tarballs/q_master_and_dashboard", 'w') do |fh|
+    File.open("tmp/q_master_and_dashboard", 'w') do |fh|
       master_dashboard_a.split(/\n/).each do |line|
         fh.puts line
       end

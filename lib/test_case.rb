@@ -92,9 +92,9 @@ class TestCase
         if options[:acceptable_exit_codes].include?(exit_code)
           # cool.
         elsif options[:failing_exit_codes].include?(exit_code)
-          assert( false, "Exited with #{exit_code}" )
+          assert( false, "Host '#{host} exited with #{exit_code} running: #{command.cmd_line('')}" )
         else
-          raise "Exited with #{exit_code}"
+          raise "Host '#{host}' exited with #{exit_code} running: #{command.cmd_line('')}"
         end
       end
 
