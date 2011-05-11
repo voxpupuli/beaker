@@ -92,7 +92,6 @@ q_vendor_packages_install='y'
 ]
 
 test_name="Generate Puppet Enterprise answer files"
-master=""
 
 puts "Skipping #{test_name}" unless ( options[:type] =~ /pe/ )
 
