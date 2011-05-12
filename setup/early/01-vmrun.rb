@@ -16,7 +16,7 @@ if options[:vmrun]
     Log.debug("VM: considering '#{line}'")
     hosts.each do |host|  # only add VMs that match a hostname
       if line.index(host)
-        if line =~ /\s(\d+\s\S+)\s/ then
+        if line =~ /(\d+\s\S+)\s/ then
           k,v = line.split(" ")
           vminfo_h[v]=k
         end
