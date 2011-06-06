@@ -206,6 +206,47 @@ class TestCase
     end
   end
 
+  def with_master_running_on(host, arg='--daemonize', &block)
+    on host, puppet_master('--configprint pidfile')
+    pidfile = stdout.chomp
+
+    on host, puppet_master(arg)
+
+    poll_master_until(host, :start)
+
+    yield if block
+
+    on host, "kill $(cat #{pidfile})"
+
+    poll_master_until(host, :stop)
+  end
+
+  def poll_master_until(host, verb)
+    timeout = 30
+    verb_exit_codes = {:start => 0, :stop => 7}
+
+    Log.debug "Wait for master to #{verb}"
+
+    agent = agents.first
+    wait_start = Time.now
+    done = false
+
+    until done or Time.now - wait_start > timeout
+      on(agent, "curl -k https://#{master}:8140 >& /dev/null", :acceptable_exit_codes => (0..255))
+      done = exit_code == verb_exit_codes[verb]
+      sleep 1 unless done
+    end
+
+    wait_finish = Time.now
+    elapsed = wait_finish - wait_start
+
+    if done
+      Log.debug "Slept for #{elapsed} seconds waiting for Puppet Master to #{verb}"
+    else
+      Log.error "Puppet Master failed to #{verb} after #{elapsed} seconds"
+    end
+  end
+
   def create_remote_file(hosts, file_path, file_content)
     Tempfile.open 'puppet-acceptance' do |tempfile|
       File.open(tempfile.path, 'w') { |file| file.puts file_content }
