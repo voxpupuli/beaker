@@ -1,20 +1,11 @@
 test_name "Validate Sign Cert"
 
 step "Master: Start Puppet Master"
-on master, puppet_master("--certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose")
-sleep 5
+with_master_running_on(master, "--certdnsnames=\"puppet:$(hostname -s):$(hostname -f)\" --verbose") do
+  step "Agents: Run agent --test first time to gen CSR "
+  on agents, puppet_agent("--test"), :acceptable_exit_codes => [1]
 
-#step "Puppet Master clean and generate agent certs"
-#on master,"puppet cert --clean #{agents.join(' ')}"
-#on master,"puppet cert --generate #{agents.join(' ')}"
-#on master,"puppet cert --sign --all"
-
-sleep 1
-step "Agents: Run agent --test first time to gen CSR "
-agents.each { |agent|
-  on agent, "cd \$HOME && puppet agent -t", :acceptable_exit_codes => [1]
-}
-
-# Sign all waiting certs
-step "Master: sign all certs"
-on master,"puppet cert --sign --all"
+  # Sign all waiting certs
+  step "Master: sign all certs"
+  on master, puppet_cert("--sign --all")
+end
