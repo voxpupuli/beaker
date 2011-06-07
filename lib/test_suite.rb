@@ -46,9 +46,9 @@ class TestSuite
       msg = "#{test_file} #{test_case.test_status}ed"
       case test_case.test_status
       when :pass
-        Log.notify msg
+        Log.success msg
       when :skip
-        Log.notify msg
+        Log.debug msg
       when :fail
         Log.error msg
       when :error
