@@ -197,9 +197,6 @@ class TestCase
   def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test', options={})
     if host.is_a? Array
       host.each { |h| run_agent_on h, arg, options }
-    elsif ["ticket #5541 is a pain and hasn't been fixed"] # XXX
-      2.times { on host, puppet_agent(arg), options.merge(:silent => true) }
-      result.log
     else
       on host, puppet_agent(arg), options
     end
