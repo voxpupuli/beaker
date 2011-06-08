@@ -6,7 +6,7 @@
 # until post install
 
 hosts.each do |host|
-  on(host, "ruby -v || #{config['puppetpath']}/bin/ruby -v") do
+  on(host, "ruby -v || #{config['puppetbindir']}/ruby -v") do
    host[:ruby_ver] = stdout
   end
 end

@@ -19,9 +19,11 @@ module TestConfig
     unless puppet_enterprise_version then
       config['CONFIG']['puppetpath'] = '/etc/puppet'
       config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
+      config['CONFIG']['puppetbindir'] = '/usr/bin'
     else   # PE paths
-      config['CONFIG']['puppetpath'] = '/opt/puppet'
+      config['CONFIG']['puppetpath'] = '/etc/puppetlabs/puppet'
       config['CONFIG']['puppetbin'] = '/usr/local/bin/puppet'
+      config['CONFIG']['puppetbindir'] = '/opt/puppet/bin'
     end
     config
   end
