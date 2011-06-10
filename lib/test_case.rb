@@ -210,11 +210,16 @@ class TestCase
 
     poll_master_until(host, :start)
 
+    master_started = true
+
     yield if block
 
-    on host, "kill $(cat #{pidfile})"
+  ensure
+    if master_started
+      on host, "kill $(cat #{pidfile})"
 
-    poll_master_until(host, :stop)
+      poll_master_until(host, :stop)
+    end
   end
 
   def poll_master_until(host, verb)
