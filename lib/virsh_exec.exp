@@ -1,5 +1,6 @@
 #!/usr/bin/expect -f
 set timeout 10
+set virt_bin /opt/libvirt/bin/virsh
 
 # Up to 4 positional args; first two are required:
 # vm_server: VM server
@@ -17,7 +18,7 @@ set load_fh [open "/etc/plharness/secret" r]
 set secret [read $load_fh]
 close $load_fh
 
-spawn virsh -c esx://root@$vmserver/?no_verify=1
+spawn  $virt_bin -c esx://root@$vmserver/?no_verify=1
 expect "Enter root's password for $vmserver: "
 send "${secret}\r";
 
