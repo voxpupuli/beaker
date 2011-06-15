@@ -202,6 +202,24 @@ class TestCase
     end
   end
 
+  def run_cron_on(host,action,user)
+    platform = host['platform']
+    if platform.include? 'solaris'
+      case action
+        when :list   then args = '-l'
+        when :remove then args = '-r'
+      end
+    else         # default for GNU/Linux platforms
+      case action
+        when :list   then args = '-l -u'
+        when :remove then args = '-r -u'
+      end
+    end
+    raise "Unsupported action '#{action}' for platform '#{platform}'" unless args
+
+    on (host, "crontab #{args} #{user}")
+  end
+
   def with_master_running_on(host, arg='--daemonize', &block)
     on host, puppet_master('--configprint pidfile')
     pidfile = stdout.chomp
