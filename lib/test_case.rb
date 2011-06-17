@@ -202,22 +202,28 @@ class TestCase
     end
   end
 
-  def run_cron_on(host,action,user)
+  def run_cron_on(host,action,user,entry="")
     platform = host['platform']
     if platform.include? 'solaris'
       case action
         when :list   then args = '-l'
         when :remove then args = '-r'
+        when :add    then args = ' '
       end
     else         # default for GNU/Linux platforms
       case action
         when :list   then args = '-l -u'
         when :remove then args = '-r -u'
+        when :add    then args = '-u'
       end
     end
     raise "Unsupported action '#{action}' for platform '#{platform}'" unless args
 
-    on (host, "crontab #{args} #{user}")
+    case action
+      when :list   then on(host,"crontab #{args} #{user}")
+      when :remove then on(host,"crontab #{args} #{user}")
+      when :add    then on(host,"echo #{entry} | crontab #{args} #{user} -")
+    end
   end
 
   def with_master_running_on(host, arg='--daemonize', &block)
