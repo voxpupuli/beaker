@@ -217,12 +217,14 @@ class TestCase
         when :add    then args = '-u'
       end
     end
-    raise "Unsupported action '#{action}' for platform '#{platform}'" unless args
-
-    case action
-      when :list   then on(host,"crontab #{args} #{user}")
-      when :remove then on(host,"crontab #{args} #{user}")
-      when :add    then on(host,"echo #{entry} | crontab #{args} #{user} -")
+   
+    if args
+      case action
+        when :list, :remove then on(host,"crontab #{args} #{user}")
+        when :add           then on(host,"echo #{entry} | crontab #{args} #{user} -")
+      end
+    else
+      raise "Unsupported action '#{action}' for platform '#{platform}'"
     end
   end
 
