@@ -173,5 +173,3 @@ if ( options[:type] =~ /pe/ ) then
   end
   system("tar cf tmp/answers.tar tmp/q_*")
 end #end if
-
-exit 0 
