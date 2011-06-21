@@ -231,19 +231,13 @@ class TestCase
   def with_master_running_on(host, arg='--daemonize', &block)
     on host, puppet_master('--configprint pidfile')
     pidfile = stdout.chomp
-
     on host, puppet_master(arg)
-
     poll_master_until(host, :start)
-
     master_started = true
-
     yield if block
-
   ensure
     if master_started
       on host, "kill $(cat #{pidfile})"
-
       poll_master_until(host, :stop)
     end
   end
@@ -282,11 +276,6 @@ class TestCase
     end
   end
 
-  def get_remote_option(hosts, subcommand, option)
-    on hosts, "puppet #{subcommand} --configprint #{option}" do
-      yield stdout.chomp
-    end
-  end
 
   def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
     # Rewrite the init.pp file with an additional class to test
