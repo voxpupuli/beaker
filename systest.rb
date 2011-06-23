@@ -38,7 +38,10 @@ else
 end
 
 TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
-TestSuite.new('acceptance', options, config).run_and_exit_on_failure
+
+unless options[:installonly] then
+  TestSuite.new('acceptance', options, config).run_and_exit_on_failure
+end
 
 Log.notify "systest completed successfully, thanks."
 exit 0
