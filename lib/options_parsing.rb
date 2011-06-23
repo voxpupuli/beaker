@@ -81,18 +81,23 @@ class Options
         @options[:vmrun] = vm
       end
 
+      @options[:installonly] = FALSE
+      opts.on( '--install-only', 'Perform install steps, run no tests' ) do
+        @options[:installonly]= TRUE
+      end
+
+      @options[:noinstall] = FALSE
+      opts.on( '--no-install', 'Skip install step' ) do
+        @options[:noinstall] = TRUE
+      end
+
       @options[:mrpropper] = FALSE
       opts.on( '--mrpropper', 'Clean hosts' ) do
         @options[:mrpropper] = TRUE
       end
 
-      @options[:noinstall] = FALSE
-      opts.on( '--noinstall', 'skip install step' ) do
-        @options[:noinstall] = TRUE
-      end
-
       @options[:notimesync] = FALSE
-      opts.on( '--notimesync', 'skip ntpdate step' ) do
+      opts.on( '--no-ntp', 'skip ntpdate step' ) do
         @options[:notimesync] = TRUE
       end
 
