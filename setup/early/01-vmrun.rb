@@ -5,12 +5,17 @@ if options[:vmrun]
   # 'git' = install from git
   # 'pe' = install Puppet Enterpise
   
-  # git and gem intalls use the same snapshot
+  # git and gem intalls use the same snapshot 'git'
+  # pe installs all use the snapshot 'pe'
   if options[:type] =~ /git/ || options[:type] =~ /gem/ then
     snapshot = 'git'
+  elsif options[:type] =~ /pe/ || options[:type] =~ /pe_ro/ then
+    snapshot = 'pe'
+  else
+    fail_test "Unable to determine snaphot to revert!"
   end 
 
-  step "Reverting to #{snapshot} on VM Server #{vmserver}"
+  step "Reverting to snapshot #{snapshot} on VM Server #{vmserver}"
   vminfo_h = Hash.new
   # get list of VMs
   hlist=`lib/virsh_exec.exp #{vmserver} list`
