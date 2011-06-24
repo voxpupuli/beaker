@@ -190,8 +190,8 @@ class TestCase
 
   def run_script_on(host,script)
     remote_path=File.join("", "tmp", File.basename(script))
-    scp_to hosts, script, remote_path
-    on hosts, remote_path
+    scp_to host, script, remote_path
+    on host, remote_path
   end
 
   def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test', options={})
