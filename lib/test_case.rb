@@ -208,23 +208,22 @@ class TestCase
       case action
         when :list   then args = '-l'
         when :remove then args = '-r'
-        when :add    then args = '/var/spool/cron/crontabs'
+        when :add
+          on(host,"echo '#{entry}' > /var/spool/cron/crontabs/#{user}")
       end
     else         # default for GNU/Linux platforms
       case action
         when :list   then args = '-l -u'
         when :remove then args = '-r -u'
-        when :add    then args = '/var/spool/cron'
+        when :add
+           on(host,"echo '#{entry}' > /tmp/#{user}.cron && crontab -u #{user} /tmp/#{user}.cron")
       end
     end
    
     if args
       case action
         when :list, :remove then on(host,"crontab #{args} #{user}")
-        when :add           then on(host,"echo '#{entry}' > #{args}/#{user}")
       end
-    else
-      raise "Unsupported action '#{action}' for platform '#{platform}'"
     end
   end
 
