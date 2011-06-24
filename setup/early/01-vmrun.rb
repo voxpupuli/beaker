@@ -4,9 +4,13 @@ if options[:vmrun]
   # the VMs have specific configs to test each install type
   # 'git' = install from git
   # 'pe' = install Puppet Enterpise
-  snapshot = options[:type]
-  step "Reverting to #{snapshot} on VM Server #{vmserver}"
+  
+  # git and gem intalls use the same snapshot
+  if options[:type] =~ /git/ || options[:type] =~ /gem/ then
+    snapshot = 'git'
+  end 
 
+  step "Reverting to #{snapshot} on VM Server #{vmserver}"
   vminfo_h = Hash.new
   # get list of VMs
   hlist=`lib/virsh_exec.exp #{vmserver} list`

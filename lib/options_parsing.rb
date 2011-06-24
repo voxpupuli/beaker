@@ -26,7 +26,7 @@ class Options
       end
 
       @options[:type] = 'git'
-      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git) - default "git"') do |type|
+      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - default "git"') do |type|
         unless File.directory?("setup/#{type}") then
           Log.error "Sorry, #{type} is not a known setup type!"
           exit 1
@@ -40,7 +40,7 @@ class Options
               "    - URI and revision, default HEAD",
               "  just giving the revision is also supported"
               ) do |value|
-        @options[:type] = 'git'
+        #@options[:type] = 'git'
         @options[:puppet] = value
       end
 
@@ -49,13 +49,13 @@ class Options
               "  #{@options[:facter]}",
               "    - otherwise, as per the puppet argument"
               ) do |value|
-        @options[:type] = 'git'
+        #@options[:type] = 'git'
         @options[:facter] = value
       end
 
       @options[:plugins] = []
       opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
-        @options[:type] = 'git'
+        #@options[:type] = 'git'
         @options[:plugins] << value
       end
 
