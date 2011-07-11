@@ -8,7 +8,7 @@ q_puppetagent_pluginsync=y
 q_puppetagent_server=MASTER
 q_puppetdashboard_install=n
 q_puppetmaster_install=n
-q_rubydevelopment_install=n
+q_rubydevelopment_install=y
 q_vendor_packages_install=y
 ]
 
@@ -25,7 +25,7 @@ q_puppetmaster_dashboard_port=3000
 q_puppetmaster_install=y
 q_puppetmaster_use_dashboard_classifier=y
 q_puppetmaster_use_dashboard_reports=y
-q_rubydevelopment_install=n
+q_rubydevelopment_install=y
 q_vendor_packages_install=y
 ]
 
@@ -87,7 +87,7 @@ q_puppetdashboard_database_user='dashboard'
 q_puppetdashboard_httpd_port='3000'
 q_puppetdashboard_install='y'
 q_puppetmaster_install='n'
-q_rubydevelopment_install='n'
+q_rubydevelopment_install='y'
 q_vendor_packages_install='y'
 ]
 
