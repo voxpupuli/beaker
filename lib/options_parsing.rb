@@ -133,6 +133,7 @@ class Options
       end
     end
     optparse.parse!
+    raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
 
     @options[:tests] << 'tests' if @options[:tests].empty?
 
