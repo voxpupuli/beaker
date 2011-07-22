@@ -25,8 +25,8 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
-      @options[:type] = 'git'
-      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - default "git"') do |type|
+      @options[:type] = nil
+      opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - no default ') do |type|
         unless File.directory?("setup/#{type}") then
           Log.error "Sorry, #{type} is not a known setup type!"
           exit 1
