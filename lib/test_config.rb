@@ -20,11 +20,13 @@ module TestConfig
       config['CONFIG']['puppetpath'] = '/etc/puppet'
       config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
       config['CONFIG']['puppetbindir'] = '/usr/bin'
-    else   # PE paths
+    else   # PE speciifc
       config['CONFIG']['puppetpath'] = '/etc/puppetlabs/puppet'
       config['CONFIG']['puppetbin'] = '/usr/local/bin/puppet'
       config['CONFIG']['puppetbindir'] = '/opt/puppet/bin'
     end
+    # need to load expect versions of PE binaries 
+    config['VERSION'] = YAML.load_file('ci/pe/pe_version') rescue nil if puppet_enterprise_version
     config
   end
 
