@@ -65,7 +65,9 @@ class TestCase
         result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
         result.stderr=nil
         result.exit_code=0
-        ssh.scp.upload!(source, target)
+        recursive_scp='false'
+        recursive_scp='true' if File.directory? source
+        ssh.scp.upload!(source, target, :recursive => recursive_scp)
       }
     end
   end
