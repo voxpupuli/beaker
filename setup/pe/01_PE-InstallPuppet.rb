@@ -25,26 +25,19 @@ end
 # Install Master first -- allows for auto cert signing
 hosts.each do |host|
   next if !( host['roles'].include? 'master' )
-  role_dashboard = host['roles'].include? 'dashboard'
   platform       = host['platform']
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
-  q_script = case
-    when (!role_dashboard); "q_master_only"
-    when (role_dashboard); "q_master_and_dashboard"
-    else Log.debug "Master warn #{host} has an unacceptable combination of roles."
-  end
-
   step "SCP Master Answer file to dist tar dir"
-  scp_to host, "tmp/#{q_script}", "/tmp/#{dist_dir}"
+  scp_to host, "tmp/q_master_only", "/tmp/#{dist_dir}"
   step "Install Puppet Master"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
+  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a q_master_only"
 end
 
 # Install Puppet Agents
 step "Install Puppet Agent"
 hosts.each do |host|
-  next if host['roles'].include? 'master'
+  #next if host['roles'].include? 'master'
   role_agent     = host['roles'].include? 'agent'
   role_dashboard = host['roles'].include? 'dashboard'
   platform       = host['platform']
