@@ -37,7 +37,7 @@ end
 # Install Puppet Agents
 step "Install Puppet Agent"
 hosts.each do |host|
-  #next if host['roles'].include? 'master'
+  next if !( host['roles'].include? 'agent' )
   role_agent     = host['roles'].include? 'agent'
   role_dashboard = host['roles'].include? 'dashboard'
   platform       = host['platform']
