@@ -12,6 +12,26 @@ q_rubydevelopment_install=y
 q_vendor_packages_install=y
 ]
 
+# Master agent answers
+master_agent_a = %q[
+q_install=y
+q_puppet_symlinks_install=y
+q_puppetagent_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetagent_install=y
+q_puppetagent_pluginsync=y
+q_puppetagent_server=MASTER
+q_puppetdashboard_install=n
+q_puppetmaster_certdnsnames=puppet:`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetmaster_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetmaster_dashboard_hostname=DASHBOARDHOST
+q_puppetmaster_dashboard_port=3000
+q_puppetmaster_install=y
+q_puppetmaster_use_dashboard_classifier=y
+q_puppetmaster_use_dashboard_reports=y
+q_rubydevelopment_install=y
+q_vendor_packages_install=y
+]
+
 # Master base answers
 master_only_a = %q[
 q_install=y
@@ -158,6 +178,20 @@ if ( options[:type] =~ /pe/ ) then
       step "Generate Master and Dashboard answer file"
       File.open("tmp/q_master", 'w') do |fh|
         master_dashboard_a.split(/\n/).each do |line|
+          if line =~ /(q_puppetagent_server=)MASTER/ then
+            line = $1+master
+          end
+          if line =~ /(q_puppetmaster_dashboard_hostname=)DASHBOARDHOST/ then
+            line = $1+dashboardhost
+          end
+          fh.puts line
+        end
+      end
+    end
+    if role_agent && role_master && !role_dashboard then
+      step "Generate Master and Agent answer file"
+      File.open("tmp/q_master", 'w') do |fh|
+        master_agent_a.split(/\n/).each do |line|
           if line =~ /(q_puppetagent_server=)MASTER/ then
             line = $1+master
           end
