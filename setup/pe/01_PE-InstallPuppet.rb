@@ -29,9 +29,9 @@ hosts.each do |host|
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
   step "SCP Master Answer file to dist tar dir"
-  scp_to host, "tmp/q_master_only", "/tmp/#{dist_dir}"
+  scp_to host, "tmp/q_master", "/tmp/#{dist_dir}"
   step "Install Puppet Master"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a q_master_only"
+  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a q_master"
 end
 
 # Install Puppet Agents
