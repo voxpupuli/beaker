@@ -29,9 +29,9 @@ hosts.each do |host|
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
   step "SCP Master Answer file to dist tar dir"
-  scp_to host, "tmp/q_master", "/tmp/#{dist_dir}"
+  scp_to host, "tmp/answers.#{host}", "/tmp/#{dist_dir}"
   step "Install Puppet Master"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a q_master"
+  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a answers.#{host}"
 end
 
 # Install Puppet Agents
@@ -45,15 +45,8 @@ hosts.each do |host|
   platform       = host['platform']
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
-  q_script = case
-    when role_agent && role_dashboard;  "q_agent_and_dashboard"
-    when role_agent && !role_dashboard; "q_agent_only"
-    when !role_agent && role_dashboard; "q_dashboard_only"
-    else Log.debug "Agent warn #{host} has an unacceptable combination of roles."
-  end
-
   step "SCP Answer file to dist tar dir"
-  scp_to host, "tmp/#{q_script}", "/tmp/#{dist_dir}"
+  scp_to host, "tmp/answers.#{host}", "/tmp/#{dist_dir}"
   step "Install Puppet Agent"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a #{q_script}"
+  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a answers.#{host}"
 end
