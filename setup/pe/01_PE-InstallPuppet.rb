@@ -37,16 +37,18 @@ end
 # Install Puppet Agents
 step "Install Puppet Agent"
 hosts.each do |host|
-  next unless ( host['roles'].include? 'agent' )
-  role_agent     = host['roles'].include? 'agent'
-  role_dashboard = host['roles'].include? 'dashboard'
+  next if host['roles'].include? 'master'
+  role_agent=FALSE
+  role_dashboard=FALSE
+  role_agent=TRUE     if host['roles'].include? 'agent'
+  role_dashboard=TRUE if host['roles'].include? 'dashboard'
   platform       = host['platform']
   dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
   q_script = case
-    when (role_agent  && !role_dashboard); "q_agent_only"
-    when (role_agent  && role_dashboard);  "q_agent_and_dashboard"
-    when (!role_agent && role_dashboard);  "q_dashboard_only"
+    when role_agent && role_dashboard;  "q_agent_and_dashboard"
+    when role_agent && !role_dashboard; "q_agent_only"
+    when !role_agent && role_dashboard; "q_dashboard_only"
     else Log.debug "Agent warn #{host} has an unacceptable combination of roles."
   end
 
