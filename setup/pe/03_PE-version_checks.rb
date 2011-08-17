@@ -1,5 +1,12 @@
 test_name "Verify correct versions of installed PE code"
 
+step "Check for presence of pe_version file"
+hosts.each do |host|
+  on(host, "test -f /opt/puppet/pe_version") do
+    assert_equal(0, exit_code)
+  end
+end
+
 step "Check Ruby Gem version"
 hosts.each do |host|
   on(host, "#{config['puppetbindir']}/gem --version") do
