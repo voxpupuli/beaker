@@ -7,6 +7,13 @@ hosts.each do |host|
   end
 end
 
+step "Check Puppet Module version"
+hosts.each do |host|
+  on(host, "#{config['puppetbindir']}/puppet-module version") do
+    assert_match(/#{version['VERSION']['puppet_module_ver']}/, stdout, "Incorrect Puppet Module tool version detected on #{host} ")
+  end
+end
+
 step "Check Ruby Gem version"
 hosts.each do |host|
   on(host, "#{config['puppetbindir']}/gem --version") do
