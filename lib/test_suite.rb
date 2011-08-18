@@ -214,6 +214,9 @@ class TestSuite
     Log.notify "Errored Tests Cases:"
     (grouped_summary[:error] || []).each {|test_case| print_test_failure(test_case)}
 
+    Log.notify "Skipped Tests Cases:"
+    (grouped_summary[:skip] || []).each {|test_case| print_test_failure(test_case)}
+
     Log.notify("\n\n")
 
     Log.stdout = !options[:quiet]
