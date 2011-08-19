@@ -21,6 +21,7 @@ q_puppetmaster_dashboard_hostname=DASHBOARDHOST
 q_puppetmaster_dashboard_port=3000
 q_puppetmaster_use_dashboard_classifier=y
 q_puppetmaster_use_dashboard_reports=y
+q_puppetmaster_forward_facts=y
 ]
 
 # Dashboard only answers
@@ -31,6 +32,9 @@ q_puppetdashboard_database_password='puppet'
 q_puppetdashboard_database_root_password='puppet'
 q_puppetdashboard_database_user='dashboard'
 q_puppetdashboard_httpd_port='3000'
+q_puppetdashboard_master_hostname=MASTER
+q_puppetdashboard_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 ]
 
 test_name="Generate Puppet Enterprise answer files"
@@ -80,6 +84,9 @@ if ( options[:type] =~ /pe/ ) then
         end
         if line =~ /(q_puppetmaster_dashboard_hostname=)DASHBOARDHOST/ then
           line = $1+dashboardhost
+        end
+        if line =~ /(q_puppetdashboard_master_hostname=)MASTER/ then
+          line = $1+master
         end
         fh.puts line
       end
