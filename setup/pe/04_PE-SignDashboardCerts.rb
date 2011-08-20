@@ -39,4 +39,4 @@ on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin
 step 'retrieve inventory service certificate.'
 on dashboard_host, "/opt/puppet/bin/ruby /opt/puppet/bin/receive_signed_cert.rb #{dashboard_host} #{master}"
 step 'start puppet master and inventory service'
-on dashboard_host, 'service pe-httpd start'
+on dashboard_host, '/etc/init.d/pe-httpd start'
