@@ -1,3 +1,5 @@
+test_name "Revert VMs"
+
 if options[:vmrun]
   vmserver = options[:vmrun]
   # VM snapshots are named to match the type of Puppet install;
@@ -41,4 +43,7 @@ if options[:vmrun]
     step "Reverting VM: #{key} with Domain: #{val} on VM server #{vmserver}"
     system("lib/virsh_exec.exp #{vmserver} snapshot-revert #{val} #{snapshot}")
   end
+else
+  Log.notify "Skipping revert VM step"  
+  skip_test "Skipping revert VM step"
 end

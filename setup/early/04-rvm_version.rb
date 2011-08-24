@@ -4,6 +4,7 @@ if options[:rvm].include? 'system'
   on hosts, "rvm --default system" 
 elsif options[:rvm].include? 'skip'
   Log.notify "Skipping set ruby version"
+  skip_test "Skipping set ruby version"
 else 
   step "Setting Ruby version"
   on hosts, "rvm --default use #{options[:rvm]}"

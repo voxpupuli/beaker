@@ -25,6 +25,11 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
+      @options[:upgrade] = nil
+      opts.on('--upgrade  VERSION', 'Specify the PE VERSION to upgrade *from*') do |upgrade|
+        @options[:upgrade] = upgrade
+      end
+
       @options[:snapshot] = nil
       opts.on('--snapshot NAME', 'Specify special VM snapshot name') do |snap|
         @options[:snapshot] = snap

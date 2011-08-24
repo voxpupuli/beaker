@@ -4,4 +4,5 @@ unless options[:notimesync]
   on hosts, "ntpdate -t 5 us.pool.ntp.org"
 else
   Log.notify "Skipping ntp time sync"
+  skip_test "Skipping ntp time sync"
 end
