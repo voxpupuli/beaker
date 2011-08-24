@@ -31,11 +31,11 @@ test_name 'Set up certificates when the dashboard and master are on seperate nod
 
 step 'set up dashboard certificates'
 # send dashboard csr
-on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake RAILS_ENV=production cert:request'
+on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake --trace RAILS_ENV=production cert:request'
 # sign dashboard cert
 on master, "puppet cert --sign dashboard"
 # retreive dashboard cert
-on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake RAILS_ENV=production cert:retrieve'
+on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake --trace RAILS_ENV=production cert:retrieve'
 step 'retrieve inventory service certificate.'
 on dashboard_host, "/opt/puppet/bin/ruby /opt/puppet/bin/receive_signed_cert.rb #{dashboard_host} #{master}"
 step 'start puppet master and inventory service'
