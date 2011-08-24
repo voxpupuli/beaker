@@ -15,6 +15,9 @@ if options[:vmrun]
     fail_test "Unable to determine snaphot to revert!"
   end 
 
+  # Set snapshot name for specia cases
+  snapshot=options[:snapshot] if options[:snapshot] 
+
   step "Reverting to snapshot #{snapshot} on VM Server #{vmserver}"
   vminfo_h = Hash.new
   # get list of VMs

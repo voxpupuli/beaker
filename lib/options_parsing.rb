@@ -25,6 +25,11 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
+      @options[:snapshot] = nil
+      opts.on('--snapshot NAME', 'Specify special VM snapshot name') do |snap|
+        @options[:snapshot] = snap
+      end
+
       @options[:type] = nil
       opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - no default ') do |type|
         unless File.directory?("setup/#{type}") then
