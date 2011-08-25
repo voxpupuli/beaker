@@ -2,36 +2,33 @@
 # SCP installer to host, Untar Installer
 #
 version  = config['pe_ver']
+test_name "Install Puppet #{version}"
 hosts.each do |host|
   platform = host['platform']
+  host['dist'] = "puppet-enterprise-#{version}-#{platform}"
 
   # determine the distro tar name
-  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
-  unless File.file? "/opt/enterprise/dists/#{dist_tar}"
-    Log.error "PE #{dist_tar} not found, help!"
+  unless File.file? "/opt/enterprise/dists/#{host['dist']}.tar"
+    Log.error "PE #{host['dist']}.tar not found, help!"
     Log.error ""
     Log.error "Make sure your configuration file uses the PE version string:"
     Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
-    fail_test "Sorry, PE #{dist_tar} file not found."
+    fail_test "Sorry, PE #{host['dist']}.tar file not found."
   end
 
   step "Pre Test Setup -- SCP install package to hosts"
-  scp_to host, "/opt/enterprise/dists/#{dist_tar}", "/tmp"
+  scp_to host, "/opt/enterprise/dists/#{host['dist']}.tar", "/tmp"
   step "Pre Test Setup -- Untar install package on hosts"
-  on host,"cd /tmp && tar xf #{dist_tar}"
-
+  on host,"cd /tmp && tar xf #{host['dist']}.tar"
 end
 
 # Install Master first -- allows for auto cert signing
 hosts.each do |host|
   next if !( host['roles'].include? 'master' )
-  platform       = host['platform']
-  dist_dir       = "puppet-enterprise-#{version}-#{platform}"
-
-  step "SCP Master Answer file to dist tar dir"
-  scp_to host, "tmp/answers.#{host}", "/tmp/#{dist_dir}"
+  step "SCP Master Answer file to #{host} #{host['dist']}"
+  scp_to host, "tmp/answers.#{host}", "/tmp/#{host['dist']}"
   step "Install Puppet Master"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a answers.#{host}"
+  on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
 end
 
 # Install Puppet Agents
@@ -42,11 +39,9 @@ hosts.each do |host|
   role_dashboard=FALSE
   role_agent=TRUE     if host['roles'].include? 'agent'
   role_dashboard=TRUE if host['roles'].include? 'dashboard'
-  platform       = host['platform']
-  dist_dir       = "puppet-enterprise-#{version}-#{platform}"
 
   step "SCP Answer file to dist tar dir"
-  scp_to host, "tmp/answers.#{host}", "/tmp/#{dist_dir}"
+  scp_to host, "tmp/answers.#{host}", "/tmp/#{host['dist']}"
   step "Install Puppet Agent"
-  on host,"cd /tmp/#{dist_dir} && ./puppet-enterprise-installer -a answers.#{host}"
+  on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
 end
