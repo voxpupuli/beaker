@@ -92,7 +92,7 @@ if ( options[:type] =~ /pe/ ) then
       end
     end
   end
-  system("tar cf tmp/answers.tar tmp/answers.*")
+  #system("tar cf tmp/answers.tar tmp/answers.*")
 else 
   Log.notify "Non-PE based install, skipping answer file generation"
   skip_test "Non-PE based install, skipping answer file generation"

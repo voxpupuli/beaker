@@ -1,6 +1,6 @@
 test_name "Agent --test post install"
 step 'Running pupept agent --test on each agent'
-zzz=10
+zzz=20
 agents.each do |agent|
   if agent['platform'].include?('solaris')
     on(agent, '/usr/sbin/svcadm disable -s svc:/network/puppetagent:default')
