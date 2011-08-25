@@ -20,6 +20,8 @@ class TestCase
       @name+other
     end
 
+    attr_reader :name
+
     # Wrap up the SSH connection process; this will cache the connection and
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
