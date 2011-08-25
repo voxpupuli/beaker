@@ -9,6 +9,7 @@ end
 
 step "Check Puppet Module version"
 hosts.each do |host|
+  next if host['platform'].include?('solaris')
   on(host, "#{config['puppetbindir']}/puppet-module version") do
     assert_match(/#{version['VERSION']['puppet_module_ver']}/, stdout, "Incorrect Puppet Module tool version detected on #{host} ")
   end
