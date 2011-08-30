@@ -8,6 +8,7 @@ require 'socket'
 require 'optparse'
 require 'systemu'
 require 'test/unit'
+require 'yaml'
 
 Test::Unit.run = true
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
