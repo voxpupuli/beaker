@@ -1,5 +1,6 @@
 # Config was taken by Ruby.
 module TestConfig
+
   SSH_DEFAULTS = {
     :config                => false,
     :paranoid              => false,
@@ -9,10 +10,21 @@ module TestConfig
     :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts"
   }
 
+  def self.ssh_defaults
+    {
+      :config                => false,
+      :paranoid              => false,
+      :auth_methods          => ["publickey"],
+      :keys                  => [Options.parse_args[:key]],
+      :port                  => 22,
+      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts"
+    }
+  end
+
   def self.load_file(config_file)
     config = YAML.load_file(config_file)
     # Merge some useful date into the config hash
-    config['CONFIG']['ssh'] = SSH_DEFAULTS.merge(config['CONFIG']['ssh'] || {})
+    config['CONFIG']['ssh'] = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
     config['CONFIG']['pe_ver'] = puppet_enterprise_version if puppet_enterprise_version 
     config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless puppet_enterprise_version
     config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless puppet_enterprise_version

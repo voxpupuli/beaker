@@ -25,6 +25,11 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
+      @options[:key] = "#{ENV['HOME']}/.ssh/id_rsa"
+      opts.on('-k', '--key PATH TO SSH KEY', 'Specify alternate SSH key, defaults to ~/.ssh/id_rsa') do |key|
+        @options[:key] = key
+      end
+
       @options[:upgrade] = nil
       opts.on('--upgrade  VERSION', 'Specify the PE VERSION to upgrade *from*') do |upgrade|
         @options[:upgrade] = upgrade
