@@ -7,7 +7,8 @@ module TestConfig
     :auth_methods          => ["publickey"],
     :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
     :port                  => 22,
-    :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts"
+    :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+    :forward_agent         => true
   }
 
   def self.ssh_defaults
@@ -17,7 +18,8 @@ module TestConfig
       :auth_methods          => ["publickey"],
       :keys                  => [Options.parse_args[:key]],
       :port                  => 22,
-      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts"
+      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+      :forward_agent         => true
     }
   end
 
