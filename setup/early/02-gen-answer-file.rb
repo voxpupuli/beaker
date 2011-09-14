@@ -14,8 +14,8 @@ q_puppetagent_server=MASTER
 ]
 
 # Master base answers
-master_a = %q[
-q_puppetmaster_certdnsnames=puppet:`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+master_a = %Q[
+q_puppetmaster_certdnsnames=puppet:`uname | grep -i sunos > /dev/null && hostname || hostname -s`:#{master}
 q_puppetmaster_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppetmaster_dashboard_hostname=DASHBOARDHOST
 q_puppetmaster_dashboard_port=3000
@@ -25,7 +25,7 @@ q_puppetmaster_forward_facts=y
 ]
 
 # Dashboard only answers
-dashboard_a = %q[
+dashboard_a = %Q[
 q_puppetdashboard_database_install='y'
 q_puppetdashboard_database_name='dashboard'
 q_puppetdashboard_database_password='puppet'
@@ -34,7 +34,7 @@ q_puppetdashboard_database_user='dashboard'
 q_puppetdashboard_httpd_port='3000'
 q_puppetdashboard_master_hostname=MASTER
 q_puppetdashboard_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
-q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`:#{dashboard}
 ]
 
 test_name="Generate Puppet Enterprise answer files"
