@@ -25,9 +25,14 @@ class Options
         puts "RVM: #{@options[:rvm]}"
       end
 
-      @options[:key] = "#{ENV['HOME']}/.ssh/id_rsa"
-      opts.on('-k', '--key PATH TO SSH KEY', 'Specify alternate SSH key, defaults to ~/.ssh/id_rsa') do |key|
-        @options[:key] = key
+      @options[:keyfile] = "#{ENV['HOME']}/.ssh/id_rsa"
+      opts.on('--keyfile PATH TO SSH KEY', 'Specify alternate SSH key, defaults to ~/.ssh/id_rsa') do |key|
+        @options[:keyfile] = key
+      end
+
+      @options[:keypair] = nil
+      opts.on('--keypair name of cloud ID key', 'No default') do |key|
+        @options[:keypair] = key
       end
 
       @options[:upgrade] = nil
