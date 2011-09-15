@@ -1,22 +1,12 @@
 # Config was taken by Ruby.
 module TestConfig
 
-  SSH_DEFAULTS = {
-    :config                => false,
-    :paranoid              => false,
-    :auth_methods          => ["publickey"],
-    :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
-    :port                  => 22,
-    :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
-    :forward_agent         => true
-  }
-
   def self.ssh_defaults
     {
       :config                => false,
       :paranoid              => false,
       :auth_methods          => ["publickey"],
-      :keys                  => [Options.parse_args[:key]],
+      :keys                  => [Options.parse_args[:keyfile]],
       :port                  => 22,
       :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
       :forward_agent         => true
