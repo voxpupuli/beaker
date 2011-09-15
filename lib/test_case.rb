@@ -42,6 +42,16 @@ class TestCase
       end
     end
   end
+
+  def to_hash
+    hash = {}
+    hash['HOSTS'] = {}
+    hash['CONFIG'] = @config
+    @hosts.each do |host|
+      hash['HOSTS'][host.name] = host.overrides
+    end
+    hash
+  end
   #
   # Identify hosts
   #

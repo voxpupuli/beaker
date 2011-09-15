@@ -36,6 +36,9 @@ if options[:noinstall]
 elsif options[:upgrade] 
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/pe_upgrade", "setup/post"] })
+elsif options[:type] == 'cp_pe'
+  setup_options = options.merge({ :random => false,
+                                  :tests => [ 'setup/cp_pe' ] })
 else
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/#{options[:type]}", "setup/post"] })
