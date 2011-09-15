@@ -98,7 +98,7 @@ class TestCase
     else
       @result = command.exec(host, options)
 
-      unless options[:silent] then
+      unless options[:stdout_only] then
         result.log
         if options[:acceptable_exit_codes].include?(exit_code)
           # cool.
@@ -285,19 +285,6 @@ class TestCase
       scp_to hosts, tempfile.path, file_path
     end
   end
-
-
-  def prep_initpp(host, entry, path="/etc/puppetlabs/puppet/modules/puppet_system_test/manifests")
-    # Rewrite the init.pp file with an additional class to test
-    # eg: class puppet_system_test {
-    #  include group
-    #  include user
-    #}
-    step "Append new system_test_class to init.pp"
-    # on host,"cd #{path} && head -n -1 init.pp > tmp_init.pp && echo include #{entry} >> tmp_init.pp && echo \} >> tmp_init.pp && mv -f tmp_init.pp init.pp"
-    on host,"cd #{path} && echo class puppet_system_test \{ > init.pp && echo include #{entry} >> init.pp && echo \} >>init.pp"
-  end
-
 
   def with_standard_output_to_logs
     stdout = ''

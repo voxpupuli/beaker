@@ -111,25 +111,20 @@ class Options
         @options[:noinstall] = TRUE
       end
 
-      @options[:mrpropper] = FALSE
-      opts.on( '--mrpropper', 'Clean hosts' ) do
-        @options[:mrpropper] = TRUE
-      end
-
       @options[:notimesync] = FALSE
       opts.on( '--no-ntp', 'skip ntpdate step' ) do
         @options[:notimesync] = TRUE
       end
 
-      @options[:stdout_only] = false
+      @options[:stdout_only] = FALSE
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
-        @options[:stdout_only] = true
+        @options[:stdout_only] = TRUE
       end
 
-      Log.stdout = true
+      Log.stdout = TRUE
       opts.on('-q', '--quiet', 'don\'t log output to STDOUT') do
-        Log.stdout = false
-        @options[:quiet] = true
+        Log.stdout = FALSE
+        @options[:quiet] = FALSE
       end
 
       Log.color = true
