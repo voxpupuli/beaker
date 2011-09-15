@@ -10,8 +10,8 @@ class Result
 
   def log
     Log.debug
-    Log.debug "<STDOUT>\n#{stdout}\n</STDOUT>"
-    Log.debug "<STDERR>\n#{stderr}\n</STDERR>"
-    Log.debug "Exited with #{exit_code}"
+    Log.debug "<STDOUT>\n#{host}: #{stdout}\n</STDOUT>"
+    Log.debug "<STDERR>\n#{host}: #{stderr}\n</STDERR>"
+    Log.debug "#{host}: Exited with #{exit_code}"
   end
 end
