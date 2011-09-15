@@ -1,9 +1,10 @@
 require 'yaml'
-keypair='dans-new-key'
+keypair=@options[:keypair]
 host_config_file='tmp/host_config.yaml'
 save_config_file='tmp/host_save_config.yaml'
-# why does it allow multiple keys
-keyfile=@config['ssh'][:keys].first
+keyfile=@options[:keyfile]
+
+skip_test 'will not run without a keyfile and keypair' and break unless keypair and keyfile
 
 # sets up a cloud master
 # requies that pe-build is in the $PATH
