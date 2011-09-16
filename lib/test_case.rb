@@ -98,7 +98,7 @@ class TestCase
     else
       @result = command.exec(host, options)
 
-      unless options[:stdout_only] then
+      unless options[:silent] then
         result.log
         if options[:acceptable_exit_codes].include?(exit_code)
           # cool.
