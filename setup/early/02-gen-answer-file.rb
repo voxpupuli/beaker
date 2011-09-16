@@ -37,7 +37,7 @@ q_puppetdashboard_database_user='dashboard'
 q_puppetdashboard_httpd_port='3000'
 q_puppetdashboard_master_hostname=MASTER
 q_puppetdashboard_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
-q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`:#{dashboard}
 ]
 
 dashboardhost = 'undefined'
