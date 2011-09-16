@@ -11,7 +11,7 @@ if options[:vmrun]
   # pe installs all use the snapshot 'pe'
   if options[:type] =~ /git/ || options[:type] =~ /gem/ then
     snapshot = 'git'
-  elsif options[:type] =~ /pe/ || options[:type] =~ /pe_ro/ || options[:type] =~ /cp_pe/ then
+  elsif options[:type] =~ /pe/ then
     snapshot = 'pe'
   else
     fail_test "Unable to determine snaphot to revert!"
