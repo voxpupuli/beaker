@@ -68,7 +68,8 @@ class TestCase
   end
   def dashboard
     dashboards = hosts 'dashboard'
-    fail "There must be exactly one dashboard" unless dashboards.length == 1
+    Log.warn "There is no dashboard host configured" if dashboards.empty?
+    fail "Cannot have more than one dashboard host" if dashboards.length > 1
     dashboards.first
   end
   #
