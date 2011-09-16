@@ -5,7 +5,7 @@
 # Need to run this post install as PE hosts will not have ruby installed
 # until post install
 
-if options[:type] =~ /pe/ || options[:type] =~ /pe_ro/ then
+if options[:type] =~ /pe/
   cmd = "#{config['puppetbindir']}/ruby -v"
 else
   cmd = 'ruby -v'
