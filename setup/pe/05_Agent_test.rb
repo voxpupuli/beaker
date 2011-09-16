@@ -16,6 +16,7 @@ agents.each do |agent|
     on(agent, '/etc/init.d/pe-puppet stop')
     sleep zzz
     on(agent, puppet_agent("--test"), :acceptable_exit_codes => [0,2])
+    sleep zzz
     on(agent, '/etc/init.d/pe-puppet start')
   end
 end
