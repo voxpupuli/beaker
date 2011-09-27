@@ -1,6 +1,11 @@
-
 test_name="Generate Puppet Enterprise answer files"
 skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
+
+if (options[:type] =~ /pe_aws/) 
+  certcmd='curl http://169.254.169.254/2008-02-01/meta-data/public-hostname'
+else
+  certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
+end
 
 common_a = %q[
 q_install=y
@@ -10,16 +15,16 @@ q_vendor_packages_install=y
 ]
 
 # Agent base answers
-agent_a = %q[
-q_puppetagent_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+agent_a = %Q[
+q_puppetagent_certname=`#{certcmd}`
 q_puppetagent_pluginsync=y
 q_puppetagent_server=MASTER
 ]
 
 # Master base answers
 master_a = %Q[
-q_puppetmaster_certdnsnames=puppet:`uname | grep -i sunos > /dev/null && hostname || hostname -s`:#{master}
-q_puppetmaster_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
+q_puppetmaster_certdnsnames=puppet:`#{certcmd}`:#{master}
+q_puppetmaster_certname=`#{certcmd}`
 q_puppetmaster_dashboard_hostname=DASHBOARDHOST
 q_puppetmaster_dashboard_port=3000
 q_puppetmaster_use_dashboard_classifier=y
@@ -36,8 +41,8 @@ q_puppetdashboard_database_root_password='puppet'
 q_puppetdashboard_database_user='dashboard'
 q_puppetdashboard_httpd_port='3000'
 q_puppetdashboard_master_hostname=MASTER
-q_puppetdashboard_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
-q_puppetdashboard_inventory_certdnsnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`:#{dashboard}
+q_puppetdashboard_inventory_certname=`#{certcmd}`
+q_puppetdashboard_inventory_certdnsnames=`#{certcmd}`:#{dashboard}
 ]
 
 dashboardhost = 'undefined'
