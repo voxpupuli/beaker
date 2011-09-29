@@ -55,20 +55,19 @@ hosts.each do |host|   # find our dashboard host for laster use
 end
 
 # create a list of hosts that are agents only -- for use by pssh
-File.open("tmp/hosts_ec2.agents", 'w') do |fh|
-  hosts.each do |host|
-    next if host['roles'].include? 'master'
-    next if host['roles'].include? 'dashboard'
-    fh.puts host
-  end
-end
-
+#File.open("tmp/hosts_ec2.agents", 'w') do |fh|
+#  hosts.each do |host|
+#    next if host['roles'].include? 'master'
+#    next if host['roles'].include? 'dashboard'
+#    fh.puts host
+#  end
+#end
 # create a list of all hosts -- for use by pssh
-File.open("tmp/hosts_ec2.all", 'w') do |fh|
-  hosts.each do |host|
-    fh.puts host
-  end
-end
+#File.open("tmp/hosts_ec2.all", 'w') do |fh|
+#  hosts.each do |host|
+#    fh.puts host
+#  end
+#end
 
 # Setup a single agent only answer file
 # base answers: common + agent
@@ -136,4 +135,3 @@ hosts.each do |host|
     fh.puts host
   end
 end
-#system("tar cf tmp/answers.tar tmp/answers.*")
