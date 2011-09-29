@@ -39,6 +39,9 @@ elsif options[:upgrade]
 elsif options[:type] == 'cp_pe'
   setup_options = options.merge({ :random => false,
                                   :tests => ["setup/early/01-vmrun.rb", "setup/cp_pe"] })
+elsif options[:type] == 'pe_aws'
+  setup_options = options.merge({ :random => false,
+                                  :tests => ["setup/pe_aws"] })
 else
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/#{options[:type]}", "setup/post"] })
