@@ -35,3 +35,18 @@ hosts.each do |host|
     assert_match(/#{version['VERSION']['puppet_ver']}/, stdout, "Incorrect Puppet version detected on #{host}")
   end
 end
+
+step "Check Rack version"
+hosts.each do |host|
+  next if host['role'].include? 'agent'
+
+  if host['platform'] =~ /debian|ubuntu/
+    on(host, 'dpkg -l rack') do
+      assert_match(/#{version['VERSION']['rack_ver']}/, stdout, "Incorrect Rack version detected on #{host}")
+    end
+  else
+    on(host, 'rpm -q rack') do
+      assert_match(/#{version['VERSION']['rack_ver']}/, stdout, "Incorrect Rack version detected on #{host}")
+    end
+  end
+end
