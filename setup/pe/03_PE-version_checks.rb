@@ -41,11 +41,11 @@ hosts.each do |host|
   next if host['roles'].include? 'agent'
 
   if host['platform'] =~ /debian|ubuntu/
-    on(host, 'dpkg -l rack') do
+    on(host, 'dpkg -l pe-rack') do
       assert_match(/#{version['VERSION']['rack_ver']}/, stdout, "Incorrect Rack version detected on #{host}")
     end
   else
-    on(host, 'rpm -q rack') do
+    on(host, 'rpm -q pe-rubygem-rack') do
       assert_match(/#{version['VERSION']['rack_ver']}/, stdout, "Incorrect Rack version detected on #{host}")
     end
   end
