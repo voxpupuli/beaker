@@ -38,7 +38,7 @@ end
 
 step "Check Rack version"
 hosts.each do |host|
-  next if host['role'].include? 'agent'
+  next if host['roles'].include? 'agent'
 
   if host['platform'] =~ /debian|ubuntu/
     on(host, 'dpkg -l rack') do
