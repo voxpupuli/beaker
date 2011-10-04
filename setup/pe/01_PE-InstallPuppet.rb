@@ -29,8 +29,6 @@ hosts.each do |host|
   scp_to host, "tmp/answers.#{host}", "/tmp/#{host['dist']}"
   step "Install Puppet Master"
   on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
-  # TODO: remove this line. It is masking a problem that needs to be resolved
-  on host, 'chown -Rvf pe-puppet:pe-puppet /var/opt/lib/pe-puppet/reports'
 end
 
 # Install Puppet Agents
