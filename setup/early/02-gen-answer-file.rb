@@ -47,7 +47,6 @@ q_puppetdashboard_inventory_certdnsnames=`#{certcmd}`:#{dashboard}
 
 dashboardhost = 'undefined'
 FileUtils.rm Dir.glob('tmp/answers.*')  # Clean up all answer files
-FileUtils.rm("tmp/answers.tar") if File::exists?("tmp/answers.tar")
 
 hosts.each do |host|   # find our dashboard host for laster use
   dashboardhost = host if host['roles'].include? 'dashboard'
@@ -96,4 +95,3 @@ hosts.each do |host|
     end
   end
 end
-#system("tar cf tmp/answers.tar tmp/answers.*")
