@@ -2,14 +2,13 @@
 
 # Determine NFS server from config
 nfs_server = config['nfs_server']
+version  = config['pe_ver']
 
 # Build hash hostname=>tarball
 disthash = Hash.new
 hosts.each do |host|
-  version  = config['pe_ver']
   platform = host['platform']
-  # determine the distro file
-  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
+  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar.gz"
   disthash[host] = dist_tar
 end
 
@@ -20,15 +19,14 @@ on master,"if [ ! -d /mnt/rw ] ; then mkdir /mnt/rw; fi; mount -t nfs #{nfs_serv
 # Only SCP the needed tarballs ONCE
 disthash.map { |k,v| v }.uniq.each do |file| 
   step "Pre Test Setup -- SCP tarballs to NFS RW mount"
-  scp_to master, "tarballs/#{file}", "/mnt/rw/pe"
+  scp_to master, "/opt/enterprise/dists/#{file}", "/mnt/rw/pe"
   step "Pre Test Setup -- extract tarballs on NFS RW mount"
-  on master, "tar xf /mnt/rw/pe/#{file} -C /mnt/rw/pe"
+  on master, "tar xzf /mnt/rw/pe/#{file} -C /mnt/rw/pe"
 end
 
 step "Pre Test Setup -- SCP answer files to NFS RW mount"
-scp_to master,"tarballs/answers.tar", "/tmp"
+scp_to master,"tarballs/answers.*", "/tmp"
 step "Pre Test Setup -- extract answer.tar on NFS RW mount"
-on master, "tar xf /tmp/answers.tar -C /mnt/rw/pe"
 
 # Mount NFS RO mount point on all hosts
 hosts.each do |host|

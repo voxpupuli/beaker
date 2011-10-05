@@ -1,5 +1,5 @@
 test_name="Generate Puppet Enterprise answer files"
-skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
+skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe_aws/ )
 
 if (options[:type] =~ /pe_aws/) 
   certcmd='curl http://169.254.169.254/2008-02-01/meta-data/public-hostname'
@@ -48,7 +48,6 @@ q_puppetdashboard_inventory_certdnsnames=`#{certcmd}`:#{dashboard}
 dashboardhost = 'undefined'
 FileUtils.rm Dir.glob('tmp/answers.*')  # Clean up all answer files
 FileUtils.rm Dir.glob('tmp/hosts_ec2.*')  # Clean up ec2 hosts files
-FileUtils.rm("tmp/answers.tar") if File::exists?("tmp/answers.tar")
 
 hosts.each do |host|   # find our dashboard host for laster use
   dashboardhost = host if host['roles'].include? 'dashboard'
