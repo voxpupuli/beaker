@@ -3,9 +3,9 @@ unless options[:notimesync]
   step "run ntpdate against NTP pool systems"
   hosts.each do |host|
     if host['platform'].include? 'solaris'
-      on(host, "sleep 10 && ntpdate -w us.pool.ntp.org")
+      on(host, "sleep 10 && ntpdate -w ntp.puppetlabs.lan")
     else
-      on(host, "ntpdate -t 5 us.pool.ntp.org")
+      on(host, "ntpdate -t 20 ntp.puppetlabs.lan")
     end
   end
 else
