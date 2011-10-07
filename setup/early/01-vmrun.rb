@@ -17,32 +17,14 @@ if options[:vmrun]
     fail_test "Unable to determine snaphot to revert!"
   end 
 
-  # Set snapshot name for specia cases
+  # Set snapshot name for special cases
   snapshot=options[:snapshot] if options[:snapshot] 
 
-  step "Reverting to snapshot #{snapshot} on VM Server #{vmserver}"
-  vminfo_h = Hash.new
-  # get list of VMs
-  hlist=`lib/virsh_exec.exp #{vmserver} list`
-
-  # interate through the VMs...
-  hlist.split("\n").each do |line|
-    Log.debug("VM: considering '#{line}'")
-    hosts.each do |host|  # only add VMs that match a hostname
-      if line.index(host)
-        if line =~ /(\d+\s\S+)\s/ then
-          k,v = line.split(" ")
-          vminfo_h[v]=k
-        end
-      end
-    end
+  hosts.each do |host|
+    step "Reverting VM: #{host} to #{snapshot} on VM server #{vmserver}"
+    system("lib/virsh_exec.exp #{vmserver} snapshot-revert #{host} #{snapshot}")
   end
 
-  # Revert the VMs
-  vminfo_h.each do |key, val|
-    step "Reverting VM: #{key} with Domain: #{val} on VM server #{vmserver}"
-    system("lib/virsh_exec.exp #{vmserver} snapshot-revert #{val} #{snapshot}")
-  end
 else
   Log.notify "Skipping revert VM step"  
   skip_test "Skipping revert VM step"
