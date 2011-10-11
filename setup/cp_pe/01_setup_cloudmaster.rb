@@ -27,7 +27,7 @@ skip_test 'we don\'t need to create a master if one was specified. Its up to the
 step 'creating a puppetmaster node in ec2'
 
 # create ec2 instances for master and dashboard
-puts `pe-builder --type t1.micro --keypair #{keypair} --keyfile #{keyfile} --os rhel5 --number 1 --cfgfile #{host_config_file} --verbose`
+puts `pe-builder --type t1.micro --keypair #{keypair} --keyfile #{keyfile} --os centos56 --number 1 --cfgfile #{host_config_file} --verbose`
 
 # add the host entries to current list of hosts
 host_config = YAML.load_file(host_config_file)['HOSTS']
