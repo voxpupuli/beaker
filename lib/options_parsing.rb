@@ -111,6 +111,11 @@ class Options
         @options[:noinstall] = TRUE
       end
 
+      @options[:ntpserver] = 'ntp.puppetlabs.lan'
+      opts.on( '--ntp-server host', 'NTP server name' ) do|server|
+        @options[:ntpserver] = server
+      end
+
       @options[:notimesync] = FALSE
       opts.on( '--no-ntp', 'skip ntpdate step' ) do
         @options[:notimesync] = TRUE
