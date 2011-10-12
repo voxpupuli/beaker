@@ -25,22 +25,34 @@ HOSTS:
     roles:
       - master
       - agent
-    platform: centos-5-i386
+    platform: el-5-i386
 CONFIG:
-  rubyver: ruby18
+  nfs_server: NONE  
+
+Here we have the machine "hostname_of_test_machine", a Centos 5.x 32 bit box,, that will serve as a Pupppet master and Agent.  No NFS server has been configured.
+
+A comprehensive list of all supported plaforms and config settings can be found in:
+cfg_examples/all-platforms.cfg
 
 
-Here we have the machine "hostname_of_test_machine", a Centos 5.x 32 bit box,, that will serve as a Pupppet master and Agent.
+systest has a large number of useful options - please invoke with systest.rb -h for more details.
 
-This represents a very basic config; more complex configs can be found under cfg_examples/.
 
 
 Steps to run the acceptance tests:
 
+To test on FOSS
+./systest.rb -c your_cfg --debug --type git -p 2.6.next  -f 1.5.8 -t path-to-your-tests 
 
-./systest.rb -c your_cfg --type git -p 2.6.next  -f 1.5.8 -t tests/acceptance --debug
+To test on PE
+./systest.rb -c your_cfg --debug --type pe -t path-to-your-tests 
 
 Results will be written to log/latest/summary.txt and runlog
+
+path-to-test:
+If you are testing on FOSS, the test for each branch can be found in the puppet repo under acceptance/tests
+
+If you are testing a PE build, the PE specific tests are under seperate repo: pe_accepance_test in acceptance/tests (git@github.com:puppetlabs/pe_acceptance_tests.git)
 
 
 Special topic branch checkout:
