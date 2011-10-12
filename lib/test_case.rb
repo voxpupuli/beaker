@@ -160,6 +160,10 @@ class TestCase
     FacterCommand.new(*args)
   end
 
+  def puppet(*args)
+    PuppetCommand.new(*args)
+  end
+
   def puppet_resource(*args)
     PuppetCommand.new(:resource,*args)
   end
