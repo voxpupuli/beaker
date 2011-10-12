@@ -12,6 +12,7 @@ q_install=y
 q_puppet_symlinks_install=y
 q_rubydevelopment_install=y
 q_vendor_packages_install=y
+q_puppet_cloud_install=n
 ]
 
 # Agent base answers
