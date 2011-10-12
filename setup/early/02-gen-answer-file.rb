@@ -10,7 +10,7 @@ end
 common_a = %q[
 q_install=y
 q_puppet_symlinks_install=y
-q_rubydevelopment_install=y
+q_rubydevelopment_install=n
 q_vendor_packages_install=y
 ]
 
@@ -56,9 +56,11 @@ hosts.each do |host|
   answers=''
   role_agent=FALSE
   role_master=FALSE
+  role_cloudpro=FALSE
   role_dashboard=FALSE
   role_agent=TRUE     if host['roles'].include? 'agent'
   role_master=TRUE    if host['roles'].include? 'master'
+  role_cloudpro=TRUE  if host['roles'].include? 'cloudpro'
   role_dashboard=TRUE if host['roles'].include? 'dashboard'
 
   answers=common_a
@@ -74,6 +76,12 @@ hosts.each do |host|
     answers=answers + 'q_puppetmaster_install=\'n\'' + "\n"
   end
   
+  if role_cloudpro
+    answers=answers + 'q_puppet_cloud_install=\'y\'' + "\n"
+  else
+    answers=answers + 'q_puppet_cloud_install=\'n\'' + "\n"
+  end
+
   if role_dashboard
     answers=answers + dashboard_a + 'q_puppetdashboard_install=\'y\'' + "\n"
   else
