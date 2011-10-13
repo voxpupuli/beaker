@@ -33,7 +33,7 @@ step 'set up dashboard certificates'
 # send dashboard csr
 on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake --trace RAILS_ENV=production cert:request'
 # sign dashboard cert
-on master, "puppet cert --sign dashboard"
+on master, puppet("cert --sign pe-internal-dashboard")
 # retreive dashboard cert
 on dashboard_host, 'cd /opt/puppet/share/puppet-dashboard; PATH=/opt/puppet/sbin:/opt/puppet/bin:$PATH rake --trace RAILS_ENV=production cert:retrieve'
 step 'retrieve inventory service certificate.'
