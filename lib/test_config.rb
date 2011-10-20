@@ -36,6 +36,7 @@ module TestConfig
 
   def self.puppet_enterprise_version
     return unless Options.parse_args[:type] =~ /pe/
+    return Options.parse_args[:pe_version] if Options.parse_args[:pe_version]
     version=""
     begin
       File.open("/opt/enterprise/dists/LATEST") do |file|

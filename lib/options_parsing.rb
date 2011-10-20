@@ -54,6 +54,16 @@ class Options
         @options[:type] = type
       end
 
+      valid_pe = %w{1.0 1.1 1.2 1.2.3}
+      @options[:pe_version] = nil
+      opts.on('--pe-version version', 'Specify PE version to install') do |ver|
+        unless valid_pe.include? ver
+          Log.error "Sorry #{ver} is not a valid PE version"
+          exit 1
+        end
+        @options[:pe_version] = ver
+      end
+
       @options[:puppet] = 'git://github.com/puppetlabs/puppet.git#HEAD'
       opts.on('-p', '--puppet URI', 'Select puppet git install URI',
               "  #{@options[:puppet]}",
