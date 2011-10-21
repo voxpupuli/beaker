@@ -63,7 +63,7 @@ else
     host['dist'] = "puppet-enterprise-#{version}-#{platform}"
   
     # determine the distro tar name
-    unless File.file? "/opt/enterprise/dists/#{host['dist']}.tar.gz"
+    unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar.gz"
       Log.error "PE #{host['dist']}.tar not found, help!"
       Log.error ""
       Log.error "Make sure your configuration file uses the PE version string:"
@@ -72,7 +72,7 @@ else
     end
   
     step "Pre Test Setup -- SCP install package to hosts"
-    scp_to host, "/opt/enterprise/dists/#{host['dist']}.tar.gz", "/tmp"
+    scp_to host, "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar.gz", "/tmp"
     step "Pre Test Setup -- Untar install package on hosts"
     on host,"cd /tmp && gunzip #{host['dist']}.tar.gz && tar xf #{host['dist']}.tar"
   end
