@@ -7,7 +7,7 @@ hosts.each do |host|
   platform = host['platform']
 
   # determine the distro tar name
-  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
+  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar.gz"
   unless File.file? "/opt/enterprise/dists/#{dist_tar}"
     Log.error "PE #{dist_tar} not found, help!"
     Log.error ""
