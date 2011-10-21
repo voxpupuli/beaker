@@ -8,7 +8,7 @@ hosts.each do |host|
   # Tarballs have changed name rhel- is now el- and affects package naming
   # change el- to rhel- to match the old tarball naming/paths.
   # It gets worse, of course, as Centos differs from RHEL as well
-  unless version =~ /^1.2/
+  unless version =~ /^1\.2/
     if platform =~ /el-(.*)/ and host.name.include? 'cent'
       platform = "centos-#{$1}" 
     elsif platform =~ /el-(.*)/ and host.name.include? 'rhel'
