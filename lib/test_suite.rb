@@ -43,7 +43,7 @@ class TestSuite
       test_case = TestCase.new(config, options, test_file).run_test
       @test_cases << test_case
 
-      msg = "#{test_file} #{test_case.test_status}ed"
+      msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed"
       case test_case.test_status
       when :pass
         Log.success msg
