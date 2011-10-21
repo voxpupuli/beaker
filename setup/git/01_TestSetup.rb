@@ -2,7 +2,7 @@ test_name "Install puppet and facter on target machines..."
 
 SourcePath  = "/opt/puppet-git-repos"
 GitHub      = 'git://github.com/puppetlabs'
-IsURI       = %r{^[^:]+://}
+IsURI       = %r{^[^:]+://|^git@github.com:}
 IsGitHubURI = %r{(https://github.com/[^/]+/[^/]+)(?:/tree/(.*))$}
 
 step "Parse Opts"
@@ -32,7 +32,7 @@ end
 
 def install_from_git(host, package, repo, revision)
   step "Clone #{repo}"
-  on host, "cd #{SourcePath} && git clone #{repo}"
+  on host, "cd #{SourcePath} && git clone #{repo} #{package}"
 
   step "Check out the revision #{revision}"
   on host, "cd #{SourcePath}/#{package} && git checkout #{revision}"
