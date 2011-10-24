@@ -34,6 +34,7 @@ q_puppetmaster_forward_facts=y
 
 # Dashboard only answers
 dashboard_a = %Q[
+q_puppet_enterpriseconsole_auth='n'
 q_puppetdashboard_database_install='y'
 q_puppetdashboard_database_name='dashboard'
 q_puppetdashboard_database_password='puppet'
