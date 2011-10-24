@@ -16,7 +16,9 @@ hosts.each do |host|
     end
   end
   host['dist'] = "puppet-enterprise-#{version}-#{platform}"
-  ext = version == '1.1' ? 'tar' : 'tar.gz'
+  long_name = Dir.glob("/opt/enterprise/dists/pe#{version}/*")[0]
+  basename = File.basename(long_name)
+  ext = basename.match(/tar.*/).to_s
 
   unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.#{ext}"
     Log.error "PE #{host['dist']}.#{ext} not found, help!"
