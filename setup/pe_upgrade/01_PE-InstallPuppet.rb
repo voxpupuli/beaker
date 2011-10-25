@@ -8,25 +8,30 @@ hosts.each do |host|
   # Tarballs have changed name rhel- is now el- and affects package naming
   # change el- to rhel- to match the old tarball naming/paths.
   # It gets worse, of course, as Centos differs from RHEL as well
-  if platform =~ /el-(.*)/ and host.name.include? 'cent'
-     platform = "centos-#{$1}" 
-  elsif platform =~ /el-(.*)/ and host.name.include? 'rhel'
-    platform = "rhel-#{$1}" 
+  unless version =~ /^1\.2/
+    if platform =~ /el-(.*)/ and host.name.include? 'cent'
+      platform = "centos-#{$1}" 
+    elsif platform =~ /el-(.*)/ and host.name.include? 'rhel'
+      platform = "rhel-#{$1}" 
+    end
   end
   host['dist'] = "puppet-enterprise-#{version}-#{platform}"
+  long_name = Dir.glob("/opt/enterprise/dists/pe#{version}/*")[0]
+  basename = File.basename(long_name)
+  ext = basename.match(/tar.*/).to_s
 
-  unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar"
-    Log.error "PE #{host['dist']}.tar not found, help!"
+  unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.#{ext}"
+    Log.error "PE #{host['dist']}.#{ext} not found, help!"
     Log.error ""
     Log.error "Make sure your configuration file uses the PE version string:"
     Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
-    fail_test "Sorry, PE #{host['dist']}.tar file not found."
+    fail_test "Sorry, PE #{host['dist']}.#{ext} file not found."
   end
 
   step "Pre Test Setup -- SCP install package to hosts"
-  scp_to host, "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar", "/tmp"
+  scp_to host, "/opt/enterprise/dists/pe#{version}/#{host['dist']}.#{ext}", "/tmp"
   step "Pre Test Setup -- Untar install package on hosts"
-  on host,"cd /tmp && tar xf #{host['dist']}.tar"
+  on host,"cd /tmp && tar xf #{host['dist']}.#{ext}"
 end
 
 # Install Master first -- allows for auto cert signing

@@ -1,2 +1,5 @@
 q_install=y
+q_puppet_cloud_install=n
 q_upgrade_installation=y
+q_vendor_packages_install=y
+q_upgrade_modules=y
