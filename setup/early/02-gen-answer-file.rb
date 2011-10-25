@@ -1,5 +1,6 @@
 test_name="Generate Puppet Enterprise answer files"
 skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
+skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
 
 if (options[:type] =~ /pe_aws/) 
   certcmd='curl http://169.254.169.254/2008-02-01/meta-data/public-hostname'
