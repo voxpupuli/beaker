@@ -13,7 +13,7 @@ class Options
       opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
         @options[:tests] << dir
       end
-      
+
       valid_rubies = %w{skip system 1.8.6 1.8.7}
       @options[:rvm] = 'skip'
       opts.on('--rvm VERSION', 'Specify Ruby version: system, 1.8.6, 1.8.7') do |rvm|
@@ -54,7 +54,7 @@ class Options
         @options[:type] = type
       end
 
-      valid_pe = %w{1.0 1.1 1.2 1.2.3}
+      valid_pe = %w{1.0 1.1 1.2 1.2.3 1.2.4}
       @options[:pe_version] = nil
       opts.on('--pe-version version', 'Specify PE version to install') do |ver|
         unless valid_pe.include? ver
