@@ -74,9 +74,11 @@ end
 
 # Setup a single agent only answer file
 # base answers: common + agent
+# FIXME: static settings here prevent CP on agents.  
 answers=common_a + agent_a + 'q_puppetagent_install=\'y\'' + "\n"
 answers=answers + 'q_puppetmaster_install=\'n\'' + "\n"
 answers=answers + 'q_puppetdashboard_install=\'n\'' + "\n"
+answers=answers + 'q_puppet_cloud_install=\'n\'' + "\n"
 File.open("tmp/answers.agent", 'w') do |fh|
   answers.split(/\n/).each do |line| 
     if line =~ /(q_puppetagent_server=)MASTER/ then
