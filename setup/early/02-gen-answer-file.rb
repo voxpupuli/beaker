@@ -50,12 +50,14 @@ q_puppetdashboard_inventory_certname=`#{certcmd}`
 q_puppetdashboard_inventory_certdnsnames=`#{certcmd}`:#{dashboard}
 ]
 
-dashboardhost = 'undefined'
+dashboardhost = nil
 FileUtils.rm Dir.glob('tmp/answers.*')  # Clean up all answer files
 
 hosts.each do |host|   # find our dashboard host for laster use
   dashboardhost = host if host['roles'].include? 'dashboard'
 end
+
+raise "No Dashboard host configured" unless dashboardhost
 # For all defined hosts...
 hosts.each do |host|
   answers=''

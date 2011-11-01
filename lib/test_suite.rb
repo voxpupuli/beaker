@@ -2,13 +2,14 @@
 require 'rexml/document'
 
 class TestSuite
-  attr_reader :name, :options, :config
+  attr_reader :name, :options, :config, :stop_on_error
 
-  def initialize(name, options, config)
+  def initialize(name, options, config, stop_on_error=FALSE)
     @name    = name.gsub(/\s+/, '-')
     @run     = false
     @options = options
     @config  = config
+    @stop_on_error = stop_on_error
 
     @test_cases = []
     @test_files = []
@@ -53,6 +54,7 @@ class TestSuite
         Log.error msg
       when :error
         Log.warn msg
+        break if stop_on_error
       end
     end
 

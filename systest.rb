@@ -48,7 +48,7 @@ else
 end
 
 # Run the harness for install
-TestSuite.new('setup', setup_options, config).run_and_exit_on_failure
+TestSuite.new('setup', setup_options, config, TRUE).run_and_exit_on_failure
 
 # Run the tests
 unless options[:installonly] then
