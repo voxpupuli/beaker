@@ -52,6 +52,7 @@ class TestSuite
         Log.debug msg
       when :fail
         Log.error msg
+        break if stop_on_error
       when :error
         Log.warn msg
         break if stop_on_error
