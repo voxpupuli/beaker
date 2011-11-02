@@ -10,42 +10,42 @@ end
 
 common_a = %q[
 q_install=y
+q_puppet_cloud_install=n
 q_puppet_symlinks_install=y
-q_rubydevelopment_install=y
 q_vendor_packages_install=y
 ]
 
 # Agent base answers
 agent_a = %Q[
 q_puppetagent_certname=`#{certcmd}`
-q_puppetagent_pluginsync=y
+q_puppetagent_install='y'
 q_puppetagent_server=MASTER
 ]
 
 # Master base answers
 master_a = %Q[
-q_puppetmaster_certdnsnames=puppet:`#{certcmd}`:#{master}
 q_puppetmaster_certname=`#{certcmd}`
-q_puppetmaster_dashboard_hostname=DASHBOARDHOST
-q_puppetmaster_dashboard_port=3000
-q_puppetmaster_use_dashboard_classifier=y
-q_puppetmaster_use_dashboard_reports=y
+q_puppetmaster_dnsaltnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`,puppet
+q_puppetmaster_enterpriseconsole_hostname=DASHBOARD
+q_puppetmaster_enterpriseconsole_port=3000
 q_puppetmaster_forward_facts=y
+q_puppetmaster_install=y
 ]
 
 # Dashboard only answers
 dashboard_a = %Q[
-q_puppet_enterpriseconsole_auth='none'
-q_puppet_enterpriseconsole_ssl_enable='n'
-q_puppetdashboard_database_install='y'
-q_puppetdashboard_database_name='dashboard'
-q_puppetdashboard_database_password='puppet'
-q_puppetdashboard_database_root_password='puppet'
-q_puppetdashboard_database_user='dashboard'
-q_puppetdashboard_httpd_port='3000'
-q_puppetdashboard_master_hostname=MASTER
-q_puppetdashboard_inventory_certname=`#{certcmd}`
-q_puppetdashboard_inventory_certdnsnames=`#{certcmd}`:#{dashboard}
+q_puppet_enterpriseconsole_auth_password='puppet'
+q_puppet_enterpriseconsole_auth_user='console'
+q_puppet_enterpriseconsole_database_install=y
+q_puppet_enterpriseconsole_database_name='console'
+q_puppet_enterpriseconsole_database_password='puppet'
+q_puppet_enterpriseconsole_database_root_password='puppet'
+q_puppet_enterpriseconsole_database_user='console'
+q_puppet_enterpriseconsole_httpd_port=3000
+q_puppet_enterpriseconsole_install=y
+q_puppet_enterpriseconsole_inventory_hostname=`#{certcmd}`
+q_puppet_enterpriseconsole_inventory_port=8140
+q_puppet_enterpriseconsole_master_hostname=MASTER
 ]
 
 dashboardhost = 'undefined'
@@ -87,7 +87,7 @@ File.open("tmp/answers.agent", 'w') do |fh|
     if line =~ /(q_puppetmaster_dashboard_hostname=)DASHBOARDHOST/ then
       line = $1+dashboardhost
     end
-    if line =~ /(q_puppetdashboard_master_hostname=)MASTER/ then
+    if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
       line = $1+master
     end
     fh.puts line
@@ -133,7 +133,7 @@ hosts.each do |host|
       if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
       end
-      if line =~ /(q_puppetmaster_dashboard_hostname=)DASHBOARDHOST/ then
+      if line =~ /(q_puppetmaster_enterpriseconsole_hostname=)DASHBOARD/ then
         line = $1+dashboardhost
       end
       if line =~ /(q_puppetdashboard_master_hostname=)MASTER/ then

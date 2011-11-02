@@ -26,7 +26,7 @@ q_puppetagent_server=MASTER
 master_a = %Q[
 q_puppetmaster_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppetmaster_dnsaltnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`,puppet
-q_puppetmaster_enterpriseconsole_hostname=localhost
+q_puppetmaster_enterpriseconsole_hostname=DASHBOARD
 q_puppetmaster_enterpriseconsole_port=3000
 q_puppetmaster_forward_facts=y
 q_puppetmaster_install=y
@@ -98,10 +98,10 @@ hosts.each do |host|
       if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
       end
-      if line =~ /(q_puppetmaster_dashboard_hostname=)DASHBOARDHOST/ then
+      if line =~ /(q_puppetmaster_enterpriseconsole_hostname=)DASHBOARD/ then
         line = $1+dashboardhost
       end
-      if line =~ /(q_puppetdashboard_master_hostname=)MASTER/ then
+      if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
         line = $1+master
       end
       fh.puts line
