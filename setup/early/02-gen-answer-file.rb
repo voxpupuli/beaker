@@ -1,4 +1,5 @@
 test_name="Generate Puppet Enterprise answer files"
+
 skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
 skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
 
@@ -46,6 +47,8 @@ q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_inventory_hostname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_port=8140
 q_puppet_enterpriseconsole_master_hostname=MASTER
+q_puppet_enterpriseconsole_inventory_certname=MASTER
+q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
 ]
 
 dashboardhost = nil
@@ -103,6 +106,12 @@ hosts.each do |host|
       end
       if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
         line = $1+master
+      end
+      if line =~ /(q_puppet_enterpriseconsole_inventory_certname=)MASTER/ then
+        line = $1+master
+      end
+      if line =~ /(q_puppet_enterpriseconsole_inventory_dnsaltnames=)MASTER/ then
+        line = $1+master+',puppetinventory'
       end
       fh.puts line
     end
