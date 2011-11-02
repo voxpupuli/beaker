@@ -47,7 +47,7 @@ q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_inventory_hostname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_port=8140
 q_puppet_enterpriseconsole_master_hostname=MASTER
-q_puppet_enterpriseconsole_inventory_certname=MASTER
+q_puppet_enterpriseconsole_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
 ]
 
@@ -105,9 +105,6 @@ hosts.each do |host|
         line = $1+dashboardhost
       end
       if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
-        line = $1+master
-      end
-      if line =~ /(q_puppet_enterpriseconsole_inventory_certname=)MASTER/ then
         line = $1+master
       end
       if line =~ /(q_puppet_enterpriseconsole_inventory_dnsaltnames=)MASTER/ then
