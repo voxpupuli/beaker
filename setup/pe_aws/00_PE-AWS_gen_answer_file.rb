@@ -2,6 +2,7 @@ test_name="Generate Puppet Enterprise answer files"
 skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
 skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
 
+portno=config['consoleport']
 if (options[:type] =~ /pe_aws/) 
   certcmd='curl http://169.254.169.254/2008-02-01/meta-data/public-hostname'
 else
@@ -27,7 +28,7 @@ master_a = %Q[
 q_puppetmaster_certname=`#{certcmd}`
 q_puppetmaster_dnsaltnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`,puppet
 q_puppetmaster_enterpriseconsole_hostname=DASHBOARD
-q_puppetmaster_enterpriseconsole_port=3000
+q_puppetmaster_enterpriseconsole_port=#{portno}
 q_puppetmaster_forward_facts=y
 q_puppetmaster_install=y
 ]
@@ -41,7 +42,7 @@ q_puppet_enterpriseconsole_database_name='console'
 q_puppet_enterpriseconsole_database_password='puppet'
 q_puppet_enterpriseconsole_database_root_password='puppet'
 q_puppet_enterpriseconsole_database_user='console'
-q_puppet_enterpriseconsole_httpd_port=3000
+q_puppet_enterpriseconsole_httpd_port=#{portno}
 q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_inventory_hostname=`#{certcmd}`
 q_puppet_enterpriseconsole_inventory_port=8140
