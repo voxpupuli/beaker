@@ -49,7 +49,9 @@ q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
 ]
 
 dashboardhost = nil
-FileUtils.rm Dir.glob('tmp/answers.*')  # Clean up all answer files
+hosts.each do |host|  # Clean up all answer files that might conflict
+  FileUtils.rm ["tmp/answers.#{host}"] if File.exists? "tmp/answers.#{host}"
+end
 
 hosts.each do |host|   # find our dashboard host for laster use
   dashboardhost = host if host['roles'].include? 'dashboard'
