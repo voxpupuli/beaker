@@ -4,11 +4,7 @@ skip_test "Skipping answers file generation for non PE tests" and break unless (
 skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
 portno=config['consoleport']
 
-if (options[:type] =~ /pe_aws/) 
-  certcmd='curl http://169.254.169.254/2008-02-01/meta-data/public-hostname'
-else
-  certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
-end
+certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
 
 common_a = %q[
 q_install=y
