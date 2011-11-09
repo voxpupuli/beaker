@@ -133,6 +133,9 @@ hosts.each do |host|
       if line =~ /(q_puppetmaster_enterpriseconsole_hostname=)DASHBOARD/ then
         line = $1+dashboardhost
       end
+      if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
+        line = $1+master
+      end
       if line =~ /(q_puppetdashboard_master_hostname=)MASTER/ then
         line = $1+master
       end
