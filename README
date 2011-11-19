@@ -1,59 +1,134 @@
 Running the Distributed Test Harness
 
-Pre-flight checks:
+-- Pre-Flight Checks --
 
-  - You will need at least one System Undet Test (SUT) host, physical or virtual is fine.  The machine will need a properly configured network.
-  - On the your SUT, you must configure pass through ssh auth for the root user.
-  - The SUT have have the "ntpdate" binary installed
-  - GIT installs: installing from a git repository then you must have git, ruby, rdoc installed on your SUT. 
-  - PE installs: PE will install git, ruby, rdoc.
+  Running the system tests requiers at least two hosts: a "Test Driver" and at
+  least one (or more) test target systems.
+  
+  System Under Test
+  - You will need at least one System Under Test (SUT) host, physical or virtual.
+  - The SUT will need a propery configured network and DNS or hosts file.
+  - On the SUT, you must configure pass through ssh auth for the root user.
+  - The SUT must have the "ntpdate" binary installed
+  - The SUT must have the "curl" binary installed
+  - FOSS install: you must have git, ruby, rdoc installed on your SUT. 
+  - PE install: PE will install git, ruby, rdoc.
 
+  Test Driver
   - The harness need not be ran as root.
-  - The machine that will drive the tests must have ruby installed, inclduing the following ruby gems:
-     rubygems
-     net-ssh 
-     net-scp
-     systemu
+  - The Test Driver must have ruby (1.8.7+) installed, inclduing the following ruby gems:
+      rubygems
+      net-ssh 
+      net-scp
+      systemu
 
 
-Prepare a config file:
+Prepare a config file.  The test harness is configuration driven; the config file 
+is yaml formated.  The manner on installation and configuration will be affected 
+by the config file; this is especially true when running PE.
 
-The test harness is configuration driven; the config file is yaml formated.  A basic config file sufficent for running tests against a single host:
+  HOSTS:
+    ubuntu-1004-64:
+      roles:
+        - master
+        - agent
+        - dashboard
+      platform: ubuntu-10.04-amd64
+    ubuntu-1004-32:
+      roles:
+        - agent
+      platform: ubuntu-10.04-i386
+  CONFIG:
+    consoleport: 443
 
-HOSTS:
-  hostname_of_test_machine:
-    roles:
-      - master
-      - agent
-    platform: el-5-i386
-CONFIG:
-  nfs_server: NONE  
 
-Here we have the machine "hostname_of_test_machine", a Centos 5.x 32 bit box,, that will serve as a Pupppet master and Agent.  No NFS server has been configured.
+Here we have the machine "ubuntu-1004-64", a 64 bit Ubuntu box, serving as Puppet Master,
+Dashboard, and Agent.  The host "ubuntu-1004-32"i, a 32-bit Ubunutu node, will be a 
+Puppet Agent only.  The Dashboard will be configured to run HTTPS on port 443.
+
+You can setup a very different test scenario by simply re-arranging the "roles":
+
+  HOSTS:
+    ubuntu-1004-64:
+      roles:
+        - dashboard
+        - agent
+      platform: ubuntu-10.04-amd64
+    ubuntu-1004-32:
+      roles:
+        - master
+        - agent
+      platform: ubuntu-10.04-i386
+  CONFIG:
+    consoleport: 443
 
 A comprehensive list of all supported plaforms and config settings can be found in:
 cfg_examples/all-platforms.cfg
 
 
-systest has a large number of useful options - please invoke with systest.rb -h for more details.
+-- RUNNING THE HARNESS --
+
+Puppet FOSS Acceptance tests are stored their respective Puppet repositry, so
+you must check out the tests first, then the harness, as such:
+
+# checkout the tests
+git://github.com/puppetlabs/puppet.git
+cd puppet
+# checkout the harness
+git clone git://github.com/puppetlabs/puppet-acceptance.git
+cd puppet-acceptance
+ln -s ../acceptance acceptance-tests
+
+./systest.rb --vmrun soko -c ci/ci-${platform}.cfg --type git -p origin/2.6rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --rvm $ruby_versions
 
 
-
-Steps to run the acceptance tests:
-
-To test on FOSS
 ./systest.rb -c your_cfg --debug --type git -p 2.6.next  -f 1.5.8 -t path-to-your-tests 
-
-To test on PE
-./systest.rb -c your_cfg --debug --type pe -t path-to-your-tests 
-
-Results will be written to log/latest/summary.txt and runlog
 
 path-to-test:
 If you are testing on FOSS, the test for each branch can be found in the puppet repo under acceptance/tests
 
-If you are testing a PE build, the PE specific tests are under seperate repo: pe_accepance_test in acceptance/tests (git@github.com:puppetlabs/pe_acceptance_tests.git)
+Special topic branch checkout with a targeted test:
+./systest.rb -c your_cfg --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 -t tests/acceptance/ticket_6856_manage_not_work_with_symlinks.rb
 
 
-Special topic branch checkout:
-./systest.rb -c 2centos_64_386 --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 -t tests/acceptance/ticket_6856_manage_not_work_with_symlinks.rb
+Running PE Tests:
+
+When performing a PE install, systest expects to find PE tarballs and a LATEST file in /opt/enterprise/dists; the LATEST file
+indicated the version string of the most recent tarball.
+
+$ [topo@gigio ]$ cat /opt/enterprise/dists/LATEST 
+2.0.0
+
+$ [topo@gigio ]$ ls -1 /opt/enterprise/dists
+LATEST
+puppet-enterprise-2.0.0-debian-5-amd64.tar.gz
+puppet-enterprise-2.0.0-debian-5-i386.tar.gz
+puppet-enterprise-2.0.0-debian-6-amd64.tar.gz
+puppet-enterprise-2.0.0-debian-6-i386.tar.gz
+puppet-enterprise-2.0.0-el-4-i386.tar.gz
+puppet-enterprise-2.0.0-el-4-x86_64.tar.gz
+puppet-enterprise-2.0.0-el-5-i386.tar.gz
+puppet-enterprise-2.0.0-el-5-x86_64.tar.gz
+puppet-enterprise-2.0.0-el-6-i386.tar.gz
+puppet-enterprise-2.0.0-el-6-x86_64.tar.gz
+puppet-enterprise-2.0.0-sles-11-i386.tar.gz
+puppet-enterprise-2.0.0-sles-11-x86_64.tar.gz
+puppet-enterprise-2.0.0-solaris-10-i386.tar.gz
+puppet-enterprise-2.0.0-solaris-10-sparc.tar.gz
+puppet-enterprise-2.0.0-ubuntu-10.04-amd64.tar.gz
+puppet-enterprise-2.0.0-ubuntu-10.04-i386.tar.gz
+
+
+PE Acceptance tests are stored in their own repositry, so we must check out the tests first, then the harness, as such:
+
+# checkout the tests
+git clone git@github.com:puppetlabs/pe_acceptance_tests.git
+cd pe_acceptance_tests
+# checkout the harness
+git clone git@github.com:puppetlabs/puppet-acceptance.git
+cd puppet-acceptance
+# symlink back the tests repo
+ln -s ../acceptance acceptance-tests
+
+# Run the tests
+./systest.rb -c your_config.cfg --type pe -t acceptance-tests/tests --debug
