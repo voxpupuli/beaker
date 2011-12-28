@@ -152,6 +152,11 @@ class Options
         @options[:random] = random_key || true
       end
 
+      @options[:uninstall] = false
+      opts.on('--uninstall', 'Test the PE Uninstaller' do
+        @options[:uninstall] = true
+      end
+
       @options[:xml] = false
       opts.on('-x', '--[no-]xml', 'Emit JUnit XML reports on tests') do |value|
         @options[:xml] = value
