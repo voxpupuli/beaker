@@ -7,7 +7,7 @@ class Options
     @options = {}
     optparse = OptionParser.new do|opts|
       # Set a banner
-      opts.banner = "Usage: harness.rb [options...]"
+      opts.banner = "Usage: #{File.basename($0)} [options...]"
 
       @options[:tests] = []
       opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
