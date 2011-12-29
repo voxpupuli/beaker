@@ -54,7 +54,7 @@ class Options
         @options[:type] = type
       end
 
-      valid_pe = %w{1.0 1.1 1.2 1.2.3 1.2.4}
+      valid_pe = %w{1.0 1.1 1.2 1.2.3 1.2.4 2.0 2.0.0}
       @options[:pe_version] = nil
       opts.on('--pe-version version', 'Specify PE version to install') do |ver|
         unless valid_pe.include? ver
