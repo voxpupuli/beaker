@@ -131,6 +131,11 @@ class Options
         @options[:notimesync] = TRUE
       end
 
+      @options[:no_root_keys] = FALSE
+      opts.on('--no-root-keys', 'skip syncing ~root/.ssh/authorized_keys') do
+        @options[:no_root_keys] = TRUE
+      end
+
       @options[:stdout_only] = FALSE
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
         @options[:stdout_only] = TRUE
