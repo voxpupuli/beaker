@@ -7,7 +7,7 @@ class Options
     @options = {}
     optparse = OptionParser.new do|opts|
       # Set a banner
-      opts.banner = "Usage: harness.rb [options...]"
+      opts.banner = "Usage: #{File.basename($0)} [options...]"
 
       @options[:tests] = []
       opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
@@ -129,6 +129,16 @@ class Options
       @options[:notimesync] = FALSE
       opts.on( '--no-ntp', 'skip ntpdate step' ) do
         @options[:notimesync] = TRUE
+      end
+
+      @options[:no_root_keys] = FALSE
+      opts.on('--no-root-keys', 'skip syncing ~root/.ssh/authorized_keys') do
+        @options[:no_root_keys] = TRUE
+      end
+
+      @options[:dhcp_renew] = FALSE
+      opts.on('--dhcp-renew', 'perform dhcp lease renewal') do
+        @options[:dhcp_renew] = TRUE
       end
 
       @options[:stdout_only] = FALSE
