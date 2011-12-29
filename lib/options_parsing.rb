@@ -136,6 +136,11 @@ class Options
         @options[:no_root_keys] = TRUE
       end
 
+      @options[:dhcp_renew] = FALSE
+      opts.on('--dhcp-renew', 'perform dhcp lease renewal') do
+        @options[:dhcp_renew] = TRUE
+      end
+
       @options[:stdout_only] = FALSE
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
         @options[:stdout_only] = TRUE
