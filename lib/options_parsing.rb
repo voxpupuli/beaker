@@ -153,7 +153,7 @@ class Options
       end
 
       @options[:uninstall] = false
-      opts.on('--uninstall', 'Test the PE Uninstaller' do
+      opts.on('--uninstall', 'Test the PE Uninstaller') do
         @options[:uninstall] = true
       end
 
