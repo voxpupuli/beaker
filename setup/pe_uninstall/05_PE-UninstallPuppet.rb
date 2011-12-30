@@ -32,11 +32,12 @@ end
 step 'Confirm Removal of Files'
 hosts.each do |host|
   processes.each do |process|
-    on host, " ! [[ -f /etc/init.d/#{process}"
+    on host, " ! [[ -f /etc/init.d/#{process} ]]"
+    on host, " ! ls /var/run | grep #{process} "
   end
 
   symlinks.each do |sym|
-    on host, " ! [[ -f /usr/local/bin/#{sym}"
+    on host, " ! [[ -f /usr/local/bin/#{sym} ]]"
   end
 end
 
@@ -49,5 +50,26 @@ hosts.each do |host|
 end
 
 step 'Confirm Removal of Packages WIP'
+hosts.each do |host|
+  cmd = case host['platform']
+  when /ubuntu|debian/
+    " ! ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}" +
+    "| xargs dpkg-query --showformat='${Status;10}' --show " +
+    "| egrep \(ok\|install\)"
+  when /el|sles/
+    " ! rpm -qp --qf '%{name} ' " +
+    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/" +
+    "| xargs rpm -q | grep -v 'not installed'"
+  when /solaris/
+  end
 
-step 'Confirm Removal of Processes'
+  on host, "#{cmd}"
+
+end
+
+step 'Confirm Removal of Processes from start up'
+hosts.each do |host|
+  processes.each do |process|
+    on host, " ! grep -Rl #{process} /etc/rc*"
+  end
+end
