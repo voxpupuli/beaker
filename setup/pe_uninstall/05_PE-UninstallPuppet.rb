@@ -1,11 +1,12 @@
-test_name 'Ensure the Unistaller works against a basic Puppet Enterprise Install'
+test_name 'Ensure the Unistaller works against a basic PE Install'
 
-# NOTE: we are not currently testing for log or run dirs!
-directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet', '/var/opt/lib/pe-puppetmaster',
+directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet',
+                  '/var/opt/lib/pe-puppetmaster',
                   '/var/opt/cache/pe-puppet-dashboard', '/var/opt/puppet' ]
 
-processes =     [ 'puppetagent', 'pe-puppet', 'pe-puppet-agent', 'pe-mcollective',
-                  'pe-httpd', 'pe-activemq', 'pe-memcached', 'pe-dashboard-workers' ]
+processes =     [ 'puppetagent', 'pe-puppet', 'pe-puppet-agent',
+                  'pe-mcollective', 'pe-httpd', 'pe-activemq', 'pe-memcached',
+                  'pe-dashboard-workers' ]
 
 users_groups =  [ 'pe-memcached', 'pe-apache', 'pe-puppet', 'puppet-dashboard',
                   'pe-activemq', 'peadmin', 'pe-mco' ]
@@ -13,6 +14,8 @@ users_groups =  [ 'pe-memcached', 'pe-apache', 'pe-puppet', 'puppet-dashboard',
 symlinks =      [ 'puppet', 'facter', 'puppet-module', 'mco', 'pe-man' ]
 
 # NOTE: which packages are installed on deb, el, sles, sol?
+# Currently we are using the content from install_dir/packages/dist-arch/
+# and not using this variable
 packages =      /^pe-.*$/
 
 step 'Uninstall!'
@@ -32,8 +35,18 @@ end
 step 'Confirm Removal of Files'
 hosts.each do |host|
   processes.each do |process|
+
+    # Ensure our init scripts are gone
     on host, " ! [[ -f /etc/init.d/#{process} ]]"
+
+    # Ensure there are no process files or directories
     on host, " ! ls /var/run | grep #{process} "
+
+    # lock files are in /var/lock/{process_name}/ in debs,
+    # /var/lock/subsys{process_name} in els
+    on host, " ! ls /var/lock | grep #{process} "
+    on host, " ! ls /var/lock/subsys | grep #{process} "
+
   end
 
   symlinks.each do |sym|
@@ -49,6 +62,8 @@ hosts.each do |host|
   end
 end
 
+# There should be no PE packages on the system, this should ensure all PE
+# packages and nothing but PE packages are checked
 step 'Confirm Removal of Packages WIP'
 hosts.each do |host|
   cmd = case host['platform']
@@ -61,12 +76,15 @@ hosts.each do |host|
     "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/" +
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
+    " ! ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}" +
+    ' | xargs pkginfo -q'
   end
 
   on host, "#{cmd}"
 
 end
 
+# Chkconfig is not cross platform, though symlinks in /etc/rc* are, I believe
 step 'Confirm Removal of Processes from start up'
 hosts.each do |host|
   processes.each do |process|
