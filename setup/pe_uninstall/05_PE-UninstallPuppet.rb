@@ -76,8 +76,9 @@ hosts.each do |host|
     "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/" +
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
-    " ! ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}" +
-    ' | xargs pkginfo -q'
+    'ls /tmp/puppet-enterprise-2.0.0-94-g6234c76-solaris-10-i386/packages/solaris-10-i386/ ' +
+    '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; if test $? -eq 0;' +
+    ' then exit 1; fi; done'
   end
 
   on host, "#{cmd}"
