@@ -50,3 +50,38 @@ hosts.each do |host|
     end
   end
 end
+
+step "Check version of Ruby Augeas bindings"
+hosts.each do |host|
+  next unless host['roles'].include? 'agent'
+  next if host['platform'] =~ /solaris/
+  cmd = ''
+
+  if host['platform'] =~ /debian|ubuntu/
+    cmd = 'dpkg -l pe-ruby-augeas'
+  else
+    cmd = 'rpm -q pe-ruby-augeas'
+  end
+
+  on(host, cmd) do
+    assert_match(/#{version['VERSION']['ruby_augeas_ver']}/, stdout, "Incorrect Ruby Augeas Bindings version detected on #{host}")
+  end
+end
+
+%w(activerecord activesupport).each do |pkg|
+  step "Check version of #{pkg}"
+  hosts.each do |host|
+    next unless host['roles'].include?('master') || host['roles'].include?('dashboard')
+    cmd = ''
+
+    if host['platform'] =~ /debian|ubuntu/
+      cmd = "dpkg -l pe-#{pkg}"
+    else
+      cmd = "rpm -q pe-rubygem-#{pkg}"
+    end
+
+    on(host, cmd) do
+      assert_match(/#{version['VERSION']["#{pkg}_ver"]}/, stdout, "Incorrect #{pkg} version detected on #{host}")
+    end
+  end
+end
