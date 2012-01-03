@@ -47,6 +47,8 @@ hosts.each do |host|
     on host, " ! ls /var/lock | grep #{process} "
     on host, " ! ls /var/lock/subsys | grep #{process} "
 
+    on host, " ! ls /var/log | grep #{process} "
+
   end
 
   symlinks.each do |sym|

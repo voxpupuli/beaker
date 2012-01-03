@@ -1,4 +1,8 @@
-#test_name 'Ensure the Unistaller works against a basic PE Install'
+## NOTE: This file runs regardless of the option passed to the Uninstaller
+## How we skip this test depends upon how we want to move it through Jenkins
+## To Be Decided by Dom and Justin on 1/3/2012
+#
+#test_name 'Ensure the Unistaller works against a basic PE Install while purging, cleaning db using an answer file'
 #
 #directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet',
 #                  '/var/opt/lib/pe-puppetmaster', '/etc/puppetlabs',
@@ -18,10 +22,19 @@
 ## and not using this variable
 #packages =      /^pe-.*$/
 #
+#step 'Create Answer file'
+#hosts.each do |host|
+#  on host, "cat > /tmp/answer_file <<EOF
+#q_pe_uninstall=y
+#q_pe_purge=y
+#q_pe_remove_db=y
+#q_pe_root_db_pass=puppet
+#EOF
+#
 #step 'Uninstall!'
 #hosts.each do |host|
 #  on host, "cd /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/ " +
-#    '&& ./puppet-enterprise-uninstaller -y'
+#    '&& ./puppet-enterprise-uninstaller -a ../answer_file'
 #end
 #
 #step 'Confirm Uninstallation'
@@ -46,6 +59,8 @@
 #    # /var/lock/subsys{process_name} in els
 #    on host, " ! ls /var/lock | grep #{process} "
 #    on host, " ! ls /var/lock/subsys | grep #{process} "
+#
+#    on host, " ! ls /var/log | grep #{process} "
 #
 #  end
 #
@@ -92,3 +107,17 @@
 #    on host, " ! grep -Rl #{process} /etc/rc*"
 #  end
 #end
+#
+## NOTE: we're use hard-coded usernames and passwords here!
+#step 'Ensure database is removed'
+#hosts.each do |host|
+#  next unless host['roles'].include? 'dashboard'
+#
+#  # We should not be able to log into mysql with the PE created user
+#  on host, " ! mysql --user=console --password=puppet"
+#
+#  # We should not be able to use the console db
+#  on host, " ! mysql --user=root --password=puppet -e 'use console'"
+#
+#end
+#
