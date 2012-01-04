@@ -13,10 +13,6 @@ users_groups =  [ 'pe-memcached', 'pe-apache', 'pe-puppet', 'puppet-dashboard',
 
 symlinks =      [ 'puppet', 'facter', 'puppet-module', 'mco', 'pe-man' ]
 
-# NOTE: which packages are installed on deb, el, sles, sol?
-# Currently we are using the content from install_dir/packages/dist-arch/
-# and not using this variable
-packages =      /^pe-.*$/
 
 step 'Uninstall!'
 hosts.each do |host|
