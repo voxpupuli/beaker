@@ -152,9 +152,9 @@ class Options
         @options[:random] = random_key || true
       end
 
-      @options[:uninstall] = false
-      opts.on('--uninstall', 'Test the PE Uninstaller') do
-        @options[:uninstall] = true
+      @options[:uninstall] = ''
+      opts.on('--uninstall TYPE', 'Test the PE Uninstaller -- accepts either standard or full as options') do |value|
+        @options[:uninstall] = value
       end
 
       @options[:xml] = false
