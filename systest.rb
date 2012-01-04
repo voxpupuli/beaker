@@ -30,10 +30,10 @@ Log.debug "Using Config #{options[:config]}"
 
 config = TestConfig.load_file(options[:config])
 
-if options[:noinstall] 
+if options[:noinstall]
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/post"] })
-elsif options[:upgrade] 
+elsif options[:upgrade]
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/pe_upgrade", "setup/post"] })
 elsif options[:type] == 'cp_pe'
@@ -42,6 +42,9 @@ elsif options[:type] == 'cp_pe'
 elsif options[:type] == 'pe_aws'
   setup_options = options.merge({ :random => false,
                                   :tests => ["setup/pe_aws"] })
+elsif options[:uninstall]
+  setup_options = options.merge({ :random => false,
+                                  :tests  => ["setup/early", "setup/pe_uninstall/#{options[:uninstall]}"] })
 else
   setup_options = options.merge({ :random => false,
                                   :tests  => ["setup/early", "setup/#{options[:type]}", "setup/post"] })
