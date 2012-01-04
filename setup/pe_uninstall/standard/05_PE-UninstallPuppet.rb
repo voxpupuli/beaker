@@ -14,9 +14,20 @@ users_groups =  [ 'pe-memcached', 'pe-apache', 'pe-puppet', 'puppet-dashboard',
 symlinks =      [ 'puppet', 'facter', 'puppet-module', 'mco', 'pe-man' ]
 
 
-step 'Uninstall!'
+step 'Test -h option'
 hosts.each do |host|
-  on host, "cd /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/ " +
+  on host, "cd /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}" +
+    '&& ./puppet-enterprise-uninstaller -h' do
+
+    assert_no_match /ERROR/, stdout, '`-h` does not seem to be a valid option'
+    assert_match /Display this help screen/, stdout,
+      'The help screen is not displayed'
+  end
+end
+
+step 'Standard Uninstall'
+hosts.each do |host|
+  on host, "cd /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}" +
     '&& ./puppet-enterprise-uninstaller -y'
 end
 
@@ -75,8 +86,8 @@ hosts.each do |host|
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
     'ls /tmp/puppet-enterprise-2.0.0-94-g6234c76-solaris-10-i386/packages/solaris-10-i386/ ' +
-    '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; if test $? -eq 0;' +
-    ' then exit 1; fi; done'
+    '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; ' +
+    'if test $? -eq 0; then exit 1; fi; done'
   end
 
   on host, "#{cmd}"
