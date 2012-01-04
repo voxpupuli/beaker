@@ -1,7 +1,7 @@
 VERSION:
   rack_ver: 1.1.0
   gem_ver: 1.3.7
-  facter_ver: 1.6.2
+  facter_ver: 1.6.4
   puppet_ver: 2.7.6
   puppet_module_ver: 0.3.4
   activerecord_ver: 2.3.14
