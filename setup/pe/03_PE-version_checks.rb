@@ -99,7 +99,7 @@ hosts.each do |host|
   end
 
   on host, "#{cmd} pe-puppet-dashboard" do
-    assert_match(/#{version['VERSION']['dashboard']}/, stdout,
+    assert_match(/#{version['VERSION']['dashboard_ver']}/, stdout,
                  "Incorrect version of dashboard on #{host}")
   end
 end
