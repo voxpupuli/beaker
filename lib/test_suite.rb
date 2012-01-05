@@ -41,6 +41,7 @@ class TestSuite
     Log.notify "Using random seed #{@random_seed}" if @random_seed
     @test_files.each do |test_file|
       Log.notify
+      Log.notify "Begin #{test_file}"
       test_case = TestCase.new(config, options, test_file).run_test
       @test_cases << test_case
 
