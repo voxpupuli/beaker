@@ -204,41 +204,41 @@ class TestCase
     on host, puppet_apply(*args), on_options, &block
   end
 
-  def run_script_on(host,script)
+  def run_script_on(host, script, &block)
     remote_path=File.join("", "tmp", File.basename(script))
     scp_to host, script, remote_path
-    on host, remote_path
+    on host, remote_path, &block
   end
 
-  def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test', options={})
+  def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test', options={}, &block)
     if host.is_a? Array
-      host.each { |h| run_agent_on h, arg, options }
+      host.each { |h| run_agent_on h, arg, options, &block }
     else
-      on host, puppet_agent(arg), options
+      on host, puppet_agent(arg), options, &block
     end
   end
 
-  def run_cron_on(host,action,user,entry="")
+  def run_cron_on(host, action, user, entry="", &block)
     platform = host['platform']
     if platform.include? 'solaris'
       case action
         when :list   then args = '-l'
         when :remove then args = '-r'
         when :add
-          on(host,"echo '#{entry}' > /var/spool/cron/crontabs/#{user}")
+          on(host, "echo '#{entry}' > /var/spool/cron/crontabs/#{user}", &block)
       end
     else         # default for GNU/Linux platforms
       case action
         when :list   then args = '-l -u'
         when :remove then args = '-r -u'
         when :add
-           on(host,"echo '#{entry}' > /tmp/#{user}.cron && crontab -u #{user} /tmp/#{user}.cron")
+           on(host, "echo '#{entry}' > /tmp/#{user}.cron && crontab -u #{user} /tmp/#{user}.cron", &block)
       end
     end
    
     if args
       case action
-        when :list, :remove then on(host,"crontab #{args} #{user}")
+        when :list, :remove then on(host, "crontab #{args} #{user}", &block)
       end
     end
   end
