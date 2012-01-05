@@ -68,6 +68,7 @@ hosts.each do |host|
   end
 end
 
+# This logic is for Ruby Gems that are packaged with be on the master/dash
 %w(activerecord activesupport).each do |pkg|
   step "Check version of #{pkg}"
   hosts.each do |host|
@@ -85,3 +86,21 @@ end
     end
   end
 end
+
+
+hosts.each do |host|
+  next unless host['roles'].include?('dashboard')
+  cmd = ''
+
+  if host['platform'] =~ /debian|ubuntu/
+    cmd = "dpkg -l"
+  else
+    cmd = "rpm -q"
+  end
+
+  on host, "#{cmd} pe-puppet-dashboard" do
+    assert_match(/#{version['VERSION']['dashboard']}/, stdout,
+                 "Incorrect version of dashboard on #{host}")
+  end
+end
+
