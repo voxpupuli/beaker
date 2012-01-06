@@ -1,5 +1,7 @@
 test_name 'Ensure the Unistaller works against a basic PE Install'
 
+cronjobs =      [ '.d/default-add-all-nodes', '.hourly/puppet_baselines.sh' ]
+
 directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet',
                   '/var/opt/lib/pe-puppetmaster',
                   '/var/opt/cache/pe-puppet-dashboard', '/var/opt/puppet' ]
@@ -66,6 +68,12 @@ hosts.each do |host|
 
   symlinks.each do |sym|
     on host, "test -f /usr/local/bin/#{sym}",
+      :acceptable_exit_codes => [1]
+  end
+
+  # remove cron files
+  cronjobs.each do |cronjob|
+    on host, "test -f /etc/cron#{cronjob}",
       :acceptable_exit_codes => [1]
   end
 end
