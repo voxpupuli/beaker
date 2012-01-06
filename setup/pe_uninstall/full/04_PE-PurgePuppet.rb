@@ -21,7 +21,13 @@ hosts.each do |host|
   on host, "cd /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/" +
     '&& ./puppet-enterprise-uninstaller -yn'
 
-  on host, "/etc/init.d/#{puppet_agent} stop"
+  if host['platform'] =~ /debian|ubuntu/
+    agent_service = 'pe-puppet-agent'
+  else
+    agent_service = 'pe-puppet'
+  end
+
+  on host, "/etc/init.d/#{agent_service} stop"
   on host, puppet('agent -t')
 
 end
