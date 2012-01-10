@@ -28,7 +28,7 @@ hosts.each do |host|
   end
 
   on host, "/etc/init.d/#{agent_service} stop"
-  on host, puppet('agent -t')
+  on host, puppet('agent -t'), :acceptable_exit_codes => [0,2]
 
 end
 
@@ -131,7 +131,7 @@ step 'Confirm Removal of Processes from start up'
 hosts.each do |host|
   processes.each do |process|
     on host, "grep -Rl #{process} /etc/rc*",
-      :acceptable_exit_codes => [1]
+      :acceptable_exit_codes => [1, 2]
   end
 end
 
