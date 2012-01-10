@@ -114,10 +114,10 @@ hosts.each do |host|
     '| egrep \(ok\|install\)'
   when /el|sles/
     " ! rpm -qp --qf '%{name} ' " +
-    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/" +
+    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/**" +
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
-    'ls /tmp/puppet-enterprise-2.0.0-94-g6234c76-solaris-10-i386/packages/solaris-10-i386/ ' +
+    "ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/solaris-10-i386/ " +
     '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; if test $? -eq 0;' +
     ' then exit 1; fi; done'
   end
@@ -130,6 +130,9 @@ end
 step 'Confirm Removal of Processes from start up'
 hosts.each do |host|
   processes.each do |process|
+
+    next if process =~ /pe-dashboard-workers/
+
     on host, "grep -Rl #{process} /etc/rc*",
       :acceptable_exit_codes => [1, 2]
   end
