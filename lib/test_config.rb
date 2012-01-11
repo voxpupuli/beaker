@@ -5,6 +5,7 @@ module TestConfig
     {
       :config                => false,
       :paranoid              => false,
+      :timeout               => 300,
       :auth_methods          => ["publickey"],
       :keys                  => [Options.parse_args[:keyfile]],
       :port                  => 22,
@@ -44,7 +45,7 @@ module TestConfig
         while line = file.gets
           if /(\w.*)/ =~ line then
             version=$1
-            Log.debug "Found: LASTEST Puppet Enterprise Version #{version}"
+            Log.debug "Found LATEST: Puppet Enterprise Version #{version}"
           end
         end
       end
