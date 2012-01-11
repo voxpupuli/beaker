@@ -1,5 +1,7 @@
 test_name 'Ensure the Unistaller works against a basic PE Install'
 
+cronjobs =      [ '.d/default-add-all-nodes', '.hourly/puppet_baselines.sh' ]
+
 directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet',
                   '/var/opt/lib/pe-puppetmaster',
                   '/var/opt/cache/pe-puppet-dashboard', '/var/opt/puppet' ]
@@ -35,7 +37,8 @@ step 'Confirm Uninstallation'
 step 'Confirm Removal of Directories'
 hosts.each do |host|
   directories.each do |dir|
-    on host, " ! [[ -d #{dir} ]]"
+    on host, "test -d #{dir}",
+      :acceptable_exit_codes => [1]
   end
 end
 
@@ -44,30 +47,44 @@ hosts.each do |host|
   processes.each do |process|
 
     # Ensure our init scripts are gone
-    on host, " ! [[ -f /etc/init.d/#{process} ]]"
+    on host, "test -f /etc/init.d/#{process}",
+      :acceptable_exit_codes => [1]
 
     # Ensure there are no process files or directories
-    on host, " ! ls /var/run | grep #{process} "
+    on host, "ls /var/run | grep #{process}",
+      :acceptable_exit_codes => [1]
 
     # lock files are in /var/lock/{process_name}/ in debs,
     # /var/lock/subsys{process_name} in els
-    on host, " ! ls /var/lock | grep #{process} "
-    on host, " ! ls /var/lock/subsys | grep #{process} "
+    on host, "ls /var/lock | grep #{process}",
+      :acceptable_exit_codes => [1]
+    on host, "ls /var/lock/subsys | grep #{process}",
+      :acceptable_exit_codes => [1]
 
-    on host, " ! ls /var/log | grep #{process} "
+    on host, "ls /var/log | grep #{process}",
+      :acceptable_exit_codes => [1]
 
   end
 
   symlinks.each do |sym|
-    on host, " ! [[ -f /usr/local/bin/#{sym} ]]"
+    on host, "test -f /usr/local/bin/#{sym}",
+      :acceptable_exit_codes => [1]
+  end
+
+  # remove cron files
+  cronjobs.each do |cronjob|
+    on host, "test -f /etc/cron#{cronjob}",
+      :acceptable_exit_codes => [1]
   end
 end
 
 step 'Confirm Removal of Users and Groups'
 hosts.each do |host|
   users_groups.each do |usr_grp|
-    on host, " ! cat /etc/passwd | grep #{usr_grp}"
-    on host, " ! cat /etc/group | grep #{usr_grp}"
+    on host, "cat /etc/passwd | grep #{usr_grp}",
+      :acceptable_exit_codes => [1]
+    on host, "cat /etc/group | grep #{usr_grp}",
+      :acceptable_exit_codes => [1]
   end
 end
 
@@ -79,13 +96,13 @@ hosts.each do |host|
   when /ubuntu|debian/
     " ! ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}" +
     "| xargs dpkg-query --showformat='${Status;10}' --show " +
-    "| egrep \(ok\|install\)"
+    '| egrep \(ok\|install\)'
   when /el|sles/
     " ! rpm -qp --qf '%{name} ' " +
-    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/" +
+    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/**" +
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
-    'ls /tmp/puppet-enterprise-2.0.0-94-g6234c76-solaris-10-i386/packages/solaris-10-i386/ ' +
+    "ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/solaris-10-i386/ " +
     '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; ' +
     'if test $? -eq 0; then exit 1; fi; done'
   end
@@ -98,6 +115,10 @@ end
 step 'Confirm Removal of Processes from start up'
 hosts.each do |host|
   processes.each do |process|
-    on host, " ! grep -Rl #{process} /etc/rc*"
+
+    next if process =~ /pe-dashboard-workers/
+
+    on host, "grep -Rl #{process} /etc/rc*",
+      :acceptable_exit_codes => [1, 2]
   end
 end
