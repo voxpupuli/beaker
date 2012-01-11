@@ -43,7 +43,7 @@ hosts.each do |host|
   on host, "cat > /tmp/answer_file <<EOF
 q_pe_uninstall=y
 q_pe_purge=y
-q_pe_remove_db=y
+q_pe_remove_db=#{ host['roles'].include?('dashboard') ? 'y' : 'n'}
 q_pe_db_root_pass=puppet
 EOF"
 end
