@@ -26,7 +26,18 @@ class TestCase
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
     def ssh
-      @ssh ||= Net::SSH.start(self, self['user'] || "root" , self['ssh'])
+      tries = 1
+      @ssh ||= begin
+                 Net::SSH.start(self, self['user'] || "root", self['ssh'])
+               rescue
+                 tries += 1
+                 if tries < 4
+                   puts "Try #{tries} -- Host Unreachable"
+                   puts 'Trying again in 20 seconds'
+                   sleep 20
+                   retry
+                 end
+               end
     end
 
     def do_action(verb,*args)
