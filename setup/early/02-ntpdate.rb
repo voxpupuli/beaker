@@ -5,6 +5,10 @@ unless options[:notimesync]
     success=FALSE
     if host['platform'].include? 'solaris'
       on(host, "sleep 10 && ntpdate -w #{options[:ntpserver]}")
+    elsif host['platform'].include? 'windows'
+      on(host, "w32tm /register")
+      on(host, "net start w32time", :acceptable_exit_codes => [0,2])
+      on(host, "w32tm /config /manualpeerlist:#{options[:ntpserver]} /syncfromflags:manual /update")
     else
       count=0
       until success do
