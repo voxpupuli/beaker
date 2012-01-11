@@ -27,7 +27,13 @@ hosts.each do |host|
     agent_service = 'pe-puppet'
   end
 
-  on host, "/etc/init.d/#{agent_service} stop"
+  if host['platform'] =~ /solaris/
+    stop_cmd = '/usr/sbin/svcadm disable -s svc:/network/puppetagent:default'
+  else
+    stop_cmd = "/etc/init.d/#{agent_service} stop"
+  end
+
+  on host, stop_cmd
   on host, puppet('agent -t'), :acceptable_exit_codes => [0,2]
 
 end
@@ -37,7 +43,7 @@ hosts.each do |host|
   on host, "cat > /tmp/answer_file <<EOF
 q_pe_uninstall=y
 q_pe_purge=y
-q_pe_remove_db=y
+q_pe_remove_db=#{ host['roles'].include?('dashboard') ? 'y' : 'n'}
 q_pe_db_root_pass=puppet
 EOF"
 end
