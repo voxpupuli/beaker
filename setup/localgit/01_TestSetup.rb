@@ -36,10 +36,13 @@ hosts.each do |host|
   step "Install puppet on the system"
   on host, "cd #{SourcePath}/puppet && ruby ./install.rb"
 
-  step "Create required users and groups"
-  on host, "getent group puppet || groupadd puppet"
-  on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
+  step "REVISIT: see #9862, this step should not be required for agents"
+  unless host['platform'].include? 'windows'
+    step "Create required users and groups"
+    on host, "getent group puppet || groupadd puppet"
+    on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
 
-  step "REVISIT: Work around bug #5794 not creating reports as required"
-  on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+    step "REVISIT: Work around bug #5794 not creating reports as required"
+    on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+  end
 end
