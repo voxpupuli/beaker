@@ -1,8 +1,8 @@
-if options[:dhcp_renew] then
-  test_name "renew dhcpd lease so we don't hiccup in the tests"
-
+test_name "renew DHCP lease"
+unless options[:dhcp_renew]
+  skip_test "Skipping DHCP renew"
+else
   step "renew dhcpd with dhclient -r && dhclient or dhcpcd -n eth0"
-
   hosts.each do |host|
     next if host['platform'].include?('solaris')
       if host['platform'].include? 'sles'

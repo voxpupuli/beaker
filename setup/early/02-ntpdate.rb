@@ -9,11 +9,12 @@ unless options[:notimesync]
       count=0
       until success do
         count+=1
+        skip_test "ntp time sync failed after #{count} tries" and break if count > 3
         on(host, "ntpdate -t 20 #{options[:ntpserver]}") do
           success=TRUE if exit_code == 0
         end
-        Log.notify "NTP date ran #{count} times"
       end
+      Log.notify "NTP date succeeded after #{count} tries"
     end
   end
 else
