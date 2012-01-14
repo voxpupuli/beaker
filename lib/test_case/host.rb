@@ -49,6 +49,12 @@ class TestCase
                end
     end
 
+    def close
+      if @ssh
+        @ssh.close
+      end
+    end
+
     def do_action(verb,*args)
       result = Result.new(self,args,'','',0)
       Log.debug "#{self}: #{verb}(#{args.inspect})"

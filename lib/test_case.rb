@@ -8,10 +8,10 @@ class TestCase
 
   attr_reader :version, :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
   attr_reader :runtime
-  def initialize(config, options={}, path=nil)
+  def initialize(hosts, config, options={}, path=nil)
     @version = config['VERSION']
     @config  = config['CONFIG']
-    @hosts   = config['HOSTS'].collect { |name,overrides| Host.create(name,overrides,@config) }
+    @hosts   = hosts
     @options = options
     @path    = path
     @usr_home = ENV['HOME']

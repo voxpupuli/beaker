@@ -9,6 +9,7 @@ require 'optparse'
 require 'systemu'
 require 'test/unit'
 require 'yaml'
+require 'lib/test_case/host'
 
 Test::Unit.run = true
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
@@ -50,12 +51,18 @@ else
                                   :tests  => ["setup/early", "setup/#{options[:type]}", "setup/post"] })
 end
 
-# Run the harness for install
-TestSuite.new('setup', setup_options, config, TRUE).run_and_exit_on_failure
+# Generate hosts
+hosts = config['HOSTS'].collect { |name,overrides| TestCase::Host.create(name,overrides,config['CONFIG']) }
+begin
+  # Run the harness for install
+  TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure
 
-# Run the tests
-unless options[:installonly] then
-  TestSuite.new('acceptance', options, config).run_and_exit_on_failure
+  # Run the tests
+  unless options[:installonly] then
+    TestSuite.new('acceptance', hosts, options, config).run_and_exit_on_failure
+  end
+ensure
+  hosts.each {|host| host.close }
 end
 
 Log.notify "systest completed successfully, thanks."

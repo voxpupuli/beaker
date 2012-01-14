@@ -4,8 +4,9 @@ require 'rexml/document'
 class TestSuite
   attr_reader :name, :options, :config, :stop_on_error
 
-  def initialize(name, options, config, stop_on_error=FALSE)
+  def initialize(name, hosts, options, config, stop_on_error=FALSE)
     @name    = name.gsub(/\s+/, '-')
+    @hosts   = hosts
     @run     = false
     @options = options
     @config  = config
@@ -42,7 +43,7 @@ class TestSuite
     @test_files.each do |test_file|
       Log.notify
       Log.notify "Begin #{test_file}"
-      test_case = TestCase.new(config, options, test_file).run_test
+      test_case = TestCase.new(@hosts, config, options, test_file).run_test
       @test_cases << test_case
 
       msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed"
