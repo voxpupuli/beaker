@@ -22,15 +22,6 @@ module TestConfig
     config['CONFIG']['pe_ver'] = puppet_enterprise_version if puppet_enterprise_version 
     config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless puppet_enterprise_version
     config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless puppet_enterprise_version
-    unless puppet_enterprise_version then
-      config['CONFIG']['puppetpath'] = '/etc/puppet'
-      config['CONFIG']['puppetbin'] = '/usr/bin/puppet'
-      config['CONFIG']['puppetbindir'] = '/usr/bin'
-    else   # PE speciifc
-      config['CONFIG']['puppetpath'] = '/etc/puppetlabs/puppet'
-      config['CONFIG']['puppetbin'] = '/usr/local/bin/puppet'
-      config['CONFIG']['puppetbindir'] = '/opt/puppet/bin'
-    end
     # need to load expect versions of PE binaries 
     config['VERSION'] = YAML.load_file('ci/pe/pe_version') rescue nil if puppet_enterprise_version
     config

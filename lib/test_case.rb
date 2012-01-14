@@ -11,7 +11,7 @@ class TestCase
   def initialize(config, options={}, path=nil)
     @version = config['VERSION']
     @config  = config['CONFIG']
-    @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
+    @hosts   = config['HOSTS'].collect { |name,overrides| Host.create(name,overrides,@config) }
     @options = options
     @path    = path
     @usr_home = ENV['HOME']

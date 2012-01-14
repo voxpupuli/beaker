@@ -31,7 +31,7 @@ puts `pe-builder --type t1.micro --keypair #{keypair} --keyfile #{keyfile} --os 
 
 # add the host entries to current list of hosts
 host_config = YAML.load_file(host_config_file)['HOSTS']
-host_config.collect { |name,overrides| @hosts.push(Host.new(name,overrides,@config)) }
+host_config.collect { |name,overrides| @hosts.push(Host.create(name,overrides,@config)) }
 
 
 # save the current configuration
