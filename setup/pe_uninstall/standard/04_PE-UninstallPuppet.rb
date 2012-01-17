@@ -90,7 +90,7 @@ end
 
 # There should be no PE packages on the system, this should ensure all PE
 # packages and nothing but PE packages are checked
-step 'Confirm Removal of Packages WIP'
+step 'Confirm Removal of Packages'
 hosts.each do |host|
   cmd = case host['platform']
   when /ubuntu|debian/
@@ -99,12 +99,12 @@ hosts.each do |host|
     '| egrep \(ok\|install\)'
   when /el|sles/
     " ! rpm -qp --qf '%{name} ' " +
-    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/el-5-i386/**" +
+    "/tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}/**" +
     "| xargs rpm -q | grep -v 'not installed'"
   when /solaris/
-    "ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/solaris-10-i386/ " +
+    "ls /tmp/puppet-enterprise-#{config['pe_ver']}-#{host['platform']}/packages/#{host['platform']}/ " +
     '| cut -d- -f2 | while read pkg; do pkginfo -q "PUP${pkg}"; ' +
-    'if test $? -eq 0; then exit 1; fi; done'
+    'if test $? -eq 0; then echo "found package ${pkg}"; exit 1; fi; done'
   end
 
   on host, "#{cmd}"
