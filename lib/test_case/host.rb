@@ -121,5 +121,14 @@ class TestCase
   end
 
   class WindowsHost < Host
+    DEFAULTS = {
+      'user' => 'Administrator'
+    }
+
+    def initialize(name, overrides, defaults)
+      super(name, overrides, defaults)
+
+      @defaults = defaults.merge(DEFAULTS)
+    end
   end
 end
