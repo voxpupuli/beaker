@@ -122,7 +122,8 @@ class TestCase
 
   class WindowsHost < Host
     DEFAULTS = {
-      'user' => 'Administrator'
+      'user'       => 'Administrator',
+      'puppetpath' => '"`cygpath -F 35`/PuppetLabs/puppet/etc"'
     }
 
     def initialize(name, overrides, defaults)

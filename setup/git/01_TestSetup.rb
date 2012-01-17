@@ -87,4 +87,8 @@ role_master=""
 hosts.each do |host|
   role_master = host if host['roles'].include? 'master'
 end
-on agents, "echo [agent] >> /etc/puppet/puppet.conf && echo server=#{role_master} >> /etc/puppet/puppet.conf"
+
+agents.each do |agent|
+  puppetconf = File.join(agent['puppetpath'], 'puppet.conf')
+  on agent, "echo [agent] >> #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
+end
