@@ -19,7 +19,9 @@ class Command
   def puppet_env_command(host_info)
     rubylib = [host_info['pluginlibpath'], host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(':')
     path    = [host_info['puppetbindir'], host_info['facterbindir'],'$PATH'   ].compact.join(':')
-    %Q{env RUBYLIB="#{rubylib}" PATH="#{path}"}
+    cmd     = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
+
+    %Q{env RUBYLIB="#{rubylib}" PATH="#{path}" #{cmd}}
   end
 end
 
