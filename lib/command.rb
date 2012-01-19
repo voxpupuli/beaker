@@ -54,3 +54,9 @@ class FacterCommand < Command
     "#{puppet_env_command(host_info)} facter #{args_string}"
   end
 end
+
+class HostCommand < Command
+  def cmd_line(host)
+    eval "\"#{@command_string}\""
+  end
+end

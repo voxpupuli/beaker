@@ -196,6 +196,10 @@ class TestCase
     PuppetCommand.new(:filebucket,*args)
   end
 
+  def host_command(command_string)
+    HostCommand.new(command_string)
+  end
+
   def apply_manifest_on(host,manifest,options={},&block)
     on_options = {:stdin => manifest + "\n"}
     on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
