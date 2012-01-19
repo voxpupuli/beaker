@@ -69,12 +69,15 @@ hosts.each do |host|
   end
   config[:version] = version
 
-  step "Create required users and groups"
-  on host, "getent group puppet || groupadd puppet"
-  on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
+  step "REVISIT: see #9862, this step should not be required for agents"
+  unless host['platform'].include? 'windows'
+    step "Create required users and groups"
+    on host, "getent group puppet || groupadd puppet"
+    on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
 
-  step "REVISIT: Work around bug #5794 not creating reports as required"
-  on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+    step "REVISIT: Work around bug #5794 not creating reports as required"
+    on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+  end
 end
 
 # Git based install assume puppet master named "puppet";
@@ -84,4 +87,8 @@ role_master=""
 hosts.each do |host|
   role_master = host if host['roles'].include? 'master'
 end
-on agents, "echo [agent] >> /etc/puppet/puppet.conf && echo server=#{role_master} >> /etc/puppet/puppet.conf"
+
+agents.each do |agent|
+  puppetconf = File.join(agent['puppetpath'], 'puppet.conf')
+  on agent, "echo [agent] >> #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
+end

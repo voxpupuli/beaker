@@ -1,5 +1,14 @@
 class TestCase
   class Host
+    def self.create(name, overrides, defaults)
+      case overrides['platform']
+      when /windows/;
+        WindowsHost.new(name, overrides, defaults)
+      else
+        UnixHost.new(name, overrides, defaults)
+      end
+    end
+
     # A cache for active SSH connections to our execution nodes.
     def initialize(name, overrides, defaults)
       @name,@overrides,@defaults = name,overrides,defaults
@@ -38,6 +47,12 @@ class TestCase
                    retry
                  end
                end
+    end
+
+    def close
+      if @ssh
+        @ssh.close
+      end
     end
 
     def do_action(verb,*args)
@@ -82,6 +97,39 @@ class TestCase
         recursive_scp='true' if File.directory? source
         ssh.scp.upload!(source, target, :recursive => recursive_scp)
       }
+    end
+  end
+
+  class UnixHost < Host
+    PE_DEFAULTS = {
+      'puppetpath'   => '/etc/puppetlabs/puppet',
+      'puppetbin'    => '/usr/local/bin/puppet',
+      'puppetbindir' => '/opt/puppet/bin'
+    }
+
+    DEFAULTS = {
+      'puppetpath'   => '/etc/puppet',
+      'puppetbin'    => '/usr/bin/puppet',
+      'puppetbindir' => '/usr/bin'
+    }
+
+    def initialize(name, overrides, defaults)
+      super(name, overrides, defaults)
+
+      @defaults = defaults.merge(TestConfig.puppet_enterprise_version ? PE_DEFAULTS : DEFAULTS)
+    end
+  end
+
+  class WindowsHost < Host
+    DEFAULTS = {
+      'user'       => 'Administrator',
+      'puppetpath' => '"`cygpath -F 35`/PuppetLabs/puppet/etc"'
+    }
+
+    def initialize(name, overrides, defaults)
+      super(name, overrides, defaults)
+
+      @defaults = defaults.merge(DEFAULTS)
     end
   end
 end

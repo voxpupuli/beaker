@@ -8,10 +8,10 @@ class TestCase
 
   attr_reader :version, :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
   attr_reader :runtime
-  def initialize(config, options={}, path=nil)
+  def initialize(hosts, config, options={}, path=nil)
     @version = config['VERSION']
     @config  = config['CONFIG']
-    @hosts   = config['HOSTS'].collect { |name,overrides| Host.new(name,overrides,@config) }
+    @hosts   = hosts
     @options = options
     @path    = path
     @usr_home = ENV['HOME']
@@ -196,6 +196,10 @@ class TestCase
     PuppetCommand.new(:filebucket,*args)
   end
 
+  def host_command(command_string)
+    HostCommand.new(command_string)
+  end
+
   def apply_manifest_on(host,manifest,options={},&block)
     on_options = {:stdin => manifest + "\n"}
     on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
@@ -244,6 +248,7 @@ class TestCase
   end
 
   def with_master_running_on(host, arg='--daemonize', &block)
+    on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
     on host, puppet_master('--configprint pidfile')
     pidfile = stdout.chomp
     on host, puppet_master(arg)
