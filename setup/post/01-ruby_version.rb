@@ -5,14 +5,16 @@
 # Need to run this post install as PE hosts will not have ruby installed
 # until post install
 
-if options[:type] =~ /pe/
-  cmd = "#{config['puppetbindir']}/ruby -v"
-else
-  cmd = 'ruby -v'
-end 
+def get_cmd(host)
+  if options[:type] =~ /pe/
+    "#{host['puppetbindir']}/ruby -v"
+  else
+    'ruby -v'
+  end
+end
 
 hosts.each do |host|
-  on(host, "#{cmd}") do
+  on(host, get_cmd(host)) do
    host[:ruby_ver] = stdout
   end
 end
