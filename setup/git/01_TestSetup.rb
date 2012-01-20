@@ -41,11 +41,12 @@ def install_from_git(host, package, repo, revision)
   on host, "cd #{target} && git remote add origin #{repo}"
   on host, "cd #{target} && git fetch origin"
 
-  step "Check out the revision #{revision}"
-  on host, "cd #{SourcePath}/#{package} && git checkout #{revision}"
+  step "Check out and clean up to revision #{revision}"
+  on host, "cd #{target} && git clean -fdx"
+  on host, "cd #{target} && git checkout --force #{revision}"
 
   step "Install #{package} on the system"
-  on host, "cd #{SourcePath}/#{package} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
+  on host, "cd #{target} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
 end
 
 
