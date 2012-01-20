@@ -10,28 +10,28 @@ end
 step "Check Puppet Module version"
 hosts.each do |host|
   next if host['platform'].include?('solaris')
-  on(host, "#{config['puppetbindir']}/puppet-module version") do
+  on(host, "#{host['puppetbindir']}/puppet-module version") do
     assert_match(/#{version['VERSION']['puppet_module_ver']}/, stdout, "Incorrect Puppet Module tool version detected on #{host} ")
   end
 end
 
 step "Check Ruby Gem version"
 hosts.each do |host|
-  on(host, "#{config['puppetbindir']}/gem --version") do
+  on(host, "#{host['puppetbindir']}/gem --version") do
     assert_match(/#{version['VERSION']['gem_ver']}/, stdout, "Incorrect gem version detected on #{host} ")
   end
 end
 
 step "Check Facter version"
 hosts.each do |host|
-  on(host, "#{config['puppetbindir']}/facter --version") do
+  on(host, "#{host['puppetbindir']}/facter --version") do
     assert_match(/#{version['VERSION']['facter_ver']}/, stdout.chomp, "Incorrect Facter version detected on #{host}")
   end
 end
 
 step "Check Puppet version"
 hosts.each do |host|
-  on(host, "#{config['puppetbindir']}/puppet --version") do
+  on(host, "#{host['puppetbindir']}/puppet --version") do
     assert_match(/#{version['VERSION']['puppet_ver']}/, stdout, "Incorrect Puppet version detected on #{host}")
   end
 end
