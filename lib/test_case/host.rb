@@ -62,9 +62,20 @@ class TestCase
       result
     end
 
-    def exec(command, stdin)
+    def exec(command, options)
       do_action('RemoteExec',command) do |result|
         ssh.open_channel do |channel|
+          if options[:pty] then
+            channel.request_pty do |ch, success|
+              if success
+                puts "Allocated a PTY on #{@name} for #{command.inspect}"
+              else
+                abort "FAILED: could not allocate a pty when requested on " +
+                  "#{@name} for #{command.inspect}"
+              end
+            end
+          end
+
           channel.exec(command) do |terminal, success|
             abort "FAILED: to execute command on a new channel on #{@name}" unless success
             terminal.on_data                   { |ch, data|       result.stdout << data }
@@ -75,7 +86,7 @@ class TestCase
             # triggers action in many remote commands, notably including
             # 'puppet apply'.  It must be sent at some point before the rest
             # of the action.
-            terminal.send_data(stdin.to_s)
+            terminal.send_data(options[:stdin].to_s)
             terminal.process
             terminal.eof!
           end

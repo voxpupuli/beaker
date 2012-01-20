@@ -12,7 +12,7 @@ class Command
   end
 
   def exec(host, options={})
-    host.exec(cmd_line(host), options[:stdin])
+    host.exec(cmd_line(host), options)
   end
 
   # Determine the appropriate puppet env command for the given host.
