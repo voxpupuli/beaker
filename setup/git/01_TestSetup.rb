@@ -31,8 +31,15 @@ else
 end
 
 def install_from_git(host, package, repo, revision)
-  step "Clone #{repo}"
-  on host, "cd #{SourcePath} && git clone #{repo} #{package}"
+  target = "#{SourcePath}/#{package}"
+
+  step "Clone #{repo} if needed"
+  on host, "cd #{SourcePath} && test -d #{package} || git clone #{repo} #{package}"
+
+  step "Update origin for #{package}"
+  on host, "cd #{target} && git remote rm origin"
+  on host, "cd #{target} && git remote add origin #{repo}"
+  on host, "cd #{target} && git fetch origin"
 
   step "Check out the revision #{revision}"
   on host, "cd #{SourcePath}/#{package} && git checkout #{revision}"
@@ -50,13 +57,13 @@ hosts.each do |host|
   on host, "echo #{github_sig} >> $HOME/.ssh/known_hosts"
   host['pluginlibpath'] = pluginlibpath
 
-  step "Clean and create #{SourcePath}"
-  on host, "rm -rf #{SourcePath} && mkdir -vp #{SourcePath}"
-
+  step "Install facter from git"
   install_from_git host, :facter, FacterRepo, FacterRev
+  step "Install puppet from git"
   install_from_git host, :puppet, PuppetRepo, PuppetRev
 
   package_names.zip(options[:plugins]).each do |package, repo|
+    step "Install #{package} plugin from git"
     install_from_git host, package, repo, 'master'
   end
 
