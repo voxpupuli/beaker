@@ -43,7 +43,7 @@ def install_from_git(host, package, repo, revision)
               "remote add origin #{repo}",
               "fetch origin",
               "clean -fdx",
-              "checkout --force #{revision}"]
+              "checkout -f #{revision}"]
   on host, commands.join(" && git ")
 
   step "Install #{package} on the system"
