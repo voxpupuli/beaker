@@ -249,6 +249,12 @@ class TestCase
 
   def with_master_running_on(host, arg='--daemonize', &block)
     on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
+    agents.each do |agent|
+      if vardir = agent['puppetvardir']
+        on agent, "rm -rf #{vardir}/*"
+      end
+    end
+
     on host, puppet_master('--configprint pidfile')
     pidfile = stdout.chomp
     on host, puppet_master(arg)

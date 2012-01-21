@@ -120,6 +120,7 @@ class TestCase
 
     DEFAULTS = {
       'puppetpath'   => '/etc/puppet',
+      'puppetvardir' => '/var/lib/puppet',
       'puppetbin'    => '/usr/bin/puppet',
       'puppetbindir' => '/usr/bin'
     }
@@ -133,8 +134,9 @@ class TestCase
 
   class WindowsHost < Host
     DEFAULTS = {
-      'user'       => 'Administrator',
-      'puppetpath' => '"`cygpath -F 35`/PuppetLabs/puppet/etc"'
+      'user'         => 'Administrator',
+      'puppetpath'   => '"`cygpath -F 35`/PuppetLabs/puppet/etc"',
+      'puppetvardir' => '"`cygpath -F 35`/PuppetLabs/puppet/var"'
     }
 
     def initialize(name, overrides, defaults)
