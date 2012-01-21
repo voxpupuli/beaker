@@ -34,6 +34,7 @@ def install_from_git(host, package, repo, revision)
   target = "#{SourcePath}/#{package}"
 
   step "Clone #{repo} if needed"
+  on host, "test -d #{SourcePath} || mkdir #{SourcePath}"
   on host, "cd #{SourcePath} && test -d #{package} || cd #{SourcePath} && git clone #{repo} #{package}"
 
   step "Update #{package} and check out revision #{revision}"
