@@ -1,5 +1,5 @@
 class TestCase
-  require 'lib/test_case/host'
+  require 'lib/host'
   require 'tempfile'
   require 'benchmark'
   require 'stringio'
