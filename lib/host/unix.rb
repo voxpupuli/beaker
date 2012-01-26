@@ -1,22 +1,26 @@
 require 'host'
 
-class UnixHost < Host
-  PE_DEFAULTS = {
-    'puppetpath'   => '/etc/puppetlabs/puppet',
-    'puppetbin'    => '/usr/local/bin/puppet',
-    'puppetbindir' => '/opt/puppet/bin'
-  }
+module Unix
+  class Host < Host
 
-  DEFAULTS = {
-    'puppetpath'   => '/etc/puppet',
-    'puppetvardir' => '/var/lib/puppet',
-    'puppetbin'    => '/usr/bin/puppet',
-    'puppetbindir' => '/usr/bin'
-  }
 
-  def initialize(name, overrides, defaults)
-    super(name, overrides, defaults)
+    PE_DEFAULTS = {
+      'puppetpath'   => '/etc/puppetlabs/puppet',
+      'puppetbin'    => '/usr/local/bin/puppet',
+      'puppetbindir' => '/opt/puppet/bin'
+    }
 
-    @defaults = defaults.merge(TestConfig.puppet_enterprise_version ? PE_DEFAULTS : DEFAULTS)
+    DEFAULTS = {
+      'puppetpath'   => '/etc/puppet',
+      'puppetvardir' => '/var/lib/puppet',
+      'puppetbin'    => '/usr/bin/puppet',
+      'puppetbindir' => '/usr/bin'
+    }
+
+    def initialize(name, overrides, defaults)
+      super(name, overrides, defaults)
+
+      @defaults = defaults.merge(TestConfig.puppet_enterprise_version ? PE_DEFAULTS : DEFAULTS)
+    end
   end
 end

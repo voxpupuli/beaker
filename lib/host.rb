@@ -2,9 +2,9 @@ class Host
   def self.create(name, overrides, defaults)
     case overrides['platform']
     when /windows/;
-      WindowsHost.new(name, overrides, defaults)
+      Windows::Host.new(name, overrides, defaults)
     else
-      UnixHost.new(name, overrides, defaults)
+      Unix::Host.new(name, overrides, defaults)
     end
   end
 
