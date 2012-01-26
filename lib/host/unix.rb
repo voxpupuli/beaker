@@ -1,8 +1,13 @@
-require 'host'
+require 'lib/host'
+require 'lib/command_factory'
 
 module Unix
   class Host < Host
+    require 'lib/host/unix/user'
+    require 'lib/host/unix/group'
 
+    include Unix::User
+    include Unix::Group
 
     PE_DEFAULTS = {
       'user'         => 'root',
