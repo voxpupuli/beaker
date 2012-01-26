@@ -1,8 +1,13 @@
-require 'host'
+require 'lib/host'
+require 'lib/command_factory'
 
 module Windows
   class Host < Host
+    require 'lib/host/windows/user'
+    require 'lib/host/windows/group'
 
+    include Windows::User
+    include Windows::Group
 
     DEFAULTS = {
       'user'         => 'Administrator',
