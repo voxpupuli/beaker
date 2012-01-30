@@ -16,12 +16,24 @@ class Command
   end
 
   # Determine the appropriate puppet env command for the given host.
-  def puppet_env_command(host_info)
+  # parameters:
+  # [host_info] a Hash containing info about the host
+  # [environment] an optional Hash containing key-value pairs to be treated as environment variables that should be
+  #     set for the duration of the puppet command.
+  def puppet_env_command(host_info, environment = {})
     rubylib = [host_info['pluginlibpath'], host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(':')
     path    = [host_info['puppetbindir'], host_info['facterbindir'],'$PATH'   ].compact.join(':')
     cmd     = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
 
-    %Q{env RUBYLIB="#{rubylib}" PATH="#{path}" #{cmd}}
+    # if the caller passed in an "environment" hash, we need to build up a string of the form " KEY1=VAL1 KEY2=VAL2"
+    # containing all of the specified environment vars.  We prefix it with a space because we will insert it into
+    # the broader command below
+    environment_vars_string = environment.nil? ? "" :
+        " %s" % environment.collect { |key, val| "#{key}=#{val}" } .join(" ")
+
+    # build up the actual command, prefixed with the RUBYLIB and PATH environment vars, plus our string containing
+    # additional environment variables (which may be an empty string)
+    %Q{env RUBYLIB="#{rubylib}" PATH="#{path}"#{environment_vars_string} #{cmd}}
   end
 end
 
@@ -29,6 +41,17 @@ class PuppetCommand < Command
   def initialize(sub_command, *args)
     @sub_command = sub_command
     @options = args.last.is_a?(Hash) ? args.pop : {}
+
+    # Not at all happy with this implementation, but it was the path of least resistance for the moment.
+    # This constructor already does a little "magic" by allowing the final value in the *args Array to
+    # be a Hash, which will be treated specially: popped from the regular args list and assigned to @options,
+    # where it will later be used to add extra command line args to the puppet command (--key=value).
+    #
+    # Here we take this one step further--if the @options hash is passed in, we check and see if it has the
+    # special key :environment in it.  If it does, then we'll pull that out of the options hash and treat
+    # it specially too; we'll use it to set additional environment variables for the duration of the puppet
+    # command.
+    @environment = @options.has_key?(:environment) ? @options.delete(:environment) : nil
     # Dom: commenting these lines addressed bug #6920
     # @options[:vardir] ||= '/tmp'
     # @options[:confdir] ||= '/tmp'
@@ -40,7 +63,7 @@ class PuppetCommand < Command
     puppet_path = host_info[:puppetbinpath] || "/bin/puppet" # TODO: is this right?
 
     args_string = (@args + @options.map { |key, value| "--#{key}=#{value}" }).join(' ')
-    "#{puppet_env_command(host_info)} puppet #{@sub_command} #{args_string}"
+    "#{puppet_env_command(host_info, @environment)} puppet #{@sub_command} #{args_string}"
   end
 end
 

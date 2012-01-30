@@ -200,11 +200,33 @@ class TestCase
     HostCommand.new(command_string)
   end
 
+  # method apply_manifest_on
+  # runs a 'puppet apply' command on a remote host
+  # parameters:
+  # [host] an instance of Host which contains the info about the host that this command should be run on
+  # [manifest] a string containing a puppet manifest to apply
+  # [options] an optional hash containing options; legal values include:
+  #   :acceptable_exit_codes => an array of integer exit codes that should be considered acceptable.  an error will be
+  #     thrown if the exit code does not match one of the values in this list.
+  #   :parseonly => any value.  If this key exists in the Hash, the "--parseonly" command line parameter will be
+  #     passed to the 'puppet apply' command.
+  #   :environment => a Hash containing string->string key value pairs.  These will be treated as extra environment
+  #     variables that should be set before running the puppet command.
+  # [&block] this method will yield to a block of code passed by the caller; this can be used for additional validation,
+  #     etc.
   def apply_manifest_on(host,manifest,options={},&block)
     on_options = {:stdin => manifest + "\n"}
     on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
     args = ["--verbose"]
     args << "--parseonly" if options[:parseonly]
+
+    # Not really thrilled with this implementation, might want to improve it later.  Basically, there is a magic
+    # trick in the constructor of PuppetCommand which allows you to pass in a Hash for the last value in the *args
+    # Array; if you do so, it will be treated specially.  So, here we check to see if our caller passed us a hash
+    # of environment variables that they want to set for the puppet command.  If so, we set the final value of
+    # *args to a new hash with just one entry (the value of which is our environment variables hash)
+    args << { :environment => options[:environment]} if options.has_key?(:environment)
+
     on host, puppet_apply(*args), on_options, &block
   end
 
