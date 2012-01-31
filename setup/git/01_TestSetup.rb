@@ -99,5 +99,5 @@ end
 
 agents.each do |agent|
   puppetconf = File.join(agent['puppetpath'], 'puppet.conf')
-  on agent, "echo [agent] >> #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
+  on agent, "echo [agent] > #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
 end
