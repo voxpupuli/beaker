@@ -5,12 +5,14 @@ module Unix
 
 
     PE_DEFAULTS = {
+      'user'         => 'root',
       'puppetpath'   => '/etc/puppetlabs/puppet',
       'puppetbin'    => '/usr/local/bin/puppet',
       'puppetbindir' => '/opt/puppet/bin'
     }
 
     DEFAULTS = {
+      'user'         => 'root',
       'puppetpath'   => '/etc/puppet',
       'puppetvardir' => '/var/lib/puppet',
       'puppetbin'    => '/usr/bin/puppet',

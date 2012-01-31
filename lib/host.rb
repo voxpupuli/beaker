@@ -36,7 +36,7 @@ class Host
   def ssh
     tries = 1
     @ssh ||= begin
-               Net::SSH.start(self, self['user'] || "root", self['ssh'])
+               Net::SSH.start(self, self['user'], self['ssh'])
              rescue
                tries += 1
                if tries < 4
