@@ -32,6 +32,7 @@ class TestCase
               @test_status = :fail
               @exception   = e
             rescue StandardError, ScriptError => e
+              Log.error(e.inspect)
               e.backtrace.each { |line| Log.error(line) }
               @test_status = :error
               @exception   = e
