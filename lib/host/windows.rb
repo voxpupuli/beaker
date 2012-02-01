@@ -6,10 +6,12 @@ module Windows
     require 'lib/host/windows/user'
     require 'lib/host/windows/group'
     require 'lib/host/windows/file'
+    require 'lib/host/windows/exec'
 
     include Windows::User
     include Windows::Group
     include Windows::File
+    include Windows::Exec
 
     DEFAULTS = {
       'user'         => 'Administrator',
