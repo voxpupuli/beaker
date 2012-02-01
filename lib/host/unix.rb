@@ -5,9 +5,11 @@ module Unix
   class Host < Host
     require 'lib/host/unix/user'
     require 'lib/host/unix/group'
+    require 'lib/host/unix/file'
 
     include Unix::User
     include Unix::Group
+    include Unix::File
 
     PE_DEFAULTS = {
       'user'         => 'root',

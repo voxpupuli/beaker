@@ -5,9 +5,11 @@ module Windows
   class Host < Host
     require 'lib/host/windows/user'
     require 'lib/host/windows/group'
+    require 'lib/host/windows/file'
 
     include Windows::User
     include Windows::Group
+    include Windows::File
 
     DEFAULTS = {
       'user'         => 'Administrator',
