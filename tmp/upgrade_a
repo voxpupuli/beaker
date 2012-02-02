@@ -5,4 +5,4 @@ q_vendor_packages_install=y
 q_upgrade_install_wrapper_modules=y
 q_puppet_enterpriseconsole_auth_password='puppet'
 q_puppet_enterpriseconsole_auth_user='console'
-q_upgrade_remove_mco_account=y
+q_upgrade_remove_mco_homedir=y
