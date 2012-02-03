@@ -7,19 +7,20 @@ hosts.each do |host|
   platform = host['platform']
 
   # determine the distro tar name
-  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar.gz"
-  unless File.file? "/opt/enterprise/dists/#{dist_tar}"
-    Log.error "PE #{dist_tar} not found, help!"
+  dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
+  dist_gz = "#{dist_tar}.gz"
+  unless File.file? "/opt/enterprise/dists/#{dist_gz}"
+    Log.error "PE #{dist_gz} not found, help!"
     Log.error ""
     Log.error "Make sure your configuration file uses the PE version string:"
     Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
-    fail_test "Sorry, PE #{dist_tar} file not found."
+    fail_test "Sorry, PE #{dist_gz} file not found."
   end
 
   step "Pre Test Setup -- SCP install package to hosts"
-  scp_to host, "/opt/enterprise/dists/#{dist_tar}", "/tmp"
+  scp_to host, "/opt/enterprise/dists/#{dist_gz}", "/tmp"
   step "Pre Test Setup -- Untar install package on hosts"
-  on host,"cd /tmp && tar xf #{dist_tar}"
+  on host,"cd /tmp && gunzip #{dist_gz} && tar xf #{dist_tar}"
 end
 
 # Upgrade Master first
