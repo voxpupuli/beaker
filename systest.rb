@@ -9,7 +9,7 @@ require 'optparse'
 require 'systemu'
 require 'test/unit'
 require 'yaml'
-require 'lib/test_case/host'
+require 'lib/host'
 
 Test::Unit.run = true
 Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
@@ -52,7 +52,7 @@ else
 end
 
 # Generate hosts
-hosts = config['HOSTS'].collect { |name,overrides| TestCase::Host.create(name,overrides,config['CONFIG']) }
+hosts = config['HOSTS'].collect { |name,overrides| Host.create(name,overrides,config['CONFIG']) }
 begin
   # Run the harness for install
   TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure

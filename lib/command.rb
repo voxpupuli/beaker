@@ -1,6 +1,8 @@
 # An immutable data structure representing a task to run on a remote
 # machine.
 class Command
+  include Test::Unit::Assertions
+
   def initialize(command_string)
     @command_string = command_string
   end
@@ -12,7 +14,24 @@ class Command
   end
 
   def exec(host, options={})
-    host.exec(cmd_line(host), options)
+    options[:acceptable_exit_codes] ||= [0]
+    options[:failing_exit_codes]    ||= [1]
+
+    cmdline = cmd_line(host)
+    result = host.exec(cmdline, options)
+
+    unless options[:silent] then
+      result.log
+      if options[:acceptable_exit_codes].include?(result.exit_code)
+        # cool.
+      elsif options[:failing_exit_codes].include?(result.exit_code)
+        assert( false, "Host '#{host} exited with #{result.exit_code} running: #{cmdline}" )
+      else
+        raise "Host '#{host}' exited with #{result.exit_code} running: #{cmdline}"
+      end
+    end
+
+    result
   end
 
   # Determine the appropriate puppet env command for the given host.

@@ -43,10 +43,12 @@ class TestSuite
     @test_files.each do |test_file|
       Log.notify
       Log.notify "Begin #{test_file}"
+      start = Time.now
       test_case = TestCase.new(@hosts, config, options, test_file).run_test
+      duration = Time.now - start
       @test_cases << test_case
 
-      msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed"
+      msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed in %.2f seconds" % duration.to_f
       case test_case.test_status
       when :pass
         Log.success msg

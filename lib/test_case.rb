@@ -1,5 +1,5 @@
 class TestCase
-  require 'lib/test_case/host'
+  require 'lib/host'
   require 'tempfile'
   require 'benchmark'
   require 'stringio'
@@ -90,8 +90,6 @@ class TestCase
   #
   attr_reader :result
   def on(host, command, options={}, &block)
-    options[:acceptable_exit_codes] ||= [0]
-    options[:failing_exit_codes]    ||= [1]
     if command.is_a? String
       command = Command.new(command)
     end
@@ -99,17 +97,6 @@ class TestCase
       host.map { |h| on h, command, options, &block }
     else
       @result = command.exec(host, options)
-
-      unless options[:silent] then
-        result.log
-        if options[:acceptable_exit_codes].include?(exit_code)
-          # cool.
-        elsif options[:failing_exit_codes].include?(exit_code)
-          assert( false, "Host '#{host} exited with #{exit_code} running: #{command.cmd_line('')}" )
-        else
-          raise "Host '#{host}' exited with #{exit_code} running: #{command.cmd_line('')}"
-        end
-      end
 
       # Also, let additional checking be performed by the caller.
       yield if block_given?
