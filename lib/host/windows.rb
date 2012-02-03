@@ -15,6 +15,7 @@ module Windows
 
     DEFAULTS = {
       'user'         => 'Administrator',
+      'group'        => 'Administrators',
       'puppetpath'   => '"`cygpath -F 35`/PuppetLabs/puppet/etc"',
       'puppetvardir' => '"`cygpath -F 35`/PuppetLabs/puppet/var"'
     }
