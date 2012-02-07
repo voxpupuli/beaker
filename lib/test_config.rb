@@ -17,19 +17,21 @@ module TestConfig
   def self.load_file(config_file)
     config = YAML.load_file(config_file)
     # Merge some useful date into the config hash
-    config['CONFIG']['consoleport'] = 3000 unless config['CONFIG']['consoleport']  
+    config['CONFIG']['consoleport'] = 3000 unless config['CONFIG']['consoleport']
     config['CONFIG']['ssh'] = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
-    config['CONFIG']['pe_ver'] = puppet_enterprise_version if puppet_enterprise_version 
-    config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless puppet_enterprise_version
-    config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless puppet_enterprise_version
-    # need to load expect versions of PE binaries 
-    config['VERSION'] = YAML.load_file('ci/pe/pe_version') rescue nil if puppet_enterprise_version
+    config['CONFIG']['pe_ver'] = puppet_enterprise_version if is_pe?
+    config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless is_pe?
+    config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless is_pe?
+    # need to load expect versions of PE binaries
+    config['VERSION'] = YAML.load_file('ci/pe/pe_version') rescue nil if is_pe?
     config
   end
 
-  def self.puppet_enterprise_version
-    return unless Options.parse_args[:type] =~ /pe/
-    return Options.parse_args[:pe_version] if Options.parse_args[:pe_version]
+  def self.is_pe?
+    Options.parse_args[:type] =~ /pe/ ? true : false
+  end
+
+  def self.load_pe_version
     version=""
     begin
       File.open("/opt/enterprise/dists/LATEST") do |file|
@@ -44,6 +46,10 @@ module TestConfig
       version = 'unknown'
     end
     return version
+  end
+
+  def self.puppet_enterprise_version
+    @pe_ver ||= Options.parse_args[:pe_version] || load_pe_version  if is_pe?
   end
 
   # Print out test configuration
