@@ -1,0 +1,14 @@
+HOSTS:
+  pe-centos6:
+    roles:
+      - master
+      - agent
+    platform: el-6-i386
+  win2003sat:
+    roles:
+      - agent
+    platform: windows-2003-amd64
+CONFIG:
+  filecount: 12
+  nfs_server: NONE
+  consoleport: 443
