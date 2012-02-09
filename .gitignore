@@ -3,3 +3,4 @@ local_setup.sh
 log/*
 !.gitignore
 /junit
+/acceptance-tests
