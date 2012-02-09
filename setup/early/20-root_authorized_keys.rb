@@ -5,7 +5,7 @@ test_name "Sync root authorized_keys from github"
 # issues on Windows and maybe Solaris.  We will likely need to filter this step
 # but we're deliberately taking the approach of "assume it will work, fix it
 # when reality dictates otherwise"
-if not options[:no_root_keys] then
+if options[:root_keys] then
   script = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
   setup_root_authorized_keys = "curl -o - #{script} | bash"
   step "Sync root authorized_keys from github"
