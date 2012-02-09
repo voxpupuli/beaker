@@ -1,4 +1,4 @@
-unless options[:notimesync]
+if options[:timesync]
   test_name "Update system time sync"
   step "run ntpdate against NTP pool systems"
   hosts.each do |host|

@@ -126,14 +126,14 @@ class Options
         @options[:ntpserver] = server
       end
 
-      @options[:notimesync] = FALSE
-      opts.on( '--no-ntp', 'skip ntpdate step' ) do
-        @options[:notimesync] = TRUE
+      @options[:timesync] = FALSE
+      opts.on( '--ntp', 'run ntpdate step' ) do
+        @options[:timesync] = TRUE
       end
 
-      @options[:no_root_keys] = FALSE
-      opts.on('--no-root-keys', 'skip syncing ~root/.ssh/authorized_keys') do
-        @options[:no_root_keys] = TRUE
+      @options[:root_keys] = FALSE
+      opts.on('--root-keys', 'sync ~root/.ssh/authorized_keys') do
+        @options[:root_keys] = TRUE
       end
 
       @options[:dhcp_renew] = FALSE
