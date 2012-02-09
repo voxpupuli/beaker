@@ -123,7 +123,7 @@ class TestCase
     @test_status = :skip
   end
   def fail_test(msg)
-    assert(false, msg)
+    flunk(msg + "\n" + Log.pretty_backtrace() + "\n")
   end
   #
   # result access
@@ -257,11 +257,37 @@ class TestCase
     end
   end
 
+  # This method performs the following steps:
+  # 1. issues start command for puppet master on specified host
+  # 2. polls until it determines that the master has started successfully
+  # 3. yields to a block of code passed by the caller
+  # 4. runs a "kill" command on the master's pid (on the specified host)
+  # 5. polls until it determines that the master has shut down successfully.
+  #
+  # Parameters:
+  # [host] the master host
+  # [arg] a string containing all of the command line arguments that you would like for the puppet master to
+  #     be started with.  Defaults to '--daemonize'.  NOTE: the following values will be added to the argument list
+  #     if they are not explicitly set in your 'args' parameter:
+  # * --daemonize
+  # * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
+  # * --dns_alt_names="puppet, $(hostname -s), $(hostname -f)"
+  # * --autosign=true
   def with_master_running_on(host, arg='--daemonize', &block)
+    # they probably want to run with daemonize.  If they pass some other arg/args but forget to re-include
+    # daemonize, we'll check and make sure they didn't explicitly specify "no-daemonize", and, failing that,
+    # we'll add daemonize to the arg string
+    if (arg !~ /(?:--daemonize)|(?:--no-daemonize)/) then arg << " --daemonize" end
+
+    if (arg !~ /--logdest/) then arg << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
+    if (arg !~ /--dns_alt_names/) then arg << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
+    if (arg !~ /--autosign/) then arg << " --autosign=true" end
+
     on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
     agents.each do |agent|
-      if vardir = agent['puppetvardir']
-        on agent, "rm -rf #{vardir}/*"
+      if ((vardir = agent['puppetvardir']) && File.exists?(vardir))
+        # we want to remove everything except the log directory
+        on agent, "for f in #{vardir}/*; do if [ \"$f\" != \"#{vardir}/log\" ]; then rm -r \"$f\"; fi; done"
       end
     end
 
@@ -331,4 +357,5 @@ class TestCase
 
     return result
   end
+
 end
