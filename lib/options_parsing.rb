@@ -173,6 +173,11 @@ class Options
         puts opts
         exit
       end
+
+      @options[:pre_script] = false
+      opts.on('--pre PATH/TO/SCRIPT', 'Pass steps to be run prior to setup') do |step|
+        @options[:pre_script] = step
+      end
     end
 
     optparse.parse!
