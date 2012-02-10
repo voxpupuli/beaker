@@ -272,7 +272,6 @@ class TestCase
   # * --daemonize
   # * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
   # * --dns_alt_names="puppet, $(hostname -s), $(hostname -f)"
-  # * --autosign=true
   def with_master_running_on(host, arg='--daemonize', &block)
     # they probably want to run with daemonize.  If they pass some other arg/args but forget to re-include
     # daemonize, we'll check and make sure they didn't explicitly specify "no-daemonize", and, failing that,
@@ -281,7 +280,6 @@ class TestCase
 
     if (arg !~ /--logdest/) then arg << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
     if (arg !~ /--dns_alt_names/) then arg << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
-    if (arg !~ /--autosign/) then arg << " --autosign=true" end
 
     on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
     agents.each do |agent|
