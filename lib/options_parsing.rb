@@ -4,6 +4,8 @@ class Options
   def self.parse_args
     return @options if @options
 
+    @no_args = ARGV.empty? ? true : false
+
     @options = {}
     optparse = OptionParser.new do|opts|
       # Set a banner
@@ -172,7 +174,14 @@ class Options
         exit
       end
     end
+
     optparse.parse!
+
+    # We have use the @no_args var because OptParse consumes ARGV as it parses
+    # so we have to check the value of ARGV at the begining of the method,
+    # let the options be set, then output usage.
+    puts optparse if @no_args
+
     raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
 
     @options[:tests] << 'tests' if @options[:tests].empty?
