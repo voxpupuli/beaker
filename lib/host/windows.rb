@@ -16,8 +16,8 @@ module Windows
     DEFAULTS = {
       'user'         => 'Administrator',
       'group'        => 'Administrators',
-      'puppetpath'   => '"`cygpath -F 35`/PuppetLabs/puppet/etc"',
-      'puppetvardir' => '"`cygpath -F 35`/PuppetLabs/puppet/var"'
+      'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+      'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var'
     }
 
     def initialize(name, overrides, defaults)
