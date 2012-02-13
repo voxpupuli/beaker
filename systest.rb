@@ -54,6 +54,14 @@ end
 # Generate hosts
 hosts = config['HOSTS'].collect { |name,overrides| Host.create(name,overrides,config['CONFIG']) }
 begin
+
+  # Run any pre-flight scripts
+  if options[:pre_script]
+    pre_opts = options.merge({ :random => false,
+                                  :tests => [ options[:pre_script] ] })
+    TestSuite.new('pre-setup', hosts, pre_opts, config, TRUE).run_and_exit_on_failure
+  end
+
   # Run the harness for install
   TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure
 
