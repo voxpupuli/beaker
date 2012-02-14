@@ -283,9 +283,9 @@ class TestCase
 
     on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
     agents.each do |agent|
-      if ((vardir = agent['puppetvardir']) && File.exists?(vardir))
+      if vardir = agent['puppetvardir']
         # we want to remove everything except the log directory
-        on agent, "for f in #{vardir}/*; do if [ \"$f\" != \"#{vardir}/log\" ]; then rm -r \"$f\"; fi; done"
+        on agent, "if [ -e \"#{vardir}\" ]; then for f in #{vardir}/*; do if [ \"$f\" != \"#{vardir}/log\" ]; then rm -rf \"$f\"; fi; done; fi"
       end
     end
 
