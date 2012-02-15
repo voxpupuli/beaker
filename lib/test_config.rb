@@ -32,9 +32,11 @@ module TestConfig
   end
 
   def self.load_pe_version
-    version=""
+    dist_dir = ENV['pe_dist_dir'] || '/opt/enterprise/dists'
+    version_file = ENV['pe_version_file'] || 'LATEST'
+    version = ""
     begin
-      File.open("/opt/enterprise/dists/LATEST") do |file|
+      File.open("#{dist_dir}/#{version_file}") do |file|
         while line = file.gets
           if /(\w.*)/ =~ line then
             version=$1
