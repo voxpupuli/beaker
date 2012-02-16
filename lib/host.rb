@@ -77,8 +77,8 @@ class Host
 
         channel.exec(command) do |terminal, success|
           abort "FAILED: to execute command on a new channel on #{@name}" unless success
-          terminal.on_data                   { |ch, data|       result.stdout << data }
-          terminal.on_extended_data          { |ch, type, data| result.stderr << data if type == 1 }
+          terminal.on_data                   { |ch, data|       result.output << result.stdout << data }
+          terminal.on_extended_data          { |ch, type, data| result.output << result.stderr << data if type == 1 }
           terminal.on_request("exit-status") { |ch, data|       result.exit_code = data.read_long  }
 
           # queue stdin data, force it to packets, and signal eof: this
