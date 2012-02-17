@@ -8,6 +8,6 @@ step "Update /etc/host on #{master}"
 # Preserve the mode the easy way...
 on master, "cp /etc/hosts /etc/hosts.old"
 on master, "cp /etc/hosts /etc/hosts.new"
-on master, "grep -v '#{master}' /etc/hosts > /etc/hosts.new"
+on master, "grep -v '#{ip} #{master}' /etc/hosts > /etc/hosts.new"
 on master, "echo \"#{ip} #{master}\" >> /etc/hosts.new"
 on master, "mv /etc/hosts.new /etc/hosts"
