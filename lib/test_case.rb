@@ -112,6 +112,35 @@ class TestCase
     raise PendingTest
   end
 
+  def confine(type, confines)
+    confines.each_pair do |property, value|
+      case type
+      when :except
+        @hosts = @hosts.reject do |host|
+          inspect_host host, property, value
+        end
+      when :to
+        @hosts = @hosts.select do |host|
+          inspect_host host, property, value
+        end
+      else
+        raise "Unknown option #{type}"
+      end
+    end
+    skip_test "No suitable hosts with: #{confines.inspect}" if @hosts.empty?
+  end
+
+  def inspect_host(host, property, value)
+    true_false = false
+    case value
+    when String
+      true_false = host[property.to_s].include? value
+    when Regexp
+      true_false = host[property.to_s] =~ value
+    end
+    true_false
+  end
+
   #
   # result access
   #
