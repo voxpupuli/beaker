@@ -105,39 +105,35 @@ class TestSuite
     @test_cases.length
   end
 
-  def test_errors
+  def passed_tests
+    fail "you have not run the tests yet" unless @run
+    @test_cases.select { |c| c.test_status == :pass }.length
+  end
+
+  def errored_tests
     fail "you have not run the tests yet" unless @run
     @test_cases.select { |c| c.test_status == :error }.length
   end
 
-  def test_failures
+  def failed_tests
     fail "you have not run the tests yet" unless @run
     @test_cases.select { |c| c.test_status == :fail }.length
   end
 
-  def test_skips
+  def skipped_tests
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :skip}.length
+    @test_cases.select { |c| c.test_status == :skip }.length
+  end
+
+  def pending_tests
+    fail "you have not run the tests yet" unless @run
+    @test_cases.select { |c| c.test_status == :pending }.length
   end
 
   private
 
   def sum_failed
-    test_failed=0
-    test_passed=0
-    test_errored=0
-    test_skips=0
-    @test_cases.each do |test_case|
-      # ?? Aren't we adding 1 to the result of a method and then
-      # discarding that value??  --  JLS 2/12
-      case test_case.test_status
-      when :pass  then test_passed  += 1
-      when :fail  then test_failed  += 1
-      when :error then test_errored += 1
-      when :skip  then test_skips   += 1
-      end
-    end
-    test_failed + test_errored
+    @sum_failed ||= failed_tests + errored_tests
   end
 
   def write_junit_xml
@@ -151,9 +147,10 @@ class TestSuite
       suite = REXML::Element.new('testsuite', doc)
       suite.add_attribute('name',     name)
       suite.add_attribute('tests',    test_count)
-      suite.add_attribute('errors',   test_errors)
-      suite.add_attribute('failures', test_failures)
-      suite.add_attribute('skip',     test_skips)
+      suite.add_attribute('errors',   errored_test)
+      suite.add_attribute('failures', failed_test)
+      suite.add_attribute('skip',     skipped_test)
+      suite.add_attribute('pending',  pending_tests)
 
       @test_cases.each do |test|
         item = REXML::Element.new('testcase', suite)
@@ -162,7 +159,7 @@ class TestSuite
         item.add_attribute('time',      test.runtime)
 
         # Did we fail?  If so, report that.
-        unless test.test_status == :pass || test.test_status == :skip then
+        if test.test_status == :fail || test.test_status == :error then
           status = REXML::Element.new('failure', item)
           status.add_attribute('type', test.test_status.to_s)
           if test.exception then
@@ -210,31 +207,20 @@ class TestSuite
 
     TestConfig.dump(config)
 
-    test_failed = 0
-    test_passed = 0
-    test_errored = 0
-    test_skips = 0
-    @test_cases.each do |test_case|
-      case test_case.test_status
-      when :pass  then test_passed  += 1
-      when :fail  then test_failed  += 1
-      when :error then test_errored += 1
-      when :skip  then test_skips   += 1
-      end
-    end
-    grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
-
     Log.notify <<-HEREDOC
 
   - Test Case Summary -
-  Attempted: #{@test_cases.length}
-     Passed: #{test_passed}
-     Failed: #{test_failed}
-    Errored: #{test_errored}
-    Skipped: #{test_skips}
+  Attempted: #{test_count}
+     Passed: #{passed_tests}
+     Failed: #{failed_tests}
+    Errored: #{errored_tests}
+    Skipped: #{skipped_tests}
+    Pending: #{pending_tests}
 
   - Specific Test Case Status -
   HEREDOC
+
+    grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
 
     Log.notify "Failed Tests Cases:"
     (grouped_summary[:fail] || []).each do |test_case|
@@ -251,6 +237,11 @@ class TestSuite
       print_test_failure(test_case)
     end
 
+    Log.notify "Pending Tests Cases:"
+    (grouped_summary[:pending] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
+
     Log.notify("\n\n")
 
     Log.stdout = !options[:quiet]
@@ -258,7 +249,12 @@ class TestSuite
   end
 
   def print_test_failure(test_case)
-    Log.notify "  Test Case #{test_case.path} reported: #{test_case.exception.inspect}"
+    test_reported = if test_case.exception
+                      "reported: #{test_case.exception.inspect}"
+                    else
+                      test_case.test_status
+                    end
+    Log.notify "  Test Case #{test_case.path} #{test_reported}"
   end
 
   def log_path(name)
