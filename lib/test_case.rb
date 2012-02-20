@@ -8,6 +8,8 @@ class TestCase
   include Test::Unit::Assertions
   include PuppetCommands
 
+  class PendingTest < Exception; end
+
   attr_reader :version, :config, :options, :path, :fail_flag, :usr_home,
               :test_status, :exception, :runtime, :result
 
@@ -34,6 +36,8 @@ class TestCase
             rescue Test::Unit::AssertionFailedError => e
               @test_status = :fail
               @exception   = e
+            rescue PendingTest
+              @test_status = :pending
             rescue StandardError, ScriptError => e
               Log.error(e.inspect)
               e.backtrace.each { |line| Log.error(line) }
@@ -101,6 +105,11 @@ class TestCase
 
   def fail_test(msg)
     flunk(msg + "\n" + Log.pretty_backtrace() + "\n")
+  end
+
+  def pending_test(msg = "WIP: #{@test_name}")
+    Log.warn msg
+    raise PendingTest
   end
 
   #
