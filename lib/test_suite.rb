@@ -5,7 +5,6 @@ require 'rexml/document'
 # Things to keep in mind:
 #   * Global State Change
 #   * File Creation Relative to CWD  -- Should be a config option
-#   * Odd Usage of test_{state}s
 #   * Factor Out Error Checking on @run State
 #   * Revist Log Formatting
 #   * Better Method Documentation
@@ -91,8 +90,12 @@ class TestSuite
     exit 1
   end
 
-  def success?
+  def fail_without_test_run
     fail "you have not run the tests yet" unless @run
+  end
+
+  def success?
+    fail_without_test_run
     sum_failed == 0
   end
 
@@ -101,33 +104,27 @@ class TestSuite
   end
 
   def test_count
-    fail "you have not run the tests yet" unless @run
-    @test_cases.length
+    @test_count ||= @test_cases.length
   end
 
   def passed_tests
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :pass }.length
+    @passed_tests ||= @test_cases.select { |c| c.test_status == :pass }.length
   end
 
   def errored_tests
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :error }.length
+    @errored_tests ||= @test_cases.select { |c| c.test_status == :error }.length
   end
 
   def failed_tests
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :fail }.length
+    @failed_tests ||= @test_cases.select { |c| c.test_status == :fail }.length
   end
 
   def skipped_tests
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :skip }.length
+    @skipped_tests ||= @test_cases.select { |c| c.test_status == :skip }.length
   end
 
   def pending_tests
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :pending }.length
+    @pending_tests ||= @test_cases.select {|c| c.test_status == :pending}.length
   end
 
   private
@@ -188,11 +185,7 @@ class TestSuite
   end
 
   def summarize
-    # We're doing a lot of simple checks to ensure we've run the test suite.
-    # Why? Can we call these methods prior to running it? Isn't this
-    # private and only called internally? At least wrap this statement
-    # in a method so its consistent.  --  JLS 2/12
-    fail "you have not run the tests yet" unless @run
+    fail_without_test_run
 
     if Log.file then
       Log.file = log_path("#{name}-summary.txt")
