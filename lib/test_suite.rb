@@ -5,8 +5,6 @@ require 'rexml/document'
 # Things to keep in mind:
 #   * Global State Change
 #   * File Creation Relative to CWD  -- Should be a config option
-#   * Factor Out Error Checking on @run State
-#   * Revist Log Formatting
 #   * Better Method Documentation
 class TestSuite
   attr_reader :name, :options, :config, :stop_on_error
@@ -200,18 +198,23 @@ class TestSuite
 
     TestConfig.dump(config)
 
-    Log.notify <<-HEREDOC
+    elapsed_time = @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
+    average_test_time = elapsed_time / test_count
 
-  - Test Case Summary -
-  Attempted: #{test_count}
-     Passed: #{passed_tests}
-     Failed: #{failed_tests}
-    Errored: #{errored_tests}
-    Skipped: #{skipped_tests}
-    Pending: #{pending_tests}
+    Log.notify %Q[
+
+          - Test Case Summary -
+   Total Suite Time: %.2f seconds
+  Average Test Time: %.2f seconds
+          Attempted: #{test_count}
+             Passed: #{passed_tests}
+             Failed: #{failed_tests}
+            Errored: #{errored_tests}
+            Skipped: #{skipped_tests}
+            Pending: #{pending_tests}
 
   - Specific Test Case Status -
-  HEREDOC
+    ] % [elapsed_time, average_test_time]
 
     grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
 
