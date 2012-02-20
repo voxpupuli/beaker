@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
 
+# This Class is in need of some cleaning up beyond what can be quickly done.
+# Things to keep in mind:
+#   * Global State Change
+#   * File Creation Relative to CWD  -- Should be a config option
+#   * Odd Usage of test_{state}s
+#   * Factor Out Error Checking on @run State
+#   * Revist Log Formatting
+#   * Better Method Documentation
 class TestSuite
   attr_reader :name, :options, :config, :stop_on_error
 
@@ -19,7 +27,9 @@ class TestSuite
       if File.file? root then
         @test_files << root
       else
-        @test_files += Dir[File.join(root, "**/*.rb")].select { |f| File.file?(f) }
+        @test_files += Dir.glob(
+          File.join(root, "**/*.rb")
+        ).select { |f| File.file?(f) }
       end
     end
     fail "no test files found..." if @test_files.empty?
@@ -48,7 +58,8 @@ class TestSuite
       duration = Time.now - start
       @test_cases << test_case
 
-      msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed in %.2f seconds" % duration.to_f
+      state = test_case.test_status == :skip ? 'skipp' : test_case.test_status
+      msg = "#{test_file} #{state}ed in %.2f seconds" % duration.to_f
       case test_case.test_status
       when :pass
         Log.success msg
@@ -84,6 +95,7 @@ class TestSuite
     fail "you have not run the tests yet" unless @run
     sum_failed == 0
   end
+
   def failed?
     !success?
   end
@@ -95,17 +107,17 @@ class TestSuite
 
   def test_errors
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :error } .length
+    @test_cases.select { |c| c.test_status == :error }.length
   end
 
   def test_failures
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :fail } .length
+    @test_cases.select { |c| c.test_status == :fail }.length
   end
 
   def test_skips
     fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :skip} .length
+    @test_cases.select { |c| c.test_status == :skip}.length
   end
 
   private
@@ -116,6 +128,8 @@ class TestSuite
     test_errored=0
     test_skips=0
     @test_cases.each do |test_case|
+      # ?? Aren't we adding 1 to the result of a method and then
+      # discarding that value??  --  JLS 2/12
       case test_case.test_status
       when :pass  then test_passed  += 1
       when :fail  then test_failed  += 1
@@ -127,6 +141,7 @@ class TestSuite
   end
 
   def write_junit_xml
+    # This should be a configuration option
     File.directory?('junit') or FileUtils.mkdir('junit')
 
     begin
@@ -167,6 +182,8 @@ class TestSuite
         end
       end
 
+      # junit/name.xml will be created in a directory relative to the CWD
+      # --  JLS 2/12
       File.open("junit/#{name}.xml", 'w') { |fh| doc.write(fh) }
     rescue Exception => e
       Log.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
@@ -174,6 +191,10 @@ class TestSuite
   end
 
   def summarize
+    # We're doing a lot of simple checks to ensure we've run the test suite.
+    # Why? Can we call these methods prior to running it? Isn't this
+    # private and only called internally? At least wrap this statement
+    # in a method so its consistent.  --  JLS 2/12
     fail "you have not run the tests yet" unless @run
 
     if Log.file then
@@ -189,10 +210,10 @@ class TestSuite
 
     TestConfig.dump(config)
 
-    test_failed=0
-    test_passed=0
-    test_errored=0
-    test_skips=0
+    test_failed = 0
+    test_passed = 0
+    test_errored = 0
+    test_skips = 0
     @test_cases.each do |test_case|
       case test_case.test_status
       when :pass  then test_passed  += 1
@@ -216,13 +237,19 @@ class TestSuite
   HEREDOC
 
     Log.notify "Failed Tests Cases:"
-    (grouped_summary[:fail] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:fail] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify "Errored Tests Cases:"
-    (grouped_summary[:error] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:error] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify "Skipped Tests Cases:"
-    (grouped_summary[:skip] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:skip] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify("\n\n")
 
