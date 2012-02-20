@@ -55,32 +55,28 @@ class TestCase
     hash
   end
 
-  #
-  # Identify hosts
-  #
-  def hosts(desired_role=nil)
-    @hosts.select { |host| desired_role.nil? or host['roles'].include?(desired_role) }
-  end
+  def with_standard_output_to_logs(&block)
+    stdout = ''
+    old_stdout = $stdout
+    $stdout = StringIO.new(stdout, 'w')
 
-  def agents
-    hosts 'agent'
-  end
+    stderr = ''
+    old_stderr = $stderr
+    $stderr = StringIO.new(stderr, 'w')
 
-  def master
-    masters = hosts 'master'
-    fail "There must be exactly one master" unless masters.length == 1
-    masters.first
-  end
+    result = yield if block_given?
 
-  def dashboard
-    dashboards = hosts 'dashboard'
-    Log.warn "There is no dashboard host configured" if dashboards.empty?
-    fail "Cannot have more than one dashboard host" if dashboards.length > 1
-    dashboards.first
+    $stdout = old_stdout
+    $stderr = old_stderr
+
+    stdout.each { |line| Log.notify(line) }
+    stderr.each { |line| Log.warn(line) }
+
+    return result
   end
 
   #
-  # Annotations
+  # Test Structure
   #
   def step(step_name,&block)
     Log.notify "  * #{step_name}"
@@ -90,35 +86,6 @@ class TestCase
   def test_name(test_name,&block)
     Log.notify test_name
     yield if block
-  end
-
-  #
-  # Basic operations
-  #
-  def on(host, command, options={}, &block)
-    if command.is_a? String
-      command = Command.new(command)
-    end
-    if host.is_a? Array
-      host.map { |h| on h, command, options, &block }
-    else
-      @result = command.exec(host, options)
-
-      # Also, let additional checking be performed by the caller.
-      yield if block_given?
-
-      return @result
-    end
-  end
-
-  def scp_to(host,from_path,to_path,options={})
-    if host.is_a? Array
-      host.each { |h| scp_to h,from_path,to_path,options }
-    else
-      @result = host.do_scp(from_path, to_path)
-      result.log
-      raise "scp exited with #{result.exit_code}" if result.exit_code != 0
-    end
   end
 
   def pass_test(msg)
@@ -151,6 +118,75 @@ class TestCase
     return nil if result.nil?
     result.exit_code
   end
+
+  #
+  # Networking Helpers
+  #
+  def on(host, command, options={}, &block)
+    if command.is_a? String
+      command = Command.new(command)
+    end
+    if host.is_a? Array
+      host.map { |h| on h, command, options, &block }
+    else
+      @result = command.exec(host, options)
+
+      # Also, let additional checking be performed by the caller.
+      yield if block_given?
+
+      return @result
+    end
+  end
+
+  def scp_to(host,from_path,to_path,options={})
+    if host.is_a? Array
+      host.each { |h| scp_to h,from_path,to_path,options }
+    else
+      @result = host.do_scp(from_path, to_path)
+      result.log
+      raise "scp exited with #{result.exit_code}" if result.exit_code != 0
+    end
+  end
+
+  def create_remote_file(hosts, file_path, file_content)
+    Tempfile.open 'puppet-acceptance' do |tempfile|
+      File.open(tempfile.path, 'w') { |file| file.puts file_content }
+
+      scp_to hosts, tempfile.path, file_path
+    end
+  end
+
+  def run_script_on(host, script, &block)
+    remote_path=File.join("", "tmp", File.basename(script))
+    scp_to host, script, remote_path
+    on host, remote_path, &block
+  end
+
+  #
+  # Identify hosts
+  #
+  def hosts(desired_role=nil)
+    @hosts.select { |host| desired_role.nil? or host['roles'].include?(desired_role) }
+  end
+
+  def agents
+    hosts 'agent'
+  end
+
+  def master
+    masters = hosts 'master'
+    fail "There must be exactly one master" unless masters.length == 1
+    masters.first
+  end
+
+  def dashboard
+    dashboards = hosts 'dashboard'
+    Log.warn "There is no dashboard host configured" if dashboards.empty?
+    fail "Cannot have more than one dashboard host" if dashboards.length > 1
+    dashboards.first
+  end
+
+
 
   #
   # Macros
@@ -227,12 +263,6 @@ class TestCase
     args << { :environment => options[:environment]} if options.has_key?(:environment)
 
     on host, puppet_apply(*args), on_options, &block
-  end
-
-  def run_script_on(host, script, &block)
-    remote_path=File.join("", "tmp", File.basename(script))
-    scp_to host, script, remote_path
-    on host, remote_path, &block
   end
 
   def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test', options={}, &block)
@@ -337,33 +367,5 @@ class TestCase
     else
       Log.error "Puppet Master failed to #{verb} after #{elapsed} seconds"
     end
-  end
-
-  def create_remote_file(hosts, file_path, file_content)
-    Tempfile.open 'puppet-acceptance' do |tempfile|
-      File.open(tempfile.path, 'w') { |file| file.puts file_content }
-
-      scp_to hosts, tempfile.path, file_path
-    end
-  end
-
-  def with_standard_output_to_logs
-    stdout = ''
-    old_stdout = $stdout
-    $stdout = StringIO.new(stdout, 'w')
-
-    stderr = ''
-    old_stderr = $stderr
-    $stderr = StringIO.new(stderr, 'w')
-
-    result = yield
-
-    $stdout = old_stdout
-    $stderr = old_stderr
-
-    stdout.each { |line| Log.notify(line) }
-    stderr.each { |line| Log.warn(line) }
-
-    return result
   end
 end
