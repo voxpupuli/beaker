@@ -6,8 +6,9 @@ class TestCase
 
   include Test::Unit::Assertions
 
-  attr_reader :version, :config, :options, :path, :fail_flag, :usr_home, :test_status, :exception
-  attr_reader :runtime
+  attr_reader :version, :config, :options, :path, :fail_flag, :usr_home,
+              :test_status, :exception, :runtime, :result
+
   def initialize(hosts, config, options={}, path=nil)
     @version = config['VERSION']
     @config  = config['CONFIG']
@@ -53,26 +54,31 @@ class TestCase
     end
     hash
   end
+
   #
   # Identify hosts
   #
   def hosts(desired_role=nil)
     @hosts.select { |host| desired_role.nil? or host['roles'].include?(desired_role) }
   end
+
   def agents
     hosts 'agent'
   end
+
   def master
     masters = hosts 'master'
     fail "There must be exactly one master" unless masters.length == 1
     masters.first
   end
+
   def dashboard
     dashboards = hosts 'dashboard'
     Log.warn "There is no dashboard host configured" if dashboards.empty?
     fail "Cannot have more than one dashboard host" if dashboards.length > 1
     dashboards.first
   end
+
   #
   # Annotations
   #
@@ -85,10 +91,10 @@ class TestCase
     Log.notify test_name
     yield if block
   end
+
   #
   # Basic operations
   #
-  attr_reader :result
   def on(host, command, options={}, &block)
     if command.is_a? String
       command = Command.new(command)
@@ -118,13 +124,16 @@ class TestCase
   def pass_test(msg)
     Log.notify msg
   end
+
   def skip_test(msg)
     Log.notify "Skip: #{msg}"
     @test_status = :skip
   end
+
   def fail_test(msg)
     flunk(msg + "\n" + Log.pretty_backtrace() + "\n")
   end
+
   #
   # result access
   #
@@ -132,18 +141,20 @@ class TestCase
     return nil if result.nil?
     result.stdout
   end
+
   def stderr
     return nil if result.nil?
     result.stderr
   end
+
   def exit_code
     return nil if result.nil?
     result.exit_code
   end
+
   #
   # Macros
   #
-
   def facter(*args)
     FacterCommand.new(*args)
   end
@@ -249,7 +260,7 @@ class TestCase
            on(host, "echo '#{entry}' > /tmp/#{user}.cron && crontab -u #{user} /tmp/#{user}.cron", &block)
       end
     end
-   
+
     if args
       case action
         when :list, :remove then on(host, "crontab #{args} #{user}", &block)
@@ -355,5 +366,4 @@ class TestCase
 
     return result
   end
-
 end
