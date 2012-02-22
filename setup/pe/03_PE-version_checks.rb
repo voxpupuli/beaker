@@ -104,3 +104,21 @@ hosts.each do |host|
   end
 end
 
+hosts.each do |host|
+  next unless host['platform'] =~ /solaris/
+  next unless host['platform'] =~ /windows/
+
+  config['pe_ver'] =~ /^(\d\.\d\.\d)/
+  version_string = %r{$1}
+
+  if host['platform'] =~ /debian|ubuntu/
+    cmd = "dpkg -l"
+  else
+    cmd = "rpm -q"
+  end
+
+  on host, "#{cmd} pe-puppet-enterprise-release" do
+    assert_match version_string, stdout, "This is not the correct release version"
+  end
+end
+
