@@ -142,8 +142,8 @@ class TestSuite
       suite = REXML::Element.new('testsuite', doc)
       suite.add_attribute('name',     name)
       suite.add_attribute('tests',    test_count)
-      suite.add_attribute('errors',   errored_test)
-      suite.add_attribute('failures', failed_test)
+      suite.add_attribute('errors',   errored_tests)
+      suite.add_attribute('failures', failed_tests)
       suite.add_attribute('skip',     skipped_test)
       suite.add_attribute('pending',  pending_tests)
 
