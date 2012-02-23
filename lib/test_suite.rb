@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
 
+# This Class is in need of some cleaning up beyond what can be quickly done.
+# Things to keep in mind:
+#   * Global State Change
+#   * File Creation Relative to CWD  -- Should be a config option
+#   * Better Method Documentation
 class TestSuite
   attr_reader :name, :options, :config, :stop_on_error
 
@@ -19,7 +24,9 @@ class TestSuite
       if File.file? root then
         @test_files << root
       else
-        @test_files += Dir[File.join(root, "**/*.rb")].select { |f| File.file?(f) }
+        @test_files += Dir.glob(
+          File.join(root, "**/*.rb")
+        ).select { |f| File.file?(f) }
       end
     end
     fail "no test files found..." if @test_files.empty?
@@ -48,7 +55,8 @@ class TestSuite
       duration = Time.now - start
       @test_cases << test_case
 
-      msg = "#{test_file} #{test_case.test_status == :skip ? 'skipp' : test_case.test_status}ed in %.2f seconds" % duration.to_f
+      state = test_case.test_status == :skip ? 'skipp' : test_case.test_status
+      msg = "#{test_file} #{state}ed in %.2f seconds" % duration.to_f
       case test_case.test_status
       when :pass
         Log.success msg
@@ -80,53 +88,51 @@ class TestSuite
     exit 1
   end
 
-  def success?
+  def fail_without_test_run
     fail "you have not run the tests yet" unless @run
+  end
+
+  def success?
+    fail_without_test_run
     sum_failed == 0
   end
+
   def failed?
     !success?
   end
 
   def test_count
-    fail "you have not run the tests yet" unless @run
-    @test_cases.length
+    @test_count ||= @test_cases.length
   end
 
-  def test_errors
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :error } .length
+  def passed_tests
+    @passed_tests ||= @test_cases.select { |c| c.test_status == :pass }.length
   end
 
-  def test_failures
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :fail } .length
+  def errored_tests
+    @errored_tests ||= @test_cases.select { |c| c.test_status == :error }.length
   end
 
-  def test_skips
-    fail "you have not run the tests yet" unless @run
-    @test_cases.select { |c| c.test_status == :skip} .length
+  def failed_tests
+    @failed_tests ||= @test_cases.select { |c| c.test_status == :fail }.length
+  end
+
+  def skipped_tests
+    @skipped_tests ||= @test_cases.select { |c| c.test_status == :skip }.length
+  end
+
+  def pending_tests
+    @pending_tests ||= @test_cases.select {|c| c.test_status == :pending}.length
   end
 
   private
 
   def sum_failed
-    test_failed=0
-    test_passed=0
-    test_errored=0
-    test_skips=0
-    @test_cases.each do |test_case|
-      case test_case.test_status
-      when :pass  then test_passed  += 1
-      when :fail  then test_failed  += 1
-      when :error then test_errored += 1
-      when :skip  then test_skips   += 1
-      end
-    end
-    test_failed + test_errored
+    @sum_failed ||= failed_tests + errored_tests
   end
 
   def write_junit_xml
+    # This should be a configuration option
     File.directory?('junit') or FileUtils.mkdir('junit')
 
     begin
@@ -136,9 +142,10 @@ class TestSuite
       suite = REXML::Element.new('testsuite', doc)
       suite.add_attribute('name',     name)
       suite.add_attribute('tests',    test_count)
-      suite.add_attribute('errors',   test_errors)
-      suite.add_attribute('failures', test_failures)
-      suite.add_attribute('skip',     test_skips)
+      suite.add_attribute('errors',   errored_test)
+      suite.add_attribute('failures', failed_test)
+      suite.add_attribute('skip',     skipped_test)
+      suite.add_attribute('pending',  pending_tests)
 
       @test_cases.each do |test|
         item = REXML::Element.new('testcase', suite)
@@ -147,7 +154,7 @@ class TestSuite
         item.add_attribute('time',      test.runtime)
 
         # Did we fail?  If so, report that.
-        unless test.test_status == :pass || test.test_status == :skip then
+        if test.test_status == :fail || test.test_status == :error then
           status = REXML::Element.new('failure', item)
           status.add_attribute('type', test.test_status.to_s)
           if test.exception then
@@ -167,6 +174,8 @@ class TestSuite
         end
       end
 
+      # junit/name.xml will be created in a directory relative to the CWD
+      # --  JLS 2/12
       File.open("junit/#{name}.xml", 'w') { |fh| doc.write(fh) }
     rescue Exception => e
       Log.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
@@ -174,7 +183,7 @@ class TestSuite
   end
 
   def summarize
-    fail "you have not run the tests yet" unless @run
+    fail_without_test_run
 
     if Log.file then
       Log.file = log_path("#{name}-summary.txt")
@@ -189,40 +198,45 @@ class TestSuite
 
     TestConfig.dump(config)
 
-    test_failed=0
-    test_passed=0
-    test_errored=0
-    test_skips=0
-    @test_cases.each do |test_case|
-      case test_case.test_status
-      when :pass  then test_passed  += 1
-      when :fail  then test_failed  += 1
-      when :error then test_errored += 1
-      when :skip  then test_skips   += 1
-      end
-    end
-    grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
+    elapsed_time = @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
+    average_test_time = elapsed_time / test_count
 
-    Log.notify <<-HEREDOC
+    Log.notify %Q[
 
-  - Test Case Summary -
-  Attempted: #{@test_cases.length}
-     Passed: #{test_passed}
-     Failed: #{test_failed}
-    Errored: #{test_errored}
-    Skipped: #{test_skips}
+          - Test Case Summary -
+   Total Suite Time: %.2f seconds
+  Average Test Time: %.2f seconds
+          Attempted: #{test_count}
+             Passed: #{passed_tests}
+             Failed: #{failed_tests}
+            Errored: #{errored_tests}
+            Skipped: #{skipped_tests}
+            Pending: #{pending_tests}
 
   - Specific Test Case Status -
-  HEREDOC
+    ] % [elapsed_time, average_test_time]
+
+    grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
 
     Log.notify "Failed Tests Cases:"
-    (grouped_summary[:fail] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:fail] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify "Errored Tests Cases:"
-    (grouped_summary[:error] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:error] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify "Skipped Tests Cases:"
-    (grouped_summary[:skip] || []).each {|test_case| print_test_failure(test_case)}
+    (grouped_summary[:skip] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
+
+    Log.notify "Pending Tests Cases:"
+    (grouped_summary[:pending] || []).each do |test_case|
+      print_test_failure(test_case)
+    end
 
     Log.notify("\n\n")
 
@@ -231,7 +245,12 @@ class TestSuite
   end
 
   def print_test_failure(test_case)
-    Log.notify "  Test Case #{test_case.path} reported: #{test_case.exception.inspect}"
+    test_reported = if test_case.exception
+                      "reported: #{test_case.exception.inspect}"
+                    else
+                      test_case.test_status
+                    end
+    Log.notify "  Test Case #{test_case.path} #{test_reported}"
   end
 
   def log_path(name)
