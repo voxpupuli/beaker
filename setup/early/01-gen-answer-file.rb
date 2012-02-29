@@ -31,30 +31,29 @@ q_puppetmaster_install=y
 ]
 
 # Dashboard only answers
-dashboard_a = %Q[
-q_puppet_enterpriseconsole_auth_database_user='console'
-q_puppet_enterpriseconsole_auth_database_password='puppet'
+dashboard_a = %q[
+q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
+q_puppet_enterpriseconsole_auth_database_password='~!@#$%^*-/aZ'
 q_puppet_enterpriseconsole_smtp_host=DASHBOARD
 q_puppet_enterpriseconsole_smtp_use_tls=n
 q_puppet_enterpriseconsole_smtp_port=25
 q_puppet_enterpriseconsole_smtp_user_auth=y
 q_puppet_enterpriseconsole_smtp_username='console'
-q_puppet_enterpriseconsole_smtp_password='puppet'
-q_puppet_enterpriseconsole_auth_password='puppet'
+q_puppet_enterpriseconsole_smtp_password='~!@#$%^*-/aZ'
+q_puppet_enterpriseconsole_auth_password='~!@#$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_user='console'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
-q_puppet_enterpriseconsole_database_password='puppet'
-q_puppet_enterpriseconsole_database_root_password='puppet'
-q_puppet_enterpriseconsole_database_user='console'
-q_puppet_enterpriseconsole_httpd_port=#{portno}
+q_puppet_enterpriseconsole_database_password='~!@#$%^*-/aZ'
+q_puppet_enterpriseconsole_database_root_password='~!@#$%^*-/aZ'
+q_puppet_enterpriseconsole_database_user='mYc0nS03u3r'
 q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_inventory_hostname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_port=8140
 q_puppet_enterpriseconsole_master_hostname=MASTER
 q_puppet_enterpriseconsole_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
-]
+] + "\nq_puppet_enterpriseconsole_httpd_port=#{portno}\n"
 
 dashboardhost = nil
 hosts.each do |host|  # Clean up all answer files that might conflict
@@ -109,6 +108,9 @@ hosts.each do |host|
         line = $1+master
       end
       if line =~ /(q_puppetmaster_enterpriseconsole_hostname=)DASHBOARD/ then
+        line = $1+dashboardhost
+      end
+      if line =~ /(q_puppet_enterpriseconsole_smtp_host=)DASHBOARD/ then
         line = $1+dashboardhost
       end
       if line =~ /(q_puppet_enterpriseconsole_master_hostname=)MASTER/ then
