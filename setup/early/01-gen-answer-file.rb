@@ -32,6 +32,14 @@ q_puppetmaster_install=y
 
 # Dashboard only answers
 dashboard_a = %Q[
+q_puppet_enterpriseconsole_auth_database_user='console'
+q_puppet_enterpriseconsole_auth_database_password='puppet'
+q_puppet_enterpriseconsole_smtp_host=DASHBOARD
+q_puppet_enterpriseconsole_smtp_use_tls=n
+q_puppet_enterpriseconsole_smtp_port=25
+q_puppet_enterpriseconsole_smtp_user_auth=y
+q_puppet_enterpriseconsole_smtp_username='console'
+q_puppet_enterpriseconsole_smtp_password='puppet'
 q_puppet_enterpriseconsole_auth_password='puppet'
 q_puppet_enterpriseconsole_auth_user='console'
 q_puppet_enterpriseconsole_database_install=y
