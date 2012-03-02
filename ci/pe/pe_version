@@ -7,4 +7,4 @@ VERSION:
   activerecord_ver: 2.3.14
   activesupport_ver: 2.3.14
   ruby_augeas_ver: 4.1
-  dashboard_ver: 1.2.4
+  dashboard_ver: 1.2.6
