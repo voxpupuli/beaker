@@ -3,9 +3,10 @@ class TestCase
   require 'tempfile'
   require 'benchmark'
   require 'stringio'
+  require 'lib/assertions'
   require 'lib/puppet_commands'
 
-  include Test::Unit::Assertions
+  include Assertions
   include PuppetCommands
 
   class PendingTest < Exception; end
