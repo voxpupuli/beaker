@@ -12,7 +12,9 @@ require 'yaml'
 require 'lib/host'
 
 Test::Unit.run = true
-Dir.glob(File.dirname(__FILE__) + '/lib/*.rb') {|file| require file}
+files = Dir.glob(File.dirname(__FILE__) + '/lib/*.rb')
+libs = files.reject { |f| f =~ /puppet_acceptance\.rb/ }
+libs.each {|file| require file}
 
 trap(:INT) do
   Log.error "Interrupt received; exiting..."

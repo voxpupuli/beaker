@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
 
   # specify any dependencies here; for example:
   s.add_development_dependency 'rspec', '2.6.0'
+  s.add_development_dependency 'fakefs', '0.4'
   s.add_development_dependency 'rake'
   s.add_runtime_dependency 'net-ssh'
   s.add_runtime_dependency 'net-scp'
