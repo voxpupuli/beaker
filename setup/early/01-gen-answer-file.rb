@@ -35,14 +35,8 @@ dashboard_a = %q[
 q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
 q_puppet_enterpriseconsole_auth_database_password='~!@#$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
-q_puppet_enterpriseconsole_smtp_host=DASHBOARD
-q_puppet_enterpriseconsole_smtp_use_tls=n
-q_puppet_enterpriseconsole_smtp_port=25
 q_puppet_enterpriseconsole_smtp_user_auth=y
-q_puppet_enterpriseconsole_smtp_username='console'
-q_puppet_enterpriseconsole_smtp_password='~!@#$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_password='~!@#$%^*-/aZ'
-q_puppet_enterpriseconsole_auth_user='admin@example.com'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
 q_puppet_enterpriseconsole_database_password='~!@#$%^*-/aZ'
@@ -54,7 +48,15 @@ q_puppet_enterpriseconsole_inventory_port=8140
 q_puppet_enterpriseconsole_master_hostname=MASTER
 q_puppet_enterpriseconsole_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
-] + "\nq_puppet_enterpriseconsole_httpd_port=#{portno}\n"
+] + %Q[
+q_puppet_enterpriseconsole_auth_user='#{ENV['q_puppet_enterpriseconsole_auth_user'] || 'admin@example.com'}'
+q_puppet_enterpriseconsole_httpd_port=#{portno}
+q_puppet_enterpriseconsole_smtp_host='#{ENV['q_puppet_enterpriseconsole_smtp_host'] || 'DASHBOARD'}'
+q_puppet_enterpriseconsole_smtp_use_tls='#{ENV['q_puppet_enterpriseconsole_smtp_use_tls'] || 'n'}'
+q_puppet_enterpriseconsole_smtp_port='#{ENV['q_puppet_enterpriseconsole_smtp_port'] || '25'}'
+q_puppet_enterpriseconsole_smtp_username='#{ENV['q_puppet_enterpriseconsole_smtp_username'] || 'console-mailer@example.com'}'
+q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp_password'] || '~!@#$%^*-/aZ'}'
+]
 
 dashboardhost = nil
 hosts.each do |host|  # Clean up all answer files that might conflict
