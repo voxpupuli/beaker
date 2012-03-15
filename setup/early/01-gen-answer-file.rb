@@ -58,12 +58,35 @@ q_puppet_enterpriseconsole_smtp_username='#{ENV['q_puppet_enterpriseconsole_smtp
 q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp_password'] || '~!@#$%^*-/aZ'}'
 ]
 
+upgrade_a = %Q[
+q_puppet_cloud_install='#{ENV['q_puppet_cloud_install'] || 'y' }'
+q_rubydevelopment_install='#{ENV['q_rubydevelopment_install'] || 'n' }'
+q_upgrade_install_wrapper_modules='#{ENV['q_upgrade_install_wrapper_modules'] || 'n' }'
+q_upgrade_installation='y'
+q_upgrade_remove_mco_homedir='#{ENV['q_upgrade_remove_mco_homedir'] || 'y' }'
+q_vendor_packages_install='y'
+q_puppet_enterpriseconsole_auth_database_name='console_auth'
+q_puppet_enterpriseconsole_auth_database_password='puppet'
+q_puppet_enterpriseconsole_auth_database_user='auth_user'
+q_puppet_enterpriseconsole_auth_password='puppet'
+q_puppet_enterpriseconsole_auth_user='#{ENV['q_puppet_enterpriseconsole_auth_user'] || 'admin@example.com' }'
+q_puppet_enterpriseconsole_setup_auth_db='y'
+q_puppet_enterpriseconsole_smtp_host='#{ENV['q_puppet_enterpriseconsole_smtp_host'] || 'smtp.gmail.com' }'
+q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp_password'] || 'password' }'
+q_puppet_enterpriseconsole_smtp_port='#{ENV['q_puppet_enterpriseconsole_smtp_port'] || '25' }'
+q_puppet_enterpriseconsole_smtp_use_tls='#{ENV['q_puppet_enterpriseconsole_smtp_use_tls'] || 'y' }'
+q_puppet_enterpriseconsole_smtp_user_auth='#{ENV['q_puppet_enterpriseconsole_smtp_user_auth'] || 'y' }'
+q_puppet_enterpriseconsole_smtp_username='#{ENV['q_puppet_enterpriseconsole_smtp_username'] || 'password' }'
+]
+
 dashboardhost = nil
 hosts.each do |host|  # Clean up all answer files that might conflict
   FileUtils.rm ["tmp/answers.#{host}"] if File.exists? "tmp/answers.#{host}"
 end
 
-hosts.each do |host|   # find our dashboard host for laster use
+FileUtils.rm [ 'tmp/upgrade_a' ] if File.exists? 'tmp/upgrade_a'
+
+hosts.each do |host|   # find our dashboard host for later use
   dashboardhost = host if host['roles'].include? 'dashboard'
 end
 
@@ -81,18 +104,18 @@ hosts.each do |host|
   role_dashboard=TRUE if host['roles'].include? 'dashboard'
 
   answers=common_a
-  if role_agent  
-    answers=answers + agent_a + 'q_puppetagent_install=\'y\'' + "\n" 
-  else 
+  if role_agent
+    answers=answers + agent_a + 'q_puppetagent_install=\'y\'' + "\n"
+  else
     answers=answers + 'q_puppetagent_install=\'n\'' + "\n"
   end
-  
+
   if role_master
     answers=answers + master_a + 'q_puppetmaster_install=\'y\'' + "\n"
   else
     answers=answers + 'q_puppetmaster_install=\'n\'' + "\n"
   end
-  
+
   if role_cloudpro
     answers=answers + 'q_puppet_cloud_install=\'y\'' + "\n"
   else
@@ -104,9 +127,13 @@ hosts.each do |host|
   else
     answers=answers + 'q_puppetdashboard_install=\'n\'' + "\n"
   end
-  
+
+  File.open 'tmp/upgrade_a', 'w' do |f|
+    f.puts upgrade_a
+  end
+
   File.open("tmp/answers.#{host}", 'w') do |fh|
-    answers.split(/\n/).each do |line| 
+    answers.split(/\n/).each do |line|
       if line =~ /(q_puppetagent_server=)MASTER/ then
         line = $1+master
       end
