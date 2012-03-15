@@ -59,10 +59,12 @@ q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp
 ]
 
 upgrade_a = %Q[
+q_puppet_enterpriseconsole_database_root_password='#{ENV['q_puppet_enterpriseconsole_database_root_password'] || 'puppet' }'
 q_puppet_cloud_install='#{ENV['q_puppet_cloud_install'] || 'y' }'
 q_rubydevelopment_install='#{ENV['q_rubydevelopment_install'] || 'n' }'
 q_upgrade_install_wrapper_modules='#{ENV['q_upgrade_install_wrapper_modules'] || 'n' }'
 q_upgrade_installation='y'
+q_puppet_enterpriseconsole_setup_auth_db='#{ENV['q_puppet_enterpriseconsole_setup_auth_db'] || 'y' }'
 q_upgrade_remove_mco_homedir='#{ENV['q_upgrade_remove_mco_homedir'] || 'y' }'
 q_vendor_packages_install='y'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
