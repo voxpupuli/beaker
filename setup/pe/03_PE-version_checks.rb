@@ -7,14 +7,6 @@ hosts.each do |host|
   end
 end
 
-step "Check Puppet Module version"
-hosts.each do |host|
-  next if host['platform'].include?('solaris')
-  on(host, "#{host['puppetbindir']}/puppet-module version") do
-    assert_match(/#{version['VERSION']['puppet_module_ver']}/, stdout, "Incorrect Puppet Module tool version detected on #{host} ")
-  end
-end
-
 step "Check Ruby Gem version"
 hosts.each do |host|
   on(host, "#{host['puppetbindir']}/gem --version") do
