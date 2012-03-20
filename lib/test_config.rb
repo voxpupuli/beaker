@@ -17,7 +17,7 @@ module TestConfig
   def self.load_file(config_file)
     config = YAML.load_file(config_file)
     # Merge some useful date into the config hash
-    config['CONFIG']['consoleport'] = 3000 unless config['CONFIG']['consoleport']
+    config['CONFIG']['consoleport'] = 443 unless config['CONFIG']['consoleport']
     config['CONFIG']['ssh'] = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
     config['CONFIG']['pe_ver'] = puppet_enterprise_version if is_pe?
     config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless is_pe?

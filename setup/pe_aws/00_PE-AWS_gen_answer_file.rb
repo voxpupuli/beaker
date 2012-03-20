@@ -29,17 +29,17 @@ q_puppetmaster_forward_facts=y
 q_puppetmaster_install=y
 ]
 
-dashboard_a = %Q[
-q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
-q_puppet_enterpriseconsole_auth_database_password='~!@#$%^*-/aZ'
+dashboard_a = %q[
+q_puppet_enterpriseconsole_auth_database_user='console_db'
+q_puppet_enterpriseconsole_auth_database_password='puppet'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
 q_puppet_enterpriseconsole_smtp_user_auth=y
-q_puppet_enterpriseconsole_auth_password='~!@#$%^*-/aZ'
+q_puppet_enterpriseconsole_auth_password='puppet'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
-q_puppet_enterpriseconsole_database_password='~!@#$%^*-/aZ'
-q_puppet_enterpriseconsole_database_root_password='~!@#$%^*-/aZ'
-q_puppet_enterpriseconsole_database_user='mYc0nS03u3r'
+q_puppet_enterpriseconsole_database_password='puppet'
+q_puppet_enterpriseconsole_database_root_password='puppet'
+q_puppet_enterpriseconsole_database_user='console'
 q_puppet_enterpriseconsole_install=y
 q_puppet_enterpriseconsole_inventory_hostname=`#{certcmd}`
 q_puppet_enterpriseconsole_inventory_port=8140
@@ -53,7 +53,7 @@ q_puppet_enterpriseconsole_smtp_host='#{ENV['q_puppet_enterpriseconsole_smtp_hos
 q_puppet_enterpriseconsole_smtp_use_tls='#{ENV['q_puppet_enterpriseconsole_smtp_use_tls'] || 'n'}'
 q_puppet_enterpriseconsole_smtp_port='#{ENV['q_puppet_enterpriseconsole_smtp_port'] || '25'}'
 q_puppet_enterpriseconsole_smtp_username='#{ENV['q_puppet_enterpriseconsole_smtp_username'] || 'console-mailer@example.com'}'
-q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp_password'] || '~!@#$%^*-/aZ'}'
+q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp_password'] || 'console'}'
 ]
 
 dashboardhost = 'undefined'
