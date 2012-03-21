@@ -20,15 +20,13 @@ class Command
     cmdline = cmd_line(host)
     result = host.exec(cmdline, options)
 
-    unless options[:silent] then
-      result.log
-      if options[:acceptable_exit_codes].include?(result.exit_code)
-        # cool.
-      elsif options[:failing_exit_codes].include?(result.exit_code)
-        assert( false, "Host '#{host} exited with #{result.exit_code} running: #{cmdline}" )
-      else
-        raise "Host '#{host}' exited with #{result.exit_code} running: #{cmdline}"
-      end
+    result.log
+    if options[:acceptable_exit_codes].include?(result.exit_code)
+      # cool.
+    elsif options[:failing_exit_codes].include?(result.exit_code)
+      assert( false, "Host '#{host} exited with #{result.exit_code} running: #{cmdline}" )
+    else
+      raise "Host '#{host}' exited with #{result.exit_code} running: #{cmdline}"
     end
 
     result
