@@ -5,6 +5,8 @@
 version  = config['pe_ver']
 test_name "Install Puppet #{version}"
 
+confine :except, :platform => 'windows'
+
 if options[:pe_version]
   distpath = "/opt/enterprise/dists/pe#{version}"
 else
