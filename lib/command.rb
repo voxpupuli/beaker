@@ -21,12 +21,10 @@ class Command
     result = host.exec(cmdline, options)
 
     result.log
-    if options[:acceptable_exit_codes].include?(result.exit_code)
-      # cool.
-    elsif options[:failing_exit_codes].include?(result.exit_code)
-      assert( false, "Host '#{host} exited with #{result.exit_code} running: #{cmdline}" )
-    else
-      raise "Host '#{host}' exited with #{result.exit_code} running: #{cmdline}"
+    unless options[:acceptable_exit_codes].include?(result.exit_code)
+      limit = 10
+      formatted_output = result.output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
+      raise "Host '#{host}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{formatted_output}"
     end
 
     result
