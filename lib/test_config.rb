@@ -40,7 +40,7 @@ module TestConfig
       File.open("#{dist_dir}/#{version_file}") do |file|
         while line = file.gets
           if /(\w.*)/ =~ line then
-            version=$1
+            version=$1.strip
             Log.debug "Found LATEST: Puppet Enterprise Version #{version}"
           end
         end
@@ -63,7 +63,7 @@ module TestConfig
       File.open("#{dist_dir}/#{version_file}") do |file|
         while line = file.gets
           if /(\w.*)/ =~ line then
-            version=$1
+            version=$1.strip
             Log.debug "Found LATEST: Puppet Enterprise Windows Version #{version}"
           end
         end

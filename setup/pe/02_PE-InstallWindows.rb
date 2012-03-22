@@ -2,6 +2,7 @@
 
 version  = config['pe_ver_win']
 test_name "Install Puppet #{version}"
+the_master = master.to_s
 
 confine :to, :platform => 'windows'
 distpath = "/opt/enterprise/dists"
@@ -23,5 +24,5 @@ hosts.each do |host|
   scp_to host, "#{distpath}/#{host['dist']}.msi", "/tmp"
 
   step "Install Puppet Agent"
-  on host,"cd /tmp && msiexec.exe /qn /i #{host['dist']}.msi"
+  on host,"cd /tmp && msiexec.exe /qn /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{the_master} PUPPET_AGENT_CERTNAME=#{host}"
 end
