@@ -20,11 +20,15 @@ class Command
     cmdline = cmd_line(host)
     result = host.exec(cmdline, options)
 
-    result.log
-    unless options[:acceptable_exit_codes].include?(result.exit_code)
-      limit = 10
-      formatted_output = result.output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
-      raise "Host '#{host}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{formatted_output}"
+    # This silent option is poorly named, but is used from within some tests
+    # to ignore failed exit codes
+    unless options[:silent]
+      result.log
+      unless options[:acceptable_exit_codes].include?(result.exit_code)
+        limit = 10
+        formatted_output = result.output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
+        raise "Host '#{host}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{formatted_output}"
+      end
     end
 
     result
