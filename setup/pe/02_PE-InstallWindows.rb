@@ -1,6 +1,6 @@
 # SCP windows msi to host and install
 
-version  = config['pe_ver']
+version  = config['pe_ver_win']
 test_name "Install Puppet #{version}"
 
 confine :to, :platform => 'windows'
