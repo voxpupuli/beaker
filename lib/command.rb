@@ -78,11 +78,9 @@ class PuppetCommand < Command
     @args = args
   end
 
-  def cmd_line(host_info)
-    puppet_path = host_info[:puppetbinpath] || "/bin/puppet" # TODO: is this right?
-
+  def cmd_line(host)
     args_string = (@args + @options.map { |key, value| "--#{key}=#{value}" }).join(' ')
-    "#{puppet_env_command(host_info, @environment)} puppet #{@sub_command} #{args_string}"
+    "#{puppet_env_command(host, @environment)} #{host['puppetbin']} #{@sub_command} #{args_string}"
   end
 end
 
@@ -91,9 +89,9 @@ class FacterCommand < Command
     @args = args
   end
 
-  def cmd_line(host_info)
+  def cmd_line(host)
     args_string = @args.join(' ')
-    "#{puppet_env_command(host_info)} facter #{args_string}"
+    "#{puppet_env_command(host)} #{host['facterbin']} #{args_string}"
   end
 end
 

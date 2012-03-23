@@ -20,6 +20,7 @@ module TestConfig
     config['CONFIG']['consoleport'] = 443 unless config['CONFIG']['consoleport']
     config['CONFIG']['ssh'] = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
     config['CONFIG']['pe_ver'] = puppet_enterprise_version if is_pe?
+    config['CONFIG']['pe_ver_win'] = puppet_enterprise_version_win if is_pe?
     config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless is_pe?
     config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless is_pe?
     # need to load expect versions of PE binaries
@@ -39,7 +40,7 @@ module TestConfig
       File.open("#{dist_dir}/#{version_file}") do |file|
         while line = file.gets
           if /(\w.*)/ =~ line then
-            version=$1
+            version=$1.strip
             Log.debug "Found LATEST: Puppet Enterprise Version #{version}"
           end
         end
@@ -52,6 +53,29 @@ module TestConfig
 
   def self.puppet_enterprise_version
     @pe_ver ||= Options.parse_args[:pe_version] || load_pe_version  if is_pe?
+  end
+
+  def self.load_pe_version_win
+    dist_dir = ENV['pe_dist_dir'] || '/opt/enterprise/dists'
+    version_file = ENV['pe_version_file'] || 'LATEST-win'
+    version = ""
+    begin
+      File.open("#{dist_dir}/#{version_file}") do |file|
+        while line = file.gets
+          if /(\w.*)/ =~ line then
+            version=$1.strip
+            Log.debug "Found LATEST: Puppet Enterprise Windows Version #{version}"
+          end
+        end
+      end
+    rescue
+      version = 'unknown'
+    end
+    return version
+  end
+
+  def self.puppet_enterprise_version_win
+    @pe_ver_win ||= Options.parse_args[:pe_version] || load_pe_version_win  if is_pe?
   end
 
   # Print out test configuration

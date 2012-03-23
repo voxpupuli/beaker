@@ -14,7 +14,11 @@ def get_cmd(host)
 end
 
 hosts.each do |host|
-  on(host, get_cmd(host)) do
-   host[:ruby_ver] = stdout
+  if host['platform'] =~ /win/ && TestConfig.is_pe?
+    host[:ruby_ver] = '1.8.7'
+  else
+    on(host, get_cmd(host)) do
+     host[:ruby_ver] = stdout
+    end
   end
 end

@@ -16,7 +16,8 @@ module Unix
     PE_DEFAULTS = {
       'user'         => 'root',
       'puppetpath'   => '/etc/puppetlabs/puppet',
-      'puppetbin'    => '/usr/local/bin/puppet',
+      'puppetbin'    => '/opt/puppet/bin/puppet',
+      'facterbin'    => '/opt/puppet/bin/facter',
       'puppetbindir' => '/opt/puppet/bin'
     }
 
@@ -25,6 +26,7 @@ module Unix
       'puppetpath'   => '/etc/puppet',
       'puppetvardir' => '/var/lib/puppet',
       'puppetbin'    => '/usr/bin/puppet',
+      'facterbin'    => '/usr/bin/facter',
       'puppetbindir' => '/usr/bin'
     }
 
