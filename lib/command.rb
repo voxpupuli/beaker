@@ -80,7 +80,7 @@ class PuppetCommand < Command
 
   def cmd_line(host)
     args_string = (@args + @options.map { |key, value| "--#{key}=#{value}" }).join(' ')
-    "#{puppet_env_command(host, @environment)} #{host['puppetbin']} #{@sub_command} #{args_string}"
+    "#{puppet_env_command(host, @environment)} puppet #{@sub_command} #{args_string}"
   end
 end
 
@@ -91,7 +91,7 @@ class FacterCommand < Command
 
   def cmd_line(host)
     args_string = @args.join(' ')
-    "#{puppet_env_command(host)} #{host['facterbin']} #{args_string}"
+    "#{puppet_env_command(host)} facter #{args_string}"
   end
 end
 
