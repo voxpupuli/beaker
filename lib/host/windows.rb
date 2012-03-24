@@ -18,9 +18,7 @@ module Windows
       'group'        => 'Administrators',
       'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
       'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'puppetbindir' => 'C:/PROGRA~1/PUPPET~1/PUPPET~1/bin',
-      'puppetbin'    => 'C:/PROGRA~1/PUPPET~1/PUPPET~1/bin/puppet.bat',
-      'facterbin'    => 'C:/PROGRA~1/PUPPET~1/PUPPET~1/bin/facter.bat'
+      'puppetbindir' => '/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/bin',
     }
 
     DEFAULTS = {
@@ -28,8 +26,6 @@ module Windows
       'group'        => 'Administrators',
       'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
       'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'puppetbin'    => 'puppet',
-      'facterbin'    => 'facter'
     }
 
     def initialize(name, overrides, defaults)
