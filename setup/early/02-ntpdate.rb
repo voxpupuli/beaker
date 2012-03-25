@@ -9,6 +9,7 @@ if options[:timesync]
       on(host, "w32tm /register")
       on(host, "net start w32time", :acceptable_exit_codes => [0,2])
       on(host, "w32tm /config /manualpeerlist:#{options[:ntpserver]} /syncfromflags:manual /update")
+      on(host, "w32tm /resync")
     else
       count=0
       until success do
