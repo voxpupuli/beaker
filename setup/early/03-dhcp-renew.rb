@@ -5,6 +5,7 @@ else
   step "renew dhcpd with dhclient -r && dhclient or dhcpcd -n eth0"
   hosts.each do |host|
     next if host['platform'].include?('solaris')
+    next if host['platform'] =~ /win/
       if host['platform'].include? 'sles'
         on host, "dhcpcd -n eth0"
       else
