@@ -82,19 +82,24 @@ end
 end
 
 
-hosts.each do |host|
-  next unless host['roles'].include?('dashboard')
-  cmd = ''
+[
+  ['pe-puppet-dashboard', 'dashboard_ver'],
+  ['pe-console-auth', 'console_auth_ver']
+].each do |pkg|
+  hosts.each do |host|
+    next unless host['roles'].include?('dashboard')
+    cmd = ''
 
-  if host['platform'] =~ /debian|ubuntu/
-    cmd = "dpkg -l"
-  else
-    cmd = "rpm -q"
-  end
+    if host['platform'] =~ /debian|ubuntu/
+      cmd = "dpkg -l"
+    else
+      cmd = "rpm -q"
+    end
 
-  on host, "#{cmd} pe-puppet-dashboard" do
-    assert_match(/#{version['VERSION']['dashboard_ver']}/, stdout,
-                 "Incorrect version of dashboard on #{host}")
+    on host, "#{cmd} #{pkg[0]}" do
+      assert_match(/#{version['VERSION'][pkg[1]]}/, stdout,
+                   "Incorrect version of #{pkg[0]} on #{host}")
+    end
   end
 end
 
