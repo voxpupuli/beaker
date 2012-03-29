@@ -18,7 +18,7 @@ module Windows
       'group'        => 'Administrators',
       'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
       'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'puppetbindir' => '/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/bin',
+      'puppetbindir' => '`cygpath -F 38`/Puppet Labs/Puppet Enterprise/bin',
     }
 
     DEFAULTS = {
