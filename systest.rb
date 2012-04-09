@@ -58,7 +58,7 @@ begin
   # Run any pre-flight scripts
   if options[:pre_script]
     pre_opts = options.merge({ :random => false,
-                                  :tests => [ options[:pre_script] ] })
+                                  :tests => [ 'setup/early', options[:pre_script] ] })
     TestSuite.new('pre-setup', hosts, pre_opts, config, TRUE).run_and_exit_on_failure
   end
 
