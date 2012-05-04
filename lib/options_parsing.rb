@@ -138,6 +138,11 @@ class Options
         @options[:dhcp_renew] = TRUE
       end
 
+      @options[:pkg_repo] = FALSE
+      opts.on('--pkg-repo', 'configure packaging system repository') do
+        @options[:pkg_repo] = TRUE
+      end
+
       @options[:stdout_only] = FALSE
       opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
         @options[:stdout_only] = TRUE
