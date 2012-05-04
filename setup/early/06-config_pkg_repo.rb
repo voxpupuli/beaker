@@ -8,7 +8,7 @@ else
   aptcfg = %q{ Acquire::http::Proxy "http://modi.puppetlabs.lan:3128/"; }
   hosts.each do |host|
     case
-    when host['platform'] =~ /debian|ubuntu/
+    when host['platform'] =~ /ubuntu/
       on(host, "mv /etc/apt/apt.conf /etc/apt/apt.conf.org") 
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg) 
     else
