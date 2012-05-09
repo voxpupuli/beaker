@@ -80,6 +80,15 @@ class Options
         @options[:facter] = value
       end
 
+      @options[:hiera] = 'git://github.com/puppetlabs/hiera.git#HEAD'
+      opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
+              "  #{@options[:hiera]}",
+              "    - otherwise, as per the puppet argument"
+              ) do |value|
+        #@options[:type] = 'git'
+        @options[:hiera] = value
+      end
+
       @options[:plugins] = []
       opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
         #@options[:type] = 'git'
@@ -174,7 +183,7 @@ class Options
         @options[:xml] = value
       end
 
-      opts.on( '-h', '--help', 'Display this screen' ) do
+      opts.on('--help', 'Display this screen' ) do
         puts opts
         exit
       end
