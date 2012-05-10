@@ -90,7 +90,7 @@ class Options
       end
 
       @options[:modules] = []
-      opts.on('-m' '--modules URI', 'Select puppet module git install URI') do |value|
+      opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
         @options[:modules] << value
       end
 
