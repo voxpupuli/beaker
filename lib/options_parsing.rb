@@ -89,6 +89,11 @@ class Options
         @options[:hiera] = value
       end
 
+      @options[:modules] = []
+      opts.on('-m' '--modules URI', 'Select puppet module git install URI') do |value|
+        @options[:modules] << value
+      end
+
       @options[:plugins] = []
       opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
         #@options[:type] = 'git'
