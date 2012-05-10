@@ -1,0 +1,13 @@
+HOSTS:
+  ec2-23-22-58-122.compute-1.amazonaws.com:
+    roles:
+      - master
+      - agent
+    platform: ubuntu-10.04-i386
+  win2003r2-32-1:
+    roles:
+      - agent
+    platform: windows-2003r2-32
+CONFIG:
+  nfs_server: NONE
+  consoleport: 443
