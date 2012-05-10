@@ -25,7 +25,8 @@ module Unix
       'puppetpath'   => '/etc/puppet',
       'puppetvardir' => '/var/lib/puppet',
       'puppetbin'    => '/usr/bin/puppet',
-      'puppetbindir' => '/usr/bin'
+      'puppetbindir' => '/usr/bin',
+      'hieralibdir'  => '/opt/puppet-git-repos/hiera/lib'
     }
 
     def initialize(name, overrides, defaults)
