@@ -48,8 +48,10 @@ masters.each do |host|
                 "remote rm origin",
                 "remote add origin #{mod[:url]}",
                 "fetch origin",
+                "checkout -f #{mod[:ref]}",
+                "reset --hard refs/remotes/origin/#{mod[:ref]}",
                 "clean -fdx",
-                "checkout -f #{mod[:ref]}"]
+    ]
 
     on host, commands.join(" && git ")
   end
