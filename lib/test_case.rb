@@ -128,7 +128,7 @@ class TestCase
         raise "Unknown option #{type}"
       end
     end
-    skip_test "No suitable hosts with: #{confines.inspect}" if @hosts.empty?
+    raise "No suitable hosts with: #{confines.inspect}" if @hosts.empty?
   end
 
   def inspect_host(host, property, value)
