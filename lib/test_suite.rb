@@ -154,23 +154,25 @@ class TestSuite
         item.add_attribute('time',      test.runtime)
 
         # Did we fail?  If so, report that.
+        # We need to remove the escape character from colorized text, the
+        # substitution of other entities is handled well by Rexml
         if test.test_status == :fail || test.test_status == :error then
           status = REXML::Element.new('failure', item)
           status.add_attribute('type', test.test_status.to_s)
           if test.exception then
-            status.add_attribute('message', test.exception.to_s)
+            status.add_attribute('message', test.exception.to_s.gsub(/\e/, ''))
             status.text = test.exception.backtrace.join("\n")
           end
         end
 
         if test.stdout then
           REXML::Element.new('system-out', item).text =
-            test.stdout.gsub(/[\0-\011\013\014\016-\037]/) {|c| "&#{c[0]};" }
+            test.stdout.gsub(/\e/, '')
         end
 
         if test.stderr then
           text = REXML::Element.new('system-err', item)
-          text.text = test.stderr.gsub(/[\0-\011\013\014\016-\037]/) {|c| "&#{c[0]};" }
+          text.text = test.stderr.gsub(/\e/, '')
         end
       end
 
