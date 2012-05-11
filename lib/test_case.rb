@@ -10,6 +10,7 @@ class TestCase
   include PuppetCommands
 
   class PendingTest < Exception; end
+  class SkipTest < Exception; end
 
   attr_reader :version, :config, :options, :path, :fail_flag, :usr_home,
               :test_status, :exception, :runtime, :result
@@ -39,6 +40,8 @@ class TestCase
               @exception   = e
             rescue PendingTest
               @test_status = :pending
+            rescue SkipTest
+              @test_status = :skip
             rescue StandardError, ScriptError => e
               Log.error(e.inspect)
               e.backtrace.each { |line| Log.error(line) }
@@ -128,7 +131,10 @@ class TestCase
         raise "Unknown option #{type}"
       end
     end
-    skip_test "No suitable hosts with: #{confines.inspect}" if @hosts.empty?
+    if @hosts.empty?
+      Log.warn "No suitable hosts with: #{confines.inspect}"
+      raise SkipTest
+    end
   end
 
   def inspect_host(host, property, value)
