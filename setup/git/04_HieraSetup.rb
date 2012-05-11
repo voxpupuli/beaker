@@ -45,17 +45,19 @@ if (options[:hiera]) then
     HieraRev  = options[:hiera]
   end
 
-  step "Install Hiera from git"
-  install_from_git master, :hiera, HieraRepo, HieraRev
-  version=''
-  on master, "cd /opt/puppet-git-repos/hiera && git describe" do
-    version = stdout.chomp
+  hosts.each do |host|
+    step "#{host} Install Hiera from git"
+    install_from_git host, :hiera, HieraRepo, HieraRev
+    version=''
+    on host, "cd /opt/puppet-git-repos/hiera && git describe" do
+      version = stdout.chomp
+    end
+    config[:version][:hiera] = version
+  
+    step "#{host}: Create Hiera config file /etc/puppet/hiera.yaml"
+    create_remote_file(host, '/etc/puppet/hiera.yaml', hieracfg)
   end
-  config[:version][:hiera] = version
-
-  step "Master: Create Hiera config file /etc/puppetlabs/puppet/hiera.yaml"
-  create_remote_file(master, '/etc/puppet/hiera.yaml', hieracfg)
 else
   Log.notify "Skipping Hiera install"
-  skip_test "Skipping Hiera install"
+  skip_test  "Skipping Hiera install"
 end
