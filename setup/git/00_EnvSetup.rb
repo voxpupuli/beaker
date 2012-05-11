@@ -1,7 +1,7 @@
 test_name "Setup environment"
 
 WINDOWS_GEMS = [
-  'sys-admin', 'win32console -v1.3.0', 'win32-dir', 'win32-eventlog',
+  'sys-admin', 'win32console -v1.3.2', 'win32-dir', 'win32-eventlog',
   'win32-process', 'win32-service', 'win32-taskscheduler'
 ]
 
