@@ -1,12 +1,17 @@
 test_name "Setup environment"
 
-WINDOWS_GEMS = %w[sys-admin win32console win32-dir win32-eventlog win32-process win32-service win32-taskscheduler]
+WINDOWS_GEMS = [
+  'sys-admin', 'win32console -v1.3.0', 'win32-dir', 'win32-eventlog',
+  'win32-process', 'win32-service', 'win32-taskscheduler'
+]
 
 hosts.each do |host|
   case host['platform']
   when /windows/
-    step "Installing gems"
-    on host, "cmd /c gem install #{WINDOWS_GEMS.join(' ')} --no-ri --no-rdoc"
+    WINDOWS_GEMS.each do |gem|
+      step "Installing #{gem}"
+      on host, "cmd /c gem install #{gem} --no-ri --no-rdoc"
+    end
   else
   end
 end
