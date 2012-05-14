@@ -26,6 +26,7 @@ module Windows
       'group'        => 'Administrators',
       'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
       'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
+      'hieralibdir'  => '/opt/puppet-git-repos/hiera/lib',
     }
 
     def initialize(name, overrides, defaults)
