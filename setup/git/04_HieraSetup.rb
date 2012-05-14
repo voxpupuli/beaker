@@ -53,9 +53,25 @@ if (options[:hiera]) then
       version = stdout.chomp
     end
     config[:version][:hiera] = version
-  
-    step "#{host}: Create Hiera config file /etc/puppet/hiera.yaml"
-    create_remote_file(host, '/etc/puppet/hiera.yaml', hieracfg)
+
+    # REVISIT
+    # very ugly hack to extract puppet conf dir from cygpath command,
+    # need to think about adding this to library for Windows hosts
+    dest_path=''
+    case
+    when host['platform'] =~ /windows/
+      on host, '`cygpath -smF 35`/PuppetLabs/puppet/etc', :acceptable_exit_codes => (1..255)
+      if stderr.chomp =~ /(C:\S*etc):/
+        dest_path = $1
+      else
+        Log.warn "Unable to determine Puppet path on Windows host #{host} #{dest_path}"
+      end
+    else
+      dest_path = host['puppetpath']
+    end
+
+    step "#{host}: Create Hiera config file hiera.yaml"
+    create_remote_file(host, "#{dest_path}/hiera.yaml", hieracfg)
   end
 else
   Log.notify "Skipping Hiera install"
