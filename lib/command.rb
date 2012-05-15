@@ -40,8 +40,8 @@ class Command
   # [environment] an optional Hash containing key-value pairs to be treated as environment variables that should be
   #     set for the duration of the puppet command.
   def puppet_env_command(host_info, environment = {})
-    rubylib = [host_info['hieralibdir'], host_info['pluginlibpath'], host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(':')
-    path    = [host_info['puppetbindir'], host_info['facterbindir'],'$PATH'   ].compact.join(':')
+    rubylib = [host_info['hieralibdir'], host_info['pluginlibpath'], host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(host_info['pathseparator'])
+    path    = [host_info['puppetbindir'], host_info['facterbindir'],'$PATH'   ].compact.join(host_info['pathseparator'])
     cmd     = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
 
     # if the caller passed in an "environment" hash, we need to build up a string of the form " KEY1=VAL1 KEY2=VAL2"

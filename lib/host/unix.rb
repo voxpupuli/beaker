@@ -14,19 +14,21 @@ module Unix
     include Unix::Exec
 
     PE_DEFAULTS = {
-      'user'         => 'root',
-      'puppetpath'   => '/etc/puppetlabs/puppet',
-      'puppetbin'    => '/opt/puppet/bin/puppet',
-      'puppetbindir' => '/opt/puppet/bin'
+      'user'          => 'root',
+      'puppetpath'    => '/etc/puppetlabs/puppet',
+      'puppetbin'     => '/opt/puppet/bin/puppet',
+      'puppetbindir'  => '/opt/puppet/bin',
+      'pathseparator' => ':',
     }
 
     DEFAULTS = {
-      'user'         => 'root',
-      'puppetpath'   => '/etc/puppet',
-      'puppetvardir' => '/var/lib/puppet',
-      'puppetbin'    => '/usr/bin/puppet',
-      'puppetbindir' => '/usr/bin',
-      'hieralibdir'  => '/opt/puppet-git-repos/hiera/lib'
+      'user'          => 'root',
+      'puppetpath'    => '/etc/puppet',
+      'puppetvardir'  => '/var/lib/puppet',
+      'puppetbin'     => '/usr/bin/puppet',
+      'puppetbindir'  => '/usr/bin',
+      'hieralibdir'   => '/opt/puppet-git-repos/hiera/lib',
+      'pathseparator' => ':',
     }
 
     def initialize(name, overrides, defaults)

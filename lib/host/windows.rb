@@ -14,19 +14,21 @@ module Windows
     include Windows::Exec
 
     PE_DEFAULTS = {
-      'user'         => 'Administrator',
-      'group'        => 'Administrators',
-      'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
-      'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'puppetbindir' => '`cygpath -F 38`/Puppet Labs/Puppet Enterprise/bin',
+      'user'          => 'Administrator',
+      'group'         => 'Administrators',
+      'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+      'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
+      'puppetbindir'  => '`cygpath -F 38`/Puppet Labs/Puppet Enterprise/bin',
+      'pathseparator' => ';',
     }
 
     DEFAULTS = {
-      'user'         => 'Administrator',
-      'group'        => 'Administrators',
-      'puppetpath'   => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
-      'puppetvardir' => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'hieralibdir'  => '/opt/puppet-git-repos/hiera/lib',
+      'user'          => 'Administrator',
+      'group'         => 'Administrators',
+      'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+      'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
+      'hieralibdir'   => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
+      'pathseparator' => ';',
     }
 
     def initialize(name, overrides, defaults)
