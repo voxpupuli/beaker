@@ -54,6 +54,8 @@ module PuppetCommands
   #     thrown if the exit code does not match one of the values in this list.
   #   :parseonly => any value.  If this key exists in the Hash, the "--parseonly" command line parameter will be
   #     passed to the 'puppet apply' command.
+  #   :trace => any value.  If this key exists in the Hash, the "--trace" command line parameter will be
+  #     passed to the 'puppet apply' command.
   #   :environment => a Hash containing string->string key value pairs.  These will be treated as extra environment
   #     variables that should be set before running the puppet command.
   # [&block] this method will yield to a block of code passed by the caller; this can be used for additional validation,
@@ -63,6 +65,7 @@ module PuppetCommands
     on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
     args = ["--verbose"]
     args << "--parseonly" if options[:parseonly]
+    args << "--trace" if options[:trace]
 
     # Not really thrilled with this implementation, might want to improve it later.  Basically, there is a magic
     # trick in the constructor of PuppetCommand which allows you to pass in a Hash for the last value in the *args
