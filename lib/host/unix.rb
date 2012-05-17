@@ -28,6 +28,7 @@ module Unix
       'puppetbin'     => '/usr/bin/puppet',
       'puppetbindir'  => '/usr/bin',
       'hieralibdir'   => '/opt/puppet-git-repos/hiera/lib',
+      'hierabindir'   => '/opt/puppet-git-repos/hiera/bin',
       'pathseparator' => ':',
     }
 

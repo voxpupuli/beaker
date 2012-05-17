@@ -28,6 +28,7 @@ module Windows
       'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
       'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
       'hieralibdir'   => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
+      'hierabindir'   => '`cygpath -w /opt/puppet-git-repos/hiera/bin`',
       'pathseparator' => ';',
     }
 
