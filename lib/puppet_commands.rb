@@ -8,6 +8,10 @@ module PuppetCommands
     PuppetCommand.new(*args)
   end
 
+  def hiera(*args)
+    HieraCommand.new(*args)
+  end
+
   def puppet_resource(*args)
     PuppetCommand.new(:resource,*args)
   end
