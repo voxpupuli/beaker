@@ -80,10 +80,9 @@ class Options
         @options[:facter] = value
       end
 
-      @options[:hiera] = 'git://github.com/puppetlabs/hiera.git#HEAD'
+      @options[:hiera] = nil
       opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
-              "  #{@options[:hiera]}",
-              "    - otherwise, as per the puppet argument"
+              "  #{@options[:hiera]}"
               ) do |value|
         #@options[:type] = 'git'
         @options[:hiera] = value
