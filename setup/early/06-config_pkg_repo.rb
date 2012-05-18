@@ -4,7 +4,8 @@ confine :except, :platform => 'windows'
 
 aptcfg = %q{ Acquire::http::Proxy "http://modi.puppetlabs.lan:3128/"; }
 
-el6_64 = %q{ [puppetlabs_local_os]
+el6_64 = %q{
+[puppetlabs_local_os]
 name=RHEL-$releasever - Base
 baseurl=http://yo.puppetlabs.lan/rhel6server-x86_64/RPMS.os
 gpgcheck=0 
