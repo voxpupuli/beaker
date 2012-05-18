@@ -7,6 +7,9 @@ hieracfg = %q{---
   - %{certname}
   - %{environment}
   - global
+
+:yaml:
+  :datadir: /etc/puppet/hieradata
 }
 
 def install_from_git(host, package, repo, revision)
@@ -72,6 +75,10 @@ if (options[:hiera]) then
 
     step "#{host}: Create Hiera config file hiera.yaml"
     create_remote_file(host, "#{dest_path}/hiera.yaml", hieracfg)
+    on host, "chmod 644 #{dest_path}/hiera.yaml"
+
+    step "#{host}: Create Hiera datadir"
+    on host, "mkdir -p #{dest_path}/hieradata"
   end
 else
   Log.notify "Skipping Hiera install"
