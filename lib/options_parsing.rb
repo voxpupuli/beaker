@@ -197,6 +197,11 @@ class Options
       opts.on('--pre PATH/TO/SCRIPT', 'Pass steps to be run prior to setup') do |step|
         @options[:pre_script] = step
       end
+
+      @options[:helper] = nil
+      opts.on('--helper PATH/TO/SCRIPT', 'A helper script (a la spec_helper) to require before tests execute') do |script|
+        require script
+      end
     end
 
     optparse.parse!
