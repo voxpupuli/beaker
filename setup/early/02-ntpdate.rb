@@ -6,7 +6,9 @@ if options[:timesync]
     if host['platform'].include? 'solaris'
       on(host, "sleep 10 && ntpdate -w #{options[:ntpserver]}")
     elsif host['platform'].include? 'windows'
-      on(host, "w32tm /register")
+      # The exit code of 5 is for Windows 2008 systems where the w32tm /register command
+      # is not actually necessary.
+      on(host, "w32tm /register", :acceptable_exit_codes => [0,5])
       on(host, "net start w32time", :acceptable_exit_codes => [0,2])
       on(host, "w32tm /config /manualpeerlist:#{options[:ntpserver]} /syncfromflags:manual /update")
       on(host, "w32tm /resync")
