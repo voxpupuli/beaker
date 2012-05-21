@@ -38,14 +38,13 @@ describe TestSuite do
                 'tmp/tests/my_shell_file.sh',
                 'tmp/tests/my_perl_file.pl' ]
 
-      tests.each_with_index do |i, my_file|
+      tests.each_with_index do |my_file, i|
         File.new my_file, 'w'
-        tests[i] = File.absolute_path my_file
+        tests[i] = File.expand_path my_file
       end
 
       ts = TestSuite.new('name', 'hosts', options, 'config', :stop_on_error)
       files = ts.instance_variable_get :@test_files
-      puts files.inspec
       (files.include? tests[0]).should be_true
       (files.include? 'tmp/tests/my_shell_file.sh').should be_false
       (files.include? 'tmp/tests/my_perl_file.pl').should be_false
