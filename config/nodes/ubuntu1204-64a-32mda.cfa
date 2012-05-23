@@ -1,0 +1,16 @@
+HOSTS:
+  precise-64-2:
+    roles:
+      - agent
+      - cloudpro
+    platform: ubuntu-12.04-amd64
+  precise-32-1:
+    roles:
+      - master
+      - agent
+      - dashboard
+      - cloudpro
+    platform: ubuntu-12.04-i386
+CONFIG:
+  nfs_server: none
+  consoleport: 443

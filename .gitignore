@@ -1,6 +1,8 @@
-local_setup.sh
 *.swp
 log/*
 !.gitignore
-/junit
-/acceptance-tests
+junit
+acceptance-tests
+pkg
+Gemfile.lock
+

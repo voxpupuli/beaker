@@ -1,6 +1,0 @@
-[puppet-spec]
-name=local repo for puppet spec yum tests
-baseurl=file:///var/yum/repo
-failovermethod=priority
-enabled=1
-gpgcheck=0

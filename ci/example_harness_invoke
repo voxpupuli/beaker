@@ -1,3 +1,0 @@
-./systest.rb --vmrun -c ci/ci-64.cfg --type git -p origin/2.6.x    -f 1.5.8 -t tests/acceptance --no-color --xml --debug
-
-./systest.rb --vmrun -c ci/ci-64.cfg --type git -p origin/2.6.next -f 1.5.8 -t tests/acceptance --no-color --xml --debug
