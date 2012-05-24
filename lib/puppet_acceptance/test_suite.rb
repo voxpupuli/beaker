@@ -259,7 +259,7 @@ module PuppetAcceptance
     def log_path(name)
       @@log_dir ||= File.join("log", @start_time.strftime("%F_%T"))
       unless File.directory?(@@log_dir) then
-        FileUtils.mkdir(@@log_dir)
+        FileUtils.mkdir_p(@@log_dir)
         FileUtils.cp(options[:config],(File.join(@@log_dir,"config.yml")))
 
         latest = File.join("log", "latest")
