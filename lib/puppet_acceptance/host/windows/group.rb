@@ -1,5 +1,5 @@
 module Windows::Group
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def group_list(&block)
     execute('wmic group where localaccount="true" get name /format:value') do |result|

@@ -1,12 +1,12 @@
-require 'lib/host'
-require 'lib/command_factory'
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
 
 module Windows
-  class Host < Host
-    require 'lib/host/windows/user'
-    require 'lib/host/windows/group'
-    require 'lib/host/windows/file'
-    require 'lib/host/windows/exec'
+  class Host < PuppetAcceptance::Host
+    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'user'))
+    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'group'))
+    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'exec'))
+    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'file'))
 
     include Windows::User
     include Windows::Group
@@ -36,7 +36,7 @@ module Windows
     def initialize(name, overrides, defaults)
       super(name, overrides, defaults)
 
-      @defaults = defaults.merge(TestConfig.is_pe? ? PE_DEFAULTS : DEFAULTS)
+      @defaults = defaults.merge(PuppetAcceptance::TestConfig.is_pe? ? PE_DEFAULTS : DEFAULTS)
     end
   end
 end

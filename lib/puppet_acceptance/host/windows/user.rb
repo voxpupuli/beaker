@@ -1,5 +1,5 @@
 module Windows::User
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def user_list(&block)
     execute('wmic useraccount where localaccount="true" get name /format:value') do |result|

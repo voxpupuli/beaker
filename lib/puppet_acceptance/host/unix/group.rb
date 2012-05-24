@@ -1,5 +1,5 @@
 module Unix::Group
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def group_list(&block)
     execute("getent group") do |result|

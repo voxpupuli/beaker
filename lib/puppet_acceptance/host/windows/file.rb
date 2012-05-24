@@ -1,5 +1,5 @@
 module Windows::File
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def tmpfile(name)
     execute("cygpath -m $(mktemp -t #{name}.XXXXXX)")

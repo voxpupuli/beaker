@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
+require 'rubygems' unless defined?(Gem)
 require 'net/ssh'
 require 'net/scp'
 require 'net/http'
@@ -9,29 +9,32 @@ require 'optparse'
 require 'systemu'
 require 'test/unit'
 require 'yaml'
-require 'lib/host'
 
 Test::Unit.run = true
-files = Dir.glob(File.dirname(__FILE__) + '/lib/*.rb')
-libs = files.reject { |f| f =~ /puppet_acceptance\.rb/ }
-libs.each {|file| require file}
+
+Dir[
+  File.expand_path(File.dirname(__FILE__)+'/lib/puppet_acceptance/*.rb')
+].each do |file|
+  require file
+end
 
 trap(:INT) do
-  Log.error "Interrupt received; exiting..."
+  PuppetAcceptance::Log.error "Interrupt received; exiting..."
   exit(1)
 end
 
 ###################################
 #  Main
 ###################################
-options=Options.parse_args
+options = PuppetAcceptance::Options.parse_args
+
 unless options[:config] then
   fail "Argh!  There is no default for Config, specify one!"
 end
 
-Log.debug "Using Config #{options[:config]}"
+PuppetAcceptance::Log.debug "Using Config #{options[:config]}"
 
-config = TestConfig.load_file(options[:config])
+config = PuppetAcceptance::TestConfig.load_file(options[:config])
 
 if options[:noinstall]
   setup_options = options.merge({ :random => false,
@@ -54,26 +57,26 @@ else
 end
 
 # Generate hosts
-hosts = config['HOSTS'].collect { |name,overrides| Host.create(name,overrides,config['CONFIG']) }
+hosts = config['HOSTS'].collect { |name,overrides| PuppetAcceptance::Host.create(name,overrides,config['CONFIG']) }
 begin
 
   # Run any pre-flight scripts
   if options[:pre_script]
     pre_opts = options.merge({ :random => false,
                                   :tests => [ 'setup/early', options[:pre_script] ] })
-    TestSuite.new('pre-setup', hosts, pre_opts, config, TRUE).run_and_exit_on_failure
+    PuppetAcceptance::TestSuite.new('pre-setup', hosts, pre_opts, config, TRUE).run_and_exit_on_failure
   end
 
   # Run the harness for install
-  TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure
+  PuppetAcceptance::TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure
 
   # Run the tests
   unless options[:installonly] then
-    TestSuite.new('acceptance', hosts, options, config).run_and_exit_on_failure
+    PuppetAcceptance::TestSuite.new('acceptance', hosts, options, config).run_and_exit_on_failure
   end
 ensure
   hosts.each {|host| host.close }
 end
 
-Log.notify "systest completed successfully, thanks."
+PuppetAcceptance::Log.notify "systest completed successfully, thanks."
 exit 0

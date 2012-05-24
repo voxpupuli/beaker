@@ -1,5 +1,5 @@
 module Unix::Exec
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def echo(msg, abs=true)
     (abs ? '/bin/echo' : 'echo') + " #{msg}"
