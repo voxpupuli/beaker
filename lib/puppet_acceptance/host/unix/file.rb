@@ -1,5 +1,5 @@
 module Unix::File
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def tmpfile(name)
     execute("mktemp -t #{name}.XXXXXX")

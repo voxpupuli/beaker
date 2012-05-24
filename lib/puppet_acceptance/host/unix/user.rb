@@ -1,5 +1,5 @@
 module Unix::User
-  include CommandFactory
+  include PuppetAcceptance::CommandFactory
 
   def user_list(&block)
     execute("getent passwd") do |result|
