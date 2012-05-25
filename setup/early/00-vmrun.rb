@@ -67,6 +67,9 @@ test_name "Revert VMs"
 
     vmserver = options[:vmrun]
     hosts.each do |host|
+      Log.warn ""
+      Log.warn "Warning you are using using VIRSH to manage #{host}!!!!"
+      Log.warn ""
       step "Reverting VM: #{host} to #{snap} on VM server #{vmserver}"
       system("lib/virsh_exec.exp #{vmserver} snapshot-revert #{host} #{snap}")
     end
