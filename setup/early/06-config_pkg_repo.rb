@@ -12,6 +12,7 @@ else
     when host['platform'] =~ /ubuntu/
       on(host, "mv /etc/apt/apt.conf /etc/apt/apt.conf.bk") 
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg) 
+      on(host, "apt-get -y -f -m update") 
     else
       Log.notify "#{host}: packing configuration not modified"  
     end
