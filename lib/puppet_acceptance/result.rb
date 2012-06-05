@@ -1,14 +1,13 @@
 module PuppetAcceptance
   class Result
     attr_accessor :host, :cmd, :stdout, :stderr, :exit_code, :output
-    def initialize(host = nil, cmd = nil, stdout = '', stderr = '',
-                   exit_code = nil, output = '')
+    def initialize(host, cmd)
       @host      = host
       @cmd       = cmd
-      @stdout    = stdout
-      @stderr    = stderr
-      @exit_code = exit_code
-      @output    = output
+      @stdout    = ''
+      @stderr    = ''
+      @exit_code = nil
+      @output    = ''
     end
 
     def log
