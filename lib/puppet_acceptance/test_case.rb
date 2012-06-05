@@ -153,18 +153,18 @@ module PuppetAcceptance
     # result access
     #
     def stdout
-      return nil if result.nil?
-      result.stdout
+      return nil if @result.nil?
+      @result.stdout
     end
 
     def stderr
-      return nil if result.nil?
-      result.stderr
+      return nil if @result.nil?
+      @result.stderr
     end
 
     def exit_code
-      return nil if result.nil?
-      result.exit_code
+      return nil if @result.nil?
+      @result.exit_code
     end
 
     #
@@ -177,7 +177,16 @@ module PuppetAcceptance
       if host.is_a? Array
         host.map { |h| on h, command, options, &block }
       else
-        @result = command.exec(host, options)
+        cmdline = command.cmd_line(host)
+
+        @result = host.exec(cmdline, {:pty => options[:pty], :stdin => options[:stdin]})
+
+        unless options[:silent]
+          @result.log
+          unless @result.exit_code_in?(options[:acceptable_exit_codes] || [0])
+            raise "Host '#{host}' exited with #{@result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{@result.formatted_output}"
+          end
+        end
 
         # Also, let additional checking be performed by the caller.
         yield if block_given?
@@ -191,8 +200,8 @@ module PuppetAcceptance
         host.each { |h| scp_to h, from_path, to_path, options }
       else
         @result = host.do_scp(from_path, to_path)
-        result.log
-        raise "scp exited with #{result.exit_code}" if result.exit_code != 0
+        @result.log
+        raise "scp exited with #{@result.exit_code}" if @result.exit_code != 0
       end
     end
 

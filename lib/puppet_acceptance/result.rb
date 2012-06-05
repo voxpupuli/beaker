@@ -17,5 +17,14 @@ module PuppetAcceptance
       Log.debug "<STDERR>\n#{host}: #{stderr}\n</STDERR>"
       Log.debug "#{host}: Exited with #{exit_code}"
     end
+
+    def formatted_output
+      limit = 10
+      @output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
+    end
+
+    def exit_code_in?(range)
+      range.include?(@exit_code)
+    end
   end
 end
