@@ -3,9 +3,7 @@ module PuppetAcceptance
     include Test::Unit::Assertions
 
     def execute(command, options={}, &block)
-      command = Command.new(command)
-
-      result = command.exec(self, options)
+      result = self.exec(Command.new(command), options)
 
       if block_given?
         yield result

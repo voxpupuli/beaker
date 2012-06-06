@@ -4,7 +4,7 @@ module PuppetAcceptance
   class Command
     include Test::Unit::Assertions
 
-    def initialize(command_string, options)
+    def initialize(command_string, options={})
       @command_string = command_string
       @options = options
     end

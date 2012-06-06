@@ -177,16 +177,7 @@ module PuppetAcceptance
       if host.is_a? Array
         host.map { |h| on h, command, options, &block }
       else
-        cmdline = command.cmd_line(host)
-
-        @result = host.exec(cmdline, {:pty => options[:pty], :stdin => options[:stdin]})
-
-        unless options[:silent]
-          @result.log
-          unless @result.exit_code_in?(options[:acceptable_exit_codes] || [0])
-            raise "Host '#{host}' exited with #{@result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{@result.formatted_output}"
-          end
-        end
+        @result = host.exec(command, options)
 
         # Also, let additional checking be performed by the caller.
         yield if block_given?
