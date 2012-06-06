@@ -5,7 +5,7 @@ version  = config['pe_ver']
 test_name "Install Puppet #{version}"
 
 if version =~ /1.1/ 
-  Log.warn "Install PE version #{version}"
+  logger.warn "Install PE version #{version}"
   hosts.each do |host|
     platform = host['platform']
     # FIXME hack-o-rama: this is likely to be fragile and very PE 1.0, 1.1 specifc:
@@ -20,10 +20,10 @@ if version =~ /1.1/
     host['dist'] = "puppet-enterprise-#{version}-#{platform}"
   
     unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar"
-      Log.error "PE #{host['dist']}.tar not found, help!"
-      Log.error ""
-      Log.error "Make sure your configuration file uses the PE version string:"
-      Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
+      logger.error "PE #{host['dist']}.tar not found, help!"
+      logger.error ""
+      logger.error "Make sure your configuration file uses the PE version string:"
+      logger.error "  eg: rhel-5-x86_64  centos-5-x86_64"
       fail_test "Sorry, PE #{host['dist']}.tar file not found."
     end
   
@@ -64,10 +64,10 @@ else
   
     # determine the distro tar name
     unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.tar.gz"
-      Log.error "PE #{host['dist']}.tar not found, help!"
-      Log.error ""
-      Log.error "Make sure your configuration file uses the PE version string:"
-      Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
+      logger.error "PE #{host['dist']}.tar not found, help!"
+      logger.error ""
+      logger.error "Make sure your configuration file uses the PE version string:"
+      logger.error "  eg: rhel-5-x86_64  centos-5-x86_64"
       fail_test "Sorry, PE #{host['dist']}.tar.gz file not found."
     end
   

@@ -13,13 +13,14 @@ module PuppetAcceptance
     class PendingTest < Exception; end
     class SkipTest < Exception; end
 
-    attr_reader :version, :config, :options, :path, :fail_flag, :usr_home,
+    attr_reader :version, :config, :logger, :options, :path, :fail_flag, :usr_home,
                 :test_status, :exception, :runtime, :result
 
-    def initialize(hosts, config, options={}, path=nil)
+    def initialize(hosts, logger, config, options={}, path=nil)
       @version = config['VERSION']
       @config  = config['CONFIG']
       @hosts   = hosts
+      @logger = logger
       @options = options
       @path    = path
       @usr_home = ENV['HOME']
@@ -44,8 +45,8 @@ module PuppetAcceptance
               rescue SkipTest
                 @test_status = :skip
               rescue StandardError, ScriptError => e
-                Log.error(e.inspect)
-                e.backtrace.each { |line| Log.error(line) }
+                @logger.error(e.inspect)
+                e.backtrace.each { |line| @logger.error(line) }
                 @test_status = :error
                 @exception   = e
               end
@@ -80,8 +81,8 @@ module PuppetAcceptance
       $stdout = old_stdout
       $stderr = old_stderr
 
-      stdout.each { |line| Log.notify(line) }
-      stderr.each { |line| Log.warn(line) }
+      stdout.each { |line| @logger.notify(line) }
+      stderr.each { |line| @logger.warn(line) }
 
       return result
     end
@@ -90,30 +91,30 @@ module PuppetAcceptance
     # Test Structure
     #
     def step(step_name, &block)
-      Log.notify "  * #{step_name}"
+      @logger.notify "  * #{step_name}"
       yield if block
     end
 
     def test_name(test_name, &block)
-      Log.notify test_name
+      @logger.notify test_name
       yield if block
     end
 
     def pass_test(msg)
-      Log.notify msg
+      @logger.notify msg
     end
 
     def skip_test(msg)
-      Log.notify "Skip: #{msg}"
+      @logger.notify "Skip: #{msg}"
       @test_status = :skip
     end
 
     def fail_test(msg)
-      flunk(msg + "\n" + Log.pretty_backtrace() + "\n")
+      flunk(msg + "\n" + @logger.pretty_backtrace() + "\n")
     end
 
     def pending_test(msg = "WIP: #{@test_name}")
-      Log.warn msg
+      @logger.warn msg
       raise PendingTest
     end
 
@@ -133,7 +134,7 @@ module PuppetAcceptance
         end
       end
       if @hosts.empty?
-        Log.warn "No suitable hosts with: #{confines.inspect}"
+        @logger.warn "No suitable hosts with: #{confines.inspect}"
         raise SkipTest
       end
     end
@@ -191,7 +192,7 @@ module PuppetAcceptance
         host.each { |h| scp_to h, from_path, to_path, options }
       else
         @result = host.do_scp(from_path, to_path)
-        @result.log
+        @result.log(@logger)
         raise "scp exited with #{@result.exit_code}" if @result.exit_code != 0
       end
     end
@@ -231,7 +232,7 @@ module PuppetAcceptance
 
     def dashboard
       dashboards = hosts 'dashboard'
-      Log.warn "There is no dashboard host configured" if dashboards.empty?
+      @logger.warn "There is no dashboard host configured" if dashboards.empty?
       fail "Cannot have more than one dashboard host" if dashboards.length > 1
       dashboards.first
     end

@@ -10,10 +10,10 @@ hosts.each do |host|
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
   dist_gz = "#{dist_tar}.gz"
   unless File.file? "/opt/enterprise/dists/#{dist_gz}"
-    Log.error "PE #{dist_gz} not found, help!"
-    Log.error ""
-    Log.error "Make sure your configuration file uses the PE version string:"
-    Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
+    logger.error "PE #{dist_gz} not found, help!"
+    logger.error ""
+    logger.error "Make sure your configuration file uses the PE version string:"
+    logger.error "  eg: rhel-5-x86_64  centos-5-x86_64"
     fail_test "Sorry, PE #{dist_gz} file not found."
   end
 

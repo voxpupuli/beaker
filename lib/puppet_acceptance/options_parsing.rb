@@ -13,14 +13,14 @@ module PuppetAcceptance
         opts.banner = "Usage: #{File.basename($0)} [options...]"
 
         @options[:config] = nil
-        opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
+        opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do |file|
           @options[:config] = file
         end
 
         @options[:type] = nil
         opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - no default ') do |type|
           unless File.directory?("setup/#{type}") then
-            Log.error "Sorry, #{type} is not a known setup type!"
+            raise "Sorry, #{type} is not a known setup type!"
             exit 1
           end
           @options[:type] = type
@@ -31,23 +31,22 @@ module PuppetAcceptance
           @options[:tests] << dir
         end
 
+        @options[:dry_run] = false
         opts.on( '-d', '--dry-run', "Just report what would be done on the targets" ) do |file|
+          @options[:dry_run] = true
           $dry_run = true
         end
 
+        @options[:debug] = false
         opts.on( '--debug', 'Enable full debugging' ) do |enable_debug|
-          if enable_debug
-            Log.log_level = :debug
-          else
-            Log.log_level = :normal
-          end
+          @options[:debug] = true
         end
 
         valid_rubies = %w{skip system 1.8.6 1.8.7}
         @options[:rvm] = 'skip'
         opts.on('--rvm VERSION', 'Specify Ruby version: system, 1.8.6, 1.8.7') do |rvm|
           unless valid_rubies.include? rvm
-            Log.error "Sorry #{rvm} is not a valid Ruby version"
+            raise "Sorry #{rvm} is not a valid Ruby version"
             exit 1
           end
           @options[:rvm] = rvm
@@ -130,14 +129,14 @@ module PuppetAcceptance
           @options[:vmrun] = vm
         end
 
-        @options[:installonly] = FALSE
+        @options[:installonly] = false
         opts.on( '--install-only', 'Perform install steps, run no tests' ) do
-          @options[:installonly]= TRUE
+          @options[:installonly] = true
         end
 
-        @options[:noinstall] = FALSE
+        @options[:noinstall] = false
         opts.on( '--no-install', 'Skip install step' ) do
-          @options[:noinstall] = TRUE
+          @options[:noinstall] = true
         end
 
         @options[:ntpserver] = 'ntp.puppetlabs.lan'
@@ -145,40 +144,39 @@ module PuppetAcceptance
           @options[:ntpserver] = server
         end
 
-        @options[:timesync] = FALSE
+        @options[:timesync] = false
         opts.on( '--ntp', 'run ntpdate step' ) do
-          @options[:timesync] = TRUE
+          @options[:timesync] = true
         end
 
-        @options[:root_keys] = FALSE
+        @options[:root_keys] = false
         opts.on('--root-keys', 'sync ~root/.ssh/authorized_keys') do
-          @options[:root_keys] = TRUE
+          @options[:root_keys] = true
         end
 
-        @options[:dhcp_renew] = FALSE
+        @options[:dhcp_renew] = false
         opts.on('--dhcp-renew', 'perform dhcp lease renewal') do
-          @options[:dhcp_renew] = TRUE
+          @options[:dhcp_renew] = true
         end
 
-        @options[:pkg_repo] = FALSE
+        @options[:pkg_repo] = false
         opts.on('--pkg-repo', 'configure packaging system repository') do
-          @options[:pkg_repo] = TRUE
+          @options[:pkg_repo] = true
         end
 
-        @options[:stdout_only] = FALSE
+        @options[:stdout_only] = false
         opts.on('-s', '--stdout-only', 'log output to STDOUT but no files') do
-          @options[:stdout_only] = TRUE
+          @options[:stdout_only] = true
         end
 
-        Log.stdout = TRUE
+        @options[:quiet] = false
         opts.on('-q', '--quiet', 'don\'t log output to STDOUT') do
-          Log.stdout = FALSE
-          @options[:quiet] = FALSE
+          @options[:quiet] = true
         end
 
-        Log.color = true
+        @options[:color] = true
         opts.on('--[no-]color', 'don\'t display color in log output') do |value|
-          Log.color = value
+          @options[:color] = value
         end
 
         @options[:random] = false
@@ -201,7 +199,7 @@ module PuppetAcceptance
           exit
         end
 
-        @options[:pre_script] = false
+        @options[:pre_script] = nil
         opts.on('--pre PATH/TO/SCRIPT', 'Pass steps to be run prior to setup') do |step|
           @options[:pre_script] = step
         end

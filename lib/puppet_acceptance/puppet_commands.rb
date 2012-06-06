@@ -65,7 +65,7 @@ module PuppetAcceptance
     #     variables that should be set before running the puppet command.
     # [&block] this method will yield to a block of code passed by the caller; this can be used for additional validation,
     #     etc.
-    def apply_manifest_on(host,manifest,options={},&block)
+    def apply_manifest_on(host, manifest, options={}, &block)
       on_options = {:stdin => manifest + "\n"}
       on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
       args = ["--verbose"]
@@ -167,7 +167,7 @@ module PuppetAcceptance
       timeout = 15
       wait_start = Time.now
 
-      Log.debug "Waiting for master to start"
+      @logger.debug "Waiting for master to start"
 
       begin
         Timeout.timeout(timeout) do
@@ -185,7 +185,7 @@ module PuppetAcceptance
       wait_finish = Time.now
       elapsed = wait_finish - wait_start
 
-      Log.debug "Slept for #{elapsed} seconds waiting for Puppet Master to start"
+      @logger.debug "Slept for #{elapsed} seconds waiting for Puppet Master to start"
     end
 
     def stop_puppet_master(host, pidfile)
@@ -198,7 +198,7 @@ module PuppetAcceptance
       timeout = 10
       wait_start = Time.now
 
-      Log.debug "Waiting for master to stop"
+      @logger.debug "Waiting for master to stop"
 
       begin
         Timeout.timeout(timeout) do
@@ -209,7 +209,7 @@ module PuppetAcceptance
           end
         end
       rescue Timeout::Error
-        Log.warn "Puppet master failed to stop after #{elapsed} seconds; killing manually"
+        @logger.warn "Puppet master failed to stop after #{elapsed} seconds; killing manually"
         on host, "kill -9 $(cat #{pidfile})"
         on host, "rm -f #{pidfile}"
       end
@@ -217,7 +217,7 @@ module PuppetAcceptance
       wait_finish = Time.now
       elapsed = wait_finish - wait_start
 
-      Log.debug "Slept for #{elapsed} seconds waiting for Puppet Master to stop"
+      @logger.debug "Slept for #{elapsed} seconds waiting for Puppet Master to stop"
     end
   end
 end

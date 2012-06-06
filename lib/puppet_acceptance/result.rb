@@ -10,11 +10,11 @@ module PuppetAcceptance
       @output    = ''
     end
 
-    def log
-      Log.debug
-      Log.debug "<STDOUT>\n#{host}: #{stdout}\n</STDOUT>"
-      Log.debug "<STDERR>\n#{host}: #{stderr}\n</STDERR>"
-      Log.debug "#{host}: Exited with #{exit_code}"
+    def log(logger)
+      logger.debug
+      logger.debug "<STDOUT>\n#{host}: #{stdout}\n</STDOUT>"
+      logger.debug "<STDERR>\n#{host}: #{stderr}\n</STDERR>"
+      logger.debug "#{host}: Exited with #{exit_code}"
     end
 
     def formatted_output(limit=10)

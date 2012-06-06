@@ -21,10 +21,10 @@ if options[:timesync]
           success=TRUE if exit_code == 0
         end
       end
-      Log.notify "NTP date succeeded after #{count} tries"
+      logger.notify "NTP date succeeded after #{count} tries"
     end
   end
 else
-  Log.notify "Skipping ntp time sync"
+  logger.notify "Skipping ntp time sync"
   skip_test "Skipping ntp time sync"
 end

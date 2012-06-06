@@ -1,30 +1,43 @@
 module PuppetAcceptance
   class Host
-    def self.create(name, overrides, defaults)
-      case overrides['platform']
-      when /windows/;
-        Windows::Host.new(name, overrides, defaults)
+    def self.create(name, platform, options, overrides, config)
+      case platform
+      when /windows/
+        Windows::Host.new(name, options, overrides, config)
       else
-        Unix::Host.new(name, overrides, defaults)
+        Unix::Host.new(name, options, overrides, config)
       end
     end
 
+    attr_accessor :logger
+
     # A cache for active SSH connections to our execution nodes.
-    def initialize(name, overrides, defaults)
-      @name,@overrides,@defaults = name,overrides,defaults
+    def initialize(name, options, overrides, defaults)
+      @name, @options, @overrides = name, options.dup, overrides
+
+      @defaults = merge_defaults_for_type(defaults, options[:type])
     end
+
+    def merge_defaults_for_type(defaults, type)
+      defaults.merge(type =~ /pe/ ? self.class.pe_defaults : self.class.foss_defaults)
+    end
+
     def []=(k,v)
       @overrides[k] = v
     end
+
     def [](k)
       @overrides.has_key?(k) ? @overrides[k] : @defaults[k]
     end
+
     def to_str
       @name
     end
+
     def to_s
       @name
     end
+
     def +(other)
       @name+other
     end
@@ -45,7 +58,7 @@ module PuppetAcceptance
     def exec(command, options={})
       cmdline = command.cmd_line(self)
 
-      Log.debug "#{self}: RemoteExec(#{cmdline})"
+      @logger.debug "#{self} $ #{cmdline}"
 
       ssh_options = {
         :stdin => options[:stdin],
@@ -56,7 +69,7 @@ module PuppetAcceptance
       result = ssh_connection.execute(cmdline, ssh_options)
 
       unless options[:silent]
-        result.log
+        result.log(@logger)
         unless result.exit_code_in?(options[:acceptable_exit_codes] || [0])
           limit = 10
           raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
@@ -66,7 +79,7 @@ module PuppetAcceptance
     end
 
     def do_scp(source, target)
-      Log.debug "#{self}: ScpFile(#{[source, target].inspect})"
+      @logger.debug "localhost $ scp #{source} #{self}:#{target}"
 
       ssh_options = {
         :dry_run => $dry_run,

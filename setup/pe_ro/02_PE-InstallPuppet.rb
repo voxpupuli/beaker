@@ -16,7 +16,7 @@ hosts.each do |host|
   q_script = case
     when (!role_dashboard); "q_master_only"
     when (role_dashboard);  "q_master_and_dashboard"
-    else Log.debug "Master warn #{host} has an unacceptable combination of roles."
+    else logger.debug "Master warn #{host} has an unacceptable combination of roles."
   end
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a /#{nfs_mnt}/#{q_script}"
 end
@@ -36,7 +36,7 @@ hosts.each do |host|
     when (role_agent  && !role_dashboard); "q_agent_only"
     when (role_agent  && role_dashboard);  "q_agent_and_dashboard"
     when (!role_agent && role_dashboard);  "q_dashboard_only"
-    else Log.debug "Agent warn #{host} has an unacceptable combination of roles."
+    else logger.debug "Agent warn #{host} has an unacceptable combination of roles."
   end
   on host,"cd #{dist_dir} && ./puppet-enterprise-installer -a /#{nfs_mnt}/#{q_script}"
 end
