@@ -12,9 +12,35 @@ module PuppetAcceptance
         # Set a banner
         opts.banner = "Usage: #{File.basename($0)} [options...]"
 
+        @options[:config] = nil
+        opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
+          @options[:config] = file
+        end
+
+        @options[:type] = nil
+        opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - no default ') do |type|
+          unless File.directory?("setup/#{type}") then
+            Log.error "Sorry, #{type} is not a known setup type!"
+            exit 1
+          end
+          @options[:type] = type
+        end
+
         @options[:tests] = []
         opts.on( '-t', '--tests DIR/FILE', 'Execute tests in DIR or FILE (defaults to "./tests")' ) do|dir|
           @options[:tests] << dir
+        end
+
+        opts.on( '-d', '--dry-run', "Just report what would be done on the targets" ) do |file|
+          $dry_run = true
+        end
+
+        opts.on( '--debug', 'Enable full debugging' ) do |enable_debug|
+          if enable_debug
+            Log.log_level = :debug
+          else
+            Log.log_level = :normal
+          end
         end
 
         valid_rubies = %w{skip system 1.8.6 1.8.7}
@@ -46,15 +72,6 @@ module PuppetAcceptance
         @options[:snapshot] = nil
         opts.on('--snapshot NAME', 'Specify special VM snapshot name') do |snap|
           @options[:snapshot] = snap
-        end
-
-        @options[:type] = nil
-        opts.on('--type TYPE', 'Select puppet install type (pe, pe_ro, git, gem) - no default ') do |type|
-          unless File.directory?("setup/#{type}") then
-            Log.error "Sorry, #{type} is not a known setup type!"
-            exit 1
-          end
-          @options[:type] = type
         end
 
         @options[:pe_version] = nil
@@ -106,23 +123,6 @@ module PuppetAcceptance
         opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
           #@options[:type] = 'git'
           @options[:plugins] << value
-        end
-
-        @options[:config] = nil
-        opts.on( '-c', '--config FILE', 'Use configuration FILE' ) do|file|
-          @options[:config] = file
-        end
-
-        opts.on( '--debug', 'Enable full debugging' ) do |enable_debug|
-          if enable_debug
-            Log.log_level = :debug
-          else
-            Log.log_level = :normal
-          end
-        end
-
-        opts.on( '-d', '--dry-run', "Just report what would be done on the targets" ) do |file|
-          $dry_run = true
         end
 
         @options[:vmrun] = nil
