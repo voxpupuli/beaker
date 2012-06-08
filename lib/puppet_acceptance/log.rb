@@ -71,6 +71,25 @@ module PuppetAcceptance
       end
     end
 
+    # This is almost exactly the same as debug, except with slightly different
+    # semantics. It's used exclusively for logging command output received from
+    # a host, which may be done differently depending on success/failure/debug.
+    # Also, we want to `print` rather than `puts`, lest we receive partial
+    # output.
+    def host_output(*args)
+      return unless @log_level == :debug
+
+      # Strip colors for readability.
+      strings = args.map do |arg|
+        arg.gsub(/\e\[(\d+;)?\d+m/, '')
+      end
+      @destinations.each do |to|
+        to.print GREY if color
+        to.print *strings
+        to.print NORMAL if color
+      end
+    end
+
     def warn(*args)
       return unless @log_level == :debug
       @destinations.each do |to|

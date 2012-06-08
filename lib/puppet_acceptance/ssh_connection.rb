@@ -34,7 +34,7 @@ module PuppetAcceptance
       @ssh.close if @ssh
     end
 
-    def execute(command, options={})
+    def execute(command, options={}, stdout_callback=nil, stderr_callback=stdout_callback)
       result = Result.new(@host, command)
       return result if options[:dry_run]
 
@@ -53,11 +53,13 @@ module PuppetAcceptance
         channel.exec(command) do |terminal, success|
           abort "FAILED: to execute command on a new channel on #{@host.name}" unless success
           terminal.on_data do |ch, data|
+            stdout_callback[data] if stdout_callback
             result.stdout << data
             result.output << data
           end
           terminal.on_extended_data do |ch, type, data|
             if type == 1
+              stderr_callback[data] if stderr_callback
               result.stderr << data
               result.output << data
             end

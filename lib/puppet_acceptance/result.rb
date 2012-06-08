@@ -11,10 +11,7 @@ module PuppetAcceptance
     end
 
     def log(logger)
-      logger.debug
-      logger.debug "<STDOUT>\n#{host}: #{stdout}\n</STDOUT>"
-      logger.debug "<STDERR>\n#{host}: #{stderr}\n</STDERR>"
-      logger.debug "#{host}: Exited with #{exit_code}"
+      logger.debug "Exited: #{exit_code}" unless exit_code == 0
     end
 
     def formatted_output(limit=10)

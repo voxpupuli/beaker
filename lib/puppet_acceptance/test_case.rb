@@ -32,24 +32,22 @@ module PuppetAcceptance
       # defined in the tests don't leak out to other tests.
       class << self
         def run_test
-          with_standard_output_to_logs do
-            @runtime = Benchmark.realtime do
-              begin
-                test = File.read(path)
-                eval test,nil,path,1
-              rescue Test::Unit::AssertionFailedError => e
-                @test_status = :fail
+          @runtime = Benchmark.realtime do
+            begin
+              test = File.read(path)
+              eval test,nil,path,1
+            rescue Test::Unit::AssertionFailedError => e
+              @test_status = :fail
+              @exception   = e
+            rescue PendingTest
+              @test_status = :pending
+            rescue SkipTest
+              @test_status = :skip
+            rescue StandardError, ScriptError => e
+              @logger.error(e.inspect)
+              e.backtrace.each { |line| @logger.error(line) }
+              @test_status = :error
                 @exception   = e
-              rescue PendingTest
-                @test_status = :pending
-              rescue SkipTest
-                @test_status = :skip
-              rescue StandardError, ScriptError => e
-                @logger.error(e.inspect)
-                e.backtrace.each { |line| @logger.error(line) }
-                @test_status = :error
-                @exception   = e
-              end
             end
           end
           return self
@@ -67,45 +65,25 @@ module PuppetAcceptance
       hash
     end
 
-    def with_standard_output_to_logs(&block)
-      stdout = ''
-      old_stdout = $stdout
-      $stdout = StringIO.new(stdout, 'w')
-
-      stderr = ''
-      old_stderr = $stderr
-      $stderr = StringIO.new(stderr, 'w')
-
-      result = yield if block_given?
-
-      $stdout = old_stdout
-      $stderr = old_stderr
-
-      stdout.each { |line| @logger.notify(line) }
-      stderr.each { |line| @logger.warn(line) }
-
-      return result
-    end
-
     #
     # Test Structure
     #
     def step(step_name, &block)
-      @logger.notify "  * #{step_name}"
+      @logger.notify "\n  * #{step_name}\n"
       yield if block
     end
 
     def test_name(test_name, &block)
-      @logger.notify test_name
+      @logger.notify "\n#{test_name}\n"
       yield if block
     end
 
     def pass_test(msg)
-      @logger.notify msg
+      @logger.notify "\n#{msg}\n"
     end
 
     def skip_test(msg)
-      @logger.notify "Skip: #{msg}"
+      @logger.notify "\nSkip: #{msg}\n"
       @test_status = :skip
     end
 

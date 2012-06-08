@@ -58,7 +58,7 @@ module PuppetAcceptance
     def exec(command, options={})
       cmdline = command.cmd_line(self)
 
-      @logger.debug "#{self} $ #{cmdline}"
+      @logger.debug "\n#{self} $ #{cmdline}"
 
       ssh_options = {
         :stdin => options[:stdin],
@@ -66,7 +66,9 @@ module PuppetAcceptance
         :dry_run => $dry_run,
       }
 
-      result = ssh_connection.execute(cmdline, ssh_options)
+      output_callback = logger.method(:host_output)
+
+      result = ssh_connection.execute(cmdline, ssh_options, output_callback)
 
       unless options[:silent]
         result.log(@logger)
