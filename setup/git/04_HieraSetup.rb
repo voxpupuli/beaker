@@ -4,8 +4,8 @@ hieracfg = %q{---
 :backend:
   - yaml
 :hierarchy:
-  - %{certname}
-  - %{environment}
+  - '%{certname}'
+  - '%{environment}'
   - global
 
 :yaml:
