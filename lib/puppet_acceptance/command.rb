@@ -41,10 +41,24 @@ module PuppetAcceptance
     # [environment] an optional Hash containing key-value pairs to be treated as environment variables that should be
     #     set for the duration of the puppet command.
     def puppet_env_command(host_info, environment = {})
-      rubylib = [host_info['hieralibdir'], host_info['pluginlibpath'], host_info['puppetlibdir'], host_info['facterlibdir'],'$RUBYLIB'].compact.join(host_info['pathseparator'])
-      # always use colon for PATH, even Windows
-      path    = [host_info['puppetbindir'], host_info['facterbindir'], host_info['hierabindir'],'$PATH'].compact.join(':')
-      cmd     = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
+      rubylib = [
+        host_info['hieralibdir'],
+        host_info['hierapuppetlibdir'],
+        host_info['pluginlibpath'],
+        host_info['puppetlibdir'],
+        host_info['facterlibdir'],
+        '$RUBYLIB'
+      ].compact.join(host_info['pathseparator'])
+
+      # Always use colon for PATH, even Windows
+      path = [
+        host_info['puppetbindir'],
+        host_info['facterbindir'],
+        host_info['hierabindir'],
+        '$PATH'
+      ].compact.join(':')
+
+      cmd = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
 
       # if the caller passed in an "environment" hash, we need to build up a string of the form " KEY1=VAL1 KEY2=VAL2"
       # containing all of the specified environment vars.  We prefix it with a space because we will insert it into

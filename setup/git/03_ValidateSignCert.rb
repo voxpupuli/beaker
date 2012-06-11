@@ -16,3 +16,4 @@ with_master_running_on(master, "--dns_alt_names=\"puppet,$(hostname -s),$(hostna
   step "Agents: Run agent --test second time to obtain signed cert"
   on agents, puppet_agent("--test"), :acceptable_exit_codes => [0,2]
 end
+

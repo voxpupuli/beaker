@@ -89,6 +89,14 @@ module PuppetAcceptance
           @options[:hiera] = value
         end
 
+        @options[:hiera_puppet] = nil
+        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI',
+                "  #{@options[:hiera_puppet]}"
+                ) do |value|
+          #@options[:type] = 'git'
+          @options[:hiera_puppet] = value
+        end
+
         @options[:modules] = []
         opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
           @options[:modules] << value

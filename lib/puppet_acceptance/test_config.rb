@@ -19,15 +19,22 @@ module PuppetAcceptance
       config = YAML.load_file(config_file)
       # Merge some useful date into the config hash
       consoleport = ENV['consoleport'] || config['CONFIG']['consoleport'] || 443
-      config['CONFIG']['consoleport'] = consoleport
-      config['CONFIG']['ssh'] = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
-      config['CONFIG']['pe_ver'] = puppet_enterprise_version if is_pe?
-      config['CONFIG']['pe_ver_win'] = puppet_enterprise_version_win if is_pe?
-      config['CONFIG']['puppet_ver'] = Options.parse_args[:puppet] unless is_pe?
-      config['CONFIG']['facter_ver'] = Options.parse_args[:facter] unless is_pe?
-      config['CONFIG']['modules'] = Options.parse_args[:modules] || []
-      config['CONFIG']['hiera_ver'] = Options.parse_args[:hiera] unless is_pe?
-      # need to load expect versions of PE binaries
+
+      config['CONFIG']['consoleport']        = consoleport
+      config['CONFIG']['ssh']                = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
+      config['CONFIG']['modules']            = Options.parse_args[:modules] || []
+
+      if is_pe?
+        config['CONFIG']['pe_ver']           = puppet_enterprise_version
+        config['CONFIG']['pe_ver_win']       = puppet_enterprise_version_win
+      else
+        config['CONFIG']['puppet_ver']       = Options.parse_args[:puppet]
+        config['CONFIG']['facter_ver']       = Options.parse_args[:facter]
+        config['CONFIG']['hiera_ver']        = Options.parse_args[:hiera]
+        config['CONFIG']['hiera_puppet_ver'] = Options.parse_args[:hiera_puppet]
+      end
+
+      # Need to load expect versions of PE binaries
       config['VERSION'] = load_dependency_versions
       config
     end
