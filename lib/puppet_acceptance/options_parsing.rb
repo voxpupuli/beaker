@@ -81,12 +81,20 @@ module PuppetAcceptance
           @options[:facter] = value
         end
 
-        @options[:hiera] = nil
+        @options[:hiera] = 'git://github.com/puppetlabs/hiera.git#HEAD'
         opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
                 "  #{@options[:hiera]}"
                 ) do |value|
           #@options[:type] = 'git'
           @options[:hiera] = value
+        end
+
+        @options[:hiera_puppet] = 'git://github.com/puppetlabs/hiera-puppet.git#HEAD'
+        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI',
+                "  #{@options[:hiera_puppet]}"
+                ) do |value|
+          #@options[:type] = 'git'
+          @options[:hiera_puppet] = value
         end
 
         @options[:modules] = []

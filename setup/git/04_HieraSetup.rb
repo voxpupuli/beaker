@@ -35,7 +35,7 @@ if (options[:hiera]) then
   GitHub      = 'git://github.com/puppetlabs'
   IsURI       = %r{^[^:]+://|^git@github.com:}
   IsGitHubURI = %r{(https://github.com/[^/]+/[^/]+)(?:/tree/(.*))$}
-  
+
   if match = IsGitHubURI.match(options[:hiera]) then
     HieraRepo = match[1] + '.git'
     HieraRev  = match[2] || 'origin/master'
@@ -48,6 +48,18 @@ if (options[:hiera]) then
     HieraRev  = options[:hiera]
   end
 
+  if match = IsGitHubURI.match(options[:hiera_puppet]) then
+    hiera_puppet_repo = match[1] + '.git'
+    hirea_puppet_rev  = match[2] || 'origin/master'
+  elsif options[:hiera_puppet] =~ IsURI then
+    repo, rev = options[:hiera_puppet].split('#', 2)
+    hiera_puppet_repo = repo
+    hirea_puppet_rev  = rev || 'HEAD'
+  else
+    hiera_puppet_repo = "#{GitHub}/hiera-puppet.git"
+    hirea_puppet_rev  = options[:hiera_puppet]
+  end
+
   hosts.each do |host|
     step "#{host} Install Hiera from git"
     install_from_git host, :hiera, HieraRepo, HieraRev
@@ -57,6 +69,15 @@ if (options[:hiera]) then
     end
     config[:version][:hiera] = version
 
+    step "#{host} Install hiera-puppet from git"
+    install_from_git host, 'hiera-puppet', hiera_puppet_repo, hirea_puppet_rev
+    version = ''
+    on host, "cd /opt/puppet-git-repos/hiera-puppet && git describe" do
+      version = stdout.chomp
+    end
+    config[:version][:hiera_puppet] = version
+
+    step "#{host} Setup Hiera configuration"
     # REVISIT
     # very ugly hack to extract puppet conf dir from cygpath command,
     # need to think about adding this to library for Windows hosts

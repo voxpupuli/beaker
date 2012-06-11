@@ -23,14 +23,15 @@ module Windows
     }
 
     DEFAULTS = {
-      'user'          => 'Administrator',
-      'group'         => 'Administrators',
-      'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
-      'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-      'hieralibdir'   => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
+      'user'              => 'Administrator',
+      'group'             => 'Administrators',
+      'puppetpath'        => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+      'puppetvardir'      => '`cygpath -smF 35`/PuppetLabs/puppet/var',
+      'hieralibdir'       => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
+      'hierapuppetlibdir' => '`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`',
       # PATH related variables need to be Unix, which cygwin converts
-      'hierabindir'   => '/opt/puppet-git-repos/hiera/bin',
-      'pathseparator' => ';',
+      'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
+      'pathseparator'     => ';',
     }
 
     def initialize(name, overrides, defaults)
