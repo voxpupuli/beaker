@@ -130,7 +130,7 @@ module PuppetAcceptance
     # * --daemonize
     # * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
     # * --dns_alt_names="puppet, $(hostname -s), $(hostname -f)"
-    def with_master_running_on(host, arg='--daemonize', &block)
+    def with_master_running_on(host, arg='--daemonize', options={}, &block)
       # they probably want to run with daemonize.  If they pass some other arg/args but forget to re-include
       # daemonize, we'll check and make sure they didn't explicitly specify "no-daemonize", and, failing that,
       # we'll add daemonize to the arg string
@@ -139,7 +139,7 @@ module PuppetAcceptance
       if (arg !~ /--logdest/) then arg << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
       if (arg !~ /--dns_alt_names/) then arg << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
 
-      on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl')
+      on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl') unless options[:preserve_ssl]
       agents.each do |agent|
         if vardir = agent['puppetvardir']
           # we want to remove everything except the log directory
