@@ -45,7 +45,7 @@ module PuppetAcceptance
       @run = true
       @start_time = Time.now
 
-      initialize_logger(@options[:debug])
+      initialize_logger(:debug => @options[:debug], :color => @options[:color])
 
       @logger.notify "Using random seed #{@random_seed}" if @random_seed
       @test_files.each do |test_file|
@@ -267,9 +267,10 @@ module PuppetAcceptance
     end
 
     # Setup log dir
-    def initialize_logger(debug)
+    def initialize_logger(options)
       @logger = Logger.new
-      @logger.log_level = debug ? :debug : :normal
+      @logger.log_level = options[:debug] ? :debug : :normal
+      @logger.color = options[:color]
       @logger.add_destination(STDOUT) unless options[:quiet]
       @logger.add_destination(log_path("#{name}-run.log")) unless options[:stdout_only]
 
