@@ -208,6 +208,13 @@ module PuppetAcceptance
       masters.first
     end
 
+    def database
+      databases = hosts 'database'
+      @logger.warn "There is no database host configured" if databases.empty?
+      fail "Cannot have more than one database host" if databases.length > 1
+      databases.first
+    end
+
     def dashboard
       dashboards = hosts 'dashboard'
       @logger.warn "There is no dashboard host configured" if dashboards.empty?
