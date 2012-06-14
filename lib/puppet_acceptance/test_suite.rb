@@ -10,7 +10,7 @@ module PuppetAcceptance
   class TestSuite
     attr_reader :name, :options, :config, :stop_on_error
 
-    def initialize(name, hosts, options, config, stop_on_error=FALSE)
+    def initialize(name, hosts, options, config, stop_on_error=false)
       @name    = name.gsub(/\s+/, '-')
       @hosts   = hosts
       @run     = false
@@ -45,14 +45,14 @@ module PuppetAcceptance
       @run = true
       @start_time = Time.now
 
-      initialize_logfiles
+      initialize_logger(:debug => @options[:debug], :color => @options[:color])
 
-      Log.notify "Using random seed #{@random_seed}" if @random_seed
+      @logger.notify "Using random seed #{@random_seed}" if @random_seed
       @test_files.each do |test_file|
-        Log.notify
-        Log.notify "Begin #{test_file}"
+        @logger.notify
+        @logger.notify "Begin #{test_file}"
         start = Time.now
-        test_case = TestCase.new(@hosts, config, options, test_file).run_test
+        test_case = TestCase.new(@hosts, @logger, config, options, test_file).run_test
         duration = Time.now - start
         @test_cases << test_case
 
@@ -60,14 +60,14 @@ module PuppetAcceptance
         msg = "#{test_file} #{state}ed in %.2f seconds" % duration.to_f
         case test_case.test_status
         when :pass
-          Log.success msg
+          @logger.success msg
         when :skip
-          Log.debug msg
+          @logger.debug msg
         when :fail
-          Log.error msg
+          @logger.error msg
           break if stop_on_error
         when :error
-          Log.warn msg
+          @logger.warn msg
           break if stop_on_error
         end
       end
@@ -85,7 +85,7 @@ module PuppetAcceptance
     def run_and_exit_on_failure
       run
       return self if success?
-      Log.error "Failed while running the #{name} suite..."
+      @logger.error "Failed while running the #{name} suite..."
       exit 1
     end
 
@@ -181,30 +181,27 @@ module PuppetAcceptance
         # --  JLS 2/12
         File.open("junit/#{name}.xml", 'w') { |fh| doc.write(fh) }
       rescue Exception => e
-        Log.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
+        @logger.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
       end
     end
 
     def summarize
       fail_without_test_run
 
-      if Log.file then
-        Log.file = log_path("#{name}-summary.txt")
-      end
-      Log.stdout = true
+      summary_logger = Logger.new(log_path("#{name}-summary.txt"), STDOUT)
 
-      Log.notify <<-HEREDOC
+      summary_logger.notify <<-HEREDOC
     Test Suite: #{name} @ #{@start_time}
 
     - Host Configuration Summary -
       HEREDOC
 
-      TestConfig.dump(config)
+      config.dump
 
       elapsed_time = @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
       average_test_time = elapsed_time / test_count
 
-      Log.notify %Q[
+      summary_logger.notify %Q[
 
             - Test Case Summary -
      Total Suite Time: %.2f seconds
@@ -221,30 +218,27 @@ module PuppetAcceptance
 
       grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
 
-      Log.notify "Failed Tests Cases:"
+      summary_logger.notify "Failed Tests Cases:"
       (grouped_summary[:fail] || []).each do |test_case|
         print_test_failure(test_case)
       end
 
-      Log.notify "Errored Tests Cases:"
+      summary_logger.notify "Errored Tests Cases:"
       (grouped_summary[:error] || []).each do |test_case|
         print_test_failure(test_case)
       end
 
-      Log.notify "Skipped Tests Cases:"
+      summary_logger.notify "Skipped Tests Cases:"
       (grouped_summary[:skip] || []).each do |test_case|
         print_test_failure(test_case)
       end
 
-      Log.notify "Pending Tests Cases:"
+      summary_logger.notify "Pending Tests Cases:"
       (grouped_summary[:pending] || []).each do |test_case|
         print_test_failure(test_case)
       end
 
-      Log.notify("\n\n")
-
-      Log.stdout = !options[:quiet]
-      Log.file   = false
+      summary_logger.notify("\n\n")
     end
 
     def print_test_failure(test_case)
@@ -253,7 +247,7 @@ module PuppetAcceptance
                       else
                         test_case.test_status
                       end
-      Log.notify "  Test Case #{test_case.path} #{test_reported}"
+      @logger.notify "  Test Case #{test_case.path} #{test_reported}"
     end
 
     def log_path(name)
@@ -273,9 +267,19 @@ module PuppetAcceptance
     end
 
     # Setup log dir
-    def initialize_logfiles
-      return if options[:stdout_only]
-      Log.file = log_path("#{name}-run.log")
+    def initialize_logger(options)
+      @logger = Logger.new
+      @logger.log_level = options[:debug] ? :debug : :normal
+      @logger.color = options[:color]
+      @logger.add_destination(STDOUT) unless options[:quiet]
+      @logger.add_destination(log_path("#{name}-run.log")) unless options[:stdout_only]
+
+      @hosts.each { |host| host.logger = @logger }
+      @config.logger = @logger
+      #
+      # This is an awful hack to maintain backward compatibility until tests
+      # are ported to use logger.
+      PuppetAcceptance.const_set(:Log, @logger)
     end
   end
 end

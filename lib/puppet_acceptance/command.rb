@@ -4,35 +4,15 @@ module PuppetAcceptance
   class Command
     include Test::Unit::Assertions
 
-    def initialize(command_string)
+    def initialize(command_string, options={})
       @command_string = command_string
+      @options = options
     end
 
     # host_info is a hash-like object that can be queried to figure out
     # properties of the host.
     def cmd_line(host_info)
       @command_string
-    end
-
-    def exec(host, options={})
-      options[:acceptable_exit_codes] ||= [0]
-      options[:failing_exit_codes]    ||= [1]
-
-      cmdline = cmd_line(host)
-      result = host.exec(cmdline, options)
-
-      # This silent option is poorly named, but is used from within some tests
-      # to ignore failed exit codes
-      unless options[:silent]
-        result.log
-        unless options[:acceptable_exit_codes].include?(result.exit_code)
-          limit = 10
-          formatted_output = result.output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
-          raise "Host '#{host}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{formatted_output}"
-        end
-      end
-
-      result
     end
 
     # Determine the appropriate puppet env command for the given host.

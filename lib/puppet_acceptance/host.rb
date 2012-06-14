@@ -1,30 +1,43 @@
 module PuppetAcceptance
   class Host
-    def self.create(name, overrides, defaults)
-      case overrides['platform']
-      when /windows/;
-        Windows::Host.new(name, overrides, defaults)
+    def self.create(name, platform, options, overrides, config)
+      case platform
+      when /windows/
+        Windows::Host.new(name, options, overrides, config)
       else
-        Unix::Host.new(name, overrides, defaults)
+        Unix::Host.new(name, options, overrides, config)
       end
     end
 
+    attr_accessor :logger
+
     # A cache for active SSH connections to our execution nodes.
-    def initialize(name, overrides, defaults)
-      @name,@overrides,@defaults = name,overrides,defaults
+    def initialize(name, options, overrides, defaults)
+      @name, @options, @overrides = name, options.dup, overrides
+
+      @defaults = merge_defaults_for_type(defaults, options[:type])
     end
+
+    def merge_defaults_for_type(defaults, type)
+      defaults.merge(type =~ /pe/ ? self.class.pe_defaults : self.class.foss_defaults)
+    end
+
     def []=(k,v)
       @overrides[k] = v
     end
+
     def [](k)
       @overrides.has_key?(k) ? @overrides[k] : @defaults[k]
     end
+
     def to_str
       @name
     end
+
     def to_s
       @name
     end
+
     def +(other)
       @name+other
     end
@@ -34,88 +47,47 @@ module PuppetAcceptance
     # Wrap up the SSH connection process; this will cache the connection and
     # allow us to reuse it for each operation without needing to reauth every
     # single time.
-    def ssh
-      tries = 1
-      @ssh ||= begin
-                 Net::SSH.start(self, self['user'], self['ssh'])
-               rescue
-                 tries += 1
-                 if tries < 4
-                   puts "Try #{tries} -- Host Unreachable"
-                   puts 'Trying again in 20 seconds'
-                   sleep 20
-                   retry
-                 end
-               end
+    def ssh_connection
+      @ssh_connection ||= SshConnection.connect(self, self['user'], self['ssh'])
     end
 
     def close
-      if @ssh
-        @ssh.close
-      end
+      @ssh_connection.close if @ssh_connection
     end
 
-    def do_action(verb,*args)
-      result = Result.new(self,args,'','',0)
-      Log.debug "#{self}: #{verb}(#{args.inspect})"
-      yield result unless $dry_run
+    def exec(command, options={})
+      cmdline = command.cmd_line(self)
+
+      @logger.debug "\n#{self} $ #{cmdline}"
+
+      ssh_options = {
+        :stdin => options[:stdin],
+        :pty => options[:pty],
+        :dry_run => $dry_run,
+      }
+
+      output_callback = logger.method(:host_output)
+
+      result = ssh_connection.execute(cmdline, ssh_options, output_callback)
+
+      unless options[:silent]
+        result.log(@logger)
+        unless result.exit_code_in?(options[:acceptable_exit_codes] || [0])
+          limit = 10
+          raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
+        end
+      end
       result
     end
 
-    def exec(command, options)
-      do_action('RemoteExec',command) do |result|
-        ssh.open_channel do |channel|
-          if options[:pty] then
-            channel.request_pty do |ch, success|
-              if success
-                puts "Allocated a PTY on #{@name} for #{command.inspect}"
-              else
-                abort "FAILED: could not allocate a pty when requested on " +
-                  "#{@name} for #{command.inspect}"
-              end
-            end
-          end
-
-          channel.exec(command) do |terminal, success|
-            abort "FAILED: to execute command on a new channel on #{@name}" unless success
-            terminal.on_data do |ch, data|
-              result.stdout << data
-              result.output << data
-            end
-            terminal.on_extended_data do |ch, type, data|
-              if type == 1
-                result.stderr << data
-                result.output << data
-              end
-            end
-            terminal.on_request("exit-status") { |ch, data|       result.exit_code = data.read_long  }
-
-            # queue stdin data, force it to packets, and signal eof: this
-            # triggers action in many remote commands, notably including
-            # 'puppet apply'.  It must be sent at some point before the rest
-            # of the action.
-            terminal.send_data(options[:stdin].to_s)
-            terminal.process
-            terminal.eof!
-          end
-        end
-        # Process SSH activity until we stop doing that - which is when our
-        # channel is finished with...
-        ssh.loop
-      end
-    end
-
     def do_scp(source, target)
-      do_action("ScpFile",source,target) { |result|
-        # Net::Scp always returns 0, so just set the return code to 0 Setting
-        # these values allows reporting via result.log(test_name)
-        result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
-        result.stderr=nil
-        result.exit_code=0
-        recursive_scp='false'
-        recursive_scp='true' if File.directory? source
-        ssh.scp.upload!(source, target, :recursive => recursive_scp)
+      @logger.debug "localhost $ scp #{source} #{self}:#{target}"
+
+      ssh_options = {
+        :dry_run => $dry_run,
       }
+
+      ssh_connection.scp(source, target, ssh_options)
     end
   end
 

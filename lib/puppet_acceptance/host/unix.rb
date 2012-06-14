@@ -13,30 +13,28 @@ module Unix
     include Unix::File
     include Unix::Exec
 
-    PE_DEFAULTS = {
+    def self.pe_defaults
+      {
       'user'          => 'root',
       'puppetpath'    => '/etc/puppetlabs/puppet',
       'puppetbin'     => '/opt/puppet/bin/puppet',
       'puppetbindir'  => '/opt/puppet/bin',
       'pathseparator' => ':',
-    }
+      }
+    end
 
-    DEFAULTS = {
-      'user'               => 'root',
-      'puppetpath'         => '/etc/puppet',
-      'puppetvardir'       => '/var/lib/puppet',
-      'puppetbin'          => '/usr/bin/puppet',
-      'puppetbindir'       => '/usr/bin',
-      'hieralibdir'        => '/opt/puppet-git-repos/hiera/lib',
-      'hierapuppetlibdir'  => '/opt/puppet-git-repos/hiera-puppet/lib',
-      'hierabindir'        => '/opt/puppet-git-repos/hiera/bin',
-      'pathseparator'      => ':',
-    }
-
-    def initialize(name, overrides, defaults)
-      super(name, overrides, defaults)
-
-      @defaults = defaults.merge(PuppetAcceptance::TestConfig.is_pe? ? PE_DEFAULTS : DEFAULTS)
+    def self.foss_defaults
+      {
+        'user'              => 'root',
+        'puppetpath'        => '/etc/puppet',
+        'puppetvardir'      => '/var/lib/puppet',
+        'puppetbin'         => '/usr/bin/puppet',
+        'puppetbindir'      => '/usr/bin',
+        'hieralibdir'       => '/opt/puppet-git-repos/hiera/lib',
+        'hierapuppetlibdir' => '/opt/puppet-git-repos/hiera-puppet/lib',
+        'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
+        'pathseparator'     => ':',
+      }
     end
   end
 end

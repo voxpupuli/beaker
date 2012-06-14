@@ -65,7 +65,7 @@ module PuppetAcceptance
     #     variables that should be set before running the puppet command.
     # [&block] this method will yield to a block of code passed by the caller; this can be used for additional validation,
     #     etc.
-    def apply_manifest_on(host,manifest,options={},&block)
+    def apply_manifest_on(host, manifest, options={}, &block)
       on_options = {:stdin => manifest + "\n"}
       on_options[:acceptable_exit_codes] = options.delete(:acceptable_exit_codes) if options.keys.include?(:acceptable_exit_codes)
       args = ["--verbose"]
@@ -130,14 +130,14 @@ module PuppetAcceptance
     # * --daemonize
     # * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
     # * --dns_alt_names="puppet, $(hostname -s), $(hostname -f)"
-    def with_master_running_on(host, arg='--daemonize', options={}, &block)
+    def with_master_running_on(host, args='--daemonize', options={}, &block)
       # they probably want to run with daemonize.  If they pass some other arg/args but forget to re-include
       # daemonize, we'll check and make sure they didn't explicitly specify "no-daemonize", and, failing that,
-      # we'll add daemonize to the arg string
-      if (arg !~ /(?:--daemonize)|(?:--no-daemonize)/) then arg << " --daemonize" end
+      # we'll add daemonize to the args string
+      if (args !~ /(?:--daemonize)|(?:--no-daemonize)/) then args << " --daemonize" end
 
-      if (arg !~ /--logdest/) then arg << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
-      if (arg !~ /--dns_alt_names/) then arg << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
+      if (args !~ /--logdest/) then args << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
+      if (args !~ /--dns_alt_names/) then args << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
 
       on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl') unless options[:preserve_ssl]
       agents.each do |agent|
@@ -150,42 +150,76 @@ module PuppetAcceptance
       end
 
       on host, puppet_master('--configprint pidfile')
+
       pidfile = stdout.chomp
-      on host, puppet_master(arg)
-      poll_master_until(host, :start)
-      master_started = true
+
+      start_puppet_master(host, args, pidfile)
+
       yield if block
     ensure
-      if master_started
-        on host, "kill $(cat #{pidfile})"
-        poll_master_until(host, :stop)
-      end
+      stop_puppet_master(host, pidfile)
     end
 
-    def poll_master_until(host, verb)
-      timeout = 30
-      verb_exit_codes = {:start => 0, :stop => 7}
+    def start_puppet_master(host, args, pidfile)
+      on host, puppet_master(args)
+      on(host, "kill -0 $(cat #{pidfile})", :acceptable_exit_codes => [0,1])
 
-      Log.debug "Wait for master to #{verb}"
+      raise "Puppet master doesn't appear to be running at all" unless exit_code == 0
 
-      agent = agents.first
+      timeout = 15
       wait_start = Time.now
-      done = false
 
-      until done or Time.now - wait_start > timeout
-        on(agent, "curl -k https://#{master}:8140 >& /dev/null", :acceptable_exit_codes => (0..255))
-        done = exit_code == verb_exit_codes[verb]
-        sleep 1 unless done
+      @logger.debug "Waiting for master to start"
+
+      begin
+        Timeout.timeout(timeout) do
+          loop do
+            # 7 is "Could not connect to host", which will happen before it's running
+            result = on(host, "curl -k https://#{host}:8140", :acceptable_exit_codes => [0,7])
+            break if exit_code == 0
+            sleep 1
+          end
+        end
+      rescue Timeout::Error
+        raise "Puppet master failed to start after #{timeout} seconds"
       end
 
       wait_finish = Time.now
       elapsed = wait_finish - wait_start
 
-      if done
-        Log.debug "Slept for #{elapsed} seconds waiting for Puppet Master to #{verb}"
-      else
-        Log.error "Puppet Master failed to #{verb} after #{elapsed} seconds"
+      @logger.debug "Slept for #{elapsed} seconds waiting for Puppet Master to start"
+    end
+
+    def stop_puppet_master(host, pidfile)
+      on host, "[ -f #{pidfile} ]", :silent => true
+
+      raise "Could not locate running puppet master" unless exit_code == 0
+
+      on host, "kill $(cat #{pidfile})", :acceptable_exit_codes => [0,1]
+
+      timeout = 10
+      wait_start = Time.now
+
+      @logger.debug "Waiting for master to stop"
+
+      begin
+        Timeout.timeout(timeout) do
+          loop do
+            on(host, "kill -0 $(cat #{pidfile})", :acceptable_exit_codes => [0,1])
+            break if exit_code == 1
+            sleep 1
+          end
+        end
+      rescue Timeout::Error
+        @logger.warn "Puppet master failed to stop after #{elapsed} seconds; killing manually"
+        on host, "kill -9 $(cat #{pidfile})"
+        on host, "rm -f #{pidfile}"
       end
+
+      wait_finish = Time.now
+      elapsed = wait_finish - wait_start
+
+      @logger.debug "Slept for #{elapsed} seconds waiting for Puppet Master to stop"
     end
   end
 end

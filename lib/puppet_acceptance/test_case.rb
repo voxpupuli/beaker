@@ -13,13 +13,14 @@ module PuppetAcceptance
     class PendingTest < Exception; end
     class SkipTest < Exception; end
 
-    attr_reader :version, :config, :options, :path, :fail_flag, :usr_home,
+    attr_reader :version, :config, :logger, :options, :path, :fail_flag, :usr_home,
                 :test_status, :exception, :runtime, :result
 
-    def initialize(hosts, config, options={}, path=nil)
+    def initialize(hosts, logger, config, options={}, path=nil)
       @version = config['VERSION']
       @config  = config['CONFIG']
       @hosts   = hosts
+      @logger = logger
       @options = options
       @path    = path
       @usr_home = ENV['HOME']
@@ -31,24 +32,22 @@ module PuppetAcceptance
       # defined in the tests don't leak out to other tests.
       class << self
         def run_test
-          with_standard_output_to_logs do
-            @runtime = Benchmark.realtime do
-              begin
-                test = File.read(path)
-                eval test,nil,path,1
-              rescue Test::Unit::AssertionFailedError => e
-                @test_status = :fail
+          @runtime = Benchmark.realtime do
+            begin
+              test = File.read(path)
+              eval test,nil,path,1
+            rescue Test::Unit::AssertionFailedError => e
+              @test_status = :fail
+              @exception   = e
+            rescue PendingTest
+              @test_status = :pending
+            rescue SkipTest
+              @test_status = :skip
+            rescue StandardError, ScriptError => e
+              @logger.error(e.inspect)
+              e.backtrace.each { |line| @logger.error(line) }
+              @test_status = :error
                 @exception   = e
-              rescue PendingTest
-                @test_status = :pending
-              rescue SkipTest
-                @test_status = :skip
-              rescue StandardError, ScriptError => e
-                Log.error(e.inspect)
-                e.backtrace.each { |line| Log.error(line) }
-                @test_status = :error
-                @exception   = e
-              end
             end
           end
           return self
@@ -66,54 +65,34 @@ module PuppetAcceptance
       hash
     end
 
-    def with_standard_output_to_logs(&block)
-      stdout = ''
-      old_stdout = $stdout
-      $stdout = StringIO.new(stdout, 'w')
-
-      stderr = ''
-      old_stderr = $stderr
-      $stderr = StringIO.new(stderr, 'w')
-
-      result = yield if block_given?
-
-      $stdout = old_stdout
-      $stderr = old_stderr
-
-      stdout.each { |line| Log.notify(line) }
-      stderr.each { |line| Log.warn(line) }
-
-      return result
-    end
-
     #
     # Test Structure
     #
     def step(step_name, &block)
-      Log.notify "  * #{step_name}"
+      @logger.notify "\n  * #{step_name}\n"
       yield if block
     end
 
     def test_name(test_name, &block)
-      Log.notify test_name
+      @logger.notify "\n#{test_name}\n"
       yield if block
     end
 
     def pass_test(msg)
-      Log.notify msg
+      @logger.notify "\n#{msg}\n"
     end
 
     def skip_test(msg)
-      Log.notify "Skip: #{msg}"
+      @logger.notify "\nSkip: #{msg}\n"
       @test_status = :skip
     end
 
     def fail_test(msg)
-      flunk(msg + "\n" + Log.pretty_backtrace() + "\n")
+      flunk(msg + "\n" + @logger.pretty_backtrace() + "\n")
     end
 
     def pending_test(msg = "WIP: #{@test_name}")
-      Log.warn msg
+      @logger.warn msg
       raise PendingTest
     end
 
@@ -133,7 +112,7 @@ module PuppetAcceptance
         end
       end
       if @hosts.empty?
-        Log.warn "No suitable hosts with: #{confines.inspect}"
+        @logger.warn "No suitable hosts with: #{confines.inspect}"
         raise SkipTest
       end
     end
@@ -153,18 +132,18 @@ module PuppetAcceptance
     # result access
     #
     def stdout
-      return nil if result.nil?
-      result.stdout
+      return nil if @result.nil?
+      @result.stdout
     end
 
     def stderr
-      return nil if result.nil?
-      result.stderr
+      return nil if @result.nil?
+      @result.stderr
     end
 
     def exit_code
-      return nil if result.nil?
-      result.exit_code
+      return nil if @result.nil?
+      @result.exit_code
     end
 
     #
@@ -177,7 +156,7 @@ module PuppetAcceptance
       if host.is_a? Array
         host.map { |h| on h, command, options, &block }
       else
-        @result = command.exec(host, options)
+        @result = host.exec(command, options)
 
         # Also, let additional checking be performed by the caller.
         yield if block_given?
@@ -191,8 +170,8 @@ module PuppetAcceptance
         host.each { |h| scp_to h, from_path, to_path, options }
       else
         @result = host.do_scp(from_path, to_path)
-        result.log
-        raise "scp exited with #{result.exit_code}" if result.exit_code != 0
+        @result.log(@logger)
+        raise "scp exited with #{@result.exit_code}" if @result.exit_code != 0
       end
     end
 
@@ -231,7 +210,7 @@ module PuppetAcceptance
 
     def dashboard
       dashboards = hosts 'dashboard'
-      Log.warn "There is no dashboard host configured" if dashboards.empty?
+      @logger.warn "There is no dashboard host configured" if dashboards.empty?
       fail "Cannot have more than one dashboard host" if dashboards.length > 1
       dashboards.first
     end

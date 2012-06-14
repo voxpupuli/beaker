@@ -21,10 +21,10 @@
 #  ext = basename.match(/tar.*/).to_s
 #
 #  unless File.file? "/opt/enterprise/dists/pe#{version}/#{host['dist']}.#{ext}"
-#    Log.error "PE #{host['dist']}.#{ext} not found, help!"
-#    Log.error ""
-#    Log.error "Make sure your configuration file uses the PE version string:"
-#    Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
+#    logger.error "PE #{host['dist']}.#{ext} not found, help!"
+#    logger.error ""
+#    logger.error "Make sure your configuration file uses the PE version string:"
+#    logger.error "  eg: rhel-5-x86_64  centos-5-x86_64"
 #    fail_test "Sorry, PE #{host['dist']}.#{ext} file not found."
 #  end
 #

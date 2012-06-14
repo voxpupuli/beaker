@@ -88,7 +88,7 @@ if (options[:hiera]) then
       if stderr.chomp =~ /(C:\S*etc):/
         dest_path = $1
       else
-        Log.warn "Unable to determine Puppet path on Windows host #{host} #{dest_path}"
+        logger.warn "Unable to determine Puppet path on Windows host #{host} #{dest_path}"
       end
     else
       dest_path = host['puppetpath']
@@ -102,6 +102,6 @@ if (options[:hiera]) then
     on host, "mkdir -p #{dest_path}/hieradata"
   end
 else
-  Log.notify "Skipping Hiera install"
+  logger.notify "Skipping Hiera install"
   skip_test  "Skipping Hiera install"
 end

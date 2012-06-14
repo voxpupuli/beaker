@@ -19,7 +19,7 @@ Dir[
 end
 
 trap(:INT) do
-  PuppetAcceptance::Log.error "Interrupt received; exiting..."
+  puts "Interrupt received; exiting..."
   exit(1)
 end
 
@@ -32,9 +32,9 @@ unless options[:config] then
   fail "Argh!  There is no default for Config, specify one!"
 end
 
-PuppetAcceptance::Log.debug "Using Config #{options[:config]}"
+puts "Using Config #{options[:config]}"
 
-config = PuppetAcceptance::TestConfig.load_file(options[:config])
+config = PuppetAcceptance::TestConfig.new(options[:config], options)
 
 if options[:noinstall]
   setup_options = options.merge({ :random => false,
@@ -57,18 +57,18 @@ else
 end
 
 # Generate hosts
-hosts = config['HOSTS'].collect { |name,overrides| PuppetAcceptance::Host.create(name,overrides,config['CONFIG']) }
+hosts = config['HOSTS'].collect { |name,overrides| PuppetAcceptance::Host.create(name, overrides[:platform], options, overrides, config['CONFIG']) }
 begin
 
   # Run any pre-flight scripts
   if options[:pre_script]
     pre_opts = options.merge({ :random => false,
                                   :tests => [ 'setup/early', options[:pre_script] ] })
-    PuppetAcceptance::TestSuite.new('pre-setup', hosts, pre_opts, config, TRUE).run_and_exit_on_failure
+    PuppetAcceptance::TestSuite.new('pre-setup', hosts, pre_opts, config, true).run_and_exit_on_failure
   end
 
   # Run the harness for install
-  PuppetAcceptance::TestSuite.new('setup', hosts, setup_options, config, TRUE).run_and_exit_on_failure
+  PuppetAcceptance::TestSuite.new('setup', hosts, setup_options, config, true).run_and_exit_on_failure
 
   # Run the tests
   unless options[:installonly] then
@@ -78,5 +78,5 @@ ensure
   hosts.each {|host| host.close }
 end
 
-PuppetAcceptance::Log.notify "systest completed successfully, thanks."
+puts "systest completed successfully, thanks."
 exit 0

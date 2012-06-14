@@ -7,16 +7,16 @@ the_master = master.to_s
 confine :to, :platform => 'windows'
 distpath = "/opt/enterprise/dists"
 
-Log.warn "Install PE Windows version #{version}"
+logger.warn "Install PE Windows version #{version}"
 hosts.each do |host|
   host['dist'] = "puppet-enterprise-#{version}"
 
   # determine the distro tar name
   unless File.file? "#{distpath}/#{host['dist']}.msi"
-    Log.error "PE #{host['dist']}.msi not found, help!"
-    Log.error ""
-    # Log.error "Make sure your configuration file uses the PE version string:"
-    # Log.error "  eg: rhel-5-x86_64  centos-5-x86_64"
+    logger.error "PE #{host['dist']}.msi not found, help!"
+    logger.error ""
+    # logger.error "Make sure your configuration file uses the PE version string:"
+    # logger.error "  eg: rhel-5-x86_64  centos-5-x86_64"
     fail_test "Sorry, PE #{host['dist']}.msi file not found."
   end
 
