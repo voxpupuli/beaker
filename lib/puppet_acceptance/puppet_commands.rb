@@ -142,8 +142,10 @@ module PuppetAcceptance
       on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl') unless options[:preserve_ssl]
       agents.each do |agent|
         if vardir = agent['puppetvardir']
-          # we want to remove everything except the log directory
-          on agent, "if [ -e \"#{vardir}\" ]; then for f in #{vardir}/*; do if [ \"$f\" != \"#{vardir}/log\" ]; then rm -rf \"$f\"; fi; done; fi"
+          # we want to remove everything except the log and ssl directory (we
+          # just got rid of ssl if preserve_ssl wasn't set, and otherwise want
+          # to leave it)
+          on agent, %Q[find "#{vardir}" -mindepth 1 -maxdepth 1 | grep -Ev "/(log|ssl)$" | xargs rm -rf]
         end
       end
 
