@@ -145,7 +145,7 @@ module PuppetAcceptance
           # we want to remove everything except the log and ssl directory (we
           # just got rid of ssl if preserve_ssl wasn't set, and otherwise want
           # to leave it)
-          on agent, %Q[find "#{vardir}" -depth 1 | grep -Ev "/(log|ssl)$" | xargs rm -rf]
+          on agent, %Q[find "#{vardir}" -mindepth 1 -maxdepth 1 | grep -Ev "/(log|ssl)$" | xargs rm -rf]
         end
       end
 
