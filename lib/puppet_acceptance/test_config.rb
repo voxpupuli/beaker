@@ -56,7 +56,7 @@ module PuppetAcceptance
     end
 
     def is_pe?
-      !! @options[:type] =~ /pe/
+      @is_pe ||= @options[:type] =~ /pe/ ? true : false
     end
 
     def load_pe_version
