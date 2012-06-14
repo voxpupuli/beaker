@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '2.6.0'
   s.add_development_dependency 'fakefs', '0.4'
   s.add_development_dependency 'rake'
+  s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'net-ssh'
   s.add_runtime_dependency 'net-scp'
   s.add_runtime_dependency 'systemu'
