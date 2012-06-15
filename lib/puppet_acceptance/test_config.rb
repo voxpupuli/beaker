@@ -68,12 +68,12 @@ module PuppetAcceptance
         File.open("#{dist_dir}/#{version_file}") do |file|
           while line = file.gets
             if /(\w.*)/ =~ line then
-              version=$1.strip
+              version = $1.strip
               @logger.debug "Found LATEST: Puppet Enterprise Version #{version}"
             end
           end
         end
-      rescue => e
+      rescue
         version = 'unknown'
       end
       return version
