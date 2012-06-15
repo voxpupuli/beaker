@@ -5,6 +5,7 @@ module PuppetAcceptance
     attr_accessor :logger
     def initialize(config_file, options)
       @options = options
+      @logger = options[:logger]
       @config = load_file(config_file)
     end
 
@@ -72,7 +73,7 @@ module PuppetAcceptance
             end
           end
         end
-      rescue
+      rescue => e
         version = 'unknown'
       end
       return version

@@ -32,12 +32,15 @@ module PuppetAcceptance
       end
     end
 
-    def initialize(*dests)
+    def initialize(*args)
+      options = args.last.is_a?(Hash) ? args.pop : {}
+      @color = options[:color]
+      @log_level = options[:debug] ? :debug : :normal
       @destinations = []
-      dests.each {|dest| add_destination(dest)}
 
-      @log_level = :normal
-      @color = true
+      dests = args << STDOUT unless options[:quiet]
+      dests.uniq!
+      dests.each {|dest| add_destination(dest)}
     end
 
     def add_destination(dest)
