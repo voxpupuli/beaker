@@ -12,9 +12,9 @@ module PuppetAcceptance
         fail "Argh!  There is no default for Config, specify one!"
       end
 
-      @hosts = @config['HOSTS'].collect do |name, overrides|
-        PuppetAcceptance::Host.create(name, overrides[:platform], @options,
-                                      overrides, @config['CONFIG'])
+      @hosts =  []
+      @config['HOSTS'].each_key do |name|
+        @hosts << PuppetAcceptance::Host.create(name, @options, @config)
       end
     end
 
