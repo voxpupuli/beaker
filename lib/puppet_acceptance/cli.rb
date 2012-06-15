@@ -41,42 +41,42 @@ module PuppetAcceptance
     end
 
     def setup_options
-      setup_options = nil
+      setup_opts = nil
       if @options[:noinstall]
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests  => ["setup/early", "setup/post"] })
 
       elsif @options[:upgrade]
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests  => ["setup/early", "setup/pe_upgrade", "setup/post"] })
 
       elsif @options[:type] == 'cp_pe'
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests => ["setup/early/01-vmrun.rb", "setup/cp_pe"] })
 
       elsif @options[:type] == 'pe_aws'
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests => ["setup/pe_aws"] })
 
       elsif @options[:uninstall]
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests  => ["setup/early", "setup/pe_uninstall/#{@options[:uninstall]}"] })
 
       else
-        setup_options = @options.merge({
+        setup_opts = @options.merge({
           :random => false,
           :tests  => ["setup/early", "setup/#{@options[:type]}", "setup/post"] })
       end
-      setup_options
+      setup_opts
     end
 
     def pre_options
-      pre_opts = options.merge({
+      @options.merge({
         :random => false,
         :tests => [ 'setup/early', @options[:pre_script] ] })
     end
