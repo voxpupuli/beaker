@@ -1,33 +1,33 @@
 module PuppetAcceptance
   class Host
-    def self.create(name, platform, options, overrides, config)
-      case platform
+
+    def self.create(name, options, config)
+      case config['HOSTS'][name]['platform']
       when /windows/
-        Windows::Host.new(name, options, overrides, config)
+        Windows::Host.new(name, options, config)
       else
-        Unix::Host.new(name, options, overrides, config)
+        Unix::Host.new(name, options, config)
       end
     end
 
     attr_accessor :logger
-
-    # A cache for active SSH connections to our execution nodes.
-    def initialize(name, options, overrides, defaults)
-      @name, @options, @overrides = name, options.dup, overrides
-
-      @defaults = merge_defaults_for_type(defaults, options[:type])
+    def initialize(name, options, config)
+      @logger = options[:logger]
+      @name, @options, = name, options.dup
+      @defaults = merge_defaults_for_type(config, options[:type])
     end
 
-    def merge_defaults_for_type(defaults, type)
-      defaults.merge(type =~ /pe/ ? self.class.pe_defaults : self.class.foss_defaults)
+    def merge_defaults_for_type(config, type)
+      defaults = type =~ /pe/ ? self.class.pe_defaults : self.class.foss_defaults
+      config['CONFIG'].merge(defaults).merge(config['HOSTS'][name])
     end
 
     def []=(k,v)
-      @overrides[k] = v
+      @defaults[k] = v
     end
 
     def [](k)
-      @overrides.has_key?(k) ? @overrides[k] : @defaults[k]
+      @defaults[k]
     end
 
     def to_str
@@ -39,7 +39,7 @@ module PuppetAcceptance
     end
 
     def +(other)
-      @name+other
+      @name + other
     end
 
     attr_reader :name, :overrides

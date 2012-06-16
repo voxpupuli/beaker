@@ -24,7 +24,7 @@ module Windows
       }
     end
 
-    def self.defaults
+    def self.foss_defaults
       {
         'user'              => 'Administrator',
         'group'             => 'Administrators',

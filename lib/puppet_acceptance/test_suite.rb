@@ -270,9 +270,6 @@ module PuppetAcceptance
     # Setup log dir
     def configure_logging(stdout_only)
       @logger.add_destination(log_path("#{name}-run.log")) unless stdout_only
-
-      @hosts.each { |host| host.logger = @logger }
-      @config.logger = @logger
       #
       # This is an awful hack to maintain backward compatibility until tests
       # are ported to use logger.
