@@ -11,10 +11,11 @@ module PuppetAcceptance
     end
 
     attr_accessor :logger
+    attr_reader :name, :defaults
     def initialize(name, options, config)
       @logger = options[:logger]
-      @name, @options, = name, options.dup
-      @defaults = merge_defaults_for_type(config, options[:type])
+      @name, @options, @config = name, options.dup, config
+      @defaults = merge_defaults_for_type(@config, options[:type])
     end
 
     def merge_defaults_for_type(config, type)
@@ -42,11 +43,10 @@ module PuppetAcceptance
       @name + other
     end
 
-    attr_reader :name, :overrides
+    def is_pe?
+      @config.is_pe?
+    end
 
-    # Wrap up the SSH connection process; this will cache the connection and
-    # allow us to reuse it for each operation without needing to reauth every
-    # single time.
     def ssh_connection
       @ssh_connection ||= SshConnection.connect(self, self['user'], self['ssh'])
     end
