@@ -6,7 +6,7 @@
 # until post install
 
 def get_cmd(host)
-  if options[:type] =~ /pe/
+  if host.is_pe?
     "#{host['puppetbindir']}/ruby -v"
   else
     'ruby -v'
@@ -14,7 +14,7 @@ def get_cmd(host)
 end
 
 hosts.each do |host|
-  if host['platform'] =~ /win/ && TestConfig.is_pe?
+  if host['platform'] =~ /win/ && host.is_pe?
     host[:ruby_ver] = '1.8.7'
   else
     on(host, get_cmd(host)) do
