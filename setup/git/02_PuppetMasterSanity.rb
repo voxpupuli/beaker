@@ -1,4 +1,4 @@
-test_name "Puppet Master santiy checks: PID file and SSL dir creation"
+test_name "Puppet Master sanity checks: PID file and SSL dir creation"
 
 pidfile = '/var/lib/puppet/run/master.pid'
 

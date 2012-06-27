@@ -30,6 +30,24 @@ else
   FacterRev  = options[:facter]
 end
 
+yagr_repos = []
+options[:yagr].each do |yagr_uri|
+  yagr_repo = {}
+  if match = IsGitHubURI.match(yagr_uri) then
+    yagr_repo[:name] = Pathname.new(match[1]).basename
+    yagr_repo[:repo] = match[1] + '.git'
+    yagr_repo[:rev] = match[2] || 'origin/master'
+  elsif yagr_uri =~ IsURI then
+    repo, rev = yagr_uri.split('#', 2)
+    yagr_repo[:name] = Pathname.new(repo).basename
+    yagr_repo[:repo] = repo
+    yagr_repo[:rev]  = rev || 'HEAD'
+  else
+    raise "Unsupported yagr uri: '#{yagr_uri}'"
+  end
+  yagr_repos << yagr_repo
+end
+
 def install_from_git(host, package, repo, revision)
   target = "#{SourcePath}/#{package}"
 
@@ -63,6 +81,11 @@ hosts.each do |host|
   install_from_git host, :facter, FacterRepo, FacterRev
   step "Install puppet from git"
   install_from_git host, :puppet, PuppetRepo, PuppetRev
+
+  step "Install additional git repos"
+  yagr_repos.each do |yagr_repo|
+    install_from_git host, yagr_repo[:name], yagr_repo[:repo], yagr_repo[:rev]
+  end
 
   package_names.zip(options[:plugins]).each do |package, repo|
     step "Install #{package} plugin from git"
