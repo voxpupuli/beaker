@@ -63,7 +63,7 @@ test_name "Revert VMs"
       logger.notify "Spent %f.2 seconds reverting" % time
     end
 
-  elsif options[:vmrun] = 'fusion'
+  elsif options[:vmrun] == 'fusion'
     require 'rubygems' unless defined?(Gem)
     begin
       require 'fission'
