@@ -83,11 +83,11 @@ module PuppetAcceptance
       return self
     end
 
-    def run_and_exit_on_failure
+    def run_and_raise_on_failure
       run
       return self if success?
       @logger.error "Failed while running the #{name} suite..."
-      exit 1
+      raise "Failed while running the #{name} suite..."
     end
 
     def fail_without_test_run
