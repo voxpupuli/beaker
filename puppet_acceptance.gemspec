@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'net-scp'
   s.add_runtime_dependency 'systemu'
   s.add_runtime_dependency 'rbvmomi'
+  s.add_runtime_dependency 'fission'
 end

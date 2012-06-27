@@ -133,7 +133,6 @@ systest allows VMWare Fusion users to have their virtual machines reverted to a
 snapshot prior to running tests.
 
 Additional requirements on the Test Driver:
-- Must have the 'fission' gem (including all its dependencies) installed
 - Must have a ~/.fissionrc that points to the `vmrun` executable and where VMs
   can be found
 
