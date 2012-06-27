@@ -94,7 +94,7 @@ test_name "Revert VMs"
 
       logger.notify "Resuming #{host}"
       start = Time.now
-      vm.start
+      vm.start :headless => true
       time = Time.now - start
       logger.notify "Spent %f.2 seconds resuming VM" % time
     end
