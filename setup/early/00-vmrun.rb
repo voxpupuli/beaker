@@ -63,6 +63,42 @@ test_name "Revert VMs"
       logger.notify "Spent %f.2 seconds reverting" % time
     end
 
+  elsif options[:vmrun] = 'fusion'
+    require 'rubygems' unless defined?(Gem)
+    begin
+      require 'fission'
+    rescue LoadError
+      fail_test "Unable to load fission, please ensure its installed"
+    end
+
+    available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
+    logger.notify "Available VM names: #{available}"
+
+    hosts.each do |host|
+      fission_opts = host.defaults["fission"] || {}
+      vm_name = host.defaults["vmname"] || host.name
+      vm = Fission::VM.new vm_name
+      fail_test("Could not find vm #{vm_name} for #{host}") unless vm.exists?
+
+      available_snapshots = vm.snapshots.data.sort.join(", ")
+      logger.notify "Available snapshots for #{host}: #{available_snapshots}"
+      snap_name = fission_opts["snapshot"] || snap
+      fail_test "No snapshot specified for #{host}" unless snap_name
+      fail_test("Could not find snapshot #{snap_name} for host #{host}") unless vm.snapshots.data.include? snap_name
+
+      logger.notify "Reverting #{host} to snapshot #{snap_name}"
+      start = Time.now
+      vm.revert_to_snapshot snap_name
+      time = Time.now - start
+      logger.notify "Spent %f.2 seconds reverting" % time
+
+      logger.notify "Resuming #{host}"
+      start = Time.now
+      vm.start :headless => true
+      time = Time.now - start
+      logger.notify "Spent %f.2 seconds resuming VM" % time
+    end
+
   elsif options[:vmrun]
 
     vmserver = options[:vmrun]

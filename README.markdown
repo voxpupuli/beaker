@@ -126,3 +126,57 @@ indicated the version string of the most recent tarball.
     cd puppet-acceptance
 ### Run the tests
     ./systest.rb -c your_config.cfg --type pe -t test_repo/tests --debug
+
+## VMWare Fusion support ##
+
+systest allows VMWare Fusion users to have their virtual machines reverted to a
+snapshot prior to running tests.
+
+Additional requirements on the Test Driver:
+- Must have a ~/.fissionrc that points to the `vmrun` executable and where VMs
+  can be found
+
+An example `.fissionrc` file (it's YAML):
+
+    ---
+    vm_dir: "/Directory/containing/my/.VMX/files"
+    vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
+
+You can then use the following arguments to systest:
+- `--vmrun fusion` tells us to enable this feature. This is required.
+- `--snapshot <name>`, where <name> is the snapshot name to revert to. This
+  applies across *all* VMs, so it only makes sense if you want to use the same
+  snapshot name for all VMs. This is optional.
+
+We'll try and match up the hostname (from your configuration file) with a VM of
+the same name. Note that the VM is expected to be pre-configured for running
+acceptance tests; it should have all the right prerequisite libraries,
+password-less SSH access for root, etc.
+
+There are a few additional options available in your configuration file. Each host
+section can now use:
+
+- `vmname`: This is useful if the hostname of the VM doesn't match the name of
+  the .VMX file on disk. The alias should be something fission can load.
+
+- `fission`: A new subsection for fission-specific options, currently limited to:
+
+  - `snapshot`: This is useful if you'd like to use different snapshots for each
+    host. The value should be a valid snapshot name for the VM.
+
+Example:
+
+    HOSTS:
+      pe-debian6:
+        roles:
+          - master
+          - agent
+        platform: debian-6-i386
+        vmname: super-awesome-vm-name
+        fission:
+          snapshot: acceptance-testing-5
+
+Diagnostics:
+
+When using `--vmrun fusion`, we'll log all the available VM names and for each
+host we'll log all the available snapshot names.
