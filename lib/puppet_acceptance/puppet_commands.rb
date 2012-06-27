@@ -211,6 +211,7 @@ module PuppetAcceptance
           end
         end
       rescue Timeout::Error
+        elapsed = Time.now - wait_start
         @logger.warn "Puppet master failed to stop after #{elapsed} seconds; killing manually"
         on host, "kill -9 $(cat #{pidfile})"
         on host, "rm -f #{pidfile}"

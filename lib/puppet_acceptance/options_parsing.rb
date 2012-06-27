@@ -1,6 +1,9 @@
 module PuppetAcceptance
   class Options
-    attr_reader :options
+
+    def self.options
+      return @options
+    end
 
     def self.parse_args
       return @options if @options
@@ -112,6 +115,16 @@ module PuppetAcceptance
           #@options[:type] = 'git'
           @options[:hiera_puppet] = value
         end
+
+        # TODO: haven't really tested this well with multiple occurrences
+        #  of the arg yet.
+        @options[:yagr] = []
+        opts.on('--yagr URI', 'Yet another git repo install URI; specify this option as many times as you like to add additional git repos to clone.'
+                ) do |value|
+          @options[:yagr] << value
+        end
+
+
 
         @options[:modules] = []
         opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
