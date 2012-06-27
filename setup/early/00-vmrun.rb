@@ -76,7 +76,7 @@ test_name "Revert VMs"
 
     hosts.each do |host|
       fission_opts = host.defaults["fission"] || {}
-      vm_name = fission_opts["vmname"] || host.name
+      vm_name = host.defaults["vmname"] || host.name
       vm = Fission::VM.new vm_name
       fail_test("Could not find vm #{vm_name} for #{host}") unless vm.exists?
 

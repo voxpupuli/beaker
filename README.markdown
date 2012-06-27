@@ -153,14 +153,16 @@ the same name. Note that the VM is expected to be pre-configured for running
 acceptance tests; it should have all the right prerequisite libraries,
 password-less SSH access for root, etc.
 
-There are a few additional options available in your configuration file. For
-each host, you can (optionally) have a "fission" section with the following
-(also optional) settings inside:
+There are a few additional options available in your configuration file. Each host
+section can now use:
 
 - `vmname`: This is useful if the hostname of the VM doesn't match the name of
   the .VMX file on disk. The alias should be something fission can load.
-- `snapshot`: This is useful if you'd like to use different snapshots for each
-  host. The value should be a valid snapshot name for the VM.
+
+- `fission`: A new subsection for fission-specific options, currently limited to:
+
+  - `snapshot`: This is useful if you'd like to use different snapshots for each
+    host. The value should be a valid snapshot name for the VM.
 
 Example:
 
@@ -170,10 +172,9 @@ Example:
           - master
           - agent
         platform: debian-6-i386
+        vmname: super-awesome-vm-name
         fission:
-          vmname: super-awesome-vm-name
           snapshot: acceptance-testing-5
-
 
 Diagnostics:
 
