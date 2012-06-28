@@ -217,6 +217,14 @@ module PuppetAcceptance
           @options[:pre_script] = step
         end
 
+        @options[:setup_dir] = nil
+        opts.on('--setup-dir PATH/TO/SETUP/DIR',
+                'An optional path to a directory containing extra "tests" to ' +
+                 'be run during various phases of the test suite (e.g. "early",' +
+                 '"pre_suite", "post_suite")') do |dir|
+          @options[:setup_dir] = dir
+        end
+
         @options[:helper] = nil
         opts.on('--helper PATH/TO/SCRIPT', 'A helper script (a la spec_helper) to require before tests execute') do |script|
           require script

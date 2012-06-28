@@ -27,7 +27,12 @@ module PuppetAcceptance
 
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
-        run_suite('acceptance', @options) unless @options[:installonly]
+        run_suite('pre-suite', pre_suite_options)
+        begin
+          run_suite('acceptance', @options) unless @options[:installonly]
+        ensure
+          run_suite('post-suite', post_suite_options)
+        end
 
       ensure
         @hosts.each {|host| host.close }
@@ -35,9 +40,13 @@ module PuppetAcceptance
     end
 
     def run_suite(name, options, failure_strategy = false)
+      if (options[:tests].empty?)
+        @logger.notify("Not tests to run for suite '#{name}'")
+        return
+      end
       PuppetAcceptance::TestSuite.new(
         name, @hosts, options, @config, failure_strategy
-      ).run_and_exit_on_failure
+      ).run_and_raise_on_failure
     end
 
     def setup_options
@@ -68,9 +77,9 @@ module PuppetAcceptance
           :tests  => ["setup/early", "setup/pe_uninstall/#{@options[:uninstall]}"] })
 
       else
-        setup_opts = @options.merge({
-          :random => false,
-          :tests  => ["setup/early", "setup/#{@options[:type]}", "setup/post"] })
+        setup_opts = build_suite_options("early")
+        setup_opts[:tests] << "setup/#{@options[:type]}"
+        setup_opts[:tests] << "setup/post"
       end
       setup_opts
     end
@@ -79,6 +88,27 @@ module PuppetAcceptance
       @options.merge({
         :random => false,
         :tests => [ 'setup/early', @options[:pre_script] ] })
+    end
+
+    def pre_suite_options
+      build_suite_options('pre_suite')
+    end
+    def post_suite_options
+      build_suite_options('post_suite')
+    end
+
+    def build_suite_options(phase_name)
+      tests = []
+      if (File.directory?("setup/#{phase_name}"))
+        tests << "setup/#{phase_name}"
+      end
+      if (@options[:setup_dir] and
+          File.directory?("#{@options[:setup_dir]}/#{phase_name}"))
+        tests << "#{@options[:setup_dir]}/#{phase_name}"
+      end
+      @options.merge({
+         :random => false,
+         :tests => tests })
     end
   end
 end
