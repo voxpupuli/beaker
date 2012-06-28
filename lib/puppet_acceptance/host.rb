@@ -1,5 +1,8 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'puppet_commands'))
+
 module PuppetAcceptance
   class Host
+    include PuppetCommands
 
     def self.create(name, options, config)
       case config['HOSTS'][name]['platform']
@@ -22,6 +25,16 @@ module PuppetAcceptance
       defaults = type =~ /pe/ ? self.class.pe_defaults : self.class.foss_defaults
       config['CONFIG'].merge(defaults).merge(config['HOSTS'][name])
     end
+
+    def node_name()
+      # TODO: might want to consider caching here; not doing it for now because
+      #  I haven't thought through all of the possible scenarios that could
+      #  cause the value to change after it had been cached.
+      result = exec(puppet_agent("--configprint node_name_value"))
+      result.stdout.chomp
+    end
+
+
 
     def []=(k,v)
       @defaults[k] = v
