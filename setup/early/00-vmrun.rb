@@ -89,12 +89,18 @@ test_name "Revert VMs"
       logger.notify "Reverting #{host} to snapshot #{snap_name}"
       start = Time.now
       vm.revert_to_snapshot snap_name
+      while vm.running?.data
+        sleep 1
+      end
       time = Time.now - start
       logger.notify "Spent %f.2 seconds reverting" % time
 
       logger.notify "Resuming #{host}"
       start = Time.now
       vm.start :headless => true
+      until vm.running?.data
+        sleep 1
+      end
       time = Time.now - start
       logger.notify "Spent %f.2 seconds resuming VM" % time
     end
