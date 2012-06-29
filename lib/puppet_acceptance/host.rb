@@ -61,7 +61,8 @@ module PuppetAcceptance
     end
 
     def ssh_connection
-      @ssh_connection ||= SshConnection.connect(self, self['user'], self['ssh'])
+      host = @defaults['ip'] || @name
+      @ssh_connection ||= SshConnection.connect(host, self['user'], self['ssh'])
     end
 
     def close
