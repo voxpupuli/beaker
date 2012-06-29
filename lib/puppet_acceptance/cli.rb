@@ -41,7 +41,7 @@ module PuppetAcceptance
 
     def run_suite(name, options, failure_strategy = false)
       if (options[:tests].empty?)
-        @logger.notify("Not tests to run for suite '#{name}'")
+        @logger.notify("No tests to run for suite '#{name}'")
         return
       end
       PuppetAcceptance::TestSuite.new(
