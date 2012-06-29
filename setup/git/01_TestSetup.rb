@@ -1,3 +1,5 @@
+require 'pathname'
+
 test_name "Install puppet and facter on target machines..."
 
 SourcePath  = "/opt/puppet-git-repos"
