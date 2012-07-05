@@ -17,6 +17,8 @@ hosts.each do |host|
     fail_test "Sorry, PE #{dist_gz} file not found."
   end
 
+  step "Pre Test Setup -- clean up /tmp"
+  on host,"rm -f /tmp/*.tar ; rm -f /tmp/*.gz", :acceptable_exit_codes => (0..255)
   step "Pre Test Setup -- SCP install package to hosts"
   scp_to host, "/opt/enterprise/dists/#{dist_gz}", "/tmp"
   step "Pre Test Setup -- Untar install package on hosts"
