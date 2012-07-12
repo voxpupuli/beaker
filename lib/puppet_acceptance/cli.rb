@@ -12,6 +12,10 @@ module PuppetAcceptance
         fail "Argh!  There is no default for Config, specify one!"
       end
 
+      if (@options[:helper])
+        require @options[:helper]
+      end
+
       @hosts =  []
       @config['HOSTS'].each_key do |name|
         @hosts << PuppetAcceptance::Host.create(name, @options, @config)
