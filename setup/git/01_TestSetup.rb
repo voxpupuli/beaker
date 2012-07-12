@@ -1,8 +1,12 @@
 require 'pathname'
 
+require 'lib/puppet_acceptance/dsl/install_utils'
+
+extend PuppetAcceptance::DSL::InstallUtils
+
 test_name "Install puppet and facter on target machines..."
 
-SourcePath  = "/opt/puppet-git-repos"
+SourcePath  = PuppetAcceptance::DSL::InstallUtils::SourcePath
 GitHub      = 'git://github.com/puppetlabs'
 IsURI       = %r{^[^:]+://|^git@github.com:}
 IsGitHubURI = %r{(https://github.com/[^/]+/[^/]+)(?:/tree/(.*))$}
@@ -50,25 +54,6 @@ options[:yagr].each do |yagr_uri|
   yagr_repos << yagr_repo
 end
 
-def install_from_git(host, package, repo, revision)
-  target = "#{SourcePath}/#{package}"
-
-  step "Clone #{repo} if needed"
-  on host, "test -d #{SourcePath} || mkdir -p #{SourcePath}"
-  on host, "test -d #{target} || git clone #{repo} #{target}"
-
-  step "Update #{package} and check out revision #{revision}"
-  commands = ["cd #{target}",
-              "remote rm origin",
-              "remote add origin #{repo}",
-              "fetch origin",
-              "clean -fdx",
-              "checkout -f #{revision}"]
-  on host, commands.join(" && git ")
-
-  step "Install #{package} on the system"
-  on host, "cd #{target} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
-end
 
 
 github_sig='github.com,207.97.227.239 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
