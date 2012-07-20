@@ -1,58 +1,44 @@
 require 'spec_helper'
+require 'fileutils'
 
 module PuppetAcceptance
   describe TestSuite do
 
-    context '.new' do
-      include FakeFS::SpecHelpers
+    context 'new', :use_fakefs => true do
+      let(:test_dir) { 'tmp/tests' }
 
-      before do
-        @test_dir = 'tmp/tests'
-        Dir.mkdir_p @test_dir
-        File.new "#{@test_dir}/test_file.rb", 'w+'
-      end
+      let(:options)  { {:tests => create_files(@files)} }
+      let(:rb_test)  { File.expand_path(test_dir + '/my_ruby_file.rb')    }
+      let(:pl_test)  { File.expand_path(test_dir + '/my_perl_file.pl')    }
+      let(:sh_test)  { File.expand_path(test_dir + '/my_shell_file.sh')   }
 
-      it 'instantiates' do
-        options = {}
-        options[:tests] = 'tmp/tests'
-        ts = PuppetAcceptance::TestSuite.new('name', 'hosts', options, 'config', :stop_on_error)
+      it 'fails without test files' do
+        expect { PuppetAcceptance::TestSuite.new 'name', 'hosts',
+                  Hash.new, 'config', :stop_on_error }.to raise_error
       end
 
       it 'includes specific files as test file when explicitly passed' do
-        options = {}
-        options[:tests] = [ 'tmp/tests/my_ruby_file.rb',
-                            'tmp/tests/my_shell_file.sh',
-                            'tmp/tests/my_perl_file.pl' ]
-        options[:tests].each do |my_file|
-          File.new my_file, 'w'
-        end
-        ts = PuppetAcceptance::TestSuite.new('name', 'hosts', options, 'config', :stop_on_error)
-        files = ts.instance_variable_get :@test_files
-        options[:tests].each do |my_file|
-          (files.include? my_file).should be_true
-        end
+        @files = [ rb_test ]
+        ts = PuppetAcceptance::TestSuite.new 'name', 'hosts', options,
+                                             'config', :stop_on_error
+
+        expect { ts.instance_variable_get(:@test_files).
+                  include? rb_test }.to be_true
       end
 
       it 'includes only .rb files as test files when dir is passed' do
-        options = {:tests => 'tmp/tests'}
-        tests = [ 'tmp/tests/my_ruby_file.rb',
-                  'tmp/tests/my_shell_file.sh',
-                  'tmp/tests/my_perl_file.pl' ]
+        create_files [ rb_test, pl_test, sh_test ]
+        @files = [ test_dir ]
 
-        tests.each_with_index do |my_file, i|
-          File.new my_file, 'w'
-          tests[i] = File.expand_path my_file
-        end
+        ts = PuppetAcceptance::TestSuite.new 'name', 'hosts',
+               options, 'config', :stop_on_error
 
-        ts = PuppetAcceptance::TestSuite.new('name', 'hosts', options, 'config', :stop_on_error)
-        files = ts.instance_variable_get :@test_files
-        (files.include? tests[0]).should be_true
-        (files.include? 'tmp/tests/my_shell_file.sh').should be_false
-        (files.include? 'tmp/tests/my_perl_file.pl').should be_false
+        processed_files = ts.instance_variable_get :@test_files
+
+        expect(processed_files).to include(rb_test)
+        expect(processed_files).to_not include(sh_test)
+        expect(processed_files).to_not include(pl_test)
       end
-
-      it 'fails without test files' do
-        ts = PuppetAcceptance::TestSuite.new('name', 'hosts', options, 'config', :stop_on_error)
     end
   end
 end
