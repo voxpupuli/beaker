@@ -74,7 +74,7 @@ module PuppetAcceptance
       return unless is_debug?
       strings = strip_colors_from args
       string = strings.join
-      optionally_color GREY, string
+      optionally_color GREY, string, false
     end
 
     def debug *args
@@ -106,10 +106,11 @@ module PuppetAcceptance
       end
     end
 
-    def optionally_color color_code, *msg
+    def optionally_color color_code, msg, add_newline = true
+      print_statement = add_newline ? :puts : :print
       @destinations.each do |to|
         to.print color_code if @color
-        to.puts *msg
+        to.send print_statement, msg
         to.print NORMAL if @color
       end
     end

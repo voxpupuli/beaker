@@ -68,15 +68,15 @@ module PuppetAcceptance
 
         context 'successfully print' do
           before do
-            my_io.should_receive :puts
-            my_io.should_receive( :print ).twice
+            my_io.stub :puts
+            my_io.should_receive( :print ).at_least :twice
           end
 
           it( 'warnings' )    { debug_logger.warn 'IMA WARNING!'        }
           it( 'debugs' )      { debug_logger.debug 'IMA DEBUGGING!'     }
           it( 'successes' )   { debug_logger.success 'SUCCESS!'         }
           it( 'errors' )      { debug_logger.error 'ERROR!'             }
-          it( 'host_output' ) { debug_logger.host_output 'Host output'  }
+          it( 'host_output' ) { debug_logger.host_output 'ERROR!'       }
         end
       end
 

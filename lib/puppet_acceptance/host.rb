@@ -64,55 +64,44 @@ module PuppetAcceptance
       @config.is_pe?
     end
 
-    def ssh_connection
-      host = self['ip'] || @name
-      @ssh_connection ||= SshConnection.connect(host, self['user'], self['ssh'])
+    def connection
+      @connection ||= SshConnection.connect( self['ip'] || @name,
+                                             self['user'],
+                                             self['ssh'] )
     end
 
     def close
-      @ssh_connection.close if @ssh_connection
+      @connection.close if @connection
     end
 
     def exec command, options={}
       # I've always found this confusing
       cmdline = command.cmd_line(self)
 
-      @logger.debug "\n#{self} $ #{cmdline}"
-
-      # these really should be the options that are passed to exec, or they should
-      # be, really, passed to the connection constructor.
-      ssh_options = {
-        :stdin => options[:stdin],
-        :pty => options[:pty],
-        :dry_run => $dry_run,
-      }
+      @logger.debug "\n#{self} $ #{cmdline}" unless options[:silent]
 
       output_callback = logger.method(:host_output)
 
-      # is this returning a result object?
-      # the options should come at the end of the method signature (rubyism)
-      # and they shouldn't be ssh specific
-      result = ssh_connection.execute(cmdline, ssh_options, output_callback)
+      unless $dry_run
+        # is this returning a result object?
+        # the options should come at the end of the method signature (rubyism)
+        # and they shouldn't be ssh specific
+        result = connection.execute(cmdline, options, output_callback)
 
-      # This should be in the logger, it's passed the configuration object and
-      # it should decide what it prints to where based on how it's been configured.
-      # Ultimately it doesn't have to be the logger, but we need to not put this
-      # info everywhere...
-      # actually I don't think this value could be in this options hash, every other
-      # use is from the options passed to `on` but this is from the harness' options
-      unless options[:silent]
-        # What?
-        result.log(@logger)
-        # No, TestCase has the knowledge about whether its failed, checking acceptable
-        # exit codes at the host level and then raising...
-        # is it necessary to break execution??
-        unless result.exit_code_in?(options[:acceptable_exit_codes] || [0])
-          limit = 10
-          raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
+        unless options[:silent]
+          # What?
+          result.log(@logger)
+          # No, TestCase has the knowledge about whether its failed, checking acceptable
+          # exit codes at the host level and then raising...
+          # is it necessary to break execution??
+          unless result.exit_code_in?(options[:acceptable_exit_codes] || [0])
+            limit = 10
+            raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
+          end
         end
+        # Danger, so we have to return this result?
+        result
       end
-      # Danger, so we have to return this result?
-      result
     end
 
     def do_scp_to(source, target)

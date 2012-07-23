@@ -1,22 +1,4 @@
 require 'spec_helper'
-require 'ostruct'
-
-#
-#
-# Shouldn't Host and a bunch of other crap in this harness decend from Struct too!?!?!
-#
-#
-#
-class MockConfig < Struct.new(:CONFIG, :HOSTS)
-  def initialize(conf, hosts, is_pe = false)
-    @is_pe = is_pe
-    super conf, hosts
-  end
-
-  def is_pe?
-    @is_pe
-  end
-end
 
 module PuppetAcceptance
   describe Host do
@@ -41,8 +23,22 @@ module PuppetAcceptance
     end
 
 
+    # it takes a command object and a hash of options,
+    # it acts on the host's logger and connection object
+    # it receives a result object from the connection#execute
+    # (which it's really just a confusing wrapper for)
+    # it controls the result objects logging and fails a test for TestCase
+    #   if the exit_code doesn't match
+    # it returns the result object
     it 'EXEC!'
 
+    # it takes a location and a destination
+    # it basically proxies that to the connection object
+    it 'DO_SCP!'
+
+    it 'interpolates to its "name"' do
+      expect( "#{host}" ).to be === 'name'
+    end
 
 
     context 'merging defaults' do
