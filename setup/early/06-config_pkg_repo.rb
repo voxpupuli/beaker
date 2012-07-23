@@ -13,6 +13,8 @@ else
       on(host, "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi")
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg)
       on(host, "apt-get -y -f -m update")
+    when host['platform'] =~ /debian/
+      on(host, "apt-get -y -f -m update")
     else
       logger.notify "#{host}: packing configuration not modified"
     end
