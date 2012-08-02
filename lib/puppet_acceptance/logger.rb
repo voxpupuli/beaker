@@ -124,15 +124,20 @@ module PuppetAcceptance
       end
     end
 
-    # utility method to get the current call stack and format it to a human-readable string (which some IDEs/editors
-    # will recognize as links to the line numbers in the trace)
-    def pretty_backtrace()
+    # Utility method format a backtrace to a human-readable string (which some
+    # IDEs/editors will recognize as links to the line numbers in the trace).
+    #
+    # @param backtrace [Array] backtrace array, if not provided falls back to
+    #   current call stack
+    def pretty_backtrace(backtrace = caller(1))
 
-      caller(1).collect do |line|
-        file_path, line_num = line.split(":")
+      backtrace.collect do |line|
+        file_path, line_num, code_snip = line.split(":")
         file_path = expand_symlinks(File.expand_path(file_path))
 
-        file_path + ":" + line_num
+        out = file_path + ":" + line_num
+        out += ":" + code_snip if code_snip
+        out
       end .join("\n")
 
     end
