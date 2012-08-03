@@ -1,7 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'puppet_commands'))
 
 module PuppetAcceptance
-  class Host    # < Struct.new :name, :options, :config
+  class Host
     include PuppetCommands
 
     def self.create name, options, config
@@ -111,7 +111,7 @@ module PuppetAcceptance
         :dry_run => $dry_run,
       }
 
-      ssh_connection.scp_to(source, target, ssh_options)
+      connection.scp_to(source, target, ssh_options)
     end
 
     def do_scp_from(source, target)
@@ -121,7 +121,7 @@ module PuppetAcceptance
           :dry_run => $dry_run,
       }
 
-      ssh_connection.scp_from(source, target, ssh_options)
+      connection.scp_from(source, target, ssh_options)
     end
   end
 
