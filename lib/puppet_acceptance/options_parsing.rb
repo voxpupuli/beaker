@@ -241,6 +241,11 @@ module PuppetAcceptance
         opts.on('--helper PATH/TO/SCRIPT', 'A helper script (a la spec_helper) to require before tests execute') do |script|
           @options[:helper] = script
         end
+
+        @defaults[:preserve_hosts] = false
+        opts.on('--[no-]preserve-hosts', 'Preserve cloud instances') do |value|
+          @options[:preserve_hosts] = value
+        end
       end
 
       optparse.parse!
