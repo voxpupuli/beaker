@@ -39,6 +39,7 @@ module PuppetAcceptance
         end
 
       ensure
+        run_suite('cleanup', cleanup_options)
         @hosts.each {|host| host.close }
       end
     end
@@ -99,6 +100,9 @@ module PuppetAcceptance
     end
     def post_suite_options
       build_suite_options('post_suite')
+    end
+    def cleanup_options
+      build_suite_options('cleanup')
     end
 
     def build_suite_options(phase_name)

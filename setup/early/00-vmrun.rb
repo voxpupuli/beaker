@@ -105,6 +105,48 @@ test_name "Revert VMs"
       time = Time.now - start
       logger.notify "Spent %f.2 seconds resuming VM" % time
     end
+  elsif options[:vmrun] == 'blimpy'
+    require 'rubygems'
+    require 'blimpy'
+
+    # These are the rightscale AMIs. They work, but we should get our own
+    # AMIs setup with the correct set of packages.
+    AMI = {
+      'el-6-x86_64' => { :image => 'ami-fa3f9c93', :region => 'us-east-1' },
+      'el-6-i386'   => { :image => 'ami-02f85a6b', :region => 'us-east-1' },
+    }
+
+    fleet = Blimpy.fleet do |fleet|
+      hosts.each do |host|
+        ami = AMI[host['platform']]
+        fleet.add(:aws) do |ship|
+          ship.name = host.name
+          ship.ports = [22, 80, 8080] #TODO pick these based on the role?
+          ship.image_id = ami[:image]
+          ship.region = ami[:region]
+          ship.username = 'root'
+        end
+      end
+    end
+
+    fleet.start
+
+    # Configure our nodes to match the blimp fleet
+    # Also generate hosts entries for the fleet, since we're iterating
+    etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
+    fleet.ships.each do |ship|
+      ship.wait_for_sshd
+      name = ship.name
+      host = hosts.select { |host| host.name == name }[0]
+      host['ip'] = ship.dns
+      on host, "hostname #{name}"
+      on host, "ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1"
+      ip = stdout.chomp
+      etc_hosts += "#{ip}\t#{name}\n"
+    end
+
+    # Send our hosts information to the nodes
+    on hosts, "echo '#{etc_hosts}' > /etc/hosts"
 
   elsif options[:vmrun]
 
