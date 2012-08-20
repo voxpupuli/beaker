@@ -149,17 +149,7 @@ test_name "Revert VMs"
     on hosts, "echo '#{etc_hosts}' > /etc/hosts"
 
   elsif options[:vmrun]
-
-    vmserver = options[:vmrun]
-    hosts.each do |host|
-      logger.warn ""
-      logger.warn "Warning you are using using VIRSH to manage #{host}!!!!"
-      logger.warn ""
-      step "Reverting VM: #{host} to #{snap} on VM server #{vmserver}"
-      system("lib/virsh_exec.exp #{vmserver} snapshot-revert #{host} #{snap}")
-    end
-
+    raise ArgumentError, "Invalid value for vmrun: #{options[:vmrun]}"
   else
-
     skip_test "Skipping revert VM step"
   end
