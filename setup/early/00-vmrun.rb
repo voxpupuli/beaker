@@ -109,12 +109,12 @@ test_name "Revert VMs"
     require 'rubygems'
     require 'blimpy'
 
-    # These are the rightscale AMIs. They work, but we should get our own
-    # AMIs setup with the correct set of packages.
-    AMI = {
-      'el-6-x86_64' => { :image => 'ami-fa3f9c93', :region => 'us-east-1' },
-      'el-6-i386'   => { :image => 'ami-02f85a6b', :region => 'us-east-1' },
-    }
+    AMI = YAML.load_file('config/image_templates/ec2.yaml')["AMI"]
+    if options[:type] =~ /pe/
+      image_type = :pe
+    else
+      image_type = :foss
+    end
 
     fleet = Blimpy.fleet do |fleet|
       hosts.each do |host|
@@ -122,7 +122,7 @@ test_name "Revert VMs"
         fleet.add(:aws) do |ship|
           ship.name = host.name
           ship.ports = [22, 80, 8080] #TODO pick these based on the role?
-          ship.image_id = ami[:image]
+          ship.image_id = ami[:image][image_type]
           ship.region = ami[:region]
           ship.username = 'root'
         end
