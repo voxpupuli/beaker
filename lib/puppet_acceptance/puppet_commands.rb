@@ -63,6 +63,9 @@ module PuppetAcceptance
     #     passed to the 'puppet apply' command.
     #   :environment => a Hash containing string->string key value pairs.  These will be treated as extra environment
     #     variables that should be set before running the puppet command.
+    #   :catch_failures => boolean. By default "puppet --apply" will exit with 0, which does not count as a test
+    #     failure, even if there were errors applying the manifest. This option enables detailed exit codes and causes
+    #     a test failure if "puppet --apply" indicates there was a failure during its execution.
     # [&block] this method will yield to a block of code passed by the caller; this can be used for additional validation,
     #     etc.
     def apply_manifest_on(host, manifest, options={}, &block)
@@ -71,6 +74,17 @@ module PuppetAcceptance
       args = ["--verbose"]
       args << "--parseonly" if options[:parseonly]
       args << "--trace" if options[:trace]
+
+      if options[:catch_failures]
+        args << '--detailed-exitcodes'
+
+        # From puppet help:
+        # "... an exit code of '2' means there were changes, an exit code of '4' means there were
+        # failures during the transaction, and an exit code of '6' means there were both
+        # changes and failures."
+        # We're after failures specifically so catch exit codes 4 and 6 only.
+        on_options[:acceptable_exit_codes] = [0, 2]
+      end
 
       # Not really thrilled with this implementation, might want to improve it later.  Basically, there is a magic
       # trick in the constructor of PuppetCommand which allows you to pass in a Hash for the last value in the *args
