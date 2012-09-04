@@ -21,7 +21,7 @@ module PuppetAcceptance
         on host, commands.join(" && git ")
 
         step "Install #{package} on the system"
-        on host, "cd #{target} && if [ -f install.rb ]; then ruby ./install.rb; else true; fi"
+        on host, "cd #{target} && if [ -f install.rb ]; then ruby ./install.rb --bindir=/usr/bin --sbindir=/usr/sbin; else true; fi"
       end
     end
   end

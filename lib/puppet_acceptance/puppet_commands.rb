@@ -143,7 +143,7 @@ module PuppetAcceptance
     #     if they are not explicitly set in your 'args' parameter:
     # * --daemonize
     # * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
-    # * --dns_alt_names="puppet, $(hostname -s), $(hostname -f)"
+    # * --dns_alt_names="puppet, $(facter hostname), $(puppet fqdn)"
     def with_master_running_on(host, args='--daemonize', options={}, &block)
       # they probably want to run with daemonize.  If they pass some other arg/args but forget to re-include
       # daemonize, we'll check and make sure they didn't explicitly specify "no-daemonize", and, failing that,
@@ -151,7 +151,7 @@ module PuppetAcceptance
       if (args !~ /(?:--daemonize)|(?:--no-daemonize)/) then args << " --daemonize" end
 
       if (args !~ /--logdest/) then args << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\"" end
-      if (args !~ /--dns_alt_names/) then args << " --dns_alt_names=\"puppet, $(hostname -s), $(hostname -f)\"" end
+      if (args !~ /--dns_alt_names/) then args << " --dns_alt_names=\"puppet, $(facter hostname), $(facter fqdn)\"" end
 
       on hosts, host_command('rm -rf #{host["puppetpath"]}/ssl') unless options[:preserve_ssl]
       agents.each do |agent|
@@ -159,7 +159,7 @@ module PuppetAcceptance
           # we want to remove everything except the log and ssl directory (we
           # just got rid of ssl if preserve_ssl wasn't set, and otherwise want
           # to leave it)
-          on agent, %Q[find "#{vardir}" -mindepth 1 -maxdepth 1 | grep -Ev "/(log|ssl)$" | xargs rm -rf]
+          on agent, %Q[for i in "#{vardir}/*"; do echo $i; done | grep -v log| grep -v ssl | xargs rm -rf]
         end
       end
 
@@ -189,7 +189,7 @@ module PuppetAcceptance
         Timeout.timeout(timeout) do
           loop do
             # 7 is "Could not connect to host", which will happen before it's running
-            result = on(host, "curl -k https://#{host}:8140", :acceptable_exit_codes => [0,7])
+            result = on(host, "curl -s -k https://#{host}:8140", :acceptable_exit_codes => [0,7])
             break if exit_code == 0
             sleep 1
           end

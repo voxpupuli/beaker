@@ -92,10 +92,18 @@ hosts.each do |host|
   unless host['platform'].include? 'windows'
     step "Create required users and groups"
     on host, "getent group puppet || groupadd puppet"
-    on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
+    if host['platform'].include? 'solaris'
+      on host, "getent passwd puppet || useradd -d /puppet -m -s /bin/sh -g puppet puppet"
+    else
+      on host, "getent passwd puppet || useradd puppet -g puppet -G puppet"
+    end
 
     step "REVISIT: Work around bug #5794 not creating reports as required"
-    on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+    if host['platform'].include? 'solaris'
+      on host, "mkdir -p /tmp/reports && chown puppet:puppet /tmp/reports"
+    else
+      on host, "mkdir -vp /tmp/reports && chown -v puppet:puppet /tmp/reports"
+    end
   end
 end
 
@@ -109,5 +117,5 @@ end
 
 agents.each do |agent|
   puppetconf = File.join(agent['puppetpath'], 'puppet.conf')
-  on agent, "echo [agent] > #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
+  on agent, "echo '[agent]' > #{puppetconf} && echo server=#{role_master} >> #{puppetconf}"
 end
