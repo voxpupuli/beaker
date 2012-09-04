@@ -42,16 +42,16 @@ module PuppetAcceptance
         if options[:pty] then
           channel.request_pty do |ch, success|
             if success
-              puts "Allocated a PTY on #{@host.name} for #{command.inspect}"
+              puts "Allocated a PTY on #{@host} for #{command.inspect}"
             else
               abort "FAILED: could not allocate a pty when requested on " +
-                "#{@host.name} for #{command.inspect}"
+                "#{@host} for #{command.inspect}"
             end
           end
         end
 
         channel.exec(command) do |terminal, success|
-          abort "FAILED: to execute command on a new channel on #{@host.name}" unless success
+          abort "FAILED: to execute command on a new channel on #{@host}" unless success
           terminal.on_data do |ch, data|
             stdout_callback[data] if stdout_callback
             result.stdout << data
