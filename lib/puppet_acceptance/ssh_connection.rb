@@ -1,7 +1,7 @@
 module PuppetAcceptance
   class SshConnection
     def initialize(host, user=nil, options={})
-      @host = host
+      @hostname = host
       @user = user
       @options = options
     end
@@ -15,7 +15,7 @@ module PuppetAcceptance
     def connect
       try = 1
       @ssh ||= begin
-                 Net::SSH.start(@host, @user, @options)
+                 Net::SSH.start(@hostname, @user, @options)
                rescue
                  try += 1
                  if try < 4
@@ -35,23 +35,23 @@ module PuppetAcceptance
     end
 
     def execute(command, options={}, stdout_callback=nil, stderr_callback=stdout_callback)
-      result = Result.new(@host, command)
+      result = Result.new(@hostname, command)
       return result if options[:dry_run]
 
       @ssh.open_channel do |channel|
         if options[:pty] then
           channel.request_pty do |ch, success|
             if success
-              puts "Allocated a PTY on #{@host.name} for #{command.inspect}"
+              puts "Allocated a PTY on #{@hostname} for #{command.inspect}"
             else
               abort "FAILED: could not allocate a pty when requested on " +
-                "#{@host.name} for #{command.inspect}"
+                "#{@hostname} for #{command.inspect}"
             end
           end
         end
 
         channel.exec(command) do |terminal, success|
-          abort "FAILED: to execute command on a new channel on #{@host.name}" unless success
+          abort "FAILED: to execute command on a new channel on #{@hostname}" unless success
           terminal.on_data do |ch, data|
             stdout_callback[data] if stdout_callback
             result.stdout << data
@@ -91,10 +91,10 @@ module PuppetAcceptance
       recursive_scp = File.directory?(source)
       @ssh.scp.upload!(source, target, :recursive => recursive_scp)
 
-      result = Result.new(@host, [source, target])
+      result = Result.new(@hostname, [source, target])
 
       # Setting these values allows reporting via result.log(test_name)
-      result.stdout = "SCP'ed file #{source} to #{@host}:#{target}"
+      result.stdout = "SCP'ed file #{source} to #{@hostname}:#{target}"
 
       # Net::Scp always returns 0, so just set the return code to 0.
       result.exit_code = 0
