@@ -118,11 +118,13 @@ test_name "Revert VMs"
 
     fleet = Blimpy.fleet do |fleet|
       hosts.each do |host|
+        amisize = host["amisize"] || 'm1.small'
         ami = AMI[host['platform']]
         fleet.add(:aws) do |ship|
           ship.name = host.name
           ship.ports = [22, 80, 8080] #TODO pick these based on the role?
           ship.image_id = ami[:image][image_type]
+          ship.flavor = amisize
           ship.region = ami[:region]
           ship.username = 'root'
         end
