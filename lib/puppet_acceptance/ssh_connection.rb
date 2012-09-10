@@ -52,16 +52,22 @@ module PuppetAcceptance
 
         channel.exec(command) do |terminal, success|
           abort "FAILED: to execute command on a new channel on #{@hostname}" unless success
-          terminal.on_data do |ch, data|
-            stdout_callback[data] if stdout_callback
-            result.stdout << data
-            result.output << data
+          terminal.on_data do |ch, raw_data|
+            stdout_callback[raw_data] if stdout_callback
+              result.raw_stdout << raw_data
+              result.raw_output << raw_data
+              normalized_data = raw_data.gsub(/\r\n?/, "\n")
+              result.stdout << normalized_data
+              result.output << normalized_data
           end
-          terminal.on_extended_data do |ch, type, data|
+          terminal.on_extended_data do |ch, type, raw_data|
             if type == 1
-              stderr_callback[data] if stderr_callback
-              result.stderr << data
-              result.output << data
+              stderr_callback[raw_data] if stderr_callback
+              result.raw_stderr << raw_data
+              result.raw_output << raw_data
+              normalized_data = raw_data.gsub(/\r\n?/, "\n")
+              result.stderr << normalized_data
+              result.output << normalized_data
             end
           end
           terminal.on_request("exit-status") do |ch, data|
