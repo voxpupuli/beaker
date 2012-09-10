@@ -2,16 +2,20 @@ AMI:
   el-6-x86_64:
     :image: 
       :pe: ami-57db123e
+      :foss: ami-57db123e
     :region: us-east-1
   el-6-i386:
     :image:
       :pe: ami-02f85a6b
+      :foss: ami-02f85a6b
     :region: us-east-1
   el-5-i386:
     :image:
       :pe: ami-750cc01c
+      :foss: ami-750cc01c
     :region: us-east-1
   ubuntu-10.04-i386:
     :image:
       :pe: ami-edae6384
+      :foss: ami-edae6384
     :region: us-east-1
