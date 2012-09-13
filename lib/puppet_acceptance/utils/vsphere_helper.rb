@@ -34,7 +34,7 @@ class VsphereHelper
   # within folders of arbitrary depth
   # retuns an array of VirtualMachine ManagedObjects
   def find_vms names, connection = @connection
-    names = names.is_a? Array ? names : [ names ]
+    names = names.is_a?(Array) ? names : [ names ]
     containerView = get_base_vm_container_from connection
     propertyCollector = connection.propertyCollector
 

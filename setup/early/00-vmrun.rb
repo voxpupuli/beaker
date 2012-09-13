@@ -7,7 +7,7 @@ test_name "Revert VMs"
   if options[:vmrun] == 'vsphere'
     require 'yaml' unless defined?(YAML)
     require File.expand_path(File.join(File.dirname(__FILE__),
-                                       '..','lib', 'puppet_acceptance',
+                                       '..', '..','lib', 'puppet_acceptance',
                                        'utils', 'vsphere_helper'))
 
     # support Fog/Cloud Provisioner layout
