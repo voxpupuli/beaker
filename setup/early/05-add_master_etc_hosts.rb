@@ -1,13 +1,22 @@
 test_name "Add Master entry to /etc/hosts"
 
 step "Get ip address of Master #{master}"
-on(master,"ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")
+if master['platform'].include? 'solaris'
+  on(master,"ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1")
+else
+  on(master,"ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")
+end
 ip=stdout.chomp
 
-step "Update /etc/host on #{master}"
+path = "/etc/hosts"
+if master['platform'].include? 'solaris'
+  path = "/etc/inet/hosts"
+end
+
+step "Update %s on #{master}" % path
 # Preserve the mode the easy way...
-on master, "cp /etc/hosts /etc/hosts.old"
-on master, "cp /etc/hosts /etc/hosts.new"
-on master, "grep -v '#{ip} #{master}' /etc/hosts > /etc/hosts.new"
-on master, "echo \"#{ip} #{master}\" >> /etc/hosts.new"
-on master, "mv /etc/hosts.new /etc/hosts"
+on master, "cp %s %s.old" % [path, path]
+on master, "cp %s %s.new" % [path, path]
+on master, "grep -v '#{ip} #{master}' %s > %s.new" % [path, path]
+on master, "echo \"#{ip} #{master}\" >> %s.new" % path
+on master, "mv %s.new %s" % [path, path]
