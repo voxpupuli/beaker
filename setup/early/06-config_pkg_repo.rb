@@ -3,6 +3,7 @@ test_name "Config Packing Repository"
 confine :except, :platform => 'windows'
 
 aptcfg = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.lan:3128/"; }
+ips_pkg_repo="http://solaris-11-internal-repo.acctest.dc1.puppetlabs.net"
 
 unless options[:pkg_repo]
   skip_test "Skipping Config Packing Repository"
@@ -15,6 +16,9 @@ else
       on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /debian/
       on(host, "apt-get -y -f -m update")
+    when host['platform'] =~ /solaris/
+      on(host,"/usr/bin/pkg unset-publisher solaris || :")
+      on(host,"/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo)
     else
       logger.notify "#{host}: packing configuration not modified"
     end
