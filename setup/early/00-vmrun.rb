@@ -1,22 +1,3 @@
-
-module SnapshotFinder
-  def self.find_snapshot vm, snapname
-    search_child_snaps vm.snapshot.rootSnapshotList, snapname
-  end
-
-  def self.search_child_snaps tree, snapname
-    snapshot = nil
-    tree.each do |child|
-      if child.name == snapname
-        snapshot ||= child.snapshot
-      else
-        snapshot ||= search_child_snaps child.childSnapshotList, snapname
-      end
-    end
-    snapshot
-  end
-end
-
 test_name "Revert VMs"
 
   snap = options[:snapshot] || options[:type]
@@ -25,36 +6,56 @@ test_name "Revert VMs"
 
   if options[:vmrun] == 'vsphere'
     require 'yaml' unless defined?(YAML)
-    require 'rubygems' unless defined?(Gem)
-    begin
-      require 'rbvmomi'
-    rescue LoadError
-      fail_test "Unable to load RbVmomi, please ensure its installed"
-    end
+    require File.expand_path(File.join(File.dirname(__FILE__),
+                                       '..', '..','lib', 'puppet_acceptance',
+                                       'utils', 'vsphere_helper'))
 
-    vInfo = YAML.load_file '/etc/plharness/vsphere'
+    # support Fog/Cloud Provisioner layout
+    # (ie, someplace besides my made up conf)
+    vInfo = nil
+    if File.exists? '/etc/plharness/vsphere'
+      vInfo = YAML.load_file '/etc/plharness/vsphere'
+      logger.notify(
+        "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
+        "Please use ~/.fog instead\n" +
+        "See http://docs.puppetlabs.com/pe/2.0/cloudprovisioner_configuring.html for format"
+      )
+    elsif File.exists?( File.join(ENV['HOME'], '.fog') )
+      vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+    end
     fail_test "Cant load vSphere config" unless vInfo
 
-    logger.notify "Connecting to vsphere at #{vInfo['location']}" +
-      " with credentials for #{vInfo['user']}"
+    vsphere_credentials = {}
+    if vInfo['location'] && vInfo['user'] && vInfo['pass']
+      vsphere_credentials[:server] = vInfo['location']
+      vsphere_credentials[:user]   = vInfo['user']
+      vsphere_credentials[:pass]   = vInfo['pass']
 
-    vsphere = RbVmomi::VIM.connect :host     => vInfo['location'],
-                                   :user     => vInfo['user'],
-                                   :password => vInfo['pass'],
-                                   :insecure => true
-    fail_test('Could not connect to vSphere') unless vsphere
+    elsif vInfo[:default][:vsphere_server] &&
+          vInfo[:default][:vsphere_username] &&
+          vInfo[:default][:vsphere_password]
 
-    dc = vsphere.serviceInstance.find_datacenter(vInfo['dc']) or
-      fail_test "Could not connect to Datacenter #{vInfo['dc']}"
+      vsphere_credentials[:server] = vInfo[:default][:vsphere_server]
+      vsphere_credentials[:user]   = vInfo[:default][:vsphere_username]
+      vsphere_credentials[:pass]   = vInfo[:default][:vsphere_password]
+    else
+      fail_test "Invalid vSphere config"
+    end
 
-    hosts.each do |host|
-      vm = dc.find_vm(host.name) or
-        fail_test "Could not find host #{host}"
+    # Do more than manage two different config files...
+    logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      " with credentials for #{vsphere_credentials[:user]}"
 
-      snapshot = SnapshotFinder.find_snapshot(vm, snap) or
-        fail_test("Could not find snapshot #{snap} for host #{host}")
+    vsphere_helper = VsphereHelper.new vsphere_credentials
 
-      logger.notify "Reverting #{host} to snapshot #{snap}"
+    vm_names = hosts.map {|h| h.name }
+    vms = vsphere_helper.find_vms vm_names
+    vms.each do |vm|
+
+      snapshot = vsphere_helper.find_snapshot(vm, snap) or
+        fail_test("Could not find snapshot #{snap} for vm #{vm.name}")
+
+      logger.notify "Reverting #{vm.name} to snapshot #{snap}"
       start = Time.now
       # This will block for each snapshot...
       # The code to issue them all and then wait until they are all done sucks
