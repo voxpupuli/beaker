@@ -7,12 +7,16 @@ test_name "Sync root authorized_keys from github"
 # when reality dictates otherwise"
 if options[:root_keys] then
   script = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-  setup_root_authorized_keys = "curl -k -o - #{script} | bash"
+  setup_root_authorized_keys = "curl -k -o - #{script} | %s"
   step "Sync root authorized_keys from github"
   hosts.each do |host|
     # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-    on(host, setup_root_authorized_keys, :acceptable_exit_codes => (0..255))
+    if host['platform'].include? 'solaris'
+      on(host, setup_root_authorized_keys % "bash", :acceptable_exit_codes => (0..255))
+    else
+      on(host, setup_root_authorized_keys % "env PATH=/usr/gnu/bin:$PATH bash", :acceptable_exit_codes => (0..255))
+    end
   end
 else
-  skip_test "Not syncing root authorized_keys from github"  
+  skip_test "Not syncing root authorized_keys from github"
 end
