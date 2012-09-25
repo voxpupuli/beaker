@@ -7,4 +7,4 @@ VERSION:
   activesupport_ver: 2.3.14
   ruby_augeas_ver: 4.1
   dashboard_ver: 1.2.10
-  console_auth_ver: 1.1.4
+  console_auth_ver: 1.1.5
