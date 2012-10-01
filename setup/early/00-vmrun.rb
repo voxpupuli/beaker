@@ -3,6 +3,7 @@ test_name "Revert VMs"
   snap = options[:snapshot] || options[:type]
   snap = 'git' if snap == 'gem'  # Sweet, sweet consistency
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
+  fail_test "You must specifiy a snapshot when using pe_noop" if snap == 'pe_noop'
 
   if options[:vmrun] == 'vsphere'
     require 'yaml' unless defined?(YAML)
