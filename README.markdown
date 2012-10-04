@@ -144,6 +144,23 @@ AMIs are built for PE based installs on:
 Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file
 lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
 
+# vSphere Support #
+
+You may have the harness revert snapshot from a running VM within vSphere as well.
+To do this create a `~/.fog` file with your vSphere credentials:
+
+Example:
+
+    :default:
+      :vsphere_server: 'vsphere.example.com'
+      :vsphere_username: 'joe'
+      :vsphere_password: 'MyP@$$w0rd'
+
+
+These follow the conventions used by Cloud Provisioner and Fog.
+
+You can now call the harness with the `--vmrun vsphere` to select the VM named in your config.yml file.
+
 
 ## Putting it all together ##
 
