@@ -116,7 +116,7 @@ test_name "Revert VMs"
         sleep 1
       end
       time = Time.now - start
-      logger.notify "Spent %f.2 seconds reverting" % time
+      logger.notify "Spent %.2f seconds reverting" % time
 
       logger.notify "Resuming #{host}"
       start = Time.now
@@ -125,7 +125,7 @@ test_name "Revert VMs"
         sleep 1
       end
       time = Time.now - start
-      logger.notify "Spent %f.2 seconds resuming VM" % time
+      logger.notify "Spent %.2f seconds resuming VM" % time
     end
   elsif options[:vmrun] == 'blimpy'
     require 'rubygems'
