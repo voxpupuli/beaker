@@ -2,7 +2,7 @@ require 'rubygems' unless defined?(Gem)
 begin
   require 'rbvmomi'
 rescue LoadError
-  fail_test "Unable to load RbVmomi, please ensure its installed"
+  raise "Unable to load RbVmomi, please ensure its installed"
 end
 
 class VsphereHelper
@@ -32,7 +32,7 @@ class VsphereHelper
   # an easier wrapper around the horrid PropertyCollector interface,
   # necessary for searching VMs in all Datacenters that may be nested
   # within folders of arbitrary depth
-  # retuns an array of VirtualMachine ManagedObjects
+  # returns a hash array of <name> => <VirtualMachine ManagedObjects>
   def find_vms names, connection = @connection
     names = names.is_a?(Array) ? names : [ names ]
     containerView = get_base_vm_container_from connection
@@ -62,9 +62,11 @@ class VsphereHelper
       :options => { :maxObjects => nil }
     })
 
-    vms = []
+    vms = {}
     results.objects.each do |result|
-      vms << result.obj if names.include?(result.propSet.first.val)
+      name = result.propSet.first.val
+      next unless names.include? name
+      vms[name] = result.obj
     end
     vms
   end

@@ -71,7 +71,10 @@ test_name "Revert VMs"
 
     vm_names = hosts.map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names
-    vms.each do |vm|
+    vm_names.each do |name|
+      unless vm = vms[name]
+        fail_test("Couldn't find VM #{name} in vSphere!")
+      end
 
       snapshot = vsphere_helper.find_snapshot(vm, snap) or
         fail_test("Could not find snapshot #{snap} for vm #{vm.name}")
@@ -84,6 +87,13 @@ test_name "Revert VMs"
 
       time = Time.now - start
       logger.notify "Spent %.2f seconds reverting" % time
+
+      unless vm.runtime.powerState == "poweredOn"
+        logger.notify "Booting #{vm.name}"
+        start = Time.now
+        vm.PowerOnVM_Task.wait_for_completion
+        logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
+      end
     end
 
   elsif options[:vmrun] == 'fusion'
@@ -116,7 +126,7 @@ test_name "Revert VMs"
         sleep 1
       end
       time = Time.now - start
-      logger.notify "Spent %f.2 seconds reverting" % time
+      logger.notify "Spent %.2f seconds reverting" % time
 
       logger.notify "Resuming #{host}"
       start = Time.now
@@ -125,7 +135,7 @@ test_name "Revert VMs"
         sleep 1
       end
       time = Time.now - start
-      logger.notify "Spent %f.2 seconds resuming VM" % time
+      logger.notify "Spent %.2f seconds resuming VM" % time
     end
   elsif options[:vmrun] == 'blimpy'
     require 'rubygems'
