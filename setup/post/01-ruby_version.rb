@@ -9,7 +9,7 @@ def get_cmd(host)
   if host.is_pe?
     "#{host['puppetbindir']}/ruby -v"
   else
-    'ruby -v'
+    'ruby -v || echo "none"'
   end
 end
 
