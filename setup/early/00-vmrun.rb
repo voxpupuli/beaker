@@ -87,6 +87,13 @@ test_name "Revert VMs"
 
       time = Time.now - start
       logger.notify "Spent %.2f seconds reverting" % time
+
+      unless vm.runtime.powerState == "poweredOn"
+        logger.notify "Booting #{vm.name}"
+        start = Time.now
+        vm.PowerOnVM_Task.wait_for_completion
+        logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
+      end
     end
 
   elsif options[:vmrun] == 'fusion'
