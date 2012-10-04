@@ -146,7 +146,7 @@ lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5
 
 # vSphere Support #
 
-You may have the harness revert snapshot from a running VM within vSphere as well.
+The harness can use vms and snapshots that live within vSphere as well.
 To do this create a `~/.fog` file with your vSphere credentials:
 
 Example:
@@ -159,7 +159,7 @@ Example:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
-You can now call the harness with the `--vmrun vsphere` to select the VM named in your config.yml file.
+You can now call the harness with the `--vmrun vsphere` option to select the VM named in your config.yml file.
 
 
 ## Putting it all together ##
