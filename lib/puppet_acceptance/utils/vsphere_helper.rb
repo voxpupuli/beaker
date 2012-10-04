@@ -2,7 +2,7 @@ require 'rubygems' unless defined?(Gem)
 begin
   require 'rbvmomi'
 rescue LoadError
-  fail_test "Unable to load RbVmomi, please ensure its installed"
+  raise "Unable to load RbVmomi, please ensure its installed"
 end
 
 class VsphereHelper
