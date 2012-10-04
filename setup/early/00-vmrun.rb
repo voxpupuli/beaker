@@ -71,7 +71,10 @@ test_name "Revert VMs"
 
     vm_names = hosts.map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names
-    vms.each do |vm|
+    vm_names.each do |name|
+      unless vm = vms[name]
+        fail_test("Couldn't find VM #{name} in vSphere!")
+      end
 
       snapshot = vsphere_helper.find_snapshot(vm, snap) or
         fail_test("Could not find snapshot #{snap} for vm #{vm.name}")
