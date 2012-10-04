@@ -16,6 +16,6 @@ AMI:
     :region: us-east-1
   ubuntu-10.04-i386:
     :image:
-      :pe: ami-4743fe2e
-      :foss: ami-4743fe2e
+      :pe: ami-f5d76b9c
+      :foss: ami-f5d76b9c
     :region: us-east-1
