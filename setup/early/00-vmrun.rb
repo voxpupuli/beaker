@@ -83,7 +83,7 @@ test_name "Revert VMs"
       snapshot.RevertToSnapshot_Task.wait_for_completion
 
       time = Time.now - start
-      logger.notify "Spent %f.2 seconds reverting" % time
+      logger.notify "Spent %.2f seconds reverting" % time
     end
 
   elsif options[:vmrun] == 'fusion'
