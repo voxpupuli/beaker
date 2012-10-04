@@ -11,8 +11,8 @@ AMI:
     :region: us-east-1
   el-5-i386:
     :image:
-      :pe: ami-750cc01c
-      :foss: ami-750cc01c
+      :pe: ami-0bd16d62
+      :foss: ami-0bd16d62
     :region: us-east-1
   ubuntu-10.04-i386:
     :image:
