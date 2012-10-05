@@ -46,6 +46,10 @@ module PuppetAcceptance
       end
       # need to load expect versions of PE binaries
       config['VERSION'] = load_dependency_versions
+      # Make sure the roles array is present for all hosts
+      config['HOSTS'].each_key do |host|
+        config['HOSTS'][host]['roles'] ||= []
+      end
       config
     end
 
