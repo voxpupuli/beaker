@@ -14,14 +14,17 @@ module PuppetAcceptance
 
     def connect
       try = 1
+      last_wait = 0
+      wait = 1
       @ssh ||= begin
                  Net::SSH.start(@hostname, @user, @options)
                rescue
-                 try += 1
-                 if try < 4
+                 if try <= 10
                    puts "Try #{try} -- Host Unreachable"
-                   puts 'Trying again in 20 seconds'
-                   sleep 20
+                   puts "Trying again in #{wait} seconds"
+                   sleep wait
+                   (last_wait, wait) = wait, last_wait + wait
+                   try += 1
                    retry
                  else
                    raise
