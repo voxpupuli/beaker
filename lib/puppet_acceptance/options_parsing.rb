@@ -12,6 +12,7 @@ module PuppetAcceptance
 
       @defaults = {}
       @options = {}
+      @options[:packages] = []
       @options_from_file = {}
 
       optparse = OptionParser.new do|opts|
@@ -112,48 +113,52 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
-        @defaults[:puppet] = 'git://github.com/puppetlabs/puppet.git#HEAD'
         opts.on('-p', '--puppet URI', 'Select puppet git install URI',
                 "  #{@options[:puppet]}",
                 "    - URI and revision, default HEAD",
                 "  just giving the revision is also supported"
                 ) do |value|
-          #@options[:type] = 'git'
-          @options[:puppet] = value
+          if value =~ /puppet/
+            @options[:packages] << value
+          else
+            @options[:packages] << "git://github.com/puppetlabs/puppet.git##{value}"
+          end
         end
 
-        @defaults[:facter] = 'git://github.com/puppetlabs/facter.git#HEAD'
         opts.on('-f', '--facter URI', 'Select facter git install URI',
                 "  #{@options[:facter]}",
                 "    - otherwise, as per the puppet argument"
                 ) do |value|
-          #@options[:type] = 'git'
-          @options[:facter] = value
+          if value =~ /facter/
+            @options[:packages] << value
+          else
+            @options[:packages] << "git://github.com/puppetlabs/facter.git##{value}"
+          end
         end
 
-        @defaults[:hiera] = nil
         opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
                 "  #{@options[:hiera]}"
                 ) do |value|
-          #@options[:type] = 'git'
-          @options[:hiera] = value
+          if value =~ /hiera/
+            @options[:packages] << value
+          else
+            @options[:packages] << "git://github.com/puppetlabs/hiera.git##{value}"
+          end
         end
 
-        @defaults[:hiera_puppet] = nil
         opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI',
                 "  #{@options[:hiera_puppet]}"
                 ) do |value|
-          #@options[:type] = 'git'
-          @options[:hiera_puppet] = value
+          if value =~ /hiera_puppet/
+            @options[:packages] << value
+          else
+            @options[:packages] << "git://github.com/puppetlabs/puppet_hiera.git##{value}"
+          end
         end
 
-        # TODO: haven't really tested this well with multiple occurrences
-        #  of the arg yet.
-        @defaults[:yagr] = []
         opts.on('--yagr URI', 'Yet another git repo install URI; specify this option as many times as you like to add additional git repos to clone.'
                 ) do |value|
-          @options[:yagr] ||= []
-          @options[:yagr] << value
+          @options[:packages] << value
         end
 
 
