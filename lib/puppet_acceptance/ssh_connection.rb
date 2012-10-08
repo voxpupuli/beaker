@@ -94,7 +94,7 @@ module PuppetAcceptance
       result
     end
 
-    def scp(source, target, options={})
+    def scp_to(source, target, options={})
       return if options[:dry_run]
 
       recursive_scp = File.directory?(source)
@@ -104,6 +104,22 @@ module PuppetAcceptance
 
       # Setting these values allows reporting via result.log(test_name)
       result.stdout = "SCP'ed file #{source} to #{@hostname}:#{target}"
+
+      # Net::Scp always returns 0, so just set the return code to 0.
+      result.exit_code = 0
+
+      result
+    end
+
+    def scp_from(source, target, options={})
+      return if options[:dry_run]
+
+      @ssh.scp.download!(source, target, :recursive => true)
+
+      result = Result.new(@hostname, [source, target])
+
+      # Setting these values allows reporting via result.log(test_name)
+      result.stdout = "SCP'ed file #{@hostname}:#{source} to #{target}"
 
       # Net::Scp always returns 0, so just set the return code to 0.
       result.exit_code = 0
