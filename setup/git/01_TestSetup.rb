@@ -8,7 +8,7 @@ test_name "Install packages and repositories on target machines..." do
   GitHubSig   = PuppetAcceptance::DSL::InstallUtils::GitHubSig
 
   tmp_repositories = []
-  options[:packages].each do |uri|
+  options[:install].each do |uri|
     raise(ArgumentError, "#{uri} is not recognized.") unless(uri =~ GitURI)
     tmp_repositories << extract_repo_info_from(uri)
   end

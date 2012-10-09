@@ -6,6 +6,7 @@ module PuppetAcceptance
     end
 
     def self.transform_old_packages(name, value)
+      return nil unless value
       # This is why '-' vs '_' as a company policy is important
       # or at least why the lack of it is annoying
       name = name.to_s.gsub(/_/, '-')
@@ -20,7 +21,7 @@ module PuppetAcceptance
 
       @defaults = {}
       @options = {}
-      @options[:packages] = []
+      @options[:install] = []
       @options_from_file = {}
 
       optparse = OptionParser.new do|opts|
@@ -121,15 +122,14 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
-        opts.on('-i', '--install',
+        opts.on('-i URI', '--install URI',
                 'Install a project repo/app on the SUTs') do |value|
-          if value =~ /,/
-            values = value.split(',')
-            values.each do |val|
-              @options[:packages] << val
-            end
+          if value.is_a?(Array)
+            @options[:install] += value
+          elsif value =~ /,/
+            @options[:install] += value.split(',')
           else
-            @options[:packages] << value
+            @options[:install] << value
           end
         end
 
@@ -160,7 +160,7 @@ module PuppetAcceptance
                 'specify this option as many times as you like to ' +
                 'add additional git repos to clone.'
                 ) do |value|
-          @options[:packages] << value
+          @options[:install] << value
         end
 
         @defaults[:modules] = []
@@ -308,14 +308,16 @@ module PuppetAcceptance
 
       # merge in the options that we read from the file
       @options = @options_from_file.merge(@options)
+      @options[:install] += [ @options_from_file[:install] ].flatten
 
       # merge in the defaults
       @options = @defaults.merge(@options)
 
       # convert old package options to new package options format
       [:puppet, :facter, :hiera, :hiera_puppet].each do |name|
-        @options[:packages] << transform_old_packages(name, @options[name])
+        @options[:install] << transform_old_packages(name, @options[name])
       end
+      @options[:install].compact!
 
       raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
 
