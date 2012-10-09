@@ -5,6 +5,14 @@ module PuppetAcceptance
       return @options
     end
 
+    def self.transform_old_packages(name, value)
+      # This is why '-' vs '_' as a company policy is important
+      # or at least why the lack of it is annoying
+      name = name.to_s.gsub(/_/, '-')
+      puppetlabs = 'git://github.com/puppetlabs'
+      value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
+    end
+
     def self.parse_args
       return @options if @options
 
@@ -114,54 +122,34 @@ module PuppetAcceptance
         end
 
         opts.on('-p', '--puppet URI', 'Select puppet git install URI',
-                "  #{@options[:puppet]}",
                 "    - URI and revision, default HEAD",
                 "  just giving the revision is also supported"
                 ) do |value|
-          if value =~ /puppet/
-            @options[:packages] << value
-          else
-            @options[:packages] << "git://github.com/puppetlabs/puppet.git##{value}"
-          end
+          @options[:puppet] = value
         end
 
         opts.on('-f', '--facter URI', 'Select facter git install URI',
-                "  #{@options[:facter]}",
                 "    - otherwise, as per the puppet argument"
                 ) do |value|
-          if value =~ /facter/
-            @options[:packages] << value
-          else
-            @options[:packages] << "git://github.com/puppetlabs/facter.git##{value}"
-          end
+          @options[:facter] = value
         end
 
-        opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
-                "  #{@options[:hiera]}"
+        opts.on('-h', '--hiera URI', 'Select Hiera git install URI'
                 ) do |value|
-          if value =~ /hiera/
-            @options[:packages] << value
-          else
-            @options[:packages] << "git://github.com/puppetlabs/hiera.git##{value}"
-          end
+          @options[:hiera] = value
         end
 
-        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI',
-                "  #{@options[:hiera_puppet]}"
+        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI'
                 ) do |value|
-          if value =~ /hiera_puppet/
-            @options[:packages] << value
-          else
-            @options[:packages] << "git://github.com/puppetlabs/puppet_hiera.git##{value}"
-          end
+          @options[:hiera_puppet] = value
         end
 
-        opts.on('--yagr URI', 'Yet another git repo install URI; specify this option as many times as you like to add additional git repos to clone.'
+        opts.on('--yagr URI', 'Yet another git repo install URI; ' +
+                'specify this option as many times as you like to ' +
+                'add additional git repos to clone.'
                 ) do |value|
           @options[:packages] << value
         end
-
-
 
         @defaults[:modules] = []
         opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
@@ -311,6 +299,11 @@ module PuppetAcceptance
 
       # merge in the defaults
       @options = @defaults.merge(@options)
+
+      # convert old package options to new package options format
+      [:puppet, :facter, :hiera, :hiera_puppet].each do |name|
+        @options[:packages] << transform_old_packages(name, @options[name])
+      end
 
       raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
 
