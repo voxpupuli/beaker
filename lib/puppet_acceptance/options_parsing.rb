@@ -121,6 +121,18 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
+        opts.on('-i', '--install',
+                'Install a project repo/app on the SUTs') do |value|
+          if value =~ /,/
+            values = value.split(',')
+            values.each do |val|
+              @options[:packages] << val
+            end
+          else
+            @options[:packages] << value
+          end
+        end
+
         opts.on('-p', '--puppet URI', 'Select puppet git install URI',
                 "    - URI and revision, default HEAD",
                 "  just giving the revision is also supported"
