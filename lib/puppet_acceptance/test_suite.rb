@@ -204,7 +204,7 @@ module PuppetAcceptance
 
       summary_logger.notify %Q[
 
-            - Test Case Summary -
+            - Test Case Summary for suite '#{name}' -
      Total Suite Time: %.2f seconds
     Average Test Time: %.2f seconds
             Attempted: #{test_count}
