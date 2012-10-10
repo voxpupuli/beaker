@@ -1,7 +1,11 @@
-test_name="Generate Puppet Enterprise answer files"
+test_name="PE 2.x: Generate Puppet Enterprise answer files"
 
-skip_test "Skipping answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
-skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
+skip_test "Skipping PE 2.x answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
+
+skip_test "Skipping PE 2.x answers file generation, --no-install selected" and break if ( options[:noinstall] )
+
+skip_test "Skipping PE 2.x answer file generation, PE version 1.2.x set" and break if ( options[:pe_version] =~ /1\.2/ )
+
 portno=config['consoleport']
 
 certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
