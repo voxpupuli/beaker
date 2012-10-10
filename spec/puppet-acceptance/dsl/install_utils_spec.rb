@@ -39,10 +39,11 @@ describe InstallUtilsTest do
       repository  = {:name => 'name'}
       path        = '/path/to/repo'
       cmd         = 'cd /path/to/repo/name && git describe || true'
-      result = (Struct.new('Result', :stdout)).new('2')
+      blah = (Struct.new('Result', :stdout)).new('2')
 
       subject.stub(:step)
-      subject.should_receive(:on).with(host, cmd).and_yield(result)
+      subject.should_receive(:on).with(host, cmd).and_yield(subject)
+      subject.stub(:result).and_return(blah)
 
       version = subject.find_git_repo_versions(host, path, repository)
 

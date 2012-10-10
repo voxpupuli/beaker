@@ -24,7 +24,9 @@ test_name "Install packages and repositories on target machines..." do
       install_from_git host, SourcePath, repository
 
       if index == 1
-        versions << find_git_repo_versions(host, SourcePath, repository)
+        versions[repository[:name]] = find_git_repo_versions(host,
+                                                             SourcePath,
+                                                             repository)
       end
     end
   end
