@@ -18,7 +18,7 @@ module PuppetAcceptance
       end
 
       # crude, viscious sorting...
-      def order_packages(packages_array)
+      def order_packages packages_array
         puppet = packages_array.select {|e| e[:name] == 'puppet' }
         puppet_depends = packages_array.select {|e| e[:name] == 'hiera' or e[:name] == 'facter' }
         depends_puppet = packages_array - puppet
