@@ -30,7 +30,7 @@ if version =~ /^1.*/   #  Older version of PE, 1.x series
     end
     host['dist'] = "puppet-enterprise-#{version}-#{platform}"
   
-    unless File.file? "#{distpath}/#{host['dist']}.tar"
+    unless File.file? "#{distpath}/#{host['dist']}.tar.gz"
       logger.error "PE #{host['dist']}.tar not found, help!"
       logger.error ""
       logger.error "Make sure your configuration file uses the PE version string:"
@@ -39,9 +39,9 @@ if version =~ /^1.*/   #  Older version of PE, 1.x series
     end
   
     step "Pre Test Setup -- SCP install package to hosts"
-    scp_to host, "#{distpath}/#{host['dist']}.tar", "/tmp"
+    scp_to host, "#{distpath}/#{host['dist']}.tar.gz", "/tmp"
     step "Pre Test Setup -- Untar install package on hosts"
-    on host,"cd /tmp && tar xf #{host['dist']}.tar"
+    on host,"cd /tmp && gunzip #{host['dist']}.tar.gz && tar xf #{host['dist']}.tar"
   end
   
   # Install Master first -- allows for auto cert signing
