@@ -8,9 +8,9 @@ test_name "Install Puppet #{version}"
 confine :except, :platform => 'windows'
 
 if options[:pe_version]
-  distpath = "/opt/enterprise/dists/pe#{version}"
+  distpath = "#{config['pe_dir']}/pe#{version}"
 else
-  distpath = "/opt/enterprise/dists"
+  distpath = "#{config['pe_dir']}"
 end
 
 if version =~ /^1.*/   #  Older version of PE, 1.x series

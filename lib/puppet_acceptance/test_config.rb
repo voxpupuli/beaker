@@ -36,6 +36,7 @@ module PuppetAcceptance
       config['CONFIG']['modules']            = @options[:modules] || []
 
       if is_pe?
+        config['CONFIG']['pe_dir']           = puppet_enterprise_dir
         config['CONFIG']['pe_ver']           = puppet_enterprise_version
         config['CONFIG']['pe_ver_win']       = puppet_enterprise_version_win
       else
@@ -65,8 +66,12 @@ module PuppetAcceptance
       @is_pe ||= @options[:type] =~ /pe/ ? true : false
     end
 
+    def puppet_enterprise_dir
+      @pe_dir ||= ENV['pe_dist_dir'] || '/opt/enterprise/dists'
+    end
+
     def load_pe_version
-      dist_dir = ENV['pe_dist_dir'] || '/opt/enterprise/dists'
+      dist_dir = puppet_enterprise_dir
       version_file = ENV['pe_version_file'] || 'LATEST'
       version = ""
       begin
@@ -89,7 +94,7 @@ module PuppetAcceptance
     end
 
     def load_pe_version_win
-      dist_dir = ENV['pe_dist_dir'] || '/opt/enterprise/dists'
+      dist_dir = puppet_enterprise_dir
       version_file = ENV['pe_version_file'] || 'LATEST-win'
       version = ""
       begin
