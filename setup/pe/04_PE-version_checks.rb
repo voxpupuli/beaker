@@ -86,6 +86,7 @@ end
   ['pe-puppet-dashboard', 'dashboard_ver'],
   ['pe-console-auth', 'console_auth_ver']
 ].each do |pkg|
+  next if version['VERSION'][pkg[1]] == nil
   hosts.each do |host|
     next unless host['roles'].include?('dashboard')
     cmd = ''
