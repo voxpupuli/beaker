@@ -133,36 +133,6 @@ module PuppetAcceptance
           end
         end
 
-        opts.on('-p', '--puppet URI', 'Select puppet git install URI',
-                "    - URI and revision, default HEAD",
-                "  just giving the revision is also supported"
-                ) do |value|
-          @options[:puppet] = value
-        end
-
-        opts.on('-f', '--facter URI', 'Select facter git install URI',
-                "    - otherwise, as per the puppet argument"
-                ) do |value|
-          @options[:facter] = value
-        end
-
-        opts.on('-h', '--hiera URI', 'Select Hiera git install URI'
-                ) do |value|
-          @options[:hiera] = value
-        end
-
-        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI'
-                ) do |value|
-          @options[:hiera_puppet] = value
-        end
-
-        opts.on('--yagr URI', 'Yet another git repo install URI; ' +
-                'specify this option as many times as you like to ' +
-                'add additional git repos to clone.'
-                ) do |value|
-          @options[:install] << value
-        end
-
         @defaults[:modules] = []
         opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
           @options[:modules] ||= []
@@ -284,6 +254,36 @@ module PuppetAcceptance
                 'Test the PE Uninstaller',
                 '(valid options: full, standard)' do |type|
           @options[:uninstall] = type
+        end
+
+        opts.on('-p URI', '--puppet URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:puppet] = value
+        end
+
+        opts.on('-f URI', '--facter URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:facter] = value
+        end
+
+        opts.on('-h URI', '--hiera URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:hiera] = value
+        end
+
+        opts.on('--hiera-puppet URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:hiera_puppet] = value
+        end
+
+        opts.on('--yagr URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:install] << value
         end
 
         @defaults[:rvm] = 'skip'
