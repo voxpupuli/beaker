@@ -34,7 +34,8 @@ module PuppetAcceptance
 
         @defaults[:type] = nil
         opts.on '--type TYPE',
-                'Select puppet install type',
+                'MANDATORY',
+                'Select testing scenario type',
                 '(eg. pe, git)' do |type|
           unless File.directory?("setup/#{type}") then
             raise "Sorry, #{type} is not a known setup type!"
@@ -178,7 +179,7 @@ module PuppetAcceptance
         end
 
         @defaults[:quiet] = false
-        opts.on '-q', '--quiet',
+        opts.on '-q', '--[no-]quiet',
                 'Do not log output to STDOUT',
                 '(default: false)' do |bool|
           @options[:quiet] = bool
@@ -199,7 +200,7 @@ module PuppetAcceptance
         end
 
         @defaults[:debug] = false
-        opts.on '--debug',
+        opts.on '--[no-]debug',
                 'Enable full debugging',
                 '(default: false)' do |bool|
           @options[:debug] = bool
@@ -212,7 +213,7 @@ module PuppetAcceptance
         end
 
         @defaults[:dry_run] = false
-        opts.on  '-d', '--dry-run',
+        opts.on  '-d', '--[no-]dry-run',
                  'Report what would happen on targets',
                  '(default: false)' do |bool|
           @options[:dry_run] = bool
@@ -227,21 +228,21 @@ module PuppetAcceptance
         end
 
         @defaults[:timesync] = false
-        opts.on '--ntp',
+        opts.on '--[no-]ntp',
                 'Sync time on SUTs before testing',
                 '(default: false)' do |bool|
           @options[:timesync] = bool
         end
 
         @defaults[:dhcp_renew] = false
-        opts.on '--dhcp-renew',
+        opts.on '--[no-]dhcp-renew',
                 'Perform dhcp lease renewal',
                 '(default: false)' do |bool|
           @options[:dhcp_renew] = bool
         end
 
         @defaults[:pkg_repo] = false
-        opts.on '--pkg-repo',
+        opts.on '--[no-]pkg-repo',
                 'Configure packaging system repository',
                 '(default: false)' do |bool|
           @options[:pkg_repo] = true
