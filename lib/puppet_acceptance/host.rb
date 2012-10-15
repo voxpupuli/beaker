@@ -104,24 +104,24 @@ module PuppetAcceptance
       end
     end
 
-    def do_scp_to(source, target)
-      @logger.debug "localhost $ scp #{source} #{self}:#{target}"
+    def do_scp_to(source, target, scp_options)
+      @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
 
       ssh_options = {
         :dry_run => $dry_run,
       }
 
-      connection.scp_to(source, target, ssh_options)
+      connection.scp_to(source, target, scp_options, ssh_options)
     end
 
-    def do_scp_from(source, target)
-      @logger.debug "localhost $ scp #{self}:#{source} #{target}"
+    def do_scp_from(source, target, scp_options)
+      @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
 
       ssh_options = {
           :dry_run => $dry_run,
       }
 
-      connection.scp_from(source, target, ssh_options)
+      connection.scp_from(source, target, scp_options, ssh_options)
     end
   end
 

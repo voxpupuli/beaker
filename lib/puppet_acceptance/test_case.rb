@@ -209,9 +209,8 @@ module PuppetAcceptance
       if host.is_a? Array
         host.each { |h| scp_from h, from_path, to_path, options }
       else
-        @result = host.do_scp_from(from_path, to_path)
+        @result = host.do_scp_from(from_path, to_path, options)
         @result.log(@logger)
-        raise "scp exited with #{@result.exit_code}" if @result.exit_code != 0
       end
     end
 
@@ -219,9 +218,8 @@ module PuppetAcceptance
       if host.is_a? Array
         host.each { |h| scp_to h, from_path, to_path, options }
       else
-        @result = host.do_scp_to(from_path, to_path)
+        @result = host.do_scp_to(from_path, to_path, options)
         @result.log(@logger)
-        raise "scp exited with #{@result.exit_code}" if @result.exit_code != 0
       end
     end
 

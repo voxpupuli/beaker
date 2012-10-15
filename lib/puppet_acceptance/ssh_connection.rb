@@ -113,10 +113,15 @@ module PuppetAcceptance
       channel.eof!
     end
 
-    def scp_to(source, target, options={})
+    def scp_to(source, target, scp_options, options={})
       return if options[:dry_run]
 
-      recursive_scp = File.directory?(source)
+      if scp_options[:recursive].nil?
+        recursive_scp = File.directory?(source)
+      else
+        recursive_scp = scp_options[:recursive]
+      end
+
       @ssh.scp.upload!(source, target, :recursive => recursive_scp)
 
       result = Result.new(@hostname, [source, target])
@@ -130,10 +135,16 @@ module PuppetAcceptance
       result
     end
 
-    def scp_from(source, target, options={})
+    def scp_from(source, target, scp_options, options={})
       return if options[:dry_run]
 
-      @ssh.scp.download!(source, target, :recursive => true)
+      if scp_options[:recursive].nil?
+        recursive_scp = true
+      else
+        recursive_scp = scp_options[:recursive]
+      end
+
+      @ssh.scp.download!(source, target, :recursive => recursive_scp)
 
       result = Result.new(@hostname, [source, target])
 
