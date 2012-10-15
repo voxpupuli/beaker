@@ -9,7 +9,7 @@ hosts.each do |host|
   # determine the distro tar name
   dist_tar = "puppet-enterprise-#{version}-#{platform}.tar"
   dist_gz = "#{dist_tar}.gz"
-  unless File.file? "/opt/enterprise/dists/#{dist_gz}"
+  unless File.file? "#{config['pe_dir']}/#{dist_gz}"
     logger.error "PE #{dist_gz} not found, help!"
     logger.error ""
     logger.error "Make sure your configuration file uses the PE version string:"
@@ -20,7 +20,7 @@ hosts.each do |host|
   step "Pre Test Setup -- clean up /tmp"
   on host,"rm -f /tmp/*.tar ; rm -f /tmp/*.gz", :acceptable_exit_codes => (0..255)
   step "Pre Test Setup -- SCP install package to hosts"
-  scp_to host, "/opt/enterprise/dists/#{dist_gz}", "/tmp"
+  scp_to host, "#{config['pe_dir']}/#{dist_gz}", "/tmp"
   step "Pre Test Setup -- Untar install package on hosts"
   on host,"cd /tmp && gunzip #{dist_gz} && tar xf #{dist_tar}"
 end
