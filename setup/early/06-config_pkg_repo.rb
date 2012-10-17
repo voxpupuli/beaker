@@ -19,6 +19,14 @@ else
     when host['platform'] =~ /solaris/
       on(host,"/usr/bin/pkg unset-publisher solaris || :")
       on(host,"/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo)
+    when host['platform'] =~ /el-6/
+      on host, 'cd /tmp; wget http://mirror.itc.virginia.edu/fedora-epel/6/i386/epel-release-6-7.noarch.rpm'
+      on host, 'cd /tmp; rpm -i epel-release-6-7.noarch.rpm'
+      on host, 'yum clean all && yum makecache'
+    when host['platform'] =~ /el-5/
+      on host, 'cd /tmp; wget http://archive.linux.duke.edu/pub/epel/5/i386/epel-release-5-4.noarch.rpm'
+      on host, 'cd /tmp; rpm -i epel-release-5-4.noarch.rpm'
+      on host, 'yum clean all && yum makecache'
     else
       logger.notify "#{host}: packing configuration not modified"
     end
