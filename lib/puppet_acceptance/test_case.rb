@@ -110,8 +110,8 @@ module PuppetAcceptance
     end
 
     def skip_test(msg)
-      @logger.notify "\nSkip: #{msg}\n"
-      @test_status = :skip
+      @logger.notify "Skip: #{msg}\n"
+      raise SkipTest
     end
 
     def fail_test(msg)
@@ -140,7 +140,7 @@ module PuppetAcceptance
       end
       if @hosts.empty?
         @logger.warn "No suitable hosts with: #{confines.inspect}"
-        raise SkipTest
+        skip_test 'No suitable hosts found'
       end
     end
 
