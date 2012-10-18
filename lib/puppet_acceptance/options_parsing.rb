@@ -5,6 +5,15 @@ module PuppetAcceptance
       return @options
     end
 
+    def self.transform_old_packages(name, value)
+      return nil unless value
+      # This is why '-' vs '_' as a company policy is important
+      # or at least why the lack of it is annoying
+      name = name.to_s.gsub(/_/, '-')
+      puppetlabs = 'git://github.com/puppetlabs'
+      value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
+    end
+
     def self.parse_args
       return @options if @options
 
@@ -12,6 +21,7 @@ module PuppetAcceptance
 
       @defaults = {}
       @options = {}
+      @options[:install] = []
       @options_from_file = {}
 
       optparse = OptionParser.new do|opts|
@@ -112,51 +122,16 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
-        @defaults[:puppet] = 'git://github.com/puppetlabs/puppet.git#HEAD'
-        opts.on('-p', '--puppet URI', 'Select puppet git install URI',
-                "  #{@options[:puppet]}",
-                "    - URI and revision, default HEAD",
-                "  just giving the revision is also supported"
-                ) do |value|
-          #@options[:type] = 'git'
-          @options[:puppet] = value
+        opts.on('-i URI', '--install URI',
+                'Install a project repo/app on the SUTs') do |value|
+          if value.is_a?(Array)
+            @options[:install] += value
+          elsif value =~ /,/
+            @options[:install] += value.split(',')
+          else
+            @options[:install] << value
+          end
         end
-
-        @defaults[:facter] = 'git://github.com/puppetlabs/facter.git#HEAD'
-        opts.on('-f', '--facter URI', 'Select facter git install URI',
-                "  #{@options[:facter]}",
-                "    - otherwise, as per the puppet argument"
-                ) do |value|
-          #@options[:type] = 'git'
-          @options[:facter] = value
-        end
-
-        @defaults[:hiera] = nil
-        opts.on('-h', '--hiera URI', 'Select Hiera git install URI',
-                "  #{@options[:hiera]}"
-                ) do |value|
-          #@options[:type] = 'git'
-          @options[:hiera] = value
-        end
-
-        @defaults[:hiera_puppet] = nil
-        opts.on('--hiera-puppet URI', 'Select hiera-puppet git install URI',
-                "  #{@options[:hiera_puppet]}"
-                ) do |value|
-          #@options[:type] = 'git'
-          @options[:hiera_puppet] = value
-        end
-
-        # TODO: haven't really tested this well with multiple occurrences
-        #  of the arg yet.
-        @defaults[:yagr] = []
-        opts.on('--yagr URI', 'Yet another git repo install URI; specify this option as many times as you like to add additional git repos to clone.'
-                ) do |value|
-          @options[:yagr] ||= []
-          @options[:yagr] << value
-        end
-
-
 
         @defaults[:modules] = []
         opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
@@ -281,6 +256,36 @@ module PuppetAcceptance
           @options[:uninstall] = type
         end
 
+        opts.on('-p URI', '--puppet URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:puppet] = value
+        end
+
+        opts.on('-f URI', '--facter URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:facter] = value
+        end
+
+        opts.on('-h URI', '--hiera URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:hiera] = value
+        end
+
+        opts.on('--hiera-puppet URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:hiera_puppet] = value
+        end
+
+        opts.on('--yagr URI',
+                'DEPRECATED -- use --install instead'
+                ) do |value|
+          @options[:install] << value
+        end
+
         @defaults[:rvm] = 'skip'
         opts.on '--rvm VERSION',
                 'DEPRECATED' do |ruby|
@@ -303,9 +308,16 @@ module PuppetAcceptance
 
       # merge in the options that we read from the file
       @options = @options_from_file.merge(@options)
+      @options[:install] += [ @options_from_file[:install] ].flatten
 
       # merge in the defaults
       @options = @defaults.merge(@options)
+
+      # convert old package options to new package options format
+      [:puppet, :facter, :hiera, :hiera_puppet].each do |name|
+        @options[:install] << transform_old_packages(name, @options[name])
+      end
+      @options[:install].compact!
 
       raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
 
