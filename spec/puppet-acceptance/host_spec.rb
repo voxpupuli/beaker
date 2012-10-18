@@ -2,9 +2,12 @@ require 'spec_helper'
 
 module PuppetAcceptance
   describe Host do
-    let(:config)  { MockConfig.new({}, {'name' => {'platform' => @platform}}, @pe)}
-    let(:options) { Hash.new                                                      }
-    let(:host)    { Host.create 'name', options, config                           }
+    let :config do
+      MockConfig.new({}, {'name' => {'platform' => @platform}}, @pe)
+    end
+
+    let(:options) { @options || Hash.new                  }
+    let(:host)    { Host.create 'name', options, config   }
 
     it 'creates a windows host given a windows config' do
       @platform = 'windows'
@@ -34,8 +37,31 @@ module PuppetAcceptance
 
     # it takes a location and a destination
     # it basically proxies that to the connection object
-    it 'DO_SCP!'
+    it 'do_scp_to logs info and proxies to the connection' do
+      logger = mock(:logger)
+      conn = mock(:connection)
+      @options = { :logger => logger }
+      host.instance_variable_set :@connection, conn
+      args = [ 'source', 'target', {} ]
 
+      logger.should_receive(:debug)
+      conn.should_receive(:scp_to).with(*args)
+
+      host.do_scp_to *args
+    end
+
+    it 'do_scp_from logs info and proxies to the connection' do
+      logger = mock(:logger)
+      conn = mock(:connection)
+      @options = { :logger => logger }
+      host.instance_variable_set :@connection, conn
+      args = [ 'source', 'target', {} ]
+
+      logger.should_receive(:debug)
+      conn.should_receive(:scp_from).with(*args)
+
+      host.do_scp_from *args
+    end
     it 'interpolates to its "name"' do
       expect( "#{host}" ).to be === 'name'
     end
