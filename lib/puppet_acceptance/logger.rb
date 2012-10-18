@@ -19,18 +19,14 @@ module PuppetAcceptance
     BRIGHT_CYAN    = "\e[01;36m"
     BRIGHT_WHITE   = "\e[01;37m"
 
-    attr_accessor :log_level
+    LOG_LEVELS      = {
+      :debug  => 1,
+      :warn   => 2,
+      :normal => 3,
+      :info   => 4
+    }
 
-    # Should we send our logs to stdout?
-    attr_accessor :color
-
-    def file=(filename)
-      if filename then
-        @file = File.new(filename, "w")
-      else
-        @file = false
-      end
-    end
+    attr_accessor :color, :log_level, :destinations
 
     def initialize(*args)
       options = args.last.is_a?(Hash) ? args.pop : {}
@@ -38,7 +34,8 @@ module PuppetAcceptance
       @log_level = options[:debug] ? :debug : :normal
       @destinations = []
 
-      dests = args << STDOUT unless options[:quiet]
+      dests = args
+      dests << STDOUT unless options[:quiet]
       dests.uniq!
       dests.each {|dest| add_destination(dest)}
     end
@@ -65,100 +62,102 @@ module PuppetAcceptance
       end
     end
 
-    def debug(*args)
-      return unless @log_level == :debug
-      @destinations.each do |to|
-        to.print GREY if color
-        to.puts *args
-        to.print NORMAL if color
+    def is_debug?
+      LOG_LEVELS[@log_level] <= LOG_LEVELS[:debug]
+    end
+
+    def is_warn?
+      LOG_LEVELS[@log_level] <= LOG_LEVELS[:warn]
+    end
+
+    def host_output *args
+      return unless is_debug?
+      strings = strip_colors_from args
+      string = strings.join
+      optionally_color GREY, string, false
+    end
+
+    def debug *args
+      return unless is_debug?
+      optionally_color WHITE, args
+    end
+
+    def warn *args
+      return unless is_warn?
+      strings = args.map {|msg| "Warning: #{msg}" }
+      optionally_color YELLOW, strings
+    end
+
+    def success *args
+      optionally_color GREEN, args
+    end
+
+    def notify *args
+      optionally_color BRIGHT_WHITE, args
+    end
+
+    def error *args
+      optionally_color BRIGHT_RED, args
+    end
+
+    def strip_colors_from lines
+      Array(lines).map do |line|
+        line.gsub /\e\[(\d+;)?\d+m/, ''
       end
     end
 
-    # This is almost exactly the same as debug, except with slightly different
-    # semantics. It's used exclusively for logging command output received from
-    # a host, which may be done differently depending on success/failure/debug.
-    # Also, we want to `print` rather than `puts`, lest we receive partial
-    # output.
-    def host_output(*args)
-      return unless @log_level == :debug
-
-      # Strip colors for readability.
-      strings = args.map do |arg|
-        arg.gsub(/\e\[(\d+;)?\d+m/, '')
-      end
+    def optionally_color color_code, msg, add_newline = true
+      print_statement = add_newline ? :puts : :print
       @destinations.each do |to|
-        to.print GREY if color
-        to.print *strings
-        to.print NORMAL if color
+        to.print color_code if @color
+        to.send print_statement, msg
+        to.print NORMAL if @color
       end
     end
 
-    def warn(*args)
-      return unless @log_level == :debug
-      @destinations.each do |to|
-        to.print YELLOW if color
-        to.puts *args.map {|msg| "Warning: #{msg}"}
-        to.print NORMAL if color
-      end
+    # utility method to get the current call stack and format it
+    # to a human-readable string (which some IDEs/editors
+    # will recognize as links to the line numbers in the trace)
+    def pretty_backtrace backtrace = caller(1)
+      backtrace = purge_harness_files_from( backtrace ) if is_debug?
+      expand_symlinks( backtrace ).join "\n"
     end
 
-    def success(*args)
-      @destinations.each do |to|
-        to.print GREEN if color
-        to.puts *args.map {|msg| msg}
-        to.print NORMAL if color
-      end
-    end
-
-    def notify(*args)
-      @destinations.each do |to|
-        to.puts *args
-      end
-    end
-
-    def error(*args)
-      @destinations.each do |to|
-        to.print BRIGHT_RED if color
-        to.puts *args.map {|msg| "Error: #{msg}"}
-        to.print NORMAL if color
-      end
-    end
-
-    # Utility method format a backtrace to a human-readable string (which some
-    # IDEs/editors will recognize as links to the line numbers in the trace).
-    #
-    # @param backtrace [Array] backtrace array, if not provided falls back to
-    #   current call stack
-    def pretty_backtrace(backtrace = caller(1))
-
+   private
+    def expand_symlinks backtrace
       backtrace.collect do |line|
-        file_path, line_num, code_snip = line.split(":")
-        file_path = expand_symlinks(File.expand_path(file_path))
-
-        out = file_path + ":" + line_num
-        out += ":" + code_snip if code_snip
-        out
-      end .join("\n")
-
+        file_path, line_num = line.split( ":" )
+        expanded_path = expand_symlink File.expand_path( file_path )
+        expanded_path + ":" + line_num
+      end
     end
 
-    # utility method that takes a path as input, checks each component of the path to see if it is a symlink, and expands
+    def purge_harness_files_from backtrace
+      mostly_purged = backtrace.reject do |line|
+        $".any? do |require_path|
+          line.include? require_path
+        end
+      end
+      completely_purged = mostly_purged.reject {|line| line.include? $0 }
+    end
+
+    # utility method that takes a path as input, checks each component
+    # of the path to see if it is a symlink, and expands
     # it if it is.  returns the expanded path.
-    def expand_symlinks(file_path)
-      file_path.split("/").inject do |full_path, next_dir|
+    def expand_symlink file_path
+      file_path.split( "/" ).inject do |full_path, next_dir|
         next_path = full_path + "/" + next_dir
-        if File.symlink?(next_path) then
-          link = File.readlink(next_path)
+        if File.symlink? next_path
+          link = File.readlink next_path
           next_path =
               case link
                 when /^\// then link
                 else
-                  File.expand_path(full_path + "/" + link)
+                  File.expand_path( full_path + "/" + link )
               end
         end
         next_path
       end
     end
-    private :expand_symlinks
   end
 end

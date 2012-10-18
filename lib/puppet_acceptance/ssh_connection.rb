@@ -1,13 +1,14 @@
 module PuppetAcceptance
   class SshConnection
-    def initialize(host, user=nil, options={})
-      @hostname = host
+
+    def initialize hostname, user = nil, options = {}
+      @hostname = hostname
       @user = user
       @options = options
     end
 
-    def self.connect(host, user='root', options={})
-      connection = new(host, user, options)
+    def self.connect hostname, user = 'root', options = {}
+      connection = new hostname, user, options
       connection.connect
       connection
     end
@@ -37,53 +38,26 @@ module PuppetAcceptance
       @ssh.close if @ssh
     end
 
-    def execute(command, options={}, stdout_callback=nil, stderr_callback=stdout_callback)
+    def execute command, options = {}, stdout_callback = nil,
+                stderr_callback = stdout_callback
+
       result = Result.new(@hostname, command)
+      # why are we getting to this point on a dry run anyways?
+      # also... the host creates connections through the class method,
+      # which automatically connects, so you can't do a dry run unless you also
+      # can connect to your hosts?
       return result if options[:dry_run]
 
       @ssh.open_channel do |channel|
-        if options[:pty] then
-          channel.request_pty do |ch, success|
-            if success
-              puts "Allocated a PTY on #{@hostname} for #{command.inspect}"
-            else
-              abort "FAILED: could not allocate a pty when requested on " +
-                "#{@hostname} for #{command.inspect}"
-            end
-          end
-        end
+        request_terminal_for( channel, command ) if options[:pty]
 
         channel.exec(command) do |terminal, success|
           abort "FAILED: to execute command on a new channel on #{@hostname}" unless success
-          terminal.on_data do |ch, raw_data|
-            stdout_callback[raw_data] if stdout_callback
-              result.raw_stdout << raw_data
-              result.raw_output << raw_data
-              normalized_data = raw_data.gsub(/\r\n?/, "\n")
-              result.stdout << normalized_data
-              result.output << normalized_data
-          end
-          terminal.on_extended_data do |ch, type, raw_data|
-            if type == 1
-              stderr_callback[raw_data] if stderr_callback
-              result.raw_stderr << raw_data
-              result.raw_output << raw_data
-              normalized_data = raw_data.gsub(/\r\n?/, "\n")
-              result.stderr << normalized_data
-              result.output << normalized_data
-            end
-          end
-          terminal.on_request("exit-status") do |ch, data|
-            result.exit_code = data.read_long
-          end
+          register_stdout_for terminal, result, stdout_callback
+          register_stderr_for terminal, result, stderr_callback
+          register_exit_code_for terminal, result
 
-          # queue stdin data, force it to packets, and signal eof: this
-          # triggers action in many remote commands, notably including
-          # 'puppet apply'.  It must be sent at some point before the rest
-          # of the action.
-          terminal.send_data(options[:stdin].to_s)
-          terminal.process
-          terminal.eof!
+          process_stdin_for( terminal, options[:stdin] ) if options[:stdin]
         end
       end
 
@@ -92,6 +66,51 @@ module PuppetAcceptance
       @ssh.loop
 
       result
+    end
+
+    def request_terminal_for channel, command
+      channel.request_pty do |ch, success|
+        if success
+          puts "Allocated a PTY on #{@hostname} for #{command.inspect}"
+        else
+          abort "FAILED: could not allocate a pty when requested on " +
+            "#{@hostname} for #{command.inspect}"
+        end
+      end
+    end
+
+    def register_stdout_for channel, output, callback = nil
+      channel.on_data do |ch, data|
+        callback[data] if callback
+        output.stdout << data
+        output.output << data
+      end
+    end
+
+    def register_stderr_for channel, output, callback = nil
+      channel.on_extended_data do |ch, type, data|
+        if type == 1
+          callback[data] if callback
+          output.stderr << data
+          output.output << data
+        end
+      end
+    end
+
+    def register_exit_code_for channel, output
+      channel.on_request("exit-status") do |ch, data|
+        output.exit_code = data.read_long
+      end
+    end
+
+    def process_stdin_for channel, stdin
+      # queue stdin data, force it to packets, and signal eof: this
+      # triggers action in many remote commands, notably including
+      # 'puppet apply'.  It must be sent at some point before the rest
+      # of the action.
+      channel.send_data stdin.to_s
+      channel.process
+      channel.eof!
     end
 
     def scp_to(source, target, options={})
