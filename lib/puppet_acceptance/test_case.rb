@@ -205,21 +205,21 @@ module PuppetAcceptance
       end
     end
 
-    def scp_from(host, from_path, to_path, options={})
+    def scp_from host, from_path, to_path, options = {}
       if host.is_a? Array
         host.each { |h| scp_from h, from_path, to_path, options }
       else
-        @result = host.do_scp_from(from_path, to_path, options)
-        @result.log(@logger)
+        @result = host.do_scp_from from_path, to_path, options
+        @result.log @logger
       end
     end
 
-    def scp_to(host, from_path, to_path, options={})
+    def scp_to host, from_path, to_path, options = {}
       if host.is_a? Array
         host.each { |h| scp_to h, from_path, to_path, options }
       else
-        @result = host.do_scp_to(from_path, to_path, options)
-        @result.log(@logger)
+        @result = host.do_scp_to from_path, to_path, options
+        @result.log @logger
       end
     end
 
