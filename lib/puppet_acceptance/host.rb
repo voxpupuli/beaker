@@ -109,7 +109,8 @@ module PuppetAcceptance
 
       options[:dry_run] = $dry_run,
 
-      connection.scp_to(source, target, options)
+      result = connection.scp_to(source, target, options)
+      return result
     end
 
     def do_scp_from source, target, options
@@ -117,7 +118,8 @@ module PuppetAcceptance
 
       options[:dry_run] = $dry_run
 
-      connection.scp_from(source, target, options)
+      result = connection.scp_from(source, target, options)
+      return result
     end
   end
 

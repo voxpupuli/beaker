@@ -120,7 +120,7 @@ module PuppetAcceptance
 
       @ssh.scp.upload! source, target, options
 
-      result = Result.new @hostname, [source, target]
+      result = Result.new(@hostname, [source, target])
 
       # Setting these values allows reporting via result.log(test_name)
       result.stdout = "SCP'ed file #{source} to #{@hostname}:#{target}"
@@ -128,7 +128,7 @@ module PuppetAcceptance
       # Net::Scp always returns 0, so just set the return code to 0.
       result.exit_code = 0
 
-      result
+      return result
     end
 
     def scp_from source, target, scp_options, options = {}
@@ -138,7 +138,7 @@ module PuppetAcceptance
 
       @ssh.scp.download! source, target, options
 
-      result = Result.new @hostname, [source, target]
+      result = Result.new(@hostname, [source, target])
 
       # Setting these values allows reporting via result.log(test_name)
       result.stdout = "SCP'ed file #{@hostname}:#{source} to #{target}"
