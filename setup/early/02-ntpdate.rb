@@ -3,7 +3,7 @@ if options[:timesync]
   step "run ntpdate against NTP pool systems"
   hosts.each do |host|
     success=FALSE
-    if host['platform'].include? 'solaris'
+    if host['platform'].include? 'solaris-10'
       on(host, "sleep 10 && ntpdate -w #{options[:ntpserver]}")
     elsif host['platform'].include? 'windows'
       # The exit code of 5 is for Windows 2008 systems where the w32tm /register command
