@@ -2,7 +2,7 @@ module Windows::Group
   include PuppetAcceptance::CommandFactory
 
   def group_list(&block)
-    execute('wmic group where localaccount="true" get name /format:value') do |result|
+    execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
       groups = []
       result.stdout.each_line do |line|
         groups << (line.match(/^Name=([\w ]+)/) or next)[1]

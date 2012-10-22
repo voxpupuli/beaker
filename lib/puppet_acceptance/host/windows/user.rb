@@ -2,7 +2,7 @@ module Windows::User
   include PuppetAcceptance::CommandFactory
 
   def user_list(&block)
-    execute('wmic useraccount where localaccount="true" get name /format:value') do |result|
+    execute('cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value') do |result|
       users = []
       result.stdout.each_line do |line|
         users << (line.match(/^Name=([\w ]+)/) or next)[1]
