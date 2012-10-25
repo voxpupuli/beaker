@@ -36,12 +36,12 @@ q_puppetmaster_install=y
 ]
 
 # Dashboard only answers
-dashboard_a = %q[
+dashboard_a = %Q[
 q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
 q_puppet_enterpriseconsole_auth_database_password='~!@#$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
 q_puppet_enterpriseconsole_smtp_user_auth=y
-q_puppet_enterpriseconsole_auth_password='~!@#$%^*-/aZ'
+q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || '~!@#$%^*-/aZ'}'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
 q_puppet_enterpriseconsole_database_password='~!@#$%^*-/aZ'
