@@ -10,7 +10,8 @@ portno=config['consoleport']
 
 certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
 
-common_a = %q[
+common_a = %Q[
+q_rpm_verify_gpg='#{ENV['q_rpm_verify_gpg'] || 'n'}'
 q_install=y
 q_puppet_cloud_install=n
 q_puppet_symlinks_install=y
