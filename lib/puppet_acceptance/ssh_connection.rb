@@ -67,6 +67,7 @@ module PuppetAcceptance
       # channel is finished with...
       @ssh.loop
 
+      result.finalize!
       result
     end
 
