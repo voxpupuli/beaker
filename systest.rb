@@ -10,7 +10,7 @@ require 'systemu'
 require 'test/unit'
 require 'yaml'
 
-Test::Unit.run = true
+#Test::Unit.run = true
 
 Dir[
   File.expand_path(File.dirname(__FILE__)+'/lib/puppet_acceptance/*.rb')

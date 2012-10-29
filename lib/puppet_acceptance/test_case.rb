@@ -7,6 +7,7 @@ module PuppetAcceptance
     require 'tempfile'
     require 'benchmark'
     require 'stringio'
+    require 'rbconfig'
 
     include Assertions
     include PuppetCommands
@@ -14,6 +15,7 @@ module PuppetAcceptance
 
     class PendingTest < Exception; end
     class SkipTest < Exception; end
+
 
     attr_reader :version, :config, :logger, :options, :path, :fail_flag, :usr_home,
                 :test_status, :exception, :runtime, :teardown_procs, :result
@@ -30,6 +32,14 @@ module PuppetAcceptance
       @exception = nil
       @runtime = nil
       @teardown_procs = []
+
+      rb_config_class = defined?(RbConfig) ? RbConfig : Config
+      if rb_config_class::CONFIG['MINOR'].to_i == 8 then
+        @test_exception_class = Test::Unit::AssertionFailedError
+      else
+        @test_execption_class = Mini::Test::AssertionFailure
+      end
+
       #
       # We put this on each wrapper (rather than the class) so that methods
       # defined in the tests don't leak out to other tests.
@@ -39,7 +49,7 @@ module PuppetAcceptance
             begin
               test = File.read(path)
               eval test,nil,path,1
-            rescue Test::Unit::AssertionFailedError => e
+            rescue @test_exception_class => e
               @test_status = :fail
               @exception   = e
             rescue PendingTest
