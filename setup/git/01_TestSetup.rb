@@ -1,4 +1,8 @@
-require 'lib/puppet_acceptance/dsl/install_utils'
+begin
+  require 'puppet_acceptance/dsl/install_utils'
+rescue LoadError
+  require File.expand_path(File.join(__FILE__, '..', '..', '..', 'lib', 'puppet_acceptance', 'dsl', 'install_utils'))
+end
 
 test_name "Install packages and repositories on target machines..." do
   extend PuppetAcceptance::DSL::InstallUtils
