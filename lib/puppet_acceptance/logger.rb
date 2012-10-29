@@ -128,7 +128,7 @@ module PuppetAcceptance
       backtrace.collect do |line|
         file_path, line_num = line.split( ":" )
         expanded_path = expand_symlink File.expand_path( file_path )
-        expanded_path + ":" + line_num
+        expanded_path.to_s + ":" + line_num.to_s
       end
     end
 
