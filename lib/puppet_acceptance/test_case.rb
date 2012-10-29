@@ -35,10 +35,12 @@ module PuppetAcceptance
 
       rb_config_class = defined?(RbConfig) ? RbConfig : Config
       if rb_config_class::CONFIG['MINOR'].to_i == 8 then
-        @test_exception_class = Test::Unit::AssertionFailedError
+        Test::Unit.run = true
+        @test_exception_class = ::Test::Unit::AssertionFailedError
       else
-        @test_execption_class = Mini::Test::AssertionFailure
+        @test_execption_class = ::MiniTest::Assertions
       end
+
 
       #
       # We put this on each wrapper (rather than the class) so that methods
