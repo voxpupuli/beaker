@@ -16,6 +16,14 @@ module PuppetAcceptance
     class PendingTest < Exception; end
     class SkipTest    < Exception; end
 
+    rb_config_class = defined?(RbConfig) ? RbConfig : Config
+    if rb_config_class::CONFIG['MINOR'].to_i == 8 then
+      Test::Unit.run = true
+      TEST_EXCEPTION_CLASS = Test::Unit::AssertionFailedError
+    else
+      TEST_EXCEPTION_CLASS = ::MiniTest::Assertion
+    end
+
     attr_reader :version, :config, :logger, :options, :path, :fail_flag,
                 :usr_home, :test_status, :exception, :runtime,
                 :teardown_procs, :result
@@ -33,14 +41,6 @@ module PuppetAcceptance
       @runtime = nil
       @teardown_procs = []
 
-      rb_config_class = defined?(RbConfig) ? RbConfig : Config
-      if rb_config_class::CONFIG['MINOR'].to_i == 8 then
-        Test::Unit.run = true
-        @test_exception_class = ::Test::Unit::AssertionFailedError
-      else
-        @test_execption_class = ::MiniTest::Assertions
-      end
-
 
       #
       # We put this on each wrapper (rather than the class) so that methods
@@ -51,7 +51,7 @@ module PuppetAcceptance
             begin
               test = File.read(path)
               eval test,nil,path,1
-            rescue @test_exception_class => e
+            rescue TEST_EXCEPTION_CLASS => e
               @test_status = :fail
               @exception   = e
             rescue PendingTest
