@@ -14,11 +14,11 @@ module PuppetAcceptance
     include Helpers
 
     class PendingTest < Exception; end
-    class SkipTest < Exception; end
+    class SkipTest    < Exception; end
 
-
-    attr_reader :version, :config, :logger, :options, :path, :fail_flag, :usr_home,
-                :test_status, :exception, :runtime, :teardown_procs, :result
+    attr_reader :version, :config, :logger, :options, :path, :fail_flag,
+                :usr_home, :test_status, :exception, :runtime,
+                :teardown_procs, :result
 
     def initialize(hosts, logger, config, options={}, path=nil)
       @version = config['VERSION']
