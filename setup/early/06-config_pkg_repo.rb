@@ -31,7 +31,7 @@ else
       on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /debian/
       on(host, "apt-get -y -f -m update")
-    when host['platform'] =~ /solaris/
+    when host['platform'] =~ /solaris-11/
       on(host,"/usr/bin/pkg unset-publisher solaris || :")
       on(host,"/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo)
     when host['platform'] =~ /el-/
