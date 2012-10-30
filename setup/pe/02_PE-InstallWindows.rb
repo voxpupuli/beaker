@@ -5,7 +5,12 @@ test_name "Install Puppet #{version}"
 the_master = master.to_s
 
 confine :to, :platform => 'windows'
-distpath = "/opt/enterprise/dists"
+
+if options[:pe_version]
+  distpath = "#{config['pe_dir']}/pe#{version}"
+else
+  distpath = "#{config['pe_dir']}"
+end
 
 logger.warn "Install PE Windows version #{version}"
 hosts.each do |host|
