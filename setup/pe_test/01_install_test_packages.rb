@@ -22,5 +22,5 @@ File.open('tmp/install_test_packages.sh', 'w') do |sh|
   sh.puts ERB.new(install_test_packages_template).result(binding)
 end
 
-scp_to dashboard, 'tmp/install_test_packages.sh', '/tmp'
-on dashboard, 'bash /tmp/install_test_packages.sh'
+scp_to dashboard, 'tmp/install_test_packages.sh', pe_dist_dir
+on dashboard, "bash #{pe_dist_dir}/install_test_packages.sh"
