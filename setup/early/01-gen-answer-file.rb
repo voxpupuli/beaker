@@ -64,6 +64,7 @@ q_puppet_enterpriseconsole_smtp_password='#{ENV['q_puppet_enterpriseconsole_smtp
 ]
 
 upgrade_a = %Q[
+q_rpm_verify_gpg='#{ENV['q_rpm_verify_gpg'] || 'y'}'
 q_puppet_enterpriseconsole_database_root_password='#{ENV['q_puppet_enterpriseconsole_database_root_password'] || 'puppet' }'
 q_puppet_cloud_install='#{ENV['q_puppet_cloud_install'] || 'y' }'
 q_rubydevelopment_install='#{ENV['q_rubydevelopment_install'] || 'n' }'
