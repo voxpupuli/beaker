@@ -198,6 +198,8 @@ test_name "Revert VMs" do
         logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
       end
     end
+
+    vsphere_helper.close
   end
 
   if virtual_machines['fusion']

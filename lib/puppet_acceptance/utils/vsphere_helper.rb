@@ -126,5 +126,9 @@ class VsphereHelper
       :type      => [ 'VirtualMachine' ]
     })
   end
+
+  def close
+    @connection.close
+  end
 end
 
