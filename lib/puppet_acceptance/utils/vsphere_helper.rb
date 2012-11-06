@@ -1,4 +1,6 @@
+require 'yaml' unless defined?(YAML)
 require 'rubygems' unless defined?(Gem)
+
 begin
   require 'rbvmomi'
 rescue LoadError
@@ -11,6 +13,42 @@ class VsphereHelper
                                        :user     => vInfo[:user],
                                        :password => vInfo[:pass],
                                        :insecure => true
+  end
+
+  def self.load_config
+    # support Fog/Cloud Provisioner layout
+    # (ie, someplace besides my made up conf)
+    vInfo = nil
+    if File.exists? '/etc/plharness/vsphere'
+      vInfo = YAML.load_file '/etc/plharness/vsphere'
+      logger.notify(
+        "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
+        "Please use ~/.fog instead\n" +
+        "See http://docs.puppetlabs.com/pe/2.0/cloudprovisioner_configuring.html for format"
+      )
+    elsif File.exists?( File.join(ENV['HOME'], '.fog') )
+      vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+    end
+    fail_test "Cant load vSphere config" unless vInfo
+
+    vsphere_credentials = {}
+    if vInfo['location'] && vInfo['user'] && vInfo['pass']
+      vsphere_credentials[:server] = vInfo['location']
+      vsphere_credentials[:user]   = vInfo['user']
+      vsphere_credentials[:pass]   = vInfo['pass']
+
+    elsif vInfo[:default][:vsphere_server] &&
+          vInfo[:default][:vsphere_username] &&
+          vInfo[:default][:vsphere_password]
+
+      vsphere_credentials[:server] = vInfo[:default][:vsphere_server]
+      vsphere_credentials[:user]   = vInfo[:default][:vsphere_username]
+      vsphere_credentials[:pass]   = vInfo[:default][:vsphere_password]
+    else
+      fail_test "Invalid vSphere config"
+    end
+
+    return vsphere_credentials
   end
 
   def find_snapshot vm, snapname
