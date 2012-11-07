@@ -20,6 +20,26 @@ test_name "Revert VMs"
     return search if search
   end
 
+  def amiports(host)
+    roles = host['roles']
+    ports = [22]
+
+    if roles.include? 'database'
+      ports << 8080
+      ports << 8081
+    end
+
+    if roles.include? 'master'
+      ports << 8140
+    end
+
+    if roles.include? 'dashboard'
+      ports << 443
+    end
+
+    ports
+  end
+
   snap = options[:snapshot] || options[:type]
   snap = 'git' if snap == 'gem'  # Sweet, sweet consistency
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
@@ -151,11 +171,11 @@ test_name "Revert VMs"
     fleet = Blimpy.fleet do |fleet|
       hosts.each do |host|
         amitype = host['vmname'] || host['platform']
-        amisize = host["amisize"] || 'm1.small'
+        amisize = host['amisize'] || 'm1.small'
         ami = AMI[amitype]
         fleet.add(:aws) do |ship|
           ship.name = host.name
-          ship.ports = [22, 80, 8080, 8081, 8140] #TODO pick these based on the role?
+          ship.ports = amiports(host)
           ship.image_id = ami[:image][image_type]
           ship.flavor = amisize
           ship.region = ami[:region]
