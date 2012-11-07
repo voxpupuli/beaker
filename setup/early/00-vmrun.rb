@@ -165,7 +165,17 @@ test_name "Revert VMs" do
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
-    vsphere_helper = VsphereHelper.new vsphere_credentials
+    count = 0
+    begin
+      vsphere_helper = VsphereHelper.new vsphere_credentials
+    rescue => e
+      if e == Test::Unit::AssertionFailedError
+        raise
+      elsif count < 5
+        count += 1
+        retry
+      end
+    end
 
     vsphere_vms = {}
     virtual_machines['vsphere'].each do |h|
