@@ -5,6 +5,12 @@
 version  = config['pe_ver']
 test_name "Install Puppet #{version}"
 
+if options[:pe_version]
+  distpath = "#{config['pe_dir']}/pe#{version}"
+else
+  distpath = "#{config['pe_dir']}"
+end
+
 if version =~ /^1.*/   #  Older version of PE, 1.x series
   logger.warn "Install PE 1.x series: #{version}"
   hosts.each do |host|
@@ -66,7 +72,7 @@ else  # New versions of PE 2.x
     host['dist'] = "puppet-enterprise-#{version}-#{platform}"
 
     # determine the distro tar name
-    unless File.file? "/opt/enterprise/dists/#{host['dist']}.tar.gz"
+    unless File.file? "#{distpath}/#{host['dist']}.tar.gz"
       logger.error "PE #{host['dist']}.tar.gz not found, help!"
       logger.error ""
       logger.error "Make sure your configuration file uses the PE version string:"
@@ -75,7 +81,7 @@ else  # New versions of PE 2.x
     end
 
     step "Pre Test Setup -- SCP install package to hosts"
-    scp_to host, "/opt/enterprise/dists/#{host['dist']}.tar.gz", "/tmp"
+    scp_to host, "#{distpath}/#{host['dist']}.tar.gz", "/tmp"
     step "Pre Test Setup -- Untar install package on hosts"
     on host,"cd /tmp && gunzip #{host['dist']}.tar.gz && tar xf #{host['dist']}.tar"
   end
