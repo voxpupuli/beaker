@@ -105,6 +105,25 @@ end
 end
 
 hosts.each do |host|
+  next if host['platform'] =~ /windows/
+
+  case host['platform']
+  when /debian|ubuntu/
+    cmd = 'dpkg -l pe-rubygem-stomp'
+  when /el-/
+    cmd = 'rpm -q pe-rubygem-stomp'
+  when /solaris/
+    cmd = 'pkginfo -x PUPstomp'
+  end
+
+  on host, cmd do
+    assert_match( /#{version['VERSION']['ruby_stomp']}/,
+                  stdout,
+                  "Incorrect Ruby Stomp version detected on #{host}" )
+  end
+end
+
+hosts.each do |host|
   next unless host['platform'] =~ /solaris/
   next unless host['platform'] =~ /windows/
 
