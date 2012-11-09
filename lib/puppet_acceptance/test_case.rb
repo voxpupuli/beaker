@@ -144,15 +144,18 @@ module PuppetAcceptance
       end
     end
 
-    def inspect_host(host, property, value)
-      true_false = false
-      case value
-      when String
-        true_false = host[property.to_s].include? value
-      when Regexp
-        true_false = host[property.to_s] =~ value
+    def inspect_host(host, property, one_or_more_values)
+      values = Array(one_or_more_values)
+      return values.any? do |value|
+        true_false = false
+        case value
+        when String
+          true_false = host[property.to_s].include? value
+        when Regexp
+          true_false = host[property.to_s] =~ value
+        end
+        true_false
       end
-      true_false
     end
 
     # Declare a teardown process that will be called after a test case is
