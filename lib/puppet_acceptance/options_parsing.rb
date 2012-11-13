@@ -230,11 +230,13 @@ module PuppetAcceptance
           @options[:installonly] = bool
         end
 
+        # Stoller: bool evals to 'false' when passing an opt
+        # prefixed with '--no'...doh!
         @defaults[:noinstall] = false
         opts.on '--no-install',
                 'Skip install step',
                 '(default: false)' do |bool|
-          @options[:noinstall] = bool
+          @options[:noinstall] = true
         end
 
         @defaults[:upgrade] = nil
