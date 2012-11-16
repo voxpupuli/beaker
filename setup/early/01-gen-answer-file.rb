@@ -11,12 +11,15 @@ portno=config['consoleport']
 certcmd='uname | grep -i sunos > /dev/null && hostname || hostname -s'
 
 common_a = %Q[
-q_rpm_verify_gpg='#{ENV['q_rpm_verify_gpg'] || 'y'}'
 q_install=y
 q_puppet_cloud_install=n
 q_puppet_symlinks_install=y
 q_vendor_packages_install=y
 ]
+
+# FIXME: This string append should be refactored once answers are in a
+# proper data structure instead of monolithis strings
+common_a += "q_rpm_verify_gpg='#{ENV['q_rpm_verify_gpg']}'\n" if ENV['q_rpm_verify_gpg']
 
 # Agent base answers
 agent_a = %Q[
