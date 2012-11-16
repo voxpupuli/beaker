@@ -19,7 +19,7 @@ q_vendor_packages_install=y
 
 # FIXME: This string append should be refactored once answers are in a
 # proper data structure instead of monolithis strings
-common_a += "q_rpm_verify_gpg='#{ENV['q_rpm_verify_gpg']}'\n" if ENV['q_rpm_verify_gpg']
+common_a += "q_verify_packages='#{ENV['q_verify_packages']}'\n" if ENV['q_verify_packages']
 
 # Agent base answers
 agent_a = %Q[
