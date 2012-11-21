@@ -25,19 +25,19 @@ AMI:
       :foss: ami-4433bf74
     :region: us-west-2
 
-  ubuntu-10.04-x86_64-west:
+  ubuntu-10.04-amd64-west:
     :image:
       :pe: ami-f4d45cc4
       :foss: ami-f4d45cc4
     :region: us-west-2
 
-  ubuntu-12.04-x86_64-west:
+  ubuntu-12.04-amd64-west:
     :image:
       :pe: ami-d6e860e6
       :foss: ami-d6e860e6
     :region: us-west-2
 
-  debian6-x86_64-west:
+  debian6-amd64-west:
     :image:
       :pe: ami-4ae8607a
       :foss: ami-4ae8607a
