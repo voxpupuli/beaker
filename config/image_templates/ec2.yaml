@@ -12,6 +12,37 @@ AMI:
       :pe: ami-57db123e
       :foss: ami-57db123e
     :region: us-east-1
+
+  el-6-x86_64-west:
+    :image:
+      :pe: ami-56d25a66
+      :foss: ami-56d25a66
+    :region: us-west-2
+
+  el-5-x86_64-west:
+    :image:
+      :pe: ami-4433bf74
+      :foss: ami-4433bf74
+    :region: us-west-2
+
+  ubuntu-10.04-amd64-west:
+    :image:
+      :pe: ami-f4d45cc4
+      :foss: ami-f4d45cc4
+    :region: us-west-2
+
+  ubuntu-12.04-amd64-west:
+    :image:
+      :pe: ami-d6e860e6
+      :foss: ami-d6e860e6
+    :region: us-west-2
+
+  debian6-amd64-west:
+    :image:
+      :pe: ami-4ae8607a
+      :foss: ami-4ae8607a
+    :region: us-west-2
+
   el-6-i386:
     :image:
       :pe: ami-02f85a6b
