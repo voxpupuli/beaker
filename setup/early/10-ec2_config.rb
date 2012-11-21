@@ -11,7 +11,7 @@ if options[:vmrun] == 'blimpy' && options[:type] !~ /pe/
     if host['platform'].include?('el-')
         on host, "yum -y install git ruby"
     elsif host['platform'].include?('ubuntu') or host['platform'].include?('debian')
-        on host, "apt-get -y install git-core ruby libruby-extras"
+        on host, "apt-get -y install git-core ruby libopenssl-ruby"
     else
       Log.debug "Warn #{host} is not a supported platform, no packages will be installed."
       next
