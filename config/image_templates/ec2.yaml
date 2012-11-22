@@ -27,8 +27,8 @@ AMI:
 
   ubuntu-10.04-amd64-west:
     :image:
-      :pe: ami-f4d45cc4
-      :foss: ami-f4d45cc4
+      :pe: ami-52ea6262
+      :foss: ami-52ea6262
     :region: us-west-2
 
   ubuntu-12.04-amd64-west:
