@@ -39,8 +39,8 @@ AMI:
 
   debian6-amd64-west:
     :image:
-      :pe: ami-4ae8607a
-      :foss: ami-4ae8607a
+      :pe: ami-4eea627e
+      :foss: ami-4eea627e
     :region: us-west-2
 
   el-6-i386:
