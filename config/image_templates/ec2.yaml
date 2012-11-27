@@ -15,8 +15,8 @@ AMI:
 
   el-6-x86_64-west:
     :image:
-      :pe: ami-56d25a66
-      :foss: ami-56d25a66
+      :pe: ami-aa8b039a
+      :foss: ami-aa8b039a
     :region: us-west-2
 
   el-5-x86_64-west:
