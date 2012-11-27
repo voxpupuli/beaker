@@ -144,6 +144,20 @@ AMIs are built for PE based installs on:
 Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file
 lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
 
+# Solaris Support #
+
+Used with `--vmrun solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
+
+Example .fog file:
+
+    :default:
+      :solaris_hypervisor_server: solaris.example.com
+      :solaris_hypervisor_username: harness
+      :solaris_hypervisor_keyfile: /home/jenkins/.ssh/id_rsa-harness
+      :solaris_hypervisor_vmpath: rpool/zoneds
+      :solaris_hypervisor_snappaths:
+        - rpool/ROOT/solaris
+
 # vSphere Support #
 
 The harness can use vms and snapshots that live within vSphere as well.
