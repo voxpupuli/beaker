@@ -45,7 +45,58 @@ test_name "Revert VMs"
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
   fail_test "You must specifiy a snapshot when using pe_noop" if snap == 'pe_noop'
 
-  if options[:vmrun] == 'vsphere'
+  if options[:vmrun] == 'solaris'
+    fog_file = nil
+    if File.exists?( File.join(ENV['HOME'], '.fog') )
+      fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+    end
+    fail_test "Cant load ~/.fog config" unless fog_file
+
+    hypername = fog_file[:default][:solaris_hypervisor_server]
+    vmpath    = fog_file[:default][:solaris_hypervisor_vmpath]
+    snappaths = fog_file[:default][:solaris_hypervisor_snappaths]
+
+    hyperconf = {
+      'HOSTS'  => {
+        hypername => { 'platform' => 'solaris-11-sparc' }
+      },
+      'CONFIG' => {
+        'user' => fog_file[:default][:solaris_hypervisor_username] || ENV['USER'],
+        'ssh'  => {
+          :keys => fog_file[:default][:solaris_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa"
+        }
+      }
+    }
+
+    hyperconfig = PuppetAcceptance::TestConfig.new( hyperconf, options )
+
+    logger.notify "Connecting to hypervisor at #{hypername}"
+    hypervisor = PuppetAcceptance::Host.create( hypername, options, hyperconfig )
+
+    # This is a hack; we want to pull from the 'foss' snapshot
+    snap = 'foss' if snap == 'git'
+
+    hosts.each do |host|
+      vm_name = host['vmname'] || host.name
+
+      logger.notify "Reverting #{vm_name} to snapshot #{snap}"
+      start = Time.now
+      on hypervisor, "sudo /sbin/zfs rollback -r #{vmpath}/#{vm_name}@#{snap}"
+      snappaths.each do |spath|
+        logger.notify "Reverting #{vm_name}/#{spath} to snapshot #{snap}"
+        on hypervisor, "sudo /sbin/zfs rollback -r #{vmpath}/#{vm_name}/#{spath}@#{snap}"
+      end
+      time = Time.now - start
+      logger.notify "Spent %.2f seconds reverting" % time
+
+      logger.notify "Booting #{vm_name}"
+      start = Time.now
+      on hypervisor, "sudo /sbin/zoneadm -z #{vm_name} boot"
+      logger.notify "Spent %.2f seconds booting #{vm_name}" % (Time.now - start)
+    end
+    hypervisor.close
+
+  elsif options[:vmrun] == 'vsphere'
     require 'yaml' unless defined?(YAML)
     require File.expand_path(File.join(File.dirname(__FILE__),
                                        '..', '..','lib', 'puppet_acceptance',
