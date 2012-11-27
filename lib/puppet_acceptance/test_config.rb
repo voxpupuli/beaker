@@ -27,7 +27,17 @@ module PuppetAcceptance
     end
 
     def load_file(config_file)
-      config = YAML.load_file(config_file)
+      if config_file.is_a? Hash
+        config = config_file
+      else
+        config = YAML.load_file(config_file)
+
+        # Make sure the roles array is present for all hosts
+        config['HOSTS'].each_key do |host|
+          config['HOSTS'][host]['roles'] ||= []
+        end
+      end
+
       # Merge some useful date into the config hash
       config['CONFIG'] ||= {}
       consoleport = ENV['consoleport'] || config['CONFIG']['consoleport'] || 443
@@ -47,10 +57,6 @@ module PuppetAcceptance
       end
       # need to load expect versions of PE binaries
       config['VERSION'] = load_dependency_versions
-      # Make sure the roles array is present for all hosts
-      config['HOSTS'].each_key do |host|
-        config['HOSTS'][host]['roles'] ||= []
-      end
       config
     end
 
