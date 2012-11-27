@@ -54,15 +54,15 @@ test_name "Revert VMs"
     # support Fog/Cloud Provisioner layout
     # (ie, someplace besides my made up conf)
     vInfo = nil
-    if File.exists? '/etc/plharness/vsphere'
+    if File.exists?( File.join(ENV['HOME'], '.fog') )
+      vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+    elsif File.exists? '/etc/plharness/vsphere'
       vInfo = YAML.load_file '/etc/plharness/vsphere'
       logger.notify(
         "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
         "Please use ~/.fog instead\n" +
         "See http://docs.puppetlabs.com/pe/2.0/cloudprovisioner_configuring.html for format"
       )
-    elsif File.exists?( File.join(ENV['HOME'], '.fog') )
-      vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
     end
     fail_test "Cant load vSphere config" unless vInfo
 
