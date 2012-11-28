@@ -81,10 +81,10 @@ test_name "Revert VMs"
 
       logger.notify "Reverting #{vm_name} to snapshot #{snap}"
       start = Time.now
-      on hypervisor, "sudo /sbin/zfs rollback -r #{vmpath}/#{vm_name}@#{snap}"
+      on hypervisor, "sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}@#{snap}"
       snappaths.each do |spath|
         logger.notify "Reverting #{vm_name}/#{spath} to snapshot #{snap}"
-        on hypervisor, "sudo /sbin/zfs rollback -r #{vmpath}/#{vm_name}/#{spath}@#{snap}"
+        on hypervisor, "sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snap}"
       end
       time = Time.now - start
       logger.notify "Spent %.2f seconds reverting" % time
