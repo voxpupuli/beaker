@@ -189,7 +189,8 @@ module PuppetAcceptance
         Timeout.timeout(timeout) do
           loop do
             # 7 is "Could not connect to host", which will happen before it's running
-            result = on(host, "curl -s -k https://#{host}:8140", :acceptable_exit_codes => [0,7])
+            result = on(host, "curl -v -s -k https://#{host}:8140", :acceptable_exit_codes => [0,7])
+            @logger.debug("curl returned exit code #{exit_code}")
             break if exit_code == 0
             sleep 1
           end
