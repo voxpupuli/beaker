@@ -195,7 +195,7 @@ module PuppetAcceptance
           $dry_run = bool
         end
 
-        @defaults[:ntpserver] = 'ntp.puppetlabs.lan'
+        @defaults[:ntpserver] = 'pool.ntp.org'
         opts.on '--ntp-server HOST',
                 'NTP server name',
                 '(default: ntp.puppetlabs.lan' do |server|
