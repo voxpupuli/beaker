@@ -279,7 +279,7 @@ module PuppetAcceptance
     #
     # @return [String] hostname of test forge
     def forge
-      ENV['forge_host'] || @config['forge_host'] || 'forge-acceptance.puppetlabs.lan'
+      ENV['forge_host'] || @config['forge_host'] || 'vulcan-acceptance.acctest.dc1.puppetlabs.net'
     end
   end
 end
