@@ -68,6 +68,15 @@ class VsphereHelper
       next unless names.include? name
       vms[name] = result.obj
     end
+
+    while results.token do
+      results = propertyCollector.ContinueRetrievePropertiesEx({:token => results.token})
+      results.objects.each do |result|
+        name = result.propSet.first.val
+        next unless names.include? name
+        vms[name] = result.obj
+      end
+    end
     vms
   end
 
