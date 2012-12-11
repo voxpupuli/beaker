@@ -20,7 +20,7 @@ module PuppetAcceptance
       @ssh ||= begin
                  Net::SSH.start(@hostname, @user, @options)
                rescue
-                 if try <= 10
+                 if try <= 11
                    puts "Try #{try} -- Host Unreachable"
                    puts "Trying again in #{wait} seconds"
                    sleep wait
