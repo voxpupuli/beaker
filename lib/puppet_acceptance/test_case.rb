@@ -8,6 +8,7 @@ module PuppetAcceptance
     require 'benchmark'
     require 'stringio'
     require 'rbconfig'
+    require 'test/unit'
 
     include Assertions
     include PuppetCommands
