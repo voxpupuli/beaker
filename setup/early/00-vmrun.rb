@@ -1,4 +1,7 @@
-test_name "Revert VMs"
+test_name "Revert VMs" do
+
+  VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion']
+  DEFAULT_HYPERVISOR = options[:vmrun]
 
   # NOTE: this code is shamelessly stolen from facter's 'domain' fact, but
   # we don't have access to facter at this point in the run.  Also, this
@@ -40,12 +43,21 @@ test_name "Revert VMs"
     ports
   end
 
+  fail_test "Invalid value for vmrun: #{options[:vmrun]}" unless VMRUN_TYPES.include? DEFAULT_HYPERVISOR
+
   snap = options[:snapshot] || options[:type]
   snap = 'git' if snap == 'gem'  # Sweet, sweet consistency
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
   fail_test "You must specifiy a snapshot when using pe_noop" if snap == 'pe_noop'
 
-  if options[:vmrun] == 'solaris'
+  vms = {}
+  hosts.each do |host|
+    hypervisor = host['hypervisor'] || DEFAULT_HYPERVISOR
+    vms[hypervisor] = [] unless vms[hypervisor]
+    vms[hypervisor] << host
+  end
+
+  if vms['solaris']
     fog_file = nil
     if File.exists?( File.join(ENV['HOME'], '.fog') )
       fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
@@ -76,7 +88,7 @@ test_name "Revert VMs"
     # This is a hack; we want to pull from the 'foss' snapshot
     snap = 'foss' if snap == 'git'
 
-    hosts.each do |host|
+    vms[solaris].each do |host|
       vm_name = host['vmname'] || host.name
 
       logger.notify "Reverting #{vm_name} to snapshot #{snap}"
@@ -95,8 +107,9 @@ test_name "Revert VMs"
       logger.notify "Spent %.2f seconds booting #{vm_name}" % (Time.now - start)
     end
     hypervisor.close
+  end
 
-  elsif options[:vmrun] == 'vsphere'
+  if vms['vsphere']
     require 'yaml' unless defined?(YAML)
     require File.expand_path(File.join(File.dirname(__FILE__),
                                        '..', '..','lib', 'puppet_acceptance',
@@ -140,7 +153,7 @@ test_name "Revert VMs"
 
     vsphere_helper = VsphereHelper.new vsphere_credentials
 
-    vm_names = hosts.map {|h| h.name }
+    vm_names = vms['vsphere'].map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names
     vm_names.each do |name|
       unless vm = vms[name]
@@ -166,8 +179,9 @@ test_name "Revert VMs"
         logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
       end
     end
+  end
 
-  elsif options[:vmrun] == 'fusion'
+  if vms['fusion']
     require 'rubygems' unless defined?(Gem)
     begin
       require 'fission'
@@ -178,7 +192,7 @@ test_name "Revert VMs"
     available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
     logger.notify "Available VM names: #{available}"
 
-    hosts.each do |host|
+    vms['fusion'].each do |host|
       fission_opts = host.defaults["fission"] || {}
       vm_name = host.defaults["vmname"] || host.name
       vm = Fission::VM.new vm_name
@@ -208,7 +222,9 @@ test_name "Revert VMs"
       time = Time.now - start
       logger.notify "Spent %.2f seconds resuming VM" % time
     end
-  elsif options[:vmrun] == 'blimpy'
+  end
+
+  if vms['blimpy']
     require 'rubygems'
     require 'blimpy'
 
@@ -220,7 +236,7 @@ test_name "Revert VMs"
     end
 
     fleet = Blimpy.fleet do |fleet|
-      hosts.each do |host|
+      vms['blimpy'].each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
         ami = AMI[amitype]
@@ -254,9 +270,5 @@ test_name "Revert VMs"
 
     # Send our hosts information to the nodes
     on hosts, "echo '#{etc_hosts}' > /etc/hosts"
-
-  elsif options[:vmrun]
-    raise ArgumentError, "Invalid value for vmrun: #{options[:vmrun]}"
-  else
-    skip_test "Skipping revert VM step"
   end
+end
