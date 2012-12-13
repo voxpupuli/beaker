@@ -31,8 +31,12 @@ module PuppetAcceptance
     end
 
     def convert string
-      if string.respond_to?(:force_encoding) and defined?(Encoding)
-        return string.force_encoding(Encoding.default_external)
+      if string.respond_to?( :force_encoding ) and defined?( Encoding )
+        # We're running in >= 1.9 and we'll need to convert
+        return string.force_encoding( Encoding.default_external )
+      else
+        # We're running in < 1.9 and Ruby doesn't care
+        return string
       end
     end
 
