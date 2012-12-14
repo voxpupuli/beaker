@@ -50,14 +50,17 @@ test_name "Revert VMs" do
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
   fail_test "You must specifiy a snapshot when using pe_noop" if snap == 'pe_noop'
 
-  vms = {}
+  virtual_machines = {}
   hosts.each do |host|
     hypervisor = host['hypervisor'] || DEFAULT_HYPERVISOR
-    vms[hypervisor] = [] unless vms[hypervisor]
-    vms[hypervisor] << host
+    logger.debug "Hypervisor for #{host} is #{host['hypervisor']}, and I'm going to use #{hypervisor}"
+    virtual_machines[hypervisor] = [] unless virtual_machines[hypervisor]
+    virtual_machines[hypervisor] << host
   end
 
-  if vms['solaris']
+  logger.warn virtual_machines.inspect
+
+  if virtual_machines['solaris']
     fog_file = nil
     if File.exists?( File.join(ENV['HOME'], '.fog') )
       fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
@@ -88,7 +91,7 @@ test_name "Revert VMs" do
     # This is a hack; we want to pull from the 'foss' snapshot
     snap = 'foss' if snap == 'git'
 
-    vms[solaris].each do |host|
+    virtual_machines[solaris].each do |host|
       vm_name = host['vmname'] || host.name
 
       logger.notify "Reverting #{vm_name} to snapshot #{snap}"
@@ -109,7 +112,7 @@ test_name "Revert VMs" do
     hypervisor.close
   end
 
-  if vms['vsphere']
+  if virtual_machines['vsphere']
     require 'yaml' unless defined?(YAML)
     require File.expand_path(File.join(File.dirname(__FILE__),
                                        '..', '..','lib', 'puppet_acceptance',
@@ -153,7 +156,7 @@ test_name "Revert VMs" do
 
     vsphere_helper = VsphereHelper.new vsphere_credentials
 
-    vm_names = vms['vsphere'].map {|h| h.name }
+    vm_names = virtual_machines['vsphere'].map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names
     vm_names.each do |name|
       unless vm = vms[name]
@@ -181,7 +184,7 @@ test_name "Revert VMs" do
     end
   end
 
-  if vms['fusion']
+  if virtual_machines['fusion']
     require 'rubygems' unless defined?(Gem)
     begin
       require 'fission'
@@ -192,7 +195,7 @@ test_name "Revert VMs" do
     available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
     logger.notify "Available VM names: #{available}"
 
-    vms['fusion'].each do |host|
+    virtual_machines['fusion'].each do |host|
       fission_opts = host.defaults["fission"] || {}
       vm_name = host.defaults["vmname"] || host.name
       vm = Fission::VM.new vm_name
@@ -224,7 +227,7 @@ test_name "Revert VMs" do
     end
   end
 
-  if vms['blimpy']
+  if virtual_machines['blimpy']
     require 'rubygems'
     require 'blimpy'
 
@@ -236,7 +239,7 @@ test_name "Revert VMs" do
     end
 
     fleet = Blimpy.fleet do |fleet|
-      vms['blimpy'].each do |host|
+      virtual_machines['blimpy'].each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
         ami = AMI[amitype]
