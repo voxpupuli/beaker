@@ -123,36 +123,41 @@ module PuppetAcceptance
       raise PendingTest
     end
 
-    def confine(type, confines)
-      confines.each_pair do |property, value|
+    def confine(type, criteria = {}, &block)
+      criteria.each_pair do |property, value|
         case type
         when :except
           @hosts = @hosts.reject do |host|
             inspect_host host, property, value
           end
+          @hosts = @hosts.reject {|host| yield host } if block_given?
         when :to
           @hosts = @hosts.select do |host|
             inspect_host host, property, value
           end
+          @hosts = @hosts.select {|host| yield host } if block_given?
         else
           raise "Unknown option #{type}"
         end
       end
       if @hosts.empty?
-        @logger.warn "No suitable hosts with: #{confines.inspect}"
+        @logger.warn "No suitable hosts with: #{criteria.inspect}"
         skip_test 'No suitable hosts found'
       end
     end
 
-    def inspect_host(host, property, value)
-      true_false = false
-      case value
-      when String
-        true_false = host[property.to_s].include? value
-      when Regexp
-        true_false = host[property.to_s] =~ value
+    def inspect_host(host, property, one_or_more_values)
+      values = Array(one_or_more_values)
+      return values.any? do |value|
+        true_false = false
+        case value
+        when String
+          true_false = host[property.to_s].include? value
+        when Regexp
+          true_false = host[property.to_s] =~ value
+        end
+        true_false
       end
-      true_false
     end
 
     # Declare a teardown process that will be called after a test case is
