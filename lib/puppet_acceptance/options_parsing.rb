@@ -195,6 +195,12 @@ module PuppetAcceptance
           $dry_run = bool
         end
 
+        @defaults[:fail_fast] = nil
+        opts.on '--fail-fast',
+                'End test run after first failure' do |bool|
+          @options[:fail_fast] = bool
+        end
+
         @defaults[:ntpserver] = 'pool.ntp.org'
         opts.on '--ntp-server HOST',
                 'NTP server name',
