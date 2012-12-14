@@ -28,6 +28,8 @@ module PuppetAcceptance
                    try += 1
                    retry
                  else
+                   # why is the logger not passed into this class?
+                   puts "Failed to connect to #{@hostname}"
                    raise
                  end
                end

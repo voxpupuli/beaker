@@ -78,9 +78,35 @@ prepare an appropriate answers file for use with the PE Installer.
 ## Provisioning ##
 Systest has built in capabilites for managing VMs and provisioning SUTs:
 
-  VMWare vSphere 
-  VMWare Fusion
-  EC2 via blimpy
+  * VMWare vSphere via the RbVmomi gem
+  * VMWare Fusion via the Fission gem
+  * EC2 via blimpy
+  * Solaris zones via SSHing to the global zone
+
+You may mix and match hypervisors as needed. The `systest.rb` script takes
+`--vmrun HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
+`--vmrun` will be the default value and you may override hypervisors on a per
+host basis in config file.
+
+For example:
+
+
+    $ cat configs/my_hosts.yml
+    lucid-alpha:
+      roles:
+        - master
+        - agent
+      platform: ubuntu-10.04-i386
+      hypervisor: fusion
+      fission:
+        snapshot: foss
+    shared-host-in-the-cloud:
+      roles:
+        - agent
+      platform: ubuntu-10.04-i386
+
+    $ ./systest.rb --config configs/my_hosts.yml --vmrun vsphere --snapshot base   ....
+
 
 # VMWare Fusion support #
 Pre-requisite: Fission gem installed and configured, including a ~/.fissionrc 
