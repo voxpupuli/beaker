@@ -30,8 +30,8 @@ module PuppetAcceptance
         step "Grab version for #{repository[:name]}"
         version = {}
         on host, "cd #{path}/#{repository[:name]} && " +
-                  "git describe || true" do
-          version[repository[:name]] = result.stdout.chomp
+                  "git describe || true" do |tc|
+          version[repository[:name]] = tc.result.stdout.chomp
         end
         version
       end

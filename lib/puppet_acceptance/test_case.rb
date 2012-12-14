@@ -218,7 +218,7 @@ module PuppetAcceptance
         @result = host.exec(command, options)
 
         # Also, let additional checking be performed by the caller.
-        yield if block_given?
+        yield self if block_given?
 
         return @result
       end
