@@ -1,4 +1,5 @@
 test_name "Revert VMs" do
+  skip_test 'vmrun option not specified' unless options[:vmrun]
 
   VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion']
   DEFAULT_HYPERVISOR = options[:vmrun]
