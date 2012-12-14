@@ -18,7 +18,8 @@ module PuppetAcceptance
     class SkipTest    < Exception; end
 
     rb_config_class = defined?(RbConfig) ? RbConfig : Config
-    if rb_config_class::CONFIG['MINOR'].to_i == 8 then
+    if rb_config_class::CONFIG['MAJOR'].to_i == 1 &&
+      rb_config_class::CONFIG['MINOR'].to_i == 8 then
       Test::Unit.run = true
       TEST_EXCEPTION_CLASS = Test::Unit::AssertionFailedError
     else
