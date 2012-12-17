@@ -1,8 +1,8 @@
 test_name="PE 1.2.x: Generate Puppet Enterprise answer files"
 
-skip_test "Skipping PE 1.2.x answer file generation" and break unless ( options[:type] =~ /pe/ )
-skip_test "Skipping PE 1.2.x answer file generation, PE version 1.2.x not set" and break unless ( config['pe_ver'] =~ /1\.2/ )
-skip_test "Skipping answers file generation, --no-install selected" and break if ( options[:noinstall] )
+skip_test "Skipping PE 1.2.x answer file generation" unless ( options[:type] =~ /pe/ )
+skip_test "Skipping PE 1.2.x answer file generation, PE version 1.2.x not set" unless ( config['pe_ver'] =~ /1\.2/ )
+skip_test "Skipping answers file generation, --no-install selected" if ( options[:noinstall] )
 
 @options[:pe_version]
 common_a = %q[

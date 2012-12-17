@@ -1,10 +1,10 @@
 test_name="PE 2.x: Generate Puppet Enterprise answer files"
 
-skip_test "Skipping PE 2.x answers file generation for non PE tests" and break unless ( options[:type] =~ /pe/ )
+skip_test "Skipping PE 2.x answers file generation for non PE tests" unless ( options[:type] =~ /pe/ )
 
-skip_test "Skipping PE 2.x answers file generation, --no-install selected" and break if ( options[:noinstall] )
+skip_test "Skipping PE 2.x answers file generation, --no-install selected" if ( options[:noinstall] )
 
-skip_test "Skipping PE 2.x answer file generation, PE version 1.2.x set" and break if ( options[:pe_version] =~ /1\.2/ )
+skip_test "Skipping PE 2.x answer file generation, PE version 1.2.x set" if ( options[:pe_version] =~ /1\.2/ )
 
 portno=config['consoleport']
 

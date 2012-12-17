@@ -119,8 +119,8 @@ module PuppetAcceptance
     # to a human-readable string (which some IDEs/editors
     # will recognize as links to the line numbers in the trace)
     def pretty_backtrace backtrace = caller(1)
-      backtrace = purge_harness_files_from( backtrace ) if is_debug?
-      expand_symlinks( backtrace ).join "\n"
+      trace = is_debug? ? backtrace : purge_harness_files_from( backtrace )
+      expand_symlinks( trace ).join "\n"
     end
 
    private
@@ -128,7 +128,7 @@ module PuppetAcceptance
       backtrace.collect do |line|
         file_path, line_num = line.split( ":" )
         expanded_path = expand_symlink File.expand_path( file_path )
-        expanded_path + ":" + line_num
+        expanded_path.to_s + ":" + line_num.to_s
       end
     end
 
