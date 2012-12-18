@@ -8,6 +8,8 @@ module PuppetAcceptance
       case config['HOSTS'][name]['platform']
       when /windows/
         Windows::Host.new name, options, config
+      when /aix/
+        Aix::Host.new name, options, config
       else
         Unix::Host.new name, options, config
       end
@@ -125,4 +127,5 @@ module PuppetAcceptance
 
   require File.expand_path(File.join(File.dirname(__FILE__), 'host/windows'))
   require File.expand_path(File.join(File.dirname(__FILE__), 'host/unix'))
+  require File.expand_path(File.join(File.dirname(__FILE__), 'host/aix'))
 end
