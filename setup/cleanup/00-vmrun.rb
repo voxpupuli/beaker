@@ -1,8 +1,15 @@
-test_name "Remove acceptance VMs"
+test_name "Remove acceptance VMs" do
 
-  if options[:vmrun] == 'blimpy' and not options[:preserve_hosts]
+  virtual_machines = {}
+  hosts.each do |host|
+    hypervisor = host['hypervisor'] || options[:vmrun]
+    virtual_machines[hypervisor] ||= []
+    virtual_machines[hypervisor] << host
+  end
+
+  if virtual_machines['blimpy'] and not options[:preserve_hosts]
     fleet = Blimpy.fleet do |fleet|
-      hosts.each do |host|
+      virtual_machines['blimpy'].each do |host|
         fleet.add(:aws) do |ship|
           ship.name = host.name
         end
@@ -10,8 +17,9 @@ test_name "Remove acceptance VMs"
     end
 
     fleet.destroy
+  end
 
-  elsif options[:vmrun] == 'vsphere' and not options[:preserve_hosts]
+  if virtual_machines['vsphere'] and not options[:preserve_hosts]
     require File.expand_path(File.join(File.dirname(__FILE__),
                                        '..', '..','lib', 'puppet_acceptance',
                                        'utils', 'vsphere_helper'))
@@ -19,13 +27,12 @@ test_name "Remove acceptance VMs"
 
     vsphere_credentials = VsphereHelper.load_config
 
-    # Do more than manage two different config files...
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
     vsphere_helper = VsphereHelper.new vsphere_credentials
 
-    vm_names = hosts.map {|h| h.name }
+    vm_names = virtual_machines['vsphere'].map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names
     vm_names.each do |name|
       unless vm = vms[name]
@@ -36,13 +43,12 @@ test_name "Remove acceptance VMs"
         logger.notify "Shutting down #{vm.name}"
         start = Time.now
         vm.PowerOffVM_Task.wait_for_completion
-        logger.notify "Spent %.2f seconds halting #{vm.name}" % (Time.now - start)
+        logger.notify(
+          "Spent %.2f seconds halting #{vm.name}" % (Time.now - start) )
       end
     end
 
     vsphere_helper.close
 
-  else
-    skip_test "Skipping cleanup VM step"
   end
-
+end
