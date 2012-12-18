@@ -104,9 +104,10 @@ module PuppetAcceptance
       end
     end
 
+    # FIX: this should be moved into host/platform
     def run_cron_on(host, action, user, entry="", &block)
       platform = host['platform']
-      if platform.include? 'solaris'
+      if platform.include?('solaris') || platform.include?('aix') then
         case action
           when :list   then args = '-l'
           when :remove then args = '-r'
