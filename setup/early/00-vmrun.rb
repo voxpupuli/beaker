@@ -166,12 +166,12 @@ test_name "Revert VMs" do
       " with credentials for #{vsphere_credentials[:user]}"
 
     count = 0
+    # During periods of vSphere connectivity troubles we may have to
+    # retry to connect. We'll catch any exception (there may be a few)
     begin
       vsphere_helper = VsphereHelper.new vsphere_credentials
     rescue => e
-      if e == Test::Unit::AssertionFailedError
-        raise
-      elsif count < 5
+      if count < 5
         count += 1
         retry
       end
