@@ -9,7 +9,7 @@ debug_opt = options[:debug] ? 'vh' : ''
 def epel_info_for! host
   version = host['platform'].match(/el-(\d+)/)[1]
   if version == '6'
-    pkg = 'epel-release-6-7.noarch.rpm'
+    pkg = 'epel-release-6-8.noarch.rpm'
     url = "http://mirror.itc.virginia.edu/fedora-epel/6/i386/#{pkg}"
   elsif version == '5'
     pkg = 'epel-release-5-4.noarch.rpm'
