@@ -61,6 +61,50 @@ test_name "Revert VMs" do
 
   logger.warn virtual_machines.inspect
 
+  if virtual_machines['aix']
+    fog_file = nil
+    if File.exists?( File.join(ENV['HOME'], '.fog') )
+      fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+    end
+    fail_test "Cant load ~/.fog config" unless fog_file
+
+    # Running the rake task on rpm-builder
+    hypername = fog_file[:default][:aix_hypervisor_server]
+    hyperconf = {
+      'HOSTS'  => {
+        hypername => { 'platform' => 'el-6-x86_64' }
+      },
+      'CONFIG' => {
+        'user' => fog_file[:default][:aix_hypervisor_username] || ENV['USER'],
+        'ssh'  => {
+          :keys => fog_file[:default][:aix_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa"
+        }
+      }
+    }
+
+    hyperconfig = PuppetAcceptance::TestConfig.new( hyperconf, options )
+
+    logger.notify "Connecting to hypervisor at #{hypername}"
+    hypervisor = PuppetAcceptance::Host.create( hypername, options, hyperconfig )
+
+    # This is a hack; we want to pull from the 'foss' snapshot
+    # Not used for AIX...yet
+    snap = 'foss' if snap == 'git'
+
+    virtual_machines['aix'].each do |host|
+      vm_name = host['vmname'] || host.name
+
+      logger.notify "Reverting #{vm_name} to snapshot #{snap}"
+      start = Time.now
+      #on hypervisor, "cd pe-aix && git pull origin master"
+      time = Time.now - start
+      # Restore AIX image, ID'd by the hostname
+      on hypervisor, "cd pe-aix && rake restore:#{host.name}"
+      logger.notify "Spent %.2f seconds reverting" % time
+    end
+    hypervisor.close
+  end
+
   if virtual_machines['solaris']
     fog_file = nil
     if File.exists?( File.join(ENV['HOME'], '.fog') )
