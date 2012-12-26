@@ -1,4 +1,9 @@
 module PuppetAcceptance
+  # A module to be mixed into test cases to provide dsl helpers.
+  # This module (as of 12/26/12) contains two very different kinds of methods
+  # Command wrappers and host interaction helpers. They should be split into
+  # two files. Most likely most of the puppet_* wrappers should also be
+  # deprecated.
   module PuppetCommands
 
 #############################################################################
@@ -63,49 +68,64 @@ module PuppetAcceptance
 #
 #############################################################################
 
-    # method with_puppet_running_on
-    # start puppet on [host], and runs it in [mode], with the the given
-    # [configuration_options], yielding [host] to a block for tests to be
-    # ran within.
+    # Test Puppet running in a certain run mode with specific options.
+    # This ensures the following steps are performed:
+    # 1. The pre-test Puppet configuration is backed up
+    # 2. A new Puppet configuraton file is layed down
+    # 3. Puppet is started or restarted in the specified run mode
+    # 4. Ensure Puppet has started correctly
+    # 5. Further tests are yielded to
+    # 6. Revert Puppet to the pre-test state
+    # 7. Testing artifacts are saved in a folder named for the test
     #
-    # parameters:
-    # [host]  an object implementing Host's interface, or an array of them
+    # @param [Array<Host>, Host] hosts One or more objects that act like Host
     #
-    # [mode]  symbol specifying a puppet mode to run in (:agent or :master)
+    # @param [Symbol]            mode  Specifying a puppet mode to run in
     #
-    # [configuration_options] a Hash of Symbol => String represent puppet
-    #                         settings. Sections of the puppet.conf may be
-    #                         specified, if no section is specified the
-    #                         a puppet.conf file will be written with the
-    #                         options put in a section named after [mode].
+    # @param [Hash{Symbol=>String}]
+    #                            config_opts Represent puppet settings.
+    #                            Sections of the puppet.conf may be
+    #                            specified, if no section is specified the
+    #                            a puppet.conf file will be written with the
+    #                            options put in a section named after [mode].
     #
-    # [&block]  really the point of this method, this yields and tests may
-    #           be ran. After the block has finished puppet is reverted to
-    #           its previous state.
+    # @param [Block]             block The point of this method, yields so
+    #                            tests may be ran. After the block is finished
+    #                            puppet will revert to a previous state.
     #
-    # example:
-    # with_puppet_running_on( agents, :agent,
-    #                          :server => master.name ) do
-    #   ....
-    # end
+    # @example A simple use case
+    #     with_puppet_running_on( agents, :agent,
+    #                              :server => master.name ) do |running_agents|
     #
-    # with_puppet_running_on( host, :master,
-    #                         :main => {:logdest => '/var/blah'},
-    #                         :master => {:masterlog => '/elswhere'},
-    #                         :agent => {:server => 'localhost'} ) do
-    #   ....
-    # end
+    #       ...tests to be ran...
+    #     end
     #
-    def with_puppet_running_on hosts, mode, configuration_options = {}, &block
+    # @example Fully utilizing the possiblities of config options
+    #     with_puppet_running_on( host, :master,
+    #                             :main => {:logdest => '/var/blah'},
+    #                             :master => {:masterlog => '/elswhere'},
+    #                             :agent => {:server => 'localhost'} ) do |running_master|
+    #
+    #       ...tests to be ran...
+    #     end
+    #
+    # @api dsl
+    def with_puppet_running_on hosts, mode, config_opts = {}, &block
       if hosts.is_a? Array
         hosts.each do |h|
-          with_puppet_running_on_a h, mode, configuration_options, block
+          with_puppet_running_on_a h, mode, config_opts, block
         end
       else
-        with_puppet_running_on_a hosts, mode, configuration_options, block
+        with_puppet_running_on_a hosts, mode, config_opts, block
       end
     end
 
+    # @see PuppetAcceptance::PuppetCommands#with_puppet_running_on
+    # @note This is the method that contains the behavior needed by
+    #       {#with_puppet_running_on}. {#with_puppet_running_on} delegates
+    #       individual host actions to this method.
+    #
+    # @api public
     def with_puppet_running_on_a host, mode, config_opts, &block
       #  begin
       #    backup_path = host.tmppath
@@ -155,35 +175,33 @@ module PuppetAcceptance
 #
 #############################################################################
 
-    # method apply_manifest_on
-    # runs 'puppet apply' on a remote [host], piping [manifest] through stdin
+    # runs 'puppet apply' on a remote host, piping manifest through stdin
     #
-    # parameters:
-    # [host] an instance of Host which contains the info about the host that
-    #        this command should be run on
+    # @param [Host] host The host that this command should be run on
     #
-    # [manifest] a string containing a puppet manifest to apply
+    # @param [String] manifest The puppet manifest to apply
     #
-    # [options] an optional hash containing options; legal values include:
-    #   :acceptable_exit_codes => an array of integer exit codes that should be
+    # @param [Hash{Symbol=>String}] options Optional options for the method
+    # @option options [Array<Fixnum>] :acceptable_exit_codes ([0]) an array of
+    #                             integer exit codes that should be
     #                             considered acceptable.  an error will be
     #                             thrown if the exit code does not match one of
     #                             the values in this list.
     #
-    #   :parseonly =>             any value.  If this key exists in the Hash,
+    # @option options [Boolean]  :parseonly (false) If this key is true,
     #                             the "--parseonly" command line parameter will
     #                             be passed to the 'puppet apply' command.
     #
-    #   :trace =>                 any value.  If this key exists in the Hash,
+    # @option options [Boolean]  :trace (false) If this key exists in the Hash,
     #                             the "--trace" command line parameter will be
     #                             passed to the 'puppet apply' command.
     #
-    #   :environment =>           a Hash containing string->string key value
-    #                             pairs. These will be treated as extra
-    #                             environment variables that should be set
-    #                             before running the puppet command.
+    # @option options [Hash{String=>String}] :environment These will be treated
+    #                             as extra environment variables that should be
+    #                             set before running the puppet command.
     #
-    #   :catch_failures =>        boolean. By default "puppet --apply" will
+    # @option options [Boolean]  :catch_failures (false) By default
+    #                             "puppet --apply" will
     #                             exit with 0, which does not count as a test
     #                             failure, even if there were errors applying
     #                             the manifest. This option enables detailed
@@ -191,7 +209,7 @@ module PuppetAcceptance
     #                             "puppet --apply" indicates there was a
     #                             failure during its execution.
     #
-    # [&block] this method will yield to a block of code passed by the caller;
+    # @param [Block] block this method will yield to a block of code passed by the caller;
     #          this can be used for additional validation, etc.
     #
     def apply_manifest_on(host, manifest, options={}, &block)
@@ -300,6 +318,7 @@ module PuppetAcceptance
     #                     ssl directories prior to starting the puppet master,
     #                     defaults to deleting them.
     #
+    # @deprecated
     def with_master_running_on(host, args='--daemonize', options={}, &block)
       # they probably want to run with daemonize.  If they pass some other
       # arg/args but forget to re-include daemonize, we'll check and make sure
@@ -347,6 +366,7 @@ module PuppetAcceptance
       end
     end
 
+    # @deprecated
     def start_puppet_master(host, args, pidfile)
       on host, puppet_master(args)
       on(host, "kill -0 $(cat #{pidfile})", :acceptable_exit_codes => [0,1])
@@ -392,6 +412,7 @@ module PuppetAcceptance
       @logger.debug "Slept #{elapsed} sec. waiting for Puppet Master to start"
     end
 
+    # @deprecated
     def stop_puppet_master(host, pidfile)
       on host, "[ -f #{pidfile} ]", :silent => true
 

@@ -7,3 +7,4 @@ pkg
 Gemfile.lock
 options.rb
 test.cfg
+.yardoc
