@@ -54,12 +54,10 @@ test_name "Revert VMs" do
   virtual_machines = {}
   hosts.each do |host|
     hypervisor = host['hypervisor'] || DEFAULT_HYPERVISOR
-    logger.debug "Hypervisor for #{host} is #{host['hypervisor']}, and I'm going to use #{hypervisor}"
+    logger.debug "Hypervisor for #{host} is #{host['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
     virtual_machines[hypervisor] = [] unless virtual_machines[hypervisor]
     virtual_machines[hypervisor] << host
   end
-
-  logger.warn virtual_machines.inspect
 
   if virtual_machines['aix']
     fog_file = nil
