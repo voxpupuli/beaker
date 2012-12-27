@@ -1,21 +1,15 @@
 module PuppetAcceptance
   class TestCase
     require File.expand_path(File.join(File.dirname(__FILE__), 'host'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'assertions'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'puppet_commands'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'helpers'))
     require 'tempfile'
     require 'benchmark'
     require 'stringio'
     require 'rbconfig'
     require 'test/unit'
 
-    include Assertions
+    include PuppetAcceptance::DSL
     include PuppetCommands
-    include Helpers
-
-    class PendingTest < Exception; end
-    class SkipTest    < Exception; end
 
     rb_config_class = defined?(RbConfig) ? RbConfig : Config
     if rb_config_class::CONFIG['MAJOR'].to_i == 1 &&
@@ -26,6 +20,7 @@ module PuppetAcceptance
       TEST_EXCEPTION_CLASS = ::MiniTest::Assertion
     end
 
+    attr_accessor :hosts
     attr_reader :version, :config, :logger, :options, :path, :fail_flag,
                 :usr_home, :test_status, :exception, :runtime,
                 :teardown_procs, :result
@@ -53,7 +48,7 @@ module PuppetAcceptance
             begin
               test = File.read(path)
               eval test,nil,path,1
-            rescue TEST_EXCEPTION_CLASS => e
+            rescue FailTest, TEST_EXCEPTION_CLASS => e
               @test_status = :fail
               @exception   = e
             rescue PendingTest
@@ -117,24 +112,6 @@ module PuppetAcceptance
     def test_name(test_name, &block)
       @logger.notify "\n#{test_name}\n"
       yield if block
-    end
-
-    def pass_test(msg)
-      @logger.notify "\n#{msg}\n"
-    end
-
-    def skip_test(msg)
-      @logger.notify "Skip: #{msg}\n"
-      raise SkipTest
-    end
-
-    def fail_test(msg)
-      flunk(msg + "\n" + @logger.pretty_backtrace() + "\n")
-    end
-
-    def pending_test(msg = "WIP: #{@test_name}")
-      @logger.warn msg
-      raise PendingTest
     end
 
     def confine(type, criteria, &block)
@@ -256,39 +233,6 @@ module PuppetAcceptance
       on host, remote_path, &block
     end
 
-    #
-    # Identify hosts
-    #
-    def hosts(desired_role = nil)
-      @hosts.select do |host|
-        desired_role.nil? or host['roles'].include?(desired_role)
-      end
-    end
-
-    def agents
-      hosts 'agent'
-    end
-
-    def master
-      masters = hosts 'master'
-      fail "There must be exactly one master" unless masters.length == 1
-      masters.first
-    end
-
-    def database
-      databases = hosts 'database'
-      @logger.warn "There is no database host configured" if databases.empty?
-      fail "Cannot have more than one database host" if databases.length > 1
-      databases.first
-    end
-
-    def dashboard
-      dashboards = hosts 'dashboard'
-      @logger.warn "There is no dashboard host configured" if dashboards.empty?
-      fail "Cannot have more than one dashboard host" if dashboards.length > 1
-      dashboards.first
-    end
-
     # This method retrieves the forge hostname from either:
     # * The environment variable 'forge_host'
     # * The parameter 'forge_host' from the CONFIG hash in a node definition
@@ -298,7 +242,9 @@ module PuppetAcceptance
     #
     # @return [String] hostname of test forge
     def forge
-      ENV['forge_host'] || @config['forge_host'] || 'vulcan-acceptance.delivery.puppetlabs.net'
+      ENV['forge_host'] ||
+        @config['forge_host'] ||
+        'vulcan-acceptance.delivery.puppetlabs.net'
     end
   end
 end

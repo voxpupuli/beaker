@@ -33,7 +33,8 @@ describe PuppetCommandsMixedIntoTestCase do
     end
 
     context 'when yielding tests to #with_puppet_running_on' do
-      it 'puppet runs in the mode, and with the options, specified'
+      specify 'puppet runs in the mode specified'
+      specify 'and with the options specified'
     end
 
     context 'and after running tests' do

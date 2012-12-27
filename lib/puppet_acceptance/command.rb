@@ -2,7 +2,6 @@ module PuppetAcceptance
   # An immutable data structure representing a task to run on a remote
   # machine.
   class Command
-    include Test::Unit::Assertions
 
     def initialize(command_string, options={})
       @command_string = command_string
