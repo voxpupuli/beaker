@@ -20,9 +20,7 @@ def epel_info_for! host
   return url
 end
 
-unless options[:pkg_repo]
-  skip_test "Skipping Config Packing Repository"
-else
+if options[:repo_proxy]
   hosts.each do |host|
     case
     when host['platform'] =~ /ubuntu/
@@ -30,10 +28,21 @@ else
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg)
       on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /debian/
+      on(host, "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi")
+      create_remote_file(host, '/etc/apt/apt.conf', aptcfg)
       on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /solaris-11/
       on(host,"/usr/bin/pkg unset-publisher solaris || :")
       on(host,"/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo)
+    else
+      logger.debug "#{host}: repo proxy configuration not modified"
+    end
+  end
+end
+
+if options[:extra_repos]
+  hosts.each do |host|
+    case
     when host['platform'] =~ /el-/
       result = on(host, 'rpm -qa | grep epel-release', :acceptable_exit_codes => [0,1])
       if result.exit_code == 1
@@ -42,7 +51,7 @@ else
         on host, 'yum clean all && yum makecache'
       end
     else
-      logger.notify "#{host}: packing configuration not modified"
+      logger.debug "#{host}: package repo configuration not modified"
     end
   end
 end

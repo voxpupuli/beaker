@@ -222,11 +222,25 @@ module PuppetAcceptance
           @options[:dhcp_renew] = bool
         end
 
-        @defaults[:pkg_repo] = false
-        opts.on '--[no-]pkg-repo',
-                'Configure packaging system repository',
-                '(default: false)' do |bool|
-          @options[:pkg_repo] = true
+        @defaults[:repo_proxy] = false
+        opts.on '--repo-proxy',
+                'Configure package system proxy',
+                '(default: false)' do
+          @options[:repo_proxy] = true
+        end
+
+        @defaults[:extra_repos] = false
+        opts.on '--extra-repos',
+                'Configure extra repositories',
+                '(default: false)' do
+          @options[:extra_repos] = true
+        end
+
+        opts.on '--pkg-repo',
+                'Configure packaging system repository (deprecated)',
+                '(default: false)' do
+          @options[:extra_repos] = true
+          @options[:repo_proxy]  = true
         end
 
         @defaults[:installonly] = false
