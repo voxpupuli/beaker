@@ -109,7 +109,7 @@ module PuppetAcceptance
     def do_scp_to source, target, options
       @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
 
-      options[:dry_run] = $dry_run,
+      options[:dry_run] = $dry_run
 
       result = connection.scp_to(source, target, options)
       return result
