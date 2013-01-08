@@ -2,16 +2,57 @@ require 'test/unit/assertions'
 
 module PuppetAcceptance
   module DSL
+    # Any custom assertions for Test::Unit or minitest live here. You may
+    # include them in your own testing if you wish, override them, or re-open
+    # the class to register new ones for use within
+    # {PuppetAcceptance::TestCase}.
+    #
+    # You may use any test/unit assertion within your assertion. The
+    # assertion below assumes access to the method #result which will
+    # contain the output (according to the interface defined in
+    # {PuppetAcceptance::Result}). When writing your own, to make them more
+    # portable and less brittle it is recommended that you pass the result
+    # or direct object for asserting against into your assertion.
+    #
+    # @example Re-opening the module to create new assertions
+    #     #=> in file my_custom_assertions.rb
+    #     require 'ipaddr'
+    #
+    #     module PuppetAcceptance
+    #       module DSL
+    #         module Assertions
+    #           def assert_ip_in_range(range, addr)
+    #             ip = IPAddr.new(addr)
+    #             ip_range = IPAddr.new(range)
+    #             assert_equal true, ip_range.include?(ip),
+    #               "#{addr} is not in address range #{ip_range}"
+    #           end
+    #         end
+    #       end
+    #     end
+    #
+    # @example Including defined assertions in Test::Unit tests
+    #     require 'puppet_acceptance/dsl'
+    #     require 'my_custom_assertions'
+    #
+    #     class TestMyThings < Test::Unit::TestCase
+    #       include PuppetAcceptance::DSL
+    #
+    #       def test_stuff
+    #         assert_ip_in_range '192.168.2.0/24', '192.168.2.100'
+    #       end
+    #     end
+    #
     module Assertions
       include Test::Unit::Assertions
 
       # Make assertions about the content of console output.
       #
-      # By default, each line of +output+ is assumed to come from STDOUT.  You may
-      # specify the stream explicitly by annotating the line with a stream marker.
-      # (If your line literally requires any stream marker at the beginning of a
-      # line, you must prefix the line with an explicit stream marker.)  The
-      # currently recognized markers are:
+      # By default, each line of +output+ is assumed to come from STDOUT.
+      # You may specify the stream explicitly by annotating the line with a
+      # stream marker. (If your line literally requires any stream marker at
+      # the beginning of a line, you must prefix the line with an explicit
+      # stream marker.)  The currently recognized markers are:
       #
       # * "STDOUT> "
       # * "STDERR> "
@@ -20,9 +61,10 @@ module PuppetAcceptance
       # * "1> "
       # * "2> "
       #
-      # Any leading common indentation is automatically removed from the +output+
-      # parameter.  For cases where this matters (e.g. every line should be
-      # indented), you should prefix the line with an explicit stream marker.
+      # Any leading common indentation is automatically removed from the
+      # +output+ parameter.  For cases where this matters (e.g. every line
+      # should be indented), you should prefix the line with an explicit
+      # stream marker.
       #
       # @example Assert order of interleaved output streams
       #   !!!plain
@@ -42,25 +84,32 @@ module PuppetAcceptance
       #       ^- This is indented 2 characters.
       #   CONSOLE
       #
-      # @param [String] output The expected console output, optionally annotated
-      #                        with stream markers.
-      # @param [String] msg An explanatory message about why the test failure is
-      #                     relevant.
-      def assert_output(output, msg='Output lines did not match')
-        # Remove the minimal consistent indentation from the input; useful for clean HEREDOCs.
-        indentation = output.lines.map { |line| line[/^ */].length }.min
-        output = output.gsub(/^ {#{indentation}}/, '')
+      # @param [String] exp_out The expected console output, optionally
+      #                         annotated with stream markers.
+      # @param [String] msg     An explanatory message about why the test
+      #                         failure is relevant.
+      def assert_output(exp_out, msg='Output lines did not match')
+        # Remove the minimal consistent indentation from the input;
+        # useful for clean HEREDOCs.
+        indentation = exp_out.lines.map { |line| line[/^ */].length }.min
+        cleaned_exp = exp_out.gsub(/^ {#{indentation}}/, '')
 
         # Divide output based on expected destination
-        out, err = output.lines.partition { |line| line !~ /^((STD)?ERR|2)> / }
-        out, err, output = [out.join, err.join, output].map do |str|
+        out, err = cleaned_exp.lines.partition do |line|
+          line !~ /^((STD)?ERR|2)> /
+        end
+        our_out, our_err, our_output = [
+          out.join, err.join, cleaned_exp
+        ].map do |str|
           str.gsub(/^((STD)?(ERR|OUT)|[12])> /, '')
         end
 
         # Exercise assertions about output
-        assert_equal output, (result.nil? ? '' : result.output), msg
-        assert_equal out,    (result.nil? ? '' : result.stdout), 'The contents of STDOUT did not match expectations'
-        assert_equal err,    (result.nil? ? '' : result.stderr), 'The contents of STDERR did not match expectations'
+        assert_equal our_output, (result.nil? ? '' : result.output), msg
+        assert_equal our_out,    (result.nil? ? '' : result.stdout),
+          'The contents of STDOUT did not match expectations'
+        assert_equal our_err,    (result.nil? ? '' : result.stderr),
+          'The contents of STDERR did not match expectations'
       end
     end
   end
