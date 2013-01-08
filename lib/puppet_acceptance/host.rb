@@ -1,8 +1,8 @@
-require File.expand_path(File.join(File.dirname(__FILE__), 'puppet_commands'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'dsl', 'wrappers'))
 
 module PuppetAcceptance
   class Host
-    include PuppetCommands
+    include PuppetAcceptance::DSL::Wrappers
 
     # This class providers array syntax for using puppet --configprint on a host
     class PuppetConfigReader
@@ -101,9 +101,12 @@ module PuppetAcceptance
       # I've always found this confusing
       cmdline = command.cmd_line(self)
 
-      @logger.debug "\n#{self} $ #{cmdline}" unless options[:silent]
-
-      output_callback = logger.method(:host_output)
+      if options[:silent]
+        output_callback = nil
+      else
+        @logger.debug "\n#{self} $ #{cmdline}"
+        output_callback = logger.method(:host_output)
+      end
 
       unless $dry_run
         # is this returning a result object?
