@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'puppet_acceptance/dsl/install_utils'
 
-class InstallUtilsTest
+class ClassMixedWithDSLInstallUtils
   include PuppetAcceptance::DSL::InstallUtils
+  include PuppetAcceptance::DSL::Structure
 end
 
-describe InstallUtilsTest do
+describe ClassMixedWithDSLInstallUtils do
   context 'extract_repo_info_from' do
     [{:protocol => 'git', :path => 'git://github.com/puppetlabs/project.git'},
      {:protocol => 'ssh', :path => 'git@github.com:puppetlabs/project.git'},
@@ -28,9 +28,9 @@ describe InstallUtilsTest do
         {:name => 'puppet_plugin'}, {:name => 'puppet'}, {:name => 'facter'}
       ]
       ordered_repos = subject.order_packages named_repos
-      expect(ordered_repos[0][:name]).to be == 'facter'
-      expect(ordered_repos[1][:name]).to be == 'puppet'
-      expect(ordered_repos[2][:name]).to be == 'puppet_plugin'
+      expect( ordered_repos[0][:name] ).to be == 'facter'
+      expect( ordered_repos[1][:name] ).to be == 'puppet'
+      expect( ordered_repos[2][:name] ).to be == 'puppet_plugin'
     end
   end
 
@@ -40,11 +40,11 @@ describe InstallUtilsTest do
       repository  = {:name => 'name'}
       path        = '/path/to/repo'
       cmd         = 'cd /path/to/repo/name && git describe || true'
-      blah = (Struct.new('Result', :stdout)).new('2')
+      logger = double.as_null_object
 
-      subject.stub(:step)
-      subject.should_receive(:on).with(host, cmd).and_yield(subject)
-      subject.stub(:result).and_return(blah)
+      subject.should_receive( :logger ).and_return( logger )
+      subject.should_receive( :on ).with(host, cmd).and_yield
+      subject.should_receive( :stdout ).and_return( '2' )
 
       version = subject.find_git_repo_versions(host, path, repository)
 
@@ -53,6 +53,18 @@ describe InstallUtilsTest do
   end
 
   context 'install_from_git' do
-    it 'install_from_git needs refactoring and a lot of testing'
+    it 'does a ton of stuff it probably shouldnt' do
+      repo = { :name => 'puppet',
+               :path => 'git://my.server.net/puppet.git',
+               :rev => 'master' }
+      path = '/path/to/repos'
+      host = { 'platform' => 'debian' }
+      logger = double.as_null_object
+
+      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.should_receive( :on ).exactly( 4 ).times
+
+      subject.install_from_git( host, path, repo )
+    end
   end
 end
