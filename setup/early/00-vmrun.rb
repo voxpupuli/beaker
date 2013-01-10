@@ -199,9 +199,14 @@ test_name "Revert VMs" do
 
     vsphere_helper = VsphereHelper.new vsphere_credentials
 
-    vm_names = virtual_machines['vsphere'].map {|h| h.name }
-    vms = vsphere_helper.find_vms vm_names
-    vm_names.each do |name|
+    vsphere_vms = {}
+    virtual_machines['vsphere'].each do |h|
+      name = h["vmname"] || h.name
+      real_snap = h["snapshot"] || snap
+      vsphere_vms[name] = real_snap
+    end
+    vms = vsphere_helper.find_vms(vsphere_vms.keys)
+    vsphere_vms.each_pair do |name, snap|
       unless vm = vms[name]
         fail_test("Couldn't find VM #{name} in vSphere!")
       end
@@ -246,7 +251,7 @@ test_name "Revert VMs" do
 
       available_snapshots = vm.snapshots.data.sort.join(", ")
       logger.notify "Available snapshots for #{host}: #{available_snapshots}"
-      snap_name = fission_opts["snapshot"] || snap
+      snap_name = host["snapshot"] || fission_opts["snapshot"] || snap
       fail_test "No snapshot specified for #{host}" unless snap_name
       fail_test("Could not find snapshot #{snap_name} for host #{host}") unless vm.snapshots.data.include? snap_name
 
