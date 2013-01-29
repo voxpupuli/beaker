@@ -51,6 +51,10 @@ if version =~ /^1.*/   #  Older version of PE, 1.x series
     scp_to host, "tmp/answers.#{host}", "/tmp/#{host['dist']}"
     step "Install Puppet Master"
     on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
+    if options[:debug]
+      on host, "sed -e 's/# ARGV/ARGV/g' -i /var/opt/lib/pe-puppetmaster/config.ru"
+      on host, "service pe-httpd restart"
+    end
   end
 
   # Install Puppet Agents
@@ -99,6 +103,10 @@ else  # New versions of PE 2.x
       on host,"umask 0027 && cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
     else
       on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
+    end
+    if options[:debug]
+      on host, "sed -e 's/# ARGV/ARGV/g' -i /var/opt/lib/pe-puppetmaster/config.ru"
+      on host, "service pe-httpd restart"
     end
   end
 
