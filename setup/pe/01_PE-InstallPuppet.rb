@@ -128,5 +128,9 @@ else  # New versions of PE 2.x
     else
       on host,"cd /tmp/#{host['dist']} && ./puppet-enterprise-installer -a answers.#{host}"
     end
+    if options[:debug] and role_dashboard == TRUE
+      on host, "sed -e 's/# ARGV/ARGV/g' -i /var/opt/lib/pe-puppetmaster/config.ru"
+      on host, "service pe-httpd restart"
+    end
   end
 end
