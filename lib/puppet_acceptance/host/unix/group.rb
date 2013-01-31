@@ -22,6 +22,14 @@ module Unix::Group
     end
   end
 
+  def group_gid(name)
+    execute("getent group #{name}") do |result|
+      # Format is:
+      # wheel:x:10:root
+      result.stdout.split(':')[2]
+    end
+  end
+
   def group_present(name, &block)
     execute("if ! getent group #{name}; then groupadd #{name}; fi", {}, &block)
   end
