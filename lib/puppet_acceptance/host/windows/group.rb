@@ -22,6 +22,10 @@ module Windows::Group
     end
   end
 
+  def group_gid(name)
+    raise NotImplementedError, "Can't retrieve group gid on a Windows host"
+  end
+
   def group_present(name, &block)
     execute("net localgroup /add \"#{name}\"", {:acceptable_exit_codes => [0,2]}, &block)
   end

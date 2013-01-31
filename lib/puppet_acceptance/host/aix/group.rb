@@ -2,15 +2,10 @@ module Aix::Group
   include PuppetAcceptance::CommandFactory
 
   def group_list(&block)
-    execute("lsgroup ALL") do |result|
-      groups = []
-      result.stdout.each_line do |line|
-        groups << (line.match(/^([^:]+)/) or next)[1]
-      end
-
+    execute("lsgroup -a ALL") do |result|
       yield result if block_given?
 
-      groups
+      result.stdout.lines.map(&:strip)
     end
   end
 
@@ -19,6 +14,14 @@ module Aix::Group
       fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name} id/
 
       yield result if block_given?
+    end
+  end
+
+  def group_gid(name)
+    execute("lsgroup -a id #{name}") do |result|
+      # Format is:
+      # staff id=500
+      result.stdout.split('=').last
     end
   end
 
