@@ -4,13 +4,14 @@ module PuppetAcceptance
       @options = PuppetAcceptance::Options.parse_args
       @logger = PuppetAcceptance::Logger.new(@options)
       @options[:logger] = @logger
-      @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
 
       if @options[:config] then
         @logger.debug "Using Config #{@options[:config]}"
       else
-        fail "Argh!  There is no default for Config, specify one!"
+        fail "Argh!  There is no default for Config, specify one (-c or --config)!"
       end
+
+      @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
 
       if (@options[:helper])
         require @options[:helper]
