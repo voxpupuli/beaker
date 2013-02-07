@@ -9,7 +9,8 @@ describe InstallUtilsTest do
   context 'extract_repo_info_from' do
     [{:protocol => 'git', :path => 'git://github.com/puppetlabs/project.git'},
      {:protocol => 'ssh', :path => 'git@github.com:puppetlabs/project.git'},
-     {:protocol => 'https', :path => 'https://github.com:puppetlabs/project'}
+     {:protocol => 'https', :path => 'https://github.com:puppetlabs/project'},
+     {:protocol => 'file', :path => 'file:///home/example/project'}
     ].each do |type|
       it "handles #{type[:protocol]} uris" do
         uri = "#{type[:path]}#master"
