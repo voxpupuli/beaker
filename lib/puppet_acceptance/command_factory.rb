@@ -1,3 +1,5 @@
+require 'test/unit/assertions'
+
 module PuppetAcceptance
   module CommandFactory
     include Test::Unit::Assertions
