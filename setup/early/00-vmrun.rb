@@ -94,10 +94,9 @@ test_name "Revert VMs" do
 
       logger.notify "Reverting #{vm_name} to snapshot #{snap}"
       start = Time.now
-      #on hypervisor, "cd pe-aix && git pull origin master"
-      time = Time.now - start
       # Restore AIX image, ID'd by the hostname
       on hypervisor, "cd pe-aix && rake restore:#{host.name}"
+      time = Time.now - start
       logger.notify "Spent %.2f seconds reverting" % time
     end
     hypervisor.close
