@@ -165,7 +165,7 @@ test_name "Revert VMs" do
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
-    vsphere_helper = VsphereHelper.new vsphere_credentials
+    vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
     vsphere_vms = {}
     virtual_machines['vsphere'].each do |h|

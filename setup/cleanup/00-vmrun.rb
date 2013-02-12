@@ -30,7 +30,7 @@ test_name "Remove acceptance VMs" do
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
-    vsphere_helper = VsphereHelper.new vsphere_credentials
+    vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
     vm_names = virtual_machines['vsphere'].map {|h| h.name }
     vms = vsphere_helper.find_vms vm_names

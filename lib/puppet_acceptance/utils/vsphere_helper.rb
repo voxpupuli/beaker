@@ -32,7 +32,7 @@ class VsphereHelper
     return vsphere_credentials
   end
 
-  def load_fog_credentials
+  def self.load_fog_credentials
     vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
 
     vsphere_credentials = {}
@@ -43,7 +43,7 @@ class VsphereHelper
     return vsphere_credentials
   end
 
-  def load_legacy_credentials
+  def self.load_legacy_credentials
     vInfo = YAML.load_file '/etc/plharness/vsphere'
 
     puts(
