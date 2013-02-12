@@ -160,43 +160,12 @@ test_name "Revert VMs" do
                                        '..', '..','lib', 'puppet_acceptance',
                                        'utils', 'vsphere_helper'))
 
-    # support Fog/Cloud Provisioner layout
-    # (ie, someplace besides my made up conf)
-    vInfo = nil
-    if File.exists?( File.join(ENV['HOME'], '.fog') )
-      vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
-    elsif File.exists? '/etc/plharness/vsphere'
-      vInfo = YAML.load_file '/etc/plharness/vsphere'
-      logger.notify(
-        "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
-        "Please use ~/.fog instead\n" +
-        "See http://docs.puppetlabs.com/pe/2.0/cloudprovisioner_configuring.html for format"
-      )
-    end
-    fail_test "Cant load vSphere config" unless vInfo
+    vsphere_credentials = VsphereHelper.load_config
 
-    vsphere_credentials = {}
-    if vInfo['location'] && vInfo['user'] && vInfo['pass']
-      vsphere_credentials[:server] = vInfo['location']
-      vsphere_credentials[:user]   = vInfo['user']
-      vsphere_credentials[:pass]   = vInfo['pass']
-
-    elsif vInfo[:default][:vsphere_server] &&
-          vInfo[:default][:vsphere_username] &&
-          vInfo[:default][:vsphere_password]
-
-      vsphere_credentials[:server] = vInfo[:default][:vsphere_server]
-      vsphere_credentials[:user]   = vInfo[:default][:vsphere_username]
-      vsphere_credentials[:pass]   = vInfo[:default][:vsphere_password]
-    else
-      fail_test "Invalid vSphere config"
-    end
-
-    # Do more than manage two different config files...
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
-    vsphere_helper = VsphereHelper.new vsphere_credentials
+    vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
     vsphere_vms = {}
     virtual_machines['vsphere'].each do |h|
@@ -229,6 +198,8 @@ test_name "Revert VMs" do
         logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
       end
     end
+
+    vsphere_helper.close
   end
 
   if virtual_machines['fusion']

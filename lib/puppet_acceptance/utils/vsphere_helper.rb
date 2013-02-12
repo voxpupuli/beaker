@@ -1,4 +1,7 @@
+require 'yaml' unless defined?(YAML)
 require 'rubygems' unless defined?(Gem)
+require 'puppet_acceptance/logger'
+
 begin
   require 'rbvmomi'
 rescue LoadError
@@ -7,10 +10,55 @@ end
 
 class VsphereHelper
   def initialize vInfo = {}
+    @logger = vInfo[:logger] || PuppetAcceptance::Logger.new
     @connection = RbVmomi::VIM.connect :host     => vInfo[:server],
                                        :user     => vInfo[:user],
                                        :password => vInfo[:pass],
                                        :insecure => true
+  end
+
+  def self.load_config
+    # support Fog/Cloud Provisioner layout
+    # (ie, someplace besides my made up conf)
+    vsphere_credentials = nil
+    if File.exists? '/etc/plharness/vsphere'
+      vsphere_credentials = load_legacy_credentials
+
+    elsif File.exists?( File.join(ENV['HOME'], '.fog') )
+      vsphere_credentials = load_fog_credentials
+
+    end
+
+    return vsphere_credentials
+  end
+
+  def self.load_fog_credentials
+    vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+
+    vsphere_credentials = {}
+    vsphere_credentials[:server] = vInfo[:default][:vsphere_server]
+    vsphere_credentials[:user]   = vInfo[:default][:vsphere_username]
+    vsphere_credentials[:pass]   = vInfo[:default][:vsphere_password]
+
+    return vsphere_credentials
+  end
+
+  def self.load_legacy_credentials
+    vInfo = YAML.load_file '/etc/plharness/vsphere'
+
+    puts(
+      "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
+      "Please use ~/.fog instead\n" +
+      "See http://docs.puppetlabs.com/pe/2.0/" +
+      "cloudprovisioner_configuring.html for format"
+    )
+
+    vsphere_credentials = {}
+    vsphere_credentials[:server] = vInfo['location']
+    vsphere_credentials[:user]   = vInfo['user']
+    vsphere_credentials[:pass]   = vInfo['pass']
+
+    return vsphere_credentials
   end
 
   def find_snapshot vm, snapname
@@ -87,6 +135,10 @@ class VsphereHelper
       :recursive => true,
       :type      => [ 'VirtualMachine' ]
     })
+  end
+
+  def close
+    @connection.close
   end
 end
 
