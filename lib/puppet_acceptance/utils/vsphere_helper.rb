@@ -1,6 +1,10 @@
 require 'yaml' unless defined?(YAML)
 require 'rubygems' unless defined?(Gem)
-require 'puppet_acceptance/logger'
+begin
+  require 'puppet_acceptance/logger'
+rescue LoadError
+  require File.expand_path(File.join(File.dirname(__FILE__), '..', 'logger.rb'))
+end
 
 begin
   require 'rbvmomi'
