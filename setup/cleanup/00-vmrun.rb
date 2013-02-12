@@ -32,7 +32,7 @@ test_name "Remove acceptance VMs" do
 
     vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
-    vm_names = virtual_machines['vsphere'].map {|h| h.name }
+    vm_names = virtual_machines['vsphere'].map {|h| h['vmname'] || h.name }
     vms = vsphere_helper.find_vms vm_names
     vm_names.each do |name|
       unless vm = vms[name]
