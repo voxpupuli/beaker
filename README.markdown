@@ -75,7 +75,7 @@ Puppet Dashboard host, resulting in a split Master/Dashboard install.  Systest w
 prepare an appropriate answers file for use with the PE Installer.
 
 
-## Provisioning ##
+# Provisioning #
 Systest has built in capabilites for managing VMs and provisioning SUTs:
 
   * VMWare vSphere via the RbVmomi gem
@@ -86,7 +86,7 @@ Systest has built in capabilites for managing VMs and provisioning SUTs:
 You may mix and match hypervisors as needed. The `systest.rb` script takes
 `--vmrun HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
 `--vmrun` will be the default value and you may override hypervisors on a per
-host basis in config file.
+host basis in config file. Default behavior for vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
 
 For example:
 
@@ -108,7 +108,7 @@ For example:
     $ ./systest.rb --config configs/my_hosts.yml --vmrun vsphere --snapshot base   ....
 
 
-# VMWare Fusion support #
+## VMWare Fusion support ##
 Pre-requisite: Fission gem installed and configured, including a ~/.fissionrc 
 that points to the `vmrun` executable and where VMs can be found.
   Example `.fissionrc` file (it's YAML):
@@ -155,7 +155,7 @@ Diagnostics:
 When using `--vmrun fusion`, we'll log all the available VM names and for each
 host we'll log all the available snapshot names.
 
-# EC2 Support #
+## EC2 Support ##
 Pre-requisite: Blimpy gem installed and .fog file correctly configured with your credentials.
 
 --vmrun blimpy
@@ -170,7 +170,7 @@ AMIs are built for PE based installs on:
 Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file
 lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
 
-# Solaris Support #
+## Solaris Support ##
 
 Used with `--vmrun solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
 
@@ -184,7 +184,7 @@ Example .fog file:
       :solaris_hypervisor_snappaths:
         - rpool/ROOT/solaris
 
-# vSphere Support #
+## vSphere Support ##
 
 The harness can use vms and snapshots that live within vSphere as well.
 To do this create a `~/.fog` file with your vSphere credentials:
@@ -202,7 +202,7 @@ These follow the conventions used by Cloud Provisioner and Fog.
 You can now call the harness with the `--vmrun vsphere` option to select the VM named in your config.yml file.
 
 
-## Putting it all together ##
+# Putting it all together #
 
 ## Running FOSS tests ##
 Puppet FOSS Acceptance tests are stored in their respective Puppet repository, so
