@@ -165,17 +165,7 @@ test_name "Revert VMs" do
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
       " with credentials for #{vsphere_credentials[:user]}"
 
-    count = 0
-    # During periods of vSphere connectivity troubles we may have to
-    # retry to connect. We'll catch any exception (there may be a few)
-    begin
-      vsphere_helper = VsphereHelper.new vsphere_credentials
-    rescue => e
-      if count < 5
-        count += 1
-        retry
-      end
-    end
+    vsphere_helper = VsphereHelper.new vsphere_credentials
 
     vsphere_vms = {}
     virtual_machines['vsphere'].each do |h|
