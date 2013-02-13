@@ -4,7 +4,8 @@ cronjobs =      [ '.d/default-add-all-nodes', '.hourly/puppet_baselines.sh' ]
 
 directories =   [ '/opt/puppet', '/var/opt/lib/pe-puppet',
                   '/var/opt/lib/pe-puppetmaster', '/etc/puppetlabs',
-                  '/var/opt/cache/pe-puppet-dashboard', '/var/opt/puppet' ]
+                  '/var/opt/cache/pe-puppet-dashboard', '/var/opt/puppet',
+                  '/var/lib/peadmin']
 
 processes =     [ 'puppetagent', 'pe-puppet', 'pe-puppet-agent',
                   'pe-mcollective', 'pe-httpd', 'pe-activemq', 'pe-memcached',
