@@ -294,11 +294,11 @@ module PuppetAcceptance
     # * The parameter 'forge_host' from the CONFIG hash in a node definition
     #
     # If none of these are available, it falls back to the static
-    # 'forge-acceptance.puppetlabs.lan'
+    # 'vulcan-acceptance.delivery.puppetlabs.net' hostname
     #
     # @return [String] hostname of test forge
     def forge
-      ENV['forge_host'] || @config['forge_host'] || 'vulcan-acceptance.acctest.dc1.puppetlabs.net'
+      ENV['forge_host'] || @config['forge_host'] || 'vulcan-acceptance.delivery.puppetlabs.net'
     end
   end
 end
