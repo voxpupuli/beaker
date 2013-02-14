@@ -7,6 +7,27 @@ test_name "Remove acceptance VMs" do
     virtual_machines[hypervisor] << host
   end
 
+  if options[:preserve_hosts]
+    hosts_config = {}
+    hosts.each do |host|
+      hosts_config[host.name] = {
+        'roles' => host['roles'],
+        'platform' => host['platform'],
+        'ip' => host['ip'],
+      }
+    end
+
+    exported_config = {
+      'HOSTS' => hosts_config,
+      'CONFIG' => config
+    }
+
+    FileUtils.mkdir_p('tmp')
+    File.open("tmp/#{File.basename(options[:config])}", 'w') do |f|
+      f.write(exported_config.to_yaml)
+    end
+  end
+
   if virtual_machines['blimpy'] and not options[:preserve_hosts]
     fleet = Blimpy.fleet do |fleet|
       virtual_machines['blimpy'].each do |host|
