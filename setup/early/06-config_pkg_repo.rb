@@ -3,7 +3,7 @@ test_name "Config Packing Repository"
 confine :except, :platform => 'windows'
 
 aptcfg = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.lan:3128/"; }
-ips_pkg_repo="http://solaris-11-internal-repo.acctest.dc1.puppetlabs.net"
+ips_pkg_repo="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 debug_opt = options[:debug] ? 'vh' : ''
 
 def epel_info_for! host
