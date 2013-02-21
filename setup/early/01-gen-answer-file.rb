@@ -29,9 +29,15 @@ q_puppetagent_server=MASTER
 ]
 
 # Master base answers
+
+# FIXME: Another string hack until we can do this in some sort of data
+# structure
+master_ip_altname=""
+master_ip_altname=",#{master['ip']}" if master['ip']
+
 master_a = %Q[
 q_puppetmaster_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
-q_puppetmaster_dnsaltnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`,puppet
+q_puppetmaster_dnsaltnames=`uname | grep -i sunos > /dev/null && hostname || hostname -s`,puppet#{master_ip_altname}
 q_puppetmaster_enterpriseconsole_hostname=DASHBOARD
 q_puppetmaster_enterpriseconsole_port=#{portno}
 q_puppetmaster_forward_facts=y
