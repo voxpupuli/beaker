@@ -10,7 +10,7 @@ How to install the test harness on your workstation:
     git clone https://github.com/puppetlabs/puppet-acceptance.git
     bundle install
 
-  Manumatically:
+  Manually:
 
     git clone https://github.com/puppetlabs/puppet-acceptance.git
     gem install rubygems net-ssh net-scp systemu
