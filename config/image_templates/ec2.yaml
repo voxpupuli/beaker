@@ -87,7 +87,7 @@ AMI:
   amazon-6-i386:
     :image:
       :pe: ami-06e1646f
-   :region: us-east-1
+    :region: us-east-1
 
   el-6-x86_64:
     :image:
