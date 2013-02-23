@@ -1,3 +1,5 @@
+require 'open-uri'
+
 module PuppetAcceptance
   # Config was taken by Ruby.
   class TestConfig
@@ -81,7 +83,7 @@ module PuppetAcceptance
       version_file = ENV['pe_version_file'] || 'LATEST'
       version = ""
       begin
-        File.open("#{dist_dir}/#{version_file}") do |file|
+        open("#{dist_dir}/#{version_file}") do |file|
           while line = file.gets
             if /(\w.*)/ =~ line then
               version = $1.strip
