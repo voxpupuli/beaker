@@ -26,12 +26,12 @@ AMI:
 
   rhel-5-i386-west:
     :image: 
-      :pe: ami-4877fd78
+      :pe: ami-4a77fd7a
     :region: us-west-2
 
   rhel-6-x86-64-west:
     :image: 
-      :pe: ami-4877fd78
+      :pe: ami-5877fd68
     :region: us-west-2
 
   rhel-6-i386-west:
@@ -41,12 +41,12 @@ AMI:
 
   ubuntu-1004-amd64-west:
     :image: 
-      :pe: ami-e27ef4d2
+      :pe: ami-e2c154d2
     :region: us-west-2
 
   ubuntu-1004-i386-west:
     :image: 
-      :pe: ami-e27ef4d2
+      :pe: ami-e6c154d6
     :region: us-west-2
 
   ubuntu-1204-amd64-west:
