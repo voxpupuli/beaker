@@ -26,11 +26,9 @@ if options[:repo_proxy]
     when host['platform'] =~ /ubuntu/
       on(host, "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi")
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg)
-      on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /debian/
       on(host, "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi")
       create_remote_file(host, '/etc/apt/apt.conf', aptcfg)
-      on(host, "apt-get -y -f -m update")
     when host['platform'] =~ /solaris-11/
       on(host,"/usr/bin/pkg unset-publisher solaris || :")
       on(host,"/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo)
@@ -53,5 +51,11 @@ if options[:extra_repos]
     else
       logger.debug "#{host}: package repo configuration not modified"
     end
+  end
+end
+
+hosts.each do |host|
+  if host['platform'] =~ /ubuntu|debian/
+    on(host, "apt-get -y -f -m update")
   end
 end
