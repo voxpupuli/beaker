@@ -11,7 +11,7 @@ AMI:
 
   centos-6-x86-64-west:
     :image: 
-      :pe: ami-a077fd90
+      :pe: ami-26f36616
     :region: us-west-2
 
   centos-6-i386-west:
@@ -21,22 +21,22 @@ AMI:
 
   rhel-5-x86-64-west:
     :image: 
-      :pe: ami-4877fd78
+      :pe: ami-9cf366ac
     :region: us-west-2
 
   rhel-5-i386-west:
     :image: 
-      :pe: ami-4a77fd7a
+      :pe: ami-9ef366ae
     :region: us-west-2
 
   rhel-6-x86-64-west:
     :image: 
-      :pe: ami-46ce5b76
+      :pe: ami-acf3669c
     :region: us-west-2
 
   rhel-6-i386-west:
     :image: 
-      :pe: ami-94cb5ea4
+      :pe: ami-92f366a2
     :region: us-west-2
 
   ubuntu-1004-amd64-west:
@@ -71,12 +71,12 @@ AMI:
 
   sles-11-x86-64-west:
     :image: 
-      :pe: ami-a075ff90
+      :pe: ami-3ef2670e
     :region: us-west-2
 
   sles-11-i386-west:
     :image: 
-      :pe: ami-fa75ffca
+      :pe: ami-38f26708
     :region: us-west-2
 
   amazon-6-x86_64:
