@@ -63,6 +63,7 @@ q_puppet_enterpriseconsole_master_hostname=MASTER
 q_puppet_enterpriseconsole_inventory_certname=`uname | grep -i sunos > /dev/null && hostname || hostname -s`
 q_puppet_enterpriseconsole_inventory_dnsaltnames=MASTER
 ] + %Q[
+q_puppet_enterpriseconsole_auth_user='#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com'}'
 q_puppet_enterpriseconsole_auth_user_email='#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com'}'
 q_puppet_enterpriseconsole_httpd_port=#{portno}
 q_puppet_enterpriseconsole_smtp_host='#{ENV['q_puppet_enterpriseconsole_smtp_host'] || 'DASHBOARD'}'
@@ -86,6 +87,7 @@ q_puppet_enterpriseconsole_auth_database_name='console_auth'
 q_puppet_enterpriseconsole_auth_database_password='puppet'
 q_puppet_enterpriseconsole_auth_database_user='auth_user'
 q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || 'puppetized'}'
+q_puppet_enterpriseconsole_auth_user='#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com'}'
 q_puppet_enterpriseconsole_auth_user_email='#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com' }'
 q_puppet_enterpriseconsole_setup_auth_db='y'
 q_puppet_enterpriseconsole_smtp_host='#{ENV['q_puppet_enterpriseconsole_smtp_host'] || 'smtp.gmail.com' }'
