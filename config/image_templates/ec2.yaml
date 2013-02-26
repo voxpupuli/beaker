@@ -11,7 +11,7 @@ AMI:
 
   centos-6-x86-64-west:
     :image: 
-      :pe: ami-26f36616
+      :pe: ami-42fb6e72
     :region: us-west-2
 
   centos-6-i386-west:
