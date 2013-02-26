@@ -17,7 +17,7 @@ hosts.each do |host|
   platform = host['platform']
 
   step "Pre Test Setup -- clean up /tmp"
-  on host,"rm -f /tmp/*.tar ; rm -f /tmp/*.gz", :acceptable_exit_codes => (0..255)
+  on host,"rm -rf /tmp/puppet-enterprise-*", :acceptable_exit_codes => (0..255)
 
   host['dist'] = "puppet-enterprise-#{version}-#{platform}"
 
