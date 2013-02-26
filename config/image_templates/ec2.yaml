@@ -76,7 +76,7 @@ AMI:
 
   sles-11-i386-west:
     :image: 
-      :pe: ami-38f26708
+      :pe: ami-aef2679e
     :region: us-west-2
 
   amazon-6-x86_64:
