@@ -164,15 +164,13 @@ module PuppetAcceptance
         end
       end
 
-      on host, puppet_master('--configprint pidfile')
-
-      pidfile = stdout.chomp
-
-      start_puppet_master(host, args, pidfile)
-
-      yield if block
-    ensure
-      stop_puppet_master(host, pidfile)
+      pidfile = on(host, puppet_master('--configprint pidfile')).stdout.chomp
+      begin
+        start_puppet_master(host, args, pidfile)
+        yield if block
+      ensure
+        stop_puppet_master(host, pidfile)
+      end
     end
 
     def start_puppet_master(host, args, pidfile)
