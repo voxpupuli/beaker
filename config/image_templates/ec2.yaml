@@ -103,8 +103,8 @@ AMI:
 
   el-5-x86_64-west:
     :image:
-      :pe: ami-4433bf74
-      :foss: ami-4433bf74
+      :pe: ami-4a6df87a
+      :foss: ami-4a6df87a
     :region: us-west-2
 
   ubuntu-10.04-amd64-west:
