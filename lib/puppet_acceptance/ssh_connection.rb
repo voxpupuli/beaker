@@ -1,6 +1,15 @@
 module PuppetAcceptance
   class SshConnection
 
+    RETRYABLE_EXCEPTIONS = [
+      SocketError,
+      Timeout::Error,
+      Errno::ETIMEDOUT,
+      Errno::EHOSTDOWN,
+      Errno::EHOSTUNREACH,
+      Errno::ECONNREFUSED,
+    ]
+
     def initialize hostname, user = nil, options = {}
       @hostname = hostname
       @user = user
@@ -19,9 +28,9 @@ module PuppetAcceptance
       wait = 1
       @ssh ||= begin
                  Net::SSH.start(@hostname, @user, @options)
-               rescue
+               rescue *RETRYABLE_EXCEPTIONS => e
                  if try <= 11
-                   puts "Try #{try} -- Host Unreachable"
+                   puts "Try #{try} -- Host Unreachable: #{e.message}"
                    puts "Trying again in #{wait} seconds"
                    sleep wait
                    (last_wait, wait) = wait, last_wait + wait
@@ -32,6 +41,8 @@ module PuppetAcceptance
                    puts "Failed to connect to #{@hostname}"
                    raise
                  end
+               rescue Net::SSH::AuthenticationFailed => e
+                 raise "Unable to authenticate to #{@hostname} with user #{e.message.inspect}"
                end
       self
     end
