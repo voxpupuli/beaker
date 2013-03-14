@@ -8,6 +8,7 @@ module PuppetAcceptance
       Errno::EHOSTDOWN,
       Errno::EHOSTUNREACH,
       Errno::ECONNREFUSED,
+      Errno::ENETUNREACH,
     ]
 
     def initialize hostname, user = nil, options = {}
