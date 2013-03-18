@@ -8,6 +8,7 @@ module PuppetAcceptance
       Errno::EHOSTDOWN,
       Errno::EHOSTUNREACH,
       Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
       Errno::ENETUNREACH,
     ]
 
