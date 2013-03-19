@@ -5,6 +5,8 @@ agents.each do |agent|
 
   if agent['platform'].include?('solaris')
     on(agent, '/usr/sbin/svcadm disable -s svc:/network/puppetagent:default')
+  elsif agent['platform'].include?('aix')
+    on(agent, '/usr/bin/stopsrc -s pe-puppet')
   elsif agent['platform'].include?('debian') or agent['platform'].include?('ubuntu')
     on(agent, '/etc/init.d/pe-puppet-agent stop')
   elsif agent['platform'].include?('windows')
