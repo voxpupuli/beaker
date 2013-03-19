@@ -110,7 +110,7 @@ hosts.each do |host|
   case host['platform']
   when /debian|ubuntu/
     cmd = 'dpkg -l pe-rubygem-stomp'
-  when /el-|sles/
+  when /el-|sles|aix/
     cmd = 'rpm -q pe-rubygem-stomp'
   when /solaris/
     cmd = 'pkginfo -x PUPstomp'
