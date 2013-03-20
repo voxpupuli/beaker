@@ -1,8 +1,13 @@
-require File.expand_path(File.join(File.dirname(__FILE__), 'dsl', 'wrappers'))
+%w(command ssh_connection).each do |lib|
+  begin
+    require "puppet_acceptance/#{lib}"
+  rescue LoadError
+    require File.expand_path(File.join(File.dirname(__FILE__), lib))
+  end
+end
 
 module PuppetAcceptance
   class Host
-    include PuppetAcceptance::DSL::Wrappers
 
     # This class providers array syntax for using puppet --configprint on a host
     class PuppetConfigReader
@@ -51,7 +56,7 @@ module PuppetAcceptance
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = exec puppet_agent("--configprint node_name_value")
+      result = exec( Command.new( 'puppet agent --configprint node_name_value' ) )
       result.stdout.chomp
     end
 

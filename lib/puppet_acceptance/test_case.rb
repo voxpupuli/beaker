@@ -1,3 +1,17 @@
+%w( host dsl ).each do |lib|
+  begin
+    require "puppet_acceptance/#{lib}"
+  rescue LoadError
+    require File.expand_path(File.join(File.dirname(__FILE__), lib))
+  end
+end
+
+require 'tempfile'
+require 'benchmark'
+require 'stringio'
+require 'rbconfig'
+require 'test/unit'
+
 module PuppetAcceptance
   # This class represents a single test case. A test case is necessarily
   # contained all in one file though may have multiple dependent examples.
@@ -10,13 +24,6 @@ module PuppetAcceptance
   # See {PuppetAcceptance::DSL} for more information about writing tests
   # using the DSL.
   class TestCase
-    require File.expand_path(File.join(File.dirname(__FILE__), 'host'))
-    require 'tempfile'
-    require 'benchmark'
-    require 'stringio'
-    require 'rbconfig'
-    require 'test/unit'
-
     include PuppetAcceptance::DSL
 
     rb_config_class = defined?(RbConfig) ? RbConfig : Config

@@ -14,7 +14,7 @@ module PuppetAcceptance
       @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
 
       if (@options[:helper])
-        require @options[:helper]
+        require File.expand_path(@options[:helper])
       end
 
       @hosts =  []
