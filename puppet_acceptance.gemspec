@@ -2,6 +2,7 @@
 $:.push File.expand_path("../lib", __FILE__)
 require 'rbconfig'
 ruby_conf = defined?(RbConfig) ? RbConfig::CONFIG : Config::CONFIG
+less_than_one_nine = ruby_conf['MAJOR'].to_i == 1 && ruby_conf['MINOR'].to_i < 9
 
 Gem::Specification.new do |s|
   s.name        = "puppet_acceptance"
@@ -21,12 +22,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '2.11.0'
   s.add_development_dependency 'fakefs', '0.4'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'simplecov' unless ruby_conf['MAJOR'].to_i == 1 &&
-    ruby_conf['MINOR'].to_i < 9
+  s.add_development_dependency 'simplecov' unless less_than_one_nine
 
   # Documentation dependencies
   s.add_development_dependency 'yard'
-  s.add_development_dependency 'markdown'
+  s.add_development_dependency 'markdown' unless less_than_one_nine
   s.add_development_dependency 'thin'
 
   # Run time dependencies
