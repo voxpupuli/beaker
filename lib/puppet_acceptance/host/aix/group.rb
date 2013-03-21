@@ -21,7 +21,7 @@ module Aix::Group
     execute("lsgroup -a id #{name}") do |result|
       # Format is:
       # staff id=500
-      result.stdout.split('=').last
+      result.stdout.split('=').last.strip
     end
   end
 
