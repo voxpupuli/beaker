@@ -280,7 +280,14 @@ test_name "Revert VMs" do
     rescue Fog::Errors::Error => ex
       fleet_retries += 1
       if fleet_retries <= 3
-        logger.notify("Sleeping and retrying Fog fleet.start due to Fog::Errors::Error (#{ex.message}), retry attempt #{fleet_retries}.")
+        sleep_time = rand(10) + 10
+        logger.notify("Calling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start due to Fog::Errors::Error (#{ex.message}), retry attempt #{fleet_retries}.")
+        begin
+          timeout(30) do
+            fleet.destroy
+          end
+        rescue
+        end
         sleep rand(20)
         retry
       else
