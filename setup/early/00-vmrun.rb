@@ -272,7 +272,22 @@ test_name "Revert VMs" do
       end
     end
 
-    fleet.start
+    # Attempt to start the fleet, we wrap it with some error handling that deals
+    # with generic Fog errors and retrying in case these errors are transient.
+    fleet_retries = 0
+    begin
+      fleet.start
+    rescue Fog::Errors::Error => ex
+      fleet_retries += 1
+      if fleet_retries <= 3
+        logger.notify("Sleeping and retrying Fog fleet.start due to Fog::Errors::Error (#{ex.message}), retry attempt #{fleet_retries}.")
+        sleep rand(20)
+        retry
+      else
+        logger.error("Retried Fog #{fleet_retries} times, giving up and throwing the exception")
+        raise ex
+      end
+    end
 
     # Configure our nodes to match the blimp fleet
     # Also generate hosts entries for the fleet, since we're iterating
