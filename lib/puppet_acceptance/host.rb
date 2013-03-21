@@ -4,6 +4,19 @@ module PuppetAcceptance
   class Host
     include PuppetCommands
 
+    # This class providers array syntax for using puppet --configprint on a host
+    class PuppetConfigReader
+      def initialize(host, command)
+        @host = host
+        @command = command
+      end
+
+      def [](k)
+        cmd = PuppetCommand.new(@command, "--configprint #{k.to_s}")
+        @host.exec(cmd).stdout.strip
+      end
+    end
+
     def self.create name, options, config
       case config['HOSTS'][name]['platform']
       when /windows/
@@ -40,6 +53,14 @@ module PuppetAcceptance
       #  cause the value to change after it had been cached.
       result = exec puppet_agent("--configprint node_name_value")
       result.stdout.chomp
+    end
+
+    # Returning our PuppetConfigReader here allows users of the Host
+    # class to do things like `host.puppet['vardir']` to query the
+    # 'main' section or, if they want the configuration for a
+    # particular run type, `host.puppet('agent')['vardir']`
+    def puppet(command="")
+      PuppetConfigReader.new(self, command)
     end
 
     def []= k, v
