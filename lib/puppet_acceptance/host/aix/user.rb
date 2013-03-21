@@ -5,7 +5,7 @@ module Aix::User
     execute("lsuser ALL") do |result|
       users = []
       result.stdout.each_line do |line|
-        users << (line.match( /^([^:]+)/) or next)[1]
+        users << line.split(' ')[0]
       end
 
       yield result if block_given?
