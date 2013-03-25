@@ -11,7 +11,7 @@ agents.each do |agent|
     step "Checking if cert issued for #{agent} (#{i})"
 
     # puppet cert --list <IP> fails, so list all
-    agent_regex = Regexp.escape "#{agent.name}"
+    agent_regex = Regexp.escape "+ \"#{agent.name}\""
     break if on(master, puppet("cert --list --all")).stdout =~ /#{agent_regex}/
 
     fail_test("Failed to sign cert for #{agent}") if i == 10
