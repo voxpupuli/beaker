@@ -1,3 +1,5 @@
+require 'semver'
+
 test_name="PE 2.x: Generate Puppet Enterprise answer files"
 
 skip_test "Skipping PE 2.x answers file generation for non PE tests" unless ( options[:type] =~ /pe/ )
@@ -44,13 +46,16 @@ q_puppetmaster_forward_facts=y
 q_puppetmaster_install=y
 ]
 
+# 2.8.1 and newer support spaces in passwords.
+dashboard_password = SemVer.new("2.8.0") < SemVer.new(config['pe_ver']) ? '~!@$%^*-/ aZ' : '~!@$%^*-/aZ'
+
 # Dashboard only answers
 dashboard_a = %Q[
 q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
 q_puppet_enterpriseconsole_auth_database_password='~!@$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
 q_puppet_enterpriseconsole_smtp_user_auth=y
-q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || '~!@$%^*-/ aZ'}'
+q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || dashboard_password}'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
 q_puppet_enterpriseconsole_database_password='~!@$%^*-/aZ'
