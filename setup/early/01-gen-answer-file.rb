@@ -44,13 +44,16 @@ q_puppetmaster_forward_facts=y
 q_puppetmaster_install=y
 ]
 
+# 2.8.1 and newer support spaces in passwords.
+dashboard_password = (config['pe_ver'].to_f >= 2.8 && (not config['pe_ver'].match(/2.8.0/))) ? '~!@$%^*-/ aZ' : '~!@$%^*-/aZ'
+
 # Dashboard only answers
 dashboard_a = %Q[
 q_puppet_enterpriseconsole_auth_database_user='mYu7hu3r'
 q_puppet_enterpriseconsole_auth_database_password='~!@$%^*-/aZ'
 q_puppet_enterpriseconsole_auth_database_name='console_auth'
 q_puppet_enterpriseconsole_smtp_user_auth=y
-q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || '~!@$%^*-/ aZ'}'
+q_puppet_enterpriseconsole_auth_password='#{ENV['q_puppet_enterpriseconsole_auth_password'] || dashboard_password}'
 q_puppet_enterpriseconsole_database_install=y
 q_puppet_enterpriseconsole_database_name='console'
 q_puppet_enterpriseconsole_database_password='~!@$%^*-/aZ'
