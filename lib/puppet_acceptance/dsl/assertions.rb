@@ -14,35 +14,6 @@ module PuppetAcceptance
     # portable and less brittle it is recommended that you pass the result
     # or direct object for asserting against into your assertion.
     #
-    # @example Re-opening the module to create new assertions
-    #     #=> in file my_custom_assertions.rb
-    #     require 'ipaddr'
-    #
-    #     module PuppetAcceptance
-    #       module DSL
-    #         module Assertions
-    #           def assert_ip_in_range(range, addr)
-    #             ip = IPAddr.new(addr)
-    #             ip_range = IPAddr.new(range)
-    #             assert_equal true, ip_range.include?(ip),
-    #               "#{addr} is not in address range #{ip_range}"
-    #           end
-    #         end
-    #       end
-    #     end
-    #
-    # @example Including defined assertions in Test::Unit tests
-    #     require 'puppet_acceptance/dsl'
-    #     require 'my_custom_assertions'
-    #
-    #     class TestMyThings < Test::Unit::TestCase
-    #       include PuppetAcceptance::DSL
-    #
-    #       def test_stuff
-    #         assert_ip_in_range '192.168.2.0/24', '192.168.2.100'
-    #       end
-    #     end
-    #
     module Assertions
       include Test::Unit::Assertions
 

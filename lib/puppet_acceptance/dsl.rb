@@ -11,11 +11,10 @@ module PuppetAcceptance
   # This is a catch all module for including Puppetlabs home grown testing
   # DSL. This module is mixed into {PuppetAcceptance::TestCase} and can be
   # mixed into any test runner by defining the methods that it requires to
-  # interact with. If not all of the functionality is required portions of
-  # the DSL may be mixed into a test runner of your choice by mixing in them.
-  # This also may lessen the number of methods that need to bedefinied.
+  # interact with. If not all of the functionality is required sub modules of
+  # the DSL may be mixed into a test runner of your choice.
   #
-  # Currently the DSL modules require #logger and #hosts defined. #logger
+  # Currently most DSL modules require #logger and #hosts defined. #logger
   # should provided the methods #debug, #warn and #notify and may be a
   # wrapper to any logger you wish (or {PuppetAcceptance::Logger}). #hosts
   # should return an array of objects which conform to the interface defined

@@ -42,31 +42,27 @@ module PuppetAcceptance
     # @param [Hash]   options These are addition options to the command. They
     #                         will be added in "--key=value" after the command
     #                         but before the arguments. There is a special key,
-    #                         'ENV', that will be used as a command option, but
-    #                         instead can be used to set any default
+    #                         'ENV', that won't be used as a command option,
+    #                         but instead can be used to set any default
     #                         environment variables
     #
-    # @example Our most common usage (usually called by {PuppetAcceptance::DSL::Wrappers#puppet})
+    # @example Recommended usage programmatically:
+    #     Command.new('git add', files, :patch => true, 'ENV' => {'PATH' => '/opt/csw/bin'})
     #
-    #     Command.new('puppet', 'agent --test --verbose --foo bar')
-    #
-    # @example Our second most common usage (same source as above)
-    #     Command.new('puppet', 'agent', '--test', '--foo', 'bar')
-    #
-    # @example My favorite
+    # @example My favorite example of a signature that we must maintain
     #     Command.new('puppet', :resource, 'scheduled_task', name,
     #                 [ 'ensure=present',
     #                   'command=c:\\\\windows\\\\system32\\\\notepad2.exe',
     #                   "arguments=args-#{name}" ] )
     #
-    # @note We must support any number of strings or symbols (or arrays of
-    #       strings an symbols) and essentially ensure they are in a flattened
-    #       array, coerced to strings, and call #join(' ') on it. Then it gets
-    #       interesting... We have options for the command line invocation
-    #       that must be turned into '--key=value' and similarly joined as
-    #       well as a hash of environment key value pairs, and finally we
-    #       need a hash of options to control the default envs that are
-    #       included.
+    # @note For backwards compatability we must support any number of strings
+    #       or symbols (or arrays of strings an symbols) and essentially
+    #       ensure they are in a flattened array, coerced to strings, and
+    #       call #join(' ') on it.  We have options for the command line
+    #       invocation that must be turned into '--key=value' and similarly
+    #       joined as well as a hash of environment key value pairs, and
+    #       finally we need a hash of options to control the default envs that
+    #       are included.
     def initialize command, args = [], options = {}
       @command = command
       @options = options
@@ -76,7 +72,7 @@ module PuppetAcceptance
       # option of `--environment`, please use ENV instead.
       if @options[:environment].is_a?(Hash)
         @environment = @options.delete(:environment)
-      elsif @options['ENV'].is_a?(Hash)
+      elsif @options['ENV'].is_a?(Hash) or @options[:ENV].is_a?(Hash)
         @environment = @options.delete('ENV')
       else
         @environment = nil

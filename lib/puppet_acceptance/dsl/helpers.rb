@@ -161,10 +161,9 @@ module PuppetAcceptance
 
       # Limit the hosts a test case is run against
       # @note This will modify the {PuppetAcceptance::TestCase#hosts} member
-      #   in place unless an array of hosts is passed into it.
-      # @note This method relies on {PuppetAcceptance::TestCase#logger}
-      #   yielding an object that responds like
-      #   {PuppetAcceptance::Logger#warn}, as well as
+      #   in place unless an array of hosts is passed into it and
+      #   {PuppetAcceptance::TestCase#logger} yielding an object that responds
+      #   like {PuppetAcceptance::Logger#warn}, as well as
       #   {PuppetAcceptance::DSL::Outcomes#skip_test}, and optionally
       #   {PuppetAcceptance::TestCase#hosts}.
       #
@@ -305,6 +304,7 @@ module PuppetAcceptance
       #     end
       #
       # @api dsl
+      # @!visibility private
       def with_puppet_running_on hosts, mode, config_opts = {}, &block
         if hosts.is_a? Array
           hosts.each do |h|
@@ -473,33 +473,29 @@ module PuppetAcceptance
 #
 # These methods not only rely on PuppetAcceptance::TestCase#on but also rely
 # on several other methods to retrieve collaboration SUTs and the state of
-# previous PuppetAcceptance::TestCase#on results
+# previous PuppetAcceptance::DSL::Helpers#on results
 #
 #############################################################################
 
-      # This method performs the following steps:
-      # 1. issues start command for puppet master on specified host
-      # 2. polls until it determines that the master has started successfully
-      # 3. yields to a block of code passed by the caller
-      # 4. runs a "kill" command on the master's pid (on the specified host)
-      # 5. polls until it determines that the master has shut down successfully.
+      # @note This method performs the following steps:
+      #   1. issues start command for puppet master on specified host
+      #   2. polls until it determines that the master has started successfully
+      #   3. yields to a block of code passed by the caller
+      #   4. runs a "kill" command on the master's pid (on the specified host)
+      #   5. polls until it determines that the master has shut down successfully.
       #
-      # Parameters:
-      # [host] the master host
+      # @param [PuppetAcceptance::Host] host  the master host
+      # @param [String] args                  a string containing all of the
+      #   command line arguments that you would like for the puppet master to be
+      #   started with.  Defaults to '--daemonize'. The following values will
+      #   be added to the argument list if they are not explicitly set in your
+      #   'args' parameter: '--daemonize', '--logdest="puppetvardir/log/puppetmaster.log"',
+      #   '--dns_alt_names="puppet, $(facter hostname), $(puppet fqdn)"'
       #
-      # [args] a string containing all of the command line arguments that you
-      #       would like for the puppet master to be started with.  Defaults
-      #       to '--daemonize'.
-      #       NOTE: the following values will be added to the argument list if
-      #       they are not explicitly set in your 'args' parameter:
-      #   * --daemonize
-      #   * --logdest="#{host['puppetvardir']}/log/puppetmaster.log"
-      #   * --dns_alt_names="puppet, $(facter hostname), $(puppet fqdn)"
-      #
-      # [options] a hash, the only key of which is respected will be:
-      #   :preserve_ssl =>  a boolean, whether or not to keep all hosts puppet
-      #                     ssl directories prior to starting the puppet master,
-      #                     defaults to deleting them.
+      # @param [Hash] options only honors :preserve_ssl
+      # @option options [Bool] :preserve_ssl whether or not to keep all
+      #                                            hosts puppet ssl directories
+      #                                            prior to starting the puppet master.
       #
       # @deprecated
       def with_master_running_on(host, args='--daemonize', options={}, &block)

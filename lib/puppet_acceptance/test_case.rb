@@ -166,7 +166,7 @@ module PuppetAcceptance
     # The TestCase as a hash
     # @api public
     # @note The visibility and semantics of this method are valid, but the
-    # structure of the Hash it returns may change without notice
+    #   structure of the Hash it returns may change without notice
     #
     # @return [Hash] A Hash representation of this test.
     def to_hash
