@@ -137,7 +137,7 @@ module PuppetAcceptance
       raise PendingTest
     end
 
-    def confine(type, criteria = {}, &block)
+    def confine(type, criteria, &block)
       criteria.each_pair do |property, value|
         case type
         when :except
