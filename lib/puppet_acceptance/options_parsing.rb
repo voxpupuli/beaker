@@ -215,13 +215,6 @@ module PuppetAcceptance
           @options[:timesync] = bool
         end
 
-        @defaults[:dhcp_renew] = false
-        opts.on '--[no-]dhcp-renew',
-                'Perform dhcp lease renewal',
-                '(default: false)' do |bool|
-          @options[:dhcp_renew] = bool
-        end
-
         @defaults[:repo_proxy] = false
         opts.on '--repo-proxy',
                 'Configure package system proxy',
