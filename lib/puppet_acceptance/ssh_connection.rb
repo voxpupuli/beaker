@@ -97,7 +97,6 @@ module PuppetAcceptance
         result = try_to_execute(command, options, stdout_callback, stderr_callback)
       rescue *RETRYABLE_EXCEPTIONS => e
         puts "Command execution failed, attempting to reconnect to #{@hostname}"
-        stop_execution
         close
         connect 
         retry
