@@ -92,14 +92,19 @@ module PuppetAcceptance
 
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
-
+      attempt = true
       begin
         result = try_to_execute(command, options, stdout_callback, stderr_callback)
       rescue *RETRYABLE_EXCEPTIONS => e
-        puts "Command execution failed, attempting to reconnect to #{@hostname}"
-        close
-        connect 
-        retry
+        if attempt
+          attempt = false
+          puts "Command execution failed, attempting to reconnect to #{@hostname}"
+          close
+          connect 
+          retry
+        else
+          raise
+        end
       end
 
       result
