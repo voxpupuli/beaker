@@ -10,6 +10,7 @@ module PuppetAcceptance
       Errno::ECONNREFUSED,
       Errno::ECONNRESET,
       Errno::ENETUNREACH,
+      Net::SSH::Disconnect
     ]
 
     def initialize hostname, user = nil, options = {}
@@ -50,10 +51,15 @@ module PuppetAcceptance
     end
 
     def close
-      @ssh.close if @ssh
+      begin
+        @ssh.close if @ssh
+      rescue
+        @ssh.shutdown! 
+      end
+      @ssh = nil
     end
 
-    def execute command, options = {}, stdout_callback = nil,
+    def try_to_execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
 
       result = Result.new(@hostname, command)
@@ -81,6 +87,26 @@ module PuppetAcceptance
       @ssh.loop
 
       result.finalize!
+      result
+    end
+
+    def execute command, options = {}, stdout_callback = nil,
+                stderr_callback = stdout_callback
+      attempt = true
+      begin
+        result = try_to_execute(command, options, stdout_callback, stderr_callback)
+      rescue *RETRYABLE_EXCEPTIONS => e
+        if attempt
+          attempt = false
+          puts "Command execution failed, attempting to reconnect to #{@hostname}"
+          close
+          connect 
+          retry
+        else
+          raise
+        end
+      end
+
       result
     end
 
