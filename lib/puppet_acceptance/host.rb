@@ -1,8 +1,13 @@
-require File.expand_path(File.join(File.dirname(__FILE__), 'puppet_commands'))
+%w(command ssh_connection).each do |lib|
+  begin
+    require "puppet_acceptance/#{lib}"
+  rescue LoadError
+    require File.expand_path(File.join(File.dirname(__FILE__), lib))
+  end
+end
 
 module PuppetAcceptance
   class Host
-    include PuppetCommands
 
     # This class providers array syntax for using puppet --configprint on a host
     class PuppetConfigReader
@@ -51,7 +56,7 @@ module PuppetAcceptance
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = exec puppet_agent("--configprint node_name_value")
+      result = exec( Command.new( 'puppet agent --configprint node_name_value' ) )
       result.stdout.chomp
     end
 
@@ -101,9 +106,12 @@ module PuppetAcceptance
       # I've always found this confusing
       cmdline = command.cmd_line(self)
 
-      @logger.debug "\n#{self} $ #{cmdline}" unless options[:silent]
-
-      output_callback = logger.method(:host_output)
+      if options[:silent]
+        output_callback = nil
+      else
+        @logger.debug "\n#{self} $ #{cmdline}"
+        output_callback = logger.method(:host_output)
+      end
 
       unless $dry_run
         # is this returning a result object?

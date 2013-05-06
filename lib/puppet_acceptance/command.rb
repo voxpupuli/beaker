@@ -1,110 +1,242 @@
 module PuppetAcceptance
-  # An immutable data structure representing a task to run on a remote
-  # machine.
+  # An object that represents a "command" on a remote host. Is responsible
+  # for munging the environment correctly. Probably poorly named.
+  #
+  # @api public
   class Command
-    include Test::Unit::Assertions
 
-    def initialize(command_string, options={})
-      @command_string = command_string
+    DEFAULT_GIT_RUBYLIB = {
+      :default => [],
+      :host => %w(hieralibdir hierapuppetlibdir
+                  pluginlibpath puppetlibdir
+                  facterlibdir),
+      :opts => { :additive => true, :separator => ':' }
+    }
+
+    DEFAULT_GIT_PATH = {
+      :default => [],
+      :host => %w(puppetbindir facterbindir hierabindir),
+      :opts => {
+        :additive => true,
+        :separator => {:host => 'pathseparator'}
+      }
+    }
+
+    DEFAULT_GIT_ENV = { :PATH => DEFAULT_GIT_PATH, :RUBYLIB => DEFAULT_GIT_RUBYLIB }
+
+    # A string representing the (possibly) incomplete command
+    attr_accessor :command
+
+    # A hash key-values where the keys are environment variables to be set
+    attr_accessor :environment
+
+    # A hash of options. Keys with values of nil are considered flags
+    attr_accessor :options
+
+    # An array of additional arguments to be supplied to the command
+    attr_accessor :args
+
+    # @param [String] command The program to call, either an absolute path
+    #                         or one in the PATH (can be overridden)
+    # @param [Array]  args    These are addition arguments to the command
+    # @param [Hash]   options These are addition options to the command. They
+    #                         will be added in "--key=value" after the command
+    #                         but before the arguments. There is a special key,
+    #                         'ENV', that won't be used as a command option,
+    #                         but instead can be used to set any default
+    #                         environment variables
+    #
+    # @example Recommended usage programmatically:
+    #     Command.new('git add', files, :patch => true, 'ENV' => {'PATH' => '/opt/csw/bin'})
+    #
+    # @example My favorite example of a signature that we must maintain
+    #     Command.new('puppet', :resource, 'scheduled_task', name,
+    #                 [ 'ensure=present',
+    #                   'command=c:\\\\windows\\\\system32\\\\notepad2.exe',
+    #                   "arguments=args-#{name}" ] )
+    #
+    # @note For backwards compatability we must support any number of strings
+    #       or symbols (or arrays of strings an symbols) and essentially
+    #       ensure they are in a flattened array, coerced to strings, and
+    #       call #join(' ') on it.  We have options for the command line
+    #       invocation that must be turned into '--key=value' and similarly
+    #       joined as well as a hash of environment key value pairs, and
+    #       finally we need a hash of options to control the default envs that
+    #       are included.
+    def initialize command, args = [], options = {}
+      @command = command
       @options = options
+      @args    = args
+
+      # this is deprecated and will not allow you to use a command line
+      # option of `--environment`, please use ENV instead.
+      if @options[:environment].is_a?(Hash)
+        @environment = @options.delete(:environment)
+      elsif @options['ENV'].is_a?(Hash) or @options[:ENV].is_a?(Hash)
+        @environment = @options.delete('ENV')
+      else
+        @environment = nil
+      end
     end
 
-    # host_info is a hash-like object that can be queried to figure out
-    # properties of the host.
-    def cmd_line(host_info)
-      @command_string
+    # @param [Host]   host An object that implements {PuppetAcceptance::Host}'s
+    #                      interface.
+    # @param [String] cmd  An command to call.
+    # @param [Hash]   env  An optional hash of environment variables to be used
+    #
+    # @return [String] This returns the fully formed command line invocation.
+    def cmd_line host, cmd = @command, env = @environment
+      env_string = env.nil? ? '' : environment_string_for( host, env )
+
+      # This will cause things like `puppet -t -v agent` which is maybe bad.
+      "#{env_string} #{cmd} #{options_string} #{args_string}"
     end
 
-    # Determine the appropriate puppet env command for the given host.
-    # parameters:
-    # [host_info] a Hash containing info about the host
-    # [environment] an optional Hash containing key-value pairs to be treated as environment variables that should be
-    #     set for the duration of the puppet command.
-    def puppet_env_command(host_info, environment = {})
-      rubylib = [
-        host_info['hieralibdir'],
-        host_info['hierapuppetlibdir'],
-        host_info['pluginlibpath'],
-        host_info['puppetlibdir'],
-        host_info['facterlibdir'],
-        '$RUBYLIB'
-      ].compact.join(host_info['pathseparator'])
+    # @param [Hash] options These are the options that the command takes
+    #
+    # @return [String] String of the options and flags for command.
+    #
+    # @note Why no. Not the least bit Unixy, why do you ask?
+    def options_string opts = @options
+      flags = []
+      options = opts.dup
+      options.each_key do |key|
+        if options[key] == nil
+          flags << key
+          options.delete(key)
+        end
+      end
 
-      # Always use colon for PATH, even Windows
-      path = [
-        host_info['puppetbindir'],
-        host_info['facterbindir'],
-        host_info['hierabindir'],
-        '$PATH'
-      ].compact.join(':')
+      short_flags, long_flags = flags.partition {|flag| flag.to_s.length == 1 }
+      parsed_short_flags = short_flags.map {|f| "-#{f}" }
+      parsed_long_flags = long_flags.map {|f| "--#{f}" }
 
-      cmd = host_info['platform'] =~ /windows/ ? 'cmd.exe /c' : ''
+      short_opts, long_opts = {}, {}
+      options.each_key do |key|
+        if key.to_s.length == 1
+          short_opts[key] = options[key]
+        else
+          long_opts[key] = options[key]
+        end
+      end
+      parsed_short_opts = short_opts.map {|k,v| "-#{k}=#{v}" }
+      parsed_long_opts = long_opts.map {|k,v| "--#{k}=#{v}" }
 
-      # if the caller passed in an "environment" hash, we need to build up a string of the form " KEY1=VAL1 KEY2=VAL2"
-      # containing all of the specified environment vars.  We prefix it with a space because we will insert it into
-      # the broader command below
-      environment_vars_string = environment.nil? ? "" :
-          " %s" % environment.collect { |key, val| "#{key}=#{val}" } .join(" ")
+      return (parsed_short_flags +
+              parsed_long_flags +
+              parsed_short_opts + parsed_long_opts).join(' ')
+    end
 
-      # build up the actual command, prefixed with the RUBYLIB and PATH environment vars, plus our string containing
-      # additional environment variables (which may be an empty string)
-      %Q{env RUBYLIB="#{rubylib}" PATH="#{path}"#{environment_vars_string} #{cmd}}
+    # @param [Array] args An array of arguments to the command.
+    #
+    # @return [String] String of the arguments for command.
+    def args_string args = @args
+      args.flatten.compact.join(' ')
+    end
+
+    # Determine the appropriate env commands for the given host.
+    #
+    # @param [Host]                 host  A Host object
+    # @param [Hash{String=>String}] env   An optional Hash containing
+    #                                     key-value pairs to be treated
+    #                                     as environment variables that
+    #                                     should be set for the duration
+    #                                     of the puppet command.
+    #
+    # @return [String] Returns a string containing command line arguments that
+    #                  will ensure the environment is correctly set for the
+    #                  given host.
+    #
+    # @note I dislike the principle of this method. There is host specific
+    #       knowledge contained here. Really the relationship should be
+    #       reversed where a host is asked for an appropriate Command when
+    #       given a generic Command.
+    def environment_string_for host, env = {}
+      return '' if env.empty?
+
+      env_array = parse_env_hash_for( host, env ).compact
+
+      # cygwin-ism
+      cmd = host['platform'] =~ /windows/ ? 'cmd.exe /c' : nil
+      env_array << cmd if cmd
+
+      environment_string = env_array.join(' ')
+
+      "env #{environment_string}"
+    end
+
+    # @!visibility private
+    def parse_env_hash_for( host, env = @environment )
+      # I needlessly love inject
+      env.inject([]) do |array_of_parsed_vars, key_and_value|
+        variable, val_in_unknown_format = *key_and_value
+        if val_in_unknown_format.is_a?(Hash)
+          value = val_in_unknown_format
+        elsif val_in_unknown_format.is_a?(Array)
+          value = { :default => val_in_unknown_format }
+        else
+          value = { :default => [ val_in_unknown_format.to_s ] }
+        end
+
+        var_settings = ensure_correct_structure_for( value )
+        # any default array of variable values ( like [ '/bin', '/usr/bin' ] for PATH )
+        default_values = var_settings[:default]
+
+        # host specific values, ie :host => [ 'puppetlibdir' ] is evaluated to
+        # an array with whatever host['puppetlibdir'] is
+        host_values = var_settings[:host].map { |attr| host[attr] }
+
+        # the two arrays are combined with host specific values first
+        var_array = ( host_values + default_values ).compact
+
+        # This will add the name of the variable, so :PATH => { ... }
+        # gets '${PATH}' appended to it if the :additive opt is passed
+        var_array << "${#{variable}}" if var_settings[:opts][:additive]
+
+        # This is stupid, but because we're using cygwin we sometimes need to use
+        # ':' and sometimes ';' on windows as a separator
+        attr_string = join_env_vars_for( var_array, host, var_settings[:opts][:separator] )
+        var_string = attr_string.empty? ? nil : %Q[#{variable}="#{attr_string}"]
+
+        # Now we append this to our accumulator array ie [ 'RUBYLIB=....', 'PATH=....' ]
+        array_of_parsed_vars << var_string
+
+        array_of_parsed_vars
+      end
+    end
+
+    # @!visibility private
+    def ensure_correct_structure_for( settings )
+      structure = { :default => [],
+        :host => [],
+        :opts => {}
+      }.merge( settings )
+      structure[:opts][:separator] ||= ':'
+      structure
+    end
+
+    # @!visibility private
+    def join_env_vars_for( array_of_variables, host, separator = ':' )
+      if separator.is_a?( Hash )
+        separator = host[separator[:host]]
+      end
+      array_of_variables.join( separator )
     end
   end
 
   class PuppetCommand < Command
-    def initialize(sub_command, *args)
-      @sub_command = sub_command
-      @options = args.last.is_a?(Hash) ? args.pop : {}
-
-      # Not at all happy with this implementation, but it was the path of least resistance for the moment.
-      # This constructor already does a little "magic" by allowing the final value in the *args Array to
-      # be a Hash, which will be treated specially: popped from the regular args list and assigned to @options,
-      # where it will later be used to add extra command line args to the puppet command (--key=value).
-      #
-      # Here we take this one step further--if the @options hash is passed in, we check and see if it has the
-      # special key :environment in it.  If it does, then we'll pull that out of the options hash and treat
-      # it specially too; we'll use it to set additional environment variables for the duration of the puppet
-      # command.
-      @environment = @options.has_key?(:environment) ? @options.delete(:environment) : nil
-      # Dom: commenting these lines addressed bug #6920
-      # @options[:vardir] ||= '/tmp'
-      # @options[:confdir] ||= '/tmp'
-      # @options[:ssldir] ||= '/tmp'
-      @args = args
-    end
-
-    def cmd_line(host)
-      args_string = (@args + @options.map { |key, value| "--#{key}=#{value}" }).join(' ')
-      "#{puppet_env_command(host, @environment)} puppet #{@sub_command} #{args_string}"
-    end
-  end
-
-  class FacterCommand < Command
-    def initialize(*args)
-      @args = args
-    end
-
-    def cmd_line(host)
-      args_string = @args.join(' ')
-      "#{puppet_env_command(host)} facter #{args_string}"
-    end
-  end
-
-  class HieraCommand < Command
-    def initialize(*args)
-      @args = args
-    end
-
-    def cmd_line(host)
-      args_string = @args.join(' ')
-      "#{puppet_env_command(host)} hiera #{args_string}"
+    def initialize *args
+      command = "puppet #{args.shift}"
+      opts = args.last.is_a?(Hash) ? args.pop : Hash.new
+      opts['ENV'] ||= Hash.new
+      opts['ENV'] = opts['ENV'].merge( DEFAULT_GIT_ENV )
+      super( command, args, opts )
     end
   end
 
   class HostCommand < Command
-    def cmd_line(host)
-      eval "\"#{@command_string}\""
+    def cmd_line host
+      eval "\"#{@command}\""
     end
   end
 end

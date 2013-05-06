@@ -1,3 +1,7 @@
+require 'socket'
+require 'timeout'
+require 'net/scp'
+
 module PuppetAcceptance
   class SshConnection
 

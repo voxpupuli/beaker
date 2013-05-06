@@ -1,4 +1,5 @@
 require 'open-uri'
+require 'yaml'
 
 module PuppetAcceptance
   # Config was taken by Ruby.

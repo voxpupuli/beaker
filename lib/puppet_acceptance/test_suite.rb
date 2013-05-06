@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
+require 'fileutils'
+%w(test_case logger).each do |lib|
+  begin
+    require "puppet_acceptance/#{lib}"
+  rescue LoadError
+    require File.expand_path(File.join(File.dirname(__FILE__), lib))
+  end
+end
 
 module PuppetAcceptance
   # This Class is in need of some cleaning up beyond what can be quickly done.

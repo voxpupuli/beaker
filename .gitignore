@@ -7,3 +7,11 @@ pkg
 Gemfile.lock
 options.rb
 test.cfg
+.yardoc
+coverage
+.bundle
+.vendor
+_vendor
+!tmp/README
+tmp/*
+doc
