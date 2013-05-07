@@ -47,7 +47,11 @@ module PuppetAcceptance
                 'MANDATORY',
                 'Select testing scenario type',
                 '(eg. pe, git)' do |type|
-          unless File.directory?("setup/#{type}") then
+          setupdir = File.expand_path(
+                       File.join(
+                         File.dirname(__FILE__), '..', '..', 'setup', type))
+
+          unless File.directory?(setupdir) then
             raise "Sorry, #{type} is not a known setup type!"
             exit 1
           end
