@@ -3,8 +3,10 @@ test_name "Remove acceptance VMs" do
   virtual_machines = {}
   hosts.each do |host|
     hypervisor = host['hypervisor'] || options[:vmrun]
-    virtual_machines[hypervisor] ||= []
-    virtual_machines[hypervisor] << host
+    if hypervisor
+      virtual_machines[hypervisor] ||= []
+      virtual_machines[hypervisor] << host
+    end
   end
 
   if options[:preserve_hosts]
