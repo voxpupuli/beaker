@@ -76,6 +76,10 @@ module PuppetAcceptance
       @defaults[k]
     end
 
+    def has_key? k
+      @defaults.has_key?(k)
+    end
+
     def to_str
       @name
     end

@@ -1,11 +1,14 @@
 test_name "Revert VMs" do
 
+  #check to see if we are running with --no-revert
+  skip_test 'Running with --no-revert, will not revert vms'  unless options[:revert]
+
   #check to see if there are any specified hypervisors/snapshots
   VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion']
   virtual_machines = {}
   hosts.each do |host|
     hypervisor = host['hypervisor'] || options[:vmrun]
-    if hypervisor
+    if hypervisor && (host.has_key?('revert') ? host['revert'] : true) #obey config file revert, defaults to reverting vms
       fail_test "Invalid hypervisor: #{hypervisor} (#{host})" unless VMRUN_TYPES.include? hypervisor
       logger.debug "Hypervisor for #{host} is #{host['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
       virtual_machines[hypervisor] = [] unless virtual_machines[hypervisor]
