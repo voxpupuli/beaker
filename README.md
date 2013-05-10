@@ -87,6 +87,8 @@ You may mix and match hypervisors as needed. The `systest.rb` script takes
 `--vmrun HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
 `--vmrun` will be the default value and you may override hypervisors on a per
 host basis in config file. Default behavior for vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
+`--revert` indicates that you want to revert VMs to snapshot before test execution, defaults to true.  Use `--no-revert` to skip reverting before test execution.
+
 
 For example:
 
@@ -100,6 +102,7 @@ For example:
       hypervisor: fusion
       fission:
         snapshot: foss
+      revert: false
     shared-host-in-the-cloud:
       roles:
         - agent
