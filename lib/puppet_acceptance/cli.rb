@@ -60,37 +60,17 @@ module PuppetAcceptance
       if @options[:noinstall]
         setup_opts = @options.merge({
           :random => false,
-          :tests  => ["#{puppet_acceptance_setup}/early",
-                      "#{puppet_acceptance_setup}/post"] })
+          :tests  => ["#{puppet_acceptance_setup}/early" ] })
 
       elsif @options[:upgrade]
         setup_opts = @options.merge({
           :random => false,
           :tests  => ["#{puppet_acceptance_setup}/early",
-                      "#{puppet_acceptance_setup}/pe_upgrade",
-                      "#{puppet_acceptance_setup}/post"] })
-
-      elsif @options[:type] == 'cp_pe'
-        setup_opts = @options.merge({
-          :random => false,
-          :tests => ["#{puppet_acceptance_setup}/early/01-vmrun.rb",
-                     "#{puppet_acceptance_setup}/cp_pe"] })
-
-      elsif @options[:type] == 'pe_aws'
-        setup_opts = @options.merge({
-          :random => false,
-          :tests => ["#{puppet_acceptance_setup}/pe_aws"] })
-
-      elsif @options[:uninstall]
-        setup_opts = @options.merge({
-          :random => false,
-          :tests  => ["#{puppet_acceptance_setup}/early",
-                      "#{puppet_acceptance_setup}/pe_uninstall/#{@options[:uninstall]}"] })
+                      "#{puppet_acceptance_setup}/pe_upgrade" ] })
 
       else
         setup_opts = build_suite_options("early")
         setup_opts[:tests] << "#{puppet_acceptance_setup}/#{@options[:type]}"
-        setup_opts[:tests] << "#{puppet_acceptance_setup}/post"
       end
       setup_opts
     end
