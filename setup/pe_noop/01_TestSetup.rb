@@ -1,1 +1,0 @@
-test_name "No-op; user specified that they will handle package installation manually"

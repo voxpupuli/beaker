@@ -73,6 +73,9 @@ module PuppetAcceptance
 
     def is_pe?
       @is_pe ||= @options[:type] =~ /pe/ ? true : false
+      unless ENV['IS_PE'].nil?
+        @is_pe ||= ENV['IS_PE'] == 'true'
+      end
     end
 
     def puppet_enterprise_dir
