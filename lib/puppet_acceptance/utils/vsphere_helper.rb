@@ -132,6 +132,48 @@ class VsphereHelper
     vms
   end
 
+  def find_datastore datastorename
+    datacenter = @connection.serviceInstance.find_datacenter
+    datacenter.find_datastore(datastorename)
+  end
+
+  def find_folder foldername
+    datacenter = @connection.serviceInstance.find_datacenter
+    base = datacenter.vmFolder
+    folders = foldername.split('/')
+    folders.each do |folder|
+      case base
+        when RbVmomi::VIM::Folder
+          base = base.childEntity.find { |f| f.name == folder }
+        else
+          abort "Unexpected object type encountered (#{base.class}) while finding folder"
+      end
+    end
+
+    base
+  end
+
+  def find_pool poolname
+    datacenter = @connection.serviceInstance.find_datacenter
+    base = datacenter.hostFolder
+    pools = poolname.split('/')
+    pools.each do |pool|
+      case base
+        when RbVmomi::VIM::Folder
+          base = base.childEntity.find { |f| f.name == pool }
+        when RbVmomi::VIM::ClusterComputeResource
+          base = base.resourcePool.resourcePool.find { |f| f.name == pool }
+        when RbVmomi::VIM::ResourcePool
+          base = base.resourcePool.find { |f| f.name == pool }
+        else
+          abort "Unexpected object type encountered (#{base.class}) while finding resource pool"
+      end
+    end
+
+    base = base.resourcePool unless base.is_a?(RbVmomi::VIM::ResourcePool) and base.respond_to?(:resourcePool)
+    base
+  end
+
   def get_base_vm_container_from connection
     viewManager = connection.serviceContent.viewManager
     viewManager.CreateContainerView({
