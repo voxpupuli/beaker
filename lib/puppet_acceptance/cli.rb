@@ -36,12 +36,14 @@ module PuppetAcceptance
         begin
           run_suite('acceptance', @options) unless @options[:installonly]
         ensure
-          run_suite('post-suite', post_suite_options)
+          run_suite('post-suite', post_suite_options) unless @options[:fail_mode] == "stop"
         end
 
       ensure
-        run_suite('cleanup', cleanup_options)
-        @hosts.each {|host| host.close }
+        if @options[:fail_mode] != "stop"
+          run_suite('cleanup', cleanup_options)
+          @hosts.each {|host| host.close }
+        end
       end
     end
 

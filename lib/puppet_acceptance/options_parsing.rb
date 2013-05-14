@@ -199,10 +199,13 @@ module PuppetAcceptance
           $dry_run = bool
         end
 
-        @defaults[:fail_fast] = nil
-        opts.on '--fail-fast',
-                'End test run after first failure' do |bool|
-          @options[:fail_fast] = bool
+        @defaults[:fail_mode] = nil
+        opts.on '--fail-mode [MODE]',
+                'How should the harness react to errors/failures',
+                'Possible values:',
+                'fast (skip all subsequent tests, cleanup, exit)',
+                'stop (skip all subsequent tests, do no cleanup, exit immediately)'  do |mode|
+          @options[:fail_mode] = mode
         end
 
         @defaults[:ntpserver] = 'pool.ntp.org'
@@ -339,6 +342,8 @@ module PuppetAcceptance
       @options[:install].compact!
 
       raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
+
+      raise ArgumentError.new("--fail-mode must be one of fast, stop") unless ["fast", "stop", nil].include?(@options[:fail_mode])
 
       @options[:tests] << 'tests' if @options[:tests].empty?
 

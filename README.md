@@ -242,6 +242,13 @@ indicates the version string of the most recent tarball.
 ### Run the tests
     ./systest.rb -c your_config.cfg --type pe -t test_repo/tests --debug
 
+### Failure management
+By default if a test fails the harness will move on and attempt the next test in the suite.  This may be undesirable when debugging.  The harness supports an optional `--fail-mode` to alter the default behavior on failure:
+
+- `fast`: After first failure do not test any subsequent tests in the given suite, simply run cleanup steps and then exit gracefully.  This option short circuits test execution while leaving you with a clean test environment for any follow up testing. 
+
+- `stop`: After first failure do not test any subsequent tests in the given suite, do not run any cleanup steps, exit immediately.  This is useful while testing setup steps or if you plan to revert the test environment before every test.
+
 ## Topic branches, special test repo
     ./systest.rb -c your_cfg.cfg --debug --type git -p 2.7.x -f 1.5.8 -t path-to-your-tests 
 
