@@ -37,7 +37,7 @@ module PuppetAcceptance
                  Net::SSH.start(@hostname, @user, @options)
                rescue *RETRYABLE_EXCEPTIONS => e
                  if try <= 11
-                   puts "Try #{try} -- Host Unreachable: #{e.message}"
+                   puts "Try #{try} -- Host #{@hostname} unreachable: #{e.message}"
                    puts "Trying again in #{wait} seconds"
                    sleep wait
                    (last_wait, wait) = wait, last_wait + wait
