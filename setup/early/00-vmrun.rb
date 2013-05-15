@@ -1,8 +1,22 @@
 test_name "Revert VMs" do
-  skip_test 'vmrun option not specified' unless options[:vmrun]
 
+  #check to see if we are running with --no-revert
+  skip_test 'Running with --no-revert, will not revert vms'  unless options[:revert]
+
+  #check to see if there are any specified hypervisors/snapshots
   VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion']
-  DEFAULT_HYPERVISOR = options[:vmrun]
+  virtual_machines = {}
+  hosts.each do |host|
+    hypervisor = host['hypervisor'] || options[:vmrun]
+    if hypervisor && (host.has_key?('revert') ? host['revert'] : true) #obey config file revert, defaults to reverting vms
+      fail_test "Invalid hypervisor: #{hypervisor} (#{host})" unless VMRUN_TYPES.include? hypervisor
+      logger.debug "Hypervisor for #{host} is #{host['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
+      virtual_machines[hypervisor] = [] unless virtual_machines[hypervisor]
+      virtual_machines[hypervisor] << host
+    end
+  end
+
+  skip_test 'no virtual machines specified' unless virtual_machines
 
   # NOTE: this code is shamelessly stolen from facter's 'domain' fact, but
   # we don't have access to facter at this point in the run.  Also, this
@@ -44,20 +58,11 @@ test_name "Revert VMs" do
     ports
   end
 
-  fail_test "Invalid value for vmrun: #{options[:vmrun]}" unless VMRUN_TYPES.include? DEFAULT_HYPERVISOR
 
   snap = options[:snapshot] || options[:type]
   snap = 'git' if snap == 'gem'  # Sweet, sweet consistency
   snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
   fail_test "You must specifiy a snapshot when using pe_noop" if snap == 'pe_noop'
-
-  virtual_machines = {}
-  hosts.each do |host|
-    hypervisor = host['hypervisor'] || DEFAULT_HYPERVISOR
-    logger.debug "Hypervisor for #{host} is #{host['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
-    virtual_machines[hypervisor] = [] unless virtual_machines[hypervisor]
-    virtual_machines[hypervisor] << host
-  end
 
   if virtual_machines['aix']
     fog_file = nil

@@ -94,6 +94,13 @@ module PuppetAcceptance
           @options[:vmrun] = vm
         end
 
+        @defaults[:revert] = true
+        opts.on '--[no-]revert',
+                'Do not revert vm images before testing',
+                '(default: true)' do |bool|
+          @options[:revert] = bool
+        end
+
         @defaults[:snapshot] = nil
         opts.on '--snapshot NAME',
                 'Specify VM snapshot to revert to' do |snap|
