@@ -14,6 +14,23 @@ module PuppetAcceptance
       value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
     end
 
+    def self.parse_install_options!
+      puppetlabs = 'git://github.com/puppetlabs'
+      @options[:install].map! { |opt|
+        case
+          when opt =~ /PUPPET\//
+            opt = "#{puppetlabs}/puppet.git##{opt.split('/')[1]}"
+          when opt =~ /FACTER\//
+            opt = "#{puppetlabs}/facter.git##{opt.split('/')[1]}"
+          when opt =~ /HIERA\//
+            opt = "#{puppetlabs}/hiera.git##{opt.split('/')[1]}"
+          when opt =~ /HIERA-PUPPET\//
+            opt = "#{puppetlabs}/hiera-puppet.git##{opt.split('/')[1]}"
+        end
+        opt
+      }
+    end
+
     def self.parse_args
       return @options if @options
 
@@ -126,8 +143,10 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
-        opts.on('-i URI', '--install URI',
-                'Install a project repo/app on the SUTs') do |value|
+        opts.on '-i URI', '--install URI',
+                'Install a project repo/app on the SUTs', 
+                'Provide full git URI or use short form KEYWORD/name',
+                'supported keywords: PUPPET, FACTER, HIERA, HIERA-PUPPET' do |value|
           if value.is_a?(Array)
             @options[:install] += value
           elsif value =~ /,/
@@ -135,6 +154,7 @@ module PuppetAcceptance
           else
             @options[:install] << value
           end
+          parse_install_options!
         end
 
         @defaults[:modules] = []
