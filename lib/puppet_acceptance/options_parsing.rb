@@ -17,14 +17,14 @@ module PuppetAcceptance
     def self.parse_install_options!
       puppetlabs = 'git://github.com/puppetlabs'
       @options[:install].map! { |opt|
-        case
-          when opt =~ /PUPPET\//
+        case opt
+          when /PUPPET\//
             opt = "#{puppetlabs}/puppet.git##{opt.split('/')[1]}"
-          when opt =~ /FACTER\//
+          when /FACTER\//
             opt = "#{puppetlabs}/facter.git##{opt.split('/')[1]}"
-          when opt =~ /HIERA\//
+          when /HIERA\//
             opt = "#{puppetlabs}/hiera.git##{opt.split('/')[1]}"
-          when opt =~ /HIERA-PUPPET\//
+          when /HIERA-PUPPET\//
             opt = "#{puppetlabs}/hiera-puppet.git##{opt.split('/')[1]}"
         end
         opt
