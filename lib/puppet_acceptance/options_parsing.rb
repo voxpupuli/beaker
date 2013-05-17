@@ -14,9 +14,9 @@ module PuppetAcceptance
       value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
     end
 
-    def self.parse_install_options!
+    def self.parse_install_options(install_opts)
       puppetlabs = 'git://github.com/puppetlabs'
-      @options[:install].map! { |opt|
+      install_opts.map! { |opt|
         case opt
           when /PUPPET\//
             opt = "#{puppetlabs}/puppet.git##{opt.split('/')[1]}"
@@ -29,6 +29,7 @@ module PuppetAcceptance
         end
         opt
       }
+      install_opts
     end
 
     def self.parse_args
@@ -154,7 +155,7 @@ module PuppetAcceptance
           else
             @options[:install] << value
           end
-          parse_install_options!
+          @options[:install] = parse_install_options(@options[:install])
         end
 
         @defaults[:modules] = []
