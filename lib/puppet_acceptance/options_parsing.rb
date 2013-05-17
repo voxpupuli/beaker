@@ -1,8 +1,13 @@
 module PuppetAcceptance
   class Options
+    GITREPO = 'git://github.com/puppetlabs'
 
     def self.options
       return @options
+    end
+
+    def self.repo?
+      GITREPO
     end
 
     def self.transform_old_packages(name, value)
@@ -10,22 +15,20 @@ module PuppetAcceptance
       # This is why '-' vs '_' as a company policy is important
       # or at least why the lack of it is annoying
       name = name.to_s.gsub(/_/, '-')
-      puppetlabs = 'git://github.com/puppetlabs'
-      value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
+      value =~ /#{name}/ ? value : "#{GITREPO}/#{name}.git##{value}"
     end
 
     def self.parse_install_options(install_opts)
-      puppetlabs = 'git://github.com/puppetlabs'
       install_opts.map! { |opt|
         case opt
-          when /PUPPET\//
-            opt = "#{puppetlabs}/puppet.git##{opt.split('/')[1]}"
-          when /FACTER\//
-            opt = "#{puppetlabs}/facter.git##{opt.split('/')[1]}"
-          when /HIERA\//
-            opt = "#{puppetlabs}/hiera.git##{opt.split('/')[1]}"
-          when /HIERA-PUPPET\//
-            opt = "#{puppetlabs}/hiera-puppet.git##{opt.split('/')[1]}"
+          when /^PUPPET\//
+            opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
+          when /^FACTER\//
+            opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
+          when /^HIERA\//
+            opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
+          when /^HIERA-PUPPET\//
+            opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
         end
         opt
       }
