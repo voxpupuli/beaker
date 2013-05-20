@@ -213,6 +213,10 @@ test_name "Revert VMs" do
                                        '..', '..','lib', 'puppet_acceptance',
                                        'utils', 'vsphere_helper'))
 
+    fail_test('You must specify a datastore for vCloud instances!') unless @config['datastore']
+    fail_test('You must specify a resource pool for vCloud instances!') unless @config['resourcepool']
+    fail_test('You must specify a folder for vCloud instances!') unless @config['folder']
+
     vsphere_credentials = VsphereHelper.load_config
 
     logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
