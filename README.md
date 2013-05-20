@@ -236,6 +236,16 @@ indicates the version string of the most recent tarball.
     <snip>
     puppet-enterprise-2.5.3-ubuntu-12.04-i386.tar.gz
 
+You can also install from git.  Use the `--install` option, which can install puppet along with other infrastructure.  This option supports the following URI formats:
+
+- `PATH`: A full and complete path to a git repository
+
+    	  --install git://github.com/puppetlabs/puppet#stable
+
+- `KEYWORD/name`:  The name of the branch of KEYWORD git repository.  Supported keywords are `PUPPET`, `FACTER`, `HIERA` and `HIERA-PUPPET`. 
+
+    	  --install PUPPET/3.1.0
+
 ### Checkout your tests
     git clone git@github.com:your/test_repo.git
     cd test_repo
