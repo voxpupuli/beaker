@@ -228,7 +228,7 @@ test_name "Revert VMs" do
     start = Time.now
     virtual_machines['vcloud'].each_with_index do |h, i|
       # Generate a randomized hostname
-      o = [('a'..'z'),('0'..'9')].map{|i| i.to_a}.flatten
+      o = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
       h['vmhostname'] = (0...15).map{o[rand(o.length)]}.join
 
       logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template #{h['template']}"
