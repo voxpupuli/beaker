@@ -202,7 +202,7 @@ Example:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
-There are two possible `--vmrun` hypervisor-types, `vsphere` and `vcloud`.
+There are two possible `--vmrun` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
 
 ### `--vmrun vsphere`
 This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
