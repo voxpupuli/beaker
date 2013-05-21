@@ -74,4 +74,39 @@ test_name "Remove acceptance VMs" do
     vsphere_helper.close
 
   end
+
+  if virtual_machines['vcloud'] and not options[:preserve_hosts]
+    require File.expand_path(File.join(File.dirname(__FILE__),
+                                       '..', '..','lib', 'puppet_acceptance',
+                                       'utils', 'vsphere_helper'))
+
+
+    vsphere_credentials = VsphereHelper.load_config
+
+    logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      " with credentials for #{vsphere_credentials[:user]}"
+
+    vsphere_helper = VsphereHelper.new( vsphere_credentials )
+
+    vm_names = virtual_machines['vcloud'].map {|h| h['vmhostname'] || h.name }
+    vms = vsphere_helper.find_vms vm_names
+    vm_names.each do |name|
+      unless vm = vms[name]
+        fail_test("Couldn't find VM #{name} in vSphere!")
+      end
+
+      if vm.runtime.powerState == 'poweredOn'
+        logger.notify "Shutting down #{vm.name}"
+        start = Time.now
+        vm.PowerOffVM_Task.wait_for_completion
+        logger.notify "Spent %.2f seconds halting #{vm.name}" % (Time.now - start)
+      end
+
+      start = Time.now
+      vm.Destroy_Task
+      logger.notify "Spent %.2f seconds destroying #{vm.name}" % (Time.now - start)
+    end
+
+    vsphere_helper.close
+  end
 end

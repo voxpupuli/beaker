@@ -4,7 +4,7 @@ test_name "Revert VMs" do
   skip_test 'Running with --no-revert, will not revert vms'  unless options[:revert]
 
   #check to see if there are any specified hypervisors/snapshots
-  VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion']
+  VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'vcloud', 'fusion']
   virtual_machines = {}
   hosts.each do |host|
     hypervisor = host['hypervisor'] || options[:vmrun]
@@ -203,6 +203,100 @@ test_name "Revert VMs" do
         logger.notify "Spent %.2f seconds booting #{vm.name}" % (Time.now - start)
       end
     end
+
+    vsphere_helper.close
+  end
+
+  if virtual_machines['vcloud']
+    require 'yaml' unless defined?(YAML)
+    require File.expand_path(File.join(File.dirname(__FILE__),
+                                       '..', '..','lib', 'puppet_acceptance',
+                                       'utils', 'vsphere_helper'))
+
+    fail_test('You must specify a datastore for vCloud instances!') unless @config['datastore']
+    fail_test('You must specify a resource pool for vCloud instances!') unless @config['resourcepool']
+    fail_test('You must specify a folder for vCloud instances!') unless @config['folder']
+
+    vsphere_credentials = VsphereHelper.load_config
+
+    logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      " with credentials for #{vsphere_credentials[:user]}"
+
+    vsphere_helper = VsphereHelper.new( vsphere_credentials )
+    vsphere_vms = {}
+
+    start = Time.now
+    virtual_machines['vcloud'].each_with_index do |h, i|
+      # Generate a randomized hostname
+      o = [('a'..'z'),('0'..'9')].map{|i| i.to_a}.flatten
+      h['vmhostname'] = (0...15).map{o[rand(o.length)]}.join
+
+      logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template #{h['template']}"
+
+      # Put the VM in the specified folder and resource pool
+      relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
+        :datastore => vsphere_helper.find_datastore(@config['datastore']),
+        :pool      => vsphere_helper.find_pool(@config['resourcepool'])
+      )
+      spec = RbVmomi::VIM.VirtualMachineCloneSpec(
+        :location => relocateSpec,
+        :powerOn  => true,
+        :template => false
+      )
+
+      # Deploy from specified template
+      vm = vsphere_helper.find_vms(h['template'])
+      if (virtual_machines['vcloud'].length == 1) or (i == virtual_machines['vcloud'].length - 1)
+        vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
+      else
+        vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec )
+      end
+    end
+    logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
+
+    start = Time.now
+    virtual_machines['vcloud'].each_with_index do |h, i|
+      logger.notify "Waiting for #{h['vmhostname']} (#{h.name}) to register with vSphere"
+      try = 1
+      last_wait = 0
+      wait = 1
+
+      until
+        vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunning' and
+        vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.ipAddress != nil
+        if try <= 11
+          sleep wait
+          (last_wait, wait) = wait, last_wait + wait
+          try += 1
+        else
+          fail_test("vSphere registration failed after #{wait} seconds")
+        end
+      end
+    end
+    logger.notify "Spent %.2f seconds waiting for vSphere registration" % (Time.now - start)
+
+    start = Time.now
+    virtual_machines['vcloud'].each_with_index do |h, i|
+      logger.notify "Waiting for #{h['vmhostname']} DNS resolution"
+      try = 1
+      last_wait = 0
+      wait = 1
+
+      begin
+        Socket.getaddrinfo(h['vmhostname'], nil)
+      rescue
+        if try <= 11
+          sleep wait
+          (last_wait, wait) = wait, last_wait + wait
+          try += 1
+
+          retry
+        else
+          fail_test("DNS resolution failed after #{wait} seconds")
+        end
+      end
+    end
+    logger.notify "Spent %.2f seconds waiting for DNS resolution" % (Time.now - start)
 
     vsphere_helper.close
   end

@@ -202,7 +202,34 @@ Example:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
-You can now call the harness with the `--vmrun vsphere` option to select the VM named in your config.yml file.
+There are two possible `--vmrun` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
+
+### `--vmrun vsphere`
+This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
+
+### `--vmrun vcloud`
+This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
+
+The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
+
+    HOSTS:
+      master-vm:
+        roles:
+          - master
+          - agent
+          - dashboard
+        platform: ubuntu-10.04-amd64
+        template: ubuntu-1004-x86_64
+      agent-vm:
+        roles:
+          - agent
+        platform: ubuntu-10.04-i386
+        template: ubuntu-1004-i386
+    CONFIG:
+      consoleport: 443
+      datastore: instance0
+      resourcepool: Delivery/Quality Assurance/FOSS/Dynamic
+      folder: delivery/Quality Assurance/FOSS/Dynamic
 
 
 # Putting it all together #
