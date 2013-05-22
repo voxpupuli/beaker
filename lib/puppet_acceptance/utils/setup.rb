@@ -60,5 +60,24 @@ module PuppetAcceptance
       end
     end
 
+    def sync_root_keys
+      # JJM This step runs on every system under test right now.  We're anticipating
+      # issues on Windows and maybe Solaris.  We will likely need to filter this step
+      # but we're deliberately taking the approach of "assume it will work, fix it
+      # when reality dictates otherwise"
+      @logger.notify "Sync root authorized_keys from github"
+      script = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
+      setup_root_authorized_keys = "curl -k -o - #{script} | %s"
+      @logger.notify "Sync root authorized_keys from github"
+      @hosts.each do |host|
+        # Allow all exit code, as this operation is unlikely to cause problems if it fails.
+        if host['platform'].include? 'solaris'
+          host.exec(HostCommand.new(setup_root_authorized_keys % "bash"), :acceptable_exit_codes => (0..255))
+        else
+          host.exec(HostCommand.new(setup_root_authorized_keys % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
+        end
+      end
+    end
+
   end
 end

@@ -41,6 +41,9 @@ module PuppetAcceptance
           @logger.debug "Setup: timesync vms"
           @ntp_controller.timesync 
         end
+        if @options[:root_keys]
+          @setup.sync_root_keys
+        end
         @setup.add_master_entry #add ip of master to /etc/hosts
         @setup.set_rvm_of_ruby #set RVM version of Ruby
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
