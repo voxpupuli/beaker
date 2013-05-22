@@ -7,8 +7,8 @@ module PuppetAcceptance
     end
 
     def timesync
-      @logger.debug "Update system time sync"
-      @logger.debug "run ntpdate against NTP pool systems"
+      @logger.notify "Update system time sync"
+      @logger.notify "run ntpdate against NTP pool systems"
       @hosts.each do |host|
         success=FALSE
         if host['platform'].include? 'solaris-10'
