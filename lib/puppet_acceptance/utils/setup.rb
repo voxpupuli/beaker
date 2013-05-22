@@ -1,5 +1,5 @@
 module PuppetAcceptance
-  class EtcHostsEditor
+  class SetupWrapper
     def initialize(options, hosts)
       @options = options.dup
       @hosts = hosts
@@ -42,5 +42,23 @@ module PuppetAcceptance
       master.exec(HostCommand.new("echo '#{ip} #{master}' >> %s.new" % path))
       master.exec(HostCommand.new("mv %s.new %s" % [path, path]))
     end
+
+    def set_rvm_of_ruby
+      if @options[:rvm].include? 'system'
+        @logger.notify "Setting Ruby version to sytem default"
+        @hosts.each do |host|
+          host.exec(HostCommand.new("rvm --default system"))
+        end
+      elsif @options[:rvm].include? 'skip'
+        @logger.notify "Skipping set ruby version"
+        return
+      else
+        @logger.notify "Setting Ruby version"
+        @hosts.each do |host|
+          host.exec(HostCommand.new("rvm --default use #{@options[:rvm]}"))
+        end
+      end
+    end
+
   end
 end

@@ -26,7 +26,7 @@ module PuppetAcceptance
     def execute!
       @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
       @ntp_controller = PuppetAcceptance::NTPController.new(@options, @hosts)
-      @etc_hosts_editor = PuppetAcceptance::EtcHostsEditor.new(@options, @hosts)
+      @setup = PuppetAcceptance::SetupWrapper.new(@options, @hosts)
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
@@ -41,7 +41,8 @@ module PuppetAcceptance
           @logger.debug "Setup: timesync vms"
           @ntp_controller.timesync 
         end
-        @etc_hosts_editor.add_master_entry
+        @setup.add_master_entry #add ip of master to /etc/hosts
+        @setup.set_rvm_of_ruby #set RVM version of Ruby
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
         run_suite('pre-suite', pre_suite_options)
