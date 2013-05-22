@@ -24,7 +24,8 @@ module PuppetAcceptance
     end
 
     def execute!
-      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts, @config)
+      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
+      @ntp_controller = PuppetAcceptance::NTPController.new(@options, @hosts)
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
@@ -34,6 +35,10 @@ module PuppetAcceptance
         if @options[:revert]
           @logger.debug "Setup: revert vms to snapshot"
           @vm_controller.revert 
+        end
+        if @options[:timesync]
+          @logger.debug "Setup: timesync vms"
+          @ntp_controller.timesync 
         end
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
