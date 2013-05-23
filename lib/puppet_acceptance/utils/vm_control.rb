@@ -2,10 +2,11 @@ module PuppetAcceptance
   class VMController
     VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
 
-    def initialize(options, hosts)
+    def initialize(options, hosts, config)
       @logger = options[:logger]
       @hosts = hosts
       @options = options.dup
+      @config = config.dup
       @virtual_machines = {}
       @hosts.each do |host|
         #check to see if there are any specified hypervisors/snapshots
