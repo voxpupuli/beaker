@@ -44,7 +44,7 @@ module PuppetAcceptance
       # Merge some useful date into the config hash
       config['CONFIG'] ||= {}
       consoleport = ENV['consoleport'] || config['CONFIG']['consoleport'] || 443
-      config['CONFIG']['consoleport']        = consoleport
+      config['CONFIG']['consoleport']        = consoleport.to_i
       config['CONFIG']['ssh']                = ssh_defaults.merge(config['CONFIG']['ssh'] || {})
       config['CONFIG']['modules']            = @options[:modules] || []
 

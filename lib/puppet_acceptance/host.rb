@@ -81,11 +81,11 @@ module PuppetAcceptance
     end
 
     def to_str
-      @name
+      @defaults['vmhostname'] || @name
     end
 
     def to_s
-      @name
+      @defaults['vmhostname'] || @name
     end
 
     def + other
@@ -97,7 +97,7 @@ module PuppetAcceptance
     end
 
     def connection
-      @connection ||= SshConnection.connect( self['ip'] || @name,
+      @connection ||= SshConnection.connect( self['ip'] || self['vmhostname'] || @name,
                                              self['user'],
                                              self['ssh'] )
     end
@@ -113,7 +113,11 @@ module PuppetAcceptance
       if options[:silent]
         output_callback = nil
       else
-        @logger.debug "\n#{self} $ #{cmdline}"
+        if @defaults['vmhostname']
+          @logger.debug "\n#{self} (#{@name}) $ #{cmdline}"
+        else
+          @logger.debug "\n#{self} $ #{cmdline}"
+        end
         output_callback = logger.method(:host_output)
       end
 

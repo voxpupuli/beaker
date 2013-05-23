@@ -1,6 +1,6 @@
 module PuppetAcceptance
   class VMController
-    VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix']
+    VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
 
     def initialize(options, hosts)
       @logger = options[:logger]
@@ -312,6 +312,99 @@ module PuppetAcceptance
       end
     end #revert_blimpy
 
+    def revert_vcloud(vcloud_hosts, snap)
+        require 'yaml' unless defined?(YAML)
+    
+        raise 'You must specify a datastore for vCloud instances!' unless @config['datastore']
+        raise 'You must specify a resource pool for vCloud instances!' unless @config['resourcepool']
+        raise 'You must specify a folder for vCloud instances!' unless @config['folder']
+    
+        vsphere_credentials = VsphereHelper.load_config
+    
+        @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+          " with credentials for #{vsphere_credentials[:user]}"
+    
+        vsphere_helper = VsphereHelper.new( vsphere_credentials )
+        vsphere_vms = {}
+    
+        start = Time.now
+        vcloud_hosts.each_with_index do |h, i|
+          # Generate a randomized hostname
+          o = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
+          h['vmhostname'] = (0...15).map{o[rand(o.length)]}.join
+    
+          @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template #{h['template']}"
+    
+          # Put the VM in the specified folder and resource pool
+          relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
+            :datastore => vsphere_helper.find_datastore(@config['datastore']),
+            :pool      => vsphere_helper.find_pool(@config['resourcepool'])
+          )
+          spec = RbVmomi::VIM.VirtualMachineCloneSpec(
+            :location => relocateSpec,
+            :powerOn  => true,
+            :template => false
+          )
+    
+          # Deploy from specified template
+          vm = vsphere_helper.find_vms(h['template'])
+          if (virtual_machines['vcloud'].length == 1) or (i == virtual_machines['vcloud'].length - 1)
+            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostna
+    me'], :spec => spec ).wait_for_completion
+          else
+            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostna
+    me'], :spec => spec )
+          end
+        end
+        @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
+    
+        start = Time.now
+        vcloud_hosts.each_with_index do |h, i|
+          @logger.notify "Waiting for #{h['vmhostname']} (#{h.name}) to register with vSphere"
+          try = 1
+          last_wait = 0
+          wait = 1
+          until
+            vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunni
+    ng' and
+            vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.ipAddress != nil
+            if try <= 11
+              sleep wait
+              (last_wait, wait) = wait, last_wait + wait
+              try += 1
+            else
+              raise "vSphere registration failed after #{wait} seconds"
+            end
+          end
+        end
+        @logger.notify "Spent %.2f seconds waiting for vSphere registration" % (Time.now - start)
+    
+        start = Time.now
+        vcloud_hosts.each_with_index do |h, i|
+          @logger.notify "Waiting for #{h['vmhostname']} DNS resolution"
+          try = 1
+          last_wait = 0
+          wait = 1
+    
+          begin
+            Socket.getaddrinfo(h['vmhostname'], nil)
+          rescue
+            if try <= 11
+              sleep wait
+              (last_wait, wait) = wait, last_wait + wait
+              try += 1
+    
+              retry
+            else
+              raise "DNS resolution failed after #{wait} seconds"
+            end
+          end
+        end
+        @logger.notify "Spent %.2f seconds waiting for DNS resolution" % (Time.now - start)
+    
+        vsphere_helper.close
+    end #revert_vcloud
+
     def revert
       #check to see if we are using any vms
       if not @virtual_machines
@@ -337,6 +430,8 @@ module PuppetAcceptance
             revert_fusion(@virtual_machines[type], snap)
           when /blimpy/
             revert_blimpy(@virtual_machines[type], snap, @hosts)
+          when /vcloud/
+            revert_vcloud(@virtual_machines[type], snap)
         end
       end
       @logger.debug "virtual machines reverted and ready"
@@ -402,6 +497,36 @@ module PuppetAcceptance
       vsphere_helper.close
     end #cleanup_vsphere
 
+    def cleanup_vcloud(vcloud_hosts)
+      vsphere_credentials = VsphereHelper.load_config
+
+      @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+        " with credentials for #{vsphere_credentials[:user]}"
+
+      vsphere_helper = VsphereHelper.new( vsphere_credentials )
+
+      vm_names = vcloud_hosts.map {|h| h['vmhostname'] || h.name }
+      vms = vsphere_helper.find_vms vm_names
+      vm_names.each do |name|
+        unless vm = vms[name]
+          raise "Couldn't find VM #{name} in vSphere!"
+        end
+
+        if vm.runtime.powerState == 'poweredOn'
+          @logger.notify "Shutting down #{vm.name}"
+          start = Time.now
+          vm.PowerOffVM_Task.wait_for_completion
+          @logger.notify "Spent %.2f seconds halting #{vm.name}" % (Time.now - start)
+        end
+
+        start = Time.now
+        vm.Destroy_Task
+        @logger.notify "Spent %.2f seconds destroying #{vm.name}" % (Time.now - start)
+      end
+
+      vsphere_helper.close
+    end
+
     def cleanup
       if @options[:preserve_hosts]
         preserve_hosts(@hosts)
@@ -412,6 +537,8 @@ module PuppetAcceptance
               cleanup_blimpy(@virtual_machines[type])
             when /vsphere/
               cleanup_vsphere(@virtual_machines[type])
+            when /vcloud/
+              cleanup_vcloud(@virtual_machines[type])
           end
         end
         @logger.debug "virtual machines cleaned up"

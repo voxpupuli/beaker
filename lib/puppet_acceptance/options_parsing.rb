@@ -1,8 +1,13 @@
 module PuppetAcceptance
   class Options
+    GITREPO = 'git://github.com/puppetlabs'
 
     def self.options
       return @options
+    end
+
+    def self.repo?
+      GITREPO
     end
 
     def self.transform_old_packages(name, value)
@@ -10,8 +15,24 @@ module PuppetAcceptance
       # This is why '-' vs '_' as a company policy is important
       # or at least why the lack of it is annoying
       name = name.to_s.gsub(/_/, '-')
-      puppetlabs = 'git://github.com/puppetlabs'
-      value =~ /#{name}/ ? value : "#{puppetlabs}/#{name}.git##{value}"
+      value =~ /#{name}/ ? value : "#{GITREPO}/#{name}.git##{value}"
+    end
+
+    def self.parse_install_options(install_opts)
+      install_opts.map! { |opt|
+        case opt
+          when /^PUPPET\//
+            opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
+          when /^FACTER\//
+            opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
+          when /^HIERA\//
+            opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
+          when /^HIERA-PUPPET\//
+            opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+        end
+        opt
+      }
+      install_opts
     end
 
     def self.parse_args
@@ -133,8 +154,10 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
-        opts.on('-i URI', '--install URI',
-                'Install a project repo/app on the SUTs') do |value|
+        opts.on '-i URI', '--install URI',
+                'Install a project repo/app on the SUTs', 
+                'Provide full git URI or use short form KEYWORD/name',
+                'supported keywords: PUPPET, FACTER, HIERA, HIERA-PUPPET' do |value|
           if value.is_a?(Array)
             @options[:install] += value
           elsif value =~ /,/
@@ -142,6 +165,7 @@ module PuppetAcceptance
           else
             @options[:install] << value
           end
+          @options[:install] = parse_install_options(@options[:install])
         end
 
         @defaults[:modules] = []
