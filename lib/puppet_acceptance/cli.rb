@@ -24,7 +24,7 @@ module PuppetAcceptance
     end
 
     def execute!
-      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
+      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts, @config)
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
