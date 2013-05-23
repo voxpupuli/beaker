@@ -28,6 +28,6 @@ module PuppetAcceptance
   #require 'puppet_acceptance/steps'
   #
   # Common Utils
-  #require 'puppet_acceptance/utils'
+  require 'puppet_acceptance/utils'
 
 end

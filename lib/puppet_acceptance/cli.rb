@@ -24,24 +24,31 @@ module PuppetAcceptance
     end
 
     def execute!
+      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
-
+        #setup phase
+        if @options[:revert]
+          @logger.debug "Setup: revert vms to snapshot"
+          @vm_controller.revert 
+        end
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
         run_suite('pre-suite', pre_suite_options)
         begin
+          #testing phase
           run_suite('acceptance', @options) unless @options[:installonly]
         ensure
           run_suite('post-suite', post_suite_options) unless @options[:fail_mode] == "stop"
         end
 
       ensure
+        #cleanup phase
         if @options[:fail_mode] != "stop"
-          run_suite('cleanup', cleanup_options)
+          @vm_controller.cleanup
           @hosts.each {|host| host.close }
         end
       end
