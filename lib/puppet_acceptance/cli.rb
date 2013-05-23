@@ -28,34 +28,43 @@ module PuppetAcceptance
       @ntp_controller = PuppetAcceptance::NTPController.new(@options, @hosts)
       @setup = PuppetAcceptance::SetupWrapper.new(@options, @hosts)
       @repo_controller = PuppetAcceptance::RepoController.new(@options, @hosts)
+
+      setup_steps = {:revert => ["revert vms to snapshot", Proc.new {@vm_controller.revert}], 
+                     :timesync => ["sync time on vms", Proc.new {@ntp_controller.timesync}],
+                     :root_keys => ["sync keys to vms" , Proc.new {@setup.sync_root_keys}],
+                     :repo_proxy => ["set repo proxy", Proc.new {@repo_controller.proxy_config}],
+                     :extra_repos => ["add repo", Proc.new {@repo_controller.add_repos}],
+                     :add_master_entry => ["update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}],
+                     :set_rvm_of_ruby => ["set RVM of ruby", Proc.new {@setup.set_rvm_of_ruby}]}
+      
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
+
         #setup phase
-        if @options[:revert]
-          @logger.debug "Setup: revert vms to snapshot"
-          @vm_controller.revert 
+        setup_errors = 0
+        setup_errors_msg = ""
+        setup_steps.each_pair do |step, block| 
+          if (not @options.has_key?(step)) or @options[step]
+            begin 
+              @logger.notify ""
+              @logger.notify "Setup: #{block[0]}"
+              block[1].call
+            rescue Exception => msg
+              @logger.error msg
+              setup_errors += 1
+              setup_errors_msg += "\n\tFailed: #{block[0]}"
+            end
+          end
         end
-        if @options[:timesync]
-          @logger.debug "Setup: timesync vms"
-          @ntp_controller.timesync 
+        if setup_errors > 0
+          @logger.error "Setup failed with #{setup_errors} error(s)"
+          @logger.error setup_errors_msg
+          raise
         end
-        if @options[:root_keys]
-          @logger.debug "Setup: --root-keys"
-          @setup.sync_root_keys
-        end
-        if @options[:repo_proxy]
-          @logger.debug "Setup: --repo-proxy"
-          @repo_conroller.proxy_config
-        end
-        if @options[:extra_repos]
-          @logger.debug "Setup: --extra-repos"
-          @repo_controller.add_repos
-        end
-        @setup.add_master_entry #add ip of master to /etc/hosts
-        @setup.set_rvm_of_ruby #set RVM version of Ruby
+
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
         run_suite('pre-suite', pre_suite_options)
