@@ -1,4 +1,4 @@
-[ 'vsphere_helper', 'vm_control', 'ntp_control', 'setup'].each do |file|
+[ 'vsphere_helper', 'vm_control', 'ntp_control', 'setup', 'repo_control' ].each do |file|
   begin
     require "puppet_acceptance/utils/#{file}"
   rescue LoadError

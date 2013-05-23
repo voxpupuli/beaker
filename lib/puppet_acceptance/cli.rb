@@ -27,6 +27,7 @@ module PuppetAcceptance
       @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
       @ntp_controller = PuppetAcceptance::NTPController.new(@options, @hosts)
       @setup = PuppetAcceptance::SetupWrapper.new(@options, @hosts)
+      @repo_controller = PuppetAcceptance::RepoController.new(@options, @hosts)
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
@@ -42,7 +43,16 @@ module PuppetAcceptance
           @ntp_controller.timesync 
         end
         if @options[:root_keys]
+          @logger.debug "Setup: --root-keys"
           @setup.sync_root_keys
+        end
+        if @options[:repo_proxy]
+          @logger.debug "Setup: --repo-proxy"
+          @repo_conroller.proxy_config
+        end
+        if @options[:extra_repos]
+          @logger.debug "Setup: --extra-repos"
+          @repo_controller.add_repos
         end
         @setup.add_master_entry #add ip of master to /etc/hosts
         @setup.set_rvm_of_ruby #set RVM version of Ruby
