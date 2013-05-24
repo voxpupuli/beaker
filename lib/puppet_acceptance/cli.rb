@@ -32,8 +32,17 @@ module PuppetAcceptance
         end
         #setup phase
         if @options[:revert]
-          @logger.debug "Setup: revert vms to snapshot"
-          @vm_controller.revert 
+          begin
+            @logger.debug "Setup: revert vms to snapshot"
+            @vm_controller.revert 
+          rescue Exception => e
+            @logger.error(e.inspect)
+            bt = e.backtrace
+            @logger.pretty_backtrace(bt).each_line do |line|
+              @logger.error(line)
+            end
+            raise
+          end
         end
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
