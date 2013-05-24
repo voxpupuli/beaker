@@ -349,6 +349,9 @@ module PuppetAcceptance
     
           # Deploy from specified template
           vm = vsphere_helper.find_vms(h['template'])
+          if vm.length == 0 
+            raise "Error in vCloud provisioning -  no vms found for template #{h['template']}"
+          end
           if (vcloud_hosts.length == 1) or (i == vcloud_hosts.length - 1)
             vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
           else
