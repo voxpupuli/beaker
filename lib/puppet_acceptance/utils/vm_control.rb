@@ -367,8 +367,7 @@ module PuppetAcceptance
           last_wait = 0
           wait = 1
           until
-            vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunni
-    ng' and
+            vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunning' and
             vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.ipAddress != nil
             if try <= 11
               sleep wait
