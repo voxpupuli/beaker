@@ -29,13 +29,13 @@ module PuppetAcceptance
       @setup = PuppetAcceptance::SetupWrapper.new(@options, @hosts)
       @repo_controller = PuppetAcceptance::RepoController.new(@options, @hosts)
 
-      setup_steps = {:revert => ["revert vms to snapshot", Proc.new {@vm_controller.revert}], 
-                     :timesync => ["sync time on vms", Proc.new {@ntp_controller.timesync}],
-                     :root_keys => ["sync keys to vms" , Proc.new {@setup.sync_root_keys}],
-                     :repo_proxy => ["set repo proxy", Proc.new {@repo_controller.proxy_config}],
-                     :extra_repos => ["add repo", Proc.new {@repo_controller.add_repos}],
-                     :add_master_entry => ["update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}],
-                     :set_rvm_of_ruby => ["set RVM of ruby", Proc.new {@setup.set_rvm_of_ruby}]}
+      setup_steps = [[:revert, "revert vms to snapshot", Proc.new {@vm_controller.revert}], 
+                     [:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
+                     [:root_keys, "sync keys to vms" , Proc.new {@setup.sync_root_keys}],
+                     [:repo_proxy, "set repo proxy", Proc.new {@repo_controller.proxy_config}],
+                     [:extra_repos, "add repo", Proc.new {@repo_controller.add_repos}],
+                     [:add_master_entry, "update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}],
+                     [:set_rvm_of_ruby, "set RVM of ruby", Proc.new {@setup.set_rvm_of_ruby}]]
       
       begin
         trap(:INT) do
@@ -46,21 +46,25 @@ module PuppetAcceptance
         #setup phase
         setup_errors = 0
         setup_errors_msg = ""
-        setup_steps.each_pair do |step, block| 
-          if (not @options.has_key?(step)) or @options[step]
+        setup_steps.each do |step| 
+          if (not @options.has_key?(step[0])) or @options[step[0]]
             begin 
               @logger.notify ""
-              @logger.notify "Setup: #{block[0]}"
-              block[1].call
-            rescue Exception => msg
-              @logger.error msg
+              @logger.notify "Setup: #{step[1]}"
+              step[2].call
+            rescue Exception => e
+              @logger.error(e.inspect)
+              bt = e.backtrace
+              @logger.pretty_backtrace(bt).each_line do |line|
+                @logger.error(line)
+              end
               setup_errors += 1
-              setup_errors_msg += "\n\tFailed: #{block[0]}"
+              setup_errors_msg += "\tFailed: #{step[1]}\n"
             end
           end
         end
         if setup_errors > 0
-          @logger.error "Setup failed with #{setup_errors} error(s)"
+          @logger.error "Setup failed with #{setup_errors} error(s):"
           @logger.error setup_errors_msg
           raise
         end
@@ -86,8 +90,18 @@ module PuppetAcceptance
       ensure
         #cleanup phase
         if @options[:fail_mode] != "stop"
-          @vm_controller.cleanup
-          @hosts.each {|host| host.close }
+          begin
+            @vm_controller.cleanup
+            @hosts.each {|host| host.close }
+          rescue Exception => e
+            @logger.error "\nCleanup failed with:"
+            @logger.error(e.inspect)
+            bt = e.backtrace
+            @logger.pretty_backtrace(bt).each_line do |line|
+              @logger.error(line)
+            end
+            raise
+          end
         end
         raise "Failed to execute tests!"
       else
