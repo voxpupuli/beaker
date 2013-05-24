@@ -48,8 +48,12 @@ module PuppetAcceptance
       ensure
         #cleanup phase
         if @options[:fail_mode] != "stop"
-          @vm_controller.cleanup
-          @hosts.each {|host| host.close }
+          begin
+            @vm_controller.cleanup
+            @hosts.each {|host| host.close }
+          rescue Exception => e
+            puts e
+          end
         end
       end
     end

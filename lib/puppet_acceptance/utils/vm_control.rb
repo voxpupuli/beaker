@@ -6,7 +6,7 @@ module PuppetAcceptance
       @logger = options[:logger]
       @hosts = hosts
       @options = options.dup
-      @config = config.dup
+      @config = config['CONFIG'].dup
       @virtual_machines = {}
       @hosts.each do |host|
         #check to see if there are any specified hypervisors/snapshots
@@ -349,12 +349,10 @@ module PuppetAcceptance
     
           # Deploy from specified template
           vm = vsphere_helper.find_vms(h['template'])
-          if (virtual_machines['vcloud'].length == 1) or (i == virtual_machines['vcloud'].length - 1)
-            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostna
-    me'], :spec => spec ).wait_for_completion
+          if (vcloud_hosts.length == 1) or (i == vcloud_hosts.length - 1)
+            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
           else
-            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostna
-    me'], :spec => spec )
+            vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec )
           end
         end
         @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
@@ -506,7 +504,10 @@ module PuppetAcceptance
 
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
-      vm_names = vcloud_hosts.map {|h| h['vmhostname'] || h.name }
+      vm_names = vcloud_hosts.map {|h| h['vmhostname'] }.compact
+      if vcloud_hosts.length != vm_names.length
+        @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
+      end
       vms = vsphere_helper.find_vms vm_names
       vm_names.each do |name|
         unless vm = vms[name]
