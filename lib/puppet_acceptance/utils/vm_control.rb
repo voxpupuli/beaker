@@ -6,7 +6,7 @@ module PuppetAcceptance
       @logger = options[:logger]
       @hosts = hosts
       @options = options.dup
-      @config = config.dup
+      @config = config['CONFIG'].dup
       @virtual_machines = {}
       @hosts.each do |host|
         #check to see if there are any specified hypervisors/snapshots
