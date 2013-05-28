@@ -1,6 +1,9 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'helpers'))
+
 module PuppetAcceptance
   class VMController
     HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
+    include SharedHelpers
 
     def initialize(options, hosts, config)
       @logger = options[:logger]
@@ -451,14 +454,8 @@ module PuppetAcceptance
         end
       end
       @logger.debug "virtual machines reverted and ready"
-    rescue StandardError => e
-      @logger.error "failed to revert virtual machines"
-      @logger.error(e.inspect)
-      bt = e.backtrace
-      @logger.pretty_backtrace(bt).each_line do |line|
-        @logger.error(line)
-      end
-      raise "Failed to revert vms"
+    rescue => e
+      report_and_raise(@logger, e, "revert vms")
     end #revert
 
     def cleanup_blimpy(blimpy_hosts)
@@ -547,14 +544,8 @@ module PuppetAcceptance
         end
         @logger.debug "virtual machines cleaned up"
       end
-    rescue StandardError => e
-      @logger.error "failed to cleanup virtual machines"
-      @logger.error(e.inspect)
-      bt = e.backtrace
-      @logger.pretty_backtrace(bt).each_line do |line|
-        @logger.error(line)
-      end
-      raise "Failed during vm cleanup"
+    rescue => e
+      report_and_raise(@logger, e, "cleanup vms")
     end
   end
 end

@@ -1,5 +1,8 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'helpers'))
+
 module PuppetAcceptance 
   class RepoController
+    include SharedHelpers
 
     APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
@@ -62,6 +65,8 @@ module PuppetAcceptance
           @logger.debug "#{host}: repo proxy configuration not modified"
         end
       end
+    rescue => e
+      report_and_raise(@logger, e, "proxy_config")
     end
 
     def add_repos
@@ -80,6 +85,8 @@ module PuppetAcceptance
           @logger.debug "#{host}: package repo configuration not modified"
         end
       end
+    rescue => e
+      report_and_raise(@logger, e, "add_repos")
     end
 
   end

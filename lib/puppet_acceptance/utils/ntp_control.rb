@@ -1,5 +1,8 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'helpers'))
+
 module PuppetAcceptance
   class NTPController
+    include SharedHelpers
     def initialize(options, hosts)
       @options = options.dup
       @hosts = hosts
@@ -32,7 +35,8 @@ module PuppetAcceptance
           @logger.notify "NTP date succeeded after #{count} tries"
         end
       end
-
+    rescue => e
+      report_and_raise(@logger, e, "timesync (--ntp)")
     end
   end
 end

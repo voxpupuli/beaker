@@ -44,29 +44,12 @@ module PuppetAcceptance
         end
 
         #setup phase
-        setup_errors = 0
-        setup_errors_msg = ""
         setup_steps.each do |step| 
           if (not @options.has_key?(step[0])) or @options[step[0]]
-            begin 
-              @logger.notify ""
-              @logger.notify "Setup: #{step[1]}"
-              step[2].call
-            rescue Exception => e
-              @logger.error(e.inspect)
-              bt = e.backtrace
-              @logger.pretty_backtrace(bt).each_line do |line|
-                @logger.error(line)
-              end
-              setup_errors += 1
-              setup_errors_msg += "\tFailed: #{step[1]}\n"
-            end
+            @logger.notify ""
+            @logger.notify "Setup: #{step[1]}"
+            step[2].call
           end
-        end
-        if setup_errors > 0
-          @logger.error "Setup failed with #{setup_errors} error(s):"
-          @logger.error setup_errors_msg
-          raise
         end
 
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]

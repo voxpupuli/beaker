@@ -1,5 +1,9 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'helpers'))
+
 module PuppetAcceptance
   class SetupWrapper
+    include SharedHelpers
+
     def initialize(options, hosts)
       @options = options.dup
       @hosts = hosts
@@ -41,6 +45,8 @@ module PuppetAcceptance
       master.exec(HostCommand.new("grep -v '#{ip} #{master}' %s > %s.new" % [path, path]))
       master.exec(HostCommand.new("echo '#{ip} #{master}' >> %s.new" % path))
       master.exec(HostCommand.new("mv %s.new %s" % [path, path]))
+    rescue => e
+      report_and_raise(@logger, e, "add_master_entry")
     end
 
     def set_rvm_of_ruby
@@ -58,6 +64,8 @@ module PuppetAcceptance
           host.exec(HostCommand.new("rvm --default use #{@options[:rvm]}"))
         end
       end
+    rescue => e
+      report_and_raise(@logger, e, "set_rvm_of_ruby")
     end
 
     def sync_root_keys
@@ -77,6 +85,8 @@ module PuppetAcceptance
           host.exec(HostCommand.new(setup_root_authorized_keys % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
         end
       end
+    rescue => e
+      report_and_raise(@logger, e, "sync_root_keys")
     end
 
   end
