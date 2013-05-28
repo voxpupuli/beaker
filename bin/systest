@@ -6,4 +6,3 @@ require 'puppet_acceptance'
 PuppetAcceptance::CLI.new.execute!
 
 puts "systest completed successfully, thanks."
-exit 0

@@ -41,23 +41,31 @@ module PuppetAcceptance
         #testing phase
         begin
           run_suite('acceptance', @options) unless @options[:installonly]
-        rescue
+        #post acceptance phase
+        rescue => e
+          #post acceptance on failure
           #if we error then run the post suite as long as we aren't in fail-stop mode
+          @logger.debug "in post acceptance on error code"
           run_suite('post-suite', post_suite_options) unless @options[:fail_mode] == "stop"
-          raise
+          raise e
         else
+          #post acceptance on success
+          @logger.debug "in post acceptance on success code"
           run_suite('post-suite', post_suite_options)
         end
-      rescue
-        #cleanup phase
+      #cleanup phase
+      rescue => e
+        #cleanup on error
         #only do cleanup if we aren't in fail-stop mode
+        @logger.debug "in cleanup on error code"
         if @options[:fail_mode] != "stop"
           @vm_controller.cleanup
           @hosts.each {|host| host.close }
         end
-        raise
+        raise "Failed to execute tests!"
       else
-        #cleanup phase
+        #cleanup on success
+        @logger.debug "in cleanup on success code"
         @vm_controller.cleanup
         @hosts.each {|host| host.close }
       end
