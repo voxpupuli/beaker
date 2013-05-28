@@ -32,38 +32,34 @@ module PuppetAcceptance
         end
         #setup phase
         if @options[:revert]
-          begin
-            @logger.debug "Setup: revert vms to snapshot"
-            @vm_controller.revert 
-          rescue Exception => e
-            @logger.error(e.inspect)
-            bt = e.backtrace
-            @logger.pretty_backtrace(bt).each_line do |line|
-              @logger.error(line)
-            end
-            raise
-          end
+          @logger.debug "Setup: revert vms to snapshot"
+          @vm_controller.revert 
         end
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
         run_suite('pre-suite', pre_suite_options)
+        #testing phase
         begin
-          #testing phase
           run_suite('acceptance', @options) unless @options[:installonly]
-        ensure
+        rescue
+          #if we error then run the post suite as long as we aren't in fail-stop mode
           run_suite('post-suite', post_suite_options) unless @options[:fail_mode] == "stop"
+          raise
+        else
+          run_suite('post-suite', post_suite_options)
         end
-
-      ensure
+      rescue
         #cleanup phase
+        #only do cleanup if we aren't in fail-stop mode
         if @options[:fail_mode] != "stop"
-          begin
-            @vm_controller.cleanup
-            @hosts.each {|host| host.close }
-          rescue Exception => e
-            puts e
-          end
+          @vm_controller.cleanup
+          @hosts.each {|host| host.close }
         end
+        raise
+      else
+        #cleanup phase
+        @vm_controller.cleanup
+        @hosts.each {|host| host.close }
       end
     end
 
