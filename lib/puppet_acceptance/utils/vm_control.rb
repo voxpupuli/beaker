@@ -436,6 +436,14 @@ module PuppetAcceptance
         end
       end
       @logger.debug "virtual machines reverted and ready"
+    rescue StandardError => e
+      @logger.error "failed to revert virtual machines"
+      @logger.error(e.inspect)
+      bt = e.backtrace
+      @logger.pretty_backtrace(bt).each_line do |line|
+        @logger.error(line)
+      end
+      raise "Failed to revert vms"
     end #revert
 
     def preserve_hosts(hosts)
@@ -547,6 +555,14 @@ module PuppetAcceptance
         end
         @logger.debug "virtual machines cleaned up"
       end
+    rescue StandardError => e
+      @logger.error "failed to cleanup virtual machines"
+      @logger.error(e.inspect)
+      bt = e.backtrace
+      @logger.pretty_backtrace(bt).each_line do |line|
+        @logger.error(line)
+      end
+      raise "Failed during vm cleanup"
     end
   end
 end
