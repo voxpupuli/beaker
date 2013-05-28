@@ -446,27 +446,6 @@ module PuppetAcceptance
       raise "Failed to revert vms"
     end #revert
 
-    def preserve_hosts(hosts)
-      hosts_config = {}
-      hosts.each do |host|
-        hosts_config[host.name] = {
-          'roles' => host['roles'],
-          'platform' => host['platform'],
-          'ip' => host['ip'],
-        }
-      end
-
-      exported_config = {
-        'HOSTS' => hosts_config,
-        'CONFIG' => @config
-      }
-
-      FileUtils.mkdir_p('tmp')
-      File.open("tmp/#{File.basename(@options[:config])}", 'w') do |f|
-        f.write(exported_config.to_yaml)
-      end
-    end #preserve_hosts
-
     def cleanup_blimpy(blimpy_hosts)
       fleet = Blimpy.fleet do |fleet|
         blimpy_hosts.each do |host|
@@ -540,9 +519,7 @@ module PuppetAcceptance
     end
 
     def cleanup
-      if @options[:preserve_hosts]
-        preserve_hosts(@hosts)
-      else
+      if not @options[:preserve_hosts]
         @virtual_machines.keys.each do |type|
           case type
             when /blimpy/
