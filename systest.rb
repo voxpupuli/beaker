@@ -7,3 +7,4 @@ else
 end
 
 system('bin/systest', *ARGV)
+exit $?.exitstatus  
