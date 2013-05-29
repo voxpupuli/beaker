@@ -68,10 +68,11 @@ module PuppetAcceptance
           #post acceptance on success
           run_suite('post-suite', post_suite_options)
         end
-      rescue Exception => msg 
-        @logger.error msg
-      ensure
-        #cleanup phase
+      #cleanup phase
+      rescue => e
+        #cleanup on error
+        #only do cleanup if we aren't in fail-stop mode
+        @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
           begin
             @vm_controller.cleanup
@@ -89,6 +90,7 @@ module PuppetAcceptance
         raise "Failed to execute tests!"
       else
         #cleanup on success
+        @logger.notify "Cleanup: cleaning up after successful run"
         @vm_controller.cleanup
         @hosts.each {|host| host.close }
       end
