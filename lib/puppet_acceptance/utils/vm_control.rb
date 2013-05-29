@@ -158,7 +158,7 @@ module PuppetAcceptance
       require 'yaml' unless defined?(YAML)
       vsphere_credentials = VsphereHelper.load_config
 
-      @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
 
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
@@ -176,9 +176,9 @@ module PuppetAcceptance
         end
 
         snapshot = vsphere_helper.find_snapshot(vm, snap) or
-          raise "Could not find snapshot #{snap} for vm #{vm.name}"
+          raise "Could not find snapshot '#{snap}' for VM #{vm.name}!"
 
-        @logger.notify "Reverting #{vm.name} to snapshot #{snap}"
+        @logger.notify "Reverting #{vm.name} to snapshot '#{snap}'"
         start = Time.now
         # This will block for each snapshot...
         # The code to issue them all and then wait until they are all done sucks
@@ -203,7 +203,7 @@ module PuppetAcceptance
       begin
         require 'fission'
       rescue LoadError
-        raise "Unable to load fission, please ensure its installed"
+        raise "Unable to load fission, please ensure it is installed!"
       end
 
       available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
@@ -213,15 +213,15 @@ module PuppetAcceptance
         fission_opts = host.defaults["fission"] || {}
         vm_name = host.defaults["vmname"] || host.name
         vm = Fission::VM.new vm_name
-        raise "Could not find vm #{vm_name} for #{host}" unless vm.exists?
+        raise "Could not find VM '#{vm_name}' for #{host}!" unless vm.exists?
 
         available_snapshots = vm.snapshots.data.sort.join(", ")
         @logger.notify "Available snapshots for #{host}: #{available_snapshots}"
         snap_name = host["snapshot"] || fission_opts["snapshot"] || snap
         raise "No snapshot specified for #{host}" unless snap_name
-        raise "Could not find snapshot #{snap_name} for host #{host}" unless vm.snapshots.data.include? snap_name
+        raise "Could not find snapshot '#{snap_name}' for host #{host}!" unless vm.snapshots.data.include? snap_name
 
-        @logger.notify "Reverting #{host} to snapshot #{snap_name}"
+        @logger.notify "Reverting #{host} to snapshot '#{snap_name}'"
         start = Time.now
         vm.revert_to_snapshot snap_name
         while vm.running?.data
@@ -322,7 +322,7 @@ module PuppetAcceptance
     
         vsphere_credentials = VsphereHelper.load_config
     
-        @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+        @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
           " with credentials for #{vsphere_credentials[:user]}"
     
         vsphere_helper = VsphereHelper.new( vsphere_credentials )
@@ -334,7 +334,15 @@ module PuppetAcceptance
           o = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
           h['vmhostname'] = (0...15).map{o[rand(o.length)]}.join
     
-          @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template #{h['template']}"
+          @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template '#{h['template']}'"
+
+          # Add VM annotation
+          configSpec = RbVmomi::VIM.VirtualMachineConfigSpec(
+            :annotation =>
+              'Base template:  ' + h['template'] + "\n" +
+              'Creation time:  ' + Time.now.strftime("%Y-%m-%d %H:%M") + "\n\n" +
+              'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' )
+          )
     
           # Put the VM in the specified folder and resource pool
           relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
@@ -342,6 +350,7 @@ module PuppetAcceptance
             :pool      => vsphere_helper.find_pool(@config['resourcepool'])
           )
           spec = RbVmomi::VIM.VirtualMachineCloneSpec(
+            :config   => configSpec,
             :location => relocateSpec,
             :powerOn  => true,
             :template => false
@@ -350,7 +359,7 @@ module PuppetAcceptance
           # Deploy from specified template
           vm = vsphere_helper.find_vms(h['template'])
           if vm.length == 0 
-            raise "Error in vCloud provisioning -  no vms found for template #{h['template']}"
+            raise "Unable to find template '#{h['template']}'!"
           end
           if (vcloud_hosts.length == 1) or (i == vcloud_hosts.length - 1)
             vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
@@ -362,7 +371,7 @@ module PuppetAcceptance
     
         start = Time.now
         vcloud_hosts.each_with_index do |h, i|
-          @logger.notify "Waiting for #{h['vmhostname']} (#{h.name}) to register with vSphere"
+          @logger.notify "Booting #{h['vmhostname']} (#{h.name}) and waiting for it to register with vSphere"
           try = 1
           last_wait = 0
           wait = 1
@@ -378,7 +387,7 @@ module PuppetAcceptance
             end
           end
         end
-        @logger.notify "Spent %.2f seconds waiting for vSphere registration" % (Time.now - start)
+        @logger.notify "Spent %.2f seconds booting and waiting for vSphere registration" % (Time.now - start)
     
         start = Time.now
         vcloud_hosts.each_with_index do |h, i|
@@ -461,7 +470,7 @@ module PuppetAcceptance
     def cleanup_vsphere(vsphere_hosts)
       vsphere_credentials = VsphereHelper.load_config
 
-      @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
 
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
@@ -488,7 +497,7 @@ module PuppetAcceptance
     def cleanup_vcloud(vcloud_hosts)
       vsphere_credentials = VsphereHelper.load_config
 
-      @logger.notify "Connecting to vsphere at #{vsphere_credentials[:server]}" +
+      @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
 
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
