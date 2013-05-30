@@ -1,6 +1,6 @@
 module PuppetAcceptance
   class VMController
-    VMRUN_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
+    HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
 
     def initialize(options, hosts, config)
       @logger = options[:logger]
@@ -10,9 +10,9 @@ module PuppetAcceptance
       @virtual_machines = {}
       @hosts.each do |host|
         #check to see if there are any specified hypervisors/snapshots
-        hypervisor = host['hypervisor'] || options[:vmrun]
+        hypervisor = host['hypervisor'] || options[:hypervisor]
         if hypervisor && (host.has_key?('revert') ? host['revert'] : true) #obey config file revert, defaults to reverting vms
-          raise "Invalid hypervisor: #{hypervisor} (#{host})" unless VMRUN_TYPES.include? hypervisor
+          raise "Invalid hypervisor: #{hypervisor} (#{host})" unless HYPERVISOR_TYPES.include? hypervisor
           @logger.debug "Hypervisor for #{host} is #{host['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
           @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]
           @virtual_machines[hypervisor] << host

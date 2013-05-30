@@ -108,11 +108,11 @@ module PuppetAcceptance
           @options[:pre_script] = step
         end
 
-        @defaults[:vmrun] = nil
-        opts.on '--vmrun VM_PROVIDER',
-                'Revert and start VMs',
-                '(valid options: vsphere, fusion, blimpy)' do |vm|
-          @options[:vmrun] = vm
+        @defaults[:hypervisor] = nil
+        opts.on '--hypervisor HYPERVISOR',
+                'Default hypervisor for vms',
+                '(valid options: vsphere, fusion, blimpy, aix, solaris, vcloud)' do |hypervisor|
+          @options[:hypervisor] = hypervisor
         end
 
         @defaults[:revert] = true
@@ -307,6 +307,11 @@ module PuppetAcceptance
                 'Test the PE Uninstaller',
                 '(valid options: full, standard)' do |type|
           @options[:uninstall] = type
+        end
+
+        opts.on '--vmrun VM_PROVIDER',
+                'DEPRECATED -- use --hypervisor instead' do |vm|
+          @options[:hypervisor] = vm
         end
 
         opts.on('-p URI', '--puppet URI',

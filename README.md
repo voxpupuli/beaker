@@ -84,9 +84,9 @@ Systest has built in capabilites for managing VMs and provisioning SUTs:
   * Solaris zones via SSHing to the global zone
 
 You may mix and match hypervisors as needed. The `systest.rb` script takes
-`--vmrun HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
-`--vmrun` will be the default value and you may override hypervisors on a per
-host basis in config file. Default behavior for vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
+`--hypservisor HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
+`--hypervisor` will be the default value and you may override hypervisors on a per
+host basis in config file. If a host does not have a hypervisor in the config file and the `--hypervisor` option is used the host is assumed to use the `--hypervisor` indicated.  If you wish to mix hosts with hypervisors and those without it is best to use the host definition in the config file and avoid the command line option.  Default behavior for vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
 `--revert` indicates that you want to revert VMs to snapshot before test execution, defaults to true.  Use `--no-revert` to skip reverting before test execution.
 
 
@@ -108,7 +108,7 @@ For example:
         - agent
       platform: ubuntu-10.04-i386
 
-    $ ./systest.rb --config configs/my_hosts.yml --vmrun vsphere --snapshot base   ....
+    $ ./systest.rb --config configs/my_hosts.yml --hypervisor vsphere --snapshot base   ....
 
 
 ## VMWare Fusion support ##
@@ -120,7 +120,7 @@ that points to the `vmrun` executable and where VMs can be found.
     vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
 You can then use the following arguments to Systest:
-- `--vmrun fusion` tells us to enable this feature. This is required.
+- `--hypervisor fusion` tells us to enable this feature. This is required.
 - `--snapshot <name>`, where <name> is the snapshot name to revert to. This
   applies across *all* VMs, so it only makes sense if you want to use the same
   snapshot name for all VMs. This is optional.
@@ -155,13 +155,13 @@ Example:
 
 Diagnostics:
 
-When using `--vmrun fusion`, we'll log all the available VM names and for each
+When using `--hypervisor fusion`, we'll log all the available VM names and for each
 host we'll log all the available snapshot names.
 
 ## EC2 Support ##
 Pre-requisite: Blimpy gem installed and .fog file correctly configured with your credentials.
 
---vmrun blimpy
+--hypervisor blimpy
 
 Currently, there is limited support EC2 nodes; we are adding support for new platforms shortly.
 
@@ -175,7 +175,7 @@ lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5
 
 ## Solaris Support ##
 
-Used with `--vmrun solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
+Used with `--hypervisor solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
 
 Example .fog file:
 
@@ -202,12 +202,12 @@ Example:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
-There are two possible `--vmrun` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
+There are two possible `--hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
 
-### `--vmrun vsphere`
+### `--hypervisor vsphere`
 This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
 
-### `--vmrun vcloud`
+### `--hypervisor vcloud`
 This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
 
 The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
@@ -246,7 +246,7 @@ you must check out the tests first, then the harness, as such:
     cd puppet-acceptance
     ln -s ../acceptance acceptance-tests
 ### Run the tests
-    ./systest.rb --vmrun fusion -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug
+    ./systest.rb --hypervisor fusion -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug
 
 
 ## Running PE tests ##
