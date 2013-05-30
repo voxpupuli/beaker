@@ -336,6 +336,11 @@ module PuppetAcceptance
     
           @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template '#{h['template']}'"
 
+          vm = vsphere_helper.find_vms(h['template'])
+          if vm.length == 0
+            raise "Unable to find template '#{h['template']}'!"
+          end
+
           # Add VM annotation
           configSpec = RbVmomi::VIM.VirtualMachineConfigSpec(
             :annotation =>
@@ -343,11 +348,12 @@ module PuppetAcceptance
               'Creation time:  ' + Time.now.strftime("%Y-%m-%d %H:%M") + "\n\n" +
               'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' )
           )
-    
+
           # Put the VM in the specified folder and resource pool
           relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
-            :datastore => vsphere_helper.find_datastore(@config['datastore']),
-            :pool      => vsphere_helper.find_pool(@config['resourcepool'])
+            :datastore    => vsphere_helper.find_datastore(@config['datastore']),
+            :pool         => vsphere_helper.find_pool(@config['resourcepool']),
+            :diskMoveType => :moveChildMostDiskBacking
           )
           spec = RbVmomi::VIM.VirtualMachineCloneSpec(
             :config   => configSpec,
@@ -357,10 +363,6 @@ module PuppetAcceptance
           )
     
           # Deploy from specified template
-          vm = vsphere_helper.find_vms(h['template'])
-          if vm.length == 0 
-            raise "Unable to find template '#{h['template']}'!"
-          end
           if (vcloud_hosts.length == 1) or (i == vcloud_hosts.length - 1)
             vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
           else
