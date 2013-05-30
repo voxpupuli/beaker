@@ -341,29 +341,6 @@ module PuppetAcceptance
             raise "Unable to find template '#{h['template']}'!"
           end
 
-          # Make sure the template is able to be used with linked clones
-          disks = vm[h['template']].config.hardware.device.grep(RbVmomi::VIM::VirtualDisk)
-          disks.select { |d| d.backing.parent == nil }.each do |disk|
-            linkSpec = {
-              :deviceChange => [
-                {
-                  :operation => :remove,
-                  :device => disk
-                },
-                {
-                  :operation => :add,
-                  :fileOperation => :create,
-                  :device => disk.dup.tap { |x|
-                    x.backing = x.backing.dup
-                    x.backing.fileName = "[#{disk.backing.datastore.name}]"
-                    x.backing.parent = disk.backing
-                  }
-                }
-              ]
-            }
-            vm[h['template']].ReconfigVM_Task(:spec => linkSpec).wait_for_completion
-          end
-
           # Add VM annotation
           configSpec = RbVmomi::VIM.VirtualMachineConfigSpec(
             :annotation =>
