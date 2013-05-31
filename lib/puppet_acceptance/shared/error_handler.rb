@@ -1,5 +1,6 @@
 module PuppetAcceptance 
-  module SharedHelpers
+  module Shared
+    module ErrorHandler
 
     def report_and_raise(logger, e, msg)
       logger.error "Failed: errored in #{msg}"
@@ -11,6 +12,6 @@ module PuppetAcceptance
       raise e
     end
 
+    end
   end
-
 end

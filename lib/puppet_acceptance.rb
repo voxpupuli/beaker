@@ -1,7 +1,7 @@
 require 'rubygems' unless defined?(Gem)
 module PuppetAcceptance
 
-  %w( test_suite test_config result command options_parsing cli ).each do |lib|
+  %w( utils test_suite test_config result command options_parsing cli ).each do |lib|
     begin
       require "puppet_acceptance/#{lib}"
     rescue LoadError
@@ -27,7 +27,7 @@ module PuppetAcceptance
   # Common setup and testing steps
   #require 'puppet_acceptance/steps'
   #
-  # Common Utils
-  require 'puppet_acceptance/utils'
+  # Shared methods and helpers
+  require 'puppet_acceptance/shared'
 
 end

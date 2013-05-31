@@ -24,10 +24,10 @@ module PuppetAcceptance
     end
 
     def execute!
-      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts)
-      @ntp_controller = PuppetAcceptance::NTPController.new(@options, @hosts)
-      @setup = PuppetAcceptance::SetupWrapper.new(@options, @hosts)
-      @repo_controller = PuppetAcceptance::RepoController.new(@options, @hosts)
+      @vm_controller = PuppetAcceptance::Utils::VMControl.new(@options, @hosts, @config)
+      @ntp_controller = PuppetAcceptance::Utils::NTPControl.new(@options, @hosts)
+      @setup = PuppetAcceptance::Utils::SetupHelper.new(@options, @hosts)
+      @repo_controller = PuppetAcceptance::Utils::RepoControl.new(@options, @hosts)
 
       setup_steps = [[:revert, "revert vms to snapshot", Proc.new {@vm_controller.revert}], 
                      [:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
@@ -42,7 +42,6 @@ module PuppetAcceptance
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
-
         #setup phase
         setup_steps.each do |step| 
           if (not @options.has_key?(step[0])) or @options[step[0]]
@@ -74,18 +73,8 @@ module PuppetAcceptance
         #only do cleanup if we aren't in fail-stop mode
         @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
-          begin
-            @vm_controller.cleanup
-            @hosts.each {|host| host.close }
-          rescue Exception => e
-            @logger.error "\nCleanup failed with:"
-            @logger.error(e.inspect)
-            bt = e.backtrace
-            @logger.pretty_backtrace(bt).each_line do |line|
-              @logger.error(line)
-            end
-            raise
-          end
+          @vm_controller.cleanup
+          @hosts.each {|host| host.close }
         end
         raise "Failed to execute tests!"
       else
