@@ -382,6 +382,8 @@ module PuppetAcceptance
       raise ArgumentError.new("--fail-mode must be one of fast, stop") unless ["fast", "stop", nil].include?(@options[:fail_mode])
 
       @options[:tests] << 'tests' if @options[:tests].empty?
+      #HACK - for backwards compatability, if no snaphost is set then use the type as the snapshot
+      @options[:snapshot] ||= @options[:type]
 
       @options
     end

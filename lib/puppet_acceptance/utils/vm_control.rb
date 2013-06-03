@@ -5,11 +5,10 @@ module PuppetAcceptance
 
       def initialize(options, hosts, config)
         @logger = options[:logger]
-        @hosts = hosts
         @options = options.dup
         @config = config['CONFIG'].dup
         @virtual_machines = {}
-        @hosts.each do |host|
+        hosts.each do |host|
           #check to see if there are any specified hypervisors/snapshots
           hypervisor = host['hypervisor'] || options[:hypervisor]
           if hypervisor && (host.has_key?('revert') ? host['revert'] : true) #obey config file revert, defaults to reverting vms
@@ -60,7 +59,8 @@ module PuppetAcceptance
         ports
       end
 
-      def revert_aix(aix_hosts, snap)
+      def revert_aix(aix_hosts)
+        #aix machines are reverted to known state, not a snapshot
         fog_file = nil
         if File.exists?( File.join(ENV['HOME'], '.fog') )
           fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
@@ -80,20 +80,15 @@ module PuppetAcceptance
             }
           }
         }
-
         hyperconfig = PuppetAcceptance::TestConfig.new( hyperconf, @options )
 
         @logger.notify "Connecting to hypervisor at #{hypername}"
         hypervisor = PuppetAcceptance::Host.create( hypername, @options, hyperconfig )
 
-        # This is a hack; we want to pull from the 'foss' snapshot
-        # Not used for AIX...yet
-        snap = 'foss' if snap == 'git'
-
         aix_hosts.each do |host|
           vm_name = host['vmname'] || host.name
 
-          @logger.notify "Reverting #{vm_name} to snapshot #{snap}"
+          @logger.notify "Reverting #{vm_name} to aix clean state"
           start = Time.now
           # Restore AIX image, ID'd by the hostname
           hypervisor.exec(Command.new("cd pe-aix && rake restore:#{host.name}"))
@@ -131,18 +126,18 @@ module PuppetAcceptance
         @logger.notify "Connecting to hypervisor at #{hypername}"
         hypervisor = PuppetAcceptance::Host.create( hypername, @options, hyperconfig )
 
-        # This is a hack; we want to pull from the 'foss' snapshot
-        snap = 'foss' if snap == 'git'
-
         solaris_hosts.each do |host|
           vm_name = host['vmname'] || host.name
+          #use the snapshot provided for this host, otherwise use the snapshot provided for this test run
+          snapshot = host['snapshot'] || snap
+          
 
-          @logger.notify "Reverting #{vm_name} to snapshot #{snap}"
+          @logger.notify "Reverting #{vm_name} to snapshot #{snapshot}"
           start = Time.now
-          hypervisor.exec(Command.new("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}@#{snap}"))
+          hypervisor.exec(Command.new("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}@#{snapshot}"))
           snappaths.each do |spath|
-            @logger.notify "Reverting #{vm_name}/#{spath} to snapshot #{snap}"
-            hypervisor.exec(Command.new("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snap}"))
+            @logger.notify "Reverting #{vm_name}/#{spath} to snapshot #{snapshot}"
+            hypervisor.exec(Command.new("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snapshot}"))
           end
           time = Time.now - start
           @logger.notify "Spent %.2f seconds reverting" % time
@@ -242,31 +237,34 @@ module PuppetAcceptance
         end
       end #revert_fusion
 
-      def revert_blimpy(blimpy_hosts, snap, hosts)
+      def revert_blimpy(blimpy_hosts, snap)
         require 'rubygems' unless defined?(Gem)
         require 'blimpy'
 
         ami_spec= YAML.load_file('config/image_templates/ec2.yaml')["AMI"]
-        #HACK HACK HACK - get type out of here
-        if @options[:type] =~ /pe/
-          image_type = :pe
-        else
-          image_type = :foss
-        end
 
         fleet = Blimpy.fleet do |fleet|
           blimpy_hosts.each do |host|
             amitype = host['vmname'] || host['platform']
             amisize = host['amisize'] || 'm1.small'
+            #first attempt to use snapshot provided for this host then default to snapshot for this test run
+            image_type = host['snapshot'] || snap
+            if not image_type
+              raise "No snapshot/image_type provided for blimpy provisioning"
+            end
             ami = ami_spec[amitype]
             fleet.add(:aws) do |ship|
               ship.name = host.name
               ship.ports = amiports(host)
-              ship.image_id = ami[:image][image_type]
+              ship.image_id = ami[:image][image_type.to_sym]
+              if not ship.image_id
+                raise "No image_id found for host #{ship.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}"
+              end
               ship.flavor = amisize
               ship.region = ami[:region]
               ship.username = 'root'
             end
+            @logger.debug "Added #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type} to blimpy fleet"
           end
         end
 
@@ -300,7 +298,7 @@ module PuppetAcceptance
         fleet.ships.each do |ship|
           ship.wait_for_sshd
           name = ship.name
-          host = hosts.select { |host| host.name == name }[0]
+          host = blimpy_hosts.select { |host| host.name == name }[0]
           host['ip'] = ship.dns
           host.exec(Command.new("hostname #{name}"))
           ip = host.exec(Command.new("ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
@@ -314,7 +312,7 @@ module PuppetAcceptance
         end
       end #revert_blimpy
 
-      def revert_vcloud(vcloud_hosts, snap)
+      def revert_vcloud(vcloud_hosts)
           require 'yaml' unless defined?(YAML)
       
           raise 'You must specify a datastore for vCloud instances!' unless @config['datastore']
@@ -425,26 +423,20 @@ module PuppetAcceptance
           return
         end
 
-        #HACK HACK HACK - get type out of here
-        snap = @options[:snapshot] || @options[:type]
-        snap = 'git' if snap == 'gem'  # Sweet, sweet consistency
-        snap = 'git' if snap == 'manual'  # Sweet, sweet consistency
-        raise "You must specifiy a snapshot when using pe_noop" unless snap != 'pe_noop'
-
         @virtual_machines.keys.each do |type|
           case type
             when /aix/
-              revert_aix(@virtual_machines[type], snap)
+              revert_aix(@virtual_machines[type])
             when /solaris/
-              revert_solaris(@virtual_machines[type], snap)
+              revert_solaris(@virtual_machines[type], @options[:snapshot])
             when /vsphere/
-              revert_vsphere(@virtual_machines[type], snap)
+              revert_vsphere(@virtual_machines[type], @options[:snapshot])
             when /fusion/
-              revert_fusion(@virtual_machines[type], snap)
+              revert_fusion(@virtual_machines[type], @options[:snapshot])
             when /blimpy/
-              revert_blimpy(@virtual_machines[type], snap, @hosts)
+              revert_blimpy(@virtual_machines[type], @options[:snapshot])
             when /vcloud/
-              revert_vcloud(@virtual_machines[type], snap)
+              revert_vcloud(@virtual_machines[type])
           end
         end
         @logger.debug "virtual machines reverted and ready"
