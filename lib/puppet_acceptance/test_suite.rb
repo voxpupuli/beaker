@@ -30,7 +30,7 @@ module PuppetAcceptance
       @test_cases = []
       @test_files = []
 
-      Array(options[:tests] || 'tests').each do |root|
+      options[:tests].each do |root|
         if File.file? root then
           @test_files << root
         else

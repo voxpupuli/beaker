@@ -246,7 +246,7 @@ you must check out the tests first, then the harness, as such:
     cd puppet-acceptance
     ln -s ../acceptance acceptance-tests
 ### Run the tests
-    ./systest.rb --hypervisor fusion -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug
+    ./systest.rb --hypervisor fusion -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
 
 
 ## Running PE tests ##
@@ -279,6 +279,12 @@ You can also install from git.  Use the `--install` option, which can install pu
 ### Checkout the harness
     git clone git@github.com:puppetlabs/puppet-acceptance.git
     cd puppet-acceptance
+### Pre-suite and Post-suite
+The harness command line supports `--pre-suite` and `--post-suite`.  `--pre-suite` describes steps to take after initial provisioning/configuring of the vms under test before the tests are run.  `--post-suite` steps are run directly after tests.
+
+Both options support directories, individual files and comma separated lists of directories and files.  Given a directory it will look for files of the type `*.rb` within that directory.  Steps will be run in the order they appear in on the command line.  Directories of steps will be run in alphabetic order of the `*.rb` files within the directory.
+
+    --pre-suite setup/early/mystep.rb,setup/early/mydir    
 ### Run the tests
     ./systest.rb -c your_config.cfg --type pe -t test_repo/tests --debug
 
