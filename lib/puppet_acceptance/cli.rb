@@ -24,17 +24,33 @@ module PuppetAcceptance
     end
 
     def execute!
-      @vm_controller = PuppetAcceptance::VMController.new(@options, @hosts, @config)
+      @vm_controller = PuppetAcceptance::Utils::VMControl.new(@options, @hosts, @config)
+      @ntp_controller = PuppetAcceptance::Utils::NTPControl.new(@options, @hosts)
+      @setup = PuppetAcceptance::Utils::SetupHelper.new(@options, @hosts)
+      @repo_controller = PuppetAcceptance::Utils::RepoControl.new(@options, @hosts)
+
+      setup_steps = [[:revert, "revert vms to snapshot", Proc.new {@vm_controller.revert}], 
+                     [:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
+                     [:root_keys, "sync keys to vms" , Proc.new {@setup.sync_root_keys}],
+                     [:repo_proxy, "set repo proxy", Proc.new {@repo_controller.proxy_config}],
+                     [:extra_repos, "add repo", Proc.new {@repo_controller.add_repos}],
+                     [:add_master_entry, "update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}],
+                     [:set_rvm_of_ruby, "set RVM of ruby", Proc.new {@setup.set_rvm_of_ruby}]]
+      
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
         #setup phase
-        if @options[:revert]
-          @logger.debug "Setup: revert vms to snapshot"
-          @vm_controller.revert 
+        setup_steps.each do |step| 
+          if (not @options.has_key?(step[0])) or @options[step[0]]
+            @logger.notify ""
+            @logger.notify "Setup: #{step[1]}"
+            step[2].call
+          end
         end
+
         run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
         run_suite('setup', setup_options, :fail_fast)
         run_suite('pre-suite', pre_suite_options)
@@ -55,6 +71,7 @@ module PuppetAcceptance
       rescue => e
         #cleanup on error
         #only do cleanup if we aren't in fail-stop mode
+        @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
           @vm_controller.cleanup
           @hosts.each {|host| host.close }
@@ -62,6 +79,7 @@ module PuppetAcceptance
         raise "Failed to execute tests!"
       else
         #cleanup on success
+        @logger.notify "Cleanup: cleaning up after successful run"
         @vm_controller.cleanup
         @hosts.each {|host| host.close }
       end
