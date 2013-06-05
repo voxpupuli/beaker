@@ -38,7 +38,7 @@ module PuppetAcceptance
         Tempfile.open 'puppet-acceptance' do |tempfile|
           File.open(tempfile.path, 'w') {|file| file.puts file_content }
 
-          host.do_scp(tempfile.path, file_path, @options)
+          host.do_scp_to(tempfile.path, file_path, @options)
         end
 
       end
