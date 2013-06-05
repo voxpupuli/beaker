@@ -56,15 +56,14 @@ module PuppetAcceptance
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = exec( Command.new( 'puppet agent --configprint node_name_value' ) )
-      result.stdout.chomp
+      result = puppet['node_name_value'].strip
     end
 
     # Returning our PuppetConfigReader here allows users of the Host
     # class to do things like `host.puppet['vardir']` to query the
     # 'main' section or, if they want the configuration for a
     # particular run type, `host.puppet('agent')['vardir']`
-    def puppet(command="")
+    def puppet(command='agent')
       PuppetConfigReader.new(self, command)
     end
 
