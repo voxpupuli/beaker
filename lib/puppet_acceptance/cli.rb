@@ -8,7 +8,7 @@ module PuppetAcceptance
       if @options[:config] then
         @logger.debug "Using Config #{@options[:config]}"
       else
-        fail "Argh!  There is no default for Config, specify one (-c or --config)!"
+        report_and_raise (@logger, RuntimeError.new("Argh!  There is no default for Config, specify one (-c or --config)!"), "CLI: initialize") 
       end
 
       @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
