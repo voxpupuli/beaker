@@ -110,7 +110,7 @@ module PuppetAcceptance
       version_file = ENV['pe_version_file'] || 'LATEST-win'
       version = ""
       begin
-        File.open("#{dist_dir}/#{version_file}") do |file|
+        open("#{dist_dir}/#{version_file}") do |file|
           while line = file.gets
             if /(\w.*)/ =~ line then
               version=$1.strip
