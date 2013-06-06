@@ -13,6 +13,12 @@ module PuppetAcceptance
 
       @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
 
+      #add additional paths to the LOAD_PATH
+      if not @options[:load_path].empty?
+        @options[:load_path].each do |path|
+          $LOAD_PATH << File.expand_path(path)
+        end
+      end
       if (@options[:helper])
         require File.expand_path(@options[:helper])
       end
@@ -84,18 +90,6 @@ module PuppetAcceptance
     end
 
     def run_suite(name, options, failure_strategy = false)
-      #expand out tests, need to know contents of directories to determine if there are any tests
-      test_files = []
-      options[:tests].each do |root|
-        if File.file? root then
-          test_files << root
-        else
-          test_files += Dir.glob(
-            File.join(root, "**/*.rb")
-          ).select { |f| File.file?(f) }
-        end
-      end
-      options[:tests] = test_files
       if (options[:tests].empty?)
         @logger.notify("No tests to run for suite '#{name}'")
         return

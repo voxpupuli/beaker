@@ -35,6 +35,22 @@ module PuppetAcceptance
       install_opts
     end
 
+    def self.file_list(paths)
+      files = []
+      if not paths.empty? 
+        paths.each do |root|
+          if File.file? root then
+            files << root
+          else
+            files += Dir.glob(
+              File.join(root, "**/*.rb")
+            ).select { |f| File.file?(f) }
+          end
+        end
+      end
+      files
+    end
+
     def self.parse_args
       return @options if @options
 
@@ -44,6 +60,7 @@ module PuppetAcceptance
       @options = {}
       @options[:install] = []
       @options[:tests] = []
+      @options[:load_path] = []
       @options[:pre_suite] = []
       @options[:post_suite] = []
       @options_from_file = {}
@@ -81,6 +98,18 @@ module PuppetAcceptance
           @options[:helper] = script
         end
 
+        @defaults[:load_path] = []
+        opts.on  '--load-path /PATH/TO/DIR,/ADDITIONAL/DIR/PATHS',
+                 'Add paths to LOAD_PATH'  do |value|
+          if value.is_a?(Array)
+            @options[:load_path] += value
+          elsif value =~ /,/
+            @options[:load_path] += value.split(',')
+          else
+            @options[:load_path] << value
+          end
+        end
+
         @defaults[:tests] = []
         opts.on  '-t', '--tests /PATH/TO/DIR,/ADDITIONA/DIR/PATHS,/PATH/TO/FILE.rb',
                  'Execute tests from paths and files',
@@ -92,6 +121,7 @@ module PuppetAcceptance
           else
             @options[:tests] << value
           end
+          @options[:tests] = file_list(@options[:tests])
         end
 
         @defaults[:pre_suite] = []
@@ -104,6 +134,7 @@ module PuppetAcceptance
           else
             @options[:pre_suite] << value
           end
+          @options[:pre_suite] = file_list(@options[:pre_suite])
         end
 
         @defaults[:post_suite] = []
@@ -116,6 +147,7 @@ module PuppetAcceptance
           else
             @options[:post_suite] << value
           end
+          @options[:post_suite] = file_list(@options[:post_suite])
         end
 
         @defaults[:hypervisor] = nil
