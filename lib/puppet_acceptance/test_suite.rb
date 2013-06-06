@@ -39,7 +39,7 @@ module PuppetAcceptance
           ).select { |f| File.file?(f) }
         end
       end
-      fail "no test files found..." if @test_files.empty?
+      report_and_raise (@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
 
       if options[:random]
         @random_seed = (options[:random] == true ? Time.now : options[:random]).to_i
@@ -99,7 +99,7 @@ module PuppetAcceptance
     end
 
     def fail_without_test_run
-      fail "you have not run the tests yet" unless @run
+      report_and_raise (@logger, RuntimeError.new("#{@name}: you have not run the tests yet"), "TestSuite: fail_without_test_run") unless @run
     end
 
     def success?
