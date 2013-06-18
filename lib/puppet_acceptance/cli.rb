@@ -18,9 +18,12 @@ module PuppetAcceptance
       end
 
       @hosts =  []
-      @config['HOSTS'].each_key do |name|
-        @hosts << PuppetAcceptance::Host.create(name, @options, @config)
-      end
+      @network_manager = PuppetAcceptance::NetworkManager.new(@config, @options, @logger)
+      @hosts = @network_manager.provision
+
+      #@config['HOSTS'].each_key do |name|
+      #  @hosts << PuppetAcceptance::Host.create(name, @options, @config)
+      #end
     end
 
     def execute!
@@ -75,6 +78,7 @@ module PuppetAcceptance
         if @options[:fail_mode] != "stop"
           @vm_controller.cleanup
           @hosts.each {|host| host.close }
+          @network_manager.cleanup
         end
         raise "Failed to execute tests!"
       else
@@ -82,6 +86,7 @@ module PuppetAcceptance
         @logger.notify "Cleanup: cleaning up after successful run"
         @vm_controller.cleanup
         @hosts.each {|host| host.close }
+        @network_manager.cleanup
       end
     end
 

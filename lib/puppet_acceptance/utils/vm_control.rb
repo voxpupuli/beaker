@@ -1,7 +1,7 @@
 module PuppetAcceptance
   module Utils
     class VMControl
-      HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud']
+      HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant']
 
       def initialize(options, hosts, config)
         @logger = options[:logger]
@@ -441,6 +441,37 @@ module PuppetAcceptance
           vsphere_helper.close
       end #revert_vcloud
 
+      # Return a random mac address
+      #
+      # @return [String] a random mac address
+      def randmac
+        "080027" + (1..3).map{"%0.2X"%rand(256)}.join
+      end
+
+      def revert_vagrant(vagrant_hosts)
+
+        #HACK HACK HACK - add checks here to ensure that we have box + box_url
+        #generate the VagrantFile
+        File.open("Vagrantfile", 'w') do |f|
+          f.write("Vagrant::Config.run do |c|\n")
+            vagrant_hosts.each do |h|
+              node_config = "  c.vm.define '#{h.name}' do |v|\n"
+              node_config << "    v.vm.host_name = '#{h.name}'\n"
+              node_config << "    v.vm.box = '#{h['box']}'\n"
+              node_config << "    v.vm.box_url = '#{h['box_url']}'\n" unless h['box_url'].nil?
+              node_config << "    v.vm.base_mac = '#{randmac}'\n"
+              node_config << "  end\n"
+              f.write(node_config)
+            end
+        f.write("end\n")
+        end
+        @logger.debug "created Vagrantfile"
+        system("vagrant up")
+        vagrant_hosts.each do |h|
+          system("vagrant ssh-config #{h.name}")
+        end
+      end
+
       def revert
         #check to see if we are using any vms
         if not @virtual_machines
@@ -462,6 +493,8 @@ module PuppetAcceptance
               revert_blimpy(@virtual_machines[type], @options[:snapshot])
             when /vcloud/
               revert_vcloud(@virtual_machines[type])
+            #when /vagrant/
+            #  revert_vagrant(@virtual_machines[type])
           end
         end
         @logger.debug "virtual machines reverted and ready"
