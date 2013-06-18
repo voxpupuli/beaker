@@ -66,15 +66,15 @@ module PuppetAcceptance
       @command = command
       @options = options
       @args    = args
+      @environment = {}
 
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
-      if @options[:environment].is_a?(Hash)
-        @environment = @options.delete(:environment)
-      elsif @options['ENV'].is_a?(Hash) or @options[:ENV].is_a?(Hash)
-        @environment = @options.delete('ENV')
-      else
-        @environment = nil
+      if @options[:environment].is_a?(Hash) or @options['environment'].is_a?(Hash)
+        @environment = @environment.merge(@options.delete(:environment))
+      end
+      if @options['ENV'].is_a?(Hash) or @options[:ENV].is_a?(Hash)
+        @environment = @environment.merge(@options.delete('ENV'))
       end
     end
 
