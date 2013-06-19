@@ -34,5 +34,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'net-ssh'
   s.add_runtime_dependency 'net-scp'
   s.add_runtime_dependency 'rbvmomi'
+  s.add_runtime_dependency 'blimpy'
+  s.add_runtime_dependency 'nokogiri', '1.5.10'
   s.add_runtime_dependency 'fission' if RUBY_PLATFORM =~ /darwin/i
 end

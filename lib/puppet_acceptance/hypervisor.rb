@@ -1,12 +1,8 @@
 module PuppetAcceptance
   class Hypervisor
 
-    attr_accessor :ssh_confs, :user, :ips, :names
-
-    def set_defaults(hosts_to_provision)
-      @ssh_confs = @ips = {}
-      @user = nil
-      @names = hosts_to_provision
+    def configure(hosts)
+      @logger.debug "No post-provisioning configuration necessary for #{self.class.name} boxes"
     end
 
     def self.create type, hosts_to_provision, options, config
@@ -23,6 +19,7 @@ module PuppetAcceptance
           PuppetAcceptance::Fusion.new hosts_to_provision, options, config
         when /blimpy/
           @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
+          PuppetAcceptance::Blimper.new hosts_to_provision, options, config
         when /vcloud/
           @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
         when /vagrant/
@@ -33,7 +30,7 @@ module PuppetAcceptance
   end
 end
 
-%w(vagrant fusion).each do |lib|
+%w(vagrant fusion blimper).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

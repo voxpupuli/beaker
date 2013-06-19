@@ -38,41 +38,32 @@ module PuppetAcceptance
     end
 
     def provision
-      @boxes = {}
-      @virtual_machines.keys.each do |type|
-        #provision all the boxes of this type
-        @boxes[type] = PuppetAcceptance::Hypervisor.create(type, @virtual_machines[type], @options, @config)
-        #now create a host object for each box in this provision set
-        @boxes[type].names.each do |name|
+      @provisioned_set = {}
+      @virtual_machines.each do |type, names|
+        hosts_for_type = []
+        #set up host objects for provisioned provisioned_set
+        names.each do |name|
           host = PuppetAcceptance::Host.create(name, @options, @config)
-          #sometimes differently provisioned boxes use some custom host settings
-          if @boxes[type].ssh_confs[name]
-            host['ssh'] = @boxes[type].ssh_confs[name]
-          end
-          if @boxes[type].user
-            host['user'] = @boxes[type].user
-          end
-          if @boxes[type].ips[name]
-            host['ip'] = @boxes[type].ips[name]
-          end
-          #HACK HACK HACK - vagrant machines run as the vagrant user, this allows us to run commands with root permissions instead
           if type =~ /vagrant/
             host['command_wrapper'] = 'sudo su -c '
           end
-          @hosts << host
+          hosts_for_type << host
         end
+        @provisioned_set[type] = PuppetAcceptance::Hypervisor.create(type, hosts_for_type, @options, @config)
+        @hosts << hosts_for_type
       end
       @noprovision_machines.each do |name|
         @hosts << PuppetAcceptance::Host.create(name, @options, @config)
       end
+      @hosts = @hosts.flatten
       @hosts
     end
 
     def cleanup
       #only cleanup if we aren't preserving hosts
       if not @options[:preserve_hosts]
-        @boxes.each_key do |type|
-          @boxes[type].cleanup
+        @provisioned_set.each_key do |type|
+          @provisioned_set[type].cleanup
         end
       end
     end
