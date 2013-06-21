@@ -10,7 +10,8 @@ module PuppetAcceptance
       end
       @logger = options[:logger]
       @options = options
-      @config = config
+      @config = config['CONFIG'].dup
+
 
       available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
       @logger.notify "Available VM names: #{available}"

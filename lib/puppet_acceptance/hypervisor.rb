@@ -20,7 +20,7 @@ module PuppetAcceptance
         when /blimpy/
           PuppetAcceptance::Blimper.new hosts_to_provision, options, config
         when /vcloud/
-          @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
+          PuppetAcceptance::Vcloud.new hosts_to_provision, options, config
         when /vagrant/
           PuppetAcceptance::Vagrant.new hosts_to_provision, options, config
         end
@@ -28,7 +28,7 @@ module PuppetAcceptance
   end
 end
 
-%w(vsphere_helper vagrant fusion blimper vsphere).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud ).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

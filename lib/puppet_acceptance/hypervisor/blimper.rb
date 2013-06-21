@@ -62,7 +62,7 @@ epel-release-5-4.noarch.rpm"))
 
   def initialize(blimpy_hosts, options, config)
     @options = options
-    @config = config
+    @config = config['CONFIG'].dup
     @logger = options[:logger]
     @blimpy_hosts = blimpy_hosts
     require 'rubygems' unless defined?(Gem)

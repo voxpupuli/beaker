@@ -3,7 +3,7 @@ module PuppetAcceptance
 
     def initialize(vsphere_hosts, options, config)
       @options = options
-      @config = config
+      @@config = config['CONFIG'].dup
       @logger = options[:logger]
       @vsphere_hosts = vsphere_hosts
       require 'yaml' unless defined?(YAML)

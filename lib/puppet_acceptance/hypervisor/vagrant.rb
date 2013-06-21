@@ -11,7 +11,7 @@ module PuppetAcceptance
     def initialize(vagrant_hosts, options, config)
       require 'tempfile'
       @options = options
-      @config = config
+      @config = config['CONFIG'].dup
       @logger = options[:logger]
       @temp_files = []
 
