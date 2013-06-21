@@ -61,6 +61,9 @@ module PuppetAcceptance
 
     def cleanup
       #only cleanup if we aren't preserving hosts
+      #shut down connections
+      @hosts.each {|host| host.close }
+
       if not @options[:preserve_hosts]
         @provisioned_set.each_key do |type|
           @provisioned_set[type].cleanup

@@ -11,12 +11,13 @@ module PuppetAcceptance
       @logger = options[:logger]
       @options = options
       @config = config['CONFIG'].dup
+      @fusion_hosts = fusion_hosts
 
 
       available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
       @logger.notify "Available VM names: #{available}"
 
-      fusion_hosts.each do |host|
+      @fusion_hosts.each do |host|
         fission_opts = host["fission"] || {}
         vm_name = host["vmname"] || host.name
         vm = Fission::VM.new vm_name

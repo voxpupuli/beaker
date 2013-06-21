@@ -14,11 +14,12 @@ module PuppetAcceptance
       @config = config['CONFIG'].dup
       @logger = options[:logger]
       @temp_files = []
+      @vagrant_hosts = vagrant_hosts
 
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
       @vagrant_file = ''
-      vagrant_hosts.each do |host|
+      @vagrant_hosts.each do |host|
         @vagrant_file = "Vagrant::Config.run do |c|\n"
         @vagrant_file << "  c.vm.define '#{host.name}' do |v|\n"
         @vagrant_file << "    v.vm.host_name = '#{host.name}'\n"
@@ -34,7 +35,7 @@ module PuppetAcceptance
       f.close()
       system("vagrant up")
       @logger.debug "construct listing of ssh-config per vagrant box name"
-      vagrant_hosts.each do |host|
+      @vagrant_hosts.each do |host|
         f = Tempfile.new("#{host.name}")
         config = `vagrant ssh-config #{host.name}`
         f.write(config)

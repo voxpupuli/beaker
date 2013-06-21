@@ -75,7 +75,7 @@ epel-release-5-4.noarch.rpm"))
     ami_spec= YAML.load_file('config/image_templates/ec2.yaml')["AMI"]
 
     fleet = Blimpy.fleet do |fleet|
-      blimpy_hosts.each do |host|
+      @blimpy_hosts.each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
         #first attempt to use snapshot provided for this host then default to snapshot for this test run
@@ -130,7 +130,7 @@ ex.message}), retry attempt #{fleet_retries}.")
     fleet.ships.each do |ship|
       ship.wait_for_sshd
       name = ship.name
-      host = blimpy_hosts.select { |host| host.name == name }[0]
+      host = @blimpy_hosts.select { |host| host.name == name }[0]
       host['ip'] = ship.dns
       host.exec(Command.new("hostname #{name}"))
       ip = host.exec(Command.new("ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
@@ -139,14 +139,14 @@ ex.message}), retry attempt #{fleet_retries}.")
     end
 
     # Send our hosts information to the nodes
-    blimpy_hosts.each do |host|
+    @blimpy_hosts.each do |host|
       host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
     end
 
     #Install git and ruby if we are not pe
     #HACK HACK HACK, type should not be in here
     if @config[:type] !~ /pe/
-        blimpy_install_git_and_ruby(blimpy_hosts)
+        blimpy_install_git_and_ruby(@blimpy_hosts)
       end
     end #revert_blimpy
 

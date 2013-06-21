@@ -7,12 +7,12 @@ module PuppetAcceptance
 
     def self.create type, hosts_to_provision, options, config
       @logger = options[:logger]
-      @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
+      @logger.notify("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
       case type
         when /aix/
-          @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
+          PuppetAcceptance::Aixer.new hosts_to_provision, options, config
         when /solaris/
-          @logger.debug("PuppetAcceptance::Hypervisor, found some #{type} boxes to create") 
+          PuppetAcceptance::Solaris.new hosts_to_provision, options, config
         when /vsphere/
           PuppetAcceptance::Vsphere.new hosts_to_provision, options, config
         when /fusion/
@@ -28,7 +28,7 @@ module PuppetAcceptance
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud ).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud aixer solaris).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

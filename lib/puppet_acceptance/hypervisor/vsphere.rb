@@ -15,7 +15,7 @@ module PuppetAcceptance
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
       vsphere_vms = {}
-      vsphere_hosts.each do |h|
+      @vsphere_hosts.each do |h|
         name = h["vmname"] || h.name
         real_snap = h["snapshot"] || @options[:snapshot]
         vsphere_vms[name] = real_snap
