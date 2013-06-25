@@ -1,7 +1,7 @@
 require 'rubygems' unless defined?(Gem)
 module PuppetAcceptance
 
-  %w( utils test_suite test_config result command options_parsing cli ).each do |lib|
+  %w( utils test_suite test_config result command options_parsing network_manager cli ).each do |lib|
     begin
       require "puppet_acceptance/#{lib}"
     rescue LoadError
@@ -17,6 +17,9 @@ module PuppetAcceptance
   #
   # Our Host Abstraction Layer
   require 'puppet_acceptance/host'
+  #
+  # Our Hypervisor Abstraction Layer
+  require 'puppet_acceptance/hypervisor'
   #
   # How we manage connecting to hosts and hypervisors
   #require 'puppet_acceptance/connectivity'

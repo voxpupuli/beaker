@@ -11,7 +11,7 @@ class VsphereHelper
     @logger = vInfo[:logger] || PuppetAcceptance::Logger.new
     begin
       require 'rbvmomi'
-    rescue LoadError => e
+    rescue LoadError
       raise "Unable to load RbVmomi, please ensure its installed"
     end
     @connection = RbVmomi::VIM.connect :host     => vInfo[:server],

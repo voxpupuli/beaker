@@ -82,6 +82,7 @@ Systest has built in capabilites for managing VMs and provisioning SUTs:
   * VMWare Fusion via the Fission gem
   * EC2 via blimpy
   * Solaris zones via SSHing to the global zone
+  * Vagrant 
 
 You may mix and match hypervisors as needed. The `systest.rb` script takes
 `--hypservisor HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
@@ -231,6 +232,24 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
       resourcepool: Delivery/Quality Assurance/FOSS/Dynamic
       folder: delivery/Quality Assurance/FOSS/Dynamic
 
+
+## Vagrant support ##
+The option allows for testing against local Vagrant boxes.  The vm is identified by `box` or `box_url` in the config file.  No snapshot name is required as the vm is reverted back to original state post testing using `vagrant destroy --force`.
+
+    HOSTS:
+      ubuntu-10-04-4-x64:
+        roles:
+          - master
+          - agent
+          - dashboard
+          - cloudpro
+        platform: ubuntu-10.04.4-x64
+        hypervisor : vagrant
+        box: ubuntu-server-10044-x64-vbox4210
+        box_url : http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-10044-x64-vbox4210.box
+    CONFIG:
+      nfs_server: none
+      consoleport: 443
 
 # Putting it all together #
 

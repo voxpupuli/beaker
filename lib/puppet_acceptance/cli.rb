@@ -18,19 +18,17 @@ module PuppetAcceptance
       end
 
       @hosts =  []
-      @config['HOSTS'].each_key do |name|
-        @hosts << PuppetAcceptance::Host.create(name, @options, @config)
-      end
+      @network_manager = PuppetAcceptance::NetworkManager.new(@config, @options, @logger)
+      @hosts = @network_manager.provision
+
     end
 
     def execute!
-      @vm_controller = PuppetAcceptance::Utils::VMControl.new(@options, @hosts, @config)
       @ntp_controller = PuppetAcceptance::Utils::NTPControl.new(@options, @hosts)
       @setup = PuppetAcceptance::Utils::SetupHelper.new(@options, @hosts)
       @repo_controller = PuppetAcceptance::Utils::RepoControl.new(@options, @hosts)
 
-      setup_steps = [[:revert, "revert vms to snapshot", Proc.new {@vm_controller.revert}], 
-                     [:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
+      setup_steps = [[:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
                      [:root_keys, "sync keys to vms" , Proc.new {@setup.sync_root_keys}],
                      [:repo_proxy, "set repo proxy", Proc.new {@repo_controller.proxy_config}],
                      [:extra_repos, "add repo", Proc.new {@repo_controller.add_repos}],
@@ -73,15 +71,13 @@ module PuppetAcceptance
         #only do cleanup if we aren't in fail-stop mode
         @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
-          @vm_controller.cleanup
-          @hosts.each {|host| host.close }
+          @network_manager.cleanup
         end
         raise "Failed to execute tests!"
       else
         #cleanup on success
         @logger.notify "Cleanup: cleaning up after successful run"
-        @vm_controller.cleanup
-        @hosts.each {|host| host.close }
+        @network_manager.cleanup
       end
     end
 
