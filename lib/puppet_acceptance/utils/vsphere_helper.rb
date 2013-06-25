@@ -6,15 +6,14 @@ rescue LoadError
   require File.expand_path(File.join(File.dirname(__FILE__), '..', 'logger.rb'))
 end
 
-begin
-  require 'rbvmomi'
-rescue LoadError
-  raise "Unable to load RbVmomi, please ensure its installed"
-end
-
 class VsphereHelper
   def initialize vInfo = {}
     @logger = vInfo[:logger] || PuppetAcceptance::Logger.new
+    begin
+      require 'rbvmomi'
+    rescue LoadError => e
+      raise "Unable to load RbVmomi, please ensure its installed"
+    end
     @connection = RbVmomi::VIM.connect :host     => vInfo[:server],
                                        :user     => vInfo[:user],
                                        :password => vInfo[:pass],
