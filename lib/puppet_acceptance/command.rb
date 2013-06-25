@@ -66,16 +66,16 @@ module PuppetAcceptance
       @command = command
       @options = options
       @args    = args
+      @environment = {}
 
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
-      if @options[:environment].is_a?(Hash)
-        @environment = @options.delete(:environment)
-      elsif @options['ENV'].is_a?(Hash) or @options[:ENV].is_a?(Hash)
-        @environment = @options.delete('ENV')
-      else
-        @environment = nil
+      [:ENV, :environment, 'environment', 'ENV'].each do |k|
+         if @options[k].is_a?(Hash)
+           @environment = @environment.merge(@options.delete(k))
+         end
       end
+
     end
 
     # @param [Host]   host An object that implements {PuppetAcceptance::Host}'s
@@ -150,7 +150,7 @@ module PuppetAcceptance
     #       knowledge contained here. Really the relationship should be
     #       reversed where a host is asked for an appropriate Command when
     #       given a generic Command.
-    def environment_string_for host, env = {}
+    def environment_string_for host, env 
       return '' if env.empty?
 
       env_array = parse_env_hash_for( host, env ).compact
