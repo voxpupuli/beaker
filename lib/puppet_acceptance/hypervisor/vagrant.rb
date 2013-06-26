@@ -18,9 +18,8 @@ module PuppetAcceptance
 
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
-      @vagrant_file = ''
+      @vagrant_file = "Vagrant::Config.run do |c|\n"
       @vagrant_hosts.each do |host|
-        @vagrant_file = "Vagrant::Config.run do |c|\n"
         @vagrant_file << "  c.vm.define '#{host.name}' do |v|\n"
         @vagrant_file << "    v.vm.host_name = '#{host.name}'\n"
         @vagrant_file << "    v.vm.box = '#{host['box']}'\n"
