@@ -76,6 +76,7 @@ module PuppetAcceptance
       unless ENV['IS_PE'].nil?
         @is_pe ||= ENV['IS_PE'] == 'true'
       end
+      @is_pe
     end
 
     def puppet_enterprise_dir

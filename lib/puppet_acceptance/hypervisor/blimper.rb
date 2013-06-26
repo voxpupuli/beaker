@@ -1,25 +1,6 @@
 module PuppetAcceptance 
   class Blimper < PuppetAcceptance::Hypervisor
 
-    # NOTE: this code is shamelessly stolen from facter's 'domain' fact, but
-    # we don't have access to facter at this point in the run.  Also, this
-    # utility method should perhaps be moved to a more central location in the
-    # framework.
-    def get_domain_name(host)
-      domain = nil
-      search = nil
-      resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
-      resolv_conf.each_line { |line|
-        if line =~ /^\s*domain\s+(\S+)/
-          domain = $1
-        elsif line =~ /^\s*search\s+(\S+)/
-          search = $1
-        end
-      }
-      return domain if domain
-      return search if search
-    end
-
     def amiports(host)
       roles = host['roles']
       ports = [22]
@@ -133,14 +114,14 @@ ex.message}), retry attempt #{fleet_retries}.")
       host = @blimpy_hosts.select { |host| host.name == name }[0]
       host['ip'] = ship.dns
       host.exec(Command.new("hostname #{name}"))
-      ip = host.exec(Command.new("ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
+      ip = get_ip(host) 
       domain = get_domain_name(host)
       etc_hosts += "#{ip}\t#{name}\t#{name}.#{domain}\n"
     end
 
     # Send our hosts information to the nodes
     @blimpy_hosts.each do |host|
-      host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
+      set_etc_hosts(host, etc_hosts)
     end
 
     #Install git and ruby if we are not pe
