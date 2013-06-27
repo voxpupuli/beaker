@@ -13,6 +13,12 @@ module PuppetAcceptance
 
       @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
 
+      #add additional paths to the LOAD_PATH
+      if not @options[:load_path].empty?
+        @options[:load_path].each do |path|
+          $LOAD_PATH << File.expand_path(path)
+        end
+      end
       if (@options[:helper])
         require File.expand_path(@options[:helper])
       end
@@ -48,10 +54,8 @@ module PuppetAcceptance
             step[2].call
           end
         end
-
-        run_suite('pre-setup', pre_options, :fail_fast) if @options[:pre_script]
-        run_suite('setup', setup_options, :fail_fast)
-        run_suite('pre-suite', pre_suite_options)
+        #pre acceptance  phase
+        run_suite('pre-suite', pre_suite_options, :fail_fast)
         #testing phase
         begin
           run_suite('acceptance', @options) unless @options[:installonly]
@@ -82,18 +86,6 @@ module PuppetAcceptance
     end
 
     def run_suite(name, options, failure_strategy = false)
-      #expand out tests, need to know contents of directories to determine if there are any tests
-      test_files = []
-      options[:tests].each do |root|
-        if File.file? root then
-          test_files << root
-        else
-          test_files += Dir.glob(
-            File.join(root, "**/*.rb")
-          ).select { |f| File.file?(f) }
-        end
-      end
-      options[:tests] = test_files
       if (options[:tests].empty?)
         @logger.notify("No tests to run for suite '#{name}'")
         return
@@ -103,59 +95,16 @@ module PuppetAcceptance
       ).run_and_raise_on_failure
     end
 
-    def setup_options
-      setup_opts = nil
-      if @options[:noinstall]
-        setup_opts = @options.merge({
-          :random => false,
-          :tests  => ["#{puppet_acceptance_setup}/early" ] })
-
-      elsif @options[:upgrade]
-        setup_opts = @options.merge({
-          :random => false,
-          :tests  => ["#{puppet_acceptance_setup}/early",
-                      "#{puppet_acceptance_setup}/pe_upgrade" ] })
-
-      else
-        setup_opts = build_suite_options("early")
-        setup_opts[:tests] << "#{puppet_acceptance_setup}/#{@options[:type]}"
-      end
-      setup_opts
-    end
-
-    def pre_options
+    def pre_suite_options
       @options.merge({
         :random => false,
-        :tests => [ "#{puppet_acceptance_setup}/early",
-                    @options[:pre_script] ] })
-    end
-
-    def pre_suite_options
-      build_suite_options('pre_suite')
+        :tests => @options[:pre_suite] })
     end
     def post_suite_options
-      build_suite_options('post_suite')
-    end
-    def cleanup_options
-      build_suite_options('cleanup')
-    end
-
-    def build_suite_options(phase_name)
-      tests = []
-      if (File.directory?("#{puppet_acceptance_setup}/#{phase_name}"))
-        tests << "#{puppet_acceptance_setup}/#{phase_name}"
-      end
-      if (@options[:setup_dir] and
-          File.directory?("#{@options[:setup_dir]}/#{phase_name}"))
-        tests << "#{@options[:setup_dir]}/#{phase_name}"
-      end
       @options.merge({
-         :random => false,
-         :tests => tests })
+        :random => false,
+        :tests => @options[:post_suite] })
     end
 
-    def puppet_acceptance_setup
-      @puppet_acceptance_setup ||= File.join(File.dirname(__FILE__), '..', '..', 'setup')
-    end
   end
 end

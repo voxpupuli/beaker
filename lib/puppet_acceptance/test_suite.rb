@@ -30,7 +30,7 @@ module PuppetAcceptance
       @test_cases = []
       @test_files = []
 
-      Array(options[:tests] || 'tests').each do |root|
+      options[:tests].each do |root|
         if File.file? root then
           @test_files << root
         else
@@ -48,6 +48,8 @@ module PuppetAcceptance
       else
         @test_files = @test_files.sort
       end
+    rescue => e
+      report_and_raise(@logger, e, "TestSuite: initialize")
     end
 
     def run
@@ -92,10 +94,16 @@ module PuppetAcceptance
     end
 
     def run_and_raise_on_failure
-      run
-      return self if success?
-      @logger.error "Failed while running the #{name} suite..."
-      raise "Failed while running the #{name} suite..."
+      begin
+        run
+        return self if success?
+      rescue => e
+        #failed during run
+        report_and_raise(@logger, e, "TestSuite :run_and_raise_on_failure")
+      else
+        #failed during test
+        report_and_raise(@logger, RuntimeError.new("Failed while running the #{name} suite"), "TestSuite: report_and_raise_on_failure")
+      end
     end
 
     def fail_without_test_run

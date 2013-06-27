@@ -35,6 +35,22 @@ module PuppetAcceptance
       install_opts
     end
 
+    def self.file_list(paths)
+      files = []
+      if not paths.empty? 
+        paths.each do |root|
+          if File.file? root then
+            files << root
+          else
+            files += Dir.glob(
+              File.join(root, "**/*.rb")
+            ).select { |f| File.file?(f) }
+          end
+        end
+      end
+      files
+    end
+
     def self.parse_args
       return @options if @options
 
@@ -43,6 +59,10 @@ module PuppetAcceptance
       @defaults = {}
       @options = {}
       @options[:install] = []
+      @options[:tests] = []
+      @options[:load_path] = []
+      @options[:pre_suite] = []
+      @options[:post_suite] = []
       @options_from_file = {}
 
       optparse = OptionParser.new do|opts|
@@ -63,36 +83,12 @@ module PuppetAcceptance
           @options_from_file = parse_options_file file
         end
 
-        @defaults[:type] = nil
+        @defaults[:type] = 'pe'
         opts.on '--type TYPE',
-                'MANDATORY',
-                'Select testing scenario type',
-                '(eg. pe, git)' do |type|
-          setupdir = File.expand_path(
-                       File.join(
-                         File.dirname(__FILE__), '..', '..', 'setup', type))
-
-          unless File.directory?(setupdir) then
-            raise "Sorry, #{type} is not a known setup type!"
-            exit 1
-          end
+                'one of git or pe', 
+                'used to determine underlying path structure of puppet install',
+                'defaults to pe' do |type|
           @options[:type] = type
-        end
-
-        @defaults[:tests] = []
-        opts.on  '-t', '--tests DIR/FILE',
-                 'Execute tests in DIR or FILE',
-                 '(default: "./tests")' do |dir|
-          @options[:tests] ||= []
-          @options[:tests] << dir
-        end
-
-        @defaults[:setup_dir] = nil
-        opts.on '--setup-dir /SETUP/DIR/PATH',
-                'Path to project specific setup steps',
-                'Commonly used stages include:',
-                '"early", "pre_suite", "post_suite"' do |dir|
-          @options[:setup_dir] = dir
         end
 
         @defaults[:helper] = nil
@@ -102,10 +98,56 @@ module PuppetAcceptance
           @options[:helper] = script
         end
 
-        @defaults[:pre_script] = nil
-        opts.on '--pre PATH/TO/SCRIPT',
-                'Pass steps to be run prior to setup' do |step|
-          @options[:pre_script] = step
+        @defaults[:load_path] = []
+        opts.on  '--load-path /PATH/TO/DIR,/ADDITIONAL/DIR/PATHS',
+                 'Add paths to LOAD_PATH'  do |value|
+          if value.is_a?(Array)
+            @options[:load_path] += value
+          elsif value =~ /,/
+            @options[:load_path] += value.split(',')
+          else
+            @options[:load_path] << value
+          end
+        end
+
+        @defaults[:tests] = []
+        opts.on  '-t', '--tests /PATH/TO/DIR,/ADDITIONA/DIR/PATHS,/PATH/TO/FILE.rb',
+                 'Execute tests from paths and files',
+                 '(default: "./tests")' do |value|
+          if value.is_a?(Array)
+            @options[:tests] += value
+          elsif value =~ /,/
+            @options[:tests] += value.split(',')
+          else
+            @options[:tests] << value
+          end
+          @options[:tests] = file_list(@options[:tests])
+        end
+
+        @defaults[:pre_suite] = []
+        opts.on '--pre-suite /PRE-SUITE/DIR/PATH,/ADDITIONAL/DIR/PATHS,/PATH/TO/FILE.rb',
+                'Path to project specific steps to be run BEFORE testing' do |value|
+          if value.is_a?(Array)
+            @options[:pre_suite] += value
+          elsif value =~ /,/
+            @options[:pre_suite] += value.split(',')
+          else
+            @options[:pre_suite] << value
+          end
+          @options[:pre_suite] = file_list(@options[:pre_suite])
+        end
+
+        @defaults[:post_suite] = []
+        opts.on '--post-suite /POST-SUITE/DIR/PATH,/OPTIONAL/ADDITONAL/DIR/PATHS,/PATH/TO/FILE.rb',
+                'Path to project specific steps to be run AFTER testing' do |dir|
+          if value.is_a?(Array)
+            @options[:post_suite] += value
+          elsif value =~ /,/
+            @options[:post_suite] += value.split(',')
+          else
+            @options[:post_suite] << value
+          end
+          @options[:post_suite] = file_list(@options[:post_suite])
         end
 
         @defaults[:hypervisor] = nil
@@ -309,6 +351,10 @@ module PuppetAcceptance
           @options[:uninstall] = type
         end
 
+        opts.on '--setup-dir /SETUP/DIR/PATH',
+                'DEPRECATED -- use --pre-suite/--post-suite' do |value|
+        end
+
         opts.on '--vmrun VM_PROVIDER',
                 'DEPRECATED -- use --hypervisor instead' do |vm|
           @options[:hypervisor] = vm
@@ -377,7 +423,9 @@ module PuppetAcceptance
       end
       @options[:install].compact!
 
-      raise ArgumentError.new("Must specify the --type argument") unless @options[:type]
+      if @options[:type] !~ /(pe)|(git)/
+        raise ArgumentError.new("--type must be one of pe or git, not '#{@options[:type]}'")
+      end
 
       raise ArgumentError.new("--fail-mode must be one of fast, stop") unless ["fast", "stop", nil].include?(@options[:fail_mode])
 
