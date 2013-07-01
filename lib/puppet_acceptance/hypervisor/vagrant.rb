@@ -28,7 +28,7 @@ module PuppetAcceptance
       #generate the VagrantFile
       @vagrant_file = "Vagrant::Config.run do |c|\n"
       @vagrant_hosts.each do |host|
-        host['ip'] = randip
+        host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
         @vagrant_file << "  c.vm.define '#{host.name}' do |v|\n"
         @vagrant_file << "    v.vm.host_name = '#{host.name}'\n"
         @vagrant_file << "    v.vm.box = '#{host['box']}'\n"
@@ -50,13 +50,13 @@ module PuppetAcceptance
       @vagrant_hosts.each do |host|
         f = Tempfile.new("#{host.name}")
         config = `vagrant ssh-config #{host.name}`
+        config = config.gsub(/#{host.name}/, host['ip']) #replace hostname with ip so that ssh-config works
         f.write(config)
         f.rewind
         host['ssh'] = {:config => f.path()}
         host['user'] = 'vagrant'
         @temp_files << f
         etc_hosts += "#{host['ip'].to_s}\t#{host.name}\n"
-        host['ip'] = nil #once the etc/hosts has been constructed we can throw the ip away
       end
       @vagrant_hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
