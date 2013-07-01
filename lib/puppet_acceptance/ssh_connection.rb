@@ -159,8 +159,8 @@ module PuppetAcceptance
       channel.eof!
     end
 
-    def scp_to source, target, options = {}
-      return if options[:dry_run]
+    def scp_to source, target, options = {}, dry_run = false
+      return if dry_run
 
       options[:recursive]=File.directory?(source) if options[:recursive].nil?
 
@@ -177,8 +177,8 @@ module PuppetAcceptance
       return result
     end
 
-    def scp_from source, target, scp_options, options = {}
-      return if options[:dry_run]
+    def scp_from source, target, scp_options, options = {}, dry_run = false
+      return if dry_run
 
       options[:recursive] = true if options[:recursive].nil?
 
