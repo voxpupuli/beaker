@@ -47,10 +47,14 @@ Puppet Agent only.  The Dashboard will be configured to run HTTPS on port 443.
           - agent
           - dashboard
         platform: ubuntu-10.04-amd64
+        hypervisor : fusion
+        snapshot : clean
       ubuntu-1004-32:
         roles:
           - agent
         platform: ubuntu-10.04-i386
+        hypervisor : fusion
+        snaphost : clean
     CONFIG:
       consoleport: 443
 
@@ -62,11 +66,15 @@ You can setup a very different test scenario by simply re-arranging the "roles":
           - dashboard
           - agent
         platform: ubuntu-10.04-amd64
+        hypervisor : fusion
+        snapshot : clean
       ubuntu-1004-32:
         roles:
           - master
           - agent
         platform: ubuntu-10.04-i386
+        hypervisor : fusion
+        snapshot : clean
     CONFIG:
       consoleport: 443
 
@@ -84,11 +92,8 @@ Systest has built in capabilites for managing VMs and provisioning SUTs:
   * Solaris zones via SSHing to the global zone
   * Vagrant 
 
-You may mix and match hypervisors as needed. The `systest.rb` script takes
-`--hypservisor HYPERVISOR` and `--snapshot SNAPSHOT` options. The value passed to
-`--hypervisor` will be the default value and you may override hypervisors on a per
-host basis in config file. If a host does not have a hypervisor in the config file and the `--hypervisor` option is used the host is assumed to use the `--hypervisor` indicated.  If you wish to mix hosts with hypervisors and those without it is best to use the host definition in the config file and avoid the command line option.  Default behavior for vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
-`--revert` indicates that you want to revert VMs to snapshot before test execution, defaults to true.  Use `--no-revert` to skip reverting before test execution.
+You may mix and match hypervisors as needed.   Hypervisors and snapshot names are defined per-host in the node configuration file.  Default behavior for Vagrant, vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
+`--provision` indicates that you want to provision and revert VMs to snapshot before test execution, defaults to true.  Use `--no-provision` to skip provisioning and reverting before test execution.
 
 
 For example:
@@ -101,15 +106,16 @@ For example:
         - agent
       platform: ubuntu-10.04-i386
       hypervisor: fusion
-      fission:
-        snapshot: foss
-      revert: false
+      snapshot: foss
+      provision: false
     shared-host-in-the-cloud:
       roles:
         - agent
       platform: ubuntu-10.04-i386
+      hypervisor vsphere
+      snaphost base
 
-    $ ./systest.rb --config configs/my_hosts.yml --hypervisor vsphere --snapshot base   ....
+    $ ./systest.rb --config configs/my_hosts.yml  ....
 
 
 ## VMWare Fusion support ##
@@ -120,16 +126,11 @@ that points to the `vmrun` executable and where VMs can be found.
     vm_dir: "/Directory/containing/my/.VMX/files"
     vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
-You can then use the following arguments to Systest:
-- `--hypervisor fusion` tells us to enable this feature. This is required.
-- `--snapshot <name>`, where <name> is the snapshot name to revert to. This
-  applies across *all* VMs, so it only makes sense if you want to use the same
-  snapshot name for all VMs. This is optional.
+You can then use the following arguments in the node configuration:
+- `hypervisor : fusion` tells us to enable this feature for this host. This is required.
+- `snapshot : <name>`, where <name> is the snapshot name to revert to.  This is required.
 
-We'll try and match up the hostname (from your configuration file) with a VM of
-the same name. Note that the VM is expected to be pre-configured for running
-acceptance tests; it should have all the right prerequisite libraries,
-password-less SSH access for root, etc.
+We'll try and match up the hostname with a VM of the same name. Note that the VM is expected to be pre-configured for running acceptance tests; it should have all the right prerequisite libraries, password-less SSH access for root, etc.
 
 There are a few additional options available in your configuration file. Each host
 section can now use:
@@ -137,10 +138,6 @@ section can now use:
 - `vmname`: This is useful if the hostname of the VM doesn't match the name of
   the .VMX file on disk. The alias should be something fission can load.
 
-- `fission`: A new subsection for fission-specific options, currently limited to:
-
-  - `snapshot`: This is useful if you'd like to use different snapshots for each
-    host. The value should be a valid snapshot name for the VM.
 
 Example:
 
@@ -151,18 +148,18 @@ Example:
           - agent
         platform: debian-6-i386
         vmname: super-awesome-vm-name
-        fission:
-          snapshot: acceptance-testing-5
+        hypervisor : fusion
+        snapshot: acceptance-testing-5
 
 Diagnostics:
 
-When using `--hypervisor fusion`, we'll log all the available VM names and for each
+When using `hypervisor fusion`, we'll log all the available VM names and for each
 host we'll log all the available snapshot names.
 
 ## EC2 Support ##
 Pre-requisite: Blimpy gem installed and .fog file correctly configured with your credentials.
 
---hypervisor blimpy
+hypervisor : blimpy
 
 Currently, there is limited support EC2 nodes; we are adding support for new platforms shortly.
 
@@ -171,12 +168,11 @@ AMIs are built for PE based installs on:
   - Enterprize Linux 5, 32 bit
   - Ubuntu 10.04, 32 bit
 
-Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file
-lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
+Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
 
 ## Solaris Support ##
 
-Used with `--hypervisor solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
+Used with `hypervisor : solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
 
 Example .fog file:
 
@@ -203,12 +199,12 @@ Example:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
-There are two possible `--hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
+There are two possible `hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
 
-### `--hypervisor vsphere`
+### `hypervisor : vsphere`
 This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
 
-### `--hypervisor vcloud`
+### `hypervisor : vcloud`
 This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
 
 The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
@@ -221,11 +217,13 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
           - dashboard
         platform: ubuntu-10.04-amd64
         template: ubuntu-1004-x86_64
+        hypervisor: vcloud
       agent-vm:
         roles:
           - agent
         platform: ubuntu-10.04-i386
         template: ubuntu-1004-i386
+        hypervisor : vcloud
     CONFIG:
       consoleport: 443
       datastore: instance0
@@ -265,7 +263,7 @@ you must check out the tests first, then the harness, as such:
     cd puppet-acceptance
     ln -s ../acceptance acceptance-tests
 ### Run the tests
-    ./systest.rb --hypervisor fusion -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
+    ./systest.rb -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
 
 
 ## Running PE tests ##
@@ -330,4 +328,4 @@ Special topic branch checkout with a targeted test:
 
 You may need to extend the harness DSL (data specific language) to handle your particular test case.  To run the harness with an addition to the LOAD_PATH use `--load-path`.  You can specify a single directory or a comma separated list of directories to be added.
 
-    bundle exec ./systest.rb --debug --config ubuntu1004-32mda.cfg --revert --tests ../puppet/acceptance/tests/resource/cron/should_allow_changing_parameters.rb  --fail fast --hypervisor fusion  --root-keys --type pe --load-path ../puppet/acceptance/lib/ 
+    bundle exec ./systest.rb --debug --config ubuntu1004-32mda.cfg --tests ../puppet/acceptance/tests/resource/cron/should_allow_changing_parameters.rb  --fail fast --root-keys --type pe --load-path ../puppet/acceptance/lib/ 

@@ -41,13 +41,7 @@ module PuppetAcceptance
       end
       report_and_raise(@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
 
-      if options[:random]
-        @random_seed = (options[:random] == true ? Time.now : options[:random]).to_i
-        srand @random_seed
-        @test_files = @test_files.sort_by { rand }
-      else
-        @test_files = @test_files.sort
-      end
+      @test_files = @test_files.sort
     rescue => e
       report_and_raise(@logger, e, "TestSuite: initialize")
     end
@@ -56,9 +50,8 @@ module PuppetAcceptance
       @run = true
       @start_time = Time.now
 
-      configure_logging @options[:stdout_only]
+      configure_logging 
 
-      @logger.notify "Using random seed #{@random_seed}" if @random_seed
       @test_files.each do |test_file|
         @logger.notify
         @logger.notify "Begin #{test_file}"
@@ -284,8 +277,8 @@ module PuppetAcceptance
     end
 
     # Setup log dir
-    def configure_logging(stdout_only)
-      @logger.add_destination(log_path("#{name}-run.log")) unless stdout_only
+    def configure_logging
+      @logger.add_destination(log_path("#{@name}-run.log"))
       #
       # This is an awful hack to maintain backward compatibility until tests
       # are ported to use logger.

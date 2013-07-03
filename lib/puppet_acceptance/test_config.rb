@@ -103,7 +103,7 @@ module PuppetAcceptance
     end
 
     def puppet_enterprise_version
-      @pe_ver ||= @options[:pe_version] || load_pe_version if is_pe?
+      @pe_ver ||= load_pe_version if is_pe?
     end
 
     def load_pe_version_win
@@ -126,7 +126,7 @@ module PuppetAcceptance
     end
 
     def puppet_enterprise_version_win
-      @pe_ver_win ||= @options[:pe_version] || load_pe_version_win if is_pe?
+      @pe_ver_win ||= load_pe_version_win if is_pe?
     end
 
     # Print out test configuration

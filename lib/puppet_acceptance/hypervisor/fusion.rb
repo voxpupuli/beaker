@@ -18,14 +18,13 @@ module PuppetAcceptance
       @logger.notify "Available VM names: #{available}"
 
       @fusion_hosts.each do |host|
-        fission_opts = host["fission"] || {}
         vm_name = host["vmname"] || host.name
         vm = Fission::VM.new vm_name
         raise "Could not find VM '#{vm_name}' for #{host.name}!" unless vm.exists?
 
         available_snapshots = vm.snapshots.data.sort.join(", ")
         @logger.notify "Available snapshots for #{host.name}: #{available_snapshots}"
-        snap_name = host["snapshot"] || fission_opts["snapshot"] || @options[:snapshot]
+        snap_name = host["snapshot"] 
         raise "No snapshot specified for #{host.name}" unless snap_name
         raise "Could not find snapshot '#{snap_name}' for host #{host.name}!" unless vm.snapshots.data.include? snap_name
 

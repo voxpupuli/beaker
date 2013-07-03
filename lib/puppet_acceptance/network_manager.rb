@@ -19,13 +19,13 @@ module PuppetAcceptance
       @noprovision_machines = []
       @config['HOSTS'].each_key do |name|
         host_info = @config['HOSTS'][name]
-        #check to see if there are any specified hypervisors/snapshots
-        hypervisor = host_info['hypervisor'] || @options[:hypervisor]
-        #revert this box
-        # - only if we are running with --revert
+        #check to see if this host has a hypervisor 
+        hypervisor = host_info['hypervisor'] 
+        #provision this box
+        # - only if we are running with --provision
         # - only if we have a hypervisor
-        # - only if either the specific hosts has no specification or has 'revert' in its config
-        if @options[:revert] && hypervisor && (host_info.has_key?('revert') ? host_info['revert'] : true) #obey config file revert, defaults to reverting vms
+        # - only if either the specific hosts has no specification or has 'provision' in its config
+        if @options[:provision] && hypervisor && (host_info.has_key?('provision') ? host_info['provision'] : true) #obey config file provision, defaults to provisioning vms
           raise "Invalid hypervisor: #{hypervisor} (#{name})" unless HYPERVISOR_TYPES.include? hypervisor
           @logger.debug "Hypervisor for #{name} is #{host_info['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
           @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]

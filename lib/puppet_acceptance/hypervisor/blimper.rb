@@ -59,8 +59,8 @@ epel-release-5-4.noarch.rpm"))
       @blimpy_hosts.each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
-        #first attempt to use snapshot provided for this host then default to snapshot for this test run
-        image_type = host['snapshot'] || @options[:snapshot]
+        #use snapshot provided for this host 
+        image_type = host['snapshot'] 
         if not image_type
           raise "No snapshot/image_type provided for blimpy provisioning"
         end

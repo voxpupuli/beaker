@@ -67,8 +67,8 @@ module PuppetAcceptance
         report_and_raise(@logger, e, "proxy_config")
       end
 
-      def add_repos
-        #extra_repos
+      def add_el_extras
+        #add_el_extras
         #only supports el-* platforms
         @hosts.each do |host|
           case

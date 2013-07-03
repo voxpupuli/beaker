@@ -34,12 +34,11 @@ module PuppetAcceptance
       @setup = PuppetAcceptance::Utils::SetupHelper.new(@options, @hosts)
       @repo_controller = PuppetAcceptance::Utils::RepoControl.new(@options, @hosts)
 
-      setup_steps = [[:timesync, "sync time on vms", Proc.new {@ntp_controller.timesync}],
-                     [:root_keys, "sync keys to vms" , Proc.new {@setup.sync_root_keys}],
-                     [:repo_proxy, "set repo proxy", Proc.new {@repo_controller.proxy_config}],
-                     [:extra_repos, "add repo", Proc.new {@repo_controller.add_repos}],
-                     [:add_master_entry, "update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}],
-                     [:set_rvm_of_ruby, "set RVM of ruby", Proc.new {@setup.set_rvm_of_ruby}]]
+      setup_steps = [[:timesync, "Sync time on hosts", Proc.new {@ntp_controller.timesync}],
+                     [:root_keys, "Sync keys to hosts" , Proc.new {@setup.sync_root_keys}],
+                     [:repo_proxy, "Proxy packaging repositories on ubuntu, debian and solaris-11", Proc.new {@repo_controller.proxy_config}],
+                     [:add_el_extras, "Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts", Proc.new {@repo_controller.add_el_extras}],
+                     [:add_master_entry, "Update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}]]
       
       begin
         trap(:INT) do
@@ -54,20 +53,21 @@ module PuppetAcceptance
             step[2].call
           end
         end
+
         #pre acceptance  phase
-        run_suite('pre-suite', pre_suite_options, :fail_fast)
+        run_suite('pre-suite', @options.merge({:tests => @options[:pre_suite]}), :fail_fast)
         #testing phase
         begin
-          run_suite('acceptance', @options) unless @options[:installonly]
+          run_suite('acceptance', @options)
         #post acceptance phase
         rescue => e
           #post acceptance on failure
           #if we error then run the post suite as long as we aren't in fail-stop mode
-          run_suite('post-suite', post_suite_options) unless @options[:fail_mode] == "stop"
+          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]})) unless @options[:fail_mode] == "stop"
           raise e
         else
           #post acceptance on success
-          run_suite('post-suite', post_suite_options)
+          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]}))
         end
       #cleanup phase
       rescue => e
@@ -93,17 +93,6 @@ module PuppetAcceptance
       PuppetAcceptance::TestSuite.new(
         name, @hosts, options, @config, failure_strategy
       ).run_and_raise_on_failure
-    end
-
-    def pre_suite_options
-      @options.merge({
-        :random => false,
-        :tests => @options[:pre_suite] })
-    end
-    def post_suite_options
-      @options.merge({
-        :random => false,
-        :tests => @options[:post_suite] })
     end
 
   end
