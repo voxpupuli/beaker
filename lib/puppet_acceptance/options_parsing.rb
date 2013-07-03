@@ -58,11 +58,6 @@ module PuppetAcceptance
 
       @defaults = {}
       @options = {}
-      @options[:install] = []
-      @options[:tests] = []
-      @options[:load_path] = []
-      @options[:pre_suite] = []
-      @options[:post_suite] = []
       @options_from_file = {}
 
       optparse = OptionParser.new do|opts|
@@ -101,6 +96,7 @@ module PuppetAcceptance
         @defaults[:load_path] = []
         opts.on  '--load-path /PATH/TO/DIR,/ADDITIONAL/DIR/PATHS',
                  'Add paths to LOAD_PATH'  do |value|
+          @options[:load_path] = []
           if value.is_a?(Array)
             @options[:load_path] += value
           elsif value =~ /,/
@@ -112,8 +108,8 @@ module PuppetAcceptance
 
         @defaults[:tests] = []
         opts.on  '-t', '--tests /PATH/TO/DIR,/ADDITIONA/DIR/PATHS,/PATH/TO/FILE.rb',
-                 'Execute tests from paths and files',
-                 '(default: "./tests")' do |value|
+                 'Execute tests from paths and files' do |value|
+          @options[:tests] = []
           if value.is_a?(Array)
             @options[:tests] += value
           elsif value =~ /,/
@@ -122,11 +118,15 @@ module PuppetAcceptance
             @options[:tests] << value
           end
           @options[:tests] = file_list(@options[:tests])
+          if @options[:tests].empty?
+            raise ArgumentError, "No tests to run!"
+          end
         end
 
         @defaults[:pre_suite] = []
         opts.on '--pre-suite /PRE-SUITE/DIR/PATH,/ADDITIONAL/DIR/PATHS,/PATH/TO/FILE.rb',
                 'Path to project specific steps to be run BEFORE testing' do |value|
+          @options[:pre_suite] = []
           if value.is_a?(Array)
             @options[:pre_suite] += value
           elsif value =~ /,/
@@ -135,11 +135,15 @@ module PuppetAcceptance
             @options[:pre_suite] << value
           end
           @options[:pre_suite] = file_list(@options[:pre_suite])
+          if @options[:pre_suite].empty?
+            raise ArgumentError, "Empty pre-suite!"
+          end
         end
 
         @defaults[:post_suite] = []
         opts.on '--post-suite /POST-SUITE/DIR/PATH,/OPTIONAL/ADDITONAL/DIR/PATHS,/PATH/TO/FILE.rb',
-                'Path to project specific steps to be run AFTER testing' do |dir|
+                'Path to project specific steps to be run AFTER testing' do |value|
+          @options[:post_suite] = []
           if value.is_a?(Array)
             @options[:post_suite] += value
           elsif value =~ /,/
@@ -148,6 +152,9 @@ module PuppetAcceptance
             @options[:post_suite] << value
           end
           @options[:post_suite] = file_list(@options[:post_suite])
+          if @options[:post_suite].empty?
+            raise ArgumentError, "Empty post-suite!"
+          end
         end
 
         @defaults[:hypervisor] = nil
@@ -196,10 +203,13 @@ module PuppetAcceptance
           @options[:keyfile] = key
         end
 
+
+        @defaults[:install] = []
         opts.on '-i URI', '--install URI',
                 'Install a project repo/app on the SUTs', 
                 'Provide full git URI or use short form KEYWORD/name',
                 'supported keywords: PUPPET, FACTER, HIERA, HIERA-PUPPET' do |value|
+          @options[:install] = []
           if value.is_a?(Array)
             @options[:install] += value
           elsif value =~ /,/
@@ -410,12 +420,13 @@ module PuppetAcceptance
       # let the options be set, then output usage.
       puts optparse if @no_args
 
+      # merge in the defaults
+      @options = @defaults.merge(@options)
+      @options_from_file = @defaults.merge(@options_from_file)
+
       # merge in the options that we read from the file
       @options = @options_from_file.merge(@options)
       @options[:install] += [ @options_from_file[:install] ].flatten
-
-      # merge in the defaults
-      @options = @defaults.merge(@options)
 
       # convert old package options to new package options format
       [:puppet, :facter, :hiera, :hiera_puppet].each do |name|
@@ -429,7 +440,6 @@ module PuppetAcceptance
 
       raise ArgumentError.new("--fail-mode must be one of fast, stop") unless ["fast", "stop", nil].include?(@options[:fail_mode])
 
-      @options[:tests] << 'tests' if @options[:tests].empty?
       #HACK - for backwards compatability, if no snaphost is set then use the type as the snapshot
       @options[:snapshot] ||= @options[:type]
 
