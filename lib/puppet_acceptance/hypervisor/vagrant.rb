@@ -55,8 +55,28 @@ module PuppetAcceptance
         f.rewind
         host['ssh'] = {:config => f.path()}
         host['user'] = 'vagrant'
-        @temp_files << f
         etc_hosts += "#{host['ip'].to_s}\t#{host.name}\n"
+        #make is possible to log in as root by copying the ssh dir to root's account
+        @logger.debug "Give root a copy of vagrant's keys"
+        if host['platform'] =~ /windows/
+          host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
+        else
+          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'))
+        end
+        host.close #shut down the connection, will reconnect on next exec
+        #rewrite ssh-config to use the root user
+        f.close
+        config = config.gsub(/vagrant/, host['user'])
+        f = Tempfile.new("#{host.name}")
+        f.write(config)
+        f.rewind
+        host['ssh'] = {:config => f.path()}
+        if host['platform'] =~ /windows/
+          host['user'] = 'Administrator'
+        else
+          host['user'] = 'root'
+        end
+        @temp_files << f
       end
       @vagrant_hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
