@@ -47,14 +47,14 @@ Puppet Agent only.  The Dashboard will be configured to run HTTPS on port 443.
           - agent
           - dashboard
         platform: ubuntu-10.04-amd64
-        hypervisor : fusion
-        snapshot : clean
+        hypervisor: fusion
+        snapshot: clean
       ubuntu-1004-32:
         roles:
           - agent
         platform: ubuntu-10.04-i386
-        hypervisor : fusion
-        snaphost : clean
+        hypervisor: fusion
+        snaphost: clean
     CONFIG:
       consoleport: 443
 
@@ -66,15 +66,15 @@ You can setup a very different test scenario by simply re-arranging the "roles":
           - dashboard
           - agent
         platform: ubuntu-10.04-amd64
-        hypervisor : fusion
-        snapshot : clean
+        hypervisor: fusion
+        snapshot: clean
       ubuntu-1004-32:
         roles:
           - master
           - agent
         platform: ubuntu-10.04-i386
-        hypervisor : fusion
-        snapshot : clean
+        hypervisor: fusion
+        snapshot: clean
     CONFIG:
       consoleport: 443
 
@@ -127,8 +127,8 @@ that points to the `vmrun` executable and where VMs can be found.
     vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
 You can then use the following arguments in the node configuration:
-- `hypervisor : fusion` tells us to enable this feature for this host. This is required.
-- `snapshot : <name>`, where <name> is the snapshot name to revert to.  This is required.
+- `hypervisor: fusion` tells us to enable this feature for this host. This is required.
+- `snapshot: <name>`, where <name> is the snapshot name to revert to.  This is required.
 
 We'll try and match up the hostname with a VM of the same name. Note that the VM is expected to be pre-configured for running acceptance tests; it should have all the right prerequisite libraries, password-less SSH access for root, etc.
 
@@ -159,7 +159,7 @@ host we'll log all the available snapshot names.
 ## EC2 Support ##
 Pre-requisite: Blimpy gem installed and .fog file correctly configured with your credentials.
 
-hypervisor : blimpy
+hypervisor: blimpy
 
 Currently, there is limited support EC2 nodes; we are adding support for new platforms shortly.
 
@@ -172,7 +172,7 @@ Systest will automagically provision EC2 nodes, provided the 'platform:' section
 
 ## Solaris Support ##
 
-Used with `hypervisor : solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
+Used with `hypervisor: solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
 
 Example .fog file:
 
@@ -201,10 +201,10 @@ These follow the conventions used by Cloud Provisioner and Fog.
 
 There are two possible `hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
 
-### `hypervisor : vsphere`
+### `hypervisor: vsphere`
 This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
 
-### `hypervisor : vcloud`
+### `hypervisor: vcloud`
 This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
 
 The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
