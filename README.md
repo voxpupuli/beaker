@@ -112,8 +112,8 @@ For example:
       roles:
         - agent
       platform: ubuntu-10.04-i386
-      hypervisor vsphere
-      snaphost base
+      hypervisor: vsphere
+      snaphost: base
 
     $ ./systest.rb --config configs/my_hosts.yml  ....
 
@@ -148,7 +148,7 @@ Example:
           - agent
         platform: debian-6-i386
         vmname: super-awesome-vm-name
-        hypervisor : fusion
+        hypervisor: fusion
         snapshot: acceptance-testing-5
 
 Diagnostics:
@@ -223,7 +223,7 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
           - agent
         platform: ubuntu-10.04-i386
         template: ubuntu-1004-i386
-        hypervisor : vcloud
+        hypervisor: vcloud
     CONFIG:
       consoleport: 443
       datastore: instance0
@@ -242,9 +242,9 @@ The option allows for testing against local Vagrant boxes.  The vm is identified
           - dashboard
           - cloudpro
         platform: ubuntu-10.04.4-x64
-        hypervisor : vagrant
+        hypervisor: vagrant
         box: ubuntu-server-10044-x64-vbox4210
-        box_url : http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-10044-x64-vbox4210.box
+        box_url: http://puppet-vagrant-boxes.puppetlabs.com/ubuntu-server-10044-x64-vbox4210.box
     CONFIG:
       nfs_server: none
       consoleport: 443
