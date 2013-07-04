@@ -35,8 +35,8 @@ module PuppetAcceptance
 
       @solaris_hosts.each do |host|
         vm_name = host['vmname'] || host.name
-        #use the snapshot provided for this host, otherwise use the snapshot provided for this test run
-        snapshot = host['snapshot'] || @options[:snapshot]
+        #use the snapshot provided for this host
+        snapshot = host['snapshot']
 
 
         @logger.notify "Reverting #{vm_name} to snapshot #{snapshot}"

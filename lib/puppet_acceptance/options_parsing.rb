@@ -157,36 +157,17 @@ module PuppetAcceptance
           end
         end
 
-        @defaults[:hypervisor] = nil
-        opts.on '--hypervisor HYPERVISOR',
-                'Default hypervisor for vms',
-                '(valid options: vsphere, fusion, blimpy, aix, solaris, vcloud)' do |hypervisor|
-          @options[:hypervisor] = hypervisor
-        end
-
-        @defaults[:revert] = true
-        opts.on '--[no-]revert',
-                'Do not revert vm images before testing',
+        @defaults[:provision] = true
+        opts.on '--[no-]provision',
+                'Do not provision vm images before testing',
                 '(default: true)' do |bool|
-          @options[:revert] = bool
-        end
-
-        @defaults[:snapshot] = nil
-        opts.on '--snapshot NAME',
-                'Specify VM snapshot to revert to' do |snap|
-          @options[:snapshot] = snap
+          @options[:provision] = bool
         end
 
         @defaults[:preserve_hosts] = false
         opts.on '--[no-]preserve-hosts',
                 'Preserve cloud instances' do |value|
           @options[:preserve_hosts] = value
-        end
-
-        @defaults[:keypair] = nil
-        opts.on '--keypair KEYPAIR_NAME',
-                'Key pair for cloud provider credentials' do |key|
-          @options[:keypair] = key
         end
 
         @defaults[:root_keys] = false
@@ -226,20 +207,6 @@ module PuppetAcceptance
           @options[:modules] << value
         end
 
-        @defaults[:plugins] = []
-        opts.on('--plugin URI', 'Select puppet plugin git install URI') do |value|
-          #@options[:type] = 'git'
-          @options[:plugins] ||= []
-          @options[:plugins] << value
-        end
-
-        @defaults[:stdout_only] = false
-        opts.on '-s', '--stdout-only',
-                'Log output to STDOUT only',
-                '(default: false)' do |bool|
-          @options[:stdout_only] = bool
-        end
-
         @defaults[:quiet] = false
         opts.on '-q', '--[no-]quiet',
                 'Do not log output to STDOUT',
@@ -268,12 +235,6 @@ module PuppetAcceptance
           @options[:debug] = bool
         end
 
-        @defaults[:random] = false
-        opts.on '-r [SEED]', '--random [SEED]',
-                'Randomize ordering of test files' do |seed|
-          @options[:random] = seed || true
-        end
-
         @defaults[:dry_run] = false
         opts.on  '-d', '--[no-]dry-run',
                  'Report what would happen on targets',
@@ -291,13 +252,6 @@ module PuppetAcceptance
           @options[:fail_mode] = mode
         end
 
-        @defaults[:ntpserver] = 'pool.ntp.org'
-        opts.on '--ntp-server HOST',
-                'NTP server name',
-                '(default: ntp.puppetlabs.lan' do |server|
-          @options[:ntpserver] = server
-        end
-
         @defaults[:timesync] = false
         opts.on '--[no-]ntp',
                 'Sync time on SUTs before testing',
@@ -307,105 +261,17 @@ module PuppetAcceptance
 
         @defaults[:repo_proxy] = false
         opts.on '--repo-proxy',
-                'Configure package system proxy',
+                'Proxy packaging repositories on ubuntu, debian and solaris-11',
                 '(default: false)' do
           @options[:repo_proxy] = true
         end
 
-        @defaults[:extra_repos] = false
-        opts.on '--extra-repos',
-                'Configure extra repositories',
+        @defaults[:add_el_extras] = false
+        opts.on '--add-el-extras',
+                'Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts',
                 '(default: false)' do
-          @options[:extra_repos] = true
+          @options[:add_el_extras] = true
         end
-
-        opts.on '--pkg-repo',
-                'Configure packaging system repository (deprecated)',
-                '(default: false)' do
-          @options[:extra_repos] = true
-          @options[:repo_proxy]  = true
-        end
-
-        @defaults[:installonly] = false
-        opts.on '--install-only',
-                'Perform install steps, run no tests',
-                '(default: false)' do |bool|
-          @options[:installonly] = bool
-        end
-
-        # Stoller: bool evals to 'false' when passing an opt
-        # prefixed with '--no'...doh!
-        @defaults[:noinstall] = false
-        opts.on '--no-install',
-                'Skip install step',
-                '(default: false)' do |bool|
-          @options[:noinstall] = true
-        end
-
-        @defaults[:upgrade] = nil
-        opts.on '--upgrade  VERSION',
-                'P.E. VERSION to upgrade *from*' do |upgrade|
-          @options[:upgrade] = upgrade
-        end
-
-        @defaults[:pe_version] = nil
-        opts.on '--pe-version VERSION',
-                'P.E. VERSION to install' do |version|
-          @options[:pe_version] = version
-        end
-
-        @defaults[:uninstall] = nil
-        opts.on '--uninstall TYPE',
-                'Test the PE Uninstaller',
-                '(valid options: full, standard)' do |type|
-          @options[:uninstall] = type
-        end
-
-        opts.on '--setup-dir /SETUP/DIR/PATH',
-                'DEPRECATED -- use --pre-suite/--post-suite' do |value|
-        end
-
-        opts.on '--vmrun VM_PROVIDER',
-                'DEPRECATED -- use --hypervisor instead' do |vm|
-          @options[:hypervisor] = vm
-        end
-
-        opts.on('-p URI', '--puppet URI',
-                'DEPRECATED -- use --install instead'
-                ) do |value|
-          @options[:puppet] = value
-        end
-
-        opts.on('-f URI', '--facter URI',
-                'DEPRECATED -- use --install instead'
-                ) do |value|
-          @options[:facter] = value
-        end
-
-        opts.on('-h URI', '--hiera URI',
-                'DEPRECATED -- use --install instead'
-                ) do |value|
-          @options[:hiera] = value
-        end
-
-        opts.on('--hiera-puppet URI',
-                'DEPRECATED -- use --install instead'
-                ) do |value|
-          @options[:hiera_puppet] = value
-        end
-
-        opts.on('--yagr URI',
-                'DEPRECATED -- use --install instead'
-                ) do |value|
-          @options[:install] << value
-        end
-
-        @defaults[:rvm] = 'skip'
-        opts.on '--rvm VERSION',
-                'DEPRECATED' do |ruby|
-          @options[:rvm] = ruby
-        end
-
 
         opts.on('--help', 'Display this screen' ) do |yes|
           puts opts
@@ -439,9 +305,6 @@ module PuppetAcceptance
       end
 
       raise ArgumentError.new("--fail-mode must be one of fast, stop") unless ["fast", "stop", nil].include?(@options[:fail_mode])
-
-      #HACK - for backwards compatability, if no snaphost is set then use the type as the snapshot
-      @options[:snapshot] ||= @options[:type]
 
       @options
     end

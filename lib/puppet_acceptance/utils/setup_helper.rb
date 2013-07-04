@@ -23,6 +23,10 @@ module PuppetAcceptance
       def add_master_entry
         @logger.notify "Add Master entry to /etc/hosts"
         master = find_only_master(@hosts)
+        if master["hypervisor"] and master["hypervisor"] =~ /vagrant/
+          @logger.debug "Don't update master entry on vagrant masters"
+          return
+        end
         @logger.debug "Get ip address of Master #{master}"
         if master['platform'].include? 'solaris'
           stdout = master.exec(Command.new("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1")).stdout
@@ -45,25 +49,6 @@ module PuppetAcceptance
         master.exec(Command.new("mv %s.new %s" % [path, path]))
       rescue => e
         report_and_raise(@logger, e, "add_master_entry")
-      end
-
-      def set_rvm_of_ruby
-        if @options[:rvm].include? 'system'
-          @logger.notify "Setting Ruby version to sytem default"
-          @hosts.each do |host|
-            host.exec(Command.new("rvm --default system"))
-          end
-        elsif @options[:rvm].include? 'skip'
-          @logger.notify "Skipping set ruby version"
-          return
-        else
-          @logger.notify "Setting Ruby version"
-          @hosts.each do |host|
-            host.exec(Command.new("rvm --default use #{@options[:rvm]}"))
-          end
-        end
-      rescue => e
-        report_and_raise(@logger, e, "set_rvm_of_ruby")
       end
 
       def sync_root_keys

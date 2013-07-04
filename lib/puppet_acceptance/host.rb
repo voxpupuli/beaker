@@ -103,6 +103,7 @@ module PuppetAcceptance
 
     def close
       @connection.close if @connection
+      @connection = nil
     end
 
     def exec command, options={}
