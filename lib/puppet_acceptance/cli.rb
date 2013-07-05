@@ -19,8 +19,8 @@ module PuppetAcceptance
           $LOAD_PATH << File.expand_path(path)
         end
       end
-      if (@options[:helper])
-        require File.expand_path(@options[:helper])
+      @options[:helper].each do |helper|
+        require File.expand_path(helper)
       end
 
       @hosts =  []
