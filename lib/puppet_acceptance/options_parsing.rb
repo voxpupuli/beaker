@@ -10,14 +10,6 @@ module PuppetAcceptance
       GITREPO
     end
 
-    def self.transform_old_packages(name, value)
-      return nil unless value
-      # This is why '-' vs '_' as a company policy is important
-      # or at least why the lack of it is annoying
-      name = name.to_s.gsub(/_/, '-')
-      value =~ /#{name}/ ? value : "#{GITREPO}/#{name}.git##{value}"
-    end
-
     def self.parse_install_options(install_opts)
       install_opts.map! { |opt|
         case opt
@@ -293,19 +285,10 @@ module PuppetAcceptance
       # let the options be set, then output usage.
       puts optparse if @no_args
 
-      # merge in the defaults
-      @options = @defaults.merge(@options)
-      @options_from_file = @defaults.merge(@options_from_file)
-
       # merge in the options that we read from the file
       @options = @options_from_file.merge(@options)
-      @options[:install] += [ @options_from_file[:install] ].flatten
-
-      # convert old package options to new package options format
-      [:puppet, :facter, :hiera, :hiera_puppet].each do |name|
-        @options[:install] << transform_old_packages(name, @options[name])
-      end
-      @options[:install].compact!
+      # merge in defaults
+      @options = @defaults.merge(@options)
 
       if @options[:type] !~ /(pe)|(git)/
         raise ArgumentError.new("--type must be one of pe or git, not '#{@options[:type]}'")
