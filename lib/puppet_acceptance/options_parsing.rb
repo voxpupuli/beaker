@@ -86,11 +86,18 @@ module PuppetAcceptance
           @options[:type] = type
         end
 
-        @defaults[:helper] = nil
+        @defaults[:helper] = []
         opts.on '--helper PATH/TO/SCRIPT',
                 'Ruby file evaluated prior to tests',
                 '(a la spec_helper)' do |script|
-          @options[:helper] = script
+          @options[:helper] = []
+          if script.is_a?(Array)
+            @options[:helper] += script
+          elsif script =~ /,/
+            @options[:helper] += script.split(',')
+          else
+            @options[:helper] << script
+          end
         end
 
         @defaults[:load_path] = []
