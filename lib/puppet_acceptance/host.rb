@@ -1,3 +1,6 @@
+require 'socket'
+require 'timeout'
+
 %w(command ssh_connection).each do |lib|
   begin
     require "puppet_acceptance/#{lib}"
@@ -59,6 +62,31 @@ module PuppetAcceptance
       result = puppet['node_name_value'].strip
     end
 
+    def port_open? port
+      Timeout.timeout 1 do
+        begin
+          TCPSocket.new(reachable_name, port).close
+          return true
+        rescue Errno::ECONNREFUSED
+          return false
+        end
+      end
+    end
+
+    def up?
+      require 'socket'
+      begin
+        Socket.getaddrinfo( reachable_name, nil )
+        return true
+      rescue SocketError
+        return false
+      end
+    end
+
+    def reachable_name
+      self['ip'] || self['vmhostname'] || name
+    end
+
     # Returning our PuppetConfigReader here allows users of the Host
     # class to do things like `host.puppet['vardir']` to query the
     # 'main' section or, if they want the configuration for a
@@ -96,7 +124,7 @@ module PuppetAcceptance
     end
 
     def connection
-      @connection ||= SshConnection.connect( self['ip'] || self['vmhostname'] || @name,
+      @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
                                              self['ssh'] )
     end
