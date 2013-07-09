@@ -34,9 +34,13 @@ module PuppetAcceptance
           if File.file? root then
             files << root
           else
-            files += Dir.glob(
+            discover_files = Dir.glob(
               File.join(root, "**/*.rb")
             ).select { |f| File.file?(f) }
+            if discover_files.empty?
+              raise ArgumentError, "Empty directory used as an option (#{root})!"
+            end
+            files += discover_files
           end
         end
       end
