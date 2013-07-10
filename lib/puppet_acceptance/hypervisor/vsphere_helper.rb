@@ -29,7 +29,6 @@ class VsphereHelper
 
     elsif File.exists?( File.join(ENV['HOME'], '.fog') )
       vsphere_credentials = load_fog_credentials
-
     end
 
     return vsphere_credentials
