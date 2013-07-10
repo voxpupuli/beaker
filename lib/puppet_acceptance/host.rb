@@ -109,14 +109,6 @@ module PuppetAcceptance
     def exec command, options={}
       # I've always found this confusing
       cmdline = command.cmd_line(self)
-      #HACK HACK HACK - I'm here for vagrant support
-      #vagrant uses the vagrant user and all commands have to wrapped with sudo su -c
-      #have to properly escape quote to make this all work
-      if @defaults['command_wrapper']
-        cmdline = cmdline.gsub('"', '\"')
-        cmdline = cmdline.gsub("'", "\'")
-        cmdline = @defaults['command_wrapper'] + '"' + cmdline + '"'
-      end
 
       if options[:silent]
         output_callback = nil

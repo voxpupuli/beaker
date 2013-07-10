@@ -44,9 +44,6 @@ module PuppetAcceptance
         #set up host objects for provisioned provisioned_set
         names.each do |name|
           host = PuppetAcceptance::Host.create(name, @options, @config)
-          if type =~ /vagrant/
-            host['command_wrapper'] = 'sudo su -c '
-          end
           hosts_for_type << host
         end
         @provisioned_set[type] = PuppetAcceptance::Hypervisor.create(type, hosts_for_type, @options, @config)
