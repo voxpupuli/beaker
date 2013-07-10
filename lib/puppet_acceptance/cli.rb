@@ -5,10 +5,22 @@ module PuppetAcceptance
       @logger = PuppetAcceptance::Logger.new(@options)
       @options[:logger] = @logger
 
-      if @options[:config] then
-        @logger.debug "Using Config #{@options[:config]}"
-      else
+      if not @options[:config] 
         report_and_raise(@logger, RuntimeError.new("Argh!  There is no default for Config, specify one (-c or --config)!"), "CLI: initialize") 
+      end
+
+      @logger.debug("Options")
+      @options.each do |opt, val|
+        if val and val != [] 
+          @logger.debug("\t#{opt.to_s}:")
+          if val.kind_of?(Array)
+            val.each do |v|
+              @logger.debug("\t\t#{v.to_s}")
+            end
+          else
+            @logger.debug("\t\t#{val.to_s}")
+          end
+        end
       end
 
       @config = PuppetAcceptance::TestConfig.new(@options[:config], @options)
