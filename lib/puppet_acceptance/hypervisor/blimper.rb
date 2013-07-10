@@ -21,26 +21,6 @@ module PuppetAcceptance
       ports
     end
 
-    def blimpy_install_git_and_ruby(blimpy_hosts)
-      @logger.notify "Install git and ruby on non-pe blimpy hosts"
-      blimpy_hosts.each do |host|
-
-        if host['platform'].include?('el-5')
-          host.exec(Command.new("wget http://download3.fedora.redhat.com/pub/epel/5Server/i386/epel-release-5-4.noarch.rpm && rpm -ihv
-epel-release-5-4.noarch.rpm"))
-        end
-
-        if host['platform'].include?('el-')
-            host.exec(Command.new("yum -y install git ruby"))
-        elsif host['platform'].include?('ubuntu') or host['platform'].include?('debian')
-            host.exec(Command.new("apt-get -y install git-core ruby libopenssl-ruby"))
-        else
-          @logger.debug "Warn #{host['platform']} is not a supported platform, no packages will be installed."
-          next
-        end
-      end
-    end #blimpy_install_git_and_ruby
-
   def initialize(blimpy_hosts, options, config)
     @options = options
     @config = config['CONFIG'].dup
@@ -124,11 +104,6 @@ ex.message}), retry attempt #{fleet_retries}.")
       set_etc_hosts(host, etc_hosts)
     end
 
-    #Install git and ruby if we are not pe
-    #HACK HACK HACK, type should not be in here
-    if @config[:type] !~ /pe/
-        blimpy_install_git_and_ruby(@blimpy_hosts)
-      end
     end #revert_blimpy
 
     def cleanup
