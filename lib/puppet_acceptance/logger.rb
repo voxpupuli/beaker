@@ -119,7 +119,7 @@ module PuppetAcceptance
     # to a human-readable string (which some IDEs/editors
     # will recognize as links to the line numbers in the trace)
     def pretty_backtrace backtrace = caller(1)
-      trace = is_debug? ? backtrace : purge_harness_files_from( backtrace )
+      trace = purge_harness_files_from( Array( backtrace ) )
       expand_symlinks( trace ).join "\n"
     end
 
@@ -134,10 +134,14 @@ module PuppetAcceptance
 
     def purge_harness_files_from backtrace
       mostly_purged = backtrace.reject do |line|
-        $".any? do |require_path|
+        # LOADED_FEATURES is an array of anything `require`d, i.e. everything
+        # but the test in question
+        $LOADED_FEATURES.any? do |require_path|
           line.include? require_path
         end
       end
+
+      # And remove lines that contain our program name in them
       completely_purged = mostly_purged.reject {|line| line.include? $0 }
     end
 
