@@ -282,7 +282,7 @@ module PuppetAcceptance
       #
       # This is an awful hack to maintain backward compatibility until tests
       # are ported to use logger.
-      PuppetAcceptance.const_set(:Log, @logger)
+      PuppetAcceptance.const_set(:Log, @logger) unless defined?( Log )
     end
   end
 end
