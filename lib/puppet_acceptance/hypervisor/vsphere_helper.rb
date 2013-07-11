@@ -79,6 +79,18 @@ class VsphereHelper
     snapshot
   end
 
+  def find_customization name
+    csm = @connection.serviceContent.customizationSpecManager
+
+    begin
+      customizationSpec = csm.GetCustomizationSpec({:name => name}).spec
+    rescue
+      customizationSpec = nil
+    end
+
+    return customizationSpec
+  end
+
   # an easier wrapper around the horrid PropertyCollector interface,
   # necessary for searching VMs in all Datacenters that may be nested
   # within folders of arbitrary depth
