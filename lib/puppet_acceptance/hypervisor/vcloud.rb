@@ -48,10 +48,11 @@ module PuppetAcceptance
           :diskMoveType => :moveChildMostDiskBacking
         )
         spec = RbVmomi::VIM.VirtualMachineCloneSpec(
-          :config   => configSpec,
-          :location => relocateSpec,
-          :powerOn  => true,
-          :template => false
+          :config        => configSpec,
+          :location      => relocateSpec,
+          :customization => vsphere_helper.find_customization( h['template'] ),
+          :powerOn       => true,
+          :template      => false
         )
 
         # Deploy from specified template
