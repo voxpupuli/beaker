@@ -55,6 +55,11 @@ module PuppetAcceptance
           :template      => false
         )
 
+        # Debug message if using a customization spec
+        if vsphere_helper.find_customization( h['template'] )
+          @logger.notify "Found customization spec for '#{h['template']}', will apply after boot"
+        end
+
         # Deploy from specified template
         if (@vcloud_hosts.length == 1) or (i == @vcloud_hosts.length - 1)
           vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
