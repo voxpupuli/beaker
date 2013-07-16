@@ -31,6 +31,7 @@ module PuppetAcceptance
           @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]
           @virtual_machines[hypervisor] << name
         else #this is a non-provisioned machine, deal with it without hypervisors
+          @logger.debug "No hypervisor for #{name}, connecting to host without provisioning"
           @noprovision_machines << name
         end
 

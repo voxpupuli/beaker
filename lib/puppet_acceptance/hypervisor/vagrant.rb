@@ -27,7 +27,8 @@ module PuppetAcceptance
         vagrant_file << "    v.vm.box = '#{host['box']}'\n"
         vagrant_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         vagrant_file << "    v.vm.base_mac = '#{randmac}'\n"
-        vagrant_file << "    v.vm.network :hostonly, \"#{host['ip'].to_s}\""
+        vagrant_file << "    v.vm.network :hostonly, \"#{host['ip'].to_s}\"\n"
+        vagrant_file << "    v.vm.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
         vagrant_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
