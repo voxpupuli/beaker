@@ -29,7 +29,6 @@ class VsphereHelper
 
     elsif File.exists?( File.join(ENV['HOME'], '.fog') )
       vsphere_credentials = load_fog_credentials
-
     end
 
     return vsphere_credentials
@@ -78,6 +77,18 @@ class VsphereHelper
       end
     end
     snapshot
+  end
+
+  def find_customization name
+    csm = @connection.serviceContent.customizationSpecManager
+
+    begin
+      customizationSpec = csm.GetCustomizationSpec({:name => name}).spec
+    rescue
+      customizationSpec = nil
+    end
+
+    return customizationSpec
   end
 
   # an easier wrapper around the horrid PropertyCollector interface,

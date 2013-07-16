@@ -48,11 +48,17 @@ module PuppetAcceptance
           :diskMoveType => :moveChildMostDiskBacking
         )
         spec = RbVmomi::VIM.VirtualMachineCloneSpec(
-          :config   => configSpec,
-          :location => relocateSpec,
-          :powerOn  => true,
-          :template => false
+          :config        => configSpec,
+          :location      => relocateSpec,
+          :customization => vsphere_helper.find_customization( h['template'] ),
+          :powerOn       => true,
+          :template      => false
         )
+
+        # Debug message if using a customization spec
+        if vsphere_helper.find_customization( h['template'] )
+          @logger.notify "Found customization spec for '#{h['template']}', will apply after boot"
+        end
 
         # Deploy from specified template
         if (@vcloud_hosts.length == 1) or (i == @vcloud_hosts.length - 1)
@@ -100,7 +106,17 @@ module PuppetAcceptance
 
             retry
           else
-            raise "DNS resolution failed after #{wait} seconds"
+            # Allow extra time for [Windows] hosts using customization templates
+            if vsphere_helper.find_customization( h['template'] )
+              if try <= 20
+                sleep wait
+                try += 1
+              else
+                raise "DNS resolution failed after #{wait} seconds"
+              end
+            else
+              raise "DNS resolution failed after #{wait} seconds"
+            end
           end
         end
       end
