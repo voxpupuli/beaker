@@ -232,7 +232,9 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
 
 
 ## Vagrant support ##
-The option allows for testing against local Vagrant boxes.  The vm is identified by `box` or `box_url` in the config file.  No snapshot name is required as the vm is reverted back to original state post testing using `vagrant destroy --force`.
+The option allows for testing against local Vagrant boxes.  As a prerequisite the Vagrant package (greather than 1.1) needs to installed - see <a href = "http://downloads.vagrantup.com/">downloads.vagrantup.com</a> for downloads.  
+
+The vm is identified by `box` or `box_url` in the config file.  No snapshot name is required as the vm is reverted back to original state post testing using `vagrant destroy --force`.
 
     HOSTS:
       ubuntu-10-04-4-x64:

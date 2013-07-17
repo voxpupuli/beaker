@@ -156,6 +156,22 @@ module PuppetAcceptance
       result = connection.scp_from(source, target, options, $dry_run)
       return result
     end
+
+    def check_for_package name
+      result = exec(Command.new("which #{name}"), :acceptable_exit_codes => (0...127))
+      result.exit_code == 0
+    end
+
+    def install_package name
+      if self['platform'] =~ /(fedora)|(centos)|(el)/
+        exec(Command.new("yum -y install #{name}"))
+      elsif self['platform'] =~ /(ubuntu)|(debian)/
+        exec(Command.new("apt-get update"))
+        exec(Command.new("apt-get install -y #{name}"))
+      else
+        raise "Package #{name} cannot be installed on #{host}"
+      end
+    end 
   end
 
   require File.expand_path(File.join(File.dirname(__FILE__), 'host/windows'))

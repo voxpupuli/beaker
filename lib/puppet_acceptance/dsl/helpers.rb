@@ -116,6 +116,26 @@ module PuppetAcceptance
         end
       end
 
+      # Check to see if a package is installed on a remote host
+      #
+      # @param [Host] host             A host object 
+      # @param [String] package_name   Name of the package to check for.
+      #
+      # @return [Boolean] true/false if the package is found 
+      def check_for_package host, package_name
+        host.check_for_package package_name
+      end
+
+      # Install a package on a host
+      #
+      # @param [Host] host             A host object 
+      # @param [String] package_name   Name of the package to install
+      #
+      # @return [Result]   An object representing the outcome of *install command*.
+      def install_package host, package_name
+        host.install_package package_name
+      end
+
       # Create a remote file out of a string
       # @note This method uses Tempfile in Ruby's STDLIB as well as {#scp_to}.
       #
