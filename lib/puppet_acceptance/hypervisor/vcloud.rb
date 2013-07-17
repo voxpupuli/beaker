@@ -20,6 +20,8 @@ module PuppetAcceptance
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
       vsphere_vms = {}
 
+      attempts = 10
+
       start = Time.now
       @vcloud_hosts.each_with_index do |h, i|
         # Generate a randomized hostname
@@ -41,24 +43,32 @@ module PuppetAcceptance
             'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' )
         )
 
+        # Are we using a customization spec?
+        customizationSpec = vsphere_helper.find_customization( h['template'] )
+
+        if customizationSpec
+          # Print a logger message if using a customization spec
+          @logger.notify "Found customization spec for '#{h['template']}', will apply after boot"
+
+          # Using a customization spec takes longer, set a longer timeout
+          attempts = attempts * 2
+        end
+
         # Put the VM in the specified folder and resource pool
         relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
           :datastore    => vsphere_helper.find_datastore(@config['datastore']),
           :pool         => vsphere_helper.find_pool(@config['resourcepool']),
           :diskMoveType => :moveChildMostDiskBacking
         )
+
+        # Create a clone spec
         spec = RbVmomi::VIM.VirtualMachineCloneSpec(
           :config        => configSpec,
           :location      => relocateSpec,
-          :customization => vsphere_helper.find_customization( h['template'] ),
+          :customization => customizationSpec,
           :powerOn       => true,
           :template      => false
         )
-
-        # Debug message if using a customization spec
-        if vsphere_helper.find_customization( h['template'] )
-          @logger.notify "Found customization spec for '#{h['template']}', will apply after boot"
-        end
 
         # Deploy from specified template
         if (@vcloud_hosts.length == 1) or (i == @vcloud_hosts.length - 1)
@@ -78,22 +88,12 @@ module PuppetAcceptance
         until
           vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunning' and
           vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.ipAddress != nil
-          if try <= 11
+          if try <= attempts
             sleep wait
             (last_wait, wait) = wait, last_wait + wait
             try += 1
           else
-            # Allow extra time for [Windows] hosts using customization templates
-            if vsphere_helper.find_customization( h['template'] )
-              if try <= 20
-                sleep wait
-                try += 1
-              else
-                raise "DNS resolution failed after #{wait} seconds"
-              end
-            else
-              raise "DNS resolution failed after #{wait} seconds"
-            end
+            raise "DNS resolution failed after #{wait} seconds"
           end
         end
       end
@@ -109,24 +109,14 @@ module PuppetAcceptance
         begin
           Socket.getaddrinfo(h['vmhostname'], nil)
         rescue
-          if try <= 11
+          if try <= attempts
             sleep wait
             (last_wait, wait) = wait, last_wait + wait
             try += 1
 
             retry
           else
-            # Allow extra time for [Windows] hosts using customization templates
-            if vsphere_helper.find_customization( h['template'] )
-              if try <= 20
-                sleep wait
-                try += 1
-              else
-                raise "DNS resolution failed after #{wait} seconds"
-              end
-            else
-              raise "DNS resolution failed after #{wait} seconds"
-            end
+            raise "DNS resolution failed after #{wait} seconds"
           end
         end
       end
