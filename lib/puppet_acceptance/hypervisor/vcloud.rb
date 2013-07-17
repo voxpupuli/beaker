@@ -83,7 +83,17 @@ module PuppetAcceptance
             (last_wait, wait) = wait, last_wait + wait
             try += 1
           else
-            raise "vSphere registration failed after #{wait} seconds"
+            # Allow extra time for [Windows] hosts using customization templates
+            if vsphere_helper.find_customization( h['template'] )
+              if try <= 20
+                sleep wait
+                try += 1
+              else
+                raise "DNS resolution failed after #{wait} seconds"
+              end
+            else
+              raise "DNS resolution failed after #{wait} seconds"
+            end
           end
         end
       end
