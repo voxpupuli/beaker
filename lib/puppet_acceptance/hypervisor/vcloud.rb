@@ -126,7 +126,7 @@ module PuppetAcceptance
     end
 
     def cleanup
-      @logger.notify "Destroying vagrant boxes"
+      @logger.notify "Destroying vCloud boxes"
       vsphere_credentials = VsphereHelper.load_config
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
