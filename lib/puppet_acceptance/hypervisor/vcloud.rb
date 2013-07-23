@@ -93,7 +93,7 @@ module PuppetAcceptance
             (last_wait, wait) = wait, last_wait + wait
             try += 1
           else
-            raise "DNS resolution failed after #{wait} seconds"
+            raise "vSphere registration failed after #{wait} seconds"
           end
         end
       end
