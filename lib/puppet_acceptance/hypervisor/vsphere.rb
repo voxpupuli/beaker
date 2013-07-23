@@ -17,7 +17,7 @@ module PuppetAcceptance
       vsphere_vms = {}
       @vsphere_hosts.each do |h|
         name = h["vmname"] || h.name
-        vsphere_vms[name] = h["snaphost"]
+        vsphere_vms[name] = h["snapshot"]
       end
       vms = vsphere_helper.find_vms(vsphere_vms.keys)
       vsphere_vms.each_pair do |name, snap|
