@@ -19,19 +19,21 @@ module PuppetAcceptance
     def make_vfile hosts
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
-      vagrant_file = "Vagrant::Config.run do |c|\n"
+      vagrant_file = "Vagrant.configure(\"2\") do |c|\n"
       hosts.each do |host|
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
         vagrant_file << "  c.vm.define '#{host.name}' do |v|\n"
-        vagrant_file << "    v.vm.host_name = '#{host.name}'\n"
+        vagrant_file << "    v.vm.hostname = '#{host.name}'\n"
         vagrant_file << "    v.vm.box = '#{host['box']}'\n"
         vagrant_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         vagrant_file << "    v.vm.base_mac = '#{randmac}'\n"
-        vagrant_file << "    v.vm.network :hostonly, \"#{host['ip'].to_s}\"\n"
-        vagrant_file << "    v.vm.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
+        vagrant_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\"\n"
         vagrant_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
+      vagrant_file << "  c.vm.provider :virtualbox do |vb|\n"
+      vagrant_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
+      vagrant_file << "  end\n"
       vagrant_file << "end\n"
       f = File.open("Vagrantfile", 'w') 
       f.write(vagrant_file)
