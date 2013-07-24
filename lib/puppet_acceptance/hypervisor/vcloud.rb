@@ -26,9 +26,21 @@ module PuppetAcceptance
         o = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
         h['vmhostname'] = o[rand(25)] + (0...14).map{o[rand(o.length)]}.join
 
+        if h['template'] =~ /\//
+          templatefolders = h['template'].split('/')
+          h['template'] = templatefolders.pop
+        end
+
         @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template '#{h['template']}'"
 
-        vm = vsphere_helper.find_vms(h['template'])
+        vm = {}
+
+        if templatefolders
+          vm[h['template']] = vsphere_helper.find_folder(templatefolders.join('/')).find(h['template'])
+        else
+          vm = vsphere_helper.find_vms(h['template'])
+        end
+
         if vm.length == 0
           raise "Unable to find template '#{h['template']}'!"
         end
