@@ -24,7 +24,7 @@ module PuppetAcceptance
       @vcloud_hosts.each_with_index do |h, i|
         # Generate a randomized hostname
         o = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
-        h['vmhostname'] = (0...15).map{o[rand(o.length)]}.join
+        h['vmhostname'] = o[rand(25)] + (0...14).map{o[rand(o.length)]}.join
 
         @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template '#{h['template']}'"
 
