@@ -1,17 +1,20 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
 
 module Unix
   class Host < PuppetAcceptance::Host
     require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'user'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'group'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'exec'))
+    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'pkg'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'file'))
 
     include Unix::User
     include Unix::Group
     include Unix::File
     include Unix::Exec
+    include Unix::Pkg
 
     def self.pe_defaults
       {

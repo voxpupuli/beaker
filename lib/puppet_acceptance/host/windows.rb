@@ -1,17 +1,20 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
 
 module Windows
   class Host < PuppetAcceptance::Host
     require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'user'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'group'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'exec'))
+    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'pkg'))
     require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'file'))
 
     include Windows::User
     include Windows::Group
     include Windows::File
     include Windows::Exec
+    include Windows::Pkg
 
     def self.pe_defaults
       {
