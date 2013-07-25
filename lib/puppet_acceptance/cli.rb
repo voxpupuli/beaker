@@ -38,6 +38,8 @@ module PuppetAcceptance
       @hosts =  []
       @network_manager = PuppetAcceptance::NetworkManager.new(@config, @options, @logger)
       @hosts = @network_manager.provision
+      #validate that the hosts are correctly configured
+      validate(@hosts, @logger)
 
     end
 

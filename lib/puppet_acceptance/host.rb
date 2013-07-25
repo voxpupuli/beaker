@@ -156,6 +156,7 @@ module PuppetAcceptance
       result = connection.scp_from(source, target, options, $dry_run)
       return result
     end
+
   end
 
   require File.expand_path(File.join(File.dirname(__FILE__), 'host/windows'))
