@@ -177,7 +177,7 @@ module PuppetAcceptance
       return result
     end
 
-    def scp_from source, target, scp_options, options = {}, dry_run = false
+    def scp_from source, target, options = {}, dry_run = false
       return if dry_run
 
       options[:recursive] = true if options[:recursive].nil?
