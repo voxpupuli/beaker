@@ -1,0 +1,11 @@
+VERSION:
+  rack_ver: 1.1.6
+  gem_ver: 1.5.3
+  facter_ver: 1.6.17
+  puppet_ver: 2.7.21
+  activerecord_ver: 2.3.17
+  activesupport_ver: 2.3.17
+  ruby_augeas_ver: 4.1
+  dashboard_ver: 1.2.10
+  console_auth_ver: 1.1.17
+  ruby_stomp: 1.2.3

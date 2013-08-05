@@ -1,0 +1,144 @@
+AMI:
+  centos-5-x86-64-west:
+    :image: 
+      :pe: ami-ec0a80dc
+    :region: us-west-2
+
+  centos-5-i386-west:
+    :image: 
+      :pe: ami-be3fb58e
+    :region: us-west-2
+
+  centos-6-x86-64-west:
+    :image: 
+      :pe: ami-42fb6e72
+    :region: us-west-2
+
+  centos-6-i386-west:
+    :image: 
+      :pe: ami-9477fda4
+    :region: us-west-2
+
+  rhel-5-x86-64-west:
+    :image: 
+      :pe: ami-9cf366ac
+    :region: us-west-2
+
+  rhel-5-i386-west:
+    :image: 
+      :pe: ami-9ef366ae
+    :region: us-west-2
+
+  rhel-6-x86-64-west:
+    :image: 
+      :pe: ami-acf3669c
+    :region: us-west-2
+
+  rhel-6-i386-west:
+    :image: 
+      :pe: ami-92f366a2
+    :region: us-west-2
+
+  ubuntu-1004-amd64-west:
+    :image: 
+      :pe: ami-e2c154d2
+    :region: us-west-2
+
+  ubuntu-1004-i386-west:
+    :image: 
+      :pe: ami-e6c154d6
+    :region: us-west-2
+
+  ubuntu-1204-amd64-west:
+    :image: 
+      :pe: ami-d6e860e6
+    :region: us-west-2
+
+  ubuntu-1204-i386-west:
+    :image: 
+      :pe: ami-9a77fdaa
+    :region: us-west-2
+
+  debian-6-amd64-west:
+    :image: 
+      :pe: ami-4eea627e
+    :region: us-west-2
+
+  debian-6-i386-west:
+    :image: 
+      :pe: ami-fcf27fcc
+    :region: us-west-2
+
+  sles-11-x86-64-west:
+    :image: 
+      :pe: ami-3ef2670e
+    :region: us-west-2
+
+  sles-11-i386-west:
+    :image: 
+      :pe: ami-aef2679e
+    :region: us-west-2
+
+  amazon-6-x86_64:
+    :image: 
+      :pe: ami-9ae663f3
+    :region: us-east-1
+
+  amazon-6-i386:
+    :image:
+      :pe: ami-06e1646f
+    :region: us-east-1
+
+  el-6-x86_64:
+    :image:
+      :pe: ami-57db123e
+      :foss: ami-57db123e
+    :region: us-east-1
+
+  el-6-x86_64-west:
+    :image:
+      :pe: ami-aa8b039a
+      :foss: ami-aa8b039a
+    :region: us-west-2
+
+  el-5-x86_64-west:
+    :image:
+      :pe: ami-4a6df87a
+      :foss: ami-4a6df87a
+    :region: us-west-2
+
+  ubuntu-10.04-amd64-west:
+    :image:
+      :pe: ami-52ea6262
+      :foss: ami-52ea6262
+    :region: us-west-2
+
+  ubuntu-12.04-amd64-west:
+    :image:
+      :pe: ami-d6e860e6
+      :foss: ami-d6e860e6
+    :region: us-west-2
+
+  debian6-amd64-west:
+    :image:
+      :pe: ami-4eea627e
+      :foss: ami-4eea627e
+    :region: us-west-2
+
+  el-6-i386:
+    :image:
+      :pe: ami-02f85a6b
+      :foss: ami-02f85a6b
+    :region: us-east-1
+
+  el-5-i386:
+    :image:
+      :pe: ami-0bd16d62
+      :foss: ami-0bd16d62
+    :region: us-east-1
+
+  ubuntu-10.04-i386:
+    :image:
+      :pe: ami-f5d76b9c
+      :foss: ami-f5d76b9c
+    :region: us-east-1
