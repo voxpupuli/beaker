@@ -1,4 +1,5 @@
 require 'resolv'
+require 'puppet_acceptance/dsl/outcomes'
 
 module PuppetAcceptance
   module DSL
@@ -274,14 +275,6 @@ module PuppetAcceptance
       end
 
 
-############################################################################
-#
-# Replacement methods for with_master_running_on, start_puppet_master,
-# stop_puppet_master, and with_agent_running_on that do not have the same
-# dependencies on TestCase or it's state
-#
-#############################################################################
-
       # Test Puppet running in a certain run mode with specific options.
       # This ensures the following steps are performed:
       # 1. The pre-test Puppet configuration is backed up
@@ -292,9 +285,7 @@ module PuppetAcceptance
       # 6. Revert Puppet to the pre-test state
       # 7. Testing artifacts are saved in a folder named for the test
       #
-      # @param [Array<Host>, Host] hosts One or more objects that act like Host
-      #
-      # @param [Symbol]            mode  Specifying a puppet mode to run in
+      # @param [Host] hosts        One object that act like Host
       #
       # @param [Hash{Symbol=>String}]
       #                            config_opts Represent puppet settings.
@@ -307,82 +298,112 @@ module PuppetAcceptance
       #                            tests may be ran. After the block is finished
       #                            puppet will revert to a previous state.
       #
-      # @example A simple use case
-      #     with_puppet_running_on( agents, :agent,
-      #                              :server => master.name ) do |running_agents|
-      #
-      #       ...tests to be ran...
+      # @example A simple use case to ensure a master is running
+      #     with_puppet_running_on( master ) do
+      #         ...tests that require a master...
       #     end
       #
       # @example Fully utilizing the possiblities of config options
-      #     with_puppet_running_on( host, :master,
+      #     with_puppet_running_on( master,
       #                             :main => {:logdest => '/var/blah'},
       #                             :master => {:masterlog => '/elswhere'},
-      #                             :agent => {:server => 'localhost'} ) do |running_master|
+      #                             :agent => {:server => 'localhost'} ) do
       #
       #       ...tests to be ran...
       #     end
       #
       # @api dsl
-      # @!visibility private
-      def with_puppet_running_on hosts, mode, config_opts = {}, &block
-        if hosts.is_a? Array
-          hosts.each do |h|
-            with_puppet_running_on_a h, mode, config_opts, block
+      def with_puppet_running_on host, conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
+        begin
+          backup_file host, host['puppetpath'], testdir, 'puppet.conf'
+          lay_down_new_puppet_conf host, conf_opts, testdir
+
+          if host.is_pe?
+            bounce_service( 'pe-httpd' )
+
+          else
+            start_puppet_from_source_on!( host )
           end
-        else
-          with_puppet_running_on_a hosts, mode, config_opts, block
+
+          yield self if block_given?
+        ensure
+          restore_puppet_conf_from_backup( host )
+
+          if host.is_pe?
+            bounce_service( 'pe-httpd' )
+
+          else
+            stop_puppet_from_source_on( host )
+          end
         end
       end
 
-      # @see PuppetAcceptance::PuppetCommands#with_puppet_running_on
-      # @note This is the method that contains the behavior needed by
-      #       {#with_puppet_running_on}. {#with_puppet_running_on} delegates
-      #       individual host actions to this method.
-      #
       # @!visibility private
-      def with_puppet_running_on_a host, mode, config_opts, &block
-        #  begin
-        #    backup_path = host.tmppath
-        #    backup_file( host, host['puppetpath'], backup_path, 'puppet.conf' )
-        #    replace_puppet_conf( host, mode, configuration_options )
-        #    start_or_bounce_service( host, mode )
+      def restore_puppet_conf_from_backup( host )
+        puppetpath = host['puppetpath']
 
-        #    yield
-
-        #  ensure
-        #    @network.on( host, "mv #{backup_puppetconf} #{host['puppetconf']}" )
-        #  end
+        host.exec( Command.new( "if [ -f #{puppetpath}/puppet.conf.bak ]; then " +
+                                    "cat #{puppetpath}/puppet.conf.bak > " +
+                                    "#{puppetpath}/puppet.conf; " +
+                                    "rm -rf #{puppetpath}/puppet.conf.bak; " +
+                                "fi" ) )
       end
 
       # @!visibility private
       def backup_file host, current_dir, new_dir, filename = 'puppet.conf'
-        #old_location = current_dir + '/' + filename
-        #new_location = new_dir + '/' + filename
+        old_location = current_dir + '/' + filename
+        new_location = new_dir + '/' + filename
 
-        #@network.on( host, "cp #{old_location} #{new_location}" )
+        host.exec( Command.new( "cp #{old_location} #{new_location}" ) )
       end
 
       # @!visibility private
-      def replace_puppet_conf( host, run_mode, configuration_options )
-        #if configuration_options.values.all? {|v| v.is_a?( Hash ) }
-        #  conf_opts.each_key do |key|
-        #    host['puppetconf'][key] = conf_opts[key]
-        #  end
-        #else
-        #  host['puppetconf'] = { mode => configuration_options }
-        #end
+      def start_puppet_from_source_on! host
+        host.exec( Command.new( puppet( 'master' ) ) )
 
-        #@network.on( host, "echo #{host['puppetconf']} > #{host['puppetconfpath']}" )
+        logger.debug 'Waiting for the puppet master to start'
+        unless port_open_within?( host, 8140, 10 )
+          raise PuppetAcceptance::DSL::FailTest, 'Puppet master did not start in a timely fashion'
+        end
+        logger.debug 'The puppet master has started'
       end
 
       # @!visibility private
-      def start_or_bounce_service( host, service )
-        #if host.running? mode
-        #  host.restart mode
-        #else
-        #  host.start mode
-        #end
+      def stop_puppet_from_source_on( host )
+        host.exec( Command.new( 'kill $(cat `puppet master --configprint pidfile`)' ) )
+      end
+
+      # @!visibility private
+      def lay_down_new_puppet_conf( host, configuration_options, testdir )
+        new_conf = puppet_conf_for( host )
+        create_remote_file host, "#{testdir}/puppet.conf", new_conf.to_s
+
+        host.exec( Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf", :silent => true ) )
+        host.exec( Command.new( "cat #{host['puppetpath']}/puppet.conf" ) )
+      end
+
+      # @!visibility private
+      def puppet_conf_for host, conf_opts
+        puppetconf = host.exec( Command.new( "cat #{host['puppetpath']}/puppet.conf" ) ).stdout
+        new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
+
+        new_conf
+      end
+
+      # @!visibility private
+      def bounce_service host, service
+        # Any reason to not
+        # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
+        # host.exec puppet_resource( 'service', service, 'ensure=running' )
+        host.exec( Command.new( "/etc/init.d/#{service} restart" ) )
+      end
+
+      # Blocks until the port is open on the host specified, returns false
+      # on failure
+      def port_open_within?( host, port = 8140, seconds = 120 )
+        repeat_for( seconds ) do
+          host.port_open?( port )
+        end
       end
 
       # Runs 'puppet apply' on a remote host, piping manifest through stdin
@@ -487,199 +508,6 @@ module PuppetAcceptance
             when :list, :remove then on(host, "crontab #{args} #{user}", &block)
           end
         end
-      end
-
-#############################################################################
-#
-# These methods not only rely on PuppetAcceptance::TestCase#on but also rely
-# on several other methods to retrieve collaboration SUTs and the state of
-# previous PuppetAcceptance::DSL::Helpers#on results
-#
-#############################################################################
-
-      # @note This method performs the following steps:
-      #   1. issues start command for puppet master on specified host
-      #   2. polls until it determines that the master has started successfully
-      #   3. yields to a block of code passed by the caller
-      #   4. runs a "kill" command on the master's pid (on the specified host)
-      #   5. polls until it determines that the master has shut down successfully.
-      #
-      # @param [PuppetAcceptance::Host] host  the master host
-      # @param [String] args                  a string containing all of the
-      #   command line arguments that you would like for the puppet master to be
-      #   started with.  Defaults to '--daemonize'. The following values will
-      #   be added to the argument list if they are not explicitly set in your
-      #   'args' parameter: '--daemonize', '--logdest="puppetvardir/log/puppetmaster.log"',
-      #   '--dns_alt_names="puppet, $(facter hostname), $(puppet fqdn)"'
-      #
-      # @param [Hash] options only honors :preserve_ssl
-      # @option options [Bool] :preserve_ssl whether or not to keep all
-      #                                            hosts puppet ssl directories
-      #                                            prior to starting the puppet master.
-      #
-      # @deprecated
-      def with_master_running_on(host, args='--daemonize', options={}, &block)
-        # they probably want to run with daemonize.  If they pass some other
-        # arg/args but forget to re-include daemonize, we'll check and make sure
-        # they didn't explicitly specify "no-daemonize", and, failing that,
-        # we'll add daemonize to the args string
-        if (args !~ /(?:--daemonize)|(?:--no-daemonize)/) then
-          args << " --daemonize"
-        end
-
-        if (args !~ /--logdest/) then
-          # master is not passed into this method, it assumes TestCase#master
-          # helper is available
-          args << " --logdest=\"#{master['puppetvardir']}/log/puppetmaster.log\""
-        end
-
-        if (args !~ /--dns_alt_names/) then
-          args << " --dns_alt_names=\"puppet, $(facter hostname), $(facter fqdn)\""
-        end
-
-        unless options[:preserve_ssl]
-          # hosts is not passed into this command, it assumes TestCase#hosts
-          # helper is available
-          on( hosts,
-              host_command('rm -rf #{host["puppetpath"]}/ssl'),
-              :silent => true )
-        end
-
-        # agents is not passed into this command, it assumes TestCase#agents
-        # is available
-        agents.each do |agent|
-          if vardir = agent['puppetvardir']
-            # we want to remove everything except the log and ssl directory (we
-            # just got rid of ssl if preserve_ssl wasn't set, and otherwise want
-            # to leave it)
-            on agent, %Q[for i in "#{vardir}/*"; do echo $i; done | ] +
-                      %Q[grep -v log| grep -v ssl | xargs rm -rf],
-                      :silent => true
-          end
-        end
-
-        on host, puppet_master('--configprint pidfile'), :silent => true
-
-        # this is TestCase#stdout and it will, hopefully be set to the stdout of
-        # the last executed TestCase#on method
-        pidfile = stdout.chomp
-
-        start_puppet_master(host, args, pidfile)
-
-        # what are we yielding here? ...execution....
-        yield if block
-      ensure
-        stop_puppet_master(host, pidfile)
-      end
-
-      # @deprecated
-      def start_puppet_master(host, args, pidfile)
-        on host, puppet_master(args)
-        on(host,
-           "kill -0 $(cat #{pidfile})",
-           :acceptable_exit_codes => [0,1],
-           :silent => true)
-
-        # this is TestCase#exit_code which will hopefully be set to the
-        # exit_code of the last TestCase#on method
-        unless exit_code == 0
-          raise "Puppet master doesn't appear to be running at all" 
-        end
-
-        timeout = 15
-        wait_start = Time.now
-
-        logger.notify "Waiting for master to start..."
-
-        debug_opt = options[:debug] ? '-v ' : ''
-
-        begin
-          Timeout.timeout(timeout) do
-            loop do
-              # 7 is "Could not connect", which will happen before it's running
-              # Here we try to explicitly set TestCase#result (it is the source
-              # of TestCase#exit_code and TestCase#stdout) though TestCase#on
-              # should set it automatically (and seems to work above)
-              result = on( host,
-                          "curl #{debug_opt}-s -k https://#{host}:8140",
-                           :acceptable_exit_codes => [0,7],
-                           :silent => true )
-
-              # this is TestCase#exit_code which will hopefully be set to the
-              # exit_code of the last TestCase#on method
-              if exit_code == 0
-                logger.debug( 'The Puppet Master has started.' )
-                break
-              elsif exit_code == 7
-                logger.debug( 'The Puppet Master has yet to start...' )
-                sleep 2
-              end
-            end
-          end
-        rescue Timeout::Error
-          raise "Puppet master failed to start after #{timeout} seconds"
-        end
-
-        wait_finish = Time.now
-        elapsed = wait_finish - wait_start
-
-        logger.debug "Slept #{elapsed} sec. waiting for Puppet Master to start"
-      end
-
-      # @deprecated
-      def stop_puppet_master(host, pidfile)
-        on host, "[ -f #{pidfile} ]", :silent => true
-
-        # this is TestCase#exit_code which will hopefully be set to the
-        # exit_code of the last TestCase#on method
-        unless exit_code == 0
-          raise "Could not locate running puppet master"
-        end
-
-        on( host,
-           "kill $(cat #{pidfile})",
-           :acceptable_exit_codes => [0,1],
-           :silent => true )
-
-        timeout = 10
-        wait_start = Time.now
-
-        logger.notify "Waiting for master to stop..."
-
-        begin
-          Timeout.timeout(timeout) do
-            loop do
-              on( host,
-                 "kill -0 $(cat #{pidfile})",
-                  :acceptable_exit_codes => [0,1],
-                  :silent => true )
-
-              # this is TestCase#exit_code which will hopefully be set to the
-              # exit_code of the last TestCase#on method
-              if exit_code == 0
-                logger.debug( 'The Puppet Master is still alive...' )
-                sleep 2
-              elsif exit_code == 1
-                logger.debug( 'The Puppet Master has stopped.' )
-                break
-              end
-            end
-          end
-        rescue Timeout::Error
-          elapsed = Time.now - wait_start
-          logger.warn(
-            "Puppet master failed to stop after #{elapsed} seconds; " +
-            'killing manually'
-          )
-
-          on host, "kill -9 $(cat #{pidfile})"
-          on host, "rm -f #{pidfile}"
-        end
-
-        wait_finish = Time.now
-        elapsed = wait_finish - wait_start
-
-        logger.debug "Slept #{elapsed} sec. waiting for Puppet Master to stop"
       end
 
       # This method accepts a block and using the puppet resource 'host' will
