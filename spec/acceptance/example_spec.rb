@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe "ignore" do
 
   example "ignore" do

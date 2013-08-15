@@ -1,5 +1,5 @@
 require "rspec/expectations"
-require "dsl_bridge"
+require "beaker-rspec"
 
 RSpec.configure do |config|
   # System specific config
@@ -7,7 +7,7 @@ RSpec.configure do |config|
 
   config.beaker_config = 'sample.cfg'
 
-  config.include DSLBridge
+  config.include BeakerRSpec
 
   config.before(:all) do
     setup(RSpec.configuration.beaker_config)

@@ -1,7 +1,7 @@
-require '../puppet_acceptance'
+require 'beaker'
 
-module DSLBridge
-  include PuppetAcceptance::DSL
+module BeakerRSpec
+  include Beaker::DSL
 
   def logger
     @logger
@@ -16,16 +16,16 @@ module DSLBridge
   end
 
   def provision
-    @network_manager = PuppetAcceptance::NetworkManager.new(@config, @options, @logger)
+    @network_manager = Beaker::NetworkManager.new(@config, @options, @logger)
     @hosts = @network_manager.provision
   end
 
   def validate
-    PuppetAcceptance::Utils::Validator.validate(@hosts, @logger)
+    Beaker::Utils::Validator.validate(@hosts, @logger)
   end
 
   def setup(config_file = 'sample.cfg')
-    @options ||= 
+    @options ||=
     {
       :provision => true,
       :debug => true,
@@ -45,9 +45,9 @@ module DSLBridge
       :post_suite => [],
       :tests => [],
     }
-    @logger ||= PuppetAcceptance::Logger.new(options)
+    @logger ||= Beaker::Logger.new(options)
     @options[:logger] = @logger
-    @config ||= PuppetAcceptance::TestConfig.new(options[:config], options)
+    @config ||= Beaker::TestConfig.new(options[:config], options)
     @hosts = []
     provision
     validate
