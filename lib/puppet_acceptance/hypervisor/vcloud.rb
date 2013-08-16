@@ -116,7 +116,7 @@ module PuppetAcceptance
         @logger.notify "Waiting for #{h['vmhostname']} DNS resolution"
         try = 1
         last_wait = 0
-        wait = 1
+        wait = 3
 
         begin
           Socket.getaddrinfo(h['vmhostname'], nil)
