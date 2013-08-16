@@ -72,7 +72,7 @@ module PuppetAcceptance
         #only supports el-* platforms
         @hosts.each do |host|
           case
-          when host['platform'] =~ /el-/
+          when host['platform'] =~ /el-(5|6)/
             result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
             if result.exit_code == 1
               url = epel_info_for! host
