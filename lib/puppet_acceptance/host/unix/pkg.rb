@@ -7,9 +7,9 @@ module Unix::Pkg
   end
 
   def install_package name
-    if self['platform'] =~ /(el-4)|(redhat-4)/
+    if self['platform'] =~ /el-4/
       @logger.debug("Package installation not supported on rhel4")
-    elsif self['platform'] =~ /(fedora)|(centos)|(el)|(redhat)/
+    elsif self['platform'] =~ /(fedora)|(centos)|(el)/
       execute("yum -y install #{name}")
     elsif self['platform'] =~ /(ubuntu)|(debian)/
       execute("apt-get update")
