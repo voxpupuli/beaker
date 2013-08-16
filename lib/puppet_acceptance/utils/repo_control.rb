@@ -13,7 +13,7 @@ module PuppetAcceptance
       end
 
       def epel_info_for! host
-        version = host['platform'].match(/el-(\d+)/)[1]
+        version = host['platform'].match(/((redhat)|(el))-(\d+)/)[1]
         if version == '6'
           pkg = 'epel-release-6-8.noarch.rpm'
           url = "http://mirror.itc.virginia.edu/fedora-epel/6/i386/#{pkg}"
@@ -72,7 +72,7 @@ module PuppetAcceptance
         #only supports el-* platforms
         @hosts.each do |host|
           case
-          when host['platform'] =~ /el-/
+          when host['platform'] =~ /(el-(5|6))|(redhat-(5|6))/
             result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
             if result.exit_code == 1
               url = epel_info_for! host
