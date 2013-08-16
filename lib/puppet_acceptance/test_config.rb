@@ -59,16 +59,7 @@ module PuppetAcceptance
         config['CONFIG']['hiera_puppet_ver'] = @options[:hiera_puppet]
       end
       # need to load expect versions of PE binaries
-      config['VERSION'] = load_dependency_versions
       config
-    end
-
-    def load_dependency_versions
-      if is_pe?
-        version_file = ENV['pe_dep_versions'] || 'config/versions/pe_version'
-        versions = YAML.load_file version_file
-        versions
-      end
     end
 
     def is_pe?

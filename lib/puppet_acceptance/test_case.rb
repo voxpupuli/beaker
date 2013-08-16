@@ -98,7 +98,6 @@ module PuppetAcceptance
     # @param [Hash{Symbol=>String}] options Parsed command line options.
     # @param [String] path The local path to a test file to be executed.
     def initialize(these_hosts, logger, config, options={}, path=nil)
-      @version = config['VERSION']
       @config  = config['CONFIG']
       @hosts   = these_hosts
       @logger = logger
