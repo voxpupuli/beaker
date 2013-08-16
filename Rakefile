@@ -24,7 +24,7 @@ end
 
 
 DOCS_DAEMON = "yard server --reload --daemon --server thin"
-FOREGROUND_SERVER = 'bundle exec yard server --reload --verbose --server thin lib/puppet_acceptance'
+FOREGROUND_SERVER = 'bundle exec yard server --reload --verbose --server thin lib/beaker'
 
 def running?( cmdline )
   ps = `ps -ef`

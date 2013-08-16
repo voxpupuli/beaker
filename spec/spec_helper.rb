@@ -5,7 +5,7 @@ unless ruby_conf['MAJOR'].to_i == 1 && ruby_conf['MINOR'].to_i < 9
   require 'simplecov'
 end
 
-require 'puppet_acceptance'
+require 'beaker'
 require 'fakefs/spec_helpers'
 require 'mocks_and_helpers'
 

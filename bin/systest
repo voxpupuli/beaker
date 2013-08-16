@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-
-require 'rubygems' unless defined?(Gem)
-require 'puppet_acceptance'
-
-PuppetAcceptance::CLI.new.execute!
-
-puts "systest completed successfully, thanks."
-exit 0

@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'rubygems' unless defined?(Gem)
+require 'beaker'
+
+Beaker::CLI.new.execute!
+
+puts "systest completed successfully, thanks."
+exit 0

@@ -134,7 +134,7 @@ If a method returns a boolean (TrueClass or FalseClass) write:
 
 List possible classes that the method may raise:
 
-    @raise [PuppetAcceptance::PendingTest]
+    @raise [Beaker::PendingTest]
 
 List parameter names yielded by a method
 
