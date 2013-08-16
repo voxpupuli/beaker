@@ -17,7 +17,7 @@ module PuppetAcceptance
         when /\A2\.8/
           Version28.answers(hosts, master_certname, options)
         else
-          raise NotImplementedError "Don't know how to generate answers for #{version}"
+          raise NotImplementedError, "Don't know how to generate answers for #{version}"
       end
     end
 
