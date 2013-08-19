@@ -599,7 +599,7 @@ module PuppetAcceptance
        #wait for a given host to appear in the dashboard
        def wait_for_host_in_dashboard(host)
          hostname = host.node_name
-         retry_command("Wait for #{hostname} to be in the console", dashboard, "curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep -v '404 Not Found'")
+         retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
        end
  
  
