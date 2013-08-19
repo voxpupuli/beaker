@@ -97,8 +97,6 @@ module PuppetAcceptance
           :q_puppet_enterpriseconsole_smtp_host => smtp_host,
           :q_puppet_enterpriseconsole_smtp_use_tls => smtp_use_tls,
           :q_puppet_enterpriseconsole_smtp_port => smtp_port,
-
-          :q_pe_database => 'y',
         }
 
         if smtp_password and smtp_username
@@ -139,6 +137,7 @@ module PuppetAcceptance
         if host == dashboard
           answers.merge! master_console_a
           answers.merge! console_database_a
+          answers[:q_pe_database] = 'y'
           unless options[:type] == :upgrade
             answers.merge! console_a
           else
