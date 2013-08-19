@@ -4,7 +4,7 @@ module PuppetAcceptance
       PACKAGES = ['curl']
       UNIX_PACKAGES = ['ntpdate']
 
-      def validate(hosts, logger)
+      def self.validate(hosts, logger)
         hosts.each do |host|
           PACKAGES.each do |pkg|
             if not host.check_for_package pkg
