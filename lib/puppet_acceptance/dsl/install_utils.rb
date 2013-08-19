@@ -231,7 +231,18 @@ module PuppetAcceptance
         sleep_until_puppetdb_started(database) unless pre_30
 
         # Run the agent once to ensure everything is in the dashboard
-        on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+        install_hosts.each do |host|
+          on host, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+
+          # Workaround for PE-1105 when deploying 3.0.0
+          # The installer did not respect our database host answers in 3.0.0,
+          # and would cause puppetdb to be bounced by the agent run. By sleeping
+          # again here, we ensure that if that bounce happens during an upgrade
+          # test we won't fail early in the install process.
+          if version == '3.0.0' and host == database
+            sleep_until_puppetdb_started(database)
+          end
+        end 
 
         install_hosts.each do |host|
           wait_for_host_in_dashboard(host)
