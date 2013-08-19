@@ -28,6 +28,19 @@ module PuppetAcceptance
       def set_etc_hosts(host, etc_hosts)
         host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
       end
+
+      def hosts_with_role(hosts, desired_role = nil)
+        hosts.select do |host|
+          desired_role.nil? or host['roles'].include?(desired_role.to_s)
+        end
+      end 
+
+      def only_host_with_role(hosts, role)
+        a_host = hosts_with_role(hosts, role)
+        raise "There can be only one #{role}, but I found:" +
+          "#{a_host.map {|h| h.to_s } }" unless a_host.length == 1
+        a_host.first 
+      end
     end
   end
 end

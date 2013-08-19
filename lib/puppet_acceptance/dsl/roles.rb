@@ -82,22 +82,15 @@ module PuppetAcceptance
       #
       # @api public
       def hosts_as(desired_role = nil)
-        hosts.select do |host|
-          desired_role.nil? or host['roles'].include?(desired_role.to_s)
-        end
+        hosts_with_role(hosts, desired_role)
       end
 
       # @param [Symbol, String] role The role to find a host for
       # @return [Host] Returns the host, if one and only one is found
-      # @raise [PuppetAcceptance::DSL::Outcomes::FailTest] Raises
-      #   a failure exception if one and only one host that matches
+      # @raise Raises a failure exception if one and only one host that matches
       #   the specified role is NOT found.
       def find_only_one role
-        a_host = hosts_as( role )
-        raise PuppetAcceptance::DSL::Outcomes::FailTest,
-          "There can be only one #{role}, but I found:" +
-          "#{a_host.map {|h| h.to_s } }" unless a_host.length == 1
-        a_host.first
+        only_host_with_role(hosts, role)
       end
     end
   end
