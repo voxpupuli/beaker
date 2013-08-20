@@ -10,8 +10,9 @@ Gem::Specification.new do |s|
   s.authors     = ["Puppetlabs"]
   s.email       = ["delivery@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker"
-  s.summary     = %q{Puppetlabs acceptance testing harness}
-  s.description = %q{Write a gem description}
+  s.summary     = %q{Let's test Puppet!}
+  s.description = %q{Puppetlabs accceptance testing harness}
+  s.license     = 'Apache2'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
