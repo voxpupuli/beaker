@@ -1,4 +1,4 @@
-   puppet-acceptance - Puppet's system level acceptance test harness
+   beaker - Puppet's system level acceptance test harness
 
    Copyright (C) 2011-2013 Puppet Labs Inc
 

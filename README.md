@@ -7,12 +7,12 @@ How to install the test harness on your workstation:
 
   Automagically:
 
-    git clone https://github.com/puppetlabs/puppet-acceptance.git
+    git clone https://github.com/puppetlabs/beaker.git
     bundle install
 
   Manually:
 
-    git clone https://github.com/puppetlabs/puppet-acceptance.git
+    git clone https://github.com/puppetlabs/beaker.git
     gem install rubygems net-ssh net-scp systemu
 
 
@@ -115,7 +115,7 @@ For example:
       hypervisor: vsphere
       snaphost: base
 
-    $ ./systest.rb --config configs/my_hosts.yml  ....
+    $ ./beaker.rb --config configs/my_hosts.yml  ....
 
 
 ## VMWare Fusion support ##
@@ -261,11 +261,11 @@ you must check out the tests first, then the harness, as such:
     git://github.com/puppetlabs/puppet.git
     cd puppet
 ### Checkout the harness
-    git clone git://github.com/puppetlabs/puppet-acceptance.git
-    cd puppet-acceptance
+    git clone git://github.com/puppetlabs/beaker.git
+    cd beaker
     ln -s ../acceptance acceptance-tests
 ### Run the tests
-    ./systest.rb -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
+    ./beaker.rb -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
 
 
 ## Running PE tests ##
@@ -296,8 +296,8 @@ You can also install from git.  Use the `--install` option, which can install pu
     git clone git@github.com:your/test_repo.git
     cd test_repo
 ### Checkout the harness
-    git clone git@github.com:puppetlabs/puppet-acceptance.git
-    cd puppet-acceptance
+    git clone git@github.com:puppetlabs/beaker.git
+    cd beaker
 ### Pre-suite and Post-suite
 The harness command line supports `--pre-suite` and `--post-suite`.  `--pre-suite` describes steps to take after initial provisioning/configuring of the vms under test before the tests are run.  `--post-suite` steps are run directly after tests.
 
@@ -305,7 +305,7 @@ Both options support directories, individual files and comma separated lists of 
 
     --pre-suite setup/early/mystep.rb,setup/early/mydir    
 ### Run the tests
-    bundle exec systest -c your_config.cfg --type pe -t test_repo/tests --debug
+    bundle exec beaker.rb -c your_config.cfg --type pe -t test_repo/tests --debug
 
 ### Failure management
 By default if a test fails the harness will move on and attempt the next test in the suite.  This may be undesirable when debugging.  The harness supports an optional `--fail-mode` to alter the default behavior on failure:
@@ -315,19 +315,18 @@ By default if a test fails the harness will move on and attempt the next test in
 - `stop`: After first failure do not test any subsequent tests in the given suite, do not run any cleanup steps, exit immediately.  This is useful while testing setup steps or if you plan to revert the test environment before every test.
 
 ## Topic branches, special test repo
-    bundle exec systest -c your_cfg.cfg --debug --type git -p 2.7.x -f 1.5.8 -t path-to-your-tests 
+    bundle exec beaker.rb -c your_cfg.cfg --debug --type git -p 2.7.x -f 1.5.8 -t path-to-your-tests 
 
     path-to-test:
     If you are testing on FOSS, the test for each branch can be found in the puppet repo under acceptance/tests
 
 Special topic branch checkout with a targeted test:
 
-    bundle exec systest -c your_cfg --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 / 
-     -t tests/acceptance/ticket_6856_manage_not_work_with_symlinks.rb
+    bundle exec beaker.rb -c your_cfg --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 / 
      
      
 ## Making extensions to the harness using `--load-path`
 
 You may need to extend the harness DSL (data specific language) to handle your particular test case.  To run the harness with an addition to the LOAD_PATH use `--load-path`.  You can specify a single directory or a comma separated list of directories to be added.
 
-    bundle exec systest --debug --config ubuntu1004-32mda.cfg --tests ../puppet/acceptance/tests/resource/cron/should_allow_changing_parameters.rb  --fail fast --root-keys --type pe --load-path ../puppet/acceptance/lib/ 
+    bundle exec beaker.rb --debug --config ubuntu1004-32mda.cfg --tests ../puppet/acceptance/tests/resource/cron/should_allow_changing_parameters.rb  --fail fast --root-keys --type pe --load-path ../puppet/acceptance/lib/ 
