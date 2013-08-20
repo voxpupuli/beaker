@@ -5,4 +5,3 @@
     require File.expand_path(File.join(File.dirname(__FILE__), 'utils', file))
   end
 end
-include PuppetAcceptance::Utils::Validator

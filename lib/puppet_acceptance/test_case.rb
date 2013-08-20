@@ -1,4 +1,4 @@
-%w( host dsl ).each do |lib|
+%w( host answers dsl ).each do |lib|
   begin
     require "puppet_acceptance/#{lib}"
   rescue LoadError
