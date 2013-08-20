@@ -189,7 +189,7 @@ module Beaker
         options[:type] = :install unless options[:type] 
         hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
         master_certname = on(master, hostcert).stdout.strip
-        answers = PuppetAcceptance::Answers.answers(version, hosts, master_certname, options)
+        answers = Beaker::Answers.answers(version, hosts, master_certname, options)
         special_nodes = [master, database, dashboard].uniq
         real_agents = agents - special_nodes
 
@@ -210,7 +210,7 @@ module Beaker
           if host['platform'] =~ /windows/
             on host, "#{installer_cmd(host, version, options[:installer])} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
-            create_remote_file host, "#{host['working_dir']}/answers", PuppetAcceptance::Answers.answer_string(host, answers)
+            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
 
             on host, "#{installer_cmd(host, version, options[:installer])} -a #{host['working_dir']}/answers"
           end

@@ -39,7 +39,7 @@ module Beaker
       @network_manager = Beaker::NetworkManager.new(@config, @options, @logger)
       @hosts = @network_manager.provision
       #validate that the hosts are correctly configured
-      PuppetAcceptance::Utils::Validator.validate(@hosts, @logger)
+      Beaker::Utils::Validator.validate(@hosts, @logger)
 
     end
 
