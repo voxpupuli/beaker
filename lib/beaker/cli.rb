@@ -1,7 +1,9 @@
 module Beaker
   class CLI
     def initialize
-      @options = Beaker::Options.parse_args
+      @options_parser = Beaker::Options.new
+      @options = @options_parser.parse_args
+      exit
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
 
