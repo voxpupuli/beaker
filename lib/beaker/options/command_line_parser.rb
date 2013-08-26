@@ -1,6 +1,29 @@
 module Beaker
   module Options
     class CommandLineParser
+
+      #generates a list of files based upon a given path or list of paths
+      #looks for .rb files
+      def file_list(paths)
+        files = []
+        if not paths.empty?
+          paths.each do |root|
+            if File.file? root then
+              files << root
+            else
+              discover_files = Dir.glob(
+                File.join(root, "**/*.rb")
+              ).select { |f| File.file?(f) }
+              if discover_files.empty?
+                raise ArgumentError, "Empty directory used as an option (#{root})!"
+              end
+              files += discover_files
+            end
+          end
+        end
+        files
+      end
+
       def initialize
         @cmd_options = Beaker::Options::OptionsHash.new
 

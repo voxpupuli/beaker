@@ -69,8 +69,8 @@ module Beaker
           @options = @options.merge(env_vars)
 
           if @options.is_pe?
-            @options['pe_ver']           = puppet_enterprise_version
-            @options['pe_ver_win']       = puppet_enterprise_version_win
+            @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:version_file])
+            @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version_win(@options[:pe_dir], @options[:version_file])
           else
             @options['puppet_ver']       = @options[:puppet]
             @options['facter_ver']       = @options[:facter]
@@ -213,51 +213,6 @@ module Beaker
         host_options
       end
 
-      def load_pe_version
-        dist_dir = @options[:pe_dir]
-        version_file = @options[:version_file]
-        version = ""
-        begin
-          open("#{dist_dir}/#{version_file}") do |file|
-            while line = file.gets
-              if /(\w.*)/ =~ line then
-                version = $1.strip
-                puts "Found LATEST: Puppet Enterprise Version #{version}"
-              end
-            end
-          end
-        rescue
-          version = 'unknown'
-        end
-        return version
-      end
-
-      def puppet_enterprise_version
-        load_pe_version if @options.is_pe?
-      end
-
-      def load_pe_version_win
-        dist_dir = @options[:pe_dir]
-        version_file = @options[:version_file]
-        version = ""
-        begin
-          open("#{dist_dir}/#{version_file}") do |file|
-            while line = file.gets
-              if /(\w.*)/ =~ line then
-                version=$1.strip
-                puts "Found LATEST: Puppet Enterprise Windows Version #{version}"
-              end
-            end
-          end
-        rescue
-          version = 'unknown'
-        end
-        return version
-      end
-
-      def puppet_enterprise_version_win
-        load_pe_version_win if @options.is_pe?
-      end
     end
   end
 end
