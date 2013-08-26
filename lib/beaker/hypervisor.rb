@@ -5,24 +5,24 @@ module Beaker
       @logger.debug "No post-provisioning configuration necessary for #{self.class.name} boxes"
     end
 
-    def self.create type, hosts_to_provision, options, config
+    def self.create type, hosts_to_provision, options
       @logger = options[:logger]
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create") 
       case type
         when /aix/
-          Beaker::Aixer.new hosts_to_provision, options, config
+          Beaker::Aixer.new hosts_to_provision, options
         when /solaris/
-          Beaker::Solaris.new hosts_to_provision, options, config
+          Beaker::Solaris.new hosts_to_provision, options
         when /vsphere/
-          Beaker::Vsphere.new hosts_to_provision, options, config
+          Beaker::Vsphere.new hosts_to_provision, options
         when /fusion/
-          Beaker::Fusion.new hosts_to_provision, options, config
+          Beaker::Fusion.new hosts_to_provision, options
         when /blimpy/
-          Beaker::Blimper.new hosts_to_provision, options, config
+          Beaker::Blimper.new hosts_to_provision, options
         when /vcloud/
-          Beaker::Vcloud.new hosts_to_provision, options, config
+          Beaker::Vcloud.new hosts_to_provision, options
         when /vagrant/
-          Beaker::Vagrant.new hosts_to_provision, options, config
+          Beaker::Vagrant.new hosts_to_provision, options
         end
     end
   end

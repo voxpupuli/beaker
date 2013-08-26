@@ -18,12 +18,11 @@ module Beaker
   class TestSuite
     attr_reader :name, :options, :config, :fail_mode
 
-    def initialize(name, hosts, options, config, fail_mode = nil)
+    def initialize(name, hosts, options, fail_mode = nil)
       @name      = name.gsub(/\s+/, '-')
       @hosts     = hosts
       @run       = false
       @options   = options
-      @config    = config
       @fail_mode = @options[:fail_mode] || fail_mode
       @logger    = options[:logger]
 
@@ -205,8 +204,6 @@ module Beaker
 
     - Host Configuration Summary -
       HEREDOC
-
-      config.dump
 
       elapsed_time = @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
       average_test_time = elapsed_time / test_count

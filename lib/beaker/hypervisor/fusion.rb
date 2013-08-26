@@ -1,7 +1,7 @@
 module Beaker 
   class Fusion < Beaker::Hypervisor
 
-  def initialize(fusion_hosts, options, config)
+  def initialize(fusion_hosts, options)
       require 'rubygems' unless defined?(Gem)
       begin
         require 'fission'
@@ -10,7 +10,6 @@ module Beaker
       end
       @logger = options[:logger]
       @options = options
-      @config = config['CONFIG'].dup
       @fusion_hosts = fusion_hosts
 
 

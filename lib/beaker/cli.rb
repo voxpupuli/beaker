@@ -1,31 +1,10 @@
 module Beaker
   class CLI
     def initialize
-      @options_parser = Beaker::Options.new
+      @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
-      exit
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
-
-      if not @options[:config] 
-        report_and_raise(@logger, RuntimeError.new("Argh!  There is no default for Config, specify one (-c or --config)!"), "CLI: initialize") 
-      end
-
-      @logger.debug("Options")
-      @options.each do |opt, val|
-        if val and val != [] 
-          @logger.debug("\t#{opt.to_s}:")
-          if val.kind_of?(Array)
-            val.each do |v|
-              @logger.debug("\t\t#{v.to_s}")
-            end
-          else
-            @logger.debug("\t\t#{val.to_s}")
-          end
-        end
-      end
-
-      @config = Beaker::TestConfig.new(@options[:config], @options)
 
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
@@ -38,7 +17,7 @@ module Beaker
       end
 
       @hosts =  []
-      @network_manager = Beaker::NetworkManager.new(@config, @options, @logger)
+      @network_manager = Beaker::NetworkManager.new(@options, @logger)
       @hosts = @network_manager.provision
       #validate that the hosts are correctly configured
       Beaker::Utils::Validator.validate(@hosts, @logger)
@@ -107,7 +86,7 @@ module Beaker
         return
       end
       Beaker::TestSuite.new(
-        name, @hosts, options, @config, failure_strategy
+        name, @hosts, options, failure_strategy
       ).run_and_raise_on_failure
     end
 

@@ -10,15 +10,14 @@ module Beaker
   class NetworkManager
     HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant']
 
-    def initialize(config, options, logger)
+    def initialize(options, logger)
       @logger = logger
       @options = options
       @hosts = []
-      @config = config
       @virtual_machines = {}
       @noprovision_machines = []
-      @config['HOSTS'].each_key do |name|
-        host_info = @config['HOSTS'][name]
+      @options['HOSTS'].each_key do |name|
+        host_info = @options['HOSTS'][name]
         #check to see if this host has a hypervisor 
         hypervisor = host_info['hypervisor'] 
         #provision this box
@@ -44,14 +43,14 @@ module Beaker
         hosts_for_type = []
         #set up host objects for provisioned provisioned_set
         names.each do |name|
-          host = Beaker::Host.create(name, @options, @config)
+          host = Beaker::Host.create(name, @options)
           hosts_for_type << host
         end
-        @provisioned_set[type] = Beaker::Hypervisor.create(type, hosts_for_type, @options, @config)
+        @provisioned_set[type] = Beaker::Hypervisor.create(type, hosts_for_type, @options)
         @hosts << hosts_for_type
       end
       @noprovision_machines.each do |name|
-        @hosts << Beaker::Host.create(name, @options, @config)
+        @hosts << Beaker::Host.create(name, @options)
       end
       @hosts = @hosts.flatten
       @hosts

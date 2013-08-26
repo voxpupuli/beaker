@@ -74,10 +74,9 @@ module Beaker
         @temp_files << f
     end
 
-    def initialize(vagrant_hosts, options, config)
+    def initialize(vagrant_hosts, options)
       require 'tempfile'
       @options = options
-      @config = config['CONFIG'].dup
       @logger = options[:logger]
       @temp_files = []
       @vagrant_hosts = vagrant_hosts

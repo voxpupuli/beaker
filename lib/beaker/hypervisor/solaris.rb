@@ -1,9 +1,8 @@
 module Beaker 
   class Solaris < Beaker::Hypervisor
 
-    def initialize(solaris_hosts, options, config)
+    def initialize(solaris_hosts, options)
       @options = options
-      @config = config['CONFIG'].dup
       @logger = options[:logger]
       @solaris_hosts = solaris_hosts
       fog_file = nil
@@ -16,17 +15,9 @@ module Beaker
       vmpath    = fog_file[:default][:solaris_hypervisor_vmpath]
       snappaths = fog_file[:default][:solaris_hypervisor_snappaths]
 
-      hyperconf = {
-        'HOSTS'  => {
-          hypername => { 'platform' => 'solaris-11-sparc' }
-        },
-        'CONFIG' => {
-          'user' => fog_file[:default][:solaris_hypervisor_username] || ENV['USER'],
-          'ssh'  => {
-            :keys => fog_file[:default][:solaris_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa"
-          }
-        }
-      }
+      @options['HOSTS'].merge({ hypername => { 'platform' => 'solaris-11-sparc' } })
+      @options['user'] = fog_file[:default][:solaris_hypervisor_username] || ENV['USER']
+      @options['ssh'] = { :keys => fog_file[:default][:solaris_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa" }
 
       hyperconfig = Beaker::TestConfig.new( hyperconf, @options )
 

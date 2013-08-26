@@ -21,9 +21,8 @@ module Beaker
       ports
     end
 
-  def initialize(blimpy_hosts, options, config)
+  def initialize(blimpy_hosts, options)
     @options = options
-    @config = config['CONFIG'].dup
     @logger = options[:logger]
     @blimpy_hosts = blimpy_hosts
     require 'rubygems' unless defined?(Gem)
