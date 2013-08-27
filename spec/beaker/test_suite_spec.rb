@@ -14,13 +14,13 @@ module Beaker
 
       it 'fails without test files' do
         expect { Beaker::TestSuite.new 'name', 'hosts',
-                  Hash.new, 'config', :stop_on_error }.to raise_error
+                  Hash.new, :stop_on_error }.to raise_error
       end
 
       it 'includes specific files as test file when explicitly passed' do
         @files = [ rb_test ]
         ts = Beaker::TestSuite.new 'name', 'hosts', options,
-                                             'config', :stop_on_error
+                                             :stop_on_error
 
         expect { ts.instance_variable_get(:@test_files).
                   include? rb_test }.to be_true
@@ -31,7 +31,7 @@ module Beaker
         @files = [ test_dir ]
 
         ts = Beaker::TestSuite.new 'name', 'hosts',
-               options, 'config', :stop_on_error
+               options, :stop_on_error
 
         processed_files = ts.instance_variable_get :@test_files
 

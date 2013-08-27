@@ -1,10 +1,15 @@
 module Beaker
   module Options
     class CommandLineParser
+      GITREPO = 'git://github.com/puppetlabs'
+
+      def self.repo?
+        GITREPO
+      end
 
       #generates a list of files based upon a given path or list of paths
       #looks for .rb files
-      def file_list(paths)
+      def self.file_list(paths)
         files = []
         if not paths.empty?
           paths.each do |root|
@@ -22,6 +27,23 @@ module Beaker
           end
         end
         files
+      end
+
+      def self.parse_git_repos(git_opts)
+        git_opts.map! { |opt|
+          case opt
+            when /^PUPPET\//
+              opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
+            when /^FACTER\//
+              opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
+            when /^HIERA\//
+              opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
+            when /^HIERA-PUPPET\//
+              opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+          end
+          opt
+        }
+        git_opts
       end
 
       def initialize

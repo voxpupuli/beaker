@@ -1,13 +1,7 @@
 module Beaker
   module Options
     class Parser
-      GITREPO = 'git://github.com/puppetlabs'
-
       attr_accessor :options
-
-      def repo?
-        GITREPO
-      end
 
       def parser_error msg = ""
         puts "Error in Beaker configuration: " + msg.to_s
@@ -118,45 +112,6 @@ module Beaker
             end
           end
         end
-      end
-
-      def parse_git_repos(git_opts)
-        git_opts.map! { |opt|
-          case opt
-            when /^PUPPET\//
-              opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
-            when /^FACTER\//
-              opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
-            when /^HIERA\//
-              opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
-            when /^HIERA-PUPPET\//
-              opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
-          end
-          opt
-        }
-        git_opts
-      end
-
-      #generates a list of files based upon a given path or list of paths
-      #looks for .rb files
-      def file_list(paths)
-        files = []
-        if not paths.empty? 
-          paths.each do |root|
-            if File.file? root then
-              files << root
-            else
-              discover_files = Dir.glob(
-                File.join(root, "**/*.rb")
-              ).select { |f| File.file?(f) }
-              if discover_files.empty?
-                raise ArgumentError, "Empty directory used as an option (#{root})!"
-              end
-              files += discover_files
-            end
-          end
-        end
-        files
       end
 
       #validation done after all option parsing
