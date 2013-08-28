@@ -5,9 +5,6 @@ module Beaker
       def self.env_vars
         h = Beaker::Options::OptionsHash.new
         h.merge({
-          :keyfile => "#{ENV['HOME']}/.ssh/id_rsa",
-          :keys => ["#{ENV['HOME']}/.ssh/id_rsa"],
-          :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
           :consoleport => ENV['consoleport'] ? ENV['consoleport'].to_i : nil,
           :type => ENV['IS_PE'] ? 'pe' : nil,
           :pe_dir => ENV['pe_dist_dir'],
@@ -50,14 +47,16 @@ module Beaker
 
       def self.ssh_defaults
         h = Beaker::Options::OptionsHash.new
-        h.merge({
+        h.merge({:ssh => {
           :config                => false,
           :paranoid              => false,
           :timeout               => 300,
           :auth_methods          => ["publickey"],
           :port                  => 22,
-          :forward_agent         => true
-        })
+          :forward_agent         => true,
+          :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
+          :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+        }})
       end
 
     end

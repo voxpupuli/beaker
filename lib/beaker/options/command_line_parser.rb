@@ -3,13 +3,13 @@ module Beaker
     class CommandLineParser
       GITREPO = 'git://github.com/puppetlabs'
 
-      def self.repo?
+      def repo?
         GITREPO
       end
 
       #generates a list of files based upon a given path or list of paths
       #looks for .rb files
-      def self.file_list(paths)
+      def file_list(paths)
         files = []
         if not paths.empty?
           paths.each do |root|
@@ -29,7 +29,7 @@ module Beaker
         files
       end
 
-      def self.parse_git_repos(git_opts)
+      def parse_git_repos(git_opts)
         git_opts.map! { |opt|
           case opt
             when /^PUPPET\//
@@ -108,7 +108,7 @@ module Beaker
             else
               @cmd_options[:tests] << value
             end
-            @cmd_options[:tests] = file_list(cmd_options[:tests])
+            @cmd_options[:tests] = file_list(@cmd_options[:tests])
             if @cmd_options[:tests].empty?
               raise ArgumentError, "No tests to run!"
             end
@@ -124,7 +124,7 @@ module Beaker
             else
               @cmd_options[:pre_suite] << value
             end
-            @cmd_options[:pre_suite] = file_list(cmd_options[:pre_suite])
+            @cmd_options[:pre_suite] = file_list(@cmd_options[:pre_suite])
             if @cmd_options[:pre_suite].empty?
               raise ArgumentError, "Empty pre-suite!"
             end
@@ -140,7 +140,7 @@ module Beaker
             else
               @cmd_options[:post_suite] << value
             end
-            @cmd_options[:post_suite] = file_list(cmd_options[:post_suite])
+            @cmd_options[:post_suite] = file_list(@cmd_options[:post_suite])
             if @cmd_options[:post_suite].empty?
               raise ArgumentError, "Empty post-suite!"
             end
@@ -166,7 +166,7 @@ module Beaker
           opts.on '--keyfile /PATH/TO/SSH/KEY',
                   'Specify alternate SSH key',
                   '(default: ~/.ssh/id_rsa)' do |key|
-            @cmd_options[:keyfile] = key
+            @cmd_options[:ssh] = {:keys => [key]}
           end
 
 
@@ -182,7 +182,7 @@ module Beaker
             else
               @cmd_options[:install] << value
             end
-            @cmd_options[:install] = parse_git_repos(cmd_options[:install])
+            @cmd_options[:install] = parse_git_repos(@cmd_options[:install])
           end
 
           opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|

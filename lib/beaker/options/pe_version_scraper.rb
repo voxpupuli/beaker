@@ -2,7 +2,7 @@ module Beaker
   module Options
     module PEVersionScraper
       def self.load_pe_version dist_dir, version_file
-        version = ""
+        version = nil
         begin
           open("#{dist_dir}/#{version_file}") do |file|
             while line = file.gets
@@ -13,13 +13,12 @@ module Beaker
             end
           end
         rescue
-          version = 'unknown'
         end
         return version
       end
 
       def self.load_pe_version_win dist_dir, version_file
-        version = ""
+        version = nil
         begin
           open("#{dist_dir}/#{version_file}") do |file|
             while line = file.gets
@@ -30,7 +29,6 @@ module Beaker
             end
           end
         rescue
-          version = 'unknown'
         end
         return version
       end

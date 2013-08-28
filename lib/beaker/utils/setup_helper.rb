@@ -8,21 +8,9 @@ module Beaker
         @logger = options[:logger]
       end
 
-      def find_masters(hosts)
-        hosts.select do |host|
-          host['roles'].include?("master")
-        end
-      end
-
-      def find_only_master(hosts)
-        m = find_masters(hosts)
-        raise "too many masters, expected one but found #{m.map {|h| h.to_s }}" unless m.length == 1
-        m.first
-      end
-
       def add_master_entry
         @logger.notify "Add Master entry to /etc/hosts"
-        master = find_only_master(@hosts)
+        master = only_host_with_role(@hosts, :master)
         if master["hypervisor"] and master["hypervisor"] =~ /vagrant/
           @logger.debug "Don't update master entry on vagrant masters"
           return

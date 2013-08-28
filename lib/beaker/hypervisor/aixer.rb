@@ -1,4 +1,4 @@
-module Beaker 
+module Beaker
   class Aixer < Beaker::Hypervisor
 
     def initialize(aix_hosts, options)
@@ -14,13 +14,15 @@ module Beaker
 
       # Running the rake task on rpm-builder
       hypername = fog_file[:default][:aix_hypervisor_server]
-
-      @options[:user] = fog_file[:default][:aix_hypervisor_username] || ENV['USER']
-      @options[:ssh] = { :keys => fog_file[:default][:aix_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa" }
-      @options['HOSTS'].merge({ hypername => { 'platform' => 'el-6-x86_64' } })
+      hyperopts = @options.dup
+      hyperopts['HOSTS'] = {
+          hypername => { 'platform' => 'el-6-x86_64' }
+      }
 
       @logger.notify "Connecting to hypervisor at #{hypername}"
-      hypervisor = Beaker::Host.create( hypername, @options)
+      hypervisor = Beaker::Host.create( hypername, hyperopts )
+      hypervisor[:user] = fog_file[:default][:aix_hypervisor_username] || ENV['USER']
+      hypervisor[:ssh][:keys] = [fog_file[:default][:aix_hypervisor_keyfile]] || ["#{ENV['HOME']}/.ssh/id_rsa"]
 
       @aix_hosts.each do |host|
         vm_name = host['vmname'] || host.name

@@ -72,7 +72,7 @@ module Beaker
             @options['hiera_puppet_ver'] = @options[:hiera_puppet]
           end
 
-          dump_args
+          @options.dump
 
           validate_args
           @options
@@ -82,36 +82,6 @@ module Beaker
           parser_error e
         end
 
-      end
-
-      def dump_hash(h, separator = '\t\t')
-        h.each do |k, v|
-          print "#{separator}#{k.to_s} => "
-          if v.kind_of?(Hash)
-            puts
-            dump_hash(v, separator + separator)
-          else
-            puts "#{v.to_s}"
-          end
-        end
-      end
-
-      def dump_args
-        puts "Options:"
-        @options.each do |opt, val|
-          if val and val != []
-            puts "\t#{opt.to_s}:"
-            if val.kind_of?(Array)
-              val.each do |v|
-                puts "\t\t#{v.to_s}"
-              end
-            elsif val.kind_of?(Hash)
-              dump_hash(val, "\t\t")
-            else
-              puts "\t\t#{val.to_s}"
-            end
-          end
-        end
       end
 
       #validation done after all option parsing
@@ -162,7 +132,7 @@ module Beaker
         host_options['HOSTS'].each_key do |host|
           host_options['HOSTS'][host]['roles'] ||= []
         end
-        if host_options['CONFIG']
+        if host_options.has_key?('CONFIG')
           host_options = host_options.merge(host_options.delete('CONFIG'))
         end
         host_options
