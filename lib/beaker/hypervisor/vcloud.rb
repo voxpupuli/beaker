@@ -11,7 +11,7 @@ module Beaker
       raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
 
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
@@ -138,7 +138,7 @@ module Beaker
 
     def cleanup
       @logger.notify "Destroying vCloud boxes"
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"

@@ -40,7 +40,7 @@ module Beaker
     attr_reader :name, :defaults
     def initialize name, options
       @logger = options[:logger]
-      @name, @options = name, options.dup
+      @name, @options = name.to_s, options.dup
 
       # This is annoying and its because of drift/lack of enforcement/lack of having
       # a explict relationship between our defaults, our setup steps and how they're

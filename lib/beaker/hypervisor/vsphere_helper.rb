@@ -20,22 +20,22 @@ class VsphereHelper
                                        :insecure => true
   end
 
-  def self.load_config
+  def self.load_config(dot_fog = '.fog')
     # support Fog/Cloud Provisioner layout
     # (ie, someplace besides my made up conf)
     vsphere_credentials = nil
     if File.exists? '/etc/plharness/vsphere'
       vsphere_credentials = load_legacy_credentials
 
-    elsif File.exists?( File.join(ENV['HOME'], '.fog') )
+    elsif File.exists?( dot_fog )
       vsphere_credentials = load_fog_credentials
     end
 
     return vsphere_credentials
   end
 
-  def self.load_fog_credentials
-    vInfo = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+  def self.load_fog_credentials(dot_fog = '.fog')
+    vInfo = YAML.load_file( dot_fog )
 
     vsphere_credentials = {}
     vsphere_credentials[:server] = vInfo[:default][:vsphere_server]

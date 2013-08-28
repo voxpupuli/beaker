@@ -32,7 +32,7 @@ module Beaker
     rescue LoadError
       raise "Unable to load Blimpy, please ensure its installed"
     end
-    ami_spec= YAML.load_file('config/image_templates/ec2.yaml')["AMI"]
+    ami_spec= YAML.load_file(@options[:ec2_yaml])["AMI"]
 
     fleet = Blimpy.fleet do |fleet|
       @blimpy_hosts.each do |host|

@@ -72,9 +72,9 @@ module Beaker
             @options['hiera_puppet_ver'] = @options[:hiera_puppet]
           end
 
+          validate_args
           @options.dump
 
-          validate_args
           @options
         rescue SystemExit
           exit
@@ -84,28 +84,65 @@ module Beaker
 
       end
 
+      def check_yaml_file(f, msg = "")
+        if not File.file?(f)
+          parser_error "#{f} does not exist (#{msg})"
+        end
+        begin
+          YAML.load_file(f)
+        rescue Exception => e
+          parser_error "#{f} is not a valid YAML file (#{msg})\n\t#{e}"
+        end
+      end
+
       #validation done after all option parsing
       def validate_args
+        #check for valid type
         if @options[:type] !~ /(pe)|(git)/
           parser_error "--type must be one of pe or git, not '#{@options[:type]}'"
         end
 
+        #check for valid fail mode
         if not ["fast", "stop", nil].include?(@options[:fail_mode])
           parser_error "--fail-mode must be one of fast, stop" 
+        end
+
+        #check for config files necessary for different hypervisors
+        hypervisors = [] 
+        @options[:HOSTS].each_key do |name|  
+          hypervisors << @options[:HOSTS][name][:hypervisor].to_s
+        end
+        hypervisors.uniq!
+        hypervisors.each do |visor|
+          if ['blimpy'].include?(visor)
+            check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
+          end
+          if ['aix', 'solaris', 'vcloud'].include?(visor)
+            check_yaml_file(@options[:dot_fog], "required by #{visor}")
+          end
+        end
+
+        #check that roles of hosts make sense
+        # - must be one and only one master
+        roles = []
+        @options[:HOSTS].each_key do |name|  
+          roles << @options[:HOSTS][name][:roles]
+        end
+        master = 0
+        roles.each do |role_array|
+          if role_array.include?('master')
+            master += 1
+          end
+        end
+        if master > 1 or master < 1
+          parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 
       end
 
       #validation done before parsing host file options
       def pre_validate_args
-        if not File.file?(@options[:hosts_file])
-          raise "--hosts-file/-h must provide a link to a valid host configuration file"
-        end
-        begin
-          YAML.load_file(@options[:hosts_file])
-        rescue Exception => e
-          raise "--hosts-file/-h file is not valid YAML\n\t#{e}"
-        end
+        check_yaml_file(@options[:hosts_file], "required host/node configuration information")
       end
 
       def parse_options_file(options_file_path)

@@ -29,6 +29,8 @@ module Beaker
         hash.each do |key, v|
           if (base[key].is_a?(Hash) || base[key].is_a?(OptionsHash)) && (hash[key].is_a?(Hash) || has[key].is_a?(OptionsHash))
             rmerge(base[key], hash[key])
+          elsif hash[key].is_a?(Hash)
+            base[key] = OptionsHash.new.merge(hash[key])
           else
             base[key]= hash[key]
           end
