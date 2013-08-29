@@ -34,7 +34,7 @@ Running Systest requires at least one 'System Under Test' (SUT) upon which to ru
 ## Prepare a Test Configuration File ##
   - The test harness is configuration driven
   - The config file is yaml formatted
-  - The type of insallation and configuration is dictated by the config file, especialy for PE
+  - The type of insallation and configuration is dictated by the config file, especially for PE
 
 Here we have the host 'ubuntu-1004-64', a 64 bit Ubuntu box, serving as Puppet Master,
 Dashboard, and Agent; the host "ubuntu-1004-32", a 32-bit Ubunutu node, will be a 
@@ -119,11 +119,11 @@ For example:
 
 
 ## VMWare Fusion support ##
-Pre-requisite: Fission gem installed and configured, including a ~/.fissionrc 
-that points to the `vmrun` executable and where VMs can be found.
+Pre-requisite: Fission gem installed and configured, including a `~/.fissionrc`
+that points to the `vmrun` executable and where virtual machines can be found.
   Example `.fissionrc` file (it's YAML):
-    ---
-    vm_dir: "/Directory/containing/my/.VMX/files"
+
+    vm_dir: "/Directory/containing/my/.vmwarevm/files/"
     vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
 You can then use the following arguments in the node configuration:
@@ -136,7 +136,7 @@ There are a few additional options available in your configuration file. Each ho
 section can now use:
 
 - `vmname`: This is useful if the hostname of the VM doesn't match the name of
-  the .VMX file on disk. The alias should be something fission can load.
+  the `.vmwarevm` file on disk. The alias should be something fission can load.
 
 
 Example:
