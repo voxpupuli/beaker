@@ -1,50 +1,6 @@
 module Beaker
   module Options
     class CommandLineParser
-      GITREPO = 'git://github.com/puppetlabs'
-
-      def repo?
-        GITREPO
-      end
-
-      #generates a list of files based upon a given path or list of paths
-      #looks for .rb files
-      def file_list(paths)
-        files = []
-        if not paths.empty?
-          paths.each do |root|
-            if File.file? root then
-              files << root
-            else
-              discover_files = Dir.glob(
-                File.join(root, "**/*.rb")
-              ).select { |f| File.file?(f) }
-              if discover_files.empty?
-                raise ArgumentError, "Empty directory used as an option (#{root})!"
-              end
-              files += discover_files
-            end
-          end
-        end
-        files
-      end
-
-      def parse_git_repos(git_opts)
-        git_opts.map! { |opt|
-          case opt
-            when /^PUPPET\//
-              opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
-            when /^FACTER\//
-              opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
-            when /^HIERA\//
-              opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
-            when /^HIERA-PUPPET\//
-              opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
-          end
-          opt
-        }
-        git_opts
-      end
 
       def initialize
         @cmd_options = Beaker::Options::OptionsHash.new
@@ -76,74 +32,27 @@ module Beaker
           opts.on '--helper PATH/TO/SCRIPT',
                   'Ruby file evaluated prior to tests',
                   '(a la spec_helper)' do |script|
-            @cmd_options[:helper] = []
-            if script.is_a?(Array)
-              @cmd_options[:helper] += script
-            elsif script =~ /,/
-              @cmd_options[:helper] += script.split(',')
-            else
-              @cmd_options[:helper] << script
-            end
+            @cmd_options[:helper] = script
           end
 
           opts.on  '--load-path /PATH/TO/DIR,/ADDITIONAL/DIR/PATHS',
                    'Add paths to LOAD_PATH'  do |value|
-            @cmd_options[:load_path] = []
-            if value.is_a?(Array)
-              @cmd_options[:load_path] += value
-            elsif value =~ /,/
-              @cmd_options[:load_path] += value.split(',')
-            else
-              @cmd_options[:load_path] << value
-            end
+            @cmd_options[:load_path] = value
           end
 
           opts.on  '-t', '--tests /PATH/TO/DIR,/ADDITIONA/DIR/PATHS,/PATH/TO/FILE.rb',
                    'Execute tests from paths and files' do |value|
-            @cmd_options[:tests] = []
-            if value.is_a?(Array)
-              @cmd_options[:tests] += value
-            elsif value =~ /,/
-              @cmd_options[:tests] += value.split(',')
-            else
-              @cmd_options[:tests] << value
-            end
-            @cmd_options[:tests] = file_list(@cmd_options[:tests])
-            if @cmd_options[:tests].empty?
-              raise ArgumentError, "No tests to run!"
-            end
+            @cmd_options[:tests] = value
           end
 
           opts.on '--pre-suite /PRE-SUITE/DIR/PATH,/ADDITIONAL/DIR/PATHS,/PATH/TO/FILE.rb',
                   'Path to project specific steps to be run BEFORE testing' do |value|
-            @cmd_options[:pre_suite] = []
-            if value.is_a?(Array)
-              @cmd_options[:pre_suite] += value
-            elsif value =~ /,/
-              @cmd_options[:pre_suite] += value.split(',')
-            else
-              @cmd_options[:pre_suite] << value
-            end
-            @cmd_options[:pre_suite] = file_list(@cmd_options[:pre_suite])
-            if @cmd_options[:pre_suite].empty?
-              raise ArgumentError, "Empty pre-suite!"
-            end
+            @cmd_options[:pre_suite] = value
           end
 
           opts.on '--post-suite /POST-SUITE/DIR/PATH,/OPTIONAL/ADDITONAL/DIR/PATHS,/PATH/TO/FILE.rb',
                   'Path to project specific steps to be run AFTER testing' do |value|
-            @cmd_options[:post_suite] = []
-            if value.is_a?(Array)
-              @cmd_options[:post_suite] += value
-            elsif value =~ /,/
-              @cmd_options[:post_suite] += value.split(',')
-            else
-              @cmd_options[:post_suite] << value
-            end
-            @cmd_options[:post_suite] = file_list(@cmd_options[:post_suite])
-            if @cmd_options[:post_suite].empty?
-              raise ArgumentError, "Empty post-suite!"
-            end
+            @cmd_options[:post_suite] = value
           end
 
           opts.on '--[no-]provision',
@@ -174,20 +83,11 @@ module Beaker
                   'Install a project repo/app on the SUTs', 
                   'Provide full git URI or use short form KEYWORD/name',
                   'supported keywords: PUPPET, FACTER, HIERA, HIERA-PUPPET' do |value|
-            @cmd_options[:install] = []
-            if value.is_a?(Array)
-              @cmd_options[:install] += value
-            elsif value =~ /,/
-              @cmd_options[:install] += value.split(',')
-            else
-              @cmd_options[:install] << value
-            end
-            @cmd_options[:install] = parse_git_repos(@cmd_options[:install])
+            @cmd_options[:install] = value
           end
 
           opts.on('-m', '--modules URI', 'Select puppet module git install URI') do |value|
-            @cmd_options[:modules] ||= []
-            @cmd_options[:modules] << value
+            @cmd_options[:modules] = value
           end
 
           opts.on '-q', '--[no-]quiet',

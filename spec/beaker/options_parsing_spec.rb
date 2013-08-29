@@ -3,8 +3,8 @@ require "spec_helper"
 module Beaker
   module Options
 
-    describe CommandLineParser do
-      let(:parser)    { CommandLineParser.new }
+    describe Parser do
+      let(:parser)    { Parser.new }
       repo = 'git://github.com/puppetlabs'
 
       it "has repo set to #{repo}" do

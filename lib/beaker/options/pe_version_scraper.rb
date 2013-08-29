@@ -1,6 +1,7 @@
 module Beaker
   module Options
     module PEVersionScraper
+      require 'open-uri'
       def self.load_pe_version dist_dir, version_file
         version = nil
         begin
@@ -12,23 +13,8 @@ module Beaker
               end
             end
           end
-        rescue
-        end
-        return version
-      end
-
-      def self.load_pe_version_win dist_dir, version_file
-        version = nil
-        begin
-          open("#{dist_dir}/#{version_file}") do |file|
-            while line = file.gets
-              if /(\w.*)/ =~ line then
-                version=$1.strip
-                puts "Found LATEST: Puppet Enterprise Windows Version #{version}"
-              end
-            end
-          end
-        rescue
+        rescue Exception => e
+          raise "Failure to examine #{dist_dir}/#{version_file}\n\t\t#{e.to_s}"
         end
         return version
       end

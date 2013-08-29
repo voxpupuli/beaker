@@ -1,12 +1,77 @@
 module Beaker
   module Options
     class Parser
+      GITREPO      = 'git://github.com/puppetlabs'
+      #these options can have the form of arg1,arg2 or [arg] or just arg
+      #should default to []
+      LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
+      #these options expand out into an array of .rb files
+      RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
       attr_accessor :options
 
       def parser_error msg = ""
         puts "Error in Beaker configuration: " + msg.to_s
         puts "\nUse beaker --help"
         exit
+      end
+
+      def repo?
+        GITREPO
+      end
+
+      #split given argument into an array
+      def split_arg arg
+        arry = []
+        if arg.is_a?(Array)
+          arry += arg
+        elsif arg =~ /,/
+          arry += arg.split(',')
+        else
+          arry << arg
+        end
+        arry
+      end
+
+      #generates a list of files based upon a given path or list of paths
+      #looks for .rb files
+      def file_list(paths)
+        files = []
+        if not paths.empty?
+          paths.each do |root|
+            if File.file? root then
+              files << root
+            else
+              discover_files = Dir.glob(
+                File.join(root, "**/*.rb")
+              ).select { |f| File.file?(f) }
+              if discover_files.empty?
+                parser_error "empty directory used as an option (#{root})!"
+              end
+              files += discover_files
+            end
+          end
+        end
+        if files.empty?
+          parser_error "no .rb files found in #{paths.to_s}"
+        end
+        files
+      end
+
+      def parse_git_repos(git_opts)
+        git_opts.map! { |opt|
+          case opt
+            when /^PUPPET\//
+              opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
+            when /^FACTER\//
+              opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
+            when /^HIERA\//
+              opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
+            when /^HIERA-PUPPET\//
+              opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+          end
+          opt
+        }
+        git_opts
       end
 
       def initialize
@@ -28,7 +93,6 @@ module Beaker
         #    $ b.merge(a)
         #     => {1=>nil, 3=>"three", 2=>"two"} 
         # a.merge(b) means combine a & b, and prefer contents of b in case of collisions
-        env_vars = Beaker::Options::Defaults.env_vars
         defaults = Beaker::Options::Defaults.defaults
         ssh_defaults = Beaker::Options::Defaults.ssh_defaults
 
@@ -38,7 +102,7 @@ module Beaker
           #  overwrite the defaults with the ssh_defaults
           @options = defaults.merge(ssh_defaults)
           cmd_line_options = @command_line_parser.parse
-          file_options = parse_options_file(@options[:options_file])
+          file_options = parse_options_file(cmd_line_options[:options_file])
           # merge together command line and file_options
           #   overwrite file options with command line options
           cmd_line_and_file_options = file_options.merge(cmd_line_options)
@@ -46,25 +110,20 @@ module Beaker
           #   overwrite defaults with command line and file options 
           @options = @options.merge(cmd_line_and_file_options)
 
-          # merge in env vars
-          #   overwrite options (default, file options and command line) with env options
-          @options = @options.merge(env_vars)
-
           #read the hosts file that contains the node configuration and hypervisor info
-          
           pre_validate_args
-
           hosts_options = parse_hosts_file(@options[:hosts_file])
           # merge in host file vars
           #   overwrite options (default, file options, command line, env) with host file options
           @options = @options.merge(hosts_options)
-          # re-merge env vars, in case any were overwritten in the hosts file
-          #   overwrite options (default, file options, command line, env, hosts file) with env
+          # merge in env vars
+          #   overwrite options (default, file options, command line, hosts file) with env
+          env_vars = Beaker::Options::Defaults.env_vars
           @options = @options.merge(env_vars)
 
           if @options.is_pe?
-            @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:version_file])
-            @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version_win(@options[:pe_dir], @options[:version_file])
+            @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file])
+            @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file_win])
           else
             @options['puppet_ver']       = @options[:puppet]
             @options['facter_ver']       = @options[:facter]
@@ -97,6 +156,24 @@ module Beaker
 
       #validation done after all option parsing
       def validate_args
+
+        #split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
+        #will end up being normalized into an array
+        LONG_OPTS.each do |opt|
+          if @options.has_key?(opt)
+            puts "#{opt} : #{@options[opt]}"
+            @options[opt] = split_arg(@options[opt])
+            if RB_FILE_OPTS.include?(opt)
+              @options[opt] = file_list(@options[opt])
+            end
+            if opt == :install
+              @options[:install] = parse_git_repos(@options[:install])
+            end
+          else
+            @options[opt] = []
+          end
+        end 
+ 
         #check for valid type
         if @options[:type] !~ /(pe)|(git)/
           parser_error "--type must be one of pe or git, not '#{@options[:type]}'"
@@ -142,6 +219,7 @@ module Beaker
 
       #validation done before parsing host file options
       def pre_validate_args
+        #ensure that a host files has been provided and is correctly formatted
         check_yaml_file(@options[:hosts_file], "required host/node configuration information")
       end
 
@@ -150,7 +228,7 @@ module Beaker
         if options_file_path 
           options_file_path = File.expand_path(options_file_path)
           unless File.exists?(options_file_path)
-            raise ArgumentError, "Specified options file '#{options_file_path}' does not exist!"
+            parser_error "Specified options file '#{options_file_path}' does not exist!"
           end
           # This eval will allow the specified options file to have access to our
           #  scope.  It is important that the variable 'options_file_path' is
