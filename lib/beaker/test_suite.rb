@@ -19,15 +19,14 @@ module Beaker
     attr_reader :name, :options, :fail_mode
 
     def initialize(name, hosts, options, fail_mode = nil)
-      @name      = name.gsub(/\s+/, '-')
-      @hosts     = hosts
-      @run       = false
-      @options   = options
-      @fail_mode = @options[:fail_mode] || fail_mode
-      @logger    = options[:logger]
-
+      @logger     = options[:logger]
       @test_cases = []
-      @test_files = @options[:tests]
+      @test_files = options[name]
+      @name       = name.to_s.gsub(/\s+/, '-')
+      @hosts      = hosts
+      @run        = false
+      @options    = options
+      @fail_mode  = options[:fail_mode] || fail_mode
 
       report_and_raise(@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
 

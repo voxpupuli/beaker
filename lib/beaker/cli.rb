@@ -50,19 +50,19 @@ module Beaker
         end
 
         #pre acceptance  phase
-        run_suite('pre-suite', @options.merge({:tests => @options[:pre_suite]}), :fail_fast)
+        run_suite(:pre_suite, :fail_fast)
         #testing phase
         begin
-          run_suite('acceptance', @options)
+          run_suite(:tests)
         #post acceptance phase
         rescue => e
           #post acceptance on failure
           #if we error then run the post suite as long as we aren't in fail-stop mode
-          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]})) unless @options[:fail_mode] == "stop"
+          run_suite(:post_suite) unless @options[:fail_mode] == "stop"
           raise e
         else
           #post acceptance on success
-          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]}))
+          run_suite(:post_suite)
         end
       #cleanup phase
       rescue => e
@@ -80,13 +80,13 @@ module Beaker
       end
     end
 
-    def run_suite(name, options, failure_strategy = false)
-      if (options[:tests].empty?)
-        @logger.notify("No tests to run for suite '#{name}'")
+    def run_suite(suite_name, failure_strategy = false)
+      if (@options[suite_name].empty?)
+        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
         return
       end
       Beaker::TestSuite.new(
-        name, @hosts, options, failure_strategy
+        suite_name, @hosts, @options, failure_strategy
       ).run_and_raise_on_failure
     end
 
