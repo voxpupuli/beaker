@@ -120,17 +120,17 @@ module Beaker
 
       # Check to see if a package is installed on a remote host
       #
-      # @param [Host] host             A host object 
+      # @param [Host] host             A host object
       # @param [String] package_name   Name of the package to check for.
       #
-      # @return [Boolean] true/false if the package is found 
+      # @return [Boolean] true/false if the package is found
       def check_for_package host, package_name
         host.check_for_package package_name
       end
 
       # Install a package on a host
       #
-      # @param [Host] host             A host object 
+      # @param [Host] host             A host object
       # @param [String] package_name   Name of the package to install
       #
       # @return [Result]   An object representing the outcome of *install command*.
@@ -288,8 +288,7 @@ module Beaker
       #
       # @param [Host] host        One object that act like Host
       #
-      # @param [Hash{Symbol=>String}]
-      #                            conf_opts Represent puppet settings.
+      # @param [Hash{Symbol=>String}] conf_opts  Represents puppet settings.
       #                            Sections of the puppet.conf may be
       #                            specified, if no section is specified the
       #                            a puppet.conf file will be written with the
@@ -303,6 +302,9 @@ module Beaker
       #
       #                            These will only be applied when starting a FOSS
       #                            master, as a pe master is just bounced.
+      #
+      # @param [File] testdir      The temporary directory which will hold backup
+      #                            configuration, and other test artifacts.
       #
       # @param [Block]             block The point of this method, yields so
       #                            tests may be ran. After the block is finished
@@ -400,6 +402,24 @@ module Beaker
       # @!visibility private
       def stop_puppet_from_source_on( host )
         host.exec( Command.new( 'kill $(cat `puppet master --configprint pidfile`)' ) )
+      rescue RuntimeError => e
+        dump_puppet_log host
+        raise e
+      end
+
+      # @!visibility private
+      def dump_puppet_log(host)
+        syslogfile = case host['platform']
+          when /fedora|centos|el/ then '/var/log/messages'
+          when /ubuntu|debian/ then '/var/log/syslog'
+          else return
+        end
+
+        logger.notify "\n*************************"
+        logger.notify "* Dumping master log    *"
+        logger.notify "*************************"
+        host.exec( Command.new( "tail -n 100 #{syslogfile}" ), :acceptable_exit_codes => [0,1])
+        logger.notify "*************************\n"
       end
 
       # @!visibility private
@@ -407,7 +427,7 @@ module Beaker
         new_conf = puppet_conf_for( host, configuration_options )
         create_remote_file host, "#{testdir}/puppet.conf", new_conf.to_s
 
-        host.exec( 
+        host.exec(
           Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf" ),
           :silent => true
         )
