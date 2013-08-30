@@ -25,10 +25,10 @@ class VsphereHelper
     # (ie, someplace besides my made up conf)
     vsphere_credentials = nil
     if File.exists? '/etc/plharness/vsphere'
-      vsphere_credentials = load_legacy_credentials
+      vsphere_credentials = load_legacy_credentials(dot_fog)
 
     elsif File.exists?( dot_fog )
-      vsphere_credentials = load_fog_credentials
+      vsphere_credentials = load_fog_credentials(dot_fog)
     end
 
     return vsphere_credentials
