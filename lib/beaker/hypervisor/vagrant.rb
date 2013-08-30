@@ -1,3 +1,5 @@
+require 'open3'
+
 module Beaker 
   class Vagrant < Beaker::Hypervisor
 
@@ -35,9 +37,10 @@ module Beaker
       vagrant_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
       vagrant_file << "  end\n"
       vagrant_file << "end\n"
-      f = File.open("Vagrantfile", 'w') 
-      f.write(vagrant_file)
-      f.close()
+      FileUtils.mkdir_p(@vagrant_path)
+      File.open(File.expand_path(File.join(@vagrant_path, "Vagrantfile")), 'w') do |f|
+        f.write(vagrant_file)
+      end
     end
 
     def hack_etc_hosts hosts
@@ -62,7 +65,10 @@ module Beaker
 
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
-        ssh_config = `vagrant ssh-config #{host.name}`
+        ssh_config = Dir.chdir(@vagrant_path) do
+          stdin, stdout = Open3.popen3('vagrant', 'ssh-config', host.name)
+          stdout.read
+        end
         #replace hostname with ip
         ssh_config = ssh_config.gsub(/#{host.name}/, host['ip']) 
         #set the user 
@@ -80,12 +86,13 @@ module Beaker
       @logger = options[:logger]
       @temp_files = []
       @vagrant_hosts = vagrant_hosts
+      @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', options[:config]))
 
       make_vfile @vagrant_hosts
 
       #stop anything currently running, that way vagrant up will re-do networking on existing boxes
-      system("vagrant halt") 
-      system("vagrant up")
+      vagrant_cmd("halt")
+      vagrant_cmd("up")
 
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
       @vagrant_hosts.each do |host|
@@ -110,7 +117,13 @@ module Beaker
         f.close()
       end
       @logger.notify "Destroying vagrant boxes"
-      system("vagrant destroy --force")
+      vagrant_cmd("destroy --force")
+    end
+
+    def vagrant_cmd(args)
+      Dir.chdir(@vagrant_path) do
+        system("vagrant #{args}")
+      end
     end
 
   end
