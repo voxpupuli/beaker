@@ -8,7 +8,7 @@ module Beaker
       repo = 'git://github.com/puppetlabs'
 
       it "has repo set to #{repo}" do
-        expect(parser.repo?).to be === "#{repo}"
+        expect(parser.repo).to be === "#{repo}"
       end
 
       #test parse_install_options

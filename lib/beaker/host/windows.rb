@@ -1,6 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'options'))
 
 module Windows
   class Host < Beaker::Host
@@ -17,18 +18,20 @@ module Windows
     include Windows::Pkg
 
     def self.pe_defaults
-      {
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
         'user'          => 'Administrator',
         'group'         => 'Administrators',
         'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
         'puppetbindir'  => '`cygpath -F 38`/Puppet Labs/Puppet Enterprise/bin',
         'pathseparator' => ';',
-      }
+      })
     end
 
     def self.foss_defaults
-      {
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
         'user'              => 'Administrator',
         'group'             => 'Administrators',
         'puppetpath'        => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
@@ -38,7 +41,7 @@ module Windows
         # PATH related variables need to be Unix, which cygwin converts
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
         'pathseparator'     => ';',
-      }
+      })
     end
   end
 end

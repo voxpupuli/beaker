@@ -6,6 +6,11 @@ module Beaker
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
 
+      @logger.notify(@options.dump)
+      if @options.has_key?(:help) && @options[:help]
+        exit
+      end
+
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
         @options[:load_path].each do |path|

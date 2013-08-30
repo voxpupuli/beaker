@@ -52,7 +52,7 @@ module Beaker
 
     def merge_defaults_for_type options, type
       defaults = self.class.send "#{type}_defaults".to_sym
-      options.merge(defaults).merge(options['HOSTS'][name])
+      defaults.merge((options['HOSTS'][name]).merge(options))
     end
 
     def node_name

@@ -1,6 +1,6 @@
 module Beaker
   module Options
-    module Defaults
+    module Presets
 
       def self.env_vars
         h = Beaker::Options::OptionsHash.new
@@ -13,7 +13,7 @@ module Beaker
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
-      def self.defaults
+      def self.presets
         h = Beaker::Options::OptionsHash.new
         h.merge({
           :hosts_file => 'sample.cfg',
@@ -37,21 +37,17 @@ module Beaker
           :pe_version_file_win => 'LATEST-win',
           :dot_fog => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml => 'config/image_templates/ec2.yaml',
+          :ssh => {
+            :config                => false,
+            :paranoid              => false,
+            :timeout               => 300,
+            :auth_methods          => ["publickey"],
+            :port                  => 22,
+            :forward_agent         => true,
+            :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
+            :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+          }
         })
-      end
-
-      def self.ssh_defaults
-        h = Beaker::Options::OptionsHash.new
-        h.merge({:ssh => {
-          :config                => false,
-          :paranoid              => false,
-          :timeout               => 300,
-          :auth_methods          => ["publickey"],
-          :port                  => 22,
-          :forward_agent         => true,
-          :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
-          :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
-        }})
       end
 
     end

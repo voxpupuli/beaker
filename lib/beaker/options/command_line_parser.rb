@@ -152,16 +152,15 @@ module Beaker
             @cmd_options[:hosts_file] = file
           end
 
-          opts.on('--help', 'Display this screen' ) do |yes|
-            puts opts
-            exit
+          opts.on('--help', 'Display this screen' ) do 
+            @cmd_options[:help] = true
           end
         end
 
       end
 
-      def parse
-        @optparse.parse!
+      def parse!( args = ARGV )
+        @optparse.parse!(args)
         @cmd_options
       end
 

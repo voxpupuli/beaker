@@ -10,12 +10,10 @@ module Beaker
       attr_accessor :options
 
       def parser_error msg = ""
-        puts "Error in Beaker configuration: " + msg.to_s
-        puts "\nUse beaker --help"
-        exit
+        raise ArgumentError, msg.to_s
       end
 
-      def repo?
+      def repo
         GITREPO
       end
 
@@ -83,63 +81,40 @@ module Beaker
         #
         # Will use env, then hosts/config file, then command line, then file options
         # 
-        #NOTE on merging two hashes
-        #    $ a = {1=>nil, 2=>'two'}
-        #     => {1=>nil, 2=>"two"} 
-        #    $ b = {1=>'one', 3=>'three'}
-        #     => {1=>"one", 3=>"three"} 
-        #    $ a.merge(b)
-        #     => {1=>"one", 2=>"two", 3=>"three"} 
-        #    $ b.merge(a)
-        #     => {1=>nil, 3=>"three", 2=>"two"} 
-        # a.merge(b) means combine a & b, and prefer contents of b in case of collisions
-        defaults = Beaker::Options::Defaults.defaults
-        ssh_defaults = Beaker::Options::Defaults.ssh_defaults
+        @options = Beaker::Options::Presets.presets
+        cmd_line_options = @command_line_parser.parse!
+        file_options = parse_options_file(cmd_line_options[:options_file])
+        # merge together command line and file_options
+        #   overwrite file options with command line options
+        cmd_line_and_file_options = file_options.merge(cmd_line_options)
+        # merge command line and file options with defaults
+        #   overwrite defaults with command line and file options 
+        @options = @options.merge(cmd_line_and_file_options)
 
-        begin
+        #read the hosts file that contains the node configuration and hypervisor info
+        pre_validate_args
+        hosts_options = parse_hosts_file(@options[:hosts_file])
+        # merge in host file vars
+        #   overwrite options (default, file options, command line, env) with host file options
+        @options = @options.merge(hosts_options)
+        # merge in env vars
+        #   overwrite options (default, file options, command line, hosts file) with env
+        env_vars = Beaker::Options::Presets.env_vars
+        @options = @options.merge(env_vars)
 
-          # merge the defaults and ssh_defaults
-          #  overwrite the defaults with the ssh_defaults
-          @options = defaults.merge(ssh_defaults)
-          cmd_line_options = @command_line_parser.parse
-          file_options = parse_options_file(cmd_line_options[:options_file])
-          # merge together command line and file_options
-          #   overwrite file options with command line options
-          cmd_line_and_file_options = file_options.merge(cmd_line_options)
-          # merge command line and file options with defaults
-          #   overwrite defaults with command line and file options 
-          @options = @options.merge(cmd_line_and_file_options)
-
-          #read the hosts file that contains the node configuration and hypervisor info
-          pre_validate_args
-          hosts_options = parse_hosts_file(@options[:hosts_file])
-          # merge in host file vars
-          #   overwrite options (default, file options, command line, env) with host file options
-          @options = @options.merge(hosts_options)
-          # merge in env vars
-          #   overwrite options (default, file options, command line, hosts file) with env
-          env_vars = Beaker::Options::Defaults.env_vars
-          @options = @options.merge(env_vars)
-
-          if @options.is_pe?
-            @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file])
-            @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file_win])
-          else
-            @options['puppet_ver']       = @options[:puppet]
-            @options['facter_ver']       = @options[:facter]
-            @options['hiera_ver']        = @options[:hiera]
-            @options['hiera_puppet_ver'] = @options[:hiera_puppet]
-          end
-
-          validate_args
-          @options.dump
-
-          @options
-        rescue SystemExit
-          exit
-        rescue Exception => e
-          parser_error e
+        if @options.is_pe?
+          @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file])
+          @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file_win])
+        else
+          @options['puppet_ver']       = @options[:puppet]
+          @options['facter_ver']       = @options[:facter]
+          @options['hiera_ver']        = @options[:hiera]
+          @options['hiera_puppet_ver'] = @options[:hiera_puppet]
         end
+
+        validate_args
+
+        @options
 
       end
 
@@ -149,7 +124,7 @@ module Beaker
         end
         begin
           YAML.load_file(f)
-        rescue Exception => e
+        rescue Psych::SyntaxError => e
           parser_error "#{f} is not a valid YAML file (#{msg})\n\t#{e}"
         end
       end
@@ -161,7 +136,6 @@ module Beaker
         #will end up being normalized into an array
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
-            puts "#{opt} : #{@options[opt]}"
             @options[opt] = split_arg(@options[opt])
             if RB_FILE_OPTS.include?(opt)
               @options[opt] = file_list(@options[opt])
