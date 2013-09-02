@@ -2,9 +2,15 @@ require 'spec_helper'
 
 class ClassMixedWithDSLHelpers
   include Beaker::DSL::Helpers
+  include Beaker::DSL::Wrappers
+
+  def logger
+    @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
+  end
 end
 
 describe ClassMixedWithDSLHelpers do
+
   describe '#on' do
     it 'allows the environment the command is run within to be specified' do
       host = double.as_null_object
@@ -225,6 +231,206 @@ describe ClassMixedWithDSLHelpers do
         with( 'my_host', 'forge.puppetlabs.com' => '127.0.0.1' )
 
       subject.stub_forge_on( 'my_host' )
+    end
+  end
+
+  describe '#with_puppet_running_on' do
+    class FakeHost
+      attr_accessor :commands
+
+      def initialize(options = {})
+        @pe = options[:pe]
+        @commands = []
+      end
+
+      def is_pe?
+        @pe
+      end
+
+      def any_exec_result
+        RSpec::Mocks::Mock.new('exec-result').as_null_object
+      end
+
+      def exec(command, options = {})
+        commands << command
+        any_exec_result
+      end
+
+      def command_strings
+        commands.map { |c| [c.command, c.args].join(' ') }
+      end
+    end
+
+    let(:is_pe) { false }
+    let(:host) { FakeHost.new(:pe => is_pe) }
+    let(:test_case_path) { 'testcase/path' }
+    let(:tmpdir_path) { '/tmp/tmpdir' }
+    let(:puppet_path) { '/puppet/path' }
+
+    def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
+      subject.instance_variable_set(:@path, test_case_path)
+      host.stub(:tmpdir).and_return(tmpdir_path)
+    end
+
+    RSpec::Matchers.define :execute_commands_matching do |pattern|
+
+      match do |actual|
+        @found_count = actual.command_strings.grep(pattern).size
+        @times.nil? ?
+          @found_count > 0 :
+          @found_count == @times
+      end
+
+      chain :exactly do |times|
+        @times = times
+      end
+
+      chain :times do
+        # clarity only
+      end
+
+      chain :once do
+        @times = 1
+        # clarity only
+      end
+
+      def message(actual, pattern, times, found_count)
+          msg = times == 1 ?
+            "#{pattern} once" :
+            "#{pattern} #{times} times"
+          msg += " but instead found a count of #{found_count}" if found_count != times
+          msg + " in:\n #{actual.command_strings.pretty_inspect}"
+      end
+
+      failure_message_for_should do |actual|
+        "Expected to find #{message(actual, pattern, @times, @found_count)}"
+      end
+
+      failure_message_for_should_not do |actual|
+        "Unexpectedly found #{message(actual, pattern, @times, @found_count)}"
+      end
+    end
+
+    before do
+      stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
+      host.stub(:[]).and_return(puppet_path)
+    end
+
+    it "raises an ArgumentError if you try to submit a String instead of a Hash of options" do
+      expect { subject.with_puppet_running_on(host, '--foo --bar') }.to raise_error(ArgumentError, /conf_opts must be a Hash. You provided a String: '--foo --bar'/)
+    end
+
+    describe "with valid arguments" do
+      before do
+        Tempfile.should_receive(:open).with('beaker')
+      end
+
+      context 'as pe' do
+        let(:is_pe) { true }
+
+        it 'bounces puppet twice' do
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/pe-httpd restart/).exactly(2).times
+        end
+
+        it 'yield to a block after bouncing service' do
+          execution = 0
+          expect do
+            subject.with_puppet_running_on(host, {}) do
+              expect(host).to execute_commands_matching(/pe-httpd restart/).once
+              execution += 1
+            end
+          end.to change { execution }.by(1)
+          expect(host).to execute_commands_matching(/pe-httpd restart/).exactly(2).times
+        end
+      end
+
+      context 'running from source' do
+
+        it 'does not try to stop if not started' do
+          subject.should_receive(:start_puppet_from_source_on!).and_return false
+          subject.should_not_receive(:stop_puppet_from_source_on)
+
+          subject.with_puppet_running_on(host, {})
+        end
+
+        context 'successfully' do
+          before do
+            host.should_receive(:port_open?).with(8140).and_return(true)
+          end
+
+          it 'starts puppet from source' do
+            subject.with_puppet_running_on(host, {})
+          end
+
+          it 'stops puppet from source' do
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching(/^kill.*puppet master --configprint pidfile/).once
+          end
+
+          it 'yields between starting and stopping' do
+            execution = 0
+            expect do
+              subject.with_puppet_running_on(host, {}) do
+                expect(host).to execute_commands_matching(/^puppet master/).once
+                execution += 1
+              end
+            end.to change { execution }.by(1)
+            expect(host).to execute_commands_matching(/^kill.*puppet master --configprint pidfile/).once
+          end
+
+          it 'passes on commandline args' do
+            subject.with_puppet_running_on(host, {:__commandline_args__ => '--with arg'})
+            expect(host).to execute_commands_matching(/^puppet master --with arg/).once
+          end
+        end
+      end
+
+      describe 'backup and restore of puppet.conf' do
+        let(:original_location) { "#{puppet_path}/puppet.conf" }
+        let(:backup_location) { "#{tmpdir_path}/puppet.conf.bak" }
+        let(:new_location) { "#{tmpdir_path}/puppet.conf" }
+
+        before do
+          host.should_receive(:port_open?).with(8140).and_return(true)
+        end
+
+        it 'backs up puppet.conf' do
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/cp #{original_location} #{backup_location}/).once
+          expect(host).to execute_commands_matching(/cat #{new_location} > #{original_location}/).once
+
+        end
+
+        it 'restores puppet.conf' do
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/cat #{backup_location} > #{original_location}/).once
+        end
+      end
+
+      describe 'handling failures' do
+        before do
+          subject.should_receive(:stop_puppet_from_source_on).and_raise(RuntimeError.new('Also failed in teardown.'))
+        end
+
+        it 'does not swallow an exception raised from within test block if ensure block also fails' do
+          host.should_receive(:port_open?).with(8140).and_return(true)
+
+          subject.logger.should_receive(:error).with(/Raised during attempt to teardown.*Also failed in teardown/)
+
+          expect do
+            subject.with_puppet_running_on(host, {}) { raise 'Failed while yielding.' }
+          end.to raise_error(RuntimeError, /failed.*because.*Failed while yielding./)
+        end
+
+        it 'does not swallow a teardown exception if no earlier exception was raised' do
+          host.should_receive(:port_open?).with(8140).and_return(true)
+          subject.logger.should_not_receive(:error)
+          expect do
+            subject.with_puppet_running_on(host, {})
+          end.to raise_error(RuntimeError, 'Also failed in teardown.')
+        end
+      end
     end
   end
 end
