@@ -16,7 +16,7 @@ module Beaker
       end
 
       def is_pe?
-        self[:type] =~ /pe/
+        self[:type] ? self[:type] =~ /pe/ : true
       end
 
       def has_key? k
@@ -70,8 +70,6 @@ module Beaker
             end
           end
           str += "#{pre}]#{EOL}"
-        else
-          str +=  "#{pre}#{opts.to_s}#{post}"
         end
         str
       end

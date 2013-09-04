@@ -7,7 +7,7 @@ module Beaker
     context 'new', :use_fakefs => true do
       let(:test_dir) { 'tmp/tests' }
 
-      let(:options)  { {:tests => create_files(@files)} }
+      let(:options)  { {'name' => create_files(@files)} }
       let(:rb_test)  { File.expand_path(test_dir + '/my_ruby_file.rb')    }
       let(:pl_test)  { File.expand_path(test_dir + '/my_perl_file.pl')    }
       let(:sh_test)  { File.expand_path(test_dir + '/my_shell_file.sh')   }
@@ -26,19 +26,6 @@ module Beaker
                   include? rb_test }.to be_true
       end
 
-      it 'includes only .rb files as test files when dir is passed' do
-        create_files [ rb_test, pl_test, sh_test ]
-        @files = [ test_dir ]
-
-        ts = Beaker::TestSuite.new 'name', 'hosts',
-               options, :stop_on_error
-
-        processed_files = ts.instance_variable_get :@test_files
-
-        expect(processed_files).to include(rb_test)
-        expect(processed_files).to_not include(sh_test)
-        expect(processed_files).to_not include(pl_test)
-      end
     end
   end
 end

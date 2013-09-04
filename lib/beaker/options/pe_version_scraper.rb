@@ -13,7 +13,7 @@ module Beaker
             end
           end
         rescue Errno::ENOENT, OpenURI::HTTPError => e
-          raise "Failure to examine #{dist_dir}/#{version_file}\n\t\t#{e.to_s}"
+          raise ArgumentError, "Failure to examine #{dist_dir}/#{version_file}\n\t\t#{e.to_s}"
         end
         return version
       end

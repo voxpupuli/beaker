@@ -17,6 +17,10 @@ module Beaker
         GITREPO
       end
 
+      def usage
+       @command_line_parser.usage
+      end
+
       #split given argument into an array
       def split_arg arg
         arry = []
@@ -76,14 +80,14 @@ module Beaker
          @command_line_parser = Beaker::Options::CommandLineParser.new
       end
 
-      def parse_args
+      def parse_args(args = ARGV)
         #NOTE on argument precedence:
         #
         # Will use env, then hosts/config file, then command line, then file options
         # 
         @options = Beaker::Options::Presets.presets
-        cmd_line_options = @command_line_parser.parse!
-        file_options = parse_options_file(cmd_line_options[:options_file])
+        cmd_line_options = @command_line_parser.parse!(args)
+        file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
         # merge together command line and file_options
         #   overwrite file options with command line options
         cmd_line_and_file_options = file_options.merge(cmd_line_options)
@@ -92,8 +96,7 @@ module Beaker
         @options = @options.merge(cmd_line_and_file_options)
 
         #read the hosts file that contains the node configuration and hypervisor info
-        pre_validate_args
-        hosts_options = parse_hosts_file(@options[:hosts_file])
+        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
         # merge in host file vars
         #   overwrite options (default, file options, command line, env) with host file options
         @options = @options.merge(hosts_options)
@@ -112,7 +115,7 @@ module Beaker
           @options['hiera_puppet_ver'] = @options[:hiera_puppet]
         end
 
-        validate_args
+        normalize_args
 
         @options
 
@@ -130,7 +133,7 @@ module Beaker
       end
 
       #validation done after all option parsing
-      def validate_args
+      def normalize_args
 
         #split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
         #will end up being normalized into an array
@@ -189,42 +192,6 @@ module Beaker
           parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 
-      end
-
-      #validation done before parsing host file options
-      def pre_validate_args
-        #ensure that a host files has been provided and is correctly formatted
-        check_yaml_file(@options[:hosts_file], "required host/node configuration information")
-      end
-
-      def parse_options_file(options_file_path)
-        result = Beaker::Options::OptionsHash.new
-        if options_file_path 
-          options_file_path = File.expand_path(options_file_path)
-          unless File.exists?(options_file_path)
-            parser_error "Specified options file '#{options_file_path}' does not exist!"
-          end
-          # This eval will allow the specified options file to have access to our
-          #  scope.  It is important that the variable 'options_file_path' is
-          #  accessible, because some existing options files (e.g. puppetdb) rely on
-          #  that variable to determine their own location (for use in 'require's, etc.)
-          result = result.merge(eval(File.read(options_file_path)))
-        end
-        result
-      end
-
-      def parse_hosts_file(hosts_file_path)
-        host_options = Beaker::Options::OptionsHash.new
-        host_options = host_options.merge((YAML.load_file(hosts_file_path)))
-
-        # Make sure the roles array is present for all hosts
-        host_options['HOSTS'].each_key do |host|
-          host_options['HOSTS'][host]['roles'] ||= []
-        end
-        if host_options.has_key?('CONFIG')
-          host_options = host_options.merge(host_options.delete('CONFIG'))
-        end
-        host_options
       end
 
     end
