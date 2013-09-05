@@ -119,7 +119,7 @@ module Beaker
     # to a human-readable string (which some IDEs/editors
     # will recognize as links to the line numbers in the trace)
     def pretty_backtrace backtrace = caller(1)
-      trace = purge_harness_files_from( Array( backtrace ) )
+      trace = is_debug? ? backtrace : purge_harness_files_from( Array( backtrace ) ) 
       expand_symlinks( trace ).join "\n"
     end
 
