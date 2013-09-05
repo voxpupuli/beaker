@@ -285,10 +285,10 @@ module Beaker
       # 6. Revert Puppet to the pre-test state
       # 7. Testing artifacts are saved in a folder named for the test
       #
-      # @param [Host] hosts        One object that act like Host
+      # @param [Host] host        One object that act like Host
       #
       # @param [Hash{Symbol=>String}]
-      #                            config_opts Represent puppet settings.
+      #                            conf_opts Represent puppet settings.
       #                            Sections of the puppet.conf may be
       #                            specified, if no section is specified the
       #                            a puppet.conf file will be written with the
@@ -517,7 +517,7 @@ module Beaker
       # removed always.
       #
       # @param machine [String] the host to execute this stub
-      # @param hosts [Hash{String=>String}] a hash containing the host to ip
+      # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
       #   mappings
       # @example Stub puppetlabs.com on the master to 127.0.0.1
       #   stub_hosts_on(master, 'puppetlabs.com' => '127.0.0.1')

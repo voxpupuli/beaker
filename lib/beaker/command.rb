@@ -91,7 +91,7 @@ module Beaker
       "#{env_string} #{cmd} #{options_string} #{args_string}"
     end
 
-    # @param [Hash] options These are the options that the command takes
+    # @param [Hash] opts These are the options that the command takes
     #
     # @return [String] String of the options and flags for command.
     #

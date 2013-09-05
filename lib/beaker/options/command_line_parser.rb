@@ -1,7 +1,12 @@
 module Beaker
   module Options
+    #An object that parses arguments in the format ['--option', 'value', '--option2', 'value2', '--switch']
     class CommandLineParser
 
+      # @example Create a CommanLineParser
+      #   a = CommandLineParser.new     
+      #    
+      # @note All of Beaker's supported command line options are defined here
       def initialize
         @cmd_options = Beaker::Options::OptionsHash.new
 
@@ -159,11 +164,27 @@ module Beaker
 
       end
 
+      # Parse an array of arguments into a Hash of options
+      # @param [Array] args The array of arguments to consume
+      #
+      # @example
+      #   args = ['--option', 'value', '--option2', 'value2', '--switch']
+      #   parser = CommandLineParser.new
+      #   parser.parse!(args) == {:option => 'value, :options2 => value, :switch => true}
+      #
+      # @return [Hash] Return the Hash of options
       def parse!( args = ARGV )
         @optparse.parse!(args)
         @cmd_options
       end
 
+      # Generate a string representing the supported arguments
+      #
+      # @example 
+      #    parser = CommandLineParser.new 
+      #    parser.usage = "Options:  ..." 
+      #
+      # @return [String] Return a string representing the available arguments
       def usage
         @optparse.help
       end

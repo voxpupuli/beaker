@@ -1,27 +1,45 @@
 module Beaker
   module Options
+    #An Object that parses, merges and normalizes all supported Beaker options and arguments
     class Parser
       GITREPO      = 'git://github.com/puppetlabs'
-      #these options can have the form of arg1,arg2 or [arg] or just arg
+      #These options can have the form of arg1,arg2 or [arg] or just arg, 
       #should default to []
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
-      #these options expand out into an array of .rb files
+      #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
+      #The OptionsHash of all parsed options
       attr_accessor :options
 
+      # Raises an ArgumentError with associated message
+      # @param [String] msg The error message to be reported
+      # @raise [ArgumentError] Takes the supplied message and raises it as an ArgumentError
       def parser_error msg = ""
         raise ArgumentError, msg.to_s
       end
 
+      # Returns the git repository used for git installations
+      # @return [String] The git repository
       def repo
         GITREPO
       end
 
+      # Returns a description of Beaker's supported arguments
+      # @return [String] The usage String
       def usage
        @command_line_parser.usage
       end
 
-      #split given argument into an array
+      # Normalizes argument into an Array.  Argument can either be converted into an array of a single value,
+      # or can become an array of multiple values by splitting arg over ','.  If argument is already an
+      # array that array is returned untouched.
+      # @example
+      #   split_arg([1, 2, 3]) == [1, 2, 3] 
+      #   split_arg(1) == [1]
+      #   split_arg("1,2") == ["1", "2"]
+      #   split_arg(nil) == []
+      # @param [Array, String] arg Either an array or a string to be split into an array
+      # @return [Array] An array of the form arg, [arg], or arg.split(',')
       def split_arg arg
         arry = []
         if arg.is_a?(Array)
@@ -34,8 +52,14 @@ module Beaker
         arry
       end
 
-      #generates a list of files based upon a given path or list of paths
-      #looks for .rb files
+      # Generates a list of files based upon a given path or list of paths.
+      #
+      # Looks recursively for .rb files in paths.
+      #
+      # @param [Array] paths Array of file paths to search for .rb files
+      # @return [Array] An Array of fully qualified paths to .rb files
+      # @raise [ArgumentError] Raises if no .rb files are found in searched directory or if
+      #                         no .rb files are found overall
       def file_list(paths)
         files = []
         if not paths.empty?
@@ -59,6 +83,18 @@ module Beaker
         files
       end
 
+      #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
+      #
+      #Supports the following keywords
+      #  PUPPET 
+      #  FACTER
+      #  HIERA 
+      #  HIERA-PUPPET
+      #@example
+      #  opts = ["PUPPET/3.1"]
+      #  parse_git_repos(opts) == ["#{GITREPO}/puppet.git#3.1"]
+      #@param [Array] git_opts An array of paths
+      #@return [Array] An array of fully qualified git repo URLs with expanded keywords
       def parse_git_repos(git_opts)
         git_opts.map! { |opt|
           case opt
@@ -76,10 +112,25 @@ module Beaker
         git_opts
       end
 
+      #Constructor for Parser
+      #
       def initialize
          @command_line_parser = Beaker::Options::CommandLineParser.new
       end
 
+      # Parses ARGV or provided arguments array, file options, hosts options and combines with environment variables and
+      # preset defaults to generate a Hash representing the Beaker options for a given test run
+      #
+      # Order of priority is as follows:
+      #   1.  environment variables are given top priority
+      #   2.  host file options
+      #   3.  the 'CONFIG' section of the hosts file
+      #   4.  ARGV or provided arguments array
+      #   5.  options file values
+      #   6.  default or preset values are given the lowest priority
+      #
+      # @param [Array] args ARGV or a provided arguments array
+      # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
         #NOTE on argument precedence:
         #
@@ -121,6 +172,10 @@ module Beaker
 
       end
 
+      # Determine is a given file exists and is a valid YAML file
+      # @param [String] f The YAML file path to examine
+      # @param [String] msg An options message to report in case of error
+      # @raise [ArgumentError] Raise if file does not exist or is not valid YAML
       def check_yaml_file(f, msg = "")
         if not File.file?(f)
           parser_error "#{f} does not exist (#{msg})"
@@ -132,7 +187,17 @@ module Beaker
         end
       end
 
-      #validation done after all option parsing
+      #Validate all merged options values for correctness
+      #
+      #Currently checks:
+      #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
+      #  - --type is one of 'pe' or 'git'
+      #  - --fail-mode is one of 'fast', 'stop' or nil
+      #  - if using blimpy hypervisor an EC2 YAML file exists
+      #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
+      #  - that one and only one master is defined per set of hosts
+      #
+      #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
 
         #split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
