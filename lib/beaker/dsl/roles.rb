@@ -91,7 +91,7 @@ module Beaker
       #   the specified role is NOT found.
       def find_only_one role
         only_host_with_role(hosts, role)
-      rescue Exception => e
+      rescue ArgumentError => e
         raise DSL::Outcomes::FailTest, e.to_s
       end
     end

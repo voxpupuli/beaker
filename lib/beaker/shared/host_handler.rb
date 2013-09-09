@@ -39,9 +39,9 @@ module Beaker
         a_host = hosts_with_role(hosts, role)
         case 
           when a_host.length == 0
-            raise "There should be one host with #{role} defined!"
+            raise ArgumentError, "There should be one host with #{role} defined!"
           when a_host.length > 1
-            raise "There should be only one host with #{role} defined, but I found #{a_host.length} (#{ a_host.each do |h| print h.to_s + "," end })" 
+            raise ArgumentError, "There should be only one host with #{role} defined, but I found #{a_host.length} (#{ a_host.each do |h| print h.to_s + "," end })" 
         end
         a_host.first 
       end
