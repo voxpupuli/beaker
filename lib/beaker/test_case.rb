@@ -51,9 +51,6 @@ module Beaker
     # 'pe' directories within 'ROOT/setup' for examples.
     attr_reader :version
 
-    # A Hash of values taken from host config file.
-    attr_reader :config
-
     # Parsed command line options.
     attr_reader :options
 
@@ -94,11 +91,9 @@ module Beaker
     #                                        against/on.
     # @param [Logger] logger A logger that implements
     #                        {Beaker::Logger}'s interface.
-    # @param [Hash{String=>String}] config Clusterfck of various config opts.
     # @param [Hash{Symbol=>String}] options Parsed command line options.
     # @param [String] path The local path to a test file to be executed.
-    def initialize(these_hosts, logger, config, options={}, path=nil)
-      @config  = config['CONFIG']
+    def initialize(these_hosts, logger, options={}, path=nil)
       @hosts   = these_hosts
       @logger = logger
       @options = options
@@ -171,7 +166,6 @@ module Beaker
     def to_hash
       hash = {}
       hash['HOSTS'] = {}
-      hash['CONFIG'] = @config
       @hosts.each do |host|
         hash['HOSTS'][host.name] = host.overrides
       end
@@ -218,7 +212,7 @@ module Beaker
     # @return [String] hostname of test forge
     def forge
       ENV['forge_host'] ||
-        @config['forge_host'] ||
+        @options['forge_host'] ||
         'vulcan-acceptance.delivery.puppetlabs.net'
     end
   end

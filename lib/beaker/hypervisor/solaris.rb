@@ -1,43 +1,34 @@
-module Beaker 
+module Beaker
   class Solaris < Beaker::Hypervisor
 
-    def initialize(solaris_hosts, options, config)
+    def initialize(solaris_hosts, options)
       @options = options
-      @config = config['CONFIG'].dup
       @logger = options[:logger]
       @solaris_hosts = solaris_hosts
       fog_file = nil
-      if File.exists?( File.join(ENV['HOME'], '.fog') )
-        fog_file = YAML.load_file( File.join(ENV['HOME'], '.fog') )
+      if File.exists?( @options[:dot_fog] )
+        fog_file = YAML.load_file( @options[:dot_fog] )
       end
-      raise "Cant load ~/.fog config" unless fog_file
+      raise "Cant load #{@options[:dot_fog]} config" unless fog_file
 
-      hypername = fog_file[:default][:solaris_hypervisor_server]
+      hypername = fog_file[:default][:solaris_hypervisor_server] 
       vmpath    = fog_file[:default][:solaris_hypervisor_vmpath]
       snappaths = fog_file[:default][:solaris_hypervisor_snappaths]
 
-      hyperconf = {
-        'HOSTS'  => {
+      hyperopts = @options.dup
+      hyperopts['HOSTS']  = {
           hypername => { 'platform' => 'solaris-11-sparc' }
-        },
-        'CONFIG' => {
-          'user' => fog_file[:default][:solaris_hypervisor_username] || ENV['USER'],
-          'ssh'  => {
-            :keys => fog_file[:default][:solaris_hypervisor_keyfile] || "#{ENV['HOME']}/.ssh/id_rsa"
-          }
-        }
       }
 
-      hyperconfig = Beaker::TestConfig.new( hyperconf, @options )
-
       @logger.notify "Connecting to hypervisor at #{hypername}"
-      hypervisor = Beaker::Host.create( hypername, @options, hyperconfig )
+      hypervisor = Beaker::Host.create( hypername, hyperopts )
+      hypervisor[:user] = fog_file[:default][:solaris_hypervisor_username] || hypervisor[:user]
+      hypervisor[:ssh][:keys] = [fog_file[:default][:solaris_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
 
       @solaris_hosts.each do |host|
         vm_name = host['vmname'] || host.name
         #use the snapshot provided for this host
         snapshot = host['snapshot']
-
 
         @logger.notify "Reverting #{vm_name} to snapshot #{snapshot}"
         start = Time.now

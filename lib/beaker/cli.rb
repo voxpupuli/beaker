@@ -1,29 +1,16 @@
 module Beaker
   class CLI
     def initialize
-      @options = Beaker::Options.parse_args
+      @options_parser = Beaker::Options::Parser.new
+      @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
 
-      if not @options[:config] 
-        report_and_raise(@logger, RuntimeError.new("Argh!  There is no default for Config, specify one (-c or --config)!"), "CLI: initialize") 
+      if @options.has_key?(:help) && @options[:help]
+        @logger.notify(@options_parser.usage)
+        exit
       end
-
-      @logger.debug("Options")
-      @options.each do |opt, val|
-        if val and val != [] 
-          @logger.debug("\t#{opt.to_s}:")
-          if val.kind_of?(Array)
-            val.each do |v|
-              @logger.debug("\t\t#{v.to_s}")
-            end
-          else
-            @logger.debug("\t\t#{val.to_s}")
-          end
-        end
-      end
-
-      @config = Beaker::TestConfig.new(@options[:config], @options)
+      @logger.notify(@options.dump)
 
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
@@ -36,7 +23,7 @@ module Beaker
       end
 
       @hosts =  []
-      @network_manager = Beaker::NetworkManager.new(@config, @options, @logger)
+      @network_manager = Beaker::NetworkManager.new(@options, @logger)
       @hosts = @network_manager.provision
       #validate that the hosts are correctly configured
       Beaker::Utils::Validator.validate(@hosts, @logger)
@@ -69,19 +56,19 @@ module Beaker
         end
 
         #pre acceptance  phase
-        run_suite('pre-suite', @options.merge({:tests => @options[:pre_suite]}), :fail_fast)
+        run_suite(:pre_suite, :fail_fast)
         #testing phase
         begin
-          run_suite('acceptance', @options)
+          run_suite(:tests)
         #post acceptance phase
         rescue => e
           #post acceptance on failure
           #if we error then run the post suite as long as we aren't in fail-stop mode
-          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]})) unless @options[:fail_mode] == "stop"
+          run_suite(:post_suite) unless @options[:fail_mode] == "stop"
           raise e
         else
           #post acceptance on success
-          run_suite('post-suite', @options.merge({:tests => @options[:post_suite]}))
+          run_suite(:post_suite)
         end
       #cleanup phase
       rescue => e
@@ -99,13 +86,13 @@ module Beaker
       end
     end
 
-    def run_suite(name, options, failure_strategy = false)
-      if (options[:tests].empty?)
-        @logger.notify("No tests to run for suite '#{name}'")
+    def run_suite(suite_name, failure_strategy = false)
+      if (@options[suite_name].empty?)
+        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
         return
       end
       Beaker::TestSuite.new(
-        name, @hosts, options, @config, failure_strategy
+        suite_name, @hosts, @options, failure_strategy
       ).run_and_raise_on_failure
     end
 

@@ -1,13 +1,12 @@
 module Beaker 
   class Vsphere < Beaker::Hypervisor
 
-    def initialize(vsphere_hosts, options, config)
+    def initialize(vsphere_hosts, options)
       @options = options
-      @@config = config['CONFIG'].dup
       @logger = options[:logger]
       @vsphere_hosts = vsphere_hosts
       require 'yaml' unless defined?(YAML)
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
@@ -50,7 +49,7 @@ module Beaker
 
     def cleanup
       @logger.notify "Destroying vsphere boxes"
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"

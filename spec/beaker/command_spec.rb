@@ -19,7 +19,7 @@ module Beaker
 
       expect( cmd.args_string    ).to be == 'to the baz'
       expect( cmd.options_string ).to be == '--foo=bar'
-      expect( cmd.environment_string_for(host) ).to be == ''
+      expect( cmd.environment_string_for(host, cmd.environment) ).to be == ''
 
     end
 
@@ -43,7 +43,7 @@ module Beaker
 
     describe '#environment_string_for' do
       it 'returns a blank string if theres no env' do
-        expect( subject.environment_string_for({}) ).to be == ''
+        expect( subject.environment_string_for({}, {}) ).to be == ''
       end
 
       it 'takes an env hash with var_name/value pairs' do

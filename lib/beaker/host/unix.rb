@@ -1,6 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'options'))
 
 module Unix
   class Host < Beaker::Host
@@ -17,7 +18,8 @@ module Unix
     include Unix::Pkg
 
     def self.pe_defaults
-      {
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
         'puppetpath'    => '/etc/puppetlabs/puppet',
@@ -29,11 +31,12 @@ module Unix
         'distmoduledir' => '/etc/puppetlabs/puppet/modules',
         'sitemoduledir' => '/opt/puppet/share/puppet/modules',
         'pathseparator' => ':',
-      }
+      })
     end
 
     def self.foss_defaults
-      {
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
         'puppetpath'        => '/etc/puppet',
@@ -48,7 +51,7 @@ module Unix
         'distmoduledir'     => '/etc/puppet/modules',
         'sitemoduledir'     => '/usr/share/puppet/modules',
         'pathseparator'     => ':',
-      }
+      })
     end
   end
 end

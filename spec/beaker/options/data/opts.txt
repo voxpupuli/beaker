@@ -1,0 +1,6 @@
+{
+  :debug     => true,
+  :tests     => 'test.rb',
+  :pre_suite => [ 'pre-suite.rb'],
+  :post_suite => "post_suite1.rb,post_suite2.rb",
+}

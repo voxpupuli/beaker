@@ -1,18 +1,17 @@
 module Beaker 
   class Vcloud < Beaker::Hypervisor
 
-    def initialize(vcloud_hosts, options, config)
+    def initialize(vcloud_hosts, options)
       @options = options
-      @config = config['CONFIG'].dup
       @logger = options[:logger]
       @vcloud_hosts = vcloud_hosts
       require 'yaml' unless defined?(YAML)
 
-      raise 'You must specify a datastore for vCloud instances!' unless @config['datastore']
-      raise 'You must specify a resource pool for vCloud instances!' unless @config['resourcepool']
-      raise 'You must specify a folder for vCloud instances!' unless @config['folder']
+      raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
+      raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
+      raise 'You must specify a folder for vCloud instances!' unless @options['folder']
 
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"
@@ -33,7 +32,7 @@ module Beaker
           h['template'] = templatefolders.pop
         end
 
-        @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@config['folder']} from template '#{h['template']}'"
+        @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@options['folder']} from template '#{h['template']}'"
 
         vm = {}
 
@@ -68,8 +67,8 @@ module Beaker
 
         # Put the VM in the specified folder and resource pool
         relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
-          :datastore    => vsphere_helper.find_datastore(@config['datastore']),
-          :pool         => vsphere_helper.find_pool(@config['resourcepool']),
+          :datastore    => vsphere_helper.find_datastore(@options['datastore']),
+          :pool         => vsphere_helper.find_pool(@options['resourcepool']),
           :diskMoveType => :moveChildMostDiskBacking
         )
 
@@ -84,9 +83,9 @@ module Beaker
 
         # Deploy from specified template
         if (@vcloud_hosts.length == 1) or (i == @vcloud_hosts.length - 1)
-          vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
+          vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
         else
-          vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@config['folder']), :name => h['vmhostname'], :spec => spec )
+          vm[h['template']].CloneVM_Task( :folder => vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )
         end
       end
       @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
@@ -139,7 +138,7 @@ module Beaker
 
     def cleanup
       @logger.notify "Destroying vCloud boxes"
-      vsphere_credentials = VsphereHelper.load_config
+      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
         " with credentials for #{vsphere_credentials[:user]}"

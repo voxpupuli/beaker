@@ -25,34 +25,34 @@ module Beaker
       end
     end
 
-    def self.create name, options, config
-      case config['HOSTS'][name]['platform']
+    def self.create name, options
+      case options['HOSTS'][name]['platform']
       when /windows/
-        Windows::Host.new name, options, config
+        Windows::Host.new name, options
       when /aix/
-        Aix::Host.new name, options, config
+        Aix::Host.new name, options
       else
-        Unix::Host.new name, options, config
+        Unix::Host.new name, options
       end
     end
 
     attr_accessor :logger
     attr_reader :name, :defaults
-    def initialize name, options, config
+    def initialize name, options
       @logger = options[:logger]
-      @name, @options, @config = name, options.dup, config
+      @name, @options = name.to_s, options.dup
 
       # This is annoying and its because of drift/lack of enforcement/lack of having
       # a explict relationship between our defaults, our setup steps and how they're
       # related through 'type' and the differences between the assumption of our two
       # configurations we have for many of our products
       type = is_pe? ? :pe : :foss
-      @defaults = merge_defaults_for_type @config, type
+      @defaults = merge_defaults_for_type @options, type
     end
 
-    def merge_defaults_for_type config, type
+    def merge_defaults_for_type options, type
       defaults = self.class.send "#{type}_defaults".to_sym
-      defaults.merge(config['CONFIG']).merge(config['HOSTS'][name])
+      defaults.merge(options.merge((options['HOSTS'][name])))
     end
 
     def node_name
@@ -120,7 +120,7 @@ module Beaker
     end
 
     def is_pe?
-      @config.is_pe?
+      @options.is_pe?
     end
 
     def connection
