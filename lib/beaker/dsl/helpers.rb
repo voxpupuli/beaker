@@ -393,6 +393,7 @@ module Beaker
 
         logger.debug 'Waiting for the puppet master to start'
         unless port_open_within?( host, 8140, 10 )
+          dump_puppet_log(host)
           raise Beaker::DSL::FailTest, 'Puppet master did not start in a timely fashion'
         end
         logger.debug 'The puppet master has started'
