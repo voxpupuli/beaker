@@ -5,13 +5,11 @@ module Beaker
   describe PuppetCommand do
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
-    let(:options) { @options || Hash.new  }
-
+    let(:defaults) { Beaker::Options::OptionsHash.new.merge({:type => :foss,'HOSTS' => {'name' => {'platform' => @platform}}})}
+    #let(:host_options) { @options ? defaults.merge(@options) : defaults}
+    let(:options) { @options || {}}
     subject(:cmd) { PuppetCommand.new( command, *args, options ) }
-    let :config do
-      MockConfig.new({}, {'name' => {'platform' => @platform}}, @pe)
-    end
-    let(:host)    { Host.create 'name', {}, config }
+    let(:host)    { Host.create 'name', defaults }
 
     it 'creates a Windows env for a Windows host' do
       @platform = 'windows'
@@ -20,7 +18,7 @@ module Beaker
       @options = { :foo => 'bar' }
 
       expect( host ).to be_a_kind_of Windows::Host
-      expect( cmd.options ).to be == @options
+      expect( cmd.options ).to be == options
       expect( cmd.args    ).to be == @args
       expect( cmd.command ).to be == "puppet " + @command
 

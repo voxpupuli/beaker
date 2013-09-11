@@ -16,29 +16,18 @@ module Beaker
   #   * File Creation Relative to CWD  -- Should be a config option
   #   * Better Method Documentation
   class TestSuite
-    attr_reader :name, :options, :config, :fail_mode
+    attr_reader :name, :options, :fail_mode
 
-    def initialize(name, hosts, options, config, fail_mode = nil)
-      @name      = name.gsub(/\s+/, '-')
-      @hosts     = hosts
-      @run       = false
-      @options   = options
-      @config    = config
-      @fail_mode = @options[:fail_mode] || fail_mode
-      @logger    = options[:logger]
-
+    def initialize(name, hosts, options, fail_mode = nil)
+      @logger     = options[:logger]
       @test_cases = []
-      @test_files = []
+      @test_files = options[name]
+      @name       = name.to_s.gsub(/\s+/, '-')
+      @hosts      = hosts
+      @run        = false
+      @options    = options
+      @fail_mode  = options[:fail_mode] || fail_mode
 
-      options[:tests].each do |root|
-        if File.file? root then
-          @test_files << root
-        else
-          @test_files += Dir.glob(
-            File.join(root, "**/*.rb")
-          ).select { |f| File.file?(f) }
-        end
-      end
       report_and_raise(@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
 
       @test_files = @test_files.sort
@@ -56,7 +45,7 @@ module Beaker
         @logger.notify
         @logger.notify "Begin #{test_file}"
         start = Time.now
-        test_case = TestCase.new(@hosts, @logger, config, options, test_file).run_test
+        test_case = TestCase.new(@hosts, @logger, options, test_file).run_test
         duration = Time.now - start
         @test_cases << test_case
 
@@ -206,8 +195,6 @@ module Beaker
     - Host Configuration Summary -
       HEREDOC
 
-      config.dump
-
       elapsed_time = @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
       average_test_time = elapsed_time / test_count
 
@@ -264,7 +251,6 @@ module Beaker
       @@log_dir ||= File.join("log", @start_time.strftime("%F_%T"))
       unless File.directory?(@@log_dir) then
         FileUtils.mkdir_p(@@log_dir)
-        FileUtils.cp(options[:config],(File.join(@@log_dir,"config.yml")))
 
         latest = File.join("log", "latest")
         if !File.exist?(latest) or File.symlink?(latest) then

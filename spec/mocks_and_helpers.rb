@@ -1,15 +1,4 @@
 
-class MockConfig < Struct.new(:CONFIG, :HOSTS)
-  def initialize(conf, hosts, is_pe = false)
-    @is_pe = is_pe
-    super conf, hosts
-  end
-
-  def is_pe?
-    @is_pe
-  end
-end
-
 class MockIO < IO
   def initialize
   end

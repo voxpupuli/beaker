@@ -91,7 +91,7 @@ module Beaker
       "#{env_string} #{cmd} #{options_string} #{args_string}"
     end
 
-    # @param [Hash] options These are the options that the command takes
+    # @param [Hash] opts These are the options that the command takes
     #
     # @return [String] String of the options and flags for command.
     #
@@ -150,7 +150,7 @@ module Beaker
     #       knowledge contained here. Really the relationship should be
     #       reversed where a host is asked for an appropriate Command when
     #       given a generic Command.
-    def environment_string_for host, env 
+    def environment_string_for host, env
       return '' if env.empty?
 
       env_array = parse_env_hash_for( host, env ).compact
