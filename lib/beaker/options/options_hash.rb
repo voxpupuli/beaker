@@ -7,7 +7,7 @@ module Beaker
       DIV = "\t"
       EOL = "\n"
 
-      # Get value for given key, search for both k as String and k as Symbol, if no present return nil
+      # Get value for given key, search for both k as String and k as Symbol, if not present return nil
       # @param [Object] k the key to find, searches for both k as String and k as Symbol
       #
       # @example Use this method to return the value for a given key

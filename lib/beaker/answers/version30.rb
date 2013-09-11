@@ -176,7 +176,7 @@ module Beaker
         dashboard = only_host_with_role(hosts, 'dashboard')
         master = only_host_with_role(hosts, 'master')
         hosts.each do |h|
-          if options[:type] == :upgrade and options[:from] =~ /\A3.0/
+          if options[:type] == :upgrade and h[:pe_ver] =~ /\A3.0/
             # 3.0.x to 3.0.x should require no answers
             the_answers[h.name] = {
               :q_install => 'y',

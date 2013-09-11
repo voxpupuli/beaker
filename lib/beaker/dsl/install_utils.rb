@@ -129,14 +129,15 @@ module Beaker
         end
       end
 
-      def do_install hosts, version, path, pre_30, options = {} 
+      def do_install hosts, options = {}
         #convenience methods for installation
         ########################################################
-        def installer_cmd(host, version, installer)
+        def installer_cmd(host, options)
+          version = options[:pe_ver] || host['pe_ver']
           if host['platform'] =~ /windows/
             "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
           else
-            "cd #{host['working_dir']}/#{host['dist']} && ./#{installer}"
+            "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]}"
           end
         end
         def link_exists?(link)
@@ -147,12 +148,15 @@ module Beaker
             return http.head(url.request_uri).code == "200"
           end
         end
-        def fetch_puppet(hosts, version, path)
-          local = File.directory?(path)
+        def fetch_puppet(hosts, options)
           hosts.each do |host|
+            windows = host['platform'] =~ /windows/
+            version = options[:pe_ver] || host['pe_ver']
+            path = options[:pe_dir] || host['pe_dir']
+            local = File.directory?(path)
             filename = ""
             extension = ""
-            if host['platform'] =~ /windows/
+            if windows
               filename = "puppet-enterprise-#{version}"
               extension = ".msi"
             else
@@ -185,11 +189,10 @@ module Beaker
         end
         ########################################################
         #start installation steps here
-        options[:installer] = 'puppet-enterprise-installer' unless options[:installer]
-        options[:type] = :install unless options[:type] 
+        options[:installer] = options[:installer] || 'puppet-enterprise-installer' 
+        options[:type] = options[:type] || :install 
         hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
         master_certname = on(master, hostcert).stdout.strip
-        answers = Beaker::Answers.answers(version, hosts, master_certname, options)
         special_nodes = [master, database, dashboard].uniq
         real_agents = agents - special_nodes
 
@@ -197,29 +200,31 @@ module Beaker
         use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
         hosts.each do |host|
           platform = use_all_tar ? 'all' : host['platform']
+          version = options[:pe_ver] || host['pe_ver']
           host['dist'] = "puppet-enterprise-#{version}-#{platform}"
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
           on host, "mkdir #{host['working_dir']}"
+          host[:answers] = Beaker::Answers.answers(version, hosts, master_certname, options)
         end
 
-        fetch_puppet(hosts, version, path)
+        fetch_puppet(hosts, options)
 
         hosts.each do |host|
           # Database host was added in 3.0. Skip it if installing an older version
-          next if host == database and host != master and host != dashboard and pre_30
+          next if host == database and host != master and host != dashboard and version_is_less(database['pe_ver'], '3.0')
           if host['platform'] =~ /windows/
-            on host, "#{installer_cmd(host, version, options[:installer])} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
+            on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
-            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, host[:answers])
 
-            on host, "#{installer_cmd(host, version, options[:installer])} -a #{host['working_dir']}/answers"
+            on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
           end
         end
 
 
-        # If we're installing a version less than 3.0, ignore the database host
+        # If we're installing a database version less than 3.0, ignore the database host
         install_hosts = hosts.dup
-        install_hosts.delete(database) if pre_30 and database != master and database != dashboard
+        install_hosts.delete(database) if version_is_less(database['pe_ver'], '3.0') and database != master and database != dashboard
 
         # On each agent, we ensure the certificate is signed then shut down the agent
         install_hosts.each do |host|
@@ -227,8 +232,8 @@ module Beaker
           stop_agent(host)
         end
 
-        # Wait for PuppetDB to be totally up and running
-        sleep_until_puppetdb_started(database) unless pre_30
+        # Wait for PuppetDB to be totally up and running (pre 3.0 version of pe only)
+        sleep_until_puppetdb_started(database) unless version_is_less(database['pe_ver'], '3.0')
 
         # Run the agent once to ensure everything is in the dashboard
         install_hosts.each do |host|
@@ -239,7 +244,7 @@ module Beaker
           # and would cause puppetdb to be bounced by the agent run. By sleeping
           # again here, we ensure that if that bounce happens during an upgrade
           # test we won't fail early in the install process.
-          if version == '3.0.0' and host == database
+          if host['pe_ver'] == '3.0.0' and host == database
             sleep_until_puppetdb_started(database)
           end
         end 
@@ -248,7 +253,7 @@ module Beaker
           wait_for_host_in_dashboard(host)
         end
 
-        if pre_30
+        if version_is_less(master['pe_ver'], '3.0')
           task = 'nodegroup:add_all_nodes group=default'
         else
           task = 'defaultgroup:ensure_default_group'
@@ -279,18 +284,17 @@ module Beaker
         return false
       end
 
-      def install_pe version, path
-        pre_30 = version_is_less(version, '3.0')
-        step "Install #{version} PE on #{path}"
-        do_install hosts, version, path, pre_30
+      def install_pe 
+        step "Install PE on test hosts"
+        do_install hosts
       end
 
-      def upgrade_pe version, path, from 
+      def upgrade_pe version, path 
         pre_30 = version_is_less(version, '3.0')
         if pre_30
-          do_install(hosts, version, path, pre_30, :type => :upgrade, :installer => 'puppet-enterprise-upgrader', :from => from)
+          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :installer => 'puppet-enterprise-upgrader'})
         else
-          do_install(hosts, version, path, pre_30, :type => :upgrade, :from => from)
+          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version})
         end
       end
 
