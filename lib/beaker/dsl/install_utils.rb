@@ -133,10 +133,11 @@ module Beaker
         #convenience methods for installation
         ########################################################
         def installer_cmd(host, options)
-          version = options[:pe_ver] || host['pe_ver']
           if host['platform'] =~ /windows/
+            version = options[:pe_ver_win] || host['pe_ver_win']
             "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
           else
+            version = options[:pe_ver] || host['pe_ver']
             "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]}"
           end
         end
@@ -151,12 +152,12 @@ module Beaker
         def fetch_puppet(hosts, options)
           hosts.each do |host|
             windows = host['platform'] =~ /windows/
-            version = options[:pe_ver] || host['pe_ver']
             path = options[:pe_dir] || host['pe_dir']
             local = File.directory?(path)
             filename = ""
             extension = ""
             if windows
+              version = options[:pe_ver_win] || host['pe_ver_win']
               filename = "puppet-enterprise-#{version}"
               extension = ".msi"
             else
@@ -201,10 +202,9 @@ module Beaker
         hosts.each do |host|
           platform = use_all_tar ? 'all' : host['platform']
           version = options[:pe_ver] || host['pe_ver']
-          host['dist'] = "puppet-enterprise-#{version}-#{platform}"
+          host['dist'] = "puppet-enterprise-#{version}-#{platform}" #dist is not used for windows boxes
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
           on host, "mkdir #{host['working_dir']}"
-          host[:answers] = Beaker::Answers.answers(version, hosts, master_certname, options)
         end
 
         fetch_puppet(hosts, options)
@@ -215,7 +215,8 @@ module Beaker
           if host['platform'] =~ /windows/
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
-            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, host[:answers])
+            answers = Beaker::Answers.answers(host[:pe_ver], hosts, master_certname, options)
+            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
 
             on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
           end
@@ -289,12 +290,14 @@ module Beaker
         do_install hosts
       end
 
-      def upgrade_pe version, path 
+      def upgrade_pe path 
+        version = Options::PEVersionScraper.load_pe_version(path, options[:pe_version_file])
+        version_win = Options::PEVersionScraper.load_pe_version(path, options[:pe_version_file_win])
         pre_30 = version_is_less(version, '3.0')
         if pre_30
-          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :installer => 'puppet-enterprise-upgrader'})
+          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader'})
         else
-          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version})
+          do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
         end
       end
 
