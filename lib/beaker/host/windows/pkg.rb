@@ -23,4 +23,7 @@ module Windows::Pkg
     execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}") 
   end
 
+  def uninstall_package(name, cmdline_args = '')
+    raise "Package #{name} cannot be uninstalled on #{self}"
+  end
 end
