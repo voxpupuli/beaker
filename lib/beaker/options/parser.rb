@@ -203,6 +203,7 @@ module Beaker
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
       #  - that one and only one master is defined per set of hosts
+      #  - that solaris/windows/aix hosts are agent only
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
@@ -262,6 +263,15 @@ module Beaker
         end
         if master > 1 or master < 1
           parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
+        end
+
+        #check that solaris/windows/el-4 boxes are only agents
+        @options[:HOSTS].each_key do |name|
+          if @options[:HOSTS][name][:platform] =~ /(solaris)|(windows)|(el-4)/
+             if (@options[:HOSTS][name][:roles] - ['agent']).size != 0
+               parser_error "#{@options[:HOSTS][name][:platform].to_s} box '#{name}' can only have role 'agent', has roles #{@options[:HOSTS][name][:roles].to_s}"
+             end
+          end
         end
 
       end

@@ -196,13 +196,17 @@ module Beaker
         master_certname = on(master, hostcert).stdout.strip
         special_nodes = [master, database, dashboard].uniq
         real_agents = agents - special_nodes
+        pre30database = version_is_less(options[:pe_ver] || database['pe_ver'], '3.0')
+        pre30master = version_is_less(options[:pe_ver] || master['pe_ver'], '3.0')
 
         # Set PE distribution for all the hosts, create working dir
         use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
         hosts.each do |host|
-          platform = use_all_tar ? 'all' : host['platform']
-          version = options[:pe_ver] || host['pe_ver']
-          host['dist'] = "puppet-enterprise-#{version}-#{platform}" #dist is not used for windows boxes
+          if host['platform'] !~ /windows/
+            platform = use_all_tar ? 'all' : host['platform']
+            version = options[:pe_ver] || host['pe_ver']
+            host['dist'] = "puppet-enterprise-#{version}-#{platform}"
+          end
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
           on host, "mkdir #{host['working_dir']}"
         end
@@ -211,7 +215,7 @@ module Beaker
 
         hosts.each do |host|
           # Database host was added in 3.0. Skip it if installing an older version
-          next if host == database and host != master and host != dashboard and version_is_less(database['pe_ver'], '3.0')
+          next if host == database and host != master and host != dashboard and pre30database
           if host['platform'] =~ /windows/
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
@@ -225,7 +229,7 @@ module Beaker
 
         # If we're installing a database version less than 3.0, ignore the database host
         install_hosts = hosts.dup
-        install_hosts.delete(database) if version_is_less(database['pe_ver'], '3.0') and database != master and database != dashboard
+        install_hosts.delete(database) if pre30database and database != master and database != dashboard
 
         # On each agent, we ensure the certificate is signed then shut down the agent
         install_hosts.each do |host|
@@ -233,8 +237,8 @@ module Beaker
           stop_agent(host)
         end
 
-        # Wait for PuppetDB to be totally up and running (pre 3.0 version of pe only)
-        sleep_until_puppetdb_started(database) unless version_is_less(database['pe_ver'], '3.0')
+        # Wait for PuppetDB to be totally up and running (post 3.0 version of pe only)
+        sleep_until_puppetdb_started(database) unless pre30database
 
         # Run the agent once to ensure everything is in the dashboard
         install_hosts.each do |host|
@@ -254,7 +258,7 @@ module Beaker
           wait_for_host_in_dashboard(host)
         end
 
-        if version_is_less(master['pe_ver'], '3.0')
+        if pre30master
           task = 'nodegroup:add_all_nodes group=default'
         else
           task = 'defaultgroup:ensure_default_group'
