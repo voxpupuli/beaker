@@ -156,27 +156,9 @@ module Beaker
         env_vars = Beaker::Options::Presets.env_vars
         @options = @options.merge(env_vars)
 
-        if @options.is_pe?
-          @options['HOSTS'].each_key do |name, val| 
-            if @options['HOSTS'][name]['platform'] =~ /windows/ 
-              @options['HOSTS'][name]['pe_ver_win'] = @options['HOSTS'][name]['pe_ver_win'] || Beaker::Options::PEVersionScraper.load_pe_version(
-                                   @options['HOSTS'][name][:pe_dir] || @options[:pe_dir], @options[:pe_version_file_win])
-            else
-              @options['HOSTS'][name]['pe_ver'] = @options['HOSTS'][name]['pe_ver'] || Beaker::Options::PEVersionScraper.load_pe_version(
-                                   @options['HOSTS'][name][:pe_dir] || @options[:pe_dir], @options[:pe_version_file])
-            end
-          end
-        else
-          @options['puppet_ver']       = @options[:puppet]
-          @options['facter_ver']       = @options[:facter]
-          @options['hiera_ver']        = @options[:hiera]
-          @options['hiera_puppet_ver'] = @options[:hiera_puppet]
-        end
-
         normalize_args
 
         @options
-
       end
 
       # Determine is a given file exists and is a valid YAML file

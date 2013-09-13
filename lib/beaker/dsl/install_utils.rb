@@ -129,12 +129,28 @@ module Beaker
         end
       end
 
+      #Preform a Puppet Enterprise upgrade or install
+      # @param [Array<Host>] hosts The hosts to install or upgrade PE on 
+      # @param  [Hash{Symbol=>Symbol, String}] options The options
+      # @option options [String] :pe_dir Default directory or URL to pull PE package from 
+      #                  (Otherwise uses individual hosts pe_dir)
+      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      #                  (Otherwise uses individual hosts pe_ver)
+      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      #                  (Otherwise uses individual Windows hosts pe_ver)
+      # @option options [String] :installer ('puppet-enterprise-installer') The name of the installer to use for upgrading/installing
+      # @option options [Symbol] :type (:install) One of :upgrade or :install
+      #
+      #                      
+      # @example 
+      #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
+      #
       def do_install hosts, options = {}
         #convenience methods for installation
         ########################################################
         def installer_cmd(host, options)
           if host['platform'] =~ /windows/
-            version = options[:pe_ver_win] || host['pe_ver_win']
+            version = options[:pe_ver_win] || host['pe_ver']
             "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
           else
             version = options[:pe_ver] || host['pe_ver']
@@ -157,7 +173,7 @@ module Beaker
             filename = ""
             extension = ""
             if windows
-              version = options[:pe_ver_win] || host['pe_ver_win']
+              version = options[:pe_ver_win] || host['pe_ver']
               filename = "puppet-enterprise-#{version}"
               extension = ".msi"
             else
@@ -289,11 +305,38 @@ module Beaker
         return false
       end
 
+      #Install PE based upon host configuration and options
+      # @example 
+      #  install_pe
+      #
+      # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
+      #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
+      #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
+      #
+      # @api dsl
       def install_pe 
-        step "Install PE on test hosts"
+        #process the version files if necessary
+        hosts.each do |host|
+          if host['platform'] =~ /windows/
+            host['pe_ver'] = host['pe_ver'] || 
+              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file_win])
+          else
+            host['pe_ver'] = host['pe_ver'] || 
+              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
+          end
+        end
         do_install hosts
       end
 
+      #Upgrade PE based upon host configuration and options
+      # @param [String] path A path (either local directory or a URL to a listing of PE builds). 
+      #                      Will contain a LATEST file indicating the latest build to install.
+      # @example 
+      #  upgrade_pe, http://neptune.puppetlabs.lan/3.0/ci-ready/
+      #
+      # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
+      #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
+      # @api dsl
       def upgrade_pe path 
         version = Options::PEVersionScraper.load_pe_version(path, options[:pe_version_file])
         version_win = Options::PEVersionScraper.load_pe_version(path, options[:pe_version_file_win])

@@ -1,6 +1,6 @@
 module Beaker
   module Answers
-    module Version203
+    module Version20
 
       def self.host_answers(host, master_certname, master, dashboard, options)
         return nil if host['platform'] =~ /windows/
