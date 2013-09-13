@@ -16,7 +16,7 @@ module BeakerRSpec
   end
 
   def provision
-    @network_manager = Beaker::NetworkManager.new(@config, @options, @logger)
+    @network_manager = Beaker::NetworkManager.new(@options, @logger)
     @hosts = @network_manager.provision
   end
 
@@ -24,30 +24,12 @@ module BeakerRSpec
     Beaker::Utils::Validator.validate(@hosts, @logger)
   end
 
-  def setup(config_file = 'sample.cfg')
-    @options ||=
-    {
-      :provision => true,
-      :debug => true,
-      :config => config_file,
-      :preserve_hosts => false,
-      :root_keys => false,
-      :keyfile => "#{ENV['HOME']}/.ssh/id_rsa",
-      :quiet => false,
-      :xml => false,
-      :color => true,
-      :dry_run => false,
-      :timesync => false,
-      :repo_proxy => false,
-      :add_el_extras => false,
-      :type => 'pe',
-      :pre_suite => [],
-      :post_suite => [],
-      :tests => [],
-    }
-    @logger ||= Beaker::Logger.new(options)
+  def setup()
+    @options_parser = Beaker::Options::Parser.new
+    @options = @options_parser.parse_args
+    @options[:debug] = true
+    @logger = Beaker::Logger.new(@options)
     @options[:logger] = @logger
-    @config ||= Beaker::TestConfig.new(options[:config], options)
     @hosts = []
     provision
     validate
