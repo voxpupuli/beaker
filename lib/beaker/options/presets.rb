@@ -20,6 +20,7 @@ module Beaker
           :pe_dir => ENV['pe_dist_dir'],
           :pe_version_file => ENV['pe_version_file'],
           :pe_version_file_win => ENV['pe_version_file'],
+          :hosts_file => ENV['hosts_file'] || ENV['config_file'],
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
