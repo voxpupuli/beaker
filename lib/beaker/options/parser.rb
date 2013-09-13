@@ -159,10 +159,10 @@ module Beaker
         if @options.is_pe?
           @options['HOSTS'].each_key do |name, val| 
             if @options['HOSTS'][name]['platform'] =~ /windows/ 
-              @options['HOSTS'][name]['pe_ver_win'] = Beaker::Options::PEVersionScraper.load_pe_version(
+              @options['HOSTS'][name]['pe_ver_win'] = @options['HOSTS'][name]['pe_ver_win'] || Beaker::Options::PEVersionScraper.load_pe_version(
                                    @options['HOSTS'][name][:pe_dir] || @options[:pe_dir], @options[:pe_version_file_win])
             else
-              @options['HOSTS'][name]['pe_ver'] = Beaker::Options::PEVersionScraper.load_pe_version(
+              @options['HOSTS'][name]['pe_ver'] = @options['HOSTS'][name]['pe_ver'] || Beaker::Options::PEVersionScraper.load_pe_version(
                                    @options['HOSTS'][name][:pe_dir] || @options[:pe_dir], @options[:pe_version_file])
             end
           end

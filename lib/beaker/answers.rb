@@ -1,4 +1,4 @@
-[ 'version30', 'version28' ].each do |file|
+[ 'version30', 'version28', 'version203' ].each do |file|
   begin
     require "beaker/answers/#{file}"
   rescue LoadError
@@ -16,6 +16,8 @@ module Beaker
           Version30.answers(hosts, master_certname, options)
         when /\A2\.8/
           Version28.answers(hosts, master_certname, options)
+        when /\A2\.0\.3/
+          Version203.answers(hosts, master_certname, options)
         else
           raise NotImplementedError, "Don't know how to generate answers for #{version}"
       end
