@@ -260,6 +260,23 @@ module Beaker
         hosts_to_modify
       end
 
+      # Ensures that host restrictions as specifid by type, criteria and
+      # host_array are confined to activity within the passed block.
+      # TestCase#hosts is reset after block has executed.
+      #
+      # @see confine
+      def confine_block(type, criteria, host_array = nil, &block)
+        begin
+          original_hosts = self.hosts.dup
+          confine(type, criteria, host_array)
+
+          yield
+
+        ensure
+          self.hosts = original_hosts
+        end
+      end
+
       # @!visibility private
       def inspect_host(host, property, one_or_more_values)
         values = Array(one_or_more_values)
