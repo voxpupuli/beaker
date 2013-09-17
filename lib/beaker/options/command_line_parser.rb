@@ -83,6 +83,11 @@ module Beaker
             @cmd_options[:ssh] = {:keys => [key]}
           end
 
+          opts.on '--timeout TIMEOUT',
+                  'Specify a provisioning timeout (in seconds)',
+                  '(default: 300)' do |value|
+            @cmd_options[:timeout] = value
+          end
 
           opts.on '-i URI', '--install URI',
                   'Install a project repo/app on the SUTs', 

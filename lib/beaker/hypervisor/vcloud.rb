@@ -19,7 +19,8 @@ module Beaker
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
       vsphere_vms = {}
 
-      attempts = 10
+      try = 1
+      attempts = @options[:timeout].to_i / 5
 
       start = Time.now
       @vcloud_hosts.each_with_index do |h, i|
@@ -60,9 +61,6 @@ module Beaker
         if customizationSpec
           # Print a logger message if using a customization spec
           @logger.notify "Found customization spec for '#{h['template']}', will apply after boot"
-
-          # Using a customization spec takes longer, set a longer timeout
-          attempts = attempts * 2
         end
 
         # Put the VM in the specified folder and resource pool
@@ -90,18 +88,17 @@ module Beaker
       end
       @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
 
+      try = (Time.now - start) / 5
+
       start = Time.now
       @vcloud_hosts.each_with_index do |h, i|
         @logger.notify "Booting #{h['vmhostname']} (#{h.name}) and waiting for it to register with vSphere"
-        try = 1
-        last_wait = 0
-        wait = 1
+
         until
           vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.toolsRunningStatus == 'guestToolsRunning' and
           vsphere_helper.find_vms(h['vmhostname'])[h['vmhostname']].summary.guest.ipAddress != nil
           if try <= attempts
-            sleep wait
-            (last_wait, wait) = wait, last_wait + wait
+            sleep 5
             try += 1
           else
             raise "vSphere registration failed after #{wait} seconds"
@@ -113,16 +110,12 @@ module Beaker
       start = Time.now
       @vcloud_hosts.each_with_index do |h, i|
         @logger.notify "Waiting for #{h['vmhostname']} DNS resolution"
-        try = 1
-        last_wait = 0
-        wait = 3
 
         begin
           Socket.getaddrinfo(h['vmhostname'], nil)
         rescue
           if try <= attempts
-            sleep wait
-            (last_wait, wait) = wait, last_wait + wait
+            sleep 5
             try += 1
 
             retry
