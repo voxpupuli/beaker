@@ -365,7 +365,8 @@ describe ClassMixedWithDSLHelpers do
 
           it 'stops puppet from source' do
             subject.with_puppet_running_on(host, {})
-            expect(host).to execute_commands_matching(/^kill.*puppet master --configprint pidfile/).once
+            expect(host).to execute_commands_matching(/^kill [^-]/).once
+            expect(host).to execute_commands_matching(/^kill -0/).once
           end
 
           it 'yields between starting and stopping' do
@@ -376,7 +377,8 @@ describe ClassMixedWithDSLHelpers do
                 execution += 1
               end
             end.to change { execution }.by(1)
-            expect(host).to execute_commands_matching(/^kill.*puppet master --configprint pidfile/).once
+            expect(host).to execute_commands_matching(/^kill [^-]/).once
+            expect(host).to execute_commands_matching(/^kill -0/).once
           end
 
           it 'passes on commandline args' do

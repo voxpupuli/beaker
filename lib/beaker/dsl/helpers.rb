@@ -1,5 +1,6 @@
 require 'resolv'
 require 'inifile'
+require 'timeout'
 require 'beaker/dsl/outcomes'
 
 module Beaker
@@ -419,7 +420,14 @@ module Beaker
 
       # @!visibility private
       def stop_puppet_from_source_on( host )
-        host.exec( Command.new( 'kill $(cat `puppet master --configprint pidfile`)' ) )
+        pid = host.exec( Command.new('cat `puppet master --configprint pidfile`') ).stdout.chomp
+        host.exec( Command.new( "kill #{pid}" ) )
+        Timeout.timeout(10) do
+          while host.exec( Command.new( "kill -0 #{pid}"), :acceptable_exit_codes => [0,1] ).exit_code == 0 do
+            # until kill -0 finds no process and we know that puppet has finished cleaning up
+            sleep 1
+          end
+        end
       rescue RuntimeError => e
         dump_puppet_log host
         raise e
