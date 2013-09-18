@@ -129,7 +129,7 @@ module Beaker
         end
       end
 
-      #Preform a Puppet Enterprise upgrade or install
+      #Perform a Puppet Enterprise upgrade or install
       # @param [Array<Host>] hosts The hosts to install or upgrade PE on 
       # @param  [Hash{Symbol=>Symbol, String}] options The options
       # @option options [String] :pe_dir Default directory or URL to pull PE package from 
@@ -145,9 +145,12 @@ module Beaker
       # @example 
       #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
       #
+      # @!visibility private
+      #
       def do_install hosts, options = {}
         #convenience methods for installation
         ########################################################
+        # @!visibility private
         def installer_cmd(host, options)
           if host['platform'] =~ /windows/
             version = options[:pe_ver_win] || host['pe_ver']
@@ -157,6 +160,7 @@ module Beaker
             "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]}"
           end
         end
+        # @!visibility private
         def link_exists?(link)
           require "net/http"
           require "open-uri"
@@ -165,6 +169,7 @@ module Beaker
             return http.head(url.request_uri).code == "200"
           end
         end
+        # @!visibility private
         def fetch_puppet(hosts, options)
           hosts.each do |host|
             windows = host['platform'] =~ /windows/
@@ -288,6 +293,7 @@ module Beaker
 
       #is version a < version b
       #3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
+      # @!visibility private
       def version_is_less a, b
         a = a.split('-')[0].split('.')
         b = b.split('-')[0].split('.')
@@ -332,7 +338,7 @@ module Beaker
       # @param [String] path A path (either local directory or a URL to a listing of PE builds). 
       #                      Will contain a LATEST file indicating the latest build to install.
       # @example 
-      #  upgrade_pe, http://neptune.puppetlabs.lan/3.0/ci-ready/
+      #  upgrade_pe("http://neptune.puppetlabs.lan/3.0/ci-ready/")
       #
       # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
       #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
