@@ -84,7 +84,7 @@ module Beaker
           end
 
           opts.on '--timeout TIMEOUT',
-                  'Specify a provisioning timeout (in seconds)',
+                  '(vCloud only) Specify a provisioning timeout (in seconds)',
                   '(default: 300)' do |value|
             @cmd_options[:timeout] = value
           end
