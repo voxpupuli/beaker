@@ -12,6 +12,8 @@ module Beaker
     def self.answers(version, hosts, master_certname, options)
 
       case version
+        when /\A3\.1/
+          Version30.answers(hosts, master_certname, options) # 3.1 matches 3.0 
         when /\A3\.0/
           Version30.answers(hosts, master_certname, options)
         when /\A2\.8/
