@@ -40,6 +40,7 @@ module Beaker
           :color => true,
           :debug => false,
           :dry_run => false,
+          :timeout => 300,
           :fail_mode => nil,
           :timesync => false,
           :repo_proxy => false,
