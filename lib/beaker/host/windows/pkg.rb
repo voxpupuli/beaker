@@ -9,7 +9,7 @@ module Windows::Pkg
   def install_package(name, cmdline_args = '')
     cygwin = ""
     rootdir = ""
-    result = exec(Beaker::Command.new("wmic os get osarchitecture | grep 32"), :acceptable_exit_codes => (0...127))
+    result = execute("echo '' | wmic os get osarchitecture | grep 32", :acceptable_exit_codes => (0...127))
     if result.exit_code == 0 #32 bit version
       rootdir = "c:\\\\cygwin"
       cygwin = "setup-x86.exe"
