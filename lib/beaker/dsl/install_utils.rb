@@ -240,7 +240,7 @@ module Beaker
           if host['platform'] =~ /windows/
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
-            answers = Beaker::Answers.answers(host[:pe_ver], hosts, master_certname, options)
+            answers = Beaker::Answers.answers(options[:pe_ver] || host[:pe_ver], hosts, master_certname, options)
             create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
 
             on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
@@ -351,6 +351,14 @@ module Beaker
           do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader'})
         else
           do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
+        end
+        #at this point we've completed a successful upgrade, update the host pe_ver to reflect that
+        hosts.each do |host|
+          if host['platform'] =~ /windows/
+            host['pe_ver'] = version_win
+          else
+            host['pe_ver'] = version
+          end
         end
       end
 
