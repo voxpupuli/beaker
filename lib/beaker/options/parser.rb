@@ -146,17 +146,19 @@ module Beaker
         #   overwrite defaults with command line and file options 
         @options = @options.merge(cmd_line_and_file_options)
 
-        #read the hosts file that contains the node configuration and hypervisor info
-        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
-        # merge in host file vars
-        #   overwrite options (default, file options, command line, env) with host file options
-        @options = @options.merge(hosts_options)
-        # merge in env vars
-        #   overwrite options (default, file options, command line, hosts file) with env
-        env_vars = Beaker::Options::Presets.env_vars
-        @options = @options.merge(env_vars)
+        if not @options[:help]
+          #read the hosts file that contains the node configuration and hypervisor info
+          hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+          # merge in host file vars
+          #   overwrite options (default, file options, command line, env) with host file options
+          @options = @options.merge(hosts_options)
+          # merge in env vars
+          #   overwrite options (default, file options, command line, hosts file) with env
+          env_vars = Beaker::Options::Presets.env_vars
+          @options = @options.merge(env_vars)
 
-        normalize_args
+          normalize_args
+        end
 
         @options
       end
