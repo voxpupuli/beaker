@@ -145,7 +145,7 @@ module Beaker
       # @example 
       #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
       #
-      # @!visibility private
+      # @api private
       #
       def do_install hosts, options = {}
         #convenience methods for installation
