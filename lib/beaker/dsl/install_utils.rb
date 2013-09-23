@@ -253,7 +253,7 @@ module Beaker
         else
           task = 'defaultgroup:ensure_default_group'
         end
-        on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
+        on dashboard, "BUNDLE_GEMFILE=/opt/puppet/share/puppet-dashboard/Gemfile /opt/puppet/bin/bundle/exec /opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
 
         # Now that all hosts are in the dashbaord, run puppet one more
         # time to configure mcollective
