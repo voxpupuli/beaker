@@ -3,6 +3,7 @@ require 'spec_helper'
 class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::InstallUtils
   include Beaker::DSL::Structure
+  include Beaker::DSL::Roles
 end
 
 describe ClassMixedWithDSLInstallUtils do
@@ -66,5 +67,290 @@ describe ClassMixedWithDSLInstallUtils do
 
       subject.install_from_git( host, path, repo )
     end
+   end
+
+    describe 'sorted_hosts' do
+      let(:hosts)      { @hosts || Hash.new }
+      let(:options)      { @options || Hash.new }
+
+      it 'can reorder so that the master comes first' do
+        @options = Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'master' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['master', 'database', 'dashboard']},
+                     'agent1' => {'platform' => 'windows', 'pe_ver' => '3.0', 'roles' => ['agent']},
+                     'agent2' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['agent']},
+        }})
+        @hosts =  [ 
+                   Beaker::Host.create('agent1', options),
+                   Beaker::Host.create('master', options),
+                   Beaker::Host.create('agent2', options),
+        ]
+        subject.stub( :hosts ).and_return( hosts )
+        expect(subject.sorted_hosts).to be === [hosts[1], hosts[0], hosts[2]] 
+      end
+      it 'leaves correctly ordered hosts alone' do
+        @options = Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'master' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['master', 'database', 'dashboard']},
+                     'agent1' => {'platform' => 'windows', 'pe_ver' => '3.0', 'roles' => ['agent']},
+                     'agent2' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['agent']},
+        }})
+        @hosts =  [ 
+                   Beaker::Host.create('master', options),
+                   Beaker::Host.create('agent1', options),
+                   Beaker::Host.create('agent2', options),
+        ]
+        subject.stub( :hosts ).and_return( hosts )
+        expect(subject.sorted_hosts).to be === hosts 
+      end
+
+    end
+
+    describe 'version_is_less' do
+      it 'reports 3.0.0-160-gac44cfb is not less than 3.0.0' do
+        expect(subject.version_is_less('3.0.0-160-gac44cfb', '3.0.0')).to be === false
+      end
+      it 'reports 3.0.0-160-gac44cfb is not less than 2.8.2' do
+        expect(subject.version_is_less('3.0.0-160-gac44cfb', '2.8.2')).to be === false
+      end
+      it 'reports 3.0.0 is less than 3.0.0-160-gac44cfb' do
+        expect(subject.version_is_less('3.0.0', '3.0.0-160-gac44cfb')).to be === true
+      end
+      it 'reports 2.8.2 is less than 3.0.0-160-gac44cfb' do
+        expect(subject.version_is_less('2.8.2', '3.0.0-160-gac44cfb')).to be === true
+      end
+      it 'reports 2.8 is less than 3.0.0-160-gac44cfb' do
+        expect(subject.version_is_less('2.8', '3.0.0-160-gac44cfb')).to be === true
+      end
+      it 'reports 2.8 is less than 2.9' do
+        expect(subject.version_is_less('2.8', '2.9')).to be === true
+      end
+    end
+
+    describe 'installer_cmd' do
+      let (:options)  {Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'unixhost' => {'platform' => 'linux', 'pe_ver' => '3.0', 'working_dir' => '/tmp', 'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386'},
+                     'winhost'  => {'platform' => 'windows', 'pe_ver' => '3.0', 'working_dir' => '/tmp'}}})}
+      let(:winhost) {Beaker::Host.create('winhost', options)}
+      let(:unixhost) {Beaker::Host.create('unixhost', options)}
+      it 'generates a windows PE install command for a windows host' do
+        expect(subject.installer_cmd(winhost, {})).to be === "cd /tmp && msiexec.exe /qn /i puppet-enterprise-3.0.msi"
+      end
+      it 'generates a unix PE install command for a unix host' do
+        expect(subject.installer_cmd(unixhost, {:installer => 'puppet-enterprise-installer'})).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer"
+      end
+    end
+
+    describe 'fetch_puppet' do
+      let (:options)  {Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'unixhost' => {'platform' => 'linux', 'pe_ver' => '3.0', 'working_dir' => '/tmp', 'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386'},
+                     'winhost'  => {'platform' => 'windows', 'pe_ver' => '3.0', 'working_dir' => '/tmp'}}})}
+      let(:winhost) {Beaker::Host.create('winhost', options)}
+      let(:unixhost) {Beaker::Host.create('unixhost', options)}
+
+      it 'can push a local PE .tar.gz to a host and unpack it' do
+        File.stub(:directory?).and_return(true) #is local
+        File.stub(:exists?).and_return(true) #is a .tar.gz
+        unixhost['pe_dir'] = '/local/file/path'
+        subject.stub(:scp_to).and_return(true)
+
+        path = unixhost['pe_dir']
+        filename = "#{unixhost['dist']}"
+        extension = '.tar.gz'
+        subject.should_receive(:scp_to).with(unixhost, "#{path}/#{filename}#{extension}", "#{unixhost['working_dir']}/#{filename}#{extension}").exactly(1).times
+        subject.should_receive(:on).with(unixhost, /gunzip/).exactly(1).times
+        subject.should_receive(:on).with(unixhost, /tar -xvf/).exactly(1).times
+        subject.fetch_puppet([unixhost], {})
+      end
+      it 'can download a PE .tar from a URL to a host and unpack it' do
+        File.stub(:directory?).and_return(false) #is not local
+        unixhost['pe_dir'] = 'http://www.path.com/dir/'
+        subject.stub(:link_exists?) do |arg|
+          if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
+            false
+          else          
+            true
+          end
+        end
+        subject.stub(:on).and_return(true)
+
+        path = unixhost['pe_dir']
+        filename = "#{unixhost['dist']}"
+        extension = '.tar'
+        subject.should_receive(:on).with(unixhost, "cd #{unixhost['working_dir']}; curl #{path}/#{filename}#{extension} -o #{filename}#{extension}").exactly(1).times
+        subject.should_receive(:on).with(unixhost, /tar -xvf/).exactly(1).times
+        subject.fetch_puppet([unixhost], {})
+
+      end
+      it 'can download a PE .tar.gz from a URL to a host and unpack it' do
+        File.stub(:directory?).and_return(false) #is not local
+        unixhost['pe_dir'] = 'http://www.path.com/dir/'
+        subject.stub(:link_exists?).and_return(true) #is a tar.gz
+        subject.stub(:on).and_return(true)
+
+        path = unixhost['pe_dir']
+        filename = "#{unixhost['dist']}"
+        extension = '.tar.gz'
+        subject.should_receive(:on).with(unixhost, "cd #{unixhost['working_dir']}; curl #{path}/#{filename}#{extension} -o #{filename}#{extension}").exactly(1).times
+        subject.should_receive(:on).with(unixhost, /gunzip/).exactly(1).times
+        subject.should_receive(:on).with(unixhost, /tar -xvf/).exactly(1).times
+        subject.fetch_puppet([unixhost], {})
+
+      end
+      it 'can push a local PE package to a windows host' do
+        File.stub(:directory?).and_return(true) #is local
+        File.stub(:exists?).and_return(true) #is present
+        winhost['pe_dir'] = '/local/file/path'
+        subject.stub(:scp_to).and_return(true)
+
+        path = winhost['pe_dir']
+        filename = "puppet-enterprise-#{winhost['pe_ver']}"
+        extension = '.msi'
+        subject.should_receive(:scp_to).with(winhost, "#{path}/#{filename}#{extension}", "#{winhost['working_dir']}/#{filename}#{extension}").exactly(1).times
+        subject.fetch_puppet([winhost], {})
+
+      end
+
+    end
+
+    describe 'do_install' do
+      let(:hosts)      { @hosts || Hash.new }
+      let(:options)      { @options || Hash.new }
+
+      it 'can preform a simple installation' do
+        @options = Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'master' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['master', 'database', 'dashboard']},
+                     'agent1' => {'platform' => 'windows', 'pe_ver' => '3.0', 'roles' => ['agent']},
+                     'agent2' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['agent']},
+        }})
+        @hosts =  [ 
+                   Beaker::Host.create('master', options),
+                   Beaker::Host.create('agent1', options),
+                   Beaker::Host.create('agent2', options),
+        ]
+        subject.stub( :on ).and_return(Beaker::Result.new({}, ''))
+        subject.stub( :fetch_puppet ).and_return(true)
+        subject.stub( :create_remote_file).and_return(true)
+        subject.stub( :sign_certificate).and_return(true)
+        subject.stub( :stop_agent).and_return(true)
+        subject.stub( :sleep_until_puppetdb_started).and_return(true)
+        subject.stub( :wait_for_host_in_dashboard).and_return(true)
+        subject.stub( :puppet_agent).and_return("puppet agent")
+
+        subject.stub( :hosts ).and_return( hosts )
+        #determine mastercert
+        subject.should_receive( :on ).with(hosts[0], /uname/).exactly(1).times
+        #create working dirs per-host
+        subject.should_receive( :on ).with(hosts[0], /mkdir/).exactly(1).times
+        subject.should_receive( :on ).with(hosts[1], /mkdir/).exactly(1).times
+        subject.should_receive( :on ).with(hosts[2], /mkdir/).exactly(1).times
+        #create answers file per-host, except windows
+        subject.should_receive( :create_remote_file ).with(hosts[0], /answers/, /q/).exactly(1).times
+        subject.should_receive( :create_remote_file ).with(hosts[2], /answers/, /q/).exactly(1).times
+        #run installer on all hosts
+        subject.should_receive( :on ).with(hosts[0], /puppet-enterprise-installer/).exactly(1).times
+        subject.should_receive( :on ).with(hosts[1], /msiexec.exe/).exactly(1).times
+        subject.should_receive( :on ).with(hosts[2], /puppet-enterprise-installer/).exactly(1).times
+        #sign certificate per-host
+        subject.should_receive( :sign_certificate ).with(hosts[0]).exactly(1).times
+        subject.should_receive( :sign_certificate ).with(hosts[1]).exactly(1).times
+        subject.should_receive( :sign_certificate ).with(hosts[2]).exactly(1).times
+        #stop puppet agent on all hosts
+        subject.should_receive( :stop_agent ).with(hosts[0]).exactly(1).times
+        subject.should_receive( :stop_agent ).with(hosts[1]).exactly(1).times
+        subject.should_receive( :stop_agent ).with(hosts[2]).exactly(1).times
+        #wait for puppetdb to start
+        subject.should_receive( :sleep_until_puppetdb_started ).with(hosts[0]).exactly(1).times
+        #run each puppet agent once
+        subject.should_receive( :on ).with(hosts[0], /puppet agent/, :acceptable_exit_codes => [0,2]).exactly(1).times
+        subject.should_receive( :on ).with(hosts[1], /puppet agent/, :acceptable_exit_codes => [0,2]).exactly(1).times
+        subject.should_receive( :on ).with(hosts[2], /puppet agent/, :acceptable_exit_codes => [0,2]).exactly(1).times
+        #run rake task on dashboard
+        subject.should_receive( :on ).with(hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/).exactly(1).times
+        #wait for all hosts to appear in the dashboard
+        subject.should_receive( :wait_for_host_in_dashboard ).with(hosts[0]).exactly(1).times
+        subject.should_receive( :wait_for_host_in_dashboard ).with(hosts[1]).exactly(1).times
+        subject.should_receive( :wait_for_host_in_dashboard ).with(hosts[2]).exactly(1).times
+        #run puppet agent now that installation is complete
+        subject.should_receive( :on ).with(hosts, /puppet agent/, :acceptable_exit_codes => [0,2]).exactly(1).times
+        subject.do_install(hosts)
+      end
+  end
+  describe 'install_pe' do
+      let(:options) {Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'master' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['master', 'database', 'dashboard']},
+                     'agent1' => {'platform' => 'windows', 'pe_ver' => '3.0', 'roles' => ['agent']},
+                     'agent2' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['agent']},
+      }})}
+      let(:hosts) {
+                 [Beaker::Host.create('agent1', options),
+                 Beaker::Host.create('master', options),
+                 Beaker::Host.create('agent2', options),]
+      }
+      it 'calls do_install with sorted hosts' do
+        subject.stub( :hosts ).and_return( hosts )
+        subject.stub( :do_install).and_return(true)
+        subject.should_receive(:do_install).with([hosts[1], hosts[0], hosts[2]])
+        subject.install_pe
+      end
+      it 'fills in missing pe_ver' do
+        hosts.each do |h|
+          h['pe_ver'] = nil
+        end
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version).and_return('2.8')
+        subject.stub( :hosts ).and_return( hosts )
+        subject.stub( :options ).and_return( {} )
+        subject.stub( :do_install).and_return(true)
+        subject.should_receive(:do_install).with([hosts[1], hosts[0], hosts[2]])
+        subject.install_pe
+        hosts.each do |h|
+          expect(h['pe_ver']).to be === '2.8'
+        end
+      end
+  end
+
+  describe 'upgrade_pe' do
+      let(:options) {Beaker::Options::OptionsHash.new.merge({'HOSTS' => {
+                     'master' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['master', 'database', 'dashboard']},
+                     'agent1' => {'platform' => 'windows', 'pe_ver' => '3.0', 'roles' => ['agent']},
+                     'agent2' => {'platform' => 'linux', 'pe_ver' => '3.0', 'roles' => ['agent']},
+      }})}
+      let(:hosts) {
+                 [Beaker::Host.create('agent1', options),
+                 Beaker::Host.create('master', options),
+                 Beaker::Host.create('agent2', options),]
+      }
+      it 'calls puppet-enterprise-upgrader for pre 3.0 upgrades' do
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version).and_return('2.8')
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version_win).and_return('2.8')
+        subject.stub( :hosts).and_return(hosts)
+        subject.stub(:options).and_return({})
+        version = version_win = '2.8'
+        path = "/path/to/upgradepkg"
+        subject.should_receive(:do_install).with([hosts[1], hosts[0], hosts[2]], {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader'})
+        subject.upgrade_pe(path)
+      end
+      it 'uses standard upgrader for post 3.0 upgrades' do
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version).and_return('3.1')
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version_win).and_return('3.1')
+        subject.stub( :hosts).and_return(hosts)
+        subject.stub(:options).and_return({})
+        version = version_win = '3.1'
+        path = "/path/to/upgradepkg"
+        subject.should_receive(:do_install).with([hosts[1], hosts[0], hosts[2]], {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win})
+        subject.upgrade_pe(path)
+      end
+      it 'updates pe_ver post upgrade' do
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version).and_return('2.8')
+        Beaker::Options::PEVersionScraper.stub(:load_pe_version_win).and_return('2.8')
+        subject.stub( :hosts).and_return(hosts)
+        subject.stub(:options).and_return({})
+        version = version_win = '2.8'
+        path = "/path/to/upgradepkg"
+        subject.should_receive(:do_install).with([hosts[1], hosts[0], hosts[2]], {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader'})
+        subject.upgrade_pe(path)
+        hosts.each do |h|
+          expect(h['pe_ver']).to be === '2.8'
+        end
+      end
+
   end
 end
