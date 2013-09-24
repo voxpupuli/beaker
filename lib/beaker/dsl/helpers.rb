@@ -385,7 +385,7 @@ module Beaker
       end
 
       # @!visibility private
-      def restore_puppet_conf_from_backup( host, backup_file = "#{puppetpath}/puppet.conf.bak" )
+      def restore_puppet_conf_from_backup( host, backup_file )
         puppetpath = host['puppetpath']
 
         host.exec( Command.new( "if [ -f #{backup_file} ]; then " +
