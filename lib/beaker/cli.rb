@@ -6,7 +6,7 @@ module Beaker
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
 
-      if @options.has_key?(:help) && @options[:help]
+      if @options[:help]
         @logger.notify(@options_parser.usage)
         exit
       end
