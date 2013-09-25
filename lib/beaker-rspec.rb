@@ -24,15 +24,13 @@ module BeakerRSpec
     Beaker::Utils::Validator.validate(@hosts, @logger)
   end
 
-  def setup()
+  def setup(args = [])
     @options_parser = Beaker::Options::Parser.new
-    @options = @options_parser.parse_args
+    @options = @options_parser.parse_args(args)
     @options[:debug] = true
     @logger = Beaker::Logger.new(@options)
     @options[:logger] = @logger
     @hosts = []
-    provision
-    validate
   end
 
   def hosts
