@@ -52,6 +52,7 @@ module Beaker
           :pe_version_file_win => 'LATEST-win',
           :dot_fog => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml => 'config/image_templates/ec2.yaml',
+          :help => false,
           :ssh => {
             :config                => false,
             :paranoid              => false,

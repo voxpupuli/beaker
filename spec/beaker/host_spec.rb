@@ -45,7 +45,7 @@ module Beaker
       args = [ 'source', 'target', {} ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_to).with(*args, nil)
+      conn.should_receive(:scp_to).with(*args, $dry_run)
 
       host.do_scp_to *args
     end
@@ -58,7 +58,7 @@ module Beaker
       args = [ 'source', 'target', {} ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_from).with(*args, nil)
+      conn.should_receive(:scp_from).with(*args, $dry_run)
 
       host.do_scp_from *args
     end

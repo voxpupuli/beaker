@@ -146,30 +146,21 @@ module Beaker
         #   overwrite defaults with command line and file options 
         @options = @options.merge(cmd_line_and_file_options)
 
-        #read the hosts file that contains the node configuration and hypervisor info
-        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
-        # merge in host file vars
-        #   overwrite options (default, file options, command line, env) with host file options
-        @options = @options.merge(hosts_options)
-        # merge in env vars
-        #   overwrite options (default, file options, command line, hosts file) with env
-        env_vars = Beaker::Options::Presets.env_vars
-        @options = @options.merge(env_vars)
+        if not @options[:help]
+          #read the hosts file that contains the node configuration and hypervisor info
+          hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+          # merge in host file vars
+          #   overwrite options (default, file options, command line, env) with host file options
+          @options = @options.merge(hosts_options)
+          # merge in env vars
+          #   overwrite options (default, file options, command line, hosts file) with env
+          env_vars = Beaker::Options::Presets.env_vars
+          @options = @options.merge(env_vars)
 
-        if @options.is_pe?
-          @options['pe_ver']           = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file])
-          @options['pe_ver_win']       = Beaker::Options::PEVersionScraper.load_pe_version(@options[:pe_dir], @options[:pe_version_file_win])
-        else
-          @options['puppet_ver']       = @options[:puppet]
-          @options['facter_ver']       = @options[:facter]
-          @options['hiera_ver']        = @options[:hiera]
-          @options['hiera_puppet_ver'] = @options[:hiera_puppet]
+          normalize_args
         end
 
-        normalize_args
-
         @options
-
       end
 
       # Determine is a given file exists and is a valid YAML file
@@ -196,6 +187,7 @@ module Beaker
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
       #  - that one and only one master is defined per set of hosts
+      #  - that solaris/windows/aix hosts are agent only
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
@@ -255,6 +247,15 @@ module Beaker
         end
         if master > 1 or master < 1
           parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
+        end
+
+        #check that solaris/windows/el-4 boxes are only agents
+        @options[:HOSTS].each_key do |name|
+          if @options[:HOSTS][name][:platform] =~ /(solaris)|(windows)|(el-4)/
+             if (@options[:HOSTS][name][:roles] - ['agent']).size != 0
+               parser_error "#{@options[:HOSTS][name][:platform].to_s} box '#{name}' can only have role 'agent', has roles #{@options[:HOSTS][name][:roles].to_s}"
+             end
+          end
         end
 
       end
