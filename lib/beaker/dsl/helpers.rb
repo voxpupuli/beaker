@@ -73,6 +73,36 @@ module Beaker
         end
       end
 
+      # @deprecated
+      # An proxy for the last {Beaker::Result#stdout} returned by
+      # a method that makes remote calls.  Use the {Beaker::Result}
+      # object returned by the method directly instead. For Usage see
+      # {Beaker::Result}.
+      def stdout
+        return nil if @result.nil?
+        @result.stdout
+      end
+
+      # @deprecated
+      # An proxy for the last {Beaker::Result#stderr} returned by
+      # a method that makes remote calls.  Use the {Beaker::Result}
+      # object returned by the method directly instead. For Usage see
+      # {Beaker::Result}.
+      def stderr
+        return nil if @result.nil?
+        @result.stderr
+      end
+
+      # @deprecated
+      # An proxy for the last {Beaker::Result#exit_code} returned by
+      # a method that makes remote calls.  Use the {Beaker::Result}
+      # object returned by the method directly instead. For Usage see
+      # {Beaker::Result}.
+      def exit_code
+        return nil if @result.nil?
+        @result.exit_code
+      end
+
       # Move a file from a remote to a local path
       # @note If using {Beaker::Host} for the hosts *scp* is not
       #   required on the system as it uses Ruby's net/scp library.  The
