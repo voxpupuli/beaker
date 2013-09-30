@@ -42,6 +42,59 @@ describe ClassMixedWithDSLHelpers do
 
       expect( subject.on( host, 'ls' ) ).to be == 'my_result'
     end
+
+    it 'provides access to stdout/stderr/exit_code upon command completion' do
+      command = 'ls'
+      host = double.as_null_object
+      result = Beaker::Result.new( host, command )
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      host.should_receive( :exec ).and_return( result )
+
+      expect( subject.on( host, command ) ).to be == result
+      expect( subject.stdout ).to be == 'stdout'
+      expect( subject.stderr ).to be == 'stderr'
+      expect( subject.exit_code ).to be == 0
+    end
+
+    it 'provides access to stdout/stderr/exit_code when yielded to a block' do
+      command = 'ls'
+      host = double.as_null_object
+      result = Beaker::Result.new( host, command )
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      host.should_receive( :exec ).and_return( result )
+
+      subject.on host, command do |containing_class|
+        expect( containing_class.stdout ).to be == 'stdout'
+        expect( containing_class.stderr ).to be == 'stderr'
+        expect( containing_class.exit_code ).to be == 0
+      end
+    end
+
+    it 'provides access to stdout/stderr/exit_code when yielded to an anonymous block' do
+      command = 'ls'
+      host = double.as_null_object
+      result = Beaker::Result.new( host, command )
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      host.should_receive( :exec ).and_return( result )
+
+      subject.on host, command do 
+        expect( subject.stdout ).to be == 'stdout'
+        expect( subject.stderr ).to be == 'stderr'
+        expect( subject.exit_code ).to be == 0
+      end
+
+    end
+
+
   end
 
   describe '#scp_from' do
