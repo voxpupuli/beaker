@@ -1,7 +1,7 @@
 module Beaker 
   class Fusion < Beaker::Hypervisor
 
-  def initialize(fusion_hosts, options)
+    def initialize(fusion_hosts, options)
       require 'rubygems' unless defined?(Gem)
       begin
         require 'fission'
@@ -11,14 +11,16 @@ module Beaker
       @logger = options[:logger]
       @options = options
       @fusion_hosts = fusion_hosts
+      @fission = Fission::VM
+    end
 
-
-      available = Fission::VM.all.data.collect{|vm| vm.name}.sort.join(", ")
+    def provision
+      available = @fission.all.data.collect{|vm| vm.name}.sort.join(", ")
       @logger.notify "Available VM names: #{available}"
 
       @fusion_hosts.each do |host|
         vm_name = host["vmname"] || host.name
-        vm = Fission::VM.new vm_name
+        vm = @fission.new vm_name
         raise "Could not find VM '#{vm_name}' for #{host.name}!" unless vm.exists?
 
         available_snapshots = vm.snapshots.data.sort.join(", ")
@@ -45,11 +47,11 @@ module Beaker
         time = Time.now - start
         @logger.notify "Spent %.2f seconds resuming VM" % time
       end
-    end #revert_fusion
+      end #revert_fusion
 
-    def cleanup
-      @logger.notify "No cleanup for fusion boxes"
-    end
+      def cleanup
+        @logger.notify "No cleanup for fusion boxes"
+      end
 
-end
+  end
 end

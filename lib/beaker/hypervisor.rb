@@ -16,7 +16,7 @@ module Beaker
         when /vsphere/
           Beaker::Vsphere.new hosts_to_provision, options
         when /fusion/
-          Beaker::Fusion.new hosts_to_provision, options
+          Beaker::Fusion.new(hosts_to_provision, options).provision
         when /blimpy/
           Beaker::Blimper.new hosts_to_provision, options
         when /vcloud/

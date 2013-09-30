@@ -10,6 +10,7 @@ require 'fakefs/spec_helpers'
 require 'mocks'
 require 'helpers'
 require 'matchers'
+require 'mock_fission'
 
 RSpec.configure do |config|
   config.include FakeFS::SpecHelpers
