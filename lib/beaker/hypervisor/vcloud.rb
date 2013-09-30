@@ -101,7 +101,7 @@ module Beaker
             sleep 5
             try += 1
           else
-            raise "vSphere registration failed after #{wait} seconds"
+            raise "vSphere registration failed after #{@options[:timeout].to_i} seconds"
           end
         end
       end
@@ -120,7 +120,7 @@ module Beaker
 
             retry
           else
-            raise "DNS resolution failed after #{wait} seconds"
+            raise "DNS resolution failed after #{@options[:timeout].to_i} seconds"
           end
         end
       end
