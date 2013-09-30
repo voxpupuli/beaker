@@ -86,7 +86,7 @@ module Beaker
       @logger = options[:logger]
       @temp_files = []
       @vagrant_hosts = vagrant_hosts
-      @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', options[:config]))
+      @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', options[:hosts_file]))
 
       make_vfile @vagrant_hosts
 
