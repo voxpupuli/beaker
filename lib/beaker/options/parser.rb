@@ -187,7 +187,8 @@ module Beaker
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
       #  - that one and only one master is defined per set of hosts
-      #  - that solaris/windows/aix hosts are agent only
+      #  - that solaris/windows/aix hosts are agent only for PE tests OR
+      #  - that windows/aix host are agent only if type is not 'pe'
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
@@ -251,13 +252,24 @@ module Beaker
 
         #check that solaris/windows/el-4 boxes are only agents
         @options[:HOSTS].each_key do |name|
-          if @options[:HOSTS][name][:platform] =~ /(solaris)|(windows)|(el-4)/
-             if (@options[:HOSTS][name][:roles] - ['agent']).size != 0
-               parser_error "#{@options[:HOSTS][name][:platform].to_s} box '#{name}' can only have role 'agent', has roles #{@options[:HOSTS][name][:roles].to_s}"
-             end
+          host = @options[:HOSTS][name]
+          if (host[:platform] =~ /windows|el-4/) ||
+             (@options.is_pe? && host[:platform] =~ /solaris/)
+
+            test_host_roles(name, host)
           end
         end
 
+      end
+
+      private
+
+      # @api private
+      def test_host_roles(host_name, host_hash)
+        host_roles = host_hash[:roles]
+        if (host_roles - ['agent']).size != 0
+          parser_error "#{host_hash[:platform].to_s} box '#{host_name}' can only have role 'agent', has roles #{host_roles.to_s}"
+        end
       end
 
     end
