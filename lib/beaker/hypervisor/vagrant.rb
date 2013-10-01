@@ -88,6 +88,9 @@ module Beaker
       @vagrant_hosts = vagrant_hosts
       @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', options[:hosts_file]))
 
+    end
+
+    def provision
       make_vfile @vagrant_hosts
 
       #stop anything currently running, that way vagrant up will re-do networking on existing boxes

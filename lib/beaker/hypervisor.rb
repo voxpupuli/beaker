@@ -22,7 +22,7 @@ module Beaker
         when /vcloud/
           Beaker::Vcloud.new hosts_to_provision, options
         when /vagrant/
-          Beaker::Vagrant.new hosts_to_provision, options
+          Beaker::Vagrant.new(hosts_to_provision, options).provision
         end
     end
   end
