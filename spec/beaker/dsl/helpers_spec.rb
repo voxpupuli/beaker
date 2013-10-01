@@ -6,8 +6,18 @@ end
 
 describe ClassMixedWithDSLHelpers do
   describe '#on' do
+    let( :command )  { 'ls' }
+    let( :hosts ) { [ double, double, double ] }
+    let( :host ) { double.as_null_object }
+    let( :result ) { Beaker::Result.new( host, command ) }
+
+    before :each do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+    end
+
     it 'allows the environment the command is run within to be specified' do
-      host = double.as_null_object
 
       Beaker::Command.should_receive( :new ).
         with( 'ls ~/.bin', [], {'ENV' => { :HOME => '/tmp/test_home' }} )
@@ -16,84 +26,99 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'delegates to itself for each host passed' do
-      hosts = [ double, double, double ]
 
       hosts.each_with_index do |host, i|
         host.should_receive( :exec ).and_return( i )
       end
 
-      results = subject.on( hosts, 'ls' )
+      results = subject.on( hosts, command )
       expect( results ).to be == [ 0, 1, 2 ]
     end
 
-    it 'yields to a given block' do
-      host = double.as_null_object
+    context 'upon command completion' do
+      before :each do
+        host.should_receive( :exec ).and_return( result )
+        @res = subject.on( host, command )
+      end
 
-      subject.on host, 'ls' do |containing_class|
-        expect( containing_class ).
-          to be_an_instance_of( ClassMixedWithDSLHelpers )
+      it 'returns the result of the action' do
+        expect( @res ).to be == result
+      end
+
+      it 'provides access to stdout' do
+        expect( @res.stdout ).to be == 'stdout'
+      end
+
+      it 'provides access to stderr' do
+        expect( @res.stderr ).to be == 'stderr'
+      end
+
+      it 'provides access to exit_code' do
+        expect( @res.exit_code ).to be == 0
       end
     end
 
-    it 'returns the result of the action' do
-      host = double.as_null_object
+    context 'when passed a block with arity of 1' do
+      before :each do
+        host.should_receive( :exec ).and_return( result )
+      end
 
-      host.should_receive( :exec ).and_return( 'my_result' )
+      it 'yields self' do
+        subject.on host, command do |containing_class|
+          expect( containing_class ).
+            to be_an_instance_of( ClassMixedWithDSLHelpers )
+        end
+      end
 
-      expect( subject.on( host, 'ls' ) ).to be == 'my_result'
-    end
+      it 'provides access to stdout' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.stdout ).to be == 'stdout'
+        end
+      end
 
-    it 'provides access to stdout/stderr/exit_code upon command completion' do
-      command = 'ls'
-      host = double.as_null_object
-      result = Beaker::Result.new( host, command )
-      result.stdout = 'stdout'
-      result.stderr = 'stderr'
-      result.exit_code = 0
+      it 'provides access to stderr' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.stderr ).to be == 'stderr'
+        end
+      end
 
-      host.should_receive( :exec ).and_return( result )
-
-      expect( subject.on( host, command ) ).to be == result
-      expect( subject.stdout ).to be == 'stdout'
-      expect( subject.stderr ).to be == 'stderr'
-      expect( subject.exit_code ).to be == 0
-    end
-
-    it 'provides access to stdout/stderr/exit_code when yielded to a block' do
-      command = 'ls'
-      host = double.as_null_object
-      result = Beaker::Result.new( host, command )
-      result.stdout = 'stdout'
-      result.stderr = 'stderr'
-      result.exit_code = 0
-
-      host.should_receive( :exec ).and_return( result )
-
-      subject.on host, command do |containing_class|
-        expect( containing_class.stdout ).to be == 'stdout'
-        expect( containing_class.stderr ).to be == 'stderr'
-        expect( containing_class.exit_code ).to be == 0
+      it 'provides access to exit_code' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.exit_code ).to be == 0
+        end
       end
     end
 
-    it 'provides access to stdout/stderr/exit_code when yielded to an anonymous block' do
-      command = 'ls'
-      host = double.as_null_object
-      result = Beaker::Result.new( host, command )
-      result.stdout = 'stdout'
-      result.stderr = 'stderr'
-      result.exit_code = 0
-
-      host.should_receive( :exec ).and_return( result )
-
-      subject.on host, command do 
-        expect( subject.stdout ).to be == 'stdout'
-        expect( subject.stderr ).to be == 'stderr'
-        expect( subject.exit_code ).to be == 0
+    context 'when passed a block with arity of 0' do
+      before :each do
+        host.should_receive( :exec ).and_return( result )
       end
 
-    end
+      it 'yields self' do
+        subject.on host, command do 
+          expect( subject ).
+            to be_an_instance_of( ClassMixedWithDSLHelpers )
+        end
+      end
 
+      it 'provides access to stdout' do
+        subject.on host, command do 
+          expect( subject.stdout ).to be == 'stdout'
+        end
+      end
+
+      it 'provides access to stderr' do
+        subject.on host, command do 
+          expect( subject.stderr ).to be == 'stderr'
+        end
+      end
+
+      it 'provides access to exit_code' do
+        subject.on host, command do 
+          expect( subject.exit_code ).to be == 0
+        end
+      end
+    end
 
   end
 
