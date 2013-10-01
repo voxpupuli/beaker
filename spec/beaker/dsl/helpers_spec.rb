@@ -235,32 +235,6 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#with_puppet_running_on' do
-    class FakeHost
-      attr_accessor :commands
-
-      def initialize(options = {})
-        @pe = options[:pe]
-        @commands = []
-      end
-
-      def is_pe?
-        @pe
-      end
-
-      def any_exec_result
-        RSpec::Mocks::Mock.new('exec-result').as_null_object
-      end
-
-      def exec(command, options = {})
-        commands << command
-        any_exec_result
-      end
-
-      def command_strings
-        commands.map { |c| [c.command, c.args].join(' ') }
-      end
-    end
-
     let(:is_pe) { false }
     let(:host) { FakeHost.new(:pe => is_pe) }
     let(:test_case_path) { 'testcase/path' }
@@ -270,46 +244,6 @@ describe ClassMixedWithDSLHelpers do
     def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
       subject.instance_variable_set(:@path, test_case_path)
       host.stub(:tmpdir).and_return(tmpdir_path)
-    end
-
-    RSpec::Matchers.define :execute_commands_matching do |pattern|
-
-      match do |actual|
-        raise(RuntimeError, "Expected #{actual} to be a FakeHost") unless actual.kind_of?(FakeHost)
-        @found_count = actual.command_strings.grep(pattern).size
-        @times.nil? ?
-          @found_count > 0 :
-          @found_count == @times
-      end
-
-      chain :exactly do |times|
-        @times = times
-      end
-
-      chain :times do
-        # clarity only
-      end
-
-      chain :once do
-        @times = 1
-        # clarity only
-      end
-
-      def message(actual, pattern, times, found_count)
-          msg = times == 1 ?
-            "#{pattern} once" :
-            "#{pattern} #{times} times"
-          msg += " but instead found a count of #{found_count}" if found_count != times
-          msg + " in:\n #{actual.command_strings.pretty_inspect}"
-      end
-
-      failure_message_for_should do |actual|
-        "Expected to find #{message(actual, pattern, @times, @found_count)}"
-      end
-
-      failure_message_for_should_not do |actual|
-        "Unexpectedly found #{message(actual, pattern, @times, @found_count)}"
-      end
     end
 
     before do

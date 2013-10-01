@@ -7,7 +7,9 @@ end
 
 require 'beaker'
 require 'fakefs/spec_helpers'
-require 'mocks_and_helpers'
+require 'mocks'
+require 'helpers'
+require 'matchers'
 
 RSpec.configure do |config|
   config.include FakeFS::SpecHelpers
