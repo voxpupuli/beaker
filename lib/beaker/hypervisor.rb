@@ -12,7 +12,7 @@ module Beaker
         when /aix/
           Beaker::Aixer.new(hosts_to_provision, options).provision
         when /solaris/
-          Beaker::Solaris.new hosts_to_provision, options
+          Beaker::Solaris.new(hosts_to_provision, options).provision
         when /vsphere/
           Beaker::Vsphere.new hosts_to_provision, options
         when /fusion/
