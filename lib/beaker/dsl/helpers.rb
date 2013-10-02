@@ -1,4 +1,6 @@
 require 'resolv'
+require 'inifile'
+require 'timeout'
 require 'beaker/dsl/outcomes'
 
 module Beaker
@@ -119,17 +121,17 @@ module Beaker
 
       # Check to see if a package is installed on a remote host
       #
-      # @param [Host] host             A host object 
+      # @param [Host] host             A host object
       # @param [String] package_name   Name of the package to check for.
       #
-      # @return [Boolean] true/false if the package is found 
+      # @return [Boolean] true/false if the package is found
       def check_for_package host, package_name
         host.check_for_package package_name
       end
 
       # Install a package on a host
       #
-      # @param [Host] host             A host object 
+      # @param [Host] host             A host object
       # @param [String] package_name   Name of the package to install
       #
       # @return [Result]   An object representing the outcome of *install command*.
@@ -259,6 +261,23 @@ module Beaker
         hosts_to_modify
       end
 
+      # Ensures that host restrictions as specifid by type, criteria and
+      # host_array are confined to activity within the passed block.
+      # TestCase#hosts is reset after block has executed.
+      #
+      # @see confine
+      def confine_block(type, criteria, host_array = nil, &block)
+        begin
+          original_hosts = self.hosts.dup
+          confine(type, criteria, host_array)
+
+          yield
+
+        ensure
+          self.hosts = original_hosts
+        end
+      end
+
       # @!visibility private
       def inspect_host(host, property, one_or_more_values)
         values = Array(one_or_more_values)
@@ -287,12 +306,23 @@ module Beaker
       #
       # @param [Host] host        One object that act like Host
       #
-      # @param [Hash{Symbol=>String}]
-      #                            conf_opts Represent puppet settings.
+      # @param [Hash{Symbol=>String}] conf_opts  Represents puppet settings.
       #                            Sections of the puppet.conf may be
       #                            specified, if no section is specified the
       #                            a puppet.conf file will be written with the
-      #                            options put in a section named after [mode].
+      #                            options put in a section named after [mode]
+      #
+      #                            There is a special setting for command_line
+      #                            arguments such as --debug or --logdest, which
+      #                            cannot be set in puppet.conf.   For example:
+      #
+      #                            :__commandline_args__ => '--logdest /tmp/a.log'
+      #
+      #                            These will only be applied when starting a FOSS
+      #                            master, as a pe master is just bounced.
+      #
+      # @param [File] testdir      The temporary directory which will hold backup
+      #                            configuration, and other test artifacts.
       #
       # @param [Block]             block The point of this method, yields so
       #                            tests may be ran. After the block is finished
@@ -314,71 +344,119 @@ module Beaker
       #
       # @api dsl
       def with_puppet_running_on host, conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
+        raise(ArgumentError, "with_puppet_running_on's conf_opts must be a Hash. You provided a #{conf_opts.class}: '#{conf_opts}'") if !conf_opts.kind_of?(Hash)
+        cmdline_args = conf_opts.delete(:__commandline_args__)
+
         begin
-          backup_file host, host['puppetpath'], testdir, 'puppet.conf'
+          backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
           if host.is_pe?
-            bounce_service( 'pe-httpd' )
-
+            bounce_service( host, 'pe-httpd' )
           else
-            start_puppet_from_source_on!( host )
+            puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
           end
 
           yield self if block_given?
+
+        rescue Exception => early_exception
+          original_exception = RuntimeError.new("PuppetAcceptance::DSL::Helpers.with_puppet_running_on failed (check backtrace for location) because: #{early_exception}\n#{early_exception.backtrace.join("\n")}\n")
+          raise(original_exception)
+
         ensure
-          restore_puppet_conf_from_backup( host )
+          begin
+            restore_puppet_conf_from_backup( host, backup_file )
 
-          if host.is_pe?
-            bounce_service( 'pe-httpd' )
+            if host.is_pe?
+              bounce_service( host, 'pe-httpd' )
+            else
+              stop_puppet_from_source_on( host ) if puppet_master_started
+            end
 
-          else
-            stop_puppet_from_source_on( host )
+          rescue Exception => teardown_exception
+            if original_exception
+              logger.error("Raised during attempt to teardown with_puppet_running_on: #{teardown_exception}\n---\n")
+              raise original_exception
+            else
+              raise teardown_exception
+            end
           end
         end
       end
 
       # @!visibility private
-      def restore_puppet_conf_from_backup( host )
+      def restore_puppet_conf_from_backup( host, backup_file )
         puppetpath = host['puppetpath']
 
-        host.exec( Command.new( "if [ -f #{puppetpath}/puppet.conf.bak ]; then " +
-                                    "cat #{puppetpath}/puppet.conf.bak > " +
+        host.exec( Command.new( "if [ -f #{backup_file} ]; then " +
+                                    "cat #{backup_file} > " +
                                     "#{puppetpath}/puppet.conf; " +
-                                    "rm -rf #{puppetpath}/puppet.conf.bak; " +
+                                    "rm -f #{backup_file}; " +
                                 "fi" ) )
       end
 
       # @!visibility private
-      def backup_file host, current_dir, new_dir, filename = 'puppet.conf'
+      def backup_the_file host, current_dir, new_dir, filename = 'puppet.conf'
         old_location = current_dir + '/' + filename
-        new_location = new_dir + '/' + filename
+        new_location = new_dir + '/' + filename + '.bak'
 
         host.exec( Command.new( "cp #{old_location} #{new_location}" ) )
+
+        return new_location
       end
 
       # @!visibility private
-      def start_puppet_from_source_on! host
-        host.exec( Command.new( puppet( 'master' ) ) )
+      def start_puppet_from_source_on! host, args = ''
+        host.exec( puppet( 'master', args ) )
 
         logger.debug 'Waiting for the puppet master to start'
         unless port_open_within?( host, 8140, 10 )
+          dump_puppet_log(host)
           raise Beaker::DSL::FailTest, 'Puppet master did not start in a timely fashion'
         end
         logger.debug 'The puppet master has started'
+        return true
       end
 
       # @!visibility private
       def stop_puppet_from_source_on( host )
-        host.exec( Command.new( 'kill $(cat `puppet master --configprint pidfile`)' ) )
+        pid = host.exec( Command.new('cat `puppet master --configprint pidfile`') ).stdout.chomp
+        host.exec( Command.new( "kill #{pid}" ) )
+        Timeout.timeout(10) do
+          while host.exec( Command.new( "kill -0 #{pid}"), :acceptable_exit_codes => [0,1] ).exit_code == 0 do
+            # until kill -0 finds no process and we know that puppet has finished cleaning up
+            sleep 1
+          end
+        end
+      rescue RuntimeError => e
+        dump_puppet_log host
+        raise e
+      end
+
+      # @!visibility private
+      def dump_puppet_log(host)
+        syslogfile = case host['platform']
+          when /fedora|centos|el/ then '/var/log/messages'
+          when /ubuntu|debian/ then '/var/log/syslog'
+          else return
+        end
+
+        logger.notify "\n*************************"
+        logger.notify "* Dumping master log    *"
+        logger.notify "*************************"
+        host.exec( Command.new( "tail -n 100 #{syslogfile}" ), :acceptable_exit_codes => [0,1])
+        logger.notify "*************************\n"
       end
 
       # @!visibility private
       def lay_down_new_puppet_conf( host, configuration_options, testdir )
-        new_conf = puppet_conf_for( host )
+        new_conf = puppet_conf_for( host, configuration_options )
         create_remote_file host, "#{testdir}/puppet.conf", new_conf.to_s
 
-        host.exec( Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf", :silent => true ) )
+        host.exec(
+          Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf" ),
+          :silent => true
+        )
         host.exec( Command.new( "cat #{host['puppetpath']}/puppet.conf" ) )
       end
 

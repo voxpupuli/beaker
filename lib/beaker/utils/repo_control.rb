@@ -58,7 +58,7 @@ module Beaker
             apt_get_update
           when host['platform'] =~ /solaris-11/
             host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-            host.exec(Command.new(host,"/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
+            host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
           else
             @logger.debug "#{host}: repo proxy configuration not modified"
           end

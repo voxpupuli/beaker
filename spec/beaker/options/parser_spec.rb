@@ -114,6 +114,59 @@ module Beaker
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 
+      describe "normalize_args" do
+        let(:hosts) do
+          {
+            'HOSTS' => {
+              :master => {
+                :roles => ["master","agent"],
+              },
+              :agent => {
+                :roles => ["agent"],
+              },
+            }
+          }
+        end
+
+        def fake_hosts_file_for_platform(hosts, platform)
+          hosts['HOSTS'].values.each { |h| h[:platform] = platform }
+          filename = "hosts_file_#{platform}"
+          File.open(filename, "w") do |file|
+            YAML.dump(hosts, file)
+          end
+          filename
+        end
+
+        shared_examples_for(:a_platform_supporting_only_agents) do |platform,type|
+          let(:args) { ["--type", type] }
+
+          it "restricts #{platform} hosts to agent for #{type}" do
+            hosts_file = fake_hosts_file_for_platform(hosts, platform)
+            args << "--hosts" << hosts_file
+            expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*can only have role 'agent'/)
+          end
+        end
+
+        context "for pe" do
+          it_should_behave_like(:a_platform_supporting_only_agents, 'solaris', 'pe')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows', 'pe')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4', 'pe')
+        end
+
+        context "for foss" do
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows', 'git')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4', 'git')
+
+          it "allows master role for solaris" do
+            hosts_file = fake_hosts_file_for_platform(hosts, 'solaris')
+            args = ["--type", "git", "--hosts", hosts_file]
+            options_hash = parser.parse_args(args)
+            expect(options_hash[:HOSTS][:master][:platform]).to match(/solaris/)
+            expect(options_hash[:HOSTS][:master][:roles]).to include('master')
+            expect(options_hash[:type]).to eq('git')
+          end
+        end
+      end
     end
   end
 end
