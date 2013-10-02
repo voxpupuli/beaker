@@ -10,7 +10,7 @@ module Beaker
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create") 
       case type
         when /aix/
-          Beaker::Aixer.new hosts_to_provision, options
+          Beaker::Aixer.new(hosts_to_provision, options).provision
         when /solaris/
           Beaker::Solaris.new hosts_to_provision, options
         when /vsphere/
