@@ -11,6 +11,7 @@ require 'mocks'
 require 'helpers'
 require 'matchers'
 require 'mock_fission'
+require 'mock_blimpy'
 
 RSpec.configure do |config|
   config.include FakeFS::SpecHelpers
