@@ -181,6 +181,7 @@ module Beaker
       #Validate all merged options values for correctness
       #
       #Currently checks:
+      #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
       #  - --type is one of 'pe' or 'git'
       #  - --fail-mode is one of 'fast', 'stop' or nil
@@ -192,6 +193,11 @@ module Beaker
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
+
+        #use the keyfile if present
+        if @options.has_key?(:keyfile)
+          @options[:ssh][:keys] = [@options[:keyfile]]
+        end
 
         #split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
         #will end up being normalized into an array
