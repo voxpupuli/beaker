@@ -26,11 +26,9 @@ module Beaker
         return url
       end
 
-      def apt_get_update
-        @hosts.each do |host|
-          if host['platform'] =~ /ubuntu|debian/
-            host.exec(Command.new("apt-get -y -f -m update"))
-          end
+      def apt_get_update host
+        if host[:platform] =~ /(ubuntu)|(debian)/ 
+          host.exec(Command.new("apt-get -y -f -m update"))
         end
       end
 
@@ -51,11 +49,11 @@ module Beaker
           when host['platform'] =~ /ubuntu/
             host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
             copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
-            apt_get_update
+            apt_get_update(host)
           when host['platform'] =~ /debian/
             host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
             copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
-            apt_get_update
+            apt_get_update(host)
           when host['platform'] =~ /solaris-11/
             host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
             host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
