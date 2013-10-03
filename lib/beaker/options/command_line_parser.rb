@@ -80,7 +80,7 @@ module Beaker
           opts.on '--keyfile /PATH/TO/SSH/KEY',
                   'Specify alternate SSH key',
                   '(default: ~/.ssh/id_rsa)' do |key|
-            @cmd_options[:ssh] = {:keys => [key]}
+            @cmd_options[:keyfile] = key
           end
 
           opts.on '--timeout TIMEOUT',

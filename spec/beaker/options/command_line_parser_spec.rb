@@ -13,7 +13,7 @@ module Beaker
       end
 
       it "supports all our command line options" do
-        expect(parser.parse!(full_opts)).to be === {:hosts_file=>"anotherfile.cfg", :options_file=>"opts_file", :type=>"pe", :helper=>"path_to_helper", :load_path=>"load_path", :tests=>"test1.rb,test2.rb,test3.rb", :pre_suite=>"pre_suite.rb", :post_suite=>"post_suite.rb", :provision=>false, :preserve_hosts=>true, :root_keys=>true, :ssh=>{:keys=>["../.ssh/id_rsa"]}, :install=>"gitrepopath", :modules=>"module", :quiet=>true, :xml=>false, :dry_run=>true, :timesync=>false, :repo_proxy=>true, :add_el_extras=>true, :fail_mode=>"fast", :color=>false}
+        expect(parser.parse!(full_opts)).to be === {:hosts_file=>"anotherfile.cfg", :options_file=>"opts_file", :type=>"pe", :helper=>"path_to_helper", :load_path=>"load_path", :tests=>"test1.rb,test2.rb,test3.rb", :pre_suite=>"pre_suite.rb", :post_suite=>"post_suite.rb", :provision=>false, :preserve_hosts=>true, :root_keys=>true, :keyfile=>"../.ssh/id_rsa", :install=>"gitrepopath", :modules=>"module", :quiet=>true, :xml=>false, :dry_run=>true, :timesync=>false, :repo_proxy=>true, :add_el_extras=>true, :fail_mode=>"fast", :color=>false}
       end
 
       it "can produce a usage description" do
