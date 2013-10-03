@@ -25,8 +25,6 @@ module Beaker
       @hosts =  []
       @network_manager = Beaker::NetworkManager.new(@options, @logger)
       @hosts = @network_manager.provision
-      #validate that the hosts are correctly configured
-      Beaker::Utils::Validator.validate(@hosts, @logger)
 
     end
 
@@ -46,6 +44,9 @@ module Beaker
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
+        #validation phase
+        Beaker::Utils::Validator.validate(@hosts, @logger)
+
         #setup phase
         setup_steps.each do |step| 
           if (not @options.has_key?(step[0])) or @options[step[0]]
