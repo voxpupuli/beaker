@@ -714,6 +714,7 @@ module Beaker
        #prompt the master to sign certs then check to confirm the cert for this host is signed
        def sign_certificate(host)
          if [master, dashboard, database].include? host
+           on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1]
            on host, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
          else
 
