@@ -13,9 +13,11 @@ module Unix::Pkg
 
   def install_package(name, cmdline_args = '')
     case self['platform']
+      when /sles-/
+        execute("zypper --non-interactive in #{name}")
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora|centos|el/
+      when /fedora|centos|el-/
         execute("yum -y #{cmdline_args} install #{name}")
       when /ubuntu|debian/
         execute("apt-get update")
@@ -31,9 +33,11 @@ module Unix::Pkg
 
   def uninstall_package(name, cmdline_args = '')
     case self['platform']
+      when /sles-/
+        execute("zypper --non-interactive rm #{name}")
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
-      when /fedora|centos|el/
+      when /fedora|centos|el-/
         execute("yum -y #{cmdline_args} remove #{name}")
       when /ubuntu|debian/
         execute("apt-get purge #{cmdline_args} -y #{name}")
