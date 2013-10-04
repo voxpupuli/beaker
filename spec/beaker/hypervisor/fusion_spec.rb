@@ -25,6 +25,8 @@ module Beaker
 
     before :each do
       MockFission.presets(vms, snaps)
+      Fusion.any_instance.stub( :require ).with( 'fission' ).and_return( true )
+      stub_const( "Fission::VM", true )
     end
 
     it "can provision a set of hosts" do
