@@ -13,7 +13,7 @@ module Beaker
           :q_verify_packages => ENV['q_verify_packages'] || 'y',
           :q_puppet_symlinks_install => 'y',
           :q_puppetagent_certname => host,
-          :q_puppetagent_server => master,
+          :q_puppetagent_server => master_certname,
 
           # Disable database, console, and master by default
           # This will be overridden by other blocks being merged in.
@@ -50,7 +50,7 @@ module Beaker
         }
 
         if master['ip']
-          master_a[:q_puppetmaster_dnsaltnames]+=","+master['ip']
+          master_a[:q_puppetmaster_dnsaltnames]+= "," + master['ip']
         end
 
         # Common answers for console and database
