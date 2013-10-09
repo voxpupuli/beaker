@@ -658,11 +658,11 @@ module Beaker
          curl_with_retries("start puppetdb (ssl)",
                            host, "https://#{host.node_name}:8081", [35, 60])
        end
- 
+
        def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
          retry_command(desc, host, "curl #{url}", desired_exit_codes, max_retries, retry_interval)
        end
- 
+
        def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
          desired_exit_codes = [desired_exit_codes].flatten
          result = on host, command, :acceptable_exit_codes => (0...127)
@@ -676,7 +676,7 @@ module Beaker
            end
          end
        end
- 
+
        #stops the puppet agent running on the host
        def stop_agent(agent)
          vardir = agent.puppet['vardir']
@@ -686,7 +686,7 @@ module Beaker
            agent_running = (result.exit_code == 0)
            sleep 2 unless agent_running
          end
-        
+
          if agent['platform'].include?('solaris')
            on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
          elsif agent['platform'].include?('aix')
@@ -702,30 +702,36 @@ module Beaker
            on(agent, "/etc/init.d/#{service} stop")
          end
        end
- 
- 
+
+
        #wait for a given host to appear in the dashboard
        def wait_for_host_in_dashboard(host)
          hostname = host.node_name
          retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
        end
- 
- 
+
+
        #prompt the master to sign certs then check to confirm the cert for this host is signed
        def sign_certificate(host)
-         return if [master, dashboard, database].include? host
- 
-         hostname = Regexp.escape host.node_name
- 
-         last_sleep = 0
-         next_sleep = 1
-         (0..10).each do |i|
-           fail_test("Failed to sign cert for #{hostname}") if i == 10
- 
-           on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
-           break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
-           sleep next_sleep
-           (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+         if [master, dashboard, database].include? host
+
+           on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1]
+           on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
+
+         else
+
+           hostname = Regexp.escape host.node_name
+
+           last_sleep = 0
+           next_sleep = 1
+           (0..10).each do |i|
+             fail_test("Failed to sign cert for #{hostname}") if i == 10
+
+             on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
+             break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
+             sleep next_sleep
+             (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+           end
          end
        end
     end
