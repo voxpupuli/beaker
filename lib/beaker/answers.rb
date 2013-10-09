@@ -12,9 +12,7 @@ module Beaker
     def self.answers(version, hosts, master_certname, options)
 
       case version
-        when /\A3\.1/
-          Version30.answers(hosts, master_certname, options) # 3.1 matches 3.0 
-        when /\A3\.0/
+        when /\A3\.[[:digit:]]/ # All 3.x so far have the same answers
           Version30.answers(hosts, master_certname, options)
         when /\A2\.8/
           Version28.answers(hosts, master_certname, options)
