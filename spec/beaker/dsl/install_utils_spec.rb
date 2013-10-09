@@ -227,13 +227,13 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
       subject.should_receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
       #sign certificate per-host
-      subject.should_receive( :sign_certificate ).with( hosts[0] ).once
-      subject.should_receive( :sign_certificate ).with( hosts[1] ).once
-      subject.should_receive( :sign_certificate ).with( hosts[2] ).once
+      subject.should_receive( :sign_certificate_on ).with( hosts[0] ).once
+      subject.should_receive( :sign_certificate_on ).with( hosts[1] ).once
+      subject.should_receive( :sign_certificate_on ).with( hosts[2] ).once
       #stop puppet agent on all hosts
-      subject.should_receive( :stop_agent ).with( hosts[0] ).once
-      subject.should_receive( :stop_agent ).with( hosts[1] ).once
-      subject.should_receive( :stop_agent ).with( hosts[2] ).once
+      subject.should_receive( :stop_agent_on ).with( hosts[0] ).once
+      subject.should_receive( :stop_agent_on ).with( hosts[1] ).once
+      subject.should_receive( :stop_agent_on ).with( hosts[2] ).once
       #wait for puppetdb to start
       subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
       #run each puppet agent once

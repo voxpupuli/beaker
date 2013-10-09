@@ -276,8 +276,8 @@ module Beaker
 
         # On each agent, we ensure the certificate is signed then shut down the agent
         install_hosts.each do |host|
-          sign_certificate(host)
-          stop_agent(host)
+          sign_certificate_on(host)
+          stop_agent_on(host)
         end
 
         # Wait for PuppetDB to be totally up and running (post 3.0 version of pe only)

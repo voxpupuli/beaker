@@ -68,6 +68,44 @@ module Beaker
         find_only_one :dashboard
       end
 
+      # The default host
+      #   - if only one host defined, then that host
+      #   OR
+      #   - host with 'default' as a role
+      #   OR
+      #   - host with 'master' as a role
+      #
+      # @return [Array<Host>]
+      # @raise [Beaker::DSL::Outcomes::FailTest] if no default host is found
+      #
+      # @example Basic usage
+      #     on, default, "curl https://#{database}/nodes/#{agent}"
+      #
+      def default
+        if hosts.length == 1
+          return hosts[0]
+        elsif has_role? :default
+          return find_only_one :default
+        elsif has_role? :master
+          return find_only_one :master
+        else
+          raise DSL::Outcomes::FailTest, "no default host specified"
+        end
+      end
+
+      # Determine if there is a host with the given role defined
+      # @return [Boolean] True if there is a host with role, false otherwise
+      #
+      # @example
+      # if has_role?(:master)
+      #   puts "master is defined"
+      # end
+      #
+      # @api public
+      def has_role?(role)
+        hosts_as(role).length > 0
+      end
+
       # Select hosts that include a desired role from #hosts
       #
       # @param [String, Symbol] desired_role The role to select for
