@@ -13,6 +13,7 @@ module Beaker
       @hosts[0][:platform] = "centos-5-x86-64-west" 
       @hosts[1][:platform] = "centos-6-x86-64-west" 
       @hosts[2][:platform] = "centos-7-x86-64-west" 
+      blimper.instance_variable_set( :@blimpy, MockBlimpy )
     end
 
     it "can provision a set of hosts" do 
@@ -22,7 +23,6 @@ module Beaker
       end
       blimper.stub( :get_domain_name ).and_return( 'domain' )
       blimper.stub( :sleep ).and_return( true )
-      blimper.instance_variable_set( :@blimpy, MockBlimpy )
 
       @hosts.each do |host|
         blimper.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nvm1.my.ip\tvm1\tvm1.domain\nvm2.my.ip\tvm2\tvm2.domain\nvm3.my.ip\tvm3\tvm3.domain\n" )
@@ -31,7 +31,10 @@ module Beaker
       blimper.provision
     end
 
-    it "can clean up after provisioning" do
+    it "calls fleet.destroy on cleanup" do
+      MockFleet.any_instance.should_receive( :add ).with( :aws ).exactly( @hosts.length ).times
+      MockFleet.any_instance.should_receive( :destroy ).once
+
       blimper.cleanup
     end
 

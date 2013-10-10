@@ -2,13 +2,12 @@ require 'spec_helper'
 
 module Beaker
   describe Host do
-    let(:defaults) { Beaker::Options::OptionsHash.new.merge({'HOSTS' => {'name' => {'platform' => @platform}}})}
-    let(:options) { @options ? defaults.merge(@options) : defaults}
-
-    let(:host)    { Host.create 'name', options }
+    let(:options)  { @options ? @options : {} }
+    let(:platform) { @platform ? { :platform => @platform } : {} }
+    let(:host)    { make_host( 'name', options.merge(platform) ) }
 
     it 'creates a windows host given a windows config' do
-      @options = {'HOSTS'=> {'name' => {'platform' => 'windows'}}}
+      @platform = 'windows'
       expect( host ).to be_a_kind_of Windows::Host
     end
 
@@ -38,7 +37,7 @@ module Beaker
     # it takes a location and a destination
     # it basically proxies that to the connection object
     it 'do_scp_to logs info and proxies to the connection' do
-      logger = mock(:logger)
+      logger = host[:logger]
       conn = mock(:connection)
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
@@ -51,7 +50,7 @@ module Beaker
     end
 
     it 'do_scp_from logs info and proxies to the connection' do
-      logger = mock(:logger)
+      logger = host[:logger]
       conn = mock(:connection)
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
@@ -69,7 +68,7 @@ module Beaker
 
     context 'merging defaults' do
       it 'knows the difference between foss and pe' do
-        @options = {:type => :pe}
+        @options = { :type => :pe }
         expect( host['puppetpath'] ).to be === '/etc/puppetlabs/puppet'
       end
 

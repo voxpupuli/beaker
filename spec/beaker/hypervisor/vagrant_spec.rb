@@ -9,22 +9,19 @@ module Beaker
     end
 
     it "can make a Vagranfile for a set of hosts" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
       vagrant.stub( :randmac ).and_return( "0123456789" )
-      FileUtils.stub( :mkdir_p ).and_return( true )
-      file = mock('file')
-      File.stub( :join ).and_return( "filename" )
-      File.stub( :expand_path ).and_return( "path/filename" )
-
-      File.should_receive(:open).with("path/filename", "w").and_yield(file)
-      file.should_receive(:write).with("Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2' do |v|\n    v.vm.hostname = 'vm2'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3' do |v|\n    v.vm.hostname = 'vm3'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n")
 
       vagrant.make_vfile( @hosts )
+
+      expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2' do |v|\n    v.vm.hostname = 'vm2'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3' do |v|\n    v.vm.hostname = 'vm3'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
     end
 
     it "can generate a new /etc/hosts file referencing each host" do
 
       @hosts.each do |host|
-        vagrant.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).exactly( 1 ).times
+        vagrant.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).once
       end
 
       vagrant.hack_etc_hosts( @hosts )
@@ -37,7 +34,7 @@ module Beaker
         host = @hosts[0]
         host[:platform] = 'unix'
 
-        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").exactly( 1 ).times
+        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
 
         vagrant.copy_ssh_to_root( host )
 
@@ -47,7 +44,7 @@ module Beaker
         host = @hosts[0]
         host[:platform] = 'windows'
 
-        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /home/Administrator/.\"").exactly( 1 ).times
+        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /home/Administrator/.\"").once
 
         vagrant.copy_ssh_to_root( host )
 
@@ -87,17 +84,17 @@ module Beaker
 
     it "can provision a set of hosts" do
 
-      vagrant.should_receive( :make_vfile ).with( @hosts ).exactly( 1 ).times
+      vagrant.should_receive( :make_vfile ).with( @hosts ).once
 
-      vagrant.should_receive( :vagrant_cmd ).with( "halt" ).exactly( 1 ).times
-      vagrant.should_receive( :vagrant_cmd ).with( "up" ).exactly( 1 ).times
+      vagrant.should_receive( :vagrant_cmd ).with( "halt" ).once
+      vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
       @hosts.each do |host|
         host_prev_name = host['user']
-        vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).exactly( 1 ).times
-        vagrant.should_receive( :copy_ssh_to_root ).with( host ).exactly( 1 ).times
-        vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).exactly( 1 ).times
+        vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).once
+        vagrant.should_receive( :copy_ssh_to_root ).with( host ).once
+        vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
       end
-      vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).exactly( 1 ).times
+      vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).once
 
 
       vagrant.provision

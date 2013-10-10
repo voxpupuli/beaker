@@ -13,7 +13,7 @@ module Beaker
 
     it "can provision a set of hosts" do
       @hosts.each do |host|
-        Command.should_receive( :new ).with( "cd pe-aix && rake restore:#{host.name}" ).exactly( 1 ).times
+        Command.should_receive( :new ).with( "cd pe-aix && rake restore:#{host.name}" ).once
 
       end
 
@@ -22,8 +22,8 @@ module Beaker
     end
 
     it "does nothing for cleanup" do
-      Command.should_receive( :new ).exactly( 0 ).times
-      Host.should_receive( :exec ).exactly( 0 ).times
+      Command.should_receive( :new ).never
+      Host.should_receive( :exec ).never
 
       aixer.cleanup
 

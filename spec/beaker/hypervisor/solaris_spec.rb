@@ -18,17 +18,17 @@ module Beaker
       @hosts.each do |host|
         vm_name = host['vmname'] || host.name
         snapshot = host['snapshot']
-        Command.should_receive( :new ).with("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}@#{snapshot}").exactly( 1 ).times
-        Command.should_receive( :new ).with("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snapshot}").exactly( 1 ).times
-        Command.should_receive( :new ).with("sudo /sbin/zoneadm -z #{vm_name} boot").exactly( 1 ).times
+        Command.should_receive( :new ).with("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}@#{snapshot}").once
+        Command.should_receive( :new ).with("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snapshot}").once
+        Command.should_receive( :new ).with("sudo /sbin/zoneadm -z #{vm_name} boot").once
       end
 
       solaris.provision
     end
 
     it "does nothing for cleanup" do
-      Command.should_receive( :new ).exactly( 0 ).times
-      Host.should_receive( :exec ).exactly( 0 ).times
+      Command.should_receive( :new ).never
+      Host.should_receive( :exec ).never
 
       solaris.cleanup
     end

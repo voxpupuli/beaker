@@ -1,3 +1,6 @@
+require 'blimpy'
+require 'yaml' unless defined?(YAML)
+
 module Beaker 
   class Blimper < Beaker::Hypervisor
 
@@ -25,13 +28,6 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @blimpy_hosts = blimpy_hosts
-      require 'rubygems' unless defined?(Gem)
-      require 'yaml' unless defined?(YAML)
-      begin
-        require 'blimpy'
-      rescue LoadError
-        raise "Unable to load Blimpy, please ensure its installed"
-      end
       @blimpy = Blimpy
     end
 

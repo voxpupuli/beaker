@@ -12,7 +12,7 @@ module Beaker
       fusion.instance_variable_set( :@fission, MockFission ) 
     end
 
-    it "can provision a set of hosts" do
+    it "can interoperate with the fission library to provision hosts"  do
       fusion.provision
     end
 
