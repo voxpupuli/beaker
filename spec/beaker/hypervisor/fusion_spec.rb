@@ -2,43 +2,22 @@ require 'spec_helper'
 
 module Beaker
   describe Fusion do
-    let( :logger ) { double( 'logger' ).as_null_object }
-    let( :defaults ) { Beaker::Options::OptionsHash.new.merge( { :logger => logger} ) }
-    let( :options ) { @options ? defaults.merge( @options ) : defaults}
-
-    let( :fusion ) { Beaker::Fusion.new( @hosts, options ) }
-    let( :vms ) { ['vm1', 'vm2', 'vm3'] }
-    let( :snaps )  { ['snapshot1', 'snapshot2', 'snapshot3'] }
-
-    def make_host name, snap
-      opts = Beaker::Options::OptionsHash.new.merge( { :logger => logger, 'HOSTS' => { name => { 'platform' => 'unix', :snapshot => snap } } } )
-      Host.create( name, opts )
-    end
-
-    def make_hosts names, snaps
-      hosts = []
-      names.zip(snaps).each do |vm, snap|
-        hosts << make_host( vm, snap )
-      end
-      hosts
-    end
+    let( :fusion ) { Beaker::Fusion.new( @hosts, make_opts ) }
 
     before :each do
-      MockFission.presets(vms, snaps)
-      Fusion.any_instance.stub( :require ).with( 'fission' ).and_return( true )
       stub_const( "Fission::VM", true )
+      @hosts = make_hosts()
+      MockFission.presets( @hosts )
+      Fusion.any_instance.stub( :require ).with( 'fission' ).and_return( true )
+      fusion.instance_variable_set( :@fission, MockFission ) 
     end
 
     it "can provision a set of hosts" do
-      @hosts = make_hosts( vms, snaps )
-      fusion.instance_variable_set( :@fission, MockFission ) 
       fusion.provision
     end
 
     it "raises an error if unknown snapshot name is used" do
-      @hosts = []
-      @hosts << make_host( 'vm1', 'unkown' )
-      fusion.instance_variable_set( :@fission, MockFission ) 
+      @hosts[0][:snapshot] = 'unknown'
       expect{ fusion.provision }.to raise_error
     end
 

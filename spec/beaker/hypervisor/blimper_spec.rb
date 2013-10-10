@@ -3,34 +3,16 @@ require 'blimpy'
 
 module Beaker
   describe Blimper do
-    let( :logger ) { double( 'logger' ).as_null_object }
-    let( :defaults ) { Beaker::Options::OptionsHash.new.merge( { :logger => logger, :config => 'sample.cfg'} ) }
-    let( :options ) { @options ? defaults.merge( @options ) : defaults}
-
-    let( :blimper ) { Beaker::Blimper.new( @hosts, options ) }
-    let( :vms ) { ['vm1', 'vm2', 'vm3'] }
-    let( :snaps )  { ['pe', 'pe', 'pe'] }
+    let( :blimper ) { Beaker::Blimper.new( @hosts, make_opts ) }
     let( :amispec ) { { "centos-5-x86-64-west" => { :image => { :pe => "ami-sekrit1" }, :region => "us-west-2" }, 
                         "centos-6-x86-64-west" => { :image => { :pe => "ami-sekrit2" }, :region => "us-west-2" }, 
                         "centos-7-x86-64-west" => { :image => { :pe => "ami-sekrit3" }, :region => "us-west-2" } }}
 
     before :each do
-      @hosts = make_hosts( vms, snaps )
-    end
-
-    def make_host name, snap, platform = 'unix'
-      opts = Beaker::Options::OptionsHash.new.merge( { :logger => logger, 'HOSTS' => { name => { 'platform' => platform, :snapshot => snap, :roles => ['agent'] } } } )
-      host = Host.create( name, opts )
-      host.stub( :exec ).and_return( name )
-      host
-    end
-
-    def make_hosts names, snaps
-      hosts = []
-      names.zip(snaps, amispec.keys).each do |vm, snap, platform|
-        hosts << make_host( vm, snap, platform )
-      end
-      hosts
+      @hosts = make_hosts( { :snapshot => :pe })
+      @hosts[0][:platform] = "centos-5-x86-64-west" 
+      @hosts[1][:platform] = "centos-6-x86-64-west" 
+      @hosts[2][:platform] = "centos-7-x86-64-west" 
     end
 
     it "can provision a set of hosts" do 
@@ -56,33 +38,33 @@ module Beaker
     context "amiports" do
 
       it "can set ports for database host" do
-        host = make_host("database", "snap")
-        host[:roles] = ["database"]
+        host = @hosts[0]
+        host[ :roles ] = [ "database" ]
         
-        expect( blimper.amiports(host) ).to be === [22, 8080, 8081]
+        expect( blimper.amiports(host) ).to be === [ 22, 8080, 8081 ]
 
       end
 
       it "can set ports for master host" do
-        host = make_host("master", "snap")
-        host[:roles] = ["master"]
+        host = @hosts[0]
+        host[ :roles ] = [ "master" ]
         
-        expect( blimper.amiports(host) ).to be === [22, 8140]
+        expect( blimper.amiports(host) ).to be === [ 22, 8140 ]
 
       end
 
       it "can set ports for dashboard host" do
-        host = make_host("dashboard", "snap")
-        host[:roles] = ["dashboard"]
+        host = @hosts[0]
+        host[ :roles ] = [ "dashboard" ]
         
-        expect( blimper.amiports(host) ).to be === [22, 443]
+        expect( blimper.amiports(host) ).to be === [ 22, 443 ]
       end
 
       it "can set ports for combined master/database/dashboard host" do
-        host = make_host("combined", "snap")
-        host[:roles] = ["dashboard", "master", "database"]
+        host = @hosts[0]
+        host[ :roles ] = [ "dashboard", "master", "database" ]
         
-        expect( blimper.amiports(host) ).to be === [22, 8080, 8081, 8140, 443]
+        expect( blimper.amiports(host) ).to be === [ 22, 8080, 8081, 8140, 443 ]
       end
     end
 

@@ -2,33 +2,10 @@ require 'spec_helper'
 
 module Beaker
   describe Vagrant do
-    let( :logger ) { double( 'logger' ).as_null_object }
-    let( :defaults ) { Beaker::Options::OptionsHash.new.merge( { :logger => logger, :hosts_file => 'sample.cfg'} ) }
-    let( :options ) { @options ? defaults.merge( @options ) : defaults}
-
-    let( :vagrant ) { Beaker::Vagrant.new( @hosts, options ) }
-    let( :vms ) { ['vm1', 'vm2', 'vm3'] }
-    let( :snaps )  { ['snapshot1', 'snapshot2', 'snapshot3'] }
+    let( :vagrant ) { Beaker::Vagrant.new( @hosts, make_opts ) }
 
     before :each do
-      @hosts = make_hosts( vms, snaps )
-    end
-
-    def make_host name, snap, platform = 'unix'
-      opts = Beaker::Options::OptionsHash.new.merge( { :logger => logger, 'HOSTS' => { name => { 'platform' => platform, :snapshot => snap } } } )
-      host = Host.create( name, opts )
-      host[:ip] = "ip.address.for.#{name}"
-      host[:box] = "#{name}_of_my_box"
-      host[:box_url] = "http://address.for.my.box.#{name}"
-      host
-    end
-
-    def make_hosts names, snaps
-      hosts = []
-      names.zip(snaps).each do |vm, snap|
-        hosts << make_host( vm, snap )
-      end
-      hosts
+      @hosts = make_hosts()
     end
 
     it "can make a Vagranfile for a set of hosts" do
@@ -57,9 +34,8 @@ module Beaker
     context "can copy vagrant's key to root .ssh on each host" do
 
       it "can copy to root on unix" do
-        host = make_host('unixhost', 'snaphost')
-        host.stub( :exec ).and_return( true )
-
+        host = @hosts[0]
+        host[:platform] = 'unix'
 
         Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").exactly( 1 ).times
 
@@ -68,8 +44,8 @@ module Beaker
       end
 
       it "can copy to Administrator on windows" do
-        host = make_host('windowshost', 'snaphost', 'windows')
-        host.stub( :exec ).and_return( true )
+        host = @hosts[0]
+        host[:platform] = 'windows'
 
         Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /home/Administrator/.\"").exactly( 1 ).times
 
@@ -79,7 +55,8 @@ module Beaker
     end
 
     it "can generate a ssh-config file" do
-      host = make_host('myhost', 'mysnap')
+      host = @hosts[0]
+      name = host.name
       Dir.stub( :chdir ).and_yield()
 
       out = mock( 'stdout' )
@@ -100,7 +77,7 @@ module Beaker
       file.stub( :rewind ).and_return( true )
 
       Tempfile.should_receive( :new ).with( "#{host.name}").and_return( file ) 
-      file.should_receive( :write ).with("Host ip.address.for.myhost\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
+      file.should_receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
 
       vagrant.set_ssh_config( host, 'root' )
       expect( host['ssh'] ).to be === { :config => file.path }

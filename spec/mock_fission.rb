@@ -42,9 +42,11 @@ end
 
 class MockFission 
   @@vms = []
-  def self.presets vms, snaps
-    vms.each do |vm|
-      @@vms << MockFissionVM.new(vm)
+  def self.presets hosts
+    snaps = []
+    hosts.each do |host|
+      @@vms << MockFissionVM.new( host.name )
+      snaps << host[ :snapshot ]
     end
     MockFissionVM.set_snapshots(snaps)
   end
