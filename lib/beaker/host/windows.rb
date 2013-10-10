@@ -24,7 +24,8 @@ module Windows
         'group'         => 'Administrators',
         'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
-        'puppetbindir'  => '`cygpath -F 38`/Puppet Labs/Puppet Enterprise/bin',
+        #if an x86 Program Files dir exists then use it, default to just Program Files
+        'puppetbindir'  => '$( [ -d "/cygdrive/c/Program Files (x86)" ] && echo "/cygdrive/c/Program Files (x86)" || echo "/cygdrive/c/Program Files" )/Puppet Labs/Puppet Enterprise/bin',
         'pathseparator' => ';',
       })
     end
