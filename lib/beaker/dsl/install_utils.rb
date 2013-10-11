@@ -276,7 +276,7 @@ module Beaker
 
         # On each agent, we ensure the certificate is signed then shut down the agent
         install_hosts.each do |host|
-          sign_certificate_on(host)
+          sign_certificate_for(host)
           stop_agent_on(host)
         end
 

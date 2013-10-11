@@ -15,6 +15,9 @@ module Beaker
     #   {Beaker::Host}'s interface to act upon.
     # * a method *logger* that yields a logger implementing
     #   {Beaker::Logger}'s interface.
+    # * the module {Beaker::DSL::Roles} that provides access to the various hosts implementing
+    #   {Beaker::Host}'s interface to act upon
+    # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
     #
     #
     # @api dsl
@@ -92,10 +95,10 @@ module Beaker
       # @!macro common_opts
       #
       # @example Most basic usage
-      #     shell, 'ls /tmp'
+      #     shell 'ls /tmp'
       #
       # @example Allowing additional exit codes to pass
-      #     shell, 'puppet agent -t', :acceptable_exit_codes => [0,2]
+      #     shell 'puppet agent -t', :acceptable_exit_codes => [0,2]
       #
       # @example Using the returned result for any kind of checking
       #     if shell('ls -la ~').stdout =~ /\.bin/
@@ -104,8 +107,8 @@ module Beaker
       #
       # @example Using TestCase helpers from within a test.
       #     agents.each do |agent|
-      #       shell('cat /etc/puppet/puppet.conf') do
-      #         assert_match stdout, /server = #{master}/, 'WTF Mate'
+      #       shell('cat /etc/puppet/puppet.conf') do |result|
+      #         assert_match result.stdout, /server = #{master}/, 'WTF Mate'
       #       end
       #     end
       #
@@ -253,13 +256,7 @@ module Beaker
       end
 
       # Move a local script to default host and execute it
-      # @note this relies on {#on} and {#scp_to}
-      #
-      # @param [String] script A local path to find an executable script at.
-      # @!macro common_opts
-      # @param [Proc] block Additional tests to run after script has executed
-      #
-      # @return [Result] Returns the result of the underlying SCP operation.
+      # @see #run_script_on
       def run_script(script, opts = {}, &block)
         run_script_on(default, script, opts, &block)
       end
@@ -282,7 +279,7 @@ module Beaker
       #   considered for inclusion or exclusion.  The key is any attribute
       #   of the host that will be yielded by {Beaker::Host#[]}.
       #   The value can be any string/regex or array of strings/regexp.
-      #   The values are compared using {Enumerable#any?} so that if one
+      #   The values are compared using [Enumerable#any?] so that if one
       #   value of an array matches the host is considered a match for that
       #   criteria.
       # @param [Array<Host>] host_array This creatively named parameter is
@@ -347,7 +344,7 @@ module Beaker
       # host_array are confined to activity within the passed block.
       # TestCase#hosts is reset after block has executed.
       #
-      # @see confine
+      # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
         begin
           original_hosts = self.hosts.dup
@@ -468,51 +465,8 @@ module Beaker
 
       # Test Puppet running in a certain run mode with specific options,
       # on the default host
-      # This ensures the following steps are performed:
-      # 1. The pre-test Puppet configuration is backed up
-      # 2. A new Puppet configuraton file is layed down
-      # 3. Puppet is started or restarted in the specified run mode
-      # 4. Ensure Puppet has started correctly
-      # 5. Further tests are yielded to
-      # 6. Revert Puppet to the pre-test state
-      # 7. Testing artifacts are saved in a folder named for the test
-      #
-      # @param [Hash{Symbol=>String}] conf_opts  Represents puppet settings.
-      #                            Sections of the puppet.conf may be
-      #                            specified, if no section is specified the
-      #                            a puppet.conf file will be written with the
-      #                            options put in a section named after [mode]
-      #
-      #                            There is a special setting for command_line
-      #                            arguments such as --debug or --logdest, which
-      #                            cannot be set in puppet.conf.   For example:
-      #
-      #                            :__commandline_args__ => '--logdest /tmp/a.log'
-      #
-      #                            These will only be applied when starting a FOSS
-      #                            master, as a pe master is just bounced.
-      #
-      # @param [File] testdir      The temporary directory which will hold backup
-      #                            configuration, and other test artifacts.
-      #
-      # @param [Block]             block The point of this method, yields so
-      #                            tests may be ran. After the block is finished
-      #                            puppet will revert to a previous state.
-      #
-      # @example A simple use case to ensure a master is running
-      #     with_puppet_running do
-      #         ...tests that require a master...
-      #     end
-      #
-      # @example Fully utilizing the possiblities of config options
-      #     with_puppet_running(    :main => {:logdest => '/var/blah'},
-      #                             :master => {:masterlog => '/elswhere'},
-      #                             :agent => {:server => 'localhost'} ) do
-      #
-      #       ...tests to be ran...
-      #     end
-      #
       # @api dsl
+      # @see #with_puppet_running_on
       def with_puppet_running conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
         with_puppet_running_on(default, conf_opts, testdir, &block)
       end
@@ -679,31 +633,7 @@ module Beaker
       end
 
       # Runs 'puppet apply' on default host, piping manifest through stdin
-      #
-      # @param [String] manifest The puppet manifest to apply
-      #
-      # @!macro common_opts
-      # @option opts [Boolean]  :parseonly (false) If this key is true, the
-      #                          "--parseonly" command line parameter will
-      #                          be passed to the 'puppet apply' command.
-      #
-      # @option opts [Boolean]  :trace (false) If this key exists in the Hash,
-      #                         the "--trace" command line parameter will be
-      #                         passed to the 'puppet apply' command.
-      #
-      # @option opts [Boolean]  :catch_failures (false) By default
-      #                         "puppet --apply" will exit with 0,
-      #                         which does not count as a test
-      #                         failure, even if there were errors applying
-      #                         the manifest. This option enables detailed
-      #                         exit codes and causes a test failure if
-      #                         "puppet --apply" indicates there was a
-      #                         failure during its execution.
-      #
-      # @param [Block] block This method will yield to a block of code passed
-      #                      by the caller; this can be used for additional
-      #                      validation, etc.
-      #
+      # @see #apply_manifest_on
       def apply_manifest(manifest, opts = {}, &block)
         apply_manifest_on(default, manifest, opts, &block)
       end
@@ -781,13 +711,9 @@ module Beaker
       # This method accepts a block and using the puppet resource 'host' will
       # setup host aliases before and after that block on the default host
       #
-      # A teardown step is also added to make sure unstubbing of the host is
-      # removed always.
-      #
-      # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
-      #   mappings
       # @example Stub puppetlabs.com on the default host to 127.0.0.1
       #   stub_hosts('puppetlabs.com' => '127.0.0.1')
+      # @see #stub_hosts_on
       def stub_hosts(ip_spec)
         stub_hosts_on(default, ip_spec)
       end
@@ -804,6 +730,7 @@ module Beaker
       # This wraps the method `stub_hosts` and makes the stub specific to
       # the forge alias.
       #
+      # @see #stub_forge_on
       def stub_forge
         stub_forge_on(default)
       end
@@ -859,6 +786,7 @@ module Beaker
       end
 
       #stops the puppet agent running on the default host
+      # @see #stop_agent_on
       def stop_agent
         stop_agent_on(default)
       end
@@ -871,7 +799,7 @@ module Beaker
       end
 
       #prompt the master to sign certs then check to confirm the cert for this host is signed
-      def sign_certificate_on(host)
+      def sign_certificate_for(host)
         return if [master, dashboard, database].include? host
 
         hostname = Regexp.escape host.node_name
@@ -889,8 +817,9 @@ module Beaker
       end
 
       #prompt the master to sign certs then check to confirm the cert for the default host is signed
+      #@see #sign_certificate_for
       def sign_certificate
-        sign_certificate_on(default)
+        sign_certificate_for(default)
       end
 
     end

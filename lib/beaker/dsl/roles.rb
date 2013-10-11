@@ -84,25 +84,25 @@ module Beaker
       def default
         if hosts.length == 1
           return hosts[0]
-        elsif has_role? :default
+        elsif any_hosts_as? :default
           return find_only_one :default
-        elsif has_role? :master
+        elsif any_hosts_as? :master
           return find_only_one :master
         else
           raise DSL::Outcomes::FailTest, "no default host specified"
         end
       end
 
-      # Determine if there is a host with the given role defined
+      # Determine if there is a host or hosts with the given role defined
       # @return [Boolean] True if there is a host with role, false otherwise
       #
-      # @example
-      # if has_role?(:master)
+      # @example Usage
+      # if any_hosts_as?(:master)
       #   puts "master is defined"
       # end
       #
       # @api public
-      def has_role?(role)
+      def any_hosts_as?(role)
         hosts_as(role).length > 0
       end
 

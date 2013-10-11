@@ -206,8 +206,8 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :on ).and_return( Beaker::Result.new( {}, '' ) )
       subject.stub( :fetch_puppet ).and_return( true )
       subject.stub( :create_remote_file ).and_return( true )
-      subject.stub( :sign_certificate ).and_return( true )
-      subject.stub( :stop_agent ).and_return( true )
+      subject.stub( :sign_certificate_for ).and_return( true )
+      subject.stub( :stop_agent_on ).and_return( true )
       subject.stub( :sleep_until_puppetdb_started ).and_return( true )
       subject.stub( :wait_for_host_in_dashboard ).and_return( true )
       subject.stub( :puppet_agent ).and_return( "puppet agent" )
@@ -227,9 +227,9 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
       subject.should_receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
       #sign certificate per-host
-      subject.should_receive( :sign_certificate_on ).with( hosts[0] ).once
-      subject.should_receive( :sign_certificate_on ).with( hosts[1] ).once
-      subject.should_receive( :sign_certificate_on ).with( hosts[2] ).once
+      subject.should_receive( :sign_certificate_for ).with( hosts[0] ).once
+      subject.should_receive( :sign_certificate_for ).with( hosts[1] ).once
+      subject.should_receive( :sign_certificate_for ).with( hosts[2] ).once
       #stop puppet agent on all hosts
       subject.should_receive( :stop_agent_on ).with( hosts[0] ).once
       subject.should_receive( :stop_agent_on ).with( hosts[1] ).once
