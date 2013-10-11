@@ -1,5 +1,4 @@
 require 'yaml' unless defined?(YAML)
-require 'rubygems' unless defined?(Gem)
 begin
   require 'beaker/logger'
 rescue LoadError

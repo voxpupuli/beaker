@@ -1,3 +1,5 @@
+require 'yaml' unless defined?(YAML)
+
 module Beaker 
   class Vsphere < Beaker::Hypervisor
 
@@ -5,7 +7,6 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @vsphere_hosts = vsphere_hosts
-      require 'yaml' unless defined?(YAML)
       vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +

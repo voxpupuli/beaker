@@ -7,6 +7,21 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
+   let (:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
+                                        :platform => 'linux',
+                                        :roles => [ 'agent' ] } ) }
+   let (:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
+                          basic_hosts[1][:platform] = 'windows'
+                          basic_hosts  }
+   let (:winhost)       { make_host( 'winhost', { 'platform' => 'windows',
+                                                  'pe_ver' => '3.0',
+                                                  'working_dir' => '/tmp' } ) }
+   let (:unixhost)      { make_host( 'unixhost', { 'platform' => 'linux',
+                                                   'pe_ver' => '3.0',
+                                                   'working_dir' => '/tmp',
+                                                   'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
+
+
   context 'extract_repo_info_from' do
     [{ :protocol => 'git', :path => 'git://github.com/puppetlabs/project.git' },
      { :protocol => 'ssh', :path => 'git@github.com:puppetlabs/project.git' },
@@ -70,47 +85,12 @@ describe ClassMixedWithDSLInstallUtils do
    end
 
   describe 'sorted_hosts' do
-    let( :hosts )        { @hosts || Hash.new }
-    let( :options )      { @options || Hash.new }
-
     it 'can reorder so that the master comes first' do
-      @options = Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'master' => { 'platform' => 'linux', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['master', 'database', 'dashboard'] },
-                   'agent1' => { 'platform' => 'windows', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['agent'] },
-                   'agent2' => { 'platform' => 'linux', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['agent'] },
-      } } )
-      @hosts =  [ 
-                 Beaker::Host.create( 'agent1', options ),
-                 Beaker::Host.create( 'master', options ),
-                 Beaker::Host.create( 'agent2', options ),
-      ]
-      subject.stub( :hosts ).and_return( hosts )
-      expect( subject.sorted_hosts ).to be === [hosts[1], hosts[0], hosts[2]] 
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      expect( subject.sorted_hosts ).to be === hosts
     end
 
     it 'leaves correctly ordered hosts alone' do
-      @options = Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'master' => { 'platform' => 'linux', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['master', 'database', 'dashboard'] },
-                   'agent1' => { 'platform' => 'windows',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-                   'agent2' => { 'platform' => 'linux', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['agent'] },
-      } } )
-      @hosts =  [ 
-                 Beaker::Host.create( 'master', options ),
-                 Beaker::Host.create( 'agent1', options ),
-                 Beaker::Host.create( 'agent2', options ),
-      ]
       subject.stub( :hosts ).and_return( hosts )
       expect( subject.sorted_hosts ).to be === hosts 
     end
@@ -144,16 +124,6 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe 'installer_cmd' do
-    let ( :options ) { Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'unixhost' => { 'platform' => 'linux', 
-                                   'pe_ver' => '3.0', 
-                                   'working_dir' => '/tmp', 
-                                   'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' },
-                   'winhost'  => { 'platform' => 'windows', 
-                                   'pe_ver' => '3.0', 
-                                   'working_dir' => '/tmp' } } } ) }
-    let( :winhost )  { Beaker::Host.create( 'winhost', options ) }
-    let( :unixhost ) { Beaker::Host.create( 'unixhost', options ) }
 
     it 'generates a windows PE install command for a windows host' do
       expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && msiexec.exe /qn /i puppet-enterprise-3.0.msi"
@@ -165,16 +135,6 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe 'fetch_puppet' do
-    let ( :options ) { Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'unixhost' => { 'platform' => 'linux', 
-                                   'pe_ver' => '3.0', 
-                                   'working_dir' => '/tmp', 
-                                   'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' },
-                   'winhost'  => { 'platform' => 'windows', 
-                                   'pe_ver' => '3.0', 
-                                   'working_dir' => '/tmp' } } } ) }
-    let( :winhost )  { Beaker::Host.create( 'winhost', options ) }
-    let( :unixhost ) { Beaker::Host.create( 'unixhost', options ) }
 
     it 'can push a local PE .tar.gz to a host and unpack it' do
       File.stub( :directory? ).and_return( true ) #is local
@@ -185,9 +145,9 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :scp_to ).with( unixhost, "#{ path }/#{ filename }#{ extension }", "#{ unixhost['working_dir'] }/#{ filename }#{ extension }" ).exactly( 1 ).times
-      subject.should_receive( :on ).with( unixhost, /gunzip/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).exactly( 1 ).times
+      subject.should_receive( :scp_to ).with( unixhost, "#{ path }/#{ filename }#{ extension }", "#{ unixhost['working_dir'] }/#{ filename }#{ extension }" ).once
+      subject.should_receive( :on ).with( unixhost, /gunzip/ ).once
+      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
@@ -206,8 +166,8 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).exactly( 1 ).times
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
+      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
@@ -220,9 +180,9 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).exactly( 1 ).times
-      subject.should_receive( :on ).with( unixhost, /gunzip/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
+      subject.should_receive( :on ).with( unixhost, /gunzip/ ).once
+      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
       subject.fetch_puppet( [unixhost], {} )
     end
      
@@ -235,33 +195,14 @@ describe ClassMixedWithDSLInstallUtils do
       path = winhost['pe_dir']
       filename = "puppet-enterprise-#{ winhost['pe_ver'] }"
       extension = '.msi'
-      subject.should_receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).exactly( 1 ).times
+      subject.should_receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [winhost], {} )
 
     end
   end
 
   describe 'do_install' do
-    let( :hosts )      { @hosts || Hash.new }
-    let( :options )      { @options || Hash.new }
-
     it 'can preform a simple installation' do
-      @options = Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'master' => { 'platform' => 'linux', 
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['master', 'database', 'dashboard'] },
-                   'agent1' => { 'platform' => 'windows',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-                   'agent2' => { 'platform' => 'linux',
-                                 'pe_ver' => '3.0', 
-                                 'roles' => ['agent'] },
-      } } )
-      @hosts =  [ 
-                 Beaker::Host.create( 'master', options ),
-                 Beaker::Host.create( 'agent1', options ),
-                 Beaker::Host.create( 'agent2', options ),
-      ]
       subject.stub( :on ).and_return( Beaker::Result.new( {}, '' ) )
       subject.stub( :fetch_puppet ).and_return( true )
       subject.stub( :create_remote_file ).and_return( true )
@@ -273,66 +214,50 @@ describe ClassMixedWithDSLInstallUtils do
 
       subject.stub( :hosts ).and_return( hosts )
       #determine mastercert
-      subject.should_receive( :on ).with( hosts[0], /uname/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts[0], /uname/ ).once
       #create working dirs per-host
-      subject.should_receive( :on ).with( hosts[0], /mkdir/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[1], /mkdir/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[2], /mkdir/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts[0], /mkdir/ ).once
+      subject.should_receive( :on ).with( hosts[1], /mkdir/ ).once
+      subject.should_receive( :on ).with( hosts[2], /mkdir/ ).once
       #create answers file per-host, except windows
-      subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).exactly( 1 ).times
-      subject.should_receive( :create_remote_file ).with( hosts[2], /answers/, /q/ ).exactly( 1 ).times
+      subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
+      subject.should_receive( :create_remote_file ).with( hosts[2], /answers/, /q/ ).once
       #run installer on all hosts
-      subject.should_receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
+      subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
+      subject.should_receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
       #sign certificate per-host
-      subject.should_receive( :sign_certificate ).with( hosts[0] ).exactly( 1 ).times
-      subject.should_receive( :sign_certificate ).with( hosts[1] ).exactly( 1 ).times
-      subject.should_receive( :sign_certificate ).with( hosts[2] ).exactly( 1 ).times
+      subject.should_receive( :sign_certificate ).with( hosts[0] ).once
+      subject.should_receive( :sign_certificate ).with( hosts[1] ).once
+      subject.should_receive( :sign_certificate ).with( hosts[2] ).once
       #stop puppet agent on all hosts
-      subject.should_receive( :stop_agent ).with( hosts[0] ).exactly( 1 ).times
-      subject.should_receive( :stop_agent ).with( hosts[1] ).exactly( 1 ).times
-      subject.should_receive( :stop_agent ).with( hosts[2] ).exactly( 1 ).times
+      subject.should_receive( :stop_agent ).with( hosts[0] ).once
+      subject.should_receive( :stop_agent ).with( hosts[1] ).once
+      subject.should_receive( :stop_agent ).with( hosts[2] ).once
       #wait for puppetdb to start
-      subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).exactly( 1 ).times
+      subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
       #run each puppet agent once
-      subject.should_receive( :on ).with( hosts[0], /puppet agent/, :acceptable_exit_codes => [0,2] ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[1], /puppet agent/, :acceptable_exit_codes => [0,2] ).exactly( 1 ).times
-      subject.should_receive( :on ).with( hosts[2], /puppet agent/, :acceptable_exit_codes => [0,2] ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts[0], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[1], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[2], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
-      subject.should_receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[0] ).exactly( 1 ).times
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[1] ).exactly( 1 ).times
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[2] ).exactly( 1 ).times
+      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[0] ).once
+      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[1] ).once
+      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[2] ).once
       #run puppet agent now that installation is complete
-      subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).exactly( 1 ).times
+      subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts )
     end
   end
 
   describe 'install_pe' do
-    let( :options ) { Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'master' => { 'platform' => 'linux',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['master', 'database', 'dashboard'] },
-                   'agent1' => { 'platform' => 'windows',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-                   'agent2' => { 'platform' => 'linux',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-    } } ) }
-    let( :hosts ) { [
-               Beaker::Host.create( 'agent1', options ),
-               Beaker::Host.create( 'master', options ),
-               Beaker::Host.create( 'agent2', options ),
-    ] }
 
     it 'calls do_install with sorted hosts' do
-      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( [hosts[1], hosts[0], hosts[2]] )
+      subject.should_receive( :do_install ).with( hosts )
       subject.install_pe
     end
 
@@ -341,10 +266,10 @@ describe ClassMixedWithDSLInstallUtils do
         h['pe_ver'] = nil
       end
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :options ).and_return( {} )
       subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( [hosts[1], hosts[0], hosts[2]] )
+      subject.should_receive( :do_install ).with( hosts )
       subject.install_pe
       hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
@@ -353,53 +278,37 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe 'upgrade_pe' do
-    let( :options ) { Beaker::Options::OptionsHash.new.merge( { 'HOSTS' => {
-                   'master' => { 'platform' => 'linux',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['master', 'database', 'dashboard'] },
-                   'agent1' => { 'platform' => 'windows',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-                   'agent2' => { 'platform' => 'linux',
-                                 'pe_ver' => '3.0',
-                                 'roles' => ['agent'] },
-    } } ) }
-    let( :hosts ) { [
-               Beaker::Host.create( 'agent1', options ),
-               Beaker::Host.create( 'master', options ),
-               Beaker::Host.create( 'agent2', options ),
-    ] }
 
     it 'calls puppet-enterprise-upgrader for pre 3.0 upgrades' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :options ).and_return( {} )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( [hosts[1], hosts[0], hosts[2]], { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
+      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
       subject.upgrade_pe( path )
     end
 
     it 'uses standard upgrader for post 3.0 upgrades' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '3.1' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '3.1' )
-      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ]  )
       subject.stub( :options ).and_return( {} )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( [hosts[1], hosts[0], hosts[2]], { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win } )
+      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win } )
       subject.upgrade_pe( path )
     end
 
     it 'updates pe_ver post upgrade' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :options ).and_return( {} )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( [hosts[1], hosts[0], hosts[2]], { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
+      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
       subject.upgrade_pe( path )
       hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
