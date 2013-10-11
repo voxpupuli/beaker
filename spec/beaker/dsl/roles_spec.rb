@@ -8,15 +8,15 @@ end
 
 describe ClassMixedWithDSLRoles do
 
-  let(:hosts)      { @hosts || Hash.new                     }
-  let(:agent1)     { {'roles' => [ 'agent' ] }              }
-  let(:agent2)     { {'roles' => [ 'agent' ] }              }
-  let(:a_and_dash) { {'roles' => [ 'agent', 'dashboard' ] } }
-  let(:custom)     { {'roles' => [ 'custome_role' ] }       }
-  let(:db)         { {'roles' => [ 'database' ] }           }
-  let(:master)     { {'roles' => [ 'master', 'agent' ] }    }
+  let(:hosts)      { @hosts || Hash.new }
+  let(:agent1)     { make_host( 'agent1', {'roles' => [ 'agent' ] } ) }
+  let(:agent2)     { make_host( 'agent2', {'roles' => [ 'agent' ] } ) }
+  let(:a_and_dash) { make_host( 'a_and_dash', {'roles' => [ 'agent', 'dashboard' ] } ) }
+  let(:custom)     { make_host( 'custom', {'roles' => [ 'custome_role' ] } ) }
+  let(:db)         { make_host( 'db', {'roles' => [ 'database' ] } ) }
+  let(:master)     { make_host( 'master', {'roles' => [ 'master', 'agent' ] } ) }
   let(:monolith) do
-    {'roles' => [ 'agent', 'dashboard', 'database', 'master', 'custom_role' ] }
+    make_host( 'monolith', {'roles' => [ 'agent', 'dashboard', 'database', 'master', 'custom_role' ] } )
   end
 
   describe '#agents' do

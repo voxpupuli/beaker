@@ -20,7 +20,7 @@ module Beaker
           Time.stub( :now ).and_return( 0, 1, 2, 3, 4, 5 )
 
           block = mock( 'block' )
-          block.should_receive( :exec ).exactly( 1 ).times.and_return( true )
+          block.should_receive( :exec ).once.and_return( true )
           
           subject.repeat_for( 5 ) do
             block.exec
@@ -37,10 +37,10 @@ module Beaker
           block.should_receive( :exec ).exactly( 5 ).times.and_return( false )
           subject.stub( 'sleep' ).and_return( true )
           subject.should_receive( :sleep ).with( 1 ).exactly( 2 ).times
-          subject.should_receive( :sleep ).with( 2 ).exactly( 1 ).times
-          subject.should_receive( :sleep ).with( 3 ).exactly( 1 ).times
-          subject.should_receive( :sleep ).with( 5 ).exactly( 1 ).times
-          subject.should_receive( :sleep ).with( 8 ).exactly( 0 ).times
+          subject.should_receive( :sleep ).with( 2 ).once
+          subject.should_receive( :sleep ).with( 3 ).once
+          subject.should_receive( :sleep ).with( 5 ).once
+          subject.should_receive( :sleep ).with( 8 ).never
 
           subject.repeat_fibonacci_style_for( 5 ) do
             block.exec
@@ -51,13 +51,13 @@ module Beaker
         it "should short circuit if the block is complete" do
 
           block = mock( 'block' )
-          block.should_receive( :exec ).exactly( 1 ).times.and_return( true )
+          block.should_receive( :exec ).once.and_return( true )
           subject.stub( 'sleep' ).and_return( true )
-          subject.should_receive( :sleep ).with( 1 ).exactly( 1 ).times
-          subject.should_receive( :sleep ).with( 2 ).exactly( 0 ).times
-          subject.should_receive( :sleep ).with( 3 ).exactly( 0 ).times
-          subject.should_receive( :sleep ).with( 5 ).exactly( 0 ).times
-          subject.should_receive( :sleep ).with( 8 ).exactly( 0 ).times
+          subject.should_receive( :sleep ).with( 1 ).once
+          subject.should_receive( :sleep ).with( 2 ).never
+          subject.should_receive( :sleep ).with( 3 ).never
+          subject.should_receive( :sleep ).with( 5 ).never
+          subject.should_receive( :sleep ).with( 8 ).never
 
           subject.repeat_fibonacci_style_for( 5 ) do
             block.exec

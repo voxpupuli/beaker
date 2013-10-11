@@ -41,13 +41,7 @@ module Beaker
           when a_host.length == 0
             raise ArgumentError, "There should be one host with #{role} defined!"
           when a_host.length > 1
-            host_string = ''
-            a_host.each do |h|
-              host_string += h.to_s 
-              if not (h == a_host.last)
-                host_string += ", "
-              end
-            end
+            host_string = ( a_host.map { |host| host.name } ).join( ', ')
             raise ArgumentError, "There should be only one host with #{role} defined, but I found #{a_host.length} (#{host_string})" 
         end
         a_host.first 

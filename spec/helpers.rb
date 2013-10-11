@@ -51,6 +51,17 @@ module HostHelpers
                                                              :type => :foss} )
   end
 
+  def generate_result (name, opts )
+    result = mock( 'result' )
+    stdout = opts.has_key?(:stdout) ? opts[:stdout] :  name
+    stderr = opts.has_key?(:stderr) ? opts[:stderr] : name
+    exit_code = opts.has_key?(:exit_code) ? opts[:exit_code] :  0
+    result.stub( :stdout ).and_return( stdout )
+    result.stub( :stderr ).and_return( stderr )
+    result.stub( :exit_code ).and_return( exit_code )
+    result
+  end
+
   def make_host_opts name, opts
     make_opts.merge( { 'HOSTS' => { name => opts } } ).merge( opts )
   end
@@ -59,7 +70,8 @@ module HostHelpers
     opts = HOST_DEFAULTS.merge(opts) 
 
     host = Beaker::Host.create( name, make_host_opts(name, opts) )
-    host.stub( :exec ).and_return( name )
+
+    host.stub( :exec ).and_return( generate_result( name, opts ) )
     host
   end
 

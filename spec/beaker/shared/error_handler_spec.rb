@@ -5,7 +5,7 @@ module Beaker
     describe ErrorHandler do
 
       let( :backtrace ) { "I'm the backtrace\nYes I am!\nI have important information" }
-      let( :logger ) { mock( 'logger' ) }
+      let( :logger )    { mock( 'logger' ) }
 
       before :each do
         logger.stub( :error ).and_return( true )
@@ -24,7 +24,7 @@ module Beaker
             logger.should_receive( :error ).with(line)
           end
 
-          subject.should_receive( :raise ).exactly( 1 ).times
+          subject.should_receive( :raise ).once
 
           subject.report_and_raise(logger, ex, mesg) 
 
