@@ -5,15 +5,18 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @solaris_hosts = solaris_hosts
-      fog_file = nil
+      @fog_file = nil
       if File.exists?( @options[:dot_fog] )
-        fog_file = YAML.load_file( @options[:dot_fog] )
+        @fog_file = YAML.load_file( @options[:dot_fog] )
       end
-      raise "Cant load #{@options[:dot_fog]} config" unless fog_file
+      raise "Cant load #{@options[:dot_fog]} config" unless @fog_file
 
-      hypername = fog_file[:default][:solaris_hypervisor_server] 
-      vmpath    = fog_file[:default][:solaris_hypervisor_vmpath]
-      snappaths = fog_file[:default][:solaris_hypervisor_snappaths]
+    end
+
+    def provision
+      hypername = @fog_file[:default][:solaris_hypervisor_server] 
+      vmpath    = @fog_file[:default][:solaris_hypervisor_vmpath]
+      snappaths = @fog_file[:default][:solaris_hypervisor_snappaths]
 
       hyperopts = @options.dup
       hyperopts['HOSTS']  = {
@@ -22,8 +25,8 @@ module Beaker
 
       @logger.notify "Connecting to hypervisor at #{hypername}"
       hypervisor = Beaker::Host.create( hypername, hyperopts )
-      hypervisor[:user] = fog_file[:default][:solaris_hypervisor_username] || hypervisor[:user]
-      hypervisor[:ssh][:keys] = [fog_file[:default][:solaris_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
+      hypervisor[:user] = @fog_file[:default][:solaris_hypervisor_username] || hypervisor[:user]
+      hypervisor[:ssh][:keys] = [@fog_file[:default][:solaris_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
 
       @solaris_hosts.each do |host|
         vm_name = host['vmname'] || host.name

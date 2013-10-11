@@ -1,3 +1,5 @@
+require 'yaml' unless defined?(YAML)
+
 module Beaker 
   class Vcloud < Beaker::Hypervisor
 
@@ -5,7 +7,6 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @vcloud_hosts = vcloud_hosts
-      require 'yaml' unless defined?(YAML)
 
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
       raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
