@@ -11,7 +11,7 @@ module Beaker
     end
 
     def rand_chunk
-      (1 + rand(253)).to_s #don't want a 0 or a 255
+      (2 + rand(252)).to_s #don't want a 0, 1, or a 255
     end
     
     def randip
