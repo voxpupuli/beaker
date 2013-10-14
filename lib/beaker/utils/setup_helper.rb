@@ -1,6 +1,10 @@
 module Beaker
   module Utils
     class SetupHelper
+      ETC_HOSTS_PATH = "/etc/hosts"
+      ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
+      ROOT_KEYS_SCRIPT = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
+      ROOT_KEYS_SYNC_CMD = "curl -k -o - #{ROOT_KEYS_SCRIPT} | %s"
 
       def initialize(options, hosts)
         @options = options.dup
@@ -23,9 +27,9 @@ module Beaker
         end
         ip=stdout.chomp
 
-        path = "/etc/hosts"
+        path = ETC_HOSTS_PATH
         if master['platform'].include? 'solaris'
-          path = "/etc/inet/hosts"
+          path = ETC_HOSTS_PATH_SOLARIS
         end
 
         @logger.debug "Update %s on #{master}" % path
@@ -45,15 +49,12 @@ module Beaker
         # but we're deliberately taking the approach of "assume it will work, fix it
         # when reality dictates otherwise"
         @logger.notify "Sync root authorized_keys from github"
-        script = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-        setup_root_authorized_keys = "curl -k -o - #{script} | %s"
-        @logger.notify "Sync root authorized_keys from github"
         @hosts.each do |host|
           # Allow all exit code, as this operation is unlikely to cause problems if it fails.
           if host['platform'].include? 'solaris'
-            host.exec(Command.new(setup_root_authorized_keys % "bash"), :acceptable_exit_codes => (0..255))
+            host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :acceptable_exit_codes => (0..255))
           else
-            host.exec(Command.new(setup_root_authorized_keys % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
+            host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
           end
         end
       rescue => e
