@@ -1,4 +1,5 @@
 require 'yaml' unless defined?(YAML)
+require 'rbvmomi'
 begin
   require 'beaker/logger'
 rescue LoadError
@@ -6,13 +7,8 @@ rescue LoadError
 end
 
 class VsphereHelper
-  def initialize vInfo = {}
+  def initialize vInfo
     @logger = vInfo[:logger] || Beaker::Logger.new
-    begin
-      require 'rbvmomi'
-    rescue LoadError
-      raise "Unable to load RbVmomi, please ensure its installed"
-    end
     @connection = RbVmomi::VIM.connect :host     => vInfo[:server],
                                        :user     => vInfo[:user],
                                        :password => vInfo[:pass],
@@ -23,11 +19,10 @@ class VsphereHelper
     # support Fog/Cloud Provisioner layout
     # (ie, someplace besides my made up conf)
     vsphere_credentials = nil
-    if File.exists? '/etc/plharness/vsphere'
-      vsphere_credentials = load_legacy_credentials
-
-    elsif File.exists?( dot_fog )
+    if File.exists?( dot_fog )
       vsphere_credentials = load_fog_credentials(dot_fog)
+    else
+      raise ArgumentError, ".fog file '#{dot_fog}' does not exist"
     end
 
     return vsphere_credentials
@@ -40,24 +35,6 @@ class VsphereHelper
     vsphere_credentials[:server] = vInfo[:default][:vsphere_server]
     vsphere_credentials[:user]   = vInfo[:default][:vsphere_username]
     vsphere_credentials[:pass]   = vInfo[:default][:vsphere_password]
-
-    return vsphere_credentials
-  end
-
-  def self.load_legacy_credentials
-    vInfo = YAML.load_file '/etc/plharness/vsphere'
-
-    puts(
-      "Use of /etc/plharness/vsphere as a config file is deprecated.\n" +
-      "Please use ~/.fog instead\n" +
-      "See http://docs.puppetlabs.com/pe/2.0/" +
-      "cloudprovisioner_configuring.html for format"
-    )
-
-    vsphere_credentials = {}
-    vsphere_credentials[:server] = vInfo['location']
-    vsphere_credentials[:user]   = vInfo['user']
-    vsphere_credentials[:pass]   = vInfo['pass']
 
     return vsphere_credentials
   end
