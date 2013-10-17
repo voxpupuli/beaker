@@ -212,6 +212,16 @@ module Beaker
         host.install_package package_name
       end
 
+      # Upgrade a package on a host. The package must already be installed
+      #
+      # @param [Host] host             A host object
+      # @param [String] package_name   Name of the package to install
+      #
+      # @return [Result]   An object representing the outcome of *upgrade command*.
+      def upgrade_package host, package_name
+        host.upgrade_package package_name
+      end
+
       # Create a remote file out of a string
       # @note This method uses Tempfile in Ruby's STDLIB as well as {#scp_to}.
       #
