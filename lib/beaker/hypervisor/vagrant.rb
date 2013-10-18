@@ -15,7 +15,7 @@ module Beaker
     end
     
     def randip
-      "192.168.#{rand_chunk}.#{rand_chunk}"
+      "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
     def make_vfile hosts
