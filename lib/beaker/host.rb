@@ -161,7 +161,7 @@ module Beaker
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
           # is it necessary to break execution??
-          unless result.exit_code_in?(options[:acceptable_exit_codes] || [0])
+          unless result.exit_code_in?(Array(options[:acceptable_exit_codes] || 0))
             limit = 10
             raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
           end
