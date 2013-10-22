@@ -1,7 +1,19 @@
 module Beaker
   module Answers
+    # This class provides answer file information for PE version 3.x
+    #
+    # @api private
     module Version30
-
+      # Return answer data for a host
+      #
+      # @param [Beaker::Host] host Host to return data for
+      # @param [String] master_certname Hostname of the puppet master.
+      # @param [Beaker::Host] master Host object representing the master
+      # @param [Beaker::Host] dashboard Host object representing the dashboard
+      # @param [Hash] options options for answer files
+      # @option options [Symbol] :type Should be one of :upgrade or :install.
+      # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
+      #   data.
       def self.host_answers(host, master_certname, master, database, dashboard, options)
         # Windows hosts don't have normal answers...
         return nil if host['platform'] =~ /windows/
@@ -170,6 +182,14 @@ module Beaker
         return answers
       end
 
+      # Return answer data for all hosts.
+      #
+      # @param [Array<Beaker::Host>] hosts An array of host objects.
+      # @param [String] master_certname Hostname of the puppet master.
+      # @param [Hash] options options for answer files
+      # @option options [Symbol] :type Should be one of :upgrade or :install.
+      # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
+      #   data.
       def self.answers(hosts, master_certname, options)
         the_answers = {}
         database = only_host_with_role(hosts, 'database')
@@ -188,7 +208,6 @@ module Beaker
         end
         return the_answers
       end
-
     end
   end
 end
