@@ -15,6 +15,9 @@ module Beaker
     #   {Beaker::Host}'s interface to act upon.
     # * a method *logger* that yields a logger implementing
     #   {Beaker::Logger}'s interface.
+    # * the module {Beaker::DSL::Roles} that provides access to the various hosts implementing
+    #   {Beaker::Host}'s interface to act upon
+    # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
     #
     #
     # @api dsl
@@ -33,7 +36,8 @@ module Beaker
 
       # The primary method for executing commands *on* some set of hosts.
       #
-      # @param [Host, Array<Host>] host    One or more hosts to act upon.
+      # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       # @param [String, Command]   command The command to execute on *host*.
       # @param [Proc]              block   Additional actions or assertions.
       # @!macro common_opts
@@ -56,12 +60,21 @@ module Beaker
       #       end
       #     end
       #
+      # @example Using a role (defined in a String)  to identify the host
+      #   on "master", "echo hello"
+      #
+      # @example Using a role (defined in a Symbol) to identify the host
+      #   on :dashboard, "echo hello"
+      #
       # @return [Result]   An object representing the outcome of *command*.
       # @raise  [FailTest] Raises an exception if *command* obviously fails.
       def on(host, command, opts = {}, &block)
         unless command.is_a? Command
           cmd_opts = opts[:environment] ? { 'ENV' => opts.delete(:environment) } : Hash.new
           command = Command.new(command.to_s, [], cmd_opts)
+        end
+        if host.is_a? String or host.is_a? Symbol
+          host = hosts_as(host) #check by role
         end
         if host.is_a? Array
           host.map { |h| on h, command, opts, &block }
@@ -73,6 +86,36 @@ module Beaker
 
           return @result
         end
+      end
+
+      # The method for executing commands on the default host
+      #
+      # @param [String, Command]   command The command to execute on *host*.
+      # @param [Proc]              block   Additional actions or assertions.
+      # @!macro common_opts
+      #
+      # @example Most basic usage
+      #     shell 'ls /tmp'
+      #
+      # @example Allowing additional exit codes to pass
+      #     shell 'puppet agent -t', :acceptable_exit_codes => [0,2]
+      #
+      # @example Using the returned result for any kind of checking
+      #     if shell('ls -la ~').stdout =~ /\.bin/
+      #       ...do some action...
+      #     end
+      #
+      # @example Using TestCase helpers from within a test.
+      #     agents.each do |agent|
+      #       shell('cat /etc/puppet/puppet.conf') do |result|
+      #         assert_match result.stdout, /server = #{master}/, 'WTF Mate'
+      #       end
+      #     end
+      #
+      # @return [Result]   An object representing the outcome of *command*.
+      # @raise  [FailTest] Raises an exception if *command* obviously fails.
+      def shell(command, opts = {}, &block)
+        on(default, command, opts, &block)
       end
 
       # @deprecated
@@ -212,6 +255,12 @@ module Beaker
         on host, remote_path, opts, &block
       end
 
+      # Move a local script to default host and execute it
+      # @see #run_script_on
+      def run_script(script, opts = {}, &block)
+        run_script_on(default, script, opts, &block)
+      end
+
       # Limit the hosts a test case is run against
       # @note This will modify the {Beaker::TestCase#hosts} member
       #   in place unless an array of hosts is passed into it and
@@ -230,7 +279,7 @@ module Beaker
       #   considered for inclusion or exclusion.  The key is any attribute
       #   of the host that will be yielded by {Beaker::Host#[]}.
       #   The value can be any string/regex or array of strings/regexp.
-      #   The values are compared using {Enumerable#any?} so that if one
+      #   The values are compared using [Enumerable#any?] so that if one
       #   value of an array matches the host is considered a match for that
       #   criteria.
       # @param [Array<Host>] host_array This creatively named parameter is
@@ -295,7 +344,7 @@ module Beaker
       # host_array are confined to activity within the passed block.
       # TestCase#hosts is reset after block has executed.
       #
-      # @see confine
+      # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
         begin
           original_hosts = self.hosts.dup
@@ -412,6 +461,14 @@ module Beaker
             end
           end
         end
+      end
+
+      # Test Puppet running in a certain run mode with specific options,
+      # on the default host
+      # @api dsl
+      # @see #with_puppet_running_on
+      def with_puppet_running conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
+        with_puppet_running_on(default, conf_opts, testdir, &block)
       end
 
       # @!visibility private
@@ -575,6 +632,12 @@ module Beaker
         on host, puppet( 'apply', *args), on_options, &block
       end
 
+      # Runs 'puppet apply' on default host, piping manifest through stdin
+      # @see #apply_manifest_on
+      def apply_manifest(manifest, opts = {}, &block)
+        apply_manifest_on(default, manifest, opts, &block)
+      end
+
       # @deprecated
       def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test',
                        options={}, &block)
@@ -645,6 +708,16 @@ module Beaker
         end
       end
 
+      # This method accepts a block and using the puppet resource 'host' will
+      # setup host aliases before and after that block on the default host
+      #
+      # @example Stub puppetlabs.com on the default host to 127.0.0.1
+      #   stub_hosts('puppetlabs.com' => '127.0.0.1')
+      # @see #stub_hosts_on
+      def stub_hosts(ip_spec)
+        stub_hosts_on(default, ip_spec)
+      end
+
       # This wraps the method `stub_hosts_on` and makes the stub specific to
       # the forge alias.
       #
@@ -653,87 +726,102 @@ module Beaker
         @forge_ip ||= Resolv.getaddress(forge)
         stub_hosts_on(machine, 'forge.puppetlabs.com' => @forge_ip)
       end
-       def sleep_until_puppetdb_started(host)
-         curl_with_retries("start puppetdb", host, "http://localhost:8080", 0, 120)
-         curl_with_retries("start puppetdb (ssl)",
-                           host, "https://#{host.node_name}:8081", [35, 60])
-       end
 
-       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
-         retry_command(desc, host, "curl #{url}", desired_exit_codes, max_retries, retry_interval)
-       end
+      # This wraps the method `stub_hosts` and makes the stub specific to
+      # the forge alias.
+      #
+      # @see #stub_forge_on
+      def stub_forge
+        stub_forge_on(default)
+      end
 
-       def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
-         desired_exit_codes = [desired_exit_codes].flatten
-         result = on host, command, :acceptable_exit_codes => (0...127)
-         num_retries = 0
-         until desired_exit_codes.include?(result.exit_code)
-           sleep retry_interval
-           result = on host, command, :acceptable_exit_codes => (0...127)
-           num_retries += 1
-           if (num_retries > max_retries)
-             fail("Unable to #{desc}")
-           end
-         end
-       end
+      def sleep_until_puppetdb_started(host)
+        curl_with_retries("start puppetdb", host, "http://localhost:8080", 0, 120)
+        curl_with_retries("start puppetdb (ssl)",
+                          host, "https://#{host.node_name}:8081", [35, 60])
+      end
 
-       #stops the puppet agent running on the host
-       def stop_agent(agent)
-         vardir = agent.puppet['vardir']
-         agent_running = true
-         while agent_running
-           result = on agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
-           agent_running = (result.exit_code == 0)
-           sleep 2 unless agent_running
-         end
+      def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
+        retry_command(desc, host, "curl #{url}", desired_exit_codes, max_retries, retry_interval)
+      end
 
-         if agent['platform'].include?('solaris')
-           on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
-         elsif agent['platform'].include?('aix')
-           on(agent, '/usr/bin/stopsrc -s pe-puppet')
-         elsif agent['platform'].include?('windows')
-           on(agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2])
-         else
-           # For the sake of not passing the PE version into this method,
-           # we just query the system to find out which service we want to
-           # stop
-           result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
-           service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
-           on(agent, "/etc/init.d/#{service} stop")
-         end
-       end
+      def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
+        desired_exit_codes = [desired_exit_codes].flatten
+        result = on host, command, :acceptable_exit_codes => (0...127)
+        num_retries = 0
+        until desired_exit_codes.include?(result.exit_code)
+          sleep retry_interval
+          result = on host, command, :acceptable_exit_codes => (0...127)
+          num_retries += 1
+          if (num_retries > max_retries)
+            fail("Unable to #{desc}")
+          end
+        end
+      end
+
+      #stops the puppet agent running on the host
+      def stop_agent_on(agent)
+        vardir = agent.puppet['vardir']
+        agent_running = true
+        while agent_running
+          result = on agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
+          agent_running = (result.exit_code == 0)
+          sleep 2 unless agent_running
+        end
+       
+        if agent['platform'].include?('solaris')
+          on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
+        elsif agent['platform'].include?('aix')
+          on(agent, '/usr/bin/stopsrc -s pe-puppet')
+        elsif agent['platform'].include?('windows')
+          on(agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2])
+        else
+          # For the sake of not passing the PE version into this method,
+          # we just query the system to find out which service we want to
+          # stop
+          result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
+          service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
+          on(agent, "/etc/init.d/#{service} stop")
+        end
+      end
+
+      #stops the puppet agent running on the default host
+      # @see #stop_agent_on
+      def stop_agent
+        stop_agent_on(default)
+      end
 
 
-       #wait for a given host to appear in the dashboard
-       def wait_for_host_in_dashboard(host)
-         hostname = host.node_name
-         retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
-       end
+      #wait for a given host to appear in the dashboard
+      def wait_for_host_in_dashboard(host)
+        hostname = host.node_name
+        retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+      end
 
+      #prompt the master to sign certs then check to confirm the cert for this host is signed
+      def sign_certificate_for(host)
+        return if [master, dashboard, database].include? host
 
-       #prompt the master to sign certs then check to confirm the cert for this host is signed
-       def sign_certificate(host)
-         if [master, dashboard, database].include? host
+        hostname = Regexp.escape host.node_name
 
-           on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
-           on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
+        last_sleep = 0
+        next_sleep = 1
+        (0..10).each do |i|
+          fail_test("Failed to sign cert for #{hostname}") if i == 10
 
-         else
+          on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
+          break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
+          sleep next_sleep
+          (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+        end
+      end
 
-           hostname = Regexp.escape host.node_name
+      #prompt the master to sign certs then check to confirm the cert for the default host is signed
+      #@see #sign_certificate_for
+      def sign_certificate
+        sign_certificate_for(default)
+      end
 
-           last_sleep = 0
-           next_sleep = 1
-           (0..10).each do |i|
-             fail_test("Failed to sign cert for #{hostname}") if i == 10
-
-             on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
-             break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
-             sleep next_sleep
-             (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
-           end
-         end
-       end
     end
   end
 end
