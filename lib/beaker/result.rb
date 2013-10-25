@@ -27,7 +27,7 @@ module Beaker
     end
 
     def normalize_line_endings string
-      return string.gsub(/\r\n?/, "\n").chomp
+      return string.gsub(/\r\n?/, "\n")
     end
 
     def convert string
