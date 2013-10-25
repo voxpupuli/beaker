@@ -482,16 +482,6 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe "#sign_certificate_for" do
-    it 'does not run on master, dashboard or database hosts' do
-      @hosts = [ { 'roles' => [ 'master', 'agent', 'dashboard', 'database' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
-
-      subject.should_receive( :on ).never
-
-      subject.sign_certificate_for( @hosts[0])
-
-    end
-
     it 'signs certs' do
       subject.stub( :sleep ).and_return( true )
       name = 'myname'
