@@ -121,7 +121,7 @@ module Beaker
 
             retry
           else
-            raise "DNS resolution failed after #{@options[:timeout].to_i} seconds"
+            raise "DNS resolution of #{h['vmhostname']} failed after #{@options[:timeout].to_i} seconds"
           end
         end
       end
