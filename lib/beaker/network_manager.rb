@@ -24,7 +24,7 @@ module Beaker
         # - only if we are running with --provision
         # - only if we have a hypervisor
         # - only if either the specific hosts has no specification or has 'provision' in its config
-        if @options[:provision] && hypervisor && (host_info.has_key?('provision') ? host_info['provision'] : true) #obey config file provision, defaults to provisioning vms
+        if (@options[:provision] && hypervisor && (host_info.has_key?('provision') ? host_info['provision'] : true)) or (hypervisor =~ /vagrant/) #obey config file provision, defaults to provisioning vms
           raise "Invalid hypervisor: #{hypervisor} (#{name})" unless HYPERVISOR_TYPES.include? hypervisor
           @logger.debug "Hypervisor for #{name} is #{host_info['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
           @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]

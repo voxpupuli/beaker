@@ -82,22 +82,35 @@ module Beaker
 
     end
 
-    it "can provision a set of hosts" do
+    describe "provisioning and cleanup" do
 
-      vagrant.should_receive( :make_vfile ).with( @hosts ).once
+      before :each do
+        vagrant.should_receive( :make_vfile ).with( @hosts ).once
 
-      vagrant.should_receive( :vagrant_cmd ).with( "halt" ).once
-      vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
-      @hosts.each do |host|
-        host_prev_name = host['user']
-        vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).once
-        vagrant.should_receive( :copy_ssh_to_root ).with( host ).once
-        vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
+        vagrant.should_receive( :vagrant_cmd ).with( "halt" ).once
+        vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
+        @hosts.each do |host|
+          host_prev_name = host['user']
+          vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).once
+          vagrant.should_receive( :copy_ssh_to_root ).with( host ).once
+          vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
+        end
+        vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).once
       end
-      vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).once
 
+      it "can provision a set of hosts" do
+        vagrant.provision
+      end
 
-      vagrant.provision
+      it "can cleanup" do
+        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
+        FileUtils.should_receive( :rm_rf ).once
+
+        vagrant.provision
+        vagrant.cleanup
+
+      end
+
     end
 
   end

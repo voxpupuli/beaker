@@ -1,6 +1,6 @@
 require 'open3'
 
-module Beaker 
+module Beaker
   class Vagrant < Beaker::Hypervisor
 
     # Return a random mac address
@@ -13,7 +13,7 @@ module Beaker
     def rand_chunk
       (2 + rand(252)).to_s #don't want a 0, 1, or a 255
     end
-    
+
     def randip
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
@@ -70,9 +70,9 @@ module Beaker
           stdout.read
         end
         #replace hostname with ip
-        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip']) 
-        #set the user 
-        ssh_config = ssh_config.gsub(/User vagrant/, "User #{user}") 
+        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip'])
+        #set the user
+        ssh_config = ssh_config.gsub(/User vagrant/, "User #{user}")
         f.write(ssh_config)
         f.rewind
         host['ssh'] = {:config => f.path()}
@@ -91,27 +91,36 @@ module Beaker
     end
 
     def provision
-      make_vfile @vagrant_hosts
+      if @options[:provision]
+        make_vfile @vagrant_hosts
 
-      #stop anything currently running, that way vagrant up will re-do networking on existing boxes
-      vagrant_cmd("halt")
-      vagrant_cmd("up")
+        #stop anything currently running, that way vagrant up will re-do networking on existing boxes
+        vagrant_cmd("halt")
+        vagrant_cmd("up")
 
-      @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
-      @vagrant_hosts.each do |host|
-        default_user = host['user']
+        @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
+        @vagrant_hosts.each do |host|
+          default_user = host['user']
 
-        set_ssh_config host, 'vagrant'
-        
-        copy_ssh_to_root host
-        #shut down connection, will reconnect on next exec
-        host.close 
+          set_ssh_config host, 'vagrant'
 
-        set_ssh_config host, default_user
+          copy_ssh_to_root host
+          #shut down connection, will reconnect on next exec
+          host.close
+
+          set_ssh_config host, default_user
+
+        end
+
+        hack_etc_hosts @vagrant_hosts
+      else
+        #we are using previsouly set up vagrant boxes, just need to set up ssh correctly
+        @vagrant_hosts.each do |host|
+          default_user = host['user']
+          set_ssh_config host, default_user
+        end
 
       end
-
-      hack_etc_hosts @vagrant_hosts
     end
 
     def cleanup
@@ -121,6 +130,7 @@ module Beaker
       end
       @logger.notify "Destroying vagrant boxes"
       vagrant_cmd("destroy --force")
+      FileUtils.rm_rf(@vagrant_path)
     end
 
     def vagrant_cmd(args)
