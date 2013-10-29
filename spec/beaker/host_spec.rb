@@ -25,14 +25,56 @@ module Beaker
     end
 
 
-    # it takes a command object and a hash of options,
-    # it acts on the host's logger and connection object
-    # it receives a result object from the connection#execute
-    # (which it's really just a confusing wrapper for)
-    # it controls the result objects logging and fails a test for TestCase
-    #   if the exit_code doesn't match
-    # it returns the result object
-    it 'EXEC!'
+    describe "executing commands" do
+      let(:command) { Beaker::Command.new('ls') }
+      let(:host) { Beaker::Host.create('host', make_host_opts('host', options.merge(platform))) }
+      let(:result) { Beaker::Result.new(host, 'ls') }
+
+      before :each do
+        result.stdout = 'stdout'
+        result.stderr = 'stderr'
+
+        logger = mock(:logger)
+        logger.stub(:host_output)
+        logger.stub(:debug)
+        host.instance_variable_set :@logger, logger
+        conn = mock(:connection)
+        conn.stub(:execute).and_return(result)
+        host.instance_variable_set :@connection, conn
+      end
+
+      it 'takes a command object and a hash of options'
+      it "acts on the host's logger and connection object"
+      it 'receives a result object from the connection#execute'
+      it "returns the result object"
+
+      context "controls the result objects logging" do
+        it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
+          result.exit_code = 0
+          expect { host.exec(command,{}) }.to_not raise_error
+        end
+        it "and fails a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
+          result.exit_code = 1
+          expect { host.exec(command,{}) }.to raise_error
+        end
+        it "and passes a test if the exit_code matches :acceptable_exit_codes" do
+          result.exit_code = 0
+          expect { host.exec(command,{:acceptable_exit_codes => 0}) }.to_not raise_error
+        end
+        it "and fails a test if the exit_code doesn't match :acceptable_exit_codes" do
+          result.exit_code = 0
+          expect { host.exec(command,{:acceptable_exit_codes => 1}) }.to raise_error
+        end
+        it "and passes a test if the exit_code matches one of the :acceptable_exit_codes" do
+          result.exit_code = 127
+          expect { host.exec(command,{:acceptable_exit_codes => [1,127]}) }.to_not raise_error
+        end
+        it "and passes a test if the exit_code matches one of the range of :acceptable_exit_codes" do
+          result.exit_code = 1
+          expect { host.exec(command,{:acceptable_exit_codes => (0..127)}) }.to_not raise_error
+        end
+      end
+    end
 
     # it takes a location and a destination
     # it basically proxies that to the connection object
