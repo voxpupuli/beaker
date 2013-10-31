@@ -20,7 +20,11 @@ module Beaker
         when /blimpy/
           Beaker::Blimper
         when /vcloud/
-          Beaker::Vcloud
+          if options['pooling-api']
+            Beaker::VcloudPooled
+          else
+            Beaker::Vcloud
+          end
         when /vagrant/
           Beaker::Vagrant
         end
@@ -37,7 +41,7 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud aixer solaris).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

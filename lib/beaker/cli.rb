@@ -65,19 +65,7 @@ module Beaker
       end
     end
 
-    def validate
-      begin
-        #validation phase
-        Beaker::Utils::Validator.validate(@hosts, @logger)
-      rescue => e
-        report_and_raise(@logger, e, "CLI.validate")
-      end
-    end
-
     def execute!
-      provision
-      validate
-      setup
 
       begin
         trap(:INT) do
@@ -85,8 +73,13 @@ module Beaker
           exit(1)
         end
 
+        provision
+        validate
+        setup
+
         #pre acceptance  phase
         run_suite(:pre_suite, :fail_fast)
+
         #testing phase
         begin
           run_suite(:tests)
@@ -106,13 +99,17 @@ module Beaker
         #only do cleanup if we aren't in fail-stop mode
         @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
-          @network_manager.cleanup
+          if @network_manager
+            @network_manager.cleanup
+          end
         end
         raise "Failed to execute tests!"
       else
         #cleanup on success
         @logger.notify "Cleanup: cleaning up after successful run"
-        @network_manager.cleanup
+        if @network_manager
+          @network_manager.cleanup
+        end
       end
     end
 
