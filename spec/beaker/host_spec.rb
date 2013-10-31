@@ -16,7 +16,7 @@ module Beaker
     end
 
     it 'can be read like a hash' do
-      expect { host['value'] }.to_not raise_error NoMethodError
+      expect{ host['value'] }.to_not raise_error NoMethodError
     end
 
     it 'can be written like a hash' do
@@ -31,6 +31,7 @@ module Beaker
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do
+        $dry_run = false
         result.stdout = 'stdout'
         result.stderr = 'stderr'
 
@@ -51,27 +52,27 @@ module Beaker
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0
-          expect { host.exec(command,{}) }.to_not raise_error
+          expect{ host.exec(command,{}) }.to_not raise_error
         end
         it "and fails a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 1
-          expect { host.exec(command,{}) }.to raise_error
+          expect{ host.exec(command,{}) }.to raise_error
         end
         it "and passes a test if the exit_code matches :acceptable_exit_codes" do
           result.exit_code = 0
-          expect { host.exec(command,{:acceptable_exit_codes => 0}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => 0}) }.to_not raise_error
         end
         it "and fails a test if the exit_code doesn't match :acceptable_exit_codes" do
           result.exit_code = 0
-          expect { host.exec(command,{:acceptable_exit_codes => 1}) }.to raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => 1}) }.to raise_error
         end
         it "and passes a test if the exit_code matches one of the :acceptable_exit_codes" do
           result.exit_code = 127
-          expect { host.exec(command,{:acceptable_exit_codes => [1,127]}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => [1,127]}) }.to_not raise_error
         end
         it "and passes a test if the exit_code matches one of the range of :acceptable_exit_codes" do
           result.exit_code = 1
-          expect { host.exec(command,{:acceptable_exit_codes => (0..127)}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => (0..127)}) }.to_not raise_error
         end
       end
     end
