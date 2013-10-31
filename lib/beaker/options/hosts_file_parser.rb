@@ -21,7 +21,7 @@ module Beaker
         begin
           host_options = host_options.merge(YAML.load_file(hosts_file_path))
         rescue Psych::SyntaxError => e
-          raise ArgumentError, "#{hosts_file_path} is not a valid YAML file (#{msg})\n\t#{e}"
+          raise ArgumentError, "#{hosts_file_path} is not a valid YAML file\n\t#{e}"
         end
 
         # Make sure the roles array is present for all hosts
