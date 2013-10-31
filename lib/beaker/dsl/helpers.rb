@@ -834,6 +834,19 @@ module Beaker
         sign_certificate_for(default)
       end
 
+      # Get a facter fact from a provided host
+      #
+      # @param [Host] host  The host to query the fact for
+      # @param [String] name The name of the fact to query for
+      # @!macro common_opts
+      #
+      # @returns String The value of the fact 'name' on the provided host
+      # @raise  [FailTest] Raises an exception if call to facter fails
+      def fact host, name, opts= {}
+        result = on host, facter(name, opts)
+        result.stdout.chomp
+      end
+
     end
   end
 end
