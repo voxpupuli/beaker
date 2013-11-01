@@ -24,6 +24,70 @@ module Beaker
       expect( host['value'] ).to be === 'blarg'
     end
 
+    describe "windows hosts" do
+      describe "install_package" do
+        let(:cygwin) { 'setup-x86.exe' }
+        let(:cygwin64) { 'setup-x86_64.exe' }
+        let(:package) { 'foo' }
+
+        before(:each) do
+          @platform = 'windows'
+          host.stub(:check_for_package).and_return(true)
+        end
+
+        context "testing osarchitecture" do
+
+          before(:each) do
+            host.should_receive(:execute).with(/wmic os get osarchitecture/, anything).and_yield(success_osarch_check)
+          end
+
+          context "32 bit" do
+            let(:success_osarch_check) { mock(:success, :exit_code => 0, :stdout => '32-bit') }
+
+            it "uses 32 bit cygwin" do
+              host.should_receive(:execute).with(/#{cygwin}.*#{package}/)
+              host.install_package(package)
+            end
+          end
+
+          context "64 bit" do
+            let(:success_osarch_check) { mock(:success, :exit_code => 0, :stdout => '64-bit') }
+
+            it "uses 64 bit cygwin" do
+              host.should_receive(:execute).with(/#{cygwin64}.*#{package}/)
+              host.install_package(package)
+            end
+          end
+        end
+
+        context "testing os name" do
+          let(:failed_osarch_check) { stub(:failed, :exit_code => 1) }
+
+          before(:each) do
+            host.should_receive(:execute).with(/wmic os get osarchitecture/, anything).and_yield(failed_osarch_check)
+            host.should_receive(:execute).with(/wmic os get name/, anything).and_yield(name_check)
+          end
+
+          context "32 bit" do
+            let(:name_check) { mock(:failure, :exit_code => 1) }
+
+            it "uses 32 bit cygwin" do
+              host.should_receive(:execute).with(/#{cygwin}.*#{package}/)
+              host.install_package(package)
+            end
+          end
+
+          context "64 bit" do
+            let(:name_check) { mock(:success, :exit_code => 0) }
+
+            it "uses 64 bit cygwin" do
+              host.should_receive(:execute).with(/#{cygwin64}.*#{package}/)
+              host.install_package(package)
+            end
+          end
+        end
+      end
+    end
 
     describe "executing commands" do
       let(:command) { Beaker::Command.new('ls') }

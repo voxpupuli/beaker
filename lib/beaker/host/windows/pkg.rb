@@ -9,16 +9,17 @@ module Windows::Pkg
   def install_package(name, cmdline_args = '')
     cygwin = ""
     rootdir = ""
-    execute("echo '' | wmic os get osarchitecture | grep 32", 
-            :acceptable_exit_codes => (0...127)) do |result|
-      if result.exit_code == 0 #32 bit version
-        rootdir = "c:\\\\cygwin"
-        cygwin = "setup-x86.exe"
-      else  #64 bit version
-        rootdir = "c:\\\\cygwin64"
-        cygwin = "setup-x86_64.exe"
-      end
+
+    arch = identify_windows_architecture
+
+    if arch == '64'
+      rootdir = "c:\\\\cygwin64"
+      cygwin = "setup-x86_64.exe"
+    else #32 bit version
+      rootdir = "c:\\\\cygwin"
+      cygwin = "setup-x86.exe"
     end
+
     if not check_for_package(cygwin)
       execute("curl --retry 5 http://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}")
     end
@@ -27,5 +28,32 @@ module Windows::Pkg
 
   def uninstall_package(name, cmdline_args = '')
     raise "Package #{name} cannot be uninstalled on #{self}"
+  end
+
+  private
+
+  # @api private
+  def identify_windows_architecture
+    arch = nil
+    execute("echo '' | wmic os get osarchitecture", 
+            :acceptable_exit_codes => (0...127)) do |result|
+
+      arch = if result.exit_code == 0
+        result.stdout =~ /64/ ? '64' : '32'
+      else
+        identify_windows_architecture_from_os_name_for_win2003
+      end
+    end
+    arch
+  end
+
+  # @api private
+  def identify_windows_architecture_from_os_name_for_win2003
+    arch = nil
+    execute("echo '' | wmic os get name | grep x64",
+            :acceptable_exit_codes => (0...127)) do |result|
+      arch = result.exit_code == 0 ? '64' : '32'
+    end
+    arch
   end
 end
