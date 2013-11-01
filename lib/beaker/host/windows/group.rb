@@ -5,7 +5,7 @@ module Windows::Group
     execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
       groups = []
       result.stdout.each_line do |line|
-        groups << (line.match(/^Name=([\w ]+)/) or next)[1]
+        groups << (line.match(/^Name=(.+)$/) or next)[1]
       end
 
       yield result if block_given?
