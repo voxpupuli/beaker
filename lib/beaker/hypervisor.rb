@@ -20,7 +20,7 @@ module Beaker
         when /blimpy/
           Beaker::Blimper
         when /vcloud/
-          if options['pooling-api']
+          if options['pooling_api']
             Beaker::VcloudPooled
           else
             Beaker::Vcloud

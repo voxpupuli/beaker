@@ -171,6 +171,10 @@ class MockVsphereHelper
   def find_folder folder
     folder
   end
+
+  def wait_for_tasks tasks, try, attempts
+    true
+  end
  
   def close
     true

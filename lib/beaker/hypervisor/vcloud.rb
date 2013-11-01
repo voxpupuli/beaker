@@ -12,12 +12,14 @@ module Beaker
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
       raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
-      vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
+      @vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
+    end
 
-      @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +
-        " with credentials for #{vsphere_credentials[:user]}"
+    def connect_to_vsphere
+      @logger.notify "Connecting to vSphere at #{@vsphere_credentials[:server]}" +
+        " with credentials for #{@vsphere_credentials[:user]}"
 
-      @vsphere_helper = VsphereHelper.new( vsphere_credentials )
+      @vsphere_helper = VsphereHelper.new( @vsphere_credentials )
     end
 
     def wait_for_dns_resolution host, try, attempts
@@ -90,92 +92,99 @@ module Beaker
     end
 
     def provision
-      vsphere_vms = {}
-
-      try = 1
-      attempts = @options[:timeout].to_i / 5
-
-      start = Time.now
-      @vcloud_hosts.each_with_index do |h, i|
-        # Generate a randomized hostname
-        h['vmhostname'] = generate_host_name
-
-        if h['template'] =~ /\//
-          templatefolders = h['template'].split('/')
-          h['template'] = templatefolders.pop
-        end
-
-        @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@options['folder']} from template '#{h['template']}'"
-
-        vm = {}
-
-        if templatefolders
-          vm[h['template']] = @vsphere_helper.find_folder(templatefolders.join('/')).find(h['template'])
-        else
-          vm = @vsphere_helper.find_vms(h['template'])
-        end
-
-        if vm.length == 0
-          raise "Unable to find template '#{h['template']}'!"
-        end
-
-        spec = create_clone_spec(h)
-
-        # Deploy from specified template
-        if (@vcloud_hosts.length == 1) or (i == @vcloud_hosts.length - 1)
-          vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec ).wait_for_completion
-        else
-          vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )
-        end
-      end
-      @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
-
-      try = (Time.now - start) / 5
-      duration = run_and_report_duration do 
+      connect_to_vsphere
+      begin
+        vsphere_vms = {}
+  
+        try = 1
+        attempts = @options[:timeout].to_i / 5
+  
+        start = Time.now
+        tasks = []
         @vcloud_hosts.each_with_index do |h, i|
-          booting_host(h, try, attempts)
+          # Generate a randomized hostname
+          h['vmhostname'] = generate_host_name
+  
+          if h['template'] =~ /\//
+            templatefolders = h['template'].split('/')
+            h['template'] = templatefolders.pop
+          end
+  
+          @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@options['folder']} from template '#{h['template']}'"
+  
+          vm = {}
+  
+          if templatefolders
+            vm[h['template']] = @vsphere_helper.find_folder(templatefolders.join('/')).find(h['template'])
+          else
+            vm = @vsphere_helper.find_vms(h['template'])
+          end
+  
+          if vm.length == 0
+            raise "Unable to find template '#{h['template']}'!"
+          end
+  
+          spec = create_clone_spec(h)
+  
+          # Deploy from specified template
+          tasks << { :obj => vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )}
         end
-      end
-      @logger.notify "Spent %.2f seconds booting and waiting for vSphere registration" % duration
-
-      try = (Time.now - start) / 5
-      duration = run_and_report_duration do
-        @vcloud_hosts.each_with_index do |h, i|
-          wait_for_dns_resolution(h, try, attempts)
+        try = (Time.now - start) / 5
+        @vsphere_helper.wait_for_tasks(tasks, try, attempts)
+        @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
+  
+        try = (Time.now - start) / 5
+        duration = run_and_report_duration do 
+          @vcloud_hosts.each_with_index do |h, i|
+            booting_host(h, try, attempts)
+          end
         end
+        @logger.notify "Spent %.2f seconds booting and waiting for vSphere registration" % duration
+  
+        try = (Time.now - start) / 5
+        duration = run_and_report_duration do
+          @vcloud_hosts.each_with_index do |h, i|
+            wait_for_dns_resolution(h, try, attempts)
+          end
+        end
+        @logger.notify "Spent %.2f seconds waiting for DNS resolution" % duration
+      rescue => e
+        @vsphere_helper.close 
+        report_and_raise(@logger, e, "Vcloud.provision")
       end
-      @logger.notify "Spent %.2f seconds waiting for DNS resolution" % duration
-
-      @vsphere_helper.close 
     end
 
     def cleanup
       @logger.notify "Destroying vCloud boxes"
-
-      vm_names = @vcloud_hosts.map {|h| h['vmhostname'] }.compact
-      if @vcloud_hosts.length != vm_names.length
-        @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
-      end
-      vms = @vsphere_helper.find_vms vm_names
-      vm_names.each do |name|
-        unless vm = vms[name]
-          raise "Couldn't find VM #{name} in vSphere!"
+      connect_to_vsphere
+      begin
+        vm_names = @vcloud_hosts.map {|h| h['vmhostname'] }.compact
+        if @vcloud_hosts.length != vm_names.length
+          @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
         end
-
-        if vm.runtime.powerState == 'poweredOn'
-          @logger.notify "Shutting down #{vm.name}"
-          duration = run_and_report_duration do
-            vm.PowerOffVM_Task.wait_for_completion
+        vms = @vsphere_helper.find_vms vm_names
+        vm_names.each do |name|
+          unless vm = vms[name]
+            raise "Couldn't find VM #{name} in vSphere!"
           end
-          @logger.notify "Spent %.2f seconds halting #{vm.name}" % duration
+  
+          if vm.runtime.powerState == 'poweredOn'
+            @logger.notify "Shutting down #{vm.name}"
+            duration = run_and_report_duration do
+              vm.PowerOffVM_Task.wait_for_completion
+            end
+            @logger.notify "Spent %.2f seconds halting #{vm.name}" % duration
+          end
+  
+          duration = run_and_report_duration do 
+            vm.Destroy_Task
+          end
+          @logger.notify "Spent %.2f seconds destroying #{vm.name}" % duration
         end
-
-        duration = run_and_report_duration do 
-          vm.Destroy_Task
-        end
-        @logger.notify "Spent %.2f seconds destroying #{vm.name}" % duration
+      rescue => e
+        @vsphere_helper.close
+        report_and_raise(@logger, e, "Vcloud.cleanup")
       end
-      @vsphere_helper.close
     end
 
   end

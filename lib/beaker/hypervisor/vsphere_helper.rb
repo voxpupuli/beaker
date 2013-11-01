@@ -169,6 +169,37 @@ class VsphereHelper
     })
   end
 
+  def wait_for_tasks tasks, try, attempts
+    filter = @connection.propertyCollector.CreateFilter(
+      spec: {
+        propSet: [{ type: 'Task', all: false, pathSet: ['info.state']}],
+        objectSet: tasks
+      },
+      partialUpdates: false
+    )
+    ver = ''
+    while true
+      result = @connection.propertyCollector.WaitForUpdates(version: ver)
+      ver = result.version
+      complete = 0
+      tasks.each do |task|
+        if ['success', 'error'].member? task.info.state
+          complete += 1
+        end
+      end
+      break if (complete == tasks.length)
+      if try <= attempts
+        sleep 5
+        try += 1
+      else
+        raise "unable to complete Vsphere tasks before timeout"
+      end
+    end
+
+    filter.DestroyPropertyFilter
+    tasks
+  end
+
   def close
     @connection.close
   end
