@@ -32,7 +32,11 @@ class MockRbVmomiSnapshot
 end
 
 class MockRbVmomiVM
-  attr_accessor :snapshot, :name
+  attr_accessor :snapshot, :name, :state
+
+  def info
+    self
+  end
 
   def process_snaphash snaphash
     shotlist = []
@@ -144,6 +148,19 @@ class MockRbVmomiConnection
     def add_result name, object
       @results.add_object( Result.new(name, object) )
     end
+
+    def WaitForUpdates arg
+      result = OpenStruct.new
+      result.version = 'version'
+      result
+    end
+
+    def CreateFilter arg
+      filter = OpenStruct.new
+      filter.DestroyPropertyFilter = true
+      filter
+    end
+
   end
 
   class ServiceInstance

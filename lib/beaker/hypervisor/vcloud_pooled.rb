@@ -5,6 +5,16 @@ require 'net/http'
 module Beaker 
   class VcloudPooled < Beaker::Hypervisor
     CHARMAP = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
+    SSH_EXCEPTIONS = [
+      SocketError,
+      Timeout::Error,
+      Errno::ETIMEDOUT,
+      Errno::EHOSTDOWN,
+      Errno::EHOSTUNREACH,
+      Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
+      Errno::ENETUNREACH,
+    ]
 
     def initialize(vcloud_hosts, options)
       @options = options
@@ -35,14 +45,19 @@ module Beaker
 
         begin
           response = http.request(request)
-        rescue
-          raise "Unable to connect to '#{uri}'!"
+        rescue *SSH_EXCEPTIONS => e
+          report_and_raise(@logger, e, 'vCloudPooled.provision (http.request)')
         end
 
         begin
-          h['vmhostname'] = JSON.parse(response.body)[h.name]['hostname']
-        rescue
-          raise "Malformed data received from '#{uri}'!"
+          parsed_response = JSON.parse(response.body)
+          if parsed_response[h['template']] && parsed_response[h['template']]['hostname'] 
+            h['vmhostname'] = parsed_response[h['template']]['hostname']
+          else
+            raise "VcloudPooled.provision - no template for #{h.name} in pool"
+          end
+        rescue JSON::ParserError => e
+          report_and_raise(@logger, e, 'vCloudPooled.provision (parse response body)')
         end
 
         @logger.notify "Using available vCloud host '#{h['vmhostname']}' (#{h.name})"
@@ -68,8 +83,8 @@ module Beaker
 
         begin
           response = http.request(request)
-        rescue
-          raise "Unable to connect to '#{uri}'!"
+        rescue *SSH_EXCEPTIONS => e
+          report_and_raise(@logger, e, 'vCloudPooled.cleanup (http.request)')
         end
       end 
 

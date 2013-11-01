@@ -119,6 +119,36 @@ module Beaker
 
    end
 
+   describe "#wait_for_tasks" do
+     it "can wait for tasks to error" do
+       vsphere_helper.stub( :sleep ).and_return( true )
+       vms.each do |vm|
+         vm.info.state = 'error'
+       end
+
+       expect(vsphere_helper.wait_for_tasks( vms, 0, 5 ) ).to be === vms
+     end
+
+     it "can wait for tasks to succeed" do
+       vsphere_helper.stub( :sleep ).and_return( true )
+       vms.each do |vm|
+         vm.info.state = 'success'
+       end
+
+       expect(vsphere_helper.wait_for_tasks( vms, 0, 5 ) ).to be === vms
+     end
+
+     it "errors when tasks fail to error/success before timing out" do
+       vsphere_helper.stub( :sleep ).and_return( true )
+       vms.each do |vm|
+         vm.info.state = 'nope'
+       end
+
+       expect{ vsphere_helper.wait_for_tasks( vms, 0, 5 ) }.to raise_error
+     end
+
+   end
+
    describe "#close" do
      it 'closes the connection' do
        connection = vsphere_helper.instance_variable_get( :@connection )
