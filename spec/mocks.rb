@@ -17,7 +17,7 @@ module MockNet
     class Response
       class ResponseHash
         def []key
-          { 'hostname' => 'pool' }
+          { 'ok' => true, 'hostname' => 'pool' }
         end
 
       end
