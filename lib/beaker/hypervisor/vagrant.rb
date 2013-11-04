@@ -21,25 +21,24 @@ module Beaker
     def make_vfile hosts
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
-      vagrant_file = "Vagrant.configure(\"2\") do |c|\n"
+      v_file = "Vagrant.configure(\"2\") do |c|\n"
       hosts.each do |host|
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
-        vagrant_file << "  c.vm.define '#{host.name}' do |v|\n"
-        vagrant_file << "    v.vm.hostname = '#{host.name}'\n"
-        vagrant_file << "    v.vm.box = '#{host['box']}'\n"
-        vagrant_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
-        vagrant_file << "    v.vm.base_mac = '#{randmac}'\n"
-        vagrant_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"255.255.0.0\"\n"
-        vagrant_file << "  end\n"
+        v_file << "  c.vm.define '#{host.name}' do |v|\n"
+        v_file << "    v.vm.hostname = '#{host.name}'\n"
+        v_file << "    v.vm.box = '#{host['box']}'\n"
+        v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
+        v_file << "    v.vm.base_mac = '#{randmac}'\n"
+        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"255.255.0.0\"\n"
+        v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
-      vagrant_file << "  c.vm.provider :virtualbox do |vb|\n"
-      vagrant_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
-      vagrant_file << "  end\n"
-      vagrant_file << "end\n"
-      FileUtils.mkdir_p(@vagrant_path)
-      File.open(File.expand_path(File.join(@vagrant_path, "Vagrantfile")), 'w') do |f|
-        f.write(vagrant_file)
+      v_file << "  c.vm.provider :virtualbox do |vb|\n"
+      v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
+      v_file << "  end\n"
+      v_file << "end\n"
+      File.open(@vagrant_file, 'w') do |f|
+        f.write(v_file)
       end
     end
 
@@ -70,7 +69,7 @@ module Beaker
           stdout.read
         end
         #replace hostname with ip
-        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip'])
+        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip']) unless not host['ip']
         #set the user
         ssh_config = ssh_config.gsub(/User vagrant/, "User #{user}")
         f.write(ssh_config)
@@ -86,41 +85,37 @@ module Beaker
       @logger = options[:logger]
       @temp_files = []
       @vagrant_hosts = vagrant_hosts
-      @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', options[:hosts_file]))
+      @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', 'vagrant_files', File.basename(options[:hosts_file])))
+      FileUtils.mkdir_p(@vagrant_path)
+      @vagrant_file = File.expand_path(File.join(@vagrant_path, "Vagrantfile"))
 
     end
 
     def provision
       if @options[:provision]
+        #setting up new vagrant hosts
+        #make sure that any old boxes are dead dead dead
+        vagrant_cmd("destroy --force")
+
         make_vfile @vagrant_hosts
 
-        #stop anything currently running, that way vagrant up will re-do networking on existing boxes
-        vagrant_cmd("halt")
         vagrant_cmd("up")
-
-        @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
-        @vagrant_hosts.each do |host|
-          default_user = host['user']
-
-          set_ssh_config host, 'vagrant'
-
-          copy_ssh_to_root host
-          #shut down connection, will reconnect on next exec
-          host.close
-
-          set_ssh_config host, default_user
-
-        end
-
-        hack_etc_hosts @vagrant_hosts
-      else
-        #we are using previsouly set up vagrant boxes, just need to set up ssh correctly
-        @vagrant_hosts.each do |host|
-          default_user = host['user']
-          set_ssh_config host, default_user
-        end
-
       end
+      @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
+      @vagrant_hosts.each do |host|
+        default_user = host['user']
+      
+        set_ssh_config host, 'vagrant'
+
+        copy_ssh_to_root host
+        #shut down connection, will reconnect on next exec
+        host.close
+
+        set_ssh_config host, default_user
+      end
+
+      hack_etc_hosts @vagrant_hosts
+
     end
 
     def cleanup

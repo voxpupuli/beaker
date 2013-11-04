@@ -87,7 +87,7 @@ module Beaker
       before :each do
         vagrant.should_receive( :make_vfile ).with( @hosts ).once
 
-        vagrant.should_receive( :vagrant_cmd ).with( "halt" ).once
+        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
         vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
         @hosts.each do |host|
           host_prev_name = host['user']

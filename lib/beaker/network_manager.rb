@@ -10,6 +10,17 @@ module Beaker
   class NetworkManager
     HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant']
 
+    def provision? options, host 
+      #provision this box
+      # - only if we are running with --provision
+      # - only if we have a hypervisor
+      # - only if either the specific hosts has no specification or has 'provision' in its config
+      # - always if it is a vagrant box (vagrant boxes are always provisioned as they always need ssh key hacking)
+      command_line_says = options[:provision] 
+      host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true) 
+      (command_line_says && host_says) or (host['hypervisor'] =~/vagrant/)
+    end
+
     def initialize(options, logger)
       @logger = logger
       @options = options
@@ -17,16 +28,11 @@ module Beaker
       @virtual_machines = {}
       @noprovision_machines = []
       @options['HOSTS'].each_key do |name|
-        host_info = @options['HOSTS'][name]
-        #check to see if this host has a hypervisor 
-        hypervisor = host_info['hypervisor'] 
-        #provision this box
-        # - only if we are running with --provision
-        # - only if we have a hypervisor
-        # - only if either the specific hosts has no specification or has 'provision' in its config
-        if (@options[:provision] && hypervisor && (host_info.has_key?('provision') ? host_info['provision'] : true)) or (hypervisor =~ /vagrant/) #obey config file provision, defaults to provisioning vms
+        host = @options['HOSTS'][name]
+        hypervisor = host['hypervisor']
+        if provision?(@options, host)
           raise "Invalid hypervisor: #{hypervisor} (#{name})" unless HYPERVISOR_TYPES.include? hypervisor
-          @logger.debug "Hypervisor for #{name} is #{host_info['hypervisor'] || 'default' }, and I'm going to use #{hypervisor}"
+          @logger.debug "Hypervisor for #{name} is #{hypervisor}"
           @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]
           @virtual_machines[hypervisor] << name
         else #this is a non-provisioned machine, deal with it without hypervisors
