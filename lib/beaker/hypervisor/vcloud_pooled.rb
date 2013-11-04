@@ -28,6 +28,7 @@ module Beaker
 
     def provision
       start = Time.now
+      try = 1
       @vcloud_hosts.each_with_index do |h, i|
         if h['template'] =~ /\//
           templatefolders = h['template'].split('/')
@@ -36,28 +37,29 @@ module Beaker
 
         @logger.notify "Requesting '#{h['template']}' VM from vCloud host pool"
 
-        uri = URI.parse(@options['pooling_api']+'/vm/'+h['template'])
-
-        http = Net::HTTP.new( uri.host, uri.port )
-        request = Net::HTTP::Post.new(uri.request_uri)
-
-        request.set_form_data({'pool' => @options['resourcepool'], 'folder' => 'foo'})
-
         begin
+          uri = URI.parse(@options['pooling_api']+'/vm/'+h['template'])
+
+          http = Net::HTTP.new( uri.host, uri.port )
+          request = Net::HTTP::Post.new(uri.request_uri)
+
+          request.set_form_data({'pool' => @options['resourcepool'], 'folder' => 'foo'})
+
+          attempts = @options[:timeout].to_i / 5
           response = http.request(request)
-        rescue *SSH_EXCEPTIONS => e
-          report_and_raise(@logger, e, 'vCloudPooled.provision (http.request)')
-        end
-
-        begin
           parsed_response = JSON.parse(response.body)
-          if parsed_response[h['template']] && parsed_response[h['template']]['hostname'] 
+          if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname'] 
             h['vmhostname'] = parsed_response[h['template']]['hostname']
           else
-            raise "VcloudPooled.provision - no template for #{h.name} in pool"
+            raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
           end
-        rescue JSON::ParserError => e
-          report_and_raise(@logger, e, 'vCloudPooled.provision (parse response body)')
+        rescue *SSH_EXCEPTIONS,JSON::ParserError,RuntimeError => e
+          if try <= attempts
+            sleep 5
+            try += 1
+            retry
+          end
+          report_and_raise(@logger, e, 'vCloudPooled.provision')
         end
 
         @logger.notify "Using available vCloud host '#{h['vmhostname']}' (#{h.name})"

@@ -4,15 +4,14 @@ module Beaker
   describe VcloudPooled do
 
     before :each do
+      vms = make_hosts()
       MockVsphereHelper.set_config( fog_file_contents )
-      MockVsphereHelper.set_vms( make_hosts() )
+      MockVsphereHelper.set_vms( vms )
       stub_const( "VsphereHelper", MockVsphereHelper )
       stub_const( "Net", MockNet )
-      json = mock( 'json' )
-      json.stub( :parse ) do |arg| 
+      JSON.stub( :parse ) do |arg|
         arg
       end
-      stub_const( "JSON", json )
       Socket.stub( :getaddrinfo ).and_return( true )
     end
 
@@ -41,6 +40,7 @@ module Beaker
 
         vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
         vcloud.stub( :require ).and_return( true )
+        vcloud.stub( :sleep ).and_return( true )
         vcloud.provision
         vcloud.cleanup
 
