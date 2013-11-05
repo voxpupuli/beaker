@@ -21,32 +21,37 @@ module Beaker
       @options[:helper].each do |helper|
         require File.expand_path(helper)
       end
-
-      @hosts =  []
-      @network_manager = Beaker::NetworkManager.new(@options, @logger)
-      @hosts = @network_manager.provision
-
     end
 
-    def execute!
+    def provision
+      begin
+        @hosts =  []
+        @network_manager = Beaker::NetworkManager.new(@options, @logger)
+        @hosts = @network_manager.provision
+      rescue => e
+        report_and_raise(@logger, e, "CLI.provision")
+      end
+    end
+
+    def validate
+      begin
+        #validation phase
+        Beaker::Utils::Validator.validate(@hosts, @logger)
+      rescue => e
+        report_and_raise(@logger, e, "CLI.validate")
+      end
+    end
+
+    def setup
       @ntp_controller = Beaker::Utils::NTPControl.new(@options, @hosts)
       @setup = Beaker::Utils::SetupHelper.new(@options, @hosts)
       @repo_controller = Beaker::Utils::RepoControl.new(@options, @hosts)
-
       setup_steps = [[:timesync, "Sync time on hosts", Proc.new {@ntp_controller.timesync}],
                      [:root_keys, "Sync keys to hosts" , Proc.new {@setup.sync_root_keys}],
                      [:repo_proxy, "Proxy packaging repositories on ubuntu, debian and solaris-11", Proc.new {@repo_controller.proxy_config}],
                      [:add_el_extras, "Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts", Proc.new {@repo_controller.add_el_extras}],
                      [:add_master_entry, "Update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}]]
-      
       begin
-        trap(:INT) do
-          @logger.warn "Interrupt received; exiting..."
-          exit(1)
-        end
-        #validation phase
-        Beaker::Utils::Validator.validate(@hosts, @logger)
-
         #setup phase
         setup_steps.each do |step| 
           if (not @options.has_key?(step[0])) or @options[step[0]]
@@ -55,9 +60,26 @@ module Beaker
             step[2].call
           end
         end
+      rescue => e
+        report_and_raise(@logger, e, "CLI.setup")
+      end
+    end
+
+    def execute!
+
+      begin
+        trap(:INT) do
+          @logger.warn "Interrupt received; exiting..."
+          exit(1)
+        end
+
+        provision
+        validate
+        setup
 
         #pre acceptance  phase
         run_suite(:pre_suite, :fail_fast)
+
         #testing phase
         begin
           run_suite(:tests)
@@ -77,13 +99,17 @@ module Beaker
         #only do cleanup if we aren't in fail-stop mode
         @logger.notify "Cleanup: cleaning up after failed run"
         if @options[:fail_mode] != "stop"
-          @network_manager.cleanup
+          if @network_manager
+            @network_manager.cleanup
+          end
         end
         raise "Failed to execute tests!"
       else
         #cleanup on success
         @logger.notify "Cleanup: cleaning up after successful run"
-        @network_manager.cleanup
+        if @network_manager
+          @network_manager.cleanup
+        end
       end
     end
 
