@@ -7,9 +7,6 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @vsphere_hosts = vsphere_hosts
-    end
-
-    def provision
       vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
 
       @logger.notify "Connecting to vSphere at #{vsphere_credentials[:server]}" +

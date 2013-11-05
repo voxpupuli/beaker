@@ -16,10 +16,6 @@ module Beaker
       @hosts = []
       @virtual_machines = {}
       @noprovision_machines = []
-    end
-
-    def provision
-      #sort hosts into those to be provisioned and those to use non-provisioned
       @options['HOSTS'].each_key do |name|
         host_info = @options['HOSTS'][name]
         #check to see if this host has a hypervisor 
@@ -37,8 +33,11 @@ module Beaker
           @logger.debug "No hypervisor for #{name}, connecting to host without provisioning"
           @noprovision_machines << name
         end
-      end
 
+      end
+    end
+
+    def provision
       @provisioned_set = {}
       @virtual_machines.each do |type, names|
         hosts_for_type = []
@@ -63,12 +62,8 @@ module Beaker
       @hosts.each {|host| host.close }
 
       if not @options[:preserve_hosts]
-        if @provisioned_set
-          @provisioned_set.each_key do |type|
-            if @provisioned_set[type]
-              @provisioned_set[type].cleanup
-            end
-          end
+        @provisioned_set.each_key do |type|
+          @provisioned_set[type].cleanup
         end
       end
     end

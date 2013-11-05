@@ -33,18 +33,11 @@ module Beaker
       expect( hypervisor.create( 'fusion', [], make_opts() ) ).to be === fusion
     end
 
-    it "creates a vcloudpooled hypervisor for vcloud hosts that are pooled" do
-      vcloud = mock( 'vcloud' )
-      vcloud.stub( :provision ).and_return( true )
-      VcloudPooled.should_receive( :new ).once.and_return( vcloud )
-      expect( hypervisor.create( 'vcloud', [], make_opts().merge( { 'pooling_api' => true } ) ) ).to be === vcloud
-    end
-
-    it "creates a vcloud hypervisor for vcloud hosts that are not pooled" do
+    it "creates a vcloud hypervisor for vcloud hosts" do
       vcloud = mock( 'vcloud' )
       vcloud.stub( :provision ).and_return( true )
       Vcloud.should_receive( :new ).once.and_return( vcloud )
-      expect( hypervisor.create( 'vcloud', [], make_opts().merge( { 'pooling_api' => false } ) ) ).to be === vcloud
+      expect( hypervisor.create( 'vcloud', [], make_opts() ) ).to be === vcloud
     end
 
     it "creates a vagrant hypervisor for vagrant hosts" do
