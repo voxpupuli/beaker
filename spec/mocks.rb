@@ -11,51 +11,6 @@ class MockIO < IO
   end
 end
 
-module MockNet
-  class HTTP
-
-    class Response
-      class ResponseHash
-        def []key
-          { 'ok' => true, 'hostname' => 'pool' }
-        end
-
-      end
-
-      def body
-        ResponseHash.new
-      end
-
-    end
-
-    class Post
-      def initialize uri
-        @uri = uri
-      end
-
-      def set_form_data hash
-
-      end
-    end
-
-    class Delete
-      def initialize uri
-        @uri = uri
-      end
-    end
-    
-    def initialize host, port
-      @host = host
-      @port = port
-    end
-
-    def request req
-      Response.new
-    end
-  end
-
-end
-
 class FakeHost
   attr_accessor :commands
 
