@@ -170,10 +170,11 @@ class VsphereHelper
   end
 
   def wait_for_tasks tasks, try, attempts
+    obj_set = tasks.map { |task| { :obj => task } }
     filter = @connection.propertyCollector.CreateFilter(
       spec: {
         propSet: [{ type: 'Task', all: false, pathSet: ['info.state']}],
-        objectSet: tasks
+        objectSet: obj_set
       },
       partialUpdates: false
     )

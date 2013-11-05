@@ -127,7 +127,7 @@ module Beaker
           spec = create_clone_spec(h)
   
           # Deploy from specified template
-          tasks << { :obj => vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )}
+          tasks << vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )
         end
         try = (Time.now - start) / 5
         @vsphere_helper.wait_for_tasks(tasks, try, attempts)
