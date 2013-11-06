@@ -17,11 +17,11 @@ module BeakerRSpec
 
   def provision
     @network_manager = Beaker::NetworkManager.new(@options, @logger)
-    @hosts = @network_manager.provision
+    RSpec.configuration.hosts = @network_manager.provision
   end
 
   def validate
-    Beaker::Utils::Validator.validate(@hosts, @logger)
+    Beaker::Utils::Validator.validate(RSpec.configuration.hosts, @logger)
   end
 
   def setup(args = [])
@@ -30,13 +30,12 @@ module BeakerRSpec
     @options[:debug] = true
     @logger = Beaker::Logger.new(@options)
     @options[:logger] = @logger
-    @hosts = []
+    RSpec.configuration.hosts = []
   end
 
   def hosts
-    @hosts 
+    RSpec.configuration.hosts
   end
-
 
   def cleanup
     @network_manager.cleanup
