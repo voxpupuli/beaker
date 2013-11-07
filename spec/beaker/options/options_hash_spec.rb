@@ -45,11 +45,9 @@ module Beaker
       end
 
       it "recursively dumps values" do
-        options.merge({'k' => 'v', 'key' => {'subkey' => 'subvalue'}, 'array_key' => ['array1', 'array2'], 'array_key2' => [['subarray1', 'subarray2'], 'anotherval']})
-        expect(options.dump).to be === "Options:\n\t\tk : v\n\t\tkey : \n\t\t\tsubkey : subvalue\n\t\tarray_key : \n\t\t\t[\n\t\t\tarray1,\n\t\t\tarray2,\n\t\t\t]\n\t\tarray_key2 : \n\t\t\t[\n\t\t\t[\n\t\t\tsubarray1,\n\t\t\tsubarray2,\n\t\t\t]\n\t\t\tanotherval,\n\t\t\t]\n"
-        
+        options.merge({'k' => { 'key' => {'subkey' => 'subvalue'}}})
+        expect(options.dump).to be === "Options:\n\t\tk : \n\t\t\tkey : \n\t\t\t\tsubkey : subvalue\n"
       end
-
     end
   end
 end
