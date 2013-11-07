@@ -7,19 +7,19 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
-   let (:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
+   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
                                         :platform => 'linux',
                                         :roles => [ 'agent' ] } ) }
-   let (:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
+   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
                           basic_hosts[1][:platform] = 'windows'
                           basic_hosts  }
-   let (:winhost)       { make_host( 'winhost', { 'platform' => 'windows',
-                                                  'pe_ver' => '3.0',
-                                                  'working_dir' => '/tmp' } ) }
-   let (:unixhost)      { make_host( 'unixhost', { 'platform' => 'linux',
-                                                   'pe_ver' => '3.0',
-                                                   'working_dir' => '/tmp',
-                                                   'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
+   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp' } ) }
+   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
+                                                  :pe_ver => '3.0',
+                                                  :working_dir => '/tmp',
+                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
 
 
   context 'extract_repo_info_from' do
