@@ -231,12 +231,12 @@ describe ClassMixedWithDSLHelpers do
   describe 'confine' do
     let(:logger) { double.as_null_object }
     before do
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.stub( :logger ).and_return( logger )
     end
 
     it 'skips the test if there are no applicable hosts' do
-      subject.should_receive( :hosts ).any_number_of_times.and_return( [] )
-      subject.should_receive( :hosts= ).any_number_of_times
+      subject.stub( :hosts ).and_return( [] )
+      subject.stub( :hosts= )
       logger.should_receive( :warn )
       subject.should_receive( :skip_test ).
         with( 'No suitable hosts found' )
@@ -245,8 +245,8 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'raises when given mode is not :to or :except' do
-      subject.should_receive( :hosts ).any_number_of_times
-      subject.should_receive( :hosts= ).any_number_of_times
+      subject.stub( :hosts )
+      subject.stub( :hosts= )
 
       expect {
         subject.confine( :regardless, {:thing => 'value'} )
@@ -331,7 +331,7 @@ describe ClassMixedWithDSLHelpers do
     it 'executes puppet on the host passed and ensures it is reverted' do
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.stub( :logger ).and_return( logger )
       subject.should_receive( :on ).twice
       subject.should_receive( :teardown ).and_yield
       subject.should_receive( :puppet ).once.

@@ -52,7 +52,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   context 'find_git_repo_versions' do
     it 'returns a hash of :name => version' do
-      host        = stub( 'Host' )
+      host        = double( 'Host' )
       repository  = { :name => 'name' }
       path        = '/path/to/repo'
       cmd         = 'cd /path/to/repo/name && git describe || true'
@@ -77,7 +77,7 @@ describe ClassMixedWithDSLInstallUtils do
       host = { 'platform' => 'debian' }
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
       subject.should_receive( :on ).exactly( 4 ).times
 
       subject.install_from_git( host, path, repo )
