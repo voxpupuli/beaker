@@ -172,15 +172,17 @@ class VsphereHelper
   def wait_for_tasks tasks, try, attempts
     obj_set = tasks.map { |task| { :obj => task } }
     filter = @connection.propertyCollector.CreateFilter(
-      spec: {
-        propSet: [{ type: 'Task', all: false, pathSet: ['info.state']}],
-        objectSet: obj_set
+      :spec => {
+        :propSet => [{ :type => 'Task',
+                       :all  => false,
+                       :pathSet => ['info.state']}],
+        :objectSet => obj_set
       },
-      partialUpdates: false
+      :partialUpdates => false
     )
     ver = ''
     while true
-      result = @connection.propertyCollector.WaitForUpdates(version: ver)
+      result = @connection.propertyCollector.WaitForUpdates(:version => ver)
       ver = result.version
       complete = 0
       tasks.each do |task|

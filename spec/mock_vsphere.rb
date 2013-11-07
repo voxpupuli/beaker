@@ -51,7 +51,7 @@ class MockRbVmomiVM
     shotlist
   end
 
-  def get_snapshot snaplist = @snapshot.rootSnapshotList, name
+  def get_snapshot name, snaplist = @snapshot.rootSnapshotList
     snapshot = nil
     snaplist.each do |snap|
       if snap.is_a?(Array)

@@ -53,7 +53,7 @@ module Beaker
           else
             raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
           end
-        rescue *SSH_EXCEPTIONS,JSON::ParserError,RuntimeError => e
+        rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
           if try <= attempts
             sleep 5
             try += 1
