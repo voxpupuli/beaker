@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Beaker
-  describe Aixer do
+  describe Solaris do
     let( :solaris) { Beaker::Solaris.new( @hosts, make_opts ) }
 
     before :each do
