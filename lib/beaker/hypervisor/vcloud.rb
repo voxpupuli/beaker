@@ -157,17 +157,19 @@ module Beaker
     def cleanup
       @logger.notify "Destroying vCloud boxes"
       connect_to_vsphere
-      begin
-        vm_names = @vcloud_hosts.map {|h| h['vmhostname'] }.compact
-        if @vcloud_hosts.length != vm_names.length
-          @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
-        end
-        vms = @vsphere_helper.find_vms vm_names
+
+      vm_names = @vcloud_hosts.map {|h| h['vmhostname'] }.compact
+      if @vcloud_hosts.length != vm_names.length
+        @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
+      end
+      vms = @vsphere_helper.find_vms vm_names
+      begin 
         vm_names.each do |name|
           unless vm = vms[name]
-            raise "Couldn't find VM #{name} in vSphere!"
+            @logger.warn "Unable to cleanup #{name}, couldn't find VM #{name} in vSphere!"
+            next
           end
-  
+
           if vm.runtime.powerState == 'poweredOn'
             @logger.notify "Shutting down #{vm.name}"
             duration = run_and_report_duration do
@@ -175,16 +177,24 @@ module Beaker
             end
             @logger.notify "Spent %.2f seconds halting #{vm.name}" % duration
           end
-  
+
           duration = run_and_report_duration do 
             vm.Destroy_Task
           end
           @logger.notify "Spent %.2f seconds destroying #{vm.name}" % duration
+
         end
-      rescue => e
-        @vsphere_helper.close
-        report_and_raise(@logger, e, "Vcloud.cleanup")
+      rescue RbVmomi::Fault => ex
+        if ex.fault.is_a?(RbVmomi::VIM::ManagedObjectNotFound)
+          #it's already gone, don't bother trying to delete it
+          name = vms.key(ex.fault.obj)
+          vms.delete(name)
+          vm_names.delete(name)
+          @logger.warn "Unable to destroy #{name}, it was not found in vSphere"
+          retry
+        end
       end
+      @vsphere_helper.close
     end
 
   end
