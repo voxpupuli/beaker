@@ -7,7 +7,7 @@ module Beaker
     end
 
     let(:instance) { WindowsGroupTest.new }
-    let(:result) { mock(:result, :stdout => group_list_output) }
+    let(:result) { double(:result, :stdout => group_list_output) }
     let(:group_list_output) do <<-EOS
 
 

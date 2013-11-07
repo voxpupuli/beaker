@@ -85,22 +85,22 @@ describe ClassMixedWithDSLRoles do
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
       expect( subject.default ).to be == default
     end
     it 'returns the master if no default host is set' do
       @hosts = [ db, agent1, agent2, master]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 4 ).times.and_return( hosts )
       expect( subject.default ).to be == master
     end
     it 'returns the only host when only a single host is defined' do
       @hosts = [ agent1 ]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 2 ).times.and_return( hosts )
       expect( subject.default ).to be == agent1
     end
     it 'raises an error when there is no default (no default, no master, no single host)'  do
       @hosts = [ agent1, agent2 ]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
       expect{ subject.default }.to raise_error Beaker::DSL::FailTest
     end
   end

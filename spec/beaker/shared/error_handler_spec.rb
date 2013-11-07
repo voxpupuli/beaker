@@ -5,7 +5,7 @@ module Beaker
     describe ErrorHandler do
 
       let( :backtrace ) { "I'm the backtrace\nYes I am!\nI have important information" }
-      let( :logger )    { mock( 'logger' ) }
+      let( :logger )    { double( 'logger' ) }
 
       before :each do
         logger.stub( :error ).and_return( true )
