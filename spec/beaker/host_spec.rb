@@ -95,7 +95,6 @@ module Beaker
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do
-        $dry_run = false
         result.stdout = 'stdout'
         result.stderr = 'stderr'
 
@@ -149,9 +148,10 @@ module Beaker
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
+      idontknow = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_to).with(*args, $dry_run)
+      conn.should_receive(:scp_to).with( *idontknow )
 
       host.do_scp_to *args
     end
@@ -162,9 +162,10 @@ module Beaker
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
+      idontknow = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_from).with(*args, $dry_run)
+      conn.should_receive(:scp_from).with( *idontknow )
 
       host.do_scp_from *args
     end
@@ -175,7 +176,7 @@ module Beaker
 
     context 'merging defaults' do
       it 'knows the difference between foss and pe' do
-        @options = { :type => :pe }
+        @options = { :type => 'pe' }
         expect( host['puppetpath'] ).to be === '/etc/puppetlabs/puppet'
       end
 
