@@ -69,10 +69,10 @@ module Beaker
           tempfilepath = "/path/to/tempfile"
           filepath = "/path/to/file"
           host = make_host( 'testhost', { :platform => 'windows' })
-          tempfile = mock( 'tempfile' )
+          tempfile = double( 'tempfile' )
           tempfile.stub( :path ).and_return( tempfilepath )
           Tempfile.stub( :open ).and_yield( tempfile )
-          file = mock( 'file' )
+          file = double( 'file' )
           File.stub( :open ).and_yield( file )
 
           file.should_receive( :puts ).with( content ).once

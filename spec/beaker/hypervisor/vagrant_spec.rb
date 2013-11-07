@@ -56,7 +56,7 @@ module Beaker
       name = host.name
       Dir.stub( :chdir ).and_yield()
 
-      out = mock( 'stdout' )
+      out = double( 'stdout' )
       out.stub( :read ).and_return("Host #{host.name}
     HostName 127.0.0.1
     User vagrant
@@ -69,7 +69,7 @@ module Beaker
 
       Open3.stub( :popen3 ).with( 'vagrant', 'ssh-config', host.name ).and_return( [ "", out ])
 
-      file = mock( 'file' )
+      file = double( 'file' )
       file.stub( :path ).and_return( '/path/sshconfig' )
       file.stub( :rewind ).and_return( true )
 

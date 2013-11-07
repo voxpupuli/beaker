@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pp'
 
 class ClassMixedWithDSLHelpers
   include Beaker::DSL::Helpers
@@ -11,12 +12,18 @@ class ClassMixedWithDSLHelpers
 end
 
 describe ClassMixedWithDSLHelpers do
+  let( :command )  { 'ls' }
+  let( :host ) { double.as_null_object }
+  let( :result ) { Beaker::Result.new( host, command ) }
+
+  let( :master ) { make_host( 'master',   :roles => %w( master agent )    ) }
+  let( :agent )  { make_host( 'agent',    :roles => %w( agent )           ) }
+  let( :custom ) { make_host( 'custom',   :roles => %w( custom agent )    ) }
+  let( :dash )   { make_host( 'console',  :roles => %w( dashboard agent ) ) }
+  let( :db )     { make_host( 'db',       :roles => %w( database agent )  ) }
+  let( :hosts ) { [ master, agent, dash, db, custom ] }
 
   describe '#on' do
-    let( :command )  { 'ls' }
-    let( :hosts ) { [ double, double, double ] }
-    let( :host ) { double.as_null_object }
-    let( :result ) { Beaker::Result.new( host, command ) }
 
     before :each do
       result.stdout = 'stdout'
@@ -33,35 +40,32 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'if the host is a String Object, finds the matching hosts with that String as role' do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      @hosts[0].should_receive( :exec ).once
+      master.should_receive( :exec ).once
 
       subject.on( 'master', 'echo hello')
 
     end
 
     it 'if the host is a Symbol Object, finds the matching hsots with that Symbol as role' do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      @hosts[0].should_receive( :exec ).once
+      master.should_receive( :exec ).once
 
       subject.on( :master, 'echo hello')
 
     end
 
     it 'delegates to itself for each host passed' do
-
+      expected = []
       hosts.each_with_index do |host, i|
+        expected << i
         host.should_receive( :exec ).and_return( i )
       end
 
       results = subject.on( hosts, command )
-      expect( results ).to be == [ 0, 1, 2 ]
+      expect( results ).to be == expected
     end
 
     context 'upon command completion' do
@@ -153,25 +157,19 @@ describe ClassMixedWithDSLHelpers do
 
   describe "shell" do
     it 'delegates to #on with the default host' do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :on ).with( @hosts[0], "echo hello", {}).once
+      subject.should_receive( :on ).with( master, "echo hello", {}).once
 
       subject.shell( "echo hello" )
-
     end
-
   end
 
   describe '#scp_from' do
     it 'delegates to the host' do
-      hosts = [ double, double, double ]
-      result = double
+      subject.should_receive( :logger ).exactly( hosts.length ).times
+      result.should_receive( :log ).exactly( hosts.length ).times
 
-      subject.should_receive( :logger ).exactly( 3 ).times
-      result.should_receive( :log ).exactly( 3 ).times
       hosts.each do |host|
         host.should_receive( :do_scp_from ).and_return( result )
       end
@@ -182,11 +180,9 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#scp_to' do
     it 'delegates to the host' do
-      hosts = [ double, double, double ]
-      result = double
+      subject.should_receive( :logger ).exactly( hosts.length ).times
+      result.should_receive( :log ).exactly( hosts.length ).times
 
-      subject.should_receive( :logger ).exactly( 3 ).times
-      result.should_receive( :log ).exactly( 3 ).times
       hosts.each do |host|
         host.should_receive( :do_scp_to ).and_return( result )
       end
@@ -197,14 +193,16 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#create_remote_file' do
     it 'scps the contents passed in to the hosts' do
-      hosts = [ 'uno.example.org', 'dos.example.org' ]
       my_opts = { :silent => true }
       tmpfile = double
 
       tmpfile.should_receive( :path ).exactly( 2 ).times.
         and_return( '/local/path/to/blah' )
+
       Tempfile.should_receive( :open ).and_yield( tmpfile )
+
       File.should_receive( :open )
+
       subject.should_receive( :scp_to ).
         with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
 
@@ -222,27 +220,23 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#run_script' do
     it 'delegates to #run_script_on with the default host' do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :run_script_on ).with( @hosts[0], "/tmp/test.sh", {}).once
+      subject.should_receive( :run_script_on ).with( master, "/tmp/test.sh", {}).once
 
       subject.run_script( '/tmp/test.sh' )
-
     end
-
   end
 
   describe 'confine' do
     let(:logger) { double.as_null_object }
     before do
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.stub( :logger ).and_return( logger )
     end
 
     it 'skips the test if there are no applicable hosts' do
-      subject.should_receive( :hosts ).any_number_of_times.and_return( [] )
-      subject.should_receive( :hosts= ).any_number_of_times
+      subject.stub( :hosts ).and_return( [] )
+      subject.stub( :hosts= )
       logger.should_receive( :warn )
       subject.should_receive( :skip_test ).
         with( 'No suitable hosts found' )
@@ -251,8 +245,8 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'raises when given mode is not :to or :except' do
-      subject.should_receive( :hosts ).any_number_of_times
-      subject.should_receive( :hosts= ).any_number_of_times
+      subject.stub( :hosts )
+      subject.stub( :hosts= )
 
       expect {
         subject.confine( :regardless, {:thing => 'value'} )
@@ -324,11 +318,9 @@ describe ClassMixedWithDSLHelpers do
 
   describe "#apply_manifest" do
     it "delegates to #apply_manifest_on with the default host" do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :apply_manifest_on ).with( @hosts[0], 'manifest', {:opt => 'value'}).once
+      subject.should_receive( :apply_manifest_on ).with( master, 'manifest', {:opt => 'value'}).once
 
       subject.apply_manifest( 'manifest', {:opt => 'value'}  )
 
@@ -339,7 +331,7 @@ describe ClassMixedWithDSLHelpers do
     it 'executes puppet on the host passed and ensures it is reverted' do
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.stub( :logger ).and_return( logger )
       subject.should_receive( :on ).twice
       subject.should_receive( :teardown ).and_yield
       subject.should_receive( :puppet ).once.
@@ -357,11 +349,9 @@ describe ClassMixedWithDSLHelpers do
 
   describe "#stub_hosts" do
     it "delegates to #stub_hosts_on with the default host" do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :stub_hosts_on ).with( @hosts[0], 'ipspec' ).once
+      subject.should_receive( :stub_hosts_on ).with( master, 'ipspec' ).once
 
       subject.stub_hosts( 'ipspec'  )
 
@@ -382,11 +372,9 @@ describe ClassMixedWithDSLHelpers do
 
   describe "#stub_forge" do
     it "delegates to #stub_forge_on with the default host" do
-      Hash.any_instance.stub( :exec ).and_return ( true )
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :stub_forge_on ).with( @hosts[0] ).once
+      subject.should_receive( :stub_forge_on ).with( master ).once
 
       subject.stub_forge( )
 
@@ -408,73 +396,72 @@ describe ClassMixedWithDSLHelpers do
 
     it 'runs the correct command on solaris' do
       vardir = '/var'
-      Hash.any_instance.stub( :puppet ).and_return( { 'vardir' => vardir } )
-      agent = { 'platform' => 'solaris' }
+      solaris_agent = make_host( 'solaris', :platform => 'solaris' )
+      solaris_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.should_receive( :on ).with( agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default' ).once
+      subject.should_receive( :on ).with( solaris_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( solaris_agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default' ).once
 
-      subject.stop_agent_on( agent )
+      subject.stop_agent_on( solaris_agent )
 
     end
 
     it 'runs the correct command on aix' do
       vardir = '/var'
-      Hash.any_instance.stub( :puppet ).and_return( { 'vardir' => vardir } )
-      agent = { 'platform' => 'aix' }
+      aix_agent = make_host( 'aix', :platform => 'aix' )
+      aix_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.should_receive( :on ).with( agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, '/usr/bin/stopsrc -s pe-puppet' ).once
+      subject.should_receive( :on ).with( aix_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( aix_agent, '/usr/bin/stopsrc -s pe-puppet' ).once
 
-      subject.stop_agent_on( agent )
+      subject.stop_agent_on( aix_agent )
 
     end
 
     it 'runs the correct command on windows' do
       vardir = '/var'
-      Hash.any_instance.stub( :puppet ).and_return( { 'vardir' => vardir } )
-      agent = { 'platform' => 'windows' }
+      win_agent = make_host( 'win', :platform => 'windows' )
+      win_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.should_receive( :on ).with( agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( win_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( win_agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2] ).once
 
-      subject.stop_agent_on( agent )
+      subject.stop_agent_on( win_agent )
 
     end
 
     it 'runs the pe-puppet on a unix system without pe-puppet-agent' do
       vardir = '/var'
-      Hash.any_instance.stub( :puppet ).and_return( { 'vardir' => vardir } )
-      agent = { 'platform' => 'unix' }
+      deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
+      deb_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.should_receive( :on ).with( agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, "/etc/init.d/pe-puppet stop" ).once
+      subject.should_receive( :on ).with( deb_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( deb_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( deb_agent, "/etc/init.d/pe-puppet stop" ).once
 
-      subject.stop_agent_on( agent )
+      subject.stop_agent_on( deb_agent )
 
     end
 
     it 'runs the pe-puppet-agent on a unix system with pe-puppet-agent' do
       vardir = '/var'
-      Hash.any_instance.stub( :puppet ).and_return( { 'vardir' => vardir } )
-      agent = { 'platform' => 'unix' }
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64' )
+      el_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.should_receive( :on ).with( agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
-      subject.should_receive( :on ).with( agent, "/etc/init.d/pe-puppet-agent stop" ).once
+      subject.should_receive( :on ).with( el_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      subject.should_receive( :on ).with( el_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
+      subject.should_receive( :on ).with( el_agent, "/etc/init.d/pe-puppet-agent stop" ).once
 
-      subject.stop_agent_on( agent )
+      subject.stop_agent_on( el_agent )
     end
 
   end
 
   describe "#stop_agent" do
     it 'delegates to #stop_agent_on with default host' do
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :stop_agent_on ).with( @hosts[0] ).once
+      subject.should_receive( :stop_agent_on ).with( master ).once
 
       subject.stop_agent( )
 
@@ -484,52 +471,45 @@ describe ClassMixedWithDSLHelpers do
   describe "#sign_certificate_for" do
     it 'signs certs' do
       subject.stub( :sleep ).and_return( true )
-      name = 'myname'
-      result = Beaker::Result.new( [], "" ) 
-      result.stdout = "+ \"#{name}\""
-      Hash.any_instance.stub( :node_name ).and_return ( name )
-      @hosts = [ { 'roles' => [ 'master', 'agent', 'dashboard', 'database' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+
+      result.stdout = "+ \"#{agent}\""
+      subject.stub( :hosts ).and_return( hosts )
 
       subject.stub( :puppet ) do |arg|
         arg
       end
 
-      subject.should_receive( :on ).with( @hosts[0], "cert --sign --all", :acceptable_exit_codes => [0,24]).once
-      subject.should_receive( :on ).with( @hosts[0], "cert --list --all").once.and_return( result )
+      subject.should_receive( :on ).with( master, "cert --sign --all", :acceptable_exit_codes => [0,24]).once
+      subject.should_receive( :on ).with( master, "cert --list --all").once.and_return( result )
 
 
-      subject.sign_certificate_for( @hosts[1] )
+      subject.sign_certificate_for( agent )
     end
 
     it 'retries 11 times before quitting' do
       subject.stub( :sleep ).and_return( true )
-      name = 'myname'
-      result = Beaker::Result.new( [], "" ) 
-      result.stdout = "no hostnames here"
-      Hash.any_instance.stub( :node_name ).and_return ( name )
-      @hosts = [ { 'roles' => [ 'master', 'agent', 'dashboard', 'database' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+
+      result.stdout = " \"#{agent}\""
+      subject.stub( :hosts ).and_return( hosts )
 
       subject.stub( :puppet ) do |arg|
         arg
       end
 
-      subject.should_receive( :on ).with( @hosts[0], "cert --sign --all", :acceptable_exit_codes => [0,24]).exactly( 11 ).times
-      subject.should_receive( :on ).with( @hosts[0], "cert --list --all").exactly( 11 ).times.and_return( result )
+      subject.should_receive( :on ).with( master, "cert --sign --all", :acceptable_exit_codes => [0,24]).exactly( 11 ).times
+      subject.should_receive( :on ).with( master, "cert --list --all").exactly( 11 ).times.and_return( result )
       subject.should_receive( :fail_test ).once
 
-      subject.sign_certificate_for( @hosts[1] )
+      subject.sign_certificate_for( agent )
     end
 
   end
 
   describe "#sign_certificate" do
     it 'delegates to #sign_certificate_for with the default host' do
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :sign_certificate_for ).with( @hosts[0] ).once
+      subject.should_receive( :sign_certificate_for ).with( master ).once
 
       subject.sign_certificate(  )
     end
@@ -674,10 +654,9 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#with_puppet_running' do
     it 'delegates to #with_puppet_running_on with the default host' do
-      @hosts = [ { 'roles' => [ 'master', 'agent' ] }, { 'roles' => [ 'agent' ] }, { 'roles' => [ 'custom' ] } ]
-      subject.stub( :hosts ).and_return(@hosts)
+      subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :with_puppet_running_on ).with( @hosts[0], {:opt => 'value'}, '/dir').once
+      subject.should_receive( :with_puppet_running_on ).with( master, {:opt => 'value'}, '/dir').once
 
       subject.with_puppet_running( {:opt => 'value'}, '/dir'  )
 
