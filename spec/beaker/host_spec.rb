@@ -148,10 +148,10 @@ module Beaker
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
-      idontknow = args + [ nil ]
+      conn_args = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_to).with( *idontknow )
+      conn.should_receive(:scp_to).with( *conn_args )
 
       host.do_scp_to *args
     end
@@ -162,10 +162,10 @@ module Beaker
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
-      idontknow = args + [ nil ]
+      conn_args = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_from).with( *idontknow )
+      conn.should_receive(:scp_from).with( *conn_args )
 
       host.do_scp_from *args
     end

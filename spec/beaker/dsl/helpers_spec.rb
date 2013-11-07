@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pp'
 
 class ClassMixedWithDSLHelpers
   include Beaker::DSL::Helpers
