@@ -13,6 +13,8 @@ module Beaker
   class Host
     SELECT_TIMEOUT = 30
 
+    class CommandFailure < StandardError; end
+
     # This class providers array syntax for using puppet --configprint on a host
     class PuppetConfigReader
       def initialize(host, command)
@@ -163,7 +165,7 @@ module Beaker
           # is it necessary to break execution??
           unless result.exit_code_in?(Array(options[:acceptable_exit_codes] || 0))
             limit = 10
-            raise "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
+            raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{limit} lines of output were:\n#{result.formatted_output(limit)}"
           end
         end
         # Danger, so we have to return this result?
