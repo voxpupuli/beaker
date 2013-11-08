@@ -63,13 +63,13 @@ module Beaker
     end
 
     def port_open? port
-      Timeout.timeout 1 do
-        begin
+      begin
+        Timeout.timeout 10 do
           TCPSocket.new(reachable_name, port).close
           return true
-        rescue Errno::ECONNREFUSED
-          return false
         end
+      rescue Errno::ECONNREFUSED, Timeout::Error
+        return false
       end
     end
 
