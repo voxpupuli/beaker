@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Beaker
   module Options
     #An Object that parses, merges and normalizes all supported Beaker options and arguments
@@ -8,6 +10,9 @@ module Beaker
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
       #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
+
+      PARSE_ERROR = if RUBY_VERSION > '1.8.7'; then Psych::SyntaxError; else ArgumentError; end
+
       #The OptionsHash of all parsed options
       attr_accessor :options
 
@@ -173,7 +178,7 @@ module Beaker
         end
         begin
           YAML.load_file(f)
-        rescue Psych::SyntaxError => e
+        rescue PARSE_ERROR => e
           parser_error "#{f} is not a valid YAML file (#{msg})\n\t#{e}"
         end
       end

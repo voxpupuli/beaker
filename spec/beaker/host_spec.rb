@@ -16,7 +16,7 @@ module Beaker
     end
 
     it 'can be read like a hash' do
-      expect{ host['value'] }.to_not raise_error NoMethodError
+      expect{ host['value'] }.to_not raise_error
     end
 
     it 'can be written like a hash' do
@@ -42,7 +42,7 @@ module Beaker
           end
 
           context "32 bit" do
-            let(:success_osarch_check) { mock(:success, :exit_code => 0, :stdout => '32-bit') }
+            let(:success_osarch_check) { double(:success, :exit_code => 0, :stdout => '32-bit') }
 
             it "uses 32 bit cygwin" do
               host.should_receive(:execute).with(/#{cygwin}.*#{package}/)
@@ -51,7 +51,7 @@ module Beaker
           end
 
           context "64 bit" do
-            let(:success_osarch_check) { mock(:success, :exit_code => 0, :stdout => '64-bit') }
+            let(:success_osarch_check) { double(:success, :exit_code => 0, :stdout => '64-bit') }
 
             it "uses 64 bit cygwin" do
               host.should_receive(:execute).with(/#{cygwin64}.*#{package}/)
@@ -61,7 +61,7 @@ module Beaker
         end
 
         context "testing os name" do
-          let(:failed_osarch_check) { stub(:failed, :exit_code => 1) }
+          let(:failed_osarch_check) { double(:failed, :exit_code => 1) }
 
           before(:each) do
             host.should_receive(:execute).with(/wmic os get osarchitecture/, anything).and_yield(failed_osarch_check)
@@ -69,7 +69,7 @@ module Beaker
           end
 
           context "32 bit" do
-            let(:name_check) { mock(:failure, :exit_code => 1) }
+            let(:name_check) { double(:failure, :exit_code => 1) }
 
             it "uses 32 bit cygwin" do
               host.should_receive(:execute).with(/#{cygwin}.*#{package}/)
@@ -78,7 +78,7 @@ module Beaker
           end
 
           context "64 bit" do
-            let(:name_check) { mock(:success, :exit_code => 0) }
+            let(:name_check) { double(:success, :exit_code => 0) }
 
             it "uses 64 bit cygwin" do
               host.should_receive(:execute).with(/#{cygwin64}.*#{package}/)
@@ -95,15 +95,14 @@ module Beaker
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do
-        $dry_run = false
         result.stdout = 'stdout'
         result.stderr = 'stderr'
 
-        logger = mock(:logger)
+        logger = double(:logger)
         logger.stub(:host_output)
         logger.stub(:debug)
         host.instance_variable_set :@logger, logger
-        conn = mock(:connection)
+        conn = double(:connection)
         conn.stub(:execute).and_return(result)
         host.instance_variable_set :@connection, conn
       end
@@ -145,26 +144,28 @@ module Beaker
     # it basically proxies that to the connection object
     it 'do_scp_to logs info and proxies to the connection' do
       logger = host[:logger]
-      conn = mock(:connection)
+      conn = double(:connection)
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
+      conn_args = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_to).with(*args, $dry_run)
+      conn.should_receive(:scp_to).with( *conn_args )
 
       host.do_scp_to *args
     end
 
     it 'do_scp_from logs info and proxies to the connection' do
       logger = host[:logger]
-      conn = mock(:connection)
+      conn = double(:connection)
       @options = { :logger => logger }
       host.instance_variable_set :@connection, conn
       args = [ 'source', 'target', {} ]
+      conn_args = args + [ nil ]
 
       logger.should_receive(:debug)
-      conn.should_receive(:scp_from).with(*args, $dry_run)
+      conn.should_receive(:scp_from).with( *conn_args )
 
       host.do_scp_from *args
     end
@@ -175,7 +176,7 @@ module Beaker
 
     context 'merging defaults' do
       it 'knows the difference between foss and pe' do
-        @options = { :type => :pe }
+        @options = { :type => 'pe' }
         expect( host['puppetpath'] ).to be === '/etc/puppetlabs/puppet'
       end
 

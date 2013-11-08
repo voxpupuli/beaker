@@ -93,9 +93,7 @@ EXPECT
 
       result = double
       result.should_receive( :nil? ).at_least( :once ).and_return( false )
-      result.should_receive( :stdout ).any_number_of_times.and_return( stdout )
-      result.should_receive( :output ).any_number_of_times.and_return( output )
-      result.should_receive( :stderr ).any_number_of_times.and_return( stderr )
+      result.should_receive( :output ).and_return( output )
 
       subject.should_receive( :result ).at_least( :once ).and_return( result )
       expect { subject.assert_output expectation }.to raise_error( exception )

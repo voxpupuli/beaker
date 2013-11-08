@@ -9,14 +9,14 @@ end
 describe ClassMixedWithDSLRoles do
 
   let( :hosts )      { @hosts || Hash.new }
-  let( :agent1 )     { make_host( 'agent1',     { 'roles' => [ 'agent' ] } ) }
-  let( :agent2 )     { make_host( 'agent2',     { 'roles' => [ 'agent' ] } ) }
-  let( :a_and_dash ) { make_host( 'a_and_dash', { 'roles' => [ 'agent', 'dashboard' ] } ) }
-  let( :custom )     { make_host( 'custom',     { 'roles' => [ 'custome_role' ] } ) }
-  let( :db )         { make_host( 'db',         { 'roles' => [ 'database' ] } ) }
-  let( :master )     { make_host( 'master',     { 'roles' => [ 'master', 'agent' ] } ) }
-  let( :default )    { make_host( 'default',    { 'roles' => [ 'default'] } ) }
-  let( :monolith )   { make_host( 'monolith',   { 'roles' => [ 'agent', 'dashboard', 'database', 'master', 'custom_role'] } ) }
+  let( :agent1 )     { make_host( 'agent1',     { :roles => [ 'agent' ] } ) }
+  let( :agent2 )     { make_host( 'agent2',     { :roles => [ 'agent' ] } ) }
+  let( :a_and_dash ) { make_host( 'a_and_dash', { :roles => [ 'agent', 'dashboard' ] } ) }
+  let( :custom )     { make_host( 'custom',     { :roles => [ 'custome_role' ] } ) }
+  let( :db )         { make_host( 'db',         { :roles => [ 'database' ] } ) }
+  let( :master )     { make_host( 'master',     { :roles => [ 'master', 'agent' ] } ) }
+  let( :default )    { make_host( 'default',    { :roles => [ 'default'] } ) }
+  let( :monolith )   { make_host( 'monolith',   { :roles => [ 'agent', 'dashboard', 'database', 'master', 'custom_role'] } ) }
 
   describe '#agents' do
     it 'returns an array of hosts that are agents' do
@@ -85,22 +85,22 @@ describe ClassMixedWithDSLRoles do
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
       expect( subject.default ).to be == default
     end
     it 'returns the master if no default host is set' do
       @hosts = [ db, agent1, agent2, master]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 4 ).times.and_return( hosts )
       expect( subject.default ).to be == master
     end
     it 'returns the only host when only a single host is defined' do
       @hosts = [ agent1 ]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 2 ).times.and_return( hosts )
       expect( subject.default ).to be == agent1
     end
     it 'raises an error when there is no default (no default, no master, no single host)'  do
       @hosts = [ agent1, agent2 ]
-      subject.should_receive( :hosts ).any_number_of_times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
       expect{ subject.default }.to raise_error Beaker::DSL::FailTest
     end
   end

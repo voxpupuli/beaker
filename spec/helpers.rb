@@ -52,7 +52,7 @@ module HostHelpers
   end
 
   def generate_result (name, opts )
-    result = mock( 'result' )
+    result = double( 'result' )
     stdout = opts.has_key?(:stdout) ? opts[:stdout] :  name
     stderr = opts.has_key?(:stderr) ? opts[:stderr] : name
     exit_code = opts.has_key?(:exit_code) ? opts[:exit_code] :  0

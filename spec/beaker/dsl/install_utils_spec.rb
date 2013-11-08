@@ -7,19 +7,19 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
-   let (:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
+   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
                                         :platform => 'linux',
                                         :roles => [ 'agent' ] } ) }
-   let (:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
+   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
                           basic_hosts[1][:platform] = 'windows'
                           basic_hosts  }
-   let (:winhost)       { make_host( 'winhost', { 'platform' => 'windows',
-                                                  'pe_ver' => '3.0',
-                                                  'working_dir' => '/tmp' } ) }
-   let (:unixhost)      { make_host( 'unixhost', { 'platform' => 'linux',
-                                                   'pe_ver' => '3.0',
-                                                   'working_dir' => '/tmp',
-                                                   'dist' => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
+   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp' } ) }
+   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
+                                                  :pe_ver => '3.0',
+                                                  :working_dir => '/tmp',
+                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
 
 
   context 'extract_repo_info_from' do
@@ -52,7 +52,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   context 'find_git_repo_versions' do
     it 'returns a hash of :name => version' do
-      host        = stub( 'Host' )
+      host        = double( 'Host' )
       repository  = { :name => 'name' }
       path        = '/path/to/repo'
       cmd         = 'cd /path/to/repo/name && git describe || true'
@@ -77,7 +77,7 @@ describe ClassMixedWithDSLInstallUtils do
       host = { 'platform' => 'debian' }
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).any_number_of_times.and_return( logger )
+      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
       subject.should_receive( :on ).exactly( 4 ).times
 
       subject.install_from_git( host, path, repo )
