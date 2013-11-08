@@ -545,6 +545,7 @@ describe ClassMixedWithDSLHelpers do
     def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
       subject.instance_variable_set(:@path, test_case_path)
       host.stub(:tmpdir).and_return(tmpdir_path)
+      host.stub(:file_exist?).and_return(true)
     end
 
     before do
@@ -643,6 +644,12 @@ describe ClassMixedWithDSLHelpers do
         it 'restores puppet.conf' do
           subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/cat '#{backup_location}' > '#{original_location}'/).once
+        end
+
+        it "doesn't restore a non-existent file" do
+          subject.stub(:backup_the_file)
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/rm -f '#{original_location}'/)
         end
       end
 

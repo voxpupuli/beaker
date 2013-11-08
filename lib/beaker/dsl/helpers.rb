@@ -474,22 +474,43 @@ module Beaker
       # @!visibility private
       def restore_puppet_conf_from_backup( host, backup_file )
         puppetpath = host['puppetpath']
+        puppet_conf = File.join(puppetpath, "puppet.conf")
 
-        host.exec( Command.new( "if [ -f '#{backup_file}' ]; then " +
-                                    "cat '#{backup_file}' > " +
-                                    "'#{puppetpath}/puppet.conf'; " +
-                                    "rm -f '#{backup_file}'; " +
-                                "fi" ) )
+        if backup_file
+          host.exec( Command.new( "if [ -f '#{backup_file}' ]; then " +
+                                      "cat '#{backup_file}' > " +
+                                      "'#{puppet_conf}'; " +
+                                      "rm -f '#{backup_file}'; " +
+                                  "fi" ) )
+        else
+          host.exec( Command.new( "rm -f '#{puppet_conf}'" ))
+        end
+
       end
 
+      # Back up the given file in the current_dir to the new_dir
+      #
       # @!visibility private
+      #
+      # @param host [Beaker::Host] The target host
+      # @param current_dir [String] The directory containing the file to back up
+      # @param new_dir [String] The directory to copy the file to
+      # @param filename [String] The file to back up. Defaults to 'puppet.conf'
+      #
+      # @return [String, nil] The path to the file if the file exists, nil if it
+      #   doesn't exist.
       def backup_the_file host, current_dir, new_dir, filename = 'puppet.conf'
+
         old_location = current_dir + '/' + filename
         new_location = new_dir + '/' + filename + '.bak'
 
-        host.exec( Command.new( "cp #{old_location} #{new_location}" ) )
-
-        return new_location
+        if host.file_exist? old_location
+          host.exec( Command.new( "cp #{old_location} #{new_location}" ) )
+          return new_location
+        else
+          logger.warn "Could not backup file '#{old_location}': no such file"
+          nil
+        end
       end
 
       # @!visibility private
