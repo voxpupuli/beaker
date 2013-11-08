@@ -6,7 +6,7 @@ less_than_one_nine = ruby_conf['MAJOR'].to_i == 1 && ruby_conf['MINOR'].to_i < 9
 
 Gem::Specification.new do |s|
   s.name        = "beaker"
-  s.version     = '0.0.0'
+  s.version     = '1.0.0'
   s.authors     = ["Puppetlabs"]
   s.email       = ["delivery@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker"
