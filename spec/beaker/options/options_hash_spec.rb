@@ -40,13 +40,71 @@ module Beaker
         expect(options[:key].is_a?(OptionsHash)) === true and expect(options[:key][:subkey]) === 'subvalue'
       end
 
-      it "supports a dump function" do
-        expect{options.dump}.to_not raise_error
-      end
+      context 'pretty prints itself' do
 
-      it "recursively dumps values" do
-        options.merge({'k' => { 'key' => {'subkey' => 'subvalue'}}})
-        expect(options.dump).to be === "Options:\n\t\tk : \n\t\t\tkey : \n\t\t\t\tsubkey : subvalue\n"
+        it 'in valid JSON' do
+          require 'json'
+
+          options['array'] = ['one', 'two', 'three']
+          options['hash'] = {'subkey' => { 'subsub' => 1 }}
+          options['nil'] = nil
+          options['number'] = 4
+          options['float'] = 1.0
+          options['string'] = 'string'
+          options['true'] = true
+
+          expect{ JSON.parse( options.dump ) }.to_not raise_error
+        end
+
+        context 'for non collection values shows' do
+          it 'non-string like values as bare words' do
+            expect( options.fmt_value( 4 ) ).to be == "4"
+            expect( options.fmt_value( 1.0 ) ).to be == "1.0"
+            expect( options.fmt_value( true ) ).to be == "true"
+            expect( options.fmt_value( false ) ).to be == "false"
+          end
+
+          it 'nil values as null' do
+            expect( options.fmt_value( nil ) ).to be == 'null'
+          end
+
+          it 'strings within double quotes' do
+            expect( options.fmt_value( 'thing' ) ).to be == '"thing"'
+          end
+        end
+
+        context 'for list like collections shows' do
+          it 'each element on a new line' do
+            fmt_list = options.fmt_value( %w{ one two three } )
+
+            expect( fmt_list ).to match(/^\s*"one",?$/)
+            expect( fmt_list ).to match(/^\s*"two",?$/)
+            expect( fmt_list ).to match(/^\s*"three",?$/)
+          end
+
+          it 'square brackets on either end of the list' do
+            fmt_list = options.fmt_value( %w{ one two three } )
+
+            expect( fmt_list ).to match( /\A\[\s*$/ )
+            expect( fmt_list ).to match( /^\s*\]\Z/ )
+          end
+        end
+
+        context 'for dict like collections shows' do
+          it 'each element on a new line' do
+            fmt_assoc = options.fmt_value( {:one => 'two', :two => 'three'} )
+
+            expect( fmt_assoc ).to match(/^\s*"one": "two",?$/)
+            expect( fmt_assoc ).to match(/^\s*"two": "three",?$/)
+          end
+
+          it 'curly braces on either end of the list' do
+            fmt_assoc = options.fmt_value( {:one => 'two', :two => 'three'} )
+
+            expect( fmt_assoc ).to match( /\A\{\s*$/ )
+            expect( fmt_assoc ).to match( /^\s*\}\Z/ )
+          end
+        end
       end
     end
   end
