@@ -1,5 +1,4 @@
 require 'socket'
-require 'timeout'
 
 %w(command ssh_connection).each do |lib|
   begin
@@ -11,6 +10,7 @@ end
 
 module Beaker
   class Host
+    SELECT_TIMEOUT = 30
 
     # This class providers array syntax for using puppet --configprint on a host
     class PuppetConfigReader
@@ -63,18 +63,26 @@ module Beaker
     end
 
     def port_open? port
-      Timeout.timeout 1 do
-        begin
-          TCPSocket.new(reachable_name, port).close
-          return true
-        rescue Errno::ECONNREFUSED
-          return false
+      s = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+      sa = Socket.sockaddr_in(port, reachable_name)
+
+      begin
+        s.connect_nonblock(sa)
+      rescue Errno::EINPROGRESS
+        if IO.select(nil, [s], nil, SELECT_TIMEOUT)
+          begin
+            s.connect_nonblock(sa)
+          rescue Errno::EISCONN
+            return true
+          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+            return false
+          end
         end
       end
+      return false
     end
 
     def up?
-      require 'socket'
       begin
         Socket.getaddrinfo( reachable_name, nil )
         return true
