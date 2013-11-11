@@ -621,7 +621,7 @@ describe ClassMixedWithDSLHelpers do
 
         it 'restores puppet.conf' do
           subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/cat #{backup_location} > #{original_location}/).once
+          expect(host).to execute_commands_matching(/cat '#{backup_location}' > '#{original_location}'/).once
         end
       end
 
