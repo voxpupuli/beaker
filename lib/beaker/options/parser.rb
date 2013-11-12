@@ -151,7 +151,7 @@ module Beaker
         #   overwrite defaults with command line and file options 
         @options = @options.merge(cmd_line_and_file_options)
 
-        if not @options[:help]
+        if not @options[:help] and not @options[:version]
           #read the hosts file that contains the node configuration and hypervisor info
           hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
           # merge in host file vars
