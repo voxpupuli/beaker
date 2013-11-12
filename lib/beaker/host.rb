@@ -1,4 +1,5 @@
 require 'socket'
+require 'timeout'
 
 %w(command ssh_connection).each do |lib|
   begin
@@ -63,23 +64,14 @@ module Beaker
     end
 
     def port_open? port
-      s = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-      sa = Socket.sockaddr_in(port, reachable_name)
-
       begin
-        s.connect_nonblock(sa)
-      rescue Errno::EINPROGRESS
-        if IO.select(nil, [s], nil, SELECT_TIMEOUT)
-          begin
-            s.connect_nonblock(sa)
-          rescue Errno::EISCONN
-            return true
-          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-            return false
-          end
+        Timeout.timeout SELECT_TIMEOUT do
+          TCPSocket.new(reachable_name, port).close
+          return true
         end
+      rescue Errno::ECONNREFUSED, Timeout::Error
+        return false
       end
-      return false
     end
 
     def up?
