@@ -10,7 +10,18 @@ require 'tempfile'
 require 'benchmark'
 require 'stringio'
 require 'rbconfig'
+#include test/unit, but do not allow it to autorun on exit
 require 'test/unit'
+if defined?(Test::Unit::AutoRunner.need_auto_run?)
+  # For test-unit gem >= 2.4.9
+  Test::Unit::AutoRunner.need_auto_run = false
+elsif defined?(Test::Unit.run?)
+  # For test-unit gem < 2.4.9
+  Test::Unit.run = true
+elsif defined?(Test::Unit::Runner)
+  # For test/unit bundled in Ruby >= 1.9.3
+  Test::Unit::Runner.module_eval("@@stop_auto_run = true")
+end
 
 module Beaker
   # This class represents a single test case. A test case is necessarily
@@ -29,7 +40,6 @@ module Beaker
     rb_config_class = defined?(RbConfig) ? RbConfig : Config
     if rb_config_class::CONFIG['MAJOR'].to_i == 1 &&
       rb_config_class::CONFIG['MINOR'].to_i == 8 then
-      Test::Unit.run = true
       # The Exception raised by Ruby's STDLIB's test framework (Ruby 1.8)
       TEST_EXCEPTION_CLASS = Test::Unit::AssertionFailedError
     else
