@@ -42,5 +42,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'inifile'
   #unf is an 'optional' fog dependency, but it warns when it is missing
   #  see https://github.com/fog/fog/pull/2320/commits
-  s.add_runtime_dependency 'unf'
+  #  uncomment to remove unf warning
+  #s.add_runtime_dependency 'unf'
 end
