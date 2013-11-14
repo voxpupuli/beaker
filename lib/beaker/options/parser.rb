@@ -11,6 +11,8 @@ module Beaker
       #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
 
+      PLATFORMS = /(centos)|(fedora)|(debian)|(oracle)|(redhat)|(scientific)|(sles)|(ubuntu)|(windows)|(solaris)|(aix)|(el)/
+
       PARSE_ERROR = if RUBY_VERSION > '1.8.7'; then Psych::SyntaxError; else ArgumentError; end
 
       #The OptionsHash of all parsed options
@@ -186,6 +188,7 @@ module Beaker
       #Validate all merged options values for correctness
       #
       #Currently checks:
+      #  - each host has a valid platform
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
       #  - --type is one of 'pe' or 'git'
@@ -198,6 +201,16 @@ module Beaker
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
+
+        @options['HOSTS'].each_key do |name|
+          if not @options['HOSTS'][name]['platform']
+            parser_error "Host #{name} does not have a platform specified"
+          else
+            if not @options['HOSTS'][name]['platform'] =~ PLATFORMS
+              parser_error "Host #{name} is on unsupported platform #{@options['HOSTS'][name]['platform']}"
+            end
+          end
+        end
 
         #use the keyfile if present
         if @options.has_key?(:keyfile)
