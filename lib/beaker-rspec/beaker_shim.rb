@@ -42,5 +42,11 @@ module BeakerRSpec
       @network_manager.cleanup
     end
 
+    def puppet_module_install opts = {}
+      hosts.each do |host|
+        scp_to host, opts[:source], File.join(host['distmoduledir'], opts[:module_name])
+      end
+    end
+
   end
 end
