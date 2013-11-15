@@ -19,8 +19,9 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # Testing dependencies
-  s.add_development_dependency 'rspec', '2.11.0'
+  s.add_development_dependency 'rspec', '2.13.0'
   s.add_development_dependency 'fakefs', '0.4'
+  s.add_development_dependency 'serverspec'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'simplecov' unless less_than_one_nine
 
