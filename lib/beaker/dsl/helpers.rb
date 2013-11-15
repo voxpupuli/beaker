@@ -449,7 +449,11 @@ module Beaker
             if host.is_pe?
               bounce_service( host, 'pe-httpd' )
             else
-              stop_puppet_from_source_on( host ) if puppet_master_started
+              if puppet_master_started
+                stop_puppet_from_source_on( host )
+              else
+                dump_puppet_log(host)
+              end
             end
 
           rescue Exception => teardown_exception
@@ -498,7 +502,6 @@ module Beaker
 
         logger.debug 'Waiting for the puppet master to start'
         unless port_open_within?( host, 8140, 10 )
-          dump_puppet_log(host)
           raise Beaker::DSL::FailTest, 'Puppet master did not start in a timely fashion'
         end
         logger.debug 'The puppet master has started'
@@ -515,9 +518,6 @@ module Beaker
             sleep 1
           end
         end
-      rescue RuntimeError => e
-        dump_puppet_log host
-        raise e
       end
 
       # @!visibility private
