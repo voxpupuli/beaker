@@ -65,7 +65,10 @@ module Beaker
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
         ssh_config = Dir.chdir(@vagrant_path) do
-          stdin, stdout = Open3.popen3('vagrant', 'ssh-config', host.name)
+          stdin, stdout, stderr, wait_thr = Open3.popen3('vagrant', 'ssh-config', host.name)
+          if not wait_thr.value.success?
+            raise "Failed to 'vagrant ssh-config' for #{host.name}"
+          end
           stdout.read
         end
         #replace hostname with ip
@@ -130,7 +133,10 @@ module Beaker
 
     def vagrant_cmd(args)
       Dir.chdir(@vagrant_path) do
-        system("vagrant #{args}")
+        run = system("vagrant #{args}")
+        if not run
+          raise "Failed to execute vagrant_cmd ( #{args} )"
+        end
       end
     end
 
