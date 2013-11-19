@@ -11,7 +11,7 @@ module Beaker
       #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
 
-      PLATFORMS = /(centos)|(fedora)|(debian)|(oracle)|(redhat)|(scientific)|(sles)|(ubuntu)|(windows)|(solaris)|(aix)|(el)/
+      PLATFORMS = /centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el/
 
       PARSE_ERROR = if RUBY_VERSION > '1.8.7'; then Psych::SyntaxError; else ArgumentError; end
 

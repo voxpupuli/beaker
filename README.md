@@ -82,6 +82,50 @@ In this case, the host 'ubuntu-1004-32' is now the Puppet Master, while 'ubuntu-
 Puppet Dashboard host, resulting in a split Master/Dashboard install.  Systest will automagically 
 prepare an appropriate answers file for use with the PE Installer.
 
+## Required Host Settings ##
+To properly define a host you must provide:
+
+* name
+  * The string identifying this host
+* platform
+  * One of the Beaker supported platforms
+
+## Optional Host Settings ##
+Additionaly, Beaker supports the following host options:
+
+* hypervisor
+  * one of `solaris`, `blimpy`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`
+  * additional settings may be required depending on the selected hypervisor (ie, template, box, box_url, etc).  Check the documentation below for your hypervisor for details  
+* snapshot
+  * the name of the snapshot to revert to before testing
+* roles
+  * the 'job' of this host, an array of `master`, `agent`, `dashboard`, `database`, `default` or any user-defined string
+* vmname
+  * the name of the vm to be provisioned, may be different from the host name
+* pe_dir
+  * the directory where PE builds are located, may be local directory or a URL
+* pe_ver
+  * the version number of PE to install
+
+
+## Supported Platforms ##
+Beaker depends upon each host in the configuration file having a platform type that is correctly formatted and supported.  The platform is used to determine how various operations are carried out internally (such as installing packages using the correct package manager for the given operating system).
+
+The platform's format is `.*PLATFORM.*` where `PLATFORM` is one of:
+
+* centos
+* fedora
+* debian
+* oracle
+* redhat
+* scientific
+* sles
+* ubuntu
+* windows
+* solaris
+* aix
+* el-
+
 
 # Provisioning #
 Systest has built in capabilites for managing VMs and provisioning SUTs:
