@@ -51,6 +51,12 @@ module Beaker
       # configurations we have for many of our products
       type = is_pe? ? :pe : :foss
       @defaults = merge_defaults_for_type @options, type
+      pkg_initialize
+    end
+
+    def pkg_initialize
+      # This method should be overridden by platform-specific code to
+      # handle whatever packaging-related initialization is necessary.
     end
 
     def merge_defaults_for_type options, type
