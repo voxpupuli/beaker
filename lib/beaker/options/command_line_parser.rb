@@ -157,6 +157,10 @@ module Beaker
             @cmd_options[:add_el_extras] = true
           end
 
+          opts.on('--version', 'Report currently running version of beaker' ) do 
+            @cmd_options[:version] = true
+          end
+
           opts.on '-c', '--config FILE',
                   'DEPRECATED use --hosts' do |file|
             @cmd_options[:hosts_file] = file
