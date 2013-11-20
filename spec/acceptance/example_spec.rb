@@ -8,4 +8,10 @@ describe "ignore" do
     end
   end
 
+  hosts.each do |node|
+    describe service('ssh'), :node => node do
+      it { should be_running }
+      it { should be_enabled }
+    end
+  end
 end
