@@ -662,4 +662,23 @@ describe ClassMixedWithDSLHelpers do
 
     end
   end
+
+  describe '#fact_on' do
+    it 'retreives a fact on host(s)' do
+      subject.should_receive(:facter).with('osfamily',{}).once
+      subject.should_receive(:on).and_return(result)
+
+      subject.fact_on('host','osfamily')
+    end
+  end
+
+  describe '#fact' do
+    it 'delegates to #fact_on with the default host' do
+      subject.stub(:hosts).and_return(hosts)
+      subject.should_receive(:fact_on).with(master,"osfamily",{}).once
+
+      subject.fact('osfamily')
+    end
+  end
+
 end
