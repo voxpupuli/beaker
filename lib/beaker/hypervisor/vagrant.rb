@@ -98,7 +98,7 @@ module Beaker
       if @options[:provision]
         #setting up new vagrant hosts
         #make sure that any old boxes are dead dead dead
-        vagrant_cmd("destroy --force")
+        vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
 
         make_vfile @vagrant_hosts
 
