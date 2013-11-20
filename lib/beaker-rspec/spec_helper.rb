@@ -14,7 +14,7 @@ RSpec.configure do |c|
   nodesetfile = ENV['RSPEC_SETFILE'] || File.join('spec/acceptance/nodesets',"#{nodeset}.yml")
 
   preserve = ENV['RSPEC_DESTROY'] ? '--preserve-hosts' : ''
-  fresh_nodes = ENV['RSPEC_PROVISION'] ? '' : '--no-provision'
+  fresh_nodes = ENV['RSPEC_NO_PROVISION'] ? '--no-provision' : ''
 
   # Configure all nodes in nodeset
   c.setup([preserve, fresh_nodes, '--type','git','--hosts', nodesetfile])
