@@ -8,6 +8,16 @@ module Beaker
       @hosts = make_hosts()
     end
 
+    it "stores the vagrant file in $WORKINGDIR/.vagrant/beaker_vagrant_files/sample.cfg" do
+      FakeFS.activate!
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+      path = vagrant.instance_variable_get( :@vagrant_path )
+
+      expect( path ).to be === File.join(Dir.pwd, '.vagrant', 'beaker_vagrant_files', 'sample.cfg')
+
+    end
+
+
     it "can make a Vagranfile for a set of hosts" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
