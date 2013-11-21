@@ -535,6 +535,13 @@ describe ClassMixedWithDSLHelpers do
       expect { subject.with_puppet_running_on(host, '--foo --bar') }.to raise_error(ArgumentError, /conf_opts must be a Hash. You provided a String: '--foo --bar'/)
     end
 
+    it 'raises the early_exception if backup_the_file fails' do
+      subject.should_receive(:backup_the_file).and_raise(RuntimeError.new('puppet conf backup failed'))
+      expect {
+        subject.with_puppet_running_on(host, {})
+      }.to raise_error(RuntimeError, /puppet conf backup failed/)
+    end
+
     describe "with valid arguments" do
       before do
         Tempfile.should_receive(:open).with('beaker')
