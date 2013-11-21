@@ -89,9 +89,7 @@ module Beaker
     describe "provisioning and cleanup" do
 
       before :each do
-        vagrant.should_receive( :make_vfile ).with( @hosts ).once
-
-        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
+        FakeFS.activate!
         vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
         @hosts.each do |host|
           host_prev_name = host['user']
@@ -103,6 +101,14 @@ module Beaker
       end
 
       it "can provision a set of hosts" do
+        vagrant.should_receive( :make_vfile ).with( @hosts ).once
+        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).never
+        vagrant.provision
+      end
+
+      it "destroys an existing set of hosts before provisioning" do
+        vagrant.make_vfile(@hosts)
+        vagrant.should_receive(:vagrant_cmd).with("destroy --force").once
         vagrant.provision
       end
 
