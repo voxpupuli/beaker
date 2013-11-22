@@ -297,21 +297,23 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#apply_manifest_on' do
-    it 'allows acceptable exit codes through :catch_failures' do
+    it 'adds acceptable exit codes' do
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace' ).
         and_return( 'puppet_command' )
 
-      subject.should_receive( :on ).
-        with( 'my_host', 'puppet_command',
-              :acceptable_exit_codes => [4,0,2],
-              :stdin => "class { \"boo\": }\n" )
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => (0..127),
+        :stdin                 => "class { \"boo\": }\n"
+      )
 
-      subject.apply_manifest_on( 'my_host',
-                                'class { "boo": }',
-                                :acceptable_exit_codes => [4],
-                                :trace => true,
-                                :catch_failures => true )
+      subject.apply_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :trace => true
+      )
     end
   end
 
@@ -322,6 +324,101 @@ describe ClassMixedWithDSLHelpers do
       subject.should_receive( :apply_manifest_on ).with( master, 'manifest', {:opt => 'value'}).once
 
       subject.apply_manifest( 'manifest', {:opt => 'value'}  )
+
+    end
+  end
+
+  describe '#test_manifest_on' do
+    it 'adds acceptable exit codes with :catch_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).
+        with( 'my_host', 'puppet_command',
+              :acceptable_exit_codes => [0,2],
+              :stdin => "class { \"boo\": }\n" )
+
+      subject.test_manifest_on( 'my_host',
+                                'class { "boo": }',
+                                :trace => true,
+                                :catch_failures => true )
+    end
+    it 'allows acceptable exit codes through :catch_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).
+        with( 'my_host', 'puppet_command',
+              :acceptable_exit_codes => [4,0,2],
+              :stdin => "class { \"boo\": }\n" )
+
+      subject.test_manifest_on( 'my_host',
+                                'class { "boo": }',
+                                :acceptable_exit_codes => [4],
+                                :trace => true,
+                                :catch_failures => true )
+    end
+    it 'enforces exit codes through :expect_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => [1,4,6],
+        :stdin                 => "class { \"boo\": }\n"
+      )
+
+      subject.test_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :trace           => true,
+        :expect_failures => true
+      )
+    end
+    it 'enforces exit codes through :expect_failures' do
+      expect {
+        subject.test_manifest_on(
+          'my_host',
+          'class { "boo": }',
+          :trace           => true,
+          :expect_failures => true,
+          :catch_failures  => true
+        )
+      }.to raise_error ArgumentError, /catch_failures.+expect_failures/
+    end
+    it 'enforces added exit codes through :expect_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => [1,2,3,4,5,6],
+        :stdin                 => "class { \"boo\": }\n"
+      )
+
+      subject.test_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :acceptable_exit_codes => (1..5),
+        :trace                 => true,
+        :expect_failures       => true
+      )
+    end
+  end
+
+  describe "#test_manifest" do
+    it "delegates to #test_manifest_on with the default host" do
+      subject.stub( :hosts ).and_return( hosts )
+
+      subject.should_receive( :test_manifest_on ).with( master, 'manifest', {:opt => 'value',:test_return => true}).once
+
+      subject.test_manifest( 'manifest', {:opt => 'value'}  )
 
     end
   end

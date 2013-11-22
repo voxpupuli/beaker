@@ -593,6 +593,35 @@ module Beaker
       end
 
       # Runs 'puppet apply' on a remote host, piping manifest through stdin
+      # @see #manifest_helper
+      def apply_manifest_on(host, manifest, opts = {}, &block)
+        manifest_helper(host, manifest, opts, &block)
+      end
+
+      # Runs 'puppet apply' on default host, piping manifest through stdin
+      # @see #apply_manifest_on
+      def apply_manifest(manifest, opts = {}, &block)
+        apply_manifest_on(default, manifest, opts, &block)
+      end
+
+      # Runs 'puppet apply' and catch failures on a remote host, piping
+      # manifest through stdin. @see #manifest_helper
+      def test_manifest_on(host, manifest, opts = {}, &block)
+        opts[:test_return] = true
+        manifest_helper(host, manifest, opts, &block)
+      end
+
+      # Runs 'puppet apply' and catch failures on default host, piping
+      # manifest through stdin @see #test_manifest_on
+      def test_manifest(manifest, opts = {}, &block)
+        opts[:test_return] = true
+        test_manifest_on(default, manifest, opts, &block)
+      end
+
+      # Helper method. @see #apply_manifest_on @see #apply_manifest @see
+      # #test_manifest_on @see #test _manifest
+      #
+      # @!visibility private
       #
       # @param [Host] host The host that this command should be run on
       #
@@ -607,35 +636,65 @@ module Beaker
       #                         the "--trace" command line parameter will be
       #                         passed to the 'puppet apply' command.
       #
-      # @option opts [Boolean]  :catch_failures (false) By default
-      #                         "puppet --apply" will exit with 0,
-      #                         which does not count as a test
-      #                         failure, even if there were errors applying
-      #                         the manifest. This option enables detailed
-      #                         exit codes and causes a test failure if
-      #                         "puppet --apply" indicates there was a
-      #                         failure during its execution.
+      # @option opts [Boolean]  :test_return (false) This option is not for
+      #                         user-consumption. This option is for internally
+      #                         enabling the `catch_failures` and
+      #                         `expect_failures` options of
+      #                         {#test_manifest_on}.
+      #
+      # @option opts [Boolean]  :catch_failures (false) By default "puppet
+      #                         apply" will exit with 0 and not throw a test
+      #                         failure even if there were errors when applying
+      #                         the manifest. This option enables detailed exit
+      #                         codes and causes a test failure if "puppet
+      #                         apply" indicates there was a failure during its
+      #                         execution, and success otherwise. Cannot be
+      #                         used with the `expect_failures` option.
+      #
+      # @option opts [Boolean]  :expect_failures (false) By default "puppet
+      #                         apply" will exit with 0 and not throw a test
+      #                         failure even if there were errors when applying
+      #                         the manifest. This option enables detailed exit
+      #                         codes and causes a test success if "puppet
+      #                         apply" indicates there was a failure during its
+      #                         execution, and failure on a successful apply.
+      #                         Cannot be used with the `catch_failures`
+      #                         option.
       #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
       #                      validation, etc.
       #
-      def apply_manifest_on(host, manifest, opts = {}, &block)
+      def manifest_helper(host, manifest, opts = {}, &block)
         on_options = {:stdin => manifest + "\n"}
-        on_options[:acceptable_exit_codes] = opts.delete(:acceptable_exit_codes)
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
 
-        if opts[:catch_failures]
-          args << '--detailed-exitcodes'
+        if opts[:test_return]
+          if opts[:catch_failures] and opts[:expect_failures]
+            raise(ArgumentError, "Cannot specify both `catch_failures` and `expect_failures` for a single manifes")
+          end
+          if opts[:catch_failures]
+            detailed_exitcodes = true
+            # From puppet help:
+            # "... an exit code of '2' means there were changes, an exit code of
+            # '4' means there were failures during the transaction, and an exit
+            # code of '6' means there were both changes and failures."
+            # We're after failures specifically so catch exit codes 4 and 6 only.
+            on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [0, 2]
+          elsif opts[:expect_failures]
+            detailed_exitcodes = true
+            on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [1, 4, 6]
+          else
+            on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | 0
+          end
+        else
+          on_options[:acceptable_exit_codes] = opts.delete(:acceptable_exit_codes) || (0..127)
+        end
 
-          # From puppet help:
-          # "... an exit code of '2' means there were changes, an exit code of
-          # '4' means there were failures during the transaction, and an exit
-          # code of '6' means there were both changes and failures."
-          # We're after failures specifically so catch exit codes 4 and 6 only.
-          on_options[:acceptable_exit_codes] |= [0, 2]
+        if detailed_exitcodes
+          args << '--detailed-exitcodes'
         end
 
         # Not really thrilled with this implementation, might want to improve it
@@ -651,12 +710,6 @@ module Beaker
         end
 
         on host, puppet( 'apply', *args), on_options, &block
-      end
-
-      # Runs 'puppet apply' on default host, piping manifest through stdin
-      # @see #apply_manifest_on
-      def apply_manifest(manifest, opts = {}, &block)
-        apply_manifest_on(default, manifest, opts, &block)
       end
 
       # @deprecated
