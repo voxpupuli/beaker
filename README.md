@@ -93,6 +93,8 @@ To properly define a host you must provide:
 ## Optional Host Settings ##
 Additionaly, Beaker supports the following host options:
 
+* ip
+  * the IP address of the SUT
 * hypervisor
   * one of `solaris`, `blimpy`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`
   * additional settings may be required depending on the selected hypervisor (ie, template, box, box_url, etc).  Check the documentation below for your hypervisor for details  
@@ -100,8 +102,6 @@ Additionaly, Beaker supports the following host options:
   * the name of the snapshot to revert to before testing
 * roles
   * the 'job' of this host, an array of `master`, `agent`, `dashboard`, `database`, `default` or any user-defined string
-* vmname
-  * the name of the vm to be provisioned, may be different from the host name
 * pe_dir
   * the directory where PE builds are located, may be local directory or a URL
 * pe_ver
@@ -111,7 +111,7 @@ Additionaly, Beaker supports the following host options:
 ## Supported Platforms ##
 Beaker depends upon each host in the configuration file having a platform type that is correctly formatted and supported.  The platform is used to determine how various operations are carried out internally (such as installing packages using the correct package manager for the given operating system).
 
-The platform's format is `.*PLATFORM.*` where `PLATFORM` is one of:
+The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one of:
 
 * centos
 * fedora
@@ -124,8 +124,9 @@ The platform's format is `.*PLATFORM.*` where `PLATFORM` is one of:
 * windows
 * solaris
 * aix
-* el-
+* el
 
+`VERSION`'s format is not enforced, but should reflect the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, scientific-6-i386-agent, etc).  `ARCH`'s format is also not enforced, but should be appropriate to the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, sles-11-x86_64-master, debian-7-amd64-master, etc).
 
 # Provisioning #
 Systest has built in capabilites for managing VMs and provisioning SUTs:
