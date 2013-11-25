@@ -8,6 +8,12 @@ module Beaker
                           basic_hosts }
     let( :master_certname ) { 'master_certname' }
 
+    it 'generates 3.2 answers for 3.2 hosts' do
+      @ver = '3.2'
+      Beaker::Answers::Version32.should_receive( :answers ).with( hosts, master_certname, {}).once
+      subject.answers( @ver, hosts, master_certname, {} )
+    end
+
     it 'generates 3.0 answers for 3.1 hosts' do
       @ver = '3.1'
       Beaker::Answers::Version30.should_receive( :answers ).with( hosts, master_certname, {} ).once
@@ -39,6 +45,22 @@ module Beaker
   end
 
   module Answers
+    describe Version32 do
+      let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
+      let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
+                      basic_hosts[1]['roles'] = ['dashboard', 'agent']
+                      basic_hosts[2]['roles'] = ['database', 'agent']
+                      basic_hosts }
+      let( :master_certname ) { 'master_certname' }
+
+      # The only difference between 3.2 and 3.0 is the addition of the
+      # master certname to the dashboard answers
+      it 'should add q_puppetmaster_certname to the dashboard answers' do
+        @ver = '3.2'
+        expect( subject.answers( hosts, master_certname, {} )['vm2']).to include :q_puppetmaster_certname
+      end
+    end
+
     describe Version30 do
       let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
       let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
