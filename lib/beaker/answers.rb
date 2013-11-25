@@ -1,4 +1,4 @@
-[ 'version30', 'version28', 'version20' ].each do |file|
+[ 'version32', 'version30', 'version28', 'version20' ].each do |file|
   begin
     require "beaker/answers/#{file}"
   rescue LoadError
@@ -25,7 +25,11 @@ module Beaker
     def self.answers(version, hosts, master_certname, options)
 
       case version
-      when /\A3\.[[:digit:]]/ # All 3.x so far have the same answers
+      when /\A3\.2/
+        Version32.answers(hosts, master_certname, options)
+      when /\A3\.1/
+        Version30.answers(hosts, master_certname, options)
+      when /\A3\.0/
         Version30.answers(hosts, master_certname, options)
       when /\A2\.8/
         Version28.answers(hosts, master_certname, options)
