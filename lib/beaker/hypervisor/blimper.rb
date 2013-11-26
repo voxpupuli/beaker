@@ -59,17 +59,17 @@ module Beaker
         end
       end
 
-      # Attempt to start the fleet, we wrap it with some error handling that deals
-      # with generic Fog errors and retrying in case these errors are transient.
+      # Attempt to start the fleet, we wrap it with some error handling that
+      # deals with generic Fog errors and retrying in case these errors are
+      # transient.
       fleet_retries = 0
       begin
         fleet.start
-      rescue Fog::Errors::Error => ex
+      rescue Fog::Errors::Error, SystemCallError => ex
         fleet_retries += 1
         if fleet_retries <= 3
           sleep_time = rand(10) + 10
-          @logger.notify("Calling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start due to Fog::Errors::Error (#{
-  ex.message}), retry attempt #{fleet_retries}.")
+          @logger.notify("Calling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start due to exception #{ex.class.to_s} (#{ex.message}), retry attempt #{fleet_retries}.")
           begin
             timeout(30) do
               fleet.destroy
