@@ -4,11 +4,12 @@ module Beaker
   module Options
 
     describe Parser do
-      let(:parser)    { Parser.new }
-      let(:opts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
-      let(:hosts_path)  { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
-      let(:badyaml_path)  { File.join(File.expand_path(File.dirname(__FILE__)), "data", "badyaml.cfg") }
-      let(:home) {ENV['HOME']}
+      let(:parser)           { Parser.new }
+      let(:opts_path)        { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
+      let(:hosts_path)       { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
+      let(:badyaml_path)     { File.join(File.expand_path(File.dirname(__FILE__)), "data", "badyaml.cfg") }
+      let(:home)             { ENV['HOME'] }
+      let(:platforms_regex)  { Parser::PLATFORMS }
 
       it "supports usage function" do
         expect{parser.usage}.to_not raise_error
@@ -18,6 +19,26 @@ module Beaker
 
       it "has repo set to #{repo}" do
         expect(parser.repo).to be === "#{repo}"
+      end
+
+      #read through the file of possible platform values, correctly identify the 50 invalid platform values
+      describe "recognizes valid platforms" do
+
+        it "accepts correctly formatted platform values" do
+          expect( 'oracle-version-arch' =~ platforms_regex ).to be === 0
+        end
+
+        it "rejects non-supported osfamilies" do
+          expect( 'amazon6-version-arch' =~ platforms_regex ).to be === nil
+        end
+
+        it "rejects platforms without version/arch" do
+          expect( 'ubuntu-5' =~ platforms_regex ).to be === nil
+        end
+
+        it "rejects platforms that do not have osfamily at start of string" do
+          expect( 'oel-r5-u6-x86-64' =~ platforms_regex ).to be === nil
+        end
       end
 
       #test parse_install_options
@@ -148,17 +169,17 @@ module Beaker
         end
 
         context "for pe" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'solaris', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4', 'pe')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'solaris-version-arch', 'pe')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'pe')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'pe')
         end
 
         context "for foss" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows', 'git')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4', 'git')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'git')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'git')
 
           it "allows master role for solaris" do
-            hosts_file = fake_hosts_file_for_platform(hosts, 'solaris')
+            hosts_file = fake_hosts_file_for_platform(hosts, 'solaris-version-arch')
             args = ["--type", "git", "--hosts", hosts_file]
             options_hash = parser.parse_args(args)
             expect(options_hash[:HOSTS][:master][:platform]).to match(/solaris/)
