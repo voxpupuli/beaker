@@ -251,6 +251,14 @@ The vm is identified by `box` or `box_url` in the config file.  No snapshot name
       nfs_server: none
       consoleport: 443
 
+VagrantFiles are created per host configuration file.  They can be found in the `.vagrant/beaker_vagrant_files` directory of the current working directory in a subdirectory named after the host configuration file.
+
+    > beaker --hosts sample.cfg
+    > cd .vagrant/beaker_vagrant_files; ls
+    sample.cfg
+    > cd sample.cfg; ls
+    VagrantFile
+
 # Putting it all together #
 
 ## Running FOSS tests ##
