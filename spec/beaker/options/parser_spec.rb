@@ -153,19 +153,19 @@ module Beaker
 
       it "can correctly combine arguments from different sources" do
         FakeFS.deactivate!
-        args = ["-h", hosts_path, "--debug", "--type", "git", "--install", "PUPPET/1.0,HIERA/hello"]
-        expect(parser.parse_args(args)).to be === {:hosts_file=>hosts_path, :options_file=>nil, :type=>"git", :provision=>true, :preserve_hosts=>false, :root_keys=>false, :quiet=>false, :xml=>false, :color=>true, :debug=>true, :dry_run=>false, :timeout=>300, :fail_mode=>nil, :timesync=>false, :repo_proxy=>false, :add_el_extras=>false, :consoleport=>443, :pe_dir=>"/opt/enterprise/dists", :pe_version_file=>"LATEST", :pe_version_file_win=>"LATEST-win", :dot_fog=>"#{home}/.fog", :help=>false, :ec2_yaml=>"config/image_templates/ec2.yaml", :ssh=>{:config=>false, :paranoid=>false, :timeout=>300, :auth_methods=>["publickey"], :port=>22, :forward_agent=>true, :keys=>["#{home}/.ssh/id_rsa"], :user_known_hosts_file=>"#{home}/.ssh/known_hosts"}, :install=>["git://github.com/puppetlabs/puppet.git#1.0", "git://github.com/puppetlabs/hiera.git#hello"], :HOSTS=>{:"pe-ubuntu-lucid"=>{:roles=>["agent", "dashboard", "database", "master"], :vmname=>"pe-ubuntu-lucid", :platform=>"ubuntu-10.04-i386", :snapshot=>"clean-w-keys", :hypervisor=>"fusion"}, :"pe-centos6"=>{:roles=>["agent"], :vmname=>"pe-centos6", :platform=>"el-6-i386", :hypervisor=>"fusion", :snapshot=>"clean-w-keys"}}, :nfs_server=>"none", :helper=>[], :load_path=>[], :tests=>[], :pre_suite=>[], :post_suite=>[], :modules=>[]}
+        args = ["-h", hosts_path, "--log-level", "debug", "--type", "git", "--install", "PUPPET/1.0,HIERA/hello"]
+        expect(parser.parse_args(args)).to be === {:log_level=>"debug", :hosts_file=>hosts_path, :options_file=>nil, :type=>"git", :provision=>true, :preserve_hosts=>false, :root_keys=>false, :quiet=>false, :xml=>false, :color=>true, :dry_run=>false, :timeout=>300, :fail_mode=>nil, :timesync=>false, :repo_proxy=>false, :add_el_extras=>false, :consoleport=>443, :pe_dir=>"/opt/enterprise/dists", :pe_version_file=>"LATEST", :pe_version_file_win=>"LATEST-win", :dot_fog=>"#{home}/.fog", :help=>false, :ec2_yaml=>"config/image_templates/ec2.yaml", :ssh=>{:config=>false, :paranoid=>false, :timeout=>300, :auth_methods=>["publickey"], :port=>22, :forward_agent=>true, :keys=>["#{home}/.ssh/id_rsa"], :user_known_hosts_file=>"#{home}/.ssh/known_hosts"}, :install=>["git://github.com/puppetlabs/puppet.git#1.0", "git://github.com/puppetlabs/hiera.git#hello"], :HOSTS=>{:"pe-ubuntu-lucid"=>{:roles=>["agent", "dashboard", "database", "master"], :vmname=>"pe-ubuntu-lucid", :platform=>"ubuntu-10.04-i386", :snapshot=>"clean-w-keys", :hypervisor=>"fusion"}, :"pe-centos6"=>{:roles=>["agent"], :vmname=>"pe-centos6", :platform=>"el-6-i386", :hypervisor=>"fusion", :snapshot=>"clean-w-keys"}}, :nfs_server=>"none", :helper=>[], :load_path=>[], :tests=>[], :pre_suite=>[], :post_suite=>[], :modules=>[]}
       end
 
       it "ensures that file-mode is one of fast/stop" do
         FakeFS.deactivate!
-        args = ["-h", hosts_path, "--debug", "--fail-mode", "slow"]
+        args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "slow"] 
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 
       it "ensures that type is one of pe/git" do
         FakeFS.deactivate!
-        args = ["-h", hosts_path, "--debug", "--type", "unkowns"]
+        args = ["-h", hosts_path, "--log-level", "debug", "--type", "unkowns"]
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 

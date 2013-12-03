@@ -16,7 +16,7 @@ module Beaker
       context 'default for' do
         its(:destinations)  { should include(STDOUT)  }
         its(:color)         { should be_nil           }
-        its(:log_level)     { should be :normal       }
+        its(:log_level)     { should be :info       }
       end
     end
 
@@ -57,7 +57,7 @@ module Beaker
 
       context 'at debug log_level' do
         subject( :debug_logger )  { Logger.new( my_io,
-                                              :debug => true,
+                                              :log_level => 'debug',
                                               :quiet => true,
                                               :color => true )
                                   }
@@ -80,14 +80,13 @@ module Beaker
         end
       end
 
-      context 'at normal log_level' do
-        subject( :normal_logger ) { Logger.new( my_io,
+      context 'at info log_level' do
+        subject( :info_logger ) { Logger.new( my_io,
                                               :quiet => true,
                                               :color => true )
                                   }
 
         its( :is_debug? ) { should be_false }
-        its( :is_warn? )  { should be_false }
 
 
         context 'skip' do
@@ -96,8 +95,7 @@ module Beaker
             my_io.should_not_receive :print
           end
 
-          it( 'warnings' )  { normal_logger.warn 'NOT A WARNING!'  }
-          it( 'debugs' )    { normal_logger.debug 'NOT DEBUGGING!' }
+          it( 'debugs' )    { info_logger.debug 'NOT DEBUGGING!' }
         end
 
 
@@ -107,9 +105,9 @@ module Beaker
             my_io.should_receive( :print ).twice
           end
 
-          it( 'successes' )     { normal_logger.success 'SUCCESS!'  }
-          it( 'notifications' ) { normal_logger.notify 'NOTFIY!'    }
-          it( 'errors' )        { normal_logger.error 'ERROR!'      }
+          it( 'successes' )     { info_logger.success 'SUCCESS!'  }
+          it( 'notifications' ) { info_logger.notify 'NOTFIY!'    }
+          it( 'errors' )        { info_logger.error 'ERROR!'      }
         end
       end
     end

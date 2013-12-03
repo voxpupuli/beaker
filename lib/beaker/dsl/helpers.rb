@@ -878,7 +878,7 @@ module Beaker
       #
       # @param [Host] host  The host to sign for
       #
-      # @returns nil
+      # @return nil
       # @raise [FailTest] if process times out
       def sign_certificate_for(host)
         if [master, dashboard, database].include? host
@@ -916,7 +916,7 @@ module Beaker
       # @param [String] name The name of the fact to query for
       # @!macro common_opts
       #
-      # @returns String The value of the fact 'name' on the provided host
+      # @return String The value of the fact 'name' on the provided host
       # @raise  [FailTest] Raises an exception if call to facter fails
       def fact_on(host, name, opts = {})
         result = on host, facter(name, opts)
