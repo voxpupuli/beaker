@@ -6,12 +6,14 @@ less_than_one_nine = ruby_conf['MAJOR'].to_i == 1 && ruby_conf['MINOR'].to_i < 9
 
 Gem::Specification.new do |s|
   s.name        = "beaker-rspec"
-  s.version     = '0.0.1'
+  s.version     = '1.0.0'
   s.authors     = ["Puppetlabs"]
   s.email       = ["sqa@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker-rspec"
   s.summary     = %q{RSpec bindings for beaker}
   s.description = %q{RSpec bindings for beaker}
+  s.license     = 'Apache2'
+
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -21,6 +23,7 @@ Gem::Specification.new do |s|
   # Testing dependencies
   s.add_development_dependency 'rspec', '2.13.0'
   s.add_development_dependency 'fakefs', '0.4'
+  s.add_development_dependency 'specinfra'
   s.add_development_dependency 'serverspec'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'simplecov' unless less_than_one_nine
