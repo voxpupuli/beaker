@@ -15,6 +15,32 @@ module Beaker
       Socket.stub( :getaddrinfo ).and_return( true )
     end
 
+    describe '#get_template_url' do
+
+      it 'works returns the valid url when passed valid pooling_api and template name' do
+        vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
+        uri = vcloud.get_template_url("http://pooling.com", "template")
+        expect( uri ).to be === "http://pooling.com/vm/template"
+      end
+      
+      it 'adds a missing scheme to a given URL' do
+        vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
+        uri = vcloud.get_template_url("pooling.com", "template")
+        expect( URI.parse(uri).scheme ).to_not be === nil
+      end
+
+      it 'raises an error on an invalid pooling api url' do
+        vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
+        expect{ vcloud.get_template_url("pooling###   ", "template")}.to raise_error ArgumentError
+      end
+
+      it 'raises an error on an invalide template name' do
+        vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
+        expect{ vcloud.get_template_url("pooling.com", "t!e&m*p(l\\a/t e")}.to raise_error ArgumentError
+      end
+      
+    end
+
     describe "#provision" do
 
       it 'provisions hosts from the pool' do 
