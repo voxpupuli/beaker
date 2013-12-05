@@ -1,6 +1,5 @@
 module Beaker
   class CLI
-    GEMSPEC = File.join(File.expand_path(File.dirname(__FILE__)), "../../beaker.gemspec")
     VERSION_STRING = 
 "      wWWWw
       |o o|

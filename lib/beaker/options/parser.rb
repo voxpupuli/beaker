@@ -189,6 +189,7 @@ module Beaker
       #
       #Currently checks:
       #  - each host has a valid platform
+      #  - each host platform is using the version codename instead of the version number
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
       #  - --type is one of 'pe' or 'git'
@@ -208,6 +209,7 @@ module Beaker
           else
             @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
           end
+          @options['HOSTS'][name]['platform'] = use_version_codename(@options['HOSTS'][name]['platform'])
         end
 
         #use the keyfile if present

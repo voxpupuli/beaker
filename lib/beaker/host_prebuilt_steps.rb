@@ -326,8 +326,23 @@ module Beaker
         if host['platform'] =~ /windows/
           host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
         else
-          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'))
+          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
+      end
+    end
+
+    #Update /etc/hosts to make it possible for each provided host to reach each other host by name.
+    #Assumes that each provided host has host[:ip] set.
+    # @param [Host, Array<Host>, String, Symbol] hosts An array of hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def hack_etc_hosts hosts, opts
+      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
+      hosts.each do |host|
+        etc_hosts += "#{host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
+      end
+      hosts.each do |host|
+        set_etc_hosts(host, etc_hosts)
       end
     end
 

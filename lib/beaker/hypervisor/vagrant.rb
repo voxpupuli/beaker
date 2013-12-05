@@ -42,16 +42,6 @@ module Beaker
       end
     end
 
-    def hack_etc_hosts hosts
-      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
-      hosts.each do |host|
-        etc_hosts += "#{host['ip'].to_s}\t#{host.name}\n"
-      end
-      hosts.each do |host|
-        set_etc_hosts(host, etc_hosts)
-      end
-    end
-
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
         ssh_config = Dir.chdir(@vagrant_path) do

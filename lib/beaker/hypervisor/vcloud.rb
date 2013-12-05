@@ -2,7 +2,6 @@ require 'yaml' unless defined?(YAML)
 
 module Beaker 
   class Vcloud < Beaker::Hypervisor
-    CHARMAP = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
 
     def initialize(vcloud_hosts, options)
       @options = options
@@ -50,10 +49,6 @@ module Beaker
           raise "vSphere registration failed after #{@options[:timeout].to_i} seconds"
         end
       end
-    end
-
-    def generate_host_name
-      CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
     end
 
     def create_clone_spec host

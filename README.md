@@ -19,6 +19,3 @@ See [LICENSE](LICENSE) file.
 
 Please log tickets and issues at our [Beaker Issue Tracker](https://github.com/puppetlabs/beaker/issues).  In addition there is an active #puppet-dev channel on Freenode.
 
-We use semantic version numbers for our releases, and recommend that users stay
-as up-to-date as possible by upgrading to patch releases and minor releases as
-they become available.
