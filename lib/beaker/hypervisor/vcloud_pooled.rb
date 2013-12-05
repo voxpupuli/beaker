@@ -4,7 +4,6 @@ require 'net/http'
 
 module Beaker 
   class VcloudPooled < Beaker::Hypervisor
-    CHARMAP = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
     SSH_EXCEPTIONS = [
       SocketError,
       Timeout::Error,

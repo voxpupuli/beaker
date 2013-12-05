@@ -388,10 +388,10 @@ module Beaker
         #process the version files if necessary
         hosts.each do |host|
           if host['platform'] =~ /windows/
-            host['pe_ver'] = host['pe_ver'] || 
+            host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
               Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file_win])
           else
-            host['pe_ver'] = host['pe_ver'] || 
+            host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
               Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
           end
         end
