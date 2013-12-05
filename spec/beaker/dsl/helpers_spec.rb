@@ -329,6 +329,56 @@ describe ClassMixedWithDSLHelpers do
                                 :trace => true,
                                 :catch_failures => true )
     end
+    it 'enforces exit codes through :expect_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => [1,4,6],
+        :stdin                 => "class { \"boo\": }\n"
+      )
+
+      subject.apply_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :trace           => true,
+        :expect_failures => true
+      )
+    end
+    it 'enforces exit codes through :expect_failures' do
+      expect {
+        subject.apply_manifest_on(
+          'my_host',
+          'class { "boo": }',
+          :trace           => true,
+          :expect_failures => true,
+          :catch_failures  => true
+        )
+      }.to raise_error ArgumentError, /catch_failures.+expect_failures/
+    end
+    it 'enforces added exit codes through :expect_failures' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => [1,2,3,4,5,6],
+        :stdin                 => "class { \"boo\": }\n"
+      )
+
+      subject.apply_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :acceptable_exit_codes => (1..5),
+        :trace                 => true,
+        :expect_failures       => true
+      )
+    end
   end
 
   describe "#apply_manifest" do

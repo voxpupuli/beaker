@@ -637,12 +637,17 @@ module Beaker
       #                         passed to the 'puppet apply' command.
       #
       # @option opts [Boolean]  :catch_failures (false) By default
-      #                         "puppet --apply" will exit with 0,
+      #                         `puppet --apply` will exit with 0,
       #                         which does not count as a test
       #                         failure, even if there were errors applying
       #                         the manifest. This option enables detailed
       #                         exit codes and causes a test failure if
-      #                         "puppet --apply" indicates there was a
+      #                         `puppet --apply` indicates there was a
+      #                         failure during its execution.
+      #
+      # @option opts [Boolean]  :expect_failures (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet --apply` indicates there were no
       #                         failure during its execution.
       #
       # @param [Block] block This method will yield to a block of code passed
@@ -655,15 +660,23 @@ module Beaker
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
 
+        # From puppet help:
+        # "... an exit code of '2' means there were changes, an exit code of
+        # '4' means there were failures during the transaction, and an exit
+        # code of '6' means there were both changes and failures."
+        if opts[:catch_failures] and opts[:expect_failures]
+          raise(ArgumentError, "Cannot specify both `catch_failures` and `expect_failures` for a single manifes")
+        end
         if opts[:catch_failures]
           args << '--detailed-exitcodes'
 
-          # From puppet help:
-          # "... an exit code of '2' means there were changes, an exit code of
-          # '4' means there were failures during the transaction, and an exit
-          # code of '6' means there were both changes and failures."
-          # We're after failures specifically so catch exit codes 4 and 6 only.
+          # We're after only complete success so allow exit codes 0 and 2 only.
           on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [0, 2]
+        elsif opts[:expect_failures]
+          args << '--detailed-exitcodes'
+
+          # We're after failures specifically so allow exit codes 1, 4, and 6 only.
+          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [1, 4, 6]
         else
           on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | 0
         end
