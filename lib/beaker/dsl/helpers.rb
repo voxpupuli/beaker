@@ -651,7 +651,6 @@ module Beaker
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
         on_options = {:stdin => manifest + "\n"}
-        on_options[:acceptable_exit_codes] = opts.delete(:acceptable_exit_codes)
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
@@ -664,7 +663,9 @@ module Beaker
           # '4' means there were failures during the transaction, and an exit
           # code of '6' means there were both changes and failures."
           # We're after failures specifically so catch exit codes 4 and 6 only.
-          on_options[:acceptable_exit_codes] |= [0, 2]
+          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [0, 2]
+        else
+          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | 0
         end
 
         # Not really thrilled with this implementation, might want to improve it
