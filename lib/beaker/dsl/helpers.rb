@@ -636,6 +636,16 @@ module Beaker
       #                         the "--trace" command line parameter will be
       #                         passed to the 'puppet apply' command.
       #
+      # @option opts [Array<Integer>] :acceptable_exit_codes ([0]) The list of exit
+      #                          codes that will NOT raise an error when found upon
+      #                          command completion.  If provided, these values will
+      #                          be combined with those used in :catch_failures and
+      #                          :expect_failures to create the full list of 
+      #                          passing exit codes.
+      #
+      # @options opts [Hash]    :environment Additional environment variables to be
+      #                         passed to the 'puppet apply' command
+      #
       # @option opts [Boolean]  :catch_failures (false) By default
       #                         `puppet --apply` will exit with 0,
       #                         which does not count as a test
@@ -656,6 +666,7 @@ module Beaker
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
         on_options = {:stdin => manifest + "\n"}
+        on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) 
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
@@ -665,20 +676,21 @@ module Beaker
         # '4' means there were failures during the transaction, and an exit
         # code of '6' means there were both changes and failures."
         if opts[:catch_failures] and opts[:expect_failures]
-          raise(ArgumentError, "Cannot specify both `catch_failures` and `expect_failures` for a single manifes")
+          raise(ArgumentError, "Cannot specify both `catch_failures` and `expect_failures` for a single manifest")
         end
         if opts[:catch_failures]
           args << '--detailed-exitcodes'
 
           # We're after only complete success so allow exit codes 0 and 2 only.
-          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [0, 2]
+          on_options[:acceptable_exit_codes] |= [0, 2]
         elsif opts[:expect_failures]
           args << '--detailed-exitcodes'
 
           # We're after failures specifically so allow exit codes 1, 4, and 6 only.
-          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | [1, 4, 6]
+          on_options[:acceptable_exit_codes] |= [1, 4, 6]
         else
-          on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) | 0
+          # Either use the provided acceptable_exit_codes or default to [0]
+          on_options[:acceptable_exit_codes] |= [0]
         end
 
         # Not really thrilled with this implementation, might want to improve it

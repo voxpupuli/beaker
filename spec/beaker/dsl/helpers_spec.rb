@@ -297,7 +297,18 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#apply_manifest_on' do
+    it 'calls puppet' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose').
+        and_return( 'puppet_command' )
 
+      subject.should_receive( :on ).
+        with( 'my_host', 'puppet_command',
+              :acceptable_exit_codes => [0],
+              :stdin => "class { \"boo\": }\n" )
+
+      subject.apply_manifest_on( 'my_host', 'class { "boo": }')
+    end
     it 'adds acceptable exit codes with :catch_failures' do
       subject.should_receive( :puppet ).
         with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
