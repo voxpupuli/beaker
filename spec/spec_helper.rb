@@ -1,3 +1,3 @@
-ENV['RSPEC_SETFILE'] = 'sample.cfg'
+ENV['RS_SETFILE'] = 'sample.cfg'
 
 require "beaker-rspec"
