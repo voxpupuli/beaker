@@ -101,7 +101,7 @@ Additionaly, Beaker supports the following host options:
 * snapshot
   * the name of the snapshot to revert to before testing
 * roles
-  * the 'job' of this host, an array of `master`, `agent`, `dashboard`, `database`, `default` or any user-defined string
+  * the 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string
 * pe_dir
   * the directory where PE builds are located, may be local directory or a URL
 * pe_ver
