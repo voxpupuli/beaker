@@ -646,14 +646,18 @@ module Beaker
       # @options opts [Hash]    :environment Additional environment variables to be
       #                         passed to the 'puppet apply' command
       #
-      # @option opts [Boolean]  :catch_failures (false) By default
-      #                         `puppet --apply` will exit with 0,
-      #                         which does not count as a test
-      #                         failure, even if there were errors applying
-      #                         the manifest. This option enables detailed
-      #                         exit codes and causes a test failure if
-      #                         `puppet --apply` indicates there was a
-      #                         failure during its execution.
+      # @option opts [Boolean]  :catch_failures (false) By default `puppet
+      #                         --apply` will exit with 0, which does not count
+      #                         as a test failure, even if there were errors or
+      #                         changes when applying the manifest. This option
+      #                         enables detailed exit codes and causes a test
+      #                         failure if `puppet --apply` indicates there was
+      #                         a failure during its execution.
+      #
+      # @option opts [Boolean]  :catch_changes (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet --apply` indicates that there were
+      #                         changes or failures during its execution.
       #
       # @option opts [Boolean]  :expect_failures (false) This option enables
       #                         detailed exit codes and causes a test failure
@@ -666,7 +670,7 @@ module Beaker
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
         on_options = {:stdin => manifest + "\n"}
-        on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes)) 
+        on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes))
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
@@ -675,10 +679,15 @@ module Beaker
         # "... an exit code of '2' means there were changes, an exit code of
         # '4' means there were failures during the transaction, and an exit
         # code of '6' means there were both changes and failures."
-        if opts[:catch_failures] and opts[:expect_failures]
-          raise(ArgumentError, "Cannot specify both `catch_failures` and `expect_failures` for a single manifest")
+        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures]].select{|x|x}.length > 1
+          raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, or `expect_failures` for a single manifest")
         end
-        if opts[:catch_failures]
+        if opts[:catch_changes]
+          args << '--detailed-exitcodes'
+
+          # We're after idempotency so allow exit code 0 only.
+          on_options[:acceptable_exit_codes] |= [0]
+        elsif opts[:catch_failures]
           args << '--detailed-exitcodes'
 
           # We're after only complete success so allow exit codes 0 and 2 only.
