@@ -30,7 +30,6 @@ module Beaker
 
       report_and_raise(@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
 
-      @test_files = @test_files.sort
     rescue => e
       report_and_raise(@logger, e, "TestSuite: initialize")
     end
