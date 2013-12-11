@@ -18,14 +18,14 @@ module BeakerRSpec
     # Accessor for options hash
     # @return Hash options
     def options
-      @options
+      RSpec.configuration.options
     end
 
     # Provision the hosts to run tests on.
     # Assumes #setup has already been called.
     #
     def provision
-      @network_manager = Beaker::NetworkManager.new(@options, @logger)
+      @network_manager = Beaker::NetworkManager.new(options, @logger)
       RSpec.configuration.hosts = @network_manager.provision
     end
 
@@ -39,12 +39,13 @@ module BeakerRSpec
     # @param [Array<String>] args The argument array of options for configuring Beaker
     # See 'beaker --help' for full list of supported command line options
     def setup(args = [])
-      @options_parser = Beaker::Options::Parser.new
-      @options = @options_parser.parse_args(args)
-      @options[:debug] = true
-      @logger = Beaker::Logger.new(@options)
-      @options[:logger] = @logger
+      options_parser = Beaker::Options::Parser.new
+      options = options_parser.parse_args(args)
+      options[:debug] = true
+      @logger = Beaker::Logger.new(options)
+      options[:logger] = @logger
       RSpec.configuration.hosts = []
+      RSpec.configuration.options = options
     end
 
     # Accessor for hosts object
