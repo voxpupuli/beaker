@@ -44,23 +44,23 @@ module Beaker
       #test parse_install_options
       it "can transform --install PUPPET/3.1 into #{repo}/puppet.git#3.1" do
         opts = ["PUPPET/3.1"]
-        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/puppet.git#3.1"] 
+        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/puppet.git#3.1"]
       end
       it "can transform --install FACTER/v.1.0 into #{repo}/facter.git#v.1.0" do
         opts = ["FACTER/v.1.0"]
-        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/facter.git#v.1.0"] 
+        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/facter.git#v.1.0"]
       end
       it "can transform --install HIERA/xyz into #{repo}/hiera.git#xyz" do
         opts = ["HIERA/xyz"]
-        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/hiera.git#xyz"] 
+        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/hiera.git#xyz"]
       end
       it "can transform --install HIERA-PUPPET/path/to/repo into #{repo}/hiera-puppet.git#path/to/repo" do
         opts = ["HIERA-PUPPET/path/to/repo"]
-        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/hiera-puppet.git#path/to/repo"] 
+        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/hiera-puppet.git#path/to/repo"]
       end
       it "can transform --install PUPPET/3.1,FACTER/v.1.0 into #{repo}/puppet.git#3.1,#{repo}/facter.git#v.1.0" do
         opts = ["PUPPET/3.1", "FACTER/v.1.0"]
-        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/puppet.git#3.1", "#{repo}/facter.git#v.1.0"] 
+        expect(parser.parse_git_repos(opts)).to be === ["#{repo}/puppet.git#3.1", "#{repo}/facter.git#v.1.0"]
       end
       it "can leave --install git://github.com/puppetlabs/puppet.git#my/full/path alone" do
         opts = ["git://github.com/puppetlabs/puppet.git#my/full/path"]
@@ -98,11 +98,45 @@ module Beaker
         it 'raises an error when no ruby files are found' do
           @files = [ pl_test, sh_test ]
           paths
-          expect{parser.file_list([File.expand_path(test_dir)])}.to raise_error(ArgumentError) 
+          expect{parser.file_list([File.expand_path(test_dir)])}.to raise_error(ArgumentError)
         end
         it 'raises an error when no paths are specified for searching' do
           @files = ''
           expect{parser.file_list('')}.to raise_error(ArgumentError)
+        end
+
+      end
+
+      context 'combining split_arg and file_list maintain test file ordering', :use_fakefs => true do
+        let(:test_dir) { 'tmp/tests/' }
+        let(:other_test_dir) {'tmp/tests2/' }
+
+        before :each do
+          @files = ['00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb', '01_TestSetup.rb', '03_PuppetMasterSanity.rb', '06_InstallModules.rb', '02_PuppetUserAndGroup.rb', '04_ValidateSignCert.rb', '07_InstallCACerts.rb'].shuffle!.map!{|x| test_dir + x }
+          @other_files = ['00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb', '01_TestSetup.rb', '03_PuppetMasterSanity.rb', '06_InstallModules.rb', '02_PuppetUserAndGroup.rb', '04_ValidateSignCert.rb', '07_InstallCACerts.rb'].shuffle!.map!{|x| other_test_dir + x }
+          create_files(@files)
+          create_files(@other_files)
+          create_files(['08_foss.rb'])
+        end
+
+        it "when provided a file followed by dir, runs the file first" do
+          arg = "08_foss.rb,#{test_dir}"
+          expect(parser.file_list(parser.split_arg(arg))).to be === ["08_foss.rb", "#{File.expand_path(test_dir)}/00_EnvSetup.rb", "#{File.expand_path(test_dir)}/01_TestSetup.rb", "#{File.expand_path(test_dir)}/02_PuppetUserAndGroup.rb", "#{File.expand_path(test_dir)}/035_StopFirewall.rb", "#{File.expand_path(test_dir)}/03_PuppetMasterSanity.rb", "#{File.expand_path(test_dir)}/04_ValidateSignCert.rb", "#{File.expand_path(test_dir)}/05_HieraSetup.rb", "#{File.expand_path(test_dir)}/06_InstallModules.rb", "#{File.expand_path(test_dir)}/07_InstallCACerts.rb"]
+        end
+
+        it "when provided a dir followed by a file, runs the file last" do
+          arg = "#{test_dir},08_foss.rb"
+          expect(parser.file_list(parser.split_arg(arg))).to be === ["#{File.expand_path(test_dir)}/00_EnvSetup.rb", "#{File.expand_path(test_dir)}/01_TestSetup.rb", "#{File.expand_path(test_dir)}/02_PuppetUserAndGroup.rb", "#{File.expand_path(test_dir)}/035_StopFirewall.rb", "#{File.expand_path(test_dir)}/03_PuppetMasterSanity.rb", "#{File.expand_path(test_dir)}/04_ValidateSignCert.rb", "#{File.expand_path(test_dir)}/05_HieraSetup.rb", "#{File.expand_path(test_dir)}/06_InstallModules.rb", "#{File.expand_path(test_dir)}/07_InstallCACerts.rb", "08_foss.rb"]
+        end
+
+        it "correctly orders files in a directory" do
+          arg = "#{test_dir}"
+          expect(parser.file_list(parser.split_arg(arg))).to be === ["#{File.expand_path(test_dir)}/00_EnvSetup.rb", "#{File.expand_path(test_dir)}/01_TestSetup.rb", "#{File.expand_path(test_dir)}/02_PuppetUserAndGroup.rb", "#{File.expand_path(test_dir)}/035_StopFirewall.rb", "#{File.expand_path(test_dir)}/03_PuppetMasterSanity.rb", "#{File.expand_path(test_dir)}/04_ValidateSignCert.rb", "#{File.expand_path(test_dir)}/05_HieraSetup.rb", "#{File.expand_path(test_dir)}/06_InstallModules.rb", "#{File.expand_path(test_dir)}/07_InstallCACerts.rb"]
+        end
+
+        it "when provided two directories orders each directory separately" do
+          arg = "#{test_dir}/,#{other_test_dir}/"
+          expect(parser.file_list(parser.split_arg(arg))).to be === ["#{File.expand_path(test_dir)}/00_EnvSetup.rb", "#{File.expand_path(test_dir)}/01_TestSetup.rb", "#{File.expand_path(test_dir)}/02_PuppetUserAndGroup.rb", "#{File.expand_path(test_dir)}/035_StopFirewall.rb", "#{File.expand_path(test_dir)}/03_PuppetMasterSanity.rb", "#{File.expand_path(test_dir)}/04_ValidateSignCert.rb", "#{File.expand_path(test_dir)}/05_HieraSetup.rb", "#{File.expand_path(test_dir)}/06_InstallModules.rb", "#{File.expand_path(test_dir)}/07_InstallCACerts.rb", "#{File.expand_path(other_test_dir)}/00_EnvSetup.rb", "#{File.expand_path(other_test_dir)}/01_TestSetup.rb", "#{File.expand_path(other_test_dir)}/02_PuppetUserAndGroup.rb", "#{File.expand_path(other_test_dir)}/035_StopFirewall.rb", "#{File.expand_path(other_test_dir)}/03_PuppetMasterSanity.rb", "#{File.expand_path(other_test_dir)}/04_ValidateSignCert.rb", "#{File.expand_path(other_test_dir)}/05_HieraSetup.rb", "#{File.expand_path(other_test_dir)}/06_InstallModules.rb", "#{File.expand_path(other_test_dir)}/07_InstallCACerts.rb"]
         end
 
       end
@@ -125,7 +159,7 @@ module Beaker
 
       it "ensures that file-mode is one of fast/stop" do
         FakeFS.deactivate!
-        args = ["-h", hosts_path, "--debug", "--fail-mode", "slow"] 
+        args = ["-h", hosts_path, "--debug", "--fail-mode", "slow"]
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 

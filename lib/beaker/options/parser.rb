@@ -80,7 +80,7 @@ module Beaker
               if discover_files.empty?
                 parser_error "empty directory used as an option (#{root})!"
               end
-              files += discover_files
+              files += discover_files.sort
             end
           end
         end
