@@ -26,6 +26,31 @@ module Beaker
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
     end
 
+    def check_url url
+      begin
+        URI.parse(url)
+      rescue
+        return false
+      end
+      true
+    end
+
+    def get_template_url pooling_api, template
+      if not check_url(pooling_api)
+        raise ArgumentError, "Invalid pooling_api URL: #{pooling_api}"
+      end
+      scheme = ''
+      if not URI.parse(pooling_api).scheme
+        scheme = 'http://'
+      end
+      #check that you have a valid uri
+      template_url = scheme + pooling_api + '/vm/' + template
+      if not check_url(template_url)
+        raise ArgumentError, "Invalid full template URL: #{template_url}"
+      end
+      template_url
+    end
+
     def provision
       start = Time.now
       try = 1
@@ -38,7 +63,7 @@ module Beaker
         @logger.notify "Requesting '#{h['template']}' VM from vCloud host pool"
 
         begin
-          uri = URI.parse(@options['pooling_api']+'/vm/'+h['template'])
+          uri = URI.parse(get_template_url(@options['pooling_api'], h['template']))
 
           http = Net::HTTP.new( uri.host, uri.port )
           request = Net::HTTP::Post.new(uri.request_uri)
@@ -78,7 +103,7 @@ module Beaker
       vm_names.each do |name|
         @logger.notify "Handing '#{name}' back to pooling API for VM destruction"
 
-        uri = URI.parse(@options['pooling_api']+'/vm/'+name)
+        uri = URI.parse(get_template_url(@options['pooling_api'], name))
 
         http = Net::HTTP.new( uri.host, uri.port )
         request = Net::HTTP::Delete.new(uri.request_uri)
