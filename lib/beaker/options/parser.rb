@@ -269,6 +269,9 @@ module Beaker
           if role_array.include?('master')
             master += 1
           end
+          if role_array.include?('frictionless') and !(role_array & ['master', 'database', 'dashboard', 'console']).empty?
+            parser_error "Only agent nodes may have the role 'frictionless', fix #{@options[:hosts_file]}"
+          end
         end
         if master > 1 or master < 1
           parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"

@@ -130,7 +130,7 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'generates a unix PE install command for a unix host' do
-      expect( subject.installer_cmd( unixhost, { :installer => 'puppet-enterprise-installer' } ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer"
+      expect( subject.installer_cmd( unixhost, { :installer => 'puppet-enterprise-installer' } ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -a /tmp/answers"
     end
   end
 
@@ -198,6 +198,14 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [winhost], {} )
 
+    end
+
+    it "does nothing for a frictionless agent" do
+      unixhost['roles'] << 'frictionless'
+
+      subject.should_not_receive(:scp_to)
+      subject.should_not_receive(:on)
+      subject.fetch_puppet( [unixhost], {} )
     end
   end
 

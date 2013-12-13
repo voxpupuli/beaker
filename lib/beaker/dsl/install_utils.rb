@@ -144,9 +144,11 @@ module Beaker
         if host['platform'] =~ /windows/
           version = options[:pe_ver_win] || host['pe_ver']
           "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
-        else
+        elsif host['roles'].include? 'frictionless'
           version = options[:pe_ver] || host['pe_ver']
-          "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]}"
+          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/#{host['platform']}.bash && bash #{host['platform']}.bash"
+        else
+          "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]} -a #{host['working_dir']}/answers"
         end
       end
 
@@ -178,6 +180,9 @@ module Beaker
       # @api private
       def fetch_puppet(hosts, options)
         hosts.each do |host|
+          # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
+          next if host['roles'].include? 'frictionless'
+
           windows = host['platform'] =~ /windows/
           path = options[:pe_dir] || host['pe_dir']
           local = File.directory?(path)
@@ -262,10 +267,13 @@ module Beaker
           if host['platform'] =~ /windows/
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
-            answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
-            create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+            # We only need answers if we're using the classic installer
+            if ! host['roles'].include? 'frictionless'
+              answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
+              create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+            end
 
-            on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
+            on host, installer_cmd(host, options)
           end
         end
 
