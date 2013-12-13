@@ -340,6 +340,25 @@ describe ClassMixedWithDSLHelpers do
                                 :trace => true,
                                 :catch_failures => true )
     end
+    it 'enforces a 0 exit code through :catch_changes' do
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        'my_host',
+        'puppet_command',
+        :acceptable_exit_codes => [0],
+        :stdin                 => "class { \"boo\": }\n"
+      )
+
+      subject.apply_manifest_on(
+        'my_host',
+        'class { "boo": }',
+        :trace         => true,
+        :catch_changes => true
+      )
+    end
     it 'enforces exit codes through :expect_failures' do
       subject.should_receive( :puppet ).
         with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
