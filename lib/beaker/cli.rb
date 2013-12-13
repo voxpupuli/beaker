@@ -26,7 +26,7 @@ module Beaker
         @logger.notify(VERSION_STRING % spec.version)
         exit
       end
-      @logger.notify(@options.dump)
+      @logger.info(@options.dump)
 
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?

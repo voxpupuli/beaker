@@ -133,8 +133,17 @@ module Beaker
 
     def vagrant_cmd(args)
       Dir.chdir(@vagrant_path) do
-        run = system("vagrant #{args}")
-        if not run
+        exit_status = 1
+        Open3.popen3("vagrant #{args}") {|stdin, stdout, stderr, wait_thr|
+          while line = stdout.gets
+            @logger.debug(line)
+          end
+          if not wait_thr.value.success?
+            raise "Failed to exec 'vagrant #{args}'"
+          end
+          exit_status = wait_thr.value 
+        }
+        if exit_status != 0
           raise "Failed to execute vagrant_cmd ( #{args} )"
         end
       end
