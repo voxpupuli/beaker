@@ -8,10 +8,15 @@ describe "ignore" do
     end
   end
 
+  example "access options hash" do
+    install_pe
+  end
+
   hosts.each do |node|
     describe service('ssh'), :node => node do
       it { should be_running }
       it { should be_enabled }
     end
   end
+
 end

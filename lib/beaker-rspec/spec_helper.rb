@@ -8,6 +8,8 @@ RSpec.configure do |c|
 
   # Define persistant hosts setting
   c.add_setting :hosts, :default => []
+  # Define persistant options setting
+  c.add_setting :options, :default => {}
 
   # Defined target nodeset
   nodeset = ENV['RS_SET'] || 'default'
