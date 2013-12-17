@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require 'beaker/version'
 
 Gem::Specification.new do |s|
   s.name        = "beaker"
-  s.version     = '1.3.1'
+  s.version     = Beaker::Version::STRING
   s.authors     = ["Puppetlabs"]
   s.email       = ["delivery@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker"

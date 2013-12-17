@@ -1,7 +1,7 @@
 require 'rubygems' unless defined?(Gem)
 module Beaker
 
-  %w( utils test_suite result command options network_manager cli ).each do |lib|
+  %w( version utils test_suite result command options network_manager cli ).each do |lib|
     begin
       require "beaker/#{lib}"
     rescue LoadError
