@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = "beaker"
-  s.version     = '1.3.0'
+  s.version     = '1.3.1'
   s.authors     = ["Puppetlabs"]
   s.email       = ["delivery@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker"
