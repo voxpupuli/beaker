@@ -29,7 +29,7 @@ module Beaker
         v_file << "    v.vm.box = '#{host['box']}'\n"
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
-        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"255.255.0.0\"\n"
+        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
         v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
