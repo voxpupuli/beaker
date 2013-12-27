@@ -146,7 +146,8 @@ module Beaker
                   'How should the harness react to errors/failures',
                   'Possible values:',
                   'fast (skip all subsequent tests, cleanup, exit)',
-                  'stop (skip all subsequent tests, do no cleanup, exit immediately)'  do |mode|
+                  'stop (skip all subsequent tests, do no cleanup, exit immediately)',
+                  'preserve (finish all subsequent tests, but do no cleanup)'  do |mode|
             @cmd_options[:fail_mode] = mode
           end
 

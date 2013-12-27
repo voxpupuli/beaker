@@ -239,7 +239,7 @@ module Beaker
         end
 
         #check for valid fail mode
-        if not ["fast", "stop", nil].include?(@options[:fail_mode])
+        if not ["fast", "stop", "preserve", nil].include?(@options[:fail_mode])
           parser_error "--fail-mode must be one of fast, stop" 
         end
 
