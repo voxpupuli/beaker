@@ -103,6 +103,22 @@ module Beaker
         make_vfile @vagrant_hosts
 
         vagrant_cmd("up")
+      else #determine ip of already up boxes
+        if File.file?(@vagrant_file) #we should have a vagrant file available to us for reading
+          f = File.read(@vagrant_file)
+          @vagrant_hosts.each do |host|
+            m = /#{host}.*?ip:\s*('|")\s*(\d+\.\d+\.\d+\.\d+)/m.match(f)
+            if m
+              ip = m[2]
+              @logger.debug("Determined existing vagrant box #{host.name} ip to be: #{ip} ")
+              host[:ip] = ip
+            else
+              raise("Unable to determine ip for vagrant box #{host.name}")
+            end
+          end
+        else
+          raise("No vagrant file found (should be located at #{@vagrant_file})")
+        end
       end
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
       @vagrant_hosts.each do |host|
