@@ -298,26 +298,26 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#apply_manifest_on' do
     it 'calls puppet' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose').
+        with( 'apply', '--verbose', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
         with( 'my_host', 'puppet_command',
-              :acceptable_exit_codes => [0],
-              :stdin => "class { \"boo\": }\n" )
+              :acceptable_exit_codes => [0] )
 
       subject.apply_manifest_on( 'my_host', 'class { "boo": }')
     end
     it 'adds acceptable exit codes with :catch_failures' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
         with( 'my_host', 'puppet_command',
-              :acceptable_exit_codes => [0,2],
-              :stdin => "class { \"boo\": }\n" )
+              :acceptable_exit_codes => [0,2] )
 
       subject.apply_manifest_on( 'my_host',
                                 'class { "boo": }',
@@ -325,14 +325,14 @@ describe ClassMixedWithDSLHelpers do
                                 :catch_failures => true )
     end
     it 'allows acceptable exit codes through :catch_failures' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
         with( 'my_host', 'puppet_command',
-              :acceptable_exit_codes => [4,0,2],
-              :stdin => "class { \"boo\": }\n" )
+              :acceptable_exit_codes => [4,0,2] )
 
       subject.apply_manifest_on( 'my_host',
                                 'class { "boo": }',
@@ -341,15 +341,15 @@ describe ClassMixedWithDSLHelpers do
                                 :catch_failures => true )
     end
     it 'enforces a 0 exit code through :catch_changes' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
         'my_host',
         'puppet_command',
-        :acceptable_exit_codes => [0],
-        :stdin                 => "class { \"boo\": }\n"
+        :acceptable_exit_codes => [0]
       )
 
       subject.apply_manifest_on(
@@ -360,15 +360,15 @@ describe ClassMixedWithDSLHelpers do
       )
     end
     it 'enforces exit codes through :expect_failures' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
         'my_host',
         'puppet_command',
-        :acceptable_exit_codes => [1,4,6],
-        :stdin                 => "class { \"boo\": }\n"
+        :acceptable_exit_codes => [1,4,6]
       )
 
       subject.apply_manifest_on(
@@ -390,15 +390,15 @@ describe ClassMixedWithDSLHelpers do
       }.to raise_error ArgumentError, /catch_failures.+expect_failures/
     end
     it 'enforces added exit codes through :expect_failures' do
+      subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes' ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
         'my_host',
         'puppet_command',
-        :acceptable_exit_codes => [1,2,3,4,5,6],
-        :stdin                 => "class { \"boo\": }\n"
+        :acceptable_exit_codes => [1,2,3,4,5,6]
       )
 
       subject.apply_manifest_on(
