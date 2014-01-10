@@ -19,7 +19,7 @@ RSpec.configure do |c|
   fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : ''
 
   # Configure all nodes in nodeset
-  c.setup([preserve, fresh_nodes, '--type','git','--hosts', nodesetfile])
+  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile])
   c.provision
   c.validate
 
