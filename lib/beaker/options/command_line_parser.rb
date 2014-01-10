@@ -28,7 +28,7 @@ module Beaker
           end
 
           opts.on '--type TYPE',
-                  'one of git or pe', 
+                  'one of git, foss, or pe',
                   'used to determine underlying path structure of puppet install',
                   '(default pe)' do |type|
             @cmd_options[:type] = type

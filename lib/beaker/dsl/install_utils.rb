@@ -383,6 +383,41 @@ module Beaker
         special_nodes + real_agents
       end
 
+      #Install POSS based upon host configuration and options
+      # @example
+      #  install_puppet
+      #
+      # @note This will attempt to add a repository for apt.puppetlabs.com on
+      #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
+      #       machines, then install the package 'puppet'
+      #
+      # @api dsl
+      # @return nil
+      def install_puppet
+        hosts.each do |host|
+          if host['platform'] =~ /el-(5|6)/
+            relver = $1
+            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-#{relver}.noarch.rpm"
+            on host, 'yum install -y puppet'
+          elsif host['platform'] =~ /fedora-(\d+)/
+            relver = $1
+            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
+            on host, 'yum install -y puppet'
+          elsif host['platform'] =~ /(ubuntu|debian)/
+            if ! host.check_for_package 'curl'
+              on host, 'apt-get install -y curl'
+            end
+            on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
+            on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
+            on host, 'apt-get -y -f -m update'
+            on host, 'apt-get install -y puppet'
+          else
+            raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+          end
+        end
+        nil
+      end
+
       #Install PE based upon host configuration and options
       # @example 
       #  install_pe
