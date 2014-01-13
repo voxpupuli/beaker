@@ -57,10 +57,10 @@ module Beaker
           @logger.debug msg
         when :fail
           @logger.error msg
-          break if fail_mode #all failure modes cause us to kick out early on failure
+          break if ["fast", "stop"].include? fail_mode
         when :error
           @logger.warn msg
-          break if fail_mode #all failure modes cause use to kick out early on error
+          break if ["fast", "stop"].include? fail_mode
         end
       end
 

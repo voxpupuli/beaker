@@ -83,6 +83,7 @@ module Beaker
 
     def execute!
 
+      skip_cleanup = ["stop", "preserve"].include? @options[:fail_mode]
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
@@ -103,7 +104,7 @@ module Beaker
         rescue => e
           #post acceptance on failure
           #if we error then run the post suite as long as we aren't in fail-stop mode
-          run_suite(:post_suite) unless @options[:fail_mode] == "stop"
+          run_suite(:post_suite) unless skip_cleanup
           raise e
         else
           #post acceptance on success
@@ -114,7 +115,7 @@ module Beaker
         #cleanup on error
         #only do cleanup if we aren't in fail-stop mode
         @logger.notify "Cleanup: cleaning up after failed run"
-        if @options[:fail_mode] != "stop"
+        unless skip_cleanup
           if @network_manager
             @network_manager.cleanup
           end
