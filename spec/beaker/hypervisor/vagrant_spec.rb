@@ -96,6 +96,34 @@ module Beaker
 
     end
 
+    describe "get_ip_from_vagrant_file" do
+      before :each do
+        FakeFS.activate!
+        vagrant.stub( :randmac ).and_return( "0123456789" )
+        vagrant.make_vfile( @hosts )
+      end
+
+      it "can find the correct ip for the provided hostname" do
+        @hosts.each do |host|
+          expect( vagrant.get_ip_from_vagrant_file(host.name) ).to be === host[:ip]
+        end
+
+      end
+
+      it "raises an error if it is unable to find an ip" do
+        expect{ vagrant.get_ip_from_vagrant_file("unknown") }.to raise_error
+
+      end
+
+      it "raises an error if no Vagrantfile is present" do
+        File.delete( vagrant.instance_variable_get( :@vagrant_file ) )
+        @hosts.each do |host|
+          expect{ vagrant.get_ip_from_vagrant_file(host.name) }.to raise_error
+        end
+      end
+
+    end
+
     describe "provisioning and cleanup" do
 
       before :each do

@@ -82,6 +82,23 @@ module Beaker
         @temp_files << f
     end
 
+    def get_ip_from_vagrant_file(hostname)
+      ip = ''
+      if File.file?(@vagrant_file) #we should have a vagrant file available to us for reading
+        f = File.read(@vagrant_file)
+        m = /#{hostname}.*?ip:\s*('|")\s*([^'"]+)('|")/m.match(f)
+        if m
+          ip = m[2]
+          @logger.debug("Determined existing vagrant box #{hostname} ip to be: #{ip} ")
+        else
+          raise("Unable to determine ip for vagrant box #{hostname}")
+        end
+      else
+        raise("No vagrant file found (should be located at #{@vagrant_file})")
+      end
+      ip
+    end
+
     def initialize(vagrant_hosts, options)
       require 'tempfile'
       @options = options
@@ -103,23 +120,12 @@ module Beaker
         make_vfile @vagrant_hosts
 
         vagrant_cmd("up")
-      else #determine ip of already up boxes
-        if File.file?(@vagrant_file) #we should have a vagrant file available to us for reading
-          f = File.read(@vagrant_file)
-          @vagrant_hosts.each do |host|
-            m = /#{host}.*?ip:\s*('|")\s*(\d+\.\d+\.\d+\.\d+)/m.match(f)
-            if m
-              ip = m[2]
-              @logger.debug("Determined existing vagrant box #{host.name} ip to be: #{ip} ")
-              host[:ip] = ip
-            else
-              raise("Unable to determine ip for vagrant box #{host.name}")
-            end
-          end
-        else
-          raise("No vagrant file found (should be located at #{@vagrant_file})")
+      else #set host ip of already up boxes
+        @vagrant_hosts.each do |host|
+          host[:ip] = get_ip_from_vagrant_file(host.name)
         end
       end
+
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
       @vagrant_hosts.each do |host|
         default_user = host['user']
