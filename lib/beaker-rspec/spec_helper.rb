@@ -17,9 +17,11 @@ RSpec.configure do |c|
 
   preserve = ENV['RS_DESTROY'] == 'no' ? '--preserve-hosts' : ''
   fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : ''
+  keyfile = ENV['RS_KEYFILE'] ? ['--keyfile', ENV['RS_KEYFILE']] : []
+  debug = ENV['RS_DEBUG'] ? ['--log-level', 'debug'] : []
 
   # Configure all nodes in nodeset
-  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile])
+  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten)
   c.provision
   c.validate
 
