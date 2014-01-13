@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.email       = ["sqa@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker-rspec"
   s.summary     = %q{RSpec bindings for beaker}
-  s.description = %q{RSpec bindings for beaker}
+  s.description = %q{RSpec bindings for beaker, see https://github.com/puppetlabs/beaker}
   s.license     = 'Apache2'
 
 
@@ -21,10 +21,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # Testing dependencies
-  s.add_development_dependency 'rspec', '2.13.0'
   s.add_development_dependency 'fakefs', '0.4'
-  s.add_development_dependency 'specinfra'
-  s.add_development_dependency 'serverspec'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'simplecov' unless less_than_one_nine
 
@@ -34,6 +31,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'thin'
 
   # Run time dependencies
-  s.add_runtime_dependency 'beaker'
-  s.add_runtime_dependency 'rspec'
+  s.add_runtime_dependency 'beaker', '~> 1.3'
+  s.add_runtime_dependency 'rspec', '~> 2.14'
+  s.add_runtime_dependency 'serverspec', '~> 0.14'
+  s.add_runtime_dependency 'specinfra', '~> 0.3'
 end
