@@ -669,7 +669,7 @@ module Beaker
       #                      validation, etc.
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
-        on_options = {:stdin => manifest + "\n"}
+        on_options = {}
         on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes))
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
@@ -714,6 +714,9 @@ module Beaker
           args << { :environment => opts[:environment]}
         end
 
+        file_path = "/tmp/apply_manifest.#{rand(1000000000).to_s}.pp"
+        create_remote_file(host, file_path, manifest + "\n")
+        args << file_path
         on host, puppet( 'apply', *args), on_options, &block
       end
 
