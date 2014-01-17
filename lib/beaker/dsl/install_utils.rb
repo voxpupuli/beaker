@@ -160,9 +160,12 @@ module Beaker
       # @api private
       def link_exists?(link)
         require "net/http"
+        require "net/https"
         require "open-uri"
         url = URI.parse(link)
-        Net::HTTP.start(url.host, url.port) do |http|
+        http = Net::HTTP.new(url.host, url.port)
+        http.use_ssl = (url.scheme == 'https')
+        http.start do |http|
           return http.head(url.request_uri).code == "200"
         end
       end
