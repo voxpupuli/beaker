@@ -5,6 +5,9 @@ module Beaker
     #An Object that parses, merges and normalizes all supported Beaker options and arguments
     class Parser
       GITREPO      = 'git://github.com/puppetlabs'
+      #location of the gemspec for Beaker
+      GEMSPEC = File.join(File.expand_path(File.dirname(__FILE__)), "../../../beaker.gemspec")
+
       #These options can have the form of arg1,arg2 or [arg] or just arg, 
       #should default to []
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
@@ -35,6 +38,13 @@ module Beaker
       # @return [String] The usage String
       def usage
        @command_line_parser.usage
+      end
+
+      # Returns the current Beaker version number contained in the beaker.gemspec file.
+      # @return [String] The version number
+      def get_version
+        gemspec = File.read(GEMSPEC)
+        /version\s+=\s+('|")([\d\.]*)('|")/.match(gemspec)[2]
       end
 
       # Normalizes argument into an Array.  Argument can either be converted into an array of a single value,
@@ -152,6 +162,9 @@ module Beaker
         # merge command line and file options with defaults
         #   overwrite defaults with command line and file options 
         @options = @options.merge(cmd_line_and_file_options)
+
+        #set the version
+        @options[:v] = get_version
 
         if not @options[:help] and not @options[:version]
           #read the hosts file that contains the node configuration and hypervisor info
@@ -273,7 +286,7 @@ module Beaker
             parser_error "Only agent nodes may have the role 'frictionless', fix #{@options[:hosts_file]}"
           end
         end
-        if master > 1 or master < 1
+        if master > 1 
           parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 

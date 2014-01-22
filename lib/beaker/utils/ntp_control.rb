@@ -12,7 +12,7 @@ module Beaker
         @logger.notify "Update system time sync"
         @logger.notify "run ntpdate against NTP pool systems"
         @hosts.each do |host|
-          success=FALSE
+          success=false
           if host['platform'].include? 'solaris-10'
             host.exec(Command.new("sleep 10 && ntpdate -w #{NTPSERVER}"))
           elsif host['platform'].include? 'windows'
@@ -25,13 +25,17 @@ module Beaker
           else
             count=0
             until success do
-              count+=1
-              raise "ntp time sync failed after #{count} tries" and break if count > 3
-              if host.exec(Command.new("ntpdate -t 20 #{NTPSERVER}")).exit_code == 0 
-                success=TRUE 
+              break if count > 3
+              if host.exec(Command.new("ntpdate -t 20 #{NTPSERVER}"), :acceptable_exit_codes => (0..255)).exit_code == 0 
+                success=true
               end
+              count+=1
             end
-            @logger.notify "NTP date succeeded after #{count} tries"
+            if success
+              @logger.notify "NTP date succeeded after #{count} tries"
+            else
+              @logger.warn "NTP date was not successful after #{count} tries, could cause puppet installation errors"
+            end
           end
         end
       rescue => e

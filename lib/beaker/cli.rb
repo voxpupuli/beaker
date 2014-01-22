@@ -1,6 +1,5 @@
 module Beaker
   class CLI
-    GEMSPEC = File.join(File.expand_path(File.dirname(__FILE__)), "../../beaker.gemspec")
     VERSION_STRING = 
 "      wWWWw
       |o o|
@@ -21,9 +20,7 @@ module Beaker
         exit
       end
       if @options[:version]
-        require 'rubygems' unless defined?(Gem)
-        spec = Gem::Specification::load(GEMSPEC)
-        @logger.notify(VERSION_STRING % spec.version)
+        @logger.notify(VERSION_STRING % @options[:v])
         exit
       end
       @logger.info(@options.dump)
