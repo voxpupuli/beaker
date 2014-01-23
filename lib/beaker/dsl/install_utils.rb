@@ -205,21 +205,29 @@ module Beaker
             end
           end
           if local
-             if not File.exists?("#{path}/#{filename}#{extension}")
-               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist" 
-             end
-             scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
+            if not File.exists?("#{path}/#{filename}#{extension}")
+              raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+            end
+            scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
+            if extension =~ /gz/
+              on host, "cd #{host['working_dir']}; gunzip #{filename}#{extension}"
+            end
+            if extension =~ /tar/
+              on host, "cd #{host['working_dir']}; tar -xvf #{filename}.tar"
+            end
           else
-             if not link_exists?("#{path}/#{filename}#{extension}")
-               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist" 
-             end
-             on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} -o #{filename}#{extension}"
-          end
-          if extension =~ /gz/
-            on host, "cd #{host['working_dir']}; gunzip #{filename}#{extension}"
-          end
-          if extension =~ /tar/
-            on host, "cd #{host['working_dir']}; tar -xvf #{filename}.tar"
+            if not link_exists?("#{path}/#{filename}#{extension}")
+              raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+            end
+            gunzip = ""
+            untar = ""
+            if extension =~ /gz/
+              gunzip = "| gunzip"
+            end
+            if extension =~ /tar/
+              untar = "| tar -xvf -"
+            end
+            on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} #{gunzip} #{untar}"
           end
         end
       end
