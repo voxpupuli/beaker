@@ -809,10 +809,14 @@ module Beaker
       # This wraps the method `stub_hosts_on` and makes the stub specific to
       # the forge alias.
       #
+      # forge api v1 canonical source is forge.puppetlabs.com
+      # forge api v3 canonical source is forgeapi.puppetlabs.com
+      #
       # @param machine [String] the host to perform the stub on
       def stub_forge_on(machine)
         @forge_ip ||= Resolv.getaddress(forge)
         stub_hosts_on(machine, 'forge.puppetlabs.com' => @forge_ip)
+        stub_hosts_on(machine, 'forgeapi.puppetlabs.com' => @forge_ip)
       end
 
       # This wraps the method `stub_hosts` and makes the stub specific to
