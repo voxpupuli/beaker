@@ -166,8 +166,7 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension }  | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
@@ -180,9 +179,7 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
-      subject.should_receive( :on ).with( unixhost, /gunzip/ ).once
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
      
