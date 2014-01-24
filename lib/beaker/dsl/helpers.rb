@@ -659,6 +659,11 @@ module Beaker
       #                         if `puppet --apply` indicates that there were
       #                         changes or failures during its execution.
       #
+      # @option opts [Boolean]  :expect_changes (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet --apply` indicates that there were
+      #                         no resource changes during its execution.
+      #
       # @option opts [Boolean]  :expect_failures (false) This option enables
       #                         detailed exit codes and causes a test failure
       #                         if `puppet --apply` indicates there were no
@@ -679,8 +684,8 @@ module Beaker
         # "... an exit code of '2' means there were changes, an exit code of
         # '4' means there were failures during the transaction, and an exit
         # code of '6' means there were both changes and failures."
-        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures]].select{|x|x}.length > 1
-          raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, or `expect_failures` for a single manifest")
+        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].select{|x|x}.length > 1
+          raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, `expect_failures`, or `expect_changes` for a single manifest")
         end
         if opts[:catch_changes]
           args << '--detailed-exitcodes'
@@ -697,6 +702,11 @@ module Beaker
 
           # We're after failures specifically so allow exit codes 1, 4, and 6 only.
           on_options[:acceptable_exit_codes] |= [1, 4, 6]
+        elsif opts[:expect_changes]
+          args << '--detailed-exitcodes'
+
+          # We're after changes specifically so allow exit code 2 only.
+          on_options[:acceptable_exit_codes] |= [2]
         else
           # Either use the provided acceptable_exit_codes or default to [0]
           on_options[:acceptable_exit_codes] |= [0]
