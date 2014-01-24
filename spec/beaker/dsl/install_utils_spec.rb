@@ -197,8 +197,9 @@ describe ClassMixedWithDSLInstallUtils do
 
     end
 
-    it "does nothing for a frictionless agent" do
+    it "does nothing for a frictionless agent for PE >= 3.2.0" do
       unixhost['roles'] << 'frictionless'
+      unixhost['pe_ver'] = '3.2.0'
 
       subject.should_not_receive(:scp_to)
       subject.should_not_receive(:on)

@@ -141,11 +141,13 @@ module Beaker
       #      on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
       # @api private
       def installer_cmd(host, options)
+        version = options[:pe_ver] || host['pe_ver']
         if host['platform'] =~ /windows/
           version = options[:pe_ver_win] || host['pe_ver']
           "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
-        elsif host['roles'].include? 'frictionless'
-          version = options[:pe_ver] || host['pe_ver']
+        # Frictionless install didn't exist pre-3.2.0, so in that case we fall
+        # through and do a regular install.
+        elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
           "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/#{host['platform']}.bash && bash #{host['platform']}.bash"
         else
           "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]} -a #{host['working_dir']}/answers"
@@ -184,7 +186,7 @@ module Beaker
       def fetch_puppet(hosts, options)
         hosts.each do |host|
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
-          next if host['roles'].include? 'frictionless'
+          next if host['roles'].include? 'frictionless' and ! version_is_less(options[:pe_ver] || host['pe_ver'], '3.2.0')
 
           windows = host['platform'] =~ /windows/
           path = options[:pe_dir] || host['pe_dir']
@@ -279,7 +281,8 @@ module Beaker
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
             # We only need answers if we're using the classic installer
-            if ! host['roles'].include? 'frictionless'
+            version = options[:pe_ver] || host['pe_ver']
+            if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
               answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
               create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
             end
