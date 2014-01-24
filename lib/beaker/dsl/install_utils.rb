@@ -148,7 +148,7 @@ module Beaker
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
-          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/#{host['platform']}.bash && bash #{host['platform']}.bash"
+          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash install.bash"
         else
           "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]} -a #{host['working_dir']}/answers"
         end
