@@ -223,13 +223,17 @@ module Beaker
             end
             gunzip = ""
             untar = ""
+            save_locally = ""
             if extension =~ /gz/
               gunzip = "| gunzip"
             end
             if extension =~ /tar/
               untar = "| tar -xvf -"
             end
-            on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} #{gunzip} #{untar}"
+            if extension =~ /msi/
+              save_locally = "-O"
+            end
+            on host, "cd #{host['working_dir']}; curl #{save_locally} #{path}/#{filename}#{extension} #{gunzip} #{untar}"
           end
         end
       end
