@@ -26,7 +26,7 @@ module SpecInfra
           @example.metadata[:stdout]  = ret[:stdout]
         end
 
-        ret
+        CommandResult.new ret
       end
 
       private
