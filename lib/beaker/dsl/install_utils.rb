@@ -238,6 +238,17 @@ module Beaker
         end
       end
 
+      #Classify the master so that it can deploy frictionless packages for a given host.
+      # @param [Host] host The host to install pacakges for
+      # @api private
+      def deploy_frictionless_to_master(host)
+        klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
+        klass = "pe_repo::platform::#{klass}"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec rake nodeclass:add[#{klass},skip]"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec rake node:addclass[#{master},#{klass}]"
+        on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
+      end
+
       #Perform a Puppet Enterprise upgrade or install
       # @param [Array<Host>] hosts The hosts to install or upgrade PE on 
       # @param  [Hash{Symbol=>Symbol, String}] options The options
@@ -289,6 +300,10 @@ module Beaker
             if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
               answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
               create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+            else
+              # If We're *not* running the classic installer, we want
+              # to make sure the master has packages for us.
+              deploy_frictionless_to_master(host)
             end
 
             on host, installer_cmd(host, options)
