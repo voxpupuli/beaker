@@ -67,7 +67,7 @@ module Beaker
                      [:add_master_entry, "Update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}]]
       begin
         #setup phase
-        setup_steps.each do |step| 
+        setup_steps.each do |step|
           if (not @options.has_key?(step[0])) or @options[step[0]]
             @logger.notify ""
             @logger.notify "Setup: #{step[1]}"
@@ -91,8 +91,10 @@ module Beaker
         validate
         setup
 
+        errored = false
+
         #pre acceptance  phase
-        run_suite(:pre_suite, :fail_fast)
+        run_suite(:pre_suite, :fast)
 
         #testing phase
         begin
@@ -100,8 +102,10 @@ module Beaker
         #post acceptance phase
         rescue => e
           #post acceptance on failure
-          #if we error then run the post suite as long as we aren't in fail-stop mode
-          run_suite(:post_suite) unless @options[:fail_mode] == "stop"
+          #run post-suite if we are in fail-slow mode
+          if @options[:fail_mode] =~ /slow/
+            run_suite(:post_suite)
+          end
           raise e
         else
           #post acceptance on success
@@ -110,9 +114,8 @@ module Beaker
       #cleanup phase
       rescue => e
         #cleanup on error
-        #only do cleanup if we aren't in fail-stop mode
-        @logger.notify "Cleanup: cleaning up after failed run"
-        if @options[:fail_mode] != "stop"
+        if @options[:preserve_hosts] =~ /(never)/
+          @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
             @network_manager.cleanup
           end
@@ -120,9 +123,11 @@ module Beaker
         raise "Failed to execute tests!"
       else
         #cleanup on success
-        @logger.notify "Cleanup: cleaning up after successful run"
-        if @network_manager
-          @network_manager.cleanup
+        if @options[:preserve_hosts] =~ /(never)|(onfail)/
+          @logger.notify "Cleanup: cleaning up after successful run"
+          if @network_manager
+            @network_manager.cleanup
+          end
         end
       end
     end

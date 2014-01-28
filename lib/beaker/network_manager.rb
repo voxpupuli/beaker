@@ -64,16 +64,13 @@ module Beaker
     end
 
     def cleanup
-      #only cleanup if we aren't preserving hosts
       #shut down connections
       @hosts.each {|host| host.close }
 
-      if not @options[:preserve_hosts]
-        if @provisioned_set
-          @provisioned_set.each_key do |type|
-            if @provisioned_set[type]
-              @provisioned_set[type].cleanup
-            end
+      if @provisioned_set
+        @provisioned_set.each_key do |type|
+          if @provisioned_set[type]
+            @provisioned_set[type].cleanup
           end
         end
       end

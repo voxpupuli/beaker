@@ -66,9 +66,14 @@ module Beaker
             @cmd_options[:provision] = bool
           end
 
-          opts.on '--[no-]preserve-hosts',
-                  'Preserve cloud instances' do |value|
-            @cmd_options[:preserve_hosts] = value
+          opts.on '--preserve-hosts [MODE]',
+                  'How should SUTs be treated post test',
+                  'Possible values:',
+                  'always (keep SUTs alive)',
+                  'onfail (keep SUTs alive if failures occur during testing)',
+                  'never (cleanup SUTs - shutdown and destroy any changes made during testing)',
+                  '(default: never)'  do |mode|
+            @cmd_options[:preserve_hosts] = mode || 'always'
           end
 
           opts.on '--root-keys',
@@ -145,9 +150,11 @@ module Beaker
           opts.on '--fail-mode [MODE]',
                   'How should the harness react to errors/failures',
                   'Possible values:',
-                  'fast (skip all subsequent tests, cleanup, exit)',
-                  'stop (skip all subsequent tests, do no cleanup, exit immediately)'  do |mode|
-            @cmd_options[:fail_mode] = mode
+                  'fast (skip all subsequent tests)',
+                  'slow (attempt to continue run post test failure)',
+                  'stop (DEPRECATED, please use fast)',
+                  '(default: slow)'  do |mode|
+            @cmd_options[:fail_mode] = mode =~ /stop/ ? 'fast' :  mode
           end
 
           opts.on '--[no-]ntp',
