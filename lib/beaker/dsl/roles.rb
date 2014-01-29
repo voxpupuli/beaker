@@ -29,7 +29,10 @@ module Beaker
         hosts_as 'agent'
       end
 
-      # The host for which ['roles'] include 'master'
+      # The host for which ['roles'] include 'master'.
+      # If no host has the 'master' role, then use the host defined as 'default'.
+      # If no host is defined as a 'master' and there is no 'default' host defined then
+      # raise an error.
       #
       # @return [Array<Host>]
       # @raise [Beaker::DSL::Outcomes::FailTest] if there are less
@@ -39,7 +42,11 @@ module Beaker
       #     on, master, 'cat /etc/puppet/puppet.conf'
       #
       def master
-        find_only_one :master
+        begin
+          find_only_one :master
+        rescue DSL::Outcomes::FailTest => e
+          default
+        end
       end
 
       # The host for which ['roles'] include 'database'
