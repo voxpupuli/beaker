@@ -239,8 +239,13 @@ module Beaker
         end
 
         #check for valid fail mode
-        if not ["fast", "stop", nil].include?(@options[:fail_mode])
-          parser_error "--fail-mode must be one of fast, stop" 
+        if @options[:fail_mode] !~ /stop|fast|slow/
+          parser_error "--fail-mode must be one of fast or slow, not '#{@options[:fail_mode]}'" 
+        end
+
+        #check for valid preserve_hosts option
+        if @options[:preserve_hosts] !~ /always|onfail|never/
+          parser_error "--preserve_hosts must be one of always, onfail or never, not '#{@options[:preserve_hosts]}'"
         end
 
         #check for config files necessary for different hypervisors
