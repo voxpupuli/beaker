@@ -15,13 +15,20 @@ RSpec.configure do |c|
   nodeset = ENV['RS_SET'] || 'default'
   nodesetfile = ENV['RS_SETFILE'] || File.join('spec/acceptance/nodesets',"#{nodeset}.yml")
 
-  preserve = ENV['RS_DESTROY'] == 'no' ? '--preserve-hosts' : ''
-  fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : ''
-  keyfile = ENV['RS_KEYFILE'] ? ['--keyfile', ENV['RS_KEYFILE']] : []
-  debug = ENV['RS_DEBUG'] ? ['--log-level', 'debug'] : []
+  case ENV['RS_DESTROY']
+  when 'no'
+    preserve = ['--preserve-hosts','always']
+  when 'onpass'
+    preserve = ['--preserve-hosts','onfail']
+  else
+    preserve = ['--preserve-hosts','never']
+  end
+  fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : nil
+  keyfile = ENV['RS_KEYFILE'] ? ['--keyfile', ENV['RS_KEYFILE']] : nil
+  debug = ENV['RS_DEBUG'] ? ['--log-level', 'debug'] : nil
 
   # Configure all nodes in nodeset
-  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten)
+  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten.compact)
   c.provision
   c.validate
 
