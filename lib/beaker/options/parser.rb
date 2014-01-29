@@ -273,8 +273,8 @@ module Beaker
             parser_error "Only agent nodes may have the role 'frictionless', fix #{@options[:hosts_file]}"
           end
         end
-        if master > 1 or master < 1
-          parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
+        if master > 1
+          parser_error "Only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 
         #check that solaris/windows/el-4 boxes are only agents
