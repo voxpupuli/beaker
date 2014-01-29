@@ -724,7 +724,7 @@ module Beaker
           args << { :environment => opts[:environment]}
         end
 
-        file_path = "/tmp/apply_manifest.#{rand(1000000000).to_s}.pp"
+        file_path = host.tmpfile('apply_manifest.pp')
         create_remote_file(host, file_path, manifest + "\n")
         args << file_path
         on host, puppet( 'apply', *args), on_options, &block

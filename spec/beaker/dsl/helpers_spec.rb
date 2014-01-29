@@ -300,26 +300,26 @@ describe ClassMixedWithDSLHelpers do
     it 'calls puppet' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
-        with( 'my_host', 'puppet_command',
+        with( agent, 'puppet_command',
               :acceptable_exit_codes => [0] )
 
-      subject.apply_manifest_on( 'my_host', 'class { "boo": }')
+      subject.apply_manifest_on( agent, 'class { "boo": }')
     end
     it 'adds acceptable exit codes with :catch_failures' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
-        with( 'my_host', 'puppet_command',
+        with( agent, 'puppet_command',
               :acceptable_exit_codes => [0,2] )
 
-      subject.apply_manifest_on( 'my_host',
+      subject.apply_manifest_on( agent,
                                 'class { "boo": }',
                                 :trace => true,
                                 :catch_failures => true )
@@ -327,14 +327,14 @@ describe ClassMixedWithDSLHelpers do
     it 'allows acceptable exit codes through :catch_failures' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).
-        with( 'my_host', 'puppet_command',
+        with( agent, 'puppet_command',
               :acceptable_exit_codes => [4,0,2] )
 
-      subject.apply_manifest_on( 'my_host',
+      subject.apply_manifest_on( agent,
                                 'class { "boo": }',
                                 :acceptable_exit_codes => [4],
                                 :trace => true,
@@ -343,17 +343,17 @@ describe ClassMixedWithDSLHelpers do
     it 'enforces a 0 exit code through :catch_changes' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
-        'my_host',
+        agent,
         'puppet_command',
         :acceptable_exit_codes => [0]
       )
 
       subject.apply_manifest_on(
-        'my_host',
+        agent,
         'class { "boo": }',
         :trace         => true,
         :catch_changes => true
@@ -362,17 +362,17 @@ describe ClassMixedWithDSLHelpers do
     it 'enforces a 2 exit code through :expect_changes' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
-        'my_host',
+        agent,
         'puppet_command',
         :acceptable_exit_codes => [2]
       )
 
       subject.apply_manifest_on(
-        'my_host',
+        agent,
         'class { "boo": }',
         :trace         => true,
         :expect_changes => true
@@ -381,17 +381,17 @@ describe ClassMixedWithDSLHelpers do
     it 'enforces exit codes through :expect_failures' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
-        'my_host',
+        agent,
         'puppet_command',
         :acceptable_exit_codes => [1,4,6]
       )
 
       subject.apply_manifest_on(
-        'my_host',
+        agent,
         'class { "boo": }',
         :trace           => true,
         :expect_failures => true
@@ -400,7 +400,7 @@ describe ClassMixedWithDSLHelpers do
     it 'enforces exit codes through :expect_failures' do
       expect {
         subject.apply_manifest_on(
-          'my_host',
+          agent,
           'class { "boo": }',
           :trace           => true,
           :expect_failures => true,
@@ -411,17 +411,17 @@ describe ClassMixedWithDSLHelpers do
     it 'enforces added exit codes through :expect_failures' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', /apply_manifest.\d+.pp/ ).
+        with( 'apply', '--verbose', '--trace', '--detailed-exitcodes', 'agent' ).
         and_return( 'puppet_command' )
 
       subject.should_receive( :on ).with(
-        'my_host',
+        agent,
         'puppet_command',
         :acceptable_exit_codes => [1,2,3,4,5,6]
       )
 
       subject.apply_manifest_on(
-        'my_host',
+        agent,
         'class { "boo": }',
         :acceptable_exit_codes => (1..5),
         :trace                 => true,
