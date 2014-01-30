@@ -166,8 +166,7 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl  #{ path }/#{ filename }#{ extension }  | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
@@ -180,9 +179,7 @@ describe ClassMixedWithDSLInstallUtils do
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } -o #{ filename }#{ extension }" ).once
-      subject.should_receive( :on ).with( unixhost, /gunzip/ ).once
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
+      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl  #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
      
@@ -200,8 +197,9 @@ describe ClassMixedWithDSLInstallUtils do
 
     end
 
-    it "does nothing for a frictionless agent" do
+    it "does nothing for a frictionless agent for PE >= 3.2.0" do
       unixhost['roles'] << 'frictionless'
+      unixhost['pe_ver'] = '3.2.0'
 
       subject.should_not_receive(:scp_to)
       subject.should_not_receive(:on)
@@ -257,6 +255,68 @@ describe ClassMixedWithDSLInstallUtils do
       #run puppet agent now that installation is complete
       subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts )
+    end
+  end
+
+  describe '#install_puppet' do
+    let(:hosts) do
+      make_hosts({:platform => platform })
+    end
+
+    before do
+      subject.stub(:hosts).and_return(hosts)
+      subject.stub(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on el-6' do
+      let(:platform) { "el-6-i386" }
+      it 'installs' do
+        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-6\.noarch\.rpm/)
+        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        subject.install_puppet
+      end
+    end
+    context 'on el-5' do
+      let(:platform) { "el-5-i386" }
+      it 'installs' do
+        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-5\.noarch\.rpm/)
+        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        subject.install_puppet
+      end
+    end
+    context 'on fedora' do
+      let(:platform) { "fedora-18-x86_84" }
+      it 'installs' do
+        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-fedora-18\.noarch\.rpm/)
+        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        subject.install_puppet
+      end
+    end
+    context 'on debian' do
+      let(:platform) { "debian-7-amd64" }
+      it 'installs' do
+        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
+        expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get -y -f -m update')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
+        subject.install_puppet
+      end
+    end
+    context 'on ubuntu' do
+      let(:platform) { "ubuntu-12.04-amd64" }
+      it 'installs' do
+        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
+        expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get -y -f -m update')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
+        subject.install_puppet
+      end
+    end
+    context 'on solaris' do
+      let(:platform) { 'solaris-11-x86_64' }
+      it 'raises an error' do
+        expect(subject).to_not receive(:on)
+        expect { subject.install_puppet }.to raise_error(/unsupported platform/)
+      end
     end
   end
 

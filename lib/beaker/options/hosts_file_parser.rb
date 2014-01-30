@@ -25,6 +25,7 @@ module Beaker
         end
 
         # Make sure the roles array is present for all hosts
+        host_options['HOSTS'] ||= {}
         host_options['HOSTS'].each_key do |host|
           host_options['HOSTS'][host]['roles'] ||= []
         end

@@ -141,12 +141,14 @@ module Beaker
       #      on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
       # @api private
       def installer_cmd(host, options)
+        version = options[:pe_ver] || host['pe_ver']
         if host['platform'] =~ /windows/
           version = options[:pe_ver_win] || host['pe_ver']
           "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
-        elsif host['roles'].include? 'frictionless'
-          version = options[:pe_ver] || host['pe_ver']
-          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/#{host['platform']}.bash && bash #{host['platform']}.bash"
+        # Frictionless install didn't exist pre-3.2.0, so in that case we fall
+        # through and do a regular install.
+        elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
+          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash install.bash"
         else
           "cd #{host['working_dir']}/#{host['dist']} && ./#{options[:installer]} -a #{host['working_dir']}/answers"
         end
@@ -184,7 +186,7 @@ module Beaker
       def fetch_puppet(hosts, options)
         hosts.each do |host|
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
-          next if host['roles'].include? 'frictionless'
+          next if host['roles'].include? 'frictionless' and ! version_is_less(options[:pe_ver] || host['pe_ver'], '3.2.0')
 
           windows = host['platform'] =~ /windows/
           path = options[:pe_dir] || host['pe_dir']
@@ -221,15 +223,30 @@ module Beaker
             end
             gunzip = ""
             untar = ""
+            save_locally = ""
             if extension =~ /gz/
               gunzip = "| gunzip"
             end
             if extension =~ /tar/
               untar = "| tar -xvf -"
             end
-            on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} #{gunzip} #{untar}"
+            if extension =~ /msi/
+              save_locally = "-O"
+            end
+            on host, "cd #{host['working_dir']}; curl #{save_locally} #{path}/#{filename}#{extension} #{gunzip} #{untar}"
           end
         end
+      end
+
+      #Classify the master so that it can deploy frictionless packages for a given host.
+      # @param [Host] host The host to install pacakges for
+      # @api private
+      def deploy_frictionless_to_master(host)
+        klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
+        klass = "pe_repo::platform::#{klass}"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec rake nodeclass:add[#{klass},skip]"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec rake node:addclass[#{master},#{klass}]"
+        on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
       end
 
       #Perform a Puppet Enterprise upgrade or install
@@ -279,9 +296,14 @@ module Beaker
             on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
           else
             # We only need answers if we're using the classic installer
-            if ! host['roles'].include? 'frictionless'
+            version = options[:pe_ver] || host['pe_ver']
+            if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
               answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
               create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+            else
+              # If We're *not* running the classic installer, we want
+              # to make sure the master has packages for us.
+              deploy_frictionless_to_master(host)
             end
 
             on host, installer_cmd(host, options)
@@ -381,6 +403,41 @@ module Beaker
         special_nodes = [master, database, dashboard].uniq
         real_agents = agents - special_nodes
         special_nodes + real_agents
+      end
+
+      #Install POSS based upon host configuration and options
+      # @example
+      #  install_puppet
+      #
+      # @note This will attempt to add a repository for apt.puppetlabs.com on
+      #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
+      #       machines, then install the package 'puppet'
+      #
+      # @api dsl
+      # @return nil
+      def install_puppet
+        hosts.each do |host|
+          if host['platform'] =~ /el-(5|6)/
+            relver = $1
+            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-#{relver}.noarch.rpm"
+            on host, 'yum install -y puppet'
+          elsif host['platform'] =~ /fedora-(\d+)/
+            relver = $1
+            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
+            on host, 'yum install -y puppet'
+          elsif host['platform'] =~ /(ubuntu|debian)/
+            if ! host.check_for_package 'curl'
+              on host, 'apt-get install -y curl'
+            end
+            on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
+            on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
+            on host, 'apt-get -y -f -m update'
+            on host, 'apt-get install -y puppet'
+          else
+            raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+          end
+        end
+        nil
       end
 
       #Install PE based upon host configuration and options

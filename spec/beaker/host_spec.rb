@@ -112,6 +112,14 @@ module Beaker
       it 'receives a result object from the connection#execute'
       it "returns the result object"
 
+      it 'logs the amount of time spent executing the command' do
+        result.exit_code = 0
+
+        expect(host.logger).to receive(:debug).with(/host executed in \d\.\d{2} seconds/)
+
+        host.exec(command,{})
+      end
+
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0

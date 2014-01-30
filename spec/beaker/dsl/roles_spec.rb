@@ -39,13 +39,18 @@ describe ClassMixedWithDSLRoles do
     end
     it 'raises an error if there is more than one master' do
       @hosts = [ master, monolith ]
-      subject.should_receive( :hosts ).and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 5 ).times.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
     end
-    it 'and raises an error if there is no master' do
+    it 'and raises an error if there is no master and no default' do
       @hosts = [ agent1, agent2, custom ]
-      subject.should_receive( :hosts ).and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 4 ).times.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
+    end
+    it 'returns the default when there is no master' do
+      @hosts = [ agent1 ]
+      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
+      expect( subject.master ).to be == agent1 
     end
   end
   describe '#dashboard' do

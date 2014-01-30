@@ -234,13 +234,18 @@ module Beaker
         end 
  
         #check for valid type
-        if @options[:type] !~ /(pe)|(git)/
-          parser_error "--type must be one of pe or git, not '#{@options[:type]}'"
+        if @options[:type] !~ /(pe)|(git)|(foss)/
+          parser_error "--type must be one of pe, git, or foss, not '#{@options[:type]}'"
         end
 
         #check for valid fail mode
-        if not ["fast", "stop", nil].include?(@options[:fail_mode])
-          parser_error "--fail-mode must be one of fast, stop" 
+        if @options[:fail_mode] !~ /stop|fast|slow/
+          parser_error "--fail-mode must be one of fast or slow, not '#{@options[:fail_mode]}'" 
+        end
+
+        #check for valid preserve_hosts option
+        if @options[:preserve_hosts] !~ /always|onfail|never/
+          parser_error "--preserve_hosts must be one of always, onfail or never, not '#{@options[:preserve_hosts]}'"
         end
 
         #check for config files necessary for different hypervisors
@@ -273,8 +278,8 @@ module Beaker
             parser_error "Only agent nodes may have the role 'frictionless', fix #{@options[:hosts_file]}"
           end
         end
-        if master > 1 or master < 1
-          parser_error "One and only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
+        if master > 1
+          parser_error "Only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 
         #check that solaris/windows/el-4 boxes are only agents

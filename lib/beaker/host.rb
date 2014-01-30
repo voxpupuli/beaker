@@ -1,5 +1,6 @@
 require 'socket'
 require 'timeout'
+require 'benchmark'
 
 %w(command ssh_connection).each do |lib|
   begin
@@ -131,6 +132,14 @@ module Beaker
       @options.is_pe?
     end
 
+    def log_prefix
+      if @defaults['vmhostname']
+        "#{self} (#{@name})"
+      else
+        self.to_s
+      end
+    end
+
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
@@ -149,11 +158,7 @@ module Beaker
       if options[:silent]
         output_callback = nil
       else
-        if @defaults['vmhostname']
-          @logger.debug "\n#{self} (#{@name}) $ #{cmdline}"
-        else
-          @logger.debug "\n#{self} $ #{cmdline}"
-        end
+        @logger.debug "\n#{log_prefix} $ #{cmdline}"
         output_callback = logger.method(:host_output)
       end
 
@@ -161,7 +166,12 @@ module Beaker
         # is this returning a result object?
         # the options should come at the end of the method signature (rubyism)
         # and they shouldn't be ssh specific
-        result = connection.execute(cmdline, options, output_callback)
+        result = nil
+
+        seconds = Benchmark.realtime {
+          result = connection.execute(cmdline, options, output_callback)
+        }
+        @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
 
         unless options[:silent]
           # What?
@@ -180,7 +190,6 @@ module Beaker
     end
 
     def do_scp_to source, target, options
-
       @logger.debug "localhost $ scp #{source} #{@name}:#{target} #{options.to_s}"
       result = connection.scp_to(source, target, options, $dry_run)
       return result
