@@ -5,6 +5,7 @@ module Beaker
     module Version32
       def self.answers(hosts, master_certname, options)
         dashboard = only_host_with_role(hosts, 'dashboard')
+        database = only_host_with_role(hosts, 'database')
         master = only_host_with_role(hosts, 'master')
 
         the_answers = Version30.answers(hosts, master_certname, options)
