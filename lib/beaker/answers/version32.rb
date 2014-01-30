@@ -13,6 +13,14 @@ module Beaker
           the_answers[dashboard.name][:q_puppetmaster_certname] = master_certname
         end
 
+        if options[:type] == :upgrade && dashboard != database
+          # In a split configuration, there is no way for the upgrader
+          # to know how much disk space is available for the database
+          # migration. We tell it to continue on, because we're
+          # awesome.
+          the_answers[dashboard.name][:q_upgrade_with_unknown_disk_space] = 'y'
+        end
+
         return the_answers
       end
     end
