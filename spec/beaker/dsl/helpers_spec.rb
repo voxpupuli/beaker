@@ -479,6 +479,8 @@ describe ClassMixedWithDSLHelpers do
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
         with( 'my_host', 'forge.puppetlabs.com' => '127.0.0.1' )
+      subject.should_receive( :stub_hosts_on ).
+        with( 'my_host', 'forgeapi.puppetlabs.com' => '127.0.0.1' )
 
       subject.stub_forge_on( 'my_host' )
     end
