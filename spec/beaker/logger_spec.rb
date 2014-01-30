@@ -16,7 +16,7 @@ module Beaker
       context 'default for' do
         its(:destinations)  { should include(STDOUT)  }
         its(:color)         { should be_nil           }
-        its(:log_level)     { should be :info       }
+        its(:log_level)     { should be :verbose      }
       end
     end
 
@@ -54,6 +54,30 @@ module Beaker
         colorized_logger.optionally_color "\e[00;30m", 'my string'
       end
 
+      context 'at verbose log_level' do
+        subject( :verbose_logger )  { Logger.new( my_io,
+                                              :log_level => 'verbose',
+                                              :quiet => true,
+                                              :color => true )
+                                  }
+
+        its( :is_debug? ) { should be_false }
+        its( :is_verbose? ) { should be_true }
+        its( :is_warn? )  { should be_true }
+
+        context 'but print' do
+          before do
+            my_io.stub :puts
+            my_io.should_receive( :print ).at_least :twice
+          end
+
+          it( 'warnings' )    { verbose_logger.warn 'IMA WARNING!'    }
+          it( 'successes' )   { verbose_logger.success 'SUCCESS!'     }
+          it( 'errors' )      { verbose_logger.error 'ERROR!'         }
+          it( 'host_output' ) { verbose_logger.host_output 'ERROR!'   }
+          it( 'debugs' )      { verbose_logger.debug 'NOT DEBUGGING!' }
+        end
+      end
 
       context 'at debug log_level' do
         subject( :debug_logger )  { Logger.new( my_io,
@@ -64,7 +88,6 @@ module Beaker
 
         its( :is_debug? ) { should be_true }
         its( :is_warn? )  { should be_true }
-
 
         context 'successfully print' do
           before do
@@ -82,8 +105,9 @@ module Beaker
 
       context 'at info log_level' do
         subject( :info_logger ) { Logger.new( my_io,
-                                              :quiet => true,
-                                              :color => true )
+                                              :log_level => :info,
+                                              :quiet     => true,
+                                              :color     => true )
                                   }
 
         its( :is_debug? ) { should be_false }
