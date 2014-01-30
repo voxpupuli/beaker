@@ -59,6 +59,11 @@ module Beaker
         @ver = '3.2'
         expect( subject.answers( hosts, master_certname, {} )['vm2']).to include :q_puppetmaster_certname
       end
+
+      it 'should add q_upgrade_with_unknown_disk_space to the dashboard on upgrade' do
+        @ver = '3.2'
+        expect( subject.answers( hosts, master_certname, {:type => :upgrade} )['vm2']).to include :q_upgrade_with_unknown_disk_space
+    end
     end
 
     describe Version30 do
