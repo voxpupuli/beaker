@@ -15,25 +15,24 @@ RSpec.configure do |c|
   nodeset = ENV['RS_SET'] || 'default'
   nodesetfile = ENV['RS_SETFILE'] || File.join('spec/acceptance/nodesets',"#{nodeset}.yml")
 
-  case ENV['RS_DESTROY']
-  when 'no'
-    preserve = ['--preserve-hosts','always']
-  when 'onpass'
-    preserve = ['--preserve-hosts','onfail']
-  else
-    preserve = ['--preserve-hosts','never']
-  end
   fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : nil
   keyfile = ENV['RS_KEYFILE'] ? ['--keyfile', ENV['RS_KEYFILE']] : nil
   debug = ENV['RS_DEBUG'] ? ['--log-level', 'debug'] : nil
 
   # Configure all nodes in nodeset
-  c.setup([preserve, fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten.compact)
+  c.setup([fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten.compact)
   c.provision
   c.validate
 
   # Destroy nodes if no preserve hosts
   c.after :suite do
-    c.cleanup
+    case ENV['RS_DESTROY']
+    when 'no'
+      # Don't cleanup
+    when 'onpass'
+      c.cleanup if RSpec.world.filtered_examples.values.flatten.none?(&:exception)
+    else
+      c.cleanup
+    end
   end
 end
