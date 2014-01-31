@@ -309,6 +309,24 @@ describe ClassMixedWithDSLHelpers do
 
       subject.apply_manifest_on( agent, 'class { "boo": }')
     end
+
+    it 'accepts an array of hosts' do
+      the_hosts = [master, agent]
+
+      subject.should_receive( :create_remote_file ).twice.and_return( true )
+      the_hosts.each do |host|
+        subject.should_receive( :puppet ).
+          with( 'apply', '--verbose', host.to_s ).
+          and_return( 'puppet_command' )
+
+        subject.should_receive( :on ).
+          with( host, 'puppet_command',
+                :acceptable_exit_codes => [0] ).ordered
+      end
+
+      subject.apply_manifest_on( the_hosts, 'include foobar')
+    end
+
     it 'adds acceptable exit codes with :catch_failures' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
