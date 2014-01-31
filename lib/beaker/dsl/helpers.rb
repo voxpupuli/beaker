@@ -674,6 +674,13 @@ module Beaker
       #                      validation, etc.
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
+        if host.is_a?(Array)
+          host.each do |h|
+            apply_manifest_on(h, manifest, opts, &block)
+          end
+          return
+        end
+
         on_options = {}
         on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes))
         args = ["--verbose"]
