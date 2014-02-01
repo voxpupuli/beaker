@@ -41,6 +41,7 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @google_hosts = google_hosts
+      @firewall = ''
       try = 1
       attempts = @options[:timeout].to_i / SLEEPWAIT
       start = Time.now
@@ -153,6 +154,35 @@ module Beaker
         :body_object => { 'name' => name, 'sizeGb' => DEFAULT_DISK_SIZE } }
     end
 
+    def firewall_get_req(name)
+      { :api_method  => @compute.firewalls.get, 
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'firewall' => name } }
+    end
+
+    def firewall_insert_req(name, network)
+      { :api_method  => @compute.firewalls.insert, 
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME }, 
+        :body_object => { 'name' => name, 
+                          'allowed'=> [ { 'IPProtocol' => 'tcp', "ports" =>  [ '443', '8140', '61613' ]} ],
+                          'network'=> network,
+                          'sourceRanges' => [ "0.0.0.0/0" ] } }
+    end
+
+    def firewall_delete_req(name)
+      { :api_method  => @compute.firewalls.delete, 
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'firewall' => name } }
+    end
+
+    def firewall_list_req()
+      { :api_method  => @compute.firewalls.list, 
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME } }
+    end
+
+    def network_get_req(name = 'default')
+      { :api_method  => @compute.networks.get, 
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'network' => name } }
+    end
+
     def instance_list_req
       { :api_method  => @compute.instances.list, 
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME } }
@@ -233,6 +263,14 @@ module Beaker
 
       #get machineType resource, used my all instances
       machineType = execute( machineType_get_req )
+
+      #set firewall to open pe ports
+      network = execute( network_get_req )
+      @firewall = generate_host_name
+      execute( firewall_insert_req( @firewall, network['selfLink'] ) )
+
+      @logger.debug("Created firewall #{@firewall}")
+
 
       @google_hosts.each do |host|
         img = get_latest_image(host[:platform])
@@ -335,9 +373,29 @@ module Beaker
       @logger.debug("#{name} disk was not removed before timeout, may still exist")
     end
 
+    def delete_firewall(name, start, attempts)
+      result = execute( firewall_delete_req( name ) )
+      #ensure deletion of disk
+      try = (Time.now - start) / SLEEPWAIT
+      while try <= attempts
+        begin
+          firewall = execute( firewall_get_req( name ) ) 
+          @logger.debug("Waiting for #{name} firewall deletion")
+          sleep(SLEEPWAIT)
+        rescue
+          @logger.debug("#{name} firewall deleted!")
+          return
+        end
+        try += 1
+      end
+      @logger.debug("#{name} firewall was not removed before timeout, may still exist")
+    end
+
     def cleanup()
       attempts = @options[:timeout].to_i / SLEEPWAIT
       start = Time.now
+
+      delete_firewall(@firewall, start, attempts) 
 
       @google_hosts.each do |host|
         delete_instance(host['vmhostname'], start, attempts)
@@ -383,6 +441,19 @@ module Beaker
         end
       else
         @logger.debug("No zombie disks found")
+      end
+      #get rid of non-default firewalls
+      result = execute( firewall_list_req() ) 
+      firewalls = result["items"]
+      firewalls.delete_if{|f| f['name'] =~ /default-allow-internal|default-ssh/}
+
+      if firewalls and not firewalls.empty?
+        firewalls.each do |firewall|
+          @logger.debug("Deleting non-default firewall #{firewall['name']}")
+          delete_firewall( firewall['name'], start, attempts )
+        end
+      else
+        @logger.debug("No zombie firewalls found")
       end
 
     end
