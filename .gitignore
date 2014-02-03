@@ -12,6 +12,13 @@ coverage
 .bundle
 .vendor
 _vendor
-!tmp/README
-tmp/*
+tmp/
 doc
+# JetBrains IDEA
+*.iml
+.idea/
+# rbenv file
+.ruby-version
+# Vagrant folder
+.vagrant/
+.vagrant_files/
