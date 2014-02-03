@@ -158,7 +158,7 @@ module Beaker
       if options[:silent]
         output_callback = nil
       else
-        @logger.debug "\n#{log_prefix} $ #{cmdline}"
+        @logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{cmdline}"
         output_callback = logger.method(:host_output)
       end
 

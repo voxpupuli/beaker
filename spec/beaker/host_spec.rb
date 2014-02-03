@@ -115,7 +115,7 @@ module Beaker
       it 'logs the amount of time spent executing the command' do
         result.exit_code = 0
 
-        expect(host.logger).to receive(:debug).with(/host executed in \d\.\d{2} seconds/)
+        expect(host.logger).to receive(:debug).with(/executed in \d\.\d{2} seconds/)
 
         host.exec(command,{})
       end
