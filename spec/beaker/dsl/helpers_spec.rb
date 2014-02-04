@@ -310,7 +310,7 @@ describe ClassMixedWithDSLHelpers do
       subject.apply_manifest_on( agent, 'class { "boo": }')
     end
 
-    it 'accepts an array of hosts' do
+    it 'operates on an array of hosts' do
       the_hosts = [master, agent]
 
       subject.should_receive( :create_remote_file ).twice.and_return( true )
@@ -324,7 +324,8 @@ describe ClassMixedWithDSLHelpers do
                 :acceptable_exit_codes => [0] ).ordered
       end
 
-      subject.apply_manifest_on( the_hosts, 'include foobar')
+      result = subject.apply_manifest_on( the_hosts, 'include foobar')
+      result.should(be_an(Array))
     end
 
     it 'adds acceptable exit codes with :catch_failures' do

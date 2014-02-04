@@ -675,10 +675,9 @@ module Beaker
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
         if host.is_a?(Array)
-          host.each do |h|
+          return host.map do |h|
             apply_manifest_on(h, manifest, opts, &block)
           end
-          return
         end
 
         on_options = {}
