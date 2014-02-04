@@ -5,6 +5,10 @@ require 'ostruct'
 
 module Beaker
   class GoogleCompute < Beaker::Hypervisor
+
+    class GoogleComputeError < StandardError
+    end
+
     SLEEPWAIT = 5
     #number of hours before an instance is considered a zombie
     ZOMBIE = 3
@@ -111,20 +115,33 @@ module Beaker
       }
     end
 
-    def execute req
-      result = @client.execute(req)
-      parsed = JSON.parse(result.body)
-      if not result.success?
-        error_code = parsed["error"] ? parsed["error"]["code"] : 0
-        if error_code == 404
-          raise "Resource Not Found: #{result.body}"
-        elsif error_code == 400
-          raise "Bad Request: #{result.body}"
-        else
-          raise "Error attempting Google Compute API execute: #{result.body}"
+    def execute req, start, attempts
+      last_error = parsed = nil
+      try = (Time.now - start) / SLEEPWAIT
+      while try <= attempts
+        begin
+          result = @client.execute(req)
+          parsed = JSON.parse(result.body)
+          if not result.success?
+            error_code = parsed["error"] ? parsed["error"]["code"] : 0
+            if error_code == 404
+              raise GoogleComputeError, "Resource Not Found: #{result.body}"
+            elsif error_code == 400
+              raise GoogleComputeError, "Bad Request: #{result.body}"
+            else
+              raise GoogleComputeError, "Error attempting Google Compute API execute: #{result.body}"
+            end
+          end
+          return parsed
+        #retry errors
+        rescue Faraday::Error::ConnectionFailed => e  
+          @logger.debug "ConnectionFailed attempting Google Compute execute command"
+          try += 1
+          last_error = e
         end
       end
-      parsed
+      #we only get down here if we've used up all our tries
+      raise last_error
     end
 
     def image_list_req(name)
@@ -237,13 +254,13 @@ module Beaker
       end
     end
 
-    def get_latest_image(platform)
+    def get_latest_image(platform, start, attempts)
       #use the platform version numbers instead of codenames
       platform = use_version_number(platform)
       #break up my platform for information
       platform_name, platform_version, platform_extra_info = platform.split('-', 3)
       #find latest image to use
-      result = execute( image_list_req(platform_name) ) 
+      result = execute( image_list_req(platform_name), start, attempts ) 
       images = result["items"]
       #reject images of the wrong version of the given platform
       images.delete_if { |image| image['name'] !~ /^#{platform_name}-#{platform_version}/}
@@ -262,31 +279,31 @@ module Beaker
       start = Time.now
 
       #get machineType resource, used my all instances
-      machineType = execute( machineType_get_req )
+      machineType = execute( machineType_get_req, start, attempts )
 
       #set firewall to open pe ports
-      network = execute( network_get_req )
+      network = execute( network_get_req, start, attempts)
       @firewall = generate_host_name
-      execute( firewall_insert_req( @firewall, network['selfLink'] ) )
+      execute( firewall_insert_req( @firewall, network['selfLink'] ), start, attempts )
 
       @logger.debug("Created firewall #{@firewall}")
 
 
       @google_hosts.each do |host|
-        img = get_latest_image(host[:platform])
+        img = get_latest_image(host[:platform], start, attempts)
 
         #create boot disk name
         host['diskname'] = generate_host_name
         #create a new boot disk for this instance
-        disk = execute( disk_insert_req( host['diskname'], img['selfLink'] ) )
+        disk = execute( disk_insert_req( host['diskname'], img['selfLink'] ), start, attempts )
 
         status = ''
         try = (Time.now - start) / SLEEPWAIT
         while status !~ /READY/ and try <= attempts 
           begin
-            disk = execute( disk_get_req( host['diskname'] ) )
+            disk = execute( disk_get_req( host['diskname'] ), start, attempts )
             status = disk['status']
-          rescue
+          rescue GoogleComputeError => e
             @logger.debug("Waiting for #{host.name}: #{host['diskname']} disk creation")
             sleep(SLEEPWAIT)
           end
@@ -300,14 +317,14 @@ module Beaker
         #create new host name
         host['vmhostname'] = generate_host_name
         #add a new instance of the image
-        instance = execute( instance_insert_req( host['vmhostname'], img['selfLink'], machineType['selfLink'], disk['selfLink'] ) )
+        instance = execute( instance_insert_req( host['vmhostname'], img['selfLink'], machineType['selfLink'], disk['selfLink'] ), start, attempts)
         status = ''
         try = (Time.now - start) / SLEEPWAIT
         while status !~ /RUNNING/ and try <= attempts
           begin
-            instance = execute( instance_get_req( host['vmhostname'] ) ) 
+            instance = execute( instance_get_req( host['vmhostname'] ), start, attempts ) 
             status = instance['status']
-          rescue
+          rescue GoogleComputeError => e
             @logger.debug("Waiting for #{host.name}: #{host['vmhostname']} instance creation")
             sleep(SLEEPWAIT)
           end
@@ -338,15 +355,15 @@ module Beaker
     end
 
     def delete_instance(name, start, attempts)
-      result = execute( instance_delete_req( name ) )
+      result = execute( instance_delete_req( name ), start, attempts )
       #ensure deletion of instance
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          result = execute( instance_get_req( name ) ) 
+          result = execute( instance_get_req( name ), start, attempts ) 
           @logger.debug("Waiting for #{name} instance deletion")
           sleep(SLEEPWAIT)
-        rescue
+        rescue GoogleComputeError => e
           @logger.debug("#{name} instance deleted!")
           return
         end
@@ -356,15 +373,15 @@ module Beaker
     end
 
     def delete_disk(name, start, attempts)
-      result = execute( disk_delete_req( name ) )
+      result = execute( disk_delete_req( name ), start, attempts )
       #ensure deletion of disk
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          disk = execute( disk_get_req( name ) ) 
+          disk = execute( disk_get_req( name ), start, attempts ) 
           @logger.debug("Waiting for #{name} disk deletion")
           sleep(SLEEPWAIT)
-        rescue
+        rescue GoogleComputeError => e
           @logger.debug("#{name} disk deleted!")
           return
         end
@@ -374,15 +391,15 @@ module Beaker
     end
 
     def delete_firewall(name, start, attempts)
-      result = execute( firewall_delete_req( name ) )
+      result = execute( firewall_delete_req( name ), start, attempts )
       #ensure deletion of disk
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          firewall = execute( firewall_get_req( name ) ) 
+          firewall = execute( firewall_get_req( name ), start, attempts ) 
           @logger.debug("Waiting for #{name} firewall deletion")
           sleep(SLEEPWAIT)
-        rescue
+        rescue GoogleComputeError => e
           @logger.debug("#{name} firewall deleted!")
           return
         end
@@ -411,7 +428,7 @@ module Beaker
       attempts = @options[:timeout].to_i / SLEEPWAIT
 
       #get rid of old instances 
-      result = execute( instance_list_req() ) 
+      result = execute( instance_list_req(), start, attempts ) 
       instances = result["items"]
       if instances
         instances.each do |instance|
@@ -427,7 +444,7 @@ module Beaker
         @logger.debug("No zombie instances found")
       end
       #get rid of old disks
-      result = execute( disk_list_req() ) 
+      result = execute( disk_list_req(), start, attempts ) 
       disks = result["items"]
       if disks
         disks.each do |disk|
@@ -443,7 +460,7 @@ module Beaker
         @logger.debug("No zombie disks found")
       end
       #get rid of non-default firewalls
-      result = execute( firewall_list_req() ) 
+      result = execute( firewall_list_req(), start, attempts ) 
       firewalls = result["items"]
       firewalls.delete_if{|f| f['name'] =~ /default-allow-internal|default-ssh/}
 
