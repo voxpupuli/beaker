@@ -22,7 +22,7 @@ module Beaker
       end
 
       def get_ip(host)
-        host.exec(Command.new("ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
+        host.exec(Command.new("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
       end
 
       def set_etc_hosts(host, etc_hosts)

@@ -20,7 +20,7 @@ module Beaker
           path = Beaker::Utils::SetupHelper::ETC_HOSTS_PATH
           master = setup_helper.only_host_with_role(hosts, :master)
 
-          Command.should_receive( :new ).with( "ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1" ).once
+          Command.should_receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
           Command.should_receive( :new ).with( "cp %s %s.old" % [path, path] ).once
           Command.should_receive( :new ).with( "cp %s %s.new" % [path, path] ).once
           Command.should_receive( :new ).with( "grep -v '#{ip} #{master}' %s > %s.new" % [path, path] ).once
