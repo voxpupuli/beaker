@@ -28,6 +28,21 @@ module Beaker
       expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2' do |v|\n    v.vm.hostname = 'vm2'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3' do |v|\n    v.vm.hostname = 'vm3'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
     end
 
+    it "uses the memsize defined per vagrant host" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+
+      vagrant.make_vfile( @hosts, {'vagrant_memsize' => 'hello!'} )
+
+      generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+
+      match = generated_file.match(/vb.customize \["modifyvm", :id, "--memory", "hello!"]/)
+
+      expect( match ).to_not be nil
+
+    end
+
     it "can generate a new /etc/hosts file referencing each host" do
 
       @hosts.each do |host|
@@ -139,14 +154,15 @@ module Beaker
       end
 
       it "can provision a set of hosts" do
-        vagrant.should_receive( :make_vfile ).with( @hosts ).once
+        options = vagrant.instance_variable_get( :@options )
+        vagrant.should_receive( :make_vfile ).with( @hosts, options ).once
         vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).never
         vagrant.provision
       end
 
       it "destroys an existing set of hosts before provisioning" do
-        vagrant.make_vfile(@hosts)
-        vagrant.should_receive(:vagrant_cmd).with("destroy --force").once
+        vagrant.make_vfile( @hosts )
+        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
         vagrant.provision
       end
 
