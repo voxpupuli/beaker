@@ -66,8 +66,7 @@ module Beaker
       name = host.name
       Dir.stub( :chdir ).and_yield()
 
-      out = double( 'stdout' )
-      out.stub( :read ).and_return("Host #{host.name}
+      vagrant.should_receive(:`).and_return("Host #{host.name}
     HostName 127.0.0.1
     User vagrant
     Port 2222
@@ -76,12 +75,6 @@ module Beaker
     PasswordAuthentication no
     IdentityFile /home/root/.vagrant.d/insecure_private_key
     IdentitiesOnly yes")
-      wait_thr = OpenStruct.new
-      state = mock( 'state' )
-      state.stub( :success? ).and_return( true )
-      wait_thr.value = state
-
-      Open3.stub( :popen3 ).with( 'vagrant', 'ssh-config', host.name ).and_return( [ "", out, "", wait_thr ])
 
       file = double( 'file' )
       file.stub( :path ).and_return( '/path/sshconfig' )
