@@ -23,7 +23,7 @@ module Beaker
         if master['platform'].include? 'solaris'
           stdout = master.exec(Command.new("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1")).stdout
         else
-          stdout = master.exec(Command.new("ip a|awk '/g/{print$2}' | cut -d/ -f1 | head -1")).stdout
+          stdout = master.exec(Command.new("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1")).stdout
         end
         ip=stdout.chomp
 
