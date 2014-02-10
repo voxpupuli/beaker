@@ -681,7 +681,8 @@ module Beaker
         end
 
         on_options = {}
-        on_options[:acceptable_exit_codes] = Array(opts.delete(:acceptable_exit_codes))
+        on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
+
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]

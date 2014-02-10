@@ -321,10 +321,10 @@ describe ClassMixedWithDSLHelpers do
 
         subject.should_receive( :on ).
           with( host, 'puppet_command',
-                :acceptable_exit_codes => [0] ).ordered
+                :acceptable_exit_codes => [0, 1] ).ordered
       end
 
-      result = subject.apply_manifest_on( the_hosts, 'include foobar')
+      result = subject.apply_manifest_on( the_hosts, 'include foobar', :acceptable_exit_codes => [0,1] )
       result.should(be_an(Array))
     end
 
