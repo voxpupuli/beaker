@@ -5,7 +5,7 @@ module Beaker
     #An Object that parses, merges and normalizes all supported Beaker options and arguments
     class Parser
       GITREPO      = 'git://github.com/puppetlabs'
-      #These options can have the form of arg1,arg2 or [arg] or just arg,
+      #These options can have the form of arg1,arg2 or [arg] or just arg, 
       #should default to []
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
       #These options expand out into an array of .rb files
@@ -189,7 +189,6 @@ module Beaker
       #
       #Currently checks:
       #  - each host has a valid platform
-      #  - each host platform is using the version codename instead of the version number
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
       #  - --type is one of 'pe' or 'git'
@@ -209,7 +208,6 @@ module Beaker
           else
             @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
           end
-          @options['HOSTS'][name]['platform'] = use_version_codename(@options['HOSTS'][name]['platform'])
         end
 
         #use the keyfile if present

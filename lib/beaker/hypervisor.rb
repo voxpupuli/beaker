@@ -119,7 +119,7 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris google_compute).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris google_compute_helper google_compute).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

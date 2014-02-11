@@ -148,7 +148,7 @@ module Beaker
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 
-      describe "normalize_args", :use_fakefs => true do
+      describe "normalize_args" do
         let(:hosts) do
           {
             'HOSTS' => {
@@ -160,14 +160,6 @@ module Beaker
               },
             }
           }
-        end
-        let(:gemspec) { "version = '0.0.0'" }
-
-        before :each do
-          File.open('tmp.gemspec', 'w') do |f|
-            f.puts(gemspec)
-          end
-          stub_const("Beaker::Options::Parser::GEMSPEC", 'tmp.gemspec') 
         end
 
         def fake_hosts_file_for_platform(hosts, platform)
