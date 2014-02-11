@@ -135,11 +135,6 @@ module Beaker
             @cmd_options[:log_level] = val
           end
 
-          opts.on '--[no-]debug',
-                  'DEPRECATED, use --log-level' do |bool|
-            @cmd_options[:log_level] =  bool ? 'debug' : 'info'
-          end
-
           opts.on  '-d', '--[no-]dry-run',
                    'Report what would happen on targets',
                    '(default: false)' do |bool|
@@ -179,14 +174,24 @@ module Beaker
             @cmd_options[:version] = true
           end
 
-          opts.on '-c', '--config FILE',
-                  'DEPRECATED use --hosts' do |file|
-            @cmd_options[:hosts_file] = file
+          opts.on('--parse-only', 'Display beaker parsed options and exit' ) do 
+            @cmd_options[:parse_only] = true
           end
 
           opts.on('--help', 'Display this screen' ) do 
             @cmd_options[:help] = true
           end
+
+          opts.on '-c', '--config FILE',
+                  'DEPRECATED, use --hosts' do |file|
+            @cmd_options[:hosts_file] = file
+          end
+
+          opts.on '--[no-]debug',
+                  'DEPRECATED, use --log-level' do |bool|
+            @cmd_options[:log_level] =  bool ? 'debug' : 'info'
+          end
+
         end
 
       end
