@@ -247,7 +247,7 @@ module Beaker
     end
 
     def log_path(name)
-      @@log_dir ||= File.join("log", @start_time.strftime("%F_%T"))
+      @@log_dir ||= File.join("log", @start_time.strftime("%F_%H_%M_%S"))
       unless File.directory?(@@log_dir) then
         FileUtils.mkdir_p(@@log_dir)
 
