@@ -221,7 +221,7 @@ Used with `hypervisor: solaris`, the harness can connect to a Solaris host via S
         - rpool/ROOT/solaris
 
 ## vSphere Support ##
-Beaker can also VMs and snapshots that live within vSphere. To do this create a `~/.fog` file with your vSphere credentials.
+Beaker can also use VMs and snapshots that live within vSphere. To do this create a `~/.fog` file with your vSphere credentials.
 
 ### Example `.fog` File ###
     :default:
