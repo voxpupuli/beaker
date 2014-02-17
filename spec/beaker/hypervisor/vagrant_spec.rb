@@ -38,7 +38,7 @@ module Beaker
 
     end
 
-    it "uses a random port number for the ssh port" do
+    it "Creates a random ssh port number when 'vagrant_ssh_port_random' is set to true" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
       vagrant.stub( :randmac ).and_return( "0123456789" )
