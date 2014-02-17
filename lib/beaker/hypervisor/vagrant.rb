@@ -18,18 +18,24 @@ module Beaker
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
-    def make_vfile hosts
+    def randport
+      rand(30000)+1024.to_i
+    end
+
+    def make_vfile hosts, options
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
       v_file = "Vagrant.configure(\"2\") do |c|\n"
       hosts.each do |host|
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
+        host['ssh_port'] = randport if options['vagrant_ssh_port_random'] == true
         v_file << "  c.vm.define '#{host.name}' do |v|\n"
         v_file << "    v.vm.hostname = '#{host.name}'\n"
         v_file << "    v.vm.box = '#{host['box']}'\n"
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
+        v_file << "    v.vm.network :forwarded_port, guest: 22, host: #{host['ssh_port']}, id: \"ssh\", auto_correct: true" if options['vagrant_ssh_port_random'] == true
         v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
@@ -117,7 +123,7 @@ module Beaker
         #make sure that any old boxes are dead dead dead
         vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
 
-        make_vfile @vagrant_hosts
+        make_vfile @vagrant_hosts, @options
 
         vagrant_cmd("up")
       else #set host ip of already up boxes
