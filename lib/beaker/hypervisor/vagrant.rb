@@ -28,13 +28,14 @@ module Beaker
       v_file = "Vagrant.configure(\"2\") do |c|\n"
       hosts.each do |host|
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
+        host['ssh_port'] = randport if options['vagrant_ssh_port_random'] == true
         v_file << "  c.vm.define '#{host.name}' do |v|\n"
         v_file << "    v.vm.hostname = '#{host.name}'\n"
         v_file << "    v.vm.box = '#{host['box']}'\n"
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
-        v_file << "    v.vm.network :forwarded_port, guest: 22, host: #{randport}, id: \"ssh\", auto_correct: true" if options['vagrant_ssh_port_random'] == true
+        v_file << "    v.vm.network :forwarded_port, guest: 22, host: #{host['ssh_port']}, id: \"ssh\", auto_correct: true" if options['vagrant_ssh_port_random'] == true
         v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
