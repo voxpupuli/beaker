@@ -38,6 +38,43 @@ module Beaker
 
     end
 
+    # NEW TEST #
+    it "can make a Vagranfile for a set of hosts with random_host_names set to true" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+
+      options = vagrant.instance_variable_get( :@options )
+      options.merge( { 'random_host_names' => true } )
+
+      vagrant.stub( :randport).and_return( "1234" )
+
+      @hosts.each do |host|
+        vagrant.generate_hostname(host)
+      end
+
+      vagrant.make_vfile( @hosts )
+
+
+      expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1-1234' do |v|\n    v.vm.hostname = 'vm1-1234'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2-1234' do |v|\n    v.vm.hostname = 'vm2-1234'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3-1234' do |v|\n    v.vm.hostname = 'vm3-1234'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
+    end
+
+    it "can generate a new /etc/hosts file referencing each host with random_host_names set to true" do
+      options = vagrant.instance_variable_get( :@options )
+      options.merge( { 'random_host_names' => true } )
+      vagrant.stub( :randport).and_return( "1234" )
+      @hosts.each do |host|
+        vagrant.generate_hostname(host)
+      end
+
+      @hosts.each do |host|
+        vagrant.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1-1234\nip.address.for.vm2\tvm2-1234\nip.address.for.vm3\tvm3-1234\n" ).once
+      end
+
+      vagrant.hack_etc_hosts( @hosts )
+
+    end 
+
     context "can copy vagrant's key to root .ssh on each host" do
 
       it "can copy to root on unix" do
@@ -88,6 +125,50 @@ module Beaker
       file.stub( :rewind ).and_return( true )
 
       Tempfile.should_receive( :new ).with( "#{host.name}").and_return( file ) 
+      file.should_receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
+
+      vagrant.set_ssh_config( host, 'root' )
+      expect( host['ssh'] ).to be === { :config => file.path }
+      expect( host['user']).to be === 'root'
+
+    end
+
+
+    it "can generate a ssh-config file with random_host_names set to true" do
+
+      options = vagrant.instance_variable_get( :@options )
+      options.merge( { 'random_host_names' => true } )
+      vagrant.stub( :randport).and_return( "1234" )
+      @hosts.each do |host|
+        vagrant.generate_hostname(host)
+      end
+
+      host = @hosts[0]
+      name = "#{host.name}-1234"
+      Dir.stub( :chdir ).and_yield()
+
+      out = double( 'stdout' )
+      out.stub( :read ).and_return("Host #{name}-1234
+    HostName 127.0.0.1
+    User vagrant
+    Port 2222
+    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking no
+    PasswordAuthentication no
+    IdentityFile /home/root/.vagrant.d/insecure_private_key
+    IdentitiesOnly yes")
+      wait_thr = OpenStruct.new
+      state = mock( 'state' )
+      state.stub( :success? ).and_return( true )
+      wait_thr.value = state
+
+      Open3.stub( :popen3 ).with( 'vagrant', 'ssh-config', name ).and_return( [ "", out, "", wait_thr ])
+
+      file = double( 'file' )
+      file.stub( :path ).and_return( '/path/sshconfig' )
+      file.stub( :rewind ).and_return( true )
+
+      Tempfile.should_receive( :new ).with( "#{name}").and_return( file ) 
       file.should_receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
 
       vagrant.set_ssh_config( host, 'root' )
