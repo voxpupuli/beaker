@@ -18,20 +18,38 @@ module Beaker
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
+    def randport
+      rand(30000)+1024.to_i
+    end
+
+    def real_hostname host
+      if @options['random_host_names'] == true
+        hostname = "#{host.name}"
+        @random_host_name[hostname]
+      else
+        "#{host.name}"
+      end
+    end
+
+    def generate_hostname host
+      @random_host_name.merge!({ "#{host.name}" => "#{host.name}-#{randport}" })
+    end
+
     def make_vfile hosts
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
       v_file = "Vagrant.configure(\"2\") do |c|\n"
       hosts.each do |host|
+        hostname = real_hostname(host)
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
-        v_file << "  c.vm.define '#{host.name}' do |v|\n"
-        v_file << "    v.vm.hostname = '#{host.name}'\n"
+        v_file << "  c.vm.define '#{hostname}' do |v|\n"
+        v_file << "    v.vm.hostname = '#{hostname}'\n"
         v_file << "    v.vm.box = '#{host['box']}'\n"
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
         v_file << "  end\n"
-        @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
+        @logger.debug "created Vagrantfile for VagrantHost #{hostname}"
       end
       v_file << "  c.vm.provider :virtualbox do |vb|\n"
       v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
@@ -45,7 +63,8 @@ module Beaker
     def hack_etc_hosts hosts
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       hosts.each do |host|
-        etc_hosts += "#{host['ip'].to_s}\t#{host.name}\n"
+        hostname = real_hostname(host)
+        etc_hosts += "#{host['ip'].to_s}\t#{hostname}\n"
       end
       hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
@@ -63,16 +82,17 @@ module Beaker
     end
 
     def set_ssh_config host, user
-        f = Tempfile.new("#{host.name}")
+        hostname = real_hostname(host)
+        f = Tempfile.new("#{hostname}")
         ssh_config = Dir.chdir(@vagrant_path) do
-          stdin, stdout, stderr, wait_thr = Open3.popen3('vagrant', 'ssh-config', host.name)
+          stdin, stdout, stderr, wait_thr = Open3.popen3('vagrant', 'ssh-config', hostname)
           if not wait_thr.value.success?
-            raise "Failed to 'vagrant ssh-config' for #{host.name}"
+            raise "Failed to 'vagrant ssh-config' for #{hostname}"
           end
           stdout.read
         end
         #replace hostname with ip
-        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip']) unless not host['ip']
+        ssh_config = ssh_config.gsub(/#{hostname}/, host['ip']) unless not host['ip']
         #set the user
         ssh_config = ssh_config.gsub(/User vagrant/, "User #{user}")
         f.write(ssh_config)
@@ -108,11 +128,18 @@ module Beaker
       @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', '.vagrant', 'beaker_vagrant_files', File.basename(options[:hosts_file])))
       FileUtils.mkdir_p(@vagrant_path)
       @vagrant_file = File.expand_path(File.join(@vagrant_path, "Vagrantfile"))
+      @random_host_name = {}
+      #@random_host_name = { 'vm1' => 'vm1-01234', 'vm2' => 'vm2-01234', 'vm3' => 'vm3-01234' }
 
     end
 
     def provision
       if @options[:provision]
+
+        @vagrant_hosts.each do |host|
+          generate_hostname(host) if @options['random_host_names'] == true
+        end
+
         #setting up new vagrant hosts
         #make sure that any old boxes are dead dead dead
         vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
@@ -122,7 +149,8 @@ module Beaker
         vagrant_cmd("up")
       else #set host ip of already up boxes
         @vagrant_hosts.each do |host|
-          host[:ip] = get_ip_from_vagrant_file(host.name)
+          hostname = real_hostname host
+          host[:ip] = get_ip_from_vagrant_file(hostname)
         end
       end
 
