@@ -130,7 +130,9 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'generates a unix PE install command for a unix host' do
-      expect( subject.installer_cmd( unixhost, { :installer => 'puppet-enterprise-installer' } ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -a /tmp/answers"
+      the_host = unixhost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -a /tmp/answers"
     end
   end
 
@@ -350,35 +352,44 @@ describe ClassMixedWithDSLInstallUtils do
     it 'calls puppet-enterprise-upgrader for pre 3.0 upgrades' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
+      subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
+      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
+      the_hosts.each do |h|
+        expect( h['pe_installer'] ).to be === 'puppet-enterprise-upgrader'
+      end
     end
 
     it 'uses standard upgrader for post 3.0 upgrades' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '3.1' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '3.1' )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ]  )
+      the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
+      subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win } )
+      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
+      the_hosts.each do |h|
+        expect( h['pe_installer'] ).to be nil
+      end
     end
 
     it 'updates pe_ver post upgrade' do
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
       Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
+      subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( hosts, { :type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win => version_win, :installer => 'puppet-enterprise-upgrader' } )
+      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
-      hosts.each do |h|
+      the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
       end
     end
