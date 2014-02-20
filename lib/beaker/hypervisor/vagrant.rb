@@ -18,7 +18,7 @@ module Beaker
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
-    def make_vfile hosts
+    def make_vfile hosts, options = {}
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
       v_file = "Vagrant.configure(\"2\") do |c|\n"
@@ -34,7 +34,7 @@ module Beaker
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
       v_file << "  c.vm.provider :virtualbox do |vb|\n"
-      v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n"
+      v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"#{options['vagrant_memsize'] ||= '1024'}\"]\n"
       v_file << "  end\n"
       v_file << "end\n"
       File.open(@vagrant_file, 'w') do |f|
@@ -117,7 +117,7 @@ module Beaker
         #make sure that any old boxes are dead dead dead
         vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
 
-        make_vfile @vagrant_hosts
+        make_vfile @vagrant_hosts, @options
 
         vagrant_cmd("up")
       else #set host ip of already up boxes
