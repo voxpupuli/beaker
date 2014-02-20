@@ -29,7 +29,7 @@ module Beaker
       def self.presets
         h = Beaker::Options::OptionsHash.new
         h.merge({
-          :log_level => 'info',
+          :log_level => 'verbose',
           :hosts_file => 'sample.cfg',
           :options_file => nil,
           :type => 'pe',
