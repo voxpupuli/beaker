@@ -15,16 +15,23 @@ module Beaker
       @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
+      @execute = true
 
       if @options[:help]
         @logger.notify(@options_parser.usage)
-        exit
+        @execute = false
+        return
       end
       if @options[:version]
         @logger.notify(VERSION_STRING % Beaker::Version::STRING)
-        exit
+        @execute = false
+        return
       end
       @logger.info(@options.dump)
+      if @options[:parse_only]
+        @execute = false
+        return
+      end
 
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
@@ -81,6 +88,9 @@ module Beaker
 
     def execute!
 
+      if !@execute
+        return
+      end
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
