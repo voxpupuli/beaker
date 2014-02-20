@@ -453,10 +453,10 @@ module Beaker
         hosts.each do |host|
           host['pe_dir'] ||= options[:pe_dir]
           if host['platform'] =~ /windows/
-            host['pe_ver'] = host['pe_ver'] || 
+            host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
               Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir], options[:pe_version_file_win])
           else
-            host['pe_ver'] = host['pe_ver'] || 
+            host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
               Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir], options[:pe_version_file])
           end
         end
@@ -478,9 +478,11 @@ module Beaker
         hosts.each do |host|
           host['pe_dir'] = host['pe_upgrade_dir'] || path
           if host['platform'] =~ /windows/
-            host['pe_ver'] = host['pe_upgrade_ver'] || Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file_win])
+            host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] || 
+              Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file_win])
           else
-            host['pe_ver'] = host['pe_upgrade_ver'] || Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file])
+            host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
+              Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file])
           end
           if version_is_less(host['pe_ver'], '3.0')
             host['pe_installer'] ||= 'puppet-enterprise-upgrader'
