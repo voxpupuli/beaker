@@ -58,12 +58,13 @@ module HostHelpers
 
   def generate_result (name, opts )
     result = double( 'result' )
-    stdout = opts.has_key?(:stdout) ? opts[:stdout] :  name
+    stdout = opts.has_key?(:stdout) ? opts[:stdout] : name
     stderr = opts.has_key?(:stderr) ? opts[:stderr] : name
     exit_code = opts.has_key?(:exit_code) ? opts[:exit_code] :  0
+    exit_code = [exit_code].flatten
     result.stub( :stdout ).and_return( stdout )
     result.stub( :stderr ).and_return( stderr )
-    result.stub( :exit_code ).and_return( exit_code )
+    result.stub( :exit_code ).and_return( *exit_code )
     result
   end
 

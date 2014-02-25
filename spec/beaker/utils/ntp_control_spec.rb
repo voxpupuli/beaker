@@ -15,6 +15,24 @@ module Beaker
 
       end
 
+      it "can retry on failure on unix hosts" do
+        @hosts = make_hosts( { :platform => 'unix', :exit_code => [1, 0] } )
+        ntp_control.stub( :sleep ).and_return(true)
+
+        Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 6 ).times
+
+        ntp_control.timesync
+      end
+
+      it "eventually gives up and raises an error when unix hosts can't be synched" do
+        @hosts = make_hosts( { :platform => 'unix', :exit_code => 1 } )
+        ntp_control.stub( :sleep ).and_return(true)
+
+        Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
+
+        expect{ ntp_control.timesync }.to raise_error
+      end
+
       it "can sync time on solaris-10 hosts" do
         @hosts = make_hosts( { :platform => 'solaris-10' } )
 
