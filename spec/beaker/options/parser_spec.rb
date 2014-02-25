@@ -9,7 +9,6 @@ module Beaker
       let(:hosts_path)       { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
       let(:badyaml_path)     { File.join(File.expand_path(File.dirname(__FILE__)), "data", "badyaml.cfg") }
       let(:home)             { ENV['HOME'] }
-      let(:platforms_regex)  { Parser::PLATFORMS }
 
       it "supports usage function" do
         expect{parser.usage}.to_not raise_error
@@ -19,26 +18,6 @@ module Beaker
 
       it "has repo set to #{repo}" do
         expect(parser.repo).to be === "#{repo}"
-      end
-
-      #read through the file of possible platform values, correctly identify the 50 invalid platform values
-      describe "recognizes valid platforms" do
-
-        it "accepts correctly formatted platform values" do
-          expect( 'oracle-version-arch' =~ platforms_regex ).to be === 0
-        end
-
-        it "rejects non-supported osfamilies" do
-          expect( 'amazon6-version-arch' =~ platforms_regex ).to be === nil
-        end
-
-        it "rejects platforms without version/arch" do
-          expect( 'ubuntu-5' =~ platforms_regex ).to be === nil
-        end
-
-        it "rejects platforms that do not have osfamily at start of string" do
-          expect( 'oel-r5-u6-x86-64' =~ platforms_regex ).to be === nil
-        end
       end
 
       #test parse_install_options
