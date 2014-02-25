@@ -1,44 +1,45 @@
-# Running the Distributed Test Harness #
+# Beaker #
+Beaker is a test harness capable of provisioning new Systems Under Test (SUTs) as defined in a configuration file.
 
-## Install the harness on your 'Test Driver' ##
-How to install the test harness on your workstation:
+## System Under Test (SUT)... ##
+  - may be physical, virtual; local or remote.
+  - will need a properly configured network and DNS or hosts file.
+  - must configure pass through ssh auth for the root user.
+  - must have the `ntpdate` binary installed
+  - must have the `curl` binary installed
+  - **Windows:** Cygwin must be installed (with `curl`, `sshd`, `bash`) and the necessary
+    Windows gems (sys-admin, win32-dir, etc).
+  - **FOSS install**: you must have `git`, `ruby`, `rdoc` installed
+  - **PE install**: PE will install `git`, `ruby`, `rdoc`.
 
-  Pre-requisites: Ruby 1.8.7+
+# Install it! (FOSS Installation) #
+Installation is easy! The difficult question is whether to install as a gem or through `git`.
 
-  Automagically:
+## Pre-requisites ##
+1. `ruby` >= 1.8.7
+
+## As a gem ##
+    gem install beaker
+
+## From git ##
+First, clone the repository from GitHub:
 
     git clone https://github.com/puppetlabs/beaker.git
+    cd beaker
+
+Next, install the supporting libraries through [Bundler](http://bundler.io/) or [RubyGems](http://rubygems.org/).
+
+### Bundler ###
     bundle install
 
-  Manually:
-
-    git clone https://github.com/puppetlabs/beaker.git
+### RubyGems ###
     gem install rubygems net-ssh net-scp systemu
 
+# Configure it! #
+Beaker requires a host configuration file, written in `YAML`,  to run tests. This file states the type of installation and configuration to use, especially for PE.
 
-## Configure Systems Under Test ##
-Running Systest requires at least one 'System Under Test' (SUT) upon which to run tests.
-
-  System Under Test
-  - SUT may be physical, virtual; local or remote.
-  - The SUT will need a properly configured network and DNS or hosts file.
-  - On the SUT, you must configure pass through ssh auth for the root user.
-  - The SUT must have the "ntpdate" binary installed
-  - The SUT must have the "curl" binary installed
-  - On Windows, Cygwin must be installed (with curl, sshd, bash) and the necessary
-    windows gems (sys-admin, win32-dir, etc).
-  - FOSS install: you must have git, ruby, rdoc installed on your SUT. 
-  - PE install: PE will install git, ruby, rdoc.
-
-
-## Prepare a Test Configuration File ##
-  - The test harness is configuration driven
-  - The config file is yaml formatted
-  - The type of insallation and configuration is dictated by the config file, especially for PE
-
-Here we have the host 'ubuntu-1004-64', a 64 bit Ubuntu box, serving as Puppet Master,
-Dashboard, and Agent; the host "ubuntu-1004-32", a 32-bit Ubunutu node, will be a 
-Puppet Agent only.  The Dashboard will be configured to run HTTPS on port 443.
+## Example Test Configuration File ##
+Let's jump right to an example configuration.
 
     HOSTS:
       ubuntu-1004-64:
@@ -58,7 +59,13 @@ Puppet Agent only.  The Dashboard will be configured to run HTTPS on port 443.
     CONFIG:
       consoleport: 443
 
-You can setup a very different test scenario by simply re-arranging the "roles":
+* Here we have the host *ubuntu-1004-64*. It is a 64-bit Ubuntu box, serving as Puppet Master,
+Puppet Dashboard, and Puppet Agent. 
+* The host *ubuntu-1004-32* is a 32-bit Ubunutu node and will be a 
+Puppet Agent only.  
+* The Dashboard will be configured to run HTTPS on port 443.
+
+You can configure a very different test scenario by re-arranging the `roles`:
 
     HOSTS:
       ubuntu-1004-64:
@@ -78,100 +85,87 @@ You can setup a very different test scenario by simply re-arranging the "roles":
     CONFIG:
       consoleport: 443
 
-In this case, the host 'ubuntu-1004-32' is now the Puppet Master, while 'ubuntu-1004-64' is the
-Puppet Dashboard host, resulting in a split Master/Dashboard install.  Systest will automagically 
-prepare an appropriate answers file for use with the PE Installer.
+* The host *ubuntu-1004-32* is now the Puppet Master and Puppet Agent.
+* The host *ubuntu-1004-64* still runs Puppet Dashboard and Puppet Agent. 
+* The result is a split Master/Dashboard install.  Beaker will automagically prepare an appropriate answers file for use with the PE Installer.
 
-## Required Host Settings ##
+### Required Host Settings ###
 To properly define a host you must provide:
 
-* name
-  * The string identifying this host
-* platform
-  * One of the Beaker supported platforms
+* `name`: The string identifying this host
+* `platform`: One of the Beaker supported platforms
 
-## Optional Host Settings ##
+### Optional Host Settings ###
 Additionaly, Beaker supports the following host options:
 
-* ip
-  * the IP address of the SUT
-* hypervisor
-  * one of `solaris`, `blimpy`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`
-  * additional settings may be required depending on the selected hypervisor (ie, template, box, box_url, etc).  Check the documentation below for your hypervisor for details  
-* snapshot
-  * the name of the snapshot to revert to before testing
-* roles
-  * the 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string
-* pe_dir
-  * the directory where PE builds are located, may be local directory or a URL
-* pe_ver
-  * the version number of PE to install
+* `ip`: IP address of the SUT
+* `hypervisor`: the hypervisor to use for host deployment
+    * one of `solaris`, `blimpy`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`
+    * additional settings may be required depending on the selected hypervisor (ie, `template`, `box`, `box_url`, etc).  Check the documentation below for your hypervisor for details  
+* `snapshot`: the name of the snapshot to revert to before testing
+* `roles`: the 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string
+* `pe_dir`: the directory where PE builds are located, may be local directory or a URL
+* `pe_ver`: the version number of PE to install
 
-
-## Supported Platforms ##
+### Supported Platforms ###
 Beaker depends upon each host in the configuration file having a platform type that is correctly formatted and supported.  The platform is used to determine how various operations are carried out internally (such as installing packages using the correct package manager for the given operating system).
 
 The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one of:
 
-* centos
-* fedora
-* debian
-* oracle
-* redhat
-* scientific
-* sles
-* ubuntu
-* windows
-* solaris
-* aix
-* el
+*  AIX
+	*  aix
+* Linux
+	* centos, debian, el, fedora, oracle, redhat, scientific, sles, ubuntu
+* Solaris
+	* solaris
+* Windows
+	* windows
 
 `VERSION`'s format is not enforced, but should reflect the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, scientific-6-i386-agent, etc).  `ARCH`'s format is also not enforced, but should be appropriate to the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, sles-11-x86_64-master, debian-7-amd64-master, etc).
 
-# Provisioning #
-Systest has built in capabilites for managing VMs and provisioning SUTs:
+## Provisioning ##
+Beaker has built in capabilites for managing VMs and provisioning SUTs:
 
-  * VMWare vSphere via the RbVmomi gem
-  * VMWare Fusion via the Fission gem
-  * EC2 via blimpy
+  * VMWare vSphere via the `rbvmomi` gem
+  * VMWare Fusion via the `fission` gem
+  * EC2 via `blimpy`
   * Solaris zones via SSHing to the global zone
   * Vagrant 
 
-You may mix and match hypervisors as needed.   Hypervisors and snapshot names are defined per-host in the node configuration file.  Default behavior for Vagrant, vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option.
-`--provision` indicates that you want to provision and revert VMs to snapshot before test execution, defaults to true.  Use `--no-provision` to skip provisioning and reverting before test execution.
+You may mix and match hypervisors as needed.   Hypervisors and snapshot names are defined per-host in the node configuration file.
 
+### Example ###
+	lucid-alpha:
+	  roles:
+	    - master
+	    - agent
+	  platform: ubuntu-10.04-i386
+	  hypervisor: fusion
+	  snapshot: foss
+	shared-host-in-the-cloud:
+	  roles:
+	    - agent
+	  platform: ubuntu-10.04-i386
+	  hypervisor: vsphere
+	  snaphost: base
 
-For example:
+### Keeping Hosts Around ###
+Default behavior for Vagrant, vSphere and EC2 is to powerdown/terminate test instances on a successful run. This can be altered with the `--preserve-hosts` option. 
 
+Before each test execution, Beaker will teardown and rebuild the defined SUTs. Use `--no-provision` to skip this behavior.
 
-    $ cat configs/my_hosts.yml
-    lucid-alpha:
-      roles:
-        - master
-        - agent
-      platform: ubuntu-10.04-i386
-      hypervisor: fusion
-      snapshot: foss
-      provision: false
-    shared-host-in-the-cloud:
-      roles:
-        - agent
-      platform: ubuntu-10.04-i386
-      hypervisor: vsphere
-      snaphost: base
+## VMWare Fusion Support ##
+Beaker supports VMware Fusion through the `fission` gem.
 
-    $ ./beaker.rb --config configs/my_hosts.yml  ....
+### Pre-requisites ###
+1. `fission` gem installed and configured, including a `~/.fissionrc` that points to the `vmrun` executable and where virtual machines can be found.
 
-
-## VMWare Fusion support ##
-Pre-requisite: Fission gem installed and configured, including a `~/.fissionrc`
-that points to the `vmrun` executable and where virtual machines can be found.
-  Example `.fissionrc` file (it's YAML):
-
+#### Example `.fissionrc` file (it's YAML) ####
     vm_dir: "/Directory/containing/my/.vmwarevm/files/"
     vmrun_bin: "/Applications/VMware Fusion.app/Contents/Library/vmrun"
 
 You can then use the following arguments in the node configuration:
+
 - `hypervisor: fusion` tells us to enable this feature for this host. This is required.
 - `snapshot: <name>`, where <name> is the snapshot name to revert to.  This is required.
 
@@ -183,9 +177,7 @@ section can now use:
 - `vmname`: This is useful if the hostname of the VM doesn't match the name of
   the `.vmwarevm` file on disk. The alias should be something fission can load.
 
-
-Example:
-
+### Example Fusion Configuration ###
     HOSTS:
       pe-debian6:
         roles:
@@ -196,31 +188,30 @@ Example:
         hypervisor: fusion
         snapshot: acceptance-testing-5
 
-Diagnostics:
-
+### Diagnostics ###
 When using `hypervisor fusion`, we'll log all the available VM names and for each
 host we'll log all the available snapshot names.
 
-## EC2 Support ##
-Pre-requisite: Blimpy gem installed and .fog file correctly configured with your credentials.
+## EC2 Support  ##
+Beaker supports EC2 support through the [blimpy](https://rubygems.org/gems/blimpy) gem.
 
-hypervisor: blimpy
+### Pre-requisites ### 
+1. `blimpy` gem 
+2. `.fog` file correctly configured with your credentials.
 
-Currently, there is limited support EC2 nodes; we are adding support for new platforms shortly.
+### Supported AMIs ###
+Currently, there is limited support for EC2 nodes; we are adding support for new platforms shortly. AMIs are built for PE-based installs on:
 
-AMIs are built for PE based installs on:
-  - Enterprize Linux 6, 64 and 32 bit
-  - Enterprize Linux 5, 32 bit
-  - Ubuntu 10.04, 32 bit
+* Enterprize Linux 6, 64 and 32 bit
+* Enterprize Linux 5, 32 bit
+* Ubuntu 10.04, 32 bit
 
-Systest will automagically provision EC2 nodes, provided the 'platform:' section of your config file lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
+Beaker will automagically provision EC2 nodes, provided the `platform` section of your config file lists a supported platform type: ubuntu-10.04-i386, el-6-x86_64, el-6-i386, el-5-i386.
 
 ## Solaris Support ##
-
 Used with `hypervisor: solaris`, the harness can connect to a Solaris host via SSH and revert zone snapshots.
 
-Example .fog file:
-
+### Example `.fog` File ###
     :default:
       :solaris_hypervisor_server: solaris.example.com
       :solaris_hypervisor_username: harness
@@ -230,30 +221,31 @@ Example .fog file:
         - rpool/ROOT/solaris
 
 ## vSphere Support ##
+Beaker can also use VMs and snapshots that live within vSphere. To do this create a `~/.fog` file with your vSphere credentials.
 
-The harness can use vms and snapshots that live within vSphere as well.
-To do this create a `~/.fog` file with your vSphere credentials:
-
-Example:
-
+### Example `.fog` File ###
     :default:
       :vsphere_server: 'vsphere.example.com'
       :vsphere_username: 'joe'
       :vsphere_password: 'MyP@$$w0rd'
 
-
 These follow the conventions used by Cloud Provisioner and Fog.
 
-There are two possible `hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
+There are two possible `hypervisor` types to use for vSphere testing: `vsphere` and `vcloud`.
 
-### `hypervisor: vsphere`
+### Hypervisor: `vsphere` ###
 This option locates an existing static VM, optionally reverts it to a pre-existing snapshot, and runs tests on it.
 
-### `hypervisor: vcloud`
+### Hypervisor: `vcloud` ###
 This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
 
-The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
+This option requires a modified test configuration file that includes the target template as well as three additional parameters in the `CONFIG` section:
 
+1. `datastore`
+1. `resourcepool`
+1. `folder`
+
+#### Example `vcloud` Config ####
     HOSTS:
       master-vm:
         roles:
@@ -275,12 +267,16 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
       resourcepool: Delivery/Quality Assurance/FOSS/Dynamic
       folder: delivery/Quality Assurance/FOSS/Dynamic
 
+## Vagrant Support ##
+The option allows for testing against local Vagrant boxes.  
 
-## Vagrant support ##
-The option allows for testing against local Vagrant boxes.  As a prerequisite the Vagrant package (greather than 1.1) needs to installed - see <a href = "http://downloads.vagrantup.com/">downloads.vagrantup.com</a> for downloads.  
+### Pre-requisites ###
+1. [Vagrant package](http://downloads.vagrantup.com/) (greather than 1.1) needs to installed
 
-The vm is identified by `box` or `box_url` in the config file.  No snapshot name is required as the vm is reverted back to original state post testing using `vagrant destroy --force`.
+### Configuration ###
+The VM is identified by `box` or `box_url` in the config file.  No snapshot name is required as the VM is reverted back to original state post testing using `vagrant destroy --force`.
 
+#### Example Vagrant Config ####
     HOSTS:
       ubuntu-10-04-4-x64:
         roles:
@@ -304,7 +300,8 @@ VagrantFiles are created per host configuration file.  They can be found in the 
     > cd sample.cfg; ls
     VagrantFile
 
-# Putting it all together #
+# Run it! #
+Now that things are installed and configured, Beaker can be executed!
 
 ## Running FOSS tests ##
 Puppet FOSS Acceptance tests are stored in their respective Puppet repository, so
@@ -320,11 +317,8 @@ you must check out the tests first, then the harness, as such:
 ### Run the tests
     ./beaker.rb -c ci/ci-${platform}.cfg --type git -p origin/2.7rc -f 1.5.8 -t acceptance-tests/tests --no-color --xml --debug --pre-suite setup/git/
 
-
 ## Running PE tests ##
-
-When performing a PE install, Systest expects to find PE tarballs and a LATEST file in /opt/enterprise/dists; the LATEST file
-indicates the version string of the most recent tarball.
+When performing a PE install, Beaker expects to find PE tarballs and a LATEST file in `/opt/enterprise/dists`; the LATEST file indicates the version string of the most recent tarball.
 
     $ [topo@gigio ]$ cat /opt/enterprise/dists/LATEST 
     2.5.3
@@ -352,22 +346,23 @@ You can also install from git.  Use the `--install` option, which can install pu
     git clone git@github.com:puppetlabs/beaker.git
     cd beaker
 ### Pre-suite and Post-suite
-The harness command line supports `--pre-suite` and `--post-suite`.  `--pre-suite` describes steps to take after initial provisioning/configuring of the vms under test before the tests are run.  `--post-suite` steps are run directly after tests.
+The harness command line supports `--pre-suite` and `--post-suite`.  `--pre-suite` describes steps to take after initial provisioning/configuring of the VMs under test before the tests are run.  `--post-suite` steps are run directly after tests.
 
-Both options support directories, individual files and comma separated lists of directories and files.  Given a directory it will look for files of the type `*.rb` within that directory.  Steps will be run in the order they appear in on the command line.  Directories of steps will be run in alphabetic order of the `*.rb` files within the directory.
+Both options support directories, individual files and comma separated lists of directories and files.  Given a directory it will look for files of the type `*.rb` within that directory.  Steps will be run in the order they appear on the command line.  Directories of steps will be run in alphabetic order of the `*.rb` files within the directory.
 
     --pre-suite setup/early/mystep.rb,setup/early/mydir    
+
 ### Run the tests
     bundle exec beaker.rb -c your_config.cfg --type pe -t test_repo/tests --debug
 
 ### Failure management
-By default if a test fails the harness will move on and attempt the next test in the suite.  This may be undesirable when debugging.  The harness supports an optional `--fail-mode` to alter the default behavior on failure:
+By default, if a test fails the harness will move on and attempt the next test in the suite.  This may be undesirable when debugging.  The harness supports an optional `--fail-mode` to alter the default behavior on failure:
 
-- `fast`: After first failure do not test any subsequent tests in the given suite, simply run cleanup steps and then exit gracefully.  This option short circuits test execution while leaving you with a clean test environment for any follow up testing. 
+- `fast`: After first failure, do not test any subsequent tests in the given suite, simply run cleanup steps and then exit gracefully.  This option short circuits test execution while leaving you with a clean test environment for any follow up testing. 
+- `slow`: After the first failure, try to continue running subsequent tests.
+- `stop` *(deprecated)*: After first failure, do not test any subsequent tests in the given suite, do not run any cleanup steps, and exit immediately. **This mode has been deprecated**; please use `fast` instead.
 
-- `stop`: After first failure do not test any subsequent tests in the given suite, do not run any cleanup steps, exit immediately.  This is useful while testing setup steps or if you plan to revert the test environment before every test.
-
-## Topic branches, special test repo
+## Topic Branches, Special Test Repo
     bundle exec beaker.rb -c your_cfg.cfg --debug --type git -p 2.7.x -f 1.5.8 -t path-to-your-tests 
 
     path-to-test:
@@ -376,10 +371,11 @@ By default if a test fails the harness will move on and attempt the next test in
 Special topic branch checkout with a targeted test:
 
     bundle exec beaker.rb -c your_cfg --type git -p https://github.com/SomeDude/puppet/tree/ticket/2.6.next/6856-dangling-symlinks -f 1.5.8 / 
-     
-     
-## Making extensions to the harness using `--load-path`
 
-You may need to extend the harness DSL (data specific language) to handle your particular test case.  To run the harness with an addition to the LOAD_PATH use `--load-path`.  You can specify a single directory or a comma separated list of directories to be added.
+# Extend it!#
+You may need to extend the harness DSL to handle your particular test case. Beaker supports this possibility through `--load-path`.
+
+## About `--load-path` ##
+`--load-path` allows you to run Beaker with additions to the `LOAD_PATH`. You can specify a single directory or a comma separated list of directories.
 
     bundle exec beaker.rb --debug --config ubuntu1004-32mda.cfg --tests ../puppet/acceptance/tests/resource/cron/should_allow_changing_parameters.rb  --fail fast --root-keys --type pe --load-path ../puppet/acceptance/lib/ 
