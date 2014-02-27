@@ -11,8 +11,6 @@ module Beaker
       #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
 
-      PLATFORMS = /^(centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el)\-.+\-.+$/
-
       PARSE_ERROR = if RUBY_VERSION > '1.8.7'; then Psych::SyntaxError; else ArgumentError; end
 
       #The OptionsHash of all parsed options
@@ -206,9 +204,7 @@ module Beaker
           if not @options['HOSTS'][name]['platform']
             parser_error "Host #{name} does not have a platform specified"
           else
-            if not @options['HOSTS'][name]['platform'] =~ PLATFORMS
-              parser_error "Host #{name} is on unsupported platform #{@options['HOSTS'][name]['platform']}"
-            end
+            @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
           end
         end
 
