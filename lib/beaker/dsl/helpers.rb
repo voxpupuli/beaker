@@ -70,7 +70,10 @@ module Beaker
       # @raise  [FailTest] Raises an exception if *command* obviously fails.
       def on(host, command, opts = {}, &block)
         unless command.is_a? Command
-          cmd_opts = opts[:environment] ? { 'ENV' => opts.delete(:environment) } : Hash.new
+          cmd_opts = {}
+          if opts[:environment]
+            cmd_opts['ENV'] = opts[:environment]
+          end
           command = Command.new(command.to_s, [], cmd_opts)
         end
         if host.is_a? String or host.is_a? Symbol
