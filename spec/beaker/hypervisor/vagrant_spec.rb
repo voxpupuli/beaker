@@ -38,7 +38,7 @@ module Beaker
 
       generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
 
-      match = generated_file.match(/vb.customize \["modifyvm", :id, "--memory", "hello!"]/)
+      match = generated_file.match(/vb.customize \["modifyvm", :id, "--memory", "hello!"\]/)
 
       expect( match ).to_not be nil
 
@@ -50,7 +50,7 @@ module Beaker
         vagrant.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).once
       end
 
-      vagrant.hack_etc_hosts( @hosts )
+      vagrant.hack_etc_hosts( @hosts, options )
 
     end
 

@@ -1,4 +1,4 @@
-[ 'repetition', 'error_handler', 'host_handler', 'timed' ].each do |file|
+[ 'repetition', 'error_handler', 'host_role_parser', 'timed' ].each do |file|
   begin
     require "beaker/shared/#{file}"
   rescue LoadError

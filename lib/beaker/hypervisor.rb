@@ -12,7 +12,7 @@ module Beaker
     include HostPrebuiltSteps
 
     #Generates an array with all letters a thru z and numbers 0 thru 9
-    CHARMAP = [('a'..'z'),('0'..'9')].map{|r| r.to_a}.flatten
+    CHARMAP = ('a'..'z').to_a + ('0'..'9').to_a
 
     #Hypervisor creator method.  Creates the appropriate hypervisor class object based upon
     #the provided hypervisor type selected, then provisions hosts with hypervisor.
@@ -85,35 +85,16 @@ module Beaker
       if @options[:add_master_entry]
         add_master_entry(@hosts, @options)
       end
-   end
+    end
 
-   #Default validation steps to be run for a given hypervisor
-   def validate
-     validate_host(@hosts, @options)
-   end
+    #Default validation steps to be run for a given hypervisor
+    def validate
+      validate_host(@hosts, @options)
+    end
 
+    #Generate a random straing composted of letter and numbers
     def generate_host_name
       CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
-    end
-
-    def copy_ssh_to_root host
-      #make it possible to log in as root by copying the ssh dir to root's account
-      @logger.debug "Give root a copy of current host's keys"
-      if host['platform'] =~ /windows/
-        host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
-      else
-        host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
-      end
-    end
-
-    def hack_etc_hosts hosts
-      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
-      hosts.each do |host|
-        etc_hosts += "#{host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
-      end
-      hosts.each do |host|
-        set_etc_hosts(host, etc_hosts)
-      end
     end
 
   end
