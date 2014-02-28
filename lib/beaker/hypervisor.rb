@@ -46,6 +46,8 @@ module Beaker
           Beaker::Vagrant
         when /google/
           Beaker::GoogleCompute
+        when /docker/
+          Beaker::Docker
         when /none/
           Beaker::Hypervisor
         else
@@ -104,7 +106,7 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper aws_sdk vsphere vcloud vcloud_pooled aixer solaris google_compute_helper google_compute).each do |lib|
+%w( vsphere_helper vagrant fusion blimper aws_sdk vsphere vcloud vcloud_pooled aixer solaris docker google_compute_helper google_compute).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError
