@@ -55,6 +55,9 @@ module Beaker
       start = Time.now
       try = 1
       @vcloud_hosts.each_with_index do |h, i|
+        if not h['template']
+          raise ArgumentError, "You must specify a template name for #{h}"
+        end
         if h['template'] =~ /\//
           templatefolders = h['template'].split('/')
           h['template'] = templatefolders.pop
