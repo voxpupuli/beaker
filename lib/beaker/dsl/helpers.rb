@@ -456,7 +456,8 @@ module Beaker
       # @api dsl
       def with_puppet_running_on host, conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
         raise(ArgumentError, "with_puppet_running_on's conf_opts must be a Hash. You provided a #{conf_opts.class}: '#{conf_opts}'") if !conf_opts.kind_of?(Hash)
-        cmdline_args = conf_opts.delete(:__commandline_args__)
+        cmdline_args = conf_opts[:__commandline_args__]
+        conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
 
         begin
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
