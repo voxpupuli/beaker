@@ -11,6 +11,10 @@ module Beaker
       @logger = options[:logger]
       @options = options
       @fusion_hosts = fusion_hosts
+      #check preconditions for fusion
+      @fusion_hosts.each do |host|
+        raise "You must specify a snapshot for Fusion instances, no snapshot defined for #{host.name}!" unless host["snapshot"]
+      end
       @fission = Fission::VM
     end
 
@@ -23,10 +27,14 @@ module Beaker
         vm = @fission.new vm_name
         raise "Could not find VM '#{vm_name}' for #{host.name}!" unless vm.exists?
 
-        available_snapshots = vm.snapshots.data.sort.join(", ")
+        vm_snapshots = vm.snapshots.data
+        if vm_snapshots.nil? or vm_snapshots.empty?
+          raise "No snapshots available for VM #{host.name} (vmname: '#{vm_name}')" 
+        end
+
+        available_snapshots = vm_snapshots.sort.join(", ")
         @logger.notify "Available snapshots for #{host.name}: #{available_snapshots}"
         snap_name = host["snapshot"] 
-        raise "No snapshot specified for #{host.name}" unless snap_name
         raise "Could not find snapshot '#{snap_name}' for host #{host.name}!" unless vm.snapshots.data.include? snap_name
 
         @logger.notify "Reverting #{host.name} to snapshot '#{snap_name}'"
