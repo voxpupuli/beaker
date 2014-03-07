@@ -63,7 +63,15 @@ module Beaker
       it 'should add q_upgrade_with_unknown_disk_space to the dashboard on upgrade' do
         @ver = '3.2'
         expect( subject.answers( hosts, master_certname, {:type => :upgrade} )['vm2']).to include :q_upgrade_with_unknown_disk_space
-    end
+      end
+
+      it 'should add answers to the host objects' do
+        @ver = '3.2'
+        answers = subject.answers( hosts, master_certname, {})
+        hosts.each do |host|
+          expect( host[:answers] ).to be === answers[host.name]
+        end
+      end
     end
 
     describe Version30 do
@@ -85,8 +93,17 @@ module Beaker
       it 'sets correct answers for a master' do
         expect( subject.answers( hosts, master_certname, {} )['vm1'] ).to be === { :q_install=>"y", :q_vendor_packages_install=>"y", :q_puppetagent_install=>"y", :q_puppet_cloud_install=>"y", :q_verify_packages=>"y", :q_puppet_symlinks_install=>"y", :q_puppetagent_certname=>hosts[0], :q_puppetagent_server=>master_certname, :q_puppetmaster_install=>"y", :q_all_in_one_install=>"y", :q_puppet_enterpriseconsole_install=>"y", :q_puppetdb_install=>"y", :q_database_install=>"y", :q_puppetdb_hostname=>hosts[0], :q_puppetdb_port=>8081, :q_puppetmaster_dnsaltnames=>"master_certname,puppet,#{hosts[0][:ip]}", :q_puppetmaster_enterpriseconsole_hostname=>hosts[0], :q_puppetmaster_enterpriseconsole_port=>443, :q_puppetmaster_certname=>"master_certname", :q_puppetdb_database_name=>"pe-puppetdb", :q_puppetdb_database_user=>"mYpdBu3r", :q_puppetdb_database_password=>"'~!@\#$%^*-/ aZ'", :q_puppet_enterpriseconsole_auth_database_name=>"console_auth", :q_puppet_enterpriseconsole_auth_database_user=>"mYu7hu3r", :q_puppet_enterpriseconsole_auth_database_password=>"'~!@\#$%^*-/ aZ'", :q_puppet_enterpriseconsole_database_name=>"console", :q_puppet_enterpriseconsole_database_user=>"mYc0nS03u3r", :q_puppet_enterpriseconsole_database_password=>"'~!@\#$%^*-/ aZ'", :q_database_host=>hosts[0], :q_database_port=>5432, :q_pe_database=>"y", :q_puppet_enterpriseconsole_inventory_hostname=>hosts[0], :q_puppet_enterpriseconsole_inventory_certname=>hosts[0], :q_puppet_enterpriseconsole_inventory_dnsaltnames=>hosts[0], :q_puppet_enterpriseconsole_inventory_port=>8140, :q_puppet_enterpriseconsole_master_hostname=>hosts[0], :q_puppet_enterpriseconsole_auth_user_email=>"'admin@example.com'", :q_puppet_enterpriseconsole_auth_password=>"'~!@\#$%^*-/ aZ'", :q_puppet_enterpriseconsole_httpd_port=>443, :q_puppet_enterpriseconsole_smtp_host=>"'vm1'", :q_puppet_enterpriseconsole_smtp_use_tls=>"'n'", :q_puppet_enterpriseconsole_smtp_port=>"'25'", :q_database_root_password=>"'=ZYdjiP3jCwV5eo9s1MBd'", :q_database_root_user=>"pe-postgres" }
       end
+
       it 'generates nil answers for a windows host' do
         expect( subject.answers( hosts, master_certname, {} )['vm2'] ).to be === nil
+      end
+
+      it 'should add answers to the host objects' do
+        @ver = '3.0'
+        answers = subject.answers( hosts, master_certname, {})
+        hosts.each do |host|
+          expect( host[:answers] ).to be === answers[host.name]
+        end
       end
     end
 
@@ -109,6 +126,13 @@ module Beaker
         expect( subject.answers( hosts, master_certname, {} )['vm2'] ).to be === nil
       end
 
+      it 'should add answers to the host objects' do
+        @ver = '2.8'
+        answers = subject.answers( hosts, master_certname, {})
+        hosts.each do |host|
+          expect( host[:answers] ).to be === answers[host.name]
+        end
+      end
 
     end
     describe Version20 do
@@ -128,6 +152,14 @@ module Beaker
 
       it 'generates nil answers for a windows host' do
         expect( subject.answers( hosts, master_certname, {} )['vm2'] ).to be === nil
+      end
+
+      it 'should add answers to the host objects' do
+        @ver = '2.0'
+        answers = subject.answers( hosts, master_certname, {})
+        hosts.each do |host|
+          expect( host[:answers] ).to be === answers[host.name]
+        end
       end
 
     end

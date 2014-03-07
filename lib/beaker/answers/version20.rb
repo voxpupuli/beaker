@@ -116,6 +116,7 @@ module Beaker
         master = only_host_with_role(hosts, 'master')
         hosts.each do |h|
           the_answers[h.name] = host_answers(h, master_certname, master, dashboard, options)
+          h[:answers] = the_answers[h.name]
         end
         return the_answers
       end
