@@ -93,6 +93,12 @@ module Beaker
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
+      when /opensuse/, /sles/
+        <<-EOF
+          RUN zypper -n in openssh
+          RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+          RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+        EOF
       else
         # TODO add more platform steps here
         raise "platform #{host['platform']} not yet supported on docker"
@@ -112,7 +118,7 @@ module Beaker
       # And define the sshd
       dockerfile += <<-EOF
         EXPOSE 22
-        CMD /usr/sbin/sshd -D
+        CMD /usr/sbin/sshd -D -o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"
       EOF
 
       @logger.debug("Dockerfile is #{dockerfile}")
