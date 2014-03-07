@@ -3,16 +3,16 @@ require 'spec_helper'
 module Beaker
   module Utils
     describe Validator do
-      let( :validator )         { Beaker::Utils::Validator }
-      let( :pkgs )              { Beaker::Utils::Validator::PACKAGES }
-      let( :unix_only_pkgs )    { Beaker::Utils::Validator::UNIX_PACKAGES }
-      let( :opensuse_only_pkg ) { Beaker::Utils::Validator::OPENSUSE_PACKAGES }
-      let( :platform )          { @platform || 'unix' }
-      let( :hosts )             { hosts = make_hosts( { :platform => platform } )
-                                  hosts[0][:roles] = ['agent']
-                                  hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                                  hosts[2][:roles] = ['agent']
-                                  hosts }
+      let( :validator )          { Beaker::Utils::Validator }
+      let( :pkgs )               { Beaker::Utils::Validator::PACKAGES }
+      let( :unix_only_pkgs )     { Beaker::Utils::Validator::UNIX_PACKAGES }
+      let( :opensuse_only_pkgs ) { Beaker::Utils::Validator::OPENSUSE_PACKAGES }
+      let( :platform )           { @platform || 'unix' }
+      let( :hosts )              { hosts = make_hosts( { :platform => platform } )
+                                   hosts[0][:roles] = ['agent']
+                                   hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+                                   hosts[2][:roles] = ['agent']
+                                   hosts }
 
       context "can validate the SUTs" do
 

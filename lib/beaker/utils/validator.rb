@@ -7,6 +7,11 @@ module Beaker
 
       def self.validate(hosts, logger)
         hosts.each do |host|
+          PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
           if host['platform'] =~ /(opensuse)/
             OPENSUSE_PACKAGES.each do |pkg|
               if not host.check_for_package pkg
@@ -14,16 +19,11 @@ module Beaker
               end
             end
           else
-            PACKAGES.each do |pkg|
-              if not host.check_for_package pkg
-                host.install_package pkg
-              end
-            end
-          end
-          if host['platform'] !~ /(windows)|(aix)|(solaris)/
-            UNIX_PACKAGES.each do |pkg|
-              if not host.check_for_package pkg
-                host.install_package pkg
+            if host['platform'] !~ /(windows)|(aix)|(solaris)/
+              UNIX_PACKAGES.each do |pkg|
+                if not host.check_for_package pkg
+                  host.install_package pkg
+                end
               end
             end
           end
