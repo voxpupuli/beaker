@@ -30,7 +30,7 @@ module Unix::Pkg
 
   def install_package(name, cmdline_args = '')
     case self['platform']
-      when /sles-/
+      when /sles-|opensuse-/
         execute("zypper --non-interactive in #{name}")
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
@@ -50,7 +50,7 @@ module Unix::Pkg
 
   def uninstall_package(name, cmdline_args = '')
     case self['platform']
-      when /sles-/
+      when /sles-|opensuse-/
         execute("zypper --non-interactive rm #{name}")
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
@@ -74,7 +74,7 @@ module Unix::Pkg
   #                               the package manager
   def upgrade_package(name, cmdline_args = '')
     case self['platform']
-      when /sles-/
+      when /sles-|opensuse-/
         execute("zypper --non-interactive --no-gpg-checks up #{name}")
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
@@ -166,7 +166,7 @@ module Unix::Pkg
         deploy_yum_repo(path, name, version)
       when /ubuntu|debian/
         deploy_apt_repo(path, name, version)
-      when /sles/
+      when /sles|opensuse/
         deploy_zyp_repo(path, name, version)
       else
         # solaris, windows
