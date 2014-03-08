@@ -19,7 +19,7 @@ module Beaker
     def initialize(vcloud_hosts, options)
       @options = options
       @logger = options[:logger]
-      @vcloud_hosts = vcloud_hosts
+      @hosts = vcloud_hosts
 
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
       raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
@@ -54,7 +54,7 @@ module Beaker
     def provision
       start = Time.now
       try = 1
-      @vcloud_hosts.each_with_index do |h, i|
+      @hosts.each_with_index do |h, i|
         if not h['template']
           raise ArgumentError, "You must specify a template name for #{h}"
         end
@@ -97,8 +97,8 @@ module Beaker
     end
 
     def cleanup
-      vm_names = @vcloud_hosts.map {|h| h['vmhostname'] }.compact
-      if @vcloud_hosts.length != vm_names.length
+      vm_names = @hosts.map {|h| h['vmhostname'] }.compact
+      if @hosts.length != vm_names.length
         @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
       end
 

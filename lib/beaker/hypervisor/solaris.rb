@@ -4,7 +4,7 @@ module Beaker
     def initialize(solaris_hosts, options)
       @options = options
       @logger = options[:logger]
-      @solaris_hosts = solaris_hosts
+      @hosts = solaris_hosts
       @fog_file = nil
       if File.exists?( @options[:dot_fog] )
         @fog_file = YAML.load_file( @options[:dot_fog] )
@@ -28,7 +28,7 @@ module Beaker
       hypervisor[:user] = @fog_file[:default][:solaris_hypervisor_username] || hypervisor[:user]
       hypervisor[:ssh][:keys] = [@fog_file[:default][:solaris_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
 
-      @solaris_hosts.each do |host|
+      @hosts.each do |host|
         vm_name = host['vmname'] || host.name
         #use the snapshot provided for this host
         snapshot = host['snapshot']

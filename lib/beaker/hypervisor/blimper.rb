@@ -27,7 +27,7 @@ module Beaker
     def initialize(blimpy_hosts, options)
       @options = options
       @logger = options[:logger]
-      @blimpy_hosts = blimpy_hosts
+      @hosts = blimpy_hosts
       @blimpy = Blimpy
     end
 
@@ -35,7 +35,7 @@ module Beaker
       ami_spec= YAML.load_file(@options[:ec2_yaml])["AMI"]
 
       fleet = @blimpy.fleet do |fleet|
-        @blimpy_hosts.each do |host|
+        @hosts.each do |host|
           amitype = host['vmname'] || host['platform']
           amisize = host['amisize'] || 'm1.small'
           #use snapshot provided for this host 
@@ -90,7 +90,7 @@ module Beaker
       fleet.ships.each do |ship|
         ship.wait_for_sshd
         name = ship.name
-        host = @blimpy_hosts.select { |host| host.name == name }[0]
+        host = @hosts.select { |host| host.name == name }[0]
         host['ip'] = ship.dns
         host.exec(Command.new("hostname #{name}"))
         ip = get_ip(host) 
@@ -99,7 +99,7 @@ module Beaker
       end
 
       # Send our hosts information to the nodes
-      @blimpy_hosts.each do |host|
+      @hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
       end
 
@@ -107,7 +107,7 @@ module Beaker
 
     def cleanup
       fleet = @blimpy.fleet do |fleet|
-        @blimpy_hosts.each do |host|
+        @hosts.each do |host|
           fleet.add(:aws) do |ship|
             ship.name = host.name
           end

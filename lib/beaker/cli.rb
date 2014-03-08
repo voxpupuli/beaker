@@ -44,48 +44,26 @@ module Beaker
       end
     end
 
+    #Provision, validate and configure all hosts as defined in the hosts file
     def provision
       begin
         @hosts =  []
         @network_manager = Beaker::NetworkManager.new(@options, @logger)
         @hosts = @network_manager.provision
+        @network_manager.validate
+        @network_manager.configure
       rescue => e
         report_and_raise(@logger, e, "CLI.provision")
       end
     end
 
-    def validate
-      begin
-        #validation phase
-        Beaker::Utils::Validator.validate(@hosts, @logger)
-      rescue => e
-        report_and_raise(@logger, e, "CLI.validate")
-      end
-    end
-
-    def setup
-      @ntp_controller = Beaker::Utils::NTPControl.new(@options, @hosts)
-      @setup = Beaker::Utils::SetupHelper.new(@options, @hosts)
-      @repo_controller = Beaker::Utils::RepoControl.new(@options, @hosts)
-      setup_steps = [[:timesync, "Sync time on hosts", Proc.new {@ntp_controller.timesync}],
-                     [:root_keys, "Sync keys to hosts" , Proc.new {@setup.sync_root_keys}],
-                     [:repo_proxy, "Proxy packaging repositories on ubuntu, debian and solaris-11", Proc.new {@repo_controller.proxy_config}],
-                     [:add_el_extras, "Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts", Proc.new {@repo_controller.add_el_extras}],
-                     [:add_master_entry, "Update /etc/hosts on master with master's ip", Proc.new {@setup.add_master_entry}]]
-      begin
-        #setup phase
-        setup_steps.each do |step|
-          if (not @options.has_key?(step[0])) or @options[step[0]]
-            @logger.notify ""
-            @logger.notify "Setup: #{step[1]}"
-            step[2].call
-          end
-        end
-      rescue => e
-        report_and_raise(@logger, e, "CLI.setup")
-      end
-    end
-
+    #Run Beaker tests.
+    #
+    # - provision hosts (includes validation and configuration)
+    # - run pre-suite
+    # - run tests
+    # - run post-suite
+    # - cleanup hosts
     def execute!
 
       if !@execute
@@ -98,8 +76,6 @@ module Beaker
         end
 
         provision
-        validate
-        setup
 
         errored = false
 
@@ -142,7 +118,11 @@ module Beaker
       end
     end
 
-    def run_suite(suite_name, failure_strategy = false)
+    #Run the provided test suite
+    #@param [Symbol] suite_name The test suite to execute
+    #@param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
+    #                                 continue to execute tests.
+    def run_suite(suite_name, failure_strategy = :slow)
       if (@options[suite_name].empty?)
         @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
         return

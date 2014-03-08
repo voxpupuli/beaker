@@ -4,7 +4,7 @@ module Beaker
     def initialize(aix_hosts, options)
       @options = options
       @logger = options[:logger]
-      @aix_hosts = aix_hosts
+      @hosts = aix_hosts
       #aix machines are reverted to known state, not a snapshot
       @fog_file = nil
       if File.exists?( @options[:dot_fog] )
@@ -27,7 +27,7 @@ module Beaker
       hypervisor[:user] = @fog_file[:default][:aix_hypervisor_username] || hypervisor[:user]
       hypervisor[:ssh][:keys] = [@fog_file[:default][:aix_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
 
-      @aix_hosts.each do |host|
+      @hosts.each do |host|
         vm_name = host['vmname'] || host.name
 
         @logger.notify "Reverting #{vm_name} to aix clean state"

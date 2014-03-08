@@ -52,16 +52,6 @@ module Beaker
       end
     end
 
-    def copy_ssh_to_root host
-      #make is possible to log in as root by copying the ssh dir to root's account
-      @logger.debug "Give root a copy of vagrant's keys"
-      if host['platform'] =~ /windows/
-        host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
-      else
-        host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'))
-      end
-    end
-
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
         ssh_config = Dir.chdir(@vagrant_path) do
@@ -104,7 +94,7 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @temp_files = []
-      @vagrant_hosts = vagrant_hosts
+      @hosts = vagrant_hosts
       @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', '.vagrant', 'beaker_vagrant_files', File.basename(options[:hosts_file])))
       FileUtils.mkdir_p(@vagrant_path)
       @vagrant_file = File.expand_path(File.join(@vagrant_path, "Vagrantfile"))
@@ -117,29 +107,29 @@ module Beaker
         #make sure that any old boxes are dead dead dead
         vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
 
-        make_vfile @vagrant_hosts, @options
+        make_vfile @hosts, @options
 
         vagrant_cmd("up")
       else #set host ip of already up boxes
-        @vagrant_hosts.each do |host|
+        @hosts.each do |host|
           host[:ip] = get_ip_from_vagrant_file(host.name)
         end
       end
 
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
-      @vagrant_hosts.each do |host|
+      @hosts.each do |host|
         default_user = host['user']
       
         set_ssh_config host, 'vagrant'
 
-        copy_ssh_to_root host
+        copy_ssh_to_root host, @options
         #shut down connection, will reconnect on next exec
         host.close
 
         set_ssh_config host, default_user
       end
 
-      hack_etc_hosts @vagrant_hosts
+      hack_etc_hosts @hosts
 
     end
 

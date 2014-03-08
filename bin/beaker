@@ -5,5 +5,5 @@ require 'beaker'
 
 Beaker::CLI.new.execute!
 
-puts "systest completed successfully, thanks."
+puts "Beaker completed successfully, thanks."
 exit 0
