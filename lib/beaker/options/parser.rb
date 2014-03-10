@@ -5,7 +5,7 @@ module Beaker
     #An Object that parses, merges and normalizes all supported Beaker options and arguments
     class Parser
       GITREPO      = 'git://github.com/puppetlabs'
-      #These options can have the form of arg1,arg2 or [arg] or just arg, 
+      #These options can have the form of arg1,arg2 or [arg] or just arg,
       #should default to []
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
       #These options expand out into an array of .rb files
@@ -39,7 +39,7 @@ module Beaker
       # or can become an array of multiple values by splitting arg over ','.  If argument is already an
       # array that array is returned untouched.
       # @example
-      #   split_arg([1, 2, 3]) == [1, 2, 3] 
+      #   split_arg([1, 2, 3]) == [1, 2, 3]
       #   split_arg(1) == [1]
       #   split_arg("1,2") == ["1", "2"]
       #   split_arg(nil) == []
@@ -69,9 +69,9 @@ module Beaker
         files = []
         if not paths.empty?
           paths.each do |root|
-            if File.file? root then
+            if File.file?(root)
               files << root
-            else
+            elsif File.directory?(root) #expand and explore
               discover_files = Dir.glob(
                 File.join(root, "**/*.rb")
               ).select { |f| File.file?(f) }
@@ -79,6 +79,8 @@ module Beaker
                 parser_error "empty directory used as an option (#{root})!"
               end
               files += discover_files.sort
+            else #not a file, not a directory, not nothin'
+              parser_error "#{root} used as a file option but is not a file or directory!"
             end
           end
         end
@@ -91,9 +93,9 @@ module Beaker
       #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
       #
       #Supports the following keywords
-      #  PUPPET 
+      #  PUPPET
       #  FACTER
-      #  HIERA 
+      #  HIERA
       #  HIERA-PUPPET
       #@example
       #  opts = ["PUPPET/3.1"]
@@ -140,7 +142,7 @@ module Beaker
         #NOTE on argument precedence:
         #
         # Will use env, then hosts/config file, then command line, then file options
-        # 
+        #
         @options = Beaker::Options::Presets.presets
         cmd_line_options = @command_line_parser.parse!(args)
         file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
@@ -148,7 +150,7 @@ module Beaker
         #   overwrite file options with command line options
         cmd_line_and_file_options = file_options.merge(cmd_line_options)
         # merge command line and file options with defaults
-        #   overwrite defaults with command line and file options 
+        #   overwrite defaults with command line and file options
         @options = @options.merge(cmd_line_and_file_options)
 
         if not @options[:help] and not @options[:version]
@@ -227,8 +229,8 @@ module Beaker
           else
             @options[opt] = []
           end
-        end 
- 
+        end
+
         #check for valid type
         if @options[:type] !~ /(pe)|(git)|(foss)/
           parser_error "--type must be one of pe, git, or foss, not '#{@options[:type]}'"
@@ -236,7 +238,7 @@ module Beaker
 
         #check for valid fail mode
         if @options[:fail_mode] !~ /stop|fast|slow/
-          parser_error "--fail-mode must be one of fast or slow, not '#{@options[:fail_mode]}'" 
+          parser_error "--fail-mode must be one of fast or slow, not '#{@options[:fail_mode]}'"
         end
 
         #check for valid preserve_hosts option
@@ -245,8 +247,8 @@ module Beaker
         end
 
         #check for config files necessary for different hypervisors
-        hypervisors = [] 
-        @options[:HOSTS].each_key do |name|  
+        hypervisors = []
+        @options[:HOSTS].each_key do |name|
           hypervisors << @options[:HOSTS][name][:hypervisor].to_s
         end
         hypervisors.uniq!
@@ -262,7 +264,7 @@ module Beaker
         #check that roles of hosts make sense
         # - must be one and only one master
         roles = []
-        @options[:HOSTS].each_key do |name|  
+        @options[:HOSTS].each_key do |name|
           roles << @options[:HOSTS][name][:roles]
         end
         master = 0
