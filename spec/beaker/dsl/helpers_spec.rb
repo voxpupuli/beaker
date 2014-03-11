@@ -651,11 +651,17 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#with_puppet_running_on' do
-    let(:is_pe) { false }
-    let(:host) { FakeHost.new(:pe => is_pe) }
     let(:test_case_path) { 'testcase/path' }
     let(:tmpdir_path) { '/tmp/tmpdir' }
     let(:puppet_path) { '/puppet/path' }
+    let(:is_pe) { false }
+    let(:host) do
+      FakeHost.new(:pe => is_pe,
+                   :options => {
+        'puppetpath' => puppet_path,
+        'platform' => 'el'
+      })
+    end
 
     def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
       subject.instance_variable_set(:@path, test_case_path)
@@ -665,7 +671,6 @@ describe ClassMixedWithDSLHelpers do
 
     before do
       stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
-      host.stub(:[]).and_return(puppet_path)
     end
 
     it "raises an ArgumentError if you try to submit a String instead of a Hash of options" do
@@ -788,6 +793,16 @@ describe ClassMixedWithDSLHelpers do
           expect do
             subject.with_puppet_running_on(host, {}) { raise 'Failed while yielding.' }
           end.to raise_error(RuntimeError, /failed.*because.*Failed while yielding./)
+        end
+
+        it 'dumps the puppet logs if there is an error in the teardown' do
+          host.should_receive(:port_open?).with(8140).and_return(true)
+
+          subject.logger.should_receive(:notify).with(/Dumping master log/)
+
+          expect do
+            subject.with_puppet_running_on(host, {})
+          end.to raise_error(RuntimeError)
         end
 
         it 'does not swallow a teardown exception if no earlier exception was raised' do

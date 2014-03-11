@@ -61,11 +61,16 @@ class FakeHost
 
   def initialize(options = {})
     @pe = options[:pe]
+    @options = options[:options]
     @commands = []
   end
 
   def is_pe?
     @pe
+  end
+
+  def [](name)
+    @options[name]
   end
 
   def any_exec_result
