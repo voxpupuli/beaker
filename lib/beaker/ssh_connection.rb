@@ -174,6 +174,7 @@ module Beaker
       # Net::Scp always returns 0, so just set the return code to 0.
       result.exit_code = 0
 
+      result.finalize!
       return result
     end
 
@@ -192,6 +193,7 @@ module Beaker
       # Net::Scp always returns 0, so just set the return code to 0.
       result.exit_code = 0
 
+      result.finalize!
       result
     end
   end
