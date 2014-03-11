@@ -79,6 +79,10 @@ module Beaker
         FROM #{host['image']}
       EOF
 
+      # additional options to specify to the sshd
+      # may vary by platform
+      sshd_options = ''
+
       # add os-specific actions
       dockerfile += case host['platform']
       when /ubuntu/, /debian/
@@ -94,6 +98,7 @@ module Beaker
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
       when /opensuse/, /sles/
+        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"'
         <<-EOF
           RUN zypper -n in openssh
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
@@ -115,10 +120,11 @@ module Beaker
         "RUN #{command}\n"
       }.join("\n")
 
-      # And define the sshd
+      # How to start a sshd on port 22.  May be an init for more supervision
+      cmd = host['docker_cmd'] || "/usr/sbin/sshd -D #{sshd_options}"
       dockerfile += <<-EOF
         EXPOSE 22
-        CMD /usr/sbin/sshd -D -o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"
+        CMD #{cmd}
       EOF
 
       @logger.debug("Dockerfile is #{dockerfile}")
