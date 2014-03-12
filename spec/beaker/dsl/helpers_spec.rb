@@ -802,7 +802,17 @@ describe ClassMixedWithDSLHelpers do
 
           expect do
             subject.with_puppet_running_on(host, {})
-          end.to raise_error(RuntimeError)
+          end.to raise_error(RuntimeError, /Also failed in teardown/)
+        end
+
+        it 'does not mask the teardown error with an error from dumping the logs' do
+          host.should_receive(:port_open?).with(8140).and_return(true)
+
+          subject.logger.should_receive(:notify).with(/Dumping master log/).and_raise("Error from dumping logs")
+
+          expect do
+            subject.with_puppet_running_on(host, {})
+          end.to raise_error(RuntimeError, /Also failed in teardown/)
         end
 
         it 'does not swallow a teardown exception if no earlier exception was raised' do
