@@ -12,7 +12,7 @@ module Beaker
               host.install_package pkg
             end
           end
-          if host['platform'] =~ /(opensuse)/
+          if host['platform'] =~ /(opensuse|sles)/
             OPENSUSE_PACKAGES.each do |pkg|
               if not host.check_for_package pkg
                 host.install_package pkg
