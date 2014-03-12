@@ -8,7 +8,7 @@ module Beaker
       # 
       # Currently supports:
       #
-      #   consoleport, IS_PE, pe_dist_dir, pe_version_file, pe_version_file_win
+      #   consoleport, IS_PE, pe_dist_dir, pe_version_file, pe_version_file_win, pe_ver
       #
       # @return [OptionsHash] The supported environment variables in an OptionsHash,
       #                       empty or nil environment variables are removed from the OptionsHash
@@ -20,6 +20,7 @@ module Beaker
           :pe_dir => ENV['pe_dist_dir'],
           :pe_version_file => ENV['pe_version_file'],
           :pe_version_file_win => ENV['pe_version_file'],
+          :pe_ver => ENV['pe_ver']
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
