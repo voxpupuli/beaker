@@ -21,7 +21,9 @@ module Beaker
           # awesome.
           the_answers[dashboard.name][:q_upgrade_with_unknown_disk_space] = 'y'
         end
-
+        hosts.each do |h|
+          h[:answers] = the_answers[h.name]
+        end
         return the_answers
       end
     end

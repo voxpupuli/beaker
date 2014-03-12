@@ -205,6 +205,7 @@ module Beaker
           else
             the_answers[h.name] = host_answers(h, master_certname, master, database, dashboard, options)
           end
+          h[:answers] = the_answers[h.name]
         end
         return the_answers
       end
