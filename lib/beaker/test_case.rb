@@ -108,7 +108,7 @@ module Beaker
       @logger = logger
       @options = options
       @path    = path
-      @usr_home = ENV['HOME']
+      @usr_home = options[:home]
       @test_status = :pass
       @exception = nil
       @runtime = nil
@@ -182,18 +182,5 @@ module Beaker
       hash
     end
 
-    # This method retrieves the forge hostname from either:
-    # * The environment variable 'forge_host'
-    # * The parameter 'forge_host' from the CONFIG hash in a node definition
-    #
-    # If none of these are available, it falls back to the static
-    # 'vulcan-acceptance.delivery.puppetlabs.net' hostname
-    #
-    # @return [String] hostname of test forge
-    def forge
-      ENV['forge_host'] ||
-        @options['forge_host'] ||
-        'vulcan-acceptance.delivery.puppetlabs.net'
-    end
   end
 end

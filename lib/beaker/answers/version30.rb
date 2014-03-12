@@ -22,7 +22,7 @@ module Beaker
         agent_a = {
           :q_puppetagent_install => 'y',
           :q_puppet_cloud_install => 'y',
-          :q_verify_packages => ENV['q_verify_packages'] || 'y',
+          :q_verify_packages => options[:answers][:q_verify_packages],
           :q_puppet_symlinks_install => 'y',
           :q_puppetagent_certname => host,
           :q_puppetagent_server => master_certname,
@@ -66,8 +66,8 @@ module Beaker
         end
 
         # Common answers for console and database
-        dashboard_password = "'#{ENV['q_puppet_enterpriseconsole_auth_password'] || '~!@#$%^*-/ aZ'}'"
-        puppetdb_password = "'#{ENV['q_puppetdb_password'] || '~!@#$%^*-/ aZ'}'"
+        dashboard_password = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_password]}'" 
+        puppetdb_password = "'#{options[:answers][:q_puppetdb_password]}'"
 
         console_database_a = {
           :q_puppetdb_database_name => 'pe-puppetdb',
@@ -85,13 +85,14 @@ module Beaker
         }
 
         # Console only answers
-        dashboard_user = "'#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com'}'"
+        dashboard_user = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_user_email]}'"
 
-        smtp_host = "'#{ENV['q_puppet_enterpriseconsole_smtp_host'] || dashboard}'"
-        smtp_port = "'#{ENV['q_puppet_enterpriseconsole_smtp_port'] || 25}'"
-        smtp_username = ENV['q_puppet_enterpriseconsole_smtp_username']
-        smtp_password = ENV['q_puppet_enterpriseconsole_smtp_password']
-        smtp_use_tls = "'#{ENV['q_puppet_enterpriseconsole_smtp_use_tls'] || 'n'}'"
+
+        smtp_host = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_host] || dashboard}'"
+        smtp_port = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_port]}'"
+        smtp_username = options[:answers][:q_puppet_enterpriseconsole_smtp_username]
+        smtp_password = options[:answers][:q_puppet_enterpriseconsole_smtp_password]
+        smtp_use_tls = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_use_tls]}'"
 
         console_a = {
           :q_puppet_enterpriseconsole_install => 'y',

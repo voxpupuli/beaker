@@ -47,13 +47,13 @@ module Beaker
           master_a[:q_puppetmaster_dnsaltnames]+=","+master['ip']
         end
 
-        dashboard_user = "'#{ENV['q_puppet_enterpriseconsole_auth_user_email'] || 'admin@example.com'}'"
-        smtp_host = "'#{ENV['q_puppet_enterpriseconsole_smtp_host'] || dashboard}'"
-        dashboard_password = ENV['q_puppet_enterpriseconsole_auth_password'] || '~!@#$%^*-/ aZ'
-        smtp_port = "'#{ENV['q_puppet_enterpriseconsole_smtp_port'] || 25}'"
-        smtp_username = ENV['q_puppet_enterpriseconsole_smtp_username']
-        smtp_password = ENV['q_puppet_enterpriseconsole_smtp_password']
-        smtp_use_tls = "'#{ENV['q_puppet_enterpriseconsole_smtp_use_tls'] || 'n'}'"
+        dashboard_user = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_user_email]}'"
+        smtp_host = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_host] || dashboard}'"
+        dashboard_password = options[:answers][:q_puppet_enterpriseconsole_auth_password]
+        smtp_port = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_port]}'"
+        smtp_username = options[:answers][:q_puppet_enterpriseconsole_smtp_username]
+        smtp_password = options[:answers][:q_puppet_enterpriseconsole_smtp_password]
+        smtp_use_tls = "'#{options[:answers][:q_puppet_enterpriseconsole_smtp_use_tls]}'"
 
         console_a = {
           :q_puppet_enterpriseconsole_install => 'y',

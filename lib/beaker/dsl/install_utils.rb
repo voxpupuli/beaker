@@ -6,6 +6,14 @@ module Beaker
     # This module contains methods to help cloning, extracting git info,
     # ordering of Puppet packages, and installing ruby projects that
     # contain an `install.rb` script.
+    #
+    # To mix this is into a class you need the following:
+    # * a method *hosts* that yields any hosts implementing
+    #   {Beaker::Host}'s interface to act upon.
+    # * a method *options* that provides an options hash, see {Beaker::Options::OptionsHash}
+    # * the module {Beaker::DSL::Roles} that provides access to the various hosts implementing
+    #   {Beaker::Host}'s interface to act upon
+    # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
     module InstallUtils
 
       # The default install path
@@ -132,18 +140,18 @@ module Beaker
       #Create the PE install command string based upon the host and options settings
       # @param [Host] host The host that PE is to be installed on
       #                    For UNIX machines using the full PE installer, the host object must have the 'pe_installer' field set correctly.
-      # @param [Hash{Symbol=>String}] options The options
-      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      # @param [Hash{Symbol=>String}] opts The options
+      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                          (Othersie uses individual Windows hosts pe_ver)
-      # @option options [String  :pe_ver Default PE version to install or upgrade to
+      # @option opts [String  :pe_ver Default PE version to install or upgrade to
       #                          (Otherwise uses individual hosts pe_ver)
       # @example
-      #      on host, "#{installer_cmd(host, options)} -a #{host['working_dir']}/answers"
+      #      on host, "#{installer_cmd(host, opts)} -a #{host['working_dir']}/answers"
       # @api private
-      def installer_cmd(host, options)
-        version = options[:pe_ver] || host['pe_ver']
+      def installer_cmd(host, opts)
+        version = opts[:pe_ver] || host['pe_ver']
         if host['platform'] =~ /windows/
-          version = options[:pe_ver_win] || host['pe_ver']
+          version = opts[:pe_ver_win] || host['pe_ver']
           "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
@@ -174,18 +182,18 @@ module Beaker
 
       #Determine the PE package to download/upload on a windows host, download/upload that package onto the host.
       # @param [Host] host The windows host to download/upload and unpack PE onto
-      # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      # @option opts [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
-      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @api private
-      def fetch_puppet_on_windows(host, options)
-        path = options[:pe_dir] || host['pe_dir']
+      def fetch_puppet_on_windows(host, opts)
+        path = opts[:pe_dir] || host['pe_dir']
         local = File.directory?(path)
-        version = options[:pe_ver_win] || host['pe_ver']
+        version = opts[:pe_ver_win] || host['pe_ver']
         filename = "puppet-enterprise-#{version}"
         extension = ".msi"
         if local
@@ -204,14 +212,14 @@ module Beaker
       #Determine the PE package to download/upload on a unix style host, download/upload that package onto the host
       #and unpack it.
       # @param [Host] host The unix style host to download/upload and unpack PE onto
-      # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      # @option opts [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
       # @api private
-      def fetch_puppet_on_unix(host, options)
-        path = options[:pe_dir] || host['pe_dir']
+      def fetch_puppet_on_unix(host, opts)
+        path = opts[:pe_dir] || host['pe_dir']
         local = File.directory?(path)
         filename = "#{host['dist']}"
         if local
@@ -241,24 +249,24 @@ module Beaker
       #Determine the PE package to download/upload per-host, download/upload that package onto the host
       #and unpack it.
       # @param [Array<Host>] hosts The hosts to download/upload and unpack PE onto
-      # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      # @option opts [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
-      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @api private
-      def fetch_puppet(hosts, options)
+      def fetch_puppet(hosts, opts)
         hosts.each do |host|
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
-          next if host['roles'].include? 'frictionless' and ! version_is_less(options[:pe_ver] || host['pe_ver'], '3.2.0')
+          next if host['roles'].include? 'frictionless' and ! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0')
 
           windows = host['platform'] =~ /windows/
           if windows
-            fetch_puppet_on_windows(host, options)
+            fetch_puppet_on_windows(host, opts)
           else
-            fetch_puppet_on_unix(host, options)
+            fetch_puppet_on_unix(host, opts)
           end
         end
       end
@@ -276,26 +284,28 @@ module Beaker
 
       #Perform a Puppet Enterprise upgrade or install
       # @param [Array<Host>] hosts The hosts to install or upgrade PE on
-      # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      # @option opts [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
-      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                  (Otherwise uses individual Windows hosts pe_ver)
-      # @option options [Symbol] :type (:install) One of :upgrade or :install
+      # @option opts [Symbol] :type (:install) One of :upgrade or :install
+      # @option opts [Hash<String>] :answers Pre-set answers based upon ENV vars and defaults
+      #                             (See {Beaker::Options::Presets.env_vars})
       #
       # @example
       #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
       #
       # @api private
       #
-      def do_install hosts, options = {}
-        options[:type] = options[:type] || :install
+      def do_install hosts, opts = {}
+        opts[:type] = opts[:type] || :install
         hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
         master_certname = on(master, hostcert).stdout.strip
-        pre30database = version_is_less(options[:pe_ver] || database['pe_ver'], '3.0')
-        pre30master = version_is_less(options[:pe_ver] || master['pe_ver'], '3.0')
+        pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
+        pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
 
         # Set PE distribution for all the hosts, create working dir
         use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
@@ -303,25 +313,25 @@ module Beaker
           host['pe_installer'] ||= 'puppet-enterprise-installer'
           if host['platform'] !~ /windows/
             platform = use_all_tar ? 'all' : host['platform']
-            version = options[:pe_ver] || host['pe_ver']
+            version = opts[:pe_ver] || host['pe_ver']
             host['dist'] = "puppet-enterprise-#{version}-#{platform}"
           end
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
           on host, "mkdir #{host['working_dir']}"
         end
 
-        fetch_puppet(hosts, options)
+        fetch_puppet(hosts, opts)
 
         hosts.each do |host|
           # Database host was added in 3.0. Skip it if installing an older version
           next if host == database and host != master and host != dashboard and pre30database
           if host['platform'] =~ /windows/
-            on host, installer_cmd(host, options)
+            on host, installer_cmd(host, opts)
           else
             # We only need answers if we're using the classic installer
-            version = options[:pe_ver] || host['pe_ver']
+            version = opts[:pe_ver] || host['pe_ver']
             if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
-              answers = Beaker::Answers.answers(options[:pe_ver] || host['pe_ver'], hosts, master_certname, options)
+              answers = Beaker::Answers.answers(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
               create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
             else
               # If We're *not* running the classic installer, we want
@@ -329,7 +339,7 @@ module Beaker
               deploy_frictionless_to_master(host)
             end
 
-            on host, installer_cmd(host, options)
+            on host, installer_cmd(host, opts)
           end
         end
 
@@ -487,7 +497,8 @@ module Beaker
               Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
           end
         end
-        do_install sorted_hosts
+        #send in the global options hash
+        do_install sorted_hosts, options
       end
 
       #Upgrade PE based upon host configuration and options
@@ -515,7 +526,8 @@ module Beaker
             host['pe_installer'] ||= 'puppet-enterprise-upgrader'
           end
         end
-        do_install(sorted_hosts, {:type => :upgrade})
+        #send in the global options hash
+        do_install(sorted_hosts, options.merge({:type => :upgrade}))
       end
     end
   end

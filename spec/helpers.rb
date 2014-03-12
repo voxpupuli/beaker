@@ -47,7 +47,7 @@ module HostHelpers
   end
 
   def make_opts
-     Beaker::Options::Presets.presets.merge( { :logger => logger, 
+     Beaker::Options::Presets.presets.merge( Beaker::Options::Presets.env_vars ).merge( { :logger => logger, 
                                                :host_config => 'sample.config',
                                                :type => :foss,
                                                :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',

@@ -11,6 +11,7 @@ class ClassMixedWithDSLHelpers
 end
 
 describe ClassMixedWithDSLHelpers do
+  let( :opts )     { Beaker::Options::Presets.env_vars }
   let( :command )  { 'ls' }
   let( :host ) { double.as_null_object }
   let( :result ) { Beaker::Result.new( host, command ) }
@@ -513,7 +514,7 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_forge_on' do
     it 'stubs forge.puppetlabs.com with the value of `forge`' do
-      subject.should_receive( :forge ).and_return( 'my_forge.example.com' )
+      subject.stub( :options ).and_return( {} )
       Resolv.should_receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
@@ -521,15 +522,16 @@ describe ClassMixedWithDSLHelpers do
       subject.should_receive( :stub_hosts_on ).
         with( 'my_host', 'forgeapi.puppetlabs.com' => '127.0.0.1' )
 
-      subject.stub_forge_on( 'my_host' )
+      subject.stub_forge_on( 'my_host', 'my_forge.example.com' )
     end
   end
 
   describe "#stub_forge" do
     it "delegates to #stub_forge_on with the default host" do
+      subject.stub( :options ).and_return( {} )
       subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :stub_forge_on ).with( master ).once
+      subject.should_receive( :stub_forge_on ).with( master, nil ).once
 
       subject.stub_forge( )
 
