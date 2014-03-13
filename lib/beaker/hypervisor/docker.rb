@@ -94,12 +94,12 @@ module Beaker
       when /ubuntu/, /debian/
         <<-EOF
           RUN apt-get update
-          RUN apt-get install -y openssh-server
+          RUN apt-get install -y openssh-server openssh-client
         EOF
       when /centos/, /fedora/, /redhat/
         <<-EOF
           RUN yum clean all
-          RUN yum install -y sudo openssh-server
+          RUN yum install -y sudo openssh-server openssh-clients
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
