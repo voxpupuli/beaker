@@ -8,6 +8,12 @@ module Beaker
                           basic_hosts }
     let( :master_certname ) { 'master_certname' }
 
+    it 'generates 3.2 answers for 3.3 hosts' do
+      @ver = '3.3'
+      Beaker::Answers::Version32.should_receive( :answers ).with( hosts, master_certname, {}).once
+      subject.answers( @ver, hosts, master_certname, {} )
+    end
+
     it 'generates 3.2 answers for 3.2 hosts' do
       @ver = '3.2'
       Beaker::Answers::Version32.should_receive( :answers ).with( hosts, master_certname, {}).once
