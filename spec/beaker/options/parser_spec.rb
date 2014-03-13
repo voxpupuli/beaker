@@ -153,10 +153,10 @@ module Beaker
           {
             'HOSTS' => {
               :master => {
-                :roles => ["master","agent"],
+                :roles => ["master","agent","arbitrary_role"],
               },
               :agent => {
-                :roles => ["agent"],
+                :roles => ["agent","default","other_abitrary_role"],
               },
             }
           }
@@ -177,7 +177,7 @@ module Beaker
           it "restricts #{platform} hosts to agent for #{type}" do
             hosts_file = fake_hosts_file_for_platform(hosts, platform)
             args << "--hosts" << hosts_file
-            expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*can only have role 'agent'/)
+            expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*may not have roles 'master', 'dashboard', or 'database'/)
           end
         end
 
