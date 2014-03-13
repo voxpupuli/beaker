@@ -297,8 +297,8 @@ module Beaker
       # @api private
       def test_host_roles(host_name, host_hash)
         host_roles = host_hash[:roles]
-        if (host_roles - ['agent']).size != 0
-          parser_error "#{host_hash[:platform].to_s} box '#{host_name}' can only have role 'agent', has roles #{host_roles.to_s}"
+        if !(host_roles & ['master', 'database', 'dashboard']).empty?
+          parser_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles 'master', 'dashboard', or 'database'; it has roles #{host_roles.to_s}"
         end
       end
 
