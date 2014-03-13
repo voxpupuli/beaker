@@ -11,13 +11,27 @@ RSpec.configure do |c|
   # Define persistant options setting
   c.add_setting :options, :default => {}
 
-  # Defined target nodeset
-  nodeset = ENV['RS_SET'] || 'default'
-  nodesetfile = ENV['RS_SETFILE'] || File.join('spec/acceptance/nodesets',"#{nodeset}.yml")
+  #default option values
+  defaults = {
+    :nodeset     => 'default',
+  }
+  #read env vars
+  env_vars = {
+    :nodeset     => ENV['BEAKER_set'] || ENV['RS_SET'],
+    :nodesetfile => ENV['BEAKER_setfile'] || ENV['RS_SETFILE'],
+    :provision   => ENV['BEAKER_provision'] || ENV['RS_PROVISION'],
+    :keyfile     => ENV['BEAKER_keyfile'] || ENV['RS_KEYFILE'],
+    :debug       => ENV['BEAKER_debug'] || ENV['RS_DEBUG'],
+    :destroy     => ENV['BEAKER_destroy'] || ENV['RS_DESTROY'],
+  }.delete_if {|key, value| value.nil?}
+  #combine defaults and env_vars to determine overall options
+  options = defaults.merge(env_vars)
 
-  fresh_nodes = ENV['RS_PROVISION'] == 'no' ? '--no-provision' : nil
-  keyfile = ENV['RS_KEYFILE'] ? ['--keyfile', ENV['RS_KEYFILE']] : nil
-  debug = ENV['RS_DEBUG'] ? ['--log-level', 'debug'] : nil
+  # process options to construct beaker command string
+  nodesetfile = options[:nodesetfile] || File.join('spec/acceptance/nodesets',"#{options[:nodeset]}.yml")
+  fresh_nodes = options[:provision] == 'no' ? '--no-provision' : nil
+  keyfile = options[:keyfile] ? ['--keyfile', options[:keyfile]] : nil
+  debug = options[:debug] ? ['--log-level', 'debug'] : nil
 
   # Configure all nodes in nodeset
   c.setup([fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten.compact)
@@ -26,7 +40,7 @@ RSpec.configure do |c|
 
   # Destroy nodes if no preserve hosts
   c.after :suite do
-    case ENV['RS_DESTROY']
+    case options[:destroy]
     when 'no'
       # Don't cleanup
     when 'onpass'
