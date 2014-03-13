@@ -62,7 +62,7 @@ module Beaker
         end
 
         it "can validate SLES hosts" do
-          @platform = 'sles'
+          @platform = 'sles-13.1-x64'
 
           hosts.each do |host|
             pkgs.each do |pkg|
