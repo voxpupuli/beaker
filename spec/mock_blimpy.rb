@@ -1,5 +1,5 @@
 class MockShip 
-  attr_accessor :name, :ports, :image_id, :flavor, :region, :username, :dns
+  attr_accessor :name, :ports, :image_id, :flavor, :region, :username, :dns, :tags
 
   def initialize
     @dns = "my.ip.address"
