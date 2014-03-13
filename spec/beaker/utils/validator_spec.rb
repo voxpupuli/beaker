@@ -3,16 +3,16 @@ require 'spec_helper'
 module Beaker
   module Utils
     describe Validator do
-      let( :validator )          { Beaker::Utils::Validator }
-      let( :pkgs )               { Beaker::Utils::Validator::PACKAGES }
-      let( :unix_only_pkgs )     { Beaker::Utils::Validator::UNIX_PACKAGES }
-      let( :opensuse_only_pkgs ) { Beaker::Utils::Validator::OPENSUSE_PACKAGES }
-      let( :platform )           { @platform || 'unix' }
-      let( :hosts )              { hosts = make_hosts( { :platform => platform } )
-                                   hosts[0][:roles] = ['agent']
-                                   hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                                   hosts[2][:roles] = ['agent']
-                                   hosts }
+      let( :validator )      { Beaker::Utils::Validator }
+      let( :pkgs )           { Beaker::Utils::Validator::PACKAGES }
+      let( :unix_only_pkgs ) { Beaker::Utils::Validator::UNIX_PACKAGES }
+      let( :sles_only_pkgs ) { Beaker::Utils::Validator::SLES_PACKAGES }
+      let( :platform )       { @platform || 'unix' }
+      let( :hosts )          { hosts = make_hosts( { :platform => platform } )
+                               hosts[0][:roles] = ['agent']
+                               hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+                               hosts[2][:roles] = ['agent']
+                               hosts }
 
       context "can validate the SUTs" do
 
@@ -27,7 +27,7 @@ module Beaker
               host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
               host.should_receive( :install_package ).with( pkg ).once
             end
-            opensuse_only_pkgs.each do |pkg|
+            sles_only_pkgs.each do |pkg|
               host.should_receive( :check_for_package).with( pkg ).never
               host.should_receive( :install_package ).with( pkg ).never
             end
@@ -50,7 +50,7 @@ module Beaker
               host.should_receive( :check_for_package).with( pkg ).never
               host.should_receive( :install_package ).with( pkg ).never
             end
-            opensuse_only_pkgs.each do |pkg|
+            sles_only_pkgs.each do |pkg|
               host.should_receive( :check_for_package).with( pkg ).never
               host.should_receive( :install_package ).with( pkg ).never
             end
@@ -61,8 +61,8 @@ module Beaker
 
         end
 
-        it "can validate OpenSuse hosts" do
-          @platform = 'opensuse'
+        it "can validate SLES hosts" do
+          @platform = 'sles'
 
           hosts.each do |host|
             pkgs.each do |pkg|
@@ -73,7 +73,7 @@ module Beaker
               host.should_receive( :check_for_package).with( pkg ).never
               host.should_receive( :install_package ).with( pkg ).never
             end
-            opensuse_only_pkgs.each do |pkg|
+            sles_only_pkgs.each do |pkg|
               host.should_receive( :check_for_package).with( pkg ).once.and_return( false )
               host.should_receive( :install_package ).with( pkg ).once
             end

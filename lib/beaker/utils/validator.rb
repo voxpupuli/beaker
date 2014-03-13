@@ -3,7 +3,7 @@ module Beaker
     module Validator
       PACKAGES = ['curl']
       UNIX_PACKAGES = ['ntpdate']
-      OPENSUSE_PACKAGES = ['ntp']
+      SLES_PACKAGES = ['ntp']
 
       def self.validate(hosts, logger)
         hosts.each do |host|
@@ -12,8 +12,8 @@ module Beaker
               host.install_package pkg
             end
           end
-          if host['platform'] =~ /(opensuse|sles)/
-            OPENSUSE_PACKAGES.each do |pkg|
+          if host['platform'].include? 'sles'
+            SLES_PACKAGES.each do |pkg|
               if not host.check_for_package pkg
                 host.install_package pkg
               end

@@ -54,8 +54,8 @@ module Beaker
 
       end
 
-      it "can sync time on OpenSuse hosts" do
-        @hosts = make_hosts( { :platform => 'opensuse' } )
+      it "can sync time on Sles hosts" do
+        @hosts = make_hosts( { :platform => 'sles' } )
 
         Command.should_receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
 

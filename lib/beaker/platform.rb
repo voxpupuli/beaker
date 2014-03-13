@@ -1,7 +1,7 @@
 module Beaker
   class Platform < String
     #supported platforms
-    PLATFORMS = /^(centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|opensuse)\-.+\-.+$/
+    PLATFORMS = /^(centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el)\-.+\-.+$/
 
     PLATFORM_VERSION_CODES = 
       { :debian => { "wheezy"  => "7",
