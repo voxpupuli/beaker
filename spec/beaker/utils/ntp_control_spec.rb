@@ -55,7 +55,7 @@ module Beaker
       end
 
       it "can sync time on Sles hosts" do
-        @hosts = make_hosts( { :platform => 'sles' } )
+        @hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
 
         Command.should_receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
 
