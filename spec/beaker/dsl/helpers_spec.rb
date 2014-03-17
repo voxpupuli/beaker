@@ -95,10 +95,10 @@ describe ClassMixedWithDSLHelpers do
         host.should_receive( :exec ).and_return( result )
       end
 
-      it 'yields self' do
+      it 'yields result' do
         subject.on host, command do |containing_class|
           expect( containing_class ).
-            to be_an_instance_of( ClassMixedWithDSLHelpers )
+            to be_an_instance_of( Beaker::Result )
         end
       end
 

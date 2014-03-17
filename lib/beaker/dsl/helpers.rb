@@ -85,7 +85,16 @@ module Beaker
           @result = host.exec(command, opts)
 
           # Also, let additional checking be performed by the caller.
-          yield self if block_given?
+          if block_given?
+            case block.arity
+              #block with arity of 0, just hand back yourself
+              when 0
+                yield self
+              #block with arity of 1 or greater, hand back the result object
+              else 
+                yield @result
+            end
+          end
 
           return @result
         end
