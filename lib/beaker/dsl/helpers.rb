@@ -490,6 +490,14 @@ module Beaker
             end
 
           rescue Exception => teardown_exception
+            begin
+              if !host.is_pe?
+                dump_puppet_log(host)
+              end
+            rescue Exception => dumping_exception
+              logger.error("Raised during attempt to dump puppet logs: #{dumping_exception}")
+            end
+
             if original_exception
               logger.error("Raised during attempt to teardown with_puppet_running_on: #{teardown_exception}\n---\n")
               raise original_exception
