@@ -15,9 +15,15 @@ module Beaker
       def add_master_entry
         @logger.notify "Add Master entry to /etc/hosts"
         master = only_host_with_role(@hosts, :master)
-        if master["hypervisor"] and master["hypervisor"] =~ /vagrant/
-          @logger.debug "Don't update master entry on vagrant masters"
-          return
+        if master["hypervisor"]
+          if master["hypervisor"] =~ /docker/
+            @logger.debug "Don't update master entry on docker masters"
+            return
+          end
+          if master["hypervisor"] =~ /vagrant/
+            @logger.debug "Don't update master entry on vagrant masters"
+            return
+          end
         end
         @logger.debug "Get ip address of Master #{master}"
         if master['platform'].include? 'solaris'

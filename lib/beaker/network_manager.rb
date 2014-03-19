@@ -8,7 +8,7 @@ end
 
 module Beaker
   class NetworkManager
-    HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant']
+    HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant', 'docker']
 
     def provision? options, host 
       #provision this box
