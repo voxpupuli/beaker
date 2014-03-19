@@ -144,7 +144,7 @@ module Beaker
         version = options[:pe_ver] || host['pe_ver']
         if host['platform'] =~ /windows/
           version = options[:pe_ver_win] || host['pe_ver']
-          "cd #{host['working_dir']} && msiexec.exe /qn /i puppet-enterprise-#{version}.msi"
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
@@ -292,7 +292,7 @@ module Beaker
           # Database host was added in 3.0. Skip it if installing an older version
           next if host == database and host != master and host != dashboard and pre30database
           if host['platform'] =~ /windows/
-            on host, "#{installer_cmd(host, options)} PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}"
+            on host, installer_cmd(host, options)
           else
             # We only need answers if we're using the classic installer
             version = options[:pe_ver] || host['pe_ver']
