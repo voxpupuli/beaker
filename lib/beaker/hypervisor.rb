@@ -27,6 +27,8 @@ module Beaker
           end
         when /vagrant/
           Beaker::Vagrant
+        when /docker/
+          Beaker::DockerHypervisor
         end
       hypervisor = hyper_class.new(hosts_to_provision, options)
       hypervisor.provision
@@ -41,7 +43,7 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris docker).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError
