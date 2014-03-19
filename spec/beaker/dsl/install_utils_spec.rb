@@ -127,7 +127,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'generates a windows PE install command for a windows host' do
       subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
-      expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'msiexec.exe /qn /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
+      expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
 
     it 'generates a unix PE install command for a unix host' do

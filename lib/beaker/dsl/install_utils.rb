@@ -144,7 +144,7 @@ module Beaker
         version = options[:pe_ver] || host['pe_ver']
         if host['platform'] =~ /windows/
           version = options[:pe_ver_win] || host['pe_ver']
-          "cd #{host['working_dir']} && cmd /C 'msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
