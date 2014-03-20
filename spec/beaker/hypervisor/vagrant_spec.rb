@@ -2,7 +2,8 @@ require 'spec_helper'
 
 module Beaker
   describe Vagrant do
-    let( :vagrant ) { Beaker::Vagrant.new( @hosts, make_opts ) }
+    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
+    let( :vagrant ) { Beaker::Vagrant.new( @hosts, options ) }
 
     before :each do
       @hosts = make_hosts()
@@ -61,7 +62,7 @@ module Beaker
 
         Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
 
-        vagrant.copy_ssh_to_root( host )
+        vagrant.copy_ssh_to_root( host, options )
 
       end
 
@@ -71,7 +72,7 @@ module Beaker
 
         Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /home/Administrator/.\"").once
 
-        vagrant.copy_ssh_to_root( host )
+        vagrant.copy_ssh_to_root( host, options )
 
       end
     end
@@ -140,7 +141,7 @@ module Beaker
         @hosts.each do |host|
           host_prev_name = host['user']
           vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).once
-          vagrant.should_receive( :copy_ssh_to_root ).with( host ).once
+          vagrant.should_receive( :copy_ssh_to_root ).with( host, options ).once
           vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
         end
         vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).once

@@ -29,7 +29,7 @@ module Beaker
         vcloud.stub( :sleep ).and_return( true )
         vcloud.provision
 
-        hosts = vcloud.instance_variable_get( :@vcloud_hosts )
+        hosts = vcloud.instance_variable_get( :@hosts )
         hosts.each do | host |
           name = host['vmhostname']
           vm = MockVsphereHelper.find_vm( name )
@@ -54,7 +54,7 @@ module Beaker
         vcloud.provision
         vcloud.cleanup
 
-        hosts = vcloud.instance_variable_get( :@vcloud_hosts )
+        hosts = vcloud.instance_variable_get( :@hosts )
         vm_names = hosts.map {|h| h['vmhostname'] }.compact
         vm_names.each do | name |
           vm = MockVsphereHelper.find_vm( name )

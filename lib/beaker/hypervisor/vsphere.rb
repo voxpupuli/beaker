@@ -6,7 +6,7 @@ module Beaker
     def initialize(vsphere_hosts, options)
       @options = options
       @logger = options[:logger]
-      @vsphere_hosts = vsphere_hosts
+      @hosts = vsphere_hosts
     end
 
     def provision
@@ -18,7 +18,7 @@ module Beaker
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
       vsphere_vms = {}
-      @vsphere_hosts.each do |h|
+      @hosts.each do |h|
         name = h["vmname"] || h.name
         vsphere_vms[name] = h["snapshot"]
       end
@@ -60,7 +60,7 @@ module Beaker
 
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
-      vm_names = @vsphere_hosts.map {|h| h['vmname'] || h.name }
+      vm_names = @hosts.map {|h| h['vmname'] || h.name }
       vms = vsphere_helper.find_vms vm_names
       vm_names.each do |name|
         unless vm = vms[name]

@@ -17,7 +17,7 @@ module Beaker
 
         vsphere.provision
 
-        hosts =  vsphere.instance_variable_get( :@vsphere_hosts )
+        hosts =  vsphere.instance_variable_get( :@hosts )
         hosts.each do |host|
           expect( MockVsphereHelper.find_vm( host.name ).powerState ) == "poweredOn"
         end
@@ -53,7 +53,7 @@ module Beaker
         vsphere = Beaker::Vsphere.new( make_hosts(), make_opts )
         vsphere.cleanup
 
-        hosts =  vsphere.instance_variable_get( :@vsphere_hosts )
+        hosts =  vsphere.instance_variable_get( :@hosts )
         hosts.each do |host|
           expect( MockVsphereHelper.find_vm( host.name ).powerState ) == "poweredOff"
         end

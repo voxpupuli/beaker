@@ -7,15 +7,17 @@
 end
 
 module Beaker
+  #Object that holds all the provisioned and non-provisioned virtual machines.
+  #Controls provisioning, configuration, validation and cleanup of those virtual machines.
   class NetworkManager
-    HYPERVISOR_TYPES = ['solaris', 'blimpy', 'vsphere', 'fusion', 'aix', 'vcloud', 'vagrant']
 
+    #Determine if a given host should be provisioned.
+    #Provision if:
+    # - only if we are running with ---provision
+    # - only if we have a hypervisor
+    # - only if either the specific hosts has no specification or has 'provision' in its config
+    # - always if it is a vagrant box (vagrant boxes are always provisioned as they always need ssh key hacking)
     def provision? options, host 
-      #provision this box
-      # - only if we are running with --provision
-      # - only if we have a hypervisor
-      # - only if either the specific hosts has no specification or has 'provision' in its config
-      # - always if it is a vagrant box (vagrant boxes are always provisioned as they always need ssh key hacking)
       command_line_says = options[:provision] 
       host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true) 
       (command_line_says && host_says) or (host['hypervisor'] =~/vagrant/)
@@ -25,55 +27,67 @@ module Beaker
       @logger = logger
       @options = options
       @hosts = []
-      @virtual_machines = {}
-      @noprovision_machines = []
+      @machines = {}
+      @hypervisors = nil
     end
 
+    #Provision all virtual machines.  Provision machines according to their set hypervisor, if no hypervisor
+    #is selected assume that the described hosts are already up and reachable and do no provisioning.
     def provision
-      #sort hosts into those to be provisioned and those to use non-provisioned
+      if @hypervisors
+        cleanup
+      end
+      @hypervisors = {}
+      #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified 
       @options['HOSTS'].each_key do |name|
         host = @options['HOSTS'][name]
-        hypervisor = host['hypervisor']
-        if provision?(@options, host)
-          raise "Invalid hypervisor: #{hypervisor} (#{name})" unless HYPERVISOR_TYPES.include? hypervisor
-          @logger.debug "Hypervisor for #{name} is #{hypervisor}"
-          @virtual_machines[hypervisor] = [] unless @virtual_machines[hypervisor]
-          @virtual_machines[hypervisor] << name
-        else #this is a non-provisioned machine, deal with it without hypervisors
-          @logger.debug "No hypervisor for #{name}, connecting to host without provisioning"
-          @noprovision_machines << name
-        end
+        hypervisor = host['hypervisor'] 
+        hypervisor = provision?(@options, host) ? host['hypervisor'] : 'none'
+        @logger.debug "Hypervisor for #{name} is #{hypervisor}"
+        @machines[hypervisor] = [] unless @machines[hypervisor]
+        @machines[hypervisor] << Beaker::Host.create(name, @options)
       end
 
-      @provisioned_set = {}
-      @virtual_machines.each do |type, names|
-        hosts_for_type = []
-        #set up host objects for provisioned provisioned_set
-        names.each do |name|
-          host = Beaker::Host.create(name, @options)
-          hosts_for_type << host
-        end
-        @provisioned_set[type] = Beaker::Hypervisor.create(type, hosts_for_type, @options)
-        @hosts << hosts_for_type
-      end
-      @noprovision_machines.each do |name|
-        @hosts << Beaker::Host.create(name, @options)
+      @machines.each_key do |type|
+        @hypervisors[type] = Beaker::Hypervisor.create(type, @machines[type], @options)
+        @hosts << @machines[type]
       end
       @hosts = @hosts.flatten
       @hosts
     end
 
+    #Validate all provisioned machines, ensure that required packages are installed - if they are missing
+    #attempt to add them.
+    #@raise [Exception] Raise an exception if virtual machines fail to be validated
+    def validate
+      if @hypervisors
+        @hypervisors.each_key do |type|
+          @hypervisors[type].validate
+        end
+      end
+    end
+
+    #Configure all provisioned machines, adding any packages or settings required for SUTs
+    #@raise [Exception] Raise an exception if virtual machines fail to be configured
+    def configure
+      if @hypervisors
+        @hypervisors.each_key do |type|
+          @hypervisors[type].configure
+        end
+      end
+    end
+
+    #Shut down network connections and revert all provisioned virtual machines
     def cleanup
       #shut down connections
       @hosts.each {|host| host.close }
 
-      if @provisioned_set
-        @provisioned_set.each_key do |type|
-          if @provisioned_set[type]
-            @provisioned_set[type].cleanup
-          end
+      if @hypervisors
+        @hypervisors.each_key do |type|
+          @hypervisors[type].cleanup
         end
       end
+      @hypervisors = nil
     end
 
   end
