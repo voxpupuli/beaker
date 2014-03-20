@@ -21,6 +21,21 @@ module Beaker
       expect{ fusion.provision }.to raise_error
     end
 
+    it 'raises an error if snapshots is nil' do
+      MockFissionVM.set_snapshots(nil)
+      expect{ fusion.provision }.to raise_error(/No snapshots available/)
+    end
+
+    it 'raises an error if snapshots are empty' do
+      MockFissionVM.set_snapshots([])
+      expect{ fusion.provision }.to raise_error(/No snapshots available/)
+    end
+
+    it 'host fails init with nil snapshot' do
+      @hosts[0][:snapshot] = nil
+      expect{ Beaker::Fusion.new( @hosts, make_opts) }.to raise_error(/specify a snapshot/)
+    end
+
   end
 
 end
