@@ -37,6 +37,7 @@ RSpec.configure do |c|
   c.setup([fresh_nodes, '--hosts', nodesetfile, keyfile, debug].flatten.compact)
   c.provision
   c.validate
+  c.configure
 
   # Destroy nodes if no preserve hosts
   c.after :suite do
