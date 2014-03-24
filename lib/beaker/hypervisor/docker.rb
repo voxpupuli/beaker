@@ -13,6 +13,8 @@ module Beaker
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
       ::Docker.validate_version!
+      # Pass on all the logging from docker-api to the beaker logger instance
+      ::Docker.logger = @logger
     end
 
     def provision
