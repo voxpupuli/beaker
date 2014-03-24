@@ -29,10 +29,18 @@ module BeakerRSpec
       RSpec.configuration.hosts = @network_manager.provision
     end
 
-    # Validate that the SUTs are up and correctly configured
+    # Validate that the SUTs are up and correctly configured.  Checks that required
+    # packages are installed and if they are missing attempt installation.
     # Assumes #setup and #provision has already been called.
     def validate
-      Beaker::Utils::Validator.validate(RSpec.configuration.hosts, @logger)
+      @network_manager.validate
+    end
+
+    # Run configuration steps to have hosts ready to test on (such as ensuring that 
+    # hosts are correctly time synched, adding keys, etc).
+    # Assumes #setup, #provision and #validate have already been called.
+    def configure
+      @network_manager.configure
     end
 
     # Setup the testing environment
