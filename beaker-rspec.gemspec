@@ -6,7 +6,7 @@ less_than_one_nine = ruby_conf['MAJOR'].to_i == 1 && ruby_conf['MINOR'].to_i < 9
 
 Gem::Specification.new do |s|
   s.name        = "beaker-rspec"
-  s.version     = '2.2.0'
+  s.version     = '2.2.1'
   s.authors     = ["Puppetlabs"]
   s.email       = ["sqa@puppetlabs.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker-rspec"
@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'thin'
 
   # Run time dependencies
-  s.add_runtime_dependency 'beaker', '~> 1.3'
+  s.add_runtime_dependency 'beaker', '~> 1.8.2'
   s.add_runtime_dependency 'rspec', '~> 2.14'
   s.add_runtime_dependency 'serverspec', '~> 0.14'
   s.add_runtime_dependency 'specinfra', '~> 0.3'
