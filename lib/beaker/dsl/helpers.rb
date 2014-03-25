@@ -983,6 +983,23 @@ module Beaker
         fact_on(default, name, opts)
       end
 
+      #Run a curl command on the provided host(s)
+      #
+      # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
+      # @param [String, Command]   cmd The curl command to execute on *host*.
+      # @param [Proc]              block   Additional actions or assertions.
+      # @!macro common_opts
+      #
+      def curl_on(host, cmd, opts = {}, &block)
+        if options.is_pe? #check global options hash
+          on host, "curl --sslv3 %s" % cmd, opts, &block
+        else
+          on host, "curl %s" % cmd, opts, &block
+        end
+      end
+
+
     end
   end
 end
