@@ -22,7 +22,7 @@ module Beaker
         @logger.notify "provisioning #{host.name}"
 
         @logger.debug("Creating image")
-        image = ::Docker::Image.build(dockerfile_for(host))
+        image = ::Docker::Image.build(dockerfile_for(host), { :rm => true })
         @logger.debug("Tagging image #{image.id} as #{host.name}")
         image.tag({
           :repo => host.name,
