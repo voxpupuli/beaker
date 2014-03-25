@@ -61,14 +61,26 @@ module Beaker
       @hosts.each do |host|
         if container = host['docker_container']
           @logger.debug("stop container #{container.id}")
-          container.stop
+          begin
+            container.stop
+          rescue Excon::Errors::ClientError => e
+            @logger.warn("stop of container #{container.id} failed: #{e.response.body}")
+          end
           @logger.debug("delete container #{container.id}")
-          container.delete
+          begin
+            container.delete
+          rescue Excon::Errors::ClientError => e
+            @logger.warn("deletion of container #{container.id} failed: #{e.response.body}")
+          end
         end
 
         if image = host['docker_image']
           @logger.debug("delete image #{image.id}")
-          image.delete
+          begin
+            image.delete
+          rescue Excon::Errors::ClientError => e
+            @logger.warn("deletion of image #{image.id} failed: #{e.response.body}")
+          end
         end
       end
     end
