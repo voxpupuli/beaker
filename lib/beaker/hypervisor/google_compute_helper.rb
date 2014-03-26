@@ -5,7 +5,7 @@ require 'ostruct'
 
 module Beaker
   #Beaker helper module for doing API level Google Compute Engine interaction.
-  class GoogleComputeHelper 
+  class GoogleComputeHelper
 
     class GoogleComputeError < StandardError
     end
@@ -50,13 +50,13 @@ module Beaker
     #Determines the default Google Compute zone based upon options and defaults
     #@return The full URL to the default zone in which Google Compute requests will be sent
     def default_zone
-      BASE_URL + @options[:gce_project] + '/global/zones/' + DEFAULT_ZONE_NAME 
+      BASE_URL + @options[:gce_project] + '/global/zones/' + DEFAULT_ZONE_NAME
     end
 
     #Determines the default Google Compute network based upon defaults and options
     #@return The full URL to the default network in which Google Compute instances will operate
     def default_network
-      BASE_URL + @options[:gce_project] + '/global/networks/default' 
+      BASE_URL + @options[:gce_project] + '/global/networks/default'
     end
 
     #Determines the Google Compute project which contains bases instances of type name
@@ -94,7 +94,7 @@ module Beaker
           return
         rescue => e
           @logger.debug("Failed to discover Google Compute API")
-          if try >= attempts 
+          if try >= attempts
             raise e
           end
         end
@@ -125,7 +125,7 @@ module Beaker
           return
         rescue => e
           @logger.debug("Failed to authorize to use Google Compute")
-          if try >= attempts 
+          if try >= attempts
             raise e
           end
         end
@@ -158,7 +158,7 @@ module Beaker
           end
           return parsed
         #retry errors
-        rescue Faraday::Error::ConnectionFailed => e  
+        rescue Faraday::Error::ConnectionFailed => e 
           @logger.debug "ConnectionFailed attempting Google Compute execute command"
           try += 1
           last_error = e
@@ -181,7 +181,7 @@ module Beaker
       #break up my platform for information
       platform_name, platform_version, platform_extra_info = platform.split('-', 3)
       #find latest image to use
-      result = execute( image_list_req(get_platform_project(platform_name)), start, attempts ) 
+      result = execute( image_list_req(get_platform_project(platform_name)), start, attempts )
       images = result["items"]
       #reject images of the wrong version of the given platform
       images.delete_if { |image| image['name'] !~ /^#{platform_name}-#{platform_version}/}
@@ -214,7 +214,7 @@ module Beaker
       execute( network_get_req, start, attempts)
     end
 
-    #Determines a list of existing Google Compute instances 
+    #Determines a list of existing Google Compute instances
     #@param [Integer] start The time when we started code execution, it is compared to Time.now to determine how many
     #                       further code execution attempts remain
     #@param [Integer] attempts The total amount of attempts to execute that we are willing to allow
@@ -225,7 +225,7 @@ module Beaker
       instances["items"]
     end
 
-    #Determines a list of existing Google Compute disks 
+    #Determines a list of existing Google Compute disks
     #@param [Integer] start The time when we started code execution, it is compared to Time.now to determine how many
     #                       further code execution attempts remain
     #@param [Integer] attempts The total amount of attempts to execute that we are willing to allow
@@ -292,7 +292,7 @@ module Beaker
     #Create a Google Compute instance on the current connection
     #@param [String] name The name of the instance to create
     #@param [Hash] img The Google Compute image to use for instance creation
-    #@param [Hash] machineType The Google Compute machineType 
+    #@param [Hash] machineType The Google Compute machineType
     #@param [Hash] disk The Google Compute disk to attach to the newly created instance
     #@param [Integer] start The time when we started code execution, it is compared to Time.now to determine how many
     #                       further code execution attempts remain
@@ -319,6 +319,34 @@ module Beaker
       instance
     end
 
+    #Add key/value pairs to a  Google Compute instance on the current connection
+    #@param [String] name The name of the instance to add metadata to
+    #@param [String] fingerprint A hash of the metadata's contents of the given instance
+    #@param [Array<Hash>] data An array of hashes.  Each hash should have a key and a value.
+    #@param [Integer] start The time when we started code execution, it is compared to Time.now to determine how many
+    #                       further code execution attempts remain
+    #@param [Integer] attempts The total amount of attempts to execute that we are willing to allow
+    #@raise [Exception] Raised if we fail to add metadata, either through errors or running out of attempts
+    def setMetadata_on_instance(name, fingerprint, data, start, attempts)
+      zone_operation = execute( instance_setMetadata_req( name, fingerprint, data), start, attempts )
+      status = ''
+      try = (Time.now - start) / SLEEPWAIT
+      while status !~ /DONE/ and try <= attempts
+        begin
+          operation = execute( operation_get_req( zone_operation['name'] ), start, attempts )
+          status = operation['status']
+        rescue GoogleComputeError => e
+          @logger.debug("Waiting for tags to be added to #{name}")
+          sleep(SLEEPWAIT)
+        end
+        try += 1
+      end
+      if status == ''
+        raise "Unable to set metaData (#{tags.to_s}) on #{name}"
+      end
+      zone_operation
+    end
+
     #Delete a Google Compute instance on the current connection
     #@param [String] name The name of the instance to delete
     #@param [Integer] start The time when we started code execution, it is compared to Time.now to determine how many
@@ -331,7 +359,7 @@ module Beaker
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          result = execute( instance_get_req( name ), start, attempts ) 
+          result = execute( instance_get_req( name ), start, attempts )
           @logger.debug("Waiting for #{name} instance deletion")
           sleep(SLEEPWAIT)
         rescue GoogleComputeError => e
@@ -355,7 +383,7 @@ module Beaker
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          disk = execute( disk_get_req( name ), start, attempts ) 
+          disk = execute( disk_get_req( name ), start, attempts )
           @logger.debug("Waiting for #{name} disk deletion")
           sleep(SLEEPWAIT)
         rescue GoogleComputeError => e
@@ -379,7 +407,7 @@ module Beaker
       try = (Time.now - start) / SLEEPWAIT
       while try <= attempts
         begin
-          firewall = execute( firewall_get_req( name ), start, attempts ) 
+          firewall = execute( firewall_get_req( name ), start, attempts )
           @logger.debug("Waiting for #{name} firewall deletion")
           sleep(SLEEPWAIT)
         rescue GoogleComputeError => e
@@ -391,18 +419,19 @@ module Beaker
       @logger.debug("#{name} firewall was not removed before timeout, may still exist")
     end
 
+
     #Create a Google Compute list all images request
     #@param [String] name The Google Compute project name to query
     #@return [Hash] A correctly formatted Google Compute request hash
     def image_list_req(name)
-      { :api_method  => @compute.images.list, 
+      { :api_method  => @compute.images.list,
         :parameters  => { 'project' => name } }
     end
 
     #Create a Google Compute list all disks request
     #@return [Hash] A correctly formatted Google Compute request hash
     def disk_list_req
-      { :api_method  => @compute.disks.list, 
+      { :api_method  => @compute.disks.list,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME } }
     end
 
@@ -410,7 +439,7 @@ module Beaker
     #@param [String] name The name of the disk to query for
     #@return [Hash] A correctly formatted Google Compute request hash
     def disk_get_req(name)
-      { :api_method  => @compute.disks.get, 
+      { :api_method  => @compute.disks.get,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'disk' => name } }
     end
 
@@ -418,7 +447,7 @@ module Beaker
     #@param [String] name The name of the disk delete
     #@return [Hash] A correctly formatted Google Compute request hash
     def disk_delete_req(name)
-      { :api_method  => @compute.disks.delete, 
+      { :api_method  => @compute.disks.delete,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'disk' => name } }
     end
 
@@ -427,8 +456,8 @@ module Beaker
     #@param [String] source The link to a Google Compute image to base the disk creation on
     #@return [Hash] A correctly formatted Google Compute request hash
     def disk_insert_req(name, source)
-      { :api_method  => @compute.disks.insert, 
-        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'sourceImage' => source }, 
+      { :api_method  => @compute.disks.insert,
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'sourceImage' => source },
         :body_object => { 'name' => name, 'sizeGb' => DEFAULT_DISK_SIZE } }
     end
 
@@ -436,7 +465,7 @@ module Beaker
     #@param [String] name The name of the firewall to query fo
     #@return [Hash] A correctly formatted Google Compute request hash
     def firewall_get_req(name)
-      { :api_method  => @compute.firewalls.get, 
+      { :api_method  => @compute.firewalls.get,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'firewall' => name } }
     end
 
@@ -445,9 +474,9 @@ module Beaker
     #@param [String] network The link to the Google Compute network to attach this firewall to
     #@return [Hash] A correctly formatted Google Compute request hash
     def firewall_insert_req(name, network)
-      { :api_method  => @compute.firewalls.insert, 
-        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME }, 
-        :body_object => { 'name' => name, 
+      { :api_method  => @compute.firewalls.insert,
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME },
+        :body_object => { 'name' => name,
                           'allowed'=> [ { 'IPProtocol' => 'tcp', "ports" =>  [ '443', '8140', '61613' ]} ],
                           'network'=> network,
                           'sourceRanges' => [ "0.0.0.0/0" ] } }
@@ -457,14 +486,14 @@ module Beaker
     #@param [String] name The name of the firewall to delete
     #@return [Hash] A correctly formatted Google Compute request hash
     def firewall_delete_req(name)
-      { :api_method  => @compute.firewalls.delete, 
+      { :api_method  => @compute.firewalls.delete,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'firewall' => name } }
     end
 
     #Create a Google Compute list firewall request
     #@return [Hash] A correctly formatted Google Compute request hash
     def firewall_list_req()
-      { :api_method  => @compute.firewalls.list, 
+      { :api_method  => @compute.firewalls.list,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME } }
     end
 
@@ -472,14 +501,33 @@ module Beaker
     #@param [String] name (default) The name of the network to access information about
     #@return [Hash] A correctly formatted Google Compute request hash
     def network_get_req(name = 'default')
-      { :api_method  => @compute.networks.get, 
+      { :api_method  => @compute.networks.get,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'network' => name } }
+    end
+
+    #Create a Google Compute zone operation request
+    #@return [Hash] A correctly formatted Google Compute request hash
+    def operation_get_req(name)
+      { :api_method  => @compute.zone_operations.get,
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'operation' => name } }
+    end
+
+    #Set tags on a Google Compute instance
+    #@param [Array<String>] tags An array of tags to be added to an instance
+    #@return [Hash] A correctly formatted Google Compute request hash
+    def instance_setMetadata_req(name, fingerprint, data)
+      { :api_method => @compute.instances.set_metadata,
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'instance' => name },
+        :body_object => { 'kind' => 'compute#metadata',
+                          'fingerprint'  => fingerprint,
+                          'items' => data }
+      }
     end
 
     #Create a Google Compute list instance request
     #@return [Hash] A correctly formatted Google Compute request hash
     def instance_list_req
-      { :api_method  => @compute.instances.list, 
+      { :api_method  => @compute.instances.list,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME } }
     end
 
@@ -487,7 +535,7 @@ module Beaker
     #@param [String] name The name of the instance to query for
     #@return [Hash] A correctly formatted Google Compute request hash
     def instance_get_req(name)
-      { :api_method  => @compute.instances.get, 
+      { :api_method  => @compute.instances.get,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'instance' => name } }
     end
 
@@ -495,7 +543,7 @@ module Beaker
     #@param [String] name The name of the instance to delete
     #@return [Hash] A correctly formatted Google Compute request hash
     def instance_delete_req(name)
-      { :api_method  => @compute.instances.delete, 
+      { :api_method  => @compute.instances.delete,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'instance' => name } }
     end
 
@@ -506,22 +554,22 @@ module Beaker
     #@param [String] disk The link to the disk to be used by the newly created instance
     #@return [Hash] A correctly formatted Google Compute request hash
     def instance_insert_req(name, image, machineType, disk)
-      { :api_method  => @compute.instances.insert, 
-        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME }, 
-        :body_object => { 'name' => name, 
-                          'image' => image, 
-                          'zone' => default_zone, 
-                          'machineType' => machineType, 
-                          'disks' => [ { 'source' => disk, 
-                                         'type' => 'PERSISTENT', 'boot' => 'true'} ], 
-                                         'networkInterfaces' => [ { 'accessConfigs' => [{ 'type' => 'ONE_TO_ONE_NAT', 'name' => 'External NAT' }], 
+      { :api_method  => @compute.instances.insert,
+        :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME },
+        :body_object => { 'name' => name,
+                          'image' => image,
+                          'zone' => default_zone,
+                          'machineType' => machineType,
+                          'disks' => [ { 'source' => disk,
+                                         'type' => 'PERSISTENT', 'boot' => 'true'} ],
+                                         'networkInterfaces' => [ { 'accessConfigs' => [{ 'type' => 'ONE_TO_ONE_NAT', 'name' => 'External NAT' }],
                                                                     'network' => default_network } ] } }
     end
 
     #Create a Google Compute machineType get request
     #@return [Hash] A correctly formatted Google Compute request hash
     def machineType_get_req()
-      { :api_method => @compute.machine_types.get, 
+      { :api_method => @compute.machine_types.get,
         :parameters => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME, 'machineType' => @options[:gce_machine_type] || DEFAULT_MACHINE_TYPE } }
     end
 

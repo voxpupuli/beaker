@@ -54,6 +54,7 @@ module Beaker
             ship.flavor = amisize
             ship.region = ami[:region]
             ship.username = 'root'
+            ship.tags = {:department => @options[:department], :project => @options[:project]}
           end
           @logger.debug "Added #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type} to blimpy fleet"
         end

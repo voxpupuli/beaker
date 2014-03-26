@@ -1,6 +1,6 @@
 require 'yaml' unless defined?(YAML)
 
-module Beaker 
+module Beaker
   class Vcloud < Beaker::Hypervisor
 
     def initialize(vcloud_hosts, options)
@@ -57,7 +57,9 @@ module Beaker
         :annotation =>
           'Base template:  ' + host['template'] + "\n" +
           'Creation time:  ' + Time.now.strftime("%Y-%m-%d %H:%M") + "\n\n" +
-          'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' )
+          'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' ) +
+          'department:     ' + @options[:department] +
+          'project:        ' + @options[:project]
       )
 
       # Are we using a customization spec?
@@ -90,44 +92,44 @@ module Beaker
       connect_to_vsphere
       begin
         vsphere_vms = {}
-  
+
         try = 1
         attempts = @options[:timeout].to_i / 5
-  
+
         start = Time.now
         tasks = []
         @hosts.each_with_index do |h, i|
           # Generate a randomized hostname
           h['vmhostname'] = generate_host_name
-  
+
           if h['template'] =~ /\//
             templatefolders = h['template'].split('/')
             h['template'] = templatefolders.pop
           end
-  
+
           @logger.notify "Deploying #{h['vmhostname']} (#{h.name}) to #{@options['folder']} from template '#{h['template']}'"
-  
+
           vm = {}
-  
+
           if templatefolders
             vm[h['template']] = @vsphere_helper.find_folder(templatefolders.join('/')).find(h['template'])
           else
             vm = @vsphere_helper.find_vms(h['template'])
           end
-  
+
           if vm.length == 0
             raise "Unable to find template '#{h['template']}'!"
           end
-  
+
           spec = create_clone_spec(h)
-  
+
           # Deploy from specified template
           tasks << vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )
         end
         try = (Time.now - start) / 5
         @vsphere_helper.wait_for_tasks(tasks, try, attempts)
         @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
-  
+
         try = (Time.now - start) / 5
         duration = run_and_report_duration do 
           @hosts.each_with_index do |h, i|
@@ -135,7 +137,7 @@ module Beaker
           end
         end
         @logger.notify "Spent %.2f seconds booting and waiting for vSphere registration" % duration
-  
+
         try = (Time.now - start) / 5
         duration = run_and_report_duration do
           @hosts.each_with_index do |h, i|
@@ -144,7 +146,7 @@ module Beaker
         end
         @logger.notify "Spent %.2f seconds waiting for DNS resolution" % duration
       rescue => e
-        @vsphere_helper.close 
+        @vsphere_helper.close
         report_and_raise(@logger, e, "Vcloud.provision")
       end
     end
@@ -158,7 +160,7 @@ module Beaker
         @logger.warn "Some hosts did not have vmhostname set correctly! This likely means VM provisioning was not successful"
       end
       vms = @vsphere_helper.find_vms vm_names
-      begin 
+      begin
         vm_names.each do |name|
           unless vm = vms[name]
             @logger.warn "Unable to cleanup #{name}, couldn't find VM #{name} in vSphere!"
@@ -173,7 +175,7 @@ module Beaker
             @logger.notify "Spent %.2f seconds halting #{vm.name}" % duration
           end
 
-          duration = run_and_report_duration do 
+          duration = run_and_report_duration do
             vm.Destroy_Task
           end
           @logger.notify "Spent %.2f seconds destroying #{vm.name}" % duration

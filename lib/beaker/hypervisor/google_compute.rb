@@ -55,6 +55,12 @@ module Beaker
         #add a new instance of the image
         instance = @gce_helper.create_instance(host['vmhostname'], img, machineType, disk, start, attempts)
         @logger.debug("Created Google Compute instance for #{host.name}: #{host['vmhostname']}")
+        #add metadata to instance
+        @gce_helper.setMetadata_on_instance(host['vmhostname'], instance['metadata']['fingerprint'],
+                                            [ {:key => :department, :value => @options[:department]}, 
+                                              {:key => :project, :value => @options[:project]} ], 
+                                            start, attempts)
+        @logger.debug("Added tags to Google Compute instance #{host.name}: #{host['vmhostname']}")
 
         #get ip for this host
         host['ip'] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
