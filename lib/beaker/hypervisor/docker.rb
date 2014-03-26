@@ -131,7 +131,7 @@ module Beaker
 
       # Make sshd directory, set root password
       dockerfile += <<-EOF
-        RUN mkdir /var/run/sshd
+        RUN mkdir -p /var/run/sshd
         RUN echo root:#{root_password} | chpasswd
       EOF
 
