@@ -71,8 +71,9 @@ module Beaker
     end
 
     #Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
-    #install them.  Verifies the presence of {HostPrebuiltSteps::PACKAGES} on all hosts and 
-    #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts.
+    #install them.  Verifies the presence of {HostPrebuiltSteps::PACKAGES} on all hosts, 
+    #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts and {HostPrebuiltSteps::SLES_PACKAGES}
+    #on sles (SUSE, Enterprise Linux) hosts.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -93,7 +94,6 @@ module Beaker
                 host.install_package pkg
               end
             end
-
           when host['platform'] !~ /(windows)|(aix)|(solaris)/
             UNIX_PACKAGES.each do |pkg|
               if not host.check_for_package pkg
@@ -326,7 +326,81 @@ module Beaker
         if host['platform'] =~ /windows/
           host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
         else
-          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'))
+          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
+        end
+      end
+    end
+
+    #Update /etc/hosts to make it possible for each provided host to reach each other host by name.
+    #Assumes that each provided host has host[:ip] set.
+    # @param [Host, Array<Host>, String, Symbol] hosts An array of hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def hack_etc_hosts hosts, opts
+      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
+      hosts.each do |host|
+        etc_hosts += "#{host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
+      end
+      hosts.each do |host|
+        set_etc_hosts(host, etc_hosts)
+      end
+    end
+
+    #Update sshd_config on debian, ubuntu, centos, el, redhat and fedora boxes to allow for root login, does nothing on other platfoms
+    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def enable_root_login host, opts
+      logger = opts[:logger]
+      if host.is_a? Array
+        host.map { |h| copy_ssh_to_root(h, opts) }
+      else
+        logger.debug "Update /etc/ssh/sshd_config to allow root login"
+        host.exec(Command.new("sudo su -c \"sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
+  )
+        #restart sshd
+        if host['platform'] =~ /debian|ubuntu/
+          host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
+        elsif host['platform'] =~ /centos|el-|redhat|fedora/
+          host.exec(Command.new("sudo su -c \"service sshd restart\""), {:pty => true})
+        else
+          @logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
+        end
+      end
+    end
+
+    #Disable SELinux on centos, does nothing on other platforms
+    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def disable_se_linux host, opts
+      logger = opts[:logger]
+      if host.is_a? Array
+        host.map { |h| copy_ssh_to_root(h, opts) }
+      else
+        if host['platform'] =~ /centos/
+          @logger.debug("Disabling se_linux on #{host.name}")
+          host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
+        else
+          @logger.warn("Attempting to disable SELinux on non-centos platform: #{host.name}: #{host['platform']}")
+        end
+      end
+    end
+
+    #Disable iptables on centos, does nothing on other platforms
+    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def disable_iptables host, opts
+      logger = opts[:logger]
+      if host.is_a? Array
+        host.map { |h| copy_ssh_to_root(h, opts) }
+      else
+        if host['platform'] =~ /centos/
+          logger.debug("Disabling iptables on #{host.name}")
+          host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
+        else
+          logger.warn("Attempting to disable iptables on non-centos platform: #{host.name}: #{host['platform']}")
         end
       end
     end

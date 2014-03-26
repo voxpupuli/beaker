@@ -53,7 +53,11 @@ module HostHelpers
                                                :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
                                                :datastore => 'instance0',
                                                :folder => 'Delivery/Quality Assurance/Staging/Dynamic',
-                                               :resourcepool => 'delivery/Quality Assurance/Staging/Dynamic' } )
+                                               :resourcepool => 'delivery/Quality Assurance/Staging/Dynamic',
+                                               :gce_project => 'beaker-compute',
+                                               :gce_keyfile => '/path/to/keyfile.p12',
+                                               :gce_password => 'notasecret',
+                                               :gce_email => '12345678910@developer.gserviceaccount.com' } )
   end
 
   def generate_result (name, opts )

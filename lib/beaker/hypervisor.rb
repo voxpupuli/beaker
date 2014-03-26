@@ -11,6 +11,9 @@ module Beaker
   class Hypervisor
     include HostPrebuiltSteps
 
+    #Generates an array with all letters a thru z and numbers 0 thru 9
+    CHARMAP = ('a'..'z').to_a + ('0'..'9').to_a
+
     #Hypervisor creator method.  Creates the appropriate hypervisor class object based upon
     #the provided hypervisor type selected, then provisions hosts with hypervisor.
     #@param [String] type The type of hypervisor to create - one of aix, solaris, vsphere, fusion,
@@ -39,6 +42,8 @@ module Beaker
           end
         when /vagrant/
           Beaker::Vagrant
+        when /google/
+          Beaker::GoogleCompute
         when /none/
           Beaker::Hypervisor
         else
@@ -80,17 +85,22 @@ module Beaker
       if @options[:add_master_entry]
         add_master_entry(@hosts, @options)
       end
-   end
+    end
 
-   #Default validation steps to be run for a given hypervisor
-   def validate
-     validate_host(@hosts, @options)
-   end
+    #Default validation steps to be run for a given hypervisor
+    def validate
+      validate_host(@hosts, @options)
+    end
+
+    #Generate a random straing composted of letter and numbers
+    def generate_host_name
+      CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
+    end
 
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris).each do |lib|
+%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris google_compute_helper google_compute).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError
