@@ -137,7 +137,7 @@ module Beaker
       # Any extra_commands specified for the host
       dockerfile += (host['extra_commands'] || []).map { |command|
         "RUN #{command}\n"
-      }.join("\n")
+      }.join('')
 
       # How to start a sshd on port 22.  May be an init for more supervision
       cmd = host['docker_cmd'] || "/usr/sbin/sshd -D #{sshd_options}"
