@@ -154,7 +154,7 @@ module Beaker
         end
       end
 
-      #Determine is a given URL is accessible 
+      #Determine is a given URL is accessible
       #@param [String] link The URL to examine
       #@return [Boolean] true if the URL has a '200' HTTP response code, false otherwise
       #@example
@@ -172,11 +172,77 @@ module Beaker
         end
       end
 
-      #Determine the PE package to download/upload per-host, download/upload that package onto the host 
-      #and unpack it.
-      # @param [Array<Host>] hosts The hosts to download/upload and unpack PE onto 
+      #Determine the PE package to download/upload on a windows host, download/upload that package onto the host.
+      # @param [Host] host The windows host to download/upload and unpack PE onto
       # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from 
+      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      #                  (Otherwise uses individual hosts pe_dir)
+      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      #                  (Otherwise uses individual hosts pe_ver)
+      # @option options [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
+      #                  (Otherwise uses individual Windows hosts pe_ver)
+      # @api private
+      def fetch_puppet_on_windows(host, options)
+        path = options[:pe_dir] || host['pe_dir']
+        local = File.directory?(path)
+        version = options[:pe_ver_win] || host['pe_ver']
+        filename = "puppet-enterprise-#{version}"
+        extension = ".msi"
+        if local
+          if not File.exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
+        else
+          if not link_exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+        end
+      end
+
+      #Determine the PE package to download/upload on a unix style host, download/upload that package onto the host
+      #and unpack it.
+      # @param [Host] host The unix style host to download/upload and unpack PE onto
+      # @param  [Hash{Symbol=>Symbol, String}] options The options
+      # @option options [String] :pe_dir Default directory or URL to pull PE package from
+      #                  (Otherwise uses individual hosts pe_dir)
+      # @option options [String] :pe_ver Default PE version to install or upgrade to
+      #                  (Otherwise uses individual hosts pe_ver)
+      # @api private
+      def fetch_puppet_on_unix(host, options)
+        path = options[:pe_dir] || host['pe_dir']
+        local = File.directory?(path)
+        filename = "#{host['dist']}"
+        if local
+          extension = File.exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
+          if not File.exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
+          if extension =~ /gz/
+            on host, "cd #{host['working_dir']}; gunzip #{filename}#{extension}"
+          end
+          if extension =~ /tar/
+            on host, "cd #{host['working_dir']}; tar -xvf #{filename}.tar"
+          end
+        else
+          extension = link_exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
+          if not link_exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          unpack = 'tar -xvf -'
+          unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack
+
+          on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} | #{unpack}"
+        end
+      end
+
+      #Determine the PE package to download/upload per-host, download/upload that package onto the host
+      #and unpack it.
+      # @param [Array<Host>] hosts The hosts to download/upload and unpack PE onto
+      # @param  [Hash{Symbol=>Symbol, String}] options The options
+      # @option options [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
       # @option options [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
@@ -189,51 +255,10 @@ module Beaker
           next if host['roles'].include? 'frictionless' and ! version_is_less(options[:pe_ver] || host['pe_ver'], '3.2.0')
 
           windows = host['platform'] =~ /windows/
-          path = options[:pe_dir] || host['pe_dir']
-          local = File.directory?(path)
-          filename = ""
-          extension = ""
           if windows
-            version = options[:pe_ver_win] || host['pe_ver']
-            filename = "puppet-enterprise-#{version}"
-            extension = ".msi"
+            fetch_puppet_on_windows(host, options)
           else
-            filename = "#{host['dist']}"
-            extension = ""
-            if local
-              extension = File.exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
-            else
-              extension = link_exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
-            end
-          end
-          if local
-            if not File.exists?("#{path}/#{filename}#{extension}")
-              raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
-            end
-            scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
-            if extension =~ /gz/
-              on host, "cd #{host['working_dir']}; gunzip #{filename}#{extension}"
-            end
-            if extension =~ /tar/
-              on host, "cd #{host['working_dir']}; tar -xvf #{filename}.tar"
-            end
-          else
-            if not link_exists?("#{path}/#{filename}#{extension}")
-              raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
-            end
-            gunzip = ""
-            untar = ""
-            save_locally = ""
-            if extension =~ /gz/
-              gunzip = "| gunzip"
-            end
-            if extension =~ /tar/
-              untar = "| tar -xvf -"
-            end
-            if extension =~ /msi/
-              save_locally = "-O"
-            end
-            on host, "cd #{host['working_dir']}; curl #{save_locally} #{path}/#{filename}#{extension} #{gunzip} #{untar}"
+            fetch_puppet_on_unix(host, options)
           end
         end
       end
@@ -250,9 +275,9 @@ module Beaker
       end
 
       #Perform a Puppet Enterprise upgrade or install
-      # @param [Array<Host>] hosts The hosts to install or upgrade PE on 
+      # @param [Array<Host>] hosts The hosts to install or upgrade PE on
       # @param  [Hash{Symbol=>Symbol, String}] options The options
-      # @option options [String] :pe_dir Default directory or URL to pull PE package from 
+      # @option options [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
       # @option options [String] :pe_ver Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
@@ -260,14 +285,13 @@ module Beaker
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @option options [Symbol] :type (:install) One of :upgrade or :install
       #
-      #                      
-      # @example 
+      # @example
       #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
       #
       # @api private
       #
       def do_install hosts, options = {}
-        options[:type] = options[:type] || :install 
+        options[:type] = options[:type] || :install
         hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
         master_certname = on(master, hostcert).stdout.strip
         pre30database = version_is_less(options[:pe_ver] || database['pe_ver'], '3.0')
@@ -335,7 +359,7 @@ module Beaker
           if host['pe_ver'] == '3.0.0' and host == database
             sleep_until_puppetdb_started(database)
           end
-        end 
+        end
 
         install_hosts.each do |host|
           wait_for_host_in_dashboard(host)
@@ -365,7 +389,7 @@ module Beaker
         b_nums = b.split('-')[0].split('.')
         (0...a_nums.length).each do |i|
           if i < b_nums.length
-            if a_nums[i] < b_nums[i] 
+            if a_nums[i] < b_nums[i]
               return true
             elsif a_nums[i] > b_nums[i]
               return false
@@ -377,7 +401,7 @@ module Beaker
         #checks all dots, they are equal so examine the rest
         a_rest = a.split('-', 2)[1]
         b_rest = b.split('-', 2)[1]
-        if a_rest and b_rest and a_rest < b_rest 
+        if a_rest and b_rest and a_rest < b_rest
           return false
         elsif a_rest and not b_rest
           return false
@@ -388,7 +412,7 @@ module Beaker
       end
 
       #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
-      # @example 
+      # @example
       #  h = sorted_hosts
       #
       # @note Order for installation should be
@@ -440,7 +464,7 @@ module Beaker
       end
 
       #Install PE based upon host configuration and options
-      # @example 
+      # @example
       #  install_pe
       #
       # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
@@ -448,23 +472,23 @@ module Beaker
       #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
       #
       # @api dsl
-      def install_pe 
+      def install_pe
         #process the version files if necessary
         hosts.each do |host|
           host['pe_dir'] ||= options[:pe_dir]
           if host['platform'] =~ /windows/
             host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir], options[:pe_version_file_win])
+              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file_win])
           else
             host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir], options[:pe_version_file])
+              Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
           end
         end
         do_install sorted_hosts
       end
 
       #Upgrade PE based upon host configuration and options
-      # @param [String] path A path (either local directory or a URL to a listing of PE builds). 
+      # @param [String] path A path (either local directory or a URL to a listing of PE builds).
       #                      Will contain a LATEST file indicating the latest build to install.
       #                      This is ignored if a pe_upgrade_ver and pe_upgrade_dir are specified
       #                      in the host configuration file.
