@@ -144,7 +144,7 @@ module Beaker
           vagrant.should_receive( :copy_ssh_to_root ).with( host, options ).once
           vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
         end
-        vagrant.should_receive( :hack_etc_hosts ).with( @hosts ).once
+        vagrant.should_receive( :hack_etc_hosts ).with( @hosts, options ).once
       end
 
       it "can provision a set of hosts" do
