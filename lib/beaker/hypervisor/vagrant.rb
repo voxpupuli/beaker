@@ -119,7 +119,7 @@ module Beaker
         set_ssh_config host, default_user
       end
 
-      hack_etc_hosts @hosts
+      hack_etc_hosts @hosts, @options
 
     end
 
