@@ -45,7 +45,8 @@ module Beaker
 
 
       @hosts.each do |host|
-        img = @gce_helper.get_latest_image(host[:platform], start, attempts)
+        gplatform = Platform.new(host[:image] || host[:platform])
+        img = @gce_helper.get_latest_image(gplatform, start, attempts)
         host['diskname'] = generate_host_name
         disk = @gce_helper.create_disk(host['diskname'], img, start, attempts)
         @logger.debug("Created Google Compute disk for #{host.name}: #{host['diskname']}")
