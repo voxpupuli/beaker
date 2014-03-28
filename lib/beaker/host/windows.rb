@@ -28,6 +28,8 @@ module Windows
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
         #if an x86 Program Files dir exists then use it, default to just Program Files
         'puppetbindir'  => '$( [ -d "/cygdrive/c/Program Files (x86)" ] && echo "/cygdrive/c/Program Files (x86)" || echo "/cygdrive/c/Program Files" )/Puppet Labs/Puppet Enterprise/bin',
+        'distmoduledir' => 'c:/programdata/puppetlabs/puppet/etc/modules',
+        'sitemoduledir' => 'c:/usr/share/puppet/modules',
         'pathseparator' => ';',
       })
     end
@@ -43,6 +45,8 @@ module Windows
         'hierapuppetlibdir' => '`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`',
         # PATH related variables need to be Unix, which cygwin converts
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
+        'distmoduledir'     => 'c:/programdata/puppetlabs/puppet/etc/modules',
+        'sitemoduledir'     => 'c:/usr/share/puppet/modules',
         'pathseparator'     => ';',
       })
     end
