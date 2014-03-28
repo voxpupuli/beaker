@@ -472,8 +472,8 @@ module Beaker
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
-          if host.is_pe?
-            bounce_service( host, 'pe-httpd' )
+          if host.is_pe? || host['puppetservice']
+            bounce_service( host, host['puppetservice'] )
           else
             puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
           end
@@ -488,8 +488,8 @@ module Beaker
           begin
             restore_puppet_conf_from_backup( host, backup_file )
 
-            if host.is_pe?
-              bounce_service( host, 'pe-httpd' )
+            if host.is_pe? || host['puppetservice']
+              bounce_service( host, host['puppetservice'] )
             else
               if puppet_master_started
                 stop_puppet_from_source_on( host )
