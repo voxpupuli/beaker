@@ -22,6 +22,7 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
+        'puppetservice' => 'pe-httpd',
         'puppetpath'    => '/etc/puppetlabs/puppet',
         'puppetbin'     => '/opt/puppet/bin/puppet',
         'puppetbindir'  => '/opt/puppet/bin',
@@ -39,6 +40,7 @@ module Unix
       h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
+        'puppetservice'     => '',
         'puppetpath'        => '/etc/puppet',
         'puppetvardir'      => '/var/lib/puppet',
         'puppetbin'         => '/usr/bin/puppet',
