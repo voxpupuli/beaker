@@ -59,7 +59,8 @@ module Beaker
         #add metadata to instance
         @gce_helper.setMetadata_on_instance(host['vmhostname'], instance['metadata']['fingerprint'],
                                             [ {:key => :department, :value => @options[:department]}, 
-                                              {:key => :project, :value => @options[:project]} ], 
+                                              {:key => :project, :value => @options[:project]},
+                                              {:key => :jenkins_build_url, :value => @options[:jenkins_build_url]} ], 
                                             start, attempts)
         @logger.debug("Added tags to Google Compute instance #{host.name}: #{host['vmhostname']}")
 
