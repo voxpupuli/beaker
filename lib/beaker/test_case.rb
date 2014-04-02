@@ -131,13 +131,13 @@ module Beaker
               @test_status = :pending
             rescue SkipTest
               @test_status = :skip
-            rescue StandardError, ScriptError => e
+            rescue StandardError, ScriptError, SignalException => e
               log_and_fail_test(e)
             ensure
               @teardown_procs.each do |teardown|
                 begin
                   teardown.call
-                rescue StandardError => e
+                rescue StandardError, SignalException => e
                   log_and_fail_test(e)
                 end
               end
