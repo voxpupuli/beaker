@@ -477,7 +477,7 @@ module Beaker
       { :api_method  => @compute.firewalls.insert,
         :parameters  => { 'project' => @options[:gce_project], 'zone' => DEFAULT_ZONE_NAME },
         :body_object => { 'name' => name,
-                          'allowed'=> [ { 'IPProtocol' => 'tcp', "ports" =>  [ '443', '8140', '61613' ]} ],
+                          'allowed'=> [ { 'IPProtocol' => 'tcp', "ports" =>  [ '443', '8140', '61613', '8080', '8081' ]} ],
                           'network'=> network,
                           'sourceRanges' => [ "0.0.0.0/0" ] } }
     end

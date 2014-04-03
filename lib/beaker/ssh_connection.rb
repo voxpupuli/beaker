@@ -14,7 +14,8 @@ module Beaker
       Errno::ECONNREFUSED,
       Errno::ECONNRESET,
       Errno::ENETUNREACH,
-      Net::SSH::Disconnect
+      Net::SSH::Disconnect,
+      Net::SSH::AuthenticationFailed,
     ]
 
     def initialize hostname, user = nil, options = {}
@@ -48,8 +49,6 @@ module Beaker
                    puts "Failed to connect to #{@hostname}"
                    raise
                  end
-               rescue Net::SSH::AuthenticationFailed => e
-                 raise "Unable to authenticate to #{@hostname} with user #{e.message.inspect}"
                end
       self
     end
