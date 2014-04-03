@@ -40,7 +40,6 @@ module Unix
       h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
-        'puppetservice'     => '',
         'puppetpath'        => '/etc/puppet',
         'puppetvardir'      => '/var/lib/puppet',
         'puppetbin'         => '/usr/bin/puppet',
