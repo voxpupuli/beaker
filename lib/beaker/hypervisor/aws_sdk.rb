@@ -27,7 +27,7 @@ module Beaker
         :logger => Logger.new($stdout),
         :log_level => :debug,
         :log_formatter => AWS::Core::LogFormatter.colored,
-        :max_retries => 10,
+        :max_retries => 12,
       }
       AWS.config(config)
 
@@ -39,6 +39,8 @@ module Beaker
     #
     # @return [void]
     def provision
+      start_time = Time.now
+
       # Load the ec2_yaml spec file
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
 
@@ -55,12 +57,35 @@ module Beaker
         end
         ami = ami_spec[amitype]
         ami_region = ami[:region]
+        region = @ec2.regions[ami_region]
+
+        # Grab image object
         image_id = ami[:image][image_type.to_sym]
-        # TODO: validate image_id exists first perhaps?
+        @logger.notify("aws-sdk: Checking image #{image_id} exists and getting its root device")
+        image = region.images[image_id]
+        if image.nil? and not image.exists?
+          raise RuntimeError, "Image not found: #{image_id}"
+        end
+
+        # Transform the images block_device_mappings output into a format
+        # ready for a create.
+        orig_bdm = image.block_device_mappings()
+        @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
+        block_device_mappings = []
+        orig_bdm.each do |device_name, rest|
+          block_device_mappings << {
+            :device_name => device_name,
+            :ebs => {
+              # This is required to override the images default for
+              # delete_on_termination, forcing all volumes to be deleted once the
+              # instance is terminated.
+              :delete_on_termination => true,
+            }
+          }
+        end
 
         # Launch the node, filling in the blanks from previous work.
         @logger.notify("aws-sdk: Launch instance")
-        region = @ec2.regions[ami_region]
         config = {
           :count => 1,
           :image_id => image_id,
@@ -70,6 +95,7 @@ module Beaker
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
+          :block_device_mappings => block_device_mappings,
         }
         instance = region.instances.create(config)
 
@@ -113,6 +139,8 @@ module Beaker
         host['ip'] = instance.dns_name
       end
 
+      @logger.notify("aws-sdk: EC2 node preparation complete in #{Time.now - start_time} seconds")
+
       # Start generating an /etc/hosts entry
       @logger.notify("aws-sdk: Configure each hosts hostname, and build up information for a global /etc/hosts")
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
@@ -151,7 +179,7 @@ module Beaker
         set_etc_hosts(host, etc_hosts)
       end
 
-      @logger.notify("aws-sdk: Provisioning complete")
+      @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
 
       nil #void
     end
