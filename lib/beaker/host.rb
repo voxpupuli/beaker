@@ -92,8 +92,9 @@ module Beaker
       end
     end
 
+    # Return the preferred method to reach the host, will use IP is available and then default to {#hostname}.
     def reachable_name
-      self['ip'] || self['vmhostname'] || name
+      self['ip'] || hostname
     end
 
     # Returning our PuppetConfigReader here allows users of the Host
@@ -116,11 +117,19 @@ module Beaker
       @defaults.has_key?(k)
     end
 
+    # The {#hostname} of this host.
     def to_str
-      @defaults['vmhostname'] || @name
+      hostname
     end
 
+    # The {#hostname} of this host.
     def to_s
+      hostname
+    end
+
+    # Return the public name of the particular host, which may be different then the name of the host provided in
+    # the configuration file as some provisioners create random, unique hostnames.
+    def hostname
       @defaults['vmhostname'] || @name
     end
 
