@@ -631,7 +631,7 @@ module Beaker
         # Any reason to not
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
-        host.exec( Command.new( "/etc/init.d/#{service} restart" ) )
+        host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
         if wait
           curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52])
         end

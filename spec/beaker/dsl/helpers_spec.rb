@@ -697,18 +697,18 @@ describe ClassMixedWithDSLHelpers do
 
         it 'bounces puppet twice' do
           subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/\/etc\/init\.d\/#{@ps} restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
         end
 
         it 'yield to a block after bouncing service' do
           execution = 0
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/\/etc\/init\.d\/#{@ps} restart/).once
+              expect(host).to execute_commands_matching(/#{@ps} restart/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/\/etc\/init\.d\/#{@ps} restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
         end
       end
 
