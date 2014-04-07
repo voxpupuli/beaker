@@ -34,6 +34,7 @@ module Beaker
         h.merge({
           :project => 'Beaker',
           :department => ENV['USER'] || ENV['USERNAME'] || 'unknown',
+          :validate => true,
           :log_level => 'verbose',
           :trace_limit => 10,
           :hosts_file => 'sample.cfg',
