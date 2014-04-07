@@ -707,6 +707,7 @@ module Beaker
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
+        args << "--parser future" if opts[:future_parser]
 
         # From puppet help:
         # "... an exit code of '2' means there were changes, an exit code of
