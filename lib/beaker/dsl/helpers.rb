@@ -633,7 +633,7 @@ module Beaker
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
         host.exec( Command.new( "/etc/init.d/#{service} restart" ) )
         if wait
-          port_open_within? host
+          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52])
         end
       end
 
