@@ -170,6 +170,12 @@ module Beaker
             @cmd_options[:add_el_extras] = true
           end
 
+          opts.on '--[no-]validate',
+                  'Validate that SUTs are correctly configured before running tests',
+                  '(default: true)' do |bool|
+            @cmd_options[:validate] = bool
+          end
+
           opts.on('--version', 'Report currently running version of beaker' ) do 
             @cmd_options[:version] = true
           end
