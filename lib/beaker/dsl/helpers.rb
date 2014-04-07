@@ -627,11 +627,14 @@ module Beaker
       end
 
       # @!visibility private
-      def bounce_service host, service
+      def bounce_service host, service, wait=true
         # Any reason to not
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
         host.exec( Command.new( "/etc/init.d/#{service} restart" ) )
+        if wait
+          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52])
+        end
       end
 
       # Blocks until the port is open on the host specified, returns false
