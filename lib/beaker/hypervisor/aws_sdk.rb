@@ -1,6 +1,7 @@
 require 'aws/ec2'
 require 'set'
 require 'zlib'
+require 'beaker/hypervisor/ec2_helper'
 
 module Beaker
   # This is an alternate EC2 driver that implements direct API access using
@@ -41,6 +42,58 @@ module Beaker
     def provision
       start_time = Time.now
 
+      # Perform the main launch work
+      launch_all_nodes()
+
+      # Wait for each node to reach status :running
+      @logger.notify("aws-sdk: Now wait for all hosts to reach state :running")
+      wait_for_status(:running)
+
+      # Grab the ip addresses from EC2 for each instance to use for ssh
+      populate_ip()
+
+      @logger.notify("aws-sdk: EC2 node preparation complete in #{Time.now - start_time} seconds")
+
+      # Configure /etc/hosts for all nodes
+      etchosts()
+
+      @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
+
+      nil #void
+    end
+
+    # Cleanup all earlier provisioned hosts on EC2 using the AWS::EC2 library
+    #
+    # It goes without saying, but a #cleanup does nothing without a #provision
+    # method call first.
+    #
+    # @return [void]
+    def cleanup
+      @logger.notify("aws-sdk: Cleanup, iterating across all hosts and terminating them")
+      @hosts.each do |host|
+        # This was set previously during provisioning
+        instance = host['instance']
+
+        # Only attempt a terminate if the instance actually is set by provision
+        # and the instance actually 'exists'.
+        if !instance.nil? and instance.exists?
+          instance.terminate
+        end
+      end
+
+      nil #void
+    end
+
+    # Launch all nodes
+    #
+    # This is where the main launching work occurs for each node. Here we take
+    # care of feeding the information from the image required into the config
+    # for the new host, we perform the launch operation and ensure that the
+    # instance is properly tagged for identification.
+    #
+    # @return [void]
+    # @api private
+    def launch_all_nodes
       # Load the ec2_yaml spec file
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
 
@@ -57,6 +110,8 @@ module Beaker
         end
         ami = ami_spec[amitype]
         ami_region = ami[:region]
+
+        # Main region object for ec2 operations
         region = @ec2.regions[ami_region]
 
         # Grab image object
@@ -91,7 +146,7 @@ module Beaker
           :image_id => image_id,
           :monitoring_enabled => true,
           :key_pair => ensure_key_pair(region),
-          :security_groups => [ensure_group(region, amiports(host))],
+          :security_groups => [ensure_group(region, Beaker::EC2Helper.amiports(host['roles']))],
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
@@ -113,24 +168,33 @@ module Beaker
         @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
       end
 
+      nil
+    end
+
+    # Waits until all boxes reach the desired status
+    #
+    # @param status [Symbol] EC2 state to wait for, :running :stopped etc.
+    # @return [void]
+    # @api private
+    def wait_for_status(status)
       # Wait for each node to reach status :running
-      @logger.notify("aws-sdk: Now wait for all hosts to reach state :running")
+      @logger.notify("aws-sdk: Now wait for all hosts to reach state #{status}")
       @hosts.each do |host|
         instance = host['instance']
         name = host.name
 
-        @logger.notify("aws-sdk: Wait for status :running for node #{name}")
+        @logger.notify("aws-sdk: Wait for status #{status} for node #{name}")
 
         # Here we keep waiting for the machine state to reach ':running' with an
         # exponential backoff for each poll.
         # TODO: should probably be a in a shared method somewhere
         for tries in 1..10
-          if instance.status == :running
+          if instance.status == status
             # Always sleep, so the next command won't cause a throttle
             backoff_sleep(tries)
             break
           elsif tries == 10
-            raise "Instance never reached state :running"
+            raise "Instance never reached state #{status}"
           end
           backoff_sleep(tries)
         end
@@ -138,9 +202,28 @@ module Beaker
         # Set the IP to be the dns_name of the host, yes I know its not an IP.
         host['ip'] = instance.dns_name
       end
+    end
 
-      @logger.notify("aws-sdk: EC2 node preparation complete in #{Time.now - start_time} seconds")
+    # Populate the hosts IP address entry from the EC2 dns_name
+    #
+    # @return [void]
+    # @api private
+    def populate_ip
+      # Obtain the IP addresses for each host
+      @hosts.each do |host|
+        instance = host['instance']
+        # Set the IP to be the dns_name of the host, yes I know its not an IP.
+        host['ip'] = instance.dns_name
+      end
 
+      nil
+    end
+
+    # Configures a suitable /etc/hosts on each host
+    #
+    # @return [void]
+    # @api private
+    def etchosts
       # Start generating an /etc/hosts entry
       @logger.notify("aws-sdk: Configure each hosts hostname, and build up information for a global /etc/hosts")
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
@@ -179,57 +262,7 @@ module Beaker
         set_etc_hosts(host, etc_hosts)
       end
 
-      @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
-
       nil #void
-    end
-
-    # Cleanup all earlier provisioned hosts on EC2 using the AWS::EC2 library
-    #
-    # It goes without saying, but a #cleanup does nothing without a #provision
-    # method call first.
-    #
-    # @return [void]
-    def cleanup
-      @logger.notify("aws-sdk: Cleanup, iterating across all hosts and terminating them")
-      @hosts.each do |host|
-        # This was set previously during provisioning
-        instance = host['instance']
-
-        # Only attempt a terminate if the instance actually is set by provision
-        # and the instance actually 'exists'.
-        if !instance.nil? and instance.exists?
-          instance.terminate
-        end
-      end
-
-      nil #void
-    end
-
-    # Return a list of open ports for testing based on a hosts role
-    #
-    # @todo horribly hard-coded
-    # @param [Beaker::Host] host Beaker host object
-    # @return [Array<Number>] array of port numbers
-    # @api private
-    def amiports(host)
-      roles = host['roles']
-      ports = [22]
-
-      if roles.include? 'database'
-        ports << 8080
-        ports << 8081
-      end
-
-      if roles.include? 'master'
-        ports << 8140
-      end
-
-      if roles.include? 'dashboard'
-        ports << 443
-      end
-
-      ports
     end
 
     # Calculates and waits a back-off period based on the number of tries

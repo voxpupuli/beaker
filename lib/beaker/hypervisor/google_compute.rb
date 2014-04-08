@@ -58,9 +58,9 @@ module Beaker
         @logger.debug("Created Google Compute instance for #{host.name}: #{host['vmhostname']}")
         #add metadata to instance
         @gce_helper.setMetadata_on_instance(host['vmhostname'], instance['metadata']['fingerprint'],
-                                            [ {:key => :department, :value => @options[:department]}, 
+                                            [ {:key => :department, :value => @options[:department]},
                                               {:key => :project, :value => @options[:project]},
-                                              {:key => :jenkins_build_url, :value => @options[:jenkins_build_url]} ], 
+                                              {:key => :jenkins_build_url, :value => @options[:jenkins_build_url]} ],
                                             start, attempts)
         @logger.debug("Added tags to Google Compute instance #{host.name}: #{host['vmhostname']}")
 
@@ -89,7 +89,7 @@ module Beaker
       attempts = @options[:timeout].to_i / SLEEPWAIT
       start = Time.now
 
-      @gce_helper.delete_firewall(@firewall, start, attempts) 
+      @gce_helper.delete_firewall(@firewall, start, attempts)
 
       @hosts.each do |host|
         @gce_helper.delete_instance(host['vmhostname'], start, attempts)
@@ -99,14 +99,14 @@ module Beaker
       end
 
     end
- 
-    #Shutdown and destroy Google Compute instances (including their associated disks and firewall rules) 
+
+    #Shutdown and destroy Google Compute instances (including their associated disks and firewall rules)
     #that have been alive longer than ZOMBIE hours.
     def kill_zombies(max_age = ZOMBIE)
       now = start = Time.now
       attempts = @options[:timeout].to_i / SLEEPWAIT
 
-      #get rid of old instances 
+      #get rid of old instances
       instances = @gce_helper.list_instances(start, attempts)
       if instances
         instances.each do |instance|
@@ -118,7 +118,7 @@ module Beaker
             @gce_helper.delete_instance( instance['name'], start, attempts )
           end
         end
-      else 
+      else
         @logger.debug("No zombie instances found")
       end
       #get rid of old disks

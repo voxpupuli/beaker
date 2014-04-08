@@ -1,28 +1,9 @@
 require 'blimpy'
 require 'yaml' unless defined?(YAML)
+require 'beaker/hypervisor/ec2_helper'
 
-module Beaker 
+module Beaker
   class Blimper < Beaker::Hypervisor
-
-    def amiports(host)
-      roles = host['roles']
-      ports = [22]
-
-      if roles.include? 'database'
-        ports << 8080
-        ports << 8081
-      end
-
-      if roles.include? 'master'
-        ports << 8140
-      end
-
-      if roles.include? 'dashboard'
-        ports << 443
-      end
-
-      ports
-    end
 
     def initialize(blimpy_hosts, options)
       @options = options
@@ -46,7 +27,7 @@ module Beaker
           ami = ami_spec[amitype]
           fleet.add(:aws) do |ship|
             ship.name = host.name
-            ship.ports = amiports(host)
+            ship.ports = Beaker::EC2Helper.amiports(host['roles'])
             ship.image_id = ami[:image][image_type.to_sym]
             if not ship.image_id
               raise "No image_id found for host #{ship.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}"
