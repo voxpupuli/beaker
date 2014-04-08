@@ -35,36 +35,6 @@ module Beaker
       @hosts[2][:platform] = "centos-7-x86-64-west"
     end
 
-    context "#amiports" do
-      it "can set ports for database host" do
-        host = @hosts[0]
-        host[:roles] = ["database"]
-
-        expect(aws.amiports(host)).to be === [22, 8080, 8081]
-      end
-
-      it "can set ports for master host" do
-        host = @hosts[0]
-        host[:roles] = ["master"]
-
-        expect(aws.amiports(host)).to be === [22, 8140]
-      end
-
-      it "can set ports for dashboard host" do
-        host = @hosts[0]
-        host[:roles] = ["dashboard"]
-
-        expect(aws.amiports(host)).to be === [22, 443]
-      end
-
-      it "can set ports for combined master/database/dashboard host" do
-        host = @hosts[0]
-        host[:roles] = ["dashboard", "master", "database"]
-
-        expect(aws.amiports(host)).to be === [22, 8080, 8081, 8140, 443]
-      end
-    end
-
     context '#backoff_sleep' do
       it "should call sleep 1024 times at attempt 10" do
         Object.any_instance.should_receive(:sleep).with(1024)
