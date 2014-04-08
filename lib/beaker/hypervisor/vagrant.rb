@@ -92,6 +92,9 @@ module Beaker
     end
 
     def provision
+      if !@options[:provision] and !File.file?(@vagrant_file)
+        raise "Beaker is configured with provision = false but no vagrant file was found at #{@vagrant_file}. You need to enable provision"
+      end
       if @options[:provision]
         #setting up new vagrant hosts
         #make sure that any old boxes are dead dead dead
