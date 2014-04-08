@@ -627,12 +627,12 @@ module Beaker
       end
 
       # @!visibility private
-      def bounce_service host, service, wait=true
+      def bounce_service host, service
         # Any reason to not
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
         host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
-        if wait
+        if host['service-wait']
           curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52])
         end
       end
