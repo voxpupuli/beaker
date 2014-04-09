@@ -32,7 +32,6 @@ module Beaker
       }
       AWS.config(config)
 
-      # TODO: decide what options to pass on new
       @ec2 = AWS::EC2.new()
     end
 
@@ -52,10 +51,14 @@ module Beaker
       # Grab the ip addresses from EC2 for each instance to use for ssh
       populate_ip()
 
+      # Wait for SSH connectivity to ensure all authentication issues are
+      # resolved before any commands are used.
+      wait_for_ssh()
+
       @logger.notify("aws-sdk: EC2 node preparation complete in #{Time.now - start_time} seconds")
 
       # Configure /etc/hosts for all nodes
-      etchosts()
+      hack_etc_hosts @hosts, @options
 
       @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
 
@@ -219,28 +222,20 @@ module Beaker
       nil
     end
 
-    # Configures a suitable /etc/hosts on each host
+    # Wait for SSH connectivity on all hosts is established.
     #
     # @return [void]
     # @api private
-    def etchosts
-      # Start generating an /etc/hosts entry
-      @logger.notify("aws-sdk: Configure each hosts hostname, and build up information for a global /etc/hosts")
-      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
+    def wait_for_ssh
+      # Wait until each host is responding to SSH, catch any authentication
+      # failures and retry them.
+      @logger.notify("aws-sdk: Waiting for SSH connectivity ...")
       @hosts.each do |host|
-
-        # This is the hostname we want the machine to use as specified in the
-        # beaker config template.
-        name = host.name
-
-        # Without this we get 'Unable to authenticate' error message while the
-        # machine is still provisioning
-        # TODO: similar to retry logic above, merge perhaps and modularize?
         tries = 0
         begin
           tries += 1
-          host.exec(Command.new("hostname #{name}"))
-        rescue RuntimeError => ex
+          host.connection
+        rescue Net::SSH::AuthenticationFailed => ex
           if tries <= 10
             backoff_sleep(tries)
             retry
@@ -248,21 +243,9 @@ module Beaker
             raise ex
           end
         end
-
-        # Construct a suitable /etc/hosts line entry for this host and append it
-        # to the global one
-        ip = get_ip(host)
-        domain = get_domain_name(host)
-        etc_hosts += "#{ip}\t#{name}\t#{name}.#{domain}\n"
       end
 
-      # Send our /etc/hosts information to all nodes
-      @logger.notify("aws-sdk: Install the global /etc/hosts on each machine")
-      @hosts.each do |host|
-        set_etc_hosts(host, etc_hosts)
-      end
-
-      nil #void
+      nil
     end
 
     # Calculates and waits a back-off period based on the number of tries
