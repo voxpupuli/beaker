@@ -589,7 +589,7 @@ describe ClassMixedWithDSLHelpers do
               'puppetlabs.com',
               'ensure=absent' )
 
-      subject.stub_hosts_on( 'my_host', 'puppetlabs.com' => '127.0.0.1' )
+      subject.stub_hosts_on( make_host('my_host', {}), 'puppetlabs.com' => '127.0.0.1' )
     end
   end
 
@@ -606,15 +606,15 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_forge_on' do
     it 'stubs forge.puppetlabs.com with the value of `forge`' do
-      subject.stub( :options ).and_return( {} )
+      host = make_host('my_host', {})
       Resolv.should_receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( 'my_host', 'forge.puppetlabs.com' => '127.0.0.1' )
+        with( host, 'forge.puppetlabs.com' => '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( 'my_host', 'forgeapi.puppetlabs.com' => '127.0.0.1' )
+        with( host, 'forgeapi.puppetlabs.com' => '127.0.0.1' )
 
-      subject.stub_forge_on( 'my_host', 'my_forge.example.com' )
+      subject.stub_forge_on( host, 'my_forge.example.com' )
     end
   end
 
@@ -951,11 +951,23 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#fact_on' do
-    it 'retreives a fact on host(s)' do
+    it 'retrieves a fact on a single host' do
+      result.stdout = "family\n"
       subject.should_receive(:facter).with('osfamily',{}).once
       subject.should_receive(:on).and_return(result)
 
-      subject.fact_on('host','osfamily')
+      expect( subject.fact_on('host','osfamily') ).to be === result.stdout.chomp
+    end
+
+    it 'retrieves an array of facts from multiple hosts' do
+      times = hosts.length
+      result.stdout = "family\n"
+      hosts.each do |host|
+        host.should_receive(:exec).and_return(result)
+      end
+
+      expect( subject.fact_on(hosts,'osfamily') ).to be === [result.stdout.chomp] * hosts.length
+
     end
   end
 
