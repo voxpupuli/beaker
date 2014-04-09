@@ -1,6 +1,7 @@
 require 'resolv'
 require 'inifile'
 require 'timeout'
+require 'digest'
 require 'beaker/dsl/outcomes'
 
 module Beaker
@@ -469,13 +470,18 @@ module Beaker
         conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
 
         begin
-          backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
-          lay_down_new_puppet_conf host, conf_opts, testdir
+          if not conf_opts.empty? 
+            backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
+            lay_down_new_puppet_conf host, conf_opts, testdir
+          end 
 
-          if host.is_pe? 
-            bounce_service( host, host['puppetservice'] )
-          else
-            puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
+          #if file_changed_since_last_check?(host, File.join(host['puppetpath'] , 'puppet.conf'))
+          if file_changed_since_last_check?(host, File.join(host['puppetpath'] , 'puppet.conf'))
+            if host.is_pe? 
+              bounce_service( host, host['puppetservice'] )
+            else
+              puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
+            end
           end
 
           yield self if block_given?
@@ -486,15 +492,19 @@ module Beaker
 
         ensure
           begin
-            restore_puppet_conf_from_backup( host, backup_file )
+            if not conf_opts.empty? 
+              restore_puppet_conf_from_backup( host, backup_file )
+            end
 
-            if host.is_pe? 
-              bounce_service( host, host['puppetservice'] )
-            else
-              if puppet_master_started
-                stop_puppet_from_source_on( host )
+            if file_changed_since_last_check?(host, File.join(host['puppetpath'] , 'puppet.conf'))
+              if host.is_pe? 
+                bounce_service( host, host['puppetservice'] )
               else
-                dump_puppet_log(host)
+                if puppet_master_started
+                  stop_puppet_from_source_on( host )
+                else
+                  dump_puppet_log(host)
+                end
               end
             end
 
@@ -1002,6 +1012,25 @@ module Beaker
         end
       end
 
+      def opts_changed?( host, opts_hash )
+        original_conf = puppet_conf_for( host, {} )
+      end
+
+      def file_changed_since_last_check?( host, file )
+        if not host.has_key?("file_digests")
+          host["file_digests"] = {}
+        end
+
+        result = host.exec( Command.new( "cat #{file} "))
+        new_digest = Digest::MD5.digest(result.stdout)
+
+        if host["file_digests"][file] != new_digest
+          host["file_digests"][file] = new_digest
+          return true
+        end
+
+        return false
+      end
 
     end
   end
