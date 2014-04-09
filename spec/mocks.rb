@@ -65,6 +65,10 @@ class FakeHost
     @commands = []
   end
 
+  def port_open?(port)
+    true
+  end
+
   def is_pe?
     @pe
   end

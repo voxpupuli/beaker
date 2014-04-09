@@ -22,6 +22,7 @@ module Windows
       h.merge({
         'user'          => 'Administrator',
         'group'         => 'Administrators',
+        'puppetservice' => 'pe-httpd',
         'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
         #if an x86 Program Files dir exists then use it, default to just Program Files

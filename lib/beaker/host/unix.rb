@@ -22,6 +22,8 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
+        'service-prefix'=> '/etc/init.d/', 
+        'puppetservice' => 'pe-httpd',
         'puppetpath'    => '/etc/puppetlabs/puppet',
         'puppetbin'     => '/opt/puppet/bin/puppet',
         'puppetbindir'  => '/opt/puppet/bin',
