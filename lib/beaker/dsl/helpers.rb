@@ -632,6 +632,9 @@ module Beaker
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
         host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
+        if host['service-wait']
+          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52], 120)
+        end
       end
 
       # Blocks until the port is open on the host specified, returns false
@@ -878,7 +881,7 @@ module Beaker
       end
 
       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
-        retry_command(desc, host, "curl #{url}", desired_exit_codes, max_retries, retry_interval)
+        retry_command(desc, host, "curl -m 1 #{url}", desired_exit_codes, max_retries, retry_interval)
       end
 
       def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
