@@ -4,6 +4,7 @@ class ClassMixedWithDSLHelpers
   include Beaker::DSL::Helpers
   include Beaker::DSL::Wrappers
   include Beaker::DSL::Roles
+  include Beaker::DSL::Patterns
 
   def logger
     @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
@@ -476,7 +477,7 @@ describe ClassMixedWithDSLHelpers do
               'puppetlabs.com',
               'ensure=absent' )
 
-      subject.stub_hosts_on( 'my_host', 'puppetlabs.com' => '127.0.0.1' )
+      subject.stub_hosts_on( make_host('my_host', {}), 'puppetlabs.com' => '127.0.0.1' )
     end
   end
 
@@ -493,15 +494,16 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_forge_on' do
     it 'stubs forge.puppetlabs.com with the value of `forge`' do
+      host = make_host('my_host', {})
       subject.should_receive( :forge ).and_return( 'my_forge.example.com' )
       Resolv.should_receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( 'my_host', 'forge.puppetlabs.com' => '127.0.0.1' )
+        with( host, 'forge.puppetlabs.com' => '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( 'my_host', 'forgeapi.puppetlabs.com' => '127.0.0.1' )
+        with( host, 'forgeapi.puppetlabs.com' => '127.0.0.1' )
 
-      subject.stub_forge_on( 'my_host' )
+      subject.stub_forge_on( host )
     end
   end
 

@@ -1,5 +1,5 @@
 [ 'install_utils', 'roles', 'outcomes', 'assertions',
-  'structure', 'helpers', 'wrappers' ].each do |file|
+  'structure', 'helpers', 'wrappers', 'patterns' ].each do |file|
   begin
     require "beaker/dsl/#{file}"
   rescue LoadError
@@ -81,5 +81,6 @@ module Beaker
     include Beaker::DSL::Wrappers
     include Beaker::DSL::Helpers
     include Beaker::DSL::InstallUtils
+    include Beaker::DSL::Patterns
   end
 end
