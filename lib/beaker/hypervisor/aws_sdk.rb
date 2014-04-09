@@ -51,11 +51,8 @@ module Beaker
       # Grab the ip addresses from EC2 for each instance to use for ssh
       populate_ip()
 
-      # Wait for SSH connectivity to ensure all authentication issues are
-      # resolved before any commands are used.
-      wait_for_ssh()
-
-      @logger.notify("aws-sdk: EC2 node preparation complete in #{Time.now - start_time} seconds")
+      # Set the hostname for each box
+      set_hostnames()
 
       # Configure /etc/hosts for all nodes
       hack_etc_hosts @hosts, @options
@@ -217,9 +214,29 @@ module Beaker
         instance = host['instance']
         # Set the IP to be the dns_name of the host, yes I know its not an IP.
         host['ip'] = instance.dns_name
+        @logger.notify("Using temp hostname #{host['ip']} for #{host.name}")
+      end
+
+      # Wait until SSH can be established first
+      wait_for_ssh()
+
+      @hosts.each do |host|
+        host['ip'] = get_ip(host)
+        @logger.notify("Now using #{host['ip']} for host #{host.name}")
       end
 
       nil
+    end
+
+    # Set the hostname of all instances to be the hostname defined in the
+    # beaker configuration.
+    #
+    # @return [void]
+    # @api private
+    def set_hostnames
+      @hosts.each do |host|
+        host.exec(Command.new("hostname #{host.name}"))
+      end
     end
 
     # Wait for SSH connectivity on all hosts is established.
