@@ -48,14 +48,14 @@ module Beaker
       @logger.notify("aws-sdk: Now wait for all hosts to reach state :running")
       wait_for_status(:running)
 
-      # Grab the ip addresses from EC2 for each instance to use for ssh
-      populate_ip()
+      # Grab the ip addresses and dns from EC2 for each instance to use for ssh
+      populate_dns()
+
+      # Wait until SSH can be established first
+      wait_for_ssh()
 
       # Set the hostname for each box
       set_hostnames()
-
-      # Configure /etc/hosts for all nodes
-      hack_etc_hosts @hosts, @options
 
       @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
 
@@ -204,25 +204,17 @@ module Beaker
       end
     end
 
-    # Populate the hosts IP address entry from the EC2 dns_name
+    # Populate the hosts IP address and vmhostname entry from the EC2 dns_name
     #
     # @return [void]
     # @api private
-    def populate_ip
-      # Obtain the IP addresses for each host
+    def populate_dns
+      # Obtain the IP addresses and dns_name for each host
       @hosts.each do |host|
         instance = host['instance']
-        # Set the IP to be the dns_name of the host, yes I know its not an IP.
-        host['ip'] = instance.dns_name
-        @logger.notify("Using temp hostname #{host['ip']} for #{host.name}")
-      end
-
-      # Wait until SSH can be established first
-      wait_for_ssh()
-
-      @hosts.each do |host|
-        host['ip'] = get_ip(host)
-        @logger.notify("Now using #{host['ip']} for host #{host.name}")
+        host['vmhostname'] = instance.dns_name
+        host['ip'] = instance.ip_address
+        @logger.notify("aws-sdk: name: #{host.name} vmhostname: #{host['vmhostname']} ip: #{host['ip']}")
       end
 
       nil
@@ -235,7 +227,7 @@ module Beaker
     # @api private
     def set_hostnames
       @hosts.each do |host|
-        host.exec(Command.new("hostname #{host.name}"))
+        host.exec(Command.new("hostname #{host['vmhostname']}"))
       end
     end
 
