@@ -34,6 +34,8 @@ module Beaker
           Beaker::Fusion
         when /blimpy/
           Beaker::Blimper
+        when /ec2/
+          Beaker::AwsSdk
         when /vcloud/
           if options['pooling_api']
             Beaker::VcloudPooled
@@ -102,7 +104,7 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper vsphere vcloud vcloud_pooled aixer solaris google_compute_helper google_compute).each do |lib|
+%w( vsphere_helper vagrant fusion blimper aws_sdk vsphere vcloud vcloud_pooled aixer solaris google_compute_helper google_compute).each do |lib|
   begin
     require "hypervisor/#{lib}"
   rescue LoadError

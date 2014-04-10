@@ -9,6 +9,7 @@ SimpleCov.configure do
     files = %w(cli.rb logger.rb options_parsing.rb test_config.rb utils/)
     files.any? {|f| file.filename =~ Regexp.new( Regexp.quote(f) ) }
   end
+  add_group 'Hypervisors', '/hypervisor'
 end
 
 SimpleCov.start if ENV['COVERAGE']
