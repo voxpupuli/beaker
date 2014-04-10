@@ -378,11 +378,11 @@ module Beaker
       if host.is_a? Array
         host.map { |h| copy_ssh_to_root(h, opts) }
       else
-        if host['platform'] =~ /centos/
+        if host['platform'] =~ /centos|el-|redhat|fedora/
           @logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
         else
-          @logger.warn("Attempting to disable SELinux on non-centos platform: #{host.name}: #{host['platform']}")
+          @logger.warn("Attempting to disable SELinux on non-supported platform: #{host.name}: #{host['platform']}")
         end
       end
     end
@@ -396,11 +396,11 @@ module Beaker
       if host.is_a? Array
         host.map { |h| copy_ssh_to_root(h, opts) }
       else
-        if host['platform'] =~ /centos/
+        if host['platform'] =~ /centos|el-|redhat|fedora/
           logger.debug("Disabling iptables on #{host.name}")
           host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
         else
-          logger.warn("Attempting to disable iptables on non-centos platform: #{host.name}: #{host['platform']}")
+          logger.warn("Attempting to disable iptables on non-supported platform: #{host.name}: #{host['platform']}")
         end
       end
     end
