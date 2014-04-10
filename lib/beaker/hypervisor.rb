@@ -89,7 +89,9 @@ module Beaker
 
     #Default validation steps to be run for a given hypervisor
     def validate
-      validate_host(@hosts, @options)
+      if @options[:validate] 
+        validate_host(@hosts, @options)
+      end
     end
 
     #Generate a random straing composted of letter and numbers
