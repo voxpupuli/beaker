@@ -51,6 +51,9 @@ module Beaker
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
+      # Configure /etc/hosts on each host
+      configure_hosts()
+
       # Wait until SSH can be established first
       wait_for_ssh()
 
@@ -214,10 +217,24 @@ module Beaker
         instance = host['instance']
         host['vmhostname'] = instance.dns_name
         host['ip'] = instance.ip_address
-        @logger.notify("aws-sdk: name: #{host.name} vmhostname: #{host['vmhostname']} ip: #{host['ip']}")
+        host['private_ip'] = instance.private_ip_address
+        @logger.notify("aws-sdk: name: #{host.name} vmhostname: #{host['vmhostname']} ip: #{host['ip']} private_ip: #{host['private_ip']}")
       end
 
       nil
+    end
+
+    # Configure /etc/hosts for each node
+    #
+    # @return [void]
+    # @api private
+    def configure_hosts
+      base = "127.0.0.1\tlocalhost localhost.localdomain\n"
+      @hosts.each do |host|
+        hn = host.hostname
+        etc_hosts = base + "#{host['private_ip']}\t#{hn} #{hn.split(".")[0]}\n"
+        set_etc_hosts(host, etc_hosts)
+      end
     end
 
     # Set the hostname of all instances to be the hostname defined in the
