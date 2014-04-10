@@ -447,6 +447,26 @@ describe ClassMixedWithDSLHelpers do
         :expect_failures       => true
       )
     end
+
+    it 'can set the --parser future flag' do
+      subject.should_receive( :create_remote_file ).and_return( true )
+      subject.should_receive( :puppet ).
+        with( 'apply', '--verbose', '--parser future', '--detailed-exitcodes', 'agent' ).
+        and_return( 'puppet_command' )
+      subject.should_receive( :on ).with(
+        agent,
+        'puppet_command',
+        :acceptable_exit_codes => [1,2,3,4,5,6]
+      )
+
+      subject.apply_manifest_on(
+        agent,
+        'class { "boo": }',
+        :acceptable_exit_codes => (1..5),
+        :future_parser         => true,
+        :expect_failures       => true
+      )
+    end
   end
 
   describe "#apply_manifest" do

@@ -690,6 +690,11 @@ module Beaker
       #                         if `puppet --apply` indicates there were no
       #                         failure during its execution.
       #
+      # @option opts [Boolean]  :future_parser (false) This option enables
+      #                         the future parser option that is available 
+      #                         from Puppet verion 3.2
+      #                         By default it will use the 'current' parser.
+      #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
       #                      validation, etc.
