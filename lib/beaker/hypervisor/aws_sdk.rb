@@ -51,14 +51,14 @@ module Beaker
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
-      # Configure /etc/hosts on each host
-      configure_hosts()
-
       # Wait until SSH can be established first
       wait_for_ssh()
 
       # Set the hostname for each box
       set_hostnames()
+
+      # Configure /etc/hosts on each host
+      configure_hosts()
 
       @logger.notify("aws-sdk: Provisioning complete in #{Time.now - start_time} seconds")
 
