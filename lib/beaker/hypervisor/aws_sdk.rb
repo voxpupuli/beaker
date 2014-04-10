@@ -45,14 +45,10 @@ module Beaker
       launch_all_nodes()
 
       # Wait for each node to reach status :running
-      @logger.notify("aws-sdk: Now wait for all hosts to reach state :running")
       wait_for_status(:running)
 
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
-
-      # Wait until SSH can be established first
-      wait_for_ssh()
 
       # Set the hostname for each box
       set_hostnames()
@@ -246,32 +242,6 @@ module Beaker
       @hosts.each do |host|
         host.exec(Command.new("hostname #{host['vmhostname']}"))
       end
-    end
-
-    # Wait for SSH connectivity on all hosts is established.
-    #
-    # @return [void]
-    # @api private
-    def wait_for_ssh
-      # Wait until each host is responding to SSH, catch any authentication
-      # failures and retry them.
-      @logger.notify("aws-sdk: Waiting for SSH connectivity ...")
-      @hosts.each do |host|
-        tries = 0
-        begin
-          tries += 1
-          host.connection
-        rescue Net::SSH::AuthenticationFailed => ex
-          if tries <= 10
-            backoff_sleep(tries)
-            retry
-          else
-            raise ex
-          end
-        end
-      end
-
-      nil
     end
 
     # Calculates and waits a back-off period based on the number of tries
