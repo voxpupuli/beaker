@@ -674,7 +674,7 @@ describe ClassMixedWithDSLHelpers do
     let(:test_case_path) { 'testcase/path' }
     let(:tmpdir_path) { '/tmp/tmpdir' }
     let(:puppet_path) { '/puppet/path' }
-    let(:puppetservice) { @ps || '' }
+    let(:puppetservice) { @ps || nil }
     let(:is_pe) { false }
     let(:host) do
       FakeHost.new(:pe => is_pe,
@@ -711,9 +711,8 @@ describe ClassMixedWithDSLHelpers do
         Tempfile.should_receive(:open).with('beaker')
       end
 
-      context 'as pe' do
-        let(:is_pe) { true }
-        @ps = 'whatever'
+      context 'with puppetservice and service-path defined' do
+        let(:puppetservice) { 'whatever' }
 
         it 'bounces puppet twice' do
           subject.with_puppet_running_on(host, {})
