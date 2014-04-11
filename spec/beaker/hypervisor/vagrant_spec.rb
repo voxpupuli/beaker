@@ -18,7 +18,6 @@ module Beaker
 
     end
 
-
     it "can make a Vagranfile for a set of hosts" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
@@ -27,6 +26,28 @@ module Beaker
       vagrant.make_vfile( @hosts )
 
       expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2' do |v|\n    v.vm.hostname = 'vm2'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3' do |v|\n    v.vm.hostname = 'vm3'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
+    end
+
+    it "generates a valid windows config" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+      @hosts[0][:platform] = 'windows'
+
+      vagrant.make_vfile( @hosts )
+
+      generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+
+      match = generated_file.match(/v.vm.network :forwarded_port, guest: 3389, host: 3389/)
+      expect( match ).to_not be_nil,'Should have proper port for RDP'
+
+      match = generated_file.match(/v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true/)
+      expect( match ).to_not be_nil, "Should have proper port for WinRM"
+
+      match = generated_file.match(/v.vm.guest = :windows/)
+      expect( match ).to_not be_nil, 'Should correctly identify guest OS so Vagrant can act accordingly'
+
+
     end
 
     it "uses the memsize defined per vagrant host" do
