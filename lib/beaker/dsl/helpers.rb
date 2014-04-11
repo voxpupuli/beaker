@@ -76,12 +76,7 @@ module Beaker
           end
           command = Command.new(command.to_s, [], cmd_opts)
         end
-        if host.is_a? String or host.is_a? Symbol
-          host = hosts_as(host) #check by role
-        end
-        if host.is_a? Array
-          host.map { |h| on h, command, opts, &block }
-        else
+        block_on host do | host |
           @result = host.exec(command, opts)
 
           # Also, let additional checking be performed by the caller.
@@ -95,8 +90,7 @@ module Beaker
                 yield @result
             end
           end
-
-          return @result
+          @result
         end
       end
 
@@ -174,11 +168,10 @@ module Beaker
       #
       # @return [Result] Returns the result of the SCP operation
       def scp_from host, from_path, to_path, opts = {}
-        if host.is_a? Array
-          host.each { |h| scp_from h, from_path, to_path, opts }
-        else
+        block_on host do | host |
           @result = host.do_scp_from(from_path, to_path, opts)
           @result.log logger
+          @result
         end
       end
 
@@ -196,11 +189,10 @@ module Beaker
       #
       # @return [Result] Returns the result of the SCP operation
       def scp_to host, from_path, to_path, opts = {}
-        if host.is_a? Array
-          host.each { |h| scp_to h, from_path, to_path, opts }
-        else
+        block_on host do | host |
           @result = host.do_scp_to(from_path, to_path, opts)
           @result.log logger
+          @result
         end
       end
 
@@ -245,7 +237,7 @@ module Beaker
       # @param [String] path     The path to the generated repository config
       #                          files. ex: /myproject/pkg/repo_configs
       # @param [String] name     A human-readable name for the repository
-      # @param [String[ version  The version of the project, as used by the
+      # @param [String] version  The version of the project, as used by the
       #                          packaging tools. This can be determined with
       #                          `rake pl:print_build_params` from the packaging
       #                          repo.
@@ -664,7 +656,7 @@ module Beaker
       #                          :expect_failures to create the full list of 
       #                          passing exit codes.
       #
-      # @options opts [Hash]    :environment Additional environment variables to be
+      # @option opts [Hash]    :environment Additional environment variables to be
       #                         passed to the 'puppet apply' command
       #
       # @option opts [Boolean]  :catch_failures (false) By default `puppet
@@ -695,67 +687,64 @@ module Beaker
       #                      validation, etc.
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
-        if host.is_a?(Array)
-          return host.map do |h|
-            apply_manifest_on(h, manifest, opts, &block)
+        block_on host do | host |
+
+          on_options = {}
+          on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
+
+          args = ["--verbose"]
+          args << "--parseonly" if opts[:parseonly]
+          args << "--trace" if opts[:trace]
+
+          # From puppet help:
+          # "... an exit code of '2' means there were changes, an exit code of
+          # '4' means there were failures during the transaction, and an exit
+          # code of '6' means there were both changes and failures."
+          if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].select{|x|x}.length > 1
+            raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, `expect_failures`, or `expect_changes` for a single manifest")
           end
+          if opts[:catch_changes]
+            args << '--detailed-exitcodes'
+
+            # We're after idempotency so allow exit code 0 only.
+            on_options[:acceptable_exit_codes] |= [0]
+          elsif opts[:catch_failures]
+            args << '--detailed-exitcodes'
+
+            # We're after only complete success so allow exit codes 0 and 2 only.
+            on_options[:acceptable_exit_codes] |= [0, 2]
+          elsif opts[:expect_failures]
+            args << '--detailed-exitcodes'
+
+            # We're after failures specifically so allow exit codes 1, 4, and 6 only.
+            on_options[:acceptable_exit_codes] |= [1, 4, 6]
+          elsif opts[:expect_changes]
+            args << '--detailed-exitcodes'
+
+            # We're after changes specifically so allow exit code 2 only.
+            on_options[:acceptable_exit_codes] |= [2]
+          else
+            # Either use the provided acceptable_exit_codes or default to [0]
+            on_options[:acceptable_exit_codes] |= [0]
+          end
+
+          # Not really thrilled with this implementation, might want to improve it
+          # later.  Basically, there is a magic trick in the constructor of
+          # PuppetCommand which allows you to pass in a Hash for the last value in
+          # the *args Array; if you do so, it will be treated specially.  So, here
+          # we check to see if our caller passed us a hash of environment variables
+          # that they want to set for the puppet command.  If so, we set the final
+          # value of *args to a new hash with just one entry (the value of which
+          # is our environment variables hash)
+          if opts.has_key?(:environment)
+            args << { :environment => opts[:environment]}
+          end
+
+          file_path = host.tmpfile('apply_manifest.pp')
+          create_remote_file(host, file_path, manifest + "\n")
+          args << file_path
+          on host, puppet( 'apply', *args), on_options, &block
         end
-
-        on_options = {}
-        on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
-
-        args = ["--verbose"]
-        args << "--parseonly" if opts[:parseonly]
-        args << "--trace" if opts[:trace]
-
-        # From puppet help:
-        # "... an exit code of '2' means there were changes, an exit code of
-        # '4' means there were failures during the transaction, and an exit
-        # code of '6' means there were both changes and failures."
-        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].select{|x|x}.length > 1
-          raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, `expect_failures`, or `expect_changes` for a single manifest")
-        end
-        if opts[:catch_changes]
-          args << '--detailed-exitcodes'
-
-          # We're after idempotency so allow exit code 0 only.
-          on_options[:acceptable_exit_codes] |= [0]
-        elsif opts[:catch_failures]
-          args << '--detailed-exitcodes'
-
-          # We're after only complete success so allow exit codes 0 and 2 only.
-          on_options[:acceptable_exit_codes] |= [0, 2]
-        elsif opts[:expect_failures]
-          args << '--detailed-exitcodes'
-
-          # We're after failures specifically so allow exit codes 1, 4, and 6 only.
-          on_options[:acceptable_exit_codes] |= [1, 4, 6]
-        elsif opts[:expect_changes]
-          args << '--detailed-exitcodes'
-
-          # We're after changes specifically so allow exit code 2 only.
-          on_options[:acceptable_exit_codes] |= [2]
-        else
-          # Either use the provided acceptable_exit_codes or default to [0]
-          on_options[:acceptable_exit_codes] |= [0]
-        end
-
-        # Not really thrilled with this implementation, might want to improve it
-        # later.  Basically, there is a magic trick in the constructor of
-        # PuppetCommand which allows you to pass in a Hash for the last value in
-        # the *args Array; if you do so, it will be treated specially.  So, here
-        # we check to see if our caller passed us a hash of environment variables
-        # that they want to set for the puppet command.  If so, we set the final
-        # value of *args to a new hash with just one entry (the value of which
-        # is our environment variables hash)
-        if opts.has_key?(:environment)
-          args << { :environment => opts[:environment]}
-        end
-
-        file_path = host.tmpfile('apply_manifest.pp')
-        create_remote_file(host, file_path, manifest + "\n")
-        args << file_path
-        on host, puppet( 'apply', *args), on_options, &block
       end
 
       # Runs 'puppet apply' on default host, piping manifest through stdin
@@ -767,9 +756,7 @@ module Beaker
       # @deprecated
       def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test',
                        options={}, &block)
-        if host.is_a? Array
-          host.each { |h| run_agent_on h, arg, options, &block }
-        else
+        block_on host do | host |
           on host, puppet_agent(arg), options, &block
         end
       end
@@ -777,32 +764,34 @@ module Beaker
       # FIX: this should be moved into host/platform
       # @visibility private
       def run_cron_on(host, action, user, entry="", &block)
-        platform = host['platform']
-        if platform.include?('solaris') || platform.include?('aix') then
-          case action
-            when :list   then args = '-l'
-            when :remove then args = '-r'
-            when :add
-              on( host,
-                 "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
-                  &block )
+        block_on host do | host |
+          platform = host['platform']
+          if platform.include?('solaris') || platform.include?('aix') then
+            case action
+              when :list   then args = '-l'
+              when :remove then args = '-r'
+              when :add
+                on( host,
+                   "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
+                    &block )
+            end
+
+          else # default for GNU/Linux platforms
+            case action
+              when :list   then args = '-l -u'
+              when :remove then args = '-r -u'
+              when :add
+                 on( host,
+                    "echo '#{entry}' > /tmp/#{user}.cron && " +
+                    "crontab -u #{user} /tmp/#{user}.cron",
+                     &block )
+            end
           end
 
-        else # default for GNU/Linux platforms
-          case action
-            when :list   then args = '-l -u'
-            when :remove then args = '-r -u'
-            when :add
-               on( host,
-                  "echo '#{entry}' > /tmp/#{user}.cron && " +
-                  "crontab -u #{user} /tmp/#{user}.cron",
-                   &block )
-          end
-        end
-
-        if args
-          case action
-            when :list, :remove then on(host, "crontab #{args} #{user}", &block)
+          if args
+            case action
+              when :list, :remove then on(host, "crontab #{args} #{user}", &block)
+            end
           end
         end
       end
@@ -813,23 +802,26 @@ module Beaker
       # A teardown step is also added to make sure unstubbing of the host is
       # removed always.
       #
-      # @param machine [String] the host to execute this stub
+      # @param [Host, Array<Host>, String, Symbol] machine    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
       #   mappings
       # @example Stub puppetlabs.com on the master to 127.0.0.1
       #   stub_hosts_on(master, 'puppetlabs.com' => '127.0.0.1')
       def stub_hosts_on(machine, ip_spec)
-        ip_spec.each do |host, ip|
-          logger.notify("Stubbing host #{host} to IP #{ip} on machine #{machine}")
-          on( machine,
-              puppet('resource', 'host', host, 'ensure=present', "ip=#{ip}") )
-        end
-
-        teardown do
+        block_on machine do | host |
           ip_spec.each do |host, ip|
-            logger.notify("Unstubbing host #{host} to IP #{ip} on machine #{machine}")
-            on( machine,
-                puppet('resource', 'host', host, 'ensure=absent') )
+            logger.notify("Stubbing host #{host} to IP #{ip} on machine #{host}")
+            on( host,
+                puppet('resource', 'host', host, 'ensure=present', "ip=#{ip}") )
+          end
+
+          teardown do
+            ip_spec.each do |host, ip|
+              logger.notify("Unstubbing host #{host} to IP #{ip} on machine #{host}")
+              on( host,
+                  puppet('resource', 'host', host, 'ensure=absent') )
+            end
           end
         end
       end
@@ -850,11 +842,14 @@ module Beaker
       # forge api v1 canonical source is forge.puppetlabs.com
       # forge api v3 canonical source is forgeapi.puppetlabs.com
       #
-      # @param machine [String] the host to perform the stub on
+      # @param [Host, Array<Host>, String, Symbol] machine    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       def stub_forge_on(machine)
         @forge_ip ||= Resolv.getaddress(forge)
-        stub_hosts_on(machine, 'forge.puppetlabs.com' => @forge_ip)
-        stub_hosts_on(machine, 'forgeapi.puppetlabs.com' => @forge_ip)
+        block_on machine do | host |
+          stub_hosts_on(host, 'forge.puppetlabs.com' => @forge_ip)
+          stub_hosts_on(host, 'forgeapi.puppetlabs.com' => @forge_ip)
+        end
       end
 
       # This wraps the method `stub_hosts` and makes the stub specific to
@@ -890,28 +885,32 @@ module Beaker
       end
 
       #stops the puppet agent running on the host
+      # @param [Host, Array<Host>, String, Symbol] agent    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       def stop_agent_on(agent)
-        vardir = agent.puppet['vardir']
-        agent_running = true
-        while agent_running
-          result = on agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
-          agent_running = (result.exit_code == 0)
-          sleep 2 unless agent_running
-        end
-       
-        if agent['platform'].include?('solaris')
-          on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
-        elsif agent['platform'].include?('aix')
-          on(agent, '/usr/bin/stopsrc -s pe-puppet')
-        elsif agent['platform'].include?('windows')
-          on(agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2])
-        else
-          # For the sake of not passing the PE version into this method,
-          # we just query the system to find out which service we want to
-          # stop
-          result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
-          service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
-          on(agent, "/etc/init.d/#{service} stop")
+        block_on agent do | host | 
+          vardir = agent.puppet['vardir']
+          agent_running = true
+          while agent_running
+            result = on host, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
+            agent_running = (result.exit_code == 0)
+            sleep 2 unless agent_running
+          end
+         
+          if host['platform'].include?('solaris')
+            on(host, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
+          elsif host['platform'].include?('aix')
+            on(host, '/usr/bin/stopsrc -s pe-puppet')
+          elsif host['platform'].include?('windows')
+            on(host, 'net stop pe-puppet', :acceptable_exit_codes => [0,2])
+          else
+            # For the sake of not passing the PE version into this method,
+            # we just query the system to find out which service we want to
+            # stop
+            result = on host, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
+            service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
+            on(host, "/etc/init.d/#{service} stop")
+          end
         end
       end
 
@@ -930,31 +929,34 @@ module Beaker
 
       # Ensure the host has requested a cert, then sign it
       #
-      # @param [Host] host  The host to sign for
+      # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       #
       # @return nil
       # @raise [FailTest] if process times out
       def sign_certificate_for(host)
-        if [master, dashboard, database].include? host
+        block_on host do | host |
+          if [master, dashboard, database].include? host
 
-          on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
-          on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
+            on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
+            on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
 
-        else
+          else
 
-          hostname = Regexp.escape host.node_name
+            hostname = Regexp.escape host.node_name
 
-          last_sleep = 0
-          next_sleep = 1
-          (0..10).each do |i|
-            fail_test("Failed to sign cert for #{hostname}") if i == 10
+            last_sleep = 0
+            next_sleep = 1
+            (0..10).each do |i|
+              fail_test("Failed to sign cert for #{hostname}") if i == 10
 
-            on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
-            break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
-            sleep next_sleep
-            (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+              on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
+              break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
+              sleep next_sleep
+              (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+            end
+
           end
-
         end
       end
 
@@ -966,15 +968,17 @@ module Beaker
 
       # Get a facter fact from a provided host
       #
-      # @param [Host] host  The host to query the fact for
+      # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
       # @param [String] name The name of the fact to query for
       # @!macro common_opts
       #
       # @return String The value of the fact 'name' on the provided host
       # @raise  [FailTest] Raises an exception if call to facter fails
       def fact_on(host, name, opts = {})
-        result = on host, facter(name, opts)
-        result.stdout.chomp if result.stdout
+        on host, facter(name, opts) do | result |
+          result.stdout.chomp if result.stdout
+        end
       end
 
       # Get a facter fact from the default host
