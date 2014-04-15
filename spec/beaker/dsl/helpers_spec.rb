@@ -674,11 +674,13 @@ describe ClassMixedWithDSLHelpers do
     let(:test_case_path) { 'testcase/path' }
     let(:tmpdir_path) { '/tmp/tmpdir' }
     let(:puppet_path) { '/puppet/path' }
+    let(:puppetservice) { @ps || nil }
     let(:is_pe) { false }
     let(:host) do
       FakeHost.new(:pe => is_pe,
                    :options => {
         'puppetpath' => puppet_path,
+        'puppetservice' => puppetservice,
         'platform' => 'el'
       })
     end
@@ -709,23 +711,23 @@ describe ClassMixedWithDSLHelpers do
         Tempfile.should_receive(:open).with('beaker')
       end
 
-      context 'as pe' do
-        let(:is_pe) { true }
+      context 'with puppetservice and service-path defined' do
+        let(:puppetservice) { 'whatever' }
 
         it 'bounces puppet twice' do
           subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/pe-httpd restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
         end
 
         it 'yield to a block after bouncing service' do
           execution = 0
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/pe-httpd restart/).once
+              expect(host).to execute_commands_matching(/#{@ps} restart/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/pe-httpd restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
         end
       end
 
