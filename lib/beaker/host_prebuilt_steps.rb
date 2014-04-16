@@ -302,8 +302,9 @@ module Beaker
 
     #Determine the ip address of the provided host 
     # @param [Host] host the host to act upon
+    # @deprecated use {Host#get_ip}
     def get_ip(host)
-      host.exec(Command.new("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1")).stdout.chomp
+      host.get_ip
     end
 
     #Append the provided string to the /etc/hosts file of the provided host
