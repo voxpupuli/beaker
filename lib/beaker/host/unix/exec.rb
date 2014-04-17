@@ -12,4 +12,12 @@ module Unix::Exec
   def path
     '/bin:/usr/bin'
   end
+
+  def get_ip
+    if self['platform'].include? 'solaris'
+      execute("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1").strip
+    else
+      execute("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1").strip
+    end
+  end
 end
