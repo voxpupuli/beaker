@@ -78,7 +78,7 @@ module Beaker
               if discover_files.empty?
                 parser_error "empty directory used as an option (#{root})!"
               end
-              files += discover_files.sort
+              files += discover_files.sort_by {|file| [file.count("/"), file]}
             else #not a file, not a directory, not nothin'
               parser_error "#{root} used as a file option but is not a file or directory!"
             end
