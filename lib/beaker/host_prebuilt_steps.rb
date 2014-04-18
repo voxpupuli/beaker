@@ -199,7 +199,7 @@ module Beaker
         host.map { |h| apt_get_update(h) }
       else
         if host[:platform] =~ /(ubuntu)|(debian)/ 
-          host.exec(Command.new("apt-get -y -f -m update"))
+          host.exec(Command.new("apt-get update"))
         end
       end
     end
