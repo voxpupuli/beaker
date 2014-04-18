@@ -111,7 +111,7 @@ describe Beaker do
     it "can perform apt-get on ubuntu hosts" do
       host = make_host( 'testhost', { :platform => 'ubuntu' } )
 
-      Beaker::Command.should_receive( :new ).with("apt-get -y -f -m update").once
+      Beaker::Command.should_receive( :new ).with("apt-get update").once
 
       subject.apt_get_update( host )
 
@@ -120,7 +120,7 @@ describe Beaker do
     it "can perform apt-get on debian hosts" do
       host = make_host( 'testhost', { :platform => 'debian' } )
 
-      Beaker::Command.should_receive( :new ).with("apt-get -y -f -m update").once
+      Beaker::Command.should_receive( :new ).with("apt-get update").once
 
       subject.apt_get_update( host )
 
