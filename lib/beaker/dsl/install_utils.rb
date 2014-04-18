@@ -454,7 +454,7 @@ module Beaker
             end
             on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
             on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
-            on host, 'apt-get -y -f -m update'
+            on host, 'apt-get update'
             on host, 'apt-get install -y puppet'
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
