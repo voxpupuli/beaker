@@ -1,9 +1,8 @@
-require 'docker'
-
 module Beaker
   class Docker < Beaker::Hypervisor
 
     def initialize(hosts, options)
+      require 'docker'
       @options = options
       @logger = options[:logger]
       @hosts = hosts
