@@ -141,7 +141,7 @@ module Beaker
 
       it "ensures that fail-mode is one of fast/slow" do
         FakeFS.deactivate!
-        args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"] 
+        args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"]
         expect{parser.parse_args(args)}.to raise_error(ArgumentError)
       end
 

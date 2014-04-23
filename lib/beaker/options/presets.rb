@@ -5,7 +5,7 @@ module Beaker
     module Presets
 
       # Generates an OptionsHash of the environment variables of interest to Beaker
-      # 
+      #
       # Currently supports:
       #
       #   consoleport, IS_PE, pe_dist_dir, pe_version_file, pe_version_file_win, pe_ver
@@ -28,7 +28,7 @@ module Beaker
       end
 
       # Generates an OptionsHash of preset values for arguments supported by Beaker
-      # 
+      #
       # @return [OptionsHash] The supported arguments in an OptionsHash
       def self.presets
         h = Beaker::Options::OptionsHash.new
