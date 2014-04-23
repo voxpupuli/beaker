@@ -149,6 +149,16 @@ module Beaker
       end
     end
 
+    #Determine the ip address of this host
+    def get_ip
+      @logger.warn("Uh oh, this should be handled by sub-classes but hasn't been")
+    end
+
+    #Return the ip address of this host
+    def ip
+      self[:ip] ||= get_ip
+    end
+
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],

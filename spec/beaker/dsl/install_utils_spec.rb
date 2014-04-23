@@ -299,7 +299,7 @@ describe ClassMixedWithDSLInstallUtils do
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
         expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get -y -f -m update')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get update')
         expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
         subject.install_puppet
       end
@@ -309,7 +309,7 @@ describe ClassMixedWithDSLInstallUtils do
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
         expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get -y -f -m update')
+        expect(subject).to receive(:on).with(hosts[0], 'apt-get update')
         expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
         subject.install_puppet
       end

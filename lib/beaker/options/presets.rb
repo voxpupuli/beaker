@@ -5,7 +5,7 @@ module Beaker
     module Presets
 
       # Generates an OptionsHash of the environment variables of interest to Beaker
-      # 
+      #
       # Currently supports:
       #
       #   consoleport, IS_PE, pe_dist_dir, pe_version_file, pe_version_file_win, pe_ver
@@ -23,11 +23,12 @@ module Beaker
           :pe_ver => ENV['pe_ver'],
           :project => ENV['BEAKER_project'],
           :department => ENV['BEAKER_department'],
+          :jenkins_build_url => ENV['BUILD_URL'],
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
       # Generates an OptionsHash of preset values for arguments supported by Beaker
-      # 
+      #
       # @return [OptionsHash] The supported arguments in an OptionsHash
       def self.presets
         h = Beaker::Options::OptionsHash.new
@@ -35,6 +36,7 @@ module Beaker
           :project => 'Beaker',
           :department => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :validate => true,
+          :jenkins_build_url => nil,
           :log_level => 'verbose',
           :trace_limit => 10,
           :hosts_file => 'sample.cfg',

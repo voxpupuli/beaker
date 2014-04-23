@@ -472,8 +472,8 @@ module Beaker
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
-          if host.is_pe?
-            bounce_service( host, 'pe-httpd' )
+          if host['puppetservice']
+            bounce_service( host, host['puppetservice'] )
           else
             puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
           end
@@ -488,8 +488,8 @@ module Beaker
           begin
             restore_puppet_conf_from_backup( host, backup_file )
 
-            if host.is_pe?
-              bounce_service( host, 'pe-httpd' )
+            if host['puppetservice']
+              bounce_service( host, host['puppetservice'] )
             else
               if puppet_master_started
                 stop_puppet_from_source_on( host )
@@ -631,7 +631,10 @@ module Beaker
         # Any reason to not
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
-        host.exec( Command.new( "/etc/init.d/#{service} restart" ) )
+        host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
+        if host['service-wait']
+          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52], 120)
+        end
       end
 
       # Blocks until the port is open on the host specified, returns false
@@ -690,6 +693,11 @@ module Beaker
       #                         if `puppet --apply` indicates there were no
       #                         failure during its execution.
       #
+      # @option opts [Boolean]  :future_parser (false) This option enables
+      #                         the future parser option that is available 
+      #                         from Puppet verion 3.2
+      #                         By default it will use the 'current' parser.
+      #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
       #                      validation, etc.
@@ -707,6 +715,7 @@ module Beaker
         args = ["--verbose"]
         args << "--parseonly" if opts[:parseonly]
         args << "--trace" if opts[:trace]
+        args << "--parser future" if opts[:future_parser]
 
         # From puppet help:
         # "... an exit code of '2' means there were changes, an exit code of
@@ -872,7 +881,7 @@ module Beaker
       end
 
       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
-        retry_command(desc, host, "curl #{url}", desired_exit_codes, max_retries, retry_interval)
+        retry_command(desc, host, "curl -m 1 #{url}", desired_exit_codes, max_retries, retry_interval)
       end
 
       def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
