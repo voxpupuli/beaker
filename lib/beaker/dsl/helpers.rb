@@ -1009,6 +1009,127 @@ module Beaker
       end
 
 
+      #Install local module for acceptance testing
+      # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
+      # @api dsl
+      # @param [Host, Array<Host>, String, Symbol] host
+      #                   One or more hosts to act upon,
+      #                   or a role (String or Symbol) that identifies one or more hosts.
+      # @param [String] source
+      #                   The current directory where the module sits, otherwise will try
+      #                         and walk the tree to figure out
+      # @param [String] module_name
+      #                   Name which the module should be installed under, please do not include author
+      # @param [String] target_module_path
+      #                   Location where the module should be installed, will default
+      #                    to host['puppetpath']/modules
+      # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
+      #
+      def copy_root_module_to(host, source = nil, module_name = nil, target_module_path = nil)
+        if !host
+          raise(ArgumentError,"Host must be defined")
+        end
+        if !source
+          source = parse_for_moduleroot Dir.getwd
+        end
+        if !target_module_path
+          target_module_path = "#{host['puppetpath']}/modules"
+        end
+        if !module_name
+          module_name = parse_for_modulename source
+          if !module_name
+            logger.debug('Still unable to determine the modulename')
+            raise(ArgumentError, "Unable to determine the module name, please update your call of puppet_module_install")
+
+          end
+        end
+        module_dir = File.join(target_module_path,module_name)
+        on host, "mkdir -p #{target_module_path}"
+        ['manifests','lib','templates','metadata.json','Modulefile','files','Gemfile'].each do |item|
+          item_source = File.join(source,item)
+          if File.exists? item_source
+            options = {}
+            if File.directory? item_source
+              on host, "mkdir -p #{File.join(module_dir,item)}"
+              options = {:mkdir => true}
+            end
+            host.do_scp_to(item_source,module_dir,options)
+          end
+        end
+      end
+
+
+      #Recursive method for finding the module root
+      # Assumes that a Modulefile exists
+      # @param [String] possible_module_directory
+      #                   will look for Modulefile and if none found go up one level and try again until root is reached
+      #
+      # @return [String,nil]
+      def parse_for_moduleroot(possible_module_directory)
+        if File.exists?("#{possible_module_directory}/Modulefile")
+          possible_module_directory
+        elsif possible_module_directory === '/'
+          logger.error "At root, can't parse for another directory"
+          nil
+        else
+          logger.debug "No Modulefile found at #{possible_module_directory}, moving up"
+          parse_for_moduleroot File.expand_path(File.join(possible_module_directory,'..'))
+        end
+      end
+
+
+      #Parse root directory of a module for module name
+      # Searches for metadata.json and then if none found, Modulefile and parses for the Name attribute
+      # @param [String] root_module_dir
+      # @return [String] module name
+      def parse_for_modulename(root_module_dir)
+        module_name = nil
+        if File.exists?("#{root_module_dir}/metadata.json")
+          logger.debug "Attempting to parse Modulename from metadata.json"
+          module_json = JSON.parse (File.read "#{root_module_dir}/metadata.json")
+          if(module_json.has_key?('name'))
+            module_name = get_module_name(module_json['name'])
+          end
+        end
+        if !module_name && File.exists?("#{root_module_dir}/Modulefile")
+          logger.debug "Attempting to parse Modulename from Modulefile"
+          if /^name\s+'?(\w+-\w+)'?\s*$/i.match(File.read("#{root_module_dir}/Modulefile"))
+            module_name = get_module_name(Regexp.last_match[1])
+          end
+        end
+        if !module_name
+          logger.debug "Unable to determine name, returning null"
+        end
+        module_name
+      end
+
+      #Parse modulename from the pattern 'Auther-ModuleName'
+      #
+      # @param [String] author_module_name <Author>-<ModuleName> pattern
+      #
+      # @return [String,nil]
+      #
+      def get_module_name(author_module_name)
+        split_name = split_author_modulename(author_module_name)
+        if split_name
+          split_name[:module]
+        end
+      end
+
+      #Split the Author-Name into a hash
+      # @param [String] author_module_attr
+      #
+      # @return [Hash<Symbol,String>,nil] :author and :module symbols will be returned
+      #
+      def split_author_modulename(author_module_attr)
+        result = /(\w+)-(\w+)/.match(author_module_attr)
+        if result
+          {:author => result[1], :module => result[2]}
+        else
+          nil
+        end
+      end
+
     end
   end
 end

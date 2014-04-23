@@ -127,26 +127,26 @@ describe ClassMixedWithDSLHelpers do
       end
 
       it 'yields self' do
-        subject.on host, command do 
+        subject.on host, command do
           expect( subject ).
             to be_an_instance_of( ClassMixedWithDSLHelpers )
         end
       end
 
       it 'provides access to stdout' do
-        subject.on host, command do 
+        subject.on host, command do
           expect( subject.stdout ).to be == 'stdout'
         end
       end
 
       it 'provides access to stderr' do
-        subject.on host, command do 
+        subject.on host, command do
           expect( subject.stderr ).to be == 'stderr'
         end
       end
 
       it 'provides access to exit_code' do
-        subject.on host, command do 
+        subject.on host, command do
           expect( subject.exit_code ).to be == 0
         end
       end
@@ -878,4 +878,109 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+
+  describe 'copy_root_module_to' do
+    def source_to_scp (source, target, items)
+      subject.stub(:parse_for_moduleroot).and_return('/totalfake/testmodule')
+      Dir.stub(:getpwd).and_return('/totalfake/testmodule')
+
+      items = [items] unless items.kind_of?(Array)
+      File.stub(:exists?).with(any_args()).and_return(false)
+      File.stub(:directory?).with(any_args()).and_return(false)
+      items.each do |item|
+        source_item = File.join(source,item)
+        File.stub(:exists?).with(source_item).and_return(true)
+        options = {}
+        if ['manifests','lib','templates','files'].include? item
+          File.stub(:directory?).with(source_item).and_return(true)
+          options = {:mkdir => true}
+        end
+        master.should_receive(:do_scp_to).with(source_item,target,options).ordered
+      end
+    end
+    it 'should call scp with the correct info, with only providing host' do
+      files = ['manifests','lib','templates','metadata.json','Modulefile','files']
+      source_to_scp '/totalfake/testmodule',"#{master['puppetpath']}/modules/testmodule",files
+      subject.stub(:parse_for_modulename).with(any_args()).and_return("testmodule")
+      subject.copy_root_module_to(master)
+    end
+    it 'should call scp with the correct info, when specifying the modulename' do
+      files = ['manifests','lib','metadata.json','Modulefile']
+      source_to_scp '/totalfake/testmodule',"#{master['puppetpath']}/modules/bogusmodule",files
+      subject.stub(:parse_for_modulename).and_return('testmodule')
+      subject.copy_root_module_to(master,nil,"bogusmodule")
+    end
+    it 'should call scp with the correct info, when specifying the target to a different path' do
+      files = ['manifests','lib','templates','metadata.json','Modulefile','files']
+      target = "/opt/shared/puppet/modules"
+      source_to_scp '/totalfake/testmodule',"#{target}/testmodule",files
+      subject.stub(:parse_for_modulename).and_return('testmodule')
+      subject.copy_root_module_to(master,nil,nil,target)
+    end
+  end
+
+  describe 'split_author_modulename' do
+    it 'should return a correct modulename' do
+      result =  subject.split_author_modulename('myname-test_43_module')
+      expect(result[:author]).to eq('myname')
+      expect(result[:module]).to eq('test_43_module')
+    end
+  end
+
+  describe 'get_module_name' do
+    it 'should return a has of author and modulename' do
+      expect(subject.get_module_name('myname-test_43_module')).to eq('test_43_module')
+    end
+    it 'should return nil for invalid names' do
+      expect(subject.get_module_name('myname-')).to eq(nil)
+    end
+  end
+
+  describe 'parse_for_modulename' do
+    directory = '/testfilepath/myname-testmodule'
+    it 'should return name from metadata.json' do
+      File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
+      File.stub(:read).with("#{directory}/metadata.json").and_return(" {\"name\":\"myname-testmodule\"} ")
+      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from metadata.json")
+      subject.logger.should_not_receive(:debug).with('Unable to determine name, returning null')
+      subject.parse_for_modulename(directory).should eq('testmodule')
+    end
+    it 'should return name from Modulefile' do
+      File.stub(:exists?).with("#{directory}/metadata.json").and_return(false)
+      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+      File.stub(:read).with("#{directory}/Modulefile").and_return("name    'myname-testmodule'  \nauthor   'myname'")
+      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from Modulefile")
+      subject.logger.should_not_receive(:debug).with("Unable to determine name, returning null")
+      expect(subject.parse_for_modulename(directory)).to eq('testmodule')
+    end
+  end
+
+  describe 'parse_for_module_root' do
+    directory = '/testfilepath/myname-testmodule'
+    it 'should recersively go up the directory to find the module files' do
+      File.stub(:exists?).with("#{directory}/acceptance/Modulefile").and_return(false)
+      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+      subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
+      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}/acceptance, moving up")
+      expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+    end
+    it 'should recersively go up the directory to find the module files' do
+      File.stub(:exists?).and_return(false)
+      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}, moving up")
+      subject.logger.should_receive(:error).with("At root, can't parse for another directory")
+      expect(subject.parse_for_moduleroot(directory)).to eq(nil)
+    end
+
+  end
+end
+
+module FakeFS
+  class File < StringIO
+    def self.absolute_path(filepath)
+      RealFile.absolute_path(filepath)
+    end
+    def self.expand_path(filepath)
+      RealFile.expand_path(filepath)
+    end
+  end
 end
