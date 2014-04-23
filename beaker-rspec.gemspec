@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # Testing dependencies
+  s.add_development_dependency 'minitest', '~> 4.0'
   s.add_development_dependency 'fakefs', '0.4'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'simplecov' unless less_than_one_nine
@@ -31,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'thin'
 
   # Run time dependencies
-  s.add_runtime_dependency 'beaker', '~> 1.9.1'
+  s.add_runtime_dependency 'beaker', '~> 1.10.0'
   s.add_runtime_dependency 'rspec', '~> 2.14'
   s.add_runtime_dependency 'serverspec', '~> 1.0.0'
   s.add_runtime_dependency 'specinfra', '~> 1.0.0'
