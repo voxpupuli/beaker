@@ -694,7 +694,7 @@ module Beaker
       #                         failure during its execution.
       #
       # @option opts [Boolean]  :future_parser (false) This option enables
-      #                         the future parser option that is available 
+      #                         the future parser option that is available
       #                         from Puppet verion 3.2
       #                         By default it will use the 'current' parser.
       #
@@ -1009,7 +1009,8 @@ module Beaker
       end
 
       #Install local module for acceptance testing
-      #
+      # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
+      # @api dsl
       # @param [Host, Array<Host>, String, Symbol] host
       #                   One or more hosts to act upon,
       #                   or a role (String or Symbol) that identifies one or more hosts.
@@ -1021,6 +1022,7 @@ module Beaker
       # @param [String] target_module_path
       #                   Location where the module should be installed, will default
       #                    to host['puppetpath']/modules
+      # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
       def copy_root_module_to(host, source = nil, module_name = nil, target_module_path = nil)
         if !host
@@ -1058,7 +1060,10 @@ module Beaker
 
       #Recursive method for finding the module root
       # Assumes that a Modulefile exists
-      # @param []
+      # @param [String] possible_module_directory
+      #                   will look for Modulefile and if none found go up one level and try again until root is reached
+      #
+      # @return [String,nil]
       def parse_for_moduleroot(possible_module_directory)
         if File.exists?("#{possible_module_directory}/Modulefile")
           possible_module_directory
@@ -1071,6 +1076,11 @@ module Beaker
         end
       end
 
+
+      #Parse root directory of a module for module name
+      # Searches for metadata.json and then if none found, Modulefile and parses for the Name attribute
+      # @param [String] root_module_dir
+      # @return [String] module name
       def parse_for_modulename(root_module_dir)
         module_name = nil
         if File.exists?("#{root_module_dir}/metadata.json")
@@ -1092,6 +1102,12 @@ module Beaker
         module_name
       end
 
+      #Parse modulename from the pattern 'Auther-ModuleName'
+      #
+      # @param [String] author_module_name <Author>-<ModuleName> pattern
+      #
+      # @return [String,nil]
+      #
       def get_module_name(author_module_name)
         split_name = split_author_modulename(author_module_name)
         if split_name
@@ -1099,6 +1115,11 @@ module Beaker
           end
       end
 
+      #Split the Author-Name into a hash
+      # @param [String] author_module_attr
+      #
+      # @return [Hash<Symbol,String>,nil] :author and :module symbols will be returned
+      #
       def split_author_modulename(author_module_attr)
         result = /(\w+)-(\w+)/.match(author_module_attr)
         if result
