@@ -187,10 +187,10 @@ module Beaker
         expect { docker.send(:dockerfile_for, {'platform' => 'a_sidewalk' }) }.to raise_error(/platform a_sidewalk not yet supported on docker/)
       end
 
-      it 'should add extra_commands as RUN statements' do
+      it 'should add docker_image_commands as RUN statements' do
         dockerfile = docker.send(:dockerfile_for, {
           'platform' => 'el-',
-          'extra_commands' => [
+          'docker_image_commands' => [
             'special one',
             'special two',
             'special three',

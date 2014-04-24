@@ -134,8 +134,8 @@ module Beaker
         RUN echo root:#{root_password} | chpasswd
       EOF
 
-      # Any extra_commands specified for the host
-      dockerfile += (host['extra_commands'] || []).map { |command|
+      # Any extra commands specified for the host
+      dockerfile += (host['docker_image_commands'] || []).map { |command|
         "RUN #{command}\n"
       }.join('')
 
