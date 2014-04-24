@@ -39,18 +39,8 @@ describe ClassMixedWithDSLRoles do
     end
     it 'raises an error if there is more than one master' do
       @hosts = [ master, monolith ]
-      subject.should_receive( :hosts ).exactly( 5 ).times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 1 ).times.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
-    end
-    it 'and raises an error if there is no master and no default' do
-      @hosts = [ agent1, agent2, custom ]
-      subject.should_receive( :hosts ).exactly( 4 ).times.and_return( hosts )
-      expect { subject.master }.to raise_error Beaker::DSL::FailTest
-    end
-    it 'returns the default when there is no master' do
-      @hosts = [ agent1 ]
-      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
-      expect( subject.master ).to be == agent1 
     end
   end
   describe '#dashboard' do
@@ -90,23 +80,18 @@ describe ClassMixedWithDSLRoles do
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
-      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 1  ).times.and_return( hosts )
       expect( subject.default ).to be == default
     end
-    it 'returns the master if no default host is set' do
-      @hosts = [ db, agent1, agent2, master]
-      subject.should_receive( :hosts ).exactly( 4 ).times.and_return( hosts )
-      expect( subject.default ).to be == master
+    it 'raises an error if there is more than one default' do
+      @hosts = [ db, monolith, default, default ]
+      subject.should_receive( :hosts ).and_return( hosts )
+      expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
-    it 'returns the only host when only a single host is defined' do
-      @hosts = [ agent1 ]
-      subject.should_receive( :hosts ).exactly( 2 ).times.and_return( hosts )
-      expect( subject.default ).to be == agent1
-    end
-    it 'raises an error when there is no default (no default, no master, no single host)'  do
-      @hosts = [ agent1, agent2 ]
-      subject.should_receive( :hosts ).exactly( 3 ).times.and_return( hosts )
-      expect{ subject.default }.to raise_error Beaker::DSL::FailTest
+    it 'and raises an error if there is no default' do
+      @hosts = [ agent1, agent2, custom ]
+      subject.should_receive( :hosts ).and_return( hosts )
+      expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
   end
 end

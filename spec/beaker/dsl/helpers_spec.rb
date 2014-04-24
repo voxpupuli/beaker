@@ -16,7 +16,7 @@ describe ClassMixedWithDSLHelpers do
   let( :host ) { double.as_null_object }
   let( :result ) { Beaker::Result.new( host, command ) }
 
-  let( :master ) { make_host( 'master',   :roles => %w( master agent )    ) }
+  let( :master ) { make_host( 'master',   :roles => %w( master agent default)    ) }
   let( :agent )  { make_host( 'agent',    :roles => %w( agent )           ) }
   let( :custom ) { make_host( 'custom',   :roles => %w( custom agent )    ) }
   let( :dash )   { make_host( 'console',  :roles => %w( dashboard agent ) ) }
