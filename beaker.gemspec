@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'fission', '~> 0.4'
   s.add_runtime_dependency 'google-api-client', '~> 0.6.4'
   s.add_runtime_dependency 'aws-sdk', '~> 1.38'
+  s.add_runtime_dependency 'docker-api' unless RUBY_VERSION < '1.9'
 
   # These are transitive dependencies that we include or pin to because...
   # Ruby 1.8 compatibility
