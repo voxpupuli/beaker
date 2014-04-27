@@ -5,6 +5,16 @@ task :spec do
   Rake::Task['test:spec'].invoke
 end
 
+task :yard do
+  Rake::Task['docs:gen'].invoke
+end
+
+task :travis do
+  ret1 = Rake::Task['yard'].invoke
+  ret2 = Rake::Task['spec'].invoke
+  (ret1 == ret2) == 0
+end
+
 namespace :test do
   desc 'Run specs (with coverage on 1.9), alias `spec` & the default'
   task :spec do
