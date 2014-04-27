@@ -3,7 +3,7 @@ module Beaker
     # Return a list of open ports for testing based on a hosts role
     #
     # @todo horribly hard-coded
-    # @param [Array<String>] an array of roles
+    # @param [Array<String>] roles An array of roles
     # @return [Array<Number>] array of port numbers
     # @api private
     def self.amiports(roles)

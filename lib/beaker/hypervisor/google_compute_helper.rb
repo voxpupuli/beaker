@@ -513,7 +513,7 @@ module Beaker
     end
 
     #Set tags on a Google Compute instance
-    #@param [Array<String>] tags An array of tags to be added to an instance
+    #@param [Array<String>] data An array of tags to be added to an instance
     #@return [Hash] A correctly formatted Google Compute request hash
     def instance_setMetadata_req(name, fingerprint, data)
       { :api_method => @compute.instances.set_metadata,

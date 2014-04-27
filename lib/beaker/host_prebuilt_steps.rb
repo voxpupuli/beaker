@@ -107,7 +107,7 @@ module Beaker
     end
 
     #Update /etc/hosts on the master node to include a rule for lookup of the master by name/ip.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>, String, Symbol] hosts One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def add_master_entry hosts, opts

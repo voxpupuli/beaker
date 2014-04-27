@@ -245,7 +245,7 @@ module Beaker
       # @param [String] path     The path to the generated repository config
       #                          files. ex: /myproject/pkg/repo_configs
       # @param [String] name     A human-readable name for the repository
-      # @param [String[ version  The version of the project, as used by the
+      # @param [String] version  The version of the project, as used by the
       #                          packaging tools. This can be determined with
       #                          `rake pl:print_build_params` from the packaging
       #                          repo.
@@ -667,7 +667,7 @@ module Beaker
       #                          :expect_failures to create the full list of 
       #                          passing exit codes.
       #
-      # @options opts [Hash]    :environment Additional environment variables to be
+      # @option opts [Hash]     :environment Additional environment variables to be
       #                         passed to the 'puppet apply' command
       #
       # @option opts [Boolean]  :catch_failures (false) By default `puppet
