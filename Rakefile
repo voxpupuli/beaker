@@ -5,6 +5,15 @@ task :spec do
   Rake::Task['test:spec'].invoke
 end
 
+task :yard do
+  Rake::Task['docs:gen'].invoke
+end
+
+task :travis do
+  Rake::Task['yard'].invoke
+  Rake::Task['spec'].invoke
+end
+
 namespace :test do
   desc 'Run specs (with coverage on 1.9), alias `spec` & the default'
   task :spec do
@@ -63,7 +72,11 @@ namespace :docs do
   task :gen => 'docs:clear' do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    sh 'bundle exec yard doc'
+    output = `bundle exec yard doc`
+    puts output
+    if output =~ /\[warn\]|\[error\]/
+      raise "Errors/Warnings during yard documentation generation"
+    end
     Dir.chdir( original_dir )
   end
 
