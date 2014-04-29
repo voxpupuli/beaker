@@ -908,14 +908,14 @@ describe ClassMixedWithDSLHelpers do
       files = ['manifests','lib','metadata.json','Modulefile']
       source_to_scp '/totalfake/testmodule',"#{master['puppetpath']}/modules/bogusmodule",files
       subject.stub(:parse_for_modulename).and_return('testmodule')
-      subject.copy_root_module_to(master,nil,"bogusmodule")
+      subject.copy_root_module_to(master,{:module_name =>"bogusmodule"})
     end
     it 'should call scp with the correct info, when specifying the target to a different path' do
       files = ['manifests','lib','templates','metadata.json','Modulefile','files']
       target = "/opt/shared/puppet/modules"
       source_to_scp '/totalfake/testmodule',"#{target}/testmodule",files
       subject.stub(:parse_for_modulename).and_return('testmodule')
-      subject.copy_root_module_to(master,nil,nil,target)
+      subject.copy_root_module_to(master,{:target_module_path => target})
     end
   end
 

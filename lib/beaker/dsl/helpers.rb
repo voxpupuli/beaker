@@ -1015,45 +1015,42 @@ module Beaker
       # @param [Host, Array<Host>, String, Symbol] host
       #                   One or more hosts to act upon,
       #                   or a role (String or Symbol) that identifies one or more hosts.
-      # @param [String] source
+      # @option opts [String] :source ('./')
       #                   The current directory where the module sits, otherwise will try
       #                         and walk the tree to figure out
-      # @param [String] module_name
-      #                   Name which the module should be installed under, please do not include author
-      # @param [String] target_module_path
+      # @option opts [String] :module_name (nil)
+      #                   Name which the module should be installed under, please do not include author,
+      #                     if none is provided it will attempt to parse the metadata.json and then the Modulefile to determine
+      #                     the name of the module
+      # @option opts [String] :target_module_path (host['puppetpath']/modules)
       #                   Location where the module should be installed, will default
       #                    to host['puppetpath']/modules
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
-      def copy_root_module_to(host, source = nil, module_name = nil, target_module_path = nil)
+      def copy_root_module_to(host, opts = {})
         if !host
-          raise(ArgumentError,"Host must be defined")
+          raise(ArgumentError, "Host must be defined")
         end
-        if !source
-          source = parse_for_moduleroot Dir.getwd
-        end
-        if !target_module_path
-          target_module_path = "#{host['puppetpath']}/modules"
-        end
-        if !module_name
-          module_name = parse_for_modulename source
-          if !module_name
-            logger.debug('Still unable to determine the modulename')
-            raise(ArgumentError, "Unable to determine the module name, please update your call of puppet_module_install")
+        source = opts[:source] || parse_for_moduleroot(Dir.getwd)
+        target_module_path = opts[:target_module_path] || "#{host['puppetpath']}/modules"
 
-          end
+        module_name = opts[:module_name] || parse_for_modulename(source)
+        if !module_name
+          logger.debug('Still unable to determine the modulename')
+          raise(ArgumentError, "Unable to determine the module name, please update your call of puppet_module_install")
         end
-        module_dir = File.join(target_module_path,module_name)
+
+        module_dir = File.join(target_module_path, module_name)
         on host, "mkdir -p #{target_module_path}"
-        ['manifests','lib','templates','metadata.json','Modulefile','files','Gemfile'].each do |item|
-          item_source = File.join(source,item)
+        ['manifests', 'lib', 'templates', 'metadata.json', 'Modulefile', 'files', 'Gemfile'].each do |item|
+          item_source = File.join(source, item)
           if File.exists? item_source
             options = {}
             if File.directory? item_source
-              on host, "mkdir -p #{File.join(module_dir,item)}"
-              options = {:mkdir => true}
+              on host, "mkdir -p #{File.join(module_dir, item)}"
+              options = { :mkdir => true }
             end
-            host.do_scp_to(item_source,module_dir,options)
+            host.do_scp_to(item_source, module_dir, options)
           end
         end
       end
