@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
 
   # Documentation dependencies
   s.add_development_dependency 'yard'
+  s.add_development_dependency 'redcarpet', '2.3.0'
   s.add_development_dependency 'markdown' unless RUBY_VERSION < '1.9'
   s.add_development_dependency 'thin'
 
