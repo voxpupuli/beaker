@@ -1,8 +1,13 @@
 module Windows::Pkg
   include Beaker::CommandFactory
 
-  def check_for_package(name)
+  def check_for_command(name)
     result = exec(Beaker::Command.new("which #{name}"), :acceptable_exit_codes => (0...127))
+    result.exit_code == 0
+  end
+
+  def check_for_package(name)
+    result = exec(Beaker::Command.new("cygcheck #{name}"), :acceptable_exit_codes => (0...127))
     result.exit_code == 0
   end
 
@@ -20,7 +25,7 @@ module Windows::Pkg
       cygwin = "setup-x86.exe"
     end
 
-    if not check_for_package(cygwin)
+    if not check_for_command(cygwin)
       execute("curl --retry 5 http://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}")
     end
     execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}")

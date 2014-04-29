@@ -12,9 +12,9 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    PACKAGES = ['curl']
-    UNIX_PACKAGES = ['ntpdate']
-    SLES_PACKAGES = ['ntp']
+    UNIX_PACKAGES = ['curl', 'ntpdate']
+    WINDOWS_PACKAGES = ['curl']
+    SLES_PACKAGES = ['curl', 'ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -71,9 +71,9 @@ module Beaker
     end
 
     #Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
-    #install them.  Verifies the presence of {HostPrebuiltSteps::PACKAGES} on all hosts,
-    #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts and {HostPrebuiltSteps::SLES_PACKAGES}
-    #on sles (SUSE, Enterprise Linux) hosts.
+    #install them.  Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
+    #{HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows
+    #platforms.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -82,24 +82,25 @@ module Beaker
       if host.is_a? Array
         host.map { |h| validate_host(h, opts) }
       else
-        PACKAGES.each do |pkg|
-          if not host.check_for_package pkg
-            host.install_package pkg
-          end
-        end
         case
-          when host['platform'] =~ /sles-/
-            SLES_PACKAGES.each do |pkg|
-              if not host.check_for_package pkg
-                host.install_package pkg
-              end
+        when host['platform'] =~ /sles-/
+          SLES_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
             end
-          when host['platform'] !~ /(windows)|(aix)|(solaris)/
-            UNIX_PACKAGES.each do |pkg|
-              if not host.check_for_package pkg
-                host.install_package pkg
-              end
+          end
+        when host['platform'] =~ /windows/
+          WINDOWS_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
             end
+          end
+        when host['platform'] !~ /aix|solaris|windows|sles-/
+          UNIX_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
         end
       end
     rescue => e
