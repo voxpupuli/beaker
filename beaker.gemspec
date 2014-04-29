@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov' unless RUBY_VERSION < '1.9'
 
   # Documentation dependencies
+  s.add_development_dependency 'redcarpet', '1.17.2'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'markdown' unless RUBY_VERSION < '1.9'
   s.add_development_dependency 'thin'

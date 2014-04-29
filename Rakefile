@@ -10,7 +10,7 @@ task :yard do
 end
 
 task :travis do
-  Rake::Task['yard'].invoke
+  Rake::Task['yard'].invoke unless RUBY_VERSION < '1.9'
   Rake::Task['spec'].invoke
 end
 
