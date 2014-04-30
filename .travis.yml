@@ -1,8 +1,11 @@
 before_install:
-  - gem update --system 2.2.1
+  - gem install bundler -v 1.5.3
+  - gem update --system 2.2.2
   - gem --version
+install:
+  - bundle _1.5.3_ install
 language: ruby
-script: "bundle exec rake travis"
+script: "bundle _1.5.3_ exec rake travis"
 notifications:
   email: false
 rvm:
