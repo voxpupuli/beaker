@@ -450,7 +450,7 @@ module Beaker
             on host, 'yum install -y puppet'
           elsif host['platform'] =~ /(ubuntu|debian)/
             if ! host.check_for_package 'lsb-release'
-              on host, 'apt-get install -y lsb-release'
+              host.install_package('lsb-release')
             end
             if ! host.check_for_package 'curl'
               on host, 'apt-get install -y curl'
