@@ -449,6 +449,9 @@ module Beaker
             on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
             on host, 'yum install -y puppet'
           elsif host['platform'] =~ /(ubuntu|debian)/
+            if ! host.check_for_package 'lsb-release'
+              host.install_package('lsb-release')
+            end
             if ! host.check_for_package 'curl'
               on host, 'apt-get install -y curl'
             end
