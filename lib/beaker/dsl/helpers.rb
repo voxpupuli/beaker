@@ -13,6 +13,7 @@ module Beaker
     # To mix this is into a class you need the following:
     # * a method *hosts* that yields any hosts implementing
     #   {Beaker::Host}'s interface to act upon.
+    # * a method *options* that provides an options hash, see {Beaker::Options::OptionsHash}
     # * a method *logger* that yields a logger implementing
     #   {Beaker::Logger}'s interface.
     # * the module {Beaker::DSL::Roles} that provides access to the various hosts implementing
@@ -860,8 +861,12 @@ module Beaker
       # forge api v3 canonical source is forgeapi.puppetlabs.com
       #
       # @param machine [String] the host to perform the stub on
-      def stub_forge_on(machine)
-        @forge_ip ||= Resolv.getaddress(forge)
+      # @param forge_host [String] The URL to use as the forge alias, will default to using :forge_host in the 
+      #                             global options hash
+      def stub_forge_on(machine, forge_host = nil)
+        #use global options hash
+        forge_host ||= options[:forge_host]
+        @forge_ip ||= Resolv.getaddress(forge_host)
         stub_hosts_on(machine, 'forge.puppetlabs.com' => @forge_ip)
         stub_hosts_on(machine, 'forgeapi.puppetlabs.com' => @forge_ip)
       end
@@ -870,8 +875,10 @@ module Beaker
       # the forge alias.
       #
       # @see #stub_forge_on
-      def stub_forge
-        stub_forge_on(default)
+      def stub_forge(forge_host = nil)
+        #use global options hash
+        forge_host ||= options[:forge_host]
+        stub_forge_on(default, forge_host)
       end
 
       def sleep_until_puppetdb_started(host)

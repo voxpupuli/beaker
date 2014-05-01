@@ -7,19 +7,20 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
-   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
-                                        :platform => 'linux',
-                                        :roles => [ 'agent' ] } ) }
-   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
-                          basic_hosts[1][:platform] = 'windows'
-                          basic_hosts  }
-   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
+  let(:opts)          { Beaker::Options::Presets.env_vars }
+  let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
+                                       :platform => 'linux',
+                                       :roles => [ 'agent' ] } ) }
+  let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
+                         basic_hosts[1][:platform] = 'windows'
+                         basic_hosts  }
+  let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp' } ) }
+  let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
                                                  :pe_ver => '3.0',
-                                                 :working_dir => '/tmp' } ) }
-   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
-                                                  :pe_ver => '3.0',
-                                                  :working_dir => '/tmp',
-                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
+                                                 :working_dir => '/tmp',
+                                                 :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
 
 
   context 'extract_repo_info_from' do
@@ -257,7 +258,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[2] ).once
       #run puppet agent now that installation is complete
       subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
-      subject.do_install( hosts )
+      subject.do_install( hosts, opts )
     end
   end
 
@@ -326,9 +327,10 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'install_pe' do
 
     it 'calls do_install with sorted hosts' do
+      subject.stub( :options ).and_return( {} )
       subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( hosts )
+      subject.should_receive( :do_install ).with( hosts, {} )
       subject.install_pe
     end
 
@@ -340,7 +342,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
       subject.stub( :options ).and_return( {} )
       subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( hosts )
+      subject.should_receive( :do_install ).with( hosts, {} )
       subject.install_pe
       hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
