@@ -448,7 +448,7 @@ module Beaker
       #
       # @api dsl
       # @return nil
-      def install_puppet
+      def install_puppet(opts = {})
         hosts.each do |host|
           if host['platform'] =~ /el-(5|6)/
             relver = $1
@@ -469,6 +469,13 @@ module Beaker
             on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
             on host, 'apt-get update'
             on host, 'apt-get install -y puppet'
+          elsif host['platform'] =~ /windows/
+            relver = opts[:version]
+            on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{relver}.msi"
+            on host, "msiexec /qn /i puppet-#{relver}.msi"
+
+            #Because the msi installer doesn't add Puppet to the environment path
+            on host, %q{ echo 'export PATH=$PATH:"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin"' > /etc/bash.bashrc }
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
           end
