@@ -331,7 +331,8 @@ module Beaker
       else
         logger.debug "Give root a copy of current user's keys, on #{host.name}"
         if host['platform'] =~ /windows/
-          host.exec(Command.new('sudo su -c "cp -r .ssh /home/Administrator/."'))
+          host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
+          host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
