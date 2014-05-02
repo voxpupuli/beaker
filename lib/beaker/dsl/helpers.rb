@@ -699,6 +699,11 @@ module Beaker
       #                         from Puppet verion 3.2
       #                         By default it will use the 'current' parser.
       #
+      # @option opts [String]   :modulepath The search path for modules, as
+      #                         a list of directories separated by the system
+      #                         path separator character. (The POSIX path separator
+      #                         is ‘:’, and the Windows path separator is ‘;’.) 
+      #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
       #                      validation, etc.
