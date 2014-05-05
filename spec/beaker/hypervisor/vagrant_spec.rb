@@ -91,7 +91,8 @@ module Beaker
         host = @hosts[0]
         host[:platform] = 'windows'
 
-        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /home/Administrator/.\"").once
+        Command.should_receive( :new ).with("cp -r .ssh /cygdrive/c/Users/Administrator/.").once
+        Command.should_receive( :new ).with("chown -R Administrator /cygdrive/c/Users/Administrator/.ssh").once
 
         vagrant.copy_ssh_to_root( host, options )
 
