@@ -28,6 +28,20 @@ module Beaker
       expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.box = 'vm1_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm1'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm2' do |v|\n    v.vm.hostname = 'vm2'\n    v.vm.box = 'vm2_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm2'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm2\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.define 'vm3' do |v|\n    v.vm.hostname = 'vm3'\n    v.vm.box = 'vm3_of_my_box'\n    v.vm.box_url = 'http://address.for.my.box.vm3'\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm3\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
     end
 
+    it "can make a Vagranfile with per-provider boxes" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+
+      host = @hosts.first
+      host['boxes'] = {'virtualbox' => {'box' => 'vboxbox', 'box_url' => 'http://example.com/vboxbox'},
+                       'libvirt'    => {'box' => 'libvirtbox', 'box_url' => 'http://example.com/libvirtbox'}}
+      host['box'] = host['box_url'] = nil
+      vagrant.make_vfile([@hosts.first])
+
+      expect( File.read( File.expand_path( File.join( path, "Vagrantfile") ) ) ).to be === "Vagrant.configure(\"2\") do |c|\n  c.vm.define 'vm1' do |v|\n    v.vm.hostname = 'vm1'\n    v.vm.provider :libvirt do |p, override|\n      override.vm.box = 'libvirtbox'\n      override.vm.box_url = 'http://example.com/libvirtbox'\n    end\n    v.vm.provider :virtualbox do |p, override|\n      override.vm.box = 'vboxbox'\n      override.vm.box_url = 'http://example.com/vboxbox'\n    end\n    v.vm.base_mac = '0123456789'\n    v.vm.network :private_network, ip: \"ip.address.for.vm1\", :netmask => \"255.255.0.0\"\n  end\n  c.vm.provider :virtualbox do |vb|\n    vb.customize [\"modifyvm\", :id, \"--memory\", \"1024\"]\n  end\nend\n"
+    end
+
     it "generates a valid windows config" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
