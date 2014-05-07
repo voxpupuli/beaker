@@ -475,7 +475,13 @@ module Beaker
             on host, "msiexec /qn /i puppet-#{relver}.msi"
 
             #Because the msi installer doesn't add Puppet to the environment path
-            on host, %q{ echo 'export PATH=$PATH:"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin"' > /etc/bash.bashrc }
+            if fact_on(host, 'architecture').eql?('x86_64')
+              install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
+            else
+              install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
+            end
+            on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+            
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
           end
