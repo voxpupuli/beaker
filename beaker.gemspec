@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rbvmomi', '1.8.1'
   s.add_runtime_dependency 'blimpy', '~> 0.6'
   s.add_runtime_dependency 'fission', '~> 0.4'
-  s.add_runtime_dependency 'google-api-client', '~> 0.6.4'
+  s.add_runtime_dependency 'google-api-client', '~> 0.7.1'
   s.add_runtime_dependency 'aws-sdk', '~> 1.38'
   s.add_runtime_dependency 'docker-api' unless RUBY_VERSION < '1.9'
 
