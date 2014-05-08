@@ -47,7 +47,13 @@ module Beaker
         when /none/
           Beaker::Hypervisor
         else
-          raise "Invalid hypervisor: #{type}"
+          # Custom hypervisor
+          begin
+            require "beaker/hypervisor/#{type}"
+          rescue LoadError
+            raise "Invalid hypervisor: #{type}"
+          end
+          const_get("Beaker::#{type.capitalize}")
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
