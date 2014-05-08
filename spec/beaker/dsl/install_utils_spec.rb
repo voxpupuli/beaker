@@ -7,7 +7,7 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
-  let(:opts)          { Beaker::Options::Presets.env_vars }
+  let(:opts)          { Beaker::Options::Presets.presets.merge(Beaker::Options::Presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
                                        :platform => 'linux',
                                        :roles => [ 'agent' ] } ) }

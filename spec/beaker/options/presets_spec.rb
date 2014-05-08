@@ -11,7 +11,8 @@ module Beaker
       end
 
       it "removes all empty/nil entries in env_vars" do
-        expect(presets.env_vars.has_value?(nil)).to be === false and expect(presets.env_vars.has_value?({})).to be === false
+        expect(presets.env_vars.has_value?(nil)).to be === false
+        expect(presets.env_vars.has_value?({})).to be === false
       end
 
       it "returns a presets OptionsHash" do

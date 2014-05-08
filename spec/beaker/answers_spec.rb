@@ -3,7 +3,7 @@ require 'spec_helper'
 module Beaker
   describe Answers do
     let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
-    let( :options )     { Beaker::Options::Presets.env_vars }
+    let( :options )     { Beaker::Options::Presets.presets }
     let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
                           basic_hosts[1]['platform'] = 'windows'
                           basic_hosts }
@@ -59,7 +59,7 @@ module Beaker
 
   module Answers
     describe Version34 do
-      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :options )     { Beaker::Options::Presets.presets }
       let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
       let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
                       basic_hosts[1]['roles'] = ['dashboard', 'agent']
@@ -76,7 +76,7 @@ module Beaker
     end
 
     describe Version32 do
-      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :options )     { Beaker::Options::Presets.presets }
       let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
       let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
                       basic_hosts[1]['roles'] = ['dashboard', 'agent']
@@ -106,7 +106,7 @@ module Beaker
     end
 
     describe Version30 do
-      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :options )     { Beaker::Options::Presets.presets }
       let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
       let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
                             basic_hosts[1]['platform'] = 'windows'
@@ -142,7 +142,7 @@ module Beaker
     end
 
     describe Version28 do
-      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :options )     { Beaker::Options::Presets.presets }
       let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
       let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
                             basic_hosts[1]['platform'] = 'windows'
@@ -174,7 +174,7 @@ module Beaker
 
     end
     describe Version20 do
-      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :options )     { Beaker::Options::Presets.presets }
       let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
       let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
                             basic_hosts[1]['platform'] = 'windows'
@@ -203,8 +203,6 @@ module Beaker
           expect( host[:answers] ).to be === answers[host.name]
         end
       end
-
     end
-
   end
 end

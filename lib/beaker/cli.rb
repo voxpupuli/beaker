@@ -108,9 +108,11 @@ module Beaker
           end
         end
 
-        @logger.error "\nFailed to execute tests!\n"
         print_reproduction_info( :error )
+        print_important_env_vars( :error )
 
+        @logger.error "Failed running the test suite."
+        puts ''
         exit 1
       else
         #cleanup on success
@@ -120,8 +122,30 @@ module Beaker
             @network_manager.cleanup
           end
         end
-        print_reproduction_info( :debug ) if @logger.is_debug?
+
+        if @logger.is_debug?
+          print_reproduction_info( :debug )
+          print_important_env_vars( :debug )
+        end
       end
+    end
+
+    def print_important_env_vars( log_level )
+      beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT.values
+      non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
+      important_env_vars = beaker_env_vars + non_beaker_env_vars
+      env_var_map = important_env_vars.inject({}) do |memo, possibly_set_vars|
+        set_var = Array(possibly_set_vars).detect {|possible_var| ENV[possible_var] }
+        memo[set_var] = ENV[set_var] if set_var
+        memo
+      end
+
+      puts ''
+      @logger.send( log_level, "Important ENV variables that may have affected your run:" )
+      env_var_map.each_pair do |var, value|
+        @logger.send( log_level, "    #{var}\t\t#{value}" )
+      end
+      puts ''
     end
 
     #Run the provided test suite
