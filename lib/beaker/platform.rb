@@ -1,15 +1,15 @@
 module Beaker
-  #This class create a Platform object inheriting from String.  It supports all String methods while adding 
+  #This class create a Platform object inheriting from String.  It supports all String methods while adding
   #several platform-specific use cases.
   class Platform < String
     #Supported platforms
-    PLATFORMS = /^(centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el)\-.+\-.+$/
+    PLATFORMS = /^(osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el)\-.+\-.+$/
     #Platform version numbers vs. codenames conversion hash
-    PLATFORM_VERSION_CODES = 
+    PLATFORM_VERSION_CODES =
       { :debian => { "wheezy"  => "7",
                      "squeeze" => "6",
                    },
-        :ubuntu => { "trusty"  => "1404", 
+        :ubuntu => { "trusty"  => "1404",
                      "saucy"   => "1310",
                      "raring"  => "1304",
                      "quantal" => "1210",
