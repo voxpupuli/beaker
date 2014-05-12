@@ -17,8 +17,8 @@ module Beaker
     SLES_PACKAGES = ['ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
-    ROOT_KEYS_SCRIPT = "https://raw.github.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-    ROOT_KEYS_SYNC_CMD = "curl -k -o - #{ROOT_KEYS_SCRIPT} | %s"
+    ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
+    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
