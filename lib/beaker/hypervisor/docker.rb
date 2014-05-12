@@ -24,15 +24,10 @@ module Beaker
 
         @logger.debug("Creating image")
         image = ::Docker::Image.build(dockerfile_for(host), { :rm => true })
-        @logger.debug("Tagging image #{image.id} as #{host.name}")
-        image.tag({
-          :repo => host.name,
-          :force => true,
-        })
 
-        @logger.debug("Creating container from image")
+        @logger.debug("Creating container from image #{image.id}")
         container = ::Docker::Container.create({
-          'Image' => host.name,
+          'Image' => image.id,
           'Hostname' => host.name,
         })
 
@@ -75,7 +70,8 @@ module Beaker
           end
         end
 
-        if image = host['docker_image']
+        # Do not remove the image if docker_reserve_image is set to true, otherwise remove it
+        if image = (host['docker_preserve_image'] ? nil : host['docker_image'])
           @logger.debug("delete image #{image.id}")
           begin
             image.delete
