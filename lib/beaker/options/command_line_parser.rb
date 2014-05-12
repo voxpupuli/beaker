@@ -208,11 +208,11 @@ module Beaker
       # @example
       #   args = ['--option', 'value', '--option2', 'value2', '--switch']
       #   parser = CommandLineParser.new
-      #   parser.parse!(args) == {:option => 'value, :options2 => value, :switch => true}
+      #   parser.parse(args) == {:option => 'value, :options2 => value, :switch => true}
       #
       # @return [Hash] Return the Hash of options
-      def parse!( args = ARGV )
-        @optparse.parse!(args)
+      def parse( args = ARGV )
+        @optparse.parse(args)
         @cmd_options
       end
 
@@ -226,7 +226,6 @@ module Beaker
       def usage
         @optparse.help
       end
-
     end
   end
 end

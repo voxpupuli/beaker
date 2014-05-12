@@ -142,10 +142,9 @@ module Beaker
         # NOTE on argument precedence:
         # Will use env, then hosts/config file, then command line, then file options
 
-        command_line = ([$0] + args).join(' ')
 
         @options = Beaker::Options::Presets.presets
-        cmd_line_options = @command_line_parser.parse!(args)
+        cmd_line_options = @command_line_parser.parse(args)
         file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
 
         # merge together command line and file_options
@@ -155,6 +154,7 @@ module Beaker
         # merge command line and file options with defaults
         #   overwrite defaults with command line and file options
         @options = @options.merge(cmd_line_and_file_options)
+        @options[:command_line] = ([$0] + args).join(' ')
 
         if not @options[:help] and not @options[:version]
           #read the hosts file that contains the node configuration and hypervisor info
@@ -169,7 +169,6 @@ module Beaker
           env_vars = Beaker::Options::Presets.env_vars
 
           @options = @options.merge(env_vars)
-          @options[:command_line] = command_line
 
           normalize_args
         end
