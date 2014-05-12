@@ -1,12 +1,3 @@
-[ 'install_utils', 'roles', 'outcomes', 'assertions',
-  'structure', 'helpers', 'wrappers' ].each do |file|
-  begin
-    require "beaker/dsl/#{file}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), 'dsl', file))
-  end
-end
-
 module Beaker
   # This is a catch all module for including Puppetlabs home grown testing
   # DSL. This module is mixed into {Beaker::TestCase} and can be

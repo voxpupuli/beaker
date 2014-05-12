@@ -1,6 +1,5 @@
 require 'blimpy'
 require 'yaml' unless defined?(YAML)
-require 'beaker/hypervisor/ec2_helper'
 
 module Beaker
   class Blimper < Beaker::Hypervisor

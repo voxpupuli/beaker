@@ -1,11 +1,3 @@
-%w( host answers dsl ).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 require 'tempfile'
 require 'benchmark'
 require 'stringio'
@@ -35,7 +27,6 @@ module Beaker
   # See {Beaker::DSL} for more information about writing tests
   # using the DSL.
   class TestCase
-    include Beaker::DSL
 
     rb_config_class = defined?(RbConfig) ? RbConfig : Config
     if rb_config_class::CONFIG['MAJOR'].to_i == 1 &&
@@ -120,6 +111,7 @@ module Beaker
       # defined in the tests don't leak out to other tests.
       class << self
         def run_test
+          extend Beaker::DSL
           @runtime = Benchmark.realtime do
             begin
               test = File.read(path)

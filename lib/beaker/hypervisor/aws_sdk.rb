@@ -1,7 +1,6 @@
 require 'aws/ec2'
 require 'set'
 require 'zlib'
-require 'beaker/hypervisor/ec2_helper'
 
 module Beaker
   # This is an alternate EC2 driver that implements direct API access using

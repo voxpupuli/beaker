@@ -1,11 +1,3 @@
-%w(command).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 module Beaker
   #Provides convienience methods for commonly run actions on hosts
   module HostPrebuiltSteps
