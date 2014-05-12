@@ -131,7 +131,7 @@ module Beaker
         @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
 
         try = (Time.now - start) / 5
-        duration = run_and_report_duration do 
+        duration = run_and_report_duration do
           @hosts.each_with_index do |h, i|
             booting_host(h, try, attempts)
           end

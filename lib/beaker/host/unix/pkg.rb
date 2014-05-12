@@ -12,7 +12,7 @@ module Unix::Pkg
     case self['platform']
     when /solaris-10/
       result.stdout =~ %r|/.*/#{name}|
-    else  
+    else
       result.exit_code == 0
     end
   end

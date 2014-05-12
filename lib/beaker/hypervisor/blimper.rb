@@ -19,8 +19,8 @@ module Beaker
         @hosts.each do |host|
           amitype = host['vmname'] || host['platform']
           amisize = host['amisize'] || 'm1.small'
-          #use snapshot provided for this host 
-          image_type = host['snapshot'] 
+          #use snapshot provided for this host
+          image_type = host['snapshot']
           if not image_type
             raise "No snapshot/image_type provided for blimpy provisioning"
           end
@@ -79,7 +79,7 @@ module Beaker
         host = @hosts.select { |host| host.name == name }[0]
         host['ip'] = ship.dns
         host.exec(Command.new("hostname #{name}"))
-        ip = get_ip(host) 
+        ip = get_ip(host)
         domain = get_domain_name(host)
         etc_hosts += "#{ip}\t#{name}\t#{name}.#{domain}\n"
       end

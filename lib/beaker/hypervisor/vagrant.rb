@@ -117,7 +117,7 @@ module Beaker
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
       @hosts.each do |host|
         default_user = host['user']
-      
+
         set_ssh_config host, 'vagrant'
 
         copy_ssh_to_root host, @options

@@ -17,9 +17,9 @@ module Beaker
     # - only if we have a hypervisor
     # - only if either the specific hosts has no specification or has 'provision' in its config
     # - always if it is a vagrant box (vagrant boxes are always provisioned as they always need ssh key hacking)
-    def provision? options, host 
-      command_line_says = options[:provision] 
-      host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true) 
+    def provision? options, host
+      command_line_says = options[:provision]
+      host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true)
       (command_line_says && host_says) or (host['hypervisor'] =~/vagrant/)
     end
 
@@ -38,10 +38,10 @@ module Beaker
         cleanup
       end
       @hypervisors = {}
-      #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified 
+      #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
       @options['HOSTS'].each_key do |name|
         host = @options['HOSTS'][name]
-        hypervisor = host['hypervisor'] 
+        hypervisor = host['hypervisor']
         hypervisor = provision?(@options, host) ? host['hypervisor'] : 'none'
         @logger.debug "Hypervisor for #{name} is #{hypervisor}"
         @machines[hypervisor] = [] unless @machines[hypervisor]

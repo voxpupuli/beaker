@@ -71,7 +71,7 @@ module Beaker
     end
 
     #Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
-    #install them.  Verifies the presence of {HostPrebuiltSteps::PACKAGES} on all hosts, 
+    #install them.  Verifies the presence of {HostPrebuiltSteps::PACKAGES} on all hosts,
     #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts and {HostPrebuiltSteps::SLES_PACKAGES}
     #on sles (SUSE, Enterprise Linux) hosts.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
@@ -148,8 +148,8 @@ module Beaker
       report_and_raise(logger, e, "add_master_entry")
     end
 
-    #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a 
-    #convenience method to allow for easy login to hosts after they have been provisioned with 
+    #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
+    #convenience method to allow for easy login to hosts after they have been provisioned with
     #Beaker.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -204,7 +204,7 @@ module Beaker
       if host.is_a? Array
         host.map { |h| apt_get_update(h) }
       else
-        if host[:platform] =~ /(ubuntu)|(debian)/ 
+        if host[:platform] =~ /(ubuntu)|(debian)/
           host.exec(Command.new("apt-get update"))
         end
       end
@@ -227,7 +227,7 @@ module Beaker
     end
 
     #Alter apt configuration on ubuntu and debian host or hosts to internal Puppet Labs
-    # proxy {HostPrebuiltSteps::APT_CFG} proxy, alter pkg on solaris-11 host or hosts 
+    # proxy {HostPrebuiltSteps::APT_CFG} proxy, alter pkg on solaris-11 host or hosts
     # to point to interal Puppetlabs proxy {HostPrebuiltSteps::IPS_PKG_REPO}. Do nothing
     # on non-ubuntu, debian or solaris-11 platform host or hosts.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
@@ -306,7 +306,7 @@ module Beaker
       return search if search
     end
 
-    #Determine the ip address of the provided host 
+    #Determine the ip address of the provided host
     # @param [Host] host the host to act upon
     # @deprecated use {Host#get_ip}
     def get_ip(host)

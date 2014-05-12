@@ -2,7 +2,7 @@ require 'yaml' unless defined?(YAML)
 require 'json'
 require 'net/http'
 
-module Beaker 
+module Beaker
   class VcloudPooled < Beaker::Hypervisor
     SSH_EXCEPTIONS = [
       SocketError,
@@ -75,7 +75,7 @@ module Beaker
           attempts = @options[:timeout].to_i / 5
           response = http.request(request)
           parsed_response = JSON.parse(response.body)
-          if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname'] 
+          if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname']
             h['vmhostname'] = parsed_response[h['template']]['hostname']
           else
             raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
@@ -115,7 +115,7 @@ module Beaker
         rescue *SSH_EXCEPTIONS => e
           report_and_raise(@logger, e, 'vCloudPooled.cleanup (http.request)')
         end
-      end 
+      end
 
       @logger.notify "Spent %.2f seconds cleaning up" % (Time.now - start)
     end

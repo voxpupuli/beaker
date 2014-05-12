@@ -6,7 +6,7 @@ module Beaker
       # Read the contents of the hosts.cfg into an OptionsHash, merge the 'CONFIG' section into the OptionsHash, return OptionsHash
       # @param [String] hosts_file_path The path to the hosts file
       #
-      # @example 
+      # @example
       #     hosts_hash = HostsFileParser.parse_hosts_file('sample.cfg')
       #     hosts_hash == {:HOSTS=>{:"pe-ubuntu-lucid"=>{:roles=>["agent", "dashboard", "database", "master"], ... }
       #

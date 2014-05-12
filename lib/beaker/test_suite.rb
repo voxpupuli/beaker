@@ -38,7 +38,7 @@ module Beaker
       @run = true
       @start_time = Time.now
 
-      configure_logging 
+      configure_logging
 
       @test_files.each do |test_file|
         @logger.notify

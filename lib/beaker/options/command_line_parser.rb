@@ -4,8 +4,8 @@ module Beaker
     class CommandLineParser
 
       # @example Create a CommanLineParser
-      #   a = CommandLineParser.new     
-      #    
+      #   a = CommandLineParser.new
+      #
       # @note All of Beaker's supported command line options are defined here
       def initialize
         @cmd_options = Beaker::Options::OptionsHash.new
@@ -95,7 +95,7 @@ module Beaker
           end
 
           opts.on '-i URI', '--install URI',
-                  'Install a project repo/app on the SUTs', 
+                  'Install a project repo/app on the SUTs',
                   'Provide full git URI or use short form KEYWORD/name',
                   'supported keywords: PUPPET, FACTER, HIERA, HIERA-PUPPET' do |value|
             @cmd_options[:install] = value
@@ -176,15 +176,15 @@ module Beaker
             @cmd_options[:validate] = bool
           end
 
-          opts.on('--version', 'Report currently running version of beaker' ) do 
+          opts.on('--version', 'Report currently running version of beaker' ) do
             @cmd_options[:version] = true
           end
 
-          opts.on('--parse-only', 'Display beaker parsed options and exit' ) do 
+          opts.on('--parse-only', 'Display beaker parsed options and exit' ) do
             @cmd_options[:parse_only] = true
           end
 
-          opts.on('--help', 'Display this screen' ) do 
+          opts.on('--help', 'Display this screen' ) do
             @cmd_options[:help] = true
           end
 
@@ -218,9 +218,9 @@ module Beaker
 
       # Generate a string representing the supported arguments
       #
-      # @example 
-      #    parser = CommandLineParser.new 
-      #    parser.usage = "Options:  ..." 
+      # @example
+      #    parser = CommandLineParser.new
+      #    parser.usage = "Options:  ..."
       #
       # @return [String] Return a string representing the available arguments
       def usage

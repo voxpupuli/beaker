@@ -1,4 +1,4 @@
-module Beaker 
+module Beaker
   module Shared
     module ErrorHandler
 
@@ -8,7 +8,7 @@ module Beaker
       bt = e.backtrace
       logger.pretty_backtrace(bt).each_line do |line|
         logger.error(line)
-      end 
+      end
       raise e
     end
 

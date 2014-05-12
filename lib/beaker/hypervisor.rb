@@ -22,7 +22,7 @@ module Beaker
     #@param [Hash] options options Options to alter execution
     def self.create(type, hosts_to_provision, options)
       @logger = options[:logger]
-      @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create") 
+      @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
       hyper_class = case type
         when /aix/
           Beaker::Aixer
@@ -51,7 +51,7 @@ module Beaker
         when /none/
           Beaker::Hypervisor
         else
-          raise "Invalid hypervisor: #{type}" 
+          raise "Invalid hypervisor: #{type}"
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
@@ -93,7 +93,7 @@ module Beaker
 
     #Default validation steps to be run for a given hypervisor
     def validate
-      if @options[:validate] 
+      if @options[:validate]
         validate_host(@hosts, @options)
       end
     end

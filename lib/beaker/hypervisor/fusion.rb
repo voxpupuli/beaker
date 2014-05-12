@@ -1,4 +1,4 @@
-module Beaker 
+module Beaker
   class Fusion < Beaker::Hypervisor
 
     def initialize(fusion_hosts, options)
@@ -29,12 +29,12 @@ module Beaker
 
         vm_snapshots = vm.snapshots.data
         if vm_snapshots.nil? or vm_snapshots.empty?
-          raise "No snapshots available for VM #{host.name} (vmname: '#{vm_name}')" 
+          raise "No snapshots available for VM #{host.name} (vmname: '#{vm_name}')"
         end
 
         available_snapshots = vm_snapshots.sort.join(", ")
         @logger.notify "Available snapshots for #{host.name}: #{available_snapshots}"
-        snap_name = host["snapshot"] 
+        snap_name = host["snapshot"]
         raise "Could not find snapshot '#{snap_name}' for host #{host.name}!" unless vm.snapshots.data.include? snap_name
 
         @logger.notify "Reverting #{host.name} to snapshot '#{snap_name}'"

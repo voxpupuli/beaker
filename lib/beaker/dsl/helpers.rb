@@ -92,7 +92,7 @@ module Beaker
               when 0
                 yield self
               #block with arity of 1 or greater, hand back the result object
-              else 
+              else
                 yield @result
             end
           end
@@ -665,7 +665,7 @@ module Beaker
       #                          codes that will NOT raise an error when found upon
       #                          command completion.  If provided, these values will
       #                          be combined with those used in :catch_failures and
-      #                          :expect_failures to create the full list of 
+      #                          :expect_failures to create the full list of
       #                          passing exit codes.
       #
       # @option opts [Hash]     :environment Additional environment variables to be
@@ -695,14 +695,14 @@ module Beaker
       #                         failure during its execution.
       #
       # @option opts [Boolean]  :future_parser (false) This option enables
-      #                         the future parser option that is available 
+      #                         the future parser option that is available
       #                         from Puppet verion 3.2
       #                         By default it will use the 'current' parser.
       #
       # @option opts [String]   :modulepath The search path for modules, as
       #                         a list of directories separated by the system
       #                         path separator character. (The POSIX path separator
-      #                         is ‘:’, and the Windows path separator is ‘;’.) 
+      #                         is ‘:’, and the Windows path separator is ‘;’.)
       #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
@@ -867,7 +867,7 @@ module Beaker
       # forge api v3 canonical source is forgeapi.puppetlabs.com
       #
       # @param machine [String] the host to perform the stub on
-      # @param forge_host [String] The URL to use as the forge alias, will default to using :forge_host in the 
+      # @param forge_host [String] The URL to use as the forge alias, will default to using :forge_host in the
       #                             global options hash
       def stub_forge_on(machine, forge_host = nil)
         #use global options hash
@@ -920,7 +920,7 @@ module Beaker
           agent_running = (result.exit_code == 0)
           sleep 2 unless agent_running
         end
-       
+
         if agent['platform'].include?('solaris')
           on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
         elsif agent['platform'].include?('aix')

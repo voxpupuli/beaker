@@ -8,11 +8,11 @@ module Beaker
       # Version file is of the format
       #
       #  3.0.1-3-g57b669e
-      #   
+      #
       # @param [String] dist_dir The directory containing the version_file
       # @param [String] version_file The file to scrape
       #
-      # @return [String, nil] The PE version in the version_file or nil if not found 
+      # @return [String, nil] The PE version in the version_file or nil if not found
       # @raise [ArgumentError] Raises if version_file does not exist or cannot be opened
       def self.load_pe_version dist_dir, version_file
         version = nil
