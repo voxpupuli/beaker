@@ -138,8 +138,14 @@ module Beaker
       end
 
       describe 'parse_args' do
+        before { FakeFS.deactivate! }
+
+        it 'pulls the args into key called :command_line' do
+          my_args = [ '--log-level', 'debug', '-h', hosts_path]
+          expect(parser.parse_args( my_args )[:command_line]).to include(my_args.join(' '))
+        end
+
         it "can correctly combine arguments from different sources" do
-          FakeFS.deactivate!
           build_url = 'http://my.build.url/'
           type = 'git'
           log_level = 'debug'
@@ -157,13 +163,11 @@ module Beaker
         end
 
         it "ensures that fail-mode is one of fast/slow" do
-          FakeFS.deactivate!
           args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"] 
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end
 
         it "ensures that type is one of pe/git" do
-          FakeFS.deactivate!
           args = ["-h", hosts_path, "--log-level", "debug", "--type", "unkowns"]
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end

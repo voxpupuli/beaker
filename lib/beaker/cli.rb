@@ -105,7 +105,11 @@ module Beaker
             @network_manager.cleanup
           end
         end
-        raise "Failed to execute tests!"
+
+        @logger.error "\nFailed to execute tests!\n"
+        print_reproduction_info( :error )
+
+        exit 1
       else
         #cleanup on success
         if @options[:preserve_hosts] =~ /(never)|(onfail)/
@@ -114,6 +118,7 @@ module Beaker
             @network_manager.cleanup
           end
         end
+        print_reproduction_info( :debug ) if @logger.is_debug?
       end
     end
 
@@ -131,5 +136,11 @@ module Beaker
       ).run_and_raise_on_failure
     end
 
+    def print_reproduction_info( log_level = :debug )
+      puts ''
+      @logger.send(log_level, "You can reproduce this run with:\n")
+      @logger.send(log_level, @options[:command_line])
+      puts ''
+    end
   end
 end

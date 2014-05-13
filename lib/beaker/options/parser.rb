@@ -139,29 +139,35 @@ module Beaker
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
-        #NOTE on argument precedence:
-        #
+        # NOTE on argument precedence:
         # Will use env, then hosts/config file, then command line, then file options
-        #
+
+
         @options = Beaker::Options::Presets.presets
-        cmd_line_options = @command_line_parser.parse!(args)
+        cmd_line_options = @command_line_parser.parse(args)
         file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
+
         # merge together command line and file_options
         #   overwrite file options with command line options
         cmd_line_and_file_options = file_options.merge(cmd_line_options)
+
         # merge command line and file options with defaults
         #   overwrite defaults with command line and file options
         @options = @options.merge(cmd_line_and_file_options)
+        @options[:command_line] = ([$0] + args).join(' ')
 
         if not @options[:help] and not @options[:version]
           #read the hosts file that contains the node configuration and hypervisor info
           hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+
           # merge in host file vars
           #   overwrite options (default, file options, command line, env) with host file options
           @options = @options.merge(hosts_options)
+
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
           env_vars = Beaker::Options::Presets.env_vars
+
           @options = @options.merge(env_vars)
 
           normalize_args
