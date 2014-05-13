@@ -52,6 +52,9 @@ module Beaker
     # an instance of {Beaker::Logger}.
     attr_accessor :logger
 
+    #The full log for this test
+    attr_accessor :sublog
+
     # A Hash of 'product name' => 'version installed', only set when
     # products are installed via git or PE install steps. See the 'git' or
     # 'pe' directories within 'ROOT/setup' for examples.
@@ -102,6 +105,7 @@ module Beaker
     def initialize(these_hosts, logger, options={}, path=nil)
       @hosts   = these_hosts
       @logger = logger
+      @sublog = ""
       @options = options
       @path    = path
       @usr_home = options[:home]
@@ -116,6 +120,7 @@ module Beaker
       # defined in the tests don't leak out to other tests.
       class << self
         def run_test
+          @logger.start_sublog
           @runtime = Benchmark.realtime do
             begin
               test = File.read(path)
@@ -139,6 +144,7 @@ module Beaker
               end
             end
           end
+          @sublog = @logger.get_sublog
           return self
         end
 

@@ -5,6 +5,8 @@ require 'net/scp'
 module Beaker
   class SshConnection
 
+    attr_accessor :logger
+
     RETRYABLE_EXCEPTIONS = [
       SocketError,
       Timeout::Error,
@@ -18,14 +20,15 @@ module Beaker
       Net::SSH::AuthenticationFailed,
     ]
 
-    def initialize hostname, user = nil, options = {}
+    def initialize hostname, user = nil, ssh_opts = {}, options = {}
       @hostname = hostname
       @user = user
-      @options = options
+      @ssh_opts = ssh_opts
+      @logger = options[:logger]
     end
 
-    def self.connect hostname, user = 'root', options = {}
-      connection = new hostname, user, options
+    def self.connect hostname, user = 'root', ssh_opts = {}, options = {}
+      connection = new hostname, user, ssh_opts, options
       connection.connect
       connection
     end
@@ -35,21 +38,22 @@ module Beaker
       last_wait = 0
       wait = 1
       @ssh ||= begin
-                 Net::SSH.start(@hostname, @user, @options)
+                 Net::SSH.start(@hostname, @user, @ssh_opts)
                rescue *RETRYABLE_EXCEPTIONS => e
                  if try <= 11
-                   puts "Try #{try} -- Host #{@hostname} unreachable: #{e.message}"
-                   puts "Trying again in #{wait} seconds"
+                   @logger.warn "Try #{try} -- Host #{@hostname} unreachable: #{e.message}"
+                   @logger.warn "Trying again in #{wait} seconds"
                    sleep wait
-                   (last_wait, wait) = wait, last_wait + wait
+                  (last_wait, wait) = wait, last_wait + wait
                    try += 1
                    retry
                  else
                    # why is the logger not passed into this class?
-                   puts "Failed to connect to #{@hostname}"
+                   @logger.error "Failed to connect to #{@hostname}"
                    raise
                  end
                end
+      @logger.debug "Created ssh connection to #{@hostname}, user: #{@user}, opts: #{@ssh_opts}"
       self
     end
 
@@ -101,7 +105,7 @@ module Beaker
       rescue *RETRYABLE_EXCEPTIONS => e
         if attempt
           attempt = false
-          puts "Command execution failed, attempting to reconnect to #{@hostname}"
+          @logger.error "Command execution failed, attempting to reconnect to #{@hostname}"
           close
           connect
           retry
@@ -116,7 +120,7 @@ module Beaker
     def request_terminal_for channel, command
       channel.request_pty do |ch, success|
         if success
-          puts "Allocated a PTY on #{@hostname} for #{command.inspect}"
+          @logger.info "Allocated a PTY on #{@hostname} for #{command.inspect}"
         else
           abort "FAILED: could not allocate a pty when requested on " +
             "#{@hostname} for #{command.inspect}"

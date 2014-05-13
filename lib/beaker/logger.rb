@@ -50,6 +50,7 @@ module Beaker
     def initialize(*args)
       options = args.last.is_a?(Hash) ? args.pop : {}
       @color = options[:color]
+      @sublog = nil
       case options[:log_level]
       when /debug/i, :debug
         @log_level = :debug
@@ -78,6 +79,8 @@ module Beaker
       case dest
       when IO
         @destinations << dest
+      when StringIO
+        @destinations << dest
       when String
         @destinations << File.open(dest, 'w')
       else
@@ -90,6 +93,8 @@ module Beaker
     def remove_destination(dest)
       case dest
       when IO
+        @destinations.delete(dest)
+      when StringIO
         @destinations.delete(dest)
       when String
         @destinations.delete_if {|d| d.respond_to?(:path) and d.path == dest}
@@ -218,6 +223,21 @@ module Beaker
     def pretty_backtrace backtrace = caller(1)
       trace = is_debug? ? backtrace : purge_harness_files_from( backtrace )
       expand_symlinks( trace ).join "\n"
+    end
+
+    # Create a new StringIO log to track the current output
+    def start_sublog
+      if @sublog
+        remove_destination(@sublog)
+      end
+      @sublog = StringIO.new
+      add_destination(@sublog)
+    end
+
+    # Return the contents of the sublog
+    def get_sublog
+      @sublog.rewind
+      @sublog.read
     end
 
     private

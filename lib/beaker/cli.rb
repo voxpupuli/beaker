@@ -10,6 +10,7 @@ module Beaker
     |   |   | "
 
     def initialize
+      @timestamp = Time.now
       @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
@@ -132,7 +133,7 @@ module Beaker
         return
       end
       Beaker::TestSuite.new(
-        suite_name, @hosts, @options, failure_strategy
+        suite_name, @hosts, @options, @timestamp, failure_strategy
       ).run_and_raise_on_failure
     end
 
