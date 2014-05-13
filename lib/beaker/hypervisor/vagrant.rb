@@ -26,8 +26,17 @@ module Beaker
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
         v_file << "  c.vm.define '#{host.name}' do |v|\n"
         v_file << "    v.vm.hostname = '#{host.name}'\n"
-        v_file << "    v.vm.box = '#{host['box']}'\n"
+        v_file << "    v.vm.box = '#{host['box']}'\n" unless host['box'].nil?
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
+        if host['boxes']
+          host['boxes'].keys.sort.each do |provider|
+            popts = host['boxes'][provider]
+            v_file << %Q{    v.vm.provider :#{provider} do |p, override|\n}
+            v_file << %Q{      override.vm.box = '#{popts['box']}'\n}
+            v_file << %Q{      override.vm.box_url = '#{popts['box_url']}'\n} unless popts['box_url'].nil?
+            v_file << %Q{    end\n}
+          end
+        end
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
         if /windows/i.match(host['platform'])
