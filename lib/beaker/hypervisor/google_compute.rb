@@ -8,6 +8,14 @@ module Beaker
     #number of hours before an instance is considered a zombie
     ZOMBIE = 3
 
+    #Create the array of metaData, each member being a hash with a :key and a :value.  Sets
+    #:department, :project and :jenkins_build_url.
+    def format_metadata
+      [ {:key => :department, :value => @options[:department]},
+        {:key => :project, :value => @options[:project]},
+        {:key => :jenkins_build_url, :value => @options[:jenkins_build_url]} ].delete_if { |member| member[:value].nil? or member[:value].empty?}
+    end
+
     #Create a new instance of the Google Compute Engine hypervisor object
     #@param [<Host>] google_hosts The array of google hosts to provision, may ONLY be of platforms /centos-6-.*/ and
     #                             /debian-7-.*/.  We currently only support the Google Compute provided templates.
@@ -56,13 +64,15 @@ module Beaker
         #add a new instance of the image
         instance = @gce_helper.create_instance(host['vmhostname'], img, machineType, disk, start, attempts)
         @logger.debug("Created Google Compute instance for #{host.name}: #{host['vmhostname']}")
-        #add metadata to instance
-        @gce_helper.setMetadata_on_instance(host['vmhostname'], instance['metadata']['fingerprint'],
-                                            [ {:key => :department, :value => @options[:department]},
-                                              {:key => :project, :value => @options[:project]},
-                                              {:key => :jenkins_build_url, :value => @options[:jenkins_build_url]} ],
-                                            start, attempts)
-        @logger.debug("Added tags to Google Compute instance #{host.name}: #{host['vmhostname']}")
+
+        #add metadata to instance, if there is any to set
+        mdata = format_metadata
+        if not mdata.empty?
+          @gce_helper.setMetadata_on_instance(host['vmhostname'], instance['metadata']['fingerprint'],
+                                              mdata,
+                                              start, attempts)
+          @logger.debug("Added tags to Google Compute instance #{host.name}: #{host['vmhostname']}")
+        end
 
         #get ip for this host
         host['ip'] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
