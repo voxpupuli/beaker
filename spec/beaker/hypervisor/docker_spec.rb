@@ -116,21 +116,10 @@ module Beaker
         docker.provision
       end
 
-      it 'should tag the Image with the host.name' do
-        hosts.each do |host|
-          image.should_receive(:tag).with({
-            :repo => host.name,
-            :force => true,
-          })
-        end
-
-        docker.provision
-      end
-
-      it 'should create a container based on the Image (identified by host.name)' do
+      it 'should create a container based on the Image (identified by image.id)' do
         hosts.each do |host|
           ::Docker::Container.should_receive(:create).with({
-            'Image' => host.name,
+            'Image' => image.id,
             'Hostname' => host.name,
           })
         end
@@ -180,6 +169,23 @@ module Beaker
         image.should_receive(:delete)
         docker.cleanup
       end
+
+      it 'should not delete the image if docker_preserve_image is set to true' do
+        hosts.each do |host|
+          host['docker_preserve_image']=true
+        end
+        image.should_not_receive(:delete)
+        docker.cleanup
+      end
+
+      it 'should delete the image if docker_preserve_image is set to false' do
+        hosts.each do |host|
+          host['docker_preserve_image']=false
+        end
+        image.should_receive(:delete)
+        docker.cleanup
+      end
+
     end
 
     describe '#dockerfile_for' do
