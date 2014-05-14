@@ -19,6 +19,7 @@ module Beaker
 
     #Creates the Platform object.  Checks to ensure that the platform String provided meets the platform
     #formatting rules.  Platforms name must be of the format /^OSFAMILY-VERSION-ARCH.*$/ where OSFAMILY is one of:
+    # * osx
     # * centos
     # * fedora
     # * debian
