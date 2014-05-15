@@ -313,7 +313,7 @@ module Beaker
           host['pe_installer'] ||= 'puppet-enterprise-installer'
           if host['platform'] !~ /windows/
             platform = use_all_tar ? 'all' : host['platform']
-            version = opts[:pe_ver] || host['pe_ver']
+            version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{platform}"
           end
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
@@ -329,7 +329,7 @@ module Beaker
             on host, installer_cmd(host, opts)
           else
             # We only need answers if we're using the classic installer
-            version = opts[:pe_ver] || host['pe_ver']
+            version = host['pe_ver'] || opts[:pe_ver]
             if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
               answers = Beaker::Answers.answers(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
               create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
