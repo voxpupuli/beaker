@@ -57,7 +57,7 @@ module Beaker
       begin
         @ssh.close if @ssh
       rescue
-        @ssh.shutdown! 
+        @ssh.shutdown!
       end
       @ssh = nil
     end
@@ -103,7 +103,7 @@ module Beaker
           attempt = false
           puts "Command execution failed, attempting to reconnect to #{@hostname}"
           close
-          connect 
+          connect
           retry
         else
           raise

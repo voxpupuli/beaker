@@ -1,6 +1,6 @@
 require 'yaml' unless defined?(YAML)
 
-module Beaker 
+module Beaker
   class Vsphere < Beaker::Hypervisor
 
     def initialize(vsphere_hosts, options)

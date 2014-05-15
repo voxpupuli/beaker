@@ -3,7 +3,7 @@ module Windows::Pkg
 
   def check_for_package(name)
     result = exec(Beaker::Command.new("which #{name}"), :acceptable_exit_codes => (0...127))
-    result.exit_code == 0 
+    result.exit_code == 0
   end
 
   def install_package(name, cmdline_args = '')
@@ -23,7 +23,7 @@ module Windows::Pkg
     if not check_for_package(cygwin)
       execute("curl --retry 5 http://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}")
     end
-    execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}") 
+    execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}")
   end
 
   def uninstall_package(name, cmdline_args = '')
@@ -35,7 +35,7 @@ module Windows::Pkg
   # @api private
   def identify_windows_architecture
     arch = nil
-    execute("echo '' | wmic os get osarchitecture", 
+    execute("echo '' | wmic os get osarchitecture",
             :acceptable_exit_codes => (0...127)) do |result|
 
       arch = if result.exit_code == 0

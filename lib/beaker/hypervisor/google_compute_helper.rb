@@ -158,7 +158,7 @@ module Beaker
           end
           return parsed
         #retry errors
-        rescue Faraday::Error::ConnectionFailed => e 
+        rescue Faraday::Error::ConnectionFailed => e
           @logger.debug "ConnectionFailed attempting Google Compute execute command"
           try += 1
           last_error = e

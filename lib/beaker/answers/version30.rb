@@ -66,7 +66,7 @@ module Beaker
         end
 
         # Common answers for console and database
-        dashboard_password = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_password]}'" 
+        dashboard_password = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_password]}'"
         puppetdb_password = "'#{options[:answers][:q_puppetdb_password]}'"
 
         console_database_a = {

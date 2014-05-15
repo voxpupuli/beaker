@@ -23,7 +23,7 @@ module Unix
         'user'          => 'root',
         'group'         => 'pe-puppet',
         'service-wait'  => false,
-        'service-prefix'=> '/etc/init.d/', 
+        'service-prefix'=> '/etc/init.d/',
         'puppetservice' => 'pe-httpd',
         'puppetpath'    => '/etc/puppetlabs/puppet',
         'puppetbin'     => '/opt/puppet/bin/puppet',

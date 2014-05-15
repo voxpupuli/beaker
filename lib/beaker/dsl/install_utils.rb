@@ -481,7 +481,7 @@ module Beaker
               install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
             end
             on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
-            
+
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
           end
@@ -519,7 +519,7 @@ module Beaker
       #                      Will contain a LATEST file indicating the latest build to install.
       #                      This is ignored if a pe_upgrade_ver and pe_upgrade_dir are specified
       #                      in the host configuration file.
-      # @example 
+      # @example
       #  upgrade_pe("http://neptune.puppetlabs.lan/3.0/ci-ready/")
       #
       # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
@@ -529,7 +529,7 @@ module Beaker
         hosts.each do |host|
           host['pe_dir'] = host['pe_upgrade_dir'] || path
           if host['platform'] =~ /windows/
-            host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] || 
+            host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
               Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file_win])
           else
             host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||

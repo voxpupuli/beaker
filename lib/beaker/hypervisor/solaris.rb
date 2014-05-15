@@ -14,7 +14,7 @@ module Beaker
     end
 
     def provision
-      hypername = @fog_file[:default][:solaris_hypervisor_server] 
+      hypername = @fog_file[:default][:solaris_hypervisor_server]
       vmpath    = @fog_file[:default][:solaris_hypervisor_vmpath]
       snappaths = @fog_file[:default][:solaris_hypervisor_snappaths]
 
