@@ -191,9 +191,9 @@ module Beaker
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @api private
       def fetch_puppet_on_windows(host, opts)
-        path = opts[:pe_dir] || host['pe_dir']
+        path = host['pe_dir'] || opts[:pe_dir]
         local = File.directory?(path)
-        version = opts[:pe_ver_win] || host['pe_ver']
+        version = host['pe_ver'] || opts[:pe_ver_win]
         filename = "puppet-enterprise-#{version}"
         extension = ".msi"
         if local
@@ -219,7 +219,7 @@ module Beaker
       #                  (Otherwise uses individual hosts pe_ver)
       # @api private
       def fetch_puppet_on_unix(host, opts)
-        path = opts[:pe_dir] || host['pe_dir']
+        path = host['pe_dir'] || opts[:pe_dir]
         local = File.directory?(path)
         filename = "#{host['dist']}"
         if local
