@@ -921,20 +921,12 @@ module Beaker
           sleep 2 unless agent_running
         end
 
-        if agent['platform'].include?('solaris')
-          on(agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default')
-        elsif agent['platform'].include?('aix')
-          on(agent, '/usr/bin/stopsrc -s pe-puppet')
-        elsif agent['platform'].include?('windows')
-          on(agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2])
-        else
-          # For the sake of not passing the PE version into this method,
-          # we just query the system to find out which service we want to
-          # stop
-          result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
-          service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
-          on(agent, "/etc/init.d/#{service} stop")
-        end
+        # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
+        # In all the case that it is different, this init script will exist. So we can assume
+        # that if the script doesn't exist, we should just use `pe-puppet`
+        result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
+        agent_service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
+        on agent, puppet_resource('service', agent_service, 'ensure=stopped')
       end
 
       #stops the puppet agent running on the default host
