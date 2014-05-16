@@ -149,10 +149,14 @@ module Beaker
       #      on host, "#{installer_cmd(host, opts)} -a #{host['working_dir']}/answers"
       # @api private
       def installer_cmd(host, opts)
-        version = opts[:pe_ver] || host['pe_ver']
+        version = host['pe_ver'] || opts[:pe_ver]
         if host['platform'] =~ /windows/
           version = opts[:pe_ver_win] || host['pe_ver']
           "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
+        elsif host['platform'] =~ /osx/
+          version = host['pe_ver'] || opts[:pe_ver]
+          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
+
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
@@ -180,15 +184,39 @@ module Beaker
         end
       end
 
+      #Determine the PE package to download/upload on a mac host, download/upload that package onto the host.
+      # Assumed file name format: puppet-enterprise-3.3.0-rc1-559-g97f0833-osx-10.9-x86_64.dmg.
+      # @param [Host] host The mac host to download/upload and unpack PE onto
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
+      #                  (Otherwise uses individual hosts pe_dir)
+      # @api private
+      def fetch_puppet_on_mac(host, opts)
+        path = host['pe_dir'] || opts[:pe_dir]
+        local = File.directory?(path)
+        filename = "#{host['dist']}"
+        extension = ".dmg"
+        if local
+          if not File.exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          scp_to host, "#{path}/#{filename}#{extension}", "#{host['working_dir']}/#{filename}#{extension}"
+        else
+          if not link_exists?("#{path}/#{filename}#{extension}")
+            raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
+          end
+          on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+        end
+      end
+
       #Determine the PE package to download/upload on a windows host, download/upload that package onto the host.
+      #Assumed file name format: puppet-enterprise-3.3.0-rc1-559-g97f0833.msi
       # @param [Host] host The windows host to download/upload and unpack PE onto
       # @param  [Hash{Symbol=>Symbol, String}] opts The options
       # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option opts [String] :pe_ver Default PE version to install or upgrade to
+      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to
       #                  (Otherwise uses individual hosts pe_ver)
-      # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
-      #                  (Otherwise uses individual Windows hosts pe_ver)
       # @api private
       def fetch_puppet_on_windows(host, opts)
         path = host['pe_dir'] || opts[:pe_dir]
@@ -215,8 +243,6 @@ module Beaker
       # @param  [Hash{Symbol=>Symbol, String}] opts The options
       # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option opts [String] :pe_ver Default PE version to install or upgrade to
-      #                  (Otherwise uses individual hosts pe_ver)
       # @api private
       def fetch_puppet_on_unix(host, opts)
         path = host['pe_dir'] || opts[:pe_dir]
@@ -262,9 +288,10 @@ module Beaker
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
           next if host['roles'].include? 'frictionless' and ! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0')
 
-          windows = host['platform'] =~ /windows/
-          if windows
+          if host['platform'] =~ /windows/
             fetch_puppet_on_windows(host, opts)
+          elsif host['platform'] =~ /osx/
+            fetch_puppet_on_mac(host, opts)
           else
             fetch_puppet_on_unix(host, opts)
           end
@@ -311,10 +338,13 @@ module Beaker
         use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
         hosts.each do |host|
           host['pe_installer'] ||= 'puppet-enterprise-installer'
-          if host['platform'] !~ /windows/
+          if host['platform'] !~ /windows|osx/
             platform = use_all_tar ? 'all' : host['platform']
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{platform}"
+          elsif host['platform'] =~ /osx/
+            version = host['pe_ver'] || opts[:pe_ver]
+            host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
           end
           host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
           on host, "mkdir #{host['working_dir']}"
@@ -327,6 +357,13 @@ module Beaker
           next if host == database and host != master and host != dashboard and pre30database
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
+          elsif host['platform'] =~ /osx/
+            on host, installer_cmd(host, opts)
+            #set the certname and master
+            on host, puppet("config set server #{master}")
+            on host, puppet("config set certname #{host}")
+            #run once to request cert
+            on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
           else
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
@@ -342,7 +379,6 @@ module Beaker
             on host, installer_cmd(host, opts)
           end
         end
-
 
         # If we're installing a database version less than 3.0, ignore the database host
         install_hosts = hosts.dup
