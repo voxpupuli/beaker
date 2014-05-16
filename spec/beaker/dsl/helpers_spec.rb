@@ -551,50 +551,15 @@ describe ClassMixedWithDSLHelpers do
       result_pass.exit_code = 0
     end
 
-    it 'runs the correct command on solaris' do
-      vardir = '/var'
-      solaris_agent = make_host( 'solaris', :platform => 'solaris' )
-      solaris_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
-
-      subject.should_receive( :on ).with( solaris_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( solaris_agent, '/usr/sbin/svcadm disable -s svc:/network/pe-puppet:default' ).once
-
-      subject.stop_agent_on( solaris_agent )
-
-    end
-
-    it 'runs the correct command on aix' do
-      vardir = '/var'
-      aix_agent = make_host( 'aix', :platform => 'aix' )
-      aix_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
-
-      subject.should_receive( :on ).with( aix_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( aix_agent, '/usr/bin/stopsrc -s pe-puppet' ).once
-
-      subject.stop_agent_on( aix_agent )
-
-    end
-
-    it 'runs the correct command on windows' do
-      vardir = '/var'
-      win_agent = make_host( 'win', :platform => 'windows' )
-      win_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
-
-      subject.should_receive( :on ).with( win_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( win_agent, 'net stop pe-puppet', :acceptable_exit_codes => [0,2] ).once
-
-      subject.stop_agent_on( win_agent )
-
-    end
-
-    it 'runs the pe-puppet on a unix system without pe-puppet-agent' do
+    it 'runs the pe-puppet on a system without pe-puppet-agent' do
       vardir = '/var'
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
       deb_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
       subject.should_receive( :on ).with( deb_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
       subject.should_receive( :on ).with( deb_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      subject.should_receive( :on ).with( deb_agent, "/etc/init.d/pe-puppet stop" ).once
+      subject.should_receive( :puppet_resource ).with( "service", "pe-puppet", "ensure=stopped").once
+      subject.should_receive( :on ).once
 
       subject.stop_agent_on( deb_agent )
 
@@ -607,7 +572,8 @@ describe ClassMixedWithDSLHelpers do
 
       subject.should_receive( :on ).with( el_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
       subject.should_receive( :on ).with( el_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
-      subject.should_receive( :on ).with( el_agent, "/etc/init.d/pe-puppet-agent stop" ).once
+      subject.should_receive( :puppet_resource ).with("service", "pe-puppet-agent", "ensure=stopped").once
+      subject.should_receive( :on ).once
 
       subject.stop_agent_on( el_agent )
     end
