@@ -9,6 +9,13 @@ module Unix::File
     execute("mktemp -dt #{name}.XXXXXX")
   end
 
+  def puppet_tmpdir(name)
+    dir = tmpdir(name)
+    user = execute("puppet master --configprint user")
+    execute("chown #{user} #{dir}")
+    dir
+  end
+
   def path_split(paths)
     paths.split(':')
   end
