@@ -228,6 +228,25 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#puppet_module_install_on' do
+    it 'scps the module to the module dir' do
+      subject.stub( :hosts ).and_return( hosts )
+
+      subject.should_receive( :scp_to ).with( master, '/module', '/etc/puppet/modules/test' ).once
+      subject.puppet_module_install_on( master, {:source => '/module', :module_name => 'test'} )
+    end
+  end
+
+  describe '#puppet_module_install' do
+    it 'delegates to #puppet_module_install_on with the hosts list' do
+      subject.stub( :hosts ).and_return( hosts )
+
+      subject.should_receive( :puppet_module_install_on ).with( hosts, {:source => '/module', :module_name => 'test'}).once
+
+      subject.puppet_module_install( {:source => '/module', :module_name => 'test'} )
+    end
+  end
+
   describe 'confine' do
     let(:logger) { double.as_null_object }
     before do
