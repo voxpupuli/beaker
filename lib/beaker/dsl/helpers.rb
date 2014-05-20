@@ -341,7 +341,7 @@ module Beaker
       # @option opts [String] :source The location on the test runners box where the files are found
       # @option opts [String] :module_name The name of the module to be copied over
       def puppet_module_install_on(host, opts = {})
-        Array(host).each do |h|
+        block_on host do | h |
           on h, puppet("module install #{opts[:module_name]}")
         end
       end
@@ -813,11 +813,11 @@ module Beaker
           end
 
           # Not really thrilled with this implementation, might want to improve it
-          # later.  Basically, there is a magic trick in the constructor of
+          # later. Basically, there is a magic trick in the constructor of
           # PuppetCommand which allows you to pass in a Hash for the last value in
-          # the *args Array; if you do so, it will be treated specially.  So, here
+          # the *args Array; if you do so, it will be treated specially. So, here
           # we check to see if our caller passed us a hash of environment variables
-          # that they want to set for the puppet command.  If so, we set the final
+          # that they want to set for the puppet command. If so, we set the final
           # value of *args to a new hash with just one entry (the value of which
           # is our environment variables hash)
           if opts.has_key?(:environment)
