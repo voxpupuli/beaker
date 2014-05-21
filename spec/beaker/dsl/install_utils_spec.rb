@@ -12,9 +12,13 @@ describe ClassMixedWithDSLInstallUtils do
                                        :platform => 'linux',
                                        :roles => [ 'agent' ] } ) }
   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
-                         basic_hosts[1][:platform] = 'windows'
-                         basic_hosts  }
+                        basic_hosts[1][:platform] = 'windows'
+                        basic_hosts[2][:platform] = 'osx-10.9-x86_64'
+                        basic_hosts  }
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp' } ) }
+  let(:machost)       { make_host( 'machost', { :platform => 'osx-10.9-x86_64',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp' } ) }
   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
@@ -93,7 +97,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'leaves correctly ordered hosts alone' do
       subject.stub( :hosts ).and_return( hosts )
-      expect( subject.sorted_hosts ).to be === hosts 
+      expect( subject.sorted_hosts ).to be === hosts
     end
   end
 
@@ -136,6 +140,12 @@ describe ClassMixedWithDSLInstallUtils do
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -a /tmp/answers"
     end
+
+    it 'generates a osx PE install command for a osx host' do
+      the_host = machost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && hdiutil attach .dmg && installer -pkg /Volumes/puppet-enterprise-3.0/puppet-enterprise-installer-3.0.pkg -target /"
+    end
   end
 
   describe 'fetch_puppet' do
@@ -161,7 +171,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :link_exists? ) do |arg|
         if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
           false
-        else          
+        else
           true
         end
       end
@@ -186,7 +196,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
-     
+
     it 'can push a local PE package to a windows host' do
       File.stub( :directory? ).and_return( true ) #is local
       File.stub( :exists? ).and_return( true ) #is present
@@ -199,6 +209,32 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [winhost], {} )
 
+    end
+
+    it 'can download a PE dmg from a URL to a mac host' do
+      File.stub( :directory? ).and_return( false ) #is not local
+      machost['pe_dir'] = 'http://www.path.com/dir/'
+      subject.stub( :link_exists? ).and_return( true ) #is  not local
+      subject.stub( :on ).and_return( true )
+
+      path = machost['pe_dir']
+      filename = "#{ machost['dist'] }"
+      extension = '.dmg'
+      subject.should_receive( :on ).with( machost, "cd #{ machost['working_dir'] }; curl -O #{ path }/#{ filename }#{ extension }" ).once
+      subject.fetch_puppet( [machost], {} )
+    end
+
+    it 'can push a PE dmg to a mac host' do
+      File.stub( :directory? ).and_return( true ) #is local
+      machost['pe_dir'] = 'http://www.path.com/dir/'
+      File.stub( :exists? ).and_return( true ) #is present
+      subject.stub( :scp_to ).and_return( true )
+
+      path = machost['pe_dir']
+      filename = "#{ machost['dist'] }"
+      extension = '.dmg'
+      subject.should_receive( :scp_to ).with( machost, "#{ path }/#{ filename }#{ extension }", "#{ machost['working_dir'] }/#{ filename }#{ extension }" ).once
+      subject.fetch_puppet( [machost], {} )
     end
 
     it "does nothing for a frictionless agent for PE >= 3.2.0" do
@@ -220,7 +256,12 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :stop_agent_on ).and_return( true )
       subject.stub( :sleep_until_puppetdb_started ).and_return( true )
       subject.stub( :wait_for_host_in_dashboard ).and_return( true )
-      subject.stub( :puppet_agent ).and_return( "puppet agent" )
+      subject.stub( :puppet_agent ).and_return do |arg|
+        "puppet agent #{arg}"
+      end
+      subject.stub( :puppet ).and_return do |arg|
+        "puppet #{arg}"
+      end
 
       subject.stub( :hosts ).and_return( hosts )
       #determine mastercert
@@ -231,11 +272,14 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( hosts[2], /mkdir/ ).once
       #create answers file per-host, except windows
       subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
-      subject.should_receive( :create_remote_file ).with( hosts[2], /answers/, /q/ ).once
       #run installer on all hosts
       subject.should_receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
       subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
-      subject.should_receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
+      subject.should_receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
+      #does extra mac specific commands
+      subject.should_receive( :on ).with( hosts[2], /puppet config set server/ ).once
+      subject.should_receive( :on ).with( hosts[2], /puppet config set certname/ ).once
+      subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
       #sign certificate per-host
       subject.should_receive( :sign_certificate_for ).with( hosts[0] ).once
       subject.should_receive( :sign_certificate_for ).with( hosts[1] ).once
@@ -247,9 +291,9 @@ describe ClassMixedWithDSLInstallUtils do
       #wait for puppetdb to start
       subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
       #run each puppet agent once
-      subject.should_receive( :on ).with( hosts[0], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
-      subject.should_receive( :on ).with( hosts[1], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
-      subject.should_receive( :on ).with( hosts[2], /puppet agent/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[1], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
       subject.should_receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
