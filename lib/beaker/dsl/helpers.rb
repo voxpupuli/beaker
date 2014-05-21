@@ -926,7 +926,13 @@ module Beaker
         # that if the script doesn't exist, we should just use `pe-puppet`
         result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
         agent_service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
-        on agent, puppet_resource('service', agent_service, 'ensure=stopped')
+        if agent['platform'] =~ /el-4/
+          # On EL4, the init script does not work correctly with
+          # 'puppet resource service'
+          on agent, "/etc/init.d/#{agent_service} stop"
+        else
+          on agent, puppet_resource('service', agent_service, 'ensure=stopped')
+        end
       end
 
       #stops the puppet agent running on the default host
