@@ -54,6 +54,20 @@ module Beaker
       expect( hypervisor.create( 'vagrant', [], make_opts() ) ).to be === vagrant
     end
 
+    it "creates a vagrant_fusion hypervisor for vagrant vmware fusion hosts" do
+      vagrant = double( 'vagrant_fusion' )
+      vagrant.stub( :provision ).and_return( true )
+      VagrantFusion.should_receive( :new ).once.and_return( vagrant )
+      expect( hypervisor.create( 'vagrant_fusion', [], make_opts() ) ).to be === vagrant
+    end
+
+    it "creates a vagrant_virtualbox hypervisor for vagrant virtualbox hosts" do
+      vagrant = double( 'vagrant_virtualbox' )
+      vagrant.stub( :provision ).and_return( true )
+      VagrantVirtualbox.should_receive( :new ).once.and_return( vagrant )
+      expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
+    end
+
     it "creates a blimpy hypervisor for blimpy hosts" do
       blimpy = double( 'blimpy' )
       blimpy.stub( :provision ).and_return( true )

@@ -33,35 +33,26 @@ module Beaker
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
 
-        if host['disk_path']
-          v_file << "    v.vm.provider :virtualbox do |vb|\n"
-          v_file << "      vb.name = '#{host.name}'\n"
-          unless File.exist?(host['disk_path'])
-            host['disk_path'] = File.join(host['disk_path'], "#{host.name}.vmdk")
-            v_file << "      vb.customize ['createhd', '--filename', '#{host['disk_path']}', '--size', #{host['disk_size'] ||= 5 * 1024}, '--format', 'vmdk']\n"
-          end
-          v_file << "      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium','#{host['disk_path']}']\n"
-          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnshostresolver1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
-          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnsproxy1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
-          v_file << "    end\n"
-        end
-
         if /windows/i.match(host['platform'])
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389\n"
           v_file << "    v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true\n"
           v_file << "    v.vm.guest = :windows"
         end
 
+        v_file << self.class.provider_vfile_section(host, options)
+
         v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
-      v_file << "  c.vm.provider :virtualbox do |vb|\n"
-      v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"#{options['vagrant_memsize'] ||= '1024'}\"]\n"
-      v_file << "  end\n"
       v_file << "end\n"
       File.open(@vagrant_file, 'w') do |f|
         f.write(v_file)
       end
+    end
+
+    def self.provider_vfile_section host, options
+      # Backwards compatibility; default to virtualbox
+      Beaker::VagrantVirtualbox.provider_vfile_section(host, options)
     end
 
     def set_ssh_config host, user
@@ -113,7 +104,7 @@ module Beaker
 
     end
 
-    def provision
+    def provision(provider = nil)
       if !@options[:provision] and !File.file?(@vagrant_file)
         raise "Beaker is configured with provision = false but no vagrant file was found at #{@vagrant_file}. You need to enable provision"
       end
@@ -124,7 +115,7 @@ module Beaker
 
         make_vfile @hosts, @options
 
-        vagrant_cmd("up")
+        vagrant_cmd("up#{" --provider #{provider}" if provider}")
       else #set host ip of already up boxes
         @hosts.each do |host|
           host[:ip] = get_ip_from_vagrant_file(host.name)

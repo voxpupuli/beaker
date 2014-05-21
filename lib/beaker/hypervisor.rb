@@ -20,33 +20,39 @@ module Beaker
       @logger = options[:logger]
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
       hyper_class = case type
-        when /aix/
+        when /^aix$/
           Beaker::Aixer
-        when /solaris/
+        when /^solaris$/
           Beaker::Solaris
-        when /vsphere/
+        when /^vsphere$/
           Beaker::Vsphere
-        when /fusion/
+        when /^fusion$/
           Beaker::Fusion
-        when /blimpy/
+        when /^blimpy$/
           Beaker::Blimper
-        when /ec2/
+        when /^ec2$/
           Beaker::AwsSdk
-        when /vcloud/
+        when /^vcloud$/
           if options['pooling_api']
             Beaker::VcloudPooled
           else
             Beaker::Vcloud
           end
-        when /vagrant/
+        when /^vagrant$/
           Beaker::Vagrant
-        when /google/
+        when /^vagrant_virtualbox$/
+          Beaker::VagrantVirtualbox
+        when /^vagrant_fusion$/
+          Beaker::VagrantFusion
+        when /^vagrant_workstation$/
+          Beaker::VagrantWorkstation
+        when /^google$/
           Beaker::GoogleCompute
-        when /docker/
+        when /^docker$/
           Beaker::Docker
-        when /openstack/
+        when /^openstack$/
           Beaker::OpenStack
-        when /none/
+        when /^none$/
           Beaker::Hypervisor
         else
           # Custom hypervisor
@@ -110,6 +116,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'fusion', 'blimper', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'blimper', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end
