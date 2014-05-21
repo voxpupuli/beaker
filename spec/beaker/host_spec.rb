@@ -189,5 +189,12 @@ module Beaker
       end
 
     end
+
+    it "creates a temporary directory on the host" do
+      host.should_receive(:tmpdir)
+      host.should_receive(:execute).with(/configprint user/)
+      host.should_receive(:execute).with(/chown/)
+      host.puppet_tmpdir("foo")
+    end
   end
 end
