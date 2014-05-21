@@ -54,6 +54,9 @@ module Beaker
       v_file << "  c.vm.provider :virtualbox do |vb|\n"
       v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"#{options['vagrant_memsize'] ||= '1024'}\"]\n"
       v_file << "  end\n"
+      v_file << "  c.vm.provider :vmware_fusion do |v|\n"
+      v_file << "    v.vmx[\"memsize\"] = \"#{options['vagrant_memsize'] ||= '1024'}\"\n"
+      v_file << "  end\n"
       v_file << "end\n"
       File.open(@vagrant_file, 'w') do |f|
         f.write(v_file)
@@ -109,7 +112,7 @@ module Beaker
 
     end
 
-    def provision
+    def provision(provider = nil)
       if !@options[:provision] and !File.file?(@vagrant_file)
         raise "Beaker is configured with provision = false but no vagrant file was found at #{@vagrant_file}. You need to enable provision"
       end
@@ -120,7 +123,7 @@ module Beaker
 
         make_vfile @hosts, @options
 
-        vagrant_cmd("up")
+        vagrant_cmd("up#{" --provider #{provider}" if provider}")
       else #set host ip of already up boxes
         @hosts.each do |host|
           host[:ip] = get_ip_from_vagrant_file(host.name)
