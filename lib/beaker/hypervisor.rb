@@ -89,6 +89,9 @@ module Beaker
       if @options[:add_master_entry]
         add_master_entry(@hosts, @options)
       end
+      if @options[:package_proxy]
+        package_proxy(@hosts, @options)
+      end
     end
 
     #Default validation steps to be run for a given hypervisor
@@ -98,7 +101,7 @@ module Beaker
       end
     end
 
-    #Generate a random straing composted of letter and numbers
+    #Generate a random string composted of letter and numbers
     def generate_host_name
       CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
     end

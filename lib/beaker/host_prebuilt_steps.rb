@@ -413,5 +413,30 @@ module Beaker
       end
     end
 
+    # Setup files for enabling requests to pass to a proxy server
+    # This works for the APT package manager on debian and ubuntu
+    # and YUM package manager on el, centos, fedora and redhat.
+    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    def package_proxy host, opts
+      logger = opts[:logger]
+
+      if host.is_a? Array
+          host.map { |h| package_proxy(h, opts) }
+      else
+        logger.debug("enabling proxy support on #{host.name}")
+        case host['platform']
+          when /ubuntu/, /debian/
+            host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
+          when /^el-/, /centos/, /fedora/, /redhat/
+            host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
+        else
+          logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
+        end
+      end
+    end
+
   end
+
 end
