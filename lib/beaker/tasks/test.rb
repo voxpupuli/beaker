@@ -1,0 +1,12 @@
+require 'beaker/tasks/rake_task'
+
+Beaker::Tasks::RakeTask.new
+desc "Run Beaker PE tests"
+Beaker::Tasks::RakeTask.new("beaker:test:pe",:hosts) do |t,args|
+  t.type = 'pe'
+end
+
+desc "Run Beaker Git tests"
+Beaker::Tasks::RakeTask.new("beaker:test:git",:hosts) do |t,args|
+  t.type = 'git'
+end
