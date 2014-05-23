@@ -16,7 +16,7 @@ module Unix::File
   # @return [String] The path to the temporary directory.
   def puppet_tmpdir(name)
     dir = tmpdir(name)
-    user = execute("puppet master --configprint user")
+    user = puppet('master')['user']
     execute("chown #{user} #{dir}")
     dir
   end
