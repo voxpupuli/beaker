@@ -273,6 +273,32 @@ module Beaker
         end
       end
 
+      # Create a temp directory on remote host owned by specified user.
+      #
+      # @param [Host] host A single remote host on which to create and adjust
+      # the ownership of a temp directory.
+      # @param [String] name A remote path prefix for the new temp
+      # directory.
+      # @param [String] user The name of user that should own the temp
+      # directory.
+      # @!macro common_opts
+      #
+      # @return [String] Returns the name of the newly-created file.
+      def create_tmpdir_on(host, name, user=nil, opts = {})
+        if not user
+          user = puppet('master')['user']
+        end
+
+        case host 
+        when Unix::Host
+          dir = host.tmpdir(name)
+          host.execute("chown #{user}.#{user} #{dir}")
+          return dir
+        else
+          raise(Exception, "Host platform not supported by create_remote_tmpdir.") 
+        end
+      end
+
       # Move a local script to a remote host and execute it
       # @note this relies on {#on} and {#scp_to}
       #
