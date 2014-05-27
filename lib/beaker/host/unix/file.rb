@@ -6,7 +6,7 @@ module Unix::File
   end
 
   def tmpdir(name)
-    execute("mktemp -td #{name}.XXXXXX")
+    execute("mktemp -dt #{name}.XXXXXX")
   end
 
   def path_split(paths)
