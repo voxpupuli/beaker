@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakefs', '0.4'
   s.add_development_dependency 'rake', '~> 10.1.0'
   s.add_development_dependency 'simplecov' unless RUBY_VERSION < '1.9'
+  s.add_development_dependency 'pry', '~> 0.9.12.6'
 
   # Documentation dependencies
   s.add_development_dependency 'yard'
