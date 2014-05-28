@@ -51,16 +51,16 @@ module Beaker
         v_file << "  end\n"
         @logger.debug "created Vagrantfile for VagrantHost #{host.name}"
       end
-      v_file << "  c.vm.provider :virtualbox do |vb|\n"
-      v_file << "    vb.customize [\"modifyvm\", :id, \"--memory\", \"#{options['vagrant_memsize'] ||= '1024'}\"]\n"
-      v_file << "  end\n"
-      v_file << "  c.vm.provider :vmware_fusion do |v|\n"
-      v_file << "    v.vmx[\"memsize\"] = \"#{options['vagrant_memsize'] ||= '1024'}\"\n"
-      v_file << "  end\n"
+      v_file << self.class.provider_vfile_section(options)
       v_file << "end\n"
       File.open(@vagrant_file, 'w') do |f|
         f.write(v_file)
       end
+    end
+
+    def self.provider_vfile_section options
+      # Backwards compatibility; default to virtualbox
+      Beaker::VagrantVirtualbox.provider_vfile_section(options)
     end
 
     def set_ssh_config host, user
