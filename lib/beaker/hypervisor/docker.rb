@@ -89,6 +89,10 @@ module Beaker
     end
 
     def dockerfile_for(host)
+
+      # Warn if image is not define, empty or nil
+      @logger.error("Docker image undefined!") if (host['image']||= nil).to_s.empty?
+
       # specify base image
       dockerfile = <<-EOF
         FROM #{host['image']}
