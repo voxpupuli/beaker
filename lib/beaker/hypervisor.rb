@@ -1,11 +1,3 @@
-%w( host_prebuilt_steps ).each do |lib|
-  begin
-    require lib
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 module Beaker
   #The Beaker class that interacts to all the supported hypervisors
   class Hypervisor
@@ -103,13 +95,5 @@ module Beaker
       CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
     end
 
-  end
-end
-
-%w( vsphere_helper vagrant fusion blimper aws_sdk vsphere vcloud vcloud_pooled aixer solaris docker google_compute_helper google_compute).each do |lib|
-  begin
-    require "hypervisor/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), "hypervisor", lib))
   end
 end

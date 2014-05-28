@@ -1,11 +1,3 @@
-[ 'version32', 'version30', 'version28', 'version20' ].each do |file|
-  begin
-    require "beaker/answers/#{file}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), 'answers', file))
-  end
-end
-
 module Beaker
   # This module provides static methods for accessing PE answer file
   # information.

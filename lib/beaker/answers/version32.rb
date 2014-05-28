@@ -1,5 +1,3 @@
-require 'beaker/answers/version30'
-
 module Beaker
   module Answers
     module Version32

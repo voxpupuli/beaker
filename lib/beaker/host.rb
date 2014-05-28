@@ -2,14 +2,6 @@ require 'socket'
 require 'timeout'
 require 'benchmark'
 
-%w(command ssh_connection).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 module Beaker
   class Host
     SELECT_TIMEOUT = 30
@@ -221,8 +213,4 @@ module Beaker
     end
 
   end
-
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/windows'))
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/unix'))
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/aix'))
 end

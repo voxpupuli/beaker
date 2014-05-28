@@ -1,14 +1,3 @@
-# -*- coding: utf-8 -*-
-require 'rexml/document'
-require 'fileutils'
-%w(test_case logger).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 module Beaker
   # This Class is in need of some cleaning up beyond what can be quickly done.
   # Things to keep in mind:

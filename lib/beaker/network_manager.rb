@@ -1,11 +1,3 @@
-%w(hypervisor).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
-end
-
 module Beaker
   #Object that holds all the provisioned and non-provisioned virtual machines.
   #Controls provisioning, configuration, validation and cleanup of those virtual machines.
