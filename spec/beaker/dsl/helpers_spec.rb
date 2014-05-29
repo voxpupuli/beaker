@@ -776,6 +776,7 @@ describe ClassMixedWithDSLHelpers do
       subject.instance_variable_set(:@path, test_case_path)
       host.stub(:tmpdir).and_return(tmpdir_path)
       host.stub(:file_exist?).and_return(true)
+      subject.stub( :options ).and_return( {} )
     end
 
     before do
