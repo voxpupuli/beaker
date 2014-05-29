@@ -36,8 +36,13 @@ module Beaker
       end
 
       it "when merged with a hash that contains a hash, the sub-hash becomes an OptionsHash" do
+        newhash = options.merge({'key' => {'subkey' => 'subvalue'}})
+        expect(newhash[:key].is_a?(OptionsHash)) === true and expect(newhash[:key][:subkey]) === 'subvalue'
+      end
+
+      it "does not alter the original hash when doing a merge" do
         options.merge({'key' => {'subkey' => 'subvalue'}})
-        expect(options[:key].is_a?(OptionsHash)) === true and expect(options[:key][:subkey]) === 'subvalue'
+        expect(options[:key]).to be === nil
       end
 
       context 'pretty prints itself' do

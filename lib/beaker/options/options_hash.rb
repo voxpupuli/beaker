@@ -109,7 +109,7 @@ module Beaker
         base
       end
 
-      # Recursively merge self with an OptionsHash or Hash
+      # Create new OptionsHash from recursively merged self with an OptionsHash or Hash
       #
       # @param [OptionsHash, Hash] hash The hash to merge from
       #
@@ -124,6 +124,26 @@ module Beaker
       #
       # @return [OptionsHash] The combined hash
       def merge hash
+        #make a deep copy into an empty hash object
+        merged_hash = rmerge(OptionsHash.new, self)
+        rmerge(merged_hash, hash)
+      end
+
+      # Recursively merge self with an OptionsHash or Hash
+      #
+      # @param [OptionsHash, Hash] hash The hash to merge from
+      #
+      # @example
+      #   base = { :key => { :subkey1 => 'subval', :subkey2 => 'subval' } }
+      #   hash = { :key => { :subkey1 => 'newval'} }
+      #
+      #   base.merge!(hash)
+      #   #=> {:key =>
+      #         {:subkey1 => 'newval',
+      #          :subkey2 => 'subval' }
+      #
+      # @return [OptionsHash] The combined hash
+      def merge! hash
         rmerge(self, hash)
       end
 
