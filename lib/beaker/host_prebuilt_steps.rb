@@ -1,9 +1,5 @@
-%w(command).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
+[ 'command' ].each do |lib|
+  require "beaker/#{lib}"
 end
 
 module Beaker

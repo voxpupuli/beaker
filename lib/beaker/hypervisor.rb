@@ -1,9 +1,5 @@
-%w( host_prebuilt_steps ).each do |lib|
-  begin
-    require lib
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
+[ 'host_prebuilt_steps' ].each do |lib|
+  require "beaker/#{lib}"
 end
 
 module Beaker
@@ -106,10 +102,6 @@ module Beaker
   end
 end
 
-%w( vsphere_helper vagrant fusion blimper aws_sdk vsphere vcloud vcloud_pooled aixer solaris docker google_compute_helper google_compute).each do |lib|
-  begin
-    require "hypervisor/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), "hypervisor", lib))
-  end
+[ 'vsphere_helper', 'vagrant', 'fusion', 'blimper', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute' ].each do |lib|
+    require "beaker/hypervisor/#{lib}"
 end

@@ -27,6 +27,7 @@ module Beaker
     #@option options [String] :gce_machine_type A Google Compute machine type used to create instances, defaults to n1-highmem-2
     #@option options [Integer] :timeout The amount of time to attempt execution before quiting and exiting with failure
     def initialize(google_hosts, options)
+      require 'beaker/hypervisor/google_compute_helper'
       @options = options
       @logger = options[:logger]
       @hosts = google_hosts

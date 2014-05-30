@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 require 'rexml/document'
 require 'fileutils'
-%w(test_case logger).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
+[ 'test_case', 'logger' ].each do |lib|
+  require "beaker/#{lib}"
 end
 
 module Beaker
