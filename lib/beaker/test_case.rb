@@ -22,6 +22,8 @@ elsif defined?(Test::Unit::Runner)
   # For test/unit bundled in Ruby >= 1.9.3
   Test::Unit::Runner.module_eval("@@stop_auto_run = true")
 end
+# Fix for "uninitialized constant MiniTest (NameError) error"
+require "minitest/autorun"
 
 module Beaker
   # This class represents a single test case. A test case is necessarily
