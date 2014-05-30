@@ -210,6 +210,74 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#create_tmpdir_for_user' do
+    let(:host) { double.as_null_object }
+    let(:result) { double.as_null_object }
+
+    before :each do
+      allow(host).to receive(:result).and_return(result)
+      allow(result).to receive(:exit_code).and_return(0)
+      allow(result).to receive(:stdout).and_return('puppet')
+    end
+
+    context 'with no user argument' do
+
+      context 'with no path name argument' do
+        context 'without puppet installed on host' do
+          it 'raises an error' do
+            allow(host).to receive(:tmpdir).and_return("tmpdirname")
+            allow(result).to receive(:exit_code).and_return(1)
+            expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+            expect{
+              subject.create_tmpdir_for_user host
+            }.to raise_error(RuntimeError, /`puppet master --configprint` failed,/)
+          end
+        end
+        context 'with puppet installed on host' do
+          it 'executes chown once' do
+            expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+            expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+            expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
+            expect(subject).to receive(:on).with(host, /chown puppet.puppet.*/)
+            subject.create_tmpdir_for_user(host)
+          end
+        end
+      end
+
+      context 'with path name argument' do
+        it 'executes chown once' do
+          expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+          expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
+          expect(subject).to receive(:on).with(host, /chown puppet.puppet \/tmp\/bogus.*/)
+          subject.create_tmpdir_for_user(host, "/tmp/bogus")
+        end
+      end
+
+    end
+
+    context 'with an invalid user argument' do
+      it 'executes chown once' do
+        allow(result).to receive(:stdout).and_return('curiousgeorge')
+        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
+        expect(subject).to receive(:on).with(host, /chown curiousgeorge.curiousgeorge \/tmp\/bogus.*/)
+        subject.create_tmpdir_for_user(host, "/tmp/bogus", "curiousgeorge")
+      end
+    end
+
+    context 'with a valid user argument' do
+      it 'executes chown once' do
+        allow(result).to receive(:exit_code).and_return(1)
+        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect{
+          subject.create_tmpdir_for_user(host, "/tmp/bogus", "curiousgeorge")
+        }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
+      end
+    end
+
+  end
+
   describe '#run_script_on' do
     it 'scps the script to a tmpdir and executes it on host(s)' do
       subject.should_receive( :scp_to )

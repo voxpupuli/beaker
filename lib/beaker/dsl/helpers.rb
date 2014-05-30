@@ -278,24 +278,32 @@ module Beaker
       # @param [Host] host A single remote host on which to create and adjust
       # the ownership of a temp directory.
       # @param [String] name A remote path prefix for the new temp
-      # directory.
+      # directory. Default value is '/tmp/beaker'
       # @param [String] user The name of user that should own the temp
-      # directory.
-      # @!macro common_opts
+      # directory. If no username is specified, use `puppet master
+      # --configprint user` to obtain username from master. Raise RuntimeError
+      # if this puppet command returns a non-zero exit code.
       #
       # @return [String] Returns the name of the newly-created file.
-      def create_tmpdir_on(host, name, user=nil, opts = {})
+      def create_tmpdir_for_user(host, name='/tmp/beaker', user=nil)
         if not user
-          user = puppet('master')['user']
+          result = on(host, "puppet master --configprint user")
+          if not result.exit_code == 0
+            raise "`puppet master --configprint` failed, check that puppet is installed on #{host} or explicitly pass in a user name."
+          end
+          user = result.stdout.strip
         end
 
-        case host 
-        when Unix::Host
+        if not on(host, "getent passwd #{user}").exit_code == 0
+          raise "User #{user} does not exist on #{host}."
+        end
+
+        if defined? host.tmpdir
           dir = host.tmpdir(name)
-          host.execute("chown #{user}.#{user} #{dir}")
+          on host, "chown #{user}.#{user} #{dir}"
           return dir
         else
-          raise(Exception, "Host platform not supported by create_remote_tmpdir.") 
+          raise "Host platform not supported by `create_tmpdir_for_user`."
         end
       end
 

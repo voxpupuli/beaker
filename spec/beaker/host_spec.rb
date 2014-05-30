@@ -11,8 +11,8 @@ module Beaker
       expect( host ).to be_a_kind_of Windows::Host
     end
 
-    it 'defaults to a unix host' do 
-      expect( host ).to be_a_kind_of Unix::Host 
+    it 'defaults to a unix host' do
+      expect( host ).to be_a_kind_of Unix::Host
     end
 
     it 'can be read like a hash' do
@@ -190,10 +190,5 @@ module Beaker
 
     end
 
-    it "creates a temporary directory on the host" do
-      host.should_receive(:tmpdir)
-      host.should_receive(:execute).with(/chown/)
-      host.puppet_tmpdir("foo")
-    end
   end
 end
