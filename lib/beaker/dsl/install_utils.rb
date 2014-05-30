@@ -577,6 +577,7 @@ module Beaker
         end
         #send in the global options hash
         do_install(sorted_hosts, options.merge({:type => :upgrade}))
+        options['upgrade'] = true
       end
     end
   end
