@@ -743,6 +743,7 @@ module Beaker
         puppet_apply_opts[:trace] = nil if opts[:trace]
         puppet_apply_opts[:parser] = 'future' if opts[:future_parser]
         puppet_apply_opts[:modulepath] = opts[:modulepath] if opts[:modulepath]
+        puppet_apply_opts[:noop] = opts[:noop] if opts[:noop]
 
         # From puppet help:
         # "... an exit code of '2' means there were changes, an exit code of
