@@ -69,6 +69,32 @@ module Unix::Pkg
     end
   end
 
+  def install_package_version(package_name, package_version=nil)
+    case self['platform']
+    when /^(fedora|el|centos)-(\d+)-(.+)$/
+      variant = (($1 == 'centos')? 'el' : $1)
+      version = $2
+      arch = $3
+
+      if package_version
+        package_name = "#{package_name}-#{package_version}"
+      end
+
+    when /^(debian|ubuntu)-([^-]+)-(.+)$/
+      variant = $1
+      version = $2
+      #arch = $3
+
+      if package_version
+        package_name = "#{package_name}=#{package_version}"
+      end
+
+    else
+      raise "Package versions cannot be specified on #{self['platform']}"
+    end
+    install_package package_name
+  end
+
   def uninstall_package(name, cmdline_args = '')
     case self['platform']
       when /sles-/

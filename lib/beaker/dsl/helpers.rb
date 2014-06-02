@@ -215,6 +215,17 @@ module Beaker
         host.check_for_package package_name
       end
 
+      # Install a package with specific verison on a host
+      #
+      # @param [Host] host             A host object
+      # @param [String] package_name   Name of the package to install
+      # @param [String] package_version   Version of the package to install
+      #
+      # @return [Result]   An object representing the outcome of *install command*.
+      def install_package_version host, package_name, package_version
+        host.install_package_version package_name, package_version
+      end
+
       # Install a package on a host
       #
       # @param [Host] host             A host object
