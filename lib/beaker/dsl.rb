@@ -1,5 +1,5 @@
 [ 'install_utils', 'roles', 'outcomes', 'assertions',
-  'structure', 'helpers', 'wrappers' ].each do |lib|
+  'structure', 'helpers', 'ezbake_utils', 'wrappers' ].each do |lib|
   require "beaker/dsl/#{lib}"
 end
 
@@ -76,6 +76,7 @@ module Beaker
     include Beaker::DSL::Assertions
     include Beaker::DSL::Wrappers
     include Beaker::DSL::Helpers
+    include Beaker::DSL::EZBakeUtils
     include Beaker::DSL::InstallUtils
   end
 end
