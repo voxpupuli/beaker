@@ -33,4 +33,11 @@ module Beaker
   # Shared methods and helpers
   require 'beaker/shared'
 
+  # Add pry support when available
+  begin
+    require 'pry'
+  rescue LoadError
+    # do nothing
+  end
+
 end
