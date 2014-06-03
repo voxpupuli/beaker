@@ -1,10 +1,6 @@
 require 'yaml' unless defined?(YAML)
 require 'rbvmomi'
-begin
-  require 'beaker/logger'
-rescue LoadError
-  require File.expand_path(File.join(File.dirname(__FILE__), '..', 'logger.rb'))
-end
+require 'beaker/logger'
 
 class VsphereHelper
   def initialize vInfo

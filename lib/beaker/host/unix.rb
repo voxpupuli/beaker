@@ -1,15 +1,12 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'options'))
+[ 'host', 'command_factory', 'command', 'options' ].each do |lib|
+      require "beaker/#{lib}"
+end
 
 module Unix
   class Host < Beaker::Host
-    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'user'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'group'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'exec'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'pkg'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'unix', 'file'))
+    [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
+          require "beaker/host/unix/#{lib}"
+    end
 
     include Unix::User
     include Unix::Group

@@ -2,12 +2,8 @@ require 'socket'
 require 'timeout'
 require 'benchmark'
 
-%w(command ssh_connection).each do |lib|
-  begin
-    require "beaker/#{lib}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), lib))
-  end
+[ 'command', 'ssh_connection' ].each do |lib|
+  require "beaker/#{lib}"
 end
 
 module Beaker
@@ -222,7 +218,7 @@ module Beaker
 
   end
 
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/windows'))
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/unix'))
-  require File.expand_path(File.join(File.dirname(__FILE__), 'host/aix'))
+  [ 'windows', 'unix', 'aix' ].each do |lib|
+    require "beaker/host/#{lib}"
+  end
 end

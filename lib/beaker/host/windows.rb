@@ -1,15 +1,12 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'host'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command_factory'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'command'))
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'options'))
+[ 'host', 'command_factory', 'command', 'options' ].each do |lib|
+      require "beaker/#{lib}"
+end
 
 module Windows
   class Host < Beaker::Host
-    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'user'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'group'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'exec'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'pkg'))
-    require File.expand_path(File.join(File.dirname(__FILE__), 'windows', 'file'))
+    [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
+          require "beaker/host/windows/#{lib}"
+    end
 
     include Windows::User
     include Windows::Group

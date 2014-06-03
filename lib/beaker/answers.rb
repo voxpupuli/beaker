@@ -1,9 +1,5 @@
-[ 'version32', 'version30', 'version28', 'version20' ].each do |file|
-  begin
-    require "beaker/answers/#{file}"
-  rescue LoadError
-    require File.expand_path(File.join(File.dirname(__FILE__), 'answers', file))
-  end
+[ 'version32', 'version30', 'version28', 'version20' ].each do |lib|
+  require "beaker/answers/#{lib}"
 end
 
 module Beaker
