@@ -20,12 +20,11 @@ namespace :beaker do
       pre_suite_log = File.read('log/latest/pre_suite-run.log')
       nodes.each do |node_info|
         hostname = /^(\w+) \(#{node_info[:node_label]}\)/.match(pre_suite_log)[1]
-        fqdn = "#{hostname}.delivery.puppetlabs.net"
-        preserved_config_hash['HOSTS'][fqdn] = {
+        preserved_config_hash['HOSTS'][hostname] = {
             'roles' => ['agent'],
             'platform' => node_info[:platform],
         }
-        preserved_config_hash['HOSTS'][fqdn]['roles'].unshift('master') if node_info[:node_label] =~ /master/
+        preserved_config_hash['HOSTS'][hostname]['roles'].unshift('master') if node_info[:node_label] =~ /master/
       end
       pp preserved_config_hash
 
