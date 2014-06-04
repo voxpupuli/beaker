@@ -23,14 +23,6 @@ describe ClassMixedWithDSLWrappers do
     end
   end
 
-  describe '#razor' do
-    it 'should split out the options and pass "razor" as first arg to Command' do
-      Beaker::Command.should_receive( :new ).
-        with('razor', [ '-p' ], opts)
-      subject.razor( '-p' )
-    end
-  end
-
   describe '#puppet' do
     it 'should split out the options and pass "puppet <blank>" to Command' do
       merged_opts = {}
