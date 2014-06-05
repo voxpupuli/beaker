@@ -32,18 +32,6 @@ module Beaker
         Command.new('hiera', args, options )
       end
 
-      # This is hairy and because of legacy code it will take a bit more
-      # work to disentangle all of the things that are being passed into
-      # this catchall param.
-      #
-      # @api dsl
-      def razor(*args)
-        options = args.last.is_a?(Hash) ? args.pop : {}
-        options['ENV'] ||= {}
-        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
-        Command.new('razor', args, options )
-      end
-
       # @param [String] command_string A string of to be interpolated
       #                                within the context of a host in
       #                                question
