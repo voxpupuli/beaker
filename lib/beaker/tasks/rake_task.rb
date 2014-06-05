@@ -22,11 +22,14 @@ module Beaker
        :type,
        :acceptance_root,
        :name]
-
+      # iterates of acceptable params
       COMMAND_OPTIONS.each do |sym|
         attr_accessor(sym.to_sym)
       end
 
+      # Sets up the predefine task checking
+      # @param *args [Array] First argument is always the name of the task
+      # if no additonal arguments are defined such as parameters it will default to [:hosts,:type]
       def initialize(*args, &task_block)
         @name = args.shift || 'beaker:test'
         if args.empty?
@@ -38,6 +41,9 @@ module Beaker
       end
 
       private
+      # Run the task provided, implements the rake task interface
+      #
+      # @param verbose [bool] Defines wether to run in verbose mode or not
       def run_task(verbose)
         puts "Running task"
 
@@ -47,6 +53,7 @@ module Beaker
         begin
           puts command if verbose
           success = system(command)
+          preserve_configuration(@options_file)
         rescue
           puts failure_message if failure_message
         end
@@ -67,12 +74,19 @@ module Beaker
         end
       end
 
+      #
+      # If an options file exists in the acceptance path for the type given use it as a default options file
+      #   if no other options file is provided
+      #
       def check_for_beaker_type_config
         if !@options_file && File.exists?("#{@acceptance_root}/.beaker-#{@type}.cfg")
           @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
         end
       end
 
+      #
+      # Check for existence of ENV variables for test if !@tests is undef
+      #
       def check_env_variables
         if File.exists?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
           @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests')
@@ -80,25 +94,20 @@ module Beaker
         @tests = ENV['TESTS'] || ENV['TEST'] if !@tests
       end
 
-      def merge_options(args)
-        options_parser = Beaker::Options::CommandLineParser.new
-        options = options_parser.parse!(args)
-        puts options
-      end
-
+      #
+      # Generate the beaker command to run beaker with all possible options passed
+      #
       def beaker_command
-        @b_command ||= begin
-          cmd_parts = []
-          cmd_parts << "beaker"
-          cmd_parts << "--keyfile #{@keyfile}" if @keyfile
-          cmd_parts << "--hosts #{@hosts}" if @hosts
-          cmd_parts << "--tests #{tests}" if @tests
-          cmd_parts << "--options-file #{@options_file}" if @options_file
-          cmd_parts << "--type #{@type}" if @type
-          cmd_parts << "--helper #{@helper}" if @helper
-          cmd_parts << "--fail-mode #{@fail_mode}" if @fail_mode
-          cmd_parts.flatten.join(" ")
-        end
+        cmd_parts = []
+        cmd_parts << "beaker"
+        cmd_parts << "--keyfile #{@keyfile}" if @keyfile
+        cmd_parts << "--hosts #{@hosts}" if @hosts
+        cmd_parts << "--tests #{tests}" if @tests
+        cmd_parts << "--options-file #{@options_file}" if @options_file
+        cmd_parts << "--type #{@type}" if @type
+        cmd_parts << "--helper #{@helper}" if @helper
+        cmd_parts << "--fail-mode #{@fail_mode}" if @fail_mode
+        cmd_parts.flatten.join(" ")
       end
     end
   end
