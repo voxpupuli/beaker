@@ -418,4 +418,30 @@ describe Beaker do
 
   end
 
+  context "package_proxy" do
+
+    subject { dummy_class.new }
+    proxyurl = "http://192.168.2.100:3128"
+
+    it "can set proxy config on a debian/ubuntu host" do
+      host = make_host('name', { :platform => 'ubuntu' } )
+
+      Beaker::Command.should_receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
+      host.should_receive( :exec ).once
+
+      subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+    end
+
+    it "can set proxy config on a redhat/centos host" do
+      host = make_host('name', { :platform => 'centos' } )
+
+      Beaker::Command.should_receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
+      host.should_receive( :exec ).once
+
+      subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+
+    end
+
+  end
+
 end

@@ -198,6 +198,9 @@ module Beaker
             @cmd_options[:log_level] =  bool ? 'debug' : 'info'
           end
 
+          opts.on '--package-proxy URL', 'Set proxy url for package managers (yum and apt)' do |value|
+            @cmd_options[:package_proxy] = value
+          end
         end
 
       end

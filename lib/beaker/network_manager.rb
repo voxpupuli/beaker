@@ -73,6 +73,16 @@ module Beaker
       end
     end
 
+    # configure proxy on all provioned machines
+    #@raise [Exception] Raise an exception if virtual machines fail to be configured
+    def package_proxy
+      if @hypervisors
+        @hypervisors.each_key do |type|
+          @hypervisors[type].package_proxy
+        end
+      end
+    end
+
     #Shut down network connections and revert all provisioned virtual machines
     def cleanup
       #shut down connections

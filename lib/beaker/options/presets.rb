@@ -42,7 +42,8 @@ module Beaker
                                       ENV['q_verify_packages'] || 'y',
                                     :q_puppetdb_password =>
                                       ENV['q_puppetdb_password'] || '~!@#$%^*-/ aZ',
-                                  }
+                                  },
+          :package_proxy        => ENV['BEAKER_PACKAGE_PROXY']
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
@@ -73,6 +74,7 @@ module Beaker
           :fail_mode           => 'slow',
           :timesync            => false,
           :repo_proxy          => false,
+          :package_proxy       => false,
           :add_el_extras       => false,
           :add_master_entry    => false,
           :consoleport         => 443,
