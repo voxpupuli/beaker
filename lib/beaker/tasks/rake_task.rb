@@ -28,7 +28,7 @@ module Beaker
       end
 
       # Sets up the predefine task checking
-      # @param *args [Array] First argument is always the name of the task
+      # @param args [Array] First argument is always the name of the task
       # if no additonal arguments are defined such as parameters it will default to [:hosts,:type]
       def initialize(*args, &task_block)
         @name = args.shift || 'beaker:test'
