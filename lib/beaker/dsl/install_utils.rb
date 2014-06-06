@@ -476,7 +476,11 @@ module Beaker
 
       #Install POSS based upon host configuration and options
       # @example
-      #  install_puppet
+      #  install_puppet({
+      #    :version        => '3.6.1',
+      #    :facter_version => '2.0.1',
+      #    :hiera_version  => '1.3.3',
+      #    :default_action => 'gem_install'
       #
       # @note This will attempt to add a repository for apt.puppetlabs.com on
       #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
@@ -531,7 +535,16 @@ module Beaker
             on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
             on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
           else
-            raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+            if options[:default_action] == 'gem_install'
+              if host.check_for_command( 'gem' )
+                ver_cmd = opts[:version] ? "-v#{opts[:version]} : ''
+                on host, "gem install puppet #{ver_cmd}"
+              else
+                raise "install_puppet() called with default_action 'gem_install' but program `gem' not installed on #{host.name}"
+              end
+            else
+              raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+            end
           end
         end
         nil
