@@ -518,16 +518,18 @@ module Beaker
             end
             on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
           elsif host['platform'] =~ /osx/
-            relver = opts[:version]
-            on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{relver}.dmg"
-            on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{relver}.dmg"
-            on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{relver}.dmg"
-            on host, "hdiutil attach puppet-#{relver}.dmg"
-            on host, "hdiutil attach facter-#{relver}.dmg"
-            on host, "hdiutil attach hiera-#{relver}.dmg"
-            on host, "installer /Volumes/puppet-#{relver}/puppet-#{relver}.pkg -target /"
-            on host, "installer /Volumes/facter-#{relver}/facter-#{relver}.pkg -target /"
-            on host, "installer /Volumes/hiera-#{relver}/hiera-#{relver}.pkg -target /"
+            puppet_ver = opts[:version]
+            facter_ver = opts[:facter_version]
+            hiera_ver = opts[:hiera_version]
+            on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{puppet_ver}.dmg"
+            on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{facter_ver}.dmg"
+            on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{hiera_ver}.dmg"
+            on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
+            on host, "hdiutil attach facter-#{facter_ver}.dmg"
+            on host, "hdiutil attach hiera-#{hiera_ver}.dmg"
+            on host, "installer -pkg /Volumes/puppet-#{puppet_ver}/puppet-#{puppet_ver}.pkg -target /"
+            on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
+            on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
           end
