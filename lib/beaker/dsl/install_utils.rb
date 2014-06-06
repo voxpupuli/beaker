@@ -493,11 +493,25 @@ module Beaker
           if host['platform'] =~ /el-(5|6|7)/
             relver = $1
             on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-#{relver}.noarch.rpm"
-            on host, 'yum install -y puppet'
+            if opts[:facter_version]
+              on host, "yum install -y facter-#{opts[:facter_version}"
+            end
+            if opts[:hiera_version]
+              on host, "yum install -y hiera-#{opts[:hiera_version}"
+            end
+            puppet_pkg = opts[:version] ? "puppet-#{version}" : 'puppet'
+            on host, "yum install -y #{puppet_pkg}"
           elsif host['platform'] =~ /fedora-(\d+)/
             relver = $1
             on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
-            on host, 'yum install -y puppet'
+            if opts[:facter_version]
+              on host, "yum install -y facter-#{opts[:facter_version}"
+            end
+            if opts[:hiera_version]
+              on host, "yum install -y hiera-#{opts[:hiera_version}"
+            end
+            puppet_pkg = opts[:version] ? "puppet-#{version}" : 'puppet'
+            on host, "yum install -y #{puppet_pkg}"
           elsif host['platform'] =~ /(ubuntu|debian)/
             if ! host.check_for_package 'lsb-release'
               host.install_package('lsb-release')
@@ -508,7 +522,14 @@ module Beaker
             on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
             on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
             on host, 'apt-get update'
-            on host, 'apt-get install -y puppet'
+            if opts[:facter_version]
+              on host, "apt-get install -y facter=#{opts[:facter_version}"
+            end
+            if opts[:hiera_version]
+              on host, "apt-get install -y hiera=#{opts[:hiera_version}"
+            end
+            puppet_pkg = opts[:version] ? "puppet=#{opts[:version]" : 'puppet'
+            on host, "apt-get install -y #{puppet_pkg}"
           elsif host['platform'] =~ /windows/
             relver = opts[:version]
             on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{relver}.msi"
@@ -537,6 +558,12 @@ module Beaker
           else
             if options[:default_action] == 'gem_install'
               if host.check_for_command( 'gem' )
+                if opts[:facter_version]
+                  on host, "gem install facter -v#{opts[:facter_version]}"
+                end
+                if opts[:hiera_version]
+                  on host, "gem install hiera -v#{opts[:hiera_version]}"
+                end
                 ver_cmd = opts[:version] ? "-v#{opts[:version]} : ''
                 on host, "gem install puppet #{ver_cmd}"
               else
