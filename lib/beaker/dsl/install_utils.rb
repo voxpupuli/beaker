@@ -517,7 +517,17 @@ module Beaker
               install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
             end
             on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
-
+          elsif host['platform'] =~ /osx/
+            relver = opts[:version]
+            on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{relver}.dmg"
+            on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{relver}.dmg"
+            on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{relver}.dmg"
+            on host, "hdiutil attach puppet-#{relver}.dmg"
+            on host, "hdiutil attach facter-#{relver}.dmg"
+            on host, "hdiutil attach hiera-#{relver}.dmg"
+            on host, "installer /Volumes/puppet-#{relver}/puppet-#{relver}.pkg -target /"
+            on host, "installer /Volumes/facter-#{relver}/facter-#{relver}.pkg -target /"
+            on host, "installer /Volumes/hiera-#{relver}/hiera-#{relver}.pkg -target /"
           else
             raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
           end
