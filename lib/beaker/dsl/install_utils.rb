@@ -475,12 +475,20 @@ module Beaker
       end
 
       #Install POSS based upon host configuration and options
-      # @example
+      # @example will install puppet 3.6.1 from native puppetlabs provided
+      #    packages wherever possible and will fail over to gem installation
+      #    when impossible
+      #
       #  install_puppet({
       #    :version        => '3.6.1',
       #    :facter_version => '2.0.1',
       #    :hiera_version  => '1.3.3',
       #    :default_action => 'gem_install'
+      #
+      # @example Will install latest packages on Enterprise Linux and Debian
+      #    based distros and fail hard on all othere platforms.
+      #
+      #  install_puppet()
       #
       # @note This will attempt to add a repository for apt.puppetlabs.com on
       #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
