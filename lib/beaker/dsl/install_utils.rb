@@ -502,23 +502,23 @@ module Beaker
             relver = $1
             on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-#{relver}.noarch.rpm"
             if opts[:facter_version]
-              on host, "yum install -y facter-#{opts[:facter_version}"
+              on host, "yum install -y facter-#{opts[:facter_version]}"
             end
             if opts[:hiera_version]
-              on host, "yum install -y hiera-#{opts[:hiera_version}"
+              on host, "yum install -y hiera-#{opts[:hiera_version]}"
             end
-            puppet_pkg = opts[:version] ? "puppet-#{version}" : 'puppet'
+            puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
             on host, "yum install -y #{puppet_pkg}"
           elsif host['platform'] =~ /fedora-(\d+)/
             relver = $1
             on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
             if opts[:facter_version]
-              on host, "yum install -y facter-#{opts[:facter_version}"
+              on host, "yum install -y facter-#{opts[:facter_version]}"
             end
             if opts[:hiera_version]
-              on host, "yum install -y hiera-#{opts[:hiera_version}"
+              on host, "yum install -y hiera-#{opts[:hiera_version]}"
             end
-            puppet_pkg = opts[:version] ? "puppet-#{version}" : 'puppet'
+            puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
             on host, "yum install -y #{puppet_pkg}"
           elsif host['platform'] =~ /(ubuntu|debian)/
             if ! host.check_for_package 'lsb-release'
@@ -531,12 +531,12 @@ module Beaker
             on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
             on host, 'apt-get update'
             if opts[:facter_version]
-              on host, "apt-get install -y facter=#{opts[:facter_version}"
+              on host, "apt-get install -y facter=#{opts[:facter_version]}-1puppetlabs1"
             end
             if opts[:hiera_version]
-              on host, "apt-get install -y hiera=#{opts[:hiera_version}"
+              on host, "apt-get install -y hiera=#{opts[:hiera_version]}-1puppetlabs1"
             end
-            puppet_pkg = opts[:version] ? "puppet=#{opts[:version]" : 'puppet'
+            puppet_pkg = opts[:version] ? "puppet=#{opts[:version]}-1puppetlabs1" : 'puppet'
             on host, "apt-get install -y #{puppet_pkg}"
           elsif host['platform'] =~ /windows/
             relver = opts[:version]
@@ -564,15 +564,15 @@ module Beaker
             on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
             on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
           else
-            if options[:default_action] == 'gem_install'
-              if host.check_for_command( 'gem' )
+            if opts[:default_action] == 'gem_install'
+              if host.check_for_package( 'gem' )
                 if opts[:facter_version]
                   on host, "gem install facter -v#{opts[:facter_version]}"
                 end
                 if opts[:hiera_version]
                   on host, "gem install hiera -v#{opts[:hiera_version]}"
                 end
-                ver_cmd = opts[:version] ? "-v#{opts[:version]} : ''
+                ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
                 on host, "gem install puppet #{ver_cmd}"
               else
                 raise "install_puppet() called with default_action 'gem_install' but program `gem' not installed on #{host.name}"
