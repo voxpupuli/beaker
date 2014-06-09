@@ -42,11 +42,7 @@ module Beaker
       #     on, master, 'cat /etc/puppet/puppet.conf'
       #
       def master
-        begin
-          find_only_one :master
-        rescue DSL::Outcomes::FailTest => e
-          default
-        end
+        find_only_one :master
       end
 
       # The host for which ['roles'] include 'database'
@@ -89,15 +85,7 @@ module Beaker
       #     on, default, "curl https://#{database}/nodes/#{agent}"
       #
       def default
-        if hosts.length == 1
-          return hosts[0]
-        elsif any_hosts_as? :default
-          return find_only_one :default
-        elsif any_hosts_as? :master
-          return find_only_one :master
-        else
-          raise DSL::Outcomes::FailTest, "no default host specified"
-        end
+        find_only_one :default
       end
 
       # Determine if there is a host or hosts with the given role defined

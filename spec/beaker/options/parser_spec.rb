@@ -163,7 +163,7 @@ module Beaker
         end
 
         it "ensures that fail-mode is one of fast/slow" do
-          args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"] 
+          args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"]
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end
 
@@ -171,6 +171,40 @@ module Beaker
           args = ["-h", hosts_path, "--log-level", "debug", "--type", "unkowns"]
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end
+      end
+
+      context "set_default_host!" do
+
+        let(:roles) { @roles || [ [ "master", "agent", "database"], ["agent"]] }
+        let(:node1) { { :node1 => { :roles => roles[0]}} }
+        let(:node2) { { :node2 => { :roles => roles[1]}} }
+        let(:hosts) { node1.merge(node2) }
+
+        it "does nothing if the default host is already set" do
+          @roles = [ ["master"], ["agent", "default"] ]
+          parser.set_default_host!(hosts)
+          expect( hosts[:node1][:roles].include?('default') ).to be === false
+          expect( hosts[:node2][:roles].include?('default') ).to be === true
+        end
+
+        it "makes the master default" do
+          @roles = [ ["master"], ["agent"] ]
+          parser.set_default_host!(hosts)
+          expect( hosts[:node1][:roles].include?('default') ).to be === true
+          expect( hosts[:node2][:roles].include?('default') ).to be === false
+        end
+
+        it "makes a single node default" do
+          @roles = [ ["master", "database", "dashboard", "agent"] ]
+          parser.set_default_host!(node1)
+          expect( hosts[:node1][:roles].include?('default') ).to be === true
+        end
+
+        it "raises an error if two nodes are defined as default" do
+          @roles = [ ["master", "default"], ["default"] ]
+          expect{ parser.set_default_host!(hosts) }.to raise_error(ArgumentError)
+        end
+
       end
 
       describe "normalize_args" do

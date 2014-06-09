@@ -119,6 +119,44 @@ module Beaker
         git_opts
       end
 
+      #Add the 'default' role to the host determined to be the default.  If a host already has the role default then
+      #do nothing.  If more than a single host has the role 'default', raise error.
+      #Default host determined to be 1) the only host in a single host configuration, 2) the host with the role 'master'
+      #defined.
+      #@param [Hash] hosts A hash of hosts, each identified by a String name.  Each named host will have an Array of roles
+      def set_default_host!(hosts)
+        default = []
+        master = []
+        default_host_name = nil
+
+        #look through the hosts and find any hosts with role 'default' and any hosts with role 'master'
+        hosts.each_key do |name|
+          host = hosts[name]
+          if host[:roles].include?('default')
+            default << name
+          elsif host[:roles].include?('master')
+            master << name
+          end
+        end
+
+        if not default.empty?
+          #we already have a default set, do nothing
+          if default.length > 1
+            parser_error "Only one host may have the role 'default', default roles assigned to #{default}"
+          end
+        else
+          #no default set, let's make one
+          if not master.empty? and master.length == 1
+            default_host_name = master[0]
+          elsif hosts.length == 1
+            default_host_name = hosts[0].keys[0]
+          end
+          if default_host_name
+            hosts[default_host_name][:roles] << 'default'
+          end
+        end
+      end
+
       #Constructor for Parser
       #
       def initialize
@@ -205,6 +243,7 @@ module Beaker
       #  - that one and only one master is defined per set of hosts
       #  - that solaris/windows/aix hosts are agent only for PE tests OR
       #  - that windows/aix host are agent only if type is not 'pe'
+      #  - sets the default host based upon machine definitions
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
@@ -302,6 +341,9 @@ module Beaker
             test_host_roles(name, host)
           end
         end
+
+        #set the default role
+        set_default_host!(@options[:HOSTS])
 
       end
 
