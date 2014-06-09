@@ -18,6 +18,16 @@ module Beaker
         EZBakeUtils.config
       end
 
+      # Prepares a staging directory for the specified project.
+      #
+      # @param [String] project_name The name of the ezbake project being worked
+      #                              on.
+      # @param [String] project_version The desired version of the primary
+      #                                 subproject being worked.
+      # @param [String] ezbake_dir The local directory where the ezbake project
+      #                            resides or should reside if it doesn't exist
+      #                            already.
+      #
       def ezbake_stage project_name, project_version, ezbake_dir="tmp/ezbake"
         conditionally_clone "git@github.com:puppetlabs/ezbake.git", ezbake_dir
 
@@ -150,8 +160,8 @@ module Beaker
         if system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git status"
           system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git pull"
         else
-          local_path = File.dirname(local_path)
-          FileUtils.mkdir_p(local_path) # make parent directory
+          parent_dir = File.dirname(local_path)
+          FileUtils.mkdir_p(parent_dir)
           system "git clone #{upstream_uri} #{local_path}"
         end
       end
