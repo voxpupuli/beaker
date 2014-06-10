@@ -23,6 +23,9 @@ module Beaker
     #
     # @api dsl
     module Helpers
+
+      PUPPET_MODULE_INSTALL_IGNORE = ['.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
+
       # @!macro common_opts
       #   @param [Hash{Symbol=>String}] opts Options to alter execution.
       #   @option opts [Boolean] :silent (false) Do not produce log output
@@ -311,8 +314,8 @@ module Beaker
       # @option opts [String] :source The location on the test runners box where the files are found
       # @option opts [String] :module_name The name of the module to be copied over
       def puppet_module_install_on(host, opts = {})
-        Array(host).each do |host|
-          scp_to host, opts[:source], File.join(host['distmoduledir'], opts[:module_name])
+        Array(host).each do |h|
+          on h, puppet("module install #{opts[:module_name]}")
         end
       end
 
@@ -1088,7 +1091,7 @@ module Beaker
       end
 
 
-      #Install local module for acceptance testing
+      # Install local module for acceptance testing
       # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
       # @api dsl
       # @param [Host, Array<Host>, String, Symbol] host
@@ -1101,37 +1104,25 @@ module Beaker
       #                   Name which the module should be installed under, please do not include author,
       #                     if none is provided it will attempt to parse the metadata.json and then the Modulefile to determine
       #                     the name of the module
-      # @option opts [String] :target_module_path (host['puppetpath']/modules)
+      # @option opts [String] :target_module_path (host['distmoduledir']/modules)
       #                   Location where the module should be installed, will default
-      #                    to host['puppetpath']/modules
+      #                    to host['distmoduledir']/modules
+      # @option opts [Array] :ignore_list
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
-      def copy_root_module_to(host, opts = {})
-        if !host
-          raise(ArgumentError, "Host must be defined")
+      def copy_module_to(host, opts = {})
+        opts = {:source => './',
+                :target_module_path => host['distmoduledir'],
+                :ignore_module_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+        ignore_list = build_ignore_list(opts)
+        target_module_dir = opts[:target_module_path]
+        if !opts.has_key?(:module_name)
+          module_name = parse_for_modulename(opts[:source])
+        else
+          module_name = opts[:module_name]
         end
-        source = opts[:source] || parse_for_moduleroot(Dir.getwd)
-        target_module_path = opts[:target_module_path] || "#{host['puppetpath']}/modules"
 
-        module_name = opts[:module_name] || parse_for_modulename(source)
-        if !module_name
-          logger.debug('Still unable to determine the modulename')
-          raise(ArgumentError, "Unable to determine the module name, please update your call of puppet_module_install")
-        end
-
-        module_dir = File.join(target_module_path, module_name)
-        on host, "mkdir -p #{target_module_path}"
-        ['manifests', 'lib', 'templates', 'metadata.json', 'Modulefile', 'files', 'Gemfile'].each do |item|
-          item_source = File.join(source, item)
-          if File.exists? item_source
-            options = {}
-            if File.directory? item_source
-              on host, "mkdir -p #{File.join(module_dir, item)}"
-              options = { :mkdir => true }
-            end
-            host.do_scp_to(item_source, module_dir, options)
-          end
-        end
+        scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
       end
 
 
@@ -1204,6 +1195,21 @@ module Beaker
         else
           nil
         end
+      end
+
+      # Build an array list of files/directories to ignore when pushing to remote host
+      # Automatically adds '..' and '.' to array.  If not opts of :ignore list is provided
+      # it will use the static variable PUPPET_MODULE_INSTALL_IGNORE
+      #
+      # @param opts [Hash]
+      # @option opts [Array] :ignore_list A list of files/directories to ignore
+      def build_ignore_list(opts = {})
+        ignore_list = opts[:ignore_list] || PUPPET_MODULE_INSTALL_IGNORE
+        if !ignore_list.kind_of?(Array) || ignore_list.nil?
+          raise ArgumentError "Ignore list must be an Array"
+        end
+        ignore_list << '.' unless ignore_list.include? '.'
+        ignore_list << '..' unless ignore_list.include? '..'
       end
 
     end
