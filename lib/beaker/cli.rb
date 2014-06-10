@@ -131,7 +131,7 @@ module Beaker
     end
 
     def print_important_env_vars( log_level )
-      beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT.values
+      beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT_SPEC.values
       non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
       important_env_vars = beaker_env_vars + non_beaker_env_vars
       env_var_map = important_env_vars.inject({}) do |memo, possibly_set_vars|

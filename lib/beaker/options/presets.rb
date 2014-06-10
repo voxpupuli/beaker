@@ -3,7 +3,15 @@ module Beaker
     #A set of functions representing the environment variables and preset argument values to be incorporated
     #into the Beaker options Object.
     module Presets
-      ENVIRONMENT = {
+
+      # This is a constant that describes the variables we want to collect
+      # from the environment. The keys correspond to the keys in
+      # `self.presets` (flattened) The values are an optional array of
+      # environment variable names to look for. The array structure allows
+      # us to define multiple environment variables for the same
+      # configuration value. They are checked in the order they are arrayed
+      # so that preferred and "fallback" values work as expected.
+      ENVIRONMENT_SPEC = {
         :home                 => 'HOME',
         :project              => ['BEAKER_PROJECT', 'BEAKER_project'],
         :department           => ['BEAKER_DEPARTMENT', 'BEAKER_department'],
@@ -18,7 +26,6 @@ module Beaker
         :release_apt_repo_url => ['BEAKER_RELEASE_APT_REPO', 'RELEASE_APT_REPO'],
         :release_yum_repo_url => ['BEAKER_RELEASE_YUM_REPO', 'RELEASE_YUM_REPO'],
         :dev_builds_url       => ['BEAKER_DEV_BUILDS_URL', 'DEV_BUILDS_URL'],
-
         :q_puppet_enterpriseconsole_auth_user_email => 'q_puppet_enterpriseconsole_auth_user_email',
         :q_puppet_enterpriseconsole_auth_password   => 'q_puppet_enterpriseconsole_auth_password',
         :q_puppet_enterpriseconsole_smtp_host       => 'q_puppet_enterpriseconsole_smtp_host',
@@ -30,18 +37,38 @@ module Beaker
         :q_puppetdb_password                        => 'q_puppetdb_password',
       }
 
-      def self.detect_environment_vars
-        ENVIRONMENT.inject({:answers => {}}) {|memo, key_value|
+      # Takes an environment_spec and searches the processes environment variables accordingly
+      #
+      # @param [Hash{Symbol=>Array,String}] env_var_spec  the spec of what env vars to search for
+      #
+      # @return [Hash] Found environment values
+      def self.collect_env_vars( env_var_spec )
+        env_var_spec.inject({:answers => {}}) do |memo, key_value|
           key, value = key_value[0], key_value[1]
-          if key.to_s =~ /^q_/
-            set_env_var = Array(value).detect {|possible_variable| ENV[possible_variable] }
-            memo[:answers][key] = ENV[set_env_var] if set_env_var
-          else
-            set_env_var = Array(value).detect {|possible_variable| ENV[possible_variable] }
-            memo[key] = ENV[set_env_var] if set_env_var
-          end
+
+          set_env_var = Array(value).detect {|possible_variable| ENV[possible_variable] }
+          memo[key] = ENV[set_env_var] if set_env_var
+
           memo
-        }
+        end
+      end
+
+      # Takes a hash where the values are found environment configuration values
+      # and munges them to appropriate Beaker configuration values
+      #
+      # @param [Hash{Symbol=>String}] found_env_vars  Environment variables to munge
+      #
+      # @return [Hash] Environment config values munged appropriately
+      def self.munge_found_env_vars( found_env_vars )
+        found_env_vars[:answers] ||= {}
+        found_env_vars.each_pair do |key,value|
+          found_env_vars[:answers][key] = value if key.to_s =~ /q_/
+        end
+        found_env_vars[:consoleport] &&= found_env_vars[:consoleport].to_i
+        found_env_vars[:type] &&= 'pe'
+        found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
+        found_env_vars[:answers].delete_if {|key, value| value.nil? or value.empty? }
+        found_env_vars.delete_if {|key, value| value.nil? or value.empty? }
       end
 
 
@@ -52,14 +79,7 @@ module Beaker
       def self.env_vars
         h = Beaker::Options::OptionsHash.new
 
-        found = detect_environment_vars
-
-        found[:consoleport] &&= found[:consoleport].to_i
-        found[:type] &&= 'pe'
-        found[:pe_version_file_win] = found[:pe_version_file]
-        found[:answers].delete_if {|key, value| value.nil? or value.empty? }
-        found.delete_if {|key, value| value.nil? or value.empty? }
-        #found[:answers] ||= {}
+        found = munge_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC ))
 
         return h.merge( found )
       end
@@ -127,7 +147,6 @@ module Beaker
           }
         })
       end
-
     end
   end
 end
