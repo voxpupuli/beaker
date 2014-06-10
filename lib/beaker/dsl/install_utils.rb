@@ -500,89 +500,119 @@ module Beaker
         hosts.each do |host|
           if host['platform'] =~ /el-(5|6|7)/
             relver = $1
-            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-#{relver}.noarch.rpm"
-            if opts[:facter_version]
-              on host, "yum install -y facter-#{opts[:facter_version]}"
-            end
-            if opts[:hiera_version]
-              on host, "yum install -y hiera-#{opts[:hiera_version]}"
-            end
-            puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
-            on host, "yum install -y #{puppet_pkg}"
+            install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'el')
           elsif host['platform'] =~ /fedora-(\d+)/
             relver = $1
-            on host, "rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-fedora-#{relver}.noarch.rpm"
-            if opts[:facter_version]
-              on host, "yum install -y facter-#{opts[:facter_version]}"
-            end
-            if opts[:hiera_version]
-              on host, "yum install -y hiera-#{opts[:hiera_version]}"
-            end
-            puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
-            on host, "yum install -y #{puppet_pkg}"
+            install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'fedora')
           elsif host['platform'] =~ /(ubuntu|debian)/
-            if ! host.check_for_package 'lsb-release'
-              host.install_package('lsb-release')
-            end
-            if ! host.check_for_package 'curl'
-              on host, 'apt-get install -y curl'
-            end
-            on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
-            on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
-            on host, 'apt-get update'
-            if opts[:facter_version]
-              on host, "apt-get install -y facter=#{opts[:facter_version]}-1puppetlabs1"
-            end
-            if opts[:hiera_version]
-              on host, "apt-get install -y hiera=#{opts[:hiera_version]}-1puppetlabs1"
-            end
-            puppet_pkg = opts[:version] ? "puppet=#{opts[:version]}-1puppetlabs1" : 'puppet'
-            on host, "apt-get install -y #{puppet_pkg}"
+            install_puppet_from_deb host, opts
           elsif host['platform'] =~ /windows/
             relver = opts[:version]
-            on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{relver}.msi"
-            on host, "msiexec /qn /i puppet-#{relver}.msi"
-
-            #Because the msi installer doesn't add Puppet to the environment path
-            if fact_on(host, 'architecture').eql?('x86_64')
-              install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
-            else
-              install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
-            end
-            on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+            install_puppet_from_msi host, opts
           elsif host['platform'] =~ /osx/
-            puppet_ver = opts[:version]
-            facter_ver = opts[:facter_version]
-            hiera_ver = opts[:hiera_version]
-            on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{puppet_ver}.dmg"
-            on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{facter_ver}.dmg"
-            on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{hiera_ver}.dmg"
-            on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
-            on host, "hdiutil attach facter-#{facter_ver}.dmg"
-            on host, "hdiutil attach hiera-#{hiera_ver}.dmg"
-            on host, "installer -pkg /Volumes/puppet-#{puppet_ver}/puppet-#{puppet_ver}.pkg -target /"
-            on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
-            on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
+            install_puppet_from_dmg host, opts
           else
             if opts[:default_action] == 'gem_install'
-              if host.check_for_package( 'gem' )
-                if opts[:facter_version]
-                  on host, "gem install facter -v#{opts[:facter_version]}"
-                end
-                if opts[:hiera_version]
-                  on host, "gem install hiera -v#{opts[:hiera_version]}"
-                end
-                ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
-                on host, "gem install puppet #{ver_cmd}"
-              else
-                raise "install_puppet() called with default_action 'gem_install' but program `gem' not installed on #{host.name}"
-              end
+              install_puppet_from_gem host, opts
             else
               raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
             end
           end
         end
         nil
+      end
+
+      # @api private
+      def install_puppet_from_rpm( host, opts )
+        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
+
+        on host, "rpm -ivh #{release_package_string}"
+
+        if opts[:facter_version]
+          on host, "yum install -y facter-#{opts[:facter_version]}"
+        end
+
+        if opts[:hiera_version]
+          on host, "yum install -y hiera-#{opts[:hiera_version]}"
+        end
+
+        puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
+        on host, "yum install -y #{puppet_pkg}"
+      end
+
+      # @api private
+      def install_puppet_from_deb( host, opts )
+        if ! host.check_for_package 'lsb-release'
+          host.install_package('lsb-release')
+        end
+
+        if ! host.check_for_package 'curl'
+          on host, 'apt-get install -y curl'
+        end
+
+        on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
+        on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
+        on host, 'apt-get update'
+
+        if opts[:facter_version]
+          on host, "apt-get install -y facter=#{opts[:facter_version]}-1puppetlabs1"
+        end
+
+        if opts[:hiera_version]
+          on host, "apt-get install -y hiera=#{opts[:hiera_version]}-1puppetlabs1"
+        end
+
+        puppet_pkg = opts[:version] ? "puppet=#{opts[:version]}-1puppetlabs1" : 'puppet'
+        on host, "apt-get install -y #{puppet_pkg}"
+      end
+
+      # @api private
+      def install_puppet_from_msi( host, opts )
+        on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
+        on host, "msiexec /qn /i puppet-#{relver}.msi"
+
+        #Because the msi installer doesn't add Puppet to the environment path
+        if fact_on(host, 'architecture').eql?('x86_64')
+          install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
+        else
+          install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
+        end
+        on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+      end
+
+      # @api private
+      def install_puppet_from_dmg( host, opts )
+        puppet_ver = opts[:version]
+        facter_ver = opts[:facter_version]
+        hiera_ver = opts[:hiera_version]
+
+        on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{puppet_ver}.dmg"
+        on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{facter_ver}.dmg"
+        on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{hiera_ver}.dmg"
+
+        on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
+        on host, "hdiutil attach facter-#{facter_ver}.dmg"
+        on host, "hdiutil attach hiera-#{hiera_ver}.dmg"
+
+        on host, "installer -pkg /Volumes/puppet-#{puppet_ver}/puppet-#{puppet_ver}.pkg -target /"
+        on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
+        on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
+      end
+
+      # @api private
+      def install_puppet_from_gem( host, opts )
+        if host.check_for_package( 'gem' )
+          if opts[:facter_version]
+            on host, "gem install facter -v#{opts[:facter_version]}"
+          end
+          if opts[:hiera_version]
+            on host, "gem install hiera -v#{opts[:hiera_version]}"
+          end
+          ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
+          on host, "gem install puppet #{ver_cmd}"
+        else
+          raise "install_puppet() called with default_action 'gem_install' but program `gem' not installed on #{host.name}"
+        end
       end
 
       #Install PE based upon host configuration and options
