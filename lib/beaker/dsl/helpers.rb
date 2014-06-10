@@ -797,8 +797,6 @@ module Beaker
 
         if host[:default_apply_opts].respond_to? :merge
           puppet_apply_opts = host[:default_apply_opts].merge( puppet_apply_opts )
-        elsif host['default_apply_opts'].respond_to? :merge
-          puppet_apply_opts = host['default_apply_opts'].merge( puppet_apply_opts )
         end
 
         on host, puppet('apply', file_path, puppet_apply_opts), on_options, &block
