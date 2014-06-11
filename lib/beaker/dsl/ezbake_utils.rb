@@ -65,7 +65,7 @@ module Beaker
           dependency_list = ezbake[:redhat][:additional_dependencies]
           dependency_list.each do |dependency|
             package_name, blah, package_version = dependency.split
-            install_package_version host, package_name, package_version
+            install_package host, package_name, package_version
           end
 
         when /^(debian|ubuntu)-([^-]+)-(.+)$/
@@ -78,7 +78,7 @@ module Beaker
             dependency = dependency.split
             package_name = dependency[0]
             package_version = dependency[2].chop # ugh
-            install_package_version host, package_name, package_version
+            install_package host, package_name, package_version
           end
 
         else

@@ -49,15 +49,21 @@ module Unix::Pkg
     end
   end
 
-  def install_package(name, cmdline_args = '')
+  def install_package(name, cmdline_args = '', version = nil)
     case self['platform']
       when /sles-/
         execute("zypper --non-interactive in #{name}")
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
       when /fedora|centos|el-/
+        if version
+          name = "#{name}-#{version}"
+        end
         execute("yum -y #{cmdline_args} install #{name}")
       when /ubuntu|debian/
+        if version
+          name = "#{name}=#{version}"
+        end
         update_apt_if_needed
         execute("apt-get install #{cmdline_args} -y #{name}")
       when /solaris-11/
@@ -67,32 +73,6 @@ module Unix::Pkg
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
-  end
-
-  def install_package_version(package_name, package_version=nil)
-    case self['platform']
-    when /^(fedora|el|centos)-(\d+)-(.+)$/
-      variant = (($1 == 'centos')? 'el' : $1)
-      version = $2
-      arch = $3
-
-      if package_version
-        package_name = "#{package_name}-#{package_version}"
-      end
-
-    when /^(debian|ubuntu)-([^-]+)-(.+)$/
-      variant = $1
-      version = $2
-      #arch = $3
-
-      if package_version
-        package_name = "#{package_name}=#{package_version}"
-      end
-
-    else
-      raise "Package versions cannot be specified on #{self['platform']}"
-    end
-    install_package package_name
   end
 
   def uninstall_package(name, cmdline_args = '')

@@ -72,7 +72,7 @@ describe ClassMixedWithEZBakeUtils do
 
   RSpec.shared_examples "installs-ezbake-dependencies" do
     it "installs ezbake dependencies" do
-      expect(subject).to receive(:install_package_version).
+      expect(subject).to receive(:install_package).
         with( kind_of(FakeHost), anything(), anything())
       subject.install_ezbake_deps host
     end
