@@ -474,28 +474,25 @@ module Beaker
         special_nodes + real_agents
       end
 
-      #Install POSS based upon host configuration and options
-      # @example will install puppet 3.6.1 from native puppetlabs provided
-      #    packages wherever possible and will fail over to gem installation
-      #    when impossible
-      #
+      #Install FOSS based upon host configuration and options
+      # @example will install puppet 3.6.1 from native puppetlabs provided packages wherever possible and will fail over to gem installation when impossible
       #  install_puppet({
       #    :version        => '3.6.1',
       #    :facter_version => '2.0.1',
       #    :hiera_version  => '1.3.3',
       #    :default_action => 'gem_install'
       #
-      # @example Will install latest packages on Enterprise Linux and Debian
-      #    based distros and fail hard on all othere platforms.
-      #
+      # @example Will install latest packages on Enterprise Linux and Debian based distros and fail hard on all othere platforms.
       #  install_puppet()
       #
       # @note This will attempt to add a repository for apt.puppetlabs.com on
       #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
-      #       machines, then install the package 'puppet'
+      #       machines, then install the package 'puppet'.
       #
       # @api dsl
       # @return nil
+      # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
+      # @raise [FailTest] When error occurs during the actual installation process
       def install_puppet(opts = {})
         hosts.each do |host|
           if host['platform'] =~ /el-(5|6|7)/
@@ -522,6 +519,21 @@ module Beaker
         nil
       end
 
+      # Installs Puppet and dependencies using rpm
+      #
+      # @param [Host] host The host to install packages on
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of Puppet to install, if nil installs latest version
+      # @option opts [String] :facter_version The version of Facter to install, if nil installs latest version
+      # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest version
+      # @option opts [String] :default_action What to do if we don't know how to install native packages on host.
+      #                                       Valid value is 'gem_install' or nil. If nil raises an exception when
+      #                                       on an unsupported platform. When 'gem_install' attempts to install
+      #                                       Puppet via gem.
+      # @option opts [String] :release The major release of the OS
+      # @option opts [String] :family The OS family (one of 'el' or 'fedora')
+      # 
+      # @return nil
       # @api private
       def install_puppet_from_rpm( host, opts )
         release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
@@ -540,6 +552,15 @@ module Beaker
         on host, "yum install -y #{puppet_pkg}"
       end
 
+      # Installs Puppet and dependencies from deb
+      #
+      # @param [Host] host The host to install packages on
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of Puppet to install, if nil installs latest version
+      # @option opts [String] :facter_version The version of Facter to install, if nil installs latest version
+      # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest version
+      # 
+      # @return nil
       # @api private
       def install_puppet_from_deb( host, opts )
         if ! host.check_for_package 'lsb-release'
@@ -566,6 +587,13 @@ module Beaker
         on host, "apt-get install -y #{puppet_pkg}"
       end
 
+      # Installs Puppet and dependencies from msi
+      #
+      # @param [Host] host The host to install packages on
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of Puppet to install, required
+      # 
+      # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
         on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
@@ -580,6 +608,15 @@ module Beaker
         on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
       end
 
+      # Installs Puppet and dependencies from dmg
+      #
+      # @param [Host] host The host to install packages on
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of Puppet to install, required
+      # @option opts [String] :facter_version The version of Facter to install, required
+      # @option opts [String] :hiera_version The version of Hiera to install, required
+      # 
+      # @return nil
       # @api private
       def install_puppet_from_dmg( host, opts )
         puppet_ver = opts[:version]
@@ -599,6 +636,16 @@ module Beaker
         on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
       end
 
+      # Installs Puppet and dependencies from gem
+      #
+      # @param [Host] host The host to install packages on
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of Puppet to install, if nil installs latest
+      # @option opts [String] :facter_version The version of Facter to install, if nil installs latest
+      # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest
+      # 
+      # @return nil
+      # @raise [StandardError] if gem does not exist on target host
       # @api private
       def install_puppet_from_gem( host, opts )
         if host.check_for_package( 'gem' )
