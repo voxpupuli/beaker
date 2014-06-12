@@ -423,40 +423,6 @@ module Beaker
         on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
       end
 
-      #Is PE version a less than PE version b
-      #@param [String] a A PE version of the from '\d.\d.\d.*'
-      #@param [String] b A PE version of the form '\d.\d.\d.*'
-      #@return [Boolean] true if a is less than b, otherwise return false
-      #
-      #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
-      # @!visibility private
-      def version_is_less a, b
-        a_nums = a.split('-')[0].split('.')
-        b_nums = b.split('-')[0].split('.')
-        (0...a_nums.length).each do |i|
-          if i < b_nums.length
-            if a_nums[i] < b_nums[i]
-              return true
-            elsif a_nums[i] > b_nums[i]
-              return false
-            end
-          else
-            return false
-          end
-        end
-        #checks all dots, they are equal so examine the rest
-        a_rest = a.split('-', 2)[1]
-        b_rest = b.split('-', 2)[1]
-        if a_rest and b_rest and a_rest < b_rest
-          return false
-        elsif a_rest and not b_rest
-          return false
-        elsif not a_rest and b_rest
-          return true
-        end
-        return false
-      end
-
       #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
       # @example
       #  h = sorted_hosts

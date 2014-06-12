@@ -101,33 +101,6 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
-  describe 'version_is_less' do
-
-    it 'reports 3.0.0-160-gac44cfb is not less than 3.0.0' do
-      expect( subject.version_is_less( '3.0.0-160-gac44cfb', '3.0.0' ) ).to be === false
-    end
-
-    it 'reports 3.0.0-160-gac44cfb is not less than 2.8.2' do
-      expect( subject.version_is_less( '3.0.0-160-gac44cfb', '2.8.2' ) ).to be === false
-    end
-
-    it 'reports 3.0.0 is less than 3.0.0-160-gac44cfb' do
-      expect( subject.version_is_less( '3.0.0', '3.0.0-160-gac44cfb' ) ).to be === true
-    end
-
-    it 'reports 2.8.2 is less than 3.0.0-160-gac44cfb' do
-      expect( subject.version_is_less( '2.8.2', '3.0.0-160-gac44cfb' ) ).to be === true
-    end
-
-    it 'reports 2.8 is less than 3.0.0-160-gac44cfb' do
-      expect( subject.version_is_less( '2.8', '3.0.0-160-gac44cfb' ) ).to be === true
-    end
-
-    it 'reports 2.8 is less than 2.9' do
-      expect( subject.version_is_less( '2.8', '2.9' ) ).to be === true
-    end
-  end
-
   describe 'installer_cmd' do
 
     it 'generates a windows PE install command for a windows host' do
@@ -243,18 +216,20 @@ describe ClassMixedWithDSLInstallUtils do
 
       subject.should_not_receive(:scp_to)
       subject.should_not_receive(:on)
+      subject.stub(:version_is_less).with('3.2.0', '3.2.0').and_return(false)
       subject.fetch_puppet( [unixhost], {} )
     end
   end
 
   describe 'do_install' do
-    it 'can preform a simple installation' do
+    it 'can perform a simple installation' do
       subject.stub( :on ).and_return( Beaker::Result.new( {}, '' ) )
       subject.stub( :fetch_puppet ).and_return( true )
       subject.stub( :create_remote_file ).and_return( true )
       subject.stub( :sign_certificate_for ).and_return( true )
       subject.stub( :stop_agent_on ).and_return( true )
       subject.stub( :sleep_until_puppetdb_started ).and_return( true )
+      subject.stub( :version_is_less ).with('3.0', '3.0').and_return( false )
       subject.stub( :wait_for_host_in_dashboard ).and_return( true )
       subject.stub( :puppet_agent ).and_return do |arg|
         "puppet agent #{arg}"
@@ -402,6 +377,7 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
+      subject.stub( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
       subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
@@ -417,6 +393,7 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
+      subject.stub( :version_is_less ).with('3.1', '3.0').and_return( false )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
       subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
@@ -432,6 +409,7 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       subject.stub( :hosts ).and_return( the_hosts )
       subject.stub( :options ).and_return( {} )
+      subject.stub( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
       subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
