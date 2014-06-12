@@ -46,7 +46,7 @@ Gem::Specification.new do |s|
 
   # These are transitive dependencies that we include or pin to because...
   # Ruby 1.8 compatibility
-  s.add_runtime_dependency 'nokogiri', '1.5.10'
+  s.add_runtime_dependency 'nokogiri', '~> 1.5.10'
   s.add_runtime_dependency 'mime-types', '~> 1.25' # 2.0 won't install on 1.8
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
