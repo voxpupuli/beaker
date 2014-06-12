@@ -65,7 +65,7 @@ module Unix::Pkg
           name = "#{name}=#{version}"
         end
         update_apt_if_needed
-        execute("apt-get install #{cmdline_args} -y #{name}")
+        execute("apt-get install --force-yes #{cmdline_args} -y #{name}")
       when /solaris-11/
         execute("pkg #{cmdline_args} install #{name}")
       when /solaris-10/

@@ -64,7 +64,7 @@ module Beaker
 
           dependency_list = ezbake[:redhat][:additional_dependencies]
           dependency_list.each do |dependency|
-            package_name, blah, package_version = dependency.split
+            package_name, _, package_version = dependency.split
             install_package host, package_name, package_version
           end
 
@@ -75,9 +75,10 @@ module Beaker
 
           dependency_list = ezbake[:debian][:additional_dependencies]
           dependency_list.each do |dependency|
-            dependency = dependency.split
-            package_name = dependency[0]
-            package_version = dependency[2].chop # ugh
+            package_name, _, package_version = dependency.split
+            if package_version
+              package_version = package_version.chop
+            end
             install_package host, package_name, package_version
           end
 
@@ -148,7 +149,7 @@ module Beaker
             make_env += "defaultsdir=/etc/sysconfig "
             on host, cd_to_package_dir + make_env + "make -e install-rpm-sysv-init"
           when /^(debian|ubuntu)-([^-]+)-(.+)$/
-            make_env += "defaultsdir=/etc/defaults "
+            make_env += "defaultsdir=/etc/default "
             on host, cd_to_package_dir + make_env + "make -e install-deb-sysv-init"
           else
             raise "No ezbake installation step for #{platform} yet..."
