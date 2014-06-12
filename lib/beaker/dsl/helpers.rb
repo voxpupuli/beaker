@@ -930,6 +930,40 @@ module Beaker
         end
       end
 
+      #Is semver-ish version a less than semver-ish version b
+      #@param [String] a A version of the from '\d.\d.\d.*'
+      #@param [String] b A version of the form '\d.\d.\d.*'
+      #@return [Boolean] true if a is less than b, otherwise return false
+      #
+      #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
+      #@note -rc being less than final builds is not yet implemented.
+      def version_is_less a, b
+        a_nums = a.split('-')[0].split('.')
+        b_nums = b.split('-')[0].split('.')
+        (0...a_nums.length).each do |i|
+          if i < b_nums.length
+            if a_nums[i] < b_nums[i]
+              return true
+            elsif a_nums[i] > b_nums[i]
+              return false
+            end
+          else
+            return false
+          end
+        end
+        #checks all dots, they are equal so examine the rest
+        a_rest = a.split('-', 2)[1]
+        b_rest = b.split('-', 2)[1]
+        if a_rest and b_rest and a_rest < b_rest
+          return false
+        elsif a_rest and not b_rest
+          return false
+        elsif not a_rest and b_rest
+          return true
+        end
+        return false
+      end
+
       #stops the puppet agent running on the host
       def stop_agent_on(agent)
         vardir = agent.puppet['vardir']
@@ -945,9 +979,15 @@ module Beaker
         # that if the script doesn't exist, we should just use `pe-puppet`
         result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
         agent_service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
-        if agent['platform'] =~ /el-4/
-          # On EL4, the init script does not work correctly with
-          # 'puppet resource service'
+
+        # Under a number of stupid circumstances, we can't stop the
+        # agent using puppet.  This is usually because of issues with
+        # the init script or system on that particular configuration.
+        avoid_puppet_at_all_costs = false
+        avoid_puppet_at_all_costs ||= agent['platform'] =~ /el-4/
+        avoid_puppet_at_all_costs ||= agent['pe_ver'] && version_is_less(agent['pe_ver'], '3.2') && agent['platform'] =~ /sles/
+
+        if avoid_puppet_at_all_costs
           on agent, "/etc/init.d/#{agent_service} stop"
         else
           on agent, puppet_resource('service', agent_service, 'ensure=stopped')
