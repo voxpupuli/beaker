@@ -7,18 +7,18 @@ module TestFileHelpers
   end
 
   def fog_file_contents
-    { :default => { :aws_access_key_id => "IMANACCESSKEY", 
-                    :aws_secret_access_key => "supersekritkey", 
-                    :aix_hypervisor_server => "aix_hypervisor.labs.net", 
-                    :aix_hypervisor_username => "aixer", 
-                    :aix_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-acceptance", 
-                    :solaris_hypervisor_server => "solaris_hypervisor.labs.net", 
-                    :solaris_hypervisor_username => "harness", 
-                    :solaris_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-old.private", 
-                    :solaris_hypervisor_vmpath => "rpoooool/zs", 
-                    :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"], 
-                    :vsphere_server => "vsphere.labs.net", 
-                    :vsphere_username => "vsphere@labs.com", 
+    { :default => { :aws_access_key_id => "IMANACCESSKEY",
+                    :aws_secret_access_key => "supersekritkey",
+                    :aix_hypervisor_server => "aix_hypervisor.labs.net",
+                    :aix_hypervisor_username => "aixer",
+                    :aix_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-acceptance",
+                    :solaris_hypervisor_server => "solaris_hypervisor.labs.net",
+                    :solaris_hypervisor_username => "harness",
+                    :solaris_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-old.private",
+                    :solaris_hypervisor_vmpath => "rpoooool/zs",
+                    :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
+                    :vsphere_server => "vsphere.labs.net",
+                    :vsphere_username => "vsphere@labs.com",
                     :vsphere_password => "supersekritpassword"} }
   end
 
@@ -47,7 +47,7 @@ module HostHelpers
   end
 
   def make_opts
-     Beaker::Options::Presets.presets.merge( Beaker::Options::Presets.env_vars ).merge( { :logger => logger, 
+     Beaker::Options::Presets.presets.merge( Beaker::Options::Presets.env_vars ).merge( { :logger => logger,
                                                :host_config => 'sample.config',
                                                :type => :foss,
                                                :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
@@ -77,7 +77,7 @@ module HostHelpers
   end
 
   def make_host name, opts
-    opts = HOST_DEFAULTS.merge(opts) 
+    opts = HOST_DEFAULTS.merge(opts)
 
     host = Beaker::Host.create( name, make_host_opts(name, opts) )
 

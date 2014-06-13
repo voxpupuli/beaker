@@ -1113,15 +1113,14 @@ module Beaker
       def copy_module_to(host, opts = {})
         opts = {:source => './',
                 :target_module_path => host['distmoduledir'],
-                :ignore_module_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+                :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
         ignore_list = build_ignore_list(opts)
         target_module_dir = opts[:target_module_path]
-        if !opts.has_key?(:module_name)
-          module_name = parse_for_modulename(opts[:source])
-        else
+        if opts.has_key?(:module_name)
           module_name = opts[:module_name]
+        else
+          module_name = parse_for_modulename(opts[:source])
         end
-
         scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
       end
 
@@ -1210,6 +1209,7 @@ module Beaker
         end
         ignore_list << '.' unless ignore_list.include? '.'
         ignore_list << '..' unless ignore_list.include? '..'
+        ignore_list
       end
 
     end

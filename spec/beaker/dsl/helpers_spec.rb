@@ -232,7 +232,7 @@ describe ClassMixedWithDSLHelpers do
     it 'scps the module to the module dir' do
       subject.stub( :hosts ).and_return( hosts )
 
-      subject.should_receive( :scp_to ).with( master, '/module', '/etc/puppet/modules/test' ).once
+      subject.should_receive( :puppet ).with('module install test' ).once
       subject.puppet_module_install_on( master, {:source => '/module', :module_name => 'test'} )
     end
   end
@@ -879,43 +879,50 @@ describe ClassMixedWithDSLHelpers do
   end
 
 
-  describe 'copy_root_module_to' do
-    def source_to_scp (source, target, items)
-      subject.stub(:parse_for_moduleroot).and_return('/totalfake/testmodule')
-      Dir.stub(:getpwd).and_return('/totalfake/testmodule')
+  describe 'copy_module_to' do
+    let(:ignore_list){%w(.git .idea .vagrant .vendor acceptance spec tests log . ..)}
+    let(:source){'./'}
+    let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
+    let(:module_parse_name){'testmodule'}
 
-      items = [items] unless items.kind_of?(Array)
-      File.stub(:exists?).with(any_args()).and_return(false)
-      File.stub(:directory?).with(any_args()).and_return(false)
-      items.each do |item|
-        source_item = File.join(source,item)
-        File.stub(:exists?).with(source_item).and_return(true)
-        options = {}
-        if ['manifests','lib','templates','files'].include? item
-          File.stub(:directory?).with(source_item).and_return(true)
-          options = {:mkdir => true}
+    shared_examples 'copy_module_to' do  |opts|
+      it{
+        host = double("host")
+        host.stub(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
+        Dir.stub(:getpwd).and_return(source)
+
+        subject.stub(:parse_for_moduleroot).and_return(source)
+        if module_parse_name
+          subject.stub(:parse_for_modulename).with(any_args()).and_return(module_parse_name)
+        else
+          subject.should_not_receive(:parse_for_modulename)
         end
-        master.should_receive(:do_scp_to).with(source_item,target,options).ordered
-      end
+
+        File.stub(:exists?).with(any_args()).and_return(false)
+        File.stub(:directory?).with(any_args()).and_return(false)
+
+        subject.should_receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
+        if opts.nil?
+          subject.copy_module_to(host)
+        else
+          subject.copy_module_to(host,opts)
+        end
+      }
     end
-    it 'should call scp with the correct info, with only providing host' do
-      files = ['manifests','lib','templates','metadata.json','Modulefile','files']
-      source_to_scp '/totalfake/testmodule',"#{master['puppetpath']}/modules/testmodule",files
-      subject.stub(:parse_for_modulename).with(any_args()).and_return("testmodule")
-      subject.copy_root_module_to(master)
+    describe 'should call scp with the correct info, with only providing host' do
+      let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
+
+      it_should_behave_like 'copy_module_to'
     end
-    it 'should call scp with the correct info, when specifying the modulename' do
-      files = ['manifests','lib','metadata.json','Modulefile']
-      source_to_scp '/totalfake/testmodule',"#{master['puppetpath']}/modules/bogusmodule",files
-      subject.stub(:parse_for_modulename).and_return('testmodule')
-      subject.copy_root_module_to(master,{:module_name =>"bogusmodule"})
+    describe 'should call scp with the correct info, when specifying the modulename' do
+      let(:target){'/etc/puppetlabs/puppet/modules/bogusmodule'}
+      let(:module_parse_name){false}
+      it_should_behave_like 'copy_module_to', {:module_name =>'bogusmodule'}
     end
-    it 'should call scp with the correct info, when specifying the target to a different path' do
-      files = ['manifests','lib','templates','metadata.json','Modulefile','files']
-      target = "/opt/shared/puppet/modules"
-      source_to_scp '/totalfake/testmodule',"#{target}/testmodule",files
-      subject.stub(:parse_for_modulename).and_return('testmodule')
-      subject.copy_root_module_to(master,{:target_module_path => target})
+    describe 'should call scp with the correct info, when specifying the target to a different path' do
+      target = '/opt/shared/puppet/modules'
+      let(:target){"#{target}/testmodule"}
+      it_should_behave_like 'copy_module_to', {:target_module_path => target}
     end
   end
 
