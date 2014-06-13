@@ -718,6 +718,10 @@ module Beaker
       #                         from Puppet verion 3.2
       #                         By default it will use the 'current' parser.
       #
+      # @option opts [Boolean]  :noop (false) If this option exists, the
+      #                         the "--noop" command line parameter will be
+      #                         passed to the 'puppet apply' command.
+      #
       # @option opts [String]   :modulepath The search path for modules, as
       #                         a list of directories separated by the system
       #                         path separator character. (The POSIX path separator
