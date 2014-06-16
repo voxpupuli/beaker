@@ -26,8 +26,8 @@ module Beaker
       expect( cmd.args_string    ).to be == 'to the baz'
       expect( cmd.options_string ).to be == '--foo=bar'
 
-      win_path  = %q[PATH="/opt/puppet-git-repos/hiera/bin:${PATH}"]
-      win_lib   = %q[RUBYLIB="`cygpath -w /opt/puppet-git-repos/hiera/lib`;`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`;${RUBYLIB}"]
+      win_path  = %q[/opt/puppet-git-repos/hiera/bin:${PATH}]
+      win_lib   = %q[`cygpath -w /opt/puppet-git-repos/hiera/lib`;`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`;${RUBYLIB}]
       cmd_exe   = %q[cmd.exe /c]
 
       command_line = cmd.environment_string_for( host, cmd.environment )
