@@ -1123,6 +1123,7 @@ module Beaker
         end
         scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
       end
+      alias :copy_root_module_to :copy_module_to
 
 
       #Recursive method for finding the module root
