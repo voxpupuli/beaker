@@ -477,7 +477,7 @@ describe ClassMixedWithDSLHelpers do
     it 'can set the --noops flag' do
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
-        with( 'apply', '--verbose', '--noop', '--detailed-exitcodes', 'agent' ).
+        with("apply", "agent", {:verbose=>nil, :noop=>true, "detailed-exitcodes"=>nil}).
         and_return( 'puppet_command' )
       subject.should_receive( :on ).with(
         agent,
