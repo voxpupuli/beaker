@@ -144,7 +144,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def debug *args
       return unless is_verbose?
-      optionally_color WHITE, args
+      optionally_color WHITE, *args
     end
 
     # Report a warning message.
@@ -162,14 +162,14 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def info *args
       return unless is_info?
-      optionally_color BLUE, args
+      optionally_color BLUE, *args
     end
 
     # Report a success message.
     # Will always be reported.
     # @param args[Array<String>] Strings to be reported
     def success *args
-      optionally_color GREEN, args
+      optionally_color GREEN, *args
     end
 
     # Report a notify message.
@@ -177,14 +177,14 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def notify *args
       return unless is_notify?
-      optionally_color BRIGHT_WHITE, args
+      optionally_color BRIGHT_WHITE, *args
     end
 
     # Report an error message.
     # Will always be reported.
     # @param args[Array<String>] Strings to be reported
     def error *args
-      optionally_color BRIGHT_RED, args
+      optionally_color BRIGHT_RED, *args
     end
 
     # Strip any color codes from provided string(s)

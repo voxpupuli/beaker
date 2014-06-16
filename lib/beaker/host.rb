@@ -186,7 +186,10 @@ module Beaker
         seconds = Benchmark.realtime {
           result = connection.execute(cmdline, options, output_callback)
         }
-        @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
+
+        if not options[:silent]
+          @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
+        end
 
         unless options[:silent]
           # What?

@@ -930,18 +930,26 @@ module Beaker
         retry_command(desc, host, "curl -m 1 #{url}", desired_exit_codes, max_retries, retry_interval)
       end
 
-      def retry_command(desc, host, command, desired_exit_codes = 0, max_retries = 60, retry_interval = 1)
+      def retry_command(desc, host, command, desired_exit_codes = 0,
+                        max_retries = 60, retry_interval = 1, verbose = false)
+        log_prefix = host.log_prefix
+        @logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command}"
+        @logger.debug "  Trying command #{max_retries} times."
+        @logger.debug ".", add_newline=false
         desired_exit_codes = [desired_exit_codes].flatten
-        result = on host, command, :acceptable_exit_codes => (0...127)
+        result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}
         num_retries = 0
         until desired_exit_codes.include?(result.exit_code)
           sleep retry_interval
-          result = on host, command, :acceptable_exit_codes => (0...127)
+          result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}
           num_retries += 1
+          @logger.debug ".", add_newline=false
           if (num_retries > max_retries)
-            fail("Unable to #{desc}")
+            @logger.debug "  Command \`#{command}\` failed."
+            fail("Command \`#{command}\` failed.")
           end
         end
+        @logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command} ostensibly successful."
       end
 
       #Is semver-ish version a less than semver-ish version b

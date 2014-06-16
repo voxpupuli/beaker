@@ -37,7 +37,6 @@ module Beaker
       configure_logging
 
       @test_files.each do |test_file|
-        @logger.notify
         @logger.notify "Begin #{test_file}"
         start = Time.now
         test_case = TestCase.new(@hosts, @logger, options, test_file).run_test
