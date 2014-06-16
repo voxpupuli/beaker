@@ -352,9 +352,11 @@ module Beaker
 
         fetch_puppet(hosts, opts)
 
-        hosts.each do |host|
-          # Database host was added in 3.0. Skip it if installing an older version
-          next if host == database and host != master and host != dashboard and pre30database
+        # If we're installing a database version less than 3.0, ignore the database host
+        install_hosts = hosts.dup
+        install_hosts.delete(database) if pre30database and database != master and database != dashboard
+
+        install_hosts.each do |host|
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
           elsif host['platform'] =~ /osx/
@@ -378,14 +380,8 @@ module Beaker
 
             on host, installer_cmd(host, opts)
           end
-        end
 
-        # If we're installing a database version less than 3.0, ignore the database host
-        install_hosts = hosts.dup
-        install_hosts.delete(database) if pre30database and database != master and database != dashboard
-
-        # On each agent, we ensure the certificate is signed then shut down the agent
-        install_hosts.each do |host|
+          # On each agent, we ensure the certificate is signed then shut down the agent
           sign_certificate_for(host)
           stop_agent_on(host)
         end
