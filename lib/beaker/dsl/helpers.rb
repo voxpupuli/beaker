@@ -718,6 +718,10 @@ module Beaker
       #                         from Puppet verion 3.2
       #                         By default it will use the 'current' parser.
       #
+      # @option opts [Boolean]  :noop (false) If this option exists, the
+      #                         the "--noop" command line parameter will be
+      #                         passed to the 'puppet apply' command.
+      #
       # @option opts [String]   :modulepath The search path for modules, as
       #                         a list of directories separated by the system
       #                         path separator character. (The POSIX path separator
@@ -743,6 +747,7 @@ module Beaker
         puppet_apply_opts[:trace] = nil if opts[:trace]
         puppet_apply_opts[:parser] = 'future' if opts[:future_parser]
         puppet_apply_opts[:modulepath] = opts[:modulepath] if opts[:modulepath]
+        puppet_apply_opts[:noop] = opts[:noop] if opts[:noop]
 
         # From puppet help:
         # "... an exit code of '2' means there were changes, an exit code of
