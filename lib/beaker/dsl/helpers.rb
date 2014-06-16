@@ -737,36 +737,41 @@ module Beaker
         on_options = {}
         on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
 
-        args = ["--verbose"]
-        args << "--parseonly" if opts[:parseonly]
-        args << "--trace" if opts[:trace]
-        args << "--parser future" if opts[:future_parser]
-        args << "--modulepath #{opts[:modulepath]}" if opts[:modulepath]
+        puppet_apply_opts = {}
+        puppet_apply_opts[:verbose] = nil
+        puppet_apply_opts[:parseonly] = nil if opts[:parseonly]
+        puppet_apply_opts[:trace] = nil if opts[:trace]
+        puppet_apply_opts[:parser] = 'future' if opts[:future_parser]
+        puppet_apply_opts[:modulepath] = opts[:modulepath] if opts[:modulepath]
 
         # From puppet help:
         # "... an exit code of '2' means there were changes, an exit code of
         # '4' means there were failures during the transaction, and an exit
         # code of '6' means there were both changes and failures."
-        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].select{|x|x}.length > 1
-          raise(ArgumentError, "Cannot specify more than one of `catch_failures`, `catch_changes`, `expect_failures`, or `expect_changes` for a single manifest")
+        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].compact.length > 1
+          raise(ArgumentError,
+                'Cannot specify more than one of `catch_failures`, ' +
+                '`catch_changes`, `expect_failures`, or `expect_changes` ' +
+                'for a single manifest')
         end
+
         if opts[:catch_changes]
-          args << '--detailed-exitcodes'
+          puppet_apply_opts['detailed-exitcodes'] = nil
 
           # We're after idempotency so allow exit code 0 only.
           on_options[:acceptable_exit_codes] |= [0]
         elsif opts[:catch_failures]
-          args << '--detailed-exitcodes'
+          puppet_apply_opts['detailed-exitcodes'] = nil
 
           # We're after only complete success so allow exit codes 0 and 2 only.
           on_options[:acceptable_exit_codes] |= [0, 2]
         elsif opts[:expect_failures]
-          args << '--detailed-exitcodes'
+          puppet_apply_opts['detailed-exitcodes'] = nil
 
           # We're after failures specifically so allow exit codes 1, 4, and 6 only.
           on_options[:acceptable_exit_codes] |= [1, 4, 6]
         elsif opts[:expect_changes]
-          args << '--detailed-exitcodes'
+          puppet_apply_opts['detailed-exitcodes'] = nil
 
           # We're after changes specifically so allow exit code 2 only.
           on_options[:acceptable_exit_codes] |= [2]
@@ -784,13 +789,17 @@ module Beaker
         # value of *args to a new hash with just one entry (the value of which
         # is our environment variables hash)
         if opts.has_key?(:environment)
-          args << { :environment => opts[:environment]}
+          puppet_apply_opts['ENV'] = opts[:environment]
         end
 
         file_path = host.tmpfile('apply_manifest.pp')
         create_remote_file(host, file_path, manifest + "\n")
-        args << file_path
-        on host, puppet( 'apply', *args), on_options, &block
+
+        if host[:default_apply_opts].respond_to? :merge
+          puppet_apply_opts = host[:default_apply_opts].merge( puppet_apply_opts )
+        end
+
+        on host, puppet('apply', file_path, puppet_apply_opts), on_options, &block
       end
 
       # Runs 'puppet apply' on default host, piping manifest through stdin
