@@ -128,7 +128,7 @@ module Beaker
       end
 
       it 'should start the container' do
-        container.should_receive(:start).with({'PublishAllPorts' => true})
+        container.should_receive(:start).with({'PublishAllPorts' => true, 'Privileged' => true})
 
         docker.provision
       end

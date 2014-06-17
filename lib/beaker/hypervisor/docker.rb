@@ -32,7 +32,7 @@ module Beaker
         })
 
         @logger.debug("Starting container #{container.id}")
-        container.start({"PublishAllPorts" => true})
+        container.start({"PublishAllPorts" => true, "Privileged" => true})
 
         # Find out where the ssh port is from the container
         ip   = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
