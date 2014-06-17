@@ -17,7 +17,7 @@ module Beaker
         :department           => ['BEAKER_DEPARTMENT', 'BEAKER_department'],
         :jenkins_build_url    => ['BEAKER_BUILD_URL', 'BUILD_URL'],
         :consoleport          => ['BEAKER_CONSOLEPORT', 'consoleport'],
-        :type                 => ['BEAKER_IS_PE', 'IS_PE'],
+        :is_pe                => ['BEAKER_IS_PE', 'IS_PE'],
         :pe_dir               => ['BEAKER_PE_DIR', 'pe_dist_dir'],
         :pe_version_file      => ['BEAKER_PE_VERSION_FILE', 'pe_version_file'],
         :pe_ver               => ['BEAKER_PE_VER', 'pe_ver'],
@@ -65,7 +65,7 @@ module Beaker
           found_env_vars[:answers][key] = value if key.to_s =~ /q_/
         end
         found_env_vars[:consoleport] &&= found_env_vars[:consoleport].to_i
-        found_env_vars[:type] &&= 'pe'
+        found_env_vars[:type] = found_env_vars[:is_pe] == 'true' || found_env_vars[:is_pe] == 'yes' ? 'pe' : nil
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
         found_env_vars[:answers].delete_if {|key, value| value.nil? or value.empty? }
         found_env_vars.delete_if {|key, value| value.nil? or value.empty? }
