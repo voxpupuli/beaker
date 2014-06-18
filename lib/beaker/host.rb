@@ -158,7 +158,7 @@ module Beaker
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
-                                             self['ssh'] )
+                                             self['ssh'], { :logger => @logger } )
     end
 
     def close
