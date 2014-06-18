@@ -476,15 +476,14 @@ describe ClassMixedWithDSLHelpers do
 
     it 'can set the --noops flag' do
       subject.should_receive( :create_remote_file ).and_return( true )
-      subject.should_receive( :puppet ).
-        with("apply", "agent", {:verbose=>nil, :noop=>nil, "detailed-exitcodes"=>nil}).
-        and_return( 'puppet_command' )
-      subject.should_receive( :on ).with(
-        agent,
-        'puppet_command',
-        :acceptable_exit_codes => [1,2,3,4,5,6]
-      )
-
+      expect( subject ).to receive( :on ).with {|h, command, opts|
+        cmdline = command.cmd_line( h )
+        expect( h ).to be == agent
+        expect( cmdline ).to include('puppet apply')
+        expect( cmdline ).to include('--detailed-exitcodes')
+        expect( cmdline ).to include('--verbose')
+        expect( cmdline ).to include('--noop')
+      }
       subject.apply_manifest_on(
         agent,
         'class { "boo": }',
