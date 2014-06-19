@@ -6,7 +6,7 @@ describe Beaker do
   let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
   let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
   let( :sync_cmd )       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
-  let( :pkgs )           { Beaker::HostPrebuiltSteps::PACKAGES }
+  let( :windows_pkgs )   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
   let( :unix_only_pkgs ) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
   let( :sles_only_pkgs ) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
   let( :platform )       { @platform || 'unix' }
@@ -310,10 +310,6 @@ describe Beaker do
     it "can validate unix hosts" do
 
       hosts.each do |host|
-        pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
-        end
         unix_only_pkgs.each do |pkg|
           host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
           host.should_receive( :install_package ).with( pkg ).once
@@ -329,13 +325,9 @@ describe Beaker do
       @platform = 'windows'
 
       hosts.each do |host|
-        pkgs.each do |pkg|
+        windows_pkgs.each do |pkg|
           host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
           host.should_receive( :install_package ).with( pkg ).once
-        end
-        unix_only_pkgs.each do |pkg|
-          host.should_receive( :check_for_package).with( pkg ).never
-          host.should_receive( :install_package ).with( pkg ).never
         end
       end
 
@@ -347,14 +339,6 @@ describe Beaker do
       @platform = 'sles-13.1-x64'
 
       hosts.each do |host|
-        pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
-        end
-        unix_only_pkgs.each do |pkg|
-          host.should_receive( :check_for_package).with( pkg ).never
-          host.should_receive( :install_package ).with( pkg ).never
-        end
         sles_only_pkgs.each do |pkg|
           host.should_receive( :check_for_package).with( pkg ).once.and_return( false )
           host.should_receive( :install_package ).with( pkg ).once

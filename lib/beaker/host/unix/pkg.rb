@@ -7,7 +7,7 @@ module Unix::Pkg
     @apt_needs_update = true
   end
 
-  def check_for_package(name)
+  def check_for_command(name)
     result = exec(Beaker::Command.new("which #{name}"), :acceptable_exit_codes => (0...127))
     case self['platform']
     when /solaris-10/
@@ -15,6 +15,27 @@ module Unix::Pkg
     else
       result.exit_code == 0
     end
+  end
+
+  def check_for_package(name)
+    case self['platform']
+      when /sles-/
+        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}"), :acceptable_exit_codes => (0...127))
+      when /el-4/
+        @logger.debug("Package query not supported on rhel4")
+        return false
+      when /fedora|centos|el-/
+        result = exec(Beaker::Command.new("rpm -q #{name}"), :acceptable_exit_codes => (0...127))
+      when /ubuntu|debian/
+        result = exec(Beaker::Command.new("dpkg -s #{name}"), :acceptable_exit_codes => (0...127))
+      when /solaris-11/
+        result = exec(Beaker::Command.new("pkg info #{name}"), :acceptable_exit_codes => (0...127))
+      when /solaris-10/
+        result = exec(Beaker::Command.new("pkginfo #{name}"), :acceptable_exit_codes => (0...127))
+      else
+        raise "Package #{name} cannot be queried on #{self}"
+    end
+    result.exit_code == 0
   end
 
   # If apt has not been updated since the last repo deployment it is
