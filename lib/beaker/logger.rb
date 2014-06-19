@@ -163,6 +163,15 @@ module Beaker
       optionally_color GREY, string, false
     end
 
+    # Custom reporting for performance/sysstat messages
+    # Will not print unless we are at {LOG_LEVELS} 'debug' or higher.
+    def perf_output *args
+      return unless is_debug?
+      strings = strip_colors_from args
+      string = strings.join
+      optionally_color MAGENTA, string, false
+    end
+
     # Report a debug message.
     # Will not print unless we are at {LOG_LEVELS} 'debug' or higher.
     # @param args[Array<String>] Strings to be reported

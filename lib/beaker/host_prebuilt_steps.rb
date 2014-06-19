@@ -78,6 +78,9 @@ module Beaker
       if host.is_a? Array
         host.map { |h| validate_host(h, opts) }
       else
+        if opts[:collect_perf_data]
+          UNIX_PACKAGES << "sysstat"
+        end
         case
         when host['platform'] =~ /sles-/
           SLES_PACKAGES.each do |pkg|
