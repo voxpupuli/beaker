@@ -80,7 +80,6 @@ module Beaker
           :repo_proxy          => false,
           :package_proxy       => false,
           :add_el_extras       => false,
-          :add_master_entry    => false,
           :consoleport         => 443,
           :pe_dir              => '/opt/enterprise/dists',
           :pe_version_file     => 'LATEST',

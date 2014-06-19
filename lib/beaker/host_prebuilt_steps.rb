@@ -103,48 +103,6 @@ module Beaker
       report_and_raise(logger, e, "validate")
     end
 
-    #Update /etc/hosts on the master node to include a rule for lookup of the master by name/ip.
-    # @param [Host, Array<Host>, String, Symbol] hosts One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def add_master_entry hosts, opts
-      logger = opts[:logger]
-      master = only_host_with_role(hosts, :master)
-      logger.notify "Add Master entry to /etc/hosts on #{master.name}"
-      if master["hypervisor"] and master["hypervisor"] =~ /docker/
-        # skip on docker because as of 0.8.1 /etc/hosts isn't modifiable
-        # https://github.com/dotcloud/docker/issues/2267
-        logger.debug "Don't update master entry on docker masters"
-        return
-      end
-      if master["hypervisor"] and master["hypervisor"] =~ /vagrant/
-        logger.debug "Don't update master entry on vagrant masters"
-        return
-      end
-      logger.debug "Get ip address of Master #{master}"
-      if master['platform'].include? 'solaris'
-        stdout = master.exec(Command.new("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1")).stdout
-      else
-        stdout = master.exec(Command.new("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1")).stdout
-      end
-      ip=stdout.chomp
-
-      path = ETC_HOSTS_PATH
-      if master['platform'].include? 'solaris'
-        path = ETC_HOSTS_PATH_SOLARIS
-      end
-
-      logger.debug "Update %s on #{master}" % path
-      # Preserve the mode the easy way...
-      master.exec(Command.new("cp %s %s.old" % [path, path]))
-      master.exec(Command.new("cp %s %s.new" % [path, path]))
-      master.exec(Command.new("grep -v '#{ip} #{master}' %s > %s.new" % [path, path]))
-      master.exec(Command.new("echo '#{ip} #{master}' >> %s.new" % path))
-      master.exec(Command.new("mv %s.new %s" % [path, path]))
-    rescue => e
-      report_and_raise(logger, e, "add_master_entry")
-    end
-
     #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
     #convenience method to allow for easy login to hosts after they have been provisioned with
     #Beaker.

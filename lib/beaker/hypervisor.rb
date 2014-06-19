@@ -88,9 +88,6 @@ module Beaker
       if @options[:add_el_extras]
         add_el_extras(@hosts, @options)
       end
-      if @options[:add_master_entry]
-        add_master_entry(@hosts, @options)
-      end
       if @options[:package_proxy]
         package_proxy(@hosts, @options)
       end
