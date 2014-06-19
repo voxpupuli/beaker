@@ -235,7 +235,7 @@ module Beaker
       #  - each host has a valid platform
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
-      #  - --type is one of 'pe' or 'git'
+      #  - --type is one of 'pe', 'git' or 'foss'
       #  - --fail-mode is one of 'fast', 'stop' or nil
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
