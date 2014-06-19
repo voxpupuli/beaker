@@ -137,6 +137,43 @@ module Beaker
       @options.is_pe?
     end
 
+    # True if this is a pe run, or if the host has had a 'use-service' property set.
+    def use_service_scripts?
+      is_pe? || self['use-service']
+    end
+
+    # Mirrors the true/false value of the host's 'graceful-restarts' property,
+    # or falls back to the value of +is_using_passenger?+ if
+    # 'graceful-restarts' is nil, but only if this is not a PE run (foss only).
+    def graceful_restarts?
+      graceful =
+      if !self['graceful-restarts'].nil?
+        self['graceful-restarts']
+      else
+        !is_pe? && is_using_passenger?
+      end
+      graceful
+    end
+
+    # Modifies the host settings to indicate that it will be using passenger service scripts,
+    # (apache2) by default.  Does nothing if this is a PE host, since it is already using
+    # passenger.
+    # @param [String] puppetservice Name of the service script that should be
+    #   called to stop/startPuppet on this host.  Defaults to 'apache2'.
+    def uses_passenger!(puppetservice = 'apache2')
+      if !is_pe?
+        self['passenger'] = true
+        self['puppetservice'] = puppetservice
+        self['use-service'] = true
+      end
+      return true
+    end
+
+    # True if this is a PE run, or if the host's 'passenger' property has been set.
+    def is_using_passenger?
+      is_pe? || self['passenger']
+    end
+
     def log_prefix
       if @defaults['vmhostname']
         "#{self} (#{@name})"

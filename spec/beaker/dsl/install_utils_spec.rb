@@ -525,7 +525,7 @@ describe ClassMixedWithDSLInstallUtils do
   describe "#install_puppetlabs_release_repo" do
     let( :platform ) { Beaker::Platform.new('solaris-7-i386') }
     let( :host ) do
-      FakeHost.new( :options => { 'platform' => platform })
+      FakeHost.create('fakevm', platform.to_s)
     end
 
     before do
@@ -592,9 +592,7 @@ describe ClassMixedWithDSLInstallUtils do
     let( :package_name ) { "puppet" }
     let( :package_version ) { "7.5.6" }
     let( :host ) do
-      FakeHost.new( :options => opts.merge({
-        'platform' => platform,
-      }))
+      FakeHost.create('fakvm', platform.to_s, opts)
     end
 
     describe "When host is unsupported platform" do
