@@ -12,7 +12,7 @@ module Beaker
 
     class CommandFailure < StandardError; end
 
-    # This class providers array syntax for using puppet --configprint on a host
+    # This class provides array syntax for using puppet --configprint on a host
     class PuppetConfigReader
       def initialize(host, command)
         @host = host
