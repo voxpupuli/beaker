@@ -36,6 +36,7 @@ module Beaker
       container.stub(:start)
       container.stub(:json).and_return({
         'NetworkSettings' => {
+          'IPAddress' => '192.0.2.1',
           'Ports' => {
             '22/tcp' => [
               {
@@ -133,11 +134,25 @@ module Beaker
         docker.provision
       end
 
-      it 'should expose port 22 to beaker' do
-        docker.provision
+      context "connecting to ssh" do
+        before { @docker_host = ENV['DOCKER_HOST'] }
+        after { ENV['DOCKER_HOST'] = @docker_host }
 
-        hosts[0]['ip'].should == '127.0.1.1'
-        hosts[0]['port'].should == 8022
+        it 'should expose port 22 to beaker' do
+          ENV['DOCKER_HOST'] = nil
+          docker.provision
+
+          hosts[0]['ip'].should == '127.0.1.1'
+          hosts[0]['port'].should == 8022
+        end
+
+        it 'should expose port 22 to beaker when using DOCKER_HOST' do
+          ENV['DOCKER_HOST'] = "tcp://192.0.2.2:2375"
+          docker.provision
+
+          hosts[0]['ip'].should == '192.0.2.2'
+          hosts[0]['port'].should == 8022
+        end
       end
 
       it 'should record the image and container for later' do
