@@ -103,7 +103,7 @@ module Beaker
       # be updated from its github master before any ezbake operations are
       # performed.
       #
-      def install_from_ezbake host, project_name, project_version, ezbake_dir='tmp/ezbake'
+      def install_from_ezbake host, project_name, project_version, env_args={}, ezbake_dir='tmp/ezbake'
         if not ezbake_config
           ezbake_stage project_name, project_version
         end
@@ -137,20 +137,22 @@ module Beaker
 
         # "make" on target
         cd_to_package_dir = "cd /root/" + dir_name + "; "
-        make_env = "env prefix=/usr confdir=/etc rundir=/var/run/#{project_name} "
-        make_env += "initdir=/etc/init.d "
-        on host, cd_to_package_dir + make_env + "make -e install-" + project_name
+        env = ""
+        if not env_args.empty?
+          env = "env " + env_args.map {|k, v| "#{k}=#{v} "}.join(' ')
+        end
+        on host, cd_to_package_dir + env + "make -e install-" + project_name
 
         # install init scripts and default settings, perform additional preinst
         # TODO: figure out a better way to install init scripts and defaults
         platform = host['platform']
         case platform
           when /^(fedora|el|centos)-(\d+)-(.+)$/
-            make_env += "defaultsdir=/etc/sysconfig "
-            on host, cd_to_package_dir + make_env + "make -e install-rpm-sysv-init"
+            env += "defaultsdir=/etc/sysconfig "
+            on host, cd_to_package_dir + env + "make -e install-rpm-sysv-init"
           when /^(debian|ubuntu)-([^-]+)-(.+)$/
-            make_env += "defaultsdir=/etc/default "
-            on host, cd_to_package_dir + make_env + "make -e install-deb-sysv-init"
+            env += "defaultsdir=/etc/default "
+            on host, cd_to_package_dir + env + "make -e install-deb-sysv-init"
           else
             raise "No ezbake installation step for #{platform} yet..."
         end
