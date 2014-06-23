@@ -10,6 +10,8 @@ RSpec.configure do |c|
   c.add_setting :hosts, :default => []
   # Define persistant options setting
   c.add_setting :options, :default => {}
+  # Define persistant logger object
+  c.add_setting :logger, :default => nil
 
   #default option values
   defaults = {

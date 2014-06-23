@@ -12,7 +12,7 @@ module BeakerRSpec
     # Accessor for logger
     # @return Beaker::Logger object
     def logger
-      @logger
+      RSpec.configuration.logger
     end
 
     # Accessor for options hash
@@ -50,8 +50,8 @@ module BeakerRSpec
       options_parser = Beaker::Options::Parser.new
       options = options_parser.parse_args(args)
       options[:debug] = true
-      @logger = Beaker::Logger.new(options)
-      options[:logger] = @logger
+      RSpec.configuration.logger = Beaker::Logger.new(options)
+      options[:logger] = logger
       RSpec.configuration.hosts = []
       RSpec.configuration.options = options
     end
