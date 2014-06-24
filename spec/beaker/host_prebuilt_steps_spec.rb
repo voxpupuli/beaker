@@ -239,49 +239,6 @@ describe Beaker do
     end
   end
 
-  context "add_master_entry" do
-    subject { dummy_class.new }
-    
-    it "can configure /etc/hosts on a unix master" do
-      path = Beaker::HostPrebuiltSteps::ETC_HOSTS_PATH
-      master = subject.only_host_with_role(hosts, :master)
-
-      Beaker::Command.should_receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
-      Beaker::Command.should_receive( :new ).with( "cp %s %s.old" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "cp %s %s.new" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "grep -v '#{ip} #{master}' %s > %s.new" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "echo '#{ip} #{master}' >> %s.new" % path ).once
-      Beaker::Command.should_receive( :new ).with( "mv %s.new %s" % [path, path] ).once
-
-      subject.add_master_entry( hosts, options )
-    end
-
-    it "can configure /etc/hosts on a solaris master" do
-      @platform = 'solaris'
-      path = Beaker::HostPrebuiltSteps::ETC_HOSTS_PATH_SOLARIS
-      master = subject.only_host_with_role(hosts, :master)
-
-      Beaker::Command.should_receive( :new ).with( "ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1" ).once
-      Beaker::Command.should_receive( :new ).with( "cp %s %s.old" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "cp %s %s.new" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "grep -v '#{ip} #{master}' %s > %s.new" % [path, path] ).once
-      Beaker::Command.should_receive( :new ).with( "echo '#{ip} #{master}' >> %s.new" % path ).once
-      Beaker::Command.should_receive( :new ).with( "mv %s.new %s" % [path, path] ).once
-
-      subject.add_master_entry( hosts, options )
-    end
-
-    it "does nothing on a vagrant master" do
-      master = subject.only_host_with_role(hosts, :master)
-      master[:hypervisor] = 'vagrant'
-
-      Beaker::Command.should_receive( :new ).never
-      
-      subject.add_master_entry( hosts, options ) 
-
-    end
-  end
-
   context "sync_root_keys" do
     subject { dummy_class.new }
 
