@@ -91,7 +91,7 @@ module Beaker
               host.install_package pkg
             end
           end
-        when host['platform'] !~ /aix|solaris|windows|sles-/
+        when host['platform'] !~ /aix|solaris|windows|sles-|osx-/
           UNIX_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
