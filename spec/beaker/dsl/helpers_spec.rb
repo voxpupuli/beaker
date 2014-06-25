@@ -803,12 +803,14 @@ describe ClassMixedWithDSLHelpers do
         let(:puppetservice) { 'whatever' }
 
         it 'bounces puppet twice' do
+          subject.stub(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
         end
 
         it 'yield to a block after bouncing service' do
           execution = 0
+          subject.stub(:curl_with_retries)
           expect do
             subject.with_puppet_running_on(host, {}) do
               expect(host).to execute_commands_matching(/#{@ps} restart/).once
