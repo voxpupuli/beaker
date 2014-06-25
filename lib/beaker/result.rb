@@ -31,9 +31,10 @@ module Beaker
     end
 
     def convert string
-      if string.respond_to?( :force_encoding ) and defined?( Encoding )
+      if string.respond_to?( :encode )
         # We're running in >= 1.9 and we'll need to convert
-        return string.force_encoding( Encoding.default_external )
+        # Remove invalide and undefined UTF-8 character encodings
+        return string.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
       else
         # We're running in < 1.9 and Ruby doesn't care
         return string

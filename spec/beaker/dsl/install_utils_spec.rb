@@ -105,7 +105,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'generates a windows PE install command for a windows host' do
       subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
-      expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
+      expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
 
     it 'generates a unix PE install command for a unix host' do
@@ -114,12 +114,47 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -a /tmp/answers"
     end
 
+    it 'generates a unix PE frictionless install command for a unix host with role "frictionless"' do
+      subject.stub( :version_is_less ).and_return( false )
+      subject.stub( :master ).and_return( 'testmaster' )
+      the_host = unixhost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      the_host['roles'] = ['frictionless']
+      expect( subject.installer_cmd( the_host, {} ) ).to be ===  "cd /tmp && curl -kO https://testmaster:8140/packages/3.0/install.bash && bash install.bash"
+    end
+
     it 'generates a osx PE install command for a osx host' do
       the_host = machost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && hdiutil attach .dmg && installer -pkg /Volumes/puppet-enterprise-3.0/puppet-enterprise-installer-3.0.pkg -target /"
     end
+
+    it 'generates a unix PE install command in verbose for a unix host when pe_debug is enabled' do
+      the_host = unixhost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      the_host[:pe_debug] = true
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp/puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386 && ./puppet-enterprise-installer -D -a /tmp/answers"
+    end
+
+    it 'generates a osx PE install command in verbose for a osx host when pe_debug is enabled' do
+      the_host = machost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      the_host[:pe_debug] = true
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && hdiutil attach .dmg && installer -verboseR -pkg /Volumes/puppet-enterprise-3.0/puppet-enterprise-installer-3.0.pkg -target /"
+    end
+
+    it 'generates a unix PE frictionless install command in verbose for a unix host with role "frictionless" and pe_debug is enabled' do
+      subject.stub( :version_is_less ).and_return( false )
+      subject.stub( :master ).and_return( 'testmaster' )
+      the_host = unixhost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      the_host['roles'] = ['frictionless']
+      the_host[:pe_debug] = true
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && curl -kO https://testmaster:8140/packages/3.0/install.bash && bash -x install.bash"
+    end
+
   end
+
 
   describe 'fetch_puppet' do
 
