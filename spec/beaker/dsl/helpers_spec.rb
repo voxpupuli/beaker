@@ -781,6 +781,7 @@ describe ClassMixedWithDSLHelpers do
 
     before do
       stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
+      subject.stub(:curl_with_retries)
     end
 
     it "raises an ArgumentError if you try to submit a String instead of a Hash of options" do
@@ -803,7 +804,6 @@ describe ClassMixedWithDSLHelpers do
         let(:puppetservice) { 'whatever' }
 
         it 'bounces puppet twice' do
-          subject.stub(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).exactly(2).times
           expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).exactly(2).times
@@ -811,7 +811,6 @@ describe ClassMixedWithDSLHelpers do
 
         it 'yield to a block after bouncing service' do
           execution = 0
-          subject.stub(:curl_with_retries)
           expect do
             subject.with_puppet_running_on(host, {}) do
               expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).once
@@ -872,26 +871,45 @@ describe ClassMixedWithDSLHelpers do
         let(:backup_location) { "#{tmpdir_path}/puppet.conf.bak" }
         let(:new_location) { "#{tmpdir_path}/puppet.conf" }
 
-        before do
-          host.should_receive(:port_open?).with(8140).and_return(true)
+        context 'when a puppetservice is used' do
+          let(:puppetservice) { 'whatever' }
+
+          it 'backs up puppet.conf' do
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching(/cp #{original_location} #{backup_location}/).once
+            expect(host).to execute_commands_matching(/cat #{new_location} > #{original_location}/).once
+          end
+
+          it 'restores puppet.conf before restarting' do
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching_in_order(/cat '#{backup_location}' > '#{original_location}'/,
+                                                               /ensure=stopped/,
+                                                               /ensure=running/)
+          end
         end
 
-        it 'backs up puppet.conf' do
-          subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/cp #{original_location} #{backup_location}/).once
-          expect(host).to execute_commands_matching(/cat #{new_location} > #{original_location}/).once
+        context 'when a puppetservice is not used' do
+          before do
+            host.should_receive(:port_open?).with(8140).and_return(true)
+          end
 
-        end
+          it 'backs up puppet.conf' do
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching(/cp #{original_location} #{backup_location}/).once
+            expect(host).to execute_commands_matching(/cat #{new_location} > #{original_location}/).once
+          end
 
-        it 'restores puppet.conf' do
-          subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/cat '#{backup_location}' > '#{original_location}'/).once
-        end
+          it 'restores puppet.conf after restarting when a puppetservice is not used' do
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching_in_order(/kill [^-]/,
+                                                               /cat '#{backup_location}' > '#{original_location}'/m)
+          end
 
-        it "doesn't restore a non-existent file" do
-          subject.stub(:backup_the_file)
-          subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/rm -f '#{original_location}'/)
+          it "doesn't restore a non-existent file" do
+            subject.stub(:backup_the_file)
+            subject.with_puppet_running_on(host, {})
+            expect(host).to execute_commands_matching(/rm -f '#{original_location}'/)
+          end
         end
       end
 

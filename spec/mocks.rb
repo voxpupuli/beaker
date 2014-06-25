@@ -43,7 +43,7 @@ module MockNet
         @uri = uri
       end
     end
-    
+
     def initialize host, port
       @host = host
       @port = port
@@ -88,5 +88,9 @@ class FakeHost
 
   def command_strings
     commands.map { |c| [c.command, c.args].join(' ') }
+  end
+
+  def log_prefix
+    "FakeHost"
   end
 end

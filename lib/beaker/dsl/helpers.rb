@@ -526,7 +526,7 @@ module Beaker
         cmdline_args = conf_opts[:__commandline_args__]
         conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
 
-        curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
+        curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries'] || 0
         logger.debug "Setting curl retries to #{curl_retries}"
 
         begin
@@ -547,9 +547,8 @@ module Beaker
 
         ensure
           begin
-            restore_puppet_conf_from_backup( host, backup_file )
-
             if host['puppetservice']
+              restore_puppet_conf_from_backup( host, backup_file )
               bounce_service( host, host['puppetservice'], curl_retries )
             else
               if puppet_master_started
@@ -557,6 +556,7 @@ module Beaker
               else
                 dump_puppet_log(host)
               end
+              restore_puppet_conf_from_backup( host, backup_file )
             end
 
           rescue Exception => teardown_exception
