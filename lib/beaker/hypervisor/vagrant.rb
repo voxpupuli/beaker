@@ -42,6 +42,10 @@ module Beaker
           v_file << "    end\n"
         end
 
+        if ENV['VB_GUEST_PLUGIN_DISABLE']
+          v_file << "    v.vbguest.auto_update = false"
+        end
+
         if /windows/i.match(host['platform'])
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389\n"
           v_file << "    v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true\n"
