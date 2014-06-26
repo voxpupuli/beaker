@@ -18,7 +18,7 @@ module Beaker
 
     end
 
-    it "can make a Vagranfile for a set of hosts" do
+    it "can make a Vagrantfile for a set of hosts" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
       vagrant.stub( :randmac ).and_return( "0123456789" )
