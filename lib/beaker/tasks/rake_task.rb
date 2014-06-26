@@ -49,16 +49,10 @@ module Beaker
 
         check_for_beaker_type_config
         command = beaker_command
-
-        begin
-          puts command if verbose
-          success = system(command)
-          preserve_configuration(@options_file)
-        rescue
-          puts failure_message if failure_message
-        end
+        puts command if verbose
+        success = system(command)
         if fail_mode == "fast" && !success
-          $stderr.puts "#{command} failed"
+          STDOUT.puts "#{command} failed"
           exit $?.exitstatus
         end
       end
