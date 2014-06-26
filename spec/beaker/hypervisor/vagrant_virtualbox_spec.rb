@@ -31,4 +31,16 @@ describe Beaker::VagrantVirtualbox do
     vagrantfile = File.read( File.expand_path( File.join( path, 'Vagrantfile' )))
     expect( vagrantfile ).to include( %Q{    v.vm.provider :virtualbox do |vb|\n      vb.customize ['modifyvm', :id, '--memory', '1024']\n    end})
   end
+
+  it "can disable the vb guest plugin" do
+    options.merge!({ :vbguest_plugin => 'disable' })
+
+    vfile_section = vagrant.class.provider_vfile_section( @hosts.first, options )
+
+    match = vfile_section.match(/vb.vbguest.auto_update = false/)
+
+    expect( match ).to_not be nil
+
+  end
+
 end
