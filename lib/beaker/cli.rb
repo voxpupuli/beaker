@@ -15,6 +15,7 @@ module Beaker
       @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
+      @options[:timestamp] = @timestamp
       @execute = true
 
       if @options[:help]
