@@ -9,6 +9,12 @@ module Beaker
                           basic_hosts }
     let( :master_certname ) { 'master_certname' }
 
+    it 'generates 3.4 answers for 3.4 hosts' do
+      @ver = '3.4'
+      Beaker::Answers::Version34.should_receive( :answers ).with( hosts, master_certname, {}).once
+      subject.answers( @ver, hosts, master_certname, {} )
+    end
+
     it 'generates 3.2 answers for 3.3 hosts' do
       @ver = '3.3'
       Beaker::Answers::Version32.should_receive( :answers ).with( hosts, master_certname, {}).once
@@ -52,6 +58,23 @@ module Beaker
   end
 
   module Answers
+    describe Version34 do
+      let( :options )     { Beaker::Options::Presets.env_vars }
+      let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
+      let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
+                      basic_hosts[1]['roles'] = ['dashboard', 'agent']
+                      basic_hosts[2]['roles'] = ['database', 'agent']
+                      basic_hosts }
+      let( :master_certname ) { 'master_certname' }
+      it 'should add answers to the host objects' do
+        @ver = '3.4'
+        answers = subject.answers( hosts, master_certname, options )
+        hosts.each do |host|
+          expect( host[:answers] ).to be === answers[host.name]
+        end
+      end
+    end
+
     describe Version32 do
       let( :options )     { Beaker::Options::Presets.env_vars }
       let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }

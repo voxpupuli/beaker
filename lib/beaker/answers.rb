@@ -1,4 +1,4 @@
-[ 'version32', 'version30', 'version28', 'version20' ].each do |lib|
+[ 'version34', 'version32', 'version30', 'version28', 'version20' ].each do |lib|
   require "beaker/answers/#{lib}"
 end
 
@@ -21,6 +21,8 @@ module Beaker
     def self.answers(version, hosts, master_certname, options)
 
       case version
+      when /\A3\.4/
+        Version34.answers(hosts, master_certname, options)
       when /\A3\.[2-3]/
         Version32.answers(hosts, master_certname, options)
       when /\A3\.1/
