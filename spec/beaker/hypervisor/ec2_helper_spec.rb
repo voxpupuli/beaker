@@ -27,5 +27,21 @@ describe Beaker::EC2Helper do
     it "can handle additional ports when a role is assigned" do
       expect(ec2.amiports(["master"],[8081,443])).to be === [22, 8140, 8081, 443]
     end
+
+    it "can handle being passed an empty array when no role assigned" do
+      expect(ec2.amiports([],[])).to be === [22]
+    end
+
+    it "can handle being passed an empty array when a role is assigned" do
+      expect(ec2.amiports(["master"],[])).to be === [22,8140]
+    end
+
+    it "can handle being passed nil when no role assigned" do
+      expect(ec2.amiports([],nil)).to be === [22]
+    end
+
+    it "can handle being passed nil when a role is assigned" do
+      expect(ec2.amiports(["master"],nil)).to be === [22,8140]
+    end
   end
 end

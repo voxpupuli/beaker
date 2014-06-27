@@ -23,7 +23,7 @@ module Beaker
       end
 
       amiports << ports
-      amiports.flatten
+      amiports.flatten.compact
     end
   end
 end
