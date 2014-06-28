@@ -1213,7 +1213,7 @@ module Beaker
       #
       # @return [String,nil]
       def parse_for_moduleroot(possible_module_directory)
-        if File.exists?("#{possible_module_directory}/Modulefile")
+        if File.exists?("#{possible_module_directory}/Modulefile") || File.exists?("#{possible_module_directory}/metadata.json")
           possible_module_directory
         elsif possible_module_directory === '/'
           logger.error "At root, can't parse for another directory"
@@ -1223,7 +1223,6 @@ module Beaker
           parse_for_moduleroot File.expand_path(File.join(possible_module_directory,'..'))
         end
       end
-
 
       #Parse root directory of a module for module name
       # Searches for metadata.json and then if none found, Modulefile and parses for the Name attribute
