@@ -52,7 +52,7 @@ module Beaker
         puts command if verbose
         success = system(command)
         if fail_mode == "fast" && !success
-          STDOUT.puts "#{command} failed"
+          $stderr.puts "#{command} failed"
           exit $?.exitstatus
         end
       end
