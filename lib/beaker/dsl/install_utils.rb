@@ -143,26 +143,32 @@ module Beaker
       # @param [Hash{Symbol=>String}] opts The options
       # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                          (Othersie uses individual Windows hosts pe_ver)
-      # @option opts [String  :pe_ver Default PE version to install or upgrade to
+      # @option opts [String]  :pe_ver Default PE version to install or upgrade to
       #                          (Otherwise uses individual hosts pe_ver)
+      # @option opts [Boolean] :pe_debug (false) Should we run the installer in debug mode?
       # @example
       #      on host, "#{installer_cmd(host, opts)} -a #{host['working_dir']}/answers"
       # @api private
       def installer_cmd(host, opts)
         version = host['pe_ver'] || opts[:pe_ver]
         if host['platform'] =~ /windows/
-          version = opts[:pe_ver_win] || host['pe_ver']
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'"
+          version = host[:pe_ver] || opts['pe_ver_win']
+          log_file = "#{File.basename(host['working_dir'])}.log"
+          pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
-          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
+          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
+          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
 
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
-          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash install.bash"
+          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -x' : ''
+          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash"
         else
-          "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']} -a #{host['working_dir']}/answers"
+          pe_debug = host[:pe_debug] || opts[:pe_debug]  ? ' -D' : ''
+          "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']}#{pe_debug} -a #{host['working_dir']}/answers"
         end
       end
 
