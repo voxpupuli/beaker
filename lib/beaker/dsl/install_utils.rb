@@ -559,7 +559,7 @@ module Beaker
       # @api private
       def install_puppet_from_msi( host, opts )
         on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
-        on host, "msiexec /qn /i puppet-#{relver}.msi"
+        on host, "msiexec /qn /i puppet-#{opts[:version]}.msi"
 
         #Because the msi installer doesn't add Puppet to the environment path
         if fact_on(host, 'architecture').eql?('x86_64')
