@@ -551,8 +551,12 @@ module Beaker
           on host, "apt-get install -y hiera=#{opts[:hiera_version]}-1puppetlabs1"
         end
 
-        puppet_pkg = opts[:version] ? "puppet=#{opts[:version]}-1puppetlabs1" : 'puppet'
-        on host, "apt-get install -y #{puppet_pkg}"
+        if opts[:version]
+          on host, "apt-get install -y puppet-common=#{opts[:version]}-1puppetlabs1"
+          on host, "apt-get install -y puppet=#{opts[:version]}-1puppetlabs1"
+        else
+          on host, 'apt-get install -y puppet'
+        end
       end
 
       # Installs Puppet and dependencies from msi
