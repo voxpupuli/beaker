@@ -17,6 +17,16 @@ module Beaker
                    },
       }
 
+    # A string with the name of the platform.
+    attr_reader :variant
+    # A string with the version number of the platform.
+    attr_reader :version
+    # A string with the codename of the platform+version, nil on platforms
+    # without codenames.
+    attr_reader :codename
+    # A string with the cpu architecture of the platform.
+    attr_reader :arch
+
     #Creates the Platform object.  Checks to ensure that the platform String provided meets the platform
     #formatting rules.  Platforms name must be of the format /^OSFAMILY-VERSION-ARCH.*$/ where OSFAMILY is one of:
     # * osx
@@ -36,7 +46,30 @@ module Beaker
       if name !~ PLATFORMS
         raise ArgumentError, "Unsupported platform name #{name}"
       end
+
       super
+
+      @variant, version, @arch = self.split('-', 3)
+      codename_version_hash = PLATFORM_VERSION_CODES[@variant.to_sym]
+
+      @version = version
+      @codename = nil
+
+      if codename_version_hash
+        if codename_version_hash[version]
+          @version = codename_version_hash[version]
+        else
+          version = version.delete('.')
+          version_codename_hash = codename_version_hash.invert
+          @codename = version_codename_hash[version]
+        end
+      end
+    end
+
+    # Returns array of attributes to allow single line assignment to local
+    # variables in DSL and test case methods.
+    def to_array
+      return @variant, @version, @arch, @codename
     end
 
     # Returns the platform string with the platform version as a codename.  If no conversion is
@@ -44,20 +77,11 @@ module Beaker
     # @example Platform.new('debian-7-xxx').with_version_codename == 'debian-wheezy-xxx'
     # @return [String] the platform string with the platform version represented as a codename
     def with_version_codename
-      name, version, extra = self.split('-', 3)
-      PLATFORM_VERSION_CODES.each_key do |platform|
-        if name =~ /#{platform}/
-          PLATFORM_VERSION_CODES[platform].each do |version_codename, version_number|
-            #remove '.' from version number
-            if version.delete('.') =~ /#{version_number}/
-              version = version_codename
-              break
-            end
-          end
-          break
-        end
+      version_array = [@variant, @version, @arch]
+      if @codename
+        version_array = [@variant, @codename, @arch]
       end
-      [name, version, extra].join('-')
+      return version_array.join('-')
     end
 
     # Returns the platform string with the platform version as a number.  If no conversion is necessary
@@ -65,19 +89,7 @@ module Beaker
     # @example Platform.new('debian-wheezy-xxx').with_version_number == 'debian-7-xxx'
     # @return [String] the platform string with the platform version represented as a number
     def with_version_number
-      name, version, extra = self.split('-', 3)
-      PLATFORM_VERSION_CODES.each_key do |platform|
-        if name =~ /#{platform}/
-          PLATFORM_VERSION_CODES[platform].each do |version_codename, version_number|
-            if version =~ /#{version_codename}/
-              version = version_number
-              break
-            end
-          end
-          break
-        end
-      end
-      [name, version, extra].join('-')
+      [@variant, @version, @arch].join('-')
     end
 
   end

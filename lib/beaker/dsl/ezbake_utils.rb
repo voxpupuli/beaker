@@ -53,26 +53,18 @@ module Beaker
       # Beaker::DSL::EZBakeUtils.config
       #
       def install_ezbake_deps host
-        platform = host['platform']
+        variant, version, arch, codename = host['platform'].to_array
         ezbake = ezbake_config
 
-        case platform
-        when /^(fedora|el|centos)-(\d+)-(.+)$/
-          variant = (($1 == 'centos')? 'el' : $1)
-          version = $2
-          arch = $3
-
+        case variant
+        when /^(fedora|el|centos)$/
           dependency_list = ezbake[:redhat][:additional_dependencies]
           dependency_list.each do |dependency|
             package_name, _, package_version = dependency.split
             install_package host, package_name, package_version
           end
 
-        when /^(debian|ubuntu)-([^-]+)-(.+)$/
-          variant = $1
-          version = $2
-          arch = $3
-
+        when /^(debian|ubuntu)$/
           dependency_list = ezbake[:debian][:additional_dependencies]
           dependency_list.each do |dependency|
             package_name, _, package_version = dependency.split
@@ -83,7 +75,7 @@ module Beaker
           end
 
         else
-          raise "No repository installation step for #{platform} yet..."
+          raise "No repository installation step for #{variant} yet..."
         end
 
       end
@@ -145,16 +137,16 @@ module Beaker
 
         # install init scripts and default settings, perform additional preinst
         # TODO: figure out a better way to install init scripts and defaults
-        platform = host['platform']
-        case platform
-          when /^(fedora|el|centos)-(\d+)-(.+)$/
+        variant, _, _, _ = host['platform'].to_array
+        case variant
+          when /^(fedora|el|centos)$/
             env += "defaultsdir=/etc/sysconfig "
             on host, cd_to_package_dir + env + "make -e install-rpm-sysv-init"
-          when /^(debian|ubuntu)-([^-]+)-(.+)$/
+          when /^(debian|ubuntu)$/
             env += "defaultsdir=/etc/default "
             on host, cd_to_package_dir + env + "make -e install-deb-sysv-init"
           else
-            raise "No ezbake installation step for #{platform} yet..."
+            raise "No ezbake installation step for #{variant} yet..."
         end
       end
 

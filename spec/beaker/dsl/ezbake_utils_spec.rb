@@ -79,7 +79,7 @@ describe ClassMixedWithEZBakeUtils do
   end
 
   describe '#install_ezbake_deps' do
-    let(:platform) { 'paper' }
+    let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
     let(:host) do
       FakeHost.new( :options => { 'platform' => platform })
     end
@@ -95,12 +95,12 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     context "When host is a debian-like platform" do
-      let(:platform) { 'debian-7-x86_64' }
+      let( :platform ) { Beaker::Platform.new('debian-7-i386') }
       include_examples "installs-ezbake-dependencies"
     end
 
     context "When host is a redhat-like platform" do
-      let(:platform) { 'el-6-x86_64' }
+      let( :platform ) { Beaker::Platform.new('centos-7-i386') }
       include_examples "installs-ezbake-dependencies"
     end
   end
@@ -116,7 +116,7 @@ describe ClassMixedWithEZBakeUtils do
   end
 
   describe '#install_from_ezbake' do
-    let(:platform) { 'paper' }
+    let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
     let(:host) do
       FakeHost.new( :options => { 'platform' => platform })
     end
@@ -130,7 +130,7 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     context "When Beaker::DSL::EZBakeUtils.config is nil" do
-      let(:platform) { 'el-6-x86_64' }
+      let( :platform ) { Beaker::Platform.new('el-7-i386') }
       before do
         Dir.stub( :chdir ).and_yield()
         subject.wipe_out_ezbake_config
@@ -149,7 +149,7 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     context "When Beaker::DSL::EZBakeUtils.config is a hash" do
-      let(:platform) { 'el-6-x86_64' }
+      let( :platform ) { Beaker::Platform.new('el-7-i386') }
       before do
         Dir.stub( :chdir ).and_yield()
         subject.initialize_ezbake_config
