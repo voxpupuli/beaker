@@ -522,12 +522,15 @@ module Beaker
         cmdline_args = conf_opts[:__commandline_args__]
         conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
 
+        curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
+        logger.debug "Setting curl retries to #{curl_retries}"
+
         begin
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
           if host['puppetservice']
-            bounce_service( host, host['puppetservice'] )
+            bounce_service( host, host['puppetservice'], curl_retries )
           else
             puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
           end
@@ -543,7 +546,7 @@ module Beaker
             restore_puppet_conf_from_backup( host, backup_file )
 
             if host['puppetservice']
-              bounce_service( host, host['puppetservice'] )
+              bounce_service( host, host['puppetservice'], curl_retries )
             else
               if puppet_master_started
                 stop_puppet_from_source_on( host )
@@ -681,13 +684,13 @@ module Beaker
       end
 
       # @!visibility private
-      def bounce_service host, service
+      def bounce_service host, service, curl_retries = 120
         # Any reason to not
         # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
         # host.exec puppet_resource( 'service', service, 'ensure=running' )
         host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
         if host['service-wait']
-          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52], 120)
+          curl_with_retries(" #{service} ", host, "http://localhost:8140", [0, 52], curl_retries)
         end
       end
 
