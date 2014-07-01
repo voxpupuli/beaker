@@ -150,6 +150,5 @@ module Beaker
       @logger.send(log_level, @options[:command_line])
       puts ''
     end
-
   end
 end

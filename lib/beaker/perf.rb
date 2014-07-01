@@ -1,6 +1,5 @@
 module Beaker
-  # The Beaker Perf module. As there is no state to keep track of, we are only
-  # using methods. This may change in the future.
+  # The Beaker Perf class. These methods are all nullops unless :collect_perf_data is set
   class Perf
 
     def initialize( hosts, options, logger )
