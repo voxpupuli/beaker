@@ -19,7 +19,6 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
-        'service-wait'  => false,
         'service-prefix'=> '/etc/init.d/',
         'master-start-curl-retries' => 120,
         'puppetservice' => 'pe-httpd',
@@ -40,7 +39,6 @@ module Unix
       h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
-        'service-wait'      => false,
         'master-start-curl-retries' => 120,
         'puppetpath'        => '/etc/puppet',
         'puppetvardir'      => '/var/lib/puppet',
