@@ -8,6 +8,16 @@ module Beaker
     #
     # @api dsl
     module EZBakeUtils
+
+      REMOTE_PACKAGES_REQUIRED = ['make']
+      LOCAL_COMMANDS_REQUIRED = [
+        ['leiningen', 'lein --version', nil],
+        ['lein-pprint', 'lein with-profile ci pprint :version', 
+          'Must have lein-pprint installed under the :ci profile.'],
+        ['java', 'java -version', nil],
+        ['git', 'git --version', nil],
+        ['rake', 'rake --version', nil],
+      ]
       class << self
         attr_accessor :config
       end
@@ -16,6 +26,31 @@ module Beaker
       #
       def ezbake_config
         EZBakeUtils.config
+      end
+
+      # Checks given host for the tools necessary to perform
+      # install_from_ezbake. If no host is given then check the local machine
+      # for necessary available tools. If a tool is not found, then raise
+      # RuntimeError.
+      #
+      def ezbake_tools_available? host = nil
+        if host
+          REMOTE_PACKAGES_REQUIRED.each do |package_name|
+            if not check_for_package host, package_name
+              raise "Required package, #{package_name}, not installed on #{host}" 
+            end
+          end
+        else
+          LOCAL_COMMANDS_REQUIRED.each do |software_name, command, additional_error_message|
+            if not system command
+              error_message = "Must have #{software_name} installed on development system.\n"
+              if additional_error_message
+                error_message += additional_error_message
+              end
+              raise error_message
+            end
+          end
+        end
       end
 
       # Prepares a staging directory for the specified project.
@@ -29,6 +64,7 @@ module Beaker
       #                            already.
       #
       def ezbake_stage project_name, project_version, ezbake_dir="tmp/ezbake"
+        ezbake_tools_available?
         conditionally_clone "git@github.com:puppetlabs/ezbake.git", ezbake_dir
 
         package_version = ''
@@ -53,6 +89,12 @@ module Beaker
       # Beaker::DSL::EZBakeUtils.config
       #
       def install_ezbake_deps host
+        ezbake_tools_available? host
+
+        if not ezbake_config
+          ezbake_stage project_name, project_version
+        end
+
         variant, version, arch, codename = host['platform'].to_array
         ezbake = ezbake_config
 
@@ -96,6 +138,8 @@ module Beaker
       # performed.
       #
       def install_from_ezbake host, project_name, project_version, env_args={}, ezbake_dir='tmp/ezbake'
+        ezbake_tools_available? host
+
         if not ezbake_config
           ezbake_stage project_name, project_version
         end
@@ -150,8 +194,12 @@ module Beaker
         end
       end
 
+      # Only clone from given git URI if there is no existing git clone at the
+      # given local_path location.
+      #
       # @!visibility private
       def conditionally_clone(upstream_uri, local_path)
+        ezbake_tools_available?
         if system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git status"
           system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git pull"
         else

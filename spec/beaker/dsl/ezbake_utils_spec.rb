@@ -34,9 +34,10 @@ module Beaker::DSL::EZBakeUtils::EZBake
 end
 
 describe ClassMixedWithEZBakeUtils do
-  let( :opts )     { Beaker::Options::Presets.env_vars }
+  let( :opts ) { Beaker::Options::Presets.env_vars }
   let( :host ) { double.as_null_object }
-  let( :config ) { }
+  let( :local_commands ) { Beaker::DSL::EZBakeUtils::LOCAL_COMMANDS_REQUIRED }
+  let( :remote_packages ) { Beaker::DSL::EZBakeUtils::REMOTE_PACKAGES_REQUIRED }
 
   describe '#ezbake_config' do
     it "returns a map with ezbake configuration parameters" do
@@ -46,8 +47,62 @@ describe ClassMixedWithEZBakeUtils do
     end
   end
 
+  describe '#ezbake_tools_available?' do
+
+    before do
+      allow(subject).to receive(:check_for_package) { true }
+      allow(subject).to receive(:system) { true }
+    end
+
+    describe "checks for remote packages when given a host" do
+
+      it "and succeeds if all packages are found" do
+        remote_packages.each do |package|
+          expect(subject).to receive(:check_for_package).with(host, package)
+        end
+        subject.ezbake_tools_available? host
+      end
+
+      it "and raises an exception if a package is missing" do
+        allow(subject).to receive(:check_for_package) { false }
+        remote_packages.each do |package|
+          expect(subject).to receive(:check_for_package).with(host, package)
+          break # just need first element
+        end
+      expect{
+        subject.ezbake_tools_available? host
+      }.to raise_error(RuntimeError, /Required package, .*, not installed on/)
+      end
+
+    end
+
+    describe "checks for local successful local commands when no host given" do
+
+      it "and succeeds if all commands return successfully" do
+        local_commands.each do |software_name, command, additional_error_messages|
+          expect(subject).to receive(:system).with(/#{command}/)
+        end
+        subject.ezbake_tools_available?
+      end
+
+      it "and raises an exception if a command returns failure" do
+        allow(subject).to receive(:system) { false }
+        local_commands.each do |software_name, command, additional_error_messages|
+          expect(subject).to receive(:system).with(/#{command}/)
+          break # just need first element
+        end
+        expect{
+          subject.ezbake_tools_available?
+        }.to raise_error(RuntimeError, /Must have .* installed on development system./)
+      end
+
+    end
+
+  end
+
   describe '#ezbake_stage' do
     before do
+      allow(subject).to receive(:ezbake_tools_available?) { true }
       subject.wipe_out_ezbake_config
     end
 
@@ -85,6 +140,7 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     before do
+      allow(subject).to receive(:ezbake_tools_available?) { true }
       subject.initialize_ezbake_config
     end
 
@@ -119,6 +175,10 @@ describe ClassMixedWithEZBakeUtils do
     let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
     let(:host) do
       FakeHost.new( :options => { 'platform' => platform })
+    end
+
+    before do
+      allow(subject).to receive(:ezbake_tools_available?) { true }
     end
 
     it "Raises an exception for unsuppoted platforms" do
