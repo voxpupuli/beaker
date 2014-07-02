@@ -181,7 +181,17 @@ describe ClassMixedWithEZBakeUtils do
       allow(subject).to receive(:ezbake_tools_available?) { true }
     end
 
-    it "Raises an exception for unsuppoted platforms" do
+
+    context "for non *nix-like platforms" do
+      let( :platform ) { Beaker::Platform.new('windows-7-i386') }
+      it "raises an exception" do
+        expect{ 
+          subject.install_from_ezbake host, "blah", "blah"
+        }.to raise_error(RuntimeError, /Beaker::DSL::EZBakeUtils unsupported platform:/)
+      end
+    end
+
+    it "raises an exception for unsupported *nix-like platforms" do
       Dir.stub( :chdir ).and_yield()
       install_from_ezbake_common_expects
       expect{ 

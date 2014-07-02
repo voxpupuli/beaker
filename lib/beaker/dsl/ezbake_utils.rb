@@ -144,6 +144,13 @@ module Beaker
           ezbake_stage project_name, project_version
         end
 
+        variant, _, _, _ = host['platform'].to_array
+
+        case variant
+        when /^(osx|windows|solaris|aix)$/
+          raise "Beaker::DSL::EZBakeUtils unsupported platform: #{variant}"
+        end
+
         ezbake = ezbake_config
         project_package_version = ezbake[:package_version]
         project_name = ezbake[:project]
@@ -181,7 +188,6 @@ module Beaker
 
         # install init scripts and default settings, perform additional preinst
         # TODO: figure out a better way to install init scripts and defaults
-        variant, _, _, _ = host['platform'].to_array
         case variant
           when /^(fedora|el|centos)$/
             env += "defaultsdir=/etc/sysconfig "
