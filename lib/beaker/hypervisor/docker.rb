@@ -35,7 +35,12 @@ module Beaker
         container.start({"PublishAllPorts" => true, "Privileged" => true})
 
         # Find out where the ssh port is from the container
-        ip   = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
+        if ENV['DOCKER_HOST']
+          ip = URI.parse(ENV['DOCKER_HOST']).host
+          @logger.info("Using docker server at #{ip}")
+        else
+          ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
+        end
         port = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostPort"]
 
         # Update host metadata
