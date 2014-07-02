@@ -9,6 +9,10 @@ task :yard do
   Rake::Task['docs:gen'].invoke
 end
 
+task :history do
+  Rake::Task['history:gen'].invoke
+end
+
 task :travis do
   Rake::Task['yard'].invoke unless RUBY_VERSION < '1.9'
   Rake::Task['spec'].invoke
@@ -24,14 +28,31 @@ namespace :test do
   end
 end
 
+###########################################################
+#
+#   History Tasks
+#
+###########################################################
+namespace :history do
+  desc 'Generate HISTORY.md'
+  task :gen do
+    original_dir = Dir.pwd
+    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
+    output = `bundle exec ruby history.rb .`
+    puts output
+    if output !~ /success/
+      raise "History generation failed"
+    end
+    Dir.chdir( original_dir )
+  end
+
+end
 
 ###########################################################
 #
 #   Documentation Tasks
 #
 ###########################################################
-
-
 DOCS_DAEMON = "yard server --reload --daemon --server thin"
 FOREGROUND_SERVER = 'bundle exec yard server --reload --verbose --server thin lib/beaker'
 
