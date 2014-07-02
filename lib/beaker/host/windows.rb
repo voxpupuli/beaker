@@ -19,7 +19,6 @@ module Windows
       h.merge({
         'user'          => 'Administrator',
         'group'         => 'Administrators',
-        'service-wait'  => false,
         'puppetservice' => 'pe-httpd',
         'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
