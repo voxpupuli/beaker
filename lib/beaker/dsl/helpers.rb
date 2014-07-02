@@ -508,8 +508,7 @@ module Beaker
       #
       # @api dsl
       def install_dev_repo (host, package_name, build_version, repo_configs_dir='tmp/repo_configs')
-        variant, version, arch = host['platform'].split('-',3)
-        _, codename, _ = host['platform'].with_version_codename.split('-',3)
+        variant, version, arch, codename = host['platform'].to_array
 
         platform_configs_dir = File.join(repo_configs_dir, host['platform'])
         parent_dir = File.dirname(platform_configs_dir)
