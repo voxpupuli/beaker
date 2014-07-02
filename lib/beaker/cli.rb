@@ -78,9 +78,8 @@ module Beaker
 
         provision
 
-        # All nodes are provisioned, setup perf monitoring if needed
+        # Setup perf monitoring if needed
         @perf = Beaker::Perf.new( @hosts, @options, @logger)
-        @perf.setup_perf_tools
 
         errored = false
 

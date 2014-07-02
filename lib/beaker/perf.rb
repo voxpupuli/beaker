@@ -7,9 +7,6 @@ module Beaker
       @options = options
       @logger = logger
       @perf_timestamp = Time.now
-    end
-
-    def setup_perf_tools
       if @options[:collect_perf_data]
         @hosts.map { |h| setup_perf_on_host(h) }
       end
@@ -42,6 +39,5 @@ module Beaker
         host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"))
       end
     end
-
   end
 end
