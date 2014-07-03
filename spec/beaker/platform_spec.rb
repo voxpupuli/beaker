@@ -30,7 +30,25 @@ module Beaker
           expect{ platform }.to raise_error(ArgumentError)
         end
 
-      end 
+      end
+
+      describe "if platform does not have codename" do
+
+        it "sets codename to nil" do
+          @name = "centos-6.5-x86_64"
+          expect{ platform.codename }.to be { nil }
+        end
+
+      end
+
+    end
+
+    context 'to_array' do
+
+      it "converts Beaker::Platform object to array of its attribues" do
+        @name = 'debian-7-somethingsomething'
+        expect( platform.to_array ).to be === ['debian', '7', 'somethingsomething', 'wheezy']
+      end
 
     end
 

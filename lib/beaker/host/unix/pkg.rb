@@ -49,17 +49,23 @@ module Unix::Pkg
     end
   end
 
-  def install_package(name, cmdline_args = '')
+  def install_package(name, cmdline_args = '', version = nil)
     case self['platform']
       when /sles-/
         execute("zypper --non-interactive in #{name}")
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
       when /fedora|centos|el-/
+        if version
+          name = "#{name}-#{version}"
+        end
         execute("yum -y #{cmdline_args} install #{name}")
       when /ubuntu|debian/
+        if version
+          name = "#{name}=#{version}"
+        end
         update_apt_if_needed
-        execute("apt-get install #{cmdline_args} -y #{name}")
+        execute("apt-get install --force-yes #{cmdline_args} -y #{name}")
       when /solaris-11/
         execute("pkg #{cmdline_args} install #{name}")
       when /solaris-10/

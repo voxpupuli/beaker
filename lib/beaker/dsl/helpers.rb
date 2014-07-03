@@ -225,8 +225,8 @@ module Beaker
       # @param [String] package_name   Name of the package to install
       #
       # @return [Result]   An object representing the outcome of *install command*.
-      def install_package host, package_name
-        host.install_package package_name
+      def install_package host, package_name, package_version = nil
+        host.install_package package_name, '', package_version
       end
 
       # Upgrade a package on a host. The package must already be installed
