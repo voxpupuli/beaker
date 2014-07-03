@@ -4,7 +4,6 @@ class ClassMixedWithDSLHelpers
   include Beaker::DSL::Helpers
   include Beaker::DSL::Wrappers
   include Beaker::DSL::Roles
-  include Beaker::DSL::Patterns
 
   def logger
     @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
@@ -33,7 +32,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'allows the environment the command is run within to be specified' do
-      subject.stub( :hosts ).and_return( hosts )
 
       Beaker::Command.should_receive( :new ).
         with( 'ls ~/.bin', [], {'ENV' => { :HOME => '/tmp/test_home' }} )
@@ -60,7 +58,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'delegates to itself for each host passed' do
-      subject.stub( :hosts ).and_return( hosts )
       expected = []
       hosts.each_with_index do |host, i|
         expected << i
@@ -73,7 +70,6 @@ describe ClassMixedWithDSLHelpers do
 
     context 'upon command completion' do
       before :each do
-        subject.stub( :hosts ).and_return( hosts )
         host.should_receive( :exec ).and_return( result )
         @res = subject.on( host, command )
       end
@@ -97,7 +93,6 @@ describe ClassMixedWithDSLHelpers do
 
     context 'when passed a block with arity of 1' do
       before :each do
-        subject.stub( :hosts ).and_return( hosts )
         host.should_receive( :exec ).and_return( result )
       end
 
@@ -129,7 +124,6 @@ describe ClassMixedWithDSLHelpers do
 
     context 'when passed a block with arity of 0' do
       before :each do
-        subject.stub( :hosts ).and_return( hosts )
         host.should_receive( :exec ).and_return( result )
       end
 
@@ -173,7 +167,6 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#scp_from' do
     it 'delegates to the host' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :logger ).exactly( hosts.length ).times
       result.should_receive( :log ).exactly( hosts.length ).times
 
@@ -187,7 +180,6 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#scp_to' do
     it 'delegates to the host' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :logger ).exactly( hosts.length ).times
       result.should_receive( :log ).exactly( hosts.length ).times
 
@@ -394,7 +386,6 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#apply_manifest_on' do
     it 'calls puppet' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
       #  with( 'apply', '--verbose', 'agent' ).
@@ -408,7 +399,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'operates on an array of hosts' do
-      subject.stub( :hosts ).and_return( hosts )
       the_hosts = [master, agent]
 
       subject.should_receive( :create_remote_file ).twice.and_return( true )
@@ -425,7 +415,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'adds acceptable exit codes with :catch_failures' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -439,7 +428,6 @@ describe ClassMixedWithDSLHelpers do
                                 :catch_failures => true )
     end
     it 'allows acceptable exit codes through :catch_failures' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -454,7 +442,6 @@ describe ClassMixedWithDSLHelpers do
                                 :catch_failures => true )
     end
     it 'enforces a 0 exit code through :catch_changes' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -472,7 +459,6 @@ describe ClassMixedWithDSLHelpers do
       )
     end
     it 'enforces a 2 exit code through :expect_changes' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -490,7 +476,6 @@ describe ClassMixedWithDSLHelpers do
       )
     end
     it 'enforces exit codes through :expect_failures' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -508,7 +493,6 @@ describe ClassMixedWithDSLHelpers do
       )
     end
     it 'enforces exit codes through :expect_failures' do
-      subject.stub( :hosts ).and_return( hosts )
       expect {
         subject.apply_manifest_on(
           agent,
@@ -519,7 +503,6 @@ describe ClassMixedWithDSLHelpers do
       }.to raise_error ArgumentError, /catch_failures.+expect_failures/
     end
     it 'enforces added exit codes through :expect_failures' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       subject.should_receive( :puppet ).
         and_return( 'puppet_command' )
@@ -539,7 +522,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'can set the --parser future flag' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
 
       expect( subject ).to receive( :on ).with {|h, command, opts|
@@ -561,7 +543,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'can set the --noops flag' do
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :create_remote_file ).and_return( true )
       expect( subject ).to receive( :on ).with {|h, command, opts|
         cmdline = command.cmd_line( h )
@@ -594,7 +575,6 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_hosts_on' do
     it 'executes puppet on the host passed and ensures it is reverted' do
-      subject.stub( :hosts ).and_return( hosts )
       logger = double.as_null_object
 
       subject.stub( :logger ).and_return( logger )
@@ -609,7 +589,7 @@ describe ClassMixedWithDSLHelpers do
               'puppetlabs.com',
               'ensure=absent' )
 
-      subject.stub_hosts_on( make_host('my_host', {}), 'puppetlabs.com' => '127.0.0.1' )
+      subject.stub_hosts_on( 'my_host', 'puppetlabs.com' => '127.0.0.1' )
     end
   end
 
@@ -626,16 +606,15 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_forge_on' do
     it 'stubs forge.puppetlabs.com with the value of `forge`' do
-      subject.stub( :hosts ).and_return( hosts )
-      host = make_host('my_host', {})
+      subject.stub( :options ).and_return( {} )
       Resolv.should_receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( host, 'forge.puppetlabs.com' => '127.0.0.1' )
+        with( 'my_host', 'forge.puppetlabs.com' => '127.0.0.1' )
       subject.should_receive( :stub_hosts_on ).
-        with( host, 'forgeapi.puppetlabs.com' => '127.0.0.1' )
+        with( 'my_host', 'forgeapi.puppetlabs.com' => '127.0.0.1' )
 
-      subject.stub_forge_on( host, 'my_forge.example.com' )
+      subject.stub_forge_on( 'my_host', 'my_forge.example.com' )
     end
   end
 
@@ -696,7 +675,6 @@ describe ClassMixedWithDSLHelpers do
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
       deb_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :on ).with( deb_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
       subject.should_receive( :on ).with( deb_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
       subject.should_receive( :puppet_resource ).with( "service", "pe-puppet", "ensure=stopped").once
@@ -711,7 +689,6 @@ describe ClassMixedWithDSLHelpers do
       el_agent = make_host( 'el', :platform => 'el-5-x86_64' )
       el_agent.stub( :puppet ).and_return( { 'vardir' => vardir } )
 
-      subject.stub( :hosts ).and_return( hosts )
       subject.should_receive( :on ).with( el_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
       subject.should_receive( :on ).with( el_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
       subject.should_receive( :puppet_resource ).with("service", "pe-puppet-agent", "ensure=stopped").once
@@ -974,24 +951,11 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#fact_on' do
-    it 'retrieves a fact on a single host' do
-      result.stdout = "family\n"
+    it 'retreives a fact on host(s)' do
       subject.should_receive(:facter).with('osfamily',{}).once
       subject.should_receive(:on).and_return(result)
 
-      expect( subject.fact_on('host','osfamily') ).to be === result.stdout.chomp
-    end
-
-    it 'retrieves an array of facts from multiple hosts' do
-      subject.stub( :hosts ).and_return( hosts )
-      times = hosts.length
-      result.stdout = "family\n"
-      hosts.each do |host|
-        host.should_receive(:exec).and_return(result)
-      end
-
-      expect( subject.fact_on(hosts,'osfamily') ).to be === [result.stdout.chomp] * hosts.length
-
+      subject.fact_on('host','osfamily')
     end
   end
 
