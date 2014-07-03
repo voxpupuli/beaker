@@ -190,8 +190,18 @@ module Beaker
         end
       end
 
-      #TODO yard doc
-      def fetch(base_url, file_name, dst_dir)
+      # Fetch file_name from the given base_url into dst_dir.
+      #
+      # @param [String] base_url The base url from which to recursively download
+      #                          files.
+      # @param [String] file_name The trailing name compnent of both the source url
+      #                           and the destination file.
+      # @param [String] dst_dir The local destination directory.
+      #
+      # @return [String] dst The name of the newly-created file.
+      #
+      # @!visibility private
+      def fetch_http_file(base_url, file_name, dst_dir)
         FileUtils.makedirs(dst_dir)
         src = "#{base_url}/#{file_name}"
         dst = File.join(dst_dir, file_name)
@@ -209,9 +219,19 @@ module Beaker
         return dst
       end
 
-      #TODO yard doc
-      def fetch_remote_dir(url, dst_dir)
-        logger.notify "fetch_remote_dir (url: #{url}, dst_dir #{dst_dir})"
+      # Recursively fetch the contents of the given http url, ignoring
+      # `index.html` and `*.gif` files.
+      #
+      # @param [String] url The base http url from which to recursively download
+      #                     files.
+      # @param [String] dst_dir The local destination directory.
+      #
+      # @return [String] dst The name of the newly-created subdirectory of
+      #                      dst_dir.
+      #
+      # @!visibility private
+      def fetch_http_dir(url, dst_dir)
+        logger.notify "fetch_http_dir (url: #{url}, dst_dir #{dst_dir})"
         if url[-1, 1] !~ /\//
           url += '/'
         end
@@ -737,8 +757,14 @@ module Beaker
         options['upgrade'] = true
       end
 
-      #TODO yard doc
-      def install_release_repo ( host )
+      # Install official puppetlabs release repository configuration on host.
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      #
+      # @note This method only works on redhat-like and debian-like hosts.
+      #
+      def install_puppetlabs_release_repo ( host )
         variant, version, arch, codename = host['platform'].to_array
 
         case variant
@@ -761,8 +787,27 @@ module Beaker
         end
       end
 
-      #TODO yard doc
-      def install_dev_repo ( host, package_name, build_version,
+      # Install development repository on the given host. This method pushes all
+      # repository information including package files for the specified
+      # package_name to the host and modifies the repository configuration file
+      # to point at the new repository. This is particularly useful for
+      # installing development packages on hosts that can't access the builds
+      # server.
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      # @param [String] package_name The name of the package whose repository is
+      #                              being installed.
+      # @param [String] build_version A string identifying the output of a
+      #                               packaging job for use in looking up
+      #                               repository directory information
+      # @param [String] repo_configs_dir A local directory where repository files will be
+      #                                  stored as an intermediate step before
+      #                                  pushing them to the given host.
+      #
+      # @note This method only works on redhat-like and debian-like hosts.
+      #
+      def install_puppetlabs_dev_repo ( host, package_name, build_version,
                                 repo_configs_dir = 'tmp/repo_configs' )
         variant, version, arch, codename = host['platform'].to_array
         platform_configs_dir = File.join(repo_configs_dir, variant)
@@ -793,7 +838,7 @@ module Beaker
             arch
           ]
 
-          repo = fetch( "%s/%s/%s/repo_configs/rpm/" %
+          repo = fetch_http_file( "%s/%s/%s/repo_configs/rpm/" %
                        [ dev_builds_url, package_name, build_version ],
                         repo_filename,
                         platform_configs_dir)
@@ -812,7 +857,7 @@ module Beaker
             raise "Unable to reach a repo directory at #{link}"
           end
 
-          repo_dir = fetch_remote_dir( link, platform_configs_dir )
+          repo_dir = fetch_http_dir( link, platform_configs_dir )
 
           config_dir = '/etc/yum.repos.d/'
           scp_to host, repo, config_dir
@@ -826,13 +871,13 @@ module Beaker
           on host, find_and_sed
 
         when /^(debian|ubuntu)$/
-          list = fetch( "%s/%s/%s/repo_configs/deb/" %
+          list = fetch_http_file( "%s/%s/%s/repo_configs/deb/" %
                          [ dev_builds_url, package_name, build_version ],
                         "pl-%s-%s-%s.list" %
                          [ package_name, build_version, codename ],
                         platform_configs_dir )
 
-          repo_dir = fetch_remote_dir( "%s/%s/%s/repos/apt/%s" %
+          repo_dir = fetch_http_dir( "%s/%s/%s/repos/apt/%s" %
                                       [ dev_builds_url, package_name,
                                         build_version, codename ],
                                        platform_configs_dir )
