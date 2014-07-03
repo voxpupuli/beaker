@@ -109,7 +109,6 @@ module Beaker
         end
 
         print_reproduction_info( :error )
-        print_important_env_vars( :error )
 
         @logger.error "Failed running the test suite."
         puts ''
@@ -125,12 +124,38 @@ module Beaker
 
         if @logger.is_debug?
           print_reproduction_info( :debug )
-          print_important_env_vars( :debug )
         end
       end
     end
 
-    def print_important_env_vars( log_level )
+    #Run the provided test suite
+    #@param [Symbol] suite_name The test suite to execute
+    #@param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
+    #                                 continue to execute tests.
+    def run_suite(suite_name, failure_strategy = :slow)
+      if (@options[suite_name].empty?)
+        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
+        return
+      end
+      Beaker::TestSuite.new(
+        suite_name, @hosts, @options, @timestamp, failure_strategy
+      ).run_and_raise_on_failure
+    end
+
+    # @see print_env_vars_affecting_beaker & print_command_line
+    def print_reproduction_info( log_level = :debug )
+      print_command_line( log_level )
+      print_env_vars_affecting_beaker( log_level )
+    end
+
+    # Prints Environment variables affecting the beaker run (those that
+    # beaker introspects + the ruby env that beaker runs within)
+    # @param [Symbol] log_level The log level (coloring) to print the message at
+    # @example Print pertinent env vars using error leve reporting (red)
+    #     print_env_vars_affecting_beaker :error
+    #
+    # @return nil
+    def print_env_vars_affecting_beaker( log_level )
       beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT_SPEC.values
       non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
       important_env_vars = beaker_env_vars + non_beaker_env_vars
@@ -148,21 +173,14 @@ module Beaker
       puts ''
     end
 
-    #Run the provided test suite
-    #@param [Symbol] suite_name The test suite to execute
-    #@param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
-    #                                 continue to execute tests.
-    def run_suite(suite_name, failure_strategy = :slow)
-      if (@options[suite_name].empty?)
-        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
-        return
-      end
-      Beaker::TestSuite.new(
-        suite_name, @hosts, @options, @timestamp, failure_strategy
-      ).run_and_raise_on_failure
-    end
-
-    def print_reproduction_info( log_level = :debug )
+    # Prints the command line that can be called to reproduce this run
+    # (assuming the environment is the same)
+    # @param [Symbol] log_level The log level (coloring) to print the message at
+    # @example Print pertinent env vars using error leve reporting (red)
+    #     print_command_line :error
+    #
+    # @return nil
+    def print_command_line( log_level = :debug )
       puts ''
       @logger.send(log_level, "You can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
