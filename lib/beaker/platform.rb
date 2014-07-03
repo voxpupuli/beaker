@@ -14,6 +14,7 @@ module Beaker
                      "raring"  => "1304",
                      "quantal" => "1210",
                      "precise" => "1204",
+                     "lucid"   => "1004",
                    },
       }
 
