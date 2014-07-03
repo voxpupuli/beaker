@@ -1091,14 +1091,3 @@ describe ClassMixedWithDSLHelpers do
 
   end
 end
-
-module FakeFS
-  class File < StringIO
-    def self.absolute_path(filepath)
-      RealFile.absolute_path(filepath)
-    end
-    def self.expand_path(filepath)
-      RealFile.expand_path(filepath)
-    end
-  end
-end
