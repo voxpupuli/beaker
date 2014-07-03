@@ -190,6 +190,74 @@ module Beaker
         end
       end
 
+      # Fetch file_name from the given base_url into dst_dir.
+      #
+      # @param [String] base_url The base url from which to recursively download
+      #                          files.
+      # @param [String] file_name The trailing name compnent of both the source url
+      #                           and the destination file.
+      # @param [String] dst_dir The local destination directory.
+      #
+      # @return [String] dst The name of the newly-created file.
+      #
+      # @!visibility private
+      def fetch_http_file(base_url, file_name, dst_dir)
+        FileUtils.makedirs(dst_dir)
+        src = "#{base_url}/#{file_name}"
+        dst = File.join(dst_dir, file_name)
+        if File.exists?(dst)
+          logger.notify "Already fetched #{dst}"
+        else
+          logger.notify "Fetching: #{src}"
+          logger.notify "  and saving to #{dst}"
+          open(src) do |remote|
+            File.open(dst, "w") do |file|
+              FileUtils.copy_stream(remote, file)
+            end
+          end
+        end
+        return dst
+      end
+
+      # Recursively fetch the contents of the given http url, ignoring
+      # `index.html` and `*.gif` files.
+      #
+      # @param [String] url The base http url from which to recursively download
+      #                     files.
+      # @param [String] dst_dir The local destination directory.
+      #
+      # @return [String] dst The name of the newly-created subdirectory of
+      #                      dst_dir.
+      #
+      # @!visibility private
+      def fetch_http_dir(url, dst_dir)
+        logger.notify "fetch_http_dir (url: #{url}, dst_dir #{dst_dir})"
+        if url[-1, 1] !~ /\//
+          url += '/'
+        end
+        url = URI.parse(url)
+        chunks = url.path.split('/')
+        dst = File.join(dst_dir, chunks.last)
+        #determine directory structure to cut
+        #only want to keep the last directory, thus cut total number of dirs - 2 (hostname + last dir name)
+        cut = chunks.length - 2
+        wget_command = "wget -nv -P #{dst_dir} --reject \"index.html*\",\"*.gif\" --cut-dirs=#{cut} -np -nH --no-check-certificate -r #{url}"
+
+        logger.notify "Fetching remote directory: #{url}"
+        logger.notify "  and saving to #{dst}"
+        logger.notify "  using command: #{wget_command}"
+
+        #in ruby 1.9+ we can upgrade this to popen3 to gain access to the subprocess pid
+        result = `#{wget_command} 2>&1`
+        result.each_line do |line|
+          logger.debug(line)
+        end
+        if $?.to_i != 0
+          raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?}"
+        end
+        dst
+      end
+
       #Determine the PE package to download/upload on a mac host, download/upload that package onto the host.
       # Assumed file name format: puppet-enterprise-3.3.0-rc1-559-g97f0833-osx-10.9-x86_64.dmg.
       # @param [Host] host The mac host to download/upload and unpack PE onto
@@ -687,6 +755,148 @@ module Beaker
         #send in the global options hash
         do_install(sorted_hosts, options.merge({:type => :upgrade}))
         options['upgrade'] = true
+      end
+
+      # Install official puppetlabs release repository configuration on host.
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      #
+      # @note This method only works on redhat-like and debian-like hosts.
+      #
+      def install_puppetlabs_release_repo ( host )
+        variant, version, arch, codename = host['platform'].to_array
+
+        case variant
+        when /^(fedora|el|centos)$/
+          variant = (($1 == 'centos') ? 'el' : $1)
+
+          rpm = options[:release_yum_repo_url] +
+            "/puppetlabs-release-%s-%s.noarch.rpm" % [variant, version]
+
+          on host, "rpm -ivh --force #{rpm}"
+
+        when /^(debian|ubuntu)$/
+          deb = options[:release_apt_repo_url] + "puppetlabs-release-%s.deb" % codename
+
+          on host, "wget -O /tmp/puppet.deb #{deb}"
+          on host, "dpkg -i --force-all /tmp/puppet.deb"
+          on host, "apt-get update"
+        else
+          raise "No repository installation step for #{variant} yet..."
+        end
+      end
+
+      # Install development repository on the given host. This method pushes all
+      # repository information including package files for the specified
+      # package_name to the host and modifies the repository configuration file
+      # to point at the new repository. This is particularly useful for
+      # installing development packages on hosts that can't access the builds
+      # server.
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      # @param [String] package_name The name of the package whose repository is
+      #                              being installed.
+      # @param [String] build_version A string identifying the output of a
+      #                               packaging job for use in looking up
+      #                               repository directory information
+      # @param [String] repo_configs_dir A local directory where repository files will be
+      #                                  stored as an intermediate step before
+      #                                  pushing them to the given host.
+      #
+      # @note This method only works on redhat-like and debian-like hosts.
+      #
+      def install_puppetlabs_dev_repo ( host, package_name, build_version,
+                                repo_configs_dir = 'tmp/repo_configs' )
+        variant, version, arch, codename = host['platform'].to_array
+        platform_configs_dir = File.join(repo_configs_dir, variant)
+
+        # some of the uses of dev_builds_url below can't include protocol info,
+        # pluse this opens up possibility of switching the behavior on provided
+        # url type
+        _, protocol, hostname = options[:dev_builds_url].partition /.*:\/\//
+        dev_builds_url = protocol + hostname
+
+        case variant
+        when /^(fedora|el|centos)$/
+          variant = (($1 == 'centos') ? 'el' : $1)
+          fedora_prefix = ((variant == 'fedora') ? 'f' : '')
+
+          if host.is_pe?
+            pattern = "pl-%s-%s-repos-pe-%s-%s%s-%s.repo"
+          else
+            pattern = "pl-%s-%s-%s-%s%s-%s.repo"
+          end
+
+          repo_filename = pattern % [
+            package_name,
+            build_version,
+            variant,
+            fedora_prefix,
+            version,
+            arch
+          ]
+
+          repo = fetch_http_file( "%s/%s/%s/repo_configs/rpm/" %
+                       [ dev_builds_url, package_name, build_version ],
+                        repo_filename,
+                        platform_configs_dir)
+
+          link = "%s/%s/%s/repos/%s/%s%s/products/%s/" %
+            [ dev_builds_url, package_name, build_version, variant,
+              fedora_prefix, version, arch ]
+
+          if not link_exists?( link )
+            link = "%s/%s/%s/repos/%s/%s%s/devel/%s/" %
+              [ dev_builds_url, package_name, build_version, variant,
+                fedora_prefix, version, arch ]
+          end
+
+          if not link_exists?( link )
+            raise "Unable to reach a repo directory at #{link}"
+          end
+
+          repo_dir = fetch_http_dir( link, platform_configs_dir )
+
+          config_dir = '/etc/yum.repos.d/'
+          scp_to host, repo, config_dir
+          scp_to host, repo_dir, '/root'
+
+          search = "baseurl\\s*=\\s*http:\\/\\/#{hostname}.*$"
+          replace = "baseurl=file:\\/\\/\\/root\\/#{arch}"
+          sed_command = "sed -i 's/#{search}/#{replace}/'"
+          find_and_sed = "find #{config_dir} -name \"*.repo\" -exec #{sed_command} {} \\;"
+
+          on host, find_and_sed
+
+        when /^(debian|ubuntu)$/
+          list = fetch_http_file( "%s/%s/%s/repo_configs/deb/" %
+                         [ dev_builds_url, package_name, build_version ],
+                        "pl-%s-%s-%s.list" %
+                         [ package_name, build_version, codename ],
+                        platform_configs_dir )
+
+          repo_dir = fetch_http_dir( "%s/%s/%s/repos/apt/%s" %
+                                      [ dev_builds_url, package_name,
+                                        build_version, codename ],
+                                       platform_configs_dir )
+
+          config_dir = '/etc/apt/sources.list.d'
+          scp_to host, list, config_dir
+          scp_to host, repo_dir, '/root'
+
+          search = "'deb\\s\\+http:\\/\\/#{hostname}.*$"
+          replace = "'deb file:\\/\\/\\/root\\/#{codename} #{codename} main'"
+          sed_command = "sed -i 's/#{search}/#{replace}/'"
+          find_and_sed = "find #{config_dir} -name \"*.list\" -exec #{sed_command} {} \\;"
+
+          on host, find_and_sed
+          on host, "apt-get update"
+
+        else
+          raise "No repository installation step for #{variant} yet..."
+        end
       end
     end
   end

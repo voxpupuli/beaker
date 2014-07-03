@@ -469,4 +469,148 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
   end
+
+
+  def fetch_allows
+    allow(File).to receive( :exists? ) { true }
+    allow(File).to receive( :open ).and_yield()
+    allow(subject).to receive( :logger ) { logger }
+  end
+
+  describe "#fetch_http_file" do
+    let( :logger) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
+
+    before do
+      fetch_allows
+    end
+
+    describe "given valid arguments" do
+
+      it "returns its second and third arguments concatenated." do
+        result = subject.fetch_http_file "http://beaker.tool/", "name", "destdir"
+        expect(result).to eq("destdir/name")
+      end
+
+    end
+
+  end
+
+  describe "#fetch_http_dir" do
+    let( :logger) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
+    let( :result) { double(:each_line => []) }
+
+    before do
+      fetch_allows
+    end
+
+    describe "given valid arguments" do
+
+      it "returns basename of first argument concatenated to second." do
+        expect(subject).to receive(:`).with(/^wget.*/).ordered { result }
+        result = subject.fetch_http_dir "http://beaker.tool/beep", "destdir"
+        expect(result).to eq("destdir/beep")
+      end
+
+    end
+
+  end
+
+  describe "#install_puppetlabs_release_repo" do
+    let( :platform ) { Beaker::Platform.new('solaris-7-i386') }
+    let( :host ) do
+      FakeHost.new( :options => { 'platform' => platform })
+    end
+
+    before do
+      allow(subject).to receive(:options) { opts }
+    end
+
+    describe "When host is unsupported platform" do
+      let( :platform ) { Beaker::Platform.new('solaris-7-i386') }
+
+      it "raises an exception." do
+        expect{
+          subject.install_puppetlabs_release_repo host
+        }.to raise_error(RuntimeError, /No repository installation step for/)
+      end
+    end
+
+    describe "When host is a debian-like platform" do
+      let( :platform ) { Beaker::Platform.new('debian-7-i386') }
+
+      it "downloads a deb file, installs, and updates the apt cache." do
+        expect(subject).to receive(:on).with( host, /wget .*/ ).ordered
+        expect(subject).to receive(:on).with( host, /dpkg .*/ ).ordered
+        expect(subject).to receive(:on).with( host, "apt-get update" ).ordered
+        subject.install_puppetlabs_release_repo host
+      end
+
+    end
+
+    describe "When host is a redhat-like platform" do
+      let( :platform ) { Beaker::Platform.new('el-7-i386') }
+
+      it "installs an rpm" do
+        expect(subject).to receive(:on).with( host, /rpm .*/ ).ordered
+        subject.install_puppetlabs_release_repo host
+      end
+
+    end
+
+  end
+
+  RSpec.shared_examples "install-dev-repo" do
+    let( :repo_config ) { "repoconfig" }
+    let( :repo_dir ) { "repodir" }
+
+    before do
+      allow(subject).to receive(:fetch_http_file) { repo_config }
+      allow(subject).to receive(:fetch_http_dir) { repo_dir }
+      allow(subject).to receive(:on).with(host, "apt-get update") { }
+      allow(subject).to receive(:options) { opts }
+      allow(subject).to receive(:link_exists?) { true }
+    end
+
+    it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
+      expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
+      expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
+      expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
+      subject.install_puppetlabs_dev_repo host, package_name, package_version
+    end
+
+  end
+
+  describe "#install_puppetlabs_dev_repo" do
+    let( :package_name ) { "puppet" }
+    let( :package_version ) { "7.5.6" }
+    let( :host ) do
+      FakeHost.new( :options => opts.merge({
+        'platform' => platform,
+      }))
+    end
+
+    describe "When host is unsupported platform" do
+      let( :platform ) { Beaker::Platform.new('solaris-7-i386') }
+
+      it "raises an exception." do
+        allow(subject).to receive(:options) { opts }
+        expect{
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        }.to raise_error(RuntimeError, /No repository installation step for/)
+      end
+
+    end
+
+    describe "When host is a debian-like platform" do
+      let( :platform ) { Beaker::Platform.new('debian-7-i386') }
+      include_examples "install-dev-repo"
+    end
+
+    describe "When host is a redhat-like platform" do
+      let( :platform ) { Beaker::Platform.new('el-7-i386') }
+      include_examples "install-dev-repo"
+    end
+
+  end
+
 end
