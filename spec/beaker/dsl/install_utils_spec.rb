@@ -4,7 +4,6 @@ class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::InstallUtils
   include Beaker::DSL::Structure
   include Beaker::DSL::Roles
-  include Beaker::DSL::Patterns
 end
 
 describe ClassMixedWithDSLInstallUtils do
