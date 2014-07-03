@@ -818,6 +818,8 @@ module Beaker
         _, protocol, hostname = options[:dev_builds_url].partition /.*:\/\//
         dev_builds_url = protocol + hostname
 
+        on host, "mkdir -p /root/#{package_name}"
+
         case variant
         when /^(fedora|el|centos)$/
           variant = (($1 == 'centos') ? 'el' : $1)
@@ -861,10 +863,10 @@ module Beaker
 
           config_dir = '/etc/yum.repos.d/'
           scp_to host, repo, config_dir
-          scp_to host, repo_dir, '/root'
+          scp_to host, repo_dir, "/root/#{package_name}"
 
           search = "baseurl\\s*=\\s*http:\\/\\/#{hostname}.*$"
-          replace = "baseurl=file:\\/\\/\\/root\\/#{arch}"
+          replace = "baseurl=file:\\/\\/\\/root\\/#{package_name}\\/#{arch}"
           sed_command = "sed -i 's/#{search}/#{replace}/'"
           find_and_sed = "find #{config_dir} -name \"*.repo\" -exec #{sed_command} {} \\;"
 
@@ -884,10 +886,10 @@ module Beaker
 
           config_dir = '/etc/apt/sources.list.d'
           scp_to host, list, config_dir
-          scp_to host, repo_dir, '/root'
+          scp_to host, repo_dir, "/root/#{package_name}"
 
           search = "'deb\\s\\+http:\\/\\/#{hostname}.*$"
-          replace = "'deb file:\\/\\/\\/root\\/#{codename} #{codename} main'"
+          replace = "'deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} main'"
           sed_command = "sed -i 's/#{search}/#{replace}/'"
           find_and_sed = "find #{config_dir} -name \"*.list\" -exec #{sed_command} {} \\;"
 
