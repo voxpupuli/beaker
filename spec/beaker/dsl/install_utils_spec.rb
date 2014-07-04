@@ -572,6 +572,7 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
+      expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
       expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
       expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
       expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
@@ -593,6 +594,7 @@ describe ClassMixedWithDSLInstallUtils do
       let( :platform ) { Beaker::Platform.new('solaris-7-i386') }
 
       it "raises an exception." do
+        expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
         allow(subject).to receive(:options) { opts }
         expect{
           subject.install_puppetlabs_dev_repo host, package_name, package_version
