@@ -2,8 +2,8 @@ require 'spec_helper'
 
 module Beaker
   module Shared
-    describe HostRoleParser do
-      let( :host_handler )   { Beaker::Shared::HostRoleParser }
+    describe HostManager do
+      let( :host_handler )   { Beaker::Shared::HostManager }
       let( :platform )       { @platform || 'unix' }
       let( :hosts )          { hosts = make_hosts( { :platform => platform } )
                                hosts[0][:roles] = ['agent']
