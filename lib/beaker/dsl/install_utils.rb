@@ -603,7 +603,7 @@ module Beaker
           host.install_package('lsb-release')
         end
 
-        if ! host.check_for_package 'curl'
+        if ! host.check_for_command 'curl'
           on host, 'apt-get install -y curl'
         end
 
@@ -688,7 +688,7 @@ module Beaker
       # @raise [StandardError] if gem does not exist on target host
       # @api private
       def install_puppet_from_gem( host, opts )
-        if host.check_for_package( 'gem' )
+        if host.check_for_command( 'gem' )
           if opts[:facter_version]
             on host, "gem install facter -v#{opts[:facter_version]}"
           end
