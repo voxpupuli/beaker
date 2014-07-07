@@ -689,10 +689,8 @@ module Beaker
 
       # @!visibility private
       def bounce_service host, service, curl_retries = 120
-        # Any reason to not
-        # host.exec puppet_resource( 'service', service, 'ensure=stopped' )
-        # host.exec puppet_resource( 'service', service, 'ensure=running' )
-        host.exec( Command.new( "#{host['service-prefix']}#{service} restart" ) )
+        host.exec puppet_resource( 'service', service, 'ensure=stopped' )
+        host.exec puppet_resource( 'service', service, 'ensure=running' )
         curl_with_retries(" #{service} ", host, "https://localhost:8140", [35, 60], curl_retries)
       end
 

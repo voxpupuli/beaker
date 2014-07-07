@@ -19,7 +19,6 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
-        'service-prefix'=> '/etc/init.d/',
         'master-start-curl-retries' => 120,
         'puppetservice' => 'pe-httpd',
         'puppetpath'    => '/etc/puppetlabs/puppet',
