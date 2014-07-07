@@ -74,6 +74,11 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'ubuntu-quantal-xxx'
       end
 
+      it "can convert ubuntu-10.04-xxx to ubuntu-lucid-xxx" do
+        @name = 'ubuntu-10.04-xxx'
+        expect( platform.with_version_codename ).to be === 'ubuntu-lucid-xxx'
+      end
+
       it "leaves centos-7-xxx alone" do
         @name = 'centos-7-xxx'
         expect( platform.with_version_codename ).to be === 'centos-7-xxx'
