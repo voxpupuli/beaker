@@ -143,8 +143,9 @@ module Beaker
       else
         if string.respond_to?( :encode )
           # We're running in >= 1.9 and we'll need to convert
-          # Remove invalide and undefined UTF-8 character encodings
-          string.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
+          # Remove invalid and undefined UTF-8 character encodings
+          encoding = Encoding ? Encoding.default_external : "UTF-8"
+          return string.encode(encoding, string.encoding, :invalid => :replace, :undef => :replace, :replace => '')
         else
           # We're running 1.8, do nothing
           string
