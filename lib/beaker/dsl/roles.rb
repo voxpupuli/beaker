@@ -103,6 +103,9 @@ module Beaker
           end
         else
           if not respond_to? role
+            if role !~ /\A[[:alpha:]]+[a-zA-Z0-9_]*[!?=]?\Z/
+              raise "Role name format error for '#{role}'.  Allowed characters are: \na-Z\n0-9 (as long as not at the beginning of name)\n'_'\n'?', '!' and '=' (only as individual last character at end of name)"
+            end
             self.class.send :define_method, role.to_s do
               hosts_as role.to_sym
             end
