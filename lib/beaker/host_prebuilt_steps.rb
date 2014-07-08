@@ -78,11 +78,13 @@ module Beaker
       if host.is_a? Array
         host.map { |h| validate_host(h, opts) }
       else
-        if opts[:collect_perf_data]
-          UNIX_PACKAGES << "sysstat"
-        end
+        puts "host['platform'] == " + host['platform']
         case
         when host['platform'] =~ /sles-/
+          if opts[:collect_perf_data]
+            puts "Adding sysstat to SLES_PACKAGES"
+            SLES_PACKAGES << "sysstat"
+          end
           SLES_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
@@ -95,6 +97,10 @@ module Beaker
             end
           end
         when host['platform'] !~ /aix|solaris|windows|sles-|osx-/
+          if opts[:collect_perf_data]
+            puts "Adding sysstat to UNIX_PACKAGES"
+            UNIX_PACKAGES << "sysstat"
+          end
           UNIX_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg

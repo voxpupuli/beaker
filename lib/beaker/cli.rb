@@ -79,7 +79,7 @@ module Beaker
         provision
 
         # Setup perf monitoring if needed
-        @perf = Beaker::Perf.new( @hosts, @options, @logger)
+        @perf = Beaker::Perf.new( @hosts, @options, @logger )
 
         errored = false
 

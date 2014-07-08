@@ -267,7 +267,10 @@ describe Beaker do
     it "can validate unix hosts" do
 
       hosts.each do |host|
+        puts "host == " + host
+        #puts "perf == " + host.options[:collect_perf_data]
         unix_only_pkgs.each do |pkg|
+          puts "pkg == " + pkg
           host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
           host.should_receive( :install_package ).with( pkg ).once
         end

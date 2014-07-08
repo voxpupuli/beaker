@@ -43,7 +43,7 @@ module Beaker
 
       it 'creates a new Perf object with a single host, :collect_perf_data = true' do
         hosts = [ make_host("myHost", @options) ]
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         expect(@my_io.string).to match(/Setup perf on host: myHost/)
@@ -51,7 +51,7 @@ module Beaker
 
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true' do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         expect(@my_io.string).to match(/Setup perf on host: myHost*Setup perf on host: myOtherHost/)
@@ -60,7 +60,7 @@ module Beaker
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true, SLES' do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
         hosts[0]['platform'] = "SLES"
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHost/)
@@ -81,7 +81,7 @@ module Beaker
 
       it "Does the Right Thing on Linux hosts" do
         @hosts[0]['platform'] = "centos"
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( @hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
@@ -90,7 +90,7 @@ module Beaker
 
       it "Does the Right Thing on non-Linux hosts" do
         @hosts[0]['platform'] = "windows"
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( @hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
@@ -112,7 +112,7 @@ module Beaker
       it "Does nothing on Linux hosts" do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
         hosts[0]['platform'] = "centos"
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
@@ -122,7 +122,7 @@ module Beaker
       it "Does nothing on non-Linux hosts" do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
         hosts[0]['platform'] = "windows"
-        @my_logger.remove_destination(STDOUT)
+#        @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options, @my_logger )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
