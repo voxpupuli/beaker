@@ -46,18 +46,6 @@ module Beaker
         a_host.first
       end
 
-      #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
-      #commands without having to refer to role by String or Symbol.
-      # @param [String, Symbol] role The role that you wish to create a definition for
-      # @example Basic usage
-      #  add_role_def('myrole')
-      #  on myrole, "run command"
-      def add_role_def role
-        send :define_method, role do
-          hosts_with_role role
-        end
-      end
-
       #Execute a block selecting the hosts that match with the provided criteria
       #@param [Array<Host>, Host, String, Symbol] sorter A host role as a String or Symbol that can be
       #                                                used to search for a set of Hosts,  a host name
@@ -74,7 +62,11 @@ module Beaker
             if match.empty?
               match = hosts_with_name(hosts, sorter) #check by name
             end
-            sorter = match
+            if match.length == 1  #we only found one matching host, don't need it wrapped in an array
+              sorter = match.pop
+            else
+              sorter = match
+            end
           else
             raise ArgumentError, "Unable to sort for #{sorter} type hosts when provided with [] as Hosts"
           end
