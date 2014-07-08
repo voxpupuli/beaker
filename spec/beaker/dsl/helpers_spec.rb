@@ -761,7 +761,7 @@ describe ClassMixedWithDSLHelpers do
     let(:test_case_path) { 'testcase/path' }
     let(:tmpdir_path) { '/tmp/tmpdir' }
     let(:puppet_path) { '/puppet/path' }
-    let(:puppetservice) { @ps || nil }
+    let(:puppetservice) { nil }
     let(:is_pe) { false }
     let(:host) do
       FakeHost.new(:pe => is_pe,
@@ -805,7 +805,8 @@ describe ClassMixedWithDSLHelpers do
         it 'bounces puppet twice' do
           subject.stub(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).exactly(2).times
         end
 
         it 'yield to a block after bouncing service' do
@@ -813,11 +814,13 @@ describe ClassMixedWithDSLHelpers do
           subject.stub(:curl_with_retries)
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/#{@ps} restart/).once
+              expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).once
+              expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/#{@ps} restart/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).exactly(2).times
         end
       end
 
