@@ -201,6 +201,9 @@ module Beaker
             #noop
           end
 
+          opts.on '--collect-perf-data', 'Use sysstat on linux hosts to collect performance and load data' do
+            @cmd_options[:collect_perf_data] = true
+          end
         end
 
       end

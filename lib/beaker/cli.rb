@@ -78,6 +78,9 @@ module Beaker
 
         provision
 
+        # Setup perf monitoring if needed
+        @perf = Beaker::Perf.new( @hosts, @options, @logger )
+
         errored = false
 
         #pre acceptance  phase
@@ -109,6 +112,7 @@ module Beaker
         end
 
         @logger.error "\nFailed to execute tests!\n"
+        @perf.print_perf_info
         print_reproduction_info( :error )
 
         exit 1
@@ -120,6 +124,7 @@ module Beaker
             @network_manager.cleanup
           end
         end
+        @perf.print_perf_info
         print_reproduction_info( :debug ) if @logger.is_debug?
       end
     end
