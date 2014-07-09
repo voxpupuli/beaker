@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'yard'
   s.add_development_dependency 'markdown' unless RUBY_VERSION < '1.9'
   s.add_development_dependency 'thin'
+  s.add_development_dependency 'gitlab-grit'
 
   # Run time dependencies
   s.add_runtime_dependency 'json', '~> 1.8'
