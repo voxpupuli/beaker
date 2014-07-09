@@ -8,9 +8,9 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    UNIX_PACKAGES = ['curl', 'ntpdate']
+    UNIX_PACKAGES = ['curl', 'ntpdate'] # --collect-perf-data will add sysstat to this list
     WINDOWS_PACKAGES = ['curl']
-    SLES_PACKAGES = ['curl', 'ntp']
+    SLES_PACKAGES = ['curl', 'ntp']     # --collect-perf-data will add sysstat to this list
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -76,15 +76,16 @@ module Beaker
     def validate_host host, opts
       logger = opts[:logger]
       if host.is_a? Array
-        host.map { |h| validate_host(h, opts) }
-      else
-        puts "host['platform'] == " + host['platform']
-        case
-        when host['platform'] =~ /sles-/
-          if opts[:collect_perf_data]
-            puts "Adding sysstat to SLES_PACKAGES"
+        if opts[:collect_perf_data]
+          if !UNIX_PACKAGES.include? "sysstat"
+            UNIX_PACKAGES << "sysstat"
             SLES_PACKAGES << "sysstat"
           end
+        end
+        host.map { |h| validate_host(h, opts) }
+      else
+        case
+        when host['platform'] =~ /sles-/
           SLES_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
@@ -97,10 +98,6 @@ module Beaker
             end
           end
         when host['platform'] !~ /aix|solaris|windows|sles-|osx-/
-          if opts[:collect_perf_data]
-            puts "Adding sysstat to UNIX_PACKAGES"
-            UNIX_PACKAGES << "sysstat"
-          end
           UNIX_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg

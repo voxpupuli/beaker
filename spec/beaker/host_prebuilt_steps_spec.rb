@@ -267,17 +267,29 @@ describe Beaker do
     it "can validate unix hosts" do
 
       hosts.each do |host|
-        puts "host == " + host
-        #puts "perf == " + host.options[:collect_perf_data]
         unix_only_pkgs.each do |pkg|
-          puts "pkg == " + pkg
           host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
           host.should_receive( :install_package ).with( pkg ).once
         end
-        
       end
 
-      subject.validate_host(hosts, logger)
+      subject.validate_host(hosts, options)
+
+    end
+
+    it "can validate unix hosts that need sysstat installed" do
+      total_pkgs = Array.new(unix_only_pkgs);
+      total_pkgs << "sysstat"
+
+      hosts.each do |host|
+        total_pkgs.each do |pkg|
+          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
+          host.should_receive( :install_package ).with( pkg ).once
+        end
+      end
+
+      opts = options.merge({:collect_perf_data => true})
+      subject.validate_host(hosts, opts)
 
     end
 
@@ -291,7 +303,7 @@ describe Beaker do
         end
       end
 
-      subject.validate_host(hosts, logger)
+      subject.validate_host(hosts, options)
 
     end
 
@@ -306,7 +318,7 @@ describe Beaker do
 
       end
 
-      subject.validate_host(hosts, logger)
+      subject.validate_host(hosts, options)
 
     end
   end
