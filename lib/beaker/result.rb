@@ -31,11 +31,11 @@ module Beaker
     end
 
     def convert string
-      if string.respond_to?( :encode )
+      if string.respond_to?( :force_encoding )
         # We're running in >= 1.9 and we'll need to convert
         # Remove invalid and undefined UTF-8 character encodings
-        encoding = Encoding ? Encoding.default_external : "UTF-8"
-        return string.encode(encoding, string.encoding, :invalid => :replace, :undef => :replace, :replace => '')
+        string.force_encoding('UTF-8')
+        return string.chars.select{|i| i.valid_encoding?}.join
       else
         # We're running in < 1.9 and Ruby doesn't care
         return string
