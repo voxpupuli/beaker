@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'spec_helper'
 
 module Beaker
@@ -5,6 +6,23 @@ module Beaker
     let(:my_io)  { MockIO.new                         }
     let(:logger) { Logger.new(my_io, :quiet => true)  }
 
+
+    context '#convert' do
+      let(:valid_utf8)  { "/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\n" }
+      let(:invalid_utf8) {"/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\xAD\n"}
+
+      it 'preserves valid utf-8 strings' do
+        expect( logger.convert(valid_utf8) ).to be === valid_utf8
+      end
+      it 'strips out invalid utf-8 characters' do
+        #this is 1.9 behavior only
+        if RUBY_VERSION.to_f >= 1.9
+          expect( logger.convert(invalid_utf8) ).to be === valid_utf8
+        else
+          pending "not supported in ruby 1.8 (using #{RUBY_VERSION})"
+        end
+      end
+    end
 
     context 'new' do
       it 'does not duplicate STDOUT when directly passed to it' do
