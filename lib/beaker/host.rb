@@ -207,14 +207,14 @@ module Beaker
     end
 
     def do_scp_to source, target, options
-      @logger.debug "localhost $ scp #{source} #{@name}:#{target} #{options.to_s}"
+      @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
       result = connection.scp_to(source, target, options, $dry_run)
       return result
     end
 
     def do_scp_from source, target, options
 
-      @logger.debug "localhost $ scp #{@name}:#{source} #{target} #{options.to_s}"
+      @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
       result = connection.scp_from(source, target, options, $dry_run)
       return result
     end
