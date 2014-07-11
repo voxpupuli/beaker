@@ -36,11 +36,24 @@ module Beaker
 
         it "sets codename to nil" do
           @name = "centos-6.5-x86_64"
-          expect{ platform.codename }.to be { nil }
+          expect(platform.codename).to be_nil
         end
 
       end
 
+      describe "platforms with version and codename" do
+        it "intializes both version and codename if given version" do
+          @name = "debian-7-x86_64"
+          expect(platform.version).to eq('7')
+          expect(platform.codename).to eq('wheezy')
+        end
+
+        it "intializes both version and codename if given codename" do
+          @name = "debian-wheezy-x86_64"
+          expect(platform.version).to eq('7')
+          expect(platform.codename).to eq('wheezy')
+        end
+      end
     end
 
     context 'to_array' do
