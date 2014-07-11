@@ -63,6 +63,7 @@ module Beaker
 
       if codename_version_hash
         if codename_version_hash[version]
+          @codename = version
           @version = codename_version_hash[version]
         else
           version = version.delete('.')
