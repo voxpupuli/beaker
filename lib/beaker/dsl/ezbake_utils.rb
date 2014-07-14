@@ -65,7 +65,7 @@ module Beaker
       #
       def ezbake_stage project_name, project_version, ezbake_dir="tmp/ezbake"
         ezbake_tools_available?
-        conditionally_clone "git@github.com:puppetlabs/ezbake.git", ezbake_dir
+        conditionally_clone "gitmirror@github.delivery.puppetlabs.net:puppetlabs-ezbake.git", ezbake_dir
 
         package_version = ''
         Dir.chdir(ezbake_dir) do
@@ -207,7 +207,8 @@ module Beaker
       def conditionally_clone(upstream_uri, local_path)
         ezbake_tools_available?
         if system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git status"
-          system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git pull"
+          system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git fetch origin"
+          system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git checkout origin/HEAD"
         else
           parent_dir = File.dirname(local_path)
           FileUtils.mkdir_p(parent_dir)
