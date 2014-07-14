@@ -67,18 +67,5 @@ module BeakerRSpec
       @network_manager.cleanup
     end
 
-    # Copy a puppet module from a given source to all hosts under test.
-    # Assumes each host under test has an associated 'distmoduledir' (set in the
-    # host configuration YAML file).
-    #
-    # @param opts [Hash]
-    # @option opts [String] :source The location on the test runners box where the files are found
-    # @option opts [String] :module_name The name of the module to be copied over
-    def puppet_module_install opts = {}
-      hosts.each do |host|
-        scp_to host, opts[:source], File.join(host['distmoduledir'], opts[:module_name])
-      end
-    end
-
   end
 end
