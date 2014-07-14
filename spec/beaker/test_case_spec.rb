@@ -84,6 +84,16 @@ module Beaker
         testcase.should_receive( :log_and_fail_test ).once.with(kind_of(Timeout::Error))
         testcase.run_test
       end
+
+      it 'correctly handles CommandFailure' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write "raise Host::CommandFailure"
+        end
+        @path = path
+        testcase.should_receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
+        testcase.run_test
+      end
     end
 
   end

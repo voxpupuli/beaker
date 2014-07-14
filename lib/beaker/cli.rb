@@ -90,7 +90,7 @@ module Beaker
         rescue => e
           #post acceptance on failure
           #run post-suite if we are in fail-slow mode
-          if @options[:fail_mode] =~ /slow/
+          if @options[:fail_mode].to_s =~ /slow/
             run_suite(:post_suite)
           end
           raise e
@@ -101,7 +101,7 @@ module Beaker
       #cleanup phase
       rescue => e
         #cleanup on error
-        if @options[:preserve_hosts] =~ /(never)/
+        if @options[:preserve_hosts].to_s =~ /(never)/
           @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
             @network_manager.cleanup
@@ -114,7 +114,7 @@ module Beaker
         exit 1
       else
         #cleanup on success
-        if @options[:preserve_hosts] =~ /(never)|(onfail)/
+        if @options[:preserve_hosts].to_s =~ /(never)|(onfail)/
           @logger.notify "Cleanup: cleaning up after successful run"
           if @network_manager
             @network_manager.cleanup
