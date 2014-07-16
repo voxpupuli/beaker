@@ -24,6 +24,43 @@ module Beaker
       expect( host['value'] ).to be === 'blarg'
     end
 
+    describe "type options" do
+      let(:options) { Beaker::Options::OptionsHash.new }
+
+      it "can be a pe host" do
+        options['type'] = 'pe'
+        expect(host.is_foss_source?).to be_false
+        expect(host.is_foss_package?).to be_false
+        expect(host.is_pe?).to be_true
+        expect(host.is_installed_as_a_packaged_service?).to be_true
+        expect(host.is_using_passenger?).to be_true
+      end
+
+      it "can be a foss-source host" do
+        options['type'] = 'git'
+        expect(host.is_foss_source?).to be_true
+        expect(host.is_foss_package?).to be_false
+        expect(host.is_pe?).to be_false
+        expect(host.is_installed_as_a_packaged_service?).to be_false
+        expect(host.is_using_passenger?).to be_false
+      end
+
+      it "can be a foss-package host" do
+        options['type'] = 'foss'
+        expect(host.is_foss_source?).to be_false
+        expect(host.is_foss_package?).to be_true
+        expect(host.is_pe?).to be_false
+        expect(host.is_installed_as_a_packaged_service?).to be_true
+        expect(host.is_using_passenger?).to be_false
+      end
+
+      it "can detect a foss-package host using passenger" do
+        options['type'] = 'foss'
+        options['puppetservice'] = 'apache2'
+        expect(host.is_using_passenger?).to be_true
+      end
+    end
+
     describe "windows hosts" do
       describe "install_package" do
         let(:cygwin) { 'setup-x86.exe' }

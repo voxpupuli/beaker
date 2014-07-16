@@ -489,16 +489,24 @@ module Beaker
       #                            specified, if no section is specified the
       #                            a puppet.conf file will be written with the
       #                            options put in a section named after [mode]
-      #
-      #                            There is a special setting for command_line
-      #                            arguments such as --debug or --logdest, which
-      #                            cannot be set in puppet.conf.   For example:
+      # @option conf_opts [String] :__commandline_args__  A special setting for
+      #                            command_line arguments such as --debug or
+      #                            --logdest, which cannot be set in
+      #                            puppet.conf. For example:
       #
       #                            :__commandline_args__ => '--logdest /tmp/a.log'
       #
       #                            These will only be applied when starting a FOSS
       #                            master, as a pe master is just bounced.
-      #
+      # @option conf_opts [Hash]   :__source_args__  A special setting of options
+      #                            for controlling how the puppet master service is
+      #                            handled. The only setting currently is
+      #                            :bypass_service_script, which if set true will
+      #                            force stopping and starting a webrick master
+      #                            using the start_puppet_from_source_* methods,
+      #                            even if it seems the host has passenger.
+      #                            This is needed in FOSS tests to initialize
+      #                            SSL.
       # @param [File] testdir      The temporary directory which will hold backup
       #                            configuration, and other test artifacts.
       #
@@ -524,7 +532,8 @@ module Beaker
       def with_puppet_running_on host, conf_opts, testdir = host.tmpdir(File.basename(@path)), &block
         raise(ArgumentError, "with_puppet_running_on's conf_opts must be a Hash. You provided a #{conf_opts.class}: '#{conf_opts}'") if !conf_opts.kind_of?(Hash)
         cmdline_args = conf_opts[:__commandline_args__]
-        conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
+        service_args = conf_opts[:__service_args__] || {}
+        conf_opts = conf_opts.reject { |k,v| [:__commandline_args__, :__service_args__].include?(k) }
 
         curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
         logger.debug "Setting curl retries to #{curl_retries}"
@@ -533,7 +542,7 @@ module Beaker
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
-          if host['puppetservice']
+          if host.is_installed_as_a_packaged_service? && !service_args[:bypass_service_script]
             bounce_service( host, host['puppetservice'], curl_retries )
           else
             puppet_master_started = start_puppet_from_source_on!( host, cmdline_args )
@@ -549,7 +558,7 @@ module Beaker
           begin
             restore_puppet_conf_from_backup( host, backup_file )
 
-            if host['puppetservice']
+            if host.is_installed_as_a_packaged_service? && !service_args[:bypass_service_script]
               bounce_service( host, host['puppetservice'], curl_retries )
             else
               if puppet_master_started
@@ -689,8 +698,13 @@ module Beaker
 
       # @!visibility private
       def bounce_service host, service, curl_retries = 120
-        host.exec puppet_resource( 'service', service, 'ensure=stopped' )
-        host.exec puppet_resource( 'service', service, 'ensure=running' )
+        if host['service-restart']
+          apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/apache2ctl" : 'apache2ctl'
+          host.exec(Command.new("#{apachectl_path} graceful"))
+        else
+          host.exec puppet_resource('service', service, 'ensure=stopped')
+          host.exec puppet_resource('service', service, 'ensure=running')
+        end
         curl_with_retries(" #{service} ", host, "https://localhost:8140", [35, 60], curl_retries)
       end
 
