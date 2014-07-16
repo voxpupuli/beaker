@@ -94,4 +94,21 @@ describe ClassMixedWithDSLRoles do
       expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
   end
+  describe '#add_role_def' do
+    it 'raises an error on unsupported role format "1role"' do
+      expect { subject.add_role_def( "1role" ) }.to raise_error
+    end
+    it 'raises an error on unsupported role format "role_!a"' do
+      expect { subject.add_role_def( "role_!a" ) }.to raise_error
+    end
+    it 'raises an error on unsupported role format "role=="' do
+      expect { subject.add_role_def( "role==" ) }.to raise_error
+    end
+    it 'creates new method for role "role_correct!"' do
+      test_role = "role_correct!"
+      subject.add_role_def( test_role )
+      subject.should respond_to test_role
+      subject.class.send( :undef_method, test_role )
+    end
+  end
 end
