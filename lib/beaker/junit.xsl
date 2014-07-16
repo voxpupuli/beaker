@@ -75,12 +75,13 @@
             <xsl:variable name="testsuite_name"><xsl:value-of select="@name"/></xsl:variable>
 
             <xsl:variable name="testsuite_name_safe" select="translate($testsuite_name,'.','_')" />
-            <xsl:variable name="testsuite_tests"><xsl:value-of select="@tests"/></xsl:variable>
+            <xsl:variable name="testsuite_attempted"><xsl:value-of select="@tests"/></xsl:variable>
             <xsl:variable name="testsuite_errors"><xsl:value-of select="@errors"/></xsl:variable>
             <xsl:variable name="testsuite_failures"><xsl:value-of select="@failures"/></xsl:variable>
             <xsl:variable name="testsuite_time"><xsl:value-of select="@time"/></xsl:variable>
             <xsl:variable name="testsuite_skip"><xsl:value-of select="@skip"/></xsl:variable>
             <xsl:variable name="testsuite_pending"><xsl:value-of select="@pending"/></xsl:variable>
+            <xsl:variable name="testsuite_total"><xsl:value-of select="@total"/></xsl:variable>
             <xsl:variable name="testsuite_panel_type">
               <xsl:choose>
                 <xsl:when test="$testsuite_errors > 0 or $testsuite_failures > 0">danger</xsl:when>
@@ -103,7 +104,7 @@
                       <div class="col-md-2">
                       </div>
                       <div class="col-md-2">
-                        <h4>Total: <xsl:value-of select="$testsuite_tests" /></h4>
+                        <h4>Attempted: <xsl:value-of select="$testsuite_attempted" /></h4>
                       </div>
                       <div class="col-md-2">
                         <h4>Failed: <xsl:value-of select="$testsuite_errors + $testsuite_failures" /></h4>
@@ -113,6 +114,9 @@
                       </div>
                       <div class="col-md-2">
                         <h4>Pending: <xsl:value-of select="$testsuite_pending" /></h4>
+                      </div>
+                      <div class="col-md-2">
+                        <h4>Total: <xsl:value-of select="$testsuite_total" /></h4>
                       </div>
                     </div> <!-- row -->
                   </a>

@@ -12,7 +12,7 @@ module Beaker
 
     #Holds the output of a test suite, formats in plain text or xml
     class TestSuiteResult
-      attr_accessor :start_time, :stop_time
+      attr_accessor :start_time, :stop_time, :total_tests
 
       #Create a {TestSuiteResult} instance.
       #@param [Hash{Symbol=>String}] options Options for this object
@@ -107,6 +107,7 @@ module Beaker
                 Errored: #{errored_tests}
                 Skipped: #{skipped_tests}
                 Pending: #{pending_tests}
+                  Total: #{@total_tests}
 
       - Specific Test Case Status -
         ] % [elapsed_time, average_test_time]
@@ -191,6 +192,7 @@ module Beaker
           suite['failures'] = failed_tests
           suite['skip']     = skipped_tests
           suite['pending']  = pending_tests
+          suite['total']    = @total_tests
           suite['time']     = "%f" % (stop_time - start_time)
           properties = Nokogiri::XML::Node.new('properties', doc)
           @options.each_pair do | name, value |
@@ -281,7 +283,7 @@ module Beaker
       @hosts      = hosts
       @run        = false
       @options    = options
-      @fail_mode  = fail_mode
+      @fail_mode  = fail_mode || @options[:fail_mode]
       @test_suite_results = TestSuiteResult.new(@options, name)
       @timestamp = timestamp
 
@@ -308,6 +310,7 @@ module Beaker
       Beaker.const_set(:Log, @logger) unless defined?( Log )
 
       @test_suite_results.start_time = start_time
+      @test_suite_results.total_tests = @test_files.length
 
       @test_files.each do |test_file|
         @logger.notify "Begin #{test_file}"
@@ -326,10 +329,10 @@ module Beaker
           @logger.debug msg
         when :fail
           @logger.error msg
-          break if @fail_mode !~ /slow/ #all failure modes except slow cause us to kick out early on failure
+          break if @fail_mode.to_s !~ /slow/ #all failure modes except slow cause us to kick out early on failure
         when :error
           @logger.warn msg
-          break if @fail_mode !~ /slow/ #all failure modes except slow cause us to kick out early on failure
+          break if @fail_mode.to_s !~ /slow/ #all failure modes except slow cause us to kick out early on failure
         end
       end
       @test_suite_results.stop_time = Time.now
