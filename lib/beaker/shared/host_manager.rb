@@ -47,36 +47,31 @@ module Beaker
       end
 
       #Execute a block selecting the hosts that match with the provided criteria
-      #@param [Array<Host>, Host, String, Symbol] sorter A host role as a String or Symbol that can be
-      #                                                used to search for a set of Hosts,  a host name
-      #                                                as a String that can be used to search for
-      #                                                a set of Hosts, or a {Host}
-      #                                                or Array<{Host}> to run the block against
-      #@param [Array<Host>] hosts ([]) The hosts to sort through. Defaults to the empty Array.
+      #@param [Array<Host>, Host] hosts The host or hosts to run the provided block against
+      #@param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role
       #@param [Block] block This method will yield to a block of code passed by the caller
-      def run_block_on sorter, hosts = [], &block
+      def run_block_on hosts = [], filter = nil, &block
         result = nil
-        if sorter.is_a? String or sorter.is_a? Symbol
+        block_hosts = hosts #the hosts to apply the block to after any filtering
+        if filter
           if not hosts.empty?
-            match = hosts_with_role(hosts, sorter) #check by role
-            if match.empty?
-              match = hosts_with_name(hosts, sorter) #check by name
+            block_hosts = hosts_with_role(hosts, filter) #check by role
+            if block_hosts.empty?
+              block_hosts = hosts_with_name(hosts, filter) #check by name
             end
-            if match.length == 1  #we only found one matching host, don't need it wrapped in an array
-              sorter = match.pop
-            else
-              sorter = match
+            if block_hosts.length == 1  #we only found one matching host, don't need it wrapped in an array
+              block_hosts = block_hosts.pop
             end
           else
-            raise ArgumentError, "Unable to sort for #{sorter} type hosts when provided with [] as Hosts"
+            raise ArgumentError, "Unable to sort for #{filter} type hosts when provided with [] as Hosts"
           end
         end
-        if sorter.is_a? Array
-          result = sorter.map do |s|
-            run_block_on s, hosts, &block
+        if block_hosts.is_a? Array
+          result = block_hosts.map do |h|
+            run_block_on h, nil, &block
           end
         else
-          result = yield sorter
+          result = yield block_hosts
         end
         result
       end

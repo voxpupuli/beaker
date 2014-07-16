@@ -58,7 +58,7 @@ module Beaker
 
       context "run_block_on" do
         it "can execute a block against hosts identified by a string" do
-          myhosts = host_handler.run_block_on( role0, hosts ) do |hosts|
+          myhosts = host_handler.run_block_on( hosts, role0 ) do |hosts|
             hosts
           end
           expect( myhosts ).to be  === hosts[0]
@@ -66,7 +66,7 @@ module Beaker
         end
 
         it "can execute a block against hosts identified by a hostname" do
-          myhosts = host_handler.run_block_on( hosts[0].name, hosts ) do |hosts|
+          myhosts = host_handler.run_block_on( hosts, hosts[0].name ) do |hosts|
             hosts
           end
           expect( myhosts ).to be  === hosts[0]
@@ -74,7 +74,7 @@ module Beaker
         end
 
         it "can execute a block against an array of hosts" do
-          myhosts = host_handler.run_block_on( hosts, hosts ) do |hosts|
+          myhosts = host_handler.run_block_on( hosts ) do |hosts|
             hosts
           end
           expect( myhosts ).to be  === hosts

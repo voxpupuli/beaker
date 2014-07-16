@@ -17,7 +17,8 @@ describe Beaker do
                            hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
                            hosts[2][:roles] = ['agent']
                            hosts }
-  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps } }
+  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps
+                                       include Beaker::DSL::Patterns } }
 
   context 'timesync' do
 

@@ -12,14 +12,24 @@ module Beaker
     module Patterns
 
       #Execute a block selecting the hosts that match with the provided criteria
-      #@param [Array<Host>, Host, String, Symbol] sorter A host role as a String or Symbol that can be
+      #@param [Array<Host>, Host, String, Symbol] hosts_or_filter A host role as a String or Symbol that can be
       #                                                used to search for a set of Hosts,  a host name
       #                                                as a String that can be used to search for
       #                                                a set of Hosts, or a {Host}
       #                                                or Array<{Host}> to run the block against
       #@param [Block] block This method will yield to a block of code passed by the caller
-      def block_on sorter, &block
-        run_block_on sorter, hosts, &block
+      def block_on hosts_or_filter, &block
+        block_hosts = nil
+        if defined? hosts
+          block_hosts = hosts
+        end
+        filter = nil
+        if hosts_or_filter.is_a? String or hosts_or_filter.is_a? Symbol
+          filter = hosts_or_filter
+        else
+          block_hosts = hosts_or_filter
+        end
+        run_block_on block_hosts, filter, &block
       end
 
     end

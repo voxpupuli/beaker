@@ -35,6 +35,7 @@ module Beaker
       let(:rb_test)       { 'my_ruby_file.rb'     }
       let(:pl_test)       { '/my_perl_file.pl'    }
       let(:sh_test)       { '/my_shell_file.sh'   }
+      let(:hosts)         { make_hosts() }
 
       it 'fails fast if fail_mode != :slow and runtime error is raised' do
         Logger.stub('new')
@@ -43,7 +44,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', 'hosts', options, Time.now, :stop )
+        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
         tsr.stub(:write_junit_xml).and_return( true )
         tsr.stub(:summarize).and_return( true )
@@ -63,7 +64,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', 'hosts', options, Time.now, :stop )
+        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
         tsr.stub(:write_junit_xml).and_return( true )
         tsr.stub(:summarize).and_return( true )
@@ -83,7 +84,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(fail_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', 'hosts', options, Time.now, :slow )
+        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :slow )
         tsr = ts.instance_variable_get( :@test_suite_results )
         tsr.stub(:write_junit_xml).and_return( true )
         tsr.stub(:summarize).and_return( true )
