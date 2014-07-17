@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 8 Jul, 2014 (cc636ca0)](#LATEST)
+* [LATEST - 17 Jul, 2014 (b0558827)](#LATEST)
+* [beaker1.15.0 - 8 Jul, 2014 (82bb4ef9)](#beaker1.15.0)
 * [beaker1.14.1 - 3 Jul, 2014 (d2e750d5)](#beaker1.14.1)
 * [beaker1.14.0 - 3 Jul, 2014 (cf8ea838)](#beaker1.14.0)
 * [beaker1.13.1 - 23 Jun, 2014 (aa09552d)](#beaker1.13.1)
@@ -50,7 +51,192 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 8 Jul, 2014 (cc636ca0)
+### <a name = "LATEST">LATEST - 17 Jul, 2014 (b0558827)
+
+* Merge pull request #364 from anodelman/make-gem (b0558827)
+
+
+```
+Merge pull request #364 from anodelman/make-gem
+
+(GEM) version bump for beaker 1.16.0
+```
+* (GEM) version bump for beaker 1.16.0 (6664c6ab)
+
+* Merge pull request #363 from puppetlabs/revert-359-issue/master/qeng-188-foss-service-restarts (56cfac77)
+
+
+```
+Merge pull request #363 from puppetlabs/revert-359-issue/master/qeng-188-foss-service-restarts
+
+Revert "(QENG-188) Allow foss runs to use service scripts"
+```
+* Revert "(QENG-188) Allow foss runs to use service scripts" (dbfa7b23)
+
+* Merge pull request #359 from jpartlow/issue/master/qeng-188-foss-service-restarts (d2464451)
+
+
+```
+Merge pull request #359 from jpartlow/issue/master/qeng-188-foss-service-restarts
+
+(QENG-188) Allow foss runs to use service scripts
+```
+* Merge pull request #360 from anodelman/fail-slow (0d0c9239)
+
+
+```
+Merge pull request #360 from anodelman/fail-slow
+
+(QENG-927) Beaker does not honor --fail-mode always fails fast
+```
+* (QENG-927) Beaker does not honor --fail-mode always fails fast (755f13eb)
+
+
+```
+(QENG-927) Beaker does not honor --fail-mode always fails fast
+
+- bug comes from regex comparison with a symbol not being coerced to a
+  string in ruby 1.8, simple adding a 'to_s' resolves this
+```
+* Merge pull request #358 from waynr/bugfix/ezbake-utils (b83f5299)
+
+
+```
+Merge pull request #358 from waynr/bugfix/ezbake-utils
+
+(QENG-924) Fix Beaker::DSL::EZBakeUtils.conditionally_clone
+```
+* Merge pull request #357 from jpartlow/issue/master/qeng-923-ensure-platform-codename (06aa5b81)
+
+
+```
+Merge pull request #357 from jpartlow/issue/master/qeng-923-ensure-platform-codename
+
+(QENG-923) Ensure @codename is set if platform string has codename
+```
+* (QENG-924) Fix Beaker::DSL::EZBakeUtils.conditionally_clone (b6cd1ac6)
+
+
+```
+(QENG-924) Fix Beaker::DSL::EZBakeUtils.conditionally_clone
+
+Fetch from origin then checkout the origin HEAD.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-923) Ensure @codename is set if platform string has codename (26724829)
+
+
+```
+(QENG-923) Ensure @codename is set if platform string has codename
+
+Beaker 1.14.0 and up has a change to Beaker::Platform which ensures that
+@version and @codename is set if the platform string contains the
+version number, and that @version is set if platform string contains the
+codename, but it fails to set the @codename in this later case.
+
+Puppet currently has debian/ubuntu configs checked (used in ci) which
+use platform strings of the form debian-wheezy-x86_64. We could change
+these, but it looks like the intention of the Beaker::Platform object is
+to provide @version and @codename (where codenames are used).
+
+This patch ensures that @codename is set along with @version in these
+cases.
+```
+* Merge pull request #356 from anodelman/utf-8-encoding (842a0d99)
+
+
+```
+Merge pull request #356 from anodelman/utf-8-encoding
+
+(QENG-912) Beaker 1.14 breaks PE Puppet Acceptance
+```
+* Merge pull request #354 from anodelman/scp-repair (6e0261f2)
+
+
+```
+Merge pull request #354 from anodelman/scp-repair
+
+(QENG-6) Beaker DSL `scp_*` commands print the options hash as if...
+```
+* (QENG-912) Beaker 1.14 breaks PE Puppet Acceptance (928fad7f)
+
+
+```
+(QENG-912) Beaker 1.14 breaks PE Puppet Acceptance
+
+- was too conservative in removing non utf-8 compliant characters -
+  ended up removing compliant characters along with undef/invalid
+  character codes
+- tested locally and it preserved messages like:
+/etc/puppet/modules
+├── jimmy-appleseed (v1.1.0)
+├── jimmy-crakorn (v0.4.0)
+└── jimmy-thelock (v1.0.0)
+- correctly removed actual undef/invalid characters so that string
+  methods can be run (ie, split, gsub)
+```
+* Merge pull request #338 from anodelman/add-history (9e6acd2e)
+
+
+```
+Merge pull request #338 from anodelman/add-history
+
+(QENG-849) beaker should maintain a history file that provides...
+```
+* (QENG-6) Beaker DSL `scp_*` commands print the options hash as if... (9aca3a1d)
+
+
+```
+(QENG-6) Beaker DSL `scp_*` commands print the options hash as if...
+
+... it were executed on the command line
+- simply remove the option hash from the debug line, it isn't
+  appropriate there.
+```
+* (QENG-849) beaker should maintain a history file that provides... (04bf6d4f)
+
+
+```
+(QENG-849) beaker should maintain a history file that provides...
+
+...information per gem release
+
+- generate a markdown history file from beaker git log
+```
+* (QENG-188) Allow foss runs to use service scripts (881311ab)
+
+
+```
+(QENG-188) Allow foss runs to use service scripts
+
+Prior to this commit, any run of beaker with a non-pe master that
+attempted to stand up a master with a particular configuration in order
+to test against it using the with_puppet_running_on() helper would
+always stand up a webrick master by executing `puppet master <args>` and
+then later stop it with `kill`.
+
+The platform team needs to be able to run acceptance suites in which the
+puppetmaster is started/stopped using package provided init scripts, or
+by restarting apache if a passenger puppetmaster package is installed.
+
+This PR makes a few additions to OptionsHash, Host and the DSL::Helpers
+to allow us to distinguish foss hosts which were spun up from source
+from those which were installed from packages.  And if we are working
+with packages, whether we will be attempting to restart a running
+service or stop/start using service scripts.
+```
+### <a name = "beaker1.15.0">beaker1.15.0 - 8 Jul, 2014 (82bb4ef9)
+
+* Merge pull request #353 from anodelman/make-gem (82bb4ef9)
+
+
+```
+Merge pull request #353 from anodelman/make-gem
+
+(HISTORY) generate history file for beaker 1.15.0
+```
+* (HISTORY) generate history file for beaker 1.15.0 (bd77ab99)
 
 * Merge pull request #351 from anodelman/make-gem (cc636ca0)
 
