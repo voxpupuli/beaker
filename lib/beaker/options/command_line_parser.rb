@@ -30,7 +30,6 @@ module Beaker
           opts.on '--type TYPE',
                   'one of git, foss, or pe',
                   'used to determine underlying path structure of puppet install',
-                  "'git' assumes a foss source checkout, while 'foss' assumes packages with service scripts have been installed",
                   '(default pe)' do |type|
             @cmd_options[:type] = type
           end

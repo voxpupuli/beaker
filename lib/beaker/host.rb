@@ -137,23 +137,6 @@ module Beaker
       @options.is_pe?
     end
 
-    def is_foss_source?
-      @options.is_foss_source?
-    end
-
-    def is_foss_package?
-      @options.is_foss_package?
-    end
-
-    # True if this is a pe run, or a foss packages run.
-    def is_installed_as_a_packaged_service?
-      !is_foss_source?
-    end
-
-    def is_using_passenger?
-      is_pe? || (is_foss_package? && self['puppetservice'] == 'apache2')
-    end
-
     def log_prefix
       if @defaults['vmhostname']
         "#{self} (#{@name})"
