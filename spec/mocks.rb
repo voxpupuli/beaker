@@ -61,7 +61,6 @@ class FakeHost
 
   def initialize(options = {})
     @pe = options[:pe]
-    @foss_packaged = options[:foss_packaged]
     @options = options[:options]
     @commands = []
   end
@@ -72,10 +71,6 @@ class FakeHost
 
   def is_pe?
     @pe
-  end
-
-  def is_installed_as_a_packaged_service?
-    @foss_packaged || @pe
   end
 
   def [](name)

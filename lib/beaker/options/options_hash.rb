@@ -42,38 +42,13 @@ module Beaker
 
       # Determine if type of ObjectHash is pe, defaults to true
       #
-      # @example Use this method to test if the :type setting is pe
+      # @example Use this method to return the value for a given key
       #     a['type'] = 'pe'
       #     a.is_pe? == true
       #
       # @return [Boolean]
       def is_pe?
         self[:type] ? self[:type] =~ /pe/ : true
-      end
-
-      # Determine if the type of ObjectHash indicates a foss source checkout
-      # installation.
-      #
-      # @example When the 'type' setting is 'git', the expectation is that
-      #   Puppet will have been installed from source:
-      #     a['type'] = 'git'
-      #     a.is_foss_source? == true
-      #
-      # @return [Boolean]
-      def is_foss_source?
-        self[:type] == 'git'
-      end
-
-      # Determine if the ObjectHash indicates a foss package installation.
-      #
-      # @example When the 'type' setting is 'foss', the expectation is that
-      #   Puppet will have been installed from packages:
-      #     a['type'] = 'foss'
-      #     a.is_foss_package? == true
-      #
-      # @return [Boolean]
-      def is_foss_package?
-        self[:type] == 'foss'
       end
 
       # Determine if key is stored in ObjectHash
