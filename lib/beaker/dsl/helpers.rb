@@ -526,7 +526,7 @@ module Beaker
         cmdline_args = conf_opts[:__commandline_args__]
         conf_opts = conf_opts.reject { |k,v| k == :__commandline_args__ }
 
-        curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries'] || 0
+        curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
         logger.debug "Setting curl retries to #{curl_retries}"
 
         begin
@@ -1200,7 +1200,7 @@ module Beaker
         module_name = nil
         if File.exists?("#{root_module_dir}/metadata.json")
           logger.debug "Attempting to parse Modulename from metadata.json"
-          module_json = JSON.parse (File.read "#{root_module_dir}/metadata.json")
+          module_json = JSON.parse(File.read "#{root_module_dir}/metadata.json")
           if(module_json.has_key?('name'))
             module_name = get_module_name(module_json['name'])
           end

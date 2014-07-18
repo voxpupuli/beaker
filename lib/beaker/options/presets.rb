@@ -63,6 +63,7 @@ module Beaker
           :forge_host          => 'vulcan-acceptance.delivery.puppetlabs.net',
           :log_level           => 'verbose',
           :trace_limit         => 10,
+          :"master-start-curl-retries" => 0,
           :hosts_file          => 'sample.cfg',
           :options_file        => nil,
           :type                => 'pe',
