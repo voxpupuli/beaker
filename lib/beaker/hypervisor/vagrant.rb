@@ -43,7 +43,7 @@ module Beaker
         end
 
         if ENV['VB_GUEST_PLUGIN_DISABLE']
-          v_file << "    v.vbguest.auto_update = false"
+          v_file << "    v.vbguest.auto_update = false\n"
         end
 
         if /windows/i.match(host['platform'])
