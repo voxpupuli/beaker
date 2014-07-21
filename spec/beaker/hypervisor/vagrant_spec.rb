@@ -70,7 +70,7 @@ module Beaker
       path = vagrant.instance_variable_get( :@vagrant_path )
       vagrant.stub( :randmac ).and_return( "0123456789" )
 
-      stub_const('ENV', {'VB_GUEST_PLUGIN_DISABLE' => 'true'})
+      stub_const('ENV', {'BEAKER_VB_GUEST_PLUGIN' => 'disable'})
 
       vagrant.make_vfile( @hosts )
 

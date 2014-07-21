@@ -42,7 +42,7 @@ module Beaker
           v_file << "    end\n"
         end
 
-        if ENV['BEAKER_VB_GUEST_PLUGIN_DISABLE']
+        if @options[:vbguest_plugin] == 'disable'
           v_file << "    v.vbguest.auto_update = false\n"
         end
 
