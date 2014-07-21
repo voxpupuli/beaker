@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Beaker
   describe Vagrant do
-    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
+    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object, :hosts_file => 'sample.cfg' }) }
     let( :vagrant ) { Beaker::Vagrant.new( @hosts, options ) }
 
     before :each do

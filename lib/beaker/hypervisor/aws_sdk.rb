@@ -10,6 +10,8 @@ module Beaker
   # It is built for full control, to reduce any other layers beyond the pure
   # vendor API.
   class AwsSdk < Beaker::Hypervisor
+    ZOMBIE = 3 #anything older than 3 hours is considered a zombie
+
     # Initialize AwsSdk hypervisor driver
     #
     # @param [Array<Beaker::Host>] hosts Array of Beaker::Host objects
@@ -81,6 +83,32 @@ module Beaker
       end
 
       nil #void
+    end
+
+    #Shutdown and destroy ec2 instances idenfitied by key that have been alive longer than ZOMBIE hours.
+    #@param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
+    #@param [String] key The key_name to match for
+    def kill_zombies(max_age = ZOMBIE, key = key_name)
+      @logger.notify("aws-sdk: Kill Zombies!")
+      #examine all available regions
+      @ec2.regions.each do |region|
+        @logger.debug "Reviewing: #{region.name}"
+        @ec2.regions[region.name].instances.each do |instance|
+          if (instance.key_name =~ /#{key}/) and (instance.launch_time + (ZOMBIE*60*60)) < Time.now and instance.status.to_s !~ /terminated/
+            @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
+            instance.terminate()
+          end
+        end
+        # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
+        # This simply looks for EBS volumes that are not in use
+        @ec2.regions[region.name].volumes.each do |vol|
+          if ( vol.status.to_s =~ /available/ )
+            @logger.debug "Tear down available volume: #{vol.id}"
+            vol.delete()
+          end
+        end
+      end
+
     end
 
     # Launch all nodes

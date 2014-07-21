@@ -20,6 +20,11 @@ module Beaker
         expect(config['consoleport']).to be === 443
       end
 
+      it "returns empty configuration when no file provided" do
+        FakeFS.deactivate!
+        expect(parser.parse_hosts_file()).to be === { :HOSTS => {} }
+      end
+
       it "raises an error on no file found" do
         FakeFS.deactivate!
         expect{parser.parse_hosts_file("not a valid path")}.to raise_error(ArgumentError)
