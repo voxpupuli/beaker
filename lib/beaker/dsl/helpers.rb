@@ -547,9 +547,8 @@ module Beaker
 
         ensure
           begin
-            restore_puppet_conf_from_backup( host, backup_file )
-
             if host['puppetservice']
+              restore_puppet_conf_from_backup( host, backup_file )
               bounce_service( host, host['puppetservice'], curl_retries )
             else
               if puppet_master_started
@@ -557,6 +556,7 @@ module Beaker
               else
                 dump_puppet_log(host)
               end
+              restore_puppet_conf_from_backup( host, backup_file )
             end
 
           rescue Exception => teardown_exception
@@ -1200,7 +1200,7 @@ module Beaker
         module_name = nil
         if File.exists?("#{root_module_dir}/metadata.json")
           logger.debug "Attempting to parse Modulename from metadata.json"
-          module_json = JSON.parse (File.read "#{root_module_dir}/metadata.json")
+          module_json = JSON.parse(File.read "#{root_module_dir}/metadata.json")
           if(module_json.has_key?('name'))
             module_name = get_module_name(module_json['name'])
           end

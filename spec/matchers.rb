@@ -1,5 +1,4 @@
 RSpec::Matchers.define :execute_commands_matching do |pattern|
-
   match do |actual|
     raise(RuntimeError, "Expected #{actual} to be a FakeHost") unless actual.kind_of?(FakeHost)
     @found_count = actual.command_strings.grep(pattern).size
@@ -18,7 +17,6 @@ RSpec::Matchers.define :execute_commands_matching do |pattern|
 
   chain :once do
     @times = 1
-    # clarity only
   end
 
   def message(actual, pattern, times, found_count)
@@ -35,5 +33,35 @@ RSpec::Matchers.define :execute_commands_matching do |pattern|
 
   failure_message_for_should_not do |actual|
     "Unexpectedly found #{message(actual, pattern, @times, @found_count)}"
+  end
+end
+
+RSpec::Matchers.define :execute_commands_matching_in_order do |*patterns|
+  match do |actual|
+    raise(RuntimeError, "Expected #{actual} to be a FakeHost") unless actual.kind_of?(FakeHost)
+
+    remaining_patterns = patterns.clone
+    actual.command_strings.each do |line|
+      if remaining_patterns.empty?
+        break
+      elsif remaining_patterns.first.match(line)
+        remaining_patterns.shift
+      end
+    end
+
+    remaining_patterns.empty?
+  end
+
+  def message(actual, patterns)
+    msg = "#{patterns.join(', ')} in order" +
+      " in:\n #{actual.command_strings.pretty_inspect}"
+  end
+
+  failure_message_for_should do |actual|
+    "Expected to find #{message(actual, patterns)}"
+  end
+
+  failure_message_for_should_not do |actual|
+    "Unexpectedly found #{message(actual, patterns)}"
   end
 end
