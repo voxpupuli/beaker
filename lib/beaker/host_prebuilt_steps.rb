@@ -11,6 +11,7 @@ module Beaker
     UNIX_PACKAGES = ['curl', 'ntpdate']
     WINDOWS_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
+    DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -68,7 +69,8 @@ module Beaker
 
     #Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
     #install them.  Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
-    #{HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows
+    #{HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts, #{HostPrebuiltSteps::DEBIAN_PACKAGES on debian platform
+    #hosts and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows
     #platforms.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -85,13 +87,19 @@ module Beaker
               host.install_package pkg
             end
           end
+        when host['platform'] =~ /debian/
+          DEBIAN_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
         when host['platform'] =~ /windows/
           WINDOWS_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
           end
-        when host['platform'] !~ /aix|solaris|windows|sles-|osx-/
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-/
           UNIX_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
