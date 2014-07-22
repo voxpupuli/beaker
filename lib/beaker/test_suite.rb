@@ -155,6 +155,20 @@ module Beaker
         text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
       end
 
+      # Escape invalid XML UTF-8 codes from provided string, see http://www.w3.org/TR/xml/#charsets for valid
+      # character specification
+      # @param [String] string The string to remove invalid codes from
+      def escape_invalid_xml_chars string
+        re = /\u0009|\u000A|\u000D|[\u0020-\uD7FF]|[\uE000-\uFFFD]|[\u10000-\u10FFFF]/
+        return string.chars.map{|i| i =~ re ? i : "\\#{i.unpack("U*").join}"}.join
+      end
+
+      # Remove color codes and invalid XML characters from provided string
+      # @param [String] string The string to format
+      def format_cdata string
+        escape_invalid_xml_chars(strip_color_codes(string))
+      end
+
       #Format and print the {TestSuiteResult} as JUnit XML
       #@param [String] xml_file The full path to print the output to.
       #@param [String] stylesheet The full path to a JUnit XML stylesheet
@@ -178,7 +192,8 @@ module Beaker
             end
           else
             #no existing file, create a new one
-            doc = Nokogiri::XML::Document.new
+            doc = Nokogiri::XML::Document.new()
+            doc.encoding = 'UTF-8'
             pi = Nokogiri::XML::ProcessingInstruction.new(doc, "xml-stylesheet", "type=\"text/xsl\" href=\"#{File.basename(stylesheet)}\"")
             pi.parent = doc
             suites = Nokogiri::XML::Node.new('testsuites', doc)
@@ -217,7 +232,8 @@ module Beaker
               status['type'] =  test.test_status.to_s
               if test.exception then
                 status['message'] = test.exception.to_s.gsub(/\e/, '')
-                status.add_child(status.document.create_cdata(test.exception.backtrace.join('\n')))
+                data = format_cdata(test.exception.backtrace.join('\n'))
+                status.add_child(status.document.create_cdata(data))
               end
               item.add_child(status)
             end
@@ -236,13 +252,15 @@ module Beaker
 
             if test.sublog then
               stdout = Nokogiri::XML::Node.new('system-out', doc)
-              stdout.add_child(stdout.document.create_cdata(strip_color_codes(test.sublog)))
+              data = format_cdata(test.sublog)
+              stdout.add_child(stdout.document.create_cdata(data))
               item.add_child(stdout)
             end
 
             if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty? then
               stderr = Nokogiri::XML::Node.new('system-err', doc)
-              stderr.add_child(stderr.document.create_cdata(strip_color_codes(test.last_result.stderr)))
+              data = format_cdata(test.last_result.stderr)
+              stderr.add_child(stderr.document.create_cdata(data))
               item.add_child(stderr)
             end
 
