@@ -94,6 +94,7 @@ module Beaker
       @ssh.loop
 
       result.finalize!
+      @logger.last_result = result
       result
     end
 
