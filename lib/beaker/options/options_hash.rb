@@ -98,7 +98,7 @@ module Beaker
       def rmerge base, hash
         return base unless hash.is_a?(Hash) || hash.is_a?(OptionsHash)
         hash.each do |key, v|
-          if (base[key].is_a?(Hash) || base[key].is_a?(OptionsHash)) && (hash[key].is_a?(Hash) || has[key].is_a?(OptionsHash))
+          if (base[key].is_a?(Hash) || base[key].is_a?(OptionsHash)) && (hash[key].is_a?(Hash) || hash[key].is_a?(OptionsHash))
             rmerge(base[key], hash[key])
           elsif hash[key].is_a?(Hash)
             base[key] = OptionsHash.new.merge(hash[key])
