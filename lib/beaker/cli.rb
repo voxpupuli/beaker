@@ -108,9 +108,10 @@ module Beaker
           end
         end
 
-        @logger.error "\nFailed to execute tests!\n"
         print_reproduction_info( :error )
 
+        @logger.error "Failed running the test suite."
+        puts ''
         exit 1
       else
         #cleanup on success
@@ -120,7 +121,10 @@ module Beaker
             @network_manager.cleanup
           end
         end
-        print_reproduction_info( :debug ) if @logger.is_debug?
+
+        if @logger.is_debug?
+          print_reproduction_info( :debug )
+        end
       end
     end
 
@@ -138,7 +142,45 @@ module Beaker
       ).run_and_raise_on_failure
     end
 
+    # @see print_env_vars_affecting_beaker & print_command_line
     def print_reproduction_info( log_level = :debug )
+      print_command_line( log_level )
+      print_env_vars_affecting_beaker( log_level )
+    end
+
+    # Prints Environment variables affecting the beaker run (those that
+    # beaker introspects + the ruby env that beaker runs within)
+    # @param [Symbol] log_level The log level (coloring) to print the message at
+    # @example Print pertinent env vars using error leve reporting (red)
+    #     print_env_vars_affecting_beaker :error
+    #
+    # @return nil
+    def print_env_vars_affecting_beaker( log_level )
+      beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT_SPEC.values
+      non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
+      important_env_vars = beaker_env_vars + non_beaker_env_vars
+      env_var_map = important_env_vars.inject({}) do |memo, possibly_set_vars|
+        set_var = Array(possibly_set_vars).detect {|possible_var| ENV[possible_var] }
+        memo[set_var] = ENV[set_var] if set_var
+        memo
+      end
+
+      puts ''
+      @logger.send( log_level, "Important ENV variables that may have affected your run:" )
+      env_var_map.each_pair do |var, value|
+        @logger.send( log_level, "    #{var}\t\t#{value}" )
+      end
+      puts ''
+    end
+
+    # Prints the command line that can be called to reproduce this run
+    # (assuming the environment is the same)
+    # @param [Symbol] log_level The log level (coloring) to print the message at
+    # @example Print pertinent env vars using error leve reporting (red)
+    #     print_command_line :error
+    #
+    # @return nil
+    def print_command_line( log_level = :debug )
       puts ''
       @logger.send(log_level, "You can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
