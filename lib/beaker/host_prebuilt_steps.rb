@@ -365,7 +365,7 @@ module Beaker
     def disable_iptables host, opts
       logger = opts[:logger]
       if host.is_a? Array
-        host.map { |h| copy_ssh_to_root(h, opts) }
+        host.map { |h| disable_iptables(h, opts) }
       else
         if host['platform'] =~ /centos|el-|redhat|fedora/
           logger.debug("Disabling iptables on #{host.name}")
