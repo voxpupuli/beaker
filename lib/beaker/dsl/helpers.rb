@@ -405,31 +405,14 @@ module Beaker
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
       #   this test case after confinement.
       def confine(type, criteria, host_array = nil, &block)
-        provided_hosts = host_array ? true : false
         hosts_to_modify = host_array || hosts
-        criteria.each_pair do |property, value|
-          case type
-          when :except
-            hosts_to_modify = hosts_to_modify.reject do |host|
-              inspect_host host, property, value
-            end
-            if block_given?
-              hosts_to_modify = hosts_to_modify.reject do |host|
-                yield host
-              end
-            end
-          when :to
-            hosts_to_modify = hosts_to_modify.select do |host|
-              inspect_host host, property, value
-            end
-            if block_given?
-              hosts_to_modify = hosts_to_modify.select do |host|
-                yield host
-              end
-            end
-          else
-            raise "Unknown option #{type}"
-          end
+        case type
+        when :except
+          hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
+        when :to
+          hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+        else
+          raise "Unknown option #{type}"
         end
         if hosts_to_modify.empty?
           logger.warn "No suitable hosts with: #{criteria.inspect}"
@@ -454,6 +437,39 @@ module Beaker
         ensure
           self.hosts = original_hosts
         end
+      end
+
+      #Return a set of hosts that meet the given criteria
+      # @param [Hash{Symbol,String=>String,Regexp,Array<String,Regexp>}]
+      #   criteria Specify the criteria with which a host should be
+      #   considered for inclusion.  The key is any attribute
+      #   of the host that will be yielded by {Beaker::Host#[]}.
+      #   The value can be any string/regex or array of strings/regexp.
+      #   The values are compared using [Enumerable#any?] so that if one
+      #   value of an array matches the host is considered a match for that
+      #   criteria.
+      # @param [Array<Host>] host_array This creatively named parameter is
+      #   an optional array of hosts to confine to.  If not passed in, this
+      #   method will modify {Beaker::TestCase#hosts} in place.
+      # @param [Proc] block Addition checks to determine suitability of hosts
+      #   for selection.  Each host that is still valid after checking
+      #   *criteria* is then passed in turn into this block.  The block
+      #   should return true if the host matches this additional criteria.
+      #
+      # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
+      def select_hosts(criteria, host_array = nil, &block)
+        hosts_to_select_from = host_array || hosts
+        criteria.each_pair do |property, value|
+          hosts_to_select_from = hosts_to_select_from.select do |host|
+            inspect_host host, property, value
+          end
+        end
+        if block_given?
+          hosts_to_select_from = hosts_to_select_from.select do |host|
+            yield host
+          end
+        end
+        hosts_to_select_from
       end
 
       # @!visibility private

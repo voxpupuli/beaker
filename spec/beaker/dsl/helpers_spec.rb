@@ -384,6 +384,43 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#select_hosts' do
+    let(:logger) { double.as_null_object }
+    before do
+      subject.stub( :logger ).and_return( logger )
+    end
+
+    it 'it returns an empty array if there are no applicable hosts' do
+      hosts = [ {'thing' => 'foo'}, {'thing' => 'bar'} ]
+
+      expect(subject.select_hosts( {'thing' => 'nope'}, hosts )).to be == []
+    end
+
+    it 'selects hosts that match a list of criteria' do
+      hosts = [ {'thing' => 'foo'}, {'thing' => 'bar'}, {'thing' => 'baz'} ]
+
+      expect(subject.select_hosts( {:thing => ['foo', 'baz']}, hosts )).to be == [ {'thing' => 'foo'}, {'thing' => 'baz'} ]
+    end
+
+    it 'selects hosts when a passed block returns true' do
+      host1 = {'platform' => 'solaris1'}
+      host2 = {'platform' => 'solaris2'}
+      host3 = {'platform' => 'windows'}
+      ret1 = (Struct.new('Result1', :stdout)).new(':global')
+      ret2 = (Struct.new('Result2', :stdout)).new('a_zone')
+      hosts = [ host1, host2, host3 ]
+      subject.should_receive( :hosts ).and_return( hosts )
+
+      subject.should_receive( :on ).with( host1, '/sbin/zonename' ).once.and_return( ret1 )
+      subject.should_receive( :on ).with( host2, '/sbin/zonename' ).once.and_return( ret2 )
+
+      selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
+                             subject.on(host, '/sbin/zonename').stdout =~ /:global/
+      end
+      expect( selected_hosts ).to be == [ host1 ]
+    end
+  end
+
   describe '#apply_manifest_on' do
     it 'calls puppet' do
       subject.should_receive( :create_remote_file ).and_return( true )
