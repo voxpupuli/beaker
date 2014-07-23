@@ -61,6 +61,27 @@ module Beaker
       expect( hypervisor.create( 'blimpy', [], make_opts() ) ).to be === blimpy
     end
 
+    context "#configure" do
+      let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
+      let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
+      let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
+
+      context "if :disable_iptables option set false" do
+        it "does not call disable_iptables" do
+          options[:disable_iptables] = false
+          hypervisor.should_receive( :disable_iptables ).never
+          hypervisor.configure
+        end
+      end
+
+      context "if :disable_iptables option set true" do
+        it "calls disable_iptables once" do
+          hypervisor.should_receive( :disable_iptables ).exactly( 1 ).times
+          hypervisor.configure
+        end
+      end
+
+    end
 
   end
 end
