@@ -405,7 +405,7 @@ module Beaker
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
-        on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
+        on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
       end
 
       #Perform a Puppet Enterprise upgrade or install

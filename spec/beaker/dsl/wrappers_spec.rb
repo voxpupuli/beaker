@@ -5,12 +5,13 @@ class ClassMixedWithDSLWrappers
 end
 
 describe ClassMixedWithDSLWrappers do
-  let(:opts)  { {'ENV' => default_opts} }
-  let(:default_opts) { Beaker::Command::DEFAULT_GIT_ENV }
+  let(:opts)       { {'ENV' => { :HOME => "/"}, :cmdexe => true } }
+  let(:empty_opts) { {'ENV' => {}, :cmdexe => true } }
+
   describe '#facter' do
     it 'should split out the options and pass "facter" as first arg to Command' do
       Beaker::Command.should_receive( :new ).
-        with('facter', [ '-p' ], opts)
+        with('facter', [ '-p' ], empty_opts)
       subject.facter( '-p' )
     end
   end
@@ -18,15 +19,14 @@ describe ClassMixedWithDSLWrappers do
   describe '#hiera' do
     it 'should split out the options and pass "hiera" as first arg to Command' do
       Beaker::Command.should_receive( :new ).
-        with('hiera', [ '-p' ], opts)
-      subject.hiera( '-p' )
+        with('hiera', [ '-p' ], empty_opts)
+      subject.hiera( '-p')
     end
   end
 
   describe '#puppet' do
     it 'should split out the options and pass "puppet <blank>" to Command' do
-      merged_opts = {}
-      merged_opts['ENV'] = {:HOME => '/'}.merge( default_opts )
+      merged_opts = opts
       merged_opts[:server] = 'master'
       Beaker::Command.should_receive( :new ).
         with('puppet agent', [ '-tv' ], merged_opts)

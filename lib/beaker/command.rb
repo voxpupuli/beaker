@@ -5,24 +5,6 @@ module Beaker
   # @api public
   class Command
 
-    DEFAULT_GIT_RUBYLIB = {
-      :default => [],
-      :host => %w(hieralibdir hierapuppetlibdir
-                  pluginlibpath puppetlibdir
-                  facterlibdir),
-      :opts => { :additive => true,
-                 :separator => {:host => 'pathseparator' }
-      }
-    }
-
-    DEFAULT_GIT_PATH = {
-      :default => [],
-      :host => %w(puppetbindir facterbindir hierabindir),
-      :opts => { :additive => true, :separator => ':' }
-    }
-
-    DEFAULT_GIT_ENV = { :PATH => DEFAULT_GIT_PATH, :RUBYLIB => DEFAULT_GIT_RUBYLIB }
-
     # A string representing the (possibly) incomplete command
     attr_accessor :command
 
@@ -67,6 +49,7 @@ module Beaker
       @options = options
       @args    = args
       @environment = {}
+      @cmdexe = @options.delete(:cmdexe) || false
 
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
@@ -87,8 +70,10 @@ module Beaker
     def cmd_line host, cmd = @command, env = @environment
       env_string = env.nil? ? '' : environment_string_for( host, env )
 
+      cygwin = ((host['platform'] =~ /windows/) and @cmdexe) ? 'cmd.exe /c' : nil
+
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      "#{env_string} #{cmd} #{options_string} #{args_string}"
+      [env_string, cygwin, cmd, options_string, args_string].compact.reject(&:empty?).join(' ')
     end
 
     # @param [Hash] opts These are the options that the command takes
@@ -133,7 +118,7 @@ module Beaker
       args.flatten.compact.join(' ')
     end
 
-    # Determine the appropriate env commands for the given host.
+    # Construct the environment string for this command
     #
     # @param [Host]                 host  A Host object
     # @param [Hash{String=>String}] env   An optional Hash containing
@@ -152,96 +137,29 @@ module Beaker
     #       given a generic Command.
     def environment_string_for host, env
       return '' if env.empty?
-
-      env_array = parse_env_hash_for( host, env ).compact
-      
-      if host['platform'] =~ /windows/
-        cmd = 'cmd.exe /c'
-        
-        case host['communicator']
-          when /bitvise/
-            environment_string = ''
-            env_array.each_with_index do |env|
-              environment_string += "set #{env} && "
-            end
-            environment_string
-          else
-            env_array << cmd if cmd
-            environment_string = env_array.join(' ')
-            "env #{environment_string}"
+      env_array = []
+      env.each_key do |key|
+        val = env[key]
+        if val.is_a?(Array)
+          val = val.join(':')
+        else
+          val = val.to_s
         end
+        env_array << "#{key.to_s.upcase}=\"#{val}\""
+      end
+
+      if host['communicator'] =~ /bitvise/
+        environment_string = ''
+        env_array.each_with_index do |env|
+          environment_string += "set #{env} && "
+        end
+        environment_string
       else
-        cmd = nil
         environment_string = env_array.join(' ')
         "env #{environment_string}"
       end
     end
 
-    # @!visibility private
-    def parse_env_hash_for( host, env = @environment )
-      # I needlessly love inject
-      env.inject([]) do |array_of_parsed_vars, key_and_value|
-        variable, val_in_unknown_format = *key_and_value
-        if val_in_unknown_format.is_a?(Hash)
-          value = val_in_unknown_format
-        elsif val_in_unknown_format.is_a?(Array)
-          value = { :default => val_in_unknown_format }
-        else
-          value = { :default => [ val_in_unknown_format.to_s ] }
-        end
-
-        var_settings = ensure_correct_structure_for( value )
-        # any default array of variable values ( like [ '/bin', '/usr/bin' ] for PATH )
-        default_values = var_settings[:default]
-
-        # host specific values, ie :host => [ 'puppetlibdir' ] is evaluated to
-        # an array with whatever host['puppetlibdir'] is
-        host_values = var_settings[:host].map { |attr| host[attr] }
-
-        # the two arrays are combined with host specific values first
-        var_array = ( host_values + default_values ).compact
-
-        # This will add the name of the variable, so :PATH => { ... }
-        # gets '${PATH}' appended to it if the :additive opt is passed
-        if host['communicator'] =~ /bitvise/
-          var_array << "%#{variable}%" if var_settings[:opts][:additive]
-        else
-          var_array << "${#{variable}}" if var_settings[:opts][:additive]
-        end
-
-        # This is stupid, but because we're using cygwin we sometimes need to use
-        # ':' and sometimes ';' on windows as a separator
-        attr_string = join_env_vars_for( var_array, host, var_settings[:opts][:separator] )
-        if host['communicator'] =~ /bitvise/
-          var_string = attr_string.empty? ? nil : %Q[#{variable}=#{attr_string}]
-        else
-          var_string = attr_string.empty? ? nil : %Q[#{variable}="#{attr_string}"]
-        end
-
-        # Now we append this to our accumulator array ie [ 'RUBYLIB=....', 'PATH=....' ]
-        array_of_parsed_vars << var_string
-
-        array_of_parsed_vars
-      end
-    end
-
-    # @!visibility private
-    def ensure_correct_structure_for( settings )
-      structure = { :default => [],
-        :host => [],
-        :opts => {}
-      }.merge( settings )
-      structure[:opts][:separator] ||= ':'
-      structure
-    end
-
-    # @!visibility private
-    def join_env_vars_for( array_of_variables, host, separator = ':' )
-      if separator.is_a?( Hash )
-        separator = host[separator[:host]]
-      end
-      array_of_variables.join( separator )
-    end
   end
 
   class PuppetCommand < Command
@@ -249,7 +167,7 @@ module Beaker
       command = "puppet #{args.shift}"
       opts = args.last.is_a?(Hash) ? args.pop : Hash.new
       opts['ENV'] ||= Hash.new
-      opts['ENV'] = opts['ENV'].merge( DEFAULT_GIT_ENV )
+      opts[:cmdexe] = true
       super( command, args, opts )
     end
   end

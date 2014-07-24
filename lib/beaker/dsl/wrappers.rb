@@ -16,7 +16,7 @@ module Beaker
       def facter(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
-        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
+        options[:cmdexe] = true
         Command.new('facter', args, options )
       end
 
@@ -28,7 +28,7 @@ module Beaker
       def hiera(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
-        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
+        options[:cmdexe] = true
         Command.new('hiera', args, options )
       end
 
@@ -49,7 +49,7 @@ module Beaker
       def puppet(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
-        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
+        options[:cmdexe] = true
         # we assume that an invocation with `puppet()` will have it's first argument
         # a face or sub command
         cmd = "puppet #{args.shift}"
