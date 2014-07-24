@@ -277,7 +277,7 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#create_tmpdir_for_user' do
-    let(:host) { double.as_null_object }
+    let(:host) { {} }
     let(:result) { double.as_null_object }
 
     before :each do
@@ -291,9 +291,10 @@ describe ClassMixedWithDSLHelpers do
       context 'with no path name argument' do
         context 'without puppet installed on host' do
           it 'raises an error' do
-            allow(host).to receive(:tmpdir).and_return("tmpdirname")
+            cmd = "the command"
             allow(result).to receive(:exit_code).and_return(1)
-            expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+            expect(Beaker::Command).to receive(:new).with(/puppet master --configprint user/, [], {"ENV"=>{}, :cmdexe=>true}).and_return(cmd)
+            expect(subject).to receive(:on).with(host, cmd).and_return(result)
             expect{
               subject.create_tmpdir_for_user host
             }.to raise_error(RuntimeError, /`puppet master --configprint` failed,/)
@@ -301,7 +302,9 @@ describe ClassMixedWithDSLHelpers do
         end
         context 'with puppet installed on host' do
           it 'executes chown once' do
-            expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+            cmd = "the command"
+            expect(Beaker::Command).to receive(:new).with(/puppet master --configprint user/, [], {"ENV"=>{}, :cmdexe=>true}).and_return(cmd)
+            expect(subject).to receive(:on).with(host, cmd).and_return(result)
             expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
             expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
             expect(subject).to receive(:on).with(host, /chown puppet.puppet.*/)
@@ -312,7 +315,9 @@ describe ClassMixedWithDSLHelpers do
 
       context 'with path name argument' do
         it 'executes chown once' do
-          expect(subject).to receive(:on).with(host, /^puppet.*/).and_return(result)
+          cmd = "the command"
+          expect(Beaker::Command).to receive(:new).with(/puppet master --configprint user/, [], {"ENV"=>{}, :cmdexe=>true}).and_return(cmd)
+          expect(subject).to receive(:on).with(host, cmd).and_return(result)
           expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
           expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
           expect(subject).to receive(:on).with(host, /chown puppet.puppet \/tmp\/bogus.*/)

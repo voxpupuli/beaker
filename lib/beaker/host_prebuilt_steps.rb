@@ -391,6 +391,118 @@ module Beaker
       end
     end
 
+
+    # Merge the two provided hashes so that an array of values is created from collisions
+    # @param [Hash] h1 The first hash
+    # @param [Hash] h2 The second hash
+    # @return [Hash] A merged hash with arrays of values where collisions between the two hashes occured.
+    # @example
+    #   > h1 = {:PATH=>"/1st/path"}
+    #   > h2 = {:PATH=>"/2nd/path"}
+    #   > additive_hash_merge(h1, h2)
+    #   => {:PATH=>["/1st/path", "/2nd/path"]}
+    def additive_hash_merge h1, h2
+      merged_hash = {}
+      normalized_h2 = h2.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v; h }
+      h1.each_pair do |key, val|
+        normalized_key = key.to_s.upcase
+        if normalized_h2.has_key?(normalized_key)
+          merged_hash[key] = [h1[key], normalized_h2[normalized_key]]
+          merged_hash[key] = merged_hash[key].uniq #remove dupes
+        end
+      end
+      merged_hash
+    end
+
+    # 'echo' the provided value on the given host
+    # @param [Host] host The host to execute the 'echo' on
+    # @param [String] val The string to 'echo' on the host
+    def echo_on_host host, val
+      #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
+      host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
+    end
+
+    # Create the hash of default environment from host (:host_env), global options hash (:host_env) and default PE/Foss puppet variables
+    # @param [Host] host The host to construct the environment hash for, host specific environment should be in :host_env in a hash
+    # @param [Hash] opts Hash of options, including optional global  host_env to be applied to each provided host
+    # @return [Hash] A hash of environment variables for provided host
+    def construct_env host, opts
+      env = additive_hash_merge(host[:host_env], opts[:host_env])
+
+      #Add PATH and RUBYLIB
+
+      #prepend any PATH already set for this host
+
+      env['PATH'] = (%w(puppetbindir facterbindir hierabindir) << env['PATH']).compact.reject(&:empty?)
+      #get the PATH defaults
+      env['PATH'].map! { |val| host[val] }
+      env['PATH'] = env['PATH'].compact.reject(&:empty?)
+      #run the paths through echo to see if they have any subcommands that need processing
+      env['PATH'].map! { |val| echo_on_host(host, val) }
+
+      #prepend any RUBYLIB already set for this host
+      env['RUBYLIB'] =  (%w(hieralibdir hierapuppetlibdir pluginlibpath puppetlibdir facterlibdir) << env['RUBYLIB']).compact.reject(&:empty?)
+      #get the RUBYLIB defaults
+      env['RUBYLIB'].map! { |val| host[val] }
+      env['RUBYLIB'] = env['RUBYLIB'].compact.reject(&:empty?)
+      #run the paths through echo to see if they have any subcommands that need processing
+      env['RUBYLIB'].map! { |val| echo_on_host(host, val) }
+
+      env.each_key do |key|
+        env[key] = env[key].join(':')
+      end
+      env
+    end
+
+    # Add a host specific set of env vars to each provided host's ~/.ssh/environment
+    # @param [Host, Array<Host>] host One or more hosts to act upon
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    def set_env host, opts
+      logger = opts[:logger]
+
+      block_on host do |host|
+        env = construct_env(host, opts)
+        logger.debug("setting local environment on #{host.name}")
+        case host['platform']
+        when /windows/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/sshd_config"))
+          host.exec(Command.new("cygrunsrv -E sshd"))
+          host.exec(Command.new("cygrunsrv -S sshd"))
+          env['CYGWIN'] = 'nodosfilewarning'
+        when /osx/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/sshd_config"))
+          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
+          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
+        when /debian|ubuntu/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("service ssh restart"))
+        when /el-|centos|fedora|redhat|oracle|scientific/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("service sshd restart"))
+        when /sles/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("rcsshd restart"))
+        when /solaris/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("svcadm restart svc:/network/ssh:default"))
+        when /aix/
+          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("stopsrc -g ssh"))
+          host.exec(Command.new("startsrc -g ssh"))
+        end
+        #ensure that ~/.ssh/environment exists
+        host.exec(Command.new("touch #{host[:ssh_env_file]}"))
+        #add the constructed env vars to this host
+        host.add_env_var('RUBYLIB', '$RUBYLIB')
+        host.add_env_var('PATH', '$PATH')
+        env.each_pair do |var, value|
+          host.add_env_var(var, value)
+        end
+        #close the host to re-establish the connection with the new sshd settings
+        host.close
+      end
+    end
+
   end
 
 end

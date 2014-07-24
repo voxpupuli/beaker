@@ -262,7 +262,7 @@ module Beaker
       # @return [String] Returns the name of the newly-created file.
       def create_tmpdir_for_user(host, name='/tmp/beaker', user=nil)
         if not user
-          result = on(host, "puppet master --configprint user")
+          result = on host, puppet("master --configprint user")
           if not result.exit_code == 0
             raise "`puppet master --configprint` failed, check that puppet is installed on #{host} or explicitly pass in a user name."
           end

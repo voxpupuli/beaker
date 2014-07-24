@@ -42,54 +42,23 @@ module Beaker
     end
 
     describe '#environment_string_for' do
+      let(:host) { {'pathseparator' => ':'} }
+
       it 'returns a blank string if theres no env' do
-        expect( subject.environment_string_for({}, {}) ).to be == ''
+        expect( subject.environment_string_for(host, {}) ).to be == ''
       end
 
       it 'takes an env hash with var_name/value pairs' do
-        expect( subject.environment_string_for({}, {:HOME => '/'}) ).
-          to be == 'env HOME="/"'
+        expect( subject.environment_string_for(host, {:HOME => '/'}) ).
+          to be == "env HOME=\"/\""
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
-        expect( subject.environment_string_for({}, {:LD_PATH => ['/', '/tmp']}) ).
-          to be == 'env LD_PATH="/:/tmp"'
-      end
-
-      it 'takes var_names where there is an array of default values' do
-        env = {:PATH => { :default => [ '/bin', '/usr/bin' ] } }
-        expect( subject.environment_string_for({}, env) ).
-          to be == 'env PATH="/bin:/usr/bin"'
-
-      end
-
-      it 'takes var_names where there is an array of host specific values' do
-        host = { 'pe_path' => '/opt/puppet/bin', 'foss_path' => '/usr/bin' }
-        env = {:PATH => { :host => [ 'pe_path', 'foss_path' ] } }
-        expect( subject.environment_string_for( host, env ) ).
-          to be == 'env PATH="/opt/puppet/bin:/usr/bin"'
-
-      end
-      it 'when using an array of values it allows to specify the separator' do
-        host = { 'whoosits_separator' => ' **sparkles** ' }
-        env = {
-          :WHOOSITS => {
-            :default => [ 'whatsits', 'wonkers' ],
-            :opts => {:separator => {:host => 'whoosits_separator' } }
-          }
-        }
-        expect( subject.environment_string_for( host, env ) ).
-          to be == 'env WHOOSITS="whatsits **sparkles** wonkers"'
+        expect( subject.environment_string_for(host, {:LD_PATH => ['/', '/tmp']}) ).
+          to be == "env LD_PATH=\"/:/tmp\""
       end
     end
 
-    describe '#parse_env_hash_for' do
-      it 'has too many responsiblities' do
-        env = { :PATH => { :default => [ '/bin', '/usr/bin' ] } }
-        var_array = cmd.parse_env_hash_for host, env
-        expect( var_array ).to be == [ 'PATH="/bin:/usr/bin"' ]
-      end
-    end
   end
   describe HostCommand do
     let(:command) { @command || '/bin/ls' }
