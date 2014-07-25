@@ -143,11 +143,13 @@ module Beaker
     # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
     # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
+
     def epel_info_for host, opts
-      version = host['platform'].version
-      if not version
-        raise "epel_info_for not available for #{host.name} on platform #{host['platform']}"
+      if !['centos','scientific','redhat','el'].include?(host['platform'].variant)
+        raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
       end
+
+      version = host['platform'].version
       if version == '6'
         url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
         pkg = host[:epel_pkg] || opts[:epel_6_pkg]
@@ -234,7 +236,7 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when host['platform'] =~ /el-(5|6)/
+        when ['centos','redhat','scientific','el'].include?(host['platform'].variant) && ['5','6'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
             url, arch, pkg = epel_info_for host, opts
