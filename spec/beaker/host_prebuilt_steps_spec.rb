@@ -17,8 +17,7 @@ describe Beaker do
                            hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
                            hosts[2][:roles] = ['agent']
                            hosts }
-  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps
-                                       include Beaker::DSL::Patterns } }
+  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps } }
 
   context 'timesync' do
 
@@ -85,20 +84,20 @@ describe Beaker do
     subject { dummy_class.new }
     
     it "can return the correct url for an el-6 host" do
-      host = make_host( 'testhost', { :platform => 'el-6-platform' } )
+      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-6-arch') } )
 
       expect( subject.epel_info_for!( host )).to be === "http://mirror.itc.virginia.edu/fedora-epel/6/i386/epel-release-6-8.noarch.rpm"
     end
 
     it "can return the correct url for an el-5 host" do
-      host = make_host( 'testhost', { :platform => 'el-5-platform' } )
+      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-5-arch') } )
 
       expect( subject.epel_info_for!( host )).to be === "http://archive.linux.duke.edu/pub/epel/5/i386/epel-release-5-4.noarch.rpm"
 
     end
 
     it "raises an error on non el-5/6 host" do
-      host = make_host( 'testhost', { :platform => 'el-4-platform' } )
+      host = make_host( 'testhost', { :platform => 'el-4-arch' } )
 
       expect{ subject.epel_info_for!( host )}.to raise_error
 
@@ -216,22 +215,22 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "add extras for el-5/6 hosts" do
-      hosts = make_hosts( { :platform => 'el-5', :exit_code => 1 } )
-      hosts[0][:platform] = 'el-6' 
-      url = "http://el_extras_url"
+      hosts = make_hosts( { 'platform' => Beaker::Platform.new('el-5-arch'), :exit_code => 1 }, 5 )
+      hosts[0]['platform'] = Beaker::Platform.new('el-6-arch')
+      hosts[1]['platform'] = Beaker::Platform.new('centos-6-arch')
+      hosts[2]['platform'] = Beaker::Platform.new('scientific-6-arch')
+      hosts[3]['platform'] = Beaker::Platform.new('redhat-6-arch')
 
-      subject.stub( :epel_info_for! ).and_return( url )
-
-      Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("rpm -i #{url}").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 5 ).times
+      Beaker::Command.should_receive( :new ).with(match_regex(%r{rpm -i http://.*epel.*})).exactly( 5 ).times
+      Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 5 ).times
 
       subject.add_el_extras( hosts, options )
 
     end
 
     it "should do nothing for non el-5/6 hosts" do
-      hosts = make_hosts( { :platform => 'windows' } )
+      hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
       Beaker::Command.should_receive( :new ).never
 
