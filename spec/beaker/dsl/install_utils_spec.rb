@@ -381,12 +381,18 @@ describe ClassMixedWithDSLInstallUtils do
     end
     describe 'on unsupported platforms' do
       let(:platform) { 'solaris-11-x86_64' }
+      let(:host) { make_host('henry', :platform => 'solaris-11-x86_64') }
+      let(:hosts) { [host] }
       it 'by default raises an error' do
         expect(subject).to_not receive(:on)
         expect { subject.install_puppet }.to raise_error(/unsupported platform/)
       end
       it 'falls back to installing from gem when given :default_action => "gem_install"' do
-        expect(subject).to receive(:on).with(hosts[0], /gem install/)
+        result = double
+        gem_env_string = '{"RubyGems Environment": [ {"GEM PATHS": [] } ] }'
+        allow( result ).to receive(:stdout).and_return gem_env_string
+        allow(subject).to receive(:on).with(host, /gem environment/).and_return result
+        expect(subject).to receive(:on).with(host, /gem install/)
         subject.install_puppet :default_action => 'gem_install'
       end
     end

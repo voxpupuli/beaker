@@ -551,6 +551,10 @@ module Beaker
               raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
             end
           end
+
+          # Certain install paths may not create the config dirs/files needed
+          on host, "mkdir -p #{host['puppetpath']}"
+          on host, "echo '' >> #{host['hieraconf']}"
         end
         nil
       end
@@ -688,19 +692,50 @@ module Beaker
       # @raise [StandardError] if gem does not exist on target host
       # @api private
       def install_puppet_from_gem( host, opts )
-        if host.check_for_command( 'gem' )
-          if opts[:facter_version]
-            on host, "gem install facter -v#{opts[:facter_version]}"
-          end
-          if opts[:hiera_version]
-            on host, "gem install hiera -v#{opts[:hiera_version]}"
-          end
-          ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
-          on host, "gem install puppet #{ver_cmd}"
-        else
-          raise "install_puppet() called with default_action 'gem_install' but program `gem' not installed on #{host.name}"
+        # Hosts may be provisioned with csw but pkgutil won't be in the
+        # PATH by default to avoid changing the behavior for Puppet's tests
+        if host['platform'] =~ /solaris-10/
+          on host, 'ln -s /opt/csw/bin/pkgutil /usr/bin/pkgutil'
         end
+
+        # Solaris doesn't necessarily have this, but gem needs it
+        if host['platform'] =~ /solaris/
+          on host, 'mkdir -p /var/lib' 
+        end
+
+        unless host.check_for_command( 'gem' )
+          gempkg = case host['platform']
+                   when /solaris-11/                   then 'ruby-18'
+                   when /ubuntu-14/                    then 'ruby'
+                   when /solaris-10|ubuntu|debian|el-/ then 'rubygems'
+                   else
+                     raise "install_puppet() called with default_action " +
+                           "'gem_install' but program `gem' is " +
+                           "not installed on #{host.name}"
+                   end
+
+          host.install_package gempkg
+        end
+
+        if host['platform'] =~ /debian|ubuntu|solaris/
+          gem_env = YAML.load( on( host, 'gem environment' ).stdout )
+          gem_paths_array = gem_env['RubyGems Environment'].find {|h| h['GEM PATHS'] != nil }['GEM PATHS']
+          path_with_gem = 'export PATH=' + gem_paths_array.join(':') + ':${PATH}'
+          on host, "echo '#{path_with_gem}' >> ~/.bashrc"
+        end
+
+        if opts[:facter_version]
+          on host, "gem install facter -v#{opts[:facter_version]} --no-ri --no-rdoc"
+        end
+
+        if opts[:hiera_version]
+          on host, "gem install hiera -v#{opts[:hiera_version]} --no-ri --no-rdoc"
+        end
+
+        ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
+        on host, "gem install puppet #{ver_cmd} --no-ri --no-rdoc"
       end
+
 
       #Install PE based upon host configuration and options
       # @example
