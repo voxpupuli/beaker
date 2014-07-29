@@ -79,7 +79,6 @@ module Beaker
         provision
 
         # Setup perf monitoring if needed
-        #@perf = Beaker::Perf.new( @hosts, @options, @logger ) if @options[:collect_perf_data]
         @perf = Beaker::Perf.new( @hosts, @options ) if @options[:collect_perf_data]
 
         errored = false
