@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
 
   # Run time dependencies
   s.add_runtime_dependency 'json', '~> 1.8'
+  s.add_runtime_dependency 'hocon', '~> 0.0.4'
   s.add_runtime_dependency 'net-ssh', '~> 2.6'
   s.add_runtime_dependency 'net-scp', '~> 1.1'
   s.add_runtime_dependency 'inifile', '~> 2.0'

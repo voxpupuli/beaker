@@ -3,6 +3,9 @@ require 'resolv'
 require 'inifile'
 require 'timeout'
 require 'beaker/dsl/outcomes'
+require 'beaker/options'
+require 'hocon'
+require 'hocon/config_error'
 
 module Beaker
   module DSL
@@ -545,6 +548,36 @@ module Beaker
         curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
         logger.debug "Setting curl retries to #{curl_retries}"
 
+        if options[:is_jvm_puppet]
+          confdir = host.puppet('master')['confdir']
+          vardir = host.puppet('master')['vardir']
+
+          if cmdline_args
+            split_args = cmdline_args.split()
+
+            split_args.each do |arg|
+              result = /--confdir=(.*)/.match(arg)
+              if result
+                confdir = result[1]
+                next
+              end
+
+              result = /--vardir=(.*)/.match(arg)
+              if result
+                vardir = result[1]
+                next
+              end
+            end
+          end
+
+          jvm_puppet_opts = { "jruby-puppet" => {
+            "master-conf-dir" => confdir,
+            "master-var-dir" => vardir,
+          }}
+
+          modify_tk_config(host, "#{host['jvm-puppet-confdir']}jvm-puppet.conf", jvm_puppet_opts)
+        end
+
         begin
           backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
@@ -701,6 +734,93 @@ module Beaker
         new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
 
         new_conf
+      end
+
+      # Modify the given TrapperKeeper config file.
+      #
+      # @param [Host] host  A host object
+      # @param [OptionsHash] options_hash  New hash which will be merged into
+      #                                    the given TrapperKeeper config.
+      # @param [String] config_file_path  Path to the TrapperKeeper config on
+      #                                   the given host which is to be
+      #                                   modified.
+      # @param [Bool] replace  If set true, instead up updating the existing
+      #                        TrapperKeeper configuration, replace it entirely
+      #                        with the contents of the given hash.
+      # @note TrapperKeeper config files can be HOCON, JSON, or ini. We choose
+      # here to read them in as JSON since the features of HOCON used by
+      # trapperkeeper config service should be limited to those which are
+      # compatible with JSON. We start by trying INI, then JSON if an exception
+      # is detected.
+      #
+      def modify_tk_config(host, config_file_path, options_hash, replace=false)
+        if options_hash.empty?
+          return nil
+        end
+
+        if replace
+          new_tk_conf_hash = merge_options_into_tk_conf( options_hash )
+        else
+          if not host.file_exist?( config_file_path )
+            raise "Error: #{config_file_path} does not exist on #{host}"
+          end
+          file_string = host.exec( Command.new( "cat #{config_file_path}" )).stdout
+
+          begin
+            tk_conf_hash = read_tk_config_string(file_string)
+          rescue RuntimeError
+            raise "Error reading trapperkeeper config: #{config_file_path} at host: #{host}"
+          end
+
+          new_tk_conf_hash = merge_options_into_tk_conf( options_hash, tk_conf_hash )
+        end
+
+        file_string = JSON.dump(new_tk_conf_hash)
+        create_remote_file host, config_file_path, file_string
+      end
+
+      # The Trapperkeeper config service will accept HOCON (aka typesafe), JSON,
+      # or Ini configuration files which means we need to safely handle the the
+      # exceptions that might come from parsing the given string with the wrong
+      # parser and fall back to the next valid parser in turn. We finally raise
+      # a RuntimeException if none of the parsers succeed. 
+      #
+      # @!visibility private
+      def read_tk_config_string( string )
+          begin
+            return Hocon.parse(string)
+          rescue Hocon::ConfigError
+            nil
+          end
+
+          begin
+            return JSON.parse(string)
+          rescue JSON::JSONError
+            nil
+          end
+
+          begin
+            return IniFile.new(string)
+          rescue IniFile::Error
+            nil
+          end
+
+          raise "Failed to read TrapperKeeper config!"
+      end
+
+      # Merge the given options_hash into a hash created from the given
+      # trapperkeeper configuration string.
+      #
+      # @!visibility private
+      def merge_options_into_tk_conf( options_hash, tk_conf_hash=nil )
+        new_hash = Beaker::Options::OptionsHash.new
+
+        if tk_conf_hash
+          new_hash.merge!(tk_conf_hash)
+        end
+        new_hash.merge!(options_hash)
+
+        new_hash
       end
 
       # @!visibility private

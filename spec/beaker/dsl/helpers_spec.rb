@@ -1026,6 +1026,68 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe 'modify_tk_config' do
+    let(:host) { double.as_null_object }
+    let(:config_file_path) { 'existing-file-path'}
+    let(:invalid_config_file_path) { 'nonexisting-file-path'}
+    let(:options_hash) { {:key => 'value'} }
+    let(:replace) { true }
+
+    shared_examples 'modify-tk-config-without-error' do
+      it 'dumps to the SUT config file path' do
+        JSON.stub(:dump)
+        subject.stub(:create_remote_file).with(host, config_file_path, anything())
+        subject.modify_tk_config(host, config_file_path, options_hash, replace)
+      end
+    end
+
+    before do
+      host.stub(:file_exist?).with(invalid_config_file_path).and_return(false)
+      host.stub(:file_exist?).with(config_file_path).and_return(true)
+    end
+
+    describe 'if file does not exist on SUT' do
+      it 'raises Runtime error' do
+        expect do
+          subject.modify_tk_config(host, invalid_config_file_path, options_hash)
+        end.to raise_error(RuntimeError, /.* does not exist on .*/)
+      end
+    end
+
+    describe 'given an empty options hash' do
+      it 'returns nil' do
+        expect(subject.modify_tk_config(host, 'blahblah', {})).to eq(nil)
+      end
+    end
+
+    describe 'given a non-empty options hash' do
+
+      describe 'given a false value to its `replace` parameter' do
+        let(:replace) { false }
+        context 'merges the contents of the config file on the SUT with options_hash' do
+          before do
+            subject.stub(:read_tk_config_string).with(anything())
+            subject.stub(:merge_options_into_tk_conf).with(options_hash, anything())
+          end
+          include_examples('modify-tk-config-without-error')
+        end
+      end
+
+      describe 'given a true value to its `replace` parameter' do
+        context 'replaces the contents of the config file on the SUT' do
+          before do
+            subject.stub(:merge_options_into_tk_conf).with(options_hash)
+            host.stub(:exec)
+            JSON.stub(:dump)
+            subject.stub(:create_remote_file).with(host, 'file-name', anything())
+          end
+          include_examples('modify-tk-config-without-error')
+        end
+      end
+
+    end
+
+  end
 
   describe 'copy_module_to' do
     let(:ignore_list){%w(.git .idea .vagrant .vendor acceptance spec tests log . ..)}
