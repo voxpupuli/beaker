@@ -805,6 +805,7 @@ describe ClassMixedWithDSLHelpers do
                    :options => {
         'puppetpath' => puppet_path,
         'puppetservice' => puppetservice,
+        'jvm-puppet-confdir' => '/etc/jvm-puppet/conf.d/',
         'platform' => 'el'
       })
     end
@@ -830,6 +831,70 @@ describe ClassMixedWithDSLHelpers do
       expect {
         subject.with_puppet_running_on(host, {})
       }.to raise_error(RuntimeError, /puppet conf backup failed/)
+    end
+
+    describe 'with jvm puppet' do
+      let(:default_confdir) { "/etc/puppet" }
+      let(:default_vardir) { "/var/lib/puppet" }
+
+      let(:custom_confdir) { "/tmp/etc/puppet" }
+      let(:custom_vardir) { "/tmp/var/lib/puppet" }
+
+      let(:command_line_args) {"--vardir=#{custom_vardir} --confdir=#{custom_confdir}"}
+      let(:conf_opts) { {:__commandline_args__ => command_line_args,
+                         :is_jvm_puppet => true}}
+
+      let(:default_jvm_puppet_opts) {{ "jruby-puppet" => {
+        "master-conf-dir" => default_confdir,
+        "master-var-dir" => default_vardir,
+      }}}
+
+      let(:custom_jvm_puppet_opts) {{ "jruby-puppet" => {
+        "master-conf-dir" => custom_confdir,
+        "master-var-dir" => custom_vardir,
+      }}}
+
+      let(:jvm_puppet_conf) { "/etc/jvm-puppet/conf.d/jvm-puppet.conf" }
+      let(:logger) { double }
+
+      def stub_post_setup
+        subject.stub( :restore_puppet_conf_from_backup)
+        subject.stub( :bounce_service)
+        subject.stub( :stop_puppet_from_source_on)
+        subject.stub( :dump_puppet_log)
+        subject.stub( :restore_puppet_conf_from_backup)
+        subject.stub( :puppet_master_started)
+        subject.stub( :start_puppet_from_source_on!)
+        subject.stub( :lay_down_new_puppet_conf)
+        subject.stub( :logger) .and_return( logger )
+        logger.stub( :error)
+        logger.stub( :debug)
+      end
+
+      before do
+        stub_post_setup
+        subject.stub( :options) .and_return( {:is_jvm_puppet => true})
+        subject.stub( :modify_tk_config)
+        host.stub(:puppet).with('master') .and_return({'confdir' => default_confdir,
+                                                       'vardir' => default_vardir})
+      end
+
+      describe 'and command line args passed' do
+        it 'modifies SUT trapperkeeper configuration w/ command line args' do
+          subject.should_receive( :modify_tk_config).with(host, jvm_puppet_conf,
+                                                          custom_jvm_puppet_opts)
+          subject.with_puppet_running_on(host, conf_opts)
+        end
+      end
+
+      describe 'and no command line args passed' do
+        let(:command_line_args) { nil }
+        it 'modifies SUT trapperkeeper configuration w/ puppet defaults' do
+          subject.should_receive( :modify_tk_config).with(host, jvm_puppet_conf,
+                                                          default_jvm_puppet_opts)
+          subject.with_puppet_running_on(host, conf_opts)
+        end
+      end
     end
 
     describe "with valid arguments" do
@@ -1064,25 +1129,21 @@ describe ClassMixedWithDSLHelpers do
 
       describe 'given a false value to its `replace` parameter' do
         let(:replace) { false }
-        context 'merges the contents of the config file on the SUT with options_hash' do
-          before do
-            subject.stub(:read_tk_config_string).with(anything())
-            subject.stub(:merge_options_into_tk_conf).with(options_hash, anything())
-          end
-          include_examples('modify-tk-config-without-error')
+        before do
+          subject.should_receive(:read_tk_config_string).with(anything())
+          subject.should_receive(:merge_options_into_tk_conf).with(options_hash, anything())
         end
+        include_examples('modify-tk-config-without-error')
       end
 
       describe 'given a true value to its `replace` parameter' do
-        context 'replaces the contents of the config file on the SUT' do
-          before do
-            subject.stub(:merge_options_into_tk_conf).with(options_hash)
-            host.stub(:exec)
-            JSON.stub(:dump)
-            subject.stub(:create_remote_file).with(host, 'file-name', anything())
-          end
-          include_examples('modify-tk-config-without-error')
+        before do
+          subject.should_receive(:merge_options_into_tk_conf).with(options_hash)
+          #host.should_receive(:exec)
+          JSON.should_receive(:dump)
+          subject.should_receive(:create_remote_file).with(host, config_file_path, anything())
         end
+        include_examples('modify-tk-config-without-error')
       end
 
     end
