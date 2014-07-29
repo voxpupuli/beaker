@@ -823,6 +823,10 @@ describe ClassMixedWithDSLHelpers do
     let(:is_pe) { false }
     let(:use_service) { false }
     let(:platform) { 'redhat' }
+    let(:configprint) { {
+      'user' => 'root',
+      'group' => 'root'
+    } }
     let(:host) do
       FakeHost.create('fakevm', "#{platform}-version-arch",
         'type' => is_pe ? 'pe': 'git',
@@ -833,7 +837,10 @@ describe ClassMixedWithDSLHelpers do
     def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
       subject.instance_variable_set(:@path, test_case_path)
       host.stub(:tmpdir).and_return(tmpdir_path)
+      host.stub(:puppet).and_return(configprint)
       host.stub(:file_exist?).and_return(true)
+      host.stub(:group_exists?).and_return(true)
+      host.stub(:user_exists?).and_return(true)
       subject.stub( :options ).and_return( {} )
     end
 

@@ -469,6 +469,22 @@ module Beaker
         hosts_to_select_from
       end
 
+      # Return the name of the puppet user.
+      #
+      # @param [Host] host One object that acts like a Beaker::Host
+      #
+      def puppet_user(host)
+        return host.puppet('master')['group']
+      end
+
+      # Return the name of the puppet group.
+      #
+      # @param [Host] host One object that acts like a Beaker::Host
+      #
+      def puppet_group(host)
+        return host.puppet('master')['user']
+      end
+
       # @!visibility private
       def inspect_host(host, property, one_or_more_values)
         values = Array(one_or_more_values)
