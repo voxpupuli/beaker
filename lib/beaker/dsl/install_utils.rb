@@ -129,7 +129,7 @@ module Beaker
           commands = ["cd #{target}",
                       "remote rm origin",
                       "remote add origin #{repo}",
-                      "fetch origin",
+                      "fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/*",
                       "clean -fdx",
                       "checkout -f #{rev}"]
           on host, commands.join(" && git ")
