@@ -473,16 +473,20 @@ module Beaker
       #
       # @param [Host] host One object that acts like a Beaker::Host
       #
+      # @note Puppet must be installed for this to work.
+      #
       def puppet_user(host)
-        return host.puppet('master')['group']
+        return host.puppet('master')['user']
       end
 
       # Return the name of the puppet group.
       #
       # @param [Host] host One object that acts like a Beaker::Host
       #
+      # @note Puppet must be installed for this to work.
+      #
       def puppet_group(host)
-        return host.puppet('master')['user']
+        return host.puppet('master')['group']
       end
 
       # @!visibility private
@@ -736,6 +740,23 @@ module Beaker
       def lay_down_new_puppet_conf( host, configuration_options, testdir )
         new_conf = puppet_conf_for( host, configuration_options )
         create_remote_file host, "#{testdir}/puppet.conf", new_conf.to_s
+        user = puppet_user host
+        group = puppet_group host
+
+        user_exists = host.user_exists?(user)
+        group_exists = host.group_exists?(group)
+
+        if user_exists and group_exists
+          on host, "chown #{user}:#{group} #{testdir}/puppet.conf"
+        end
+
+        if not user_exists
+          logger.warn "user: #{user} does not exist on #{host}"
+        end
+
+        if not group_exists
+          logger.warn "group: #{group} does not exist on #{host}"
+        end
 
         host.exec(
           Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf" ),

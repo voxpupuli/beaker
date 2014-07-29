@@ -29,4 +29,10 @@ module Unix::User
   def user_absent(name, &block)
     execute("if getent passwd #{name}; then userdel #{name}; fi", {}, &block)
   end
+
+  def user_exists?(name)
+    command = "getent passwd #{name}"
+    result = exec(Beaker::Command.new(command), {:acceptable_exit_codes => (0..127)})
+    return result.exit_code == 0
+  end
 end

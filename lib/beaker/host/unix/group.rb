@@ -37,4 +37,10 @@ module Unix::Group
   def group_absent(name, &block)
     execute("if getent group #{name}; then groupdel #{name}; fi", {}, &block)
   end
+
+  def group_exists?(name)
+    command = "getent group #{name}"
+    result = exec(Beaker::Command.new(command), {:acceptable_exit_codes => (0..127)})
+    return result.exit_code == 0
+  end
 end
