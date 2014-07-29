@@ -78,6 +78,10 @@ module Beaker
     def validate_host host, opts
       logger = opts[:logger]
       if host.is_a? Array
+        if opts[:collect_perf_data]
+          UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
+          SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
+        end
         host.map { |h| validate_host(h, opts) }
       else
         case

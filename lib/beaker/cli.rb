@@ -78,6 +78,9 @@ module Beaker
 
         provision
 
+        # Setup perf monitoring if needed
+        @perf = Beaker::Perf.new( @hosts, @options ) if @options[:collect_perf_data]
+
         errored = false
 
         #pre acceptance  phase
@@ -108,6 +111,7 @@ module Beaker
           end
         end
 
+        @perf.print_perf_info if @options[:collect_perf_data]
         print_reproduction_info( :error )
 
         @logger.error "Failed running the test suite."
@@ -125,6 +129,7 @@ module Beaker
         if @logger.is_debug?
           print_reproduction_info( :debug )
         end
+        @perf.print_perf_info if @options[:collect_perf_data]
       end
     end
 
