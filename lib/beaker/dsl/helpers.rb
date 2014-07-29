@@ -556,16 +556,11 @@ module Beaker
             split_args = cmdline_args.split()
 
             split_args.each do |arg|
-              result = /--confdir=(.*)/.match(arg)
-              if result
-                confdir = result[1]
-                next
-              end
-
-              result = /--vardir=(.*)/.match(arg)
-              if result
-                vardir = result[1]
-                next
+              case arg
+              when /--confdir=(.*)/
+                confdir = $1
+              when /--vardir=(.*)/
+                vardir = $1
               end
             end
           end
@@ -575,7 +570,8 @@ module Beaker
             "master-var-dir" => vardir,
           }}
 
-          modify_tk_config(host, "#{host['jvm-puppet-confdir']}jvm-puppet.conf", jvm_puppet_opts)
+          jvm_puppet_conf = File.join("#{host['jvm-puppet-confdir']}", "jvm-puppet.conf")
+          modify_tk_config(host, jvm_puppet_conf, jvm_puppet_opts)
         end
 
         begin
@@ -744,22 +740,23 @@ module Beaker
       # @param [String] config_file_path  Path to the TrapperKeeper config on
       #                                   the given host which is to be
       #                                   modified.
-      # @param [Bool] replace  If set true, instead up updating the existing
+      # @param [Bool] replace  If set true, instead of updating the existing
       #                        TrapperKeeper configuration, replace it entirely
       #                        with the contents of the given hash.
-      # @note TrapperKeeper config files can be HOCON, JSON, or ini. We choose
-      # here to read them in as JSON since the features of HOCON used by
-      # trapperkeeper config service should be limited to those which are
-      # compatible with JSON. We start by trying INI, then JSON if an exception
-      # is detected.
+      #
+      # @note TrapperKeeper config files can be HOCON, JSON, or Ini. We don't
+      # particularly care which of these the file named by `config_file_path` on
+      # the SUT actually is, just that the contents can be parsed into a map.
       #
       def modify_tk_config(host, config_file_path, options_hash, replace=false)
         if options_hash.empty?
           return nil
         end
 
+        new_hash = Beaker::Options::OptionsHash.new
+
         if replace
-          new_tk_conf_hash = merge_options_into_tk_conf( options_hash )
+          new_hash.merge!(options_hash)
         else
           if not host.file_exist?( config_file_path )
             raise "Error: #{config_file_path} does not exist on #{host}"
@@ -772,10 +769,11 @@ module Beaker
             raise "Error reading trapperkeeper config: #{config_file_path} at host: #{host}"
           end
 
-          new_tk_conf_hash = merge_options_into_tk_conf( options_hash, tk_conf_hash )
+          new_hash.merge!(options_hash)
+          new_hash.merge!(tk_conf_hash)
         end
 
-        file_string = JSON.dump(new_tk_conf_hash)
+        file_string = JSON.dump(new_hash)
         create_remote_file host, config_file_path, file_string
       end
 
@@ -783,7 +781,7 @@ module Beaker
       # or Ini configuration files which means we need to safely handle the the
       # exceptions that might come from parsing the given string with the wrong
       # parser and fall back to the next valid parser in turn. We finally raise
-      # a RuntimeException if none of the parsers succeed. 
+      # a RuntimeException if none of the parsers succeed.
       #
       # @!visibility private
       def read_tk_config_string( string )
@@ -806,21 +804,6 @@ module Beaker
           end
 
           raise "Failed to read TrapperKeeper config!"
-      end
-
-      # Merge the given options_hash into a hash created from the given
-      # trapperkeeper configuration string.
-      #
-      # @!visibility private
-      def merge_options_into_tk_conf( options_hash, tk_conf_hash=nil )
-        new_hash = Beaker::Options::OptionsHash.new
-
-        if tk_conf_hash
-          new_hash.merge!(tk_conf_hash)
-        end
-        new_hash.merge!(options_hash)
-
-        new_hash
       end
 
       # @!visibility private

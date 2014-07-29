@@ -1131,15 +1131,12 @@ describe ClassMixedWithDSLHelpers do
         let(:replace) { false }
         before do
           subject.should_receive(:read_tk_config_string).with(anything())
-          subject.should_receive(:merge_options_into_tk_conf).with(options_hash, anything())
         end
         include_examples('modify-tk-config-without-error')
       end
 
       describe 'given a true value to its `replace` parameter' do
         before do
-          subject.should_receive(:merge_options_into_tk_conf).with(options_hash)
-          #host.should_receive(:exec)
           JSON.should_receive(:dump)
           subject.should_receive(:create_remote_file).with(host, config_file_path, anything())
         end
