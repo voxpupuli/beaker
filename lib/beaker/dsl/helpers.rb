@@ -1303,7 +1303,7 @@ module Beaker
       #
       # @return [String,nil]
       def parse_for_moduleroot(possible_module_directory)
-        if File.exists?("#{possible_module_directory}/Modulefile")
+        if File.exists?("#{possible_module_directory}/Modulefile") || File.exists?("#{possible_module_directory}/metadata.json")
           possible_module_directory
         elsif possible_module_directory === '/'
           logger.error "At root, can't parse for another directory"
