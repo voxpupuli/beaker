@@ -12,7 +12,7 @@ describe ClassMixedWithDSLRoles do
   let( :agent1 )     { make_host( 'agent1',     { :roles => [ 'agent' ] } ) }
   let( :agent2 )     { make_host( 'agent2',     { :roles => [ 'agent' ] } ) }
   let( :a_and_dash ) { make_host( 'a_and_dash', { :roles => [ 'agent', 'dashboard' ] } ) }
-  let( :custom )     { make_host( 'custom',     { :roles => [ 'custome_role' ] } ) }
+  let( :custom )     { make_host( 'custom',     { :roles => [ 'custom_role' ] } ) }
   let( :db )         { make_host( 'db',         { :roles => [ 'database' ] } ) }
   let( :master )     { make_host( 'master',     { :roles => [ 'master', 'agent' ] } ) }
   let( :default )    { make_host( 'default',    { :roles => [ 'default'] } ) }
@@ -92,6 +92,41 @@ describe ClassMixedWithDSLRoles do
       @hosts = [ agent1, agent2, custom ]
       subject.should_receive( :hosts ).and_return( hosts )
       expect { subject.database }.to raise_error Beaker::DSL::FailTest
+    end
+  end
+  describe '#add_role_def' do
+    it 'raises an error on unsupported role format "1role"' do
+      expect { subject.add_role_def( "1role" ) }.to raise_error
+    end
+    it 'raises an error on unsupported role format "role_!a"' do
+      expect { subject.add_role_def( "role_!a" ) }.to raise_error
+    end
+    it 'raises an error on unsupported role format "role=="' do
+      expect { subject.add_role_def( "role==" ) }.to raise_error
+    end
+    it 'creates new method for role "role_correct!"' do
+      test_role = "role_correct!"
+      subject.add_role_def( test_role )
+      subject.should respond_to test_role
+      subject.class.send( :undef_method, test_role )
+    end
+    it 'returns a single node for a new method for a role defined in a single node' do
+      @hosts = [ agent1, agent2, monolith ]
+      subject.should_receive( :hosts ).and_return( hosts )
+      test_role = "custom_role"
+      subject.add_role_def( test_role )
+      subject.should respond_to test_role
+      expect( subject.send( test_role )).to be == @hosts[2]
+      subject.class.send( :undef_method, test_role )
+    end
+    it 'returns an array of nodes for a new method for a role defined in multiple nodes' do
+      @hosts = [ agent1, agent2, monolith, custom ]
+      subject.should_receive( :hosts ).and_return( hosts )
+      test_role = "custom_role"
+      subject.add_role_def( test_role )
+      subject.should respond_to test_role
+      expect( subject.send( test_role )).to be == [@hosts[2], @hosts[3]]
+      subject.class.send( :undef_method, test_role )
     end
   end
 end

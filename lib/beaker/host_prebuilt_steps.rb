@@ -1,10 +1,12 @@
-[ 'command' ].each do |lib|
+[ 'command', "dsl/patterns" ].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Beaker
   #Provides convienience methods for commonly run actions on hosts
   module HostPrebuiltSteps
+    include Beaker::DSL::Patterns
+
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
@@ -20,14 +22,12 @@ module Beaker
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
     #Run timesync on the provided hosts
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def timesync host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| timesync(h, opts) }
-      else
+      block_on host do |host|
         logger.notify "Update system time sync for '#{host.name}'"
         if host['platform'].include? 'windows'
           # The exit code of 5 is for Windows 2008 systems where the w32tm /register command
@@ -77,13 +77,11 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        if opts[:collect_perf_data]
-          UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
-          SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
-        end
-        host.map { |h| validate_host(h, opts) }
-      else
+      if opts[:collect_perf_data]
+        UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
+        SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
+      end
+      block_on host do |host|
         case
         when host['platform'] =~ /sles-/
           SLES_PACKAGES.each do |pkg|
@@ -118,7 +116,7 @@ module Beaker
     #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
     #convenience method to allow for easy login to hosts after they have been provisioned with
     #Beaker.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def sync_root_keys host, opts
@@ -127,9 +125,7 @@ module Beaker
       # but we're deliberately taking the approach of "assume it will work, fix it
       # when reality dictates otherwise"
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| sync_root_keys(h, opts) }
-      else
+      block_on host do |host|
       logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
         if host['platform'].include? 'solaris'
@@ -166,11 +162,9 @@ module Beaker
 
     #Run 'apt-get update' on the provided host or hosts.  If the platform of the provided host is not
     #ubuntu or debian do nothing.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
-    def apt_get_update host
-      if host.is_a? Array
-        host.map { |h| apt_get_update(h) }
-      else
+    # @param [Host, Array<Host>] hosts One or more hosts to act upon
+    def apt_get_update hosts
+      block_on hosts do |host|
         if host[:platform] =~ /(ubuntu)|(debian)/
           host.exec(Command.new("apt-get update"))
         end
@@ -178,13 +172,11 @@ module Beaker
     end
 
     #Create a file on host or hosts at the provided file path with the provided file contents.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [String] file_path The path at which the new file will be created on the host or hosts.
     # @param [String] file_content The contents of the file to be created on the host or hosts.
     def copy_file_to_remote(host, file_path, file_content)
-      if host.is_a? Array
-        host.map { |h| copy_file_to_remote(h, file_path, file_contents) }
-      else
+      block_on host do |host|
         Tempfile.open 'beaker' do |tempfile|
           File.open(tempfile.path, 'w') {|file| file.puts file_content }
 
@@ -197,16 +189,14 @@ module Beaker
     # proxy {HostPrebuiltSteps::APT_CFG} proxy, alter pkg on solaris-11 host or hosts
     # to point to interal Puppetlabs proxy {HostPrebuiltSteps::IPS_PKG_REPO}. Do nothing
     # on non-ubuntu, debian or solaris-11 platform host or hosts.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def proxy_config( host, opts )
       # repo_proxy
       # supports ubuntu, debian and solaris platforms
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| proxy_config(h, opts) }
-      else
+      block_on host do |host|
         case
         when host['platform'] =~ /ubuntu/
           host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
@@ -228,7 +218,7 @@ module Beaker
     end
 
     #Install EPEL on host or hosts with platform = /el-(5|6)/.  Do nothing on host or hosts of other platforms.
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -237,9 +227,7 @@ module Beaker
       #only supports el-* platforms
       logger = opts[:logger]
       debug_opt = opts[:debug] ? 'vh' : ''
-      if host.is_a? Array
-        host.map { |h| add_el_extras(h, opts) }
-      else
+      block_on host do |host|
         case
         when host['platform'] =~ /el-(5|6)/
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
@@ -288,14 +276,12 @@ module Beaker
     end
 
     #Make it possible to log in as root by copying the current users ssh keys to the root account
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def copy_ssh_to_root host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| copy_ssh_to_root(h, opts) }
-      else
+      block_on host do |host|
         logger.debug "Give root a copy of current user's keys, on #{host.name}"
         if host['platform'] =~ /windows/
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
@@ -308,7 +294,7 @@ module Beaker
 
     #Update /etc/hosts to make it possible for each provided host to reach each other host by name.
     #Assumes that each provided host has host[:ip] set.
-    # @param [Host, Array<Host>, String, Symbol] hosts An array of hosts to act upon
+    # @param [Host, Array<Host>] hosts An array of hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def hack_etc_hosts hosts, opts
@@ -322,14 +308,12 @@ module Beaker
     end
 
     #Update sshd_config on debian, ubuntu, centos, el, redhat and fedora boxes to allow for root login, does nothing on other platfoms
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def enable_root_login host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| copy_ssh_to_root(h, opts) }
-      else
+      block_on host do |host|
         logger.debug "Update /etc/ssh/sshd_config to allow root login"
         host.exec(Command.new("sudo su -c \"sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
   )
@@ -345,14 +329,12 @@ module Beaker
     end
 
     #Disable SELinux on centos, does nothing on other platforms
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def disable_se_linux host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| copy_ssh_to_root(h, opts) }
-      else
+      block_on host do |host|
         if host['platform'] =~ /centos|el-|redhat|fedora/
           @logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
@@ -363,14 +345,12 @@ module Beaker
     end
 
     #Disable iptables on centos, does nothing on other platforms
-    # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def disable_iptables host, opts
       logger = opts[:logger]
-      if host.is_a? Array
-        host.map { |h| copy_ssh_to_root(h, opts) }
-      else
+      block_on host do |host|
         if host['platform'] =~ /centos|el-|redhat|fedora/
           logger.debug("Disabling iptables on #{host.name}")
           host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
@@ -389,9 +369,7 @@ module Beaker
     def package_proxy host, opts
       logger = opts[:logger]
 
-      if host.is_a? Array
-          host.map { |h| package_proxy(h, opts) }
-      else
+      block_on host do |host|
         logger.debug("enabling proxy support on #{host.name}")
         case host['platform']
           when /ubuntu/, /debian/

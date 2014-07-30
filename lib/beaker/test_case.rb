@@ -125,6 +125,14 @@ module Beaker
         def run_test
           @logger.start_sublog
           @logger.last_result = nil
+
+          #add arbitrary role methods
+          roles = []
+          @hosts.each do |host|
+            roles << host[:roles]
+          end
+          add_role_def( roles.flatten.uniq )
+
           @runtime = Benchmark.realtime do
             begin
               test = File.read(path)

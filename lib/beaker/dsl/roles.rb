@@ -88,6 +88,35 @@ module Beaker
         find_only_one :default
       end
 
+      #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
+      #commands without having to refer to role by String or Symbol.  Will not add a new method 
+      #definition if the name is already in use.
+      # @param [String, Symbol, Array[String,Symbol]] role The role that you wish to create a definition for, either a String
+      # Symbol or an Array of Strings or Symbols.
+      # @example Basic usage
+      #  add_role_def('myrole')
+      #  on myrole, "run command"
+      def add_role_def role
+        if role.kind_of?(Array)
+          role.each do |r|
+            add_role_def r
+          end
+        else
+          if not respond_to? role
+            if role !~ /\A[[:alpha:]]+[a-zA-Z0-9_]*[!?=]?\Z/
+              raise "Role name format error for '#{role}'.  Allowed characters are: \na-Z\n0-9 (as long as not at the beginning of name)\n'_'\n'?', '!' and '=' (only as individual last character at end of name)"
+            end
+            self.class.send :define_method, role.to_s do
+              hosts_with_role = hosts_as role.to_sym
+              if hosts_with_role.length == 1
+                hosts_with_role = hosts_with_role.pop
+              end
+              hosts_with_role
+            end
+          end
+        end
+      end
+
       # Determine if there is a host or hosts with the given role defined
       # @return [Boolean] True if there is a host with role, false otherwise
       #
