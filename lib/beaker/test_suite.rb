@@ -240,9 +240,9 @@ module Beaker
               item.add_child(stdout)
             end
 
-            if test.stderr then
+            if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty? then
               stderr = Nokogiri::XML::Node.new('system-err', doc)
-              stderr.add_child(stderr.document.create_cdata(strip_color_codes(test.stderr)))
+              stderr.add_child(stderr.document.create_cdata(strip_color_codes(test.last_result.stderr)))
               item.add_child(stderr)
             end
 

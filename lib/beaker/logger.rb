@@ -4,6 +4,10 @@ module Beaker
     # to a given destination (be it a string or file)
     #
   class Logger
+
+    #The results of the most recently run command
+    attr_accessor :last_result
+
     NORMAL         = "\e[00;00m"
     BRIGHT_NORMAL  = "\e[00;01m"
     BLACK          = "\e[00;30m"
@@ -65,6 +69,9 @@ module Beaker
       else
         @log_level = :verbose
       end
+
+      @last_result = nil
+
       @destinations = []
 
       dests = args

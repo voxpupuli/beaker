@@ -55,6 +55,9 @@ module Beaker
     #The full log for this test
     attr_accessor :sublog
 
+    #The result for the last command run
+    attr_accessor :last_result
+
     # A Hash of 'product name' => 'version installed', only set when
     # products are installed via git or PE install steps. See the 'git' or
     # 'pe' directories within 'ROOT/setup' for examples.
@@ -121,6 +124,7 @@ module Beaker
       class << self
         def run_test
           @logger.start_sublog
+          @logger.last_result = nil
           @runtime = Benchmark.realtime do
             begin
               test = File.read(path)
@@ -145,6 +149,7 @@ module Beaker
             end
           end
           @sublog = @logger.get_sublog
+          @last_result = @logger.last_result
           return self
         end
 
