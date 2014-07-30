@@ -886,18 +886,33 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'parse_for_module_root' do
     directory = '/testfilepath/myname-testmodule'
-    it 'should recersively go up the directory to find the module files' do
-      File.stub(:exists?).with("#{directory}/acceptance/Modulefile").and_return(false)
-      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
-      subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
-      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}/acceptance, moving up")
-      expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+    describe 'stops searching when either' do
+      it 'finds a Modulefile' do
+        File.stub(:exists?).and_return(false)
+        File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+
+        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
+        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+      end
+      it 'finds a metadata.json file' do
+        File.stub(:exists?).and_return(false)
+        File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
+
+        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
+        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+      end
     end
     it 'should recersively go up the directory to find the module files' do
       File.stub(:exists?).and_return(false)
-      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}, moving up")
+      subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}, moving up")
       subject.logger.should_receive(:error).with("At root, can't parse for another directory")
       expect(subject.parse_for_moduleroot(directory)).to eq(nil)
     end
   end
 end
+
+
+
+
