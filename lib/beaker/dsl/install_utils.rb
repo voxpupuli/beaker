@@ -1219,7 +1219,7 @@ module Beaker
           logger.error "At root, can't parse for another directory"
           nil
         else
-          logger.debug "No Modulefile found at #{possible_module_directory}, moving up"
+          logger.debug "No Modulefile or metadata.json found at #{possible_module_directory}, moving up"
           parse_for_moduleroot File.expand_path(File.join(possible_module_directory,'..'))
         end
       end
