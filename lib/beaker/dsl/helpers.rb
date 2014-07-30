@@ -769,8 +769,8 @@ module Beaker
             raise "Error reading trapperkeeper config: #{config_file_path} at host: #{host}"
           end
 
-          new_hash.merge!(options_hash)
           new_hash.merge!(tk_conf_hash)
+          new_hash.merge!(options_hash)
         end
 
         file_string = JSON.dump(new_hash)
