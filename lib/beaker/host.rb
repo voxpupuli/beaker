@@ -265,6 +265,7 @@ module Beaker
         end
       end
 
+      @logger.debug result.stdout
       return result
     end
 
@@ -272,6 +273,7 @@ module Beaker
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
       result = connection.scp_from(source, target, options, $dry_run)
+      @logger.debug result.stdout
       return result
     end
 
