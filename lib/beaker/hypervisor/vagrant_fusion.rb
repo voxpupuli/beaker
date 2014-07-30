@@ -9,9 +9,9 @@ class Beaker::VagrantFusion < Beaker::Vagrant
     super
   end
 
-  def self.provider_vfile_section(options)
-    "  c.vm.provider :vmware_fusion do |v|\n" +
-    "    v.vmx[\"memsize\"] = \"#{options['vagrant_memsize'] ||= '1024'}\"\n" +
-    "  end\n"
+  def self.provider_vfile_section(host, options)
+    "    v.vm.provider :vmware_fusion do |v|\n" +
+    "      v.vmx['memsize'] = '#{options['vagrant_memsize'] ||= '1024'}'\n" +
+    "    end\n"
   end
 end
