@@ -206,9 +206,65 @@ module Beaker
       end
     end
 
+    # Create the provided directory structure on the host
+    # @param [String] dir The directory structure to create on the host
+    # @return [Boolean] True, if directory construction succeeded, otherwise False
+    def mkdir_p dir
+      result = exec(Beaker::Command.new("mkdir -p #{dir}"), :acceptable_exit_codes => [0, 1])
+      result.exit_code == 0
+    end
+
+    # scp files from the localhost to this test host
+    # @param source [String] The path to the file/dir to upload
+    # @param target [String] The destination path on the host
+    # @param [Hash{Symbol=>String}] options Options to alter execution
+    # @option options [Boolean] :recursive Should we copy recursively?  Defaults to 'True' in case of a directory source.
+    # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
     def do_scp_to source, target, options
       @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
-      result = connection.scp_to(source, target, options, $dry_run)
+
+      result = Result.new(@name, [source, target])
+      has_ignore = options[:ignore] and not options[:ignore].empty?
+      # construct the regex for matching ignored files/dirs
+      ignore_re = nil
+      if has_ignore
+        ignore_arr = Array(options[:ignore]).map do |entry|
+          "((\/|\\A)#{entry}(\/|\\z))".sub(/\./, "\.")
+        end
+        ignore_re = Regexp.new(ignore_arr.join('|'))
+      end
+
+      # either a single file, or a directory with no ignores
+      if File.file?(source) or (File.directory?(source) and not has_ignore)
+        source_file = source
+        if has_ignore and (source =~ ignore_re)
+          @logger.debug "After rejecting ignored files/dirs, there is no file to copy"
+          source_file = nil
+          result.stdout = "No files to copy"
+          result.exit_code = 1
+        end
+        if source_file
+          result = connection.scp_to(source_file, target, options, $dry_run)
+        end
+      else # a directory with ignores
+        dir_source = Dir.glob("#{source}/**/*").reject do |f|
+          f =~ ignore_re
+        end
+        @logger.debug "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
+
+        # create necessary directory structure on host
+        required_dirs = (dir_source.map{ | dir | File.dirname(dir) }).uniq
+        required_dirs.each do |dir|
+          mkdir_p( File.join(target, dir) )
+        end
+
+        # copy each file to the host
+        dir_source.each do |s|
+          file_path = File.join(target, s)
+          result = connection.scp_to(s, file_path, options, $dry_run)
+        end
+      end
+
       return result
     end
 

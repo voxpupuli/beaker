@@ -148,39 +148,123 @@ module Beaker
       end
     end
 
-    # it takes a location and a destination
-    # it basically proxies that to the connection object
-    it 'do_scp_to logs info and proxies to the connection' do
-      logger = host[:logger]
-      conn = double(:connection)
-      @options = { :logger => logger }
-      host.instance_variable_set :@connection, conn
-      args = [ 'source', 'target', {} ]
-      conn_args = args + [ nil ]
+    context 'do_scp_to' do
+      # it takes a location and a destination
+      # it basically proxies that to the connection object
+      it 'do_scp_to logs info and proxies to the connection' do
+        File.stub(:file?).and_return(true)
+        logger = host[:logger]
+        conn = double(:connection)
+        @options = { :logger => logger }
+        host.instance_variable_set :@connection, conn
+        args = [ 'source', 'target', {} ]
+        conn_args = args + [ nil ]
 
-      logger.should_receive(:debug)
-      conn.should_receive(:scp_to).with( *conn_args )
+        logger.should_receive(:debug)
+        conn.should_receive(:scp_to).with( *conn_args )
 
-      host.do_scp_to *args
+        host.do_scp_to *args
+      end
+
+      context "using an ignore array" do
+
+        before :each do
+          test_dir = 'tmp/tests'
+          other_test_dir = 'tmp/tests2'
+
+          files = [
+            '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+            '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+            '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+
+          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
+
+          create_files( @fileset1 )
+          create_files( @fileset2 )
+        end
+
+        it 'can take an ignore list that excludes all files and not call scp_to', :use_fakefs => true do
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ 'tmp', 'target', {:ignore => ['tests', 'tests2']} ]
+
+          logger.should_receive(:debug)
+          host.should_receive( :mkdir_p ).exactly(0).times
+          conn.should_receive(:scp_to).exactly(0).times
+
+          host.do_scp_to *args
+        end
+
+        it 'can take an ignore list that excludes a single file and scp the rest', :use_fakefs => true do
+          exclude_file = '07_InstallCACerts.rb'
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+
+          Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
+
+          logger.should_receive(:debug)
+          host.should_receive( :mkdir_p ).with('target/tmp/tests')
+          host.should_receive( :mkdir_p ).with('target/tmp/tests2')
+          (@fileset1 + @fileset2).each do |file|
+            if file !~ /#{exclude_file}/
+              file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]
+              conn_args = file_args + [ nil ]
+              conn.should_receive(:scp_to).with( *conn_args )
+            end
+          end
+
+          host.do_scp_to *args
+        end
+
+        it 'can take an ignore list that excludes a dir and scp the rest', :use_fakefs => true do
+          exclude_file = 'tests'
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+
+          Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
+
+          logger.should_receive(:debug)
+          host.should_receive( :mkdir_p ).with('target/tmp/tests2')
+          (@fileset2).each do |file|
+            file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]
+            conn_args = file_args + [ nil ]
+            conn.should_receive(:scp_to).with( *conn_args )
+          end
+
+          host.do_scp_to *args
+        end
+      end
     end
 
-    it 'do_scp_from logs info and proxies to the connection' do
-      logger = host[:logger]
-      conn = double(:connection)
-      @options = { :logger => logger }
-      host.instance_variable_set :@connection, conn
-      args = [ 'source', 'target', {} ]
-      conn_args = args + [ nil ]
+    context 'do_scp_from' do
+      it 'do_scp_from logs info and proxies to the connection' do
+        logger = host[:logger]
+        conn = double(:connection)
+        @options = { :logger => logger }
+        host.instance_variable_set :@connection, conn
+        args = [ 'source', 'target', {} ]
+        conn_args = args + [ nil ]
 
-      logger.should_receive(:debug)
-      conn.should_receive(:scp_from).with( *conn_args )
+        logger.should_receive(:debug)
+        conn.should_receive(:scp_from).with( *conn_args )
 
-      host.do_scp_from *args
+        host.do_scp_from *args
+      end
     end
+
     it 'interpolates to its "name"' do
       expect( "#{host}" ).to be === 'name'
     end
-
 
     context 'merging defaults' do
       it 'knows the difference between foss and pe' do

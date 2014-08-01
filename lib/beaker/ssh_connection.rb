@@ -168,6 +168,7 @@ module Beaker
 
       options[:recursive]=File.directory?(source) if options[:recursive].nil?
 
+      @logger.debug "going to upload! #{source} to #{@hostname}:#{target}"
       @ssh.scp.upload! source, target, options
 
       result = Result.new(@hostname, [source, target])
