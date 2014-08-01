@@ -30,7 +30,7 @@ module Beaker
         @logger.perf_output("Creating symlink from /etc/sysstat/sysstat.cron to /etc/cron.d")
         host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'),:acceptable_exit_codes => [0,1])
       end
-      if host['platform'] =~ /debian|ubuntu|redhat|centos/ # SLES doesn't need this step
+      if host['platform'] =~ /debian|ubuntu|redhat|centos|oracle|scientific|el|fedora/ # SLES doesn't need this step
         host.exec(Command.new('service sysstat start'))
       end
     end
@@ -50,7 +50,7 @@ module Beaker
     # @return [void]  The report is sent to the logging output
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
-      if host['platform'] =~ /debian|ubuntu|redhat|centos|sles/
+      if host['platform'] =~ /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|sles/ # All flavours of Linux
         host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"))
       end
     end

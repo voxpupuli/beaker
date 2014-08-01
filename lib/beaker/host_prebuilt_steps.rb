@@ -77,9 +77,10 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
+      # Additional Packages to be determined at runtime
+      additional_pkgs = Array.new
       if opts[:collect_perf_data]
-        UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
-        SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
+        additional_pkgs << "sysstat" if !additional_pkgs.include? "sysstat"
       end
       block_on host do |host|
         case
@@ -89,8 +90,18 @@ module Beaker
               host.install_package pkg
             end
           end
+          additional_pkgs.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
         when host['platform'] =~ /debian/
           DEBIAN_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
+          additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
@@ -103,6 +114,11 @@ module Beaker
           end
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-/
           UNIX_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
+          additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
