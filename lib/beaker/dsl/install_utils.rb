@@ -812,7 +812,7 @@ module Beaker
           on host, "rpm -ivh --force #{rpm}"
 
         when /^(debian|ubuntu)$/
-          deb = options[:release_apt_repo_url] + "puppetlabs-release-%s.deb" % codename
+          deb = URI.join(options[:release_apt_repo_url],  "puppetlabs-release-%s.deb" % codename)
 
           on host, "wget -O /tmp/puppet.deb #{deb}"
           on host, "dpkg -i --force-all /tmp/puppet.deb"
@@ -923,8 +923,8 @@ module Beaker
           scp_to host, list, config_dir
           scp_to host, repo_dir, "/root/#{package_name}"
 
-          search = "'deb\\s\\+http:\\/\\/#{hostname}.*$"
-          replace = "'deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} main'"
+          search = "deb\\s\\+http:\\/\\/#{hostname}.*$"
+          replace = "deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} main"
           sed_command = "sed -i 's/#{search}/#{replace}/'"
           find_and_sed = "find #{config_dir} -name \"*.list\" -exec #{sed_command} {} \\;"
 
