@@ -101,14 +101,25 @@ module Beaker
       #
       # @see #find_git_repo_versions
       def install_from_git host, path, repository
-        name   = repository[:name]
-        repo   = repository[:path]
-        rev    = repository[:rev]
-        target = "#{path}/#{name}"
+        name          = repository[:name]
+        repo          = repository[:path]
+        rev           = repository[:rev]
+        depth         = repository[:depth]
+        depth_branch  = repository[:depth_branch]
+        target        = "#{path}/#{name}"
+
+        if (depth_branch.nil?)
+          depth_branch = rev
+        end
+
+        clone_cmd = "git clone #{repo} #{target}"
+        if (depth)
+          clone_cmd = "git clone --branch #{depth_branch} --depth #{depth} #{repo} #{target}"
+        end
 
         step "Clone #{repo} if needed" do
           on host, "test -d #{path} || mkdir -p #{path}"
-          on host, "test -d #{target} || git clone #{repo} #{target}"
+          on host, "test -d #{target} || #{clone_cmd}"
         end
 
         step "Update #{name} and check out revision #{rev}" do
