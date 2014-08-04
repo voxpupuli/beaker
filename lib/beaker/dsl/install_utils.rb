@@ -568,11 +568,11 @@ module Beaker
       #                                       Puppet via gem.
       # @option opts [String] :release The major release of the OS
       # @option opts [String] :family The OS family (one of 'el' or 'fedora')
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_rpm( host, opts )
-        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
+        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
 
         on host, "rpm -ivh #{release_package_string}"
 
@@ -595,7 +595,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, if nil installs latest version
       # @option opts [String] :facter_version The version of Facter to install, if nil installs latest version
       # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest version
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_deb( host, opts )
@@ -632,7 +632,7 @@ module Beaker
       # @param [Host] host The host to install packages on
       # @param [Hash{Symbol=>String}] opts An options hash
       # @option opts [String] :version The version of Puppet to install, required
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
@@ -655,7 +655,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, required
       # @option opts [String] :facter_version The version of Facter to install, required
       # @option opts [String] :hiera_version The version of Hiera to install, required
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_dmg( host, opts )
@@ -683,7 +683,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, if nil installs latest
       # @option opts [String] :facter_version The version of Facter to install, if nil installs latest
       # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest
-      # 
+      #
       # @return nil
       # @raise [StandardError] if gem does not exist on target host
       # @api private
