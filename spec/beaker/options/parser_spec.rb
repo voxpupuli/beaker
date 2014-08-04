@@ -200,6 +200,12 @@ module Beaker
           expect( hosts[:node1][:roles].include?('default') ).to be === true
         end
 
+        it "makes a single non-master node default" do
+          @roles = [ ["database", "dashboard", "agent"] ]
+          parser.set_default_host!(node1)
+          expect( hosts[:node1][:roles].include?('default') ).to be === true
+        end
+
         it "raises an error if two nodes are defined as default" do
           @roles = [ ["master", "default"], ["default"] ]
           expect{ parser.set_default_host!(hosts) }.to raise_error(ArgumentError)

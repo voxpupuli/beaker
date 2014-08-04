@@ -149,7 +149,7 @@ module Beaker
           if not master.empty? and master.length == 1
             default_host_name = master[0]
           elsif hosts.length == 1
-            default_host_name = hosts[0].keys[0]
+            default_host_name = hosts.keys[0]
           end
           if default_host_name
             hosts[default_host_name][:roles] << 'default'
