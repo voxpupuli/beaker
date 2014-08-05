@@ -56,38 +56,40 @@ module MockNet
 
 end
 
-class FakeHost
-  attr_accessor :commands
-
-  def initialize(options = {})
-    @pe = options[:pe]
-    @options = options[:options]
-    @commands = []
+module FakeHost
+  def self.create(name = 'fakevm', platform = 'redhat-version-arch', options = {})
+    options_hash = Beaker::Options::OptionsHash.new.merge(options)
+    options_hash['HOSTS'] = { name => { 'platform' => Beaker::Platform.new(platform) } }
+    host = Beaker::Host.create(name, options_hash)
+    host.extend(MockedExec)
+    host
   end
 
-  def port_open?(port)
-    true
-  end
+  module MockedExec
+    def self.extended(other)
+      other.instance_eval do
+        send(:instance_variable_set, :@commands, [])
+      end
+    end
 
-  def is_pe?
-    @pe
-  end
+    attr_accessor :commands
 
-  def [](name)
-    @options[name]
-  end
+    def port_open?(port)
+      true
+    end
 
-  def any_exec_result
-    RSpec::Mocks::Mock.new('exec-result').as_null_object
-  end
+    def any_exec_result
+      RSpec::Mocks::Mock.new('exec-result').as_null_object
+    end
 
-  def exec(command, options = {})
-    commands << command
-    any_exec_result
-  end
+    def exec(command, options = {})
+      commands << command
+      any_exec_result
+    end
 
-  def command_strings
-    commands.map { |c| [c.command, c.args].join(' ') }
+    def command_strings
+      commands.map { |c| [c.command, c.args].join(' ') }
+    end
   end
 
   def log_prefix
