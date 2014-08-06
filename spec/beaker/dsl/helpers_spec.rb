@@ -820,14 +820,17 @@ describe ClassMixedWithDSLHelpers do
   describe '#with_puppet_running_on' do
     let(:test_case_path) { 'testcase/path' }
     let(:tmpdir_path) { '/tmp/tmpdir' }
+    let(:puppet_path) { '/puppet/path' }
+    let(:puppetservice) { nil }
     let(:is_pe) { false }
-    let(:use_service) { false }
-    let(:platform) { 'redhat' }
     let(:host) do
-      FakeHost.create('fakevm', "#{platform}-version-arch",
-        'type' => is_pe ? 'pe': 'git',
-        'use-service' => use_service
-      )
+      FakeHost.new(:pe => is_pe,
+                   :options => {
+        'puppetpath' => puppet_path,
+        'puppetservice' => puppetservice,
+        'jvm-puppet-confdir' => '/etc/jvm-puppet/conf.d/',
+        'platform' => 'el'
+      })
     end
 
     def stub_host_and_subject_to_allow_the_default_testdir_argument_to_be_created
@@ -922,78 +925,30 @@ describe ClassMixedWithDSLHelpers do
         Tempfile.should_receive(:open).with('beaker')
       end
 
-      context 'for pe hosts' do
-        let(:is_pe) { true }
-        let(:service_restart) { true }
+      context 'with puppetservice and service-path defined' do
+        let(:puppetservice) { 'whatever' }
 
         it 'bounces puppet twice' do
           subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/#{host['puppetsbindir']}\/apache2ctl graceful/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).exactly(2).times
         end
 
-        it 'yields to a block after bouncing service' do
-          execution = 0
-          subject.stub(:curl_with_retries)
-          expect do
-            subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/#{host['puppetsbindir']}\/apache2ctl graceful/).once
-              execution += 1
-            end
-          end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/#{host['puppetsbindir']}\/apache2ctl graceful/).exactly(2).times
-        end
-      end
-
-      context 'for foss packaged hosts using passenger' do
-        before(:each) do
-          host.uses_passenger!
-        end
-
-        it 'bounces puppet twice' do
-          subject.stub(:curl_with_retries)
-          subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
-        end
-
-        it 'yields to a block after bouncing service' do
-          execution = 0
-          subject.stub(:curl_with_retries)
-          expect do
-            subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/apache2ctl graceful/).once
-              execution += 1
-            end
-          end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
-        end
-      end
-
-      context 'for foss packaged hosts using webrick' do
-        let(:use_service) { true }
-
-        it 'stops and starts master using service scripts' do
-          subject.stub(:curl_with_retries)
-          subject.with_puppet_running_on(host, {})
-          expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(2).times
-          expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
-        end
-
-        it 'yields to a block after stopping and starting service' do
+        it 'yield to a block after bouncing service' do
           execution = 0
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).once
-              expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).once
+              expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).once
+              expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(2).times
-          expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=stopped/).exactly(2).times
+          expect(host).to execute_commands_matching(/puppet resource service #{puppetservice} ensure=running/).exactly(2).times
         end
       end
 
       context 'running from source' do
-        let('use-service') { false }
 
         it 'does not try to stop if not started' do
           subject.should_receive(:start_puppet_from_source_on!).and_return false
@@ -1037,12 +992,12 @@ describe ClassMixedWithDSLHelpers do
       end
 
       describe 'backup and restore of puppet.conf' do
-        let(:original_location) { "#{host['puppetpath']}/puppet.conf" }
+        let(:original_location) { "#{puppet_path}/puppet.conf" }
         let(:backup_location) { "#{tmpdir_path}/puppet.conf.bak" }
         let(:new_location) { "#{tmpdir_path}/puppet.conf" }
 
         context 'when a puppetservice is used' do
-          let(:use_service) { true }
+          let(:puppetservice) { 'whatever' }
 
           it 'backs up puppet.conf' do
             subject.with_puppet_running_on(host, {})
