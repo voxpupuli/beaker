@@ -173,7 +173,7 @@ module Beaker
           :image_id => image_id,
           :monitoring_enabled => true,
           :key_pair => ensure_key_pair(region),
-          :security_groups => [ensure_group(region, Beaker::EC2Helper.amiports(host['roles']))],
+          :security_groups => [ensure_group(region, Beaker::EC2Helper.amiports(host['roles'], host['ports']))],
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
