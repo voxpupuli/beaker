@@ -77,14 +77,16 @@ module Beaker
       # @return [Result]   An object representing the outcome of *command*.
       # @raise  [FailTest] Raises an exception if *command* obviously fails.
       def on(host, command, opts = {}, &block)
-        unless command.is_a? Command
+        block_on host do | host |
+          if command.is_a? Command
+            command = command.cmd_line(host)
+          end
           cmd_opts = {}
+          #add any additional environment variables to the command
           if opts[:environment]
             cmd_opts['ENV'] = opts[:environment]
           end
           command = Command.new(command.to_s, [], cmd_opts)
-        end
-        block_on host do | host |
           @result = host.exec(command, opts)
 
           # Also, let additional checking be performed by the caller.
