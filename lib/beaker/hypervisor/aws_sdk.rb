@@ -49,6 +49,9 @@ module Beaker
       # Wait for each node to reach status :running
       wait_for_status(:running)
 
+      # Add metadata tags to each instance
+      add_tags()
+
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
@@ -96,15 +99,26 @@ module Beaker
         @ec2.regions[region.name].instances.each do |instance|
           if (instance.key_name =~ /#{key}/) and (instance.launch_time + (ZOMBIE*60*60)) < Time.now and instance.status.to_s !~ /terminated/
             @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
-            instance.terminate()
+            begin
+              instance.terminate()
+            rescue AWS::EC2::Errors => e
+              @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
+            end
           end
         end
         # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
         # This simply looks for EBS volumes that are not in use
-        @ec2.regions[region.name].volumes.each do |vol|
-          if ( vol.status.to_s =~ /available/ )
-            @logger.debug "Tear down available volume: #{vol.id}"
-            vol.delete()
+        # Note: don't use volumes.each here as that funtion doesn't allow proper rescue from error states
+        volumes = @ec2.regions[region.name].volumes.map { |vol| vol.id }
+        volumes.each do |vol|
+          begin
+            vol = @ec2.regions[region.name].volumes[vol]
+            if ( vol.status.to_s =~ /available/ )
+              @logger.debug "Tear down available volume: #{vol.id}"
+              vol.delete()
+            end
+          rescue AWS::EC2::Errors::InvalidVolume::NotFound => e
+            @logger.debug "Failed to remove volume: #{vol.id}, #{e}"
           end
         end
       end
@@ -185,13 +199,6 @@ module Beaker
         # manipulated by 'cleanup' for example.
         host['instance'] = instance
 
-        # Define tags for the instance
-        @logger.notify("aws-sdk: Add tags")
-        instance.add_tag("jenkins_build_url", :value => @options[:jenkins_build_url])
-        instance.add_tag("Name", :value => host.name)
-        instance.add_tag("department", :value => @options[:department])
-        instance.add_tag("project", :value => @options[:project])
-
         @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
       end
 
@@ -226,23 +233,41 @@ module Beaker
           backoff_sleep(tries)
         end
 
-        # Set the IP to be the dns_name of the host, yes I know its not an IP.
-        host['ip'] = instance.dns_name
       end
     end
 
-    # Populate the hosts IP address and vmhostname entry from the EC2 dns_name
+    #Add metadata tags to all instances
+    #
+    # @return [void]
+    # @api private
+    def add_tags
+      @hosts.each do |host|
+        instance = host['instance']
+
+        # Define tags for the instance
+        @logger.notify("aws-sdk: Add tags for #{host.name}")
+        instance.add_tag("jenkins_build_url", :value => @options[:jenkins_build_url])
+        instance.add_tag("Name", :value => host.name)
+        instance.add_tag("department", :value => @options[:department])
+        instance.add_tag("project", :value => @options[:project])
+      end
+
+      nil
+    end
+
+    # Populate the hosts IP address from the EC2 dns_name
     #
     # @return [void]
     # @api private
     def populate_dns
       # Obtain the IP addresses and dns_name for each host
       @hosts.each do |host|
+        @logger.notify("aws-sdk: Populate DNS for #{host.name}")
         instance = host['instance']
-        host['vmhostname'] = instance.dns_name
         host['ip'] = instance.ip_address
         host['private_ip'] = instance.private_ip_address
-        @logger.notify("aws-sdk: name: #{host.name} vmhostname: #{host['vmhostname']} ip: #{host['ip']} private_ip: #{host['private_ip']}")
+        host['dns_name'] = instance.dns_name
+        @logger.notify("aws-sdk: name: #{host.name} ip: #{host['ip']} private_ip: #{host['private_ip']} dns_name: #{instance.dns_name}")
       end
 
       nil
@@ -253,10 +278,21 @@ module Beaker
     # @return [void]
     # @api private
     def configure_hosts
-      base = "127.0.0.1\tlocalhost localhost.localdomain\n"
       @hosts.each do |host|
-        hn = host.hostname
-        etc_hosts = base + "#{host['private_ip']}\t#{hn} #{hn.split(".")[0]}\n"
+        etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
+        name = host.name
+        domain = get_domain_name(host)
+        ip = host['private_ip']
+        etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{host['dns_name']}\n"
+        @hosts.each do |neighbor|
+          if neighbor == host
+            next
+          end
+          name = neighbor.name
+          domain = get_domain_name(neighbor)
+          ip = neighbor['ip']
+          etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{neighbor['dns_name']}\n"
+        end
         set_etc_hosts(host, etc_hosts)
       end
     end
@@ -268,7 +304,7 @@ module Beaker
     # @api private
     def set_hostnames
       @hosts.each do |host|
-        host.exec(Command.new("hostname #{host['vmhostname']}"))
+        host.exec(Command.new("hostname #{host.name}"))
       end
     end
 
