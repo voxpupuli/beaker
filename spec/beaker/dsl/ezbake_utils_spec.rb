@@ -128,7 +128,7 @@ describe ClassMixedWithEZBakeUtils do
   RSpec.shared_examples "installs-ezbake-dependencies" do
     it "installs ezbake dependencies" do
       expect(subject).to receive(:install_package).
-        with( kind_of(FakeHost), anything(), anything())
+        with( kind_of(Beaker::Host), anything(), anything())
       subject.install_ezbake_deps host
     end
   end
@@ -136,7 +136,7 @@ describe ClassMixedWithEZBakeUtils do
   describe '#install_ezbake_deps' do
     let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
     let(:host) do
-      FakeHost.new( :options => { 'platform' => platform })
+      FakeHost.create('fakevm', platform.to_s)
     end
 
     before do
@@ -164,23 +164,22 @@ describe ClassMixedWithEZBakeUtils do
   def install_from_ezbake_common_expects
     expect(subject).to receive(:`).with(/rake package:tar/).ordered
     expect(subject).to receive(:scp_to).
-      with( kind_of(FakeHost), anything(), anything()).ordered
+      with( kind_of(Beaker::Host), anything(), anything()).ordered
     expect(subject).to receive(:on).
-      with( kind_of(FakeHost), /tar -xzf/).ordered
+      with( kind_of(Beaker::Host), /tar -xzf/).ordered
     expect(subject).to receive(:on).
-      with( kind_of(FakeHost), /make -e install-#{EZBAKE_CONFIG_EXAMPLE[:real_name]}/).ordered
+      with( kind_of(Beaker::Host), /make -e install-#{EZBAKE_CONFIG_EXAMPLE[:real_name]}/).ordered
   end
 
   describe '#install_from_ezbake' do
     let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
     let(:host) do
-      FakeHost.new( :options => { 'platform' => platform })
+      FakeHost.create('fakevm', platform.to_s)
     end
 
     before do
       allow(subject).to receive(:ezbake_tools_available?) { true }
     end
-
 
     context "for non *nix-like platforms" do
       let( :platform ) { Beaker::Platform.new('windows-7-i386') }
@@ -212,7 +211,7 @@ describe ClassMixedWithEZBakeUtils do
         }.ordered
         install_from_ezbake_common_expects
         expect(subject).to receive(:on).
-          with( kind_of(FakeHost), /install-rpm-sysv-init/).ordered
+          with( kind_of(Beaker::Host), /install-rpm-sysv-init/).ordered
         subject.install_from_ezbake host, "blah", "blah"
       end
 
@@ -228,7 +227,7 @@ describe ClassMixedWithEZBakeUtils do
       it "skips ezbake_stage" do
         install_from_ezbake_common_expects
         expect(subject).to receive(:on).
-          with( kind_of(FakeHost), /install-rpm-sysv-init/).ordered
+          with( kind_of(Beaker::Host), /install-rpm-sysv-init/).ordered
         subject.install_from_ezbake host, "blah", "blah"
       end
 

@@ -24,6 +24,86 @@ module Beaker
       expect( host['value'] ).to be === 'blarg'
     end
 
+    describe "host types" do
+      let(:options) { Beaker::Options::OptionsHash.new }
+
+      it "can be a pe host" do
+        options['type'] = 'pe'
+        expect(host.is_pe?).to be_true
+        expect(host.use_service_scripts?).to be_true
+        expect(host.is_using_passenger?).to be_true
+        expect(host.graceful_restarts?).to be_false
+      end
+
+      it "can be a foss-source host" do
+        expect(host.is_pe?).to be_false
+        expect(host.use_service_scripts?).to be_false
+        expect(host.is_using_passenger?).to be_false
+      end
+
+      it "can be a foss-package host" do
+        options['use-service'] = true
+        expect(host.is_pe?).to be_false
+        expect(host.use_service_scripts?).to be_true
+        expect(host.is_using_passenger?).to be_false
+        expect(host.graceful_restarts?).to be_false
+      end
+
+      it "can be a foss-packaged host using passenger" do
+        host.uses_passenger!
+        expect(host.is_pe?).to be_false
+        expect(host.use_service_scripts?).to be_true
+        expect(host.is_using_passenger?).to be_true
+        expect(host.graceful_restarts?).to be_true
+      end
+    end
+
+    describe "uses_passenger!" do
+      it "sets passenger property" do
+        host.uses_passenger!
+        expect(host['passenger']).to be_true
+        expect(host.is_using_passenger?).to be_true
+      end
+
+      it "sets puppetservice" do
+        host.uses_passenger!('servicescript')
+        expect(host['puppetservice']).to eq('servicescript')
+      end
+
+      it "sets puppetservice to apache2 by default" do
+        host.uses_passenger!
+        expect(host['puppetservice']).to eq('apache2')
+      end
+    end
+
+    describe "graceful_restarts?" do
+      it "is true if graceful-restarts property is set true" do
+        options['graceful-restarts'] = true
+        expect(host.graceful_restarts?).to be_true
+      end
+
+      it "is false if graceful-restarts property is set false" do
+        options['graceful-restarts'] = false
+        expect(host.graceful_restarts?).to be_false
+      end
+
+      it "is false if is_pe and graceful-restarts is nil" do
+        options['type'] = 'pe'
+        expect(host.graceful_restarts?).to be_false
+      end
+
+      it "is true if is_pe and graceful-restarts is true" do
+        options['type'] = 'pe'
+        options['graceful-restarts'] = true
+        expect(host.graceful_restarts?).to be_true
+      end
+
+      it "falls back to passenger property if not pe and graceful-restarts is nil" do
+        host.uses_passenger!
+        expect(host.graceful_restarts?).to be_true
+      end
+    end
+
     describe "windows hosts" do
       describe "install_package" do
         let(:cygwin) { 'setup-x86.exe' }

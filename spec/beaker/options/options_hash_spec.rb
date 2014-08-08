@@ -17,12 +17,12 @@ module Beaker
       end
 
       it "supports is_pe?, defaults to pe" do
-        expect(options.is_pe?) === true
+        expect(options.is_pe?).to be_true
       end
 
       it "supports is_pe?, respects :type == foss" do
         options[:type] = 'foss'
-        expect(options.is_pe?) === false
+        expect(options.is_pe?).to be_false
       end
 
       it "can delete by string of symbol key" do
