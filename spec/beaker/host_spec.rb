@@ -161,7 +161,7 @@ module Beaker
         conn_args = args + [ nil ]
 
         logger.should_receive(:debug)
-        conn.should_receive(:scp_to).with( *conn_args )
+        conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_scp_to *args
       end
@@ -216,7 +216,7 @@ module Beaker
             if file !~ /#{exclude_file}/
               file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]
               conn_args = file_args + [ nil ]
-              conn.should_receive(:scp_to).with( *conn_args )
+              conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             end
           end
 
@@ -238,7 +238,7 @@ module Beaker
           (@fileset2).each do |file|
             file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]
             conn_args = file_args + [ nil ]
-            conn.should_receive(:scp_to).with( *conn_args )
+            conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
           end
 
           host.do_scp_to *args
@@ -256,7 +256,7 @@ module Beaker
         conn_args = args + [ nil ]
 
         logger.should_receive(:debug)
-        conn.should_receive(:scp_from).with( *conn_args )
+        conn.should_receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_scp_from *args
       end
