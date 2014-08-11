@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 17 Jul, 2014 (b0558827)](#LATEST)
+* [LATEST - 11 Aug, 2014 (d0719d5d)](#LATEST)
+* [beaker1.16.0 - 17 Jul, 2014 (c1267696)](#beaker1.16.0)
 * [beaker1.15.0 - 8 Jul, 2014 (82bb4ef9)](#beaker1.15.0)
 * [beaker1.14.1 - 3 Jul, 2014 (d2e750d5)](#beaker1.14.1)
 * [beaker1.14.0 - 3 Jul, 2014 (cf8ea838)](#beaker1.14.0)
@@ -51,7 +52,658 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 17 Jul, 2014 (b0558827)
+### <a name = "LATEST">LATEST - 11 Aug, 2014 (d0719d5d)
+
+* (GEM) create beaker 1.17.0 gem (b2528072)
+
+* Merge pull request #336 from anodelman/higgs-installer (2d65b8d0)
+
+
+```
+Merge pull request #336 from anodelman/higgs-installer
+
+(QENG-751) Request for Higgs support in installing beaker
+```
+* Merge pull request #391 from waynr/fix/qeng-903-jvm-puppet-debian-support (d0719d5d)
+
+
+```
+Merge pull request #391 from waynr/fix/qeng-903-jvm-puppet-debian-support
+
+(QENG-903) Debian platform support for jvm-puppet.
+```
+* Merge pull request #395 from waynr/feature/QENG-922-puppet-user-group-methods (3ebc92c1)
+
+
+```
+Merge pull request #395 from waynr/feature/QENG-922-puppet-user-group-methods
+
+(QENG-922) Add `puppet_user` and `puppet_group` DSL methods.
+```
+* Merge pull request #390 from jpartlow/issue/master/qeng-188-foss-service-restarts-pe-unchanged (884cb9ae)
+
+
+```
+Merge pull request #390 from jpartlow/issue/master/qeng-188-foss-service-restarts-pe-unchanged
+
+(QENG-188) Allow foss runs to use service scripts (pe unchanged)
+```
+* Merge pull request #385 from anodelman/scp-repair (6e0fcbaa)
+
+
+```
+Merge pull request #385 from anodelman/scp-repair
+
+(QENG-1012) (gh-143) beaker scp moving data one byte at a time
+```
+* Merge pull request #387 from colinPL/qeng_1032 (32160885)
+
+
+```
+Merge pull request #387 from colinPL/qeng_1032
+
+(QENG-1032) Fix for tests without a master host
+```
+* Merge pull request #392 from anodelman/maint (75b61a36)
+
+
+```
+Merge pull request #392 from anodelman/maint
+
+(MAINT)(gh-210) series of commits to get beaker smoketest working in ec2
+```
+* (gh-210) Setting PATH, ignored :environment option (ad22e590)
+
+
+```
+(gh-210) Setting PATH, ignored :environment option
+
+- we do not correctly handle adding additional environment variables to
+  puppet commands, this patch allows you to add those env vars
+```
+* Merge pull request #389 from waynr/revert/qeng-188 (42f28681)
+
+
+```
+Merge pull request #389 from waynr/revert/qeng-188
+
+Revert "(QENG-188) Allow foss runs to use service scripts, take 2"
+```
+* Revert "(QENG-188) Allow foss runs to use service scripts, take 2" (1d9300bc)
+
+
+```
+Revert "(QENG-188) Allow foss runs to use service scripts, take 2"
+
+This reverts commit 577fce4dcaf4c6879157fd51777d6691eae1496d.
+```
+* Merge pull request #384 from jpartlow/issue/master/qeng-188-better-foss-service-restarts (4c991d24)
+
+
+```
+Merge pull request #384 from jpartlow/issue/master/qeng-188-better-foss-service-restarts
+
+(QENG-188) Allow foss runs to use service scripts, take 2
+```
+* (QENG-1032) Fix for tests without a master host (76329613)
+
+
+```
+(QENG-1032) Fix for tests without a master host
+
+If a master role is not defined in the current test's config, then
+setting a default node will fail. The code is expecting "hosts" to be a
+list, but it is actually a hash. This commit fixes this issue and
+adds a new spec test to validate a non-master single node is set as
+default.
+```
+* (QENG-903) Debian platform support for jvm-puppet. (e1c336db)
+
+
+```
+(QENG-903) Debian platform support for jvm-puppet.
+
+A couple simple fixes for previously unvisited code paths.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Merge pull request #330 from anodelman/scp-ignore (5144958f)
+
+
+```
+Merge pull request #330 from anodelman/scp-ignore
+
+(QENG-762) add support to beaker scp_to/scp_from to ignore files of ...
+```
+* Merge pull request #371 from anodelman/xml (7d1771f4)
+
+
+```
+Merge pull request #371 from anodelman/xml
+
+(QENG-845) Beaker junit xml: XML Parsing error
+```
+* (MAINT) aws_sdk support repairs (8d318540)
+
+
+```
+(MAINT) aws_sdk support repairs
+
+- vmhostname was being set incorrectly and breaking PE installation
+- move instance metadata tag addition to after instance is running
+- /etc/hosts generation fixed so that it has entries for all other hosts
+  on each individual host
+- add agent listen port (8139)
+- fix zombie killing by correctly handling volumes that may not exist
+  when attempted deletion occurs
+```
+* (QENG-1012) (gh-143) beaker scp moving data one byte at a time (8a4a72a8)
+
+
+```
+(QENG-1012) (gh-143) beaker scp moving data one byte at a time
+
+- force chunk_size during transfer
+- print more debug metrics so that we can monitor how quickly files are
+  moved
+```
+* Merge pull request #362 from anodelman/revert-343-revert-237-role-repair (82f759c5)
+
+
+```
+Merge pull request #362 from anodelman/revert-343-revert-237-role-repair
+
+(QENG-431) expanded and improved role support in beaker
+```
+* Merge pull request #381 from waynr/feature/qeng-969-add-modify-tk-config-dsl-method (30971c2b)
+
+
+```
+Merge pull request #381 from waynr/feature/qeng-969-add-modify-tk-config-dsl-method
+
+(QENG-969) Fix bug introduced with last patch.
+```
+* Merge pull request #370 from anodelman/junit (a3733322)
+
+
+```
+Merge pull request #370 from anodelman/junit
+
+(QENG-819) stderr collected for each testcase is incorrect...
+```
+* Merge pull request #375 from waynr/feature/qeng-997-add-pe-installer-answer-for-jvm-puppet (d6f8792a)
+
+
+```
+Merge pull request #375 from waynr/feature/qeng-997-add-pe-installer-answer-for-jvm-puppet
+
+(QENG-997) Add PE installer answer for jvm puppet.
+```
+* Merge pull request #374 from justinstoller/bug/master/QENG-989_gem_install_on_solaris (fd4e7279)
+
+
+```
+Merge pull request #374 from justinstoller/bug/master/QENG-989_gem_install_on_solaris
+
+(QENG-989,990) Clean up open source install rough edges
+```
+* (QENG-969) Fix bug introduced with last patch. (ab510c71)
+
+
+```
+(QENG-969) Fix bug introduced with last patch.
+
+Last patch addressed some PR comments regarding coding style and led to bug
+which is now fixed.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Merge pull request #378 from waynr/feature/qeng-969-add-modify-tk-config-dsl-method (4449be0f)
+
+
+```
+Merge pull request #378 from waynr/feature/qeng-969-add-modify-tk-config-dsl-method
+
+Feature/qeng 969 add modify tk config dsl method
+```
+* (MAINT) add 61613 to open port list for ec2 instances (fa34996c)
+
+
+```
+(MAINT) add 61613 to open port list for ec2 instances
+
+- 61613 needs to be open for MCO to work correctly
+```
+* Merge pull request #355 from doug-rosser/atop_integration (3c09294c)
+
+
+```
+Merge pull request #355 from doug-rosser/atop_integration
+
+(QENG-807) add --collect-perf-data option, rspec tests, and yard docs
+```
+* (QENG-969) Addresss PR feedback. (ed31f189)
+
+
+```
+(QENG-969) Addresss PR feedback.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-922) Add `puppet_user` and `puppet_group` DSL methods. (2cf5ef87)
+
+
+```
+(QENG-922) Add `puppet_user` and `puppet_group` DSL methods.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Remove dead line of code (a423d969)
+
+* (QENG-969) Update `with_puppet_running_on` spec test. (db5b45f1)
+
+
+```
+(QENG-969) Update `with_puppet_running_on` spec test.
+
+Test that `with_puppet_running_on` actually uses `modify_tk_conf` when the
+circumstances are right.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-969) Add modify_tk_config DSL method. (1aad9e7d)
+
+
+```
+(QENG-969) Add modify_tk_config DSL method.
+
+Comes with some "private" helper methods for reading tk config strings and
+merging or replacing the SUT config file using Beaker::Options::OptionsHash
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-997) Add PE installer answer for jvm puppet. (b06b6313)
+
+
+```
+(QENG-997) Add PE installer answer for jvm puppet.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-989,990) Clean up open source install rough edges (408b730a)
+
+
+```
+(QENG-989,990) Clean up open source install rough edges
+
+This ensures that puppet and friends are available after gem installs on
+Solaris and Debian. It also makes sure that the config directory and
+hiera.yaml file are aways present. The former change fixes QENG-989 while
+the latter fixes QENG-990).
+
+[edit: to address pull request comments]
+```
+* Merge pull request #365 from anodelman/maint (01c7ac7a)
+
+
+```
+Merge pull request #365 from anodelman/maint
+
+(QENG-941) create contributor documentation for beaker
+```
+* Merge pull request #369 from anodelman/options-hash (9215548a)
+
+
+```
+Merge pull request #369 from anodelman/options-hash
+
+(gh-333) Typo in method name ('has' instead of 'hash') in ...
+```
+* Merge pull request #296 from anodelman/confine-agents (78a75ce6)
+
+
+```
+Merge pull request #296 from anodelman/confine-agents
+
+(QENG-758) add ability to select a group a beaker hosts based upon...
+```
+* Merge pull request #248 from justinstoller/feature/master/QENG-515-debug_env_vars (4329e6b8)
+
+
+```
+Merge pull request #248 from justinstoller/feature/master/QENG-515-debug_env_vars
+
+(QENG-515) Provide Important Env Vars Set in Debug Output
+```
+* (QENG-845) Beaker junit xml: XML Parsing error (d33c710e)
+
+
+```
+(QENG-845) Beaker junit xml: XML Parsing error
+
+- need to strip out invalid characters from strings before printing to
+  xml, these characters are still invalid even if wrapped in a cdata
+  tag
+```
+* (QENG-819) stderr collected for each testcase is incorrect... (8a5ffb15)
+
+
+```
+(QENG-819) stderr collected for each testcase is incorrect...
+
+...(as seen in beaker xml output)
+
+- keep track of the last result generated through the ssh connection
+- add the last stderr to the junit xml output
+- clear the collected last result before each test case
+```
+* (gh-333) Typo in method name ('has' instead of 'hash') in ... (fa93b233)
+
+
+```
+(gh-333) Typo in method name ('has' instead of 'hash') in ...
+
+... options_hash.rb (line 101)
+
+- yup, fix the typo
+```
+* Merge pull request #368 from anodelman/ec2-killer (73fe9788)
+
+
+```
+Merge pull request #368 from anodelman/ec2-killer
+
+(QENG-968) automate cleanup of zombie ec2 beaker instances generated by jenkins smoketests
+```
+* Merge pull request #367 from anodelman/move-to-ec2 (62ddb7dd)
+
+
+```
+Merge pull request #367 from anodelman/move-to-ec2
+
+(QENG-844) move beaker smoketests over to ec2
+```
+* (QENG-968) automate cleanup of zombie ec2 beaker instances... (505a80fb)
+
+
+```
+(QENG-968) automate cleanup of zombie ec2 beaker instances...
+
+... generated by jenkins smoketests
+
+- add support to aws_sdk hypervisor to kill zombies that have alive
+  longer than a given amount of hours
+- make it possible to run beaker without a hosts_file, thus making it a
+  script executor
+```
+* Merge pull request #321 from zaphod42/issue/master/race-in-stopping-master (75105eba)
+
+
+```
+Merge pull request #321 from zaphod42/issue/master/race-in-stopping-master
+
+(QENG-840) Replace puppet.conf after stopping master
+```
+* (QENG-844) move beaker smoketests over to ec2 (1ee634e3)
+
+
+```
+(QENG-844) move beaker smoketests over to ec2
+
+- add 'lsb-release' to required packages for debian boxes, it is not in
+  our default ami's
+```
+* (maint) Create default for master-start-curl-retries (2f8bf654)
+
+
+```
+(maint) Create default for master-start-curl-retries
+
+The master-start-curl-retries option did not have a default before.
+Without the default it was possible to end up with a comparison against
+null when retrying a check with curl (for checking that services are
+running). This adds a default of 0 (no retries) to the presets.
+```
+* (QENG-941) create contributor documentation for beaker (5b1fc8a9)
+
+
+```
+(QENG-941) create contributor documentation for beaker
+
+- create CONTRIBUTING.md
+- covers steps necessary before PRs will be merged into Beaker
+```
+* (QENG-431) (cleanup + split out filtering) expanded and improved role support in beaker (83f8aed1)
+
+
+```
+(QENG-431) (cleanup + split out filtering) expanded and improved role support in beaker
+
+- split out filtering from applying the block to hosts
+- block_on now determines if we have a filter or not
+- run_block_on accepts both a set of hosts and an optional filter
+```
+* (QENG-431) (cleanup) expanded and improved role support in beaker (24ba4467)
+
+
+```
+(QENG-431) (cleanup) expanded and improved role support in beaker
+
+- cleanup in response to review comments
+```
+* Revert "Revert "(QENG-431) expanded and improved role support in beaker"" (2e0b33b8)
+
+* Clean up and document reproduction info methods in Beaker::CLI (fbb11f82)
+
+* (maint) Remove unneeded modifications to File (975ff81a)
+
+
+```
+(maint) Remove unneeded modifications to File
+
+These modifications to the FakeFS::File class do not appear to be
+needed. When they are removed all of the tests continue to work as
+before.
+```
+* (QENG-751) Request for Higgs support in installing beaker (ced78c55)
+
+
+```
+(QENG-751) Request for Higgs support in installing beaker
+
+- adds install_higgs command
+- executes against master node
+- downloads pe packages based upon pe_ver/pe_dir
+- goes up to the point in the install where human interaction is
+  required (notices indication in install log that a link has been
+  provided to a web server)
+```
+* (QENG-840) Replace puppet.conf after stopping master (ae264bed)
+
+
+```
+(QENG-840) Replace puppet.conf after stopping master
+
+A webrick master watches the puppet.conf file and will try to reload and
+reapply the settings catalog when it changes. The with_puppet_running_on
+method gets into a race with this behavior, plus bug PUP-2834, because
+it puts the backed up puppet.conf back into place *before* trying to
+shut down the master process. This caused the master to periodically
+read the new configuration, fail in applying it, crash, and then beaker
+would try to kill the process. The process was already dead and the kill
+command ends up failing. This then causes the test to fail.
+
+This changes it so that for webrick masters, the backed up file isn't
+moved back into place until *after* the master has been shut down. Since
+rack masters don't ever try to reread the config file, this doesn't
+affect them. Also, in the rack case, the file needs to be moved into
+place *before* the master is stopped since it is actually fully
+restarted.
+```
+* (QENG-762) add support to beaker scp_to/scp_from to ignore files of ... (53fce7cd)
+
+
+```
+(QENG-762) add support to beaker scp_to/scp_from to ignore files of ...
+
+... certain name/type
+
+- added support to scp_to for an ignore list of files/dirs.  Does not
+  support globbing.
+```
+* (QENG-807) add --collect-perf-data option, rspec tests, and yard docs (8d1a891d)
+
+* (QENG-188) Allow foss runs to use service scripts (44d18d5f)
+
+
+```
+(QENG-188) Allow foss runs to use service scripts
+
+Prior to this commit, any run of beaker with a non-pe master that
+attempted to stand up a master with a particular configuration in order
+to test against it using the with_puppet_running_on() helper would
+always stand up a webrick master by executing `puppet master <args>` and
+then later stop it with `kill`.
+
+The platform team needs to be able to run acceptance suites in which the
+puppetmaster is started/stopped using package provided init scripts, or
+by restarting apache if a passenger puppetmaster package is installed.
+
+This PR takes the approach of enhancing Beaker::Host with a few query
+methods controlled by host properties, either set in the hosts.cfg, or
+directly on a master Beaker::Host instance during the execution of a
+setup step.  The added properties are:
+
+ * 'use-service' : if true, service scripts will be used instead of
+manually starting a webrick master
+ * 'passenger'   : if true, indicates a passenger package has been
+installed, and by default graceful service restarts will be used
+ * 'puppetservice' : the 'puppetservice' property has been added to the
+Beaker::Host::Unix.foss_defaults with the value of 'puppetmaster'.  It
+should be set to the appropriate service script name for passenger if a
+passenger package has been installed.
+ * 'graceful-restarts' : can be set false if you want to stop/start with
+service scripts rather than use graceful restarts when running with
+passenger
+
+The Beaker::Host#uses_passenger! call may be used to set a host
+appropriately for passenger.
+
+The graceful restarts facility of the dsl helper's bounce method assumes
+apache2 was used for passenger and that apach2ctl is available.
+
+Any existing test suite which does not 'opt-in' to any of these service
+host changes by specifying any of the above properties should not be
+effected by this commit.
+
+There is also a spec related change to the FakeHost helper, which
+previously was a stub pretending to provide Beaker::Host like facilities
+and recording commands for review.  This became unwieldy when the
+various query methods for use_service_scripts? is_using_passenger? and
+so forth were added, and the FakeHost has been updated to instead use
+Beaker::Host.create to provide a host instance that is then extended
+with the MockedExec module stubbing the exec facilities for testing.
+```
+* (QENG-188) Allow foss runs to use service scripts, take 2 (577fce4d)
+
+
+```
+(QENG-188) Allow foss runs to use service scripts, take 2
+
+Prior to this commit, any run of beaker with a non-pe master that
+attempted to stand up a master with a particular configuration in order
+to test against it using the with_puppet_running_on() helper would
+always stand up a webrick master by executing `puppet master <args>` and
+then later stop it with `kill`.
+
+The platform team needs to be able to run acceptance suites in which the
+puppetmaster is started/stopped using package provided init scripts, or
+by restarting apache if a passenger puppetmaster package is installed.
+
+This PR takes the approach of enhancing Beaker::Host with a few query
+methods controlled by host properties, either set in the hosts.cfg, or
+directly on a master Beaker::Host instance during the execution of a
+setup step.  The added properties are:
+
+ * 'use-service' : if true, service scripts will be used instead of
+manually starting a webrick master
+ * 'passenger'   : if true, indicates a passenger package has been
+installed, and by default graceful service restarts will be used
+ * 'puppetservice' : the 'puppetservice' property has been added to the
+Beaker::Host::Unix.foss_defaults with the value of 'puppetmaster'.  It
+should be set to the appropriate service script name for passenger if a
+passenger package has been installed.
+ * 'graceful-restarts' : can be set false if you want to stop/start with
+service scripts rather than use graceful restarts when running with
+passenger
+
+The Beaker::Host#uses_passenger! call may be used to set a host
+appropriately for passenger.
+
+The graceful restarts facility of the dsl helper's bounce method assumes
+apache2 was used for passenger and that apach2ctl is available.
+
+Any existing test suite which does not 'opt-in' to any of these service
+host changes by specifying any of the above properties should not be
+effected by this commit.  The exception to this is that PE runs will use
+graceful restarts automatically with this commit.
+
+There is also a spec related change to the FakeHost helper, which
+previously was a stub pretending to provide Beaker::Host like facilities
+and recording commands for review.  This became unwieldy when the
+various query methods for use_service_scripts? is_using_passenger? and
+so forth were added, and the FakeHost has been updated to instead use
+Beaker::Host.create to provide a host instance that is then extended
+with the MockedExec module stubbing the exec facilities for testing.
+```
+* Ensure IS_PE only respects different values (36abc3d8)
+
+
+```
+Ensure IS_PE only respects different values
+
+Previously if we set the IS_PE or BEAKER_IS_PE environment variable at
+all we would automatically make the run a PE run. This caused
+non-obvious behavior for users that set IS_PE=false.
+
+This changes the searching of the environment to only set the :type
+option if [BEAKER_]IS_PE=yes|true.
+
+Signed-off-by: Justin Stoller <justin@puppetlabs.com>
+```
+* Improve documentation and readability of environment parsing improvements (b27ac271)
+
+* (QENG-758) add ability to select a group a beaker hosts based upon... (6acb6147)
+
+
+```
+(QENG-758) add ability to select a group a beaker hosts based upon...
+
+...a set of properties
+
+- a shortcut means of selecting a sub group of hosts to run commands on
+```
+* (QENG-5156) Provide Important Env Vars Set in Debug Output (88c18537)
+
+
+```
+(QENG-5156) Provide Important Env Vars Set in Debug Output
+
+This provides the Environment Variables that are pertinent to running
+Beaker as an error message after a failed run or as a debug message
+on a successful run in the debug log level.
+```
+### <a name = "beaker1.16.0">beaker1.16.0 - 17 Jul, 2014 (c1267696)
+
+* Merge pull request #366 from anodelman/make-gem (c1267696)
+
+
+```
+Merge pull request #366 from anodelman/make-gem
+
+(HISTORY) update history for release of beaker 1.16.0 gem
+```
+* (HISTORY) update history for release of beaker 1.16.0 gem (385f65c6)
 
 * Merge pull request #364 from anodelman/make-gem (b0558827)
 
