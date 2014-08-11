@@ -1,4 +1,6 @@
-# Generates a HISTORY.md file for your repo based on tags and commits
+# Generates a HISTORY.md file for your repo based on tags and commits, defaults to history for 
+#     master branch but can generate history for specified branch
+#
 # Requires: gem install gitlab-grit
 # Usage: ruby history.rb /your/repo/directory
 #
@@ -7,16 +9,17 @@
 require 'grit'
 
 if ARGV.size < 1
-  p "Usage: ruby history.rb /your/repo/directory"
+  p "Usage: ruby history.rb /your/repo/directory branch(defaults to master)"
   exit
 end
 
 output_file = 'HISTORY.md'
 repo_dir = ARGV[0]
+branch = ARGV[1] || 'master'
 output = "# #{File.basename(File.absolute_path(repo_dir))} - History\n"
 
 repo = Grit::Repo.new(repo_dir)
-head = Grit::Tag.new(repo.commits.first.sha, repo, repo.commits.first.id)
+head = Grit::Tag.new(repo.commits(branch).first.sha, repo, repo.commits(branch).first.id)
 tags = repo.tags + [head]
 tags.sort! {|x,y| y.commit.authored_date <=> x.commit.authored_date}
 
