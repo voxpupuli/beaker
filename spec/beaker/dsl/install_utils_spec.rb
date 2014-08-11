@@ -277,10 +277,6 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :hosts ).and_return( hosts )
       #determine mastercert
       subject.should_receive( :on ).with( hosts[0], /uname/ ).once
-      #create working dirs per-host
-      subject.should_receive( :on ).with( hosts[0], /mkdir/ ).once
-      subject.should_receive( :on ).with( hosts[1], /mkdir/ ).once
-      subject.should_receive( :on ).with( hosts[2], /mkdir/ ).once
       #create answers file per-host, except windows
       subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts
@@ -315,6 +311,56 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts, opts )
     end
+  end
+
+  describe 'do_higgs_install' do
+
+    before :each do
+      my_time = double( "time double" )
+      my_time.stub( :strftime ).and_return( "2014-07-01_15.27.53" )
+      Time.stub( :new ).and_return( my_time )
+
+      hosts[0]['working_dir'] = "tmp/2014-07-01_15.27.53"
+      hosts[0]['dist'] = 'dist'
+      hosts[0]['pe_installer'] = 'pe-installer'
+      hosts[0].stub( :tmpdir ).and_return( "/tmp/2014-07-01_15.27.53" )
+
+      @fail_result = Beaker::Result.new( {}, '' )
+      @fail_result.stdout = "No match here"
+      @success_result = Beaker::Result.new( {}, '' )
+      @success_result.stdout = "Please go to https://website in your browser to continue installation"
+    end
+
+    it 'can perform a simple installation' do
+      subject.stub( :fetch_puppet ).and_return( true )
+      subject.stub( :sleep ).and_return( true )
+
+      subject.stub( :hosts ).and_return( hosts )
+
+      #run higgs installer command
+      subject.should_receive( :on ).with( hosts[0],
+                                         "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
+                                        opts ).once
+      #check to see if the higgs installation has proceeded correctly, works on second check
+      subject.should_receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).and_return( @fail_result, @success_result )
+      subject.do_higgs_install( hosts[0], opts )
+    end
+
+    it 'fails out after checking installation log 10 times' do
+      subject.stub( :fetch_puppet ).and_return( true )
+      subject.stub( :sleep ).and_return( true )
+
+      subject.stub( :hosts ).and_return( hosts )
+
+      #run higgs installer command
+      subject.should_receive( :on ).with( hosts[0],
+                                         "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
+                                        opts ).once
+      #check to see if the higgs installation has proceeded correctly, works on second check
+      subject.should_receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).exactly(10).times.and_return( @fail_result )
+      expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error
+    end
+
   end
 
   describe '#install_puppet' do
@@ -423,6 +469,20 @@ describe ClassMixedWithDSLInstallUtils do
         expect( h['pe_ver'] ).to be === '2.8'
       end
     end
+  end
+
+  describe 'install_higgs' do
+    it 'fills in missing pe_ver' do
+      hosts[0]['pe_ver'] = nil
+      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
+      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      subject.stub( :options ).and_return( {} )
+      subject.stub( :do_higgs_install ).and_return( true )
+      subject.should_receive( :do_higgs_install ).with( hosts[0], {} )
+      subject.install_higgs
+      expect( hosts[0]['pe_ver'] ).to be === '2.8'
+    end
+
   end
 
   describe 'upgrade_pe' do

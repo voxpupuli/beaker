@@ -172,6 +172,17 @@ module Beaker
         end
       end
 
+      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a 
+      #background process.  The output of the command will be stored in the provided host['higgs_file'].
+      # @param [Host] host The host that Higgs is to be installed on
+      #                    The host object must have the 'working_dir', 'dist' and 'pe_installer' field set correctly.
+      # @api private
+      def higgs_installer_cmd host
+
+        "cd #{host['working_dir']}/#{host['dist']} ; nohup ./#{host['pe_installer']} <<<Y > #{host['higgs_file']} 2>&1 &"
+
+      end
+
       #Determine is a given URL is accessible
       #@param [String] link The URL to examine
       #@return [Boolean] true if the URL has a '200' HTTP response code, false otherwise
@@ -420,8 +431,7 @@ module Beaker
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
           end
-          host['working_dir'] = "/tmp/" + Time.new.strftime("%Y-%m-%d_%H.%M.%S") #unique working dirs make me happy
-          on host, "mkdir #{host['working_dir']}"
+          host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
         end
 
         fetch_puppet(hosts, opts)
@@ -491,6 +501,57 @@ module Beaker
         # Now that all hosts are in the dashbaord, run puppet one more
         # time to configure mcollective
         on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+      end
+
+      #Perform a Puppet Enterprise Higgs install up until web browser interaction is required, runs on linux hosts only.
+      # @param [Host] host The host to install higgs on
+      # @param  [Hash{Symbol=>Symbol, String}] opts The options
+      # @option opts [String] :pe_dir Default directory or URL to pull PE package from
+      #                  (Otherwise uses individual hosts pe_dir)
+      # @option opts [String] :pe_ver Default PE version to install 
+      #                  (Otherwise uses individual hosts pe_ver)
+      # @raise [StandardError] When installation times out
+      #
+      # @example
+      #  do_higgs_install(master, {:pe_dir => path, :pe_ver => version})
+      #
+      # @api private
+      #
+      def do_higgs_install host, opts
+        use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
+        platform = use_all_tar ? 'all' : host['platform']
+        version = host['pe_ver'] || opts[:pe_ver]
+        host['dist'] = "puppet-enterprise-#{version}-#{platform}"
+
+        use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
+        host['pe_installer'] ||= 'puppet-enterprise-installer'
+        host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
+
+        fetch_puppet([host], opts)
+
+        host['higgs_file'] = "higgs_#{File.basename(host['working_dir'])}.log"
+        on host, higgs_installer_cmd(host), opts
+
+        #wait for output to host['higgs_file']
+        #we're all done when we find this line in the PE installation log
+        higgs_re = /Please\s+go\s+to\s+https:\/\/.*\s+in\s+your\s+browser\s+to\s+continue\s+installation/m
+        res = Result.new(host, 'tmp cmd')
+        tries = 10
+        attempts = 0
+        prev_sleep = 0
+        cur_sleep = 1
+        while (res.stdout !~ higgs_re) and (attempts < tries)
+          res = on host, "cd #{host['working_dir']}/#{host['dist']} && cat #{host['higgs_file']}", :acceptable_exit_codes => (0..255)
+          attempts += 1
+          sleep( cur_sleep )
+          prev_sleep = cur_sleep
+          cur_sleep = cur_sleep + prev_sleep
+        end
+
+        if attempts >= tries
+          raise "Failed to kick off PE (Higgs) web installation"
+        end
+
       end
 
       #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
@@ -935,6 +996,29 @@ module Beaker
           raise "No repository installation step for #{variant} yet..."
         end
       end
+
+      #Install Higgs up till the point where you need to continue installation in a web browser, defaults to execution
+      #on the master node.
+      #@param [Host] higgs_host The host to install Higgs on (supported on linux platform only)
+      # @example
+      #  install_higgs
+      #
+      # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
+      #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz).
+      #
+      # @api dsl
+      def install_higgs( higgs_host = master )
+        #process the version files if necessary
+        master['pe_dir'] ||= options[:pe_dir]
+        master['pe_ver'] = master['pe_ver'] || options['pe_ver'] ||
+          Beaker::Options::PEVersionScraper.load_pe_version(master[:pe_dir] || options[:pe_dir], options[:pe_version_file])
+        if higgs_host['platform'] =~ /osx|windows/
+          raise "Attempting higgs installation on host #{higgs_host.name} with unsupported platform #{higgs_host['platform']}"
+        end
+        #send in the global options hash
+        do_higgs_install higgs_host, options
+      end
+
     end
   end
 end
