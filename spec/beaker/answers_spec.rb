@@ -73,13 +73,6 @@ module Beaker
           expect( host[:answers] ).to be === answers[host.name]
         end
       end
-
-      it 'should add q_jvm_puppetmaster to the master answers' do
-        @ver = '3.4'
-        answers = subject.answers( hosts, master_certname, options )
-        expect( subject.answers( hosts, master_certname, options )['vm1']).to include :q_jvm_puppetmaster
-      end
-
     end
 
     describe Version32 do
