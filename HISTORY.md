@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 11 Aug, 2014 (d0719d5d)](#LATEST)
+* [LATEST - 12 Aug, 2014 (0cb4134e)](#LATEST)
+* [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
 * [beaker1.16.0 - 17 Jul, 2014 (c1267696)](#beaker1.16.0)
 * [beaker1.15.0 - 8 Jul, 2014 (82bb4ef9)](#beaker1.15.0)
 * [beaker1.14.1 - 3 Jul, 2014 (d2e750d5)](#beaker1.14.1)
@@ -52,7 +53,59 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 11 Aug, 2014 (d0719d5d)
+### <a name = "LATEST">LATEST - 12 Aug, 2014 (0cb4134e)
+
+* (HISTORY) update HISTORY.md for 1.17.1 gem (0cb4134e)
+
+* (GEM) create beaker 1.17.1 gem (07b67f32)
+
+* Merge pull request #397 from anodelman/maint (3e86c6f8)
+
+
+```
+Merge pull request #397 from anodelman/maint
+
+(MAINT) add ability to generate history for branch other than 'master'
+```
+* Merge pull request #398 from nicklewis/revert-jvm-master (d9c67d1e)
+
+
+```
+Merge pull request #398 from nicklewis/revert-jvm-master
+
+Revert "(QENG-997) Add PE installer answer for jvm puppet."
+```
+* Revert "(QENG-997) Add PE installer answer for jvm puppet." (215e115f)
+
+
+```
+Revert "(QENG-997) Add PE installer answer for jvm puppet."
+
+This reverts commit b06b6313de24da82a031b6b04dc95042812b4445.
+
+The installer doesn't actually function with this answer set, so we
+certainly shouldn't be making it the default.
+```
+* (MAINT) add ability to generate history for branch other than 'master' (76ad94d5)
+
+
+```
+(MAINT) add ability to generate history for branch other than 'master'
+
+- want to be able to generate a new HISTORY.md file based upon a
+  provided branch name
+```
+### <a name = "beaker1.17.0">beaker1.17.0 - 12 Aug, 2014 (fb482b56)
+
+* Merge pull request #396 from anodelman/make-gem (fb482b56)
+
+
+```
+Merge pull request #396 from anodelman/make-gem
+
+(GEM) create beaker 1.17.0 gem
+```
+* (HISTORY) add history for 1.17.0 gem (c04acf4d)
 
 * (GEM) create beaker 1.17.0 gem (b2528072)
 
@@ -553,57 +606,6 @@ restarted.
 ```
 * (QENG-807) add --collect-perf-data option, rspec tests, and yard docs (8d1a891d)
 
-* (QENG-188) Allow foss runs to use service scripts (44d18d5f)
-
-
-```
-(QENG-188) Allow foss runs to use service scripts
-
-Prior to this commit, any run of beaker with a non-pe master that
-attempted to stand up a master with a particular configuration in order
-to test against it using the with_puppet_running_on() helper would
-always stand up a webrick master by executing `puppet master <args>` and
-then later stop it with `kill`.
-
-The platform team needs to be able to run acceptance suites in which the
-puppetmaster is started/stopped using package provided init scripts, or
-by restarting apache if a passenger puppetmaster package is installed.
-
-This PR takes the approach of enhancing Beaker::Host with a few query
-methods controlled by host properties, either set in the hosts.cfg, or
-directly on a master Beaker::Host instance during the execution of a
-setup step.  The added properties are:
-
- * 'use-service' : if true, service scripts will be used instead of
-manually starting a webrick master
- * 'passenger'   : if true, indicates a passenger package has been
-installed, and by default graceful service restarts will be used
- * 'puppetservice' : the 'puppetservice' property has been added to the
-Beaker::Host::Unix.foss_defaults with the value of 'puppetmaster'.  It
-should be set to the appropriate service script name for passenger if a
-passenger package has been installed.
- * 'graceful-restarts' : can be set false if you want to stop/start with
-service scripts rather than use graceful restarts when running with
-passenger
-
-The Beaker::Host#uses_passenger! call may be used to set a host
-appropriately for passenger.
-
-The graceful restarts facility of the dsl helper's bounce method assumes
-apache2 was used for passenger and that apach2ctl is available.
-
-Any existing test suite which does not 'opt-in' to any of these service
-host changes by specifying any of the above properties should not be
-effected by this commit.
-
-There is also a spec related change to the FakeHost helper, which
-previously was a stub pretending to provide Beaker::Host like facilities
-and recording commands for review.  This became unwieldy when the
-various query methods for use_service_scripts? is_using_passenger? and
-so forth were added, and the FakeHost has been updated to instead use
-Beaker::Host.create to provide a host instance that is then extended
-with the MockedExec module stubbing the exec facilities for testing.
-```
 * (QENG-188) Allow foss runs to use service scripts, take 2 (577fce4d)
 
 
@@ -647,6 +649,57 @@ Any existing test suite which does not 'opt-in' to any of these service
 host changes by specifying any of the above properties should not be
 effected by this commit.  The exception to this is that PE runs will use
 graceful restarts automatically with this commit.
+
+There is also a spec related change to the FakeHost helper, which
+previously was a stub pretending to provide Beaker::Host like facilities
+and recording commands for review.  This became unwieldy when the
+various query methods for use_service_scripts? is_using_passenger? and
+so forth were added, and the FakeHost has been updated to instead use
+Beaker::Host.create to provide a host instance that is then extended
+with the MockedExec module stubbing the exec facilities for testing.
+```
+* (QENG-188) Allow foss runs to use service scripts (44d18d5f)
+
+
+```
+(QENG-188) Allow foss runs to use service scripts
+
+Prior to this commit, any run of beaker with a non-pe master that
+attempted to stand up a master with a particular configuration in order
+to test against it using the with_puppet_running_on() helper would
+always stand up a webrick master by executing `puppet master <args>` and
+then later stop it with `kill`.
+
+The platform team needs to be able to run acceptance suites in which the
+puppetmaster is started/stopped using package provided init scripts, or
+by restarting apache if a passenger puppetmaster package is installed.
+
+This PR takes the approach of enhancing Beaker::Host with a few query
+methods controlled by host properties, either set in the hosts.cfg, or
+directly on a master Beaker::Host instance during the execution of a
+setup step.  The added properties are:
+
+ * 'use-service' : if true, service scripts will be used instead of
+manually starting a webrick master
+ * 'passenger'   : if true, indicates a passenger package has been
+installed, and by default graceful service restarts will be used
+ * 'puppetservice' : the 'puppetservice' property has been added to the
+Beaker::Host::Unix.foss_defaults with the value of 'puppetmaster'.  It
+should be set to the appropriate service script name for passenger if a
+passenger package has been installed.
+ * 'graceful-restarts' : can be set false if you want to stop/start with
+service scripts rather than use graceful restarts when running with
+passenger
+
+The Beaker::Host#uses_passenger! call may be used to set a host
+appropriately for passenger.
+
+The graceful restarts facility of the dsl helper's bounce method assumes
+apache2 was used for passenger and that apach2ctl is available.
+
+Any existing test suite which does not 'opt-in' to any of these service
+host changes by specifying any of the above properties should not be
+effected by this commit.
 
 There is also a spec related change to the FakeHost helper, which
 previously was a stub pretending to provide Beaker::Host like facilities
