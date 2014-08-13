@@ -102,6 +102,91 @@ module Beaker
       end
 
       #
+      # Installs `facter`, `hiera`, `puppet` and when needed `win32_ruby`
+      #
+      # @example
+      #   install_puppet_from_git(host,{
+      #    :version        => '3.6.1',
+      #    :facter_version => '2.0.1',
+      #    :hiera_version  => '1.3.3',
+      #   })
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [String] :repo_dir defaults to /opt/puppet-git-repos
+      # @option opts [String] :git_root The root url for your git repository, defaults to git://github.com/puppetlabs
+      # @option opts [String] :win_ruby_arch x86 or x64, defaults to x86
+      # @option opts [String] :version tag or branch to use from Puppet repo
+      # @option opts [String] :hiera_version tag or branch to use from Hiera repo
+      # @option opts [String] :facter_version tag or branch to use from Facter repo
+      #
+      # @api dsl
+      def install_puppet_from_git(host, opts = {})
+        if host.kind_of?(Array)
+          host.each { |h| install_puppet_from_git(h, opts) }
+        else
+          repo_dir = opts[:repo_dir] || host[:platform] =~ /windows/i ? 'c:/puppet-git-repos' : '/opt/puppet-git-repos'
+          git_root = opts[:git_root] || 'git://github.com/puppetlabs'
+          versions = {
+              :facter => opts[:facter_version] || 'master',
+              :hiera => opts[:hiera_version] || 'master',
+              :puppet => opts[:version] || 'master',
+          }
+          install_puppet_win32_ruby(host, opts) if host =~ /windows/i
+          %w{facter hiera puppet}.each { |repo|
+            install_from_git(host, repo_dir,
+                             :name => repo,
+                             :path => "#{git_root}/#{repo}.git",
+                             :revision => versions[repo])
+          }
+          on host, 'mkdir -p /etc/puppet/modules' unless host['platform'] =~ /windows/i
+        end
+      end
+
+      #
+      # Installs Puppet's Win32 Ruby to a given host if Windows, defaults to 2.1.x and determines architecture from host
+      #
+      # @example
+      #   install_puppet_win32_ruby(host, {
+      #     :win_ruby_version => '2.1.x-x64',
+      #     :repo_dir         => 'c:/puppet-git-repos',
+      #   } )
+      # @param [Host] host an object impleteing {Beaker::Hosts}'s interface
+      # @param [Hash{Symbol => String}] opts
+      # @option opts [String] :repo_dir defaults to /opt/puppet-git-repos, directory to install ruby
+      # @option opts [String] :win_ruby_version branch, tag or revision to use when cloning win32-ruby
+      # @option opts [String] :win_ruby_arch architecture version to install, this is when not specifying the win_ruby_version
+      #                         and defaults to parsing the Hosts platform for 'x86_64' or 'x64' otherwise defaults to x86
+      # @api dsl
+      def install_puppet_win32_ruby(host, opts={})
+        git_root = opts[:git_root] || 'git://github.com/puppetlabs'
+        if host['platform'] =~ /windows/i
+          repo_dir = 'c:/puppet-git-repos'
+          arch = opts[:win_ruby_arch] || host[:platform]
+          revision = if opts[:win_ruby_version]
+                       opts[:win_ruby_version]
+                     elsif arch =~ /x64|x86_64/
+                       '2.1.x-x64'
+                     else
+                       '2.1.x-x86'
+                     end
+          install_from_git(host, repo_dir,
+                           :name => 'puppet-win32-ruby',
+                           :path => "#{git_root}/puppet-win32-ruby.git",
+                           :rev => revision)
+          on host, "cd #{repo_dir}/puppet-win32-ruby; cp -r ruby/* /"
+          on host, 'cd /lib; icacls ruby /grant "Everyone:(OI)(CI)(RX)"'
+          on host, 'cd /lib; icacls ruby /reset /T'
+          on host, 'cd /; icacls bin /grant "Everyone:(OI)(CI)(RX)"'
+          on host, 'cd /; icacls bin /reset /T'
+          on host, 'ruby --version'
+          on host, 'cmd /c gem list'
+        end
+      end
+
+
+
+      #
       # @see #find_git_repo_versions
       def install_from_git host, path, repository
         name          = repository[:name]
