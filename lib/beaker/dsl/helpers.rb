@@ -189,6 +189,8 @@ module Beaker
       # @note If using {Beaker::Host} for the hosts *scp* is not
       #   required on the system as it uses Ruby's net/scp library.  The
       #   net-scp gem however is required (and specified in the gemspec.
+      #   When using SCP with Windows it will now auto expand path when
+      #   using `cygpath instead of failing or requiring full path
       #
       # @param [Host, #do_scp_to] host One or more hosts (or some object
       #                                that responds like
@@ -200,6 +202,10 @@ module Beaker
       # @return [Result] Returns the result of the SCP operation
       def scp_to host, from_path, to_path, opts = {}
         block_on host do | host |
+          if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            result = on host, "echo #{to_path}"
+            to_path = result.raw_output.chomp
+          end
           @result = host.do_scp_to(from_path, to_path, opts)
           @result.log logger
           @result
