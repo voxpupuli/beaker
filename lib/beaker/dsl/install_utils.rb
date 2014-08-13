@@ -744,7 +744,7 @@ module Beaker
         else
           host['dist'] = "puppet-#{version}"
         end
-        link = "http://downloads.puppetlabs.com/windows/#{host['dist']}.msi"
+        link = "#{opts[:win_download_url]}/#{host['dist']}.msi"
         if not link_exists?( link )
           raise "Puppet #{version} at #{link} does not exist!"
         end
