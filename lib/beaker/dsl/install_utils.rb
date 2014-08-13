@@ -574,10 +574,13 @@ module Beaker
       #Install FOSS based upon host configuration and options
       # @example will install puppet 3.6.1 from native puppetlabs provided packages wherever possible and will fail over to gem installation when impossible
       #  install_puppet({
-      #    :version        => '3.6.1',
-      #    :facter_version => '2.0.1',
-      #    :hiera_version  => '1.3.3',
-      #    :default_action => 'gem_install'
+      #    :version          => '3.6.1',
+      #    :facter_version   => '2.0.1',
+      #    :hiera_version    => '1.3.3',
+      #    :default_action   => 'gem_install',
+      #
+      #   })
+      #
       #
       # @example Will install latest packages on Enterprise Linux and Debian based distros and fail hard on all othere platforms.
       #  install_puppet()
@@ -585,12 +588,19 @@ module Beaker
       # @note This will attempt to add a repository for apt.puppetlabs.com on
       #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
       #       machines, then install the package 'puppet'.
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [String] :version Version of puppet to download
+      # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
+      # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/(puppet|hiera|facter)-%version%.msi
       #
       # @api dsl
       # @return nil
       # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
       # @raise [FailTest] When error occurs during the actual installation process
       def install_puppet(opts = {})
+        default_download_url = 'http://downloads.puppetlabs.com'
+        opts = {:win_download_url => "#{default_download_url}/windows",
+                :mac_download_url => "#{default_download_url}/mac"}.merge(opts)
         hosts.each do |host|
           if host['platform'] =~ /el-(5|6|7)/
             relver = $1
@@ -637,7 +647,7 @@ module Beaker
       # @return nil
       # @api private
       def install_puppet_from_rpm( host, opts )
-        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
+        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
 
         on host, "rpm -ivh #{release_package_string}"
 
@@ -697,11 +707,12 @@ module Beaker
       # @param [Host] host The host to install packages on
       # @param [Hash{Symbol=>String}] opts An options hash
       # @option opts [String] :version The version of Puppet to install, required
+      # @option opts [String] :win_download_url The url to download puppet from
       # 
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
-        on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
+        on host, "curl -O #{opts[:win_download_url]}/puppet-#{opts[:version]}.msi"
         on host, "msiexec /qn /i puppet-#{opts[:version]}.msi"
 
         #Because the msi installer doesn't add Puppet to the environment path
@@ -728,9 +739,9 @@ module Beaker
         facter_ver = opts[:facter_version]
         hiera_ver = opts[:hiera_version]
 
-        on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{puppet_ver}.dmg"
-        on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{facter_ver}.dmg"
-        on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{hiera_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/puppet-#{puppet_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/facter-#{facter_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/hiera-#{hiera_ver}.dmg"
 
         on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
         on host, "hdiutil attach facter-#{facter_ver}.dmg"
