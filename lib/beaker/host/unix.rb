@@ -19,7 +19,6 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
-        'master-start-curl-retries' => 120,
         'jvm-puppet-confdir' => '/etc/puppetlabs/jvm-puppet/conf.d',
         'puppetservice'    => 'pe-httpd',
         'puppetpath'       => '/etc/puppetlabs/puppet',
@@ -40,7 +39,6 @@ module Unix
       h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
-        'master-start-curl-retries' => 120,
         'jvm-puppet-confdir' => '/etc/jvm-puppet/conf.d',
         'puppetservice'     => 'puppetmaster',
         'puppetpath'        => '/etc/puppet',
