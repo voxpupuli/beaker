@@ -33,6 +33,12 @@ module Beaker
   # Shared methods and helpers
   require 'beaker/shared'
 
+  # utf-8 support in ruby 1.8
+  if RUBY_VERSION.to_f < 1.9
+    require 'jcode'
+    $KCODE="u"
+  end
+
   # Add pry support when available
   begin
     require 'pry'
