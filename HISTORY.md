@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 12 Aug, 2014 (0cb4134e)](#LATEST)
+* [LATEST - 15 Aug, 2014 (f6227484)](#LATEST)
+* [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
 * [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
 * [beaker1.16.0 - 17 Jul, 2014 (c1267696)](#beaker1.16.0)
 * [beaker1.15.0 - 8 Jul, 2014 (82bb4ef9)](#beaker1.15.0)
@@ -53,9 +54,97 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 12 Aug, 2014 (0cb4134e)
+### <a name = "LATEST">LATEST - 15 Aug, 2014 (f6227484)
 
-* (HISTORY) update HISTORY.md for 1.17.1 gem (0cb4134e)
+* (GEM) update version number for 1.17.2 (f6227484)
+
+* Merge pull request #406 from anodelman/ec2 (5799458b)
+
+
+```
+Merge pull request #406 from anodelman/ec2
+
+(QENG-1090) beaker: exception when waiting for instance running in ec2
+```
+* Merge pull request #403 from anodelman/win-fix (956aa18c)
+
+
+```
+Merge pull request #403 from anodelman/win-fix
+
+(QENG-1081) Beaker Fails During Pre-suite in the "install_pe"...
+```
+* Merge pull request #405 from anodelman/utf-8-encoding (410490e4)
+
+
+```
+Merge pull request #405 from anodelman/utf-8-encoding
+
+(QENG-1087) beaker - failure in XML output
+```
+* Merge pull request #404 from anodelman/fix-default (cc38a7f4)
+
+
+```
+Merge pull request #404 from anodelman/fix-default
+
+(QENG-1086) The master-start-curl-retries is preset to...
+```
+* (QENG-1090) beaker: exception when waiting for instance running in ec2 (ae64c8e9)
+
+
+```
+(QENG-1090) beaker: exception when waiting for instance running in ec2
+
+- correctly capture AWS::EC2::Errors::InvalidInstanceID::NotFound when
+  checking status of newly created instance, deal with it as another
+  case that requires a retry
+```
+* (QENG-1087) beaker - failure in XML output (5a392c1a)
+
+
+```
+(QENG-1087) beaker - failure in XML output
+
+- caused by improperly stripping unsupported unicode characters from xml
+  output
+- add inclusion of 'jcode' for ruby 1.8 (included with Ruby and adds
+  lots of useful Unicode-oriented features to String and Regexp)
+- tested on 1.9 and 1.8 and correctly replaced invalid unicode with
+  escaped hex value
+```
+* (QENG-1086) The master-start-curl-retries is preset to... (77610212)
+
+
+```
+(QENG-1086) The master-start-curl-retries is preset to...
+
+...0, which causes default hosts not to retry verifying a bounced master.
+
+- host value being overwritten by default presets
+```
+* (QENG-1081) Beaker Fails During Pre-suite in the "install_pe"... (f08d67b1)
+
+
+```
+(QENG-1081) Beaker Fails During Pre-suite in the "install_pe"...
+
+... Function on Windows
+
+- when using an array of hosts the command object was overwritten and
+  thus the platform specific information was lost
+```
+### <a name = "beaker1.17.1">beaker1.17.1 - 12 Aug, 2014 (72e60299)
+
+* Merge pull request #399 from anodelman/make-gem (72e60299)
+
+
+```
+Merge pull request #399 from anodelman/make-gem
+
+create beaker 1.17.1 gem
+```
+* (HISTORY) update HISTORY.md for 1.17.1 gem (21480832)
 
 * (GEM) create beaker 1.17.1 gem (07b67f32)
 
