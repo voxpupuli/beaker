@@ -223,12 +223,16 @@ module Beaker
         # exponential backoff for each poll.
         # TODO: should probably be a in a shared method somewhere
         for tries in 1..10
-          if instance.status == status
-            # Always sleep, so the next command won't cause a throttle
-            backoff_sleep(tries)
-            break
-          elsif tries == 10
-            raise "Instance never reached state #{status}"
+          begin
+            if instance.status == status
+              # Always sleep, so the next command won't cause a throttle
+              backoff_sleep(tries)
+              break
+            elsif tries == 10
+              raise "Instance never reached state #{status}"
+            end
+          rescue AWS::EC2::Errors::InvalidInstanceID::NotFound => e
+            @logger.debug("Instance #{name} not yet available (#{e})")
           end
           backoff_sleep(tries)
         end
