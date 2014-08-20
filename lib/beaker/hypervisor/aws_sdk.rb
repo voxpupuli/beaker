@@ -101,15 +101,15 @@ module Beaker
         @logger.debug "Reviewing: #{region.name}"
         @ec2.regions[region.name].instances.each do |instance|
           if (instance.key_name =~ /#{key}/)
-            @logger.debug "Examining #{instance.id} (keyname: #{key}, launch time: #{instance.launch_time}, status: #{instance.status})"
-          end
-          if (instance.key_name =~ /#{key}/) and ((time_now - instance.launch_time) >  ZOMBIE*60*60) and instance.status.to_s !~ /terminated/
-            @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
-            begin
-              instance.terminate()
-              kill_count += 1
-            rescue AWS::EC2::Errors => e
-              @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
+            @logger.debug "Examining #{instance.id} (keyname: #{instance.key_name}, launch time: #{instance.launch_time}, status: #{instance.status})"
+            if ((time_now - instance.launch_time) >  max_age*60*60) and instance.status.to_s !~ /terminated/
+              @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
+              begin
+                instance.terminate()
+                kill_count += 1
+              rescue AWS::EC2::Errors => e
+                @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
+              end
             end
           end
         end
