@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 15 Aug, 2014 (f6227484)](#LATEST)
+* [LATEST - 20 Aug, 2014 (92584d1e)](#LATEST)
+* [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
 * [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
 * [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
 * [beaker1.16.0 - 17 Jul, 2014 (c1267696)](#beaker1.16.0)
@@ -54,7 +55,41 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 15 Aug, 2014 (f6227484)
+### <a name = "LATEST">LATEST - 20 Aug, 2014 (92584d1e)
+
+* (GEM) version bump for 1.17.3 gem (92584d1e)
+
+* Merge pull request #408 from anodelman/ec2 (5c8b14c0)
+
+
+```
+Merge pull request #408 from anodelman/ec2
+
+(MAINT) nits in beaker ec2 support
+```
+* (MAINT) nits in beaker ec2 support (3d823291)
+
+
+```
+(MAINT) nits in beaker ec2 support
+
+- correctly identify zombies that are over X hours old
+- better notification of what instances are being examinged for possible
+  termination
+- properly notify user of missing aws_access_key_id and
+  aws_secret_access_key during initialization
+```
+### <a name = "beaker1.17.2">beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)
+
+* Merge pull request #407 from anodelman/make-gem (c6f1f64a)
+
+
+```
+Merge pull request #407 from anodelman/make-gem
+
+create beaker 1.17.2 gem
+```
+* (HISTORY) update history for 1.17.2 gem (d15db7e4)
 
 * (GEM) update version number for 1.17.2 (f6227484)
 
