@@ -119,7 +119,7 @@ module Beaker
           :add_el_extras        => false,
           :release_apt_repo_url => "http://apt.puppetlabs.com",
           :release_yum_repo_url => "http://yum.puppetlabs.com",
-          :dev_builds_url       => "http://builds.puppetlabs.lan",
+          :dev_builds_url       => "http://builds.delivery.puppetlabs.net",
           :consoleport          => 443,
           :pe_dir               => '/opt/enterprise/dists',
           :pe_version_file      => 'LATEST',
