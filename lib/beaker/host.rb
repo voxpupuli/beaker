@@ -291,13 +291,25 @@ module Beaker
 
         # create necessary directory structure on host
         required_dirs = (dir_source.map{ | dir | File.dirname(dir) }).uniq
+        require 'pathname'
+        source_path = Pathname.new(source)
         required_dirs.each do |dir|
-          mkdir_p( File.join(target, dir) )
+          dir_path = Pathname.new(dir)
+          if dir_path.absolute?
+            mkdir_p(File.join(target,dir_path.relative_path_from(source_path)))
+          else
+            mkdir_p( File.join(target, dir) )
+          end
         end
 
         # copy each file to the host
         dir_source.each do |s|
-          file_path = File.join(target, s)
+          s_path = Pathname.new(s)
+          if s_path.absolute?
+            file_path = File.join(target,s_path.relative_path_from(source_path))
+          else
+            file_path = File.join(target, s)
+          end
           result = connection.scp_to(s, file_path, options, $dry_run)
         end
       end
