@@ -92,15 +92,22 @@ module Beaker
     #@param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
     #@param [String] key The key_name to match for
     def kill_zombies(max_age = ZOMBIE, key = key_name)
-      @logger.notify("aws-sdk: Kill Zombies!")
+      @logger.notify("aws-sdk: Kill Zombies! (keyname: #{key}, age: #{max_age} hrs)")
       #examine all available regions
+      kill_count = 0
+      volume_count = 0
+      time_now = Time.now.getgm #ec2 uses GM time
       @ec2.regions.each do |region|
         @logger.debug "Reviewing: #{region.name}"
         @ec2.regions[region.name].instances.each do |instance|
-          if (instance.key_name =~ /#{key}/) and (instance.launch_time + (ZOMBIE*60*60)) < Time.now and instance.status.to_s !~ /terminated/
+          if (instance.key_name =~ /#{key}/)
+            @logger.debug "Examining #{instance.id} (keyname: #{key}, launch time: #{instance.launch_time}, status: #{instance.status})"
+          end
+          if (instance.key_name =~ /#{key}/) and ((time_now - instance.launch_time) >  ZOMBIE*60*60) and instance.status.to_s !~ /terminated/
             @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
             begin
               instance.terminate()
+              kill_count += 1
             rescue AWS::EC2::Errors => e
               @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
             end
@@ -116,12 +123,14 @@ module Beaker
             if ( vol.status.to_s =~ /available/ )
               @logger.debug "Tear down available volume: #{vol.id}"
               vol.delete()
+              volume_count += 1
             end
           rescue AWS::EC2::Errors::InvalidVolume::NotFound => e
             @logger.debug "Failed to remove volume: #{vol.id}, #{e}"
           end
         end
       end
+      @logger.notify "#{key}: Killed #{kill_count} instance(s), freed #{volume_count} volume(s)"
 
     end
 
@@ -451,6 +460,9 @@ module Beaker
       creds = {}
       creds[:access_key] = default[:aws_access_key_id]
       creds[:secret_key] = default[:aws_secret_access_key]
+      raise "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!" unless creds[:access_key]
+      raise "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!" unless creds[:secret_key]
+
       creds
     end
   end
