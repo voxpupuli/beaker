@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 20 Aug, 2014 (92584d1e)](#LATEST)
+* [LATEST - 20 Aug, 2014 (1e6a4a8f)](#LATEST)
+* [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
 * [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
 * [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
 * [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
@@ -55,7 +56,47 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 20 Aug, 2014 (92584d1e)
+### <a name = "LATEST">LATEST - 20 Aug, 2014 (1e6a4a8f)
+
+* (GEM) version bump for 1.17.4 (1e6a4a8f)
+
+* Merge pull request #411 from anodelman/ec2 (2b4c9049)
+
+
+```
+Merge pull request #411 from anodelman/ec2
+
+(MAINT) kill zombies after provided number of hours
+```
+* Merge pull request #409 from cyberious/ScpCopyIgnoreFix (e59632eb)
+
+
+```
+Merge pull request #409 from cyberious/ScpCopyIgnoreFix
+
+QENG-1080 do_scp_to now checks for source path of absolute and prunes accordingly
+```
+* (MAINT) kill zombies after provided number of hours (3f3c3b27)
+
+
+```
+(MAINT) kill zombies after provided number of hours
+
+- was always using the default 3 hours
+```
+* QENG-1080 Fixed issue where we appended the source path to the target path, we now check for absolute path prior (cdd9c7b8)
+
+### <a name = "beaker1.17.3">beaker1.17.3 - 20 Aug, 2014 (f8a536c1)
+
+* Merge pull request #410 from anodelman/make-gem (f8a536c1)
+
+
+```
+Merge pull request #410 from anodelman/make-gem
+
+create beaker 1.17.3 gem
+```
+* (HISTORY) update history for 1.17.3 gem (0d6006c4)
 
 * (GEM) version bump for 1.17.3 gem (92584d1e)
 
