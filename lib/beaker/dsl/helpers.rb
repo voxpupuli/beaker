@@ -301,7 +301,7 @@ module Beaker
 
         if defined? host.tmpdir
           dir = host.tmpdir(name)
-          on host, "chown #{user}.#{user} #{dir}"
+          on host, "chown #{user}:#{user} #{dir}"
           return dir
         else
           raise "Host platform not supported by `create_tmpdir_for_user`."
