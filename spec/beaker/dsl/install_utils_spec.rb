@@ -444,6 +444,30 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
   end
+  
+  describe 'configure_puppet' do
+    before do
+      subject.stub(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on).with(host, "echo \"[main]\nserver=testbox.test.local\n\n\" > /etc/puppet/puppet.conf")
+        subject.configure_puppet(host, config)
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on).with(host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text\"")
+        subject.configure_puppet(host, config)
+      end
+    end
+  end
 
   describe 'install_pe' do
 
