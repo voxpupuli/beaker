@@ -653,6 +653,52 @@ module Beaker
         end
         nil
       end
+      
+      # Configure puppet.conf on the given host based upon a provided hash
+      # @example will configure /etc/puppet.conf on the puppet master.
+      #   config = { 
+      #     'main' => {
+      #       'server'   => 'testbox.test.local',
+      #       'certname' => 'testbox.test.local',
+      #       'logdir'   => '/var/log/puppet',
+      #       'vardir'   => '/var/lib/puppet',
+      #       'ssldir'   => '/var/lib/puppet/ssl',
+      #       'rundir'   => '/var/run/puppet'
+      #     },
+      #     'agent' => {
+      #       'environment' => 'dev'
+      #     }
+      #   }
+      #   configure_puppet(master, config)
+      #
+      # @api dsl
+      # @return nil
+      def configure_puppet(host, opts = {})
+          if host['platform'] =~ /windows/
+            puppet_conf = "#{host['puppetpath']}\\puppet.conf"
+            powershell_pre = "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass"
+            conf_data = ''
+            opts.each do |section,options|
+              conf_data << "[#{section}]`n"
+              options.each do |option,value|
+                conf_data << "#{option}=#{value}`n"
+              end
+              conf_data << "`n"
+            end
+            on host, "#{powershell_pre} -Command \"\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text\""
+          else
+            puppet_conf = "#{host['puppetpath']}/puppet.conf"
+            conf_data = ''
+            opts.each do |section,options|
+              conf_data << "[#{section}]\n"
+              options.each do |option,value|
+                conf_data << "#{option}=#{value}\n"
+              end
+              conf_data << "\n"
+            end
+            on host, "echo \"#{conf_data}\" > #{puppet_conf}"
+          end
+      end
 
       # Installs Puppet and dependencies using rpm
       #
