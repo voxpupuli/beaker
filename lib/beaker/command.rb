@@ -154,14 +154,27 @@ module Beaker
       return '' if env.empty?
 
       env_array = parse_env_hash_for( host, env ).compact
-
-      # cygwin-ism
-      cmd = host['platform'] =~ /windows/ ? 'cmd.exe /c' : nil
-      env_array << cmd if cmd
-
-      environment_string = env_array.join(' ')
-
-      "env #{environment_string}"
+      
+      if host['platform'] =~ /windows/
+        cmd = 'cmd.exe /c'
+        
+        case host['communicator']
+          when /bitvise/
+            environment_string = ''
+            env_array.each_with_index do |env|
+              environment_string += "set #{env} && "
+            end
+            environment_string
+          else
+            env_array << cmd if cmd
+            environment_string = env_array.join(' ')
+            "env #{environment_string}"
+        end
+      else
+        cmd = nil
+        environment_string = env_array.join(' ')
+        "env #{environment_string}"
+      end
     end
 
     # @!visibility private
@@ -190,12 +203,20 @@ module Beaker
 
         # This will add the name of the variable, so :PATH => { ... }
         # gets '${PATH}' appended to it if the :additive opt is passed
-        var_array << "${#{variable}}" if var_settings[:opts][:additive]
+        if host['communicator'] =~ /bitvise/
+          var_array << "%#{variable}%" if var_settings[:opts][:additive]
+        else
+          var_array << "${#{variable}}" if var_settings[:opts][:additive]
+        end
 
         # This is stupid, but because we're using cygwin we sometimes need to use
         # ':' and sometimes ';' on windows as a separator
         attr_string = join_env_vars_for( var_array, host, var_settings[:opts][:separator] )
-        var_string = attr_string.empty? ? nil : %Q[#{variable}="#{attr_string}"]
+        if host['communicator'] =~ /bitvise/
+          var_string = attr_string.empty? ? nil : %Q[#{variable}=#{attr_string}]
+        else
+          var_string = attr_string.empty? ? nil : %Q[#{variable}="#{attr_string}"]
+        end
 
         # Now we append this to our accumulator array ie [ 'RUBYLIB=....', 'PATH=....' ]
         array_of_parsed_vars << var_string
