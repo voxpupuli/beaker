@@ -444,6 +444,30 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
   end
+  
+  describe 'host_entry' do
+    before do
+      subject.stub(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      it 'it add an entry into the /etc/hosts file' do
+        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
+        expect(subject).to receive(:on).with(host, "echo 23.251.154.122\t\tforge.puppetlabs.com >> /etc/hosts")
+        subject.host_entry(host, entry)
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+      it 'it add an entry into the /etc/hosts file' do
+        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
+        expect(subject).to receive(:on).with(host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+        subject.host_entry(host, entry)
+      end
+    end
+  end
 
   describe 'install_pe' do
 
