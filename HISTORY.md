@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 20 Aug, 2014 (1e6a4a8f)](#LATEST)
+* [LATEST - 21 Aug, 2014 (4a96b147)](#LATEST)
+* [beaker1.17.4 - 21 Aug, 2014 (8e6d070f)](#beaker1.17.4)
 * [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
 * [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
 * [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
@@ -56,7 +57,55 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 20 Aug, 2014 (1e6a4a8f)
+### <a name = "LATEST">LATEST - 21 Aug, 2014 (4a96b147)
+
+* (GEM) version bump for beaker 1.17.5 gem (4a96b147)
+
+* Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix (61e56aa7)
+
+
+```
+Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix
+
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+```
+* (QENG-1110) Beaker::DSL::EZBakeUtils bugfix (bd1d91f2)
+
+
+```
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+
+Allows arbitrary arguments to be passed to ezbake command line.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails (716ab3d4)
+
+
+```
+Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails
+
+(QENG-1108) Fix chown command to use ':' rather than '.'
+```
+* (QENG-1108) Fix chown command to use ':' rather than '.' (c2da3911)
+
+
+```
+(QENG-1108) Fix chown command to use ':' rather than '.'
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.4">beaker1.17.4 - 21 Aug, 2014 (8e6d070f)
+
+* Merge pull request #413 from anodelman/make-gem (8e6d070f)
+
+
+```
+Merge pull request #413 from anodelman/make-gem
+
+create beaker 1.17.4 gem
+```
+* (HISTORY) update history for beaker 1.17.4 gem (bd1fe05f)
 
 * (GEM) version bump for 1.17.4 (1e6a4a8f)
 
