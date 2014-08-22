@@ -996,10 +996,59 @@ module Beaker
       end
 
       # @deprecated
-      def run_agent_on(host, arg='--no-daemonize --verbose --onetime --test',
-                       options={}, &block)
+      def run_agent_on(host, opts={}, &block)
         block_on host do | host |
-          on host, puppet_agent(arg), options, &block
+          
+          on_options = {}
+          on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
+
+          puppet_agent_opts = {}
+          puppet_agent_opts['no-daemonize'] = nil
+          puppet_agent_opts[:verbose] = nil
+          puppet_agent_opts[:debug] = nil if opts[:debug]
+          puppet_agent_opts[:onetime] = nil
+          puppet_agent_opts[:test] = nil
+          puppet_agent_opts[:noop] = nil if opts[:noop]
+          
+          # From puppet help:
+          # "... an exit code of '2' means there were changes, an exit code of
+          # '4' means there were failures during the transaction, and an exit
+          # code of '6' means there were both changes and failures."
+          if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].compact.length > 1
+            raise(ArgumentError,
+                  'Cannot specify more than one of `catch_failures`, ' +
+                  '`catch_changes`, `expect_failures`, or `expect_changes` ' +
+                  'for a single manifest')
+          end
+
+          if opts[:catch_changes]
+            puppet_agent_opts['detailed-exitcodes'] = nil
+
+            # We're after idempotency so allow exit code 0 only.
+            on_options[:acceptable_exit_codes] |= [0]
+          elsif opts[:catch_failures]
+            puppet_agent_opts['detailed-exitcodes'] = nil
+
+            # We're after only complete success so allow exit codes 0 and 2 only.
+            on_options[:acceptable_exit_codes] |= [0, 2]
+          elsif opts[:expect_failures]
+            puppet_agent_opts['detailed-exitcodes'] = nil
+
+            # We're after failures specifically so allow exit codes 1, 4, and 6 only.
+            on_options[:acceptable_exit_codes] |= [1, 4, 6]
+          elsif opts[:expect_changes]
+            puppet_agent_opts['detailed-exitcodes'] = nil
+
+            # We're after changes specifically so allow exit code 2 only.
+            on_options[:acceptable_exit_codes] |= [2]
+          else
+            # Either use the provided acceptable_exit_codes or default to [0]
+            on_options[:acceptable_exit_codes] |= [0]
+          end
+          
+          #on host, puppet_agent(arg), options, &block
+          on host, puppet('agent', puppet_agent_opts), on_options, &block
+          
         end
       end
 
