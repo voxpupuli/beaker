@@ -185,7 +185,7 @@ module Beaker
         end
       end
 
-      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a 
+      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a
       #background process.  The output of the command will be stored in the provided host['higgs_file'].
       # @param [Host] host The host that Higgs is to be installed on
       #                    The host object must have the 'working_dir', 'dist' and 'pe_installer' field set correctly.
@@ -531,7 +531,7 @@ module Beaker
       # @param  [Hash{Symbol=>Symbol, String}] opts The options
       # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option opts [String] :pe_ver Default PE version to install 
+      # @option opts [String] :pe_ver Default PE version to install
       #                  (Otherwise uses individual hosts pe_ver)
       # @raise [StandardError] When installation times out
       #
