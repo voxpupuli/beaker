@@ -431,9 +431,12 @@ module Beaker
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
           elsif host['platform'] =~ /windows/
-            #x86_64 builds only available for 3.4 and onward
             version = host[:pe_ver] || opts['pe_ver_win']
-            if !(version_is_less(version, '3.4')) and host.is_x86_64?
+            #only install 64bit builds if
+            # - we are on pe version 3.4+
+            # - we do not have install_32 set on host
+            # - we do not have install_32 set globally
+            if !(version_is_less(version, '3.4')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
               host['dist'] = "puppet-enterprise-#{version}-x64"
             else
               host['dist'] = "puppet-enterprise-#{version}"
