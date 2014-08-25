@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 EZBAKE_CONFIG_EXAMPLE= { 
-  :project => 'jvm-puppet',
-  :real_name => 'jvm-puppet',
+  :project => 'puppetserver',
+  :real_name => 'puppetserver',
   :user => 'puppet',
   :group => 'puppet',
-  :uberjar_name => 'jvm-puppet-release.jar',
+  :uberjar_name => 'puppetserver-release.jar',
   :config_files => [],
   :terminus_info => {},
   :debian => { :additional_dependencies => ["puppet (= 3.6.1-puppetlabs1)"], },
