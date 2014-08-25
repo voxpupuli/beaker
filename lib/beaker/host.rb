@@ -192,6 +192,18 @@ module Beaker
       self[:ip] ||= get_ip
     end
 
+    #Examine the host system to determine the architecture
+    #@return [Boolean] true if x86_64, false otherwise
+    def determine_if_x86_64
+      result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+      result.exit_code == 0
+    end
+
+    #@return [Boolean] true if x86_64, false otherwise
+    def is_x86_64?
+      @x86_64 ||= determine_if_x86_64
+    end
+
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],

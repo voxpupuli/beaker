@@ -152,10 +152,9 @@ module Beaker
       def installer_cmd(host, opts)
         version = host['pe_ver'] || opts[:pe_ver]
         if host['platform'] =~ /windows/
-          version = host[:pe_ver] || opts['pe_ver_win']
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
@@ -307,7 +306,7 @@ module Beaker
         path = host['pe_dir'] || opts[:pe_dir]
         local = File.directory?(path)
         version = host['pe_ver'] || opts[:pe_ver_win]
-        filename = "puppet-enterprise-#{version}"
+        filename = "#{host['dist']}"
         extension = ".msi"
         if local
           if not File.exists?("#{path}/#{filename}#{extension}")
@@ -431,6 +430,14 @@ module Beaker
           elsif host['platform'] =~ /osx/
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
+          elsif host['platform'] =~ /windows/
+            #x86_64 builds only available for 3.4 and onward
+            version = host[:pe_ver] || opts['pe_ver_win']
+            if !(version_is_less(version, '3.4')) and host.is_x86_64?
+              host['dist'] = "puppet-enterprise-#{version}-x64"
+            else
+              host['dist'] = "puppet-enterprise-#{version}"
+            end
           end
           host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
         end
