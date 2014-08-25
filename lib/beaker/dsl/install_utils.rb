@@ -712,16 +712,28 @@ module Beaker
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
-        on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
-        on host, "msiexec /qn /i puppet-#{opts[:version]}.msi"
+        #only install 64bit builds if
+        # - we are on puppet version 3.7+
+        # - we do not have install_32 set on host
+        # - we do not have install_32 set globally
+        version = opts[:version]
+        if !(version_is_less(version, '3.7')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+          host['dist'] = "puppet-#{version}-x64"
+        else
+          host['dist'] = "puppet-#{version}"
+        end
+        link = "http://downloads.puppetlabs.com/windows/#{host['dist']}.msi"
+        if not link_exists?( link )
+          raise "Puppet #{version} at #{link} does not exist!"
+        end
+        on host, "curl -O #{link}"
+        on host, "msiexec /qn /i #{host['dist']}.msi"
 
         #Because the msi installer doesn't add Puppet to the environment path
-        if fact_on(host, 'architecture').eql?('x86_64')
-          install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
-        else
-          install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
-        end
-        on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+        #Add both potential paths for simplicity
+        #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
+        puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
+        on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
       end
 
       # Installs Puppet and dependencies from dmg
