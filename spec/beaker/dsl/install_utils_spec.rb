@@ -436,7 +436,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
       it 'falls back to installing from gem when given :default_action => "gem_install"' do
         result = double
-        gem_env_string = '{"RubyGems Environment": [ {"GEM PATHS": [] } ] }'
+        gem_env_string = '{"RubyGems Environment": [ {"GEM PATHS": [], "EXECUTABLE DIRECTORY": "/does/not/exist" } ] }'
         allow( result ).to receive(:stdout).and_return gem_env_string
         allow(subject).to receive(:on).with(host, /gem environment/).and_return result
         expect(subject).to receive(:on).with(host, /gem install/)
