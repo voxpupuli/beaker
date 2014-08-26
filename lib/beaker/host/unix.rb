@@ -19,7 +19,7 @@ module Unix
       h.merge({
         'user'          => 'root',
         'group'         => 'pe-puppet',
-        'jvm-puppet-confdir' => '/etc/puppetlabs/jvm-puppet/conf.d',
+        'puppetserver-confdir' => '/etc/puppetlabs/puppetserver/conf.d',
         'puppetservice'    => 'pe-httpd',
         'puppetpath'       => '/etc/puppetlabs/puppet',
         'puppetbin'        => '/opt/puppet/bin/puppet',
@@ -39,7 +39,7 @@ module Unix
       h.merge({
         'user'              => 'root',
         'group'             => 'puppet',
-        'jvm-puppet-confdir' => '/etc/jvm-puppet/conf.d',
+        'puppetserver-confdir' => '/etc/puppetserver/conf.d',
         'puppetservice'     => 'puppetmaster',
         'puppetpath'        => '/etc/puppet',
         'puppetvardir'      => '/var/lib/puppet',
