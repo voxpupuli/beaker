@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 21 Aug, 2014 (4a96b147)](#LATEST)
+* [LATEST - 27 Aug, 2014 (71be2050)](#LATEST)
+* [beaker1.17.5 - 22 Aug, 2014 (7e553089)](#beaker1.17.5)
 * [beaker1.17.4 - 21 Aug, 2014 (8e6d070f)](#beaker1.17.4)
 * [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
 * [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
@@ -57,7 +58,40 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 21 Aug, 2014 (4a96b147)
+### <a name = "LATEST">LATEST - 27 Aug, 2014 (71be2050)
+
+* (GEM) version bump for 1.17.6 gem (71be2050)
+
+* Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references (fe77e9b0)
+
+
+```
+Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references
+
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+```
+* (QENG-1134) Remove 'jvm-puppet' references left in Beaker. (5da4eebc)
+
+
+```
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+
+Recently the `jvm-puppet` name was changed to `puppet-server`, this patch
+addresses that in both `lib/` and `spec/`
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.5">beaker1.17.5 - 22 Aug, 2014 (7e553089)
+
+* Merge pull request #417 from anodelman/make-gem (7e553089)
+
+
+```
+Merge pull request #417 from anodelman/make-gem
+
+create beaker 1.17.5 gem
+```
+* (HISTORY) update history for beaker 1.17.5 gem (ebefea72)
 
 * (GEM) version bump for beaker 1.17.5 gem (4a96b147)
 
