@@ -79,8 +79,8 @@ module Beaker
       logger = opts[:logger]
       # Additional Packages to be determined at runtime
       additional_pkgs = Array.new
-      if opts[:collect_perf_data]
-        additional_pkgs << "sysstat" if !additional_pkgs.include? "sysstat"
+      if ( opts[:collect_perf_data] and !additional_pkgs.include? "sysstat" )
+        additional_pkgs << "sysstat"
       end
       block_on host do |host|
         case
