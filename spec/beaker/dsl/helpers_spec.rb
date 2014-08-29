@@ -618,6 +618,23 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  it 'can set the --debug flag' do
+    subject.stub( :hosts ).and_return( hosts )
+    subject.should_receive( :create_remote_file ).and_return( true )
+    expect( subject ).to receive( :on ).with {|h, command, opts|
+      cmdline = command.cmd_line( h )
+      expect( h ).to be == agent
+      expect( cmdline ).to include('puppet apply')
+      expect( cmdline ).not_to include('--verbose')
+      expect( cmdline ).to include('--debug')
+    }
+    subject.apply_manifest_on(
+      agent,
+      'class { "boo": }',
+      :debug => true,
+    )
+  end
+
   describe "#apply_manifest" do
     it "delegates to #apply_manifest_on with the default host" do
       subject.stub( :hosts ).and_return( hosts )
