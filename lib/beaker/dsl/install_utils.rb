@@ -390,6 +390,7 @@ module Beaker
         klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
         klass = "pe_repo::platform::#{klass}"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master}]"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
         on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
       end
