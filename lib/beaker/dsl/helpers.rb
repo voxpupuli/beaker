@@ -476,7 +476,7 @@ module Beaker
       # @note This method assumes puppet is installed on the host.
       #
       def puppet_user(host)
-        return host.puppet('master')['group']
+        return host.puppet('master')['user']
       end
 
       # Return the name of the puppet group.
@@ -486,7 +486,7 @@ module Beaker
       # @note This method assumes puppet is installed on the host.
       #
       def puppet_group(host)
-        return host.puppet('master')['user']
+        return host.puppet('master')['group']
       end
 
       # @!visibility private
