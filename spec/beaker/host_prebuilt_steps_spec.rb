@@ -265,6 +265,11 @@ describe Beaker do
   context "validate_host" do
     subject { dummy_class.new }
 
+    before(:each) do
+      # Must reset additional_pkgs between each test as it hangs around
+      Beaker::HostPrebuiltSteps.class_variable_set(:@@additional_pkgs, [])
+    end
+
     it "can validate unix hosts" do
 
       hosts.each do |host|
@@ -291,7 +296,6 @@ describe Beaker do
 
       opts = options.merge({:collect_perf_data => true})
       subject.validate_host(hosts, opts)
-
     end
 
     it "can validate windows hosts" do

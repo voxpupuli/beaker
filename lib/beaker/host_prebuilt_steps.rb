@@ -14,6 +14,8 @@ module Beaker
     WINDOWS_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
+    # Packages added at runtime
+    @@additional_pkgs = []
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -77,10 +79,8 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
-      # Additional Packages to be determined at runtime
-      additional_pkgs = Array.new
-      if ( opts[:collect_perf_data] and !additional_pkgs.include? "sysstat" )
-        additional_pkgs << "sysstat"
+      if ( opts[:collect_perf_data] and !@@additional_pkgs.include? "sysstat" )
+        @@additional_pkgs << "sysstat"
       end
       block_on host do |host|
         case
@@ -90,7 +90,7 @@ module Beaker
               host.install_package pkg
             end
           end
-          additional_pkgs.each do |pkg|
+          @@additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
@@ -101,7 +101,7 @@ module Beaker
               host.install_package pkg
             end
           end
-          additional_pkgs.each do |pkg|
+          @@additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
@@ -118,7 +118,7 @@ module Beaker
               host.install_package pkg
             end
           end
-          additional_pkgs.each do |pkg|
+          @@additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
