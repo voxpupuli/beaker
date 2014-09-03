@@ -65,6 +65,43 @@ module Beaker
       @answers = answers.answers
     end
 
+    it 'should add console services answers to dashboard answers' do
+      @ver = '3.4'
+      answers = @answers
+      expect( @answers['vm2'] ).to include :q_classifier_database_user => 'DFGhjlkj'
+      expect( @answers['vm2'] ).to include :q_classifier_database_name => 'classifier'
+      expect( @answers['vm2'] ).to include :q_classifier_database_password => "'~!@\#$%^*-/ aZ'"
+      expect( @answers['vm2'] ).to include :q_activity_database_user => 'adsfglkj'
+      expect( @answers['vm2'] ).to include :q_activity_database_name => 'activity'
+      expect( @answers['vm2'] ).to include :q_activity_database_password => "'~!@\#$%^*-/ aZ'"
+      expect( @answers['vm2'] ).to include :q_rbac_database_user => 'RbhNBklm'
+      expect( @answers['vm2'] ).to include :q_rbac_database_name => 'rbac'
+      expect( @answers['vm2'] ).to include :q_rbac_database_password => "'~!@\#$%^*-/ aZ'"
+    end
+
+
+    it 'should add console services answers to database answers' do
+      @ver = '3.4'
+      answers = @answers
+      expect( @answers['vm3'] ).to include :q_classifier_database_user => 'DFGhjlkj'
+      expect( @answers['vm3'] ).to include :q_classifier_database_name => 'classifier'
+      expect( @answers['vm3'] ).to include :q_classifier_database_password => "'~!@\#$%^*-/ aZ'"
+      expect( @answers['vm3'] ).to include :q_activity_database_user => 'adsfglkj'
+      expect( @answers['vm3'] ).to include :q_activity_database_name => 'activity'
+      expect( @answers['vm3'] ).to include :q_activity_database_password => "'~!@\#$%^*-/ aZ'"
+      expect( @answers['vm3'] ).to include :q_rbac_database_user => 'RbhNBklm'
+      expect( @answers['vm3'] ).to include :q_rbac_database_name => 'rbac'
+      expect( @answers['vm3'] ).to include :q_rbac_database_password => "'~!@\#$%^*-/ aZ'"
+    end
+
+    it 'should add answers to the host objects' do
+      @ver = '3.4'
+      answers = @answers
+      hosts.each do |host|
+        expect( host[:answers] ).to be === answers[host.name]
+      end
+    end
+
     it 'should add answers to the host objects' do
       hosts.each do |host|
         expect( host[:answers] ).to be === @answers[host.name]
