@@ -152,10 +152,9 @@ module Beaker
       def installer_cmd(host, opts)
         version = host['pe_ver'] || opts[:pe_ver]
         if host['platform'] =~ /windows/
-          version = host[:pe_ver] || opts['pe_ver_win']
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
@@ -307,7 +306,7 @@ module Beaker
         path = host['pe_dir'] || opts[:pe_dir]
         local = File.directory?(path)
         version = host['pe_ver'] || opts[:pe_ver_win]
-        filename = "puppet-enterprise-#{version}"
+        filename = "#{host['dist']}"
         extension = ".msi"
         if local
           if not File.exists?("#{path}/#{filename}#{extension}")
@@ -431,6 +430,17 @@ module Beaker
           elsif host['platform'] =~ /osx/
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
+          elsif host['platform'] =~ /windows/
+            version = host[:pe_ver] || opts['pe_ver_win']
+            #only install 64bit builds if
+            # - we are on pe version 3.4+
+            # - we do not have install_32 set on host
+            # - we do not have install_32 set globally
+            if !(version_is_less(version, '3.4')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+              host['dist'] = "puppet-enterprise-#{version}-x64"
+            else
+              host['dist'] = "puppet-enterprise-#{version}"
+            end
           end
           host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
         end
@@ -702,16 +712,28 @@ module Beaker
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
-        on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
-        on host, "msiexec /qn /i puppet-#{opts[:version]}.msi"
+        #only install 64bit builds if
+        # - we are on puppet version 3.7+
+        # - we do not have install_32 set on host
+        # - we do not have install_32 set globally
+        version = opts[:version]
+        if !(version_is_less(version, '3.7')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+          host['dist'] = "puppet-#{version}-x64"
+        else
+          host['dist'] = "puppet-#{version}"
+        end
+        link = "http://downloads.puppetlabs.com/windows/#{host['dist']}.msi"
+        if not link_exists?( link )
+          raise "Puppet #{version} at #{link} does not exist!"
+        end
+        on host, "curl -O #{link}"
+        on host, "msiexec /qn /i #{host['dist']}.msi"
 
         #Because the msi installer doesn't add Puppet to the environment path
-        if fact_on(host, 'architecture').eql?('x86_64')
-          install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
-        else
-          install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
-        end
-        on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+        #Add both potential paths for simplicity
+        #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
+        puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
+        on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
       end
 
       # Installs Puppet and dependencies from dmg
