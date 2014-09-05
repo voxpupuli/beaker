@@ -14,8 +14,6 @@ module Beaker
     WINDOWS_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
-    # Packages added at runtime
-    @@additional_pkgs = []
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -79,9 +77,6 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
-      if ( opts[:collect_perf_data] and !@@additional_pkgs.include? "sysstat" )
-        @@additional_pkgs << "sysstat"
-      end
       block_on host do |host|
         case
         when host['platform'] =~ /sles-/
@@ -90,18 +85,8 @@ module Beaker
               host.install_package pkg
             end
           end
-          @@additional_pkgs.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
         when host['platform'] =~ /debian/
           DEBIAN_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
-          @@additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end
@@ -114,11 +99,6 @@ module Beaker
           end
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-/
           UNIX_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
-          @@additional_pkgs.each do |pkg|
             if not host.check_for_package pkg
               host.install_package pkg
             end

@@ -284,21 +284,6 @@ describe Beaker do
 
     end
 
-    it "can validate unix hosts that need sysstat installed" do
-      total_pkgs = Array.new(unix_only_pkgs);
-      total_pkgs << "sysstat"
-
-      hosts.each do |host|
-        total_pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
-        end
-      end
-
-      opts = options.merge({:collect_perf_data => true})
-      subject.validate_host(hosts, opts)
-    end
-
     it "can validate windows hosts" do
       @platform = 'windows'
 
