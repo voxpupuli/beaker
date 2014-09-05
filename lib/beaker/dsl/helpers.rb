@@ -28,7 +28,7 @@ module Beaker
     # @api dsl
     module Helpers
 
-      PUPPET_MODULE_INSTALL_IGNORE = ['.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
+      PUPPET_MODULE_INSTALL_IGNORE = ['.bundle', '.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
 
       # @!macro common_opts
       #   @param [Hash{Symbol=>String}] opts Options to alter execution.
