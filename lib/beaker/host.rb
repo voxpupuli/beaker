@@ -263,13 +263,12 @@ module Beaker
       result.exit_code == 0
     end
 
-    # scp files from the localhost to this test host
+    # scp files from the localhost to this test host, if a directory is provided it is recursively copied
     # @param source [String] The path to the file/dir to upload
     # @param target [String] The destination path on the host
     # @param [Hash{Symbol=>String}] options Options to alter execution
-    # @option options [Boolean] :recursive Should we copy recursively?  Defaults to 'True' in case of a directory source.
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
-    def do_scp_to source, target, options
+    def do_scp_to source, target, options = {}
       @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
 
       result = Result.new(@name, [source, target])
