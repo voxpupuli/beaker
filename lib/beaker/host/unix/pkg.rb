@@ -5,6 +5,7 @@ module Unix::Pkg
   # unix-specific package management setup
   def pkg_initialize
     @apt_needs_update = true
+    @emerge_needs_sync = true
   end
 
   def check_for_command(name)
@@ -32,6 +33,8 @@ module Unix::Pkg
         result = exec(Beaker::Command.new("pkg info #{name}"), :acceptable_exit_codes => (0...127))
       when /solaris-10/
         result = exec(Beaker::Command.new("pkginfo #{name}"), :acceptable_exit_codes => (0...127))
+      when /gentoo/
+        result = exec(Beaker::Command.new("ls -d /var/db/pkg/*/* | grep #{name}"), :acceptable_exit_codes => (0...127))
       else
         raise "Package #{name} cannot be queried on #{self}"
     end
@@ -45,6 +48,17 @@ module Unix::Pkg
       if @apt_needs_update
         execute("apt-get update")
         @apt_needs_update = false
+      end
+    end
+  end
+
+  # If emerge has not been synced since the last repo deployment it is
+  # updated. Otherwise this is a noop
+  def sync_emerge_if_needed
+    if self['platform'] =~ /gentoo/
+      if @emerge_needs_sync
+        execute("emerge --sync")
+        @emerge_needs_sync = false
       end
     end
   end
@@ -70,6 +84,9 @@ module Unix::Pkg
         execute("pkg #{cmdline_args} install #{name}")
       when /solaris-10/
         execute("pkgutil -i -y #{cmdline_args} #{name}")
+      when /gentoo/
+        sync_emerge_if_needed
+        execute("emerge #{name}")
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
@@ -89,6 +106,8 @@ module Unix::Pkg
         execute("pkg #{cmdline_args} uninstall #{name}")
       when /solaris-10/
         execute("pkgutil -r -y #{cmdline_args} #{name}")
+      when /gentoo/
+        execute("emerge --unmerge #{name}")
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
@@ -114,6 +133,9 @@ module Unix::Pkg
         execute("pkg #{cmdline_args} update #{name}")
       when /solaris-10/
         execute("pkgutil -u -y #{cmdline_args} ${name}")
+      when /gentoo/
+        sync_emerge_if_needed
+        execute("emerge -uDN #{name}")
       else
         raise "Package #{name} cannot be upgraded on #{self}"
     end
