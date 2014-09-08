@@ -648,7 +648,7 @@ module Beaker
       # @return nil
       # @api private
       def install_puppet_from_rpm( host, opts )
-        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
+        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
 
         on host, "rpm -ivh #{release_package_string}"
 
@@ -776,15 +776,20 @@ module Beaker
       # @raise [StandardError] if gem does not exist on target host
       # @api private
       def install_puppet_from_gem( host, opts )
+        # There are a lot of special things to do for Solaris and Solaris 10.
+        # This is easier than checking host['platform'] every time.
+        is_solaris10 = host['platform'] =~ /solaris-10/
+        is_solaris = host['platform'] =~ /solaris/
+
         # Hosts may be provisioned with csw but pkgutil won't be in the
         # PATH by default to avoid changing the behavior for Puppet's tests
-        if host['platform'] =~ /solaris-10/
+        if is_solaris10
           on host, 'ln -s /opt/csw/bin/pkgutil /usr/bin/pkgutil'
         end
 
         # Solaris doesn't necessarily have this, but gem needs it
-        if host['platform'] =~ /solaris/
-          on host, 'mkdir -p /var/lib' 
+        if is_solaris
+          on host, 'mkdir -p /var/lib'
         end
 
         unless host.check_for_command( 'gem' )
@@ -799,6 +804,11 @@ module Beaker
                    end
 
           host.install_package gempkg
+        end
+
+        # Link 'gem' to /usr/bin instead of adding /opt/csw/bin to PATH.
+        if is_solaris10
+          on host, 'ln -s /opt/csw/bin/gem /usr/bin/gem'
         end
 
         if host['platform'] =~ /debian|ubuntu|solaris/
@@ -818,6 +828,21 @@ module Beaker
 
         ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
         on host, "gem install puppet #{ver_cmd} --no-ri --no-rdoc"
+
+        # Similar to the treatment of 'gem' above.
+        # This avoids adding /opt/csw/bin to PATH.
+        if is_solaris
+          gem_env = YAML.load( on( host, 'gem environment' ).stdout )
+          # This is the section we want - this has the dir where gem executables go.
+          env_sect = 'EXECUTABLE DIRECTORY'
+          # Get the directory where 'gem' installs executables.
+          # On Solaris 10 this is usually /opt/csw/bin
+          gem_exec_dir = gem_env['RubyGems Environment'].find {|h| h[env_sect] != nil }[env_sect]
+
+          on host, "ln -s #{gem_exec_dir}/hiera /usr/bin/hiera"
+          on host, "ln -s #{gem_exec_dir}/facter /usr/bin/facter"
+          on host, "ln -s #{gem_exec_dir}/puppet /usr/bin/puppet"
+        end
       end
 
 
