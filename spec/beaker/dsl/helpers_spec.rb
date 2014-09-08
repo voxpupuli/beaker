@@ -1233,6 +1233,7 @@ describe ClassMixedWithDSLHelpers do
 
   describe 'copy_module_to' do
     let(:ignore_list) { Beaker::DSL::Helpers::PUPPET_MODULE_INSTALL_IGNORE }
+
     let(:source){'./'}
     let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
     let(:module_parse_name){'testmodule'}
