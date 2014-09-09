@@ -265,12 +265,6 @@ describe Beaker do
   context "validate_host" do
     subject { dummy_class.new }
 
-    before(:each) do
-      # Must reset additional_pkgs between each test as it hangs around
-      #Beaker::HostPrebuiltSteps.class_variable_set(:@@additional_pkgs, [])
-      Beaker::HostPrebuiltSteps.module_eval(%q{@@additional_pkgs = []})
-    end
-
     it "can validate unix hosts" do
 
       hosts.each do |host|
