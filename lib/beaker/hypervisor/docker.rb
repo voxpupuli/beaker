@@ -113,19 +113,19 @@ module Beaker
       when /ubuntu/, /debian/
         dockerfile += <<-EOF
           RUN apt-get update
-          RUN apt-get install -y openssh-server openssh-client
+          RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
         EOF
       when /^el-/, /centos/, /fedora/, /redhat/
         dockerfile += <<-EOF
           RUN yum clean all
-          RUN yum install -y sudo openssh-server openssh-clients
+          RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
       when /opensuse/, /sles/
         sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"'
         dockerfile += <<-EOF
-          RUN zypper -n in openssh
+          RUN zypper -n in openssh #{Beaker::HostPrebuiltSteps::SLES_PACKAGES.join(' ')}
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
