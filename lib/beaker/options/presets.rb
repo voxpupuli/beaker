@@ -94,7 +94,6 @@ module Beaker
           :department           => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :validate             => true,
           :jenkins_build_url    => nil,
-          :forge_host           => 'vulcan-acceptance.delivery.puppetlabs.net',
           :log_level            => 'verbose',
           :trace_limit          => 10,
           :"master-start-curl-retries" => 120,
