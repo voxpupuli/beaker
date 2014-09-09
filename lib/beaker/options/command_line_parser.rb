@@ -120,6 +120,7 @@ module Beaker
           opts.on '--log-level LEVEL',
                   'Log level',
                   'Supported LEVEL keywords:',
+                  'trace   : all messages, full stack trace of errors, file copy details',
                   'debug   : all messages, plus full stack trace of errors',
                   'verbose : all messages',
                   'info    : info messages, notifications and warnings',
