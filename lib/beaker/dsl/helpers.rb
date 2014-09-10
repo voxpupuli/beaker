@@ -1301,7 +1301,7 @@ module Beaker
       # Install local module for acceptance testing
       # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
       # @api dsl
-      # @param [Host, Array<Host>, String, Symbol] host
+      # @param [Host, Array<Host>] host
       #                   One or more hosts to act upon,
       #                   or a role (String or Symbol) that identifies one or more hosts.
       # @option opts [String] :source ('./')
@@ -1318,17 +1318,19 @@ module Beaker
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
       def copy_module_to(host, opts = {})
-        opts = {:source => './',
-                :target_module_path => host['distmoduledir'],
-                :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
-        ignore_list = build_ignore_list(opts)
-        target_module_dir = opts[:target_module_path]
         if opts.has_key?(:module_name)
           module_name = opts[:module_name]
         else
           module_name = parse_for_modulename(opts[:source])
         end
-        scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
+        Array.new(host).each do |host|
+          opts = {:source => './',
+                :target_module_path => host['distmoduledir'],
+                :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+          ignore_list = build_ignore_list(opts)
+          target_module_dir = opts[:target_module_path]
+          scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
+        end
       end
       alias :copy_root_module_to :copy_module_to
 
