@@ -7,15 +7,11 @@ module Beaker
     # @return [Array<Number>] array of port numbers
     # @api private
     def self.amiports(roles)
-      ports = [22, 61613, 8139]
+      ports = [22, 61613, 8139, 8140]
 
       if roles.include? 'database'
         ports << 8080
         ports << 8081
-      end
-
-      if roles.include? 'master'
-        ports << 8140
       end
 
       if roles.include? 'dashboard'
