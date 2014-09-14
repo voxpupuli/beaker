@@ -132,6 +132,8 @@ module Beaker
         default_user = host['user']
 
         set_ssh_config host, 'vagrant'
+	
+	enable_root_login host, @options
 
         copy_ssh_to_root host, @options
         #shut down connection, will reconnect on next exec
