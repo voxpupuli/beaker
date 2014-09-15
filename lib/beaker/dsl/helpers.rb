@@ -1323,13 +1323,13 @@ module Beaker
         else
           module_name = parse_for_modulename(opts[:source])
         end
-        Array.new(host).each do |host|
+        Array.new(host).each do |h|
           opts = {:source => './',
-                :target_module_path => host['distmoduledir'],
+                :target_module_path => h['distmoduledir'],
                 :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
           ignore_list = build_ignore_list(opts)
           target_module_dir = opts[:target_module_path]
-          scp_to host, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
+          scp_to h, File.join(opts[:source]), File.join(target_module_dir, module_name), {:ignore => ignore_list}
         end
       end
       alias :copy_root_module_to :copy_module_to
