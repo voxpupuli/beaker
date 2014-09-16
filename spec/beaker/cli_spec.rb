@@ -19,7 +19,7 @@ module Beaker
         cli.stub(:validate).and_return(true)
         cli.stub(:provision).and_return(true)
       end
-     
+
       describe "test fail mode" do
         it 'continues testing after failed test if using slow fail_mode' do
           cli.stub(:run_suite).with(:pre_suite, :fast).and_return(true)
@@ -47,7 +47,7 @@ module Beaker
 
         end
       end
- 
+
       describe "SUT preserve mode" do
         it 'cleans up SUTs post testing if tests fail and preserve_hosts = never' do
           cli.stub(:run_suite).with(:pre_suite, :fast).and_return(true)

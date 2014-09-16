@@ -476,8 +476,8 @@ module Beaker
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
             if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
-              answers = Beaker::Answers.answers(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
-              create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
+              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
+              create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
             else
               # If We're *not* running the classic installer, we want
               # to make sure the master has packages for us.
