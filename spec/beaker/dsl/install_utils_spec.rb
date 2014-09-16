@@ -317,6 +317,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :sleep_until_puppetdb_started ).and_return( true )
       subject.stub( :version_is_less ).with('3.0', '3.4').and_return( true )
       subject.stub( :version_is_less ).with('3.0', '3.0').and_return( false )
+      subject.stub( :version_is_less ).with('3.0', '3.4').and_return( true )
       subject.stub( :wait_for_host_in_dashboard ).and_return( true )
       subject.stub( :puppet_agent ).and_return do |arg|
         "puppet agent #{arg}"
