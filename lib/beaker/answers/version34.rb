@@ -12,13 +12,13 @@ module Beaker
       the_answers = super
 
       classifier_database_user     = answer_for(@options, :q_classifier_database_user, 'DFGhjlkj')
-      classifier_database_name     = answer_for(@options, :q_database_name, 'classifier')
+      classifier_database_name     = answer_for(@options, :q_database_name, 'pe-classifier')
       classifier_database_password = "'#{@options[:answers][:q_classifier_database_password]}'"
       activity_database_user       = answer_for(@options, :q_activity_database_user, 'adsfglkj')
-      activity_database_name       = answer_for(@options, :q_activity_database_name, 'activity')
+      activity_database_name       = answer_for(@options, :q_activity_database_name, 'pe-activity')
       activity_database_password   = "'#{@options[:answers][:q_activity_database_password]}'"
       rbac_database_user           = answer_for(@options, :q_rbac_database_user, 'RbhNBklm')
-      rbac_database_name           = answer_for(@options, :q_rbac_database_name, 'rbac')
+      rbac_database_name           = answer_for(@options, :q_rbac_database_name, 'pe-rbac')
       rbac_database_password       = "'#{@options[:answers][:q_rbac_database_password]}'"
 
       console_services_hash = {
