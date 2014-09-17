@@ -69,28 +69,27 @@ module Beaker
       @ver = '3.4'
       answers = @answers
       expect( @answers['vm2'] ).to include :q_classifier_database_user => 'DFGhjlkj'
-      expect( @answers['vm2'] ).to include :q_classifier_database_name => 'classifier'
+      expect( @answers['vm2'] ).to include :q_classifier_database_name => 'pe-classifier'
       expect( @answers['vm2'] ).to include :q_classifier_database_password => "'~!@\#$%^*-/ aZ'"
       expect( @answers['vm2'] ).to include :q_activity_database_user => 'adsfglkj'
-      expect( @answers['vm2'] ).to include :q_activity_database_name => 'activity'
+      expect( @answers['vm2'] ).to include :q_activity_database_name => 'pe-activity'
       expect( @answers['vm2'] ).to include :q_activity_database_password => "'~!@\#$%^*-/ aZ'"
       expect( @answers['vm2'] ).to include :q_rbac_database_user => 'RbhNBklm'
-      expect( @answers['vm2'] ).to include :q_rbac_database_name => 'rbac'
+      expect( @answers['vm2'] ).to include :q_rbac_database_name => 'pe-rbac'
       expect( @answers['vm2'] ).to include :q_rbac_database_password => "'~!@\#$%^*-/ aZ'"
     end
-
 
     it 'should add console services answers to database answers' do
       @ver = '3.4'
       answers = @answers
       expect( @answers['vm3'] ).to include :q_classifier_database_user => 'DFGhjlkj'
-      expect( @answers['vm3'] ).to include :q_classifier_database_name => 'classifier'
+      expect( @answers['vm3'] ).to include :q_classifier_database_name => 'pe-classifier'
       expect( @answers['vm3'] ).to include :q_classifier_database_password => "'~!@\#$%^*-/ aZ'"
       expect( @answers['vm3'] ).to include :q_activity_database_user => 'adsfglkj'
-      expect( @answers['vm3'] ).to include :q_activity_database_name => 'activity'
+      expect( @answers['vm3'] ).to include :q_activity_database_name => 'pe-activity'
       expect( @answers['vm3'] ).to include :q_activity_database_password => "'~!@\#$%^*-/ aZ'"
       expect( @answers['vm3'] ).to include :q_rbac_database_user => 'RbhNBklm'
-      expect( @answers['vm3'] ).to include :q_rbac_database_name => 'rbac'
+      expect( @answers['vm3'] ).to include :q_rbac_database_name => 'pe-rbac'
       expect( @answers['vm3'] ).to include :q_rbac_database_password => "'~!@\#$%^*-/ aZ'"
     end
 
