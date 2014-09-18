@@ -1,12 +1,12 @@
-module Windows::File
+module PSWindows::File
   include Beaker::CommandFactory
 
   def tmpfile(name)
-    execute("cygpath -m $(mktemp -t #{name}.XXXXXX)")
+    execute("echo C:\\Windows\\Temp\\#{name}.XXXXXX")
   end
 
   def tmpdir(name)
-    execute("cygpath -m $(mktemp -td #{name}.XXXXXX)")
+    execute("echo C:\\Windows\\Temp\\#{name}.XXXXXX")
   end
 
   def path_split(paths)

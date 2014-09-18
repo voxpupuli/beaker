@@ -28,7 +28,13 @@ module Beaker
     def self.create name, options
       case options['HOSTS'][name]['platform']
       when /windows/
-        Windows::Host.new name, options
+        if options['HOSTS'][name]['communicator'].nil?
+          Windows::Host.new name, options
+        elsif options['HOSTS'][name]['communicator'].include?('bitvise')
+          PSWindows::Host.new name, options
+        else
+          raise "Unknown communicator #{options['HOSTS'][name]['communicator']}"
+        end
       when /aix/
         Aix::Host.new name, options
       else
