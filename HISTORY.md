@@ -1,6 +1,8 @@
 # beaker - History
 ## Tags
-* [LATEST - 27 Aug, 2014 (71be2050)](#LATEST)
+* [LATEST - 18 Sep, 2014 (116ecd2e)](#LATEST)
+* [beaker1.17.7 - 2 Sep, 2014 (e47881f0)](#beaker1.17.7)
+* [beaker1.17.6 - 27 Aug, 2014 (bfb257bf)](#beaker1.17.6)
 * [beaker1.17.5 - 22 Aug, 2014 (7e553089)](#beaker1.17.5)
 * [beaker1.17.4 - 21 Aug, 2014 (8e6d070f)](#beaker1.17.4)
 * [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
@@ -58,7 +60,317 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 27 Aug, 2014 (71be2050)
+### <a name = "LATEST">LATEST - 18 Sep, 2014 (116ecd2e)
+
+* (GEM) version bump for beaker 1.18.0 (116ecd2e)
+
+* Merge pull request #450 from anodelman/scp-repair (ee03903b)
+
+
+```
+Merge pull request #450 from anodelman/scp-repair
+
+(QENG-1128) Beaker no long auto recursively scps directories to systems under test
+```
+* Merge pull request #361 from anodelman/openstack (2e15cdaa)
+
+
+```
+Merge pull request #361 from anodelman/openstack
+
+(QENG-15) support openstack in beaker
+```
+* Merge pull request #388 from ferventcoder/ticket/master/allow-git-depth (4d4120a3)
+
+
+```
+Merge pull request #388 from ferventcoder/ticket/master/allow-git-depth
+
+(QENG-1037) Install from git should accept depth
+```
+* Merge pull request #435 from leoc/add-prebuilt-packages-to-docker (c0a20691)
+
+
+```
+Merge pull request #435 from leoc/add-prebuilt-packages-to-docker
+
+(gh-426) Add prebuild packages to Dockerfile
+```
+* Merge pull request #439 from doug-rosser/perf_fixes (7c68e4da)
+
+
+```
+Merge pull request #439 from doug-rosser/perf_fixes
+
+(QENG-1033) Don't modify constants and properly support all Linux platforms in Perf
+```
+* Merge pull request #416 from anodelman/ec2 (de3b3f9d)
+
+
+```
+Merge pull request #416 from anodelman/ec2
+
+(MAINT) add ability to list all instances associated with an ec2 keyname
+```
+* (QENG-1033) Remove dead rspec code (c713fdb1)
+
+* Merge pull request #451 from anodelman/maint (34db9711)
+
+
+```
+Merge pull request #451 from anodelman/maint
+
+(MAINT) broken spec fixes (docker + copy_module_to)
+```
+* (MAINT) broken spec fixes (docker + copy_module_to) (98454e51)
+
+
+```
+(MAINT) broken spec fixes (docker + copy_module_to)
+
+- docker spec was still allowing sleeps to execute making things run
+  slow
+- update copy_module_to spec test to use correct ignore list
+```
+* (QENG-1128) Beaker no long auto recursively scps directories... (c89fae53)
+
+
+```
+(QENG-1128) Beaker no long auto recursively scps directories...
+
+to systems under test
+
+- issue was :recursive variable was being carried over successive calls
+  to scp_to.  To prevent this, just set it based upon the file type
+  being called
+```
+* Merge pull request #440 from colinPL/qeng989_solaris_gem (34e6474f)
+
+
+```
+Merge pull request #440 from colinPL/qeng989_solaris_gem
+
+(QENG-989) install_puppet_from_gem fails on Solaris
+```
+* Merge pull request #412 from anodelman/maint (8e991e18)
+
+
+```
+Merge pull request #412 from anodelman/maint
+
+(QENG-1018) default dev_builds_url in Beaker needs to be updated
+```
+* Merge pull request #448 from cyberious/AddIgnores (eb5a99c5)
+
+
+```
+Merge pull request #448 from cyberious/AddIgnores
+
+QENG-1199 add .bundle to ignore list
+```
+* QENG-1199 add .bundle to ignore list (314d85ce)
+
+* (QENG-1033) Move all functionality into the Perf module and sync the rspec tests (64e69a17)
+
+* Merge pull request #445 from waynr/fix/qeng-1186-beaker-dsl-helpers-puppet-mixup (cbff4759)
+
+
+```
+Merge pull request #445 from waynr/fix/qeng-1186-beaker-dsl-helpers-puppet-mixup
+
+(QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group}
+```
+* Merge pull request #425 from jtopper/avoid_docker_clean_race (c40c37de)
+
+
+```
+Merge pull request #425 from jtopper/avoid_docker_clean_race
+
+(GH-425) Sleep briefly after killing processes - Docker
+```
+* Merge pull request #436 from anodelman/win-fix (de316e3a)
+
+
+```
+Merge pull request #436 from anodelman/win-fix
+
+(QENG-797) Enhance Beaker to look for x64 installers for Windows
+```
+* (QENG-1033) Reset additional_pkgs in a way supported by all Ruby versions (9e6b5283)
+
+* (QENG-1033) additional_pkgs should be a module level variable (6623ec0e)
+
+* (QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group} (5bb6ee4e)
+
+
+```
+(QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group}
+
+Looks like the contents of these methods were mixed upwhen originally written.
+Luckily the puppet user is usually the same as the puppet group.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-1033) combine two conditionals into a single statement (e2e91ccc)
+
+* (QENG-989) install_puppet_from_gem fails on Solaris (45ac614e)
+
+
+```
+(QENG-989) install_puppet_from_gem fails on Solaris
+
+Trying to install puppet from gems would fail on both Solaris 10 and
+11. Solaris 10 now has pkgutil and gem symlinked (ln -s) to /usr/bin.
+Both Solaris versions have puppet-related gems symlinked to /usr/bin
+after installation. This is to avoid clobbering the PATH.
+```
+* (QENG-1129) support win64 open source builds (47bf159f)
+
+
+```
+(QENG-1129) support win64 open source builds
+
+- add ability to install 64 bit windows builds
+- supported when puppet version is 3.7+ or pe is 3.4+, and install_32 is not set for
+  host or globally
+- correctly update path post pe/puppet installation
+```
+* (QENG-1026) Add support for x64 PE windows to Beaker (59a39bd7)
+
+
+```
+(QENG-1026) Add support for x64 PE windows to Beaker
+
+- default to installing 64 bit builds on 64 bit windows
+- support install_32 host option, true = install 32 bit no matter the
+  arch, false/unset = install 64 bit on 64 bit, otherwise 32 bit
+```
+* (QENG-797) Enhance Beaker to look for x64 installers for Windows (066dae5d)
+
+
+```
+(QENG-797) Enhance Beaker to look for x64 installers for Windows
+
+- add ability to install 64 bit pe builds (available for pe 3.4)
+- add is_x86_64? method to host, convenience method for determining arch
+  of host
+```
+* (gh-426) Add prebuild packages to Dockerfile (f4085aca)
+
+
+```
+(gh-426) Add prebuild packages to Dockerfile
+
+Without this patch every time the specs run, prebuilt packages are
+installed to the new docker image. Even when preserving the image.
+To increase the speed of the test suite we install those packages when
+creating the Docker image. The `HostPrebuiltSteps` checks whether those
+are installed and does not do anything directly starting to execute the
+specs inside the image.
+```
+* (GH-425) Sleep after killing processes (18699dc4)
+
+
+```
+(GH-425) Sleep after killing processes
+
+This avoids a race condition in which the killed processes haven't
+exited by the time we try and unmount the root fs and the call to
+container.delete errors.
+```
+* (MAINT) add ability to list all instances associated with an ec2 keyname (d5ad9e35)
+
+
+```
+(MAINT) add ability to list all instances associated with an ec2 keyname
+
+- convenience function for listing all instances associated with a
+  provided keyname, useful for tracking what's happening in ec2
+```
+* (QENG-1018) default dev_builds_url in Beaker needs to be updated (1b2a935f)
+
+
+```
+(QENG-1018) default dev_builds_url in Beaker needs to be updated
+
+- update to builds.delivery.puppetlabs.net
+```
+* (QENG-1037) Install from git should accept depth (ffcddcc0)
+
+
+```
+(QENG-1037) Install from git should accept depth
+
+When installing from larger repositories, being able to specify depth can cut
+the time of git checkout in half. This becomes especially helpful when you are
+checking out multiple repositories.
+Due to the older git on some of the templates, this provides the older
+--branch name --depth 1 commands, which means when using depth, one should
+ensure the rev passed is a branch and not a single commit. Alternatively one
+can add depth_branch => 'name' to repository and have that used instead of rev.
+```
+* (maint) formatting (239d8054)
+
+
+```
+(maint) formatting
+
+This removes trailing whitespaces in install_utils.rb
+```
+* Add Enterprise Linux (el) (3f2bb69b)
+
+* (QENG-15) beaker openstack support (EXPERIMENTAL) (745f1a4a)
+
+
+```
+(QENG-15) beaker openstack support (EXPERIMENTAL)
+
+- experimental code to support openstack, may be missing configuration
+  steps or otherwise be incomplete
+- should be used as a basis for further beaker openstack infrastructure
+```
+### <a name = "beaker1.17.7">beaker1.17.7 - 2 Sep, 2014 (e47881f0)
+
+* Merge pull request #444 from branan/ship_1_17_7 (e47881f0)
+
+
+```
+Merge pull request #444 from branan/ship_1_17_7
+
+(maint) Bump version for 1.17.7 release
+```
+* (maint) Bump version for 1.17.7 release (0cb30f18)
+
+* Merge pull request #443 from briancain/maint/master/add-node-to-classifier (701f81c2)
+
+
+```
+Merge pull request #443 from briancain/maint/master/add-node-to-classifier
+
+(QENG-1182) Add node to classifier prior to adding pe_repo class
+```
+* (QENG-1182) Add node to classifier prior to adding pe_repo class (00b2f458)
+
+
+```
+(QENG-1182) Add node to classifier prior to adding pe_repo class
+
+Prior to this commit, beaker would make the assumption that a node had
+already checked into the classifier. This commit changes that by
+ensuring that the node is in the classifier before giving it the pe_repo
+class.
+```
+### <a name = "beaker1.17.6">beaker1.17.6 - 27 Aug, 2014 (bfb257bf)
+
+* Merge pull request #441 from anodelman/make-gem (bfb257bf)
+
+
+```
+Merge pull request #441 from anodelman/make-gem
+
+create beaker 1.17.6 gem
+```
+* (HISTORY) update history for 1.17.6 gem (a7ee6c69)
 
 * (GEM) version bump for 1.17.6 gem (71be2050)
 
