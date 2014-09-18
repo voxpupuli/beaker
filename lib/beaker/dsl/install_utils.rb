@@ -182,7 +182,7 @@ module Beaker
         end
       end
 
-      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a 
+      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a
       #background process.  The output of the command will be stored in the provided host['higgs_file'].
       # @param [Host] host The host that Higgs is to be installed on
       #                    The host object must have the 'working_dir', 'dist' and 'pe_installer' field set correctly.
@@ -530,7 +530,7 @@ module Beaker
       # @param  [Hash{Symbol=>Symbol, String}] opts The options
       # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option opts [String] :pe_ver Default PE version to install 
+      # @option opts [String] :pe_ver Default PE version to install
       #                  (Otherwise uses individual hosts pe_ver)
       # @raise [StandardError] When installation times out
       #
@@ -641,7 +641,7 @@ module Beaker
         end
         nil
       end
-      
+
       # Configure a host entry on the give host
       # @example: will add a host entry for forge.puppetlabs.com
       #   host_entry(host, { :ip => '23.251.154.122', :name => 'forge.puppetlabs.com' })
@@ -653,7 +653,7 @@ module Beaker
           powershell_pre = "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass"
           hosts_file = "C:\\Windows\\System32\\Drivers\\etc\\hosts"
           host_entry = "#{opts['ip']}`t`t#{opts['name']}"
-          on host, "#{powershell_pre} -Command \"\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text\""
+          on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         else
           hosts_file = "/etc/hosts"
           host_entry = "#{opts['ip']}\t\t#{opts['name']}"
