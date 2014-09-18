@@ -304,25 +304,6 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
-  describe '#puppet_module_install_on' do
-    it 'scps the module to the module dir' do
-      subject.stub( :hosts ).and_return( hosts )
-
-      subject.should_receive( :puppet ).with('module install test' ).once
-      subject.puppet_module_install_on( master, {:source => '/module', :module_name => 'test'} )
-    end
-  end
-
-  describe '#puppet_module_install' do
-    it 'delegates to #puppet_module_install_on with the hosts list' do
-      subject.stub( :hosts ).and_return( hosts )
-
-      subject.should_receive( :puppet_module_install_on ).with( hosts, {:source => '/module', :module_name => 'test'}).once
-
-      subject.puppet_module_install( {:source => '/module', :module_name => 'test'} )
-    end
-  end
-
   describe 'confine' do
     let(:logger) { double.as_null_object }
     before do
@@ -1226,109 +1207,6 @@ describe ClassMixedWithDSLHelpers do
         end
         include_examples('modify-tk-config-without-error')
       end
-
     end
-
-  end
-
-  describe 'copy_module_to' do
-    let(:ignore_list) { Beaker::DSL::Helpers::PUPPET_MODULE_INSTALL_IGNORE }
-    let(:source){'./'}
-    let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
-    let(:module_parse_name){'testmodule'}
-
-    shared_examples 'copy_module_to' do  |opts|
-      it{
-        host = double("host")
-        host.stub(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
-        Dir.stub(:getpwd).and_return(source)
-
-        subject.stub(:parse_for_moduleroot).and_return(source)
-        if module_parse_name
-          subject.stub(:parse_for_modulename).with(any_args()).and_return(module_parse_name)
-        else
-          subject.should_not_receive(:parse_for_modulename)
-        end
-
-        File.stub(:exists?).with(any_args()).and_return(false)
-        File.stub(:directory?).with(any_args()).and_return(false)
-
-        subject.should_receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
-        if opts.nil?
-          subject.copy_module_to(host)
-        else
-          subject.copy_module_to(host,opts)
-        end
-      }
-    end
-    describe 'should call scp with the correct info, with only providing host' do
-      let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
-
-      it_should_behave_like 'copy_module_to'
-    end
-    describe 'should call scp with the correct info, when specifying the modulename' do
-      let(:target){'/etc/puppetlabs/puppet/modules/bogusmodule'}
-      let(:module_parse_name){false}
-      it_should_behave_like 'copy_module_to', {:module_name =>'bogusmodule'}
-    end
-    describe 'should call scp with the correct info, when specifying the target to a different path' do
-      target = '/opt/shared/puppet/modules'
-      let(:target){"#{target}/testmodule"}
-      it_should_behave_like 'copy_module_to', {:target_module_path => target}
-    end
-  end
-
-  describe 'split_author_modulename' do
-    it 'should return a correct modulename' do
-      result =  subject.split_author_modulename('myname-test_43_module')
-      expect(result[:author]).to eq('myname')
-      expect(result[:module]).to eq('test_43_module')
-    end
-  end
-
-  describe 'get_module_name' do
-    it 'should return a has of author and modulename' do
-      expect(subject.get_module_name('myname-test_43_module')).to eq('test_43_module')
-    end
-    it 'should return nil for invalid names' do
-      expect(subject.get_module_name('myname-')).to eq(nil)
-    end
-  end
-
-  describe 'parse_for_modulename' do
-    directory = '/testfilepath/myname-testmodule'
-    it 'should return name from metadata.json' do
-      File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
-      File.stub(:read).with("#{directory}/metadata.json").and_return(" {\"name\":\"myname-testmodule\"} ")
-      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from metadata.json")
-      subject.logger.should_not_receive(:debug).with('Unable to determine name, returning null')
-      subject.parse_for_modulename(directory).should eq('testmodule')
-    end
-    it 'should return name from Modulefile' do
-      File.stub(:exists?).with("#{directory}/metadata.json").and_return(false)
-      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
-      File.stub(:read).with("#{directory}/Modulefile").and_return("name    'myname-testmodule'  \nauthor   'myname'")
-      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from Modulefile")
-      subject.logger.should_not_receive(:debug).with("Unable to determine name, returning null")
-      expect(subject.parse_for_modulename(directory)).to eq('testmodule')
-    end
-  end
-
-  describe 'parse_for_module_root' do
-    directory = '/testfilepath/myname-testmodule'
-    it 'should recersively go up the directory to find the module files' do
-      File.stub(:exists?).with("#{directory}/acceptance/Modulefile").and_return(false)
-      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
-      subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
-      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}/acceptance, moving up")
-      expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
-    end
-    it 'should recersively go up the directory to find the module files' do
-      File.stub(:exists?).and_return(false)
-      subject.logger.should_receive(:debug).with("No Modulefile found at #{directory}, moving up")
-      subject.logger.should_receive(:error).with("At root, can't parse for another directory")
-      expect(subject.parse_for_moduleroot(directory)).to eq(nil)
-    end
-
   end
 end
