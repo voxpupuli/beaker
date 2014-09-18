@@ -39,8 +39,8 @@ module Beaker
             v_file << "      vb.customize ['createhd', '--filename', '#{host['disk_path']}', '--size', #{host['disk_size'] ||= 5 * 1024}, '--format', 'vmdk']\n"
           end
           v_file << "      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium','#{host['disk_path']}']\n"
-          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnshostresolver1\", \"on\"]\n" if host['natdns'].eql?('on')
-          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnsproxy1\", \"on\"]\n" if host['natdns'].eql?('on')
+          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnshostresolver1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
+          v_file << "      vb.customize [\"modifyvm\", :id, \"--natdnsproxy1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
           v_file << "    end\n"
         end
 
