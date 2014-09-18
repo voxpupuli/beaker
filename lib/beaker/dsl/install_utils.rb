@@ -653,7 +653,7 @@ module Beaker
         end
         nil
       end
-      
+
       # Configure a host entry on the give host
       # @example: will add a host entry for forge.puppetlabs.com
       #   host_entry(host, { :ip => '23.251.154.122', :name => 'forge.puppetlabs.com' })
@@ -665,7 +665,7 @@ module Beaker
           powershell_pre = "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass"
           hosts_file = "C:\\Windows\\System32\\Drivers\\etc\\hosts"
           host_entry = "#{opts['ip']}`t`t#{opts['name']}"
-          on host, "#{powershell_pre} -Command \"\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text\""
+          on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         else
           hosts_file = "/etc/hosts"
           host_entry = "#{opts['ip']}\t\t#{opts['name']}"
