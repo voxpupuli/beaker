@@ -1,6 +1,9 @@
 # beaker - History
 ## Tags
-* [LATEST - 20 Aug, 2014 (92584d1e)](#LATEST)
+* [LATEST - 27 Aug, 2014 (71be2050)](#LATEST)
+* [beaker1.17.5 - 22 Aug, 2014 (7e553089)](#beaker1.17.5)
+* [beaker1.17.4 - 21 Aug, 2014 (8e6d070f)](#beaker1.17.4)
+* [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
 * [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
 * [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
 * [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
@@ -55,7 +58,128 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 20 Aug, 2014 (92584d1e)
+### <a name = "LATEST">LATEST - 27 Aug, 2014 (71be2050)
+
+* (GEM) version bump for 1.17.6 gem (71be2050)
+
+* Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references (fe77e9b0)
+
+
+```
+Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references
+
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+```
+* (QENG-1134) Remove 'jvm-puppet' references left in Beaker. (5da4eebc)
+
+
+```
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+
+Recently the `jvm-puppet` name was changed to `puppet-server`, this patch
+addresses that in both `lib/` and `spec/`
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.5">beaker1.17.5 - 22 Aug, 2014 (7e553089)
+
+* Merge pull request #417 from anodelman/make-gem (7e553089)
+
+
+```
+Merge pull request #417 from anodelman/make-gem
+
+create beaker 1.17.5 gem
+```
+* (HISTORY) update history for beaker 1.17.5 gem (ebefea72)
+
+* (GEM) version bump for beaker 1.17.5 gem (4a96b147)
+
+* Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix (61e56aa7)
+
+
+```
+Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix
+
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+```
+* (QENG-1110) Beaker::DSL::EZBakeUtils bugfix (bd1d91f2)
+
+
+```
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+
+Allows arbitrary arguments to be passed to ezbake command line.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails (716ab3d4)
+
+
+```
+Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails
+
+(QENG-1108) Fix chown command to use ':' rather than '.'
+```
+* (QENG-1108) Fix chown command to use ':' rather than '.' (c2da3911)
+
+
+```
+(QENG-1108) Fix chown command to use ':' rather than '.'
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.4">beaker1.17.4 - 21 Aug, 2014 (8e6d070f)
+
+* Merge pull request #413 from anodelman/make-gem (8e6d070f)
+
+
+```
+Merge pull request #413 from anodelman/make-gem
+
+create beaker 1.17.4 gem
+```
+* (HISTORY) update history for beaker 1.17.4 gem (bd1fe05f)
+
+* (GEM) version bump for 1.17.4 (1e6a4a8f)
+
+* Merge pull request #411 from anodelman/ec2 (2b4c9049)
+
+
+```
+Merge pull request #411 from anodelman/ec2
+
+(MAINT) kill zombies after provided number of hours
+```
+* Merge pull request #409 from cyberious/ScpCopyIgnoreFix (e59632eb)
+
+
+```
+Merge pull request #409 from cyberious/ScpCopyIgnoreFix
+
+QENG-1080 do_scp_to now checks for source path of absolute and prunes accordingly
+```
+* (MAINT) kill zombies after provided number of hours (3f3c3b27)
+
+
+```
+(MAINT) kill zombies after provided number of hours
+
+- was always using the default 3 hours
+```
+* QENG-1080 Fixed issue where we appended the source path to the target path, we now check for absolute path prior (cdd9c7b8)
+
+### <a name = "beaker1.17.3">beaker1.17.3 - 20 Aug, 2014 (f8a536c1)
+
+* Merge pull request #410 from anodelman/make-gem (f8a536c1)
+
+
+```
+Merge pull request #410 from anodelman/make-gem
+
+create beaker 1.17.3 gem
+```
+* (HISTORY) update history for 1.17.3 gem (0d6006c4)
 
 * (GEM) version bump for 1.17.3 gem (92584d1e)
 

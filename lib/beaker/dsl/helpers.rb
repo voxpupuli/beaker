@@ -28,7 +28,7 @@ module Beaker
     # @api dsl
     module Helpers
 
-      PUPPET_MODULE_INSTALL_IGNORE = ['.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
+      PUPPET_MODULE_INSTALL_IGNORE = ['.bundle', '.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
 
       # @!macro common_opts
       #   @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -301,7 +301,7 @@ module Beaker
 
         if defined? host.tmpdir
           dir = host.tmpdir(name)
-          on host, "chown #{user}.#{user} #{dir}"
+          on host, "chown #{user}:#{user} #{dir}"
           return dir
         else
           raise "Host platform not supported by `create_tmpdir_for_user`."
@@ -476,7 +476,7 @@ module Beaker
       # @note This method assumes puppet is installed on the host.
       #
       def puppet_user(host)
-        return host.puppet('master')['group']
+        return host.puppet('master')['user']
       end
 
       # Return the name of the puppet group.
@@ -486,7 +486,7 @@ module Beaker
       # @note This method assumes puppet is installed on the host.
       #
       def puppet_group(host)
-        return host.puppet('master')['user']
+        return host.puppet('master')['group']
       end
 
       # @!visibility private
@@ -571,7 +571,7 @@ module Beaker
         curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
         logger.debug "Setting curl retries to #{curl_retries}"
 
-        if options[:is_jvm_puppet]
+        if options[:is_puppetserver]
           confdir = host.puppet('master')['confdir']
           vardir = host.puppet('master')['vardir']
 
@@ -588,13 +588,13 @@ module Beaker
             end
           end
 
-          jvm_puppet_opts = { "jruby-puppet" => {
+          puppetserver_opts = { "jruby-puppet" => {
             "master-conf-dir" => confdir,
             "master-var-dir" => vardir,
           }}
 
-          jvm_puppet_conf = File.join("#{host['jvm-puppet-confdir']}", "jvm-puppet.conf")
-          modify_tk_config(host, jvm_puppet_conf, jvm_puppet_opts)
+          puppetserver_conf = File.join("#{host['puppetserver-confdir']}", "puppetserver.conf")
+          modify_tk_config(host, puppetserver_conf, puppetserver_opts)
         end
 
         begin

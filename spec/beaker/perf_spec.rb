@@ -27,6 +27,7 @@ module Beaker
 
       it 'creates a new Perf object with a single host, :collect_perf_data = true' do
         hosts = [ make_host("myHost", @options) ]
+        hosts.each { |host| host['platform'] = "centos-6-x86_64" }
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
@@ -35,6 +36,7 @@ module Beaker
 
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true' do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
+        hosts.each { |host| host['platform'] = "centos-6-x86_64" }
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
@@ -43,7 +45,8 @@ module Beaker
 
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true, SLES' do
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
-        hosts[0]['platform'] = "SLES"
+        hosts[0]['platform'] = "centos-6-x86_64"
+        hosts[1]['platform'] = "sles-11-x86_64"
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
@@ -65,12 +68,12 @@ module Beaker
       end
 
       it "Does the Right Thing on Linux hosts" do
-        @hosts[0]['platform'] = "centos"
+        @hosts[0]['platform'] = "centos-6-x86_64"
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( @hosts, @options )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHostGetting perf data for host: myHostGetting perf data for host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHostGetting perf data for host: myHostGetting perf data for host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHost/)
       end
 
       it "Does the Right Thing on non-Linux hosts" do
@@ -79,7 +82,7 @@ module Beaker
         perf = Perf.new( @hosts, @options )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHostGetting perf data for host: myHostGetting perf data for host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHostPerf \(sysstat\) not supported on host: myHostSetup perf on host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHostGetting perf data for host: myHostPerf \(sysstat\) not supported on host: myHostGetting perf data for host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHost/)
       end
     end
 

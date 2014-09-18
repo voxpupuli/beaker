@@ -853,7 +853,7 @@ describe ClassMixedWithDSLHelpers do
       }.to raise_error(RuntimeError, /puppet conf backup failed/)
     end
 
-    describe 'with jvm puppet' do
+    describe 'with puppet-server' do
       let(:default_confdir) { "/etc/puppet" }
       let(:default_vardir) { "/var/lib/puppet" }
 
@@ -862,19 +862,19 @@ describe ClassMixedWithDSLHelpers do
 
       let(:command_line_args) {"--vardir=#{custom_vardir} --confdir=#{custom_confdir}"}
       let(:conf_opts) { {:__commandline_args__ => command_line_args,
-                         :is_jvm_puppet => true}}
+                         :is_puppetserver => true}}
 
-      let(:default_jvm_puppet_opts) {{ "jruby-puppet" => {
+      let(:default_puppetserver_opts) {{ "jruby-puppet" => {
         "master-conf-dir" => default_confdir,
         "master-var-dir" => default_vardir,
       }}}
 
-      let(:custom_jvm_puppet_opts) {{ "jruby-puppet" => {
+      let(:custom_puppetserver_opts) {{ "jruby-puppet" => {
         "master-conf-dir" => custom_confdir,
         "master-var-dir" => custom_vardir,
       }}}
 
-      let(:jvm_puppet_conf) { "/etc/jvm-puppet/conf.d/jvm-puppet.conf" }
+      let(:puppetserver_conf) { "/etc/puppetserver/conf.d/puppetserver.conf" }
       let(:logger) { double }
 
       def stub_post_setup
@@ -893,7 +893,7 @@ describe ClassMixedWithDSLHelpers do
 
       before do
         stub_post_setup
-        subject.stub( :options) .and_return( {:is_jvm_puppet => true})
+        subject.stub( :options) .and_return( {:is_puppetserver => true})
         subject.stub( :modify_tk_config)
         host.stub(:puppet).with('master') .and_return({'confdir' => default_confdir,
                                                        'vardir' => default_vardir})
@@ -901,8 +901,8 @@ describe ClassMixedWithDSLHelpers do
 
       describe 'and command line args passed' do
         it 'modifies SUT trapperkeeper configuration w/ command line args' do
-          subject.should_receive( :modify_tk_config).with(host, jvm_puppet_conf,
-                                                          custom_jvm_puppet_opts)
+          subject.should_receive( :modify_tk_config).with(host, puppetserver_conf,
+                                                          custom_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)
         end
       end
@@ -910,8 +910,8 @@ describe ClassMixedWithDSLHelpers do
       describe 'and no command line args passed' do
         let(:command_line_args) { nil }
         it 'modifies SUT trapperkeeper configuration w/ puppet defaults' do
-          subject.should_receive( :modify_tk_config).with(host, jvm_puppet_conf,
-                                                          default_jvm_puppet_opts)
+          subject.should_receive( :modify_tk_config).with(host, puppetserver_conf,
+                                                          default_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)
         end
       end
@@ -1232,7 +1232,7 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe 'copy_module_to' do
-    let(:ignore_list){%w(.git .idea .vagrant .vendor acceptance spec tests log . ..)}
+    let(:ignore_list) { Beaker::DSL::Helpers::PUPPET_MODULE_INSTALL_IGNORE }
     let(:source){'./'}
     let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
     let(:module_parse_name){'testmodule'}

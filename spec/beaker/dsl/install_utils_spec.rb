@@ -88,6 +88,47 @@ describe ClassMixedWithDSLInstallUtils do
 
       subject.install_from_git( host, path, repo )
     end
+
+    it 'allows a checkout depth of 1' do
+      repo   = { :name => 'puppet',
+                 :path => 'git://my.server.net/puppet.git',
+                 :rev => 'master',
+                 :depth => 1 }
+
+      path   = '/path/to/repos'
+      cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:rev]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
+      host   = { 'platform' => 'debian' }
+      logger = double.as_null_object
+      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
+      subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
+      # this is the the command we want to test
+      subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
+
+      subject.install_from_git( host, path, repo )
+    end
+
+    it 'allows a checkout depth with a rev from a specific branch' do
+      repo   = { :name => 'puppet',
+                 :path => 'git://my.server.net/puppet.git',
+                 :rev => 'a2340acddadfeafd234230faf',
+                 :depth => 50,
+                 :depth_branch => 'master' }
+
+      path   = '/path/to/repos'
+      cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
+      host   = { 'platform' => 'debian' }
+      logger = double.as_null_object
+      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
+      subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
+      # this is the the command we want to test
+      subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
+
+      subject.install_from_git( host, path, repo )
+    end
    end
 
   describe 'sorted_hosts' do
@@ -105,6 +146,7 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'installer_cmd' do
 
     it 'generates a windows PE install command for a windows host' do
+      winhost['dist'] = 'puppet-enterprise-3.0'
       subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
       expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
@@ -210,6 +252,7 @@ describe ClassMixedWithDSLInstallUtils do
       File.stub( :directory? ).and_return( true ) #is local
       File.stub( :exists? ).and_return( true ) #is present
       winhost['pe_dir'] = '/local/file/path'
+      winhost['dist'] = 'puppet-enterprise-3.0'
       subject.stub( :scp_to ).and_return( true )
 
       path = winhost['pe_dir']
@@ -265,6 +308,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :sign_certificate_for ).and_return( true )
       subject.stub( :stop_agent_on ).and_return( true )
       subject.stub( :sleep_until_puppetdb_started ).and_return( true )
+      subject.stub( :version_is_less ).with('3.0', '3.4').and_return( true )
       subject.stub( :version_is_less ).with('3.0', '3.0').and_return( false )
       subject.stub( :wait_for_host_in_dashboard ).and_return( true )
       subject.stub( :puppet_agent ).and_return do |arg|
@@ -436,7 +480,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
       it 'falls back to installing from gem when given :default_action => "gem_install"' do
         result = double
-        gem_env_string = '{"RubyGems Environment": [ {"GEM PATHS": [] } ] }'
+        gem_env_string = '{"RubyGems Environment": [ {"GEM PATHS": [], "EXECUTABLE DIRECTORY": "/does/not/exist" } ] }'
         allow( result ).to receive(:stdout).and_return gem_env_string
         allow(subject).to receive(:on).with(host, /gem environment/).and_return result
         expect(subject).to receive(:on).with(host, /gem install/)

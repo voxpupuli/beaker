@@ -88,6 +88,28 @@ module Beaker
       nil #void
     end
 
+    #Print instances to the logger.  Instances will be from all regions associated with provided key name and
+    #limited by regex compared to instance status.  Defaults to running instances.
+    #@param [String] key The key_name to match for
+    #@param [Regex] status The regular expression to match against the instance's status
+    def log_instances(key = key_name, status = /running/)
+      instances = []
+      @ec2.regions.each do |region|
+        @logger.debug "Reviewing: #{region.name}"
+        @ec2.regions[region.name].instances.each do |instance|
+          if (instance.key_name =~ /#{key}/) and (instance.status.to_s =~ status)
+            instances << instance
+          end
+        end
+      end
+      output = ""
+      instances.each do |instance|
+        output << "#{instance.id} keyname: #{instance.key_name}, dns name: #{instance.dns_name}, private ip: #{instance.private_ip_address}, ip: #{instance.ip_address}, launch time #{instance.launch_time}, status: #{instance.status}\n"
+      end
+      @logger.notify("aws-sdk: List instances (keyname: #{key})")
+      @logger.notify("#{output}")
+    end
+
     #Shutdown and destroy ec2 instances idenfitied by key that have been alive longer than ZOMBIE hours.
     #@param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
     #@param [String] key The key_name to match for
