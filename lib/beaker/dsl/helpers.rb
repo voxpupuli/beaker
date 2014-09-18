@@ -930,40 +930,10 @@ module Beaker
           puppet_apply_opts[:modulepath] = opts[:modulepath] if opts[:modulepath]
           puppet_apply_opts[:noop] = nil if opts[:noop]
 
-          # From puppet help:
-          # "... an exit code of '2' means there were changes, an exit code of
-          # '4' means there were failures during the transaction, and an exit
-          # code of '6' means there were both changes and failures."
-          if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].compact.length > 1
-            raise(ArgumentError,
-                  'Cannot specify more than one of `catch_failures`, ' +
-                  '`catch_changes`, `expect_failures`, or `expect_changes` ' +
-                  'for a single manifest')
-          end
+          on_options[:acceptable_exit_codes] |= catch_exit_codes(on_options[:acceptable_exit_codes], opts)
 
-          if opts[:catch_changes]
+          if opts[:catch_changes] || opts[:catch_failures] || opts[:expect_failures] || opts[:expect_changes]
             puppet_apply_opts['detailed-exitcodes'] = nil
-
-            # We're after idempotency so allow exit code 0 only.
-            on_options[:acceptable_exit_codes] |= [0]
-          elsif opts[:catch_failures]
-            puppet_apply_opts['detailed-exitcodes'] = nil
-
-            # We're after only complete success so allow exit codes 0 and 2 only.
-            on_options[:acceptable_exit_codes] |= [0, 2]
-          elsif opts[:expect_failures]
-            puppet_apply_opts['detailed-exitcodes'] = nil
-
-            # We're after failures specifically so allow exit codes 1, 4, and 6 only.
-            on_options[:acceptable_exit_codes] |= [1, 4, 6]
-          elsif opts[:expect_changes]
-            puppet_apply_opts['detailed-exitcodes'] = nil
-
-            # We're after changes specifically so allow exit code 2 only.
-            on_options[:acceptable_exit_codes] |= [2]
-          else
-            # Either use the provided acceptable_exit_codes or default to [0]
-            on_options[:acceptable_exit_codes] |= [0]
           end
 
           # Not really thrilled with this implementation, might want to improve it
@@ -995,10 +965,95 @@ module Beaker
         apply_manifest_on(default, manifest, opts, &block)
       end
 
-      # @deprecated
+      # Maps useful opts arguments such as :catch_failures to their corrisponding --detailed-exit-codes values
+      #
+      # @param exit_codes [Array] of existing exit codes. This is assumed to be an override and in merged with the discovered codes to form the final value
+      # @param opts [Hash] of opts from the executing method. Expected contents of this hash include: catch_changes, catch_failures, expect_failures and expect_changes
+      #
+      # @return [Array] of exit codes for the given opts
+      def catch_exit_codes(exit_codes, opts)
+
+        # From puppet help:
+        # "... an exit code of '2' means there were changes, an exit code of
+        # '4' means there were failures during the transaction, and an exit
+        # code of '6' means there were both changes and failures."
+        if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].compact.length > 1
+          raise(ArgumentError,
+                'Cannot specify more than one of `catch_failures`, ' +
+                '`catch_changes`, `expect_failures`, or `expect_changes` ' +
+                'for a single manifest')
+        end
+
+        if opts[:catch_changes]
+          # We're after idempotency so allow exit code 0 only.
+          codes = [0]
+        elsif opts[:catch_failures]
+          # We're after only complete success so allow exit codes 0 and 2 only.
+          codes = [0,2]
+        elsif opts[:expect_failures]
+          # We're after failures specifically so allow exit codes 1, 4, and 6 only.
+          codes =[1,4,6]
+        elsif opts[:expect_changes]
+          # We're after changes specifically so allow exit code 2 only.
+          codes = [2]
+        else
+          codes = [0]
+        end
+
+        return exit_codes.concat(codes)
+      end
+
+      # Runs 'puppet agent' on a remote host, piping manifest through stdin
+      #
+      # @param [Host] host The host that this command should be run on
+      #
+      # @!macro common_opts
+      #
+      # @option opts [Array<Integer>] :acceptable_exit_codes ([0]) The list of exit
+      #                          codes that will NOT raise an error when found upon
+      #                          command completion.  If provided, these values will
+      #                          be combined with those used in :catch_failures and
+      #                          :expect_failures to create the full list of
+      #                          passing exit codes.
+      #
+      # @option opts [Boolean]  :catch_failures (false) By default `puppet
+      #                         --apply` will exit with 0, which does not count
+      #                         as a test failure, even if there were errors or
+      #                         changes when applying the manifest. This option
+      #                         enables detailed exit codes and causes a test
+      #                         failure if `puppet agent` indicates there was
+      #                         a failure during its execution.
+      #
+      # @option opts [Boolean]  :catch_changes (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet agent` indicates that there were
+      #                         changes or failures during its execution.
+      #
+      # @option opts [Boolean]  :expect_changes (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet agent` indicates that there were
+      #                         no resource changes during its execution.
+      #
+      # @option opts [Boolean]  :expect_failures (false) This option enables
+      #                         detailed exit codes and causes a test failure
+      #                         if `puppet agent` indicates there were no
+      #                         failure during its execution.
+      #
+      # @option opts [Boolean]  :noop (false) If this option exists, the
+      #                         the "--noop" command line parameter will be
+      #                         passed to the 'puppet agent' command.
+      #
+      # @option opts [Boolean]  :debug (false) If this option exists, the
+      #                         the "--debug" command line parameter will be
+      #                         passed to the 'puppet agent' command.
+      #
+      # @param [Block] block This method will yield to a block of code passed
+      #                      by the caller; this can be used for additional
+      #                      validation, etc.
+      #
       def run_agent_on(host, opts={}, &block)
         block_on host do | host |
-          
+
           on_options = {}
           on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
 
@@ -1009,47 +1064,23 @@ module Beaker
           puppet_agent_opts[:onetime] = nil
           puppet_agent_opts[:test] = nil
           puppet_agent_opts[:noop] = nil if opts[:noop]
-          
-          # From puppet help:
-          # "... an exit code of '2' means there were changes, an exit code of
-          # '4' means there were failures during the transaction, and an exit
-          # code of '6' means there were both changes and failures."
-          if [opts[:catch_changes],opts[:catch_failures],opts[:expect_failures],opts[:expect_changes]].compact.length > 1
-            raise(ArgumentError,
-                  'Cannot specify more than one of `catch_failures`, ' +
-                  '`catch_changes`, `expect_failures`, or `expect_changes` ' +
-                  'for a single manifest')
+
+          on_options[:acceptable_exit_codes] |= catch_exit_codes(on_options[:acceptable_exit_codes], opts)
+
+          if opts[:catch_changes] || opts[:catch_failures] || opts[:expect_failures] || opts[:expect_changes]
+            puppet_agent_opts['detailed-exitcodes'] = nil
           end
 
-          if opts[:catch_changes]
-            puppet_agent_opts['detailed-exitcodes'] = nil
-
-            # We're after idempotency so allow exit code 0 only.
-            on_options[:acceptable_exit_codes] |= [0]
-          elsif opts[:catch_failures]
-            puppet_agent_opts['detailed-exitcodes'] = nil
-
-            # We're after only complete success so allow exit codes 0 and 2 only.
-            on_options[:acceptable_exit_codes] |= [0, 2]
-          elsif opts[:expect_failures]
-            puppet_agent_opts['detailed-exitcodes'] = nil
-
-            # We're after failures specifically so allow exit codes 1, 4, and 6 only.
-            on_options[:acceptable_exit_codes] |= [1, 4, 6]
-          elsif opts[:expect_changes]
-            puppet_agent_opts['detailed-exitcodes'] = nil
-
-            # We're after changes specifically so allow exit code 2 only.
-            on_options[:acceptable_exit_codes] |= [2]
-          else
-            # Either use the provided acceptable_exit_codes or default to [0]
-            on_options[:acceptable_exit_codes] |= [0]
-          end
-          
           #on host, puppet_agent(arg), options, &block
           on host, puppet('agent', puppet_agent_opts), on_options, &block
-          
+
         end
+      end
+
+      # Runs 'puppet agent' on default host, piping manifest through stdin
+      # @see #run_agent_on
+      def run_agent(opts = {}, &block)
+        run_agent_on(default, opts, &block)
       end
 
       # FIX: this should be moved into host/platform
