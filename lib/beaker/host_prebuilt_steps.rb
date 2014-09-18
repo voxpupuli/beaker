@@ -77,10 +77,6 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
-      if opts[:collect_perf_data]
-        UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
-        SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
-      end
       block_on host do |host|
         case
         when host['platform'] =~ /sles-/

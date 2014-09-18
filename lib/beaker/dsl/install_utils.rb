@@ -101,14 +101,25 @@ module Beaker
       #
       # @see #find_git_repo_versions
       def install_from_git host, path, repository
-        name   = repository[:name]
-        repo   = repository[:path]
-        rev    = repository[:rev]
-        target = "#{path}/#{name}"
+        name          = repository[:name]
+        repo          = repository[:path]
+        rev           = repository[:rev]
+        depth         = repository[:depth]
+        depth_branch  = repository[:depth_branch]
+        target        = "#{path}/#{name}"
+
+        if (depth_branch.nil?)
+          depth_branch = rev
+        end
+
+        clone_cmd = "git clone #{repo} #{target}"
+        if (depth)
+          clone_cmd = "git clone --branch #{depth_branch} --depth #{depth} #{repo} #{target}"
+        end
 
         step "Clone #{repo} if needed" do
           on host, "test -d #{path} || mkdir -p #{path}"
-          on host, "test -d #{target} || git clone #{repo} #{target}"
+          on host, "test -d #{target} || #{clone_cmd}"
         end
 
         step "Update #{name} and check out revision #{rev}" do
@@ -152,10 +163,9 @@ module Beaker
       def installer_cmd(host, opts)
         version = host['pe_ver'] || opts[:pe_ver]
         if host['platform'] =~ /windows/
-          version = host[:pe_ver] || opts['pe_ver_win']
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i puppet-enterprise-#{version}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
+          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
@@ -307,7 +317,7 @@ module Beaker
         path = host['pe_dir'] || opts[:pe_dir]
         local = File.directory?(path)
         version = host['pe_ver'] || opts[:pe_ver_win]
-        filename = "puppet-enterprise-#{version}"
+        filename = "#{host['dist']}"
         extension = ".msi"
         if local
           if not File.exists?("#{path}/#{filename}#{extension}")
@@ -390,6 +400,7 @@ module Beaker
         klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
         klass = "pe_repo::platform::#{klass}"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master}]"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
         on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
       end
@@ -430,6 +441,17 @@ module Beaker
           elsif host['platform'] =~ /osx/
             version = host['pe_ver'] || opts[:pe_ver]
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
+          elsif host['platform'] =~ /windows/
+            version = host[:pe_ver] || opts['pe_ver_win']
+            #only install 64bit builds if
+            # - we are on pe version 3.4+
+            # - we do not have install_32 set on host
+            # - we do not have install_32 set globally
+            if !(version_is_less(version, '3.4')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+              host['dist'] = "puppet-enterprise-#{version}-x64"
+            else
+              host['dist'] = "puppet-enterprise-#{version}"
+            end
           end
           host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
         end
@@ -652,11 +674,11 @@ module Beaker
       #                                       Puppet via gem.
       # @option opts [String] :release The major release of the OS
       # @option opts [String] :family The OS family (one of 'el' or 'fedora')
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_rpm( host, opts )
-        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm" 
+        release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
 
         on host, "rpm -ivh #{release_package_string}"
 
@@ -679,7 +701,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, if nil installs latest version
       # @option opts [String] :facter_version The version of Facter to install, if nil installs latest version
       # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest version
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_deb( host, opts )
@@ -716,20 +738,32 @@ module Beaker
       # @param [Host] host The host to install packages on
       # @param [Hash{Symbol=>String}] opts An options hash
       # @option opts [String] :version The version of Puppet to install, required
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
-        on host, "curl -O http://downloads.puppetlabs.com/windows/puppet-#{opts[:version]}.msi"
-        on host, "msiexec /qn /i puppet-#{opts[:version]}.msi"
+        #only install 64bit builds if
+        # - we are on puppet version 3.7+
+        # - we do not have install_32 set on host
+        # - we do not have install_32 set globally
+        version = opts[:version]
+        if !(version_is_less(version, '3.7')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+          host['dist'] = "puppet-#{version}-x64"
+        else
+          host['dist'] = "puppet-#{version}"
+        end
+        link = "http://downloads.puppetlabs.com/windows/#{host['dist']}.msi"
+        if not link_exists?( link )
+          raise "Puppet #{version} at #{link} does not exist!"
+        end
+        on host, "curl -O #{link}"
+        on host, "msiexec /qn /i #{host['dist']}.msi"
 
         #Because the msi installer doesn't add Puppet to the environment path
-        if fact_on(host, 'architecture').eql?('x86_64')
-          install_dir = '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin'
-        else
-          install_dir = '/cygdrive/c/Program Files/Puppet Labs/Puppet/bin'
-        end
-        on host, %Q{ echo 'export PATH=$PATH:"#{install_dir}"' > /etc/bash.bashrc }
+        #Add both potential paths for simplicity
+        #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
+        puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
+        on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
       end
 
       # Installs Puppet and dependencies from dmg
@@ -739,7 +773,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, required
       # @option opts [String] :facter_version The version of Facter to install, required
       # @option opts [String] :hiera_version The version of Hiera to install, required
-      # 
+      #
       # @return nil
       # @api private
       def install_puppet_from_dmg( host, opts )
@@ -767,20 +801,25 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, if nil installs latest
       # @option opts [String] :facter_version The version of Facter to install, if nil installs latest
       # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest
-      # 
+      #
       # @return nil
       # @raise [StandardError] if gem does not exist on target host
       # @api private
       def install_puppet_from_gem( host, opts )
+        # There are a lot of special things to do for Solaris and Solaris 10.
+        # This is easier than checking host['platform'] every time.
+        is_solaris10 = host['platform'] =~ /solaris-10/
+        is_solaris = host['platform'] =~ /solaris/
+
         # Hosts may be provisioned with csw but pkgutil won't be in the
         # PATH by default to avoid changing the behavior for Puppet's tests
-        if host['platform'] =~ /solaris-10/
+        if is_solaris10
           on host, 'ln -s /opt/csw/bin/pkgutil /usr/bin/pkgutil'
         end
 
         # Solaris doesn't necessarily have this, but gem needs it
-        if host['platform'] =~ /solaris/
-          on host, 'mkdir -p /var/lib' 
+        if is_solaris
+          on host, 'mkdir -p /var/lib'
         end
 
         unless host.check_for_command( 'gem' )
@@ -795,6 +834,11 @@ module Beaker
                    end
 
           host.install_package gempkg
+        end
+
+        # Link 'gem' to /usr/bin instead of adding /opt/csw/bin to PATH.
+        if is_solaris10
+          on host, 'ln -s /opt/csw/bin/gem /usr/bin/gem'
         end
 
         if host['platform'] =~ /debian|ubuntu|solaris/
@@ -814,6 +858,21 @@ module Beaker
 
         ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
         on host, "gem install puppet #{ver_cmd} --no-ri --no-rdoc"
+
+        # Similar to the treatment of 'gem' above.
+        # This avoids adding /opt/csw/bin to PATH.
+        if is_solaris
+          gem_env = YAML.load( on( host, 'gem environment' ).stdout )
+          # This is the section we want - this has the dir where gem executables go.
+          env_sect = 'EXECUTABLE DIRECTORY'
+          # Get the directory where 'gem' installs executables.
+          # On Solaris 10 this is usually /opt/csw/bin
+          gem_exec_dir = gem_env['RubyGems Environment'].find {|h| h[env_sect] != nil }[env_sect]
+
+          on host, "ln -s #{gem_exec_dir}/hiera /usr/bin/hiera"
+          on host, "ln -s #{gem_exec_dir}/facter /usr/bin/facter"
+          on host, "ln -s #{gem_exec_dir}/puppet /usr/bin/puppet"
+        end
       end
 
 

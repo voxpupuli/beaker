@@ -166,7 +166,7 @@ module Beaker
     def scp_to source, target, options = {}, dry_run = false
       return if dry_run
 
-      options[:recursive]  = File.directory?(source) if options[:recursive].nil?
+      options[:recursive]  = File.directory?(source)
       options[:chunk_size] = options[:chunk_size] || 16384
 
       result = Result.new(@hostname, [source, target])
@@ -188,7 +188,7 @@ module Beaker
     def scp_from source, target, options = {}, dry_run = false
       return if dry_run
 
-      options[:recursive] = true if options[:recursive].nil?
+      options[:recursive] = true
       options[:chunk_size] = options[:chunk_size] || 16384
 
       result = Result.new(@hostname, [source, target])
