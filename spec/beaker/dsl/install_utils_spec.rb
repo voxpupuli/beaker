@@ -508,8 +508,8 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
   end
-  
-  describe 'host_entry' do
+
+  describe '#add_system32_hosts_entry' do
     before do
       subject.stub(:on).and_return(Beaker::Result.new({},''))
     end
@@ -519,7 +519,7 @@ describe ClassMixedWithDSLInstallUtils do
       it 'it add an entry into the /etc/hosts file' do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
         expect(subject).to receive(:on).with(host, "echo 23.251.154.122\t\tforge.puppetlabs.com >> /etc/hosts")
-        subject.host_entry(host, entry)
+        subject.add_system32_hosts_entry(host, entry)
       end
     end
     context 'on windows' do
@@ -528,7 +528,7 @@ describe ClassMixedWithDSLInstallUtils do
       it 'it add an entry into the /etc/hosts file' do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
         expect(subject).to receive(:on).with(host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
-        subject.host_entry(host, entry)
+        subject.add_system32_hosts_entry(host, entry)
       end
     end
   end
