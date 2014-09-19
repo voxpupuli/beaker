@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 18 Sep, 2014 (b4e69b83)](#LATEST)
+* [LATEST - 19 Sep, 2014 (47f147e3)](#LATEST)
+* [beaker1.19.0 - 19 Sep, 2014 (6a56cc90)](#beaker1.19.0)
 * [beaker1.18.0 - 18 Sep, 2014 (b9171d9c)](#beaker1.18.0)
 * [beaker1.17.7 - 2 Sep, 2014 (e47881f0)](#beaker1.17.7)
 * [beaker1.17.6 - 27 Aug, 2014 (bfb257bf)](#beaker1.17.6)
@@ -61,7 +62,61 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 18 Sep, 2014 (b4e69b83)
+### <a name = "LATEST">LATEST - 19 Sep, 2014 (47f147e3)
+
+* (HISTORY) history update for beaker 1.19.1 gem (47f147e3)
+
+* (GEM) version bump for 1.19.1 gem (7538dc00)
+
+* Merge pull request #465 from anodelman/junit (38fca3f5)
+
+
+```
+Merge pull request #465 from anodelman/junit
+
+(MAINT) update junit.xsl to handle more weird test case paths
+```
+* Merge pull request #466 from branan/QENG-1264 (c77157d5)
+
+
+```
+Merge pull request #466 from branan/QENG-1264
+
+(QENG-1264) Allow users to specify recursive option for scp_{from,to}
+```
+* (QENG-1264) Allow users to specify recursive option for scp_{from,to} (cc1b2189)
+
+
+```
+(QENG-1264) Allow users to specify recursive option for scp_{from,to}
+
+The fix for QENG-1128 caused scp_from and scp_to to ignore the
+recursive flag. This caused all scp_from operations to be recursive,
+which will cause a failure if trying to copy only a single file.
+
+The fix to this, without regressing on QENG-1128, is to actually copy
+the options hash locally so that we can modify it as needed for
+defaults without updating any global data.
+```
+* (MAINT) update junit.xsl to handle more weird test case paths (c940f116)
+
+
+```
+(MAINT) update junit.xsl to handle more weird test case paths
+
+- paths with (, ), \s, or / are breaking links, this fixes that
+```
+### <a name = "beaker1.19.0">beaker1.19.0 - 19 Sep, 2014 (6a56cc90)
+
+* Merge pull request #463 from anodelman/make-gem (6a56cc90)
+
+
+```
+Merge pull request #463 from anodelman/make-gem
+
+create beaker 1.19.0 gem
+```
+* (HISTORY) update history for beaker 1.19.0 gem (b00c31c1)
 
 * (GEM) version bump for beaker 1.19.0 gem (b4e69b83)
 
