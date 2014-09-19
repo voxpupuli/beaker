@@ -1,6 +1,7 @@
 # beaker - History
 ## Tags
-* [LATEST - 18 Sep, 2014 (116ecd2e)](#LATEST)
+* [LATEST - 18 Sep, 2014 (b4e69b83)](#LATEST)
+* [beaker1.18.0 - 18 Sep, 2014 (b9171d9c)](#beaker1.18.0)
 * [beaker1.17.7 - 2 Sep, 2014 (e47881f0)](#beaker1.17.7)
 * [beaker1.17.6 - 27 Aug, 2014 (bfb257bf)](#beaker1.17.6)
 * [beaker1.17.5 - 22 Aug, 2014 (7e553089)](#beaker1.17.5)
@@ -60,7 +61,40 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 18 Sep, 2014 (116ecd2e)
+### <a name = "LATEST">LATEST - 18 Sep, 2014 (b4e69b83)
+
+* (GEM) version bump for beaker 1.19.0 gem (b4e69b83)
+
+* Merge pull request #459 from justinstoller/bug/master/QENG-1212_better (c683a928)
+
+
+```
+Merge pull request #459 from justinstoller/bug/master/QENG-1212_better
+
+(QENG-1212) Improve module installation experience
+```
+* (QENG-1212) Improve module installation experience (61f05e90)
+
+
+```
+(QENG-1212) Improve module installation experience
+
+Prior to this puppet module installation was carried out with either
+`puppet_module_install` or `copy_module_to`. This replaces them with a
+method `install_dev_puppet_module` that will install either via scp or
+pmt from a staging forge depending on arguements and environment
+```
+### <a name = "beaker1.18.0">beaker1.18.0 - 18 Sep, 2014 (b9171d9c)
+
+* Merge pull request #461 from anodelman/make-gem (b9171d9c)
+
+
+```
+Merge pull request #461 from anodelman/make-gem
+
+create beaker 1.18.0 gem
+```
+* (HISTORY) update history for beaker 1.18.0 gem release (8f22c5c9)
 
 * (GEM) version bump for beaker 1.18.0 (116ecd2e)
 
