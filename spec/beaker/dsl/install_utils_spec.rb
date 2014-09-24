@@ -516,10 +516,12 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on debian' do
       let(:platform) { 'debian-7-amd64' }
       let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
-      it 'it add an entry into the /etc/hosts file' do
-        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
-        expect(subject).to receive(:on).with(host, "echo 23.251.154.122\t\tforge.puppetlabs.com >> /etc/hosts")
-        subject.add_system32_hosts_entry(host, entry)
+      it 'logs message - nothing to do on this host' do
+        Beaker::Command.should_receive( :new ).never
+
+        expect {
+          subject.add_system32_hosts_entry(host, {})
+        }.to raise_error
       end
     end
     context 'on windows' do

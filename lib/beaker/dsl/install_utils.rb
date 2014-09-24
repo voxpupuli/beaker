@@ -666,9 +666,7 @@ module Beaker
           host_entry = "#{opts['ip']}`t`t#{opts['name']}"
           on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         else
-          hosts_file = "/etc/hosts"
-          host_entry = "#{opts['ip']}\t\t#{opts['name']}"
-          on host, "echo #{host_entry} >> #{hosts_file}"
+          raise "nothing to do for #{host.name} on #{host['platform']}"
         end
       end
 
