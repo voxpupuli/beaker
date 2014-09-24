@@ -28,6 +28,8 @@ module Beaker
         v_file << "    v.vm.hostname = '#{host.name}'\n"
         v_file << "    v.vm.box = '#{host['box']}'\n"
         v_file << "    v.vm.box_url = '#{host['box_url']}'\n" unless host['box_url'].nil?
+        v_file << "    v.vm.box_version = '#{host['box_version']}'\n" unless host['box_version'].nil?
+        v_file << "    v.vm.box_check_update = '#{host['box_check_update'] ||= 'true'}'\n"
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
 
