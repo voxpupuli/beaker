@@ -139,11 +139,11 @@ module Beaker
     # @return [String] The URL for EPL for the provided host
     # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
     def epel_info_for! host
-      version = host['platform'].match(/el-(\d+)/)
-      if not version
+      if !['centos','scientific','redhat','el'].include?(host['platform'].variant)
         raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
       end
-      version = version[1]
+
+      version = host['platform'].version
       if version == '6'
         pkg = 'epel-release-6-8.noarch.rpm'
         url = "http://mirror.itc.virginia.edu/fedora-epel/6/i386/#{pkg}"
@@ -225,10 +225,10 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when host['platform'] =~ /el-(5|6)/
+        when ['centos','redhat','scientific','el'].include?(host['platform'].variant) && ['5','6'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
-            url = epel_info_for! host
+            url = epel_info_for!(host)
             host.exec(Command.new("rpm -i#{debug_opt} #{url}"))
             host.exec(Command.new('yum clean all && yum makecache'))
           end
