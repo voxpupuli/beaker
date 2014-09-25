@@ -150,6 +150,39 @@ module Beaker
           expect{ cli.execute! }.to raise_error
 
         end
+
+        it 'cleans up SUTs post testing if tests fail and preserve_hosts = onpass' do
+          cli.stub(:run_suite).with(:pre_suite, :fast).and_return(true)
+          cli.stub(:run_suite).with(:tests).and_throw("bad test")
+          cli.stub(:run_suite).with(:post_suite).and_return(true)
+          options = cli.instance_variable_get(:@options)
+          options[:fail_mode] = 'fast'
+          options[:preserve_hosts] = 'onpass'
+          cli.instance_variable_set(:@options, options)
+
+          netmanager = double(:netmanager)
+          cli.instance_variable_set(:@network_manager, netmanager)
+          netmanager.should_receive(:cleanup).once
+
+          expect{ cli.execute! }.to raise_error
+
+        end
+
+        it 'preserves SUTs post testing if no tests fail and preserve_hosts = onpass' do
+          cli.stub(:run_suite).with(:pre_suite, :fast).and_return(true)
+          cli.stub(:run_suite).with(:tests).and_return(true)
+          cli.stub(:run_suite).with(:post_suite).and_return(true)
+          options = cli.instance_variable_get(:@options)
+          options[:fail_mode] = 'fast'
+          options[:preserve_hosts] = 'onpass'
+          cli.instance_variable_set(:@options, options)
+
+          netmanager = double(:netmanager)
+          cli.instance_variable_set(:@network_manager, netmanager)
+          netmanager.should_receive(:cleanup).never
+
+          expect{ cli.execute! }.to_not raise_error
+        end
       end
     end
   end

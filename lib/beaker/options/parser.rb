@@ -288,8 +288,8 @@ module Beaker
         end
 
         #check for valid preserve_hosts option
-        if @options[:preserve_hosts] !~ /always|onfail|never/
-          parser_error "--preserve_hosts must be one of always, onfail or never, not '#{@options[:preserve_hosts]}'"
+        if @options[:preserve_hosts] !~ /always|onfail|onpass|never/
+          parser_error "--preserve_hosts must be one of always, onfail, onpass or never, not '#{@options[:preserve_hosts]}'"
         end
 
         #check for config files necessary for different hypervisors
