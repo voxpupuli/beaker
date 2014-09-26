@@ -13,6 +13,7 @@ module Beaker
 
       aws
     }
+    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
     let(:amispec) {{
       "centos-5-x86-64-west" => {
         :image => {:pe => "ami-sekrit1"},
@@ -33,6 +34,25 @@ module Beaker
       @hosts[0][:platform] = "centos-5-x86-64-west"
       @hosts[1][:platform] = "centos-6-x86-64-west"
       @hosts[2][:platform] = "centos-7-x86-64-west"
+    end
+
+    context '# enables root when user is not root' do
+        it "should not enable root when we are root user" do
+            host = @hosts[0]
+            Command.should_not_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"")
+            aws.enable_root(host)
+        end
+
+        it "should enable root when not root user" do
+            host = @hosts[0]
+            host[:platform] = "ubuntu-12.04-amd64.west"
+            host[:user] = 'ubuntu'
+            Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
+            Command.should_receive( :new ).with("sudo su -c \"sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config\"").once
+            Command.should_receive( :new ).with("sudo su -c \"service ssh restart\"").once
+            aws.enable_root(host)
+        end
+
     end
 
     context '#backoff_sleep' do
