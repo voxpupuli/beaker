@@ -104,7 +104,7 @@ module Beaker
       #cleanup phase
       rescue => e
         #cleanup on error
-        if @options[:preserve_hosts].to_s =~ /(?:never)|(?:onpass)/
+        if @options[:preserve_hosts].to_s =~ /(never)|(onpass)/
           @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
             @network_manager.cleanup
@@ -119,7 +119,7 @@ module Beaker
         exit 1
       else
         #cleanup on success
-        if @options[:preserve_hosts].to_s =~ /(?:never)|(?:onfail)/
+        if @options[:preserve_hosts].to_s =~ /(never)|(onfail)/
           @logger.notify "Cleanup: cleaning up after successful run"
           if @network_manager
             @network_manager.cleanup
