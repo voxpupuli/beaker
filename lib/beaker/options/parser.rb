@@ -161,6 +161,7 @@ module Beaker
       #
       def initialize
          @command_line_parser = Beaker::Options::CommandLineParser.new
+         @presets = Beaker::Options::Presets.new
       end
 
       # Parses ARGV or provided arguments array, file options, hosts options and combines with environment variables and
@@ -181,7 +182,7 @@ module Beaker
         # Will use env, then hosts/config file, then command line, then file options
 
 
-        @options = Beaker::Options::Presets.presets
+        @options = @presets.presets
         cmd_line_options = @command_line_parser.parse(args)
         file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
 
@@ -204,7 +205,7 @@ module Beaker
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
-          env_vars = Beaker::Options::Presets.env_vars
+          env_vars = @presets.env_vars
 
           @options = @options.merge(env_vars)
 
