@@ -340,9 +340,9 @@ module Beaker
     # @return [void]
     # @api private
     def enable_root_on_hosts
-        @hosts.each do |host|
-            enable_root(host)
-        end
+      @hosts.each do |host|
+        enable_root(host)
+      end
     end
 
     # Enables root access for a host when username is not root
@@ -350,13 +350,12 @@ module Beaker
     # @return [void]
     # @api private
     def enable_root(host)
-        if host['user'] != 'root'
-            copy_ssh_to_root(host, @options)
-            enable_root_login(host, @options)
-            host['user'] = 'root'
-            host.close
-        end
-
+      if host['user'] != 'root'
+        copy_ssh_to_root(host, @options)
+        enable_root_login(host, @options)
+        host['user'] = 'root'
+        host.close
+      end
     end
 
     # Set the hostname of all instances to be the hostname defined in the

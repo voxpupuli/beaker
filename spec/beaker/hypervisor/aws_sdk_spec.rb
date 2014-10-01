@@ -2,18 +2,18 @@ require 'spec_helper'
 
 module Beaker
   describe AwsSdk do
+    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
     let(:aws) {
       # Mock out the call to load_fog_credentials
       Beaker::AwsSdk.any_instance.stub(:load_fog_credentials).and_return(fog_file_contents)
 
       # This is needed because the EC2 api looks up a local endpoints.json file
       FakeFS.deactivate!
-      aws = Beaker::AwsSdk.new(@hosts, make_opts)
+      aws = Beaker::AwsSdk.new(@hosts, options)
       FakeFS.activate!
 
       aws
     }
-    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
     let(:amispec) {{
       "centos-5-x86-64-west" => {
         :image => {:pe => "ami-sekrit1"},
@@ -27,32 +27,27 @@ module Beaker
         :image => {:pe => "ami-sekrit3"},
         :region => "us-west-2",
       },
+      "ubuntu-12.04-amd64-west" => {
+        :image => {:pe => "ami-sekrit4"},
+        :region => "us-west-2"
+      },
     }}
 
     before :each do
-      @hosts = make_hosts({:snapshot => :pe})
+      @hosts = make_hosts({:snapshot => :pe}, 4)
       @hosts[0][:platform] = "centos-5-x86-64-west"
       @hosts[1][:platform] = "centos-6-x86-64-west"
       @hosts[2][:platform] = "centos-7-x86-64-west"
+      @hosts[3][:platform] = "ubuntu-12.04-amd64-west"
+      @hosts[3][:user] = "ubuntu"
     end
 
-    context '# enables root when user is not root' do
-        it "should not enable root when we are root user" do
-            host = @hosts[0]
-            Command.should_not_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"")
-            aws.enable_root(host)
-        end
-
-        it "should enable root when not root user" do
-            host = @hosts[0]
-            host[:platform] = "ubuntu-12.04-amd64.west"
-            host[:user] = 'ubuntu'
-            Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
-            Command.should_receive( :new ).with("sudo su -c \"sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config\"").once
-            Command.should_receive( :new ).with("sudo su -c \"service ssh restart\"").once
-            aws.enable_root(host)
-        end
-
+    context 'enabling root shall be called once for the ubuntu machine' do
+      it "should enable root once" do
+        aws.should_receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
+        aws.should_receive(:enable_root_login).with( @hosts[3], options).once()
+        aws.enable_root_on_hosts();
+      end
     end
 
     context '#backoff_sleep' do
