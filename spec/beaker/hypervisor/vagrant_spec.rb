@@ -18,7 +18,7 @@ module Beaker
 
     end
 
-    it "can make a Vagranfile for a set of hosts" do
+    it "can make a Vagrantfile for a set of hosts" do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
       vagrant.stub( :randmac ).and_return( "0123456789" )
@@ -60,6 +60,23 @@ module Beaker
       generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
 
       match = generated_file.match(/vb.customize \["modifyvm", :id, "--memory", "hello!"\]/)
+
+      expect( match ).to_not be nil
+
+    end
+
+    it "can disable the vb guest plugin" do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      vagrant.stub( :randmac ).and_return( "0123456789" )
+
+      stub_const('ENV', {'BEAKER_VB_GUEST_PLUGIN' => 'disable'})
+
+      vagrant.make_vfile( @hosts )
+
+      generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+
+      match = generated_file.match(/v.vbguest.auto_update = false/)
 
       expect( match ).to_not be nil
 
