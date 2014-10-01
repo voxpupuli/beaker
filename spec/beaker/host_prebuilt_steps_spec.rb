@@ -50,15 +50,6 @@ describe Beaker do
       expect{ subject.timesync( hosts, options ) }.to raise_error
     end
 
-    it "can sync time on solaris-10 hosts" do
-      hosts = make_hosts( { :platform => 'solaris-10' } )
-
-      Beaker::Command.should_receive( :new ).with("sleep 10 && ntpdate -w #{ntpserver}").exactly( 3 ).times
-
-      subject.timesync( hosts, options )
-
-    end
-
     it "can sync time on windows hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 

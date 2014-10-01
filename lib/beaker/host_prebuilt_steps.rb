@@ -39,8 +39,6 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-            when host['platform'] =~ /solaris-10/
-              ntp_command = "sleep 10 && ntpdate -w #{NTPSERVER}"
             when host['platform'] =~ /sles-/
               ntp_command = "sntp #{NTPSERVER}"
             else
