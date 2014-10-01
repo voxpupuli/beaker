@@ -14,6 +14,7 @@ module Beaker
     WINDOWS_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
+    GENTOO_PACKAGES = ['net-misc/curl', 'ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -41,7 +42,7 @@ module Beaker
           case
             when host['platform'] =~ /solaris-10/
               ntp_command = "sleep 10 && ntpdate -w #{NTPSERVER}"
-            when host['platform'] =~ /sles-/
+            when host['platform'] =~ /sles-|gentoo/
               ntp_command = "sntp #{NTPSERVER}"
             else
               ntp_command = "ntpdate -t 20 #{NTPSERVER}"
@@ -79,6 +80,12 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
+        when host['platform'] =~ /gentoo/
+          GENTOO_PACKAGES.each do |pkg|
+            if not host.check_for_package pkg
+              host.install_package pkg
+            end
+          end
         when host['platform'] =~ /sles-/
           SLES_PACKAGES.each do |pkg|
             if not host.check_for_package pkg
