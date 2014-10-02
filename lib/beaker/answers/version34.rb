@@ -33,6 +33,12 @@ module Beaker
         :q_rbac_database_password       => rbac_database_password,
       }
 
+      # If we're installing or upgrading from a non-RBAC version, set the 'admin' password
+      if @options[:type] == :upgrade && @options[:HOSTS][dashboard.name][:pe_ver] < "3.4.0"
+        dashboard_password = "'#{options[:answers][:q_puppet_enterpriseconsole_auth_password]}'"
+        the_answers[dashboard.name][:q_puppet_enterpriseconsole_auth_password] = dashboard_password
+      end
+
       the_answers[dashboard.name].merge!(console_services_hash)
       the_answers[database.name].merge!(console_services_hash)
 
