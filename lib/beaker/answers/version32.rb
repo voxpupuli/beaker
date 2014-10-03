@@ -17,7 +17,7 @@ module Beaker
       the_answers = super
       if dashboard != master
         # in 3.2, dashboard needs the master certname
-        the_answers[dashboard.name][:q_puppetmaster_certname] = @master_certname
+        the_answers[dashboard.name][:q_puppetmaster_certname] = master
       end
 
       if @options[:type] == :upgrade && dashboard != database

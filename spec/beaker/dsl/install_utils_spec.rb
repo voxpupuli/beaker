@@ -326,8 +326,6 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       subject.stub( :hosts ).and_return( hosts )
-      #determine mastercert
-      subject.should_receive( :on ).with( hosts[0], /uname/ ).once
       #create answers file per-host, except windows
       subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts

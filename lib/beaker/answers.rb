@@ -9,25 +9,24 @@ module Beaker
     #
     # @param [String] version Puppet Enterprise version to generate answer data for
     # @param [Array<Beaker::Host>] hosts An array of host objects.
-    # @param [String] master_certname Hostname of the puppet master.
     # @param [Hash] options options for answer files
     # @option options [Symbol] :type Should be one of :upgrade or :install.
     # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
     #   data.
-    def self.create version, hosts, master_certname, options
+    def self.create version, hosts, options
       case version
       when /\A3\.4/
-        return Version34.new(version, hosts, master_certname, options)
+        return Version34.new(version, hosts, options)
       when /\A3\.[2-3]/
-        return Version32.new(version, hosts, master_certname, options)
+        return Version32.new(version, hosts, options)
       when /\A3\.1/
-        return Version30.new(version, hosts, master_certname, options)
+        return Version30.new(version, hosts, options)
       when /\A3\.0/
-        return Version30.new(version, hosts, master_certname, options)
+        return Version30.new(version, hosts, options)
       when /\A2\.8/
-        return Version28.new(version, hosts, master_certname, options)
+        return Version28.new(version, hosts, options)
       when /\A2\.0/
-        return Version20.new(version, hosts, master_certname, options)
+        return Version20.new(version, hosts, options)
       else
         raise NotImplementedError, "Don't know how to generate answers for #{version}"
       end
@@ -48,15 +47,13 @@ module Beaker
     #
     # @param [String] version Puppet Enterprise version to generate answer data for
     # @param [Array<Beaker::Host>] hosts An array of host objects.
-    # @param [String] master_certname Hostname of the puppet master.
     # @param [Hash] options options for answer files
     # @option options [Symbol] :type Should be one of :upgrade or :install.
     # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
     #   data.
-    def initialize(version, hosts, master_certname, options)
+    def initialize(version, hosts, options)
       @version = version
       @hosts = hosts
-      @master_certname = master_certname
       @options = options
     end
 

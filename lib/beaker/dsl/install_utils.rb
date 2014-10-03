@@ -428,8 +428,6 @@ module Beaker
       #
       def do_install hosts, opts = {}
         opts[:type] = opts[:type] || :install
-        hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
-        master_certname = on(master, hostcert).stdout.strip
         pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
         pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
 
@@ -479,7 +477,7 @@ module Beaker
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
             if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
-              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
+              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
               create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
             else
               # If We're *not* running the classic installer, we want

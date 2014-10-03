@@ -6,14 +6,13 @@ module Beaker
     # Return answer data for a host
     #
     # @param [Beaker::Host] host Host to return data for
-    # @param [String] master_certname Hostname of the puppet master.
     # @param [Beaker::Host] master Host object representing the master
     # @param [Beaker::Host] dashboard Host object representing the dashboard
     # @param [Hash] options options for answer files
     # @option options [Symbol] :type Should be one of :upgrade or :install.
     # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
     #   data.
-    def host_answers(host, master_certname, master, dashboard, options)
+    def host_answers(host, master, dashboard, options)
       return nil if host['platform'] =~ /windows/
 
       agent_a = {
@@ -31,19 +30,16 @@ module Beaker
         :q_puppet_enterpriseconsole_install => 'n',
       }
 
+      master_dns_altnames = [master.to_s, master['ip'], 'puppet'].compact.uniq.join(',')
       master_a = {
         :q_puppetmaster_install => 'y',
-        :q_puppetmaster_certname => master_certname,
+        :q_puppetmaster_certname => master,
         :q_puppetmaster_install => 'y',
-        :q_puppetmaster_dnsaltnames => master_certname+",puppet",
+        :q_puppetmaster_dnsaltnames => master_dns_altnames,
         :q_puppetmaster_enterpriseconsole_hostname => dashboard,
         :q_puppetmaster_enterpriseconsole_port => answer_for(options, :q_puppetmaster_enterpriseconsole_port, 443),
         :q_puppetmaster_forward_facts => 'y',
       }
-
-      if master['ip']
-        master_a[:q_puppetmaster_dnsaltnames]+=","+master['ip']
-      end
 
       dashboard_user = "'#{answer_for(options, :q_puppet_enterpriseconsole_auth_user_email)}'"
       smtp_host = "'#{answer_for(options, :q_puppet_enterpriseconsole_smtp_host, dashboard)}'"
@@ -113,7 +109,7 @@ module Beaker
       dashboard = only_host_with_role(@hosts, 'dashboard')
       master = only_host_with_role(@hosts, 'master')
       @hosts.each do |h|
-        the_answers[h.name] = host_answers(h, @master_certname, master, dashboard, @options)
+        the_answers[h.name] = host_answers(h, master, dashboard, @options)
         if h[:custom_answers]
           the_answers[h.name] = the_answers[h.name].merge(h[:custom_answers])
         end
