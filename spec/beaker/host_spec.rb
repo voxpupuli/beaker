@@ -240,7 +240,7 @@ module Beaker
         args = [ 'source', 'target', {} ]
         conn_args = args + [ nil ]
 
-        logger.should_receive(:debug)
+        logger.should_receive(:trace)
         conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_scp_to *args
@@ -272,7 +272,7 @@ module Beaker
           host.instance_variable_set :@connection, conn
           args = [ source_path, target_path, {:ignore => ['tests', 'tests2']} ]
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).exactly(0).times
           conn.should_receive(:scp_to).exactly(0).times
 
@@ -288,7 +288,7 @@ module Beaker
 
           Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).with("#{target_path}/tests")
           host.should_receive( :mkdir_p ).with("#{target_path}/tests2")
           (@fileset1 + @fileset2).each do |file|
@@ -332,7 +332,7 @@ module Beaker
           host.instance_variable_set :@connection, conn
           args = [ 'tmp', 'target', {:ignore => ['tests', 'tests2']} ]
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).exactly(0).times
           conn.should_receive(:scp_to).exactly(0).times
 
@@ -349,7 +349,7 @@ module Beaker
 
           Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).with('target/tmp/tests')
           host.should_receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
@@ -373,7 +373,7 @@ module Beaker
 
           Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset2).each do |file|
             file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]
