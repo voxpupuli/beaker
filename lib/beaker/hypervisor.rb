@@ -99,6 +99,9 @@ module Beaker
       if @options[:package_proxy]
         package_proxy(@hosts, @options)
       end
+      if @options[:disable_iptables]
+        disable_iptables @hosts, @options
+      end
     end
 
     #Default validation steps to be run for a given hypervisor

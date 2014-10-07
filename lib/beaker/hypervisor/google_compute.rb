@@ -83,7 +83,6 @@ module Beaker
         host['user'] = 'google_compute'
 
         disable_se_linux(host, @options)
-        disable_iptables(host, @options)
         copy_ssh_to_root(host, @options)
         enable_root_login(host, @options)
         host['user'] = default_user
