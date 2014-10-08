@@ -96,9 +96,6 @@ module Beaker
       if @options[:add_el_extras]
         add_el_extras(@hosts, @options)
       end
-      if @options[:package_proxy]
-        package_proxy(@hosts, @options)
-      end
       if @options[:disable_iptables]
         disable_iptables @hosts, @options
       end
@@ -106,6 +103,10 @@ module Beaker
 
     #Default validation steps to be run for a given hypervisor
     def validate
+      if @options[:package_proxy]
+        package_proxy(@hosts, @options)
+        @options.delete(:package_proxy)
+      end
       if @options[:validate]
         validate_host(@hosts, @options)
       end
