@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe Beaker do
   let( :options )        { make_opts.merge({ 'logger' => double().as_null_object }) }
+  let( :ntpserver_set )  { "ntp_server_set" }
+  let( :options_ntp )    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let( :ntpserver )      { Beaker::HostPrebuiltSteps::NTPSERVER }
   let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
   let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
@@ -68,6 +70,35 @@ describe Beaker do
       Beaker::Command.should_receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
 
       subject.timesync( hosts, options )
+
+    end
+
+    it "can set time server on unix hosts" do
+      hosts = make_hosts( { :platform => 'unix' } )
+
+      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
+    end
+
+    it "can set time server on windows hosts" do
+      hosts = make_hosts( { :platform => 'windows' } )
+
+      Beaker::Command.should_receive( :new ).with("w32tm /register").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("net start w32time").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver_set} /syncfromflags:manual /update").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("w32tm /resync").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
+
+    end
+
+    it "can set time server on Sles hosts" do
+      hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
+
+      Beaker::Command.should_receive( :new ).with("sntp #{ntpserver_set}").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
 
     end
   end
