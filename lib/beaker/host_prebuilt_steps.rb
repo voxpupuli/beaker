@@ -362,7 +362,17 @@ module Beaker
       block_on host do |host|
         if host['platform'] =~ /centos|el-|redhat|fedora/
           logger.debug("Disabling iptables on #{host.name}")
-          host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
+          if host.exec(Command.new('whoami')).stdout.chomp =~ /root/ #don't need to sudo if we are root
+            if host.check_for_command('iptables') #is iptables even installed?
+              host.exec(Command.new("/etc/init.d/iptables stop"))
+            else
+              logger.warn("iptables not installed on #{host.name} (#{host['platform']})")
+            end
+          else
+            if host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true, :acceptable_exit_codes => (0..255)}).exit_code != '0'
+              logger.warn("failed to disable iptables on #{host.name} (#{host['platform']})")
+            end
+          end
         else
           logger.warn("Attempting to disable iptables on non-supported platform: #{host.name}: #{host['platform']}")
         end
