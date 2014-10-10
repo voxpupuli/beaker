@@ -57,6 +57,7 @@ module Beaker
       self
     end
 
+    # closes this SshConnection
     def close
       begin
         @ssh.close if @ssh
