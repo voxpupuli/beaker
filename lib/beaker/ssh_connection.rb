@@ -163,6 +163,11 @@ module Beaker
       channel.eof!
     end
 
+    # scp file(s) from the localhost to the target location on the host specified by this SshConnection, if a directory is provided it is recursively copied
+    # @param source [String] The path to the file/dir to upload
+    # @param target [String] The destination path on the host
+    # @param options [Hash{Symbol=>String}] Options to alter execution
+    # @param dry_run [Boolean] Set to true to run the command without executing scp
     def scp_to source, target, options = {}, dry_run = false
       return if dry_run
 
@@ -174,20 +179,32 @@ module Beaker
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
-      @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
-        result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+      begin
+        @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
+          puts "pants"
+          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+        end
+        rescue Net::SCP::Error => e
+          result.exit_code = 1
+          result.stderr << e.message
       end
 
-      # Setting these values allows reporting via result.log(test_name)
-      result.stdout << "  SCP'ed file #{source} to #{@hostname}:#{target}"
+      if result.exit_code != 1
+        # Setting these values allows reporting via result.log(test_name)
+        result.stdout << "  SCP'ed file #{source} to #{@hostname}:#{target}"
 
-      # Net::Scp always returns 0, so just set the return code to 0.
-      result.exit_code = 0
+        result.exit_code = 0
+      end
 
       result.finalize!
       return result
     end
 
+    # scp file(s) to the localhost from the host specified by this connection, if a directory is provided it is recursively copied
+    # @param source [String] The path to the file/dir to download from the host
+    # @param target [String] The localhost destination path
+    # @param options [Hash{Symbol=>String}] Options to alter execution
+    # @param dry_run [Boolean] Set to true to run the command without executing scp
     def scp_from source, target, options = {}, dry_run = false
       return if dry_run
 
@@ -199,15 +216,21 @@ module Beaker
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
-      @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
-        result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+      begin
+        @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
+          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+        end
+        rescue Net::SCP::Error => e
+          result.exit_code = 1
+          result.stderr << e.message
       end
 
-      # Setting these values allows reporting via result.log(test_name)
-      result.stdout << "  SCP'ed file #{@hostname}:#{source} to #{target}"
+      if result.exit_code != 1
+        # Setting these values allows reporting via result.log(test_name)
+        result.stdout << "  SCP'ed file #{@hostname}:#{source} to #{target}"
 
-      # Net::Scp always returns 0, so just set the return code to 0.
-      result.exit_code = 0
+        result.exit_code = 0
+      end
 
       result.finalize!
       result

@@ -27,6 +27,50 @@ module Beaker
       connection.connect
     end
 
+    it 'scp_to returns 0 on successful scp' do
+      mock_ssh = Object.new
+      mock_scp = Object.new
+      mock_ssh.stub(:scp) { mock_scp }
+      mock_scp.stub(:upload!)
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      expect( connection.scp_to("pantsMcGee", "fisherPrice").exit_code ).to be === 0
+    end
+
+    it 'scp_to returns 1 on failed scp' do
+      mock_ssh = Object.new
+      mock_scp = Object.new
+      mock_ssh.stub(:scp) { mock_scp }
+      mock_scp.stub(:upload!) { raise Net::SCP::Error }
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      expect( connection.scp_to("pantsMcGee", "fisherPrice").exit_code ).to be === 1
+    end
+
+    it 'scp_from returns 0 on successful scp' do
+      mock_ssh = Object.new
+      mock_scp = Object.new
+      mock_ssh.stub(:scp) { mock_scp }
+      mock_scp.stub(:download!)
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      expect( connection.scp_from("pantsMcGee", "fisherPrice").exit_code ).to be === 0
+    end
+
+    it 'scp_from returns 1 on failed scp' do
+      mock_ssh = Object.new
+      mock_scp = Object.new
+      mock_ssh.stub(:scp) { mock_scp }
+      mock_scp.stub(:download!) { raise Net::SCP::Error }
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      expect( connection.scp_from("pantsMcGee", "fisherPrice").exit_code ).to be === 1
+    end
+
     it 'close?'
     it 'execute'
     it 'request_terminal_for'
@@ -34,7 +78,6 @@ module Beaker
     it 'register_stderr_for'
     it 'register_exit_code_for'
     it 'process_stdin_for'
-    it 'scp'
 
   end
 end
