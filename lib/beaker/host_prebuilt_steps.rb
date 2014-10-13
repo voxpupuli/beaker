@@ -27,6 +27,7 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def timesync host, opts
       logger = opts[:logger]
+      ntp_server = opts[:ntp_server] ? opts[:ntp_server] : NTPSERVER
       block_on host do |host|
         logger.notify "Update system time sync for '#{host.name}'"
         if host['platform'].include? 'windows'
@@ -34,15 +35,15 @@ module Beaker
           # is not actually necessary.
           host.exec(Command.new("w32tm /register"), :acceptable_exit_codes => [0,5])
           host.exec(Command.new("net start w32time"), :acceptable_exit_codes => [0,2])
-          host.exec(Command.new("w32tm /config /manualpeerlist:#{NTPSERVER} /syncfromflags:manual /update"))
+          host.exec(Command.new("w32tm /config /manualpeerlist:#{ntp_server} /syncfromflags:manual /update"))
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
         else
           case
             when host['platform'] =~ /sles-/
-              ntp_command = "sntp #{NTPSERVER}"
+              ntp_command = "sntp #{ntp_server}"
             else
-              ntp_command = "ntpdate -t 20 #{NTPSERVER}"
+              ntp_command = "ntpdate -t 20 #{ntp_server}"
           end
           success=false
           try = 0
