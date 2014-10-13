@@ -283,6 +283,9 @@ module Beaker
       end
 
       # either a single file, or a directory with no ignores
+      if not File.file?(source) and not File.directory?(source)
+        raise IOError, "No such file or directory - #{source}"
+      end
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
         if has_ignore and (source =~ ignore_re)
