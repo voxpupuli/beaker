@@ -71,6 +71,7 @@ module Beaker
                   'Possible values:',
                   'always (keep SUTs alive)',
                   'onfail (keep SUTs alive if failures occur during testing)',
+                  'onpass (keep SUTs alive if no failures occur during testing)',
                   'never (cleanup SUTs - shutdown and destroy any changes made during testing)',
                   '(default: never)'  do |mode|
             @cmd_options[:preserve_hosts] = mode || 'always'
