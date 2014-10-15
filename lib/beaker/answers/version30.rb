@@ -6,14 +6,13 @@ module Beaker
     # Return answer data for a host
     #
     # @param [Beaker::Host] host Host to return data for
-    # @param [String] master_certname Hostname of the puppet master.
     # @param [Beaker::Host] master Host object representing the master
     # @param [Beaker::Host] dashboard Host object representing the dashboard
     # @param [Hash] options options for answer files
     # @option options [Symbol] :type Should be one of :upgrade or :install.
     # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
     #   data.
-    def host_answers(host, master_certname, master, database, dashboard, options)
+    def host_answers(host, master, database, dashboard, options)
       # Windows hosts don't have normal answers...
       return nil if host['platform'] =~ /windows/
 
@@ -24,7 +23,7 @@ module Beaker
         :q_verify_packages => options[:answers][:q_verify_packages],
         :q_puppet_symlinks_install => 'y',
         :q_puppetagent_certname => host,
-        :q_puppetagent_server => master_certname,
+        :q_puppetagent_server => master,
 
         # Disable database, console, and master by default
         # This will be overridden by other blocks being merged in.
@@ -43,7 +42,7 @@ module Beaker
 
       # master/database answers
       master_database_a = {
-        :q_puppetmaster_certname => master_certname
+        :q_puppetmaster_certname => master
       }
 
       # Master/dashboard answers
@@ -53,16 +52,13 @@ module Beaker
       }
 
       # Master only answers
+      master_dns_altnames = [master.to_s, master['ip'], 'puppet'].compact.uniq.join(',')
       master_a = {
         :q_puppetmaster_install => 'y',
-        :q_puppetmaster_dnsaltnames => master_certname+",puppet",
+        :q_puppetmaster_dnsaltnames => master_dns_altnames,
         :q_puppetmaster_enterpriseconsole_hostname => dashboard,
         :q_puppetmaster_enterpriseconsole_port => answer_for(options, :q_puppetmaster_enterpriseconsole_port, 443),
       }
-
-      if master['ip']
-        master_a[:q_puppetmaster_dnsaltnames]+= "," + master['ip']
-      end
 
       # Common answers for console and database
       database_name = answer_for(options, :q_puppetdb_database_name, 'pe-puppetdb')
@@ -208,7 +204,7 @@ module Beaker
             :q_install_vendor_packages => 'y',
           }
         else
-          the_answers[h.name] = host_answers(h, @master_certname, master, database, dashboard, @options)
+          the_answers[h.name] = host_answers(h, master, database, dashboard, @options)
         end
         if h[:custom_answers]
           the_answers[h.name] = the_answers[h.name].merge(h[:custom_answers])
