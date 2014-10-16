@@ -842,7 +842,7 @@ describe ClassMixedWithDSLHelpers do
         arg
       end
 
-      subject.should_receive( :on ).with( master, "cert --sign --all", :acceptable_exit_codes => [0,24]).once
+      subject.should_receive( :on ).with( master, "cert --sign --all --allow-dns-alt-names", :acceptable_exit_codes => [0,24]).once
       subject.should_receive( :on ).with( master, "cert --list --all").once.and_return( result )
 
 
@@ -859,7 +859,7 @@ describe ClassMixedWithDSLHelpers do
         arg
       end
 
-      subject.should_receive( :on ).with( master, "cert --sign --all", :acceptable_exit_codes => [0,24]).exactly( 11 ).times
+      subject.should_receive( :on ).with( master, "cert --sign --all --allow-dns-alt-names", :acceptable_exit_codes => [0,24]).exactly( 11 ).times
       subject.should_receive( :on ).with( master, "cert --list --all").exactly( 11 ).times.and_return( result )
       subject.should_receive( :fail_test ).once
 
