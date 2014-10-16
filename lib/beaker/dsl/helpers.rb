@@ -1289,7 +1289,7 @@ module Beaker
             (0..10).each do |i|
               fail_test("Failed to sign cert for #{hostname}") if i == 10
 
-              on master, puppet("cert --sign --all"), :acceptable_exit_codes => [0,24]
+              on master, puppet("cert --sign --all --allow-dns-alt-names"), :acceptable_exit_codes => [0,24]
               break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
               sleep next_sleep
               (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
