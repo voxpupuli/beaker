@@ -1,5 +1,5 @@
 module Beaker
   module Version
-    STRING = '1.19.1'
+    STRING = '1.20.0'
   end
 end
