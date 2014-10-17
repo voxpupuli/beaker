@@ -1219,7 +1219,7 @@ module Beaker
       #wait for a given host to appear in the dashboard
       def wait_for_host_in_dashboard(host)
         hostname = host.node_name
-        retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --sslv3 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+        retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
       end
 
       # Ensure the host has requested a cert, then sign it
@@ -1295,7 +1295,7 @@ module Beaker
       #
       def curl_on(host, cmd, opts = {}, &block)
         if options.is_pe? #check global options hash
-          on host, "curl --sslv3 %s" % cmd, opts, &block
+          on host, "curl --tlsv1 %s" % cmd, opts, &block
         else
           on host, "curl %s" % cmd, opts, &block
         end
