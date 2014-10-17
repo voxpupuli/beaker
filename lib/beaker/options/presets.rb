@@ -119,7 +119,7 @@ module Beaker
           :timeout              => 300,
           :fail_mode            => 'slow',
           :timesync             => false,
-          :disable_iptables     => true,
+          :disable_iptables     => false,
           :repo_proxy           => false,
           :package_proxy        => false,
           :add_el_extras        => false,
