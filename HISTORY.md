@@ -1,6 +1,7 @@
-# beaker - History
+# default - History
 ## Tags
-* [LATEST - 19 Sep, 2014 (47f147e3)](#LATEST)
+* [LATEST - 17 Oct, 2014 (ab118389)](#LATEST)
+* [beaker1.19.1 - 19 Sep, 2014 (3aafc71d)](#beaker1.19.1)
 * [beaker1.19.0 - 19 Sep, 2014 (6a56cc90)](#beaker1.19.0)
 * [beaker1.18.0 - 18 Sep, 2014 (b9171d9c)](#beaker1.18.0)
 * [beaker1.17.7 - 2 Sep, 2014 (e47881f0)](#beaker1.17.7)
@@ -62,9 +63,299 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 19 Sep, 2014 (47f147e3)
+### <a name = "LATEST">LATEST - 17 Oct, 2014 (ab118389)
 
-* (HISTORY) history update for beaker 1.19.1 gem (47f147e3)
+* (GEM) update beaker version to 1.20.0 (ab118389)
+
+* Merge pull request #497 from briancain/QENG1391/master/use-tls-for-pe-curl (d03ec9b6)
+
+
+```
+Merge pull request #497 from briancain/QENG1391/master/use-tls-for-pe-curl
+
+[UNDER REVIEW](QENG-1391) Use TLSv1 over SSLv3 for curl against PE
+```
+* Merge pull request #498 from anodelman/ec2 (57f30946)
+
+
+```
+Merge pull request #498 from anodelman/ec2
+
+(MAINT) open port 4435 for dashboard
+```
+* (MAINT) open port 4435 for dashboard (aa4af898)
+
+
+```
+(MAINT) open port 4435 for dashboard
+
+yup, do that
+```
+* Merge pull request #446 from branan/use_vmpooler_fqdn (00e77f59)
+
+
+```
+Merge pull request #446 from branan/use_vmpooler_fqdn
+
+(QENG-1192) Use hostname specified by hypervisor everywhere.
+```
+* (QENG-1391) Use TLSv1 over SSLv3 for curl against PE (6449a3b6)
+
+
+```
+(QENG-1391) Use TLSv1 over SSLv3 for curl against PE
+
+Prior to this commit, beaker was exclusively using SSLv3 against Puppet
+Enterprise. Due to the recent information with POODLE, this commit updates
+beaker to use TLS over SSL since we are disabling the use
+of SSLv3.
+```
+* Merge pull request #475 from er0ck/feature/master/QENG-1231-preserve_hosts_onpass (fa56d804)
+
+
+```
+Merge pull request #475 from er0ck/feature/master/QENG-1231-preserve_hosts_onpass
+
+(QENG-1231) add onpass option to --preserve-hosts
+```
+* Merge pull request #486 from kevpl/qeng270_ntp_addoption (821884e6)
+
+
+```
+Merge pull request #486 from kevpl/qeng270_ntp_addoption
+
+(QENG-270) Added ntp_server as an option for host config
+```
+* Merge pull request #490 from anodelman/ec2 (d12ba02d)
+
+
+```
+Merge pull request #490 from anodelman/ec2
+
+(QENG-1205) EC2 zombie killer can fail when instance not found
+```
+* (QENG-1205) EC2 zombie killer can fail when instance not found (270d6417)
+
+
+```
+(QENG-1205) EC2 zombie killer can fail when instance not found
+
+- better error handling around zombie killing
+```
+* (QENG-270) Added ntp_server as an option for host config (b148b657)
+
+
+```
+(QENG-270) Added ntp_server as an option for host config
+
+Before this, you couldn't specify an ntp server, so if you used the timesync option, it would only use the hard-coded value 'pool.ntp.org'.
+This was a problem because occasionally that service couldn't be reached.  In order to fix this, we've allowed people to specify a server, so that they can get more reliable ntp services, and not see failures based on being able to reach one.
+```
+* Merge pull request #377 from waynr/feature/qeng-967-disable-iptables-on-el-hosts (c9145e5d)
+
+
+```
+Merge pull request #377 from waynr/feature/qeng-967-disable-iptables-on-el-hosts
+
+(QENG-967) Disable iptables on el hosts bringup.
+```
+* Merge pull request #452 from anodelman/maint (c46271e0)
+
+
+```
+Merge pull request #452 from anodelman/maint
+
+(QENG-1209) scp in debug output shows far too much output
+```
+* (QENG-1192) Use hostname specified by hypervisor everywhere (db171537)
+
+
+```
+(QENG-1192) Use hostname specified by hypervisor everywhere
+
+reviously, we would call out to `hostname` on the SUT when deploying
+PE. This may give us a name that isn't resolvable our routable by
+every host in the configuration. We should instead just use whatever
+the hypervisor tells us is the correct way to connect to the host.
+
+This also sneaks in a small change to the vmpooler hypervisor, to make
+it return FQDNs. Using these FQDNs is really what this is all about.
+```
+* Merge pull request #271 from hunner/add_fusion (9a00806f)
+
+
+```
+Merge pull request #271 from hunner/add_fusion
+
+(QENG-1146) Add vagrant_fusion, vagrant_workstation and vagrant_virtualbox providers
+```
+* remove non-capture from regex groups (8e65b146)
+
+* Merge pull request #462 from er0ck/fix/master/QENG-1261-fix_ntpdate_on_solaris10 (6f5162e7)
+
+
+```
+Merge pull request #462 from er0ck/fix/master/QENG-1261-fix_ntpdate_on_solaris10
+
+(QENG-1261) remove solaris-10 specific ntpdate options
+```
+* Merge pull request #464 from anodelman/answers (e145c964)
+
+
+```
+Merge pull request #464 from anodelman/answers
+
+(QENG-1054) Add functionality to install_pe to modify answers...
+```
+* Merge pull request #476 from leoarnold/master (189eb410)
+
+
+```
+Merge pull request #476 from leoarnold/master
+
+Added link to installation instructions to README.md
+```
+* Merge pull request #479 from anodelman/epel (6ee6fe4c)
+
+
+```
+Merge pull request #479 from anodelman/epel
+
+(QENG-1206) Acceptance failing when trying to install epel-release...
+```
+* (QENG-1206) Acceptance failing when trying to install epel-release... (17bd48be)
+
+
+```
+(QENG-1206) Acceptance failing when trying to install epel-release...
+
+and EPEL packages from public mirrors
+- add ability to set epel_url, epel_arch and epel_package as global
+  options or on a per-host basis
+- added reasonable default values
+```
+* Added link to installation instructions to README.md (5b513899)
+
+* (QENG-1231) add onpass option to --preserve-hosts (e772e289)
+
+
+```
+(QENG-1231) add onpass option to --preserve-hosts
+* add spec tests similar to onfail spec tests
+* add cleanup to rescue when --preserve-hosts onpass
+* add help statement for onpass
+```
+* Merge pull request #418 from liamjbennett/vagrant_box_update (decdb05c)
+
+
+```
+Merge pull request #418 from liamjbennett/vagrant_box_update
+
+Adding support to vagrant for box_version and box_check_update.
+```
+* Merge pull request #422 from liamjbennett/vagrant_natdns (a64a3bac)
+
+
+```
+Merge pull request #422 from liamjbennett/vagrant_natdns
+
+Enable natresolver and natdnsproxy for vagrant.
+```
+* (QENG-1261) remove solaris-10 specific ntpdate options.  -w causes an (a795d859)
+
+
+```
+(QENG-1261) remove solaris-10 specific ntpdate options.  -w causes an
+error.
+remove related spec test.
+```
+* (gh-470) refactoring natdns to use the unless syntax (3d67a83a)
+
+* (QENG-1054) Add functionality to install_pe to modify answers... (6a35cda6)
+
+
+```
+(QENG-1054) Add functionality to install_pe to modify answers...
+
+...file before install
+
+- add ability to add custom_answers to individual hosts to be appended
+  to answer file
+- rework answer file code so that answers are an object that can be
+  queried for an answer string
+- instead of querying env for individual answers just pull in anything
+  that matches q_*
+- pull the default answer values into the presets so that it is more
+  easily tracked
+```
+* (QENG-1209) scp in debug output shows far too much output (059248e7)
+
+
+```
+(QENG-1209) scp in debug output shows far too much output
+
+- move detailed output into a new log level called 'trace', could still
+  be useful for tracking networking failures - but will be disabled by
+  default
+- add ability to flip on/off quiet output to logging
+```
+* Enable natresolver and natdnsproxy for vagrant. (613ddba8)
+
+
+```
+Enable natresolver and natdnsproxy for vagrant.
+
+There are cases where tests run will fail when trying to download
+from the outside world due to dns issues. In order to resolve this
+I configured the natdnsproxy1 and natdnshostresolver1 vagrant settings
+```
+* (gh-471) Adding support to vagrant for box_version and box_check_update. (24bb0951)
+
+
+```
+(gh-471) Adding support to vagrant for box_version and box_check_update.
+
+If using versioned boxes from vagrant cloud and a new update is
+published, by default vagrant will attempt to update that box to
+the latest version. This may be undesired behaviour. Like any other
+versioned object you way wish to fix that initial download to a
+fixed version or a version range.
+```
+* (QENG-967) Disable iptables on el hosts bringup. (11cb16ef)
+
+
+```
+(QENG-967) Disable iptables on el hosts bringup.
+
+Also fixes bug in `disable_iptables` where per-array-element was invoking wrong
+method. Looks like `disable_iptables` was originally copied from
+`copy_ssh_to_root`
+
+Also adds rspec for Beaker::Hypervisor.configure
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-1146) Add vagrant_fusion, vmware_workstation, and vagrant_virtualbox providers (fdcbac3d)
+
+
+```
+(QENG-1146) Add vagrant_fusion, vmware_workstation, and vagrant_virtualbox providers
+
+Currently the vagrant hypervisor provider just does virtualbox. This
+allows the vagrant vmware_fusion and vmware_workstation plugins to be
+used instead.
+```
+### <a name = "beaker1.19.1">beaker1.19.1 - 19 Sep, 2014 (3aafc71d)
+
+* Merge pull request #467 from anodelman/master (3aafc71d)
+
+
+```
+Merge pull request #467 from anodelman/master
+
+create beaker 1.19.1 gem
+```
+* (HISTORY) history update for beaker 1.19.1 gem (d5bea586)
 
 * (GEM) version bump for 1.19.1 gem (7538dc00)
 
