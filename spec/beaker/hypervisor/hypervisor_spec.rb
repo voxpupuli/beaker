@@ -90,6 +90,7 @@ module Beaker
 
       context "if :disable_iptables option set true" do
         it "calls disable_iptables once" do
+          options[:disable_iptables] = true
           hypervisor.should_receive( :disable_iptables ).exactly( 1 ).times
           hypervisor.configure
         end
