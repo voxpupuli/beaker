@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 17 Oct, 2014 (ab118389)](#LATEST)
+* [LATEST - 17 Oct, 2014 (3fff222d)](#LATEST)
+* [beaker1.20.0 - 17 Oct, 2014 (24acc2d3)](#beaker1.20.0)
 * [beaker1.19.1 - 19 Sep, 2014 (3aafc71d)](#beaker1.19.1)
 * [beaker1.19.0 - 19 Sep, 2014 (6a56cc90)](#beaker1.19.0)
 * [beaker1.18.0 - 18 Sep, 2014 (b9171d9c)](#beaker1.18.0)
@@ -63,7 +64,40 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 17 Oct, 2014 (ab118389)
+### <a name = "LATEST">LATEST - 17 Oct, 2014 (3fff222d)
+
+* (GEM) update beaker version to 1.20.1 (3fff222d)
+
+* Merge pull request #501 from anodelman/iptables (bc685ab5)
+
+
+```
+Merge pull request #501 from anodelman/iptables
+
+(MAINT) fix broken hypervisor config spec test
+```
+* (MAINT) fix broken hypervisor config spec test (9c2123d8)
+
+* Merge pull request #500 from anodelman/iptables (4d6d4919)
+
+
+```
+Merge pull request #500 from anodelman/iptables
+
+(MAINT) do not disable iptables on default
+```
+* (MAINT) do not disable iptables on default (10e768f7)
+
+
+```
+(MAINT) do not disable iptables on default
+
+- this is the desired behavior until the disable iptables function is
+  more reliable
+```
+### <a name = "beaker1.20.0">beaker1.20.0 - 17 Oct, 2014 (24acc2d3)
+
+* (HISTORY) update beaker history for gem release 1.20.0 (24acc2d3)
 
 * (GEM) update beaker version to 1.20.0 (ab118389)
 
