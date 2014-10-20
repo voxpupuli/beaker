@@ -62,7 +62,6 @@ module Beaker
             hosts
           end
           expect( myhosts ).to be  === hosts[0]
-
         end
 
         it "can execute a block against hosts identified by a hostname" do
@@ -70,7 +69,6 @@ module Beaker
             hosts
           end
           expect( myhosts ).to be  === hosts[0]
-
         end
 
         it "can execute a block against an array of hosts" do
@@ -78,7 +76,10 @@ module Beaker
             hosts
           end
           expect( myhosts ).to be  === hosts
+        end
 
+        it "receives an ArgumentError on empty host" do
+          expect { host_handler.run_block_on( [], role0 ) }.to raise_error(ArgumentError)
         end
 
       end
