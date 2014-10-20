@@ -27,6 +27,7 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def timesync host, opts
       logger = opts[:logger]
+      ntp_server = opts[:ntp_server] ? opts[:ntp_server] : NTPSERVER
       block_on host do |host|
         logger.notify "Update system time sync for '#{host.name}'"
         if host['platform'].include? 'windows'
@@ -34,17 +35,15 @@ module Beaker
           # is not actually necessary.
           host.exec(Command.new("w32tm /register"), :acceptable_exit_codes => [0,5])
           host.exec(Command.new("net start w32time"), :acceptable_exit_codes => [0,2])
-          host.exec(Command.new("w32tm /config /manualpeerlist:#{NTPSERVER} /syncfromflags:manual /update"))
+          host.exec(Command.new("w32tm /config /manualpeerlist:#{ntp_server} /syncfromflags:manual /update"))
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-            when host['platform'] =~ /solaris-10/
-              ntp_command = "sleep 10 && ntpdate -w #{NTPSERVER}"
             when host['platform'] =~ /sles-/
-              ntp_command = "sntp #{NTPSERVER}"
+              ntp_command = "sntp #{ntp_server}"
             else
-              ntp_command = "ntpdate -t 20 #{NTPSERVER}"
+              ntp_command = "ntpdate -t 20 #{ntp_server}"
           end
           success=false
           try = 0
@@ -77,10 +76,6 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def validate_host host, opts
       logger = opts[:logger]
-      if opts[:collect_perf_data]
-        UNIX_PACKAGES << "sysstat" if !UNIX_PACKAGES.include? "sysstat"
-        SLES_PACKAGES << "sysstat" if !SLES_PACKAGES.include? "sysstat"
-      end
       block_on host do |host|
         case
         when host['platform'] =~ /sles-/
@@ -139,25 +134,30 @@ module Beaker
     end
 
     #Determine the Extra Packages for Enterprise Linux URL for the provided Enterprise Linux host.
-    # @param [Host] host One host to act upon
-    # @return [String] The URL for EPL for the provided host
+    # @param [Host, Array<Host>] host One host to act on.  Will use host epel_url, epel_arch and epel_pkg
+    #                                 before using defaults provided in opts.
+    # @return [String, String, String] The URL, arch  and package name for EPL for the provided host
+    # @param [Hash{Symbol=>String}] opts Options to alter execution.
+    # @option opts [String] :epel_url Link to download
+    # @option opts [String] :epel_arch Architecture to download (i386, x86_64, etc), defaults to i386
+    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
+    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
-    def epel_info_for! host
-      version = host['platform'].match(/el-(\d+)/)
+    def epel_info_for host, opts
+      version = host['platform'].version
       if not version
-        raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
+        raise "epel_info_for not available for #{host.name} on platform #{host['platform']}"
       end
-      version = version[1]
       if version == '6'
-        pkg = 'epel-release-6-8.noarch.rpm'
-        url = "http://mirror.itc.virginia.edu/fedora-epel/6/i386/#{pkg}"
+        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
+        pkg = host[:epel_pkg] || opts[:epel_6_pkg]
       elsif version == '5'
-        pkg = 'epel-release-5-4.noarch.rpm'
-        url = "http://archive.linux.duke.edu/pub/epel/5/i386/#{pkg}"
+        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
+        pkg = host[:epel_pkg] || opts[:epel_5_pkg]
       else
-        raise "epel_info_for! does not support el version #{version}, on #{host.name}"
+        raise "epel_info_for does not support el version #{version}, on #{host.name}"
       end
-      return url
+      return url, host[:epel_arch] || opts[:epel_arch] || 'i386', pkg
     end
 
     #Run 'apt-get update' on the provided host or hosts.  If the platform of the provided host is not
@@ -218,10 +218,15 @@ module Beaker
     end
 
     #Install EPEL on host or hosts with platform = /el-(5|6)/.  Do nothing on host or hosts of other platforms.
-    # @param [Host, Array<Host>] host One or more hosts to act upon
+    # @param [Host, Array<Host>] host One or more hosts to act upon.  Will use individual host epel_url, epel_arch
+    #                                 and epel_pkg before using defaults provided in opts.
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    # @option opts [String] :epel_url Link to download from 
+    # @option opts [String] :epel_arch Architecture of epel to download (i386, x86_64, etc)
+    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
+    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     def add_el_extras( host, opts )
       #add_el_extras
       #only supports el-* platforms
@@ -232,8 +237,12 @@ module Beaker
         when host['platform'] =~ /el-(5|6)/
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
-            url = epel_info_for! host
-            host.exec(Command.new("rpm -i#{debug_opt} #{url}"))
+            url, arch, pkg = epel_info_for host, opts
+            host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/#{pkg}"))
+            #update /etc/yum.repos.d/epel.repo for new baseurl
+            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape(url)}/\$basearch;' /etc/yum.repos.d/epel.repo"))
+            #remove mirrorlist
+            host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
             host.exec(Command.new('yum clean all && yum makecache'))
           end
         else

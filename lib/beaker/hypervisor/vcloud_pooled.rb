@@ -76,7 +76,9 @@ module Beaker
           response = http.request(request)
           parsed_response = JSON.parse(response.body)
           if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname']
-            h['vmhostname'] = parsed_response[h['template']]['hostname']
+            hostname = parsed_response[h['template']]['hostname']
+            domain = parsed_response['domain']
+            h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
           else
             raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
           end

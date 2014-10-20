@@ -240,12 +240,72 @@ module Beaker
         args = [ 'source', 'target', {} ]
         conn_args = args + [ nil ]
 
-        logger.should_receive(:debug)
+        logger.should_receive(:trace)
         conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_scp_to *args
       end
 
+      context "using an ignore array with an absolute source path" do
+        source_path = '/repos/puppetlabs-inifile'
+        target_path = '/etc/puppetlabs/modules/inifile'
+        before :each do
+          test_dir = "#{source_path}/tests"
+          other_test_dir = "#{source_path}/tests2"
+
+          files = [
+              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+              '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+
+          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
+
+          create_files( @fileset1 )
+          create_files( @fileset2 )
+        end
+        it 'can take an ignore list that excludes all files and not call scp_to', :use_fakefs => true do
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ source_path, target_path, {:ignore => ['tests', 'tests2']} ]
+
+          logger.should_receive(:trace)
+          host.should_receive( :mkdir_p ).exactly(0).times
+          conn.should_receive(:scp_to).exactly(0).times
+
+          host.do_scp_to *args
+        end
+        it 'can take an ignore list that excludes a single file and scp the rest', :use_fakefs => true do
+          exclude_file = '07_InstallCACerts.rb'
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ source_path, target_path, {:ignore => [exclude_file]} ]
+
+          Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
+
+          logger.should_receive(:trace)
+          host.should_receive( :mkdir_p ).with("#{target_path}/tests")
+          host.should_receive( :mkdir_p ).with("#{target_path}/tests2")
+          (@fileset1 + @fileset2).each do |file|
+            if file !~ /#{exclude_file}/
+              file_args = [ file, File.join(target_path, file.gsub(source_path,'')), {:ignore => [exclude_file]} ]
+              conn_args = file_args + [ nil ]
+              conn.should_receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+            else
+              file_args = [ file, File.join(target_path, file.gsub(source_path,'')), {:ignore => [exclude_file]} ]
+              conn_args = file_args + [ nil ]
+              conn.should_not_receive(:scp_to).with( *conn_args )
+            end
+          end
+
+          host.do_scp_to *args
+        end
+      end
       context "using an ignore array" do
 
         before :each do
@@ -272,7 +332,7 @@ module Beaker
           host.instance_variable_set :@connection, conn
           args = [ 'tmp', 'target', {:ignore => ['tests', 'tests2']} ]
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).exactly(0).times
           conn.should_receive(:scp_to).exactly(0).times
 
@@ -289,7 +349,7 @@ module Beaker
 
           Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).with('target/tmp/tests')
           host.should_receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
@@ -313,7 +373,7 @@ module Beaker
 
           Dir.stub( :glob ).and_return( @fileset1 + @fileset2 )
 
-          logger.should_receive(:debug)
+          logger.should_receive(:trace)
           host.should_receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset2).each do |file|
             file_args = [ file, File.join('target', file), {:ignore => [exclude_file]} ]

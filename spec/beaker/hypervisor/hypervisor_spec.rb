@@ -54,6 +54,20 @@ module Beaker
       expect( hypervisor.create( 'vagrant', [], make_opts() ) ).to be === vagrant
     end
 
+    it "creates a vagrant_fusion hypervisor for vagrant vmware fusion hosts" do
+      vagrant = double( 'vagrant_fusion' )
+      vagrant.stub( :provision ).and_return( true )
+      VagrantFusion.should_receive( :new ).once.and_return( vagrant )
+      expect( hypervisor.create( 'vagrant_fusion', [], make_opts() ) ).to be === vagrant
+    end
+
+    it "creates a vagrant_virtualbox hypervisor for vagrant virtualbox hosts" do
+      vagrant = double( 'vagrant_virtualbox' )
+      vagrant.stub( :provision ).and_return( true )
+      VagrantVirtualbox.should_receive( :new ).once.and_return( vagrant )
+      expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
+    end
+
     it "creates a blimpy hypervisor for blimpy hosts" do
       blimpy = double( 'blimpy' )
       blimpy.stub( :provision ).and_return( true )
@@ -61,6 +75,28 @@ module Beaker
       expect( hypervisor.create( 'blimpy', [], make_opts() ) ).to be === blimpy
     end
 
+    context "#configure" do
+      let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
+      let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
+      let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
+
+      context "if :disable_iptables option set false" do
+        it "does not call disable_iptables" do
+          options[:disable_iptables] = false
+          hypervisor.should_receive( :disable_iptables ).never
+          hypervisor.configure
+        end
+      end
+
+      context "if :disable_iptables option set true" do
+        it "calls disable_iptables once" do
+          options[:disable_iptables] = true
+          hypervisor.should_receive( :disable_iptables ).exactly( 1 ).times
+          hypervisor.configure
+        end
+      end
+
+    end
 
   end
 end

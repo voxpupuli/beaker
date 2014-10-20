@@ -29,6 +29,7 @@ module Beaker
 
     # The defined log levels.  Each log level also reports messages at levels lower than itself
     LOG_LEVELS      = {
+      :trace   => 6,
       :debug   => 5,
       :verbose => 3,
       :info    => 2,
@@ -56,6 +57,8 @@ module Beaker
       @color = options[:color]
       @sublog = nil
       case options[:log_level]
+      when /trace/i, :trace
+        @log_level = :trace
       when /debug/i, :debug
         @log_level = :debug
       when /verbose/i, :verbose
@@ -78,6 +81,18 @@ module Beaker
       dests << STDOUT unless options[:quiet]
       dests.uniq!
       dests.each {|dest| add_destination(dest)}
+    end
+
+
+    # Turn on/off STDOUT logging
+    # @param [Boolean] off If true, disable STDOUT logging, if false enable STDOUT logging
+    def quiet(off = true)
+      if off
+        remove_destination(STDOUT) #turn off the noise!
+      else
+        remove_destination(STDOUT) #in case we are calling this in error and we are already noisy
+        add_destination(STDOUT)
+      end
     end
 
     # Construct an array of open steams for printing log messages to
@@ -108,6 +123,12 @@ module Beaker
       else
         raise "Unsuitable log destination #{dest.inspect}"
       end
+    end
+
+    # Are we at {LOG_LEVELS} trace?
+    # @return [Boolean] true if 'trace' or higher, false if not 'trace' {LOG_LEVELS} or lower
+    def is_trace?
+      LOG_LEVELS[@log_level] >= LOG_LEVELS[:trace]
     end
 
     # Are we at {LOG_LEVELS} debug?
@@ -179,6 +200,14 @@ module Beaker
       strings = strip_colors_from args
       string = strings.join
       optionally_color MAGENTA, string, false
+    end
+
+    # Report a trace message.
+    # Will not print unless we are at {LOG_LEVELS} 'trace' or higher.
+    # @param args[Array<String>] Strings to be reported
+    def trace *args
+      return unless is_trace?
+      optionally_color CYAN, *args
     end
 
     # Report a debug message.

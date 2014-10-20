@@ -171,21 +171,25 @@ module Beaker
       end
 
       it 'should stop the containers' do
+        docker.stub( :sleep ).and_return(true)
         container.should_receive(:stop)
         docker.cleanup
       end
 
       it 'should delete the containers' do
+        docker.stub( :sleep ).and_return(true)
         container.should_receive(:delete)
         docker.cleanup
       end
 
       it 'should delete the images' do
+        docker.stub( :sleep ).and_return(true)
         image.should_receive(:delete)
         docker.cleanup
       end
 
       it 'should not delete the image if docker_preserve_image is set to true' do
+        docker.stub( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=true
         end
@@ -194,6 +198,7 @@ module Beaker
       end
 
       it 'should delete the image if docker_preserve_image is set to false' do
+        docker.stub( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=false
         end

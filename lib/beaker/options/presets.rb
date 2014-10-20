@@ -1,12 +1,12 @@
 module Beaker
   module Options
-    #A set of functions representing the environment variables and preset argument values to be incorporated
+    #A class representing the environment variables and preset argument values to be incorporated
     #into the Beaker options Object.
-    module Presets
+    class Presets
 
       # This is a constant that describes the variables we want to collect
       # from the environment. The keys correspond to the keys in
-      # `self.presets` (flattened) The values are an optional array of
+      # `presets` (flattened) The values are an optional array of
       # environment variable names to look for. The array structure allows
       # us to define multiple environment variables for the same
       # configuration value. They are checked in the order they are arrayed
@@ -26,24 +26,27 @@ module Beaker
         :release_apt_repo_url => ['BEAKER_RELEASE_APT_REPO', 'RELEASE_APT_REPO'],
         :release_yum_repo_url => ['BEAKER_RELEASE_YUM_REPO', 'RELEASE_YUM_REPO'],
         :dev_builds_url       => ['BEAKER_DEV_BUILDS_URL', 'DEV_BUILDS_URL'],
-        :q_puppet_enterpriseconsole_auth_user_email => 'q_puppet_enterpriseconsole_auth_user_email',
-        :q_puppet_enterpriseconsole_auth_password   => 'q_puppet_enterpriseconsole_auth_password',
-        :q_puppet_enterpriseconsole_smtp_host       => 'q_puppet_enterpriseconsole_smtp_host',
-        :q_puppet_enterpriseconsole_smtp_port       => 'q_puppet_enterpriseconsole_smtp_port',
-        :q_puppet_enterpriseconsole_smtp_username   => 'q_puppet_enterpriseconsole_smtp_username',
-        :q_puppet_enterpriseconsole_smtp_password   => 'q_puppet_enterpriseconsole_smtp_password',
-        :q_puppet_enterpriseconsole_smtp_use_tls    => 'q_puppet_enterpriseconsole_smtp_use_tls',
-        :q_verify_packages                          => 'q_verify_packages',
-        :q_puppetdb_password                        => 'q_puppetdb_password',
       }
+
+      # Select all environment variables whose name matches provided regex
+      # @return [Hash] Hash of environment variables
+      def select_env_by_regex regex
+        envs = Beaker::Options::OptionsHash.new
+        ENV.each_pair do | k, v |
+          if k.to_s =~ /#{regex}/
+            envs[k] = v
+          end
+        end
+        envs
+      end
 
       # Takes an environment_spec and searches the processes environment variables accordingly
       #
       # @param [Hash{Symbol=>Array,String}] env_var_spec  the spec of what env vars to search for
       #
       # @return [Hash] Found environment values
-      def self.collect_env_vars( env_var_spec )
-        env_var_spec.inject({:answers => {}}) do |memo, key_value|
+      def collect_env_vars( env_var_spec )
+        env_var_spec.inject({}) do |memo, key_value|
           key, value = key_value[0], key_value[1]
 
           set_env_var = Array(value).detect {|possible_variable| ENV[possible_variable] }
@@ -54,50 +57,52 @@ module Beaker
       end
 
       # Takes a hash where the values are found environment configuration values
-      # and munges them to appropriate Beaker configuration values
+      # and formats them to appropriate Beaker configuration values
       #
       # @param [Hash{Symbol=>String}] found_env_vars  Environment variables to munge
       #
-      # @return [Hash] Environment config values munged appropriately
-      def self.munge_found_env_vars( found_env_vars )
-        found_env_vars[:answers] ||= {}
-        found_env_vars.each_pair do |key,value|
-          found_env_vars[:answers][key] = value if key.to_s =~ /q_/
-        end
+      # @return [Hash] Environment config values formatted appropriately
+      def format_found_env_vars( found_env_vars )
         found_env_vars[:consoleport] &&= found_env_vars[:consoleport].to_i
         found_env_vars[:type] = found_env_vars[:is_pe] == 'true' || found_env_vars[:is_pe] == 'yes' ? 'pe' : nil
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
-        found_env_vars[:answers].delete_if {|key, value| value.nil? or value.empty? }
-        found_env_vars.delete_if {|key, value| value.nil? or value.empty? }
+        found_env_vars
       end
-
 
       # Generates an OptionsHash of the environment variables of interest to Beaker
       #
       # @return [OptionsHash] The supported environment variables in an OptionsHash,
       #                       empty or nil environment variables are removed from the OptionsHash
-      def self.env_vars
-        h = Beaker::Options::OptionsHash.new
+      def calculate_env_vars
+        found = Beaker::Options::OptionsHash.new
+        found = found.merge(format_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC )))
+        found[:answers] = select_env_by_regex('\\Aq_')
 
-        found = munge_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC ))
+        found.delete_if {|key, value| value.nil? or value.empty? }
+        found
+      end
 
-        return h.merge( found )
+      # Return an OptionsHash of environment variables used in this run of Beaker
+      #
+      # @return [OptionsHash] The supported environment variables in an OptionsHash,
+      #                       empty or nil environment variables are removed from the OptionsHash
+      def env_vars
+        @env ||= calculate_env_vars
       end
 
       # Generates an OptionsHash of preset values for arguments supported by Beaker
       #
       # @return [OptionsHash] The supported arguments in an OptionsHash
-      def self.presets
+      def presets
         h = Beaker::Options::OptionsHash.new
         h.merge({
           :project              => 'Beaker',
           :department           => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :validate             => true,
           :jenkins_build_url    => nil,
-          :forge_host           => 'vulcan-acceptance.delivery.puppetlabs.net',
           :log_level            => 'verbose',
           :trace_limit          => 10,
-          :"master-start-curl-retries" => 0,
+          :"master-start-curl-retries" => 120,
           :options_file         => nil,
           :type                 => 'pe',
           :provision            => true,
@@ -114,23 +119,40 @@ module Beaker
           :timeout              => 300,
           :fail_mode            => 'slow',
           :timesync             => false,
+          :disable_iptables     => false,
           :repo_proxy           => false,
           :package_proxy        => false,
           :add_el_extras        => false,
           :release_apt_repo_url => "http://apt.puppetlabs.com",
           :release_yum_repo_url => "http://yum.puppetlabs.com",
-          :dev_builds_url       => "http://builds.puppetlabs.lan",
+          :dev_builds_url       => "http://builds.delivery.puppetlabs.net",
+          :epel_url             => "http://mirrors.kernel.org/fedora-epel",
+          :epel_arch            => "i386",
+          :epel_6_pkg           => "epel-release-6-8.noarch.rpm",
+          :epel_5_pkg           => "epel-release-5-4.noarch.rpm",
           :consoleport          => 443,
           :pe_dir               => '/opt/enterprise/dists',
           :pe_version_file      => 'LATEST',
           :pe_version_file_win  => 'LATEST-win',
           :answers              => {
-                                     :q_puppet_enterpriseconsole_auth_user_email => 'admin@example.com',
-                                     :q_puppet_enterpriseconsole_auth_password   => '~!@#$%^*-/ aZ',
-                                     :q_puppet_enterpriseconsole_smtp_port       => 25,
-                                     :q_puppet_enterpriseconsole_smtp_use_tls    => 'n',
-                                     :q_verify_packages                          => 'y',
-                                     :q_puppetdb_password                        => '~!@#$%^*-/ aZ'
+                                     :q_puppet_enterpriseconsole_auth_user_email    => 'admin@example.com',
+                                     :q_puppet_enterpriseconsole_auth_password      => '~!@#$%^*-/ aZ',
+                                     :q_puppet_enterpriseconsole_smtp_port          => 25,
+                                     :q_puppet_enterpriseconsole_smtp_use_tls       => 'n',
+                                     :q_verify_packages                             => 'y',
+                                     :q_puppetdb_password                           => '~!@#$%^*-/ aZ',
+                                     :q_puppetmaster_enterpriseconsole_port         => 443,
+                                     :q_puppet_enterpriseconsole_auth_database_name => 'console_auth',
+                                     :q_puppet_enterpriseconsole_auth_database_user => 'mYu7hu3r',
+                                     :q_puppet_enterpriseconsole_database_name      => 'console',
+                                     :q_puppet_enterpriseconsole_database_user      => 'mYc0nS03u3r',
+                                     :q_database_root_password                      => '=ZYdjiP3jCwV5eo9s1MBd',
+                                     :q_database_root_user                          => 'pe-postgres',
+                                     :q_database_export_dir                         => '/tmp',
+                                     :q_puppetdb_database_name                      => 'pe-puppetdb',
+                                     :q_puppetdb_database_user                      => 'mYpdBu3r',
+                                     :q_database_port                               => 5432,
+                                     :q_puppetdb_port                               => 8081,
           },
           :dot_fog              => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml             => 'config/image_templates/ec2.yaml',

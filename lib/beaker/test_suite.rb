@@ -155,12 +155,33 @@ module Beaker
         text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
       end
 
+      # Determine if the provided number falls in the range of accepted xml unicode values
+      # See http://www.w3.org/TR/xml/#charsets for valid for valid character specifications.
+      # @param [Integer] int The number to check against
+      # @return [Boolean] True, if the number corresponds to a valid xml unicode character, otherwise false
+      def is_valid_xml(int)
+        return ( int == 0x9 or
+                 int == 0xA or
+               ( int >= 0x0020 and int <= 0xD7FF ) or
+               ( int >= 0xE000 and int <= 0xFFFD ) or
+               ( int >= 0x100000 and int <= 0x10FFFF )
+        )
+      end
+
       # Escape invalid XML UTF-8 codes from provided string, see http://www.w3.org/TR/xml/#charsets for valid
       # character specification
       # @param [String] string The string to remove invalid codes from
       def escape_invalid_xml_chars string
-        re = /\u0009|\u000A|\u000D|[\u0020-\uD7FF]|[\uE000-\uFFFD]|[\u10000-\u10FFFF]/
-        return string.chars.map{|i| i =~ re ? i : "\\#{i.unpack("U*").join}"}.join
+        escaped_string = ""
+        string.chars.each do |i|
+          char_as_codestring = i.unpack("U*").join
+          if is_valid_xml(char_as_codestring.to_i)
+            escaped_string << i
+          else
+            escaped_string << "\\#{char_as_codestring}"
+          end
+        end
+        escaped_string
       end
 
       # Remove color codes and invalid XML characters from provided string
