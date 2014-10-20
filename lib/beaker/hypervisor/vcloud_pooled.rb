@@ -52,7 +52,6 @@ module Beaker
 
     def provision
       start = Time.now
-      try = 1
       @hosts.each_with_index do |h, i|
         if not h['template']
           raise ArgumentError, "You must specify a template name for #{h}"
@@ -64,6 +63,8 @@ module Beaker
 
         @logger.notify "Requesting '#{h['template']}' VM from vCloud host pool"
 
+        last_wait, wait = 0, 1
+        waited = 0 #the amount of time we've spent waiting for this host to provision
         begin
           uri = URI.parse(get_template_url(@options['pooling_api'], h['template']))
 
@@ -72,7 +73,6 @@ module Beaker
 
           request.set_form_data({'pool' => @options['resourcepool'], 'folder' => 'foo'})
 
-          attempts = @options[:timeout].to_i / 5
           response = http.request(request)
           parsed_response = JSON.parse(response.body)
           if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname']
@@ -83,9 +83,11 @@ module Beaker
             raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
           end
         rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
-          if try <= attempts
-            sleep 5
-            try += 1
+          if waited <= @options[:timeout].to_i
+            @logger.debug("Retrying provision for vCloud host #{h.name} after waiting #{wait} second(s) (failed with #{e.class})")
+            sleep wait
+            waited += wait
+            last_wait, wait = wait, last_wait + wait
             retry
           end
           report_and_raise(@logger, e, 'vCloudPooled.provision')
