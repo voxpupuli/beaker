@@ -185,7 +185,7 @@ module Beaker
         end
       end
 
-      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a 
+      #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a
       #background process.  The output of the command will be stored in the provided host['higgs_file'].
       # @param [Host] host The host that Higgs is to be installed on
       #                    The host object must have the 'working_dir', 'dist' and 'pe_installer' field set correctly.
@@ -531,7 +531,7 @@ module Beaker
       # @param  [Hash{Symbol=>Symbol, String}] opts The options
       # @option opts [String] :pe_dir Default directory or URL to pull PE package from
       #                  (Otherwise uses individual hosts pe_dir)
-      # @option opts [String] :pe_ver Default PE version to install 
+      # @option opts [String] :pe_ver Default PE version to install
       #                  (Otherwise uses individual hosts pe_ver)
       # @raise [StandardError] When installation times out
       #
@@ -731,7 +731,6 @@ module Beaker
       # @param [Hash{Symbol=>String}] opts An options hash
       # @option opts [String] :version The version of Puppet to install, required
       # @option opts [String] :win_download_url The url to download puppet from
-      # 
       # @return nil
       # @api private
       def install_puppet_from_msi( host, opts )
@@ -745,9 +744,7 @@ module Beaker
         else
           host['dist'] = "puppet-#{version}"
         end
-        
         link = "#{opts[:win_download_url]}/#{host['dist']}.msi"
-
         if not link_exists?( link )
           raise "Puppet #{version} at #{link} does not exist!"
         end
