@@ -186,7 +186,7 @@ module Beaker
           end
 
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -x' : ''
-          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash #{frictionless_install_opts.join(' ')}"
+          "cd #{host['working_dir']} && curl --tlsv1 -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash #{frictionless_install_opts.join(' ')}".strip
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''

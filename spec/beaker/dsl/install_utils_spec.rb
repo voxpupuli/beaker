@@ -170,7 +170,17 @@ describe ClassMixedWithDSLInstallUtils do
       the_host = unixhost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       the_host['roles'] = ['frictionless']
-      expect( subject.installer_cmd( the_host, {} ) ).to be ===  "cd /tmp && curl -kO https://testmaster:8140/packages/3.0/install.bash && bash install.bash "
+      expect( subject.installer_cmd( the_host, {} ) ).to be ===  "cd /tmp && curl --tlsv1 -kO https://testmaster:8140/packages/3.0/install.bash && bash install.bash"
+    end
+
+    it 'generates a unix PE frictionless install command for a unix host with role "frictionless" and "frictionless_options"' do
+      subject.stub( :version_is_less ).and_return( false )
+      subject.stub( :master ).and_return( 'testmaster' )
+      the_host = unixhost.dup
+      the_host['pe_installer'] = 'puppet-enterprise-installer'
+      the_host['roles'] = ['frictionless']
+      the_host['frictionless_options'] = { 'main' => { 'dns_alt_names' => 'puppet' } }
+      expect( subject.installer_cmd( the_host, {} ) ).to be ===  "cd /tmp && curl --tlsv1 -kO https://testmaster:8140/packages/3.0/install.bash && bash install.bash main:dns_alt_names=puppet"
     end
 
     it 'generates a osx PE install command for a osx host' do
@@ -200,7 +210,7 @@ describe ClassMixedWithDSLInstallUtils do
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       the_host['roles'] = ['frictionless']
       the_host[:pe_debug] = true
-      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && curl -kO https://testmaster:8140/packages/3.0/install.bash && bash -x install.bash "
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && curl --tlsv1 -kO https://testmaster:8140/packages/3.0/install.bash && bash -x install.bash"
     end
 
   end
