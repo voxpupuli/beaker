@@ -1145,10 +1145,10 @@ module Beaker
       # @param [Hash{Symbol=>String}] opts Options to alter execution.
       # @param [Proc]              block   Additional actions or assertions.
       #
-      # @option opts [Array<Fixnum>] :desired_exit_codes ([0]) An array
-      #   (or range) of integer exit codes that should be considered
-      #   acceptable.  An error will be thrown if the exit code does not
-      #   match one of the values in this list.
+      # @option opts [Array<Fixnum>, Fixnum] :desired_exit_codes (0) An array
+      #   or integer exit code(s) that should be considered
+      #   acceptable.  An error will be thrown if the exit code never
+      #   matches one of the values in this list.
       # @option opts [Fixnum] :max_retries (60) number of times the
       #   command will be tried before failing
       # @option opts [Float] :retry_interval (1) number of seconds
@@ -1158,8 +1158,8 @@ module Beaker
         option_exit_codes     = opts[:desired_exit_codes]
         option_max_retries    = opts[:max_retries].to_i
         option_retry_interval = opts[:retry_interval].to_f
-        option_use_exit_codes = (option_exit_codes and not option_exit_codes.empty?)
-        desired_exit_codes    = option_use_exit_codes ? option_exit_codes.flatten : [0]
+        desired_exit_codes    = option_exit_codes ? [option_exit_codes].flatten : [0]
+        desired_exit_codes    = [0] if desired_exit_codes.empty?
         max_retries           = option_max_retries == 0 ? 60 : option_max_retries  # nil & "" both return 0
         retry_interval        = option_retry_interval == 0 ? 1 : option_retry_interval
         verbose               = true.to_s == opts[:verbose]
