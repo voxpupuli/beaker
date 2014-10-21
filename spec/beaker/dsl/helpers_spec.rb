@@ -161,6 +161,64 @@ describe ClassMixedWithDSLHelpers do
 
   end
 
+  describe "#retry_on" do
+    it 'fails correctly when command never succeeds' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 1
+
+      retries = 5
+
+      opts = {
+        :max_retries    => retries,
+        :retry_interval => 0.0001,
+      }
+
+      subject.stub(:on).and_return(result)
+      subject.should_receive(:on).exactly(retries+2)
+      expect { subject.retry_on("desc", host, command, opts) }.to raise_error(RuntimeError)
+    end
+
+    it 'will return success correctly if it succeeds the first time' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      opts = {
+          :max_retries    => 5,
+          :retry_interval => 0.0001,
+      }
+
+      subject.stub(:on).and_return(result)
+      subject.should_receive(:on).once
+
+      result_given = subject.retry_on("desc", host, command, opts)
+      expect(result_given.exit_code).to be === 0
+    end
+
+    it 'will return success correctly if it succeeds after failing a few times' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+
+      opts = {
+          :max_retries    => 10,
+          :retry_interval => 0.1,
+      }
+
+      reps_num = 4
+      count = 0
+      subject.stub(:on) do
+        result.exit_code = count > reps_num ? 0 : 1
+        count += 1
+        result
+      end
+      subject.should_receive(:on).exactly(reps_num + 2)
+
+      result_given = subject.retry_on("desc", host, command, opts)
+      expect(result_given.exit_code).to be === 0
+    end
+  end
+
   describe "shell" do
     it 'delegates to #on with the default host' do
       subject.stub( :hosts ).and_return( hosts )
