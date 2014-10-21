@@ -246,6 +246,12 @@ module Beaker
         host.do_scp_to *args
       end
 
+      it 'throws an IOError when the file given doesn\'t exist' do
+        File.stub(:file?).and_return(false)
+        File.stub(:directory?).and_return(false)
+        expect { host.do_scp_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
+      end
+
       context "using an ignore array with an absolute source path" do
         source_path = '/repos/puppetlabs-inifile'
         target_path = '/etc/puppetlabs/modules/inifile'
