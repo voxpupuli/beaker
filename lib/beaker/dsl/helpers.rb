@@ -1134,7 +1134,7 @@ module Beaker
             :max_retries => max_retries,
             :retry_interval => retry_interval
         }
-        retry_on(desc, host, "curl -m 1 #{url}", opts)
+        retry_on(host, "curl -m 1 #{url}", opts)
       end
 
       # This command will execute repeatedly until success or it runs out with an error
@@ -1154,7 +1154,7 @@ module Beaker
       # @option opts [Float] :retry_interval (1) number of seconds
       #   that we'll wait between tries
       # @option opts [Boolean] :verbose (false)
-      def retry_on(desc, host, command, opts = {}, &block)
+      def retry_on(host, command, opts = {}, &block)
         option_exit_codes     = opts[:desired_exit_codes]
         option_max_retries    = opts[:max_retries].to_i
         option_retry_interval = opts[:retry_interval].to_f
@@ -1263,7 +1263,7 @@ module Beaker
       #wait for a given host to appear in the dashboard
       def wait_for_host_in_dashboard(host)
         hostname = host.node_name
-        retry_on("Wait for #{hostname} to be in the console", dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+        retry_on(dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
       end
 
       # Ensure the host has requested a cert, then sign it

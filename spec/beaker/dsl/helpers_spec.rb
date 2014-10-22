@@ -176,7 +176,7 @@ describe ClassMixedWithDSLHelpers do
 
       subject.stub(:on).and_return(result)
       subject.should_receive(:on).exactly(retries+2)
-      expect { subject.retry_on("desc", host, command, opts) }.to raise_error(RuntimeError)
+      expect { subject.retry_on(host, command, opts) }.to raise_error(RuntimeError)
     end
 
     it 'will return success correctly if it succeeds the first time' do
@@ -192,7 +192,7 @@ describe ClassMixedWithDSLHelpers do
       subject.stub(:on).and_return(result)
       subject.should_receive(:on).once
 
-      result_given = subject.retry_on("desc", host, command, opts)
+      result_given = subject.retry_on(host, command, opts)
       expect(result_given.exit_code).to be === 0
     end
 
@@ -214,7 +214,7 @@ describe ClassMixedWithDSLHelpers do
       end
       subject.should_receive(:on).exactly(reps_num + 2)
 
-      result_given = subject.retry_on("desc", host, command, opts)
+      result_given = subject.retry_on(host, command, opts)
       expect(result_given.exit_code).to be === 0
     end
   end
