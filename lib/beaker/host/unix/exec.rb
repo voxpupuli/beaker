@@ -14,7 +14,7 @@ module Unix::Exec
   end
 
   def get_ip
-    if self['platform'].include? 'solaris'
+    if (self['platform'].include? 'solaris') || (self['platform'].include? 'osx')
       execute("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1").strip
     else
       execute("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1").strip
