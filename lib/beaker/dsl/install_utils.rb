@@ -169,16 +169,16 @@ module Beaker
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
           "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
-        elsif host['platform'] =~ /osx/
-          version = host['pe_ver'] || opts[:pe_ver]
-          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
-          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
 
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -x' : ''
           "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash"
+        elsif host['platform'] =~ /osx/
+          version = host['pe_ver'] || opts[:pe_ver]
+          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
+          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
         else
           pe_debug = host[:pe_debug] || opts[:pe_debug]  ? ' -D' : ''
           "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']}#{pe_debug} -a #{host['working_dir']}/answers"
@@ -384,7 +384,7 @@ module Beaker
       def fetch_puppet(hosts, opts)
         hosts.each do |host|
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
-          next if host['roles'].include? 'frictionless' and ! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0')
+          next if host['roles'].include?('frictionless') && (! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0'))
 
           if host['platform'] =~ /windows/
             fetch_puppet_on_windows(host, opts)
@@ -466,26 +466,27 @@ module Beaker
         install_hosts.each do |host|
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
-          elsif host['platform'] =~ /osx/
-            on host, installer_cmd(host, opts)
-            #set the certname and master
-            on host, puppet("config set server #{master}")
-            on host, puppet("config set certname #{host}")
-            #run once to request cert
-            on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
           else
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
-            if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
-              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
-              create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
-            else
+            if host['roles'].include?('frictionless') &&  (! version_is_less(version, '3.2.0'))
               # If We're *not* running the classic installer, we want
               # to make sure the master has packages for us.
               deploy_frictionless_to_master(host)
+              on host, installer_cmd(host, opts)
+            elsif host['platform'] =~ /osx/
+              # If we're not frictionless, we need to run the OSX special-case
+              on host, installer_cmd(host, opts)
+              #set the certname and master
+              on host, puppet("config set server #{master}")
+              on host, puppet("config set certname #{host}")
+              #run once to request cert
+              on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
+            else
+              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
+              create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
+              on host, installer_cmd(host, opts)
             end
-
-            on host, installer_cmd(host, opts)
           end
 
           # On each agent, we ensure the certificate is signed then shut down the agent
