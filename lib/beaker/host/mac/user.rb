@@ -15,6 +15,7 @@ module Mac::User
   end
 
   def user_get(name, &block)
+    answer = ""
     execute("dscacheutil -q user -a name #{name}") do |result|
       fail_test "failed to get user #{name}" unless result.stdout =~  /^name: #{name}/
       ui = Hash.new  # user info
@@ -25,8 +26,9 @@ module Mac::User
       answer  = "#{ui[:name]}:#{ui[:password]}:#{ui[:uid]}:#{ui[:gid]}:"
       answer << "#{ui[:name]}:#{ui[:dir]}:#{ui[:shell]}"
 
-      yield answer if block_given?
+      yield result if block_given?
     end
+    answer
   end
 
   def user_present(name, &block)
