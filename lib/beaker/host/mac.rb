@@ -8,7 +8,6 @@ module Mac
     [ 'exec', 'file' ].each do |lib|
       require "beaker/host/unix/#{lib}"
     end
-    # [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
     [ 'user', 'group' ].each do |lib|
           require "beaker/host/mac/#{lib}"
     end
@@ -17,7 +16,6 @@ module Mac
     include Mac::Group
     include Unix::File
     include Unix::Exec
-    # include Unix::Pkg
 
     def self.pe_defaults
       h = Beaker::Options::OptionsHash.new
