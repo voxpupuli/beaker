@@ -13,11 +13,11 @@ describe Beaker::EC2Helper do
     end
 
     it "can set ports for dashboard host" do
-      expect(ec2.amiports(["dashboard"])).to be === [22, 61613, 8139, 443, 4435]
+      expect(ec2.amiports(["dashboard"])).to be === [22, 61613, 8139, 443, 4433, 4435]
     end
 
     it "can set ports for combined master/database/dashboard host" do
-      expect(ec2.amiports(["dashboard", "master", "database"])).to be === [22, 61613, 8139, 5432, 8080, 8081, 8140, 443, 4435]
+      expect(ec2.amiports(["dashboard", "master", "database"])).to be === [22, 61613, 8139, 5432, 8080, 8081, 8140, 443, 4433, 4435]
     end
   end
 end
