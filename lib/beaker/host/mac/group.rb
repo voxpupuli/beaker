@@ -59,8 +59,6 @@ module Mac::Group
     execute("if dscl . -list /Groups/#{name}; then dscl . -delete /Groups/#{name}; fi", {}, &block)
   end
 
-  private
-
   def gid_next
     gid_last = execute("dscl . -list /Groups PrimaryGroupID | sort -k 2 -g | tail -1 | awk '{print $2}'")
     gid_last.to_i + 1

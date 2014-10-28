@@ -53,8 +53,6 @@ module Mac::User
     execute("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {}, &block)
   end
 
-  private
-
   def uid_next
     uid_last = execute("dscl . -list /Users UniqueID | sort -k 2 -g | tail -1 | awk '{print $2}'")
     uid_last.to_i + 1
