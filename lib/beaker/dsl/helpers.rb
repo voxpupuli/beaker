@@ -1128,6 +1128,16 @@ module Beaker
                           host, "https://#{host.node_name}:8081", [35, 60])
       end
 
+      def sleep_until_puppetserver_started(host)
+        curl_with_retries("start puppetserver (ssl)",
+                          host, "https://#{host.node_name}:8140", [35, 60])
+      end
+
+      def sleep_until_nc_started(host)
+        curl_with_retries("start nodeclassifier (ssl)",
+                          host, "https://#{host.node_name}:4433", [35, 60])
+      end
+
       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
         opts = {
           :desired_exit_codes => desired_exit_codes,
