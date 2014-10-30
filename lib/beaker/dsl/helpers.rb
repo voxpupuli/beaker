@@ -867,18 +867,25 @@ module Beaker
       #                         path separator character. (The POSIX path separator
       #                         is ‘:’, and the Windows path separator is ‘;’.)
       #
+      # @option opts [String]   :debug (false) If this option exists,
+      #                         the "--debug" command line parameter
+      #                         will be passed to the 'puppet apply' command.
+      #
       # @param [Block] block This method will yield to a block of code passed
       #                      by the caller; this can be used for additional
       #                      validation, etc.
       #
       def apply_manifest_on(host, manifest, opts = {}, &block)
         block_on host do | host |
-
           on_options = {}
           on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
 
           puppet_apply_opts = {}
-          puppet_apply_opts[:verbose] = nil
+          if opts[:debug]
+            puppet_apply_opts[:debug] = nil
+          else
+            puppet_apply_opts[:verbose] = nil
+          end
           puppet_apply_opts[:parseonly] = nil if opts[:parseonly]
           puppet_apply_opts[:trace] = nil if opts[:trace]
           puppet_apply_opts[:parser] = 'future' if opts[:future_parser]
