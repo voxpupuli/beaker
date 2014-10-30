@@ -1129,21 +1129,51 @@ module Beaker
       end
 
       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
-        retry_command(desc, host, "curl -m 1 #{url}", desired_exit_codes, max_retries, retry_interval)
+        opts = {
+          :desired_exit_codes => desired_exit_codes,
+          :max_retries => max_retries,
+          :retry_interval => retry_interval
+        }
+        retry_on(host, "curl -m 1 #{url}", opts)
       end
 
-      def retry_command(desc, host, command, desired_exit_codes = 0,
-                        max_retries = 60, retry_interval = 1, verbose = false)
+      # This command will execute repeatedly until success or it runs out with an error
+      #
+      # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                            or a role (String or Symbol) that identifies one or more hosts.
+      # @param [String, Command]   command The command to execute on *host*.
+      # @param [Hash{Symbol=>String}] opts Options to alter execution.
+      # @param [Proc]              block   Additional actions or assertions.
+      #
+      # @option opts [Array<Fixnum>, Fixnum] :desired_exit_codes (0) An array
+      #   or integer exit code(s) that should be considered
+      #   acceptable.  An error will be thrown if the exit code never
+      #   matches one of the values in this list.
+      # @option opts [Fixnum] :max_retries (60) number of times the
+      #   command will be tried before failing
+      # @option opts [Float] :retry_interval (1) number of seconds
+      #   that we'll wait between tries
+      # @option opts [Boolean] :verbose (false)
+      def retry_on(host, command, opts = {}, &block)
+        option_exit_codes     = opts[:desired_exit_codes]
+        option_max_retries    = opts[:max_retries].to_i
+        option_retry_interval = opts[:retry_interval].to_f
+        desired_exit_codes    = option_exit_codes ? [option_exit_codes].flatten : [0]
+        desired_exit_codes    = [0] if desired_exit_codes.empty?
+        max_retries           = option_max_retries == 0 ? 60 : option_max_retries  # nil & "" both return 0
+        retry_interval        = option_retry_interval == 0 ? 1 : option_retry_interval
+        verbose               = true.to_s == opts[:verbose]
+
         log_prefix = host.log_prefix
         logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command}"
         logger.debug "  Trying command #{max_retries} times."
         logger.debug ".", add_newline=false
-        desired_exit_codes = [desired_exit_codes].flatten
-        result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}
+
+        result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
         num_retries = 0
         until desired_exit_codes.include?(result.exit_code)
           sleep retry_interval
-          result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}
+          result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
           num_retries += 1
           logger.debug ".", add_newline=false
           if (num_retries > max_retries)
@@ -1152,6 +1182,7 @@ module Beaker
           end
         end
         logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command} ostensibly successful."
+        result
       end
 
       #Is semver-ish version a less than semver-ish version b
@@ -1232,7 +1263,7 @@ module Beaker
       #wait for a given host to appear in the dashboard
       def wait_for_host_in_dashboard(host)
         hostname = host.node_name
-        retry_command("Wait for #{hostname} to be in the console", dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+        retry_on(dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
       end
 
       # Ensure the host has requested a cert, then sign it
