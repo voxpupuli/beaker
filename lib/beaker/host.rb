@@ -31,6 +31,8 @@ module Beaker
         Windows::Host.new name, options
       when /aix/
         Aix::Host.new name, options
+      when /osx/
+        Mac::Host.new name, options
       else
         Unix::Host.new name, options
       end
@@ -346,7 +348,7 @@ module Beaker
 
   end
 
-  [ 'windows', 'unix', 'aix' ].each do |lib|
+  [ 'windows', 'unix', 'aix', 'mac' ].each do |lib|
     require "beaker/host/#{lib}"
   end
 end
