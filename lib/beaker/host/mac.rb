@@ -1,5 +1,5 @@
 [ 'host', 'command_factory', 'command', 'options' ].each do |lib|
-      require "beaker/#{lib}"
+  require "beaker/#{lib}"
 end
 
 module Mac
@@ -9,7 +9,7 @@ module Mac
       require "beaker/host/unix/#{lib}"
     end
     [ 'user', 'group' ].each do |lib|
-          require "beaker/host/mac/#{lib}"
+      require "beaker/host/mac/#{lib}"
     end
 
     include Mac::User
