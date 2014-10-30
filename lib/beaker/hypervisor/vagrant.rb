@@ -31,7 +31,9 @@ module Beaker
         v_file << "    v.vm.box_version = '#{host['box_version']}'\n" unless host['box_version'].nil?
         v_file << "    v.vm.box_check_update = '#{host['box_check_update'] ||= 'true'}'\n"
         v_file << "    v.vm.base_mac = '#{randmac}'\n"
-        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
+        host['ips'].each do |ip|
+          v_file << "    v.vm.network :private_network, ip: \"#{ip.to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\"\n"
+        end
 
         if /windows/i.match(host['platform'])
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389\n"
@@ -127,6 +129,8 @@ module Beaker
         default_user = host['user']
 
         set_ssh_config host, 'vagrant'
+	
+	enable_root_login host, @options
 
         copy_ssh_to_root host, @options
         #shut down connection, will reconnect on next exec
