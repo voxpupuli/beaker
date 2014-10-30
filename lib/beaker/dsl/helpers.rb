@@ -1130,9 +1130,9 @@ module Beaker
 
       def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
         opts = {
-            :desired_exit_codes => desired_exit_codes,
-            :max_retries => max_retries,
-            :retry_interval => retry_interval
+          :desired_exit_codes => desired_exit_codes,
+          :max_retries => max_retries,
+          :retry_interval => retry_interval
         }
         retry_on(host, "curl -m 1 #{url}", opts)
       end
