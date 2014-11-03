@@ -53,11 +53,13 @@ module Beaker
     end
 
     let (:docker) { ::Beaker::Docker.new( hosts, { :logger => logger }) }
+    let(:docker_options) { nil }
 
     before :each do
       # Stub out all of the docker-api gem. we should never really call it
       # from these tests
       ::Beaker::Docker.any_instance.stub(:require).with('docker')
+      ::Docker.stub(:options).and_return(docker_options)
       ::Docker.stub(:options=)
       ::Docker.stub(:logger=)
       ::Docker.stub(:validate_version!)
@@ -79,9 +81,19 @@ module Beaker
       end
 
       it 'should set Docker options' do
-        ::Docker.should_receive(:options=).once
+        ::Docker.should_receive(:options=).with({:write_timeout => 300, :read_timeout => 300}).once
 
         docker
+      end
+
+      context 'when Docker options are already set' do
+        let(:docker_options) {{:write_timeout => 600, :foo => :bar}}
+
+        it 'should not override Docker options' do
+          ::Docker.should_receive(:options=).with({:write_timeout => 600, :read_timeout => 300, :foo => :bar}).once
+
+          docker
+        end
       end
 
       it 'should check the Docker gem can work with the api' do
