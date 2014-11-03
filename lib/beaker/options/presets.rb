@@ -64,7 +64,13 @@ module Beaker
       # @return [Hash] Environment config values formatted appropriately
       def format_found_env_vars( found_env_vars )
         found_env_vars[:consoleport] &&= found_env_vars[:consoleport].to_i
-        found_env_vars[:type] = found_env_vars[:is_pe] == 'true' || found_env_vars[:is_pe] == 'yes' ? 'pe' : nil
+        if found_env_vars[:is_pe] == 'true' || found_env_vars[:is_pe] == 'yes'
+          found_env_vars[:type] = 'pe'
+        elsif found_env_vars[:is_pe] == 'false' || found_env_vars[:is_pe] == 'no'
+          found_env_vars[:type] = 'foss'
+        else
+          found_env_vars[:type] = nil
+        end
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
         found_env_vars
       end
