@@ -17,7 +17,6 @@ class Beaker::VagrantVirtualbox < Beaker::Vagrant
       provider_section << "      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium','#{host['disk_path']}']\n"
       provider_section << "      vb.customize [\"modifyvm\", :id, \"--natdnshostresolver1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
       provider_section << "      vb.customize [\"modifyvm\", :id, \"--natdnsproxy1\", \"#{host['natdns']}\"]\n" unless host['natdns'].nil?
-      provider_section << "    end\n"
     end
     provider_section << "    end\n"
 
