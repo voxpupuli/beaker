@@ -1145,7 +1145,7 @@ module Beaker
       # Install local module for acceptance testing
       # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
       # @api dsl
-      # @param [Host, Array<Host>, String, Symbol] host
+      # @param [Host, Array<Host>, String, Symbol] one_or_more_hosts
       #                   One or more hosts to act upon,
       #                   or a role (String or Symbol) that identifies one or more hosts.
       # @option opts [String] :source ('./')
@@ -1161,19 +1161,21 @@ module Beaker
       # @option opts [Array] :ignore_list
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
-      def copy_module_to(host, opts = {})
-        opts = {:source => './',
-                :target_module_path => host['distmoduledir'],
-                :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
-        ignore_list = build_ignore_list(opts)
-        target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
-        source = File.expand_path( opts[:source] )
-        if opts.has_key?(:module_name)
-          module_name = opts[:module_name]
-        else
-          _, module_name = parse_for_modulename( source )
+      def copy_module_to(one_or_more_hosts, opts = {})
+        block_on one_or_more_hosts do |host|
+          opts = {:source => './',
+                  :target_module_path => host['distmoduledir'],
+                  :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+          ignore_list = build_ignore_list(opts)
+          target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
+          source = File.expand_path( opts[:source] )
+          if opts.has_key?(:module_name)
+            module_name = opts[:module_name]
+          else
+            _, module_name = parse_for_modulename( source )
+          end
+          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
         end
-        scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
       end
       alias :copy_root_module_to :copy_module_to
 
