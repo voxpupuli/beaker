@@ -8,7 +8,11 @@ module Beaker
       @hosts = hosts
 
       # increase the http timeouts as provisioning images can be slow
-      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }
+      timeout_opts = { :write_timeout => 300, :read_timeout => 300 }
+
+      # avoid over writing Docker options
+      ::Docker.options =  ( ::Docker.respond_to?(:options) ? ::Docker.options.merge(timeout_opts) : timeout_opts)
+
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
       ::Docker.validate_version!
