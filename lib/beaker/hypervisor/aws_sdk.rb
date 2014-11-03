@@ -55,6 +55,9 @@ module Beaker
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
+      #enable root if user is not root
+      enable_root_on_hosts()
+
       # Set the hostname for each box
       set_hostnames()
 
@@ -345,6 +348,29 @@ module Beaker
           etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{neighbor['dns_name']}\n"
         end
         set_etc_hosts(host, etc_hosts)
+      end
+    end
+
+    # Enables root for instances with custom username like ubuntu-amis
+    #
+    # @return [void]
+    # @api private
+    def enable_root_on_hosts
+      @hosts.each do |host|
+        enable_root(host)
+      end
+    end
+
+    # Enables root access for a host when username is not root
+    #
+    # @return [void]
+    # @api private
+    def enable_root(host)
+      if host['user'] != 'root'
+        copy_ssh_to_root(host, @options)
+        enable_root_login(host, @options)
+        host['user'] = 'root'
+        host.close
       end
     end
 
