@@ -51,6 +51,7 @@ module Beaker
         @hosts =  []
         @network_manager = Beaker::NetworkManager.new(@options, @logger)
         @hosts = @network_manager.provision
+        @network_manager.proxy_package_manager
         @network_manager.validate
         @network_manager.configure
       rescue => e

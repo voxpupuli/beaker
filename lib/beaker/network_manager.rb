@@ -75,10 +75,10 @@ module Beaker
 
     # configure proxy on all provioned machines
     #@raise [Exception] Raise an exception if virtual machines fail to be configured
-    def package_proxy
+    def proxy_package_manager
       if @hypervisors
         @hypervisors.each_key do |type|
-          @hypervisors[type].package_proxy
+          @hypervisors[type].proxy_package_manager
         end
       end
     end

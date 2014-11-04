@@ -85,7 +85,15 @@ module Beaker
       nil
     end
 
-    #Default configuration steps to be run for a given hypervisor
+    #Proxy package managers on tests hosts created by this hypervisor, runs before validation and configuration.
+    def proxy_package_manager
+      if @options[:package_proxy]
+        package_proxy(@hosts, @options)
+      end
+    end
+
+    #Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
+    #to the provided SUT for test execution to be successful.
     def configure
       if @options[:timesync]
         timesync(@hosts, @options)
@@ -96,15 +104,13 @@ module Beaker
       if @options[:add_el_extras]
         add_el_extras(@hosts, @options)
       end
-      if @options[:package_proxy]
-        package_proxy(@hosts, @options)
-      end
       if @options[:disable_iptables]
         disable_iptables @hosts, @options
       end
     end
 
-    #Default validation steps to be run for a given hypervisor
+    #Default validation steps to be run for a given hypervisor.  Ensures that SUTs meet requirements to be
+    #beaker test nodes.
     def validate
       if @options[:validate]
         validate_host(@hosts, @options)
