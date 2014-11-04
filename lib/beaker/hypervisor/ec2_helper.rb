@@ -3,11 +3,13 @@ module Beaker
     # Return a list of open ports for testing based on a hosts role
     #
     # @todo horribly hard-coded
-    # @param [Array<String>] roles An array of roles
+    # @param [Host] host to find ports for
     # @return [Array<Number>] array of port numbers
     # @api private
-    def self.amiports(roles)
+    def self.amiports(host)
       ports = [22, 61613, 8139]
+
+      roles = host['roles']
 
       if roles.include? 'database'
         ports << 5432
@@ -25,7 +27,15 @@ module Beaker
         ports << 4435
       end
 
-      ports
+      # If they only specified one port in the host config file, YAML will have converted it
+      # into a string, but if it was more than one, an array.
+      user_ports = []
+      if host.has_key?('additional_ports')
+        user_ports = host['additional_ports'].is_a?(Array) ? host['additional_ports'] : [host['additional_ports']]
+      end
+
+      additional_ports = ports + user_ports
+      additional_ports.uniq
     end
   end
 end
