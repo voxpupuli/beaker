@@ -111,6 +111,7 @@ module Beaker
       # add platform-specific actions
       case host['platform']
       when /ubuntu/, /debian/
+        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
         dockerfile += <<-EOF
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}

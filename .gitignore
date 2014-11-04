@@ -19,6 +19,7 @@ doc
 .idea/
 # rbenv file
 .ruby-version
+.ruby-gemset
 # Vagrant folder
 .vagrant/
 .vagrant_files/
