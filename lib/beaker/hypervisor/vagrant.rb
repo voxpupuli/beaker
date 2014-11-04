@@ -128,7 +128,10 @@ module Beaker
 
         set_ssh_config host, 'vagrant'
 
+        #copy vagrant's keys to roots home dir, to allow for login as root
         copy_ssh_to_root host, @options
+        #ensure that root login is enabled for this host
+        enable_root_login host, @options
         #shut down connection, will reconnect on next exec
         host.close
 
