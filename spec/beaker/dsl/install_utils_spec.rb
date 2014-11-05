@@ -831,20 +831,35 @@ describe ClassMixedWithDSLInstallUtils do
         end
       }
     end
+
     describe 'should call scp with the correct info, with only providing host' do
       let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
 
       it_should_behave_like 'copy_module_to', :module_name => 'testmodule'
     end
+
     describe 'should call scp with the correct info, when specifying the modulename' do
       let(:target){'/etc/puppetlabs/puppet/modules/bogusmodule'}
       let(:module_parse_name){false}
       it_should_behave_like 'copy_module_to', {:module_name =>'bogusmodule'}
     end
+
     describe 'should call scp with the correct info, when specifying the target to a different path' do
       target = '/opt/shared/puppet/modules'
       let(:target){"#{target}/testmodule"}
       it_should_behave_like 'copy_module_to', {:target_module_path => target, :module_name => 'testmodule'}
+    end
+
+    describe 'should accept multiple hosts when' do
+      it 'used in a default manner' do
+        subject.stub( :build_ignore_list ).and_return( [] )
+        subject.stub( :parse_for_modulename ).and_return( [nil, 'modulename'] )
+        subject.stub( :on ).and_return( double.as_null_object )
+        hosts = [{}, {}]
+
+        subject.should_receive( :scp_to ).twice
+        subject.copy_module_to( hosts )
+      end
     end
   end
 
