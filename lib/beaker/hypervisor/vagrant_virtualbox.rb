@@ -9,6 +9,7 @@ class Beaker::VagrantVirtualbox < Beaker::Vagrant
     provider_section  = ""
     provider_section << "    v.vm.provider :virtualbox do |vb|\n"
     provider_section << "      vb.customize ['modifyvm', :id, '--memory', '#{options['vagrant_memsize'] ||= '1024'}']\n"
+    provider_section << "      vb.vbguest.auto_update = false" if options[:vbguest_plugin] == 'disable'
     if host['disk_path']
       unless File.exist?(host['disk_path'])
         host['disk_path'] = File.join(host['disk_path'], "#{host.name}.vmdk")
