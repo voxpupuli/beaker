@@ -341,7 +341,7 @@ module Beaker
       start_time = Time.now
 
       #Create a run log for this TestSuite.
-      run_log = log_path(@timestamp, "#{@name}-run.log", @options[:log_dir])
+      run_log = log_path("#{@name}-run.log", @options[:log_dated_dir])
       @logger.add_destination(run_log)
 
       # This is an awful hack to maintain backward compatibility until tests
@@ -379,8 +379,8 @@ module Beaker
       # REVISIT: This changes global state, breaking logging in any future runs
       # of the suite – or, at least, making them highly confusing for anyone who
       # has not studied the implementation in detail. --daniel 2011-03-14
-      @test_suite_results.summarize( Logger.new(log_path(@timestamp, "#{name}-summary.txt", @options[:log_dir]), STDOUT) )
-      @test_suite_results.write_junit_xml( log_path(@timestamp, @options[:xml_file], @options[:xml_dir]), File.join(@options[:project_root], @options[:xml_stylesheet]) )
+      @test_suite_results.summarize( Logger.new(log_path("#{name}-summary.txt", @options[:log_dated_dir]), STDOUT) )
+      @test_suite_results.write_junit_xml( log_path(@options[:xml_file], @options[:xml_dated_dir]), File.join(@options[:project_root], @options[:xml_stylesheet]) )
 
       #All done with this run, remove run log
       @logger.remove_destination(run_log)
@@ -404,32 +404,28 @@ module Beaker
       end
     end
 
-    #Create a full file path for output to be written to, using the provided timestamp, name and output directory.
-    #@param [Time] timestamp The time that we are making this path with
-    #@param [String] name The file name that we want to write to.
-    #@param [String] basedir The desired output directory.  A subdirectory tagged with the time will be created which will contain
-    #                        the output file (./basedir/timestamp/).  
-    #                        A symlink will be made from that to ./basedir/timestamp/latest.
-    #@example
-    #  log_path('2014-06-02 16:31:22 -0700','output.txt', 'log')
+    # Gives a full file path for output to be written to, maintaining the latest symlink
+    # @param [String] name The file name that we want to write to.
+    # @param [String] log_dir The desired output directory.
+    #                         A symlink will be made from ./parentdir/latest to that.
+    # @example
+    #   log_path('output.txt', 'log/2014-06-02_16_31_22')
     #
-    #    This will create the structure:
+    #     This will create the structure:
     #
-    #  ./log/2014-06-02_16_31_22/output.txt
-    #  ./log/latest -> 2014-06-02_16_31_22
-    def log_path(timestamp, name, basedir)
-      log_dir = File.join(basedir, timestamp.strftime("%F_%H_%M_%S"))
-      unless File.directory?(log_dir) then
-        FileUtils.mkdir_p(log_dir)
+    #   ./log/2014-06-02_16_31_22/output.txt
+    #   ./log/latest -> 2014-06-02_16_31_22
+    def log_path(name, log_dir)
+      log_parent_dir = File.dirname(log_dir)
+      FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
 
-        latest = File.join(basedir, "latest")
-        if !File.exist?(latest) or File.symlink?(latest) then
-          File.delete(latest) if File.exist?(latest)
-          File.symlink(File.basename(log_dir), latest)
-        end
+      latest = File.join(log_parent_dir, "latest")
+      if !File.exist?(latest) or File.symlink?(latest) then
+        File.delete(latest) if File.exist?(latest)
+        File.symlink(File.basename(log_dir), latest)
       end
 
-      File.join(basedir, 'latest', name)
+      File.join(log_parent_dir, 'latest', name)
     end
 
   end

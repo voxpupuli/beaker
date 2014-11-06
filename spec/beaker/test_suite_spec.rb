@@ -28,7 +28,7 @@ module Beaker
 
     context 'run', :use_fakefs => true do
 
-      let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dir => '.' }) }
+      let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.'}) }
       let(:broken_script) { "raise RuntimeError" }
       let(:fail_script)   { "raise Beaker::DSL::Outcomes::FailTest" }
       let(:okay_script)   { "true" }

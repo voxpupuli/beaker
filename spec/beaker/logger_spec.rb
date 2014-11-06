@@ -3,8 +3,9 @@ require 'spec_helper'
 
 module Beaker
   describe Logger, :use_fakefs => true do
-    let(:my_io)  { MockIO.new                         }
-    let(:logger) { Logger.new(my_io, :quiet => true)  }
+    let(:my_io)     { MockIO.new                         }
+    let(:logger)    { Logger.new(my_io, :quiet => true)  }
+    let(:test_dir)  { 'tmp/tests' }
 
 
     context '#convert' do
@@ -22,6 +23,20 @@ module Beaker
           pending "not supported in ruby 1.8 (using #{RUBY_VERSION})"
         end
       end
+    end
+
+    context '#generate_dated_log_folder' do
+
+      it 'generates path for a given timestamp' do
+        input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
+        expect( Logger.generate_dated_log_folder(test_dir, input_time) ).to be === File.join(test_dir, '2014-06-02_16_31_22')
+      end
+
+      it 'generates directory for a given timestamp' do
+        input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
+        expect( File.directory? Logger.generate_dated_log_folder(test_dir, input_time) ).to be_true
+      end
+
     end
 
     context 'new' do

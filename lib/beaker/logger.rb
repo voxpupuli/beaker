@@ -306,6 +306,18 @@ module Beaker
       @sublog.read
     end
 
+    # Utility method to centralize dated log folder generation
+    #
+    # @param [String] base_dir path of the directory for the dated log folder to live in
+    # @param [Time] timestamp the timestamp that should be used to generate the dated log folder
+    #
+    # @return [String] the path of the dated log folder generated
+    def Logger.generate_dated_log_folder(base_dir, timestamp)
+      log_dir = File.join(base_dir, timestamp.strftime("%F_%H_%M_%S"))
+      FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
+      log_dir
+    end
+
     private
     # Expand each symlink found to its full path
     # Lines are assumed to be in the format "String : Integer"
