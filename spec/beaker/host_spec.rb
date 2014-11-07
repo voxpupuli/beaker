@@ -246,6 +246,23 @@ module Beaker
         host.exec(command,{})
       end
 
+      it 'raises a CommandFailure when an unacceptable exit code is returned' do
+        result.exit_code = 7
+        opts = { :acceptable_exit_codes => [0, 1] }
+
+        expect { host.exec(command, opts) }.to raise_error(Beaker::Host::CommandFailure)
+      end
+
+      it 'does not throw an error when an unacceptable exit code is returned and the accept_all_exit_codes flag is set' do
+        result.exit_code = 7
+        opts = {
+            :acceptable_exit_codes  => [0, 1],
+            :accept_all_exit_codes  => true
+        }
+
+        expect { host.exec(command, opts) }.to_not raise_error
+      end
+
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0
