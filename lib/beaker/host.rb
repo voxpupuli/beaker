@@ -249,7 +249,13 @@ module Beaker
           # exit codes at the host level and then raising...
           # is it necessary to break execution??
           unless result.exit_code_in?(Array(options[:acceptable_exit_codes] || 0))
-            raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            msg = "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            if options[:fail_on_error] then
+              require 'beaker/dsl/outcomes'
+              fail_test msg
+            else
+              raise CommandFailure, msg
+            end
           end
         end
         # Danger, so we have to return this result?

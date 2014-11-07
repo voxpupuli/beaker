@@ -119,6 +119,7 @@ module Beaker
           :dry_run              => false,
           :timeout              => 300,
           :fail_mode            => 'slow',
+          :fail_on_error        => false,
           :timesync             => false,
           :disable_iptables     => false,
           :repo_proxy           => false,
