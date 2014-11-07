@@ -30,8 +30,18 @@ module Beaker
             expect( munged[:type] ).to be == 'pe'
           end
         end
+        describe 'sets type to foss if...' do
+          it 'env var is set to "false"' do
+            munged = presets.format_found_env_vars( {:is_pe => 'true'} )
+            expect( munged[:type] ).to be == 'pe'
+          end
+          it 'env var is set to "no"' do
+            munged = presets.format_found_env_vars( {:is_pe => 'yes'} )
+            expect( munged[:type] ).to be == 'pe'
+          end
+        end
         it 'does not set type otherwise' do
-          munged = presets.format_found_env_vars( {:is_pe => 'false'} )
+          munged = presets.format_found_env_vars( {:is_pe => nil} )
           expect( munged[:type] ).to be == nil
         end
       end
