@@ -146,6 +146,11 @@ module Beaker
         "RUN #{command}\n"
       }.join('')
 
+      # Override image entrypoint
+      if host['docker_image_entrypoint']
+        dockerfile += "ENTRYPOINT #{host['docker_image_entrypoint']}\n"
+      end
+
       # How to start a sshd on port 22.  May be an init for more supervision
       cmd = host['docker_cmd'] || "/usr/sbin/sshd -D #{sshd_options}"
       dockerfile += <<-EOF

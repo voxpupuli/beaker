@@ -238,6 +238,15 @@ module Beaker
         dockerfile.should =~ /RUN special one\nRUN special two\nRUN special three/
       end
 
+      it 'should add docker_image_entrypoint' do
+        dockerfile = docker.send(:dockerfile_for, {
+          'platform' => 'el-',
+          'docker_image_entrypoint' => '/bin/bash'
+        })
+
+        dockerfile.should =~ %r{ENTRYPOINT /bin/bash}
+      end
+
       it 'should use zypper on sles' do
         dockerfile = docker.send(:dockerfile_for, {
           'platform' => 'sles',
