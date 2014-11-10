@@ -475,6 +475,21 @@ describe ClassMixedWithDSLInstallUtils do
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
+    context 'on windows' do
+      let(:platform) { "windows-2008r2-i386" }
+      it 'installs specific version of puppet when passed :version' do
+        subject.stub(:link_exists?).and_return( true )
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
+        subject.install_puppet(:version => '3000')
+      end
+      it 'installs from custom url when passed :win_download_url' do
+        subject.stub(:link_exists?).and_return( true )
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
+        subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
+      end
+    end
     describe 'on unsupported platforms' do
       let(:platform) { 'solaris-11-x86_64' }
       let(:host) { make_host('henry', :platform => 'solaris-11-x86_64') }
