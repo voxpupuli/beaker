@@ -8,8 +8,8 @@ module Beaker
       let( :logger )    { double( 'logger' ) }
 
       before :each do
-        logger.stub( :error ).and_return( true )
-        logger.stub( :pretty_backtrace ).and_return( backtrace )
+        allow( logger ).to receive( :error ).and_return( true )
+        allow( logger ).to receive( :pretty_backtrace ).and_return( backtrace )
 
       end
 
@@ -17,14 +17,14 @@ module Beaker
 
         it "records the backtrace of the exception to the logger" do
           ex = Exception.new("ArgumentError")
-          ex.stub( :backtrace ).and_return(backtrace)
+          allow( ex ).to receive( :backtrace ).and_return(backtrace)
           mesg = "I'm the extra message"
          
           backtrace.each_line do |line|
-            logger.should_receive( :error ).with(line)
+            expect( logger ).to receive( :error ).with(line)
           end
 
-          subject.should_receive( :raise ).once
+          expect( subject ).to receive( :raise ).once
 
           subject.report_and_raise(logger, ex, mesg) 
 

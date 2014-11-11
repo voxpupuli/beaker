@@ -28,25 +28,25 @@ describe Beaker do
     it "can sync time on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 3 ).times
 
       subject.timesync( hosts, options )
     end
 
     it "can retry on failure on unix hosts" do
       hosts = make_hosts( { :platform => 'unix', :exit_code => [1, 0] } )
-      subject.stub( :sleep ).and_return(true)
+      allow( subject ).to receive( :sleep ).and_return(true)
 
-      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 6 ).times
 
       subject.timesync( hosts, options )
     end
 
     it "eventually gives up and raises an error when unix hosts can't be synched" do
       hosts = make_hosts( { :platform => 'unix', :exit_code => 1 } )
-      subject.stub( :sleep ).and_return(true)
+      allow( subject ).to receive( :sleep ).and_return(true)
 
-      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
 
       expect{ subject.timesync( hosts, options ) }.to raise_error
     end
@@ -54,10 +54,10 @@ describe Beaker do
     it "can sync time on windows hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
-      Beaker::Command.should_receive( :new ).with("w32tm /register").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("net start w32time").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver} /syncfromflags:manual /update").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("w32tm /resync").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /register").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("net start w32time").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver} /syncfromflags:manual /update").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /resync").exactly( 3 ).times
 
       subject.timesync( hosts, options )
 
@@ -66,7 +66,7 @@ describe Beaker do
     it "can sync time on Sles hosts" do
       hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
 
-      Beaker::Command.should_receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
 
       subject.timesync( hosts, options )
 
@@ -75,7 +75,7 @@ describe Beaker do
     it "can set time server on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
 
       subject.timesync( hosts, options_ntp )
     end
@@ -83,10 +83,10 @@ describe Beaker do
     it "can set time server on windows hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
-      Beaker::Command.should_receive( :new ).with("w32tm /register").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("net start w32time").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver_set} /syncfromflags:manual /update").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("w32tm /resync").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /register").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("net start w32time").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver_set} /syncfromflags:manual /update").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("w32tm /resync").exactly( 3 ).times
 
       subject.timesync( hosts, options_ntp )
 
@@ -95,7 +95,7 @@ describe Beaker do
     it "can set time server on Sles hosts" do
       hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
 
-      Beaker::Command.should_receive( :new ).with("sntp #{ntpserver_set}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sntp #{ntpserver_set}").exactly( 3 ).times
 
       subject.timesync( hosts, options_ntp )
 
@@ -133,7 +133,7 @@ describe Beaker do
     it "can perform apt-get on ubuntu hosts" do
       host = make_host( 'testhost', { :platform => 'ubuntu' } )
 
-      Beaker::Command.should_receive( :new ).with("apt-get update").once
+      expect( Beaker::Command ).to receive( :new ).with("apt-get update").once
 
       subject.apt_get_update( host )
 
@@ -142,7 +142,7 @@ describe Beaker do
     it "can perform apt-get on debian hosts" do
       host = make_host( 'testhost', { :platform => 'debian' } )
 
-      Beaker::Command.should_receive( :new ).with("apt-get update").once
+      expect( Beaker::Command ).to receive( :new ).with("apt-get update").once
 
       subject.apt_get_update( host )
 
@@ -151,7 +151,7 @@ describe Beaker do
     it "does nothing on non debian/ubuntu hosts" do
       host = make_host( 'testhost', { :platform => 'windows' } )
 
-      Beaker::Command.should_receive( :new ).never
+      expect( Beaker::Command ).to receive( :new ).never
 
       subject.apt_get_update( host )
 
@@ -168,13 +168,13 @@ describe Beaker do
       filepath = "/path/to/file"
       host = make_host( 'testhost', { :platform => 'windows' })
       tempfile = double( 'tempfile' )
-      tempfile.stub( :path ).and_return( tempfilepath )
-      Tempfile.stub( :open ).and_yield( tempfile )
+      allow( tempfile ).to receive( :path ).and_return( tempfilepath )
+      allow( Tempfile ).to receive( :open ).and_yield( tempfile )
       file = double( 'file' )
-      File.stub( :open ).and_yield( file )
+      allow( File ).to receive( :open ).and_yield( file )
 
-      file.should_receive( :puts ).with( content ).once
-      host.should_receive( :do_scp_to ).with( tempfilepath, filepath, subject.instance_variable_get( :@options ) ).once
+      expect( file ).to receive( :puts ).with( content ).once
+      expect( host ).to receive( :do_scp_to ).with( tempfilepath, filepath, subject.instance_variable_get( :@options ) ).once
 
       subject.copy_file_to_remote(host, filepath, content)
 
@@ -188,10 +188,10 @@ describe Beaker do
     it "correctly configures ubuntu hosts" do
       hosts = make_hosts( { :platform => 'ubuntu', :exit_code => 1 } )
 
-      Beaker::Command.should_receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 )
+      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 )
       hosts.each do |host|
-        subject.should_receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        subject.should_receive( :apt_get_update ).with( host ).once
+        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
+        expect( subject ).to receive( :apt_get_update ).with( host ).once
       end
 
       subject.proxy_config( hosts, options )
@@ -201,10 +201,10 @@ describe Beaker do
     it "correctly configures debian hosts" do
       hosts = make_hosts( { :platform => 'debian' } )
 
-      Beaker::Command.should_receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
       hosts.each do |host|
-        subject.should_receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        subject.should_receive( :apt_get_update ).with( host ).once
+        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
+        expect( subject ).to receive( :apt_get_update ).with( host ).once
       end
 
       subject.proxy_config( hosts, options )
@@ -214,9 +214,9 @@ describe Beaker do
     it "correctly configures solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'solaris-11' } )
 
-      Beaker::Command.should_receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
       hosts.each do |host|
-        Beaker::Command.should_receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
+        expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
       end
 
       subject.proxy_config( hosts, options )
@@ -225,8 +225,8 @@ describe Beaker do
 
     it "does nothing for non ubuntu/debian/solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
-      
-      Beaker::Command.should_receive( :new ).never
+
+      expect( Beaker::Command ).to receive( :new ).never
 
       subject.proxy_config( hosts, options )
 
@@ -245,13 +245,13 @@ describe Beaker do
       hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
       hosts[4][:platform] = Beaker::Platform.new('oracle-5-arch')
 
-      Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
-      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 4 ).times
-      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
-      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
-      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
-      Beaker::Command.should_receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
-      Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("yum clean all && yum makecache").exactly( 6 ).times
 
       subject.add_el_extras( hosts, options )
 
@@ -260,7 +260,7 @@ describe Beaker do
     it "should do nothing for non el-5/6 hosts" do
       hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
-      Beaker::Command.should_receive( :new ).never
+      expect( Beaker::Command ).to receive( :new ).never
 
       subject.add_el_extras( hosts, options )
 
@@ -273,7 +273,7 @@ describe Beaker do
     it "can sync keys on a solaris host" do
       @platform = 'solaris'
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "| bash" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( sync_cmd % "| bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -282,9 +282,9 @@ describe Beaker do
     it "can sync keys on an eos host" do
       @platform = 'eos'
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "> manage_root_authorized_keys" ).exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with( "sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys" ).exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with( "bash manage_root_authorized_keys" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( sync_cmd % "> manage_root_authorized_keys" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( "sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( "bash manage_root_authorized_keys" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -292,7 +292,7 @@ describe Beaker do
 
     it "can sync keys on a non-solaris host" do
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "| env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( sync_cmd % "| env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -307,8 +307,8 @@ describe Beaker do
 
       hosts.each do |host|
         unix_only_pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
+          expect( host ).to receive( :check_for_package ).with( pkg ).once.and_return( false )
+          expect( host ).to receive( :install_package ).with( pkg ).once
         end
       end
 
@@ -321,8 +321,8 @@ describe Beaker do
 
       hosts.each do |host|
         windows_pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
+          expect( host ).to receive( :check_for_package ).with( pkg ).once.and_return( false )
+          expect( host ).to receive( :install_package ).with( pkg ).once
         end
       end
 
@@ -335,8 +335,8 @@ describe Beaker do
 
       hosts.each do |host|
         sles_only_pkgs.each do |pkg|
-          host.should_receive( :check_for_package).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
+          expect( host ).to receive( :check_for_package).with( pkg ).once.and_return( false )
+          expect( host ).to receive( :install_package ).with( pkg ).once
         end
 
       end
@@ -352,7 +352,7 @@ describe Beaker do
     it "can find the domain for a host" do
       host = make_host('name', { :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" } )
 
-      Beaker::Command.should_receive( :new ).with( "cat /etc/resolv.conf" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
 
       expect( subject.get_domain_name( host ) ).to be === "labs.lan"
 
@@ -361,7 +361,7 @@ describe Beaker do
     it "can find the search for a host" do
       host = make_host('name', { :stdout => "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" } )
 
-      Beaker::Command.should_receive( :new ).with( "cat /etc/resolv.conf" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
 
       expect( subject.get_domain_name( host ) ).to be === "labs.lan"
 
@@ -374,7 +374,7 @@ describe Beaker do
     it "can exec the get_ip command" do
       host = make_host('name', { :stdout => "192.168.2.130\n" } )
 
-      Beaker::Command.should_receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
 
       expect( subject.get_ip( host ) ).to be === "192.168.2.130"
 
@@ -389,8 +389,8 @@ describe Beaker do
       host = make_host('name', {})
       etc_hosts = "127.0.0.1  localhost\n192.168.2.130 pe-ubuntu-lucid\n192.168.2.128 pe-centos6\n192.168.2.131 pe-debian6"
 
-      Beaker::Command.should_receive( :new ).with( "echo '#{etc_hosts}' > /etc/hosts" ).once
-      host.should_receive( :exec ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo '#{etc_hosts}' > /etc/hosts" ).once
+      expect( host ).to receive( :exec ).once
 
       subject.set_etc_hosts(host, etc_hosts)
     end
@@ -405,8 +405,8 @@ describe Beaker do
     it "can set proxy config on an ubuntu host" do
       host = make_host('name', { :platform => 'ubuntu' } )
 
-      Beaker::Command.should_receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
-      host.should_receive( :exec ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
+      expect( host ).to receive( :exec ).once
 
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
@@ -414,8 +414,8 @@ describe Beaker do
     it "can set proxy config on a debian/ubuntu host" do
       host = make_host('name', { :platform => 'ubuntu' } )
 
-      Beaker::Command.should_receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
-      host.should_receive( :exec ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
+      expect( host ).to receive( :exec ).once
 
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
@@ -423,8 +423,8 @@ describe Beaker do
     it "can set proxy config on a centos host" do
       host = make_host('name', { :platform => 'centos' } )
 
-      Beaker::Command.should_receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
-      host.should_receive( :exec ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
+      expect( host ).to receive( :exec ).once
 
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
@@ -503,18 +503,18 @@ describe Beaker do
           :env2_key => :env2_value
       }
 
-      subject.should_receive( :construct_env ).and_return( opts )
+      expect( subject ).to receive( :construct_env ).and_return( opts )
       host_specific_commands_array.each do |command|
-        Beaker::Command.should_receive( :new ).with( command ).once
+        expect( Beaker::Command ).to receive( :new ).with( command ).once
       end
-      Beaker::Command.should_receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
-      host.should_receive( :add_env_var ).with( 'RUBYLIB', '$RUBYLIB' ).once
-      host.should_receive( :add_env_var ).with( 'PATH', '$PATH' ).once
+      expect( Beaker::Command ).to receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
+      expect( host ).to receive( :add_env_var ).with( 'RUBYLIB', '$RUBYLIB' ).once
+      expect( host ).to receive( :add_env_var ).with( 'PATH', '$PATH' ).once
       opts.each_pair do |key, value|
-        host.should_receive( :add_env_var ).with( key, value ).once
+        expect( host ).to receive( :add_env_var ).with( key, value ).once
       end
-      host.should_receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
-      host.should_receive( :exec ).exactly( host_specific_commands_array.length + 1 ).times
+      expect( host ).to receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
+      expect( host ).to receive( :exec ).exactly( host_specific_commands_array.length + 1 ).times
 
       subject.set_env(host, options.merge( opts ))
     end

@@ -32,8 +32,8 @@ module Beaker
 
       it "raises an error on bad yaml file" do
         FakeFS.deactivate!
-        YAML.stub(:load_file) { raise Psych::SyntaxError }
-        File.stub(:exists?).and_return(true)
+        allow( YAML ).to receive(:load_file) { raise Psych::SyntaxError }
+        allow( File ).to receive(:exists?).and_return(true)
         expect { parser.parse_hosts_file("not a valid path") }.to raise_error(ArgumentError)
       end
 

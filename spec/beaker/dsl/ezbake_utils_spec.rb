@@ -25,7 +25,7 @@ class ClassMixedWithEZBakeUtils
   end
 
   def logger
-    @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
+    @logger ||= RSpec::Mocks::Double.new('logger').as_null_object
   end
 end
 
@@ -107,7 +107,7 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     it "initializes EZBakeUtils.config" do
-      Dir.stub( :chdir ).and_yield()
+      allow( Dir ).to receive( :chdir ).and_yield()
       allow(subject).to receive(:conditionally_clone) { true }
 
       expect(subject).to receive(:`).with(/^lein.*/).ordered
@@ -191,7 +191,7 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     it "raises an exception for unsupported *nix-like platforms" do
-      Dir.stub( :chdir ).and_yield()
+      allow( Dir ).to receive( :chdir ).and_yield()
       install_from_ezbake_common_expects
       expect{ 
         subject.install_from_ezbake host, "blah", "blah"
@@ -201,7 +201,7 @@ describe ClassMixedWithEZBakeUtils do
     context "When Beaker::DSL::EZBakeUtils.config is nil" do
       let( :platform ) { Beaker::Platform.new('el-7-i386') }
       before do
-        Dir.stub( :chdir ).and_yield()
+        allow( Dir ).to receive( :chdir ).and_yield()
         subject.wipe_out_ezbake_config
       end
 
@@ -220,7 +220,7 @@ describe ClassMixedWithEZBakeUtils do
     context "When Beaker::DSL::EZBakeUtils.config is a hash" do
       let( :platform ) { Beaker::Platform.new('el-7-i386') }
       before do
-        Dir.stub( :chdir ).and_yield()
+        allow( Dir ).to receive( :chdir ).and_yield()
         subject.initialize_ezbake_config
       end
 

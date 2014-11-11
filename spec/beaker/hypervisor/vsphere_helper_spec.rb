@@ -18,21 +18,21 @@ module Beaker
                                                 
 
     before :each do
-      stub_const( "RbVmomi", MockRbVmomi )
+     stub_const( "RbVmomi", MockRbVmomi )
     end
 
     describe "#load_config" do 
 
       it 'can load a .fog file' do
-        File.stub( :exists? ).and_return( true )
-        YAML.stub( :load_file ).and_return( fog_file_contents )
+        allow( File ).to receive( :exists? ).and_return( true )
+        allow( YAML ).to receive( :load_file ).and_return( fog_file_contents )
 
         expect( VsphereHelper.load_config ).to be === vInfo
 
       end
 
       it 'raises an error when the .fog file is missing' do
-        File.stub( :exists? ).and_return( false )
+        allow( File ).to receive( :exists? ).and_return( false )
 
         expect{ VsphereHelper.load_config }.to raise_error( ArgumentError )
 
@@ -121,7 +121,7 @@ module Beaker
 
    describe "#wait_for_tasks" do
      it "can wait for tasks to error" do
-       vsphere_helper.stub( :sleep ).and_return( true )
+       allow( vsphere_helper ).to receive( :sleep ).and_return( true )
        vms.each do |vm|
          vm.info.state = 'error'
        end
@@ -130,7 +130,7 @@ module Beaker
      end
 
      it "can wait for tasks to succeed" do
-       vsphere_helper.stub( :sleep ).and_return( true )
+       allow( vsphere_helper ).to receive( :sleep ).and_return( true )
        vms.each do |vm|
          vm.info.state = 'success'
        end
@@ -139,7 +139,7 @@ module Beaker
      end
 
      it "errors when tasks fail to error/success before timing out" do
-       vsphere_helper.stub( :sleep ).and_return( true )
+       allow( vsphere_helper ).to receive( :sleep ).and_return( true )
        vms.each do |vm|
          vm.info.state = 'nope'
        end
@@ -152,7 +152,7 @@ module Beaker
    describe "#close" do
      it 'closes the connection' do
        connection = vsphere_helper.instance_variable_get( :@connection )
-       connection.should_receive( :close ).once
+       expect( connection ).to receive( :close ).once
        
        vsphere_helper.close
      end

@@ -40,13 +40,13 @@ EOS
 
     it 'returns user names list correctly' do
       result.stdout = dscacheutil_list
-      subject.should_receive( :execute ).and_yield(result)
-      expect { subject.user_list }.to be === ['puppet1', 'puppet2']
+      expect( subject ).to receive( :execute ).and_yield(result)
+      expect( subject.user_list ).to be === ['puppet1', 'puppet2']
     end
 
     it 'yields correctly with the result object' do
       result.stdout = dscacheutil_list
-      subject.should_receive( :execute ).and_yield(result)
+      expect( subject ).to receive( :execute ).and_yield(result)
       subject.user_list { |result|
         expect( result.stdout ).to be === dscacheutil_list
       }
@@ -59,21 +59,21 @@ EOS
     it 'fails if a name line isn\'t included' do
       result.stdout = ''
       user_name = 'any_name'
-      subject.should_receive( :execute ).and_yield(result)
+      expect( subject ).to receive( :execute ).and_yield(result)
       expect { subject.user_get(user_name) }.to raise_error(MiniTest::Assertion, "failed to get user #{user_name}")
     end
 
     it 'parses mac dscacheutil output into /etc/passwd format correctly' do
       result.stdout = puppet1
-      subject.should_receive( :execute ).and_yield(result)
-      expect{ subject.user_get('puppet1') }.to be === 'puppet1:*:67:234:/Users/puppet1:/bin/bash'
+      expect( subject ).to receive( :execute ).and_yield(result)
+      expect( subject.user_get('puppet1') ).to be === "puppet1:*:67:234:puppet1:/Users/puppet1:/bin/bash"
     end
 
     it 'yields correctly with the result object' do
       result.stdout = puppet1
-      subject.should_receive( :execute ).and_yield(result)
+      expect( subject ).to receive( :execute ).and_yield(result)
       subject.user_get('puppet1') do |result|
-        expect{ result.stdout }.to be === puppet1
+        expect( result.stdout ).to be === puppet1
       end
     end
 
@@ -83,7 +83,7 @@ EOS
 
     it 'returns user existence without running create command if it already exists' do
       result.stdout = puppet1
-      subject.should_receive( :execute ).once.and_yield(result)
+      expect( subject ).to receive( :execute ).once.and_yield(result)
       subject.user_present( 'puppet1' )
     end
 
@@ -93,10 +93,10 @@ EOS
       gid = 1007
       name = "madeup_user"
 
-      subject.should_receive( :uid_next ).and_return(uid)
-      subject.should_receive( :gid_next ).and_return(gid)
-      subject.should_receive( :execute ).once.ordered.and_yield(result)
-      subject.should_receive( :execute ).once.ordered
+      expect( subject ).to receive( :uid_next ).and_return(uid)
+      expect( subject ).to receive( :gid_next ).and_return(gid)
+      expect( subject ).to receive( :execute ).once.ordered.and_yield(result)
+      expect( subject ).to receive( :execute ).once.ordered
       subject.user_present( name )
     end
 
@@ -106,7 +106,7 @@ EOS
 
     it 'calls execute to run logic' do
       name = "main_one"
-      subject.should_receive( :execute ).once.with("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {})
+      expect( subject ).to receive( :execute ).once.with("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {})
       subject.user_absent( name )
     end
 
@@ -116,8 +116,8 @@ EOS
 
     it 'returns the next ID given' do
       n = 117
-      subject.should_receive( :execute ).and_return("#{n}")
-      expect { subject.uid_next }.to be === n + 1
+      expect( subject ).to receive( :execute ).and_return("#{n}")
+      expect( subject.uid_next ).to be === n + 1
     end
 
   end
@@ -126,8 +126,8 @@ EOS
 
     it 'returns the next ID given' do
       n = 843
-      subject.should_receive( :execute ).and_return("#{n}")
-      expect { subject.gid_next }.to be === n + 1
+      expect( subject ).to receive( :execute ).and_return("#{n}")
+      expect( subject.gid_next ).to be === n + 1
     end
 
   end

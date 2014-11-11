@@ -6,7 +6,7 @@ module Beaker
     before :each do
       MockVsphereHelper.set_config( fog_file_contents )
       MockVsphereHelper.set_vms( make_hosts() )
-      stub_const( "VsphereHelper", MockVsphereHelper )
+     stub_const( "VsphereHelper", MockVsphereHelper )
     end
 
     describe "#provision" do

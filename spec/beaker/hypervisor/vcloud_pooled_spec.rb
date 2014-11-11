@@ -7,12 +7,12 @@ module Beaker
       vms = make_hosts()
       MockVsphereHelper.set_config( fog_file_contents )
       MockVsphereHelper.set_vms( vms )
-      stub_const( "VsphereHelper", MockVsphereHelper )
-      stub_const( "Net", MockNet )
-      JSON.stub( :parse ) do |arg|
+     stub_const( "VsphereHelper", MockVsphereHelper )
+     stub_const( "Net", MockNet )
+      allow( JSON ).to receive( :parse ) do |arg|
         arg
       end
-      Socket.stub( :getaddrinfo ).and_return( true )
+      allow( Socket ).to receive( :getaddrinfo ).and_return( true )
     end
 
     describe '#get_template_url' do
@@ -46,8 +46,8 @@ module Beaker
       it 'provisions hosts from the pool' do 
 
         vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
-        vcloud.stub( :require ).and_return( true )
-        vcloud.stub( :sleep ).and_return( true )
+        allow( vcloud ).to receive( :require ).and_return( true )
+        allow( vcloud ).to receive( :sleep ).and_return( true )
         vcloud.provision
 
         hosts = vcloud.instance_variable_get( :@hosts )
@@ -65,8 +65,8 @@ module Beaker
         MockVsphereHelper.powerOn
 
         vcloud = Beaker::VcloudPooled.new( make_hosts, make_opts )
-        vcloud.stub( :require ).and_return( true )
-        vcloud.stub( :sleep ).and_return( true )
+        allow( vcloud ).to receive( :require ).and_return( true )
+        allow( vcloud ).to receive( :sleep ).and_return( true )
         vcloud.provision
         vcloud.cleanup
 

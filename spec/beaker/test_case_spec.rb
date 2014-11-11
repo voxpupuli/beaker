@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Beaker
-  describe TestCase, :use_fakefs => true do
+  describe TestCase do
     let(:logger) {  double('logger').as_null_object }
     let(:path) { @path || '/tmp/nope' }
     let(:testcase) { TestCase.new({}, logger, {}, path) }
@@ -13,7 +13,7 @@ module Beaker
           f.write ""
         end
         @path = path
-        testcase.should_not_receive( :log_and_fail_test )
+        expect( testcase ).to_not receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pass
@@ -25,7 +25,7 @@ module Beaker
           f.write "raise SkipTest"
         end
         @path = path
-        testcase.should_not_receive( :log_and_fail_test )
+        expect( testcase ).to_not receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :skip
@@ -37,7 +37,7 @@ module Beaker
           f.write "raise PendingTest"
         end
         @path = path
-        testcase.should_not_receive( :log_and_fail_test )
+        expect( testcase ).to_not receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pending
@@ -49,7 +49,7 @@ module Beaker
           f.write "raise FailTest"
         end
         @path = path
-        testcase.should_not_receive( :log_and_fail_test )
+        expect( testcase ).to_not receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :fail
@@ -61,7 +61,7 @@ module Beaker
           f.write "raise RuntimeError"
         end
         @path = path
-        testcase.should_receive( :log_and_fail_test ).once.with(kind_of(RuntimeError))
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(RuntimeError))
         testcase.run_test
       end
 
@@ -71,7 +71,7 @@ module Beaker
           f.write "raise ScriptError"
         end
         @path = path
-        testcase.should_receive( :log_and_fail_test ).once.with(kind_of(ScriptError))
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(ScriptError))
         testcase.run_test
       end
 
@@ -81,7 +81,7 @@ module Beaker
           f.write "raise Timeout::Error"
         end
         @path = path
-        testcase.should_receive( :log_and_fail_test ).once.with(kind_of(Timeout::Error))
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Timeout::Error))
         testcase.run_test
       end
 
@@ -91,7 +91,7 @@ module Beaker
           f.write "raise Host::CommandFailure"
         end
         @path = path
-        testcase.should_receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
         testcase.run_test
       end
     end

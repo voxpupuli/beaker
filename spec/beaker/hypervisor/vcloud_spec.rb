@@ -6,14 +6,14 @@ module Beaker
     before :each do
       MockVsphereHelper.set_config( fog_file_contents )
       MockVsphereHelper.set_vms( make_hosts() )
-      stub_const( "VsphereHelper", MockVsphereHelper )
-      stub_const( "Net", MockNet )
-      json = mock( 'json' )
-      json.stub( :parse ) do |arg| 
+     stub_const( "VsphereHelper", MockVsphereHelper )
+     stub_const( "Net", MockNet )
+      json = double( 'json' )
+      allow( json ).to receive( :parse ) do |arg| 
         arg
       end
-      stub_const( "JSON", json )
-      Socket.stub( :getaddrinfo ).and_return( true )
+     stub_const( "JSON", json )
+      allow( Socket ).to receive( :getaddrinfo ).and_return( true )
     end
 
     describe "#provision" do
@@ -25,8 +25,8 @@ module Beaker
         opts[:pooling_api] = nil
 
         vcloud = Beaker::Vcloud.new( make_hosts, opts )
-        vcloud.stub( :require ).and_return( true )
-        vcloud.stub( :sleep ).and_return( true )
+        allow( vcloud ).to receive( :require ).and_return( true )
+        allow( vcloud ).to receive( :sleep ).and_return( true )
         vcloud.provision
 
         hosts = vcloud.instance_variable_get( :@hosts )
@@ -49,8 +49,8 @@ module Beaker
         opts[:pooling_api] = nil
 
         vcloud = Beaker::Vcloud.new( make_hosts, opts )
-        vcloud.stub( :require ).and_return( true )
-        vcloud.stub( :sleep ).and_return( true )
+        allow( vcloud ).to receive( :require ).and_return( true )
+        allow( vcloud ).to receive( :sleep ).and_return( true )
         vcloud.provision
         vcloud.cleanup
 

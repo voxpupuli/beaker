@@ -6,65 +6,65 @@ module Beaker
 
     it "creates an aix hypervisor for aix hosts" do
       aix = double( 'aix' )
-      aix.stub( :provision ).and_return( true )
+      allow( aix ).to receive( :provision ).and_return( true )
 
-      Aixer.should_receive( :new ).once.and_return( aix )
+      expect( Aixer ).to receive( :new ).once.and_return( aix )
       expect( hypervisor.create( 'aix', [], make_opts() ) ).to be === aix
     end
 
     it "creates a solaris hypervisor for solaris hosts" do
       solaris = double( 'solaris' )
-      solaris.stub( :provision ).and_return( true )
-      Solaris.should_receive( :new ).once.and_return( solaris )
+      allow( solaris ).to receive( :provision ).and_return( true )
+      expect( Solaris ).to receive( :new ).once.and_return( solaris )
       expect( hypervisor.create( 'solaris', [], make_opts() ) ).to be === solaris
     end
 
     it "creates a vsphere hypervisor for vsphere hosts" do
       vsphere = double( 'vsphere' )
-      vsphere.stub( :provision ).and_return( true )
-      Vsphere.should_receive( :new ).once.and_return( vsphere )
+      allow( vsphere ).to receive( :provision ).and_return( true )
+      expect( Vsphere ).to receive( :new ).once.and_return( vsphere )
       expect( hypervisor.create( 'vsphere', [], make_opts() ) ).to be === vsphere
     end
 
     it "creates a fusion hypervisor for fusion hosts" do
       fusion = double( 'fusion' )
-      fusion.stub( :provision ).and_return( true )
-      Fusion.should_receive( :new ).once.and_return( fusion )
+      allow( fusion ).to receive( :provision ).and_return( true )
+      expect( Fusion ).to receive( :new ).once.and_return( fusion )
       expect( hypervisor.create( 'fusion', [], make_opts() ) ).to be === fusion
     end
 
     it "creates a vcloudpooled hypervisor for vcloud hosts that are pooled" do
       vcloud = double( 'vcloud' )
-      vcloud.stub( :provision ).and_return( true )
-      VcloudPooled.should_receive( :new ).once.and_return( vcloud )
+      allow( vcloud ).to receive( :provision ).and_return( true )
+      expect( VcloudPooled ).to receive( :new ).once.and_return( vcloud )
       expect( hypervisor.create( 'vcloud', [], make_opts().merge( { 'pooling_api' => true } ) ) ).to be === vcloud
     end
 
     it "creates a vcloud hypervisor for vcloud hosts that are not pooled" do
       vcloud = double( 'vcloud' )
-      vcloud.stub( :provision ).and_return( true )
-      Vcloud.should_receive( :new ).once.and_return( vcloud )
+      allow( vcloud ).to receive( :provision ).and_return( true )
+      expect( Vcloud ).to receive( :new ).once.and_return( vcloud )
       expect( hypervisor.create( 'vcloud', [], make_opts().merge( { 'pooling_api' => false } ) ) ).to be === vcloud
     end
 
     it "creates a vagrant hypervisor for vagrant hosts" do
       vagrant = double( 'vagrant' )
-      vagrant.stub( :provision ).and_return( true )
-      Vagrant.should_receive( :new ).once.and_return( vagrant )
+      allow( vagrant ).to receive( :provision ).and_return( true )
+      expect( Vagrant ).to receive( :new ).once.and_return( vagrant )
       expect( hypervisor.create( 'vagrant', [], make_opts() ) ).to be === vagrant
     end
 
     it "creates a vagrant_fusion hypervisor for vagrant vmware fusion hosts" do
       vagrant = double( 'vagrant_fusion' )
-      vagrant.stub( :provision ).and_return( true )
-      VagrantFusion.should_receive( :new ).once.and_return( vagrant )
+      allow( vagrant ).to receive( :provision ).and_return( true )
+      expect( VagrantFusion ).to receive( :new ).once.and_return( vagrant )
       expect( hypervisor.create( 'vagrant_fusion', [], make_opts() ) ).to be === vagrant
     end
 
     it "creates a vagrant_virtualbox hypervisor for vagrant virtualbox hosts" do
       vagrant = double( 'vagrant_virtualbox' )
-      vagrant.stub( :provision ).and_return( true )
-      VagrantVirtualbox.should_receive( :new ).once.and_return( vagrant )
+      allow( vagrant ).to receive( :provision ).and_return( true )
+      expect( VagrantVirtualbox ).to receive( :new ).once.and_return( vagrant )
       expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
     end
 
@@ -76,7 +76,7 @@ module Beaker
       context "if :disable_iptables option set false" do
         it "does not call disable_iptables" do
           options[:disable_iptables] = false
-          hypervisor.should_receive( :disable_iptables ).never
+          expect( hypervisor ).to receive( :disable_iptables ).never
           hypervisor.configure
         end
       end
@@ -84,7 +84,7 @@ module Beaker
       context "if :disable_iptables option set true" do
         it "calls disable_iptables once" do
           options[:disable_iptables] = true
-          hypervisor.should_receive( :disable_iptables ).exactly( 1 ).times
+          expect( hypervisor ).to receive( :disable_iptables ).exactly( 1 ).times
           hypervisor.configure
         end
       end

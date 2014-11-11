@@ -1,4 +1,4 @@
-require 'test/unit/assertions'
+require 'minitest/test'
 
 module Beaker
   module DSL
@@ -15,7 +15,19 @@ module Beaker
     # or direct object for asserting against into your assertion.
     #
     module Assertions
-      include Test::Unit::Assertions
+      include Minitest::Assertions
+
+      #Why do we need this accessor?
+      # https://github.com/seattlerb/minitest/blob/master/lib/minitest/assertions.rb#L8-L12
+      # Protocol: Nearly everything here boils up to +assert+, which
+      # expects to be able to increment an instance accessor named
+      # +assertions+. This is not provided by Assertions and must be
+      # provided by the thing including Assertions. See Minitest::Runnable
+      # for an example.
+      attr_accessor :assertions
+      def assertions
+        @assertions || 0
+      end
 
       # Make assertions about the content of console output.
       #
@@ -82,6 +94,17 @@ module Beaker
         assert_equal our_err,    (result.nil? ? '' : result.stderr),
           'The contents of STDERR did not match expectations'
       end
+
+      # Assert that the provided string does not match the provided regular expression, can pass optional message
+      # @deprecated This is placed her for backwards compatability for tests that used Test::Unit::Assertions,
+      #             http://apidock.com/ruby/Test/Unit/Assertions/assert_no_match
+      #             
+      def assert_no_match(regexp, string, msg=nil)
+        assert_instance_of(Regexp, regexp, "The first argument to assert_no_match should be a Regexp.")
+        msg = message(msg) { "<#{mu_pp(regexp)}> expected to not match\n<#{mu_pp(string)}>" }
+        assert(regexp !~ string, msg)
+      end
+
     end
   end
 end
