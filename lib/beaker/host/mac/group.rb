@@ -52,7 +52,7 @@ module Mac::Group
     execute("dscacheutil -q group -a name #{name}") do |result|
       result.stdout.each_line { |line|
         if line =~ /^gid:/
-          gid = line[5, line.length - 5]
+          gid = (line[5, line.length - 5]).chomp
           break
         end
       }

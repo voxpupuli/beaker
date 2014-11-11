@@ -169,15 +169,9 @@ module Beaker
           convert s
         end
       else
-        if string.respond_to?( :force_encoding )
-          # We're running in >= 1.9 and we'll need to convert
-          # Remove invalid and undefined UTF-8 character encodings
-          string.force_encoding('UTF-8')
-          return string.chars.select{|i| i.valid_encoding?}.join
-        else
-          # We're running 1.8, do nothing
-          string
-        end
+        # Remove invalid and undefined UTF-8 character encodings
+        string.force_encoding('UTF-8')
+        return string.chars.select{|i| i.valid_encoding?}.join
       end
     end
 

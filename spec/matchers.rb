@@ -27,11 +27,11 @@ RSpec::Matchers.define :execute_commands_matching do |pattern|
       msg + " in:\n #{actual.command_strings.pretty_inspect}"
   end
 
-  failure_message_for_should do |actual|
+  failure_message do |actual|
     "Expected to find #{message(actual, pattern, @times, @found_count)}"
   end
 
-  failure_message_for_should_not do |actual|
+  failure_message_when_negated do |actual|
     "Unexpectedly found #{message(actual, pattern, @times, @found_count)}"
   end
 end
@@ -57,11 +57,11 @@ RSpec::Matchers.define :execute_commands_matching_in_order do |*patterns|
       " in:\n #{actual.command_strings.pretty_inspect}"
   end
 
-  failure_message_for_should do |actual|
+  failure_message do |actual|
     "Expected to find #{message(actual, patterns)}"
   end
 
-  failure_message_for_should_not do |actual|
+  failure_message_when_negated do |actual|
     "Unexpectedly found #{message(actual, patterns)}"
   end
 end

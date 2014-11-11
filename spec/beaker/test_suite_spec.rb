@@ -4,7 +4,7 @@ require 'fileutils'
 module Beaker
   describe TestSuite do
 
-    context 'new', :use_fakefs => true do
+    context 'new' do
       let(:test_dir) { 'tmp/tests' }
 
       let(:options)  { {'name' => create_files(@files)} }
@@ -20,13 +20,13 @@ module Beaker
         @files = [ rb_test ]
         ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now, :stop_on_error)
 
-        expect { ts.instance_variable_get(:@test_files).
-                  include? rb_test }.to be_true
+        tfs = ts.instance_variable_get(:@test_files)
+        expect(tfs).to include rb_test
       end
 
     end
 
-    context 'run', :use_fakefs => true do
+    context 'run' do
 
       let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.'}) }
       let(:broken_script) { "raise RuntimeError" }
@@ -38,7 +38,7 @@ module Beaker
       let(:hosts)         { make_hosts() }
 
       it 'fails fast if fail_mode != :slow and runtime error is raised' do
-        Logger.stub('new')
+        allow( Logger ).to receive('new')
         @files = [ rb_test, pl_test, sh_test]
         File.open(rb_test, 'w') { |file| file.write(broken_script) }
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
@@ -46,8 +46,8 @@ module Beaker
 
         ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
-        tsr.stub(:write_junit_xml).and_return( true )
-        tsr.stub(:summarize).and_return( true )
+        allow( tsr ).to receive(:write_junit_xml).and_return( true )
+        allow( tsr ).to receive(:summarize).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 1
@@ -58,7 +58,7 @@ module Beaker
       end
 
       it 'fails fast if fail_mode != :slow and fail test is raised' do
-        Logger.stub('new')
+        allow( Logger ).to receive('new')
         @files = [ rb_test, pl_test, sh_test]
         File.open(rb_test, 'w') { |file| file.write(fail_script) }
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
@@ -66,8 +66,8 @@ module Beaker
 
         ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
-        tsr.stub(:write_junit_xml).and_return( true )
-        tsr.stub(:summarize).and_return( true )
+        allow( tsr ).to receive(:write_junit_xml).and_return( true )
+        allow( tsr ).to receive(:summarize).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 0
@@ -78,7 +78,7 @@ module Beaker
       end
 
       it 'fails slow if fail_mode = :slow, even if a test fails and there is a runtime error' do
-        Logger.stub('new')
+        allow( Logger ).to receive('new')
         @files = [ rb_test, pl_test, sh_test]
         File.open(rb_test, 'w') { |file| file.write(broken_script) }
         File.open(pl_test, 'w') { |file| file.write(fail_script) }
@@ -86,8 +86,8 @@ module Beaker
 
         ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :slow )
         tsr = ts.instance_variable_get( :@test_suite_results )
-        tsr.stub(:write_junit_xml).and_return( true )
-        tsr.stub(:summarize).and_return( true )
+        allow( tsr ).to receive(:write_junit_xml).and_return( true )
+        allow( tsr ).to receive(:summarize).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 1

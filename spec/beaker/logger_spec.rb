@@ -2,11 +2,10 @@
 require 'spec_helper'
 
 module Beaker
-  describe Logger, :use_fakefs => true do
+  describe Logger do
     let(:my_io)     { MockIO.new                         }
     let(:logger)    { Logger.new(my_io, :quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
-
 
     context '#convert' do
       let(:valid_utf8)  { "/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\n" }
@@ -34,7 +33,7 @@ module Beaker
 
       it 'generates directory for a given timestamp' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, input_time) ).to be_true
+        expect( File.directory? Logger.generate_dated_log_folder(test_dir, input_time) ).to be_truthy
       end
 
     end
@@ -42,7 +41,7 @@ module Beaker
     context 'new' do
       it 'does not duplicate STDOUT when directly passed to it' do
         stdout_logger = Logger.new STDOUT
-        expect( stdout_logger ).to have(1).destinations
+        expect( stdout_logger.destinations.size ).to be === 1
       end
 
 
@@ -57,7 +56,7 @@ module Beaker
     context 'it can' do
       it 'open/create a file when a string is given to add_destination' do
         logger.add_destination 'my_tmp_file'
-        expect( File.exists?( 'my_tmp_file' ) ).to be_true
+        expect( File.exists?( 'my_tmp_file' ) ).to be_truthy
 
         io = logger.destinations.select {|d| d.respond_to? :path }.first
         expect( io.path ).to match /my_tmp_file/
@@ -80,9 +79,9 @@ module Beaker
       it 'colors strings if @color is set' do
         colorized_logger = Logger.new my_io, :color => true, :quiet => true
 
-        my_io.should_receive( :print ).with "\e[00;30m"
-        my_io.should_receive( :print )
-        my_io.should_receive( :puts ).with 'my string'
+        expect( my_io ).to receive( :print ).with "\e[00;30m"
+        expect( my_io ).to receive( :print )
+        expect( my_io ).to receive( :puts ).with 'my string'
 
         colorized_logger.optionally_color "\e[00;30m", 'my string'
       end
@@ -94,14 +93,14 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_debug? ) { should be_true }
-        its( :is_trace? ) { should be_true }
-        its( :is_warn? )  { should be_true }
+        its( :is_debug? ) { should be_truthy }
+        its( :is_trace? ) { should be_truthy }
+        its( :is_warn? )  { should be_truthy }
 
         context 'but print' do
           before do
-            my_io.stub :puts
-            my_io.should_receive( :print ).at_least :twice
+            allow( my_io ).to receive :puts
+            expect( my_io ).to receive( :print ).at_least :twice
           end
 
           it( 'warnings' )    { trace_logger.warn 'IMA WARNING!'    }
@@ -120,15 +119,15 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_false }
-        its( :is_debug? ) { should be_false }
-        its( :is_verbose? ) { should be_true }
-        its( :is_warn? )  { should be_true }
+        its( :is_trace? ) { should be_falsy }
+        its( :is_debug? ) { should be_falsy }
+        its( :is_verbose? ) { should be_truthy }
+        its( :is_warn? )  { should be_truthy }
 
         context 'but print' do
           before do
-            my_io.stub :puts
-            my_io.should_receive( :print ).at_least :twice
+            allow( my_io ).to receive :puts
+            expect( my_io ).to receive( :print ).at_least :twice
           end
 
           it( 'warnings' )    { verbose_logger.warn 'IMA WARNING!'    }
@@ -146,14 +145,14 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_false }
-        its( :is_debug? ) { should be_true }
-        its( :is_warn? )  { should be_true }
+        its( :is_trace? ) { should be_falsy }
+        its( :is_debug? ) { should be_truthy }
+        its( :is_warn? )  { should be_truthy }
 
         context 'successfully print' do
           before do
-            my_io.stub :puts
-            my_io.should_receive( :print ).at_least :twice
+            allow( my_io ).to receive :puts
+            expect( my_io ).to receive( :print ).at_least :twice
           end
 
           it( 'warnings' )    { debug_logger.warn 'IMA WARNING!'        }
@@ -171,14 +170,14 @@ module Beaker
                                               :color     => true )
                                   }
 
-        its( :is_debug? ) { should be_false }
-        its( :is_trace? ) { should be_false }
+        its( :is_debug? ) { should be_falsy }
+        its( :is_trace? ) { should be_falsy }
 
 
         context 'skip' do
           before do
-            my_io.should_not_receive :puts
-            my_io.should_not_receive :print
+            expect( my_io ).to_not receive :puts
+            expect( my_io ).to_not receive :print
           end
 
           it( 'debugs' )    { info_logger.debug 'NOT DEBUGGING!' }
@@ -188,8 +187,8 @@ module Beaker
 
         context 'but print' do
           before do
-            my_io.should_receive :puts
-            my_io.should_receive( :print ).twice
+            expect( my_io ).to receive :puts
+            expect( my_io ).to receive( :print ).twice
           end
 
           it( 'successes' )     { info_logger.success 'SUCCESS!'  }

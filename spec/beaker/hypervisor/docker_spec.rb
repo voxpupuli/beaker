@@ -14,27 +14,27 @@ module Beaker
 
     let(:logger) do
       logger = double('logger')
-      logger.stub(:debug)
-      logger.stub(:info)
-      logger.stub(:warn)
-      logger.stub(:error)
-      logger.stub(:notify)
+      allow( logger ).to receive(:debug)
+      allow( logger ).to receive(:info)
+      allow( logger ).to receive(:warn)
+      allow( logger ).to receive(:error)
+      allow( logger ).to receive(:notify)
       logger
     end
 
     let(:image) do
       image = double('Docker::Image')
-      image.stub(:id)
-      image.stub(:tag)
-      image.stub(:delete)
+      allow( image ).to receive(:id)
+      allow( image ).to receive(:tag)
+      allow( image ).to receive(:delete)
       image
     end
 
     let(:container) do
       container = double('Docker::Container')
-      container.stub(:id)
-      container.stub(:start)
-      container.stub(:json).and_return({
+      allow( container ).to receive(:id)
+      allow( container ).to receive(:start)
+      allow( container ).to receive(:json).and_return({
         'NetworkSettings' => {
           'IPAddress' => '192.0.2.1',
           'Ports' => {
@@ -47,8 +47,8 @@ module Beaker
           },
         },
       })
-      container.stub(:stop)
-      container.stub(:delete)
+      allow( container ).to receive(:stop)
+      allow( container ).to receive(:delete)
       container
     end
 
@@ -58,30 +58,30 @@ module Beaker
     before :each do
       # Stub out all of the docker-api gem. we should never really call it
       # from these tests
-      ::Beaker::Docker.any_instance.stub(:require).with('docker')
-      ::Docker.stub(:options).and_return(docker_options)
-      ::Docker.stub(:options=)
-      ::Docker.stub(:logger=)
-      ::Docker.stub(:validate_version!)
-      ::Docker::Image.stub(:build).and_return(image)
-      ::Docker::Container.stub(:create).and_return(container)
-      ::Docker::Container.any_instance.stub(:start)
+      allow_any_instance_of( ::Beaker::Docker ).to receive(:require).with('docker')
+      allow( ::Docker ).to receive(:options).and_return(docker_options)
+      allow( ::Docker ).to receive(:options=)
+      allow( ::Docker ).to receive(:logger=)
+      allow( ::Docker ).to receive(:validate_version!)
+      allow( ::Docker::Image ).to receive(:build).and_return(image)
+      allow( ::Docker::Container ).to receive(:create).and_return(container)
+      allow_any_instance_of( ::Docker::Container ).to receive(:start)
     end
 
     describe '#initialize' do
       it 'should require the docker gem' do
-        ::Beaker::Docker.any_instance.should_receive(:require).with('docker').once
+        expect_any_instance_of( ::Beaker::Docker ).to receive(:require).with('docker').once
 
         docker
       end
 
       it 'should fail when the gem is absent' do
-        ::Beaker::Docker.any_instance.stub(:require).with('docker').and_raise(LoadError)
+        allow_any_instance_of( ::Beaker::Docker ).to receive(:require).with('docker').and_raise(LoadError)
         expect { docker }.to raise_error(LoadError)
       end
 
       it 'should set Docker options' do
-        ::Docker.should_receive(:options=).with({:write_timeout => 300, :read_timeout => 300}).once
+        expect( ::Docker ).to receive(:options=).with({:write_timeout => 300, :read_timeout => 300}).once
 
         docker
       end
@@ -90,20 +90,20 @@ module Beaker
         let(:docker_options) {{:write_timeout => 600, :foo => :bar}}
 
         it 'should not override Docker options' do
-          ::Docker.should_receive(:options=).with({:write_timeout => 600, :read_timeout => 300, :foo => :bar}).once
+          expect( ::Docker ).to receive(:options=).with({:write_timeout => 600, :read_timeout => 300, :foo => :bar}).once
 
           docker
         end
       end
 
       it 'should check the Docker gem can work with the api' do
-        ::Docker.should_receive(:validate_version!).once
+        expect( ::Docker ).to receive(:validate_version!).once
 
         docker
       end
 
       it 'should hook the Beaker logger into the Docker one' do
-        ::Docker.should_receive(:logger=).with(logger)
+        expect( ::Docker ).to receive(:logger=).with(logger)
 
         docker
       end
@@ -111,27 +111,27 @@ module Beaker
 
     describe '#provision' do
       before :each do
-        docker.stub(:dockerfile_for)
+        allow( docker ).to receive(:dockerfile_for)
       end
 
       it 'should call dockerfile_for with all the hosts' do
         hosts.each do |host|
-          docker.should_receive(:dockerfile_for).with(host).and_return('')
+          expect( docker ).to receive(:dockerfile_for).with(host).and_return('')
         end
 
         docker.provision
       end
 
       it 'should pass the Dockerfile on to Docker::Image.create' do
-        docker.stub(:dockerfile_for).and_return('special testing value')
-        ::Docker::Image.should_receive(:build).with('special testing value', { :rm => true })
+        allow( docker ).to receive(:dockerfile_for).and_return('special testing value')
+        expect( ::Docker::Image ).to receive(:build).with('special testing value', { :rm => true })
 
         docker.provision
       end
 
       it 'should create a container based on the Image (identified by image.id)' do
         hosts.each do |host|
-          ::Docker::Container.should_receive(:create).with({
+          expect( ::Docker::Container ).to receive(:create).with({
             'Image' => image.id,
             'Hostname' => host.name,
           })
@@ -141,7 +141,7 @@ module Beaker
       end
 
       it 'should start the container' do
-        container.should_receive(:start).with({'PublishAllPorts' => true, 'Privileged' => true})
+        expect( container ).to receive(:start).with({'PublishAllPorts' => true, 'Privileged' => true})
 
         docker.provision
       end
@@ -154,67 +154,67 @@ module Beaker
           ENV['DOCKER_HOST'] = nil
           docker.provision
 
-          hosts[0]['ip'].should == '127.0.1.1'
-          hosts[0]['port'].should == 8022
+          expect( hosts[0]['ip'] ).to be === '127.0.1.1'
+          expect( hosts[0]['port'] ).to be ===  8022
         end
 
         it 'should expose port 22 to beaker when using DOCKER_HOST' do
           ENV['DOCKER_HOST'] = "tcp://192.0.2.2:2375"
           docker.provision
 
-          hosts[0]['ip'].should == '192.0.2.2'
-          hosts[0]['port'].should == 8022
+          expect( hosts[0]['ip'] ).to be === '192.0.2.2'
+          expect( hosts[0]['port'] ).to be === 8022
         end
       end
 
       it 'should record the image and container for later' do
         docker.provision
 
-        hosts[0]['docker_image'].should == image
-        hosts[0]['docker_container'].should == container
+        expect( hosts[0]['docker_image'] ).to be === image
+        expect( hosts[0]['docker_container'] ).to be === container
       end
     end
 
     describe '#cleanup' do
       before :each do
         # get into a state where there's something to clean
-        docker.stub(:dockerfile_for)
+        allow( docker ).to receive(:dockerfile_for)
         docker.provision
       end
 
       it 'should stop the containers' do
-        docker.stub( :sleep ).and_return(true)
-        container.should_receive(:stop)
+        allow( docker ).to receive( :sleep ).and_return(true)
+        expect( container ).to receive(:stop)
         docker.cleanup
       end
 
       it 'should delete the containers' do
-        docker.stub( :sleep ).and_return(true)
-        container.should_receive(:delete)
+        allow( docker ).to receive( :sleep ).and_return(true)
+        expect( container ).to receive(:delete)
         docker.cleanup
       end
 
       it 'should delete the images' do
-        docker.stub( :sleep ).and_return(true)
-        image.should_receive(:delete)
+        allow( docker ).to receive( :sleep ).and_return(true)
+        expect( image ).to receive(:delete)
         docker.cleanup
       end
 
       it 'should not delete the image if docker_preserve_image is set to true' do
-        docker.stub( :sleep ).and_return(true)
+        allow( docker ).to receive( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=true
         end
-        image.should_not_receive(:delete)
+        expect( image ).to_not receive(:delete)
         docker.cleanup
       end
 
       it 'should delete the image if docker_preserve_image is set to false' do
-        docker.stub( :sleep ).and_return(true)
+        allow( docker ).to receive( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=false
         end
-        image.should_receive(:delete)
+        expect( image ).to receive(:delete)
         docker.cleanup
       end
 
@@ -235,7 +235,7 @@ module Beaker
           ]
         })
 
-        dockerfile.should =~ /RUN special one\nRUN special two\nRUN special three/
+        expect( dockerfile ).to be =~ /RUN special one\nRUN special two\nRUN special three/
       end
 
       it 'should add docker_image_entrypoint' do
@@ -244,7 +244,7 @@ module Beaker
           'docker_image_entrypoint' => '/bin/bash'
         })
 
-        dockerfile.should =~ %r{ENTRYPOINT /bin/bash}
+        expect( dockerfile ).to be =~ %r{ENTRYPOINT /bin/bash}
       end
 
       it 'should use zypper on sles' do
@@ -252,7 +252,7 @@ module Beaker
           'platform' => 'sles',
         })
 
-        dockerfile.should =~ /RUN zypper -n in openssh/
+        expect( dockerfile ).to be =~ /RUN zypper -n in openssh/
       end
     end
   end

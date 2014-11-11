@@ -12,15 +12,15 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'notifies the logger' do
-      subject.should_receive( :logger ).and_return( logger )
-      logger.should_receive( :notify )
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
       subject.step 'blah'
     end
 
     it 'yields if a block is given' do
-      subject.should_receive( :logger ).and_return( logger )
-      logger.should_receive( :notify )
-      subject.should_receive( :foo )
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      expect( subject ).to receive( :foo )
       subject.step 'blah' do
         subject.foo
       end
@@ -33,15 +33,15 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'notifies the logger' do
-      subject.should_receive( :logger ).and_return( logger )
-      logger.should_receive( :notify )
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
       subject.test_name 'blah'
     end
 
     it 'yields if a block is given' do
-      subject.should_receive( :logger ).and_return( logger )
-      logger.should_receive( :notify )
-      subject.should_receive( :foo )
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo
       end
@@ -53,7 +53,7 @@ describe ClassMixedWithDSLStructure do
       teardown_array = double
       subject.instance_variable_set :@teardown_procs, teardown_array
       block = lambda { 'blah' }
-      teardown_array.should_receive( :<< ).with( block )
+      expect( teardown_array ).to receive( :<< ).with( block )
       subject.teardown &block
     end
   end
