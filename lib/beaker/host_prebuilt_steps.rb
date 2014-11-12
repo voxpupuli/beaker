@@ -143,9 +143,8 @@ module Beaker
     # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
     # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
-
     def epel_info_for host, opts
-      if !['centos','scientific','redhat','el'].include?(host['platform'].variant)
+      if !el_based?(host)
         raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
       end
 
@@ -236,7 +235,7 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when ['centos','redhat','scientific','el'].include?(host['platform'].variant) && ['5','6'].include?(host['platform'].version)
+        when el_based?(host) && ['5','6'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
             url, arch, pkg = epel_info_for host, opts
@@ -503,6 +502,16 @@ module Beaker
         #close the host to re-establish the connection with the new sshd settings
         host.close
       end
+    end
+
+    private
+
+    # A helper to tell whether a host is el-based
+    # @param [Host] host the host to act upon
+    #
+    # @return [Boolean] if the host is el_based
+    def el_based? host
+      ['centos','redhat','scientific','el','oracle'].include?(host['platform'].variant)
     end
 
   end
