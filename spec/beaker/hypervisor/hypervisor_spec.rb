@@ -68,13 +68,6 @@ module Beaker
       expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
     end
 
-    it "creates a blimpy hypervisor for blimpy hosts" do
-      blimpy = double( 'blimpy' )
-      blimpy.stub( :provision ).and_return( true )
-      Blimper.should_receive( :new ).once.and_return( blimpy )
-      expect( hypervisor.create( 'blimpy', [], make_opts() ) ).to be === blimpy
-    end
-
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }

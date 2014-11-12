@@ -11,7 +11,6 @@ require 'mocks'
 require 'helpers'
 require 'matchers'
 require 'mock_fission'
-require 'mock_blimpy'
 require 'mock_vsphere'
 require 'mock_vsphere_helper'
 
