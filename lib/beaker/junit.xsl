@@ -170,7 +170,8 @@
                     <xsl:variable name="testcase_classname"><xsl:value-of select="@classname"/></xsl:variable>
                     <xsl:variable name="testcase_fullpath"><xsl:value-of select="concat($testcase_classname, '/', $testcase_name)"/></xsl:variable>
                     <xsl:variable name="testcase_time"><xsl:value-of select="@time"/></xsl:variable>
-                    <xsl:variable name="testcase_link" select="translate(translate($testcase_fullpath, '/', '_'), '.', '_')" />
+                     <xsl:variable name="testcase_link" select="translate($testcase_fullpath, '/\() .', '______')" />
+
                     <xsl:variable name="testcase_panel_type">
                       <xsl:choose>
                         <xsl:when test="failure or error">danger</xsl:when>

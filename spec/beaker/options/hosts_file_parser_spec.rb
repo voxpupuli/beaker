@@ -4,8 +4,8 @@ module Beaker
   module Options
     describe HostsFileParser do
 
-      let(:parser) {HostsFileParser}
-      let(:filepath) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg")}
+      let(:parser)      {HostsFileParser}
+      let(:filepath)    {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg")}
 
       it "can correctly read a host file" do
         FakeFS.deactivate!
@@ -28,6 +28,13 @@ module Beaker
       it "raises an error on no file found" do
         FakeFS.deactivate!
         expect{parser.parse_hosts_file("not a valid path")}.to raise_error(ArgumentError)
+      end
+
+      it "raises an error on bad yaml file" do
+        FakeFS.deactivate!
+        YAML.stub(:load_file) { raise Psych::SyntaxError }
+        File.stub(:exists?).and_return(true)
+        expect { parser.parse_hosts_file("not a valid path") }.to raise_error(ArgumentError)
       end
 
     end

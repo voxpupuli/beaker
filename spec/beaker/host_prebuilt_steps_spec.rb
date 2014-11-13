@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe Beaker do
   let( :options )        { make_opts.merge({ 'logger' => double().as_null_object }) }
+  let( :ntpserver_set )  { "ntp_server_set" }
+  let( :options_ntp )    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let( :ntpserver )      { Beaker::HostPrebuiltSteps::NTPSERVER }
   let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
   let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
@@ -50,15 +52,6 @@ describe Beaker do
       expect{ subject.timesync( hosts, options ) }.to raise_error
     end
 
-    it "can sync time on solaris-10 hosts" do
-      hosts = make_hosts( { :platform => 'solaris-10' } )
-
-      Beaker::Command.should_receive( :new ).with("sleep 10 && ntpdate -w #{ntpserver}").exactly( 3 ).times
-
-      subject.timesync( hosts, options )
-
-    end
-
     it "can sync time on windows hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
@@ -79,28 +72,57 @@ describe Beaker do
       subject.timesync( hosts, options )
 
     end
+
+    it "can set time server on unix hosts" do
+      hosts = make_hosts( { :platform => 'unix' } )
+
+      Beaker::Command.should_receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
+    end
+
+    it "can set time server on windows hosts" do
+      hosts = make_hosts( { :platform => 'windows' } )
+
+      Beaker::Command.should_receive( :new ).with("w32tm /register").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("net start w32time").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("w32tm /config /manualpeerlist:#{ntpserver_set} /syncfromflags:manual /update").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("w32tm /resync").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
+
+    end
+
+    it "can set time server on Sles hosts" do
+      hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
+
+      Beaker::Command.should_receive( :new ).with("sntp #{ntpserver_set}").exactly( 3 ).times
+
+      subject.timesync( hosts, options_ntp )
+
+    end
   end
 
   context "epel_info_for!" do
     subject { dummy_class.new }
-    
-    it "can return the correct url for an el-6 host" do
-      host = make_host( 'testhost', { :platform => 'el-6-platform' } )
 
-      expect( subject.epel_info_for!( host )).to be === "http://mirror.itc.virginia.edu/fedora-epel/6/i386/epel-release-6-8.noarch.rpm"
+    it "can return the correct url for an el-6 host" do
+      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-6-platform') } )
+
+      expect( subject.epel_info_for( host, options )).to be === ["http://mirrors.kernel.org/fedora-epel/6", "i386", "epel-release-6-8.noarch.rpm"]
     end
 
     it "can return the correct url for an el-5 host" do
-      host = make_host( 'testhost', { :platform => 'el-5-platform' } )
+      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-5-platform') } )
 
-      expect( subject.epel_info_for!( host )).to be === "http://archive.linux.duke.edu/pub/epel/5/i386/epel-release-5-4.noarch.rpm"
+      expect( subject.epel_info_for( host, options )).to be === ["http://mirrors.kernel.org/fedora-epel/5", "i386", "epel-release-5-4.noarch.rpm"]
 
     end
 
     it "raises an error on non el-5/6 host" do
-      host = make_host( 'testhost', { :platform => 'el-4-platform' } )
+      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-4-platform') } )
 
-      expect{ subject.epel_info_for!( host )}.to raise_error
+      expect{ subject.epel_info_for( host, options )}.to raise_error
 
     end
 
@@ -163,7 +185,7 @@ describe Beaker do
 
   context "proxy_config" do
     subject { dummy_class.new }
-    
+
     it "correctly configures ubuntu hosts" do
       hosts = make_hosts( { :platform => 'ubuntu', :exit_code => 1 } )
 
@@ -216,14 +238,15 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "add extras for el-5/6 hosts" do
-      hosts = make_hosts( { :platform => 'el-5', :exit_code => 1 } )
-      hosts[0][:platform] = 'el-6' 
-      url = "http://el_extras_url"
-
-      subject.stub( :epel_info_for! ).and_return( url )
+      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 } )
+      hosts[0][:platform] = Beaker::Platform.new('el-6-arch')
 
       Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("rpm -i #{url}").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 1 ).times
+      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
+      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 1 ).times
+      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
+      Beaker::Command.should_receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 3 ).times
       Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 3 ).times
 
       subject.add_el_extras( hosts, options )
@@ -231,7 +254,7 @@ describe Beaker do
     end
 
     it "should do nothing for non el-5/6 hosts" do
-      hosts = make_hosts( { :platform => 'windows' } )
+      hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
       Beaker::Command.should_receive( :new ).never
 
@@ -275,22 +298,6 @@ describe Beaker do
       end
 
       subject.validate_host(hosts, options)
-
-    end
-
-    it "can validate unix hosts that need sysstat installed" do
-      total_pkgs = Array.new(unix_only_pkgs);
-      total_pkgs << "sysstat"
-
-      hosts.each do |host|
-        total_pkgs.each do |pkg|
-          host.should_receive( :check_for_package ).with( pkg ).once.and_return( false )
-          host.should_receive( :install_package ).with( pkg ).once
-        end
-      end
-
-      opts = options.merge({:collect_perf_data => true})
-      subject.validate_host(hosts, opts)
 
     end
 

@@ -72,6 +72,32 @@ module Beaker
         colorized_logger.optionally_color "\e[00;30m", 'my string'
       end
 
+      context 'at trace log_level' do
+        subject( :trace_logger )  { Logger.new( my_io,
+                                              :log_level => 'trace',
+                                              :quiet => true,
+                                              :color => true )
+                                  }
+
+        its( :is_debug? ) { should be_true }
+        its( :is_trace? ) { should be_true }
+        its( :is_warn? )  { should be_true }
+
+        context 'but print' do
+          before do
+            my_io.stub :puts
+            my_io.should_receive( :print ).at_least :twice
+          end
+
+          it( 'warnings' )    { trace_logger.warn 'IMA WARNING!'    }
+          it( 'successes' )   { trace_logger.success 'SUCCESS!'     }
+          it( 'errors' )      { trace_logger.error 'ERROR!'         }
+          it( 'host_output' ) { trace_logger.host_output 'ERROR!'   }
+          it( 'debugs' )      { trace_logger.debug 'DEBUGGING!'     }
+          it( 'traces' )      { trace_logger.trace 'TRACING!'       }
+        end
+      end
+
       context 'at verbose log_level' do
         subject( :verbose_logger )  { Logger.new( my_io,
                                               :log_level => 'verbose',
@@ -79,6 +105,7 @@ module Beaker
                                               :color => true )
                                   }
 
+        its( :is_trace? ) { should be_false }
         its( :is_debug? ) { should be_false }
         its( :is_verbose? ) { should be_true }
         its( :is_warn? )  { should be_true }
@@ -104,6 +131,7 @@ module Beaker
                                               :color => true )
                                   }
 
+        its( :is_trace? ) { should be_false }
         its( :is_debug? ) { should be_true }
         its( :is_warn? )  { should be_true }
 
@@ -129,6 +157,7 @@ module Beaker
                                   }
 
         its( :is_debug? ) { should be_false }
+        its( :is_trace? ) { should be_false }
 
 
         context 'skip' do
@@ -138,6 +167,7 @@ module Beaker
           end
 
           it( 'debugs' )    { info_logger.debug 'NOT DEBUGGING!' }
+          it( 'traces' )    { info_logger.debug 'NOT TRACING!'   }
         end
 
 

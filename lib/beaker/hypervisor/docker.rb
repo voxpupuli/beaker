@@ -8,7 +8,7 @@ module Beaker
       @hosts = hosts
 
       # increase the http timeouts as provisioning images can be slow
-      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }
+      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }.merge(::Docker.options || {})
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
       ::Docker.validate_version!
@@ -64,6 +64,7 @@ module Beaker
           @logger.debug("stop container #{container.id}")
           begin
             container.stop
+            sleep 2 # avoid a race condition where the root FS can't unmount
           rescue Excon::Errors::ClientError => e
             @logger.warn("stop of container #{container.id} failed: #{e.response.body}")
           end
@@ -110,21 +111,22 @@ module Beaker
       # add platform-specific actions
       case host['platform']
       when /ubuntu/, /debian/
+        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
         dockerfile += <<-EOF
           RUN apt-get update
-          RUN apt-get install -y openssh-server openssh-client
+          RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
         EOF
       when /^el-/, /centos/, /fedora/, /redhat/
         dockerfile += <<-EOF
           RUN yum clean all
-          RUN yum install -y sudo openssh-server openssh-clients
+          RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
       when /opensuse/, /sles/
         sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"'
         dockerfile += <<-EOF
-          RUN zypper -n in openssh
+          RUN zypper -n in openssh #{Beaker::HostPrebuiltSteps::SLES_PACKAGES.join(' ')}
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF

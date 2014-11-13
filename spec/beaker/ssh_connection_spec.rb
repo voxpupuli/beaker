@@ -27,7 +27,36 @@ module Beaker
       connection.connect
     end
 
-    it 'close?'
+    it 'close runs ssh close' do
+      mock_ssh = Object.new
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      mock_ssh.should_receive( :close ).once
+      connection.close
+    end
+
+    it 'close sets the @ssh variable to nil' do
+      mock_ssh = Object.new
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      mock_ssh.should_receive( :close ).once
+      connection.close
+
+      expect( connection.instance_variable_get(:@ssh) ).to be_nil
+    end
+
+    it 'close calls ssh shutdown if ssh close fails' do
+      mock_ssh = Object.new
+      mock_ssh.stub( :close ) { raise Error }
+      Net::SSH.should_receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+      connection.connect
+
+      mock_ssh.should_receive( :shutdown! ).once
+      connection.close
+    end
+
     it 'execute'
     it 'request_terminal_for'
     it 'register_stdout_for'

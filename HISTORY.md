@@ -1,6 +1,15 @@
-# beaker - History
+# default - History
 ## Tags
-* [LATEST - 20 Aug, 2014 (92584d1e)](#LATEST)
+* [LATEST - 17 Oct, 2014 (3fff222d)](#LATEST)
+* [beaker1.20.0 - 17 Oct, 2014 (24acc2d3)](#beaker1.20.0)
+* [beaker1.19.1 - 19 Sep, 2014 (3aafc71d)](#beaker1.19.1)
+* [beaker1.19.0 - 19 Sep, 2014 (6a56cc90)](#beaker1.19.0)
+* [beaker1.18.0 - 18 Sep, 2014 (b9171d9c)](#beaker1.18.0)
+* [beaker1.17.7 - 2 Sep, 2014 (e47881f0)](#beaker1.17.7)
+* [beaker1.17.6 - 27 Aug, 2014 (bfb257bf)](#beaker1.17.6)
+* [beaker1.17.5 - 22 Aug, 2014 (7e553089)](#beaker1.17.5)
+* [beaker1.17.4 - 21 Aug, 2014 (8e6d070f)](#beaker1.17.4)
+* [beaker1.17.3 - 20 Aug, 2014 (f8a536c1)](#beaker1.17.3)
 * [beaker1.17.2 - 15 Aug, 2014 (c6f1f64a)](#beaker1.17.2)
 * [beaker1.17.1 - 12 Aug, 2014 (72e60299)](#beaker1.17.1)
 * [beaker1.17.0 - 12 Aug, 2014 (fb482b56)](#beaker1.17.0)
@@ -55,7 +64,848 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 20 Aug, 2014 (92584d1e)
+### <a name = "LATEST">LATEST - 17 Oct, 2014 (3fff222d)
+
+* (GEM) update beaker version to 1.20.1 (3fff222d)
+
+* Merge pull request #501 from anodelman/iptables (bc685ab5)
+
+
+```
+Merge pull request #501 from anodelman/iptables
+
+(MAINT) fix broken hypervisor config spec test
+```
+* (MAINT) fix broken hypervisor config spec test (9c2123d8)
+
+* Merge pull request #500 from anodelman/iptables (4d6d4919)
+
+
+```
+Merge pull request #500 from anodelman/iptables
+
+(MAINT) do not disable iptables on default
+```
+* (MAINT) do not disable iptables on default (10e768f7)
+
+
+```
+(MAINT) do not disable iptables on default
+
+- this is the desired behavior until the disable iptables function is
+  more reliable
+```
+### <a name = "beaker1.20.0">beaker1.20.0 - 17 Oct, 2014 (24acc2d3)
+
+* (HISTORY) update beaker history for gem release 1.20.0 (24acc2d3)
+
+* (GEM) update beaker version to 1.20.0 (ab118389)
+
+* Merge pull request #497 from briancain/QENG1391/master/use-tls-for-pe-curl (d03ec9b6)
+
+
+```
+Merge pull request #497 from briancain/QENG1391/master/use-tls-for-pe-curl
+
+[UNDER REVIEW](QENG-1391) Use TLSv1 over SSLv3 for curl against PE
+```
+* Merge pull request #498 from anodelman/ec2 (57f30946)
+
+
+```
+Merge pull request #498 from anodelman/ec2
+
+(MAINT) open port 4435 for dashboard
+```
+* (MAINT) open port 4435 for dashboard (aa4af898)
+
+
+```
+(MAINT) open port 4435 for dashboard
+
+yup, do that
+```
+* Merge pull request #446 from branan/use_vmpooler_fqdn (00e77f59)
+
+
+```
+Merge pull request #446 from branan/use_vmpooler_fqdn
+
+(QENG-1192) Use hostname specified by hypervisor everywhere.
+```
+* (QENG-1391) Use TLSv1 over SSLv3 for curl against PE (6449a3b6)
+
+
+```
+(QENG-1391) Use TLSv1 over SSLv3 for curl against PE
+
+Prior to this commit, beaker was exclusively using SSLv3 against Puppet
+Enterprise. Due to the recent information with POODLE, this commit updates
+beaker to use TLS over SSL since we are disabling the use
+of SSLv3.
+```
+* Merge pull request #475 from er0ck/feature/master/QENG-1231-preserve_hosts_onpass (fa56d804)
+
+
+```
+Merge pull request #475 from er0ck/feature/master/QENG-1231-preserve_hosts_onpass
+
+(QENG-1231) add onpass option to --preserve-hosts
+```
+* Merge pull request #486 from kevpl/qeng270_ntp_addoption (821884e6)
+
+
+```
+Merge pull request #486 from kevpl/qeng270_ntp_addoption
+
+(QENG-270) Added ntp_server as an option for host config
+```
+* Merge pull request #490 from anodelman/ec2 (d12ba02d)
+
+
+```
+Merge pull request #490 from anodelman/ec2
+
+(QENG-1205) EC2 zombie killer can fail when instance not found
+```
+* (QENG-1205) EC2 zombie killer can fail when instance not found (270d6417)
+
+
+```
+(QENG-1205) EC2 zombie killer can fail when instance not found
+
+- better error handling around zombie killing
+```
+* (QENG-270) Added ntp_server as an option for host config (b148b657)
+
+
+```
+(QENG-270) Added ntp_server as an option for host config
+
+Before this, you couldn't specify an ntp server, so if you used the timesync option, it would only use the hard-coded value 'pool.ntp.org'.
+This was a problem because occasionally that service couldn't be reached.  In order to fix this, we've allowed people to specify a server, so that they can get more reliable ntp services, and not see failures based on being able to reach one.
+```
+* Merge pull request #377 from waynr/feature/qeng-967-disable-iptables-on-el-hosts (c9145e5d)
+
+
+```
+Merge pull request #377 from waynr/feature/qeng-967-disable-iptables-on-el-hosts
+
+(QENG-967) Disable iptables on el hosts bringup.
+```
+* Merge pull request #452 from anodelman/maint (c46271e0)
+
+
+```
+Merge pull request #452 from anodelman/maint
+
+(QENG-1209) scp in debug output shows far too much output
+```
+* (QENG-1192) Use hostname specified by hypervisor everywhere (db171537)
+
+
+```
+(QENG-1192) Use hostname specified by hypervisor everywhere
+
+reviously, we would call out to `hostname` on the SUT when deploying
+PE. This may give us a name that isn't resolvable our routable by
+every host in the configuration. We should instead just use whatever
+the hypervisor tells us is the correct way to connect to the host.
+
+This also sneaks in a small change to the vmpooler hypervisor, to make
+it return FQDNs. Using these FQDNs is really what this is all about.
+```
+* Merge pull request #271 from hunner/add_fusion (9a00806f)
+
+
+```
+Merge pull request #271 from hunner/add_fusion
+
+(QENG-1146) Add vagrant_fusion, vagrant_workstation and vagrant_virtualbox providers
+```
+* remove non-capture from regex groups (8e65b146)
+
+* Merge pull request #462 from er0ck/fix/master/QENG-1261-fix_ntpdate_on_solaris10 (6f5162e7)
+
+
+```
+Merge pull request #462 from er0ck/fix/master/QENG-1261-fix_ntpdate_on_solaris10
+
+(QENG-1261) remove solaris-10 specific ntpdate options
+```
+* Merge pull request #464 from anodelman/answers (e145c964)
+
+
+```
+Merge pull request #464 from anodelman/answers
+
+(QENG-1054) Add functionality to install_pe to modify answers...
+```
+* Merge pull request #476 from leoarnold/master (189eb410)
+
+
+```
+Merge pull request #476 from leoarnold/master
+
+Added link to installation instructions to README.md
+```
+* Merge pull request #479 from anodelman/epel (6ee6fe4c)
+
+
+```
+Merge pull request #479 from anodelman/epel
+
+(QENG-1206) Acceptance failing when trying to install epel-release...
+```
+* (QENG-1206) Acceptance failing when trying to install epel-release... (17bd48be)
+
+
+```
+(QENG-1206) Acceptance failing when trying to install epel-release...
+
+and EPEL packages from public mirrors
+- add ability to set epel_url, epel_arch and epel_package as global
+  options or on a per-host basis
+- added reasonable default values
+```
+* Added link to installation instructions to README.md (5b513899)
+
+* (QENG-1231) add onpass option to --preserve-hosts (e772e289)
+
+
+```
+(QENG-1231) add onpass option to --preserve-hosts
+* add spec tests similar to onfail spec tests
+* add cleanup to rescue when --preserve-hosts onpass
+* add help statement for onpass
+```
+* Merge pull request #418 from liamjbennett/vagrant_box_update (decdb05c)
+
+
+```
+Merge pull request #418 from liamjbennett/vagrant_box_update
+
+Adding support to vagrant for box_version and box_check_update.
+```
+* Merge pull request #422 from liamjbennett/vagrant_natdns (a64a3bac)
+
+
+```
+Merge pull request #422 from liamjbennett/vagrant_natdns
+
+Enable natresolver and natdnsproxy for vagrant.
+```
+* (QENG-1261) remove solaris-10 specific ntpdate options.  -w causes an (a795d859)
+
+
+```
+(QENG-1261) remove solaris-10 specific ntpdate options.  -w causes an
+error.
+remove related spec test.
+```
+* (gh-470) refactoring natdns to use the unless syntax (3d67a83a)
+
+* (QENG-1054) Add functionality to install_pe to modify answers... (6a35cda6)
+
+
+```
+(QENG-1054) Add functionality to install_pe to modify answers...
+
+...file before install
+
+- add ability to add custom_answers to individual hosts to be appended
+  to answer file
+- rework answer file code so that answers are an object that can be
+  queried for an answer string
+- instead of querying env for individual answers just pull in anything
+  that matches q_*
+- pull the default answer values into the presets so that it is more
+  easily tracked
+```
+* (QENG-1209) scp in debug output shows far too much output (059248e7)
+
+
+```
+(QENG-1209) scp in debug output shows far too much output
+
+- move detailed output into a new log level called 'trace', could still
+  be useful for tracking networking failures - but will be disabled by
+  default
+- add ability to flip on/off quiet output to logging
+```
+* Enable natresolver and natdnsproxy for vagrant. (613ddba8)
+
+
+```
+Enable natresolver and natdnsproxy for vagrant.
+
+There are cases where tests run will fail when trying to download
+from the outside world due to dns issues. In order to resolve this
+I configured the natdnsproxy1 and natdnshostresolver1 vagrant settings
+```
+* (gh-471) Adding support to vagrant for box_version and box_check_update. (24bb0951)
+
+
+```
+(gh-471) Adding support to vagrant for box_version and box_check_update.
+
+If using versioned boxes from vagrant cloud and a new update is
+published, by default vagrant will attempt to update that box to
+the latest version. This may be undesired behaviour. Like any other
+versioned object you way wish to fix that initial download to a
+fixed version or a version range.
+```
+* (QENG-967) Disable iptables on el hosts bringup. (11cb16ef)
+
+
+```
+(QENG-967) Disable iptables on el hosts bringup.
+
+Also fixes bug in `disable_iptables` where per-array-element was invoking wrong
+method. Looks like `disable_iptables` was originally copied from
+`copy_ssh_to_root`
+
+Also adds rspec for Beaker::Hypervisor.configure
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-1146) Add vagrant_fusion, vmware_workstation, and vagrant_virtualbox providers (fdcbac3d)
+
+
+```
+(QENG-1146) Add vagrant_fusion, vmware_workstation, and vagrant_virtualbox providers
+
+Currently the vagrant hypervisor provider just does virtualbox. This
+allows the vagrant vmware_fusion and vmware_workstation plugins to be
+used instead.
+```
+### <a name = "beaker1.19.1">beaker1.19.1 - 19 Sep, 2014 (3aafc71d)
+
+* Merge pull request #467 from anodelman/master (3aafc71d)
+
+
+```
+Merge pull request #467 from anodelman/master
+
+create beaker 1.19.1 gem
+```
+* (HISTORY) history update for beaker 1.19.1 gem (d5bea586)
+
+* (GEM) version bump for 1.19.1 gem (7538dc00)
+
+* Merge pull request #465 from anodelman/junit (38fca3f5)
+
+
+```
+Merge pull request #465 from anodelman/junit
+
+(MAINT) update junit.xsl to handle more weird test case paths
+```
+* Merge pull request #466 from branan/QENG-1264 (c77157d5)
+
+
+```
+Merge pull request #466 from branan/QENG-1264
+
+(QENG-1264) Allow users to specify recursive option for scp_{from,to}
+```
+* (QENG-1264) Allow users to specify recursive option for scp_{from,to} (cc1b2189)
+
+
+```
+(QENG-1264) Allow users to specify recursive option for scp_{from,to}
+
+The fix for QENG-1128 caused scp_from and scp_to to ignore the
+recursive flag. This caused all scp_from operations to be recursive,
+which will cause a failure if trying to copy only a single file.
+
+The fix to this, without regressing on QENG-1128, is to actually copy
+the options hash locally so that we can modify it as needed for
+defaults without updating any global data.
+```
+* (MAINT) update junit.xsl to handle more weird test case paths (c940f116)
+
+
+```
+(MAINT) update junit.xsl to handle more weird test case paths
+
+- paths with (, ), \s, or / are breaking links, this fixes that
+```
+### <a name = "beaker1.19.0">beaker1.19.0 - 19 Sep, 2014 (6a56cc90)
+
+* Merge pull request #463 from anodelman/make-gem (6a56cc90)
+
+
+```
+Merge pull request #463 from anodelman/make-gem
+
+create beaker 1.19.0 gem
+```
+* (HISTORY) update history for beaker 1.19.0 gem (b00c31c1)
+
+* (GEM) version bump for beaker 1.19.0 gem (b4e69b83)
+
+* Merge pull request #459 from justinstoller/bug/master/QENG-1212_better (c683a928)
+
+
+```
+Merge pull request #459 from justinstoller/bug/master/QENG-1212_better
+
+(QENG-1212) Improve module installation experience
+```
+* (QENG-1212) Improve module installation experience (61f05e90)
+
+
+```
+(QENG-1212) Improve module installation experience
+
+Prior to this puppet module installation was carried out with either
+`puppet_module_install` or `copy_module_to`. This replaces them with a
+method `install_dev_puppet_module` that will install either via scp or
+pmt from a staging forge depending on arguements and environment
+```
+### <a name = "beaker1.18.0">beaker1.18.0 - 18 Sep, 2014 (b9171d9c)
+
+* Merge pull request #461 from anodelman/make-gem (b9171d9c)
+
+
+```
+Merge pull request #461 from anodelman/make-gem
+
+create beaker 1.18.0 gem
+```
+* (HISTORY) update history for beaker 1.18.0 gem release (8f22c5c9)
+
+* (GEM) version bump for beaker 1.18.0 (116ecd2e)
+
+* Merge pull request #450 from anodelman/scp-repair (ee03903b)
+
+
+```
+Merge pull request #450 from anodelman/scp-repair
+
+(QENG-1128) Beaker no long auto recursively scps directories to systems under test
+```
+* Merge pull request #361 from anodelman/openstack (2e15cdaa)
+
+
+```
+Merge pull request #361 from anodelman/openstack
+
+(QENG-15) support openstack in beaker
+```
+* Merge pull request #388 from ferventcoder/ticket/master/allow-git-depth (4d4120a3)
+
+
+```
+Merge pull request #388 from ferventcoder/ticket/master/allow-git-depth
+
+(QENG-1037) Install from git should accept depth
+```
+* Merge pull request #435 from leoc/add-prebuilt-packages-to-docker (c0a20691)
+
+
+```
+Merge pull request #435 from leoc/add-prebuilt-packages-to-docker
+
+(gh-426) Add prebuild packages to Dockerfile
+```
+* Merge pull request #439 from doug-rosser/perf_fixes (7c68e4da)
+
+
+```
+Merge pull request #439 from doug-rosser/perf_fixes
+
+(QENG-1033) Don't modify constants and properly support all Linux platforms in Perf
+```
+* Merge pull request #416 from anodelman/ec2 (de3b3f9d)
+
+
+```
+Merge pull request #416 from anodelman/ec2
+
+(MAINT) add ability to list all instances associated with an ec2 keyname
+```
+* (QENG-1033) Remove dead rspec code (c713fdb1)
+
+* Merge pull request #451 from anodelman/maint (34db9711)
+
+
+```
+Merge pull request #451 from anodelman/maint
+
+(MAINT) broken spec fixes (docker + copy_module_to)
+```
+* (MAINT) broken spec fixes (docker + copy_module_to) (98454e51)
+
+
+```
+(MAINT) broken spec fixes (docker + copy_module_to)
+
+- docker spec was still allowing sleeps to execute making things run
+  slow
+- update copy_module_to spec test to use correct ignore list
+```
+* (QENG-1128) Beaker no long auto recursively scps directories... (c89fae53)
+
+
+```
+(QENG-1128) Beaker no long auto recursively scps directories...
+
+to systems under test
+
+- issue was :recursive variable was being carried over successive calls
+  to scp_to.  To prevent this, just set it based upon the file type
+  being called
+```
+* Merge pull request #440 from colinPL/qeng989_solaris_gem (34e6474f)
+
+
+```
+Merge pull request #440 from colinPL/qeng989_solaris_gem
+
+(QENG-989) install_puppet_from_gem fails on Solaris
+```
+* Merge pull request #412 from anodelman/maint (8e991e18)
+
+
+```
+Merge pull request #412 from anodelman/maint
+
+(QENG-1018) default dev_builds_url in Beaker needs to be updated
+```
+* Merge pull request #448 from cyberious/AddIgnores (eb5a99c5)
+
+
+```
+Merge pull request #448 from cyberious/AddIgnores
+
+QENG-1199 add .bundle to ignore list
+```
+* QENG-1199 add .bundle to ignore list (314d85ce)
+
+* (QENG-1033) Move all functionality into the Perf module and sync the rspec tests (64e69a17)
+
+* Merge pull request #445 from waynr/fix/qeng-1186-beaker-dsl-helpers-puppet-mixup (cbff4759)
+
+
+```
+Merge pull request #445 from waynr/fix/qeng-1186-beaker-dsl-helpers-puppet-mixup
+
+(QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group}
+```
+* Merge pull request #425 from jtopper/avoid_docker_clean_race (c40c37de)
+
+
+```
+Merge pull request #425 from jtopper/avoid_docker_clean_race
+
+(GH-425) Sleep briefly after killing processes - Docker
+```
+* Merge pull request #436 from anodelman/win-fix (de316e3a)
+
+
+```
+Merge pull request #436 from anodelman/win-fix
+
+(QENG-797) Enhance Beaker to look for x64 installers for Windows
+```
+* (QENG-1033) Reset additional_pkgs in a way supported by all Ruby versions (9e6b5283)
+
+* (QENG-1033) additional_pkgs should be a module level variable (6623ec0e)
+
+* (QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group} (5bb6ee4e)
+
+
+```
+(QENG-1186) Fix Beaker::DSL:Helpers.puppet_{user,group}
+
+Looks like the contents of these methods were mixed upwhen originally written.
+Luckily the puppet user is usually the same as the puppet group.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* (QENG-1033) combine two conditionals into a single statement (e2e91ccc)
+
+* (QENG-989) install_puppet_from_gem fails on Solaris (45ac614e)
+
+
+```
+(QENG-989) install_puppet_from_gem fails on Solaris
+
+Trying to install puppet from gems would fail on both Solaris 10 and
+11. Solaris 10 now has pkgutil and gem symlinked (ln -s) to /usr/bin.
+Both Solaris versions have puppet-related gems symlinked to /usr/bin
+after installation. This is to avoid clobbering the PATH.
+```
+* (QENG-1129) support win64 open source builds (47bf159f)
+
+
+```
+(QENG-1129) support win64 open source builds
+
+- add ability to install 64 bit windows builds
+- supported when puppet version is 3.7+ or pe is 3.4+, and install_32 is not set for
+  host or globally
+- correctly update path post pe/puppet installation
+```
+* (QENG-1026) Add support for x64 PE windows to Beaker (59a39bd7)
+
+
+```
+(QENG-1026) Add support for x64 PE windows to Beaker
+
+- default to installing 64 bit builds on 64 bit windows
+- support install_32 host option, true = install 32 bit no matter the
+  arch, false/unset = install 64 bit on 64 bit, otherwise 32 bit
+```
+* (QENG-797) Enhance Beaker to look for x64 installers for Windows (066dae5d)
+
+
+```
+(QENG-797) Enhance Beaker to look for x64 installers for Windows
+
+- add ability to install 64 bit pe builds (available for pe 3.4)
+- add is_x86_64? method to host, convenience method for determining arch
+  of host
+```
+* (gh-426) Add prebuild packages to Dockerfile (f4085aca)
+
+
+```
+(gh-426) Add prebuild packages to Dockerfile
+
+Without this patch every time the specs run, prebuilt packages are
+installed to the new docker image. Even when preserving the image.
+To increase the speed of the test suite we install those packages when
+creating the Docker image. The `HostPrebuiltSteps` checks whether those
+are installed and does not do anything directly starting to execute the
+specs inside the image.
+```
+* (GH-425) Sleep after killing processes (18699dc4)
+
+
+```
+(GH-425) Sleep after killing processes
+
+This avoids a race condition in which the killed processes haven't
+exited by the time we try and unmount the root fs and the call to
+container.delete errors.
+```
+* (MAINT) add ability to list all instances associated with an ec2 keyname (d5ad9e35)
+
+
+```
+(MAINT) add ability to list all instances associated with an ec2 keyname
+
+- convenience function for listing all instances associated with a
+  provided keyname, useful for tracking what's happening in ec2
+```
+* (QENG-1018) default dev_builds_url in Beaker needs to be updated (1b2a935f)
+
+
+```
+(QENG-1018) default dev_builds_url in Beaker needs to be updated
+
+- update to builds.delivery.puppetlabs.net
+```
+* (QENG-1037) Install from git should accept depth (ffcddcc0)
+
+
+```
+(QENG-1037) Install from git should accept depth
+
+When installing from larger repositories, being able to specify depth can cut
+the time of git checkout in half. This becomes especially helpful when you are
+checking out multiple repositories.
+Due to the older git on some of the templates, this provides the older
+--branch name --depth 1 commands, which means when using depth, one should
+ensure the rev passed is a branch and not a single commit. Alternatively one
+can add depth_branch => 'name' to repository and have that used instead of rev.
+```
+* (maint) formatting (239d8054)
+
+
+```
+(maint) formatting
+
+This removes trailing whitespaces in install_utils.rb
+```
+* Add Enterprise Linux (el) (3f2bb69b)
+
+* (QENG-15) beaker openstack support (EXPERIMENTAL) (745f1a4a)
+
+
+```
+(QENG-15) beaker openstack support (EXPERIMENTAL)
+
+- experimental code to support openstack, may be missing configuration
+  steps or otherwise be incomplete
+- should be used as a basis for further beaker openstack infrastructure
+```
+### <a name = "beaker1.17.7">beaker1.17.7 - 2 Sep, 2014 (e47881f0)
+
+* Merge pull request #444 from branan/ship_1_17_7 (e47881f0)
+
+
+```
+Merge pull request #444 from branan/ship_1_17_7
+
+(maint) Bump version for 1.17.7 release
+```
+* (maint) Bump version for 1.17.7 release (0cb30f18)
+
+* Merge pull request #443 from briancain/maint/master/add-node-to-classifier (701f81c2)
+
+
+```
+Merge pull request #443 from briancain/maint/master/add-node-to-classifier
+
+(QENG-1182) Add node to classifier prior to adding pe_repo class
+```
+* (QENG-1182) Add node to classifier prior to adding pe_repo class (00b2f458)
+
+
+```
+(QENG-1182) Add node to classifier prior to adding pe_repo class
+
+Prior to this commit, beaker would make the assumption that a node had
+already checked into the classifier. This commit changes that by
+ensuring that the node is in the classifier before giving it the pe_repo
+class.
+```
+### <a name = "beaker1.17.6">beaker1.17.6 - 27 Aug, 2014 (bfb257bf)
+
+* Merge pull request #441 from anodelman/make-gem (bfb257bf)
+
+
+```
+Merge pull request #441 from anodelman/make-gem
+
+create beaker 1.17.6 gem
+```
+* (HISTORY) update history for 1.17.6 gem (a7ee6c69)
+
+* (GEM) version bump for 1.17.6 gem (71be2050)
+
+* Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references (fe77e9b0)
+
+
+```
+Merge pull request #438 from waynr/fix/qeng-1134-remove-jvm-puppet-references
+
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+```
+* (QENG-1134) Remove 'jvm-puppet' references left in Beaker. (5da4eebc)
+
+
+```
+(QENG-1134) Remove 'jvm-puppet' references left in Beaker.
+
+Recently the `jvm-puppet` name was changed to `puppet-server`, this patch
+addresses that in both `lib/` and `spec/`
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.5">beaker1.17.5 - 22 Aug, 2014 (7e553089)
+
+* Merge pull request #417 from anodelman/make-gem (7e553089)
+
+
+```
+Merge pull request #417 from anodelman/make-gem
+
+create beaker 1.17.5 gem
+```
+* (HISTORY) update history for beaker 1.17.5 gem (ebefea72)
+
+* (GEM) version bump for beaker 1.17.5 gem (4a96b147)
+
+* Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix (61e56aa7)
+
+
+```
+Merge pull request #415 from waynr/feature/qeng-1110-install-from-ezbake-bugfix
+
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+```
+* (QENG-1110) Beaker::DSL::EZBakeUtils bugfix (bd1d91f2)
+
+
+```
+(QENG-1110) Beaker::DSL::EZBakeUtils bugfix
+
+Allows arbitrary arguments to be passed to ezbake command line.
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+* Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails (716ab3d4)
+
+
+```
+Merge pull request #414 from waynr/feature/qeng-1108-create-tmpdir-for-user-fails
+
+(QENG-1108) Fix chown command to use ':' rather than '.'
+```
+* (QENG-1108) Fix chown command to use ':' rather than '.' (c2da3911)
+
+
+```
+(QENG-1108) Fix chown command to use ':' rather than '.'
+
+Signed-off-by: Wayne <wayne@puppetlabs.com>
+```
+### <a name = "beaker1.17.4">beaker1.17.4 - 21 Aug, 2014 (8e6d070f)
+
+* Merge pull request #413 from anodelman/make-gem (8e6d070f)
+
+
+```
+Merge pull request #413 from anodelman/make-gem
+
+create beaker 1.17.4 gem
+```
+* (HISTORY) update history for beaker 1.17.4 gem (bd1fe05f)
+
+* (GEM) version bump for 1.17.4 (1e6a4a8f)
+
+* Merge pull request #411 from anodelman/ec2 (2b4c9049)
+
+
+```
+Merge pull request #411 from anodelman/ec2
+
+(MAINT) kill zombies after provided number of hours
+```
+* Merge pull request #409 from cyberious/ScpCopyIgnoreFix (e59632eb)
+
+
+```
+Merge pull request #409 from cyberious/ScpCopyIgnoreFix
+
+QENG-1080 do_scp_to now checks for source path of absolute and prunes accordingly
+```
+* (MAINT) kill zombies after provided number of hours (3f3c3b27)
+
+
+```
+(MAINT) kill zombies after provided number of hours
+
+- was always using the default 3 hours
+```
+* QENG-1080 Fixed issue where we appended the source path to the target path, we now check for absolute path prior (cdd9c7b8)
+
+### <a name = "beaker1.17.3">beaker1.17.3 - 20 Aug, 2014 (f8a536c1)
+
+* Merge pull request #410 from anodelman/make-gem (f8a536c1)
+
+
+```
+Merge pull request #410 from anodelman/make-gem
+
+create beaker 1.17.3 gem
+```
+* (HISTORY) update history for 1.17.3 gem (0d6006c4)
 
 * (GEM) version bump for 1.17.3 gem (92584d1e)
 

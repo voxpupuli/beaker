@@ -95,6 +95,32 @@ module Beaker
       def puppet_filebucket(*args)
         puppet( 'filebucket', *args )
       end
+
+      # Returns a {Beaker::Command} object for executing powershell commands on a host
+      #
+      # @param [String]   command   The powershell command to execute
+      # @param [Hash]     args      The commandline paramaeters to be passed to powershell
+      #
+      # @example Setting the contents of a file
+      #     powershell("Set-Content -path 'fu.txt' -value 'fu'")
+      #
+      # @example Using an alternative execution policy
+      #     powershell("Set-Content -path 'fu.txt' -value 'fu'", {'ExecutionPolicy' => 'Unrestricted'})
+      #
+      # @return [Command]
+      def powershell(command, args={})
+        ps_opts = {
+          'ExecutionPolicy' => 'Bypass',
+          'InputFormat'     => 'None',
+          'NoLogo'          => '',
+          'NoProfile'       => '',
+          'NonInteractive'  => ''
+        }
+        ps_opts.merge!(args)
+
+        arguments = " #{ps_opts.sort.map{|k,v| v.eql?('') ? "-#{k}" : "-#{k} #{v}" }.join(' ')} -Command \"#{command}\""
+        Command.new('powershell.exe', arguments, {})
+      end
     end
   end
 end

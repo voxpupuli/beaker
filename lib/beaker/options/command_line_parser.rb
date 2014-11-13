@@ -71,6 +71,7 @@ module Beaker
                   'Possible values:',
                   'always (keep SUTs alive)',
                   'onfail (keep SUTs alive if failures occur during testing)',
+                  'onpass (keep SUTs alive if no failures occur during testing)',
                   'never (cleanup SUTs - shutdown and destroy any changes made during testing)',
                   '(default: never)'  do |mode|
             @cmd_options[:preserve_hosts] = mode || 'always'
@@ -120,6 +121,7 @@ module Beaker
           opts.on '--log-level LEVEL',
                   'Log level',
                   'Supported LEVEL keywords:',
+                  'trace   : all messages, full stack trace of errors, file copy details',
                   'debug   : all messages, plus full stack trace of errors',
                   'verbose : all messages',
                   'info    : info messages, notifications and warnings',
