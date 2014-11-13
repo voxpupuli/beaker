@@ -508,7 +508,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
   end
-  
+
   describe 'configure_puppet' do
     before do
       subject.stub(:on).and_return(Beaker::Result.new({},''))
@@ -527,7 +527,10 @@ describe ClassMixedWithDSLInstallUtils do
       let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
       it 'it sets the puppet.conf file to the provided config' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on).with(host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text\"")
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text\"")
+        end
         subject.configure_puppet(host, config)
       end
     end
@@ -966,7 +969,3 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 end
-
-
-
-
