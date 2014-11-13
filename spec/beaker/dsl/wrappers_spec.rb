@@ -49,4 +49,20 @@ describe ClassMixedWithDSLWrappers do
       end
     end
   end
+
+  describe '#powershell' do
+    it 'should pass "powershell.exe <args> -Command <command>" to Command' do
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'")
+      command.command.should == 'powershell.exe'
+      command.args.should == ' -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command "Set-Content -path \'fu.txt\' -value \'fu\'"'
+      command.options.should == {}
+    end
+
+    it 'should merge the arguments provided with the defaults' do
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'ExecutionPolicy' => 'Unrestricted'})
+      command.command.should == 'powershell.exe'
+      command.args.should == ' -ExecutionPolicy Unrestricted -InputFormat None -NoLogo -NoProfile -NonInteractive -Command "Set-Content -path \'fu.txt\' -value \'fu\'"'
+      command.options.should == {}
+    end
+  end
 end

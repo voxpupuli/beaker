@@ -57,19 +57,19 @@ module Beaker
       #
       # @param [String] project_name The name of the ezbake project being worked
       #                              on.
-      # @param [String] project_version The desired version of the primary
-      #                                 subproject being worked.
+      # @param [String] project_param_string Parameters to be passed to ezbake
+      #                                      on the command line.
       # @param [String] ezbake_dir The local directory where the ezbake project
       #                            resides or should reside if it doesn't exist
       #                            already.
       #
-      def ezbake_stage project_name, project_version, ezbake_dir="tmp/ezbake"
+      def ezbake_stage project_name, project_param_string, ezbake_dir="tmp/ezbake"
         ezbake_tools_available?
         conditionally_clone "gitmirror@github.delivery.puppetlabs.net:puppetlabs-ezbake.git", ezbake_dir
 
         package_version = ''
         Dir.chdir(ezbake_dir) do
-          `lein run -- stage #{project_name} #{project_name}-version=#{project_version}`
+          `lein run -- stage #{project_name} #{project_param_string}`
         end
 
         staging_dir = File.join(ezbake_dir, 'target/staging')
@@ -92,7 +92,7 @@ module Beaker
         ezbake_tools_available? host
 
         if not ezbake_config
-          ezbake_stage project_name, project_version
+          ezbake_stage project_name, project_param_string
         end
 
         variant, version, arch, codename = host['platform'].to_array
@@ -130,18 +130,18 @@ module Beaker
       # this is the name of both a subdirectory of the ezbake_dir/configs dir
       # and the name of the .clj file in that directory which contains the
       # project map used by ezbake to create the staging directory.
-      # @param [String] project_version The version of the project specified by
+      # @param [String] project_param_string The version of the project specified by
       # project_name which is to be built and installed on the remote host.
       # @param [String] ezbake_dir The directory to which ezbake should be
       # cloned; alternatively, if ezbake is already at that directory, it will
       # be updated from its github master before any ezbake operations are
       # performed.
       #
-      def install_from_ezbake host, project_name, project_version, env_args={}, ezbake_dir='tmp/ezbake'
+      def install_from_ezbake host, project_name, project_param_string, env_args={}, ezbake_dir='tmp/ezbake'
         ezbake_tools_available? host
 
         if not ezbake_config
-          ezbake_stage project_name, project_version
+          ezbake_stage project_name, project_param_string
         end
 
         variant, _, _, _ = host['platform'].to_array

@@ -51,6 +51,7 @@ module Beaker
         @hosts =  []
         @network_manager = Beaker::NetworkManager.new(@options, @logger)
         @hosts = @network_manager.provision
+        @network_manager.proxy_package_manager
         @network_manager.validate
         @network_manager.configure
       rescue => e
@@ -104,7 +105,7 @@ module Beaker
       #cleanup phase
       rescue => e
         #cleanup on error
-        if @options[:preserve_hosts].to_s =~ /(never)/
+        if @options[:preserve_hosts].to_s =~ /(never)|(onpass)/
           @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
             @network_manager.cleanup
@@ -161,21 +162,25 @@ module Beaker
     #
     # @return nil
     def print_env_vars_affecting_beaker( log_level )
-      beaker_env_vars = Beaker::Options::Presets::ENVIRONMENT_SPEC.values
       non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
-      important_env_vars = beaker_env_vars + non_beaker_env_vars
-      env_var_map = important_env_vars.inject({}) do |memo, possibly_set_vars|
+      env_var_map = non_beaker_env_vars.inject({}) do |memo, possibly_set_vars|
         set_var = Array(possibly_set_vars).detect {|possible_var| ENV[possible_var] }
         memo[set_var] = ENV[set_var] if set_var
         memo
       end
 
-      puts ''
-      @logger.send( log_level, "Important ENV variables that may have affected your run:" )
+      env_var_map = env_var_map.merge(Beaker::Options::Presets.new.env_vars)
+
+      @logger.send( log_level, "\nImportant ENV variables that may have affected your run:" )
       env_var_map.each_pair do |var, value|
-        @logger.send( log_level, "    #{var}\t\t#{value}" )
+        if value.is_a?(Hash)
+          value.each_pair do | subvar, subvalue |
+            @logger.send( log_level, "    #{subvar}\t\t#{subvalue}" )
+          end
+        else
+          @logger.send( log_level, "    #{var}\t\t#{value}" )
+        end
       end
-      puts ''
     end
 
     # Prints the command line that can be called to reproduce this run
@@ -186,10 +191,8 @@ module Beaker
     #
     # @return nil
     def print_command_line( log_level = :debug )
-      puts ''
-      @logger.send(log_level, "You can reproduce this run with:\n")
+      @logger.send(log_level, "\nYou can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
-      puts ''
     end
   end
 end

@@ -129,4 +129,13 @@ describe ClassMixedWithDSLRoles do
       subject.class.send( :undef_method, test_role )
     end
   end
+  describe '#any_hosts_as?' do
+    it 'returns true if a host exists, false otherwise' do
+      @hosts = [ agent1, agent2 ]
+      # subject.should_receive( :hosts ).and_return( hosts )
+      subject.should_receive( :hosts ).exactly( 2 ).times.and_return( hosts )
+      expect( subject.any_hosts_as?( "agent" )).to be == true
+      expect( subject.any_hosts_as?( "custom_role" )).to be == false
+    end
+  end
 end

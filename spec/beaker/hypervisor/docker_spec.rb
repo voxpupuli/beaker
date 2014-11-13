@@ -53,11 +53,13 @@ module Beaker
     end
 
     let (:docker) { ::Beaker::Docker.new( hosts, { :logger => logger }) }
+    let(:docker_options) { nil }
 
     before :each do
       # Stub out all of the docker-api gem. we should never really call it
       # from these tests
       ::Beaker::Docker.any_instance.stub(:require).with('docker')
+      ::Docker.stub(:options).and_return(docker_options)
       ::Docker.stub(:options=)
       ::Docker.stub(:logger=)
       ::Docker.stub(:validate_version!)
@@ -79,9 +81,19 @@ module Beaker
       end
 
       it 'should set Docker options' do
-        ::Docker.should_receive(:options=).once
+        ::Docker.should_receive(:options=).with({:write_timeout => 300, :read_timeout => 300}).once
 
         docker
+      end
+
+      context 'when Docker options are already set' do
+        let(:docker_options) {{:write_timeout => 600, :foo => :bar}}
+
+        it 'should not override Docker options' do
+          ::Docker.should_receive(:options=).with({:write_timeout => 600, :read_timeout => 300, :foo => :bar}).once
+
+          docker
+        end
       end
 
       it 'should check the Docker gem can work with the api' do
@@ -171,21 +183,25 @@ module Beaker
       end
 
       it 'should stop the containers' do
+        docker.stub( :sleep ).and_return(true)
         container.should_receive(:stop)
         docker.cleanup
       end
 
       it 'should delete the containers' do
+        docker.stub( :sleep ).and_return(true)
         container.should_receive(:delete)
         docker.cleanup
       end
 
       it 'should delete the images' do
+        docker.stub( :sleep ).and_return(true)
         image.should_receive(:delete)
         docker.cleanup
       end
 
       it 'should not delete the image if docker_preserve_image is set to true' do
+        docker.stub( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=true
         end
@@ -194,6 +210,7 @@ module Beaker
       end
 
       it 'should delete the image if docker_preserve_image is set to false' do
+        docker.stub( :sleep ).and_return(true)
         hosts.each do |host|
           host['docker_preserve_image']=false
         end

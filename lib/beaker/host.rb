@@ -37,6 +37,8 @@ module Beaker
         end
       when /aix/
         Aix::Host.new name, options
+      when /osx/
+        Mac::Host.new name, options
       else
         Unix::Host.new name, options
       end
@@ -198,6 +200,18 @@ module Beaker
       self[:ip] ||= get_ip
     end
 
+    #Examine the host system to determine the architecture
+    #@return [Boolean] true if x86_64, false otherwise
+    def determine_if_x86_64
+      result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+      result.exit_code == 0
+    end
+
+    #@return [Boolean] true if x86_64, false otherwise
+    def is_x86_64?
+      @x86_64 ||= determine_if_x86_64
+    end
+
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
@@ -258,14 +272,13 @@ module Beaker
       result.exit_code == 0
     end
 
-    # scp files from the localhost to this test host
+    # scp files from the localhost to this test host, if a directory is provided it is recursively copied
     # @param source [String] The path to the file/dir to upload
     # @param target [String] The destination path on the host
-    # @param [Hash{Symbol=>String}] options Options to alter execution
-    # @option options [Boolean] :recursive Should we copy recursively?  Defaults to 'True' in case of a directory source.
+    # @param options [Hash{Symbol=>String}] Options to alter execution
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
     def do_scp_to source, target, options
-      @logger.debug "localhost $ scp #{source} #{@name}:#{target}"
+      @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
       result = Result.new(@name, [source, target])
       has_ignore = options[:ignore] and not options[:ignore].empty?
@@ -279,24 +292,30 @@ module Beaker
       end
 
       # either a single file, or a directory with no ignores
+      if not File.file?(source) and not File.directory?(source)
+        raise IOError, "No such file or directory - #{source}"
+      end
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
         if has_ignore and (source =~ ignore_re)
-          @logger.debug "After rejecting ignored files/dirs, there is no file to copy"
+          @logger.trace "After rejecting ignored files/dirs, there is no file to copy"
           source_file = nil
           result.stdout = "No files to copy"
           result.exit_code = 1
         end
         if source_file
           result = connection.scp_to(source_file, target, options, $dry_run)
+          @logger.trace result.stdout
         end
       else # a directory with ignores
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
           f =~ ignore_re
         end
-        @logger.debug "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
+        @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
 
         # create necessary directory structure on host
+        # run this quietly (no STDOUT)
+        @logger.quiet(true)
         required_dirs = (dir_source.map{ | dir | File.dirname(dir) }).uniq
         require 'pathname'
         source_path = Pathname.new(source)
@@ -308,6 +327,7 @@ module Beaker
             mkdir_p( File.join(target, dir) )
           end
         end
+        @logger.quiet(false)
 
         # copy each file to the host
         dir_source.each do |s|
@@ -318,10 +338,10 @@ module Beaker
             file_path = File.join(target, s)
           end
           result = connection.scp_to(s, file_path, options, $dry_run)
+          @logger.trace result.stdout
         end
       end
 
-      @logger.debug result.stdout
       return result
     end
 
@@ -335,7 +355,7 @@ module Beaker
 
   end
 
-  [ 'windows', 'unix', 'aix' ].each do |lib|
+  [ 'windows', 'unix', 'aix', 'mac' ].each do |lib|
     require "beaker/host/#{lib}"
   end
 end

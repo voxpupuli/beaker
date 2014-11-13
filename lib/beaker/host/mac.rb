@@ -1,18 +1,21 @@
 [ 'host', 'command_factory', 'command', 'options' ].each do |lib|
-      require "beaker/#{lib}"
+  require "beaker/#{lib}"
 end
 
-module Unix
+module Mac
   class Host < Beaker::Host
-    [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
-          require "beaker/host/unix/#{lib}"
+
+    [ 'exec', 'file' ].each do |lib|
+      require "beaker/host/unix/#{lib}"
+    end
+    [ 'user', 'group' ].each do |lib|
+      require "beaker/host/mac/#{lib}"
     end
 
-    include Unix::User
-    include Unix::Group
+    include Mac::User
+    include Mac::Group
     include Unix::File
     include Unix::Exec
-    include Unix::Pkg
 
     def self.pe_defaults
       h = Beaker::Options::OptionsHash.new

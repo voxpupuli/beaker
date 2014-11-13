@@ -55,6 +55,9 @@ module Beaker
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
+      #enable root if user is not root
+      enable_root_on_hosts()
+
       # Set the hostname for each box
       set_hostnames()
 
@@ -88,9 +91,35 @@ module Beaker
       nil #void
     end
 
-    #Shutdown and destroy ec2 instances idenfitied by key that have been alive longer than ZOMBIE hours.
-    #@param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
-    #@param [String] key The key_name to match for
+    # Print instances to the logger. Instances will be from all regions
+    # associated with provided key name and limited by regex compared to
+    # instance status. Defaults to running instances.
+    #
+    # @param [String] key The key_name to match for
+    # @param [Regex] status The regular expression to match against the instance's status
+    def log_instances(key = key_name, status = /running/)
+      instances = []
+      @ec2.regions.each do |region|
+        @logger.debug "Reviewing: #{region.name}"
+        @ec2.regions[region.name].instances.each do |instance|
+          if (instance.key_name =~ /#{key}/) and (instance.status.to_s =~ status)
+            instances << instance
+          end
+        end
+      end
+      output = ""
+      instances.each do |instance|
+        output << "#{instance.id} keyname: #{instance.key_name}, dns name: #{instance.dns_name}, private ip: #{instance.private_ip_address}, ip: #{instance.ip_address}, launch time #{instance.launch_time}, status: #{instance.status}\n"
+      end
+      @logger.notify("aws-sdk: List instances (keyname: #{key})")
+      @logger.notify("#{output}")
+    end
+
+    # Shutdown and destroy ec2 instances idenfitied by key that have been alive
+    # longer than ZOMBIE hours.
+    #
+    # @param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
+    # @param [String] key The key_name to match for
     def kill_zombies(max_age = ZOMBIE, key = key_name)
       @logger.notify("aws-sdk: Kill Zombies! (keyname: #{key}, age: #{max_age} hrs)")
       #examine all available regions
@@ -99,18 +128,20 @@ module Beaker
       time_now = Time.now.getgm #ec2 uses GM time
       @ec2.regions.each do |region|
         @logger.debug "Reviewing: #{region.name}"
-        @ec2.regions[region.name].instances.each do |instance|
-          if (instance.key_name =~ /#{key}/)
-            @logger.debug "Examining #{instance.id} (keyname: #{instance.key_name}, launch time: #{instance.launch_time}, status: #{instance.status})"
-            if ((time_now - instance.launch_time) >  max_age*60*60) and instance.status.to_s !~ /terminated/
-              @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
-              begin
-                instance.terminate()
-                kill_count += 1
-              rescue AWS::EC2::Errors => e
-                @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
+        # Note: don't use instances.each here as that funtion doesn't allow proper rescue from error states
+        instances = @ec2.regions[region.name].instances
+        instances.each do |instance|
+          begin
+            if (instance.key_name =~ /#{key}/)
+              @logger.debug "Examining #{instance.id} (keyname: #{instance.key_name}, launch time: #{instance.launch_time}, status: #{instance.status})"
+              if ((time_now - instance.launch_time) >  max_age*60*60) and instance.status.to_s !~ /terminated/
+                @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
+                  instance.terminate()
+                  kill_count += 1
               end
             end
+          rescue AWS::Core::Resource::NotFound, AWS::EC2::Errors => e
+            @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
           end
         end
         # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
@@ -152,6 +183,12 @@ module Beaker
       @hosts.each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
+        subnet_id = host['subnet_id'] || nil
+        vpc_id = host['vpc_id'] || nil
+
+        if vpc_id and !subnet_id
+          raise RuntimeError, "A subnet_id must be provided with a vpc_id"
+        end
 
         # Use snapshot provided for this host
         image_type = host['snapshot']
@@ -163,6 +200,9 @@ module Beaker
 
         # Main region object for ec2 operations
         region = @ec2.regions[ami_region]
+
+        # Obtain the VPC object if it exists
+        vpc = vpc_id ? region.vpcs[vpc_id] : nil
 
         # Grab image object
         image_id = ami[:image][image_type.to_sym]
@@ -196,11 +236,12 @@ module Beaker
           :image_id => image_id,
           :monitoring_enabled => true,
           :key_pair => ensure_key_pair(region),
-          :security_groups => [ensure_group(region, Beaker::EC2Helper.amiports(host['roles']))],
+          :security_groups => [ensure_group(vpc || region, Beaker::EC2Helper.amiports(host['roles']))],
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
           :block_device_mappings => block_device_mappings,
+          :subnet => subnet_id,
         }
         instance = region.instances.create(config)
 
@@ -249,7 +290,7 @@ module Beaker
       end
     end
 
-    #Add metadata tags to all instances
+    # Add metadata tags to all instances
     #
     # @return [void]
     # @api private
@@ -307,6 +348,29 @@ module Beaker
           etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{neighbor['dns_name']}\n"
         end
         set_etc_hosts(host, etc_hosts)
+      end
+    end
+
+    # Enables root for instances with custom username like ubuntu-amis
+    #
+    # @return [void]
+    # @api private
+    def enable_root_on_hosts
+      @hosts.each do |host|
+        enable_root(host)
+      end
+    end
+
+    # Enables root access for a host when username is not root
+    #
+    # @return [void]
+    # @api private
+    def enable_root(host)
+      if host['user'] != 'root'
+        copy_ssh_to_root(host, @options)
+        enable_root_login(host, @options)
+        host['user'] = 'root'
+        host.close
       end
     end
 
@@ -407,18 +471,20 @@ module Beaker
 
     # Return an existing group, or create new one
     #
-    # @param region [AWS::EC2::Region] the AWS region control object
+    # Accepts a region or VPC as input for checking & creation.
+    #
+    # @param rv [AWS::EC2::Region, AWS::EC2::VPC] the AWS region or vpc control object
     # @param ports [Array<Number>] an array of port numbers
     # @return [AWS::EC2::SecurityGroup] created security group
     # @api private
-    def ensure_group(region, ports)
+    def ensure_group(rv, ports)
       @logger.notify("aws-sdk: Ensure security group exists for ports #{ports.to_s}, create if not")
       name = group_id(ports)
 
-      group = region.security_groups.filter('group-name', name).first
+      group = rv.security_groups.filter('group-name', name).first
 
       if group.nil?
-        group = create_group(region, ports)
+        group = create_group(rv, ports)
       end
 
       group
@@ -426,15 +492,17 @@ module Beaker
 
     # Create a new security group
     #
-    # @param region [AWS::EC2::Region] the AWS region control object
+    # Accepts a region or VPC for group creation.
+    #
+    # @param rv [AWS::EC2::Region, AWS::EC2::VPC] the AWS region or vpc control object
     # @param ports [Array<Number>] an array of port numbers
     # @return [AWS::EC2::SecurityGroup] created security group
     # @api private
-    def create_group(region, ports)
+    def create_group(rv, ports)
       name = group_id(ports)
       @logger.notify("aws-sdk: Creating group #{name} for ports #{ports.to_s}")
-      group = region.security_groups.create(name,
-                                            :description => "Custom Beaker security group for #{ports.to_a}")
+      group = rv.security_groups.create(name,
+                                        :description => "Custom Beaker security group for #{ports.to_a}")
 
       unless ports.is_a? Set
         ports = Set.new(ports)

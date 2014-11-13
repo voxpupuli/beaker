@@ -20,6 +20,7 @@ module Beaker
 
       if roles.include? 'dashboard'
         ports << 443
+        ports << 4435
       end
 
       ports

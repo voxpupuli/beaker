@@ -2,6 +2,10 @@
 
 Puppet Labs cloud enabled acceptance testing tool.
 
+# Installation
+
+See [Beaker Installation](https://github.com/puppetlabs/beaker/wiki/Beaker-Installation) wiki page.
+
 #Documentation
 
 Documentation for Beaker can be found online at the
