@@ -17,7 +17,11 @@ module MockNet
     class Response
       class ResponseHash
         def []key
-          { 'ok' => true, 'hostname' => 'pool' }
+          if key == "domain"
+            nil
+          else
+            { 'ok' => true, 'hostname' => 'pool' }
+          end
         end
 
       end
