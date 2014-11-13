@@ -529,7 +529,12 @@ describe ClassMixedWithDSLInstallUtils do
       let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
       it 'it add an entry into the /etc/hosts file' do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
-        expect(subject).to receive(:on).with(host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+        end
+
+
         subject.add_system32_hosts_entry(host, entry)
       end
     end
