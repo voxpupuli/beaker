@@ -25,6 +25,9 @@ module Beaker
       # Github's ssh signature for cloning via ssh
       GitHubSig   = 'github.com,207.97.227.239 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
 
+      # The directories in the module directory that will not be scp-ed to the test system when using `copy_module_to`
+      PUPPET_MODULE_INSTALL_IGNORE = ['.bundle', '.git', '.idea', '.vagrant', '.vendor', 'acceptance', 'spec', 'tests', 'log']
+
       # @param [String] uri A uri in the format of <git uri>#<revision>
       #                     the `git://`, `http://`, `https://`, and ssh
       #                     (if cloning as the remote git user) protocols
@@ -166,16 +169,16 @@ module Beaker
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
           "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
-        elsif host['platform'] =~ /osx/
-          version = host['pe_ver'] || opts[:pe_ver]
-          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
-          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
 
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -x' : ''
           "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash"
+        elsif host['platform'] =~ /osx/
+          version = host['pe_ver'] || opts[:pe_ver]
+          pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
+          "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
         else
           pe_debug = host[:pe_debug] || opts[:pe_debug]  ? ' -D' : ''
           "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']}#{pe_debug} -a #{host['working_dir']}/answers"
@@ -381,7 +384,7 @@ module Beaker
       def fetch_puppet(hosts, opts)
         hosts.each do |host|
           # We install Puppet from the master for frictionless installs, so we don't need to *fetch* anything
-          next if host['roles'].include? 'frictionless' and ! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0')
+          next if host['roles'].include?('frictionless') && (! version_is_less(opts[:pe_ver] || host['pe_ver'], '3.2.0'))
 
           if host['platform'] =~ /windows/
             fetch_puppet_on_windows(host, opts)
@@ -400,7 +403,7 @@ module Beaker
         klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
         klass = "pe_repo::platform::#{klass}"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
-        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master}]"
+        on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
         on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
         on master, "puppet agent -t", :acceptable_exit_codes => [0,2]
       end
@@ -425,8 +428,6 @@ module Beaker
       #
       def do_install hosts, opts = {}
         opts[:type] = opts[:type] || :install
-        hostcert='uname | grep -i sunos > /dev/null && hostname || hostname -s'
-        master_certname = on(master, hostcert).stdout.strip
         pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
         pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
 
@@ -465,26 +466,27 @@ module Beaker
         install_hosts.each do |host|
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
-          elsif host['platform'] =~ /osx/
-            on host, installer_cmd(host, opts)
-            #set the certname and master
-            on host, puppet("config set server #{master}")
-            on host, puppet("config set certname #{host}")
-            #run once to request cert
-            on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
           else
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
-            if (! host['roles'].include? 'frictionless') || version_is_less(version, '3.2.0')
-              answers = Beaker::Answers.answers(opts[:pe_ver] || host['pe_ver'], hosts, master_certname, opts)
-              create_remote_file host, "#{host['working_dir']}/answers", Beaker::Answers.answer_string(host, answers)
-            else
+            if host['roles'].include?('frictionless') &&  (! version_is_less(version, '3.2.0'))
               # If We're *not* running the classic installer, we want
               # to make sure the master has packages for us.
               deploy_frictionless_to_master(host)
+              on host, installer_cmd(host, opts)
+            elsif host['platform'] =~ /osx/
+              # If we're not frictionless, we need to run the OSX special-case
+              on host, installer_cmd(host, opts)
+              #set the certname and master
+              on host, puppet("config set server #{master}")
+              on host, puppet("config set certname #{host}")
+              #run once to request cert
+              on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
+            else
+              answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
+              create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
+              on host, installer_cmd(host, opts)
             end
-
-            on host, installer_cmd(host, opts)
           end
 
           # On each agent, we ensure the certificate is signed then shut down the agent
@@ -596,10 +598,13 @@ module Beaker
       #Install FOSS based upon host configuration and options
       # @example will install puppet 3.6.1 from native puppetlabs provided packages wherever possible and will fail over to gem installation when impossible
       #  install_puppet({
-      #    :version        => '3.6.1',
-      #    :facter_version => '2.0.1',
-      #    :hiera_version  => '1.3.3',
-      #    :default_action => 'gem_install'
+      #    :version          => '3.6.1',
+      #    :facter_version   => '2.0.1',
+      #    :hiera_version    => '1.3.3',
+      #    :default_action   => 'gem_install',
+      #
+      #   })
+      #
       #
       # @example Will install latest packages on Enterprise Linux and Debian based distros and fail hard on all othere platforms.
       #  install_puppet()
@@ -607,12 +612,19 @@ module Beaker
       # @note This will attempt to add a repository for apt.puppetlabs.com on
       #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
       #       machines, then install the package 'puppet'.
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [String] :version Version of puppet to download
+      # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
+      # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/(puppet|hiera|facter)-%version%.msi
       #
       # @api dsl
       # @return nil
       # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
       # @raise [FailTest] When error occurs during the actual installation process
       def install_puppet(opts = {})
+        default_download_url = 'http://downloads.puppetlabs.com'
+        opts = {:win_download_url => "#{default_download_url}/windows",
+                :mac_download_url => "#{default_download_url}/mac"}.merge(opts)
         hosts.each do |host|
           if host['platform'] =~ /el-(5|6|7)/
             relver = $1
@@ -735,9 +747,7 @@ module Beaker
       # @param [Host] host The host to install packages on
       # @param [Hash{Symbol=>String}] opts An options hash
       # @option opts [String] :version The version of Puppet to install, required
-      #
-      # @return nil
-      # @api private
+      # @option opts [String] :win_download_url The url to download puppet from
       def install_puppet_from_msi( host, opts )
         #only install 64bit builds if
         # - we are on puppet version 3.7+
@@ -749,7 +759,7 @@ module Beaker
         else
           host['dist'] = "puppet-#{version}"
         end
-        link = "http://downloads.puppetlabs.com/windows/#{host['dist']}.msi"
+        link = "#{opts[:win_download_url]}/#{host['dist']}.msi"
         if not link_exists?( link )
           raise "Puppet #{version} at #{link} does not exist!"
         end
@@ -770,6 +780,7 @@ module Beaker
       # @option opts [String] :version The version of Puppet to install, required
       # @option opts [String] :facter_version The version of Facter to install, required
       # @option opts [String] :hiera_version The version of Hiera to install, required
+      # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
       #
       # @return nil
       # @api private
@@ -778,9 +789,9 @@ module Beaker
         facter_ver = opts[:facter_version]
         hiera_ver = opts[:hiera_version]
 
-        on host, "curl -O http://downloads.puppetlabs.com/mac/puppet-#{puppet_ver}.dmg"
-        on host, "curl -O http://downloads.puppetlabs.com/mac/facter-#{facter_ver}.dmg"
-        on host, "curl -O http://downloads.puppetlabs.com/mac/hiera-#{hiera_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/puppet-#{puppet_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/facter-#{facter_ver}.dmg"
+        on host, "curl -O #{opts[:mac_download_url]}/hiera-#{hiera_ver}.dmg"
 
         on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
         on host, "hdiutil attach facter-#{facter_ver}.dmg"
@@ -1094,6 +1105,220 @@ module Beaker
         do_higgs_install higgs_host, options
       end
 
+      # Install the desired module on all hosts using either the PMT or a
+      #   staging forge
+      #
+      # @see install_dev_puppet_module
+      def install_dev_puppet_module_on( host, opts )
+        if options[:forge_host]
+          with_forge_stubbed_on( host ) do
+            install_puppet_module_via_pmt_on( host, opts )
+          end
+        else
+          copy_module_to( host, opts )
+        end
+      end
+      alias :puppet_module_install_on :install_dev_puppet_module_on
+
+      # Install the desired module on all hosts using either the PMT or a
+      #   staging forge
+      #
+      # Passes options through to either `install_puppet_module_via_pmt_on`
+      #   or `copy_module_to`
+      #
+      # @param opts [Hash]
+      #
+      # @example Installing a module from the local directory
+      #   install_dev_puppet_module( :source => './', :module_name => 'concat' )
+      #
+      # @example Installing a module from a staging forge
+      #   options[:forge_host] = 'my-forge-api.example.com'
+      #   install_dev_puppet_module( :source => './', :module_name => 'concat' )
+      #
+      # @see install_puppet_module_via_pmt
+      # @see copy_module_to
+      def install_dev_puppet_module( opts )
+        block_on( hosts ) {|h| install_dev_puppet_module_on( h, opts ) }
+      end
+      alias :puppet_module_install :install_dev_puppet_module
+
+      # Install the desired module with the PMT on a given host
+      #
+      # @param opts [Hash]
+      # @option opts [String] :module_name The short name of the module to be installed
+      # @option opts [String] :version The version of the module to be installed
+      def install_puppet_module_via_pmt_on( host, opts = {} )
+        block_on host do |h|
+          version_info = opts[:version] ? "-v #{opts[:version]}" : ""
+          if opts[:source]
+            author_name, module_name = parse_for_modulename( opts[:source] )
+            modname = "#{author_name}-#{module_name}"
+          else
+            modname = opts[:module_name]
+          end
+
+          on h, puppet("module install #{modname} #{version_info}")
+        end
+      end
+
+      # Install the desired module with the PMT on all known hosts
+      # @see #install_puppet_module_via_pmt_on
+      def install_puppet_module_via_pmt( opts = {} )
+        install_puppet_module_via_pmt_on(hosts, opts)
+      end
+
+      # Install local module for acceptance testing
+      # should be used as a presuite to ensure local module is copied to the hosts you want, particularly masters
+      # @api dsl
+      # @param [Host, Array<Host>, String, Symbol] one_or_more_hosts
+      #                   One or more hosts to act upon,
+      #                   or a role (String or Symbol) that identifies one or more hosts.
+      # @option opts [String] :source ('./')
+      #                   The current directory where the module sits, otherwise will try
+      #                         and walk the tree to figure out
+      # @option opts [String] :module_name (nil)
+      #                   Name which the module should be installed under, please do not include author,
+      #                     if none is provided it will attempt to parse the metadata.json and then the Modulefile to determine
+      #                     the name of the module
+      # @option opts [String] :target_module_path (host['distmoduledir']/modules)
+      #                   Location where the module should be installed, will default
+      #                    to host['distmoduledir']/modules
+      # @option opts [Array] :ignore_list
+      # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
+      #
+      def copy_module_to(one_or_more_hosts, opts = {})
+        block_on one_or_more_hosts do |host|
+          opts = {:source => './',
+                  :target_module_path => host['distmoduledir'],
+                  :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+          ignore_list = build_ignore_list(opts)
+          target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
+          source = File.expand_path( opts[:source] )
+          if opts.has_key?(:module_name)
+            module_name = opts[:module_name]
+          else
+            _, module_name = parse_for_modulename( source )
+          end
+          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+        end
+      end
+      alias :copy_root_module_to :copy_module_to
+
+      # Install a package on a host
+      #
+      # @param [Host] host             A host object
+      # @param [String] package_name   Name of the package to install
+      #
+      # @return [Result]   An object representing the outcome of *install command*.
+      def install_package host, package_name, package_version = nil
+        host.install_package package_name, '', package_version
+      end
+
+      # Check to see if a package is installed on a remote host
+      #
+      # @param [Host] host             A host object
+      # @param [String] package_name   Name of the package to check for.
+      #
+      # @return [Boolean] true/false if the package is found
+      def check_for_package host, package_name
+        host.check_for_package package_name
+      end
+
+      # Upgrade a package on a host. The package must already be installed
+      #
+      # @param [Host] host             A host object
+      # @param [String] package_name   Name of the package to install
+      #
+      # @return [Result]   An object representing the outcome of *upgrade command*.
+      def upgrade_package host, package_name
+        host.upgrade_package package_name
+      end
+
+      #Recursive method for finding the module root
+      # Assumes that a Modulefile exists
+      # @param [String] possible_module_directory
+      #                   will look for Modulefile and if none found go up one level and try again until root is reached
+      #
+      # @return [String,nil]
+      def parse_for_moduleroot(possible_module_directory)
+        if File.exists?("#{possible_module_directory}/Modulefile") || File.exists?("#{possible_module_directory}/metadata.json")
+          possible_module_directory
+        elsif possible_module_directory === '/'
+          logger.error "At root, can't parse for another directory"
+          nil
+        else
+          logger.debug "No Modulefile or metadata.json found at #{possible_module_directory}, moving up"
+          parse_for_moduleroot File.expand_path(File.join(possible_module_directory,'..'))
+        end
+      end
+
+      #Parse root directory of a module for module name
+      # Searches for metadata.json and then if none found, Modulefile and parses for the Name attribute
+      # @param [String] root_module_dir
+      # @return [String] module name
+      def parse_for_modulename(root_module_dir)
+        author_name, module_name = nil, nil
+        if File.exists?("#{root_module_dir}/metadata.json")
+          logger.debug "Attempting to parse Modulename from metadata.json"
+          module_json = JSON.parse(File.read "#{root_module_dir}/metadata.json")
+          if(module_json.has_key?('name'))
+            author_name, module_name = get_module_name(module_json['name'])
+          end
+        end
+        if !module_name && File.exists?("#{root_module_dir}/Modulefile")
+          logger.debug "Attempting to parse Modulename from Modulefile"
+          if /^name\s+'?(\w+-\w+)'?\s*$/i.match(File.read("#{root_module_dir}/Modulefile"))
+            author_name, module_name = get_module_name(Regexp.last_match[1])
+          end
+        end
+        if !module_name && !author_name
+          logger.debug "Unable to determine name, returning null"
+        end
+        return author_name, module_name
+      end
+
+      #Parse modulename from the pattern 'Auther-ModuleName'
+      #
+      # @param [String] author_module_name <Author>-<ModuleName> pattern
+      #
+      # @return [String,nil]
+      #
+      def get_module_name(author_module_name)
+        split_name = split_author_modulename(author_module_name)
+        if split_name
+          return split_name[:author], split_name[:module]
+        end
+      end
+
+      #Split the Author-Name into a hash
+      # @param [String] author_module_attr
+      #
+      # @return [Hash<Symbol,String>,nil] :author and :module symbols will be returned
+      #
+      def split_author_modulename(author_module_attr)
+        result = /(\w+)-(\w+)/.match(author_module_attr)
+        if result
+          {:author => result[1], :module => result[2]}
+        else
+          nil
+        end
+      end
+
+      # Build an array list of files/directories to ignore when pushing to remote host
+      # Automatically adds '..' and '.' to array.  If not opts of :ignore list is provided
+      # it will use the static variable PUPPET_MODULE_INSTALL_IGNORE
+      #
+      # @param opts [Hash]
+      # @option opts [Array] :ignore_list A list of files/directories to ignore
+      def build_ignore_list(opts = {})
+        ignore_list = opts[:ignore_list] || PUPPET_MODULE_INSTALL_IGNORE
+        if !ignore_list.kind_of?(Array) || ignore_list.nil?
+          raise ArgumentError "Ignore list must be an Array"
+        end
+        ignore_list << '.' unless ignore_list.include? '.'
+        ignore_list << '..' unless ignore_list.include? '..'
+        ignore_list
+      end
     end
   end
 end

@@ -2,13 +2,20 @@ require 'spec_helper'
 
 class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::InstallUtils
+  include Beaker::DSL::Wrappers
+  include Beaker::DSL::Helpers
   include Beaker::DSL::Structure
   include Beaker::DSL::Roles
   include Beaker::DSL::Patterns
+
+  def logger
+    @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
+  end
 end
 
 describe ClassMixedWithDSLInstallUtils do
-  let(:opts)          { Beaker::Options::Presets.presets.merge(Beaker::Options::Presets.env_vars) }
+  let(:presets)       { Beaker::Options::Presets.new }
+  let(:opts)          { presets.presets.merge(presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
                                        :platform => 'linux',
                                        :roles => [ 'agent' ] } ) }
@@ -319,8 +326,6 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       subject.stub( :hosts ).and_return( hosts )
-      #determine mastercert
-      subject.should_receive( :on ).with( hosts[0], /uname/ ).once
       #create answers file per-host, except windows
       subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts
@@ -468,6 +473,21 @@ describe ClassMixedWithDSLInstallUtils do
         expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y hiera=2001-1puppetlabs1')
         expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y facter=1999-1puppetlabs1')
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
+      end
+    end
+    context 'on windows' do
+      let(:platform) { "windows-2008r2-i386" }
+      it 'installs specific version of puppet when passed :version' do
+        subject.stub(:link_exists?).and_return( true )
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
+        subject.install_puppet(:version => '3000')
+      end
+      it 'installs from custom url when passed :win_download_url' do
+        subject.stub(:link_exists?).and_return( true )
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
+        subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
       end
     end
     describe 'on unsupported platforms' do
@@ -750,4 +770,205 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe '#install_dev_puppet_module_on' do
+    context 'having set a stub forge' do
+      it 'stubs the forge on the host' do
+        master = hosts.first
+        subject.stub( :options ).and_return( {:forge_host => 'ahost.com'} )
+
+        subject.should_receive( :with_forge_stubbed_on )
+
+        subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
+      end
+
+      it 'installs via #install_puppet_module_via_pmt' do
+        master = hosts.first
+        subject.stub( :options ).and_return( {:forge_host => 'ahost.com'} )
+        subject.stub( :with_forge_stubbed_on ).and_yield
+
+        subject.should_receive( :install_puppet_module_via_pmt_on )
+
+        subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
+      end
+    end
+    context 'without a stub forge (default)' do
+      it 'calls copy_module_to to get the module on the SUT' do
+        master = hosts.first
+        subject.stub( :options ).and_return( {} )
+
+        subject.should_receive( :copy_module_to )
+
+        subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
+      end
+    end
+  end
+
+  describe '#install_dev_puppet_module' do
+    it 'delegates to #install_dev_puppet_module_on with the hosts list' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.stub( :options ).and_return( {} )
+
+      hosts.each do |host|
+        subject.should_receive( :install_dev_puppet_module_on ).
+          with( host, {:source => '/module', :module_name => 'test'})
+      end
+
+      subject.install_dev_puppet_module( {:source => '/module', :module_name => 'test'} )
+    end
+  end
+
+  describe '#install_puppet_module_via_pmt_on' do
+    it 'installs module via puppet module tool' do
+      subject.stub( :hosts ).and_return( hosts )
+      master = hosts.first
+
+      subject.should_receive( :puppet ).with('module install test ' ).once
+
+      subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
+    end
+  end
+
+  describe '#install_puppet_module_via_pmt' do
+    it 'delegates to #install_puppet_module_via_pmt with the hosts list' do
+      subject.stub( :hosts ).and_return( hosts )
+
+      subject.should_receive( :install_puppet_module_via_pmt_on ).with( hosts, {:source => '/module', :module_name => 'test'}).once
+
+      subject.install_puppet_module_via_pmt( {:source => '/module', :module_name => 'test'} )
+    end
+  end
+
+  describe 'copy_module_to' do
+    let(:ignore_list) { Beaker::DSL::InstallUtils::PUPPET_MODULE_INSTALL_IGNORE }
+    let(:source){ File.expand_path('./')}
+    let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
+    let(:module_parse_name){'testmodule'}
+
+    shared_examples 'copy_module_to' do  |opts|
+      it{
+        host = double("host")
+        host.stub(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
+        result = double
+        stdout = target.split('/')[0..-2].join('/') + "\n"
+        result.stub(:stdout).and_return( stdout )
+        host.stub(:exec).with( any_args ).and_return( result )
+        Dir.stub(:getpwd).and_return(source)
+
+        subject.stub(:parse_for_moduleroot).and_return(source)
+        if module_parse_name
+          subject.stub(:parse_for_modulename).with(any_args()).and_return(module_parse_name)
+        else
+          subject.should_not_receive(:parse_for_modulename)
+        end
+
+        File.stub(:exists?).with(any_args()).and_return(false)
+        File.stub(:directory?).with(any_args()).and_return(false)
+
+        subject.should_receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
+        if opts.nil?
+          subject.copy_module_to(host)
+        else
+          subject.copy_module_to(host,opts)
+        end
+      }
+    end
+
+    describe 'should call scp with the correct info, with only providing host' do
+      let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
+
+      it_should_behave_like 'copy_module_to', :module_name => 'testmodule'
+    end
+
+    describe 'should call scp with the correct info, when specifying the modulename' do
+      let(:target){'/etc/puppetlabs/puppet/modules/bogusmodule'}
+      let(:module_parse_name){false}
+      it_should_behave_like 'copy_module_to', {:module_name =>'bogusmodule'}
+    end
+
+    describe 'should call scp with the correct info, when specifying the target to a different path' do
+      target = '/opt/shared/puppet/modules'
+      let(:target){"#{target}/testmodule"}
+      it_should_behave_like 'copy_module_to', {:target_module_path => target, :module_name => 'testmodule'}
+    end
+
+    describe 'should accept multiple hosts when' do
+      it 'used in a default manner' do
+        subject.stub( :build_ignore_list ).and_return( [] )
+        subject.stub( :parse_for_modulename ).and_return( [nil, 'modulename'] )
+        subject.stub( :on ).and_return( double.as_null_object )
+        hosts = [{}, {}]
+
+        subject.should_receive( :scp_to ).twice
+        subject.copy_module_to( hosts )
+      end
+    end
+  end
+
+  describe 'split_author_modulename' do
+    it 'should return a correct modulename' do
+      result =  subject.split_author_modulename('myname-test_43_module')
+      expect(result[:author]).to eq('myname')
+      expect(result[:module]).to eq('test_43_module')
+    end
+  end
+
+  describe 'get_module_name' do
+    it 'should return an array of author and modulename' do
+      expect(subject.get_module_name('myname-test_43_module')).to eq(['myname', 'test_43_module'])
+    end
+    it 'should return nil for invalid names' do
+      expect(subject.get_module_name('myname-')).to eq(nil)
+    end
+  end
+
+  describe 'parse_for_modulename' do
+    directory = '/testfilepath/myname-testmodule'
+    it 'should return name from metadata.json' do
+      File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
+      File.stub(:read).with("#{directory}/metadata.json").and_return(" {\"name\":\"myname-testmodule\"} ")
+      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from metadata.json")
+      subject.logger.should_not_receive(:debug).with('Unable to determine name, returning null')
+      subject.parse_for_modulename(directory).should eq(['myname', 'testmodule'])
+    end
+    it 'should return name from Modulefile' do
+      File.stub(:exists?).with("#{directory}/metadata.json").and_return(false)
+      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+      File.stub(:read).with("#{directory}/Modulefile").and_return("name    'myname-testmodule'  \nauthor   'myname'")
+      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from Modulefile")
+      subject.logger.should_not_receive(:debug).with("Unable to determine name, returning null")
+      expect(subject.parse_for_modulename(directory)).to eq(['myname', 'testmodule'])
+    end
+  end
+
+  describe 'parse_for_module_root' do
+    directory = '/testfilepath/myname-testmodule'
+    describe 'stops searching when either' do
+      it 'finds a Modulefile' do
+        File.stub(:exists?).and_return(false)
+        File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+
+        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
+        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+      end
+      it 'finds a metadata.json file' do
+        File.stub(:exists?).and_return(false)
+        File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
+
+        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
+        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
+      end
+    end
+    it 'should recersively go up the directory to find the module files' do
+      File.stub(:exists?).and_return(false)
+      subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}, moving up")
+      subject.logger.should_receive(:error).with("At root, can't parse for another directory")
+      expect(subject.parse_for_moduleroot(directory)).to eq(nil)
+    end
+  end
 end
+
+
+
+

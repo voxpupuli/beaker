@@ -52,7 +52,6 @@ module Beaker
     end
 
     # Iterate over all hosts, calling get_perf_data
-    # @param [void]
     # @return [void]
     def print_perf_info()
       @perf_end_timestamp = Time.now

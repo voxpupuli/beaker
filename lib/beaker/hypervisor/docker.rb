@@ -8,7 +8,7 @@ module Beaker
       @hosts = hosts
 
       # increase the http timeouts as provisioning images can be slow
-      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }
+      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }.merge(::Docker.options || {})
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
       ::Docker.validate_version!
@@ -111,6 +111,7 @@ module Beaker
       # add platform-specific actions
       case host['platform']
       when /ubuntu/, /debian/
+        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
         dockerfile += <<-EOF
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
