@@ -509,6 +509,37 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
+  describe '#add_system32_hosts_entry' do
+    before do
+      subject.stub(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      it 'logs message - nothing to do on this host' do
+        Beaker::Command.should_receive( :new ).never
+
+        expect {
+          subject.add_system32_hosts_entry(host, {})
+        }.to raise_error
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+      it 'it add an entry into the /etc/hosts file' do
+        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+        end
+
+
+        subject.add_system32_hosts_entry(host, entry)
+      end
+    end
+  end
+
   describe 'install_pe' do
 
     it 'calls do_install with sorted hosts' do
@@ -942,7 +973,3 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 end
-
-
-
-
