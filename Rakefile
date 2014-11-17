@@ -19,11 +19,15 @@ task :travis do
 end
 
 namespace :test do
-  desc 'Run specs (with coverage on 1.9), alias `spec` & the default'
+  desc 'Run specs and check for deprecation warnings'
   task :spec do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    sh 'export COVERAGE=true; bundle exec rspec'
+    output = `export COVERAGE=true; bundle exec rspec`
+    puts output
+    if output =~ /Deprecation Warnings/
+      raise "Deprecation Warnings in spec generation, please fix!"
+    end
     Dir.chdir( original_dir )
   end
 end
