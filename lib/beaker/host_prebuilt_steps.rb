@@ -324,8 +324,9 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         logger.debug "Update /etc/ssh/sshd_config to allow root login"
-        host.exec(Command.new("sudo su -c \"sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
-  )
+        # note: this sed command only works on gnu sed
+        host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
+        )
         #restart sshd
         if host['platform'] =~ /debian|ubuntu/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
