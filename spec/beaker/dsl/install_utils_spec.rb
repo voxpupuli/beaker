@@ -110,7 +110,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
       subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
       subject.install_from_git( host, path, repo )
@@ -131,7 +131,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
       subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
       subject.install_from_git( host, path, repo )
