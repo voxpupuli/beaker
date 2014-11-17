@@ -28,7 +28,7 @@ module Beaker
       def cfacter(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
-        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
+        options[:cmdexe] = true
         Command.new('cfacter', args, options )
       end
 

@@ -19,7 +19,7 @@ describe ClassMixedWithDSLWrappers do
   describe '#cfacter' do
     it 'should split out the options and pass "cfacter" as first arg to Command' do
       Beaker::Command.should_receive( :new ).
-        with('cfacter', [ '-p' ], opts)
+        with('cfacter', [ '-p' ], empty_opts)
       subject.cfacter( '-p' )
     end
   end
