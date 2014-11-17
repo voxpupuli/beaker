@@ -169,6 +169,52 @@ module Beaker
       end
     end
 
+    describe "#add_env_var" do
+
+      it "does nothing if the key/value pair already exists" do
+        result = Beaker::Result.new(host, '')
+        result.exit_code = 0
+        Beaker::Command.should_receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        host.should_receive(:exec).once.and_return(result)
+
+        host.add_env_var('key', '/my/first/value')
+      end
+
+      it "adds new line to environment file if no env var of that name already exists" do
+        result = Beaker::Result.new(host, '')
+        result.exit_code = 1
+        Beaker::Command.should_receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        host.should_receive(:exec).and_return(result)
+        Beaker::Command.should_receive(:new).with(/grep KEY ~\/\.ssh\/environment/)
+        host.should_receive(:exec).and_return(result)
+        Beaker::Command.should_receive(:new).with("echo \"KEY=/my/first/value\" >> ~/.ssh/environment")
+        host.add_env_var('key', '/my/first/value')
+      end
+
+      it "updates existing line in environment file when adding additional value to existing variable" do
+        result = Beaker::Result.new(host, '')
+        result.exit_code = 1
+        Beaker::Command.should_receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        host.should_receive(:exec).and_return(result)
+        result = Beaker::Result.new(host, '')
+        result.exit_code = 0
+        Beaker::Command.should_receive(:new).with(/grep KEY ~\/\.ssh\/environment/)
+        host.should_receive(:exec).and_return(result)
+        Beaker::Command.should_receive(:new).with("sed -i -e \"s/KEY=/KEY=\\/my\\/first\\/value:/\" ~/.ssh/environment")
+        host.add_env_var('key', '/my/first/value')
+      end
+
+    end
+
+    describe "#delete_env_var" do
+      it "deletes env var" do
+        Beaker::Command.should_receive(:new).with("sed -i -e \"/key=\\/my\\/first\\/value$/d\" ~/.ssh/environment")
+        Beaker::Command.should_receive(:new).with("sed -i -e \"s/key=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/key=\\1/\" ~/.ssh/environment")
+        host.delete_env_var('key', '/my/first/value')
+      end
+
+    end
+
     describe "executing commands" do
       let(:command) { Beaker::Command.new('ls') }
       let(:host) { Beaker::Host.create('host', make_host_opts('host', options.merge(platform))) }
@@ -419,6 +465,5 @@ module Beaker
       end
 
     end
-
   end
 end

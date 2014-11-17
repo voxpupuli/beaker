@@ -25,6 +25,7 @@ module Beaker
       @user = user
       @ssh_opts = ssh_opts
       @logger = options[:logger]
+      @options = options
     end
 
     def self.connect hostname, user = 'root', ssh_opts = {}, options = {}

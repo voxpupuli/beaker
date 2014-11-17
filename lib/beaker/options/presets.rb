@@ -147,6 +147,8 @@ module Beaker
           :pe_dir               => '/opt/enterprise/dists',
           :pe_version_file      => 'LATEST',
           :pe_version_file_win  => 'LATEST-win',
+          :host_env             => {},
+          :ssh_env_file         => '~/.ssh/environment',
           :answers              => {
                                      :q_puppet_enterpriseconsole_auth_user_email    => 'admin@example.com',
                                      :q_puppet_enterpriseconsole_auth_password      => '~!@#$%^*-/ aZ',

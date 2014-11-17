@@ -105,6 +105,7 @@ module Beaker
       if @options[:disable_iptables]
         disable_iptables @hosts, @options
       end
+      set_env(@hosts, @options)
     end
 
     #Default validation steps to be run for a given hypervisor.  Ensures that SUTs meet requirements to be

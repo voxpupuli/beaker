@@ -206,6 +206,38 @@ module Beaker
       @x86_64 ||= determine_if_x86_64
     end
 
+    #Add the provided key/val to the current ssh environment
+    #@param [String] key The key to add the value to
+    #@param [String] val The value for the key
+    #@example
+    #  host.add_env_var('PATH', '/usr/bin:PATH')
+    def add_env_var key, val
+      key = key.to_s.upcase
+      escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
+      #see if the key/value pair already exists
+      if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{self[:ssh_env_file]}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        return #nothing to do here, key value pair already exists
+      #see if the key already exists
+      elsif exec(Beaker::Command.new("grep #{key} #{self[:ssh_env_file]}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        exec(Beaker::Command.new("sed -i -e \"s/#{key}=/#{key}=#{escaped_val}:/\" #{self[:ssh_env_file]}"))
+      else
+        exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{self[:ssh_env_file]}"))
+      end
+    end
+
+    #Delete the provided key/val from the current ssh environment
+    #@param [String] key The key to delete the value from
+    #@param [String] val The value to delete for the key
+    #@example
+    #  host.delete_env_var('PATH', '/usr/bin:PATH')
+    def delete_env_var key, val
+      val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
+      #if the key only has that single value remove the entire line
+      exec(Beaker::Command.new("sed -i -e \"/#{key}=#{val}$/d\" #{self[:ssh_env_file]}"))
+      #if the key has multiple values and we only need to remove the provided val
+      exec(Beaker::Command.new("sed -i -e \"s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/\" #{self[:ssh_env_file]}"))
+    end
+
     def connection
       @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
