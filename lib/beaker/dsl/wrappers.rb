@@ -25,6 +25,18 @@ module Beaker
       # this catchall param.
       #
       # @api dsl
+      def cfacter(*args)
+        options = args.last.is_a?(Hash) ? args.pop : {}
+        options['ENV'] ||= {}
+        options['ENV'] = options['ENV'].merge( Command::DEFAULT_GIT_ENV )
+        Command.new('cfacter', args, options )
+      end
+
+      # This is hairy and because of legacy code it will take a bit more
+      # work to disentangle all of the things that are being passed into
+      # this catchall param.
+      #
+      # @api dsl
       def hiera(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}

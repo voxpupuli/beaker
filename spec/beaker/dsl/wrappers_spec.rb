@@ -16,6 +16,14 @@ describe ClassMixedWithDSLWrappers do
     end
   end
 
+  describe '#cfacter' do
+    it 'should split out the options and pass "cfacter" as first arg to Command' do
+      Beaker::Command.should_receive( :new ).
+        with('cfacter', [ '-p' ], opts)
+      subject.cfacter( '-p' )
+    end
+  end
+
   describe '#hiera' do
     it 'should split out the options and pass "hiera" as first arg to Command' do
       Beaker::Command.should_receive( :new ).
