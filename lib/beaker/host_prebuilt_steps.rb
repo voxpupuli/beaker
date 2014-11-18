@@ -331,7 +331,7 @@ module Beaker
         if host['platform'] =~ /debian|ubuntu/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora/
-          host.exec(Command.new("sudo su -c \"service sshd restart\""), {:pty => true})
+          host.exec(Command.new("sudo -E service sshd restart"))
         else
           @logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
