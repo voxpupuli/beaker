@@ -53,9 +53,21 @@ module Beaker
         HostCommand.new(command_string)
       end
 
-      # This is hairy and because of legacy code it will take a bit more
-      # work to disentangle all of the things that are being passed into
-      # this catchall param.
+      # Returns a {Beaker::Command} object for executing puppet commands on a host
+      #
+      # @param [Array] args the command-line arguments to send to puppet
+      #
+      # @example examining users from puppet
+      #     puppet('resource user')
+      #     puppet('resource', 'user')
+      #
+      # @example examining certs on a system
+      #     puppet("cert --list --all")
+      #
+      # @example run puppet apply
+      #     puppet("apply")
+      #
+      # @return [Command] the created Command object for this puppet call
       #
       # @api dsl
       def puppet(*args)

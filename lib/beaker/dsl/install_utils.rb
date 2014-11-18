@@ -1147,17 +1147,27 @@ module Beaker
       # @param opts [Hash]
       # @option opts [String] :module_name The short name of the module to be installed
       # @option opts [String] :version The version of the module to be installed
+      # @option opts [Symbol] :log_level The level you'd like this to log with
       def install_puppet_module_via_pmt_on( host, opts = {} )
         block_on host do |h|
-          version_info = opts[:version] ? "-v #{opts[:version]}" : ""
+          version_info = opts[:version] ? " -v #{opts[:version]}" : ""
           if opts[:source]
             author_name, module_name = parse_for_modulename( opts[:source] )
             modname = "#{author_name}-#{module_name}"
           else
             modname = opts[:module_name]
           end
+          log_level = ''
+          case opts[:log_level]
+            when :verbose
+              log_level = ' --verbose'
+            when :debug
+              log_level = ' --debug'
+            when :trace
+              log_level = ' --trace'
+          end
 
-          on h, puppet("module install #{modname} #{version_info}")
+          on h, puppet("module install #{modname}#{version_info}#{log_level}")
         end
       end
 

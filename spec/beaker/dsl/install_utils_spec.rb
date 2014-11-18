@@ -827,9 +827,37 @@ describe ClassMixedWithDSLInstallUtils do
       subject.stub( :hosts ).and_return( hosts )
       master = hosts.first
 
-      subject.should_receive( :puppet ).with('module install test ' ).once
+      subject.should_receive( :puppet ).with('module install test' ).once
 
       subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
+    end
+
+    it 'takes the log_level option correctly for verbose' do
+      subject.stub( :hosts ).and_return( hosts )
+      master = hosts.first
+
+      subject.should_receive( :puppet ).with('module install test --verbose' ).once
+
+      subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test', :log_level => :verbose} )
+    end
+
+    it 'takes the log_level option correctly for debug' do
+      subject.stub( :hosts ).and_return( hosts )
+      master = hosts.first
+
+      subject.should_receive( :puppet ).with('module install test --debug' ).once
+
+      subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test', :log_level => :debug} )
+    end
+
+    it 'takes the version option and passes it down correctly' do
+      subject.stub( :hosts ).and_return( hosts )
+      master = hosts.first
+      version = '7.14.11'
+
+      subject.should_receive( :puppet ).with("module install test -v #{version}" ).once
+
+      subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test', :version => version} )
     end
   end
 
