@@ -956,7 +956,7 @@ module Beaker
           rpm = options[:release_yum_repo_url] +
             "/puppetlabs-release-%s-%s.noarch.rpm" % [variant, version]
 
-          on host, "rpm -ivh --force #{rpm}"
+          on host, "rpm -ivh #{rpm}"
 
         when /^(debian|ubuntu)$/
           deb = URI.join(options[:release_apt_repo_url],  "puppetlabs-release-%s.deb" % codename)
