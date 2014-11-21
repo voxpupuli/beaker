@@ -59,7 +59,7 @@ module Beaker
           rescue LoadError
             raise "Invalid hypervisor: #{type}"
           end
-          const_get("Beaker::#{type.capitalize}")
+          Beaker.const_get(type.capitalize)
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
