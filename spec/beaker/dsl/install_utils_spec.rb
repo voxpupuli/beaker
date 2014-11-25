@@ -18,11 +18,13 @@ describe ClassMixedWithDSLInstallUtils do
   let(:opts)          { presets.presets.merge(presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
                                        :platform => 'linux',
-                                       :roles => [ 'agent' ] } ) }
+                                       :roles => [ 'agent' ] }, 4 ) }
   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
                         basic_hosts[1][:platform] = 'windows'
                         basic_hosts[2][:platform] = 'osx-10.9-x86_64'
+                        basic_hosts[3][:platform] = 'eos'
                         basic_hosts  }
+  let(:hosts_sorted)  { [ hosts[1], hosts[0], hosts[2], hosts[3] ] }
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp' } ) }
@@ -33,6 +35,10 @@ describe ClassMixedWithDSLInstallUtils do
                                                  :pe_ver => '3.0',
                                                  :working_dir => '/tmp',
                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
+  let(:eoshost)       { make_host( 'eoshost', { :platform => 'eos',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp',
+                                                :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
 
 
   context 'extract_repo_info_from' do
@@ -140,7 +146,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'sorted_hosts' do
     it 'can reorder so that the master comes first' do
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      subject.stub( :hosts ).and_return( hosts_sorted )
       expect( subject.sorted_hosts ).to be === hosts
     end
 
@@ -187,6 +193,15 @@ describe ClassMixedWithDSLInstallUtils do
       the_host = machost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && hdiutil attach .dmg && installer -pkg /Volumes/puppet-enterprise-3.0/puppet-enterprise-installer-3.0.pkg -target /"
+    end
+
+    it 'generates an EOS PE install command for an EOS host' do
+      the_host = eoshost.dup
+      command = <<-DOC
+enable
+extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix
+      DOC
+      expect( subject.installer_cmd( the_host, {} ) ).to be === "Cli -c '#{command}'"
     end
 
     it 'generates a unix PE install command in verbose for a unix host when pe_debug is enabled' do
@@ -263,6 +278,23 @@ describe ClassMixedWithDSLInstallUtils do
       extension = '.tar.gz'
       subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
+    end
+
+    it 'can download a PE .swix from a URL to an EOS host and unpack it' do
+      File.stub( :directory? ).and_return( false ) #is not local
+      eoshost['pe_dir'] = 'http://www.path.com/dir/'
+      subject.stub( :link_exists? ).and_return( true ) #is a tar.gz
+      subject.stub( :on ).and_return( true )
+
+      path = eoshost['pe_dir']
+      filename = "#{ eoshost['dist'] }"
+      extension = '.swix'
+      command = <<-DOC
+enable
+copy #{path}/#{filename}#{extension} extension:
+DOC
+      subject.should_receive( :on ).with( eoshost, "Cli -c '#{command}'" ).once
+      subject.fetch_puppet( [eoshost], {} )
     end
 
     it 'can push a local PE package to a windows host' do
@@ -343,30 +375,38 @@ describe ClassMixedWithDSLInstallUtils do
       subject.should_receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
       subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
       subject.should_receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
-      #does extra mac specific commands
+      subject.should_receive( :on ).with( hosts[3], /^Cli/ ).once
+      #does extra mac/EOS specific commands
       subject.should_receive( :on ).with( hosts[2], /puppet config set server/ ).once
+      subject.should_receive( :on ).with( hosts[3], /puppet config set server/ ).once
       subject.should_receive( :on ).with( hosts[2], /puppet config set certname/ ).once
+      subject.should_receive( :on ).with( hosts[3], /puppet config set certname/ ).once
       subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
+      subject.should_receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
       #sign certificate per-host
       subject.should_receive( :sign_certificate_for ).with( hosts[0] ).once
       subject.should_receive( :sign_certificate_for ).with( hosts[1] ).once
       subject.should_receive( :sign_certificate_for ).with( hosts[2] ).once
+      subject.should_receive( :sign_certificate_for ).with( hosts[3] ).once
       #stop puppet agent on all hosts
       subject.should_receive( :stop_agent_on ).with( hosts[0] ).once
       subject.should_receive( :stop_agent_on ).with( hosts[1] ).once
       subject.should_receive( :stop_agent_on ).with( hosts[2] ).once
+      subject.should_receive( :stop_agent_on ).with( hosts[3] ).once
       #wait for puppetdb to start
       subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
       #run each puppet agent once
       subject.should_receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       subject.should_receive( :on ).with( hosts[1], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      subject.should_receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
       subject.should_receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
       subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[0] ).once
       subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[1] ).once
       subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[2] ).once
+      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[3] ).once
       #run puppet agent now that installation is complete
       subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts, opts )
@@ -555,7 +595,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'calls do_install with sorted hosts' do
       subject.stub( :options ).and_return( {} )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      subject.stub( :hosts ).and_return( hosts_sorted )
       subject.stub( :do_install ).and_return( true )
       subject.should_receive( :do_install ).with( hosts, {} )
       subject.install_pe
@@ -566,7 +606,7 @@ describe ClassMixedWithDSLInstallUtils do
         h['pe_ver'] = nil
       end
       Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      subject.stub( :hosts ).and_return( hosts_sorted )
       subject.stub( :options ).and_return( {} )
       subject.stub( :do_install ).and_return( true )
       subject.should_receive( :do_install ).with( hosts, {} )
