@@ -116,7 +116,7 @@ module Beaker
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
         EOF
-      when /^el-/, /centos/, /fedora/, /redhat/
+      when /^el-/, /centos/, /fedora/, /redhat/, /eos/
         dockerfile += <<-EOF
           RUN yum clean all
           RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}

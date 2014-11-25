@@ -24,7 +24,7 @@ module Unix::Pkg
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
-      when /fedora|centos|el-/
+      when /fedora|centos|eos|el-/
         result = exec(Beaker::Command.new("rpm -q #{name}"), :acceptable_exit_codes => (0...127))
       when /ubuntu|debian/
         result = exec(Beaker::Command.new("dpkg -s #{name}"), :acceptable_exit_codes => (0...127))
@@ -55,7 +55,7 @@ module Unix::Pkg
         execute("zypper --non-interactive in #{name}")
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora|centos|el-/
+      when /fedora|centos|eos|el-/
         if version
           name = "#{name}-#{version}"
         end
@@ -81,7 +81,7 @@ module Unix::Pkg
         execute("zypper --non-interactive rm #{name}")
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
-      when /fedora|centos|el-/
+      when /fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}")
       when /ubuntu|debian/
         execute("apt-get purge #{cmdline_args} -y #{name}")
@@ -105,7 +105,7 @@ module Unix::Pkg
         execute("zypper --non-interactive --no-gpg-checks up #{name}")
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
-      when /fedora|centos|el-/
+      when /fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}")
       when /ubuntu|debian/
         update_apt_if_needed
@@ -189,7 +189,7 @@ module Unix::Pkg
     case self['platform']
       when /el-4/
         @logger.debug("Package repo deploy is not supported on rhel4")
-      when /fedora|centos|el-/
+      when /fedora|centos|eos|el-/
         deploy_yum_repo(path, name, version)
       when /ubuntu|debian/
         deploy_apt_repo(path, name, version)

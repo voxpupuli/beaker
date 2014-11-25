@@ -17,7 +17,7 @@ module Beaker
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
+    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} %s"
     APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
@@ -124,9 +124,17 @@ module Beaker
       logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
         if host['platform'].include? 'solaris'
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "| bash"), :acceptable_exit_codes => (0..255))
+        elsif host['platform'].include? 'eos'
+          # this is a terrible terrible thing that I'm already in the process of fixing
+          # the only reason that I include this terrible implementation is that the
+          # fix relies on changes in another repo, so I'm not sure how long it'll take
+          # to get those in
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "> manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new("sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new("bash manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
         else
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "| env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
         end
       end
     rescue => e
@@ -331,7 +339,7 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /centos|el-|redhat|fedora/
+        elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E service sshd restart"))
         else
           @logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
@@ -346,7 +354,7 @@ module Beaker
     def disable_se_linux host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|fedora/
+        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
           @logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
         else
@@ -362,7 +370,7 @@ module Beaker
     def disable_iptables host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|fedora/
+        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
           logger.debug("Disabling iptables on #{host.name}")
           host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
         else
@@ -385,7 +393,7 @@ module Beaker
         case host['platform']
           when /ubuntu/, /debian/
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
-          when /^el-/, /centos/, /fedora/, /redhat/
+          when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
@@ -478,7 +486,7 @@ module Beaker
         when /debian|ubuntu/
           host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service ssh restart"))
-        when /el-|centos|fedora|redhat|oracle|scientific/
+        when /el-|centos|fedora|redhat|oracle|scientific|eos/
           host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service sshd restart"))
         when /sles/
