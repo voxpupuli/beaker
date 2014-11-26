@@ -266,21 +266,10 @@ describe Beaker do
   context "sync_root_keys" do
     subject { dummy_class.new }
 
-    it "can sync keys on a solaris host" do
+    it "can sync keys on a solaris/eos host" do
       @platform = 'solaris'
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "| bash" ).exactly( 3 ).times
-
-      subject.sync_root_keys( hosts, options )
-
-    end
-
-    it "can sync keys on an eos host" do
-      @platform = 'eos'
-
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "> manage_root_authorized_keys" ).exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with( "sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys" ).exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with( "bash manage_root_authorized_keys" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( sync_cmd % "bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -288,7 +277,7 @@ describe Beaker do
 
     it "can sync keys on a non-solaris host" do
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "| env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( sync_cmd % "env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 

@@ -17,7 +17,7 @@ module Beaker
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
-    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} %s"
+    ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
@@ -123,18 +123,10 @@ module Beaker
       block_on host do |host|
       logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if host['platform'].include? 'solaris'
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "| bash"), :acceptable_exit_codes => (0..255))
-        elsif host['platform'].include? 'eos'
-          # this is a terrible terrible thing that I'm already in the process of fixing
-          # the only reason that I include this terrible implementation is that the
-          # fix relies on changes in another repo, so I'm not sure how long it'll take
-          # to get those in
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "> manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
-          host.exec(Command.new("sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
-          host.exec(Command.new("bash manage_root_authorized_keys"), :acceptable_exit_codes => (0..255))
+        if host['platform'] =~ /solaris|eos/
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :acceptable_exit_codes => (0..255))
         else
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "| env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
         end
       end
     rescue => e
