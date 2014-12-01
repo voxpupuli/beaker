@@ -864,7 +864,19 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :hosts ).and_return( hosts )
       master = hosts.first
 
-      expect( subject ).to receive( :puppet ).with('module install test ' ).once
+
+      expect( subject ).to receive( :puppet ).with('module install test ', {}).once
+
+      subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
+    end
+
+    it 'takes the trace option and passes it down correctly' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      master = hosts.first
+      trace_opts = { :trace => nil }
+      master['default_module_install_opts'] = trace_opts
+
+      expect( subject ).to receive( :puppet ).with('module install test ', trace_opts).once
 
       subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
     end
