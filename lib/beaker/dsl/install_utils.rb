@@ -1187,7 +1187,12 @@ module Beaker
             modname = opts[:module_name]
           end
 
-          on h, puppet("module install #{modname} #{version_info}")
+          puppet_opts = {}
+          if host[:default_module_install_opts].respond_to? :merge
+            puppet_opts = host[:default_module_install_opts].merge( puppet_opts )
+          end
+
+          on h, puppet("module install #{modname} #{version_info}", puppet_opts)
         end
       end
 
