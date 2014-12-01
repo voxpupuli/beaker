@@ -19,8 +19,7 @@ describe Beaker do
                            hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
                            hosts[2][:roles] = ['agent']
                            hosts }
-  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps
-                                       include Beaker::DSL::Patterns } }
+  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps } }
 
   context 'timesync' do
 
@@ -238,16 +237,21 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "add extras for el-5/6 hosts" do
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 } )
-      hosts[0][:platform] = Beaker::Platform.new('el-6-arch')
 
-      Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 1 ).times
+      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 }, 6 )
+      hosts[0][:platform] = Beaker::Platform.new('el-6-arch')
+      hosts[1][:platform] = Beaker::Platform.new('centos-6-arch')
+      hosts[2][:platform] = Beaker::Platform.new('scientific-6-arch')
+      hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
+      hosts[4][:platform] = Beaker::Platform.new('oracle-5-arch')
+
+      Beaker::Command.should_receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
+      Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 4 ).times
       Beaker::Command.should_receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
-      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 1 ).times
+      Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
       Beaker::Command.should_receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
-      Beaker::Command.should_receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 3 ).times
-      Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
+      Beaker::Command.should_receive( :new ).with("yum clean all && yum makecache").exactly( 6 ).times
 
       subject.add_el_extras( hosts, options )
 
