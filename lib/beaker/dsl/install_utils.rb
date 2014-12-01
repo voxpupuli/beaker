@@ -173,8 +173,20 @@ module Beaker
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
+          # PE 3.4 introduced the ability to pass in config options to the bash script in the form
+          # of <section>:<key>=<value>
+          frictionless_install_opts = []
+          if host.has_key?('frictionless_options') and !  version_is_less(version, '3.4.0')
+            # since we have options to pass in, we need to tell the bash script
+            host['frictionless_options'].each do |section, settings|
+              settings.each do |key, value|
+                frictionless_install_opts << "#{section}:#{key}=#{value}"
+              end
+            end
+          end
+
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -x' : ''
-          "cd #{host['working_dir']} && curl -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash"
+          "cd #{host['working_dir']} && curl --tlsv1 -kO https://#{master}:8140/packages/#{version}/install.bash && bash#{pe_debug} install.bash #{frictionless_install_opts.join(' ')}".strip
         elsif host['platform'] =~ /osx/
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
@@ -430,6 +442,10 @@ module Beaker
         opts[:type] = opts[:type] || :install
         pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
         pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
+
+        unless version_is_less(opts[:pe_ver] || master['pe_ver'], '3.4')
+          master['puppetservice'] = 'pe-puppetserver'
+        end
 
         # Set PE distribution for all the hosts, create working dir
         use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'

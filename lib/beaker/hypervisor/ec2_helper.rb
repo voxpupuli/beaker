@@ -10,6 +10,7 @@ module Beaker
       ports = [22, 61613, 8139]
 
       if roles.include? 'database'
+        ports << 5432
         ports << 8080
         ports << 8081
       end
@@ -20,6 +21,7 @@ module Beaker
 
       if roles.include? 'dashboard'
         ports << 443
+        ports << 4433
         ports << 4435
       end
 
