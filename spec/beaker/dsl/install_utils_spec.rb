@@ -197,10 +197,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'generates an EOS PE install command for an EOS host' do
       the_host = eoshost.dup
-      command = <<-DOC
-enable
-extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix
-      DOC
+      commands = ['enable', "extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix"]
+      command = commands.join("\n")
       expect( subject.installer_cmd( the_host, {} ) ).to be === "Cli -c '#{command}'"
     end
 
@@ -250,7 +248,6 @@ extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix
 
     it 'can download a PE .tar from a URL to a host and unpack it' do
       File.stub( :directory? ).and_return( false ) #is not local
-      unixhost['pe_dir'] = 'http://www.path.com/dir/'
       subject.stub( :link_exists? ) do |arg|
         if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
           false
@@ -269,7 +266,6 @@ extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix
 
     it 'can download a PE .tar.gz from a URL to a host and unpack it' do
       File.stub( :directory? ).and_return( false ) #is not local
-      unixhost['pe_dir'] = 'http://www.path.com/dir/'
       subject.stub( :link_exists? ).and_return( true ) #is a tar.gz
       subject.stub( :on ).and_return( true )
 
@@ -282,17 +278,14 @@ extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix
 
     it 'can download a PE .swix from a URL to an EOS host and unpack it' do
       File.stub( :directory? ).and_return( false ) #is not local
-      eoshost['pe_dir'] = 'http://www.path.com/dir/'
       subject.stub( :link_exists? ).and_return( true ) #is a tar.gz
       subject.stub( :on ).and_return( true )
 
       path = eoshost['pe_dir']
       filename = "#{ eoshost['dist'] }"
       extension = '.swix'
-      command = <<-DOC
-enable
-copy #{path}/#{filename}#{extension} extension:
-DOC
+      commands = ['enable', "copy #{path}/#{filename}#{extension} extension:"]
+      command = commands.join("\n")
       subject.should_receive( :on ).with( eoshost, "Cli -c '#{command}'" ).once
       subject.fetch_puppet( [eoshost], {} )
     end
@@ -300,7 +293,6 @@ DOC
     it 'can push a local PE package to a windows host' do
       File.stub( :directory? ).and_return( true ) #is local
       File.stub( :exists? ).and_return( true ) #is present
-      winhost['pe_dir'] = '/local/file/path'
       winhost['dist'] = 'puppet-enterprise-3.0'
       subject.stub( :scp_to ).and_return( true )
 
@@ -314,7 +306,6 @@ DOC
 
     it 'can download a PE dmg from a URL to a mac host' do
       File.stub( :directory? ).and_return( false ) #is not local
-      machost['pe_dir'] = 'http://www.path.com/dir/'
       subject.stub( :link_exists? ).and_return( true ) #is  not local
       subject.stub( :on ).and_return( true )
 
@@ -327,7 +318,6 @@ DOC
 
     it 'can push a PE dmg to a mac host' do
       File.stub( :directory? ).and_return( true ) #is local
-      machost['pe_dir'] = 'http://www.path.com/dir/'
       File.stub( :exists? ).and_return( true ) #is present
       subject.stub( :scp_to ).and_return( true )
 
