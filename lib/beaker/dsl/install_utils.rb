@@ -640,7 +640,7 @@ module Beaker
       #  install_puppet()
       #
       # @note This will attempt to add a repository for apt.puppetlabs.com on
-      #       Debian or Ubuntu machines, or yum.puppetlabs.com on EL or Fedora
+      #       Debian, Ubuntu, or Cumulus machines, or yum.puppetlabs.com on EL or Fedora
       #       machines, then install the package 'puppet'.
       # @param [Hash{Symbol=>String}] opts
       # @option opts [String] :version Version of puppet to download
@@ -662,7 +662,7 @@ module Beaker
           elsif host['platform'] =~ /fedora-(\d+)/
             relver = $1
             install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'fedora')
-          elsif host['platform'] =~ /(ubuntu|debian)/
+          elsif host['platform'] =~ /(ubuntu|debian|cumulus)/
             install_puppet_from_deb host, opts
           elsif host['platform'] =~ /windows/
             relver = opts[:version]
@@ -862,9 +862,9 @@ module Beaker
 
         unless host.check_for_command( 'gem' )
           gempkg = case host['platform']
-                   when /solaris-11/                   then 'ruby-18'
-                   when /ubuntu-14/                    then 'ruby'
-                   when /solaris-10|ubuntu|debian|el-/ then 'rubygems'
+                   when /solaris-11/                            then 'ruby-18'
+                   when /ubuntu-14/                             then 'ruby'
+                   when /solaris-10|ubuntu|debian|el-|cumulus/  then 'rubygems'
                    else
                      raise "install_puppet() called with default_action " +
                            "'gem_install' but program `gem' is " +
@@ -879,7 +879,7 @@ module Beaker
           on host, 'ln -s /opt/csw/bin/gem /usr/bin/gem'
         end
 
-        if host['platform'] =~ /debian|ubuntu|solaris/
+        if host['platform'] =~ /debian|ubuntu|solaris|cumulus/
           gem_env = YAML.load( on( host, 'gem environment' ).stdout )
           gem_paths_array = gem_env['RubyGems Environment'].find {|h| h['GEM PATHS'] != nil }['GEM PATHS']
           path_with_gem = 'export PATH=' + gem_paths_array.join(':') + ':${PATH}'
@@ -988,7 +988,7 @@ module Beaker
 
           on host, "rpm -ivh #{rpm}"
 
-        when /^(debian|ubuntu)$/
+        when /^(debian|ubuntu|cumulus)$/
           deb = URI.join(options[:release_apt_repo_url],  "puppetlabs-release-%s.deb" % codename)
 
           on host, "wget -O /tmp/puppet.deb #{deb}"
@@ -1084,7 +1084,7 @@ module Beaker
 
           on host, find_and_sed
 
-        when /^(debian|ubuntu)$/
+        when /^(debian|ubuntu|cumulus)$/
           list = fetch_http_file( "%s/%s/%s/repo_configs/deb/" %
                          [ dev_builds_url, package_name, build_version ],
                         "pl-%s-%s-%s.list" %
