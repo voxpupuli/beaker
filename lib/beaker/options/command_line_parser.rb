@@ -155,7 +155,7 @@ module Beaker
           end
 
           opts.on '--repo-proxy',
-                  'Proxy packaging repositories on ubuntu, debian and solaris-11',
+                  'Proxy packaging repositories on ubuntu, debian, cumulus and solaris-11',
                   '(default: false)' do
             @cmd_options[:repo_proxy] = true
           end

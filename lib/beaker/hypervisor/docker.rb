@@ -116,6 +116,12 @@ module Beaker
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
         EOF
+        when  /cumulus/
+          sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
+          dockerfile += <<-EOF
+          RUN apt-get update
+          RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
+        EOF
       when /^el-/, /centos/, /fedora/, /redhat/, /eos/
         dockerfile += <<-EOF
           RUN yum clean all

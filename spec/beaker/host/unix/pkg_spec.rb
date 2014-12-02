@@ -81,6 +81,14 @@ module Beaker
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
+      it "checks correctly on cumulus" do
+        @opts = {'platform' => 'cumulus-is-me'}
+        pkg = 'cumulus_package'
+        Beaker::Command.should_receive(:new).with("dpkg -s #{pkg}").and_return('')
+        instance.should_receive(:exec).with('', :acceptable_exit_codes => (0...127)).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.check_for_package(pkg) ).to be === true
+      end
+
       it "checks correctly on solaris-11" do
         @opts = {'platform' => 'solaris-11-is-me'}
         pkg = 'solaris-11_package'

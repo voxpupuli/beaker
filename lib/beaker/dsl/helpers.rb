@@ -680,7 +680,7 @@ module Beaker
       def dump_puppet_log(host)
         syslogfile = case host['platform']
           when /fedora|centos|el|redhat|scientific/ then '/var/log/messages'
-          when /ubuntu|debian/ then '/var/log/syslog'
+          when /ubuntu|debian|cumulus/ then '/var/log/syslog'
           else return
         end
 
