@@ -705,7 +705,7 @@ module Beaker
       def install_puppet_from_rpm( host, opts )
         release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
 
-        on host, "rpm -ivh #{release_package_string}"
+        on host, "rpm -q --quiet puppetlabs-release || rpm -ivh #{release_package_string}"
 
         if opts[:facter_version]
           on host, "yum install -y facter-#{opts[:facter_version]}"
