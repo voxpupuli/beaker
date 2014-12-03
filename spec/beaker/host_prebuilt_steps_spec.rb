@@ -273,7 +273,18 @@ describe Beaker do
     it "can sync keys on a solaris host" do
       @platform = 'solaris'
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "bash" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( sync_cmd % "| bash" ).exactly( 3 ).times
+
+      subject.sync_root_keys( hosts, options )
+
+    end
+
+    it "can sync keys on an eos host" do
+      @platform = 'eos'
+
+      Beaker::Command.should_receive( :new ).with( sync_cmd % "> manage_root_authorized_keys" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( "sed -i 's|mv -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|cp -f $SSH_HOME/authorized_keys.tmp $SSH_HOME/authorized_keys|' manage_root_authorized_keys" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( "bash manage_root_authorized_keys" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -281,7 +292,7 @@ describe Beaker do
 
     it "can sync keys on a non-solaris host" do
 
-      Beaker::Command.should_receive( :new ).with( sync_cmd % "env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
+      Beaker::Command.should_receive( :new ).with( sync_cmd % "| env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
@@ -391,6 +402,15 @@ describe Beaker do
     subject { dummy_class.new }
     proxyurl = "http://192.168.2.100:3128"
 
+    it "can set proxy config on an ubuntu host" do
+      host = make_host('name', { :platform => 'ubuntu' } )
+
+      Beaker::Command.should_receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
+      host.should_receive( :exec ).once
+
+      subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+    end
+
     it "can set proxy config on a debian/ubuntu host" do
       host = make_host('name', { :platform => 'ubuntu' } )
 
@@ -400,14 +420,103 @@ describe Beaker do
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
 
-    it "can set proxy config on a redhat/centos host" do
+    it "can set proxy config on a centos host" do
       host = make_host('name', { :platform => 'centos' } )
 
       Beaker::Command.should_receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
       host.should_receive( :exec ).once
 
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+    end
 
+  end
+
+  context "set_env" do
+    subject { dummy_class.new }
+
+    it "can set the environment on a windows host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/sshd_config",
+        "cygrunsrv -E sshd",
+        "cygrunsrv -S sshd"
+      ]
+      set_env_helper('windows', commands)
+    end
+
+    it "can set the environment on an OS X host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/sshd_config",
+        "launchctl unload /System/Library/LaunchDaemons/ssh.plist",
+        "launchctl load /System/Library/LaunchDaemons/ssh.plist"
+      ]
+      set_env_helper('osx', commands)
+    end
+
+    it "can set the environment on an ssh-based linux host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "service ssh restart"
+      ]
+      set_env_helper('ubuntu', commands)
+    end
+
+    it "can set the environment on an sshd-based linux host" do
+      commands = [
+          "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+          "service sshd restart"
+      ]
+      set_env_helper('eos', commands)
+    end
+
+    it "can set the environment on an sles host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "rcsshd restart"
+      ]
+      set_env_helper('sles', commands)
+    end
+
+    it "can set the environment on a solaris host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "svcadm restart svc:/network/ssh:default"
+      ]
+      set_env_helper('solaris', commands)
+    end
+
+    it "can set the environment on an aix host" do
+      commands = [
+        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "stopsrc -g ssh",
+        "startsrc -g ssh"
+      ]
+      set_env_helper('aix', commands)
+    end
+
+    def set_env_helper(platform_name, host_specific_commands_array)
+      host = make_host('name', {
+          :platform     => platform_name,
+          :ssh_env_file => 'ssh_env_file'
+      } )
+      opts = {
+          :env1_key => :env1_value,
+          :env2_key => :env2_value
+      }
+
+      subject.should_receive( :construct_env ).and_return( opts )
+      host_specific_commands_array.each do |command|
+        Beaker::Command.should_receive( :new ).with( command ).once
+      end
+      Beaker::Command.should_receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
+      host.should_receive( :add_env_var ).with( 'RUBYLIB', '$RUBYLIB' ).once
+      host.should_receive( :add_env_var ).with( 'PATH', '$PATH' ).once
+      opts.each_pair do |key, value|
+        host.should_receive( :add_env_var ).with( key, value ).once
+      end
+      host.should_receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
+      host.should_receive( :exec ).exactly( host_specific_commands_array.length + 1 ).times
+
+      subject.set_env(host, options.merge( opts ))
     end
 
   end

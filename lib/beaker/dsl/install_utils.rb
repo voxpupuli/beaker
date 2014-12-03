@@ -191,6 +191,10 @@ module Beaker
           version = host['pe_ver'] || opts[:pe_ver]
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
           "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
+        elsif host['platform'] =~ /eos/
+          commands = ['enable', "extension puppet-enterprise-#{version}-#{host['platform']}.swix"]
+          command = commands.join("\n")
+          "Cli -c '#{command}'"
         else
           pe_debug = host[:pe_debug] || opts[:pe_debug]  ? ' -D' : ''
           "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']}#{pe_debug} -a #{host['working_dir']}/answers"
@@ -371,14 +375,24 @@ module Beaker
             on host, "cd #{host['working_dir']}; tar -xvf #{filename}.tar"
           end
         else
-          extension = link_exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
+          if host['platform'] =~ /eos/
+            extension = '.swix'
+          else
+            extension = link_exists?("#{path}/#{filename}.tar.gz") ? ".tar.gz" : ".tar"
+          end
           if not link_exists?("#{path}/#{filename}#{extension}")
             raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
           end
-          unpack = 'tar -xvf -'
-          unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack
 
-          on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} | #{unpack}"
+          if host['platform'] =~ /eos/
+            commands = ['enable', "copy #{path}/#{filename}#{extension} extension:"]
+            command = commands.join("\n")
+            on host, "Cli -c '#{command}'"
+          else
+            unpack = 'tar -xvf -'
+            unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack
+            on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} | #{unpack}"
+          end
         end
       end
 
@@ -490,7 +504,7 @@ module Beaker
               # to make sure the master has packages for us.
               deploy_frictionless_to_master(host)
               on host, installer_cmd(host, opts)
-            elsif host['platform'] =~ /osx/
+            elsif host['platform'] =~ /osx|eos/
               # If we're not frictionless, we need to run the OSX special-case
               on host, installer_cmd(host, opts)
               #set the certname and master
