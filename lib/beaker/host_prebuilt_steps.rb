@@ -178,7 +178,7 @@ module Beaker
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        if host[:platform] =~ /(ubuntu)|(debian)|(cumulus)/
+        if host[:platform] =~ /ubuntu|debian|cumulus/
           host.exec(Command.new("apt-get update"))
         end
       end
