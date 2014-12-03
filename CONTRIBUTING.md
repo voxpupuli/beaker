@@ -36,6 +36,7 @@
 ````
  
 * Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
+  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
 * Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without apporpriate documentation will be rejected.
 * Run the tests to assure nothing else was accidentally broken, using `rake test`
   * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 1.8, 2.0). Beaker supports Ruby 1.8+, and breakage of support for older/newer rubies will cause a patch to be rejected.
