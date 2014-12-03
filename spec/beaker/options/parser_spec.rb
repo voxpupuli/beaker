@@ -50,7 +50,7 @@ module Beaker
         end
       end
 
-      context 'testing path traversing', :use_fakefs => true do
+      context 'testing path traversing' do
 
         let(:test_dir) { 'tmp/tests' }
         let(:rb_test)  { File.expand_path(test_dir + '/my_ruby_file.rb')    }
@@ -76,7 +76,7 @@ module Beaker
         end
       end
 
-      context 'combining split_arg and file_list maintain test file ordering', :use_fakefs => true do
+      context 'combining split_arg and file_list maintain test file ordering' do
         let(:test_dir) { 'tmp/tests' }
         let(:other_test_dir) {'tmp/tests2' }
 

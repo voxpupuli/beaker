@@ -11,7 +11,7 @@ module Beaker
       #These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
 
-      PARSE_ERROR = if RUBY_VERSION > '1.8.7'; then Psych::SyntaxError; else ArgumentError; end
+      PARSE_ERROR = Psych::SyntaxError
 
       #The OptionsHash of all parsed options
       attr_accessor :options
@@ -240,7 +240,6 @@ module Beaker
       #  - --fail-mode is one of 'fast', 'stop' or nil
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
-      #  - if using docker hypervisor are using RUBY 1.9+
       #  - that one and only one master is defined per set of hosts
       #  - that solaris/windows/aix hosts are agent only for PE tests OR
       #  - that windows/aix host are agent only if type is not 'pe'
@@ -305,12 +304,6 @@ module Beaker
           end
           if ['aix', 'solaris', 'vcloud'].include?(visor)
             check_yaml_file(@options[:dot_fog], "required by #{visor}")
-          end
-        end
-        #if using docker need ruby 1.9+
-        if hypervisors.include?('docker')
-          if RUBY_VERSION < '1.9'
-            parser_error "Cannot use the 'docker' hypervisor on Ruby < 1.9 (using #{RUBY_VERSION})"
           end
         end
 

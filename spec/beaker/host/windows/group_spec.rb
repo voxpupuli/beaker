@@ -29,7 +29,7 @@ Name=#{group_name}
     end
 
     before(:each) do
-      instance.should_receive(:execute).with(/wmic group where/).and_yield(result)
+      expect( instance ).to receive(:execute).with(/wmic group where/).and_yield(result)
     end
 
     it "gets a group_list" do

@@ -5,7 +5,7 @@ module Beaker
     let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
     let(:aws) {
       # Mock out the call to load_fog_credentials
-      Beaker::AwsSdk.any_instance.stub(:load_fog_credentials).and_return(fog_file_contents)
+      allow_any_instance_of( Beaker::AwsSdk ).to receive(:load_fog_credentials).and_return(fog_file_contents)
 
       # This is needed because the EC2 api looks up a local endpoints.json file
       FakeFS.deactivate!
@@ -44,15 +44,15 @@ module Beaker
 
     context 'enabling root shall be called once for the ubuntu machine' do
       it "should enable root once" do
-        aws.should_receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
-        aws.should_receive(:enable_root_login).with( @hosts[3], options).once()
+        expect( aws ).to receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
+        expect( aws ).to receive(:enable_root_login).with( @hosts[3], options).once()
         aws.enable_root_on_hosts();
       end
     end
 
     context '#backoff_sleep' do
       it "should call sleep 1024 times at attempt 10" do
-        Object.any_instance.should_receive(:sleep).with(1024)
+        expect_any_instance_of( Object ).to receive(:sleep).with(1024)
         aws.backoff_sleep(10)
       end
     end
@@ -63,7 +63,7 @@ module Beaker
         allow(File).to receive(:exists?).with(/id_rsa.pub/) { true }
         allow(File).to receive(:read).with(/id_rsa.pub/) { "foobar" }
 
-        # Should return contents of previously stubbed id_rsa.pub
+        # Should return contents of allow( previously ).to receivebed id_rsa.pub
         expect(aws.public_key).to eq("foobar")
       end
 
@@ -75,8 +75,8 @@ module Beaker
     context '#key_name' do
       it 'returns a key name from the local hostname' do
         # Mock out the hostname and local user calls
-        Socket.should_receive(:gethostname) { "foobar" }
-        aws.should_receive(:local_user) { "bob" }
+        expect( Socket ).to receive(:gethostname) { "foobar" }
+        expect( aws ).to receive(:local_user) { "bob" }
 
         # Should match the expected composite key name
         expect(aws.key_name).to eq("Beaker-bob-foobar")

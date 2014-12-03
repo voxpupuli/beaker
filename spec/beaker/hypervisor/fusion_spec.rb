@@ -5,10 +5,10 @@ module Beaker
     let( :fusion ) { Beaker::Fusion.new( @hosts, make_opts ) }
 
     before :each do
-      stub_const( "Fission::VM", true )
+     stub_const( "Fission::VM", true )
       @hosts = make_hosts()
       MockFission.presets( @hosts )
-      Fusion.any_instance.stub( :require ).with( 'fission' ).and_return( true )
+      allow_any_instance_of( Fusion ).to receive( :require ).with( 'fission' ).and_return( true )
       fusion.instance_variable_set( :@fission, MockFission ) 
     end
 

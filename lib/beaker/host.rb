@@ -343,11 +343,10 @@ module Beaker
         @logger.quiet(true)
         required_dirs = (dir_source.map{ | dir | File.dirname(dir) }).uniq
         require 'pathname'
-        source_path = Pathname.new(source)
         required_dirs.each do |dir|
           dir_path = Pathname.new(dir)
           if dir_path.absolute?
-            mkdir_p(File.join(target,dir_path.relative_path_from(source_path)))
+            mkdir_p(File.join(target, dir.gsub(source, '')))
           else
             mkdir_p( File.join(target, dir) )
           end
@@ -358,7 +357,7 @@ module Beaker
         dir_source.each do |s|
           s_path = Pathname.new(s)
           if s_path.absolute?
-            file_path = File.join(target,s_path.relative_path_from(source_path))
+            file_path = File.join(target, s.gsub(source,''))
           else
             file_path = File.join(target, s)
           end

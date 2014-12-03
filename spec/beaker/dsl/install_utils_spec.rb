@@ -9,7 +9,7 @@ class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::Patterns
 
   def logger
-    @logger ||= RSpec::Mocks::Mock.new('logger').as_null_object
+    @logger ||= RSpec::Mocks::Double.new('logger').as_null_object
   end
 end
 
@@ -77,9 +77,9 @@ describe ClassMixedWithDSLInstallUtils do
       cmd         = 'cd /path/to/repo/name && git describe || true'
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).and_return( logger )
-      subject.should_receive( :on ).with( host, cmd ).and_yield
-      subject.should_receive( :stdout ).and_return( '2' )
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( subject ).to receive( :on ).with( host, cmd ).and_yield
+      expect( subject ).to receive( :stdout ).and_return( '2' )
 
       version = subject.find_git_repo_versions( host, path, repository )
 
@@ -96,8 +96,8 @@ describe ClassMixedWithDSLInstallUtils do
       host = { 'platform' => 'debian' }
       logger = double.as_null_object
 
-      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
-      subject.should_receive( :on ).exactly( 4 ).times
+      expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).exactly( 4 ).times
 
       subject.install_from_git( host, path, repo )
     end
@@ -112,12 +112,12 @@ describe ClassMixedWithDSLInstallUtils do
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:rev]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
-      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
-      subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
+      expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
-      subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, cmd ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
       subject.install_from_git( host, path, repo )
     end
@@ -133,12 +133,12 @@ describe ClassMixedWithDSLInstallUtils do
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
-      subject.should_receive( :logger ).exactly( 3 ).times.and_return( logger )
-      subject.should_receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
+      expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
-      subject.should_receive( :on ).with( host, cmd ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
-      subject.should_receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, cmd ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
       subject.install_from_git( host, path, repo )
     end
@@ -146,12 +146,12 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'sorted_hosts' do
     it 'can reorder so that the master comes first' do
-      subject.stub( :hosts ).and_return( hosts_sorted )
+      allow( subject ).to receive( :hosts ).and_return( hosts_sorted )
       expect( subject.sorted_hosts ).to be === hosts
     end
 
     it 'leaves correctly ordered hosts alone' do
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject.sorted_hosts ).to be === hosts
     end
   end
@@ -160,7 +160,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'generates a windows PE install command for a windows host' do
       winhost['dist'] = 'puppet-enterprise-3.0'
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
+      allow( subject ).to receive( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
       expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
 
@@ -171,8 +171,8 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'generates a unix PE frictionless install command for a unix host with role "frictionless"' do
-      subject.stub( :version_is_less ).and_return( false )
-      subject.stub( :master ).and_return( 'testmaster' )
+      allow( subject ).to receive( :version_is_less ).and_return( false )
+      allow( subject ).to receive( :master ).and_return( 'testmaster' )
       the_host = unixhost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       the_host['roles'] = ['frictionless']
@@ -180,8 +180,8 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'generates a unix PE frictionless install command for a unix host with role "frictionless" and "frictionless_options"' do
-      subject.stub( :version_is_less ).and_return( false )
-      subject.stub( :master ).and_return( 'testmaster' )
+      allow( subject ).to receive( :version_is_less ).and_return( false )
+      allow( subject ).to receive( :master ).and_return( 'testmaster' )
       the_host = unixhost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       the_host['roles'] = ['frictionless']
@@ -217,8 +217,8 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'generates a unix PE frictionless install command in verbose for a unix host with role "frictionless" and pe_debug is enabled' do
-      subject.stub( :version_is_less ).and_return( false )
-      subject.stub( :master ).and_return( 'testmaster' )
+      allow( subject ).to receive( :version_is_less ).and_return( false )
+      allow( subject ).to receive( :master ).and_return( 'testmaster' )
       the_host = unixhost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
       the_host['roles'] = ['frictionless']
@@ -232,99 +232,99 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'fetch_puppet' do
 
     it 'can push a local PE .tar.gz to a host and unpack it' do
-      File.stub( :directory? ).and_return( true ) #is local
-      File.stub( :exists? ).and_return( true ) #is a .tar.gz
+      allow( File ).to receive( :directory? ).and_return( true ) #is local
+      allow( File ).to receive( :exists? ).and_return( true ) #is a .tar.gz
       unixhost['pe_dir'] = '/local/file/path'
-      subject.stub( :scp_to ).and_return( true )
+      allow( subject ).to receive( :scp_to ).and_return( true )
 
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :scp_to ).with( unixhost, "#{ path }/#{ filename }#{ extension }", "#{ unixhost['working_dir'] }/#{ filename }#{ extension }" ).once
-      subject.should_receive( :on ).with( unixhost, /gunzip/ ).once
-      subject.should_receive( :on ).with( unixhost, /tar -xvf/ ).once
+      expect( subject ).to receive( :scp_to ).with( unixhost, "#{ path }/#{ filename }#{ extension }", "#{ unixhost['working_dir'] }/#{ filename }#{ extension }" ).once
+      expect( subject ).to receive( :on ).with( unixhost, /gunzip/ ).once
+      expect( subject ).to receive( :on ).with( unixhost, /tar -xvf/ ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
     it 'can download a PE .tar from a URL to a host and unpack it' do
-      File.stub( :directory? ).and_return( false ) #is not local
-      subject.stub( :link_exists? ) do |arg|
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ) do |arg|
         if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
           false
         else
           true
         end
       end
-      subject.stub( :on ).and_return( true )
+      allow( subject ).to receive( :on ).and_return( true )
 
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | tar -xvf -" ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
     it 'can download a PE .tar.gz from a URL to a host and unpack it' do
-      File.stub( :directory? ).and_return( false ) #is not local
-      subject.stub( :link_exists? ).and_return( true ) #is a tar.gz
-      subject.stub( :on ).and_return( true )
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
+      allow( subject ).to receive( :on ).and_return( true )
 
       path = unixhost['pe_dir']
       filename = "#{ unixhost['dist'] }"
       extension = '.tar.gz'
-      subject.should_receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_puppet( [unixhost], {} )
     end
 
     it 'can download a PE .swix from a URL to an EOS host and unpack it' do
-      File.stub( :directory? ).and_return( false ) #is not local
-      subject.stub( :link_exists? ).and_return( true ) #is a tar.gz
-      subject.stub( :on ).and_return( true )
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
+      allow( subject ).to receive( :on ).and_return( true )
 
       path = eoshost['pe_dir']
       filename = "#{ eoshost['dist'] }"
       extension = '.swix'
       commands = ['enable', "copy #{path}/#{filename}#{extension} extension:"]
       command = commands.join("\n")
-      subject.should_receive( :on ).with( eoshost, "Cli -c '#{command}'" ).once
+      expect( subject ).to receive( :on ).with( eoshost, "Cli -c '#{command}'" ).once
       subject.fetch_puppet( [eoshost], {} )
     end
 
     it 'can push a local PE package to a windows host' do
-      File.stub( :directory? ).and_return( true ) #is local
-      File.stub( :exists? ).and_return( true ) #is present
+      allow( File ).to receive( :directory? ).and_return( true ) #is local
+      allow( File ).to receive( :exists? ).and_return( true ) #is present
       winhost['dist'] = 'puppet-enterprise-3.0'
-      subject.stub( :scp_to ).and_return( true )
+      allow( subject ).to receive( :scp_to ).and_return( true )
 
       path = winhost['pe_dir']
       filename = "puppet-enterprise-#{ winhost['pe_ver'] }"
       extension = '.msi'
-      subject.should_receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).once
+      expect( subject ).to receive( :scp_to ).with( winhost, "#{ path }/#{ filename }#{ extension }", "#{ winhost['working_dir'] }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [winhost], {} )
 
     end
 
     it 'can download a PE dmg from a URL to a mac host' do
-      File.stub( :directory? ).and_return( false ) #is not local
-      subject.stub( :link_exists? ).and_return( true ) #is  not local
-      subject.stub( :on ).and_return( true )
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #is  not local
+      allow( subject ).to receive( :on ).and_return( true )
 
       path = machost['pe_dir']
       filename = "#{ machost['dist'] }"
       extension = '.dmg'
-      subject.should_receive( :on ).with( machost, "cd #{ machost['working_dir'] }; curl -O #{ path }/#{ filename }#{ extension }" ).once
+      expect( subject ).to receive( :on ).with( machost, "cd #{ machost['working_dir'] }; curl -O #{ path }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [machost], {} )
     end
 
     it 'can push a PE dmg to a mac host' do
-      File.stub( :directory? ).and_return( true ) #is local
-      File.stub( :exists? ).and_return( true ) #is present
-      subject.stub( :scp_to ).and_return( true )
+      allow( File ).to receive( :directory? ).and_return( true ) #is local
+      allow( File ).to receive( :exists? ).and_return( true ) #is present
+      allow( subject ).to receive( :scp_to ).and_return( true )
 
       path = machost['pe_dir']
       filename = "#{ machost['dist'] }"
       extension = '.dmg'
-      subject.should_receive( :scp_to ).with( machost, "#{ path }/#{ filename }#{ extension }", "#{ machost['working_dir'] }/#{ filename }#{ extension }" ).once
+      expect( subject ).to receive( :scp_to ).with( machost, "#{ path }/#{ filename }#{ extension }", "#{ machost['working_dir'] }/#{ filename }#{ extension }" ).once
       subject.fetch_puppet( [machost], {} )
     end
 
@@ -332,73 +332,69 @@ describe ClassMixedWithDSLInstallUtils do
       unixhost['roles'] << 'frictionless'
       unixhost['pe_ver'] = '3.2.0'
 
-      subject.should_not_receive(:scp_to)
-      subject.should_not_receive(:on)
-      subject.stub(:version_is_less).with('3.2.0', '3.2.0').and_return(false)
+      expect( subject).to_not receive(:scp_to)
+      expect( subject).to_not receive(:on)
+      allow( subject ).to receive(:version_is_less).with('3.2.0', '3.2.0').and_return(false)
       subject.fetch_puppet( [unixhost], {} )
     end
   end
 
   describe 'do_install' do
     it 'can perform a simple installation' do
-      subject.stub( :on ).and_return( Beaker::Result.new( {}, '' ) )
-      subject.stub( :fetch_puppet ).and_return( true )
-      subject.stub( :create_remote_file ).and_return( true )
-      subject.stub( :sign_certificate_for ).and_return( true )
-      subject.stub( :stop_agent_on ).and_return( true )
-      subject.stub( :sleep_until_puppetdb_started ).and_return( true )
-      subject.stub( :version_is_less ).with('3.0', '3.4').and_return( true )
-      subject.stub( :version_is_less ).with('3.0', '3.0').and_return( false )
-      subject.stub( :version_is_less ).with('3.0', '3.4').and_return( true )
-      subject.stub( :wait_for_host_in_dashboard ).and_return( true )
-      subject.stub( :puppet_agent ).and_return do |arg|
+      allow( subject ).to receive( :on ).and_return( Beaker::Result.new( {}, '' ) )
+      allow( subject ).to receive( :fetch_puppet ).and_return( true )
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      allow( subject ).to receive( :sign_certificate_for ).and_return( true )
+      allow( subject ).to receive( :stop_agent_on ).and_return( true )
+      allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
+      allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
+      allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"
       end
-      subject.stub( :puppet ).and_return do |arg|
+      allow( subject ).to receive( :puppet ) do |arg|
         "puppet #{arg}"
       end
 
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
       #create answers file per-host, except windows
-      subject.should_receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
+      expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts
-      subject.should_receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
-      subject.should_receive( :on ).with( hosts[1], /msiexec.exe/ ).once
-      subject.should_receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
-      subject.should_receive( :on ).with( hosts[3], /^Cli/ ).once
+      expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
+      expect( subject ).to receive( :on ).with( hosts[1], /msiexec.exe/ ).once
+      expect( subject ).to receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /^Cli/ ).once
       #does extra mac/EOS specific commands
-      subject.should_receive( :on ).with( hosts[2], /puppet config set server/ ).once
-      subject.should_receive( :on ).with( hosts[3], /puppet config set server/ ).once
-      subject.should_receive( :on ).with( hosts[2], /puppet config set certname/ ).once
-      subject.should_receive( :on ).with( hosts[3], /puppet config set certname/ ).once
-      subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
-      subject.should_receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
+      expect( subject ).to receive( :on ).with( hosts[2], /puppet config set server/ ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /puppet config set server/ ).once
+      expect( subject ).to receive( :on ).with( hosts[2], /puppet config set certname/ ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /puppet config set certname/ ).once
+      expect( subject ).to receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
       #sign certificate per-host
-      subject.should_receive( :sign_certificate_for ).with( hosts[0] ).once
-      subject.should_receive( :sign_certificate_for ).with( hosts[1] ).once
-      subject.should_receive( :sign_certificate_for ).with( hosts[2] ).once
-      subject.should_receive( :sign_certificate_for ).with( hosts[3] ).once
+      expect( subject ).to receive( :sign_certificate_for ).with( hosts[0] ).once
+      expect( subject ).to receive( :sign_certificate_for ).with( hosts[1] ).once
+      expect( subject ).to receive( :sign_certificate_for ).with( hosts[2] ).once
+      expect( subject ).to receive( :sign_certificate_for ).with( hosts[3] ).once
       #stop puppet agent on all hosts
-      subject.should_receive( :stop_agent_on ).with( hosts[0] ).once
-      subject.should_receive( :stop_agent_on ).with( hosts[1] ).once
-      subject.should_receive( :stop_agent_on ).with( hosts[2] ).once
-      subject.should_receive( :stop_agent_on ).with( hosts[3] ).once
+      expect( subject ).to receive( :stop_agent_on ).with( hosts[0] ).once
+      expect( subject ).to receive( :stop_agent_on ).with( hosts[1] ).once
+      expect( subject ).to receive( :stop_agent_on ).with( hosts[2] ).once
+      expect( subject ).to receive( :stop_agent_on ).with( hosts[3] ).once
       #wait for puppetdb to start
-      subject.should_receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
+      expect( subject ).to receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once
       #run each puppet agent once
-      subject.should_receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
-      subject.should_receive( :on ).with( hosts[1], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
-      subject.should_receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
-      subject.should_receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      expect( subject ).to receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      expect( subject ).to receive( :on ).with( hosts[1], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      expect( subject ).to receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
-      subject.should_receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
+      expect( subject ).to receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[0] ).once
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[1] ).once
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[2] ).once
-      subject.should_receive( :wait_for_host_in_dashboard ).with( hosts[3] ).once
       #run puppet agent now that installation is complete
-      subject.should_receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
+      expect( subject ).to receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts, opts )
     end
   end
@@ -407,13 +403,13 @@ describe ClassMixedWithDSLInstallUtils do
 
     before :each do
       my_time = double( "time double" )
-      my_time.stub( :strftime ).and_return( "2014-07-01_15.27.53" )
-      Time.stub( :new ).and_return( my_time )
+      allow( my_time ).to receive( :strftime ).and_return( "2014-07-01_15.27.53" )
+      allow( Time ).to receive( :new ).and_return( my_time )
 
       hosts[0]['working_dir'] = "tmp/2014-07-01_15.27.53"
       hosts[0]['dist'] = 'dist'
       hosts[0]['pe_installer'] = 'pe-installer'
-      hosts[0].stub( :tmpdir ).and_return( "/tmp/2014-07-01_15.27.53" )
+      allow( hosts[0] ).to receive( :tmpdir ).and_return( "/tmp/2014-07-01_15.27.53" )
 
       @fail_result = Beaker::Result.new( {}, '' )
       @fail_result.stdout = "No match here"
@@ -422,32 +418,32 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'can perform a simple installation' do
-      subject.stub( :fetch_puppet ).and_return( true )
-      subject.stub( :sleep ).and_return( true )
+      allow( subject ).to receive( :fetch_puppet ).and_return( true )
+      allow( subject ).to receive( :sleep ).and_return( true )
 
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
 
       #run higgs installer command
-      subject.should_receive( :on ).with( hosts[0],
+      expect( subject ).to receive( :on ).with( hosts[0],
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      subject.should_receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).and_return( @fail_result, @success_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).and_return( @fail_result, @success_result )
       subject.do_higgs_install( hosts[0], opts )
     end
 
     it 'fails out after checking installation log 10 times' do
-      subject.stub( :fetch_puppet ).and_return( true )
-      subject.stub( :sleep ).and_return( true )
+      allow( subject ).to receive( :fetch_puppet ).and_return( true )
+      allow( subject ).to receive( :sleep ).and_return( true )
 
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
 
       #run higgs installer command
-      subject.should_receive( :on ).with( hosts[0],
+      expect( subject ).to receive( :on ).with( hosts[0],
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      subject.should_receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).exactly(10).times.and_return( @fail_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).exactly(10).times.and_return( @fail_result )
       expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error
     end
 
@@ -459,8 +455,8 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     before do
-      subject.stub(:hosts).and_return(hosts)
-      subject.stub(:on).and_return(Beaker::Result.new({},''))
+      allow( subject ).to receive(:hosts).and_return(hosts)
+      allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
     end
     context 'on el-6' do
       let(:platform) { "el-6-i386" }
@@ -519,13 +515,13 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on windows' do
       let(:platform) { "windows-2008r2-i386" }
       it 'installs specific version of puppet when passed :version' do
-        subject.stub(:link_exists?).and_return( true )
+        allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
         subject.install_puppet(:version => '3000')
       end
       it 'installs from custom url when passed :win_download_url' do
-        subject.stub(:link_exists?).and_return( true )
+        allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i puppet-3000.msi')
         subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
@@ -552,13 +548,13 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#add_system32_hosts_entry' do
     before do
-      subject.stub(:on).and_return(Beaker::Result.new({},''))
+      allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
     end
     context 'on debian' do
       let(:platform) { 'debian-7-amd64' }
       let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
       it 'logs message - nothing to do on this host' do
-        Beaker::Command.should_receive( :new ).never
+        expect( Beaker::Command ).to receive( :new ).never
 
         expect {
           subject.add_system32_hosts_entry(host, {})
@@ -584,10 +580,10 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'install_pe' do
 
     it 'calls do_install with sorted hosts' do
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :hosts ).and_return( hosts_sorted )
-      subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( hosts, {} )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :hosts ).and_return( hosts_sorted )
+      allow( subject ).to receive( :do_install ).and_return( true )
+      expect( subject ).to receive( :do_install ).with( hosts, {} )
       subject.install_pe
     end
 
@@ -595,11 +591,11 @@ describe ClassMixedWithDSLInstallUtils do
       hosts.each do |h|
         h['pe_ver'] = nil
       end
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( hosts_sorted )
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :do_install ).and_return( true )
-      subject.should_receive( :do_install ).with( hosts, {} )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '2.8' )
+      allow( subject ).to receive( :hosts ).and_return( hosts_sorted )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :do_install ).and_return( true )
+      expect( subject ).to receive( :do_install ).with( hosts, {} )
       subject.install_pe
       hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
@@ -610,11 +606,11 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'install_higgs' do
     it 'fills in missing pe_ver' do
       hosts[0]['pe_ver'] = nil
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      subject.stub( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :do_higgs_install ).and_return( true )
-      subject.should_receive( :do_higgs_install ).with( hosts[0], {} )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '2.8' )
+      allow( subject ).to receive( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2] ] )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :do_higgs_install ).and_return( true )
+      expect( subject ).to receive( :do_higgs_install ).with( hosts[0], {} )
       subject.install_higgs
       expect( hosts[0]['pe_ver'] ).to be === '2.8'
     end
@@ -624,15 +620,15 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'upgrade_pe' do
 
     it 'calls puppet-enterprise-upgrader for pre 3.0 upgrades' do
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '2.8' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version_win ).and_return( '2.8' )
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
-      subject.stub( :hosts ).and_return( the_hosts )
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :version_is_less ).with('2.8', '3.0').and_return( true )
+      allow( subject ).to receive( :hosts ).and_return( the_hosts )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be === 'puppet-enterprise-upgrader'
@@ -640,15 +636,15 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'uses standard upgrader for post 3.0 upgrades' do
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '3.1' )
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '3.1' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '3.1' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version_win ).and_return( '3.1' )
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
-      subject.stub( :hosts ).and_return( the_hosts )
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :version_is_less ).with('3.1', '3.0').and_return( false )
+      allow( subject ).to receive( :hosts ).and_return( the_hosts )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.1', '3.0').and_return( false )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be nil
@@ -656,15 +652,15 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     it 'updates pe_ver post upgrade' do
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version ).and_return( '2.8' )
-      Beaker::Options::PEVersionScraper.stub( :load_pe_version_win ).and_return( '2.8' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '2.8' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version_win ).and_return( '2.8' )
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
-      subject.stub( :hosts ).and_return( the_hosts )
-      subject.stub( :options ).and_return( {} )
-      subject.stub( :version_is_less ).with('2.8', '3.0').and_return( true )
+      allow( subject ).to receive( :hosts ).and_return( the_hosts )
+      allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      subject.should_receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
@@ -675,8 +671,6 @@ describe ClassMixedWithDSLInstallUtils do
 
 
   def fetch_allows
-    allow(File).to receive( :exists? ) { true }
-    allow(File).to receive( :open ).and_yield()
     allow(subject).to receive( :logger ) { logger }
   end
 
@@ -690,6 +684,7 @@ describe ClassMixedWithDSLInstallUtils do
     describe "given valid arguments" do
 
       it "returns its second and third arguments concatenated." do
+        create_files(['destdir/name'])
         result = subject.fetch_http_file "http://beaker.tool/", "name", "destdir"
         expect(result).to eq("destdir/name")
       end
@@ -710,6 +705,7 @@ describe ClassMixedWithDSLInstallUtils do
 
       it "returns basename of first argument concatenated to second." do
         expect(subject).to receive(:`).with(/^wget.*/).ordered { result }
+        expect($?).to receive(:to_i).and_return(0)
         result = subject.fetch_http_dir "http://beaker.tool/beep", "destdir"
         expect(result).to eq("destdir/beep")
       end
@@ -817,32 +813,32 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe '#install_dev_puppet_module_on' do
-    context 'having set a stub forge' do
+    context 'having set allow( a ).to receive forge' do
       it 'stubs the forge on the host' do
         master = hosts.first
-        subject.stub( :options ).and_return( {:forge_host => 'ahost.com'} )
+        allow( subject ).to receive( :options ).and_return( {:forge_host => 'ahost.com'} )
 
-        subject.should_receive( :with_forge_stubbed_on )
+        expect( subject ).to receive( :with_forge_stubbed_on )
 
         subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
       end
 
       it 'installs via #install_puppet_module_via_pmt' do
         master = hosts.first
-        subject.stub( :options ).and_return( {:forge_host => 'ahost.com'} )
-        subject.stub( :with_forge_stubbed_on ).and_yield
+        allow( subject ).to receive( :options ).and_return( {:forge_host => 'ahost.com'} )
+        allow( subject ).to receive( :with_forge_stubbed_on ).and_yield
 
-        subject.should_receive( :install_puppet_module_via_pmt_on )
+        expect( subject ).to receive( :install_puppet_module_via_pmt_on )
 
         subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
       end
     end
-    context 'without a stub forge (default)' do
+    context 'without allow( a ).to receive forge (default)' do
       it 'calls copy_module_to to get the module on the SUT' do
         master = hosts.first
-        subject.stub( :options ).and_return( {} )
+        allow( subject ).to receive( :options ).and_return( {} )
 
-        subject.should_receive( :copy_module_to )
+        expect( subject ).to receive( :copy_module_to )
 
         subject.install_dev_puppet_module_on( master, {:source => '/module', :module_name => 'test'} )
       end
@@ -851,11 +847,11 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_dev_puppet_module' do
     it 'delegates to #install_dev_puppet_module_on with the hosts list' do
-      subject.stub( :hosts ).and_return( hosts )
-      subject.stub( :options ).and_return( {} )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :options ).and_return( {} )
 
       hosts.each do |host|
-        subject.should_receive( :install_dev_puppet_module_on ).
+        expect( subject ).to receive( :install_dev_puppet_module_on ).
           with( host, {:source => '/module', :module_name => 'test'})
       end
 
@@ -865,10 +861,10 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_puppet_module_via_pmt_on' do
     it 'installs module via puppet module tool' do
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
       master = hosts.first
 
-      subject.should_receive( :puppet ).with('module install test ' ).once
+      expect( subject ).to receive( :puppet ).with('module install test ' ).once
 
       subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
     end
@@ -876,9 +872,9 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_puppet_module_via_pmt' do
     it 'delegates to #install_puppet_module_via_pmt with the hosts list' do
-      subject.stub( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
 
-      subject.should_receive( :install_puppet_module_via_pmt_on ).with( hosts, {:source => '/module', :module_name => 'test'}).once
+      expect( subject ).to receive( :install_puppet_module_via_pmt_on ).with( hosts, {:source => '/module', :module_name => 'test'}).once
 
       subject.install_puppet_module_via_pmt( {:source => '/module', :module_name => 'test'} )
     end
@@ -893,24 +889,24 @@ describe ClassMixedWithDSLInstallUtils do
     shared_examples 'copy_module_to' do  |opts|
       it{
         host = double("host")
-        host.stub(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
+        allow( host ).to receive(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
-        result.stub(:stdout).and_return( stdout )
-        host.stub(:exec).with( any_args ).and_return( result )
-        Dir.stub(:getpwd).and_return(source)
+        allow( result ).to receive(:stdout).and_return( stdout )
+        allow( host ).to receive(:exec).with( any_args ).and_return( result )
+        allow( Dir ).to receive(:getpwd).and_return(source)
 
-        subject.stub(:parse_for_moduleroot).and_return(source)
+        allow( subject ).to receive(:parse_for_moduleroot).and_return(source)
         if module_parse_name
-          subject.stub(:parse_for_modulename).with(any_args()).and_return(module_parse_name)
+          allow( subject ).to receive(:parse_for_modulename).with(any_args()).and_return(module_parse_name)
         else
-          subject.should_not_receive(:parse_for_modulename)
+          expect( subject).to_not receive(:parse_for_modulename)
         end
 
-        File.stub(:exists?).with(any_args()).and_return(false)
-        File.stub(:directory?).with(any_args()).and_return(false)
+        allow( File ).to receive(:exists?).with(any_args()).and_return(false)
+        allow( File ).to receive(:directory?).with(any_args()).and_return(false)
 
-        subject.should_receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
+        expect( subject ).to receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
         if opts.nil?
           subject.copy_module_to(host)
         else
@@ -939,12 +935,12 @@ describe ClassMixedWithDSLInstallUtils do
 
     describe 'should accept multiple hosts when' do
       it 'used in a default manner' do
-        subject.stub( :build_ignore_list ).and_return( [] )
-        subject.stub( :parse_for_modulename ).and_return( [nil, 'modulename'] )
-        subject.stub( :on ).and_return( double.as_null_object )
+        allow( subject ).to receive( :build_ignore_list ).and_return( [] )
+        allow( subject ).to receive( :parse_for_modulename ).and_return( [nil, 'modulename'] )
+        allow( subject ).to receive( :on ).and_return( double.as_null_object )
         hosts = [{}, {}]
 
-        subject.should_receive( :scp_to ).twice
+        expect( subject ).to receive( :scp_to ).twice
         subject.copy_module_to( hosts )
       end
     end
@@ -970,18 +966,18 @@ describe ClassMixedWithDSLInstallUtils do
   describe 'parse_for_modulename' do
     directory = '/testfilepath/myname-testmodule'
     it 'should return name from metadata.json' do
-      File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
-      File.stub(:read).with("#{directory}/metadata.json").and_return(" {\"name\":\"myname-testmodule\"} ")
-      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from metadata.json")
-      subject.logger.should_not_receive(:debug).with('Unable to determine name, returning null')
-      subject.parse_for_modulename(directory).should eq(['myname', 'testmodule'])
+      allow( File ).to receive(:exists?).with("#{directory}/metadata.json").and_return(true)
+      allow( File ).to receive(:read).with("#{directory}/metadata.json").and_return(" {\"name\":\"myname-testmodule\"} ")
+      expect( subject.logger ).to receive(:debug).with("Attempting to parse Modulename from metadata.json")
+      expect(subject.logger).to_not receive(:debug).with('Unable to determine name, returning null')
+      expect(subject.parse_for_modulename(directory)).to eq(['myname', 'testmodule'])
     end
     it 'should return name from Modulefile' do
-      File.stub(:exists?).with("#{directory}/metadata.json").and_return(false)
-      File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
-      File.stub(:read).with("#{directory}/Modulefile").and_return("name    'myname-testmodule'  \nauthor   'myname'")
-      subject.logger.should_receive(:debug).with("Attempting to parse Modulename from Modulefile")
-      subject.logger.should_not_receive(:debug).with("Unable to determine name, returning null")
+      allow( File ).to receive(:exists?).with("#{directory}/metadata.json").and_return(false)
+      allow( File ).to receive(:exists?).with("#{directory}/Modulefile").and_return(true)
+      allow( File ).to receive(:read).with("#{directory}/Modulefile").and_return("name    'myname-testmodule'  \nauthor   'myname'")
+      expect( subject.logger ).to receive(:debug).with("Attempting to parse Modulename from Modulefile")
+      expect(subject.logger).to_not receive(:debug).with("Unable to determine name, returning null")
       expect(subject.parse_for_modulename(directory)).to eq(['myname', 'testmodule'])
     end
   end
@@ -990,26 +986,26 @@ describe ClassMixedWithDSLInstallUtils do
     directory = '/testfilepath/myname-testmodule'
     describe 'stops searching when either' do
       it 'finds a Modulefile' do
-        File.stub(:exists?).and_return(false)
-        File.stub(:exists?).with("#{directory}/Modulefile").and_return(true)
+        allow( File ).to receive(:exists?).and_return(false)
+        allow( File ).to receive(:exists?).with("#{directory}/Modulefile").and_return(true)
 
-        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
-        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect( subject.logger ).to_not receive(:debug).with("At root, can't parse for another directory")
+        expect( subject.logger ).to receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
         expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
       end
       it 'finds a metadata.json file' do
-        File.stub(:exists?).and_return(false)
-        File.stub(:exists?).with("#{directory}/metadata.json").and_return(true)
+        allow( File ).to receive(:exists?).and_return(false)
+        allow( File ).to receive(:exists?).with("#{directory}/metadata.json").and_return(true)
 
-        subject.logger.should_not_receive(:debug).with("At root, can't parse for another directory")
-        subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
+        expect( subject.logger ).to_not receive(:debug).with("At root, can't parse for another directory")
+        expect( subject.logger ).to receive(:debug).with("No Modulefile or metadata.json found at #{directory}/acceptance, moving up")
         expect(subject.parse_for_moduleroot("#{directory}/acceptance")).to eq(directory)
       end
     end
     it 'should recersively go up the directory to find the module files' do
-      File.stub(:exists?).and_return(false)
-      subject.logger.should_receive(:debug).with("No Modulefile or metadata.json found at #{directory}, moving up")
-      subject.logger.should_receive(:error).with("At root, can't parse for another directory")
+      allow( File ).to receive(:exists?).and_return(false)
+      expect( subject.logger ).to receive(:debug).with("No Modulefile or metadata.json found at #{directory}, moving up")
+      expect( subject.logger ).to receive(:error).with("At root, can't parse for another directory")
       expect(subject.parse_for_moduleroot(directory)).to eq(nil)
     end
   end

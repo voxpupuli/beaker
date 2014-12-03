@@ -10,8 +10,7 @@ module Beaker
     end
 
     it "stores the vagrant file in $WORKINGDIR/.vagrant/beaker_vagrant_files/sample.cfg" do
-      FakeFS.activate!
-      vagrant.stub( :randmac ).and_return( "0123456789" )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
       path = vagrant.instance_variable_get( :@vagrant_path )
 
       expect( path ).to be === File.join(Dir.pwd, '.vagrant', 'beaker_vagrant_files', 'sample.cfg')
@@ -19,9 +18,8 @@ module Beaker
     end
 
     it "can make a Vagrantfile for a set of hosts" do
-      FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
-      vagrant.stub( :randmac ).and_return( "0123456789" )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
 
       vagrant.make_vfile( @hosts )
 
@@ -66,9 +64,8 @@ EOF
     end
 
     it "generates a valid windows config" do
-      FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
-      vagrant.stub( :randmac ).and_return( "0123456789" )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
       @hosts[0][:platform] = 'windows'
 
       vagrant.make_vfile( @hosts )
@@ -88,9 +85,8 @@ EOF
     end
 
     it "uses the memsize defined per vagrant host" do
-      FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
-      vagrant.stub( :randmac ).and_return( "0123456789" )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
 
       vagrant.make_vfile( @hosts, {'vagrant_memsize' => 'hello!'} )
 
@@ -105,7 +101,7 @@ EOF
     it "can generate a new /etc/hosts file referencing each host" do
 
       @hosts.each do |host|
-        vagrant.should_receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).once
+        expect( vagrant ).to receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).once
       end
 
       vagrant.hack_etc_hosts( @hosts, options )
@@ -118,7 +114,7 @@ EOF
         host = @hosts[0]
         host[:platform] = 'unix'
 
-        Command.should_receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
+        expect( Command ).to receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
 
         vagrant.copy_ssh_to_root( host, options )
 
@@ -128,8 +124,8 @@ EOF
         host = @hosts[0]
         host[:platform] = 'windows'
 
-        Command.should_receive( :new ).with("cp -r .ssh /cygdrive/c/Users/Administrator/.").once
-        Command.should_receive( :new ).with("chown -R Administrator /cygdrive/c/Users/Administrator/.ssh").once
+        expect( Command ).to receive( :new ).with("cp -r .ssh /cygdrive/c/Users/Administrator/.").once
+        expect( Command ).to receive( :new ).with("chown -R Administrator /cygdrive/c/Users/Administrator/.ssh").once
 
         vagrant.copy_ssh_to_root( host, options )
 
@@ -139,9 +135,9 @@ EOF
     it "can generate a ssh-config file" do
       host = @hosts[0]
       name = host.name
-      Dir.stub( :chdir ).and_yield()
-
-      vagrant.should_receive(:`).and_return("Host #{host.name}
+      allow( Dir ).to receive( :chdir ).and_yield()
+      out = double( 'stdout' )
+      allow( out ).to receive( :read ).and_return("Host #{name}
     HostName 127.0.0.1
     User vagrant
     Port 2222
@@ -151,12 +147,19 @@ EOF
     IdentityFile /home/root/.vagrant.d/insecure_private_key
     IdentitiesOnly yes")
 
-      file = double( 'file' )
-      file.stub( :path ).and_return( '/path/sshconfig' )
-      file.stub( :rewind ).and_return( true )
+      wait_thr = OpenStruct.new
+      state = double( 'state' )
+      allow( state ).to receive( :success? ).and_return( true )
+      wait_thr.value = state
 
-      Tempfile.should_receive( :new ).with( "#{host.name}").and_return( file ) 
-      file.should_receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
+      allow( Open3 ).to receive( :popen3 ).with( 'vagrant', 'ssh-config', name ).and_return( [ "", out, "", wait_thr ])
+
+      file = double( 'file' )
+      allow( file ).to receive( :path ).and_return( '/path/sshconfig' )
+      allow( file ).to receive( :rewind ).and_return( true )
+
+      expect( Tempfile ).to receive( :new ).with( "#{host.name}").and_return( file ) 
+      expect( file ).to receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
 
       vagrant.set_ssh_config( host, 'root' )
       expect( host['ssh'] ).to be === { :config => file.path }
@@ -166,8 +169,7 @@ EOF
 
     describe "get_ip_from_vagrant_file" do
       before :each do
-        FakeFS.activate!
-        vagrant.stub( :randmac ).and_return( "0123456789" )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
         vagrant.make_vfile( @hosts )
       end
 
@@ -195,33 +197,32 @@ EOF
     describe "provisioning and cleanup" do
 
       before :each do
-        FakeFS.activate!
-        vagrant.should_receive( :vagrant_cmd ).with( "up" ).once
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "up" ).once
         @hosts.each do |host|
           host_prev_name = host['user']
-          vagrant.should_receive( :set_ssh_config ).with( host, 'vagrant' ).once
-          vagrant.should_receive( :copy_ssh_to_root ).with( host, options ).once
-          vagrant.should_receive( :set_ssh_config ).with( host, host_prev_name ).once
+          expect( vagrant ).to receive( :set_ssh_config ).with( host, 'vagrant' ).once
+          expect( vagrant ).to receive( :copy_ssh_to_root ).with( host, options ).once
+          expect( vagrant ).to receive( :set_ssh_config ).with( host, host_prev_name ).once
         end
-        vagrant.should_receive( :hack_etc_hosts ).with( @hosts, options ).once
+        expect( vagrant ).to receive( :hack_etc_hosts ).with( @hosts, options ).once
       end
 
       it "can provision a set of hosts" do
         options = vagrant.instance_variable_get( :@options )
-        vagrant.should_receive( :make_vfile ).with( @hosts, options ).once
-        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).never
+        expect( vagrant ).to receive( :make_vfile ).with( @hosts, options ).once
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).never
         vagrant.provision
       end
 
       it "destroys an existing set of hosts before provisioning" do
         vagrant.make_vfile( @hosts )
-        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).once
         vagrant.provision
       end
 
       it "can cleanup" do
-        vagrant.should_receive( :vagrant_cmd ).with( "destroy --force" ).once
-        FileUtils.should_receive( :rm_rf ).once
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).once
+        expect( FileUtils ).to receive( :rm_rf ).once
 
         vagrant.provision
         vagrant.cleanup

@@ -1,3 +1,5 @@
+require 'rspec/mocks'
+
 class MockIO < IO
   def initialize
   end
@@ -61,6 +63,8 @@ module MockNet
 end
 
 module FakeHost
+  include RSpec::Mocks::TestDouble
+
   def self.create(name = 'fakevm', platform = 'redhat-version-arch', options = {})
     options_hash = Beaker::Options::OptionsHash.new.merge(options)
     options_hash['HOSTS'] = { name => { 'platform' => Beaker::Platform.new(platform) } }
@@ -83,7 +87,7 @@ module FakeHost
     end
 
     def any_exec_result
-      RSpec::Mocks::Mock.new('exec-result').as_null_object
+      RSpec::Mocks::Double.new('exec-result').as_null_object
     end
 
     def exec(command, options = {})
