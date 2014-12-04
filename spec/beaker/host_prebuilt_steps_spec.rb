@@ -151,7 +151,7 @@ describe Beaker do
     it "can perform apt-get on cumulus hosts" do
       host = make_host( 'testhost', { :platform => 'cumulus' } )
 
-      Beaker::Command.should_receive( :new ).with("apt-get update").once
+      expect( Beaker::Command ).to receive( :new ).with("apt-get update").once
 
       subject.apt_get_update( host )
 
@@ -223,10 +223,10 @@ describe Beaker do
     it "correctly configures cumulus hosts" do
       hosts = make_hosts( { :platform => 'cumulus' } )
 
-      Beaker::Command.should_receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
       hosts.each do |host|
-        subject.should_receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        subject.should_receive( :apt_get_update ).with( host ).once
+        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
+        expect( subject ).to receive( :apt_get_update ).with( host ).once
       end
 
       subject.proxy_config( hosts, options )

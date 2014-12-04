@@ -84,8 +84,8 @@ module Beaker
       it "checks correctly on cumulus" do
         @opts = {'platform' => 'cumulus-is-me'}
         pkg = 'cumulus_package'
-        Beaker::Command.should_receive(:new).with("dpkg -s #{pkg}").and_return('')
-        instance.should_receive(:exec).with('', :acceptable_exit_codes => (0...127)).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}").and_return('')
+        expect( instance ).to receive(:exec).with('', :acceptable_exit_codes => (0...127)).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
