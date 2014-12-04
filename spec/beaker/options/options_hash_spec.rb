@@ -45,6 +45,30 @@ module Beaker
         expect(options[:key]).to be === nil
       end
 
+      describe '#get_type' do
+        let(:options) { Beaker::Options::OptionsHash.new }
+
+        it 'returns pe as expected in the normal case' do
+          newhash = options.merge({:type => 'pe'})
+          expect(newhash.get_type).to be === :pe
+        end
+
+        it 'returns foss as expected in the normal case' do
+          newhash = options.merge({:type => 'foss'})
+          expect(newhash.get_type).to be === :foss
+        end
+
+        it 'returns aio as expected in the normal case' do
+          newhash = options.merge({:type => 'aio'})
+          expect(newhash.get_type).to be === :aio
+        end
+
+        it 'returns foss as the default' do
+          newhash = options.merge({:type => 'git'})
+          expect(newhash.get_type).to be === :foss
+        end
+      end
+
       context 'pretty prints itself' do
 
         it 'in valid JSON' do
