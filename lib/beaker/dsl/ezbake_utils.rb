@@ -106,7 +106,7 @@ module Beaker
             install_package host, package_name, package_version
           end
 
-        when /^(debian|ubuntu)$/
+        when /^(debian|ubuntu|cumulus)$/
           dependency_list = ezbake[:debian][:additional_dependencies]
           dependency_list.each do |dependency|
             package_name, _, package_version = dependency.split
@@ -192,7 +192,7 @@ module Beaker
           when /^(fedora|el|centos)$/
             env += "defaultsdir=/etc/sysconfig "
             on host, cd_to_package_dir + env + "make -e install-rpm-sysv-init"
-          when /^(debian|ubuntu)$/
+          when /^(debian|ubuntu|cumulus)$/
             env += "defaultsdir=/etc/default "
             on host, cd_to_package_dir + env + "make -e install-deb-sysv-init"
           else

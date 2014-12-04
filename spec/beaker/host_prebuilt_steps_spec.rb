@@ -148,7 +148,16 @@ describe Beaker do
 
     end
 
-    it "does nothing on non debian/ubuntu hosts" do
+    it "can perform apt-get on cumulus hosts" do
+      host = make_host( 'testhost', { :platform => 'cumulus' } )
+
+      expect( Beaker::Command ).to receive( :new ).with("apt-get update").once
+
+      subject.apt_get_update( host )
+
+    end
+
+    it "does nothing on non debian/ubuntu/cumulus hosts" do
       host = make_host( 'testhost', { :platform => 'windows' } )
 
       expect( Beaker::Command ).to receive( :new ).never
@@ -211,6 +220,19 @@ describe Beaker do
 
     end
 
+    it "correctly configures cumulus hosts" do
+      hosts = make_hosts( { :platform => 'cumulus' } )
+
+      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
+      hosts.each do |host|
+        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
+        expect( subject ).to receive( :apt_get_update ).with( host ).once
+      end
+
+      subject.proxy_config( hosts, options )
+
+    end
+
     it "correctly configures solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'solaris-11' } )
 
@@ -223,7 +245,7 @@ describe Beaker do
 
     end
 
-    it "does nothing for non ubuntu/debian/solaris-11 hosts" do
+    it "does nothing for non ubuntu/debian/cumulus/solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
       expect( Beaker::Command ).to receive( :new ).never
@@ -402,17 +424,8 @@ describe Beaker do
     subject { dummy_class.new }
     proxyurl = "http://192.168.2.100:3128"
 
-    it "can set proxy config on an ubuntu host" do
-      host = make_host('name', { :platform => 'ubuntu' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
-      expect( host ).to receive( :exec ).once
-
-      subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
-    end
-
-    it "can set proxy config on a debian/ubuntu host" do
-      host = make_host('name', { :platform => 'ubuntu' } )
+    it "can set proxy config on a debian/ubuntu/cumulus host" do
+      host = make_host('name', { :platform => 'cumulus' } )
 
       expect( Beaker::Command ).to receive( :new ).with( "echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy" ).once
       expect( host ).to receive( :exec ).once

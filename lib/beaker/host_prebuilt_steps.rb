@@ -14,6 +14,7 @@ module Beaker
     WINDOWS_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
+    CUMULUS_PACKAGES = ['addons', 'ntpdate', 'lsb-release']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -66,11 +67,15 @@ module Beaker
       report_and_raise(logger, e, "timesync (--ntp)")
     end
 
-    #Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
-    #install them.  Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
-    #{HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts, #{HostPrebuiltSteps::DEBIAN_PACKAGES on debian platform
-    #hosts and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows
-    #platforms.
+    # Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
+    # install them.
+    #
+    # Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
+    # {HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts,
+    # {HostPrebuiltSteps::DEBIAN_PACKAGES} on debian platform hosts,
+    # {HostPrebuiltSteps::CUMULUS_PACKAGES} on cumulus platform hosts,
+    # and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows platform hosts.
+    #
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -79,33 +84,31 @@ module Beaker
       block_on host do |host|
         case
         when host['platform'] =~ /sles-/
-          SLES_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
+          check_and_install_packages_if_needed(host, SLES_PACKAGES)
         when host['platform'] =~ /debian/
-          DEBIAN_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
+          check_and_install_packages_if_needed(host, DEBIAN_PACKAGES)
+        when host['platform'] =~ /cumulus/
+          check_and_install_packages_if_needed(host, CUMULUS_PACKAGES)
         when host['platform'] =~ /windows/
-          WINDOWS_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-/
-          UNIX_PACKAGES.each do |pkg|
-            if not host.check_for_package pkg
-              host.install_package pkg
-            end
-          end
+          check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus/
+          check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end
     rescue => e
       report_and_raise(logger, e, "validate")
+    end
+
+    # Installs the given packages if they aren't already on a host
+    #
+    # @param [Host] host Host to act on
+    # @param [Array<String>] package_list List of package names to install
+    def check_and_install_packages_if_needed host, package_list
+      package_list.each do |pkg|
+        if not host.check_for_package pkg
+          host.install_package pkg
+        end
+      end
     end
 
     #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
@@ -169,12 +172,13 @@ module Beaker
       return url, host[:epel_arch] || opts[:epel_arch] || 'i386', pkg
     end
 
-    #Run 'apt-get update' on the provided host or hosts.  If the platform of the provided host is not
-    #ubuntu or debian do nothing.
+    # Run 'apt-get update' on the provided host or hosts.
+    # If the platform of the provided host is not ubuntu, debian or cumulus: do nothing.
+    #
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        if host[:platform] =~ /(ubuntu)|(debian)/
+        if host[:platform] =~ /ubuntu|debian|cumulus/
           host.exec(Command.new("apt-get update"))
         end
       end
@@ -194,24 +198,21 @@ module Beaker
       end
     end
 
-    #Alter apt configuration on ubuntu and debian host or hosts to internal Puppet Labs
-    # proxy {HostPrebuiltSteps::APT_CFG} proxy, alter pkg on solaris-11 host or hosts
-    # to point to interal Puppetlabs proxy {HostPrebuiltSteps::IPS_PKG_REPO}. Do nothing
-    # on non-ubuntu, debian or solaris-11 platform host or hosts.
+    # On ubuntu, debian, or cumulus host or hosts: alter apt configuration to use
+    # the internal Puppet Labs proxy {HostPrebuiltSteps::APT_CFG} proxy.
+    # On solaris-11 host or hosts: alter pkg to point to
+    # the internal Puppet Labs proxy {HostPrebuiltSteps::IPS_PKG_REPO}.
+    #
+    # Do nothing for other platform host or hosts.
+    #
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def proxy_config( host, opts )
-      # repo_proxy
-      # supports ubuntu, debian and solaris platforms
       logger = opts[:logger]
       block_on host do |host|
         case
-        when host['platform'] =~ /ubuntu/
-          host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
-          copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
-          apt_get_update(host)
-        when host['platform'] =~ /debian/
+        when host['platform'] =~ /ubuntu|debian|cumulus/
           host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
           copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
           apt_get_update(host)
@@ -325,7 +326,10 @@ module Beaker
       end
     end
 
-    #Update sshd_config on debian, ubuntu, centos, el, redhat and fedora boxes to allow for root login, does nothing on other platfoms
+    # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
+    #
+    # Does nothing on other platfoms.
+    #
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -337,7 +341,7 @@ module Beaker
         host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
         )
         #restart sshd
-        if host['platform'] =~ /debian|ubuntu/
+        if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E service sshd restart"))
@@ -380,7 +384,7 @@ module Beaker
     end
 
     # Setup files for enabling requests to pass to a proxy server
-    # This works for the APT package manager on debian and ubuntu
+    # This works for the APT package manager on debian, ubuntu, and cumulus
     # and YUM package manager on el, centos, fedora and redhat.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -391,7 +395,7 @@ module Beaker
       block_on host do |host|
         logger.debug("enabling proxy support on #{host.name}")
         case host['platform']
-          when /ubuntu/, /debian/
+          when /ubuntu/, /debian/, /cumulus/
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
           when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
@@ -483,7 +487,7 @@ module Beaker
           host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/sshd_config"))
           host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
           host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
-        when /debian|ubuntu/
+        when /debian|ubuntu|cumulus/
           host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service ssh restart"))
         when /el-|centos|fedora|redhat|oracle|scientific|eos/

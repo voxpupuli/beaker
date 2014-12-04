@@ -4,8 +4,8 @@ module Beaker
 
     PERF_PACKAGES = ['sysstat']
     # SLES does not treat sysstat as a service that can be started
-    PERF_SUPPORTED_PLATFORMS = /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|eos|sles/
-    PERF_START_PLATFORMS     = /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|eos/
+    PERF_SUPPORTED_PLATFORMS = /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|eos|cumulus|sles/
+    PERF_START_PLATFORMS     = /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|eos|cumulus/
 
     # Create the Perf instance and runs setup_perf_on_host on all hosts if --collect-perf-data
     # was used as an option on the Baker command line invocation. Instances of this class do not
@@ -39,7 +39,7 @@ module Beaker
         @logger.perf_output("Perf (sysstat) not supported on host: " + host)
       end
 
-      if host['platform'] =~ /debian|ubuntu/
+      if host['platform'] =~ /debian|ubuntu|cumulus/
         @logger.perf_output("Modify /etc/default/sysstat on Debian and Ubuntu platforms")
         host.exec(Command.new('sed -i s/ENABLED=\"false\"/ENABLED=\"true\"/ /etc/default/sysstat'))
       elsif host['platform'] =~ /sles/
