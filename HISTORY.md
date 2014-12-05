@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 17 Oct, 2014 (3fff222d)](#LATEST)
+* [LATEST - 5 Dec, 2014 (6a1295f2)](#LATEST)
+* [beaker1.20.1 - 17 Oct, 2014 (be250ad6)](#beaker1.20.1)
 * [beaker1.20.0 - 17 Oct, 2014 (24acc2d3)](#beaker1.20.0)
 * [beaker1.19.1 - 19 Sep, 2014 (3aafc71d)](#beaker1.19.1)
 * [beaker1.19.0 - 19 Sep, 2014 (6a56cc90)](#beaker1.19.0)
@@ -64,7 +65,1043 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 17 Oct, 2014 (3fff222d)
+### <a name = "LATEST">LATEST - 5 Dec, 2014 (6a1295f2)
+
+* (GEM) update beaker version to 2.0.0 (6a1295f2)
+
+* Merge pull request #559 from anodelman/maint (d84c5705)
+
+
+```
+Merge pull request #559 from anodelman/maint
+
+(QENG-1574) update beaker gem dependencies post 1.8 EOL
+```
+* Merge pull request #556 from kevpl/qeng1266_cumulus_supportadd (d148eaa4)
+
+
+```
+Merge pull request #556 from kevpl/qeng1266_cumulus_supportadd
+
+(QENG-1266) added cumulus support to beaker
+```
+* (QENG-1574) update beaker gem dependencies post 1.8 EOL (9832850a)
+
+
+```
+(QENG-1574) update beaker gem dependencies post 1.8 EOL
+
+VERSION BUMP ALL THE THINGS!
+```
+* (QENG-1266) updated spec tests to conform to newer spec standards (235e515c)
+
+* Merge pull request #555 from kevpl/qeng1150_puppet_trace_opts (7777210b)
+
+
+```
+Merge pull request #555 from kevpl/qeng1150_puppet_trace_opts
+
+(QENG-1150) added trace option to puppet module install command via host...
+```
+* Merge pull request #526 from ericwilliamson/task/qeng-1454-allow-user-ports-ec2 (7a81b70e)
+
+
+```
+Merge pull request #526 from ericwilliamson/task/qeng-1454-allow-user-ports-ec2
+
+(QENG-1454) Allow user to specify ports to open on ec2
+```
+* Merge pull request #558 from anodelman/maint (8732bd0f)
+
+
+```
+Merge pull request #558 from anodelman/maint
+
+(MAINT) update CONTRIBUTING doc to reflect new RSpec test requirements
+```
+* (MAINT) update CONTRIBUTING doc to reflect new RSpec test requirements (34e1df05)
+
+
+```
+(MAINT) update CONTRIBUTING doc to reflect new RSpec test requirements
+
+- will not allow use of deprecated RSpec method calls in Beaker spec
+  tests
+```
+* Merge pull request #536 from anodelman/1.8 (a8276575)
+
+
+```
+Merge pull request #536 from anodelman/1.8
+
+(QENG-437) beaker: EOL 1.8 ruby
+```
+* Merge pull request #553 from kevpl/qeng299_eos_added (336c1b7d)
+
+
+```
+Merge pull request #553 from kevpl/qeng299_eos_added
+
+(QENG-299) Added support for EOS
+```
+* Merge pull request #551 from Mylezeem/support_vagrant_libvirt (651d2eda)
+
+
+```
+Merge pull request #551 from Mylezeem/support_vagrant_libvirt
+
+(GH-552) Hypervisor: Add support for vagrant_libvirt
+```
+* (QENG-1266) added in review feedback (a258e924)
+
+* Merge pull request #545 from logicminds/sshd_restart (5e72b1e0)
+
+
+```
+Merge pull request #545 from logicminds/sshd_restart
+
+beaker restarts sshd incorrectly on centos 6
+```
+* Merge pull request #539 from mcanevet/fix/install_puppet_from_rpm (8db201a1)
+
+
+```
+Merge pull request #539 from mcanevet/fix/install_puppet_from_rpm
+
+(MAINT) rpm returns 1 if package already installed
+```
+* (QENG-1266) added cumulus support to beaker (d4137d78)
+
+* (QENG-1150) added trace option to puppet module install command via host option (7b3964a3)
+
+* (QENG-299) applied review feedback (f436930d)
+
+
+```
+(QENG-299) applied review feedback
+
+two specific things were done here: removal of unnecessary pe_dir
+setting in spec tests, and changing HEREDOC usage to string array
+join calls for better readability
+```
+* Merge pull request #531 from kevpl/qeng1430_2_fail (c6e78a59)
+
+
+```
+Merge pull request #531 from kevpl/qeng1430_2_fail
+
+(QENG-1430) Added accept_all_exit_codes option to host exec calls
+```
+* Merge pull request #534 from kevpl/qeng1000_takeover (4bbc1922)
+
+
+```
+Merge pull request #534 from kevpl/qeng1000_takeover
+
+(QENG-1000) Ensure that add-el-extras works on all rhel platforms
+```
+* Merge pull request #542 from logicminds/enable_root_login (af15ec89)
+
+
+```
+Merge pull request #542 from logicminds/enable_root_login
+
+fix bug with sed conditional check during permit root login
+```
+* Merge pull request #549 from anodelman/cherry (20705a7b)
+
+
+```
+Merge pull request #549 from anodelman/cherry
+
+(QENG-1509) merge pe-beaker and beaker post pe 3.7 release
+```
+* (QENG-299) Added support for EOS (cf3bf7f3)
+
+* Merge pull request #548 from kevpl/qeng1100_rpm_noforce (b4babc29)
+
+
+```
+Merge pull request #548 from kevpl/qeng1100_rpm_noforce
+
+(QENG-1100) removed unneeded force argument to rpm call
+```
+* (gh-552) Add support for vagrant_libvirt (15ed7785)
+
+
+```
+(gh-552) Add support for vagrant_libvirt
+
+Currently vagrand backend support is limited to virtualbox,
+vmware_workstation and fusion. Vagrant offers a non-official
+libvirt backend through the vagrant-libvirt[1] plugin.
+This commit aims to add support for vagrant_libvirt.
+
+[1] https://github.com/pradels/vagrant-libvirt
+```
+* Merge pull request #544 from hunner/fix_custom_hypervisors (0423ded0)
+
+
+```
+Merge pull request #544 from hunner/fix_custom_hypervisors
+
+Fix const_get for custom hypervisors
+```
+* (QENG-1100) removed unneeded force argument to rpm call (9b3948d0)
+
+* Merge pull request #532 from maestrodev/docker-entrypoint (5d1b017f)
+
+
+```
+Merge pull request #532 from maestrodev/docker-entrypoint
+
+Allow overriding Docker image entrypoint
+```
+* (gh-543) - beaker restarts sshd incorrectly on centos 6 and sshd never recovers (4043bf98)
+
+* (MAINT) Fix const_get for custom hypervisors (d45e723c)
+
+
+```
+(MAINT) Fix const_get for custom hypervisors
+
+This code must not have ever been used before, as const_get() has to be
+run for each section of a namespace (and thus can't contain ::)
+```
+* Merge pull request #541 from anodelman/maint (5bb7a566)
+
+
+```
+Merge pull request #541 from anodelman/maint
+
+(MAINT) fix broken spec test
+```
+* (MAINT) fix broken spec test (a1454bc0)
+
+
+```
+(MAINT) fix broken spec test
+
+- fix broken spec test
+- add check for deprecation warnings during spec testing
+```
+* (gh-546) fix bug with sed conditional check during permit root login (37741b7b)
+
+* Merge pull request #540 from MikaelSmith/bug/master/CFACT-160-add-cfacter-wrapper (d3c9a535)
+
+
+```
+Merge pull request #540 from MikaelSmith/bug/master/CFACT-160-add-cfacter-wrapper
+
+(CFACT-160) Add cfacter wrapper method
+```
+* Merge pull request #420 from liamjbennett/host_entry_method (e3a338f8)
+
+
+```
+Merge pull request #420 from liamjbennett/host_entry_method
+
+Adding a utility method for adding host entries
+```
+* Merge pull request #449 from anodelman/env-fix (9d46f143)
+
+
+```
+Merge pull request #449 from anodelman/env-fix
+
+(QENG-526) A friendly way for Beaker to set environment...
+```
+* Merge pull request #529 from kevpl/qeng846_logpath (283fa970)
+
+
+```
+Merge pull request #529 from kevpl/qeng846_logpath
+
+(QENG-846) Centralized dated log path generation, and added options for ...
+```
+* Merge pull request #535 from kevpl/qeng1340_takeover (335ddae9)
+
+
+```
+Merge pull request #535 from kevpl/qeng1340_takeover
+
+(QENG-1340) Add GitHub PR refspec to install_from_git
+```
+* Merge pull request #537 from kevpl/qeng688_log_default (0df6f1f7)
+
+
+```
+Merge pull request #537 from kevpl/qeng688_log_default
+
+(QENG-688) made default log_level info rather than verbose
+```
+* Merge pull request #538 from anodelman/blimpy (10d2009a)
+
+
+```
+Merge pull request #538 from anodelman/blimpy
+
+(QENG-1476) drop blimpy hypervisor from beaker
+```
+* (CFACT-160) Add cfacter wrapper method (9810a413)
+
+
+```
+(CFACT-160) Add cfacter wrapper method
+
+Used by the Native Facter (cfacter) project to run acceptance tests.
+```
+* (MAINT) rpm returns 1 if package already installed (4dbfa3f9)
+
+* fixing tests for add_system32_hosts_entry method (5b9a5ea7)
+
+* Merge branch 'master' into host_entry_method (f5ad6ed3)
+
+* (QENG-1476) drop blimpy hypervisor from beaker (7d21a3c0)
+
+
+```
+(QENG-1476) drop blimpy hypervisor from beaker
+
+- replaced with aws_sdk
+```
+* (QENG-1000) added oracle support to this fix (5d09da45)
+
+* (QENG-688) made default log_level info rather than verbose (d111ecc6)
+
+* (QENG-437) beaker: EOL 1.8 ruby (aedddc3f)
+
+
+```
+(QENG-437) beaker: EOL 1.8 ruby
+
+- remove code chunks built for ruby 1.8
+- update rspec + minitest, remove test/unit
+- update spec tests to meet current rspec standard, here's a good
+  reference
+  http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/
+```
+* (QENG-1340) updated spec tests to match fix for this issue (214e78f4)
+
+* (QENG-1430) added spec for accept_all_exit_codes being explicitly set to false (711db068)
+
+* Merge pull request #522 from justinstoller/allow_custom_download_urls (20447ddd)
+
+
+```
+Merge pull request #522 from justinstoller/allow_custom_download_urls
+
+QENG-1074 Add options for mac and win download from alternative sources for install_puppet
+```
+* Merge pull request #421 from liamjbennett/vagrant_ssh_config (34b40432)
+
+
+```
+Merge pull request #421 from liamjbennett/vagrant_ssh_config
+
+Fix bug connecting to windows vagrant host
+```
+* Allow overriding Docker image entrypoint (d7da78fc)
+
+
+```
+Allow overriding Docker image entrypoint
+
+Using docker_image_entrypoint
+```
+* (QENG-1430) Added accept_all_exit_codes option to host exec calls (74f97391)
+
+
+```
+(QENG-1430) Added accept_all_exit_codes option to host exec calls
+
+QA was having issues with errors occuring when they'd like to have failures, since the specific
+error codes are forseen and specific failure cases.  In order to help them with this use case,
+I've added the accept_all_exit_codes option, which will not error on unacceptable exit codes,
+defering to the test above to deal with the command's exit code as a failure or otherwise.
+```
+* Merge pull request #515 from justinstoller/QENG-1126 (5343e5b6)
+
+
+```
+Merge pull request #515 from justinstoller/QENG-1126
+
+(QENG-1126) Allow setting IS_PE to the negative
+```
+* (QENG-846) Centralized dated log path generation, and added options for specific log paths (192cecf2)
+
+
+```
+(QENG-846) Centralized dated log path generation, and added options for specific log paths
+
+Before, the latest link was hard to use since it jumped around, and you couldn't really get at
+the timestamped log path itself because it was hidden in the log_path function.  This work
+separates out the timestamped path generation into a static method so that it can be used
+anywhere, and adds the current usages of it to the global options, so that they can be used
+for other purposes, such as the use case for this issue: copying other files to this location
+```
+* Merge pull request #525 from justinstoller/GH-320-disable_vbguest_plugin (d1a728a6)
+
+
+```
+Merge pull request #525 from justinstoller/GH-320-disable_vbguest_plugin
+
+(GH-320) Allow disabling of vbguest plugin auto-update
+```
+* Merge pull request #521 from justinstoller/maint/master/multiple_hosts_for_copy_module_to (38a0a68d)
+
+
+```
+Merge pull request #521 from justinstoller/maint/master/multiple_hosts_for_copy_module_to
+
+(MAINT) Allow passing multiple hosts to copy_module_to
+```
+* Merge pull request #524 from jalvarezsamayoa/feature/issue_519 (a5581315)
+
+
+```
+Merge pull request #524 from jalvarezsamayoa/feature/issue_519
+
+Fix #519 Unable to ssh to docker container based on Ubuntu Trusty
+```
+* (QENG-1454) Allow user to specify ports to open on ec2 (b1bd184f)
+
+
+```
+(QENG-1454) Allow user to specify ports to open on ec2
+
+Previous to this commit, the list of ports that beaker should open for
+ec2 was hard coded and incomplete. For example it was missing port
+'5432' for the database node, which is the port postgresql uses.
+This commit adds the ability for a user to specify additional ports to open
+in their `hosts.cfg` file. By allowing this, it should provide some
+flexibility to the hard coded nature of the ports, and allow beaker to
+just provide the defaults that are currently known.
+```
+* Merge pull request #520 from anodelman/docker (76427a67)
+
+
+```
+Merge pull request #520 from anodelman/docker
+
+(QENG-1450) when docker options are already set they should...
+```
+* Merge pull request #518 from anodelman/maint (f9548854)
+
+
+```
+Merge pull request #518 from anodelman/maint
+
+(QENG-1449) proxy package managers before configuration/validation...
+```
+* Fix #519 Unable to ssh to docker container based on Ubuntu Trusty (846dfc34)
+
+* Merge pull request #517 from anodelman/vagrant-maint (a7435074)
+
+
+```
+Merge pull request #517 from anodelman/vagrant-maint
+
+(gh-456) Can't ssh root@127.0.0.1 via vagrant if root...
+```
+* (QENG-1450) when docker options are already set they should... (fd98e13b)
+
+
+```
+(QENG-1450) when docker options are already set they should...
+
+... not be overridden
+
+- as reported in https://github.com/puppetlabs/beaker/pull/509
+- repackaged PR to meet contributor guidelines
+```
+* (QENG-1449) proxy package managers before configuration/validation... (3d960d65)
+
+
+```
+(QENG-1449) proxy package managers before configuration/validation...
+
+... of hypervisor SUTs
+
+- run proxy_package_manager for each hypervisor before
+  configure/validate step
+```
+* (gh-456) Can't ssh root@127.0.0.1 via vagrant if root... (34a4ef48)
+
+
+```
+(gh-456) Can't ssh root@127.0.0.1 via vagrant if root...
+
+... login disabled in /etc/ssh/sshd_config
+
+- add enable_root_login step by default
+- clean up spurious 'end' when generating/using an extra disk on
+  virtualbox instances
+- tested clean locally
+```
+* (MAINT) Allow passing multiple hosts to copy_module_to (36a78237)
+
+* Merge pull request #478 from paschdan/awsSdk-nonroot (ba128d04)
+
+
+```
+Merge pull request #478 from paschdan/awsSdk-nonroot
+
+(gh-477) enables root for non-root users on ec2 hypervisor
+```
+* Merge pull request #508 from kevpl/qeng1400_osx (8167af28)
+
+
+```
+Merge pull request #508 from kevpl/qeng1400_osx
+
+QENG-1400 - Added OS X Support to Beaker's users and guests
+```
+* (QENG-1400) fixed whitespace issues in host file (59ed17a4)
+
+* Merge pull request #502 from kevpl/qeng1211_retry (6f0d6da2)
+
+
+```
+Merge pull request #502 from kevpl/qeng1211_retry
+
+(QENG-1211) Added documentation & tests for retry_on
+```
+* (QENG-1211) fixed whitespace issues (7c8f1550)
+
+* Merge pull request #442 from leoc/add-debug-flag-to-apply-manifest-on (532b095e)
+
+
+```
+Merge pull request #442 from leoc/add-debug-flag-to-apply-manifest-on
+
+(MAINT) Add --debug option to `apply_manifest_on` helper
+```
+* Merge pull request #460 from liamjbennett/powershell_wrapper (1b00cabb)
+
+
+```
+Merge pull request #460 from liamjbennett/powershell_wrapper
+
+Adding a new powershell wrapper
+```
+* Merge pull request #401 from cyberious/ScpAutoExpand (4e301174)
+
+
+```
+Merge pull request #401 from cyberious/ScpAutoExpand
+
+QENG-1075 Auto expand cygpath when performing scp_to on windows
+```
+* Merge pull request #494 from branan/skip_on_existing_node (440ae0ec)
+
+
+```
+Merge pull request #494 from branan/skip_on_existing_node
+
+(maint) Don't fail if master node is already in console
+```
+* (maint) Add helpers for sleep until puppetserver / nc started (c76c61cb)
+
+
+```
+(maint) Add helpers for sleep until puppetserver / nc started
+
+In PE 3.7, we added the JVM puppetserver and a JVM node classifier.
+These services each take anywhere from 30-100 seconds to start. This
+commit adds a helper function to curl until the service is started just
+like we do for the (jvm) puppetdb service.
+```
+* (QENG-1400) Added yard documentation for OS X host users and groups (c0d32896)
+
+* (QENG-1400) Added spec tests for OS X host users and groups (1d4d31b6)
+
+* (maint) Add support for 3.7 answers (f08f53eb)
+
+
+```
+(maint) Add support for 3.7 answers
+
+Because we could still be testing against builds with a "3.4" number
+the answers haven't been completely converted yet. Once we no longer
+have any 3.4 builds to test we can do a full conversion.
+```
+* (maint) open port 4433 on ec2 for the node classifier (87d51464)
+
+
+```
+(maint) open port 4433 on ec2 for the node classifier
+
+Previous to this commit, we never explicitly opened the node classifier
+port in ec2, since it is new in 3.4.
+```
+* Merge pull request #511 from kevpl/yard_quickfix (5dfe8980)
+
+
+```
+Merge pull request #511 from kevpl/yard_quickfix
+
+(MAINT) removed yard param notation where no parameter was given
+```
+* (MAINT) removed yard param notation where no parameter was given (4fc43503)
+
+* (maint) open port 5432 on ec2 for postgresql (727f3541)
+
+
+```
+(maint) open port 5432 on ec2 for postgresql
+
+Previous to this commit, we never explicitly opened the database port in
+ec2. Either it was somehow implicitly being included/created and that
+broke, or split installs just never worked in ec2.
+```
+* (QENG-1400) Removed comments and added in formatting feedback (7ab657a3)
+
+* (QENG-1400) Allowed yield blocks to get at actual command output, and returned unix style passwd user output (def2d633)
+
+
+```
+(QENG-1400) Allowed yield blocks to get at actual command output, and returned unix style passwd user output
+
+Mac's dscl output isn't formatted as the /etc/passwd expected by callers.  In order to go back to this, I changed the yield to use the
+information after I formatted it.  However, this fails because the callers are relying on the parameter given to them having a .stdout
+call and other things like it, so I've gone back to that old way, and allowed the unix formatting to still be used in the return
+```
+* Merge pull request #507 from branan/osx_simplified_support (b65bf067)
+
+
+```
+Merge pull request #507 from branan/osx_simplified_support
+
+(QENG-1414) Allow installation of OSX using simplified agent
+```
+* Merge pull request #506 from puppetlabs/aws-sdk-bump (c05dd108)
+
+
+```
+Merge pull request #506 from puppetlabs/aws-sdk-bump
+
+Bump aws-sdk to v1.57.0 for eu-central-1 support
+```
+* (QENG-1414) Allow installation of OSX using simplified agent (0c552bd7)
+
+
+```
+(QENG-1414) Allow installation of OSX using simplified agent
+
+OSX has been a supported simplified platform since its release, but
+beaker did not support this deployment pattern. This change makes it
+work.
+
+Conflicts:
+	lib/beaker/dsl/install_utils.rb
+```
+* (QENG-1400) Added support for host operations on a mac (fb1bad4a)
+
+* Bump aws-sdk to v1.57.0 for eu-central-1 support (867660da)
+
+
+```
+Bump aws-sdk to v1.57.0 for eu-central-1 support
+
+Prior to this commit, we pinned aws-sdk to v1.42.0. Today, AWS brought
+the eu-central-1 datacenter online. When Beaker attempts to run its
+zombie killer script(s), the AWS SDK doesn't know how to handle this
+datacenter. To combat the issue, AWS released v1.57.0 of the aws-sdk gem
+today to coincide with this datacenter being brought online.
+
+This commit modifies Beaker's Gemspec to use aws-sdk v1.57.0 so that it
+can properly use the eu-central-1 datacenter.
+```
+* (QENG-1211) Removing unnecessary description parameter from retry_on (d1c5a9c1)
+
+
+```
+(QENG-1211) Removing unnecessary description parameter from retry_on
+
+Before, the description parameter was unused by retry_command, but there were usages of the
+function that tried putting information into this. Removing it makes the usages more correct,
+since it wasn't actually being used, and makes it conform better to our _on function's
+parameter standard
+```
+* (maint) Use tlsv1 when curling simplified install script (e6d4c810)
+
+
+```
+(maint) Use tlsv1 when curling simplified install script
+
+As of PE 3.7, the puppetmaster no longer supports pre-TLS security
+standards.
+
+Conflicts:
+	lib/beaker/dsl/install_utils.rb
+	spec/beaker/dsl/install_utils_spec.rb
+```
+* (QENG-1211) Fixed logical error in acceptable exit code argument for retry_on (9ce699d1)
+
+* Merge pull request #493 from kevpl/qeng1257_scpto_addioerror (2e778ff5)
+
+
+```
+Merge pull request #493 from kevpl/qeng1257_scpto_addioerror
+
+QENG-1257 scp_to Added IOError
+```
+* Merge pull request #382 from justinstoller/metadataJsonSupport (2c9839b8)
+
+
+```
+Merge pull request #382 from justinstoller/metadataJsonSupport
+
+Metadata json support
+```
+* (QENG-1211) Added documentation & tests for retry_on (762720da)
+
+
+```
+(QENG-1211) Added documentation & tests for retry_on
+
+Before, the retry_command method was private by convention, because it didn't have
+tests or any documentation.  Some of the QA team wanted to use this functionality,
+so now we've added those supporting items to gain confidence in its regular use.
+```
+* Merge pull request #495 from kevpl/qeng1374_sshconn_addclosespec (a05a6b1b)
+
+
+```
+Merge pull request #495 from kevpl/qeng1374_sshconn_addclosespec
+
+(QENG-1374) Added specs for the SshConnection close function
+```
+* Merge pull request #489 from anodelman/pooler (1f4aaef6)
+
+
+```
+Merge pull request #489 from anodelman/pooler
+
+(QENG-779) backoff from pooler reqests when retrying
+```
+* Merge pull request #487 from kevpl/qeng1354_spec_add (31472d55)
+
+
+```
+Merge pull request #487 from kevpl/qeng1354_spec_add
+
+(QENG-1354) Added low-hanging rspec tests to improve coverage
+```
+* Merge pull request #468 from kbarber/add-vpc-support-to-aws-sdk (e7b7cd63)
+
+
+```
+Merge pull request #468 from kbarber/add-vpc-support-to-aws-sdk
+
+Add VPC support to the aws_sdk hypervisor
+```
+* Allow frictionlesss install to pass params (bf62c90f)
+
+
+```
+Allow frictionlesss install to pass params
+
+Previously, the frictionless agent install did not have a
+way to specify puppet config settings at install time. In 3.4 the
+ability was added to pass in additional settings in the form of
+`section:key=value` and have it call `puppet config set` with those
+options before starting puppet. This allows an agent to dynamically
+configure it's certname, server or any other setting.
+
+Conflicts:
+	lib/beaker/dsl/install_utils.rb
+```
+* (maint) Don't fail if master node is already in console (280bdf4d)
+
+* (QENG-1257) do_scp_to raises IOError if file doesn't exist (7db9279a)
+
+
+```
+(QENG-1257) do_scp_to raises IOError if file doesn't exist
+
+Before, if the file doesn't exist, you would get a Result object back that had a nil exit_code.  Talking with some people, we decided that if you get a Result object back, it implies that the command was run, which doesn't happen here.  Now we raise an error, which is more indicative of an error in beaker setup, which is what's actually going on here.
+```
+* (QENG-1257) updated yard doc for do_scp_to to make parameters consistently formatted (72f8debd)
+
+* (QENG-1374) Added specs for the SshConnection close function (64dda96f)
+
+* (QENG-779) backoff from pooler reqests when retrying (21a9597f)
+
+
+```
+(QENG-779) backoff from pooler reqests when retrying
+
+- add fibonacci backoffs to vpooler instance requests
+```
+* (QENG-1354) Added low-hanging rspec tests to improve coverage (bf05fa0f)
+
+
+```
+(QENG-1354) Added low-hanging rspec tests to improve coverage
+
+This was just a task to get me a little more comfortable with the codebase,
+and add a little more testing to plug some small gaps that we had in coverage
+```
+* (PE-5681) Add auth password answer on upgrade to 3.4 (093c73f7)
+
+
+```
+(PE-5681) Add auth password answer on upgrade to 3.4
+
+Prior to this commit we were not providing the auth_password answer on
+upgrades to 3.4.
+This commit adds that answer. This will allow the tests to complete.
+
+Conflicts:
+	lib/beaker/answers/version34.rb
+```
+* (gh-477) enables root for non-root users on ec2 hypervisor (5d3072f7)
+
+
+```
+(gh-477) enables root for non-root users on ec2 hypervisor
+
+- fixes codestyle
+- fixes tests
+```
+* (gh-477) enables root for non-root users on ec2 hypervisor (e2f3f662)
+
+
+```
+(gh-477) enables root for non-root users on ec2 hypervisor
+
+- root login is not possible on ubuntu-amis
+- provision is not possible without root
+
+This Patch enables root when the host['user'] differs from "root"
+```
+* (gh-472) refactoring method so that is only supports windows and will raise error on other platforms (90a19c83)
+
+* Add VPC support to the aws_sdk hypervisor (53a32039)
+
+
+```
+Add VPC support to the aws_sdk hypervisor
+
+This adds support for launching instances into an AWS VPC.
+
+This adds two new configuration options:
+
+- subnet_id
+- vpc_id
+
+That can be added to the HOSTS section of your beaker configuration. These
+options are both mandatory for this feature to work.
+
+The code has been basically modified to deal with the VPC object now,
+if those configuration items are provided.
+
+Signed-off-by: Ken Barber <ken@bob.sh>
+```
+* renaming method to add_system32_hosts_entry (200a9c24)
+
+* removing unused powershell command (76ce2546)
+
+* switching method to use powershell wrapper (67a56318)
+
+* Merge branch 'master' into host_entry_method (422a17b0)
+
+* (gh-469) Adding a new wrapper for the powershell.exe command (a24449c3)
+
+
+```
+(gh-469) Adding a new wrapper for the powershell.exe command
+
+There are several places in the codebase where this will be used as
+powershell is the most common scipting environment on windows.
+
+The aim of this new addtion is to wrap a few of the complexities of
+executing powershell commands, such as discovering the powershell.exe
+location and passing the correct command line paramaters.
+```
+* Merge pull request #4 from branan/db_names (1c40dbd2)
+
+
+```
+Merge pull request #4 from branan/db_names
+
+(maint) Use pe- prefix for DB names of console_services components
+Conflicts:
+	lib/beaker/answers/version34.rb
+	spec/beaker/answers_spec.rb
+```
+* Merge pull request #3 from branan/fix_specs (8c88db60)
+
+
+```
+Merge pull request #3 from branan/fix_specs
+
+(maint) fix spec tests because I am an asshole
+```
+* Merge pull request #2 from branan/puppetserver (9fbc57f9)
+
+
+```
+Merge pull request #2 from branan/puppetserver
+
+(QENG-1252) Use pe-puppetserver as master service on PE 3.4+
+```
+* Merge pull request #1 from briancain/maint/master/update-to-set-console-services-answers (741d088a)
+
+
+```
+Merge pull request #1 from briancain/maint/master/update-to-set-console-services-answers
+
+(PE-5775) Add new console services answers to beaker for 3.4
+Conflicts:
+	lib/beaker/answers/version34.rb
+	lib/beaker/options/presets.rb
+	spec/beaker/answers_spec.rb
+```
+* (MAINT) Add --debug option to `apply_manifest_on` helper (0a30af04)
+
+
+```
+(MAINT) Add --debug option to `apply_manifest_on` helper
+
+Before every 'puppet apply' command is executed with --verbose.
+Now you can pass `debug: true`, which executes 'puppet apply' with the
+--debug flag.
+```
+* (QENG-1126) Allow setting IS_PE to the negative (bd9999cd)
+
+
+```
+(QENG-1126) Allow setting IS_PE to the negative
+
+Previously we had an environment variable "IS_PE" or "BEAKER_IS_PE" to
+set whether or not we were using PE. Since then PE has become the
+default. Module authors would like a similarly simple way via the ENV
+to override the default and set the installation type as "FOSS".
+The convention that has arisen is to use the negative in the IS_PE
+environment variable (e.g. "IS_PE=no"). This brings that convention
+into Beaker proper.
+
+Original work done by @cyberious (Travis Fields).
+```
+* (MAINT) Fix bug connecting to windows vagrant host (bf353c1d)
+
+
+```
+(MAINT) Fix bug connecting to windows vagrant host
+
+When running multiple hosts in vagrant with an linux master and windows
+agent it seems that vagrant has difficulty connecting to box when the
+ssh_config file contains 127.0.0.1 for the host. This change fixes the
+issue by replacing it with the host ip if it has been specified in the
+nodeset.
+
+This might need a little more manual testing.
+```
+* Adding a utility method for adding host entries (5c3c00e8)
+
+
+```
+Adding a utility method for adding host entries
+
+As much as this is a infrastructure-smell in the linux world, adding
+hosts entries is still all to common in the windows world. This method
+allows host entries to be configured to meet that need.
+
+It can also be used when developing with vagrant to make sure that the
+master and agent vms can see each other properly.
+```
+* QENG-1075 Auto expand cygpath when performing scp_to (2006a1ad)
+
+
+```
+QENG-1075 Auto expand cygpath when performing scp_to
+
+Modified to have match anything on the to_path `cygpath
+
+Added yard docs to expanding new behavior with cygpath
+```
+* (QENG-1074) Override mac and win url for `install_puppet` (c24d8cf8)
+
+
+```
+(QENG-1074) Override mac and win url for `install_puppet`
+
+Previously we always downloaded windows or osx installation packages
+from http://downloads.puppetlabs.com.
+
+This allows the specifying of special urls for windows and osx to
+`Beaker::DSL::InstallHelpers#install_puppet`.
+```
+* (MAINT) fix spec stubs for Modulefile/metadata.json detection (e5b1ad07)
+
+* (MAINT) improve Modulefile/metadata.json logging msg (f5a8f642)
+
+* (QENG-1340) Add GitHub PR refspec to install_from_git (7fa8d7d3)
+
+
+```
+(QENG-1340) Add GitHub PR refspec to install_from_git
+
+ - When testing out Jenkins job configuration tweaks that must coincide with source
+   changes, it can be useful to have Beaker be aware of the GitHub refspec.  This
+   allows SHA references to GitHub commits / PRs that have not yet been merged,
+   without having to jump through a number of additional job configurations to gain
+   access to the appropriate commits.
+ - Note that this does have performance implications, as performing a fetch will take
+   longer on the first time.
+```
+* (QENG-1000) Ensure that add-el-extras works on all rhel platforms (493639d2)
+
+
+```
+(QENG-1000) Ensure that add-el-extras works on all rhel platforms
+
+The --add-el-extras options was only working for platform strings of the form
+el-(5,6), which meant that you couldn't have beaker add the el repo on a
+'centos' platform for instance.
+
+Change makes more use of the Beaker::Platform attributes and checks
+other rhel variants (centos, scientific, and the 'redhat' variant is
+another platform label used for rhel I believe).
+```
+* (QENG-526) A friendly way for Beaker to set environment... (1e3b31e2)
+
+
+```
+(QENG-526) A friendly way for Beaker to set environment...
+
+... variables for SUTs
+
+- add support for option :host_env, it can be set in the host
+  configuration file
+- requires updating each host so that sshd allows remotely setting
+  environment variables
+- add host.add_env_var(key,val) and host.delete_env_var(key,val) for
+  using in test writing
+```
+* (MAINT) Add metadata.json as part of determining module root (fb25b502)
+
+* (GH-320) Allow disabling of vbguest plugin auto-update (8d099274)
+
+
+```
+(GH-320) Allow disabling of vbguest plugin auto-update
+
+A common Vagrant plugin can cause considerably lengthier test runs
+unless disabled in the Vagrantfile.
+
+This patch allows disabling the "vb auto update plugin" via an
+environment variable
+
+Originally coded by @petems (Peter Souter)
+  refactored by @justinstoller (Justin Stoller)
+```
+### <a name = "beaker1.20.1">beaker1.20.1 - 17 Oct, 2014 (be250ad6)
+
+* (HISTORY) update beaker history for gem release 1.20.1 (be250ad6)
 
 * (GEM) update beaker version to 1.20.1 (3fff222d)
 
