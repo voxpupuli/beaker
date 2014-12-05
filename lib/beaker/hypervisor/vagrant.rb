@@ -65,7 +65,7 @@ module Beaker
           stdout.read
         end
         #replace hostname with ip
-        ssh_config = ssh_config.gsub(/Host #{host.name}/, "Host #{host['ip']}") unless not host['ip']
+        ssh_config = ssh_config.gsub(/^Host #{host.name}/, "Host #{host['ip']}") unless not host['ip']
         if host['platform'] =~ /windows/
           ssh_config = ssh_config.gsub(/127\.0\.0\.1/, host['ip']) unless not host['ip']
         end
@@ -129,7 +129,8 @@ module Beaker
       @hosts.each do |host|
         default_user = host['user']
 
-        set_ssh_config host, 'vagrant'
+        vagrant_user = host['vagrant_user'] || 'vagrant'
+        set_ssh_config host, vagrant_user
 
         #copy vagrant's keys to roots home dir, to allow for login as root
         copy_ssh_to_root host, @options
