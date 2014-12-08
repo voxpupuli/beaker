@@ -15,6 +15,8 @@ module Beaker
     #   data.
     def self.create version, hosts, options
       case version
+      when /\A4\.0/
+        return Version34.new(version, hosts, options)
       when /\A3\.7/
         return Version34.new(version, hosts, options)
       when /\A3\.4/
