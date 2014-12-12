@@ -16,6 +16,7 @@ module Beaker
         :project              => ['BEAKER_PROJECT', 'BEAKER_project'],
         :department           => ['BEAKER_DEPARTMENT', 'BEAKER_department'],
         :jenkins_build_url    => ['BEAKER_BUILD_URL', 'BUILD_URL'],
+        :created_by           => ['BEAKER_CREATED_BY'],
         :consoleport          => ['BEAKER_CONSOLEPORT', 'consoleport'],
         :is_pe                => ['BEAKER_IS_PE', 'IS_PE'],
         :pe_dir               => ['BEAKER_PE_DIR', 'pe_dist_dir'],
@@ -110,9 +111,10 @@ module Beaker
         h = Beaker::Options::OptionsHash.new
         h.merge({
           :project                => 'Beaker',
-          :department             => ENV['USER'] || ENV['USERNAME'] || 'unknown',
-          :validate               => true,
+          :department             => 'unknown',
+          :created_by             => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :jenkins_build_url      => nil,
+          :validate               => true,
           :log_level              => 'info',
           :trace_limit            => 10,
           :"master-start-curl-retries"  => 120,

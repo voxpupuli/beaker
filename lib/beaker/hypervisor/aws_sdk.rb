@@ -304,6 +304,7 @@ module Beaker
         instance.add_tag("Name", :value => host.name)
         instance.add_tag("department", :value => @options[:department])
         instance.add_tag("project", :value => @options[:project])
+        instance.add_tag("created_by", :value => @options[:created_by])
       end
 
       nil
