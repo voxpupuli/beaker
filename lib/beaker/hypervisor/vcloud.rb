@@ -98,8 +98,11 @@ module Beaker
         start = Time.now
         tasks = []
         @hosts.each_with_index do |h, i|
-          # Generate a randomized hostname
-          h['vmhostname'] = generate_host_name
+          if h['name']
+            h['vmhostname'] = h['name']
+          else
+            h['vmhostname'] = generate_host_name
+          end
 
           if h['template'] =~ /\//
             templatefolders = h['template'].split('/')
