@@ -449,7 +449,7 @@ describe Beaker do
 
     it "can set the environment on a windows host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/sshd_config",
         "cygrunsrv -E sshd",
         "cygrunsrv -S sshd"
       ]
@@ -458,7 +458,7 @@ describe Beaker do
 
     it "can set the environment on an OS X host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/sshd_config",
         "launchctl unload /System/Library/LaunchDaemons/ssh.plist",
         "launchctl load /System/Library/LaunchDaemons/ssh.plist"
       ]
@@ -467,7 +467,7 @@ describe Beaker do
 
     it "can set the environment on an ssh-based linux host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
         "service ssh restart"
       ]
       set_env_helper('ubuntu', commands)
@@ -475,7 +475,7 @@ describe Beaker do
 
     it "can set the environment on an sshd-based linux host" do
       commands = [
-          "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+          "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
           "service sshd restart"
       ]
       set_env_helper('eos', commands)
@@ -483,7 +483,7 @@ describe Beaker do
 
     it "can set the environment on an sles host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
         "rcsshd restart"
       ]
       set_env_helper('sles', commands)
@@ -491,7 +491,7 @@ describe Beaker do
 
     it "can set the environment on a solaris host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
         "svcadm restart svc:/network/ssh:default"
       ]
       set_env_helper('solaris', commands)
@@ -499,7 +499,7 @@ describe Beaker do
 
     it "can set the environment on an aix host" do
       commands = [
-        "echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config",
+        "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
         "stopsrc -g ssh",
         "startsrc -g ssh"
       ]
