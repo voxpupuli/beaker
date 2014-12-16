@@ -80,4 +80,40 @@ module Beaker
       expect( cmd.cmd_line host ).to be === ""
     end
   end
+  describe SedCommand do
+    let(:host)        { Hash.new }
+    let(:platform)    { @platform   || 'unix' }
+    let(:expression)  { @expression || 's/b/s/' }
+    let(:filename)    { @filename   || '/fakefile' }
+    let(:options)     { @options    || Hash.new  }
+    subject(:cmd)     { SedCommand.new( platform, expression, filename, options ) }
+
+    it 'forms a basic sed command correctly' do
+      expect( cmd.cmd_line host ).to be === "sed -i -e \"#{expression}\" #{filename}"
+    end
+
+    it 'provides the -i option to rewrite file in-place on non-solaris hosts' do
+      expect( cmd.cmd_line host ).to include('-i')
+    end
+
+    describe 'on solaris hosts' do
+      it 'removes the -i option correctly' do
+        @platform = 'solaris'
+        expect( cmd.cmd_line host ).not_to include('-i')
+      end
+
+      it 'deals with in-place file substitution correctly' do
+        @platform = 'solaris'
+        default_temp_file = "#{filename}.tmp"
+        expect( cmd.cmd_line host ).to include(" > #{default_temp_file} && mv #{default_temp_file} #{filename} && rm -f #{default_temp_file}")
+      end
+
+      it 'allows you to provide the name of the temp file for in-place file substitution' do
+        @platform = 'solaris'
+        temp_file = 'mytemp.tmp'
+        @options = { :temp_file => temp_file }
+        expect( cmd.cmd_line host ).to include(" > #{temp_file} && mv #{temp_file} #{filename} && rm -f #{temp_file}")
+      end
+    end
+  end
 end
