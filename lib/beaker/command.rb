@@ -194,14 +194,13 @@ module Beaker
     # @return a new {SedCommand} object
     def initialize platform, expression, filename, opts = {}
       command = "sed -i -e \"#{expression}\" #{filename}"
-      if platform =~ /solaris/
+      if platform =~ /solaris|aix|osx/
         command.slice! '-i '
         temp_file = opts[:temp_file] ? opts[:temp_file] : "#{filename}.tmp"
         command << " > #{temp_file} && mv #{temp_file} #{filename} && rm -f #{temp_file}"
       end
       args = []
       opts['ENV'] ||= Hash.new
-      opts[:cmdexe] = true
       super( command, args, opts )
     end
   end
