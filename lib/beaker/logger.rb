@@ -170,7 +170,7 @@ module Beaker
         end
       else
         # Remove invalid and undefined UTF-8 character encodings
-        string.force_encoding('UTF-8')
+        string.to_s.force_encoding('UTF-8')
         return string.chars.select{|i| i.valid_encoding?}.join
       end
     end
