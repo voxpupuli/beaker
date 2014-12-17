@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 5 Dec, 2014 (6a1295f2)](#LATEST)
+* [LATEST - 17 Dec, 2014 (747aacee)](#LATEST)
+* [beaker2.0.0 - 5 Dec, 2014 (fb4b620b)](#beaker2.0.0)
 * [beaker1.20.1 - 17 Oct, 2014 (be250ad6)](#beaker1.20.1)
 * [beaker1.20.0 - 17 Oct, 2014 (24acc2d3)](#beaker1.20.0)
 * [beaker1.19.1 - 19 Sep, 2014 (3aafc71d)](#beaker1.19.1)
@@ -65,7 +66,123 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 5 Dec, 2014 (6a1295f2)
+### <a name = "LATEST">LATEST - 17 Dec, 2014 (747aacee)
+
+* (GEM) update beaker version to 2.1.0 (747aacee)
+
+* Merge pull request #576 from anodelman/utf-8-encoding (0ff3e99e)
+
+
+```
+Merge pull request #576 from anodelman/utf-8-encoding
+
+(QENG-1599) force_encoding requires string input, pukes on symbols
+```
+* Merge pull request #582 from kevpl/qeng1596_2.0_solaris (d949312b)
+
+
+```
+Merge pull request #582 from kevpl/qeng1596_2.0_solaris
+
+(QENG-1596) fixed sed commands on solaris
+```
+* Merge pull request #580 from anodelman/fix-ssh-login (ff448494)
+
+
+```
+Merge pull request #580 from anodelman/fix-ssh-login
+
+(QENG-1594) Beaker 2.0.0 breaks Centos 7 sshd
+```
+* Merge pull request #583 from anodelman/aws (9e68d52e)
+
+
+```
+Merge pull request #583 from anodelman/aws
+
+(QENG-1529) beaker support to query aws instance information
+```
+* Merge pull request #579 from puppetlabs/vcloud_hypervisor_improvements (32ff90c9)
+
+
+```
+Merge pull request #579 from puppetlabs/vcloud_hypervisor_improvements
+
+(QENG-1548) vcloud hypervisor improvements
+```
+* (QENG-1596) added aix and osx to SedCommand fix (e2c0aecd)
+
+* (QENG-1596) fixed sed commands on solaris (c1894743)
+
+* (QENG-1594) Beaker 2.0.0 breaks Centos 7 sshd (f2c1b1ef)
+
+
+```
+(QENG-1594) Beaker 2.0.0 breaks Centos 7 sshd
+
+- append newline to end of sshd_config file
+```
+* (QENG-1548) Don't generate a hostname if 'name' is specified (11d918bb)
+
+* (QENG-1548) Allow 'resourcepool' to be an optional param for 'vcloud' hypervisor (780dfb68)
+
+* Merge pull request #574 from anodelman/maint (b89073d3)
+
+
+```
+Merge pull request #574 from anodelman/maint
+
+(MAINT) missing assert_not_match method
+```
+* (QENG-1599) force_encoding requires string input, pukes on symbols (77488bc1)
+
+* Merge pull request #575 from anodelman/tagging (1984b158)
+
+
+```
+Merge pull request #575 from anodelman/tagging
+
+(MAINT) update ec2 tags with 'created_by'
+```
+* (MAINT) update ec2 tags with 'created_by' (d760570c)
+
+
+```
+(MAINT) update ec2 tags with 'created_by'
+
+- now tag ec2 instances with Name, department, project,
+  jenkins_build_url and created_by
+```
+* (MAINT) missing assert_not_match method (779f61bc)
+
+
+```
+(MAINT) missing assert_not_match method
+
+- just add alias to assert_no_match
+```
+* (QENG-1529) beaker support to query aws instance information (c2d2a33c)
+
+
+```
+(QENG-1529) beaker support to query aws instance information
+
+- access to individual instances by id
+- access to array of all instances
+```
+* Merge pull request #565 from puppetlabs/add_40_answers (56d896a5)
+
+
+```
+Merge pull request #565 from puppetlabs/add_40_answers
+
+(maint) Make beaker support 4.0
+```
+* (maint) Make beaker support 4.0 (e9fcdaf6)
+
+### <a name = "beaker2.0.0">beaker2.0.0 - 5 Dec, 2014 (fb4b620b)
+
+* (HISTORY) update beaker history for gem release 2.0.0 (fb4b620b)
 
 * (GEM) update beaker version to 2.0.0 (6a1295f2)
 
