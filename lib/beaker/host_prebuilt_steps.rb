@@ -479,28 +479,28 @@ module Beaker
         logger.debug("setting local environment on #{host.name}")
         case host['platform']
         when /windows/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/sshd_config"))
           host.exec(Command.new("cygrunsrv -E sshd"))
           host.exec(Command.new("cygrunsrv -S sshd"))
           env['CYGWIN'] = 'nodosfilewarning'
         when /osx/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/sshd_config"))
           host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
           host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
         when /debian|ubuntu|cumulus/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service ssh restart"))
         when /el-|centos|fedora|redhat|oracle|scientific|eos/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service sshd restart"))
         when /sles/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("rcsshd restart"))
         when /solaris/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("svcadm restart svc:/network/ssh:default"))
         when /aix/
-          host.exec(Command.new("echo 'PermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("stopsrc -g ssh"))
           host.exec(Command.new("startsrc -g ssh"))
         end
