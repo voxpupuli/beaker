@@ -214,14 +214,15 @@ module Beaker
     def add_env_var key, val
       key = key.to_s.upcase
       escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
+      env_file = self[:ssh_env_file]
       #see if the key/value pair already exists
-      if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{self[:ssh_env_file]}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+      if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
         return #nothing to do here, key value pair already exists
       #see if the key already exists
-      elsif exec(Beaker::Command.new("grep #{key} #{self[:ssh_env_file]}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-        exec(Beaker::Command.new("sed -i -e \"s/#{key}=/#{key}=#{escaped_val}:/\" #{self[:ssh_env_file]}"))
+      elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
       else
-        exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{self[:ssh_env_file]}"))
+        exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
       end
     end
 
@@ -233,9 +234,9 @@ module Beaker
     def delete_env_var key, val
       val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
       #if the key only has that single value remove the entire line
-      exec(Beaker::Command.new("sed -i -e \"/#{key}=#{val}$/d\" #{self[:ssh_env_file]}"))
+      exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
       #if the key has multiple values and we only need to remove the provided val
-      exec(Beaker::Command.new("sed -i -e \"s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/\" #{self[:ssh_env_file]}"))
+      exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/", self[:ssh_env_file]))
     end
 
     def connection

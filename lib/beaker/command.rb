@@ -170,4 +170,31 @@ module Beaker
       eval "\"#{@command}\""
     end
   end
+
+  class SedCommand < Command
+
+    # sets up a SedCommand for a particular platform
+    #
+    # the purpose is to abstract away platform-dependent details of the sed command
+    #
+    # @param [String] platform The host platform string
+    # @param [String] expression The sed expression
+    # @param [String] filename The file to apply the sed expression to
+    # @param [Hash{Symbol=>String}] opts Additional options
+    # @option opts [String] :temp_file The temp file to use for in-place substitution
+    #         (only applies to solaris hosts, they don't provide the -i option)
+    #
+    # @return a new {SedCommand} object
+    def initialize platform, expression, filename, opts = {}
+      command = "sed -i -e \"#{expression}\" #{filename}"
+      if platform =~ /solaris|aix|osx/
+        command.slice! '-i '
+        temp_file = opts[:temp_file] ? opts[:temp_file] : "#{filename}.tmp"
+        command << " > #{temp_file} && mv #{temp_file} #{filename} && rm -f #{temp_file}"
+      end
+      args = []
+      opts['ENV'] ||= Hash.new
+      super( command, args, opts )
+    end
+  end
 end

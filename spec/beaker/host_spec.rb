@@ -200,7 +200,7 @@ module Beaker
         result.exit_code = 0
         expect( Beaker::Command ).to receive(:new).with(/grep KEY ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with("sed -i -e \"s/KEY=/KEY=\\/my\\/first\\/value:/\" ~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/KEY=/KEY=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
 
@@ -208,8 +208,8 @@ module Beaker
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect( Beaker::Command ).to receive(:new).with("sed -i -e \"/key=\\/my\\/first\\/value$/d\" ~/.ssh/environment")
-        expect( Beaker::Command ).to receive(:new).with("sed -i -e \"s/key=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/key=\\1/\" ~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/key=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/key=\\1/', '~/.ssh/environment')
         host.delete_env_var('key', '/my/first/value')
       end
 
