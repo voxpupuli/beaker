@@ -115,6 +115,20 @@ module Beaker
       @logger.notify("#{output}")
     end
 
+    # Provided an id return an instance object.
+    # Instance object will respond to methods described here: http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/Instance.html
+    # @param [String] id The id of the instance to return
+    # @return [AWS::EC2::Instance] An AWS::EC2 instance object
+    def instance_by_id(id)
+      @ec2.instances[id]
+    end
+
+    # Return all instances currently on ec2.
+    # @return [Array<AWS::EC2::Instance>] An array of AWS::EC2 instance objects
+    def instances
+      @ec2.instances
+    end
+
     # Shutdown and destroy ec2 instances idenfitied by key that have been alive
     # longer than ZOMBIE hours.
     #
