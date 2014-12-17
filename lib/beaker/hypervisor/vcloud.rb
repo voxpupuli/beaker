@@ -9,7 +9,6 @@ module Beaker
       @hosts = vcloud_hosts
 
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
-      raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
       @vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
     end
@@ -73,7 +72,7 @@ module Beaker
       # Put the VM in the specified folder and resource pool
       relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
         :datastore    => @vsphere_helper.find_datastore(@options['datastore']),
-        :pool         => @vsphere_helper.find_pool(@options['resourcepool']),
+        :pool         => @options['resourcepool'] ? @vsphere_helper.find_pool(@options['resourcepool']) : nil,
         :diskMoveType => :moveChildMostDiskBacking
       )
 
@@ -99,8 +98,11 @@ module Beaker
         start = Time.now
         tasks = []
         @hosts.each_with_index do |h, i|
-          # Generate a randomized hostname
-          h['vmhostname'] = generate_host_name
+          if h['name']
+            h['vmhostname'] = h['name']
+          else
+            h['vmhostname'] = generate_host_name
+          end
 
           if h['template'] =~ /\//
             templatefolders = h['template'].split('/')
