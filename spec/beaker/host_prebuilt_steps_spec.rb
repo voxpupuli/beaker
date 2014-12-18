@@ -476,7 +476,7 @@ describe Beaker do
     it "can set the environment on an sshd-based linux host" do
       commands = [
           "echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config",
-          "service sshd restart"
+          "/sbin/service sshd restart"
       ]
       set_env_helper('eos', commands)
     end
