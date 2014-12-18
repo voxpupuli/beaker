@@ -65,7 +65,7 @@ module Beaker
           stdout.read
         end
         #replace hostname with ip
-        ssh_config = ssh_config.gsub(/#{host.name}/, host['ip']) unless not host['ip']
+        ssh_config = ssh_config.gsub(/Host #{host.name}/, "Host #{host['ip']}") unless not host['ip']
         if host['platform'] =~ /windows/
           ssh_config = ssh_config.gsub(/127\.0\.0\.1/, host['ip']) unless not host['ip']
         end
