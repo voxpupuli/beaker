@@ -22,6 +22,7 @@ module Beaker
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
       v_file = "Vagrant.configure(\"2\") do |c|\n"
+      v_file << "  c.ssh.forward_agent = true\n" unless options['forward_ssh_agent'].nil?
       hosts.each do |host|
         host['ip'] ||= randip #use the existing ip, otherwise default to a random ip
         v_file << "  c.vm.define '#{host.name}' do |v|\n"
