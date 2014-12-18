@@ -344,7 +344,7 @@ module Beaker
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
-          host.exec(Command.new("sudo -E service sshd restart"))
+          host.exec(Command.new("sudo -E /sbin/service sshd restart"))
         else
           @logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -492,7 +492,7 @@ module Beaker
           host.exec(Command.new("service ssh restart"))
         when /el-|centos|fedora|redhat|oracle|scientific|eos/
           host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("service sshd restart"))
+          host.exec(Command.new("/sbin/service sshd restart"))
         when /sles/
           host.exec(Command.new("echo 'PermitUserEnvironment yes\n' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("rcsshd restart"))
