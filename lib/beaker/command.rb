@@ -158,6 +158,7 @@ module Beaker
         environment_string = env_array.join(' ')
         "env #{environment_string}"
       end
+
     end
 
   end
