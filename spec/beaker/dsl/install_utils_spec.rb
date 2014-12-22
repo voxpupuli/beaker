@@ -517,6 +517,7 @@ describe ClassMixedWithDSLInstallUtils do
       it 'installs specific version of puppet when passed :version' do
         allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
         expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i /cygdrive/c/Windows/Temp/puppet-3000.msi')
         subject.install_puppet(:version => '3000')
       end

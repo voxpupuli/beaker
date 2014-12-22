@@ -33,7 +33,7 @@ module Windows
 
     def self.foss_defaults
       h = Beaker::Options::OptionsHash.new
-      h.merge({
+      defaults = {
         'user'              => 'Administrator',
         'group'             => 'Administrators',
         'puppetpath'        => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
@@ -47,7 +47,42 @@ module Windows
         'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin',
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
         'pathseparator'     => ';',
-      })
+      }
+      
+      if defined?(communicator)
+        case communicator
+        when /bitvise/
+            if platform.include?('amd64')
+              h.merge({
+                'puppetpath'    => "C:\\Program Files (x86)\\Puppet Labs\\Puppet\\etc",
+                'hieraconf'     => "C:\\Program Files (x86)\\Puppet Labs\\Puppet\\etc\\hiera.yaml",
+                'puppetvardir'  => 'C:\\Program Files (x86)\\Puppet Labs\\Puppet\\var',
+                'puppetbindir'  => "C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin",
+              })
+            else
+              h.merge({
+                'puppetpath'    => "C:\\Program Files\\Puppet Labs\\Puppet\\etc",
+                'hieraconf'     => "C:\\Program Files\\Puppet Labs\\Puppet\\etc\\hiera.yaml",
+                'puppetvardir'  => 'C:\\Program Files\\Puppet Labs\\Puppet\\var',
+                'puppetbindir'  => "C:\\Program Files\\Puppet Labs\\Puppet\\bin",
+              })
+            end
+            
+          h.merge({
+            'user'              => 'Administrator',
+            'group'             => 'Administrators',
+            'distmoduledir'     => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules',
+            'sitemoduledir'     => 'C:\\usr\\share\\puppet\\modules',
+            'hieralibdir'       => 'C:\\opt\\puppet-git-repos\\hiera\\lib',
+            'hierapuppetlibdir' => 'C:\\opt\\puppet-git-repos\\hiera-puppet\\lib',    
+            'hierabindir'       => 'C:\\opt\\puppet-git-repos\\hiera\\bin',
+            'pathseparator'     => ';',
+          })
+        else
+          h.merge(defaults)
+        end
+      end
+      return h
     end
   end
 end
