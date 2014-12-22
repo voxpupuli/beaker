@@ -5,7 +5,7 @@ require 'beaker/hypervisor/ec2_helper'
 
 module Beaker
   # This is an alternate EC2 driver that implements direct API access using
-  # Amazon's AWS-SDK library: http://aws.amazon.com/documentation/sdkforruby/
+  # Amazon's AWS-SDK library: {http://aws.amazon.com/documentation/sdkforruby/ SDK For Ruby}
   #
   # It is built for full control, to reduce any other layers beyond the pure
   # vendor API.
@@ -116,7 +116,7 @@ module Beaker
     end
 
     # Provided an id return an instance object.
-    # Instance object will respond to methods described here: http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/Instance.html
+    # Instance object will respond to methods described here: {http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/Instance.html AWS Instance Object}.
     # @param [String] id The id of the instance to return
     # @return [AWS::EC2::Instance] An AWS::EC2 instance object
     def instance_by_id(id)
@@ -124,9 +124,40 @@ module Beaker
     end
 
     # Return all instances currently on ec2.
+    # @see AwsSdk#instance_by_id
     # @return [Array<AWS::EC2::Instance>] An array of AWS::EC2 instance objects
     def instances
       @ec2.instances
+    end
+
+    # Provided an id return a VPC object.
+    # VPC object will respond to methods described here: {http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/VPC.html AWS VPC Object}.
+    # @param [String] id The id of the VPC to return
+    # @return [AWS::EC2::VPC] An AWS::EC2 vpc object
+    def vpc_by_id(id)
+      @ec2.vpcs[id]
+    end
+
+    # Return all VPCs currently on ec2.
+    # @see AwsSdk#vpc_by_id
+    # @return [Array<AWS::EC2::VPC>] An array of AWS::EC2 vpc objects
+    def vpcs
+      @ec2.vpcs
+    end
+
+    # Provided an id return a security group object
+    # Security object will respond to methods described here: {http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/SecurityGroup.html AWS SecurityGroup Object}.
+    # @param [String] id The id of the security group to return
+    # @return [AWS::EC2::SecurityGroup] An AWS::EC2 security group object
+    def security_group_by_id(id)
+      @ec2.security_groups[id]
+    end
+
+    # Return all security groups currently on ec2.
+    # @see AwsSdk#security_goup_by_id
+    # @return [Array<AWS::EC2::SecurityGroup>] An array of AWS::EC2 security group objects
+    def security_groups
+      @ec2.security_groups
     end
 
     # Shutdown and destroy ec2 instances idenfitied by key that have been alive
