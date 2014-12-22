@@ -796,30 +796,17 @@ module Beaker
 
         case host['communicator']
         when /bitvise/
-<<<<<<< HEAD
           dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
-=======
-          dest = "C:\\Windows\\Temp\\puppet-#{version}.msi"
->>>>>>> updating communicator work with latest 64-bit changes
 
           on host, "set PATH=\"%PATH%;#{host['puppetbindir']}\""
           on host, "setx PATH \"%PATH%;#{host['puppetbindir']}\""
 
-<<<<<<< HEAD
           on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
 
           on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
         else
           dest = "/cygdrive/c/Windows/Temp/#{host['dist']}.msi"
           on host, "curl -O #{dest} #{link}"
-=======
-          on host, "powershell.exe -InputFormat None -NoProfile -NonInteractive -NoLogo -ExecutionPolicy Bypass -Command \"$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{url}','#{dest}')\""
-
-          on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
-        else
-          dest = "/cygdrive/c/Windows/Temp/puppet-#{version}.msi"
-          on host, "curl -O #{link}"
->>>>>>> updating communicator work with latest 64-bit changes
 
           #Because the msi installer doesn't add Puppet to the environment path
           #Add both potential paths for simplicity
@@ -829,10 +816,7 @@ module Beaker
         end
 
         on host, "msiexec /qn /i #{dest}"
-<<<<<<< HEAD
-
-=======
->>>>>>> updating communicator work with latest 64-bit changes
+        
       end
 
       # Installs Puppet and dependencies from dmg
