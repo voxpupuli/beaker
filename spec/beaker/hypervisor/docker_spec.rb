@@ -22,6 +22,11 @@ module Beaker
       logger
     end
 
+    let(:options) {{
+      :logger => logger,
+      :forward_ssh_agent => true,
+    }}
+
     let(:image) do
       image = double('Docker::Image')
       allow( image ).to receive(:id)
@@ -52,7 +57,7 @@ module Beaker
       container
     end
 
-    let (:docker) { ::Beaker::Docker.new( hosts, { :logger => logger }) }
+    let (:docker) { ::Beaker::Docker.new( hosts, options ) }
     let(:docker_options) { nil }
 
     before :each do
@@ -165,6 +170,18 @@ module Beaker
           expect( hosts[0]['ip'] ).to be === '192.0.2.2'
           expect( hosts[0]['port'] ).to be === 8022
         end
+
+        it 'should have ssh agent forwarding enabled' do
+          ENV['DOCKER_HOST'] = nil
+          docker.provision
+
+          expect( hosts[0]['ip'] ).to be === '127.0.1.1'
+          expect( hosts[0]['port'] ).to be === 8022
+          expect( hosts[0]['ssh'][:password] ).to be ===  'root'
+          expect( hosts[0]['ssh'][:port] ).to be ===  8022
+          expect( hosts[0]['ssh'][:forward_agent] ).to be === true
+        end
+
       end
 
       it 'should record the image and container for later' do

@@ -43,7 +43,7 @@ module Beaker
         end
         port = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostPort"]
 
-        forward_ssh_agent = @options['forward_ssh_agent'] || false
+        forward_ssh_agent = @options[:forward_ssh_agent] || false
 
         # Update host metadata
         host['ip']  = ip
