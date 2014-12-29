@@ -312,7 +312,7 @@ module Beaker
       ignore_re = nil
       if has_ignore
         ignore_arr = Array(options[:ignore]).map do |entry|
-          "((\/|\\A)#{entry}(\/|\\z))".sub(/\./, "\.")
+          "((\/|\\A)#{entry}(\/|\\z))".gsub(/\./, '\.')
         end
         ignore_re = Regexp.new(ignore_arr.join('|'))
       end
