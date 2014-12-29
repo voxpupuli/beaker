@@ -18,6 +18,7 @@ module Beaker
        :log_level,
        :options_file,
        :preserve_hosts,
+       :provision,
        :tests,
        :type,
        :acceptance_root,
@@ -48,6 +49,7 @@ module Beaker
         puts "Running task"
 
         check_for_beaker_type_config
+        check_env_variables
         command = beaker_command
         puts command if verbose
         success = system(command)
@@ -79,13 +81,21 @@ module Beaker
       end
 
       #
-      # Check for existence of ENV variables for test if !@tests is undef
+      # Check for existence of ENV variables for
+      # tests, hosts, preserver_hosts, fail_mode, provision and log_level
+      # if they are not previously set by the calling rake task.
+      #
       #
       def check_env_variables
         if File.exists?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
           @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests')
         end
         @tests = ENV['TESTS'] || ENV['TEST'] if !@tests
+        @hosts = ENV['BEAKER_setfile'] || ENV['BEAKER_set'] if !@hosts
+        @preserve_hosts = ENV['BEAKER_preserve'] if !@preserve_hosts
+        @fail_mode = ENV['BEAKER_fail'] if !@fail_mode
+        @provision = ENV['BEAKER_provision'] if !@provision
+        @log_level = ENV['BEAKER_log_level'] if !@log_level
       end
 
       #
@@ -96,11 +106,14 @@ module Beaker
         cmd_parts << "beaker"
         cmd_parts << "--keyfile #{@keyfile}" if @keyfile
         cmd_parts << "--hosts #{@hosts}" if @hosts
-        cmd_parts << "--tests #{tests}" if @tests
+        cmd_parts << "--tests #{@tests}" if @tests
         cmd_parts << "--options-file #{@options_file}" if @options_file
+        cmd_parts << "--preserve-hosts #{@preserve_hosts}" if @preserve_hosts
+        cmd_parts << '--no-provision' if @provision == 'no'
         cmd_parts << "--type #{@type}" if @type
         cmd_parts << "--helper #{@helper}" if @helper
         cmd_parts << "--fail-mode #{@fail_mode}" if @fail_mode
+        cmd_parts << "--log-level #{@log_level}" if @log_level
         cmd_parts.flatten.join(" ")
       end
     end
