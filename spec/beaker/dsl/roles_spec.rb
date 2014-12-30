@@ -9,6 +9,7 @@ end
 describe ClassMixedWithDSLRoles do
 
   let( :hosts )      { @hosts || Hash.new }
+  let( :options )    { @options || Hash.new }
   let( :agent1 )     { make_host( 'agent1',     { :roles => [ 'agent' ] } ) }
   let( :agent2 )     { make_host( 'agent2',     { :roles => [ 'agent' ] } ) }
   let( :a_and_dash ) { make_host( 'a_and_dash', { :roles => [ 'agent', 'dashboard' ] } ) }
@@ -42,6 +43,12 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).exactly( 1 ).times.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
     end
+    it 'returns nil if no master and masterless is set' do
+      @options = { :masterless => true }
+      expect( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :options ).and_return( options )
+      expect( subject.master ).to be_nil
+    end
   end
   describe '#dashboard' do
     it 'returns the dashboard if there is one' do
@@ -58,6 +65,12 @@ describe ClassMixedWithDSLRoles do
       @hosts = [ agent1, agent2, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.dashboard }.to raise_error Beaker::DSL::FailTest
+    end
+    it 'returns nil if no dashboard and masterless is set' do
+      @options = { :masterless => true }
+      expect( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :options ).and_return( options )
+      expect( subject.dashboard ).to be_nil
     end
   end
   describe '#database' do
@@ -76,6 +89,12 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
+    it 'returns nil if no database and masterless is set' do
+      @options = { :masterless => true }
+      expect( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :options ).and_return( options )
+      expect( subject.database ).to be_nil
+    end
   end
   describe '#default' do
     it 'returns the default host when one is specified' do
@@ -86,12 +105,18 @@ describe ClassMixedWithDSLRoles do
     it 'raises an error if there is more than one default' do
       @hosts = [ db, monolith, default, default ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
-      expect { subject.database }.to raise_error Beaker::DSL::FailTest
+      expect { subject.default }.to raise_error Beaker::DSL::FailTest
     end
     it 'and raises an error if there is no default' do
       @hosts = [ agent1, agent2, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
-      expect { subject.database }.to raise_error Beaker::DSL::FailTest
+      expect { subject.default }.to raise_error Beaker::DSL::FailTest
+    end
+    it 'returns nil if no default and masterless is set' do
+      @options = { :masterless => true }
+      expect( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :options ).and_return( options )
+      expect( subject.default ).to be_nil
     end
   end
   describe '#add_role_def' do

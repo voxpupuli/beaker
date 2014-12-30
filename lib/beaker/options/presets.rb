@@ -118,6 +118,7 @@ module Beaker
           :log_level              => 'info',
           :trace_limit            => 10,
           :"master-start-curl-retries"  => 120,
+          :masterless             => false,
           :options_file           => nil,
           :type                   => 'pe',
           :provision              => true,

@@ -453,12 +453,16 @@ module Beaker
       # @api private
       #
       def do_install hosts, opts = {}
+        masterless = (defined? options) ? options[:masterless] : false
+        opts[:masterless] = masterless # has to pass masterless down for answer generation awareness
         opts[:type] = opts[:type] || :install
-        pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
-        pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
+        unless masterless
+          pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
+          pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
 
-        unless version_is_less(opts[:pe_ver] || master['pe_ver'], '3.4')
-          master['puppetservice'] = 'pe-puppetserver'
+          unless version_is_less(opts[:pe_ver] || master['pe_ver'], '3.4')
+            master['puppetservice'] = 'pe-puppetserver'
+          end
         end
 
         # Set PE distribution for all the hosts, create working dir
@@ -489,9 +493,11 @@ module Beaker
 
         fetch_puppet(hosts, opts)
 
-        # If we're installing a database version less than 3.0, ignore the database host
         install_hosts = hosts.dup
-        install_hosts.delete(database) if pre30database and database != master and database != dashboard
+        unless masterless
+          # If we're installing a database version less than 3.0, ignore the database host
+          install_hosts.delete(database) if pre30database and database != master and database != dashboard
+        end
 
         install_hosts.each do |host|
           if host['platform'] =~ /windows/
@@ -520,41 +526,43 @@ module Beaker
           end
 
           # On each agent, we ensure the certificate is signed then shut down the agent
-          sign_certificate_for(host)
+          sign_certificate_for(host) unless masterless
           stop_agent_on(host)
         end
 
-        # Wait for PuppetDB to be totally up and running (post 3.0 version of pe only)
-        sleep_until_puppetdb_started(database) unless pre30database
+        unless masterless
+          # Wait for PuppetDB to be totally up and running (post 3.0 version of pe only)
+          sleep_until_puppetdb_started(database) unless pre30database
 
-        # Run the agent once to ensure everything is in the dashboard
-        install_hosts.each do |host|
-          on host, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+          # Run the agent once to ensure everything is in the dashboard
+          install_hosts.each do |host|
+            on host, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
 
-          # Workaround for PE-1105 when deploying 3.0.0
-          # The installer did not respect our database host answers in 3.0.0,
-          # and would cause puppetdb to be bounced by the agent run. By sleeping
-          # again here, we ensure that if that bounce happens during an upgrade
-          # test we won't fail early in the install process.
-          if host['pe_ver'] == '3.0.0' and host == database
-            sleep_until_puppetdb_started(database)
+            # Workaround for PE-1105 when deploying 3.0.0
+            # The installer did not respect our database host answers in 3.0.0,
+            # and would cause puppetdb to be bounced by the agent run. By sleeping
+            # again here, we ensure that if that bounce happens during an upgrade
+            # test we won't fail early in the install process.
+            if host['pe_ver'] == '3.0.0' and host == database
+              sleep_until_puppetdb_started(database)
+            end
           end
-        end
 
-        install_hosts.each do |host|
-          wait_for_host_in_dashboard(host)
-        end
+          install_hosts.each do |host|
+            wait_for_host_in_dashboard(host)
+          end
 
-        if pre30master
-          task = 'nodegroup:add_all_nodes group=default'
-        else
-          task = 'defaultgroup:ensure_default_group'
-        end
-        on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
+          if pre30master
+            task = 'nodegroup:add_all_nodes group=default'
+          else
+            task = 'defaultgroup:ensure_default_group'
+          end
+          on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
 
-        # Now that all hosts are in the dashbaord, run puppet one more
-        # time to configure mcollective
-        on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+          # Now that all hosts are in the dashbaord, run puppet one more
+          # time to configure mcollective
+          on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
+        end
       end
 
       #Perform a Puppet Enterprise Higgs install up until web browser interaction is required, runs on linux hosts only.
@@ -620,7 +628,10 @@ module Beaker
       #
       # @!visibility private
       def sorted_hosts
-        special_nodes = [master, database, dashboard].uniq
+        special_nodes = []
+        [master, database, dashboard].uniq.each do |host|
+          special_nodes << host if host != nil
+        end
         real_agents = agents - special_nodes
         special_nodes + real_agents
       end

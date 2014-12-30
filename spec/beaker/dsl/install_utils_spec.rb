@@ -154,6 +154,13 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject.sorted_hosts ).to be === hosts
     end
+
+    it 'does not allow nil entries' do
+      allow( subject ).to receive( :options ).and_return( { :masterless => true } )
+      masterless_host = [basic_hosts[0]]
+      allow( subject ).to receive( :hosts ).and_return( masterless_host )
+      expect( subject.sorted_hosts ).to be === masterless_host
+    end
   end
 
   describe 'installer_cmd' do
@@ -396,6 +403,30 @@ describe ClassMixedWithDSLInstallUtils do
       #run puppet agent now that installation is complete
       expect( subject ).to receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
       subject.do_install( hosts, opts )
+    end
+
+    it 'can perform a masterless installation' do
+      hosts = make_hosts({
+        :pe_ver => '3.0',
+        :roles => ['agent']
+      }, 1)
+
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :options ).and_return({ :masterless => true })
+      allow( subject ).to receive( :on ).and_return( Beaker::Result.new( {}, '' ) )
+      allow( subject ).to receive( :fetch_puppet ).and_return( true )
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      allow( subject ).to receive( :stop_agent_on ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with(anything, '3.2.0').exactly(hosts.length + 1).times.and_return( false )
+
+      expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
+      expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
+      expect( subject ).to_not receive( :sign_certificate_for )
+      expect( subject ).to receive( :stop_agent_on ).with( hosts[0] ).once
+      expect( subject ).to_not receive( :sleep_until_puppetdb_started )
+      expect( subject ).to_not receive( :wait_for_host_in_dashboard )
+      expect( subject ).to_not receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] )
+      subject.do_install( hosts, opts)
     end
   end
 

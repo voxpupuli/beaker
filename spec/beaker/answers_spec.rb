@@ -50,6 +50,44 @@ module Beaker
     end
   end
 
+  describe "Masterless Setup" do
+    let( :ver ) { @ver || '3.0' }
+    let( :options )     { options = Beaker::Options::Presets.new.presets
+                          options[:masterless] = true
+                          options }
+    let( :hosts ) { make_hosts({}, 1) }
+    let( :host ) { hosts[0] }
+    let( :answers ) { Beaker::Answers.create(ver, hosts, options) }
+    let( :host_answers ) { answers.answers[host.name] }
+
+
+    it 'adds the correct answers' do
+      expect( host_answers[:q_puppetagent_server] ).to be === host_answers[:q_puppetagent_certname]
+      expect( host_answers[:q_continue_or_reenter_master_hostname]).to be === 'c'
+    end
+
+    it 'skips the correct answers' do
+      expect( host_answers[:q_puppetmaster_install]).to be === 'n'
+      expect( host_answers[:q_puppet_enterpriseconsole_install] ).to be === 'n'
+      expect( host_answers[:q_puppetdb_install] ).to be === 'n'
+    end
+
+    it '3.0: never calls #only_host_with_role in #generate_answers' do
+      expect( answers.generate_answers ).to_not receive( :only_host_with_role )
+    end
+
+    it '3.2: never calls #only_host_with_role in #generate_answers' do
+      @ver = '3.2'
+      expect( answers.generate_answers ).to_not receive( :only_host_with_role )
+    end
+
+    it '3.4: never calls #only_host_with_role in #generate_answers' do
+      @ver = '3.4'
+      expect( answers.generate_answers ).to_not receive( :only_host_with_role )
+    end
+
+  end
+
   describe Version34 do
     let( :options )     { Beaker::Options::Presets.new.presets }
     let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
