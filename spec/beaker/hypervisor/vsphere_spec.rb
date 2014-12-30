@@ -44,6 +44,20 @@ module Beaker
 
       end
 
+      it 'provisions hosts if no snapshot is provided' do
+        MockVsphereHelper.powerOff
+        hosts = make_hosts()
+        hosts[0]["snapshot"] = nil
+        vsphere = Beaker::Vsphere.new( hosts, make_opts )
+
+        vsphere.provision
+
+        hosts.each do |host|
+          expect( MockVsphereHelper.find_vm( host.name ).powerState ) == "poweredOn"
+        end
+
+      end
+
     end
 
     describe "#cleanup" do

@@ -36,7 +36,11 @@ class VsphereHelper
   end
 
   def find_snapshot vm, snapname
-    search_child_snaps vm.snapshot.rootSnapshotList, snapname
+    if vm.snapshot
+      search_child_snaps vm.snapshot.rootSnapshotList, snapname
+    else
+      raise "vm #{vm.name} has no snapshots to revert to"
+    end
   end
 
   def search_child_snaps tree, snapname

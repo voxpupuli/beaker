@@ -28,17 +28,19 @@ module Beaker
           raise "Couldn't find VM #{name} in vSphere!"
         end
 
-        snapshot = vsphere_helper.find_snapshot(vm, snap) or
-          raise "Could not find snapshot '#{snap}' for VM #{vm.name}!"
+        if snap
+          snapshot = vsphere_helper.find_snapshot(vm, snap) or
+            raise "Could not find snapshot '#{snap}' for VM #{vm.name}!"
 
-        @logger.notify "Reverting #{vm.name} to snapshot '#{snap}'"
-        start = Time.now
-        # This will block for each snapshot...
-        # The code to issue them all and then wait until they are all done sucks
-        snapshot.RevertToSnapshot_Task.wait_for_completion
+          @logger.notify "Reverting #{vm.name} to snapshot '#{snap}'"
+          start = Time.now
+          # This will block for each snapshot...
+          # The code to issue them all and then wait until they are all done sucks
+          snapshot.RevertToSnapshot_Task.wait_for_completion
 
-        time = Time.now - start
-        @logger.notify "Spent %.2f seconds reverting" % time
+          time = Time.now - start
+          @logger.notify "Spent %.2f seconds reverting" % time
+        end
 
         unless vm.runtime.powerState == "poweredOn"
           @logger.notify "Booting #{vm.name}"
