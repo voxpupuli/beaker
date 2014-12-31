@@ -33,7 +33,7 @@ module Beaker
     def convert string
       # Remove invalid and undefined UTF-8 character encodings
       string.to_s.force_encoding('UTF-8')
-      string.chars.select{|i| i.valid_encoding?}.join
+      string.to_s.chars.select{|i| i.valid_encoding?}.join
     end
 
     def log(logger)
