@@ -95,6 +95,7 @@ module Beaker
     #Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
     #to the provided SUT for test execution to be successful.
     def configure
+      return unless @options[:configure]
       if @options[:timesync]
         timesync(@hosts, @options)
       end

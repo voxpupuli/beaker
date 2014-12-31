@@ -89,6 +89,30 @@ module Beaker
         end
       end
 
+      context 'if :configure option set false' do
+        it 'does not make any configure calls' do
+          options[:configure]         = false
+          options[:timesync]          = true
+          options[:root_keys]         = true
+          options[:add_el_extras]     = true
+          options[:disable_iptables]  = true
+          expect( hypervisor ).to_not receive( :timesync )
+          expect( hypervisor ).to_not receive( :sync_root_keys )
+          expect( hypervisor ).to_not receive( :add_el_extras )
+          expect( hypervisor ).to_not receive( :disable_iptables )
+          expect( hypervisor ).to_not receive( :set_env )
+          hypervisor.configure
+        end
+      end
+
+      context 'if :configure option set true' do
+        it 'does call set_env' do
+          options[:configure] = true
+          expect( hypervisor ).to receive( :set_env ).once
+          hypervisor.configure
+        end
+      end
+
     end
 
   end

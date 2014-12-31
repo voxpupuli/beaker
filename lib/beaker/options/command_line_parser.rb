@@ -66,6 +66,12 @@ module Beaker
             @cmd_options[:provision] = bool
           end
 
+          opts.on '--[no-]configure',
+                  'Do not configure vm images before testing',
+                  '(default: true)' do |bool|
+            @cmd_options[:configure] = bool
+          end
+
           opts.on '--preserve-hosts [MODE]',
                   'How should SUTs be treated post test',
                   'Possible values:',
@@ -171,7 +177,7 @@ module Beaker
           end
 
           opts.on '--[no-]validate',
-                  'Validate that SUTs are correctly configured before running tests',
+                  'Validate that SUTs are correctly provisioned before running tests',
                   '(default: true)' do |bool|
             @cmd_options[:validate] = bool
           end
