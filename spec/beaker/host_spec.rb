@@ -233,10 +233,22 @@ module Beaker
         host.instance_variable_set :@connection, conn
       end
 
-      it 'takes a command object and a hash of options'
-      it "acts on the host's logger and connection object"
-      it 'receives a result object from the connection#execute'
-      it "returns the result object"
+      it 'takes a command object and a hash of options' do
+        result.exit_code = 0
+        expect{ host.exec(command, {}) }.to_not raise_error
+      end
+
+      it 'acts on the host\'s logger and connection object' do
+        result.exit_code = 0
+        expect( host.instance_variable_get(:@logger) ).to receive(:debug).at_least(1).times
+        expect( host.instance_variable_get(:@connection) ).to receive(:execute).once
+        host.exec(command)
+      end
+
+      it 'returns the result object' do
+        result.exit_code = 0
+        expect( host.exec(command) ).to be === result
+      end
 
       it 'logs the amount of time spent executing the command' do
         result.exit_code = 0
