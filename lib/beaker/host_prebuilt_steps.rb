@@ -505,6 +505,7 @@ module Beaker
           host.exec(Command.new("startsrc -g ssh"))
         end
         #ensure that ~/.ssh/environment exists
+        host.exec(Command.new("mkdir #{Pathname.new(host[:ssh_env_file]).dirname}"))
         host.exec(Command.new("touch #{host[:ssh_env_file]}"))
         #add the constructed env vars to this host
         host.add_env_var('RUBYLIB', '$RUBYLIB')
