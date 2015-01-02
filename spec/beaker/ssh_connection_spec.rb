@@ -57,13 +57,191 @@ module Beaker
       connection.close
     end
 
-    it 'execute'
-    it 'request_terminal_for'
-    it 'register_stdout_for'
-    it 'register_stderr_for'
-    it 'register_exit_code_for'
-    it 'process_stdin_for'
-    it 'scp'
+    describe '#execute' do
+      it 'retries if failed with a retryable exception' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
+
+        allow( subject ).to receive( :close )
+        expect( subject ).to receive( :try_to_execute ).ordered.once { raise Timeout::Error }
+        expect( subject ).to receive( :try_to_execute ).ordered.once { Beaker::Result.new('name', 'ls') }
+        expect( subject ).to_not receive( :try_to_execute )
+        connection.execute('ls')
+      end
+
+      it 'raises an error if it fails both times' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
+
+        allow( subject ).to receive( :close )
+        allow( subject ).to receive( :try_to_execute ) { raise Timeout::Error }
+
+        expect{ connection.execute('ls') }.to raise_error
+      end
+    end
+
+    describe '#request_terminal_for' do
+      it 'fails correctly by calling the abort method' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
+
+        mock_channel = Object.new
+        allow( mock_channel ).to receive( :request_pty ).and_yield(nil, false)
+
+        expect( subject ).to receive( :abort ).once
+        connection.request_terminal_for mock_channel, 'ls'
+      end
+    end
+
+    describe '#register_stdout_for' do
+      before :each do
+        @mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { @mock_ssh }
+        connection.connect
+
+        @data = '7 of clubs'
+        @mock_channel = Object.new
+        allow( @mock_channel ).to receive( :on_data ).and_yield(nil, @data)
+
+        @mock_output = Object.new
+        @mock_output_stdout = Object.new
+        @mock_output_output = Object.new
+        allow( @mock_output ).to receive( :stdout ) { @mock_output_stdout }
+        allow( @mock_output ).to receive( :output ) { @mock_output_output }
+        allow( @mock_output_stdout ).to receive( :<< )
+        allow( @mock_output_output ).to receive( :<< )
+      end
+
+      it 'puts data into stdout & output correctly' do
+        expect( @mock_output_stdout ).to receive( :<< ).with(@data)
+        expect( @mock_output_output ).to receive( :<< ).with(@data)
+
+        connection.register_stdout_for @mock_channel, @mock_output
+      end
+
+      it 'calls the callback if given' do
+        @mock_callback = Object.new
+        expect( @mock_callback ).to receive( :[] ).with(@data)
+
+        connection.register_stdout_for @mock_channel, @mock_output, @mock_callback
+      end
+    end
+
+    describe '#register_stderr_for' do
+      let( :result ) { Beaker::Result.new('hostname', 'command') }
+
+      before :each do
+        @mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { @mock_ssh }
+        connection.connect
+
+        @data = '3 of spades'
+        @mock_channel = Object.new
+        allow( @mock_channel ).to receive( :on_extended_data ).and_yield(nil, 1, @data)
+      end
+
+      it 'puts data into stderr & output correctly' do
+        expect( result.stderr ).to receive( :<< ).with(@data)
+        expect( result.output ).to receive( :<< ).with(@data)
+
+        connection.register_stderr_for @mock_channel, result
+      end
+
+      it 'calls the callback if given' do
+        @mock_callback = Object.new
+        expect( @mock_callback ).to receive( :[] ).with(@data)
+
+        connection.register_stderr_for @mock_channel, result, @mock_callback
+      end
+
+      it 'skips everything if type is not 1' do
+        allow( @mock_channel ).to receive( :on_extended_data ).and_yield(nil, '1', @data)
+
+        @mock_callback = Object.new
+        expect( @mock_callback ).to_not receive( :[] )
+        expect( result.stderr ).to_not receive( :<< )
+        expect( result.output ).to_not receive( :<< )
+
+        connection.register_stderr_for @mock_channel, result, @mock_callback
+      end
+    end
+
+    describe '#register_exit_code_for' do
+      let( :result ) { Beaker::Result.new('hostname', 'command') }
+
+      it 'assigns the output\'s exit code correctly from the data' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
+
+        data = '10 of jeromes'
+        mock_data = Object.new
+        allow( mock_data ).to receive( :read_long ) { data }
+        mock_channel = Object.new
+        allow( mock_channel ).to receive( :on_request ).with('exit-status').and_yield(nil, mock_data)
+
+        connection.register_exit_code_for mock_channel, result
+        expect( result.exit_code ).to be === data
+      end
+    end
+
+    describe 'process_stdin_for' do
+      it 'calls the correct channel methods in order' do
+        stdin = 'jean shorts'
+        mock_channel = Object.new
+
+        expect( mock_channel ).to receive( :send_data ).with(stdin).ordered.once
+        expect( mock_channel ).to receive( :process ).ordered.once
+        expect( mock_channel ).to receive( :eof! ).ordered.once
+
+        connection.process_stdin_for mock_channel, stdin
+      end
+    end
+
+    describe '#scp_to' do
+      before :each do
+        @mock_ssh = Object.new
+        @mock_scp = Object.new
+        allow( @mock_scp ).to receive( :upload! )
+        allow( @mock_ssh ).to receive( :scp ).and_return( @mock_scp )
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { @mock_ssh }
+        connection.connect
+      end
+
+      it 'calls scp.upload!' do
+        expect( @mock_scp ).to receive( :upload! ).once
+        connection.scp_to '', ''
+      end
+
+      it 'returns a result object' do
+        expect( connection.scp_to '', '' ).to be_a_kind_of Beaker::Result
+      end
+
+    end
+
+    describe '#scp_from' do
+      before :each do
+        @mock_ssh = Object.new
+        @mock_scp = Object.new
+        allow( @mock_scp ).to receive( :download! )
+        allow( @mock_ssh ).to receive( :scp ).and_return( @mock_scp )
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { @mock_ssh }
+        connection.connect
+      end
+
+      it 'calls scp.download!' do
+        expect( @mock_scp ).to receive( :download! ).once
+        connection.scp_from '', ''
+      end
+
+      it 'returns a result object' do
+        expect( connection.scp_from '', '' ).to be_a_kind_of Beaker::Result
+      end
+
+    end
 
   end
 end
