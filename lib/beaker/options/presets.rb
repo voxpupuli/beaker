@@ -115,6 +115,7 @@ module Beaker
           :created_by             => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :jenkins_build_url      => nil,
           :validate               => true,
+          :configure              => true,
           :log_level              => 'info',
           :trace_limit            => 10,
           :"master-start-curl-retries"  => 120,
