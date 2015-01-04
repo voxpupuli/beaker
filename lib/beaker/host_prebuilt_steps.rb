@@ -1,3 +1,5 @@
+require 'pathname'
+
 [ 'command', "dsl/patterns" ].each do |lib|
   require "beaker/#{lib}"
 end
@@ -504,14 +506,19 @@ module Beaker
           host.exec(Command.new("stopsrc -g ssh"))
           host.exec(Command.new("startsrc -g ssh"))
         end
+
         #ensure that ~/.ssh/environment exists
+        host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
+        host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
         host.exec(Command.new("touch #{host[:ssh_env_file]}"))
+
         #add the constructed env vars to this host
         host.add_env_var('RUBYLIB', '$RUBYLIB')
         host.add_env_var('PATH', '$PATH')
         env.each_pair do |var, value|
           host.add_env_var(var, value)
         end
+
         #close the host to re-establish the connection with the new sshd settings
         host.close
       end
