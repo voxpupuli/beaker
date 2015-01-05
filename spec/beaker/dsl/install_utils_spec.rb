@@ -372,7 +372,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( hosts[2], /puppet config set certname/ ).once
       expect( subject ).to receive( :on ).with( hosts[3], /puppet config set certname/ ).once
       expect( subject ).to receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
-      expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [1] ).once
+      expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0, 1] ).once
       #sign certificate per-host
       expect( subject ).to receive( :sign_certificate_for ).with( hosts[0] ).once
       expect( subject ).to receive( :sign_certificate_for ).with( hosts[1] ).once
