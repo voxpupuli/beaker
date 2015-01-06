@@ -1,3 +1,4 @@
+require 'open3'
 
 task :default => [ 'test:spec' ]
 
@@ -14,7 +15,7 @@ task :history do
 end
 
 task :travis do
-  Rake::Task['yard'].invoke unless RUBY_VERSION < '1.9'
+  Rake::Task['yard'].invoke
   Rake::Task['spec'].invoke
 end
 
@@ -23,10 +24,23 @@ namespace :test do
   task :spec do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    output = `export COVERAGE=true; bundle exec rspec`
-    puts output
-    if output =~ /Deprecation Warnings/
-      raise "Deprecation Warnings in spec generation, please fix!"
+    exit_status = 1
+    output = ''
+    Open3.popen3("bundle exec rspec") {|stdin, stdout, stderr, wait_thr|
+      while line = stdout.gets
+        puts line
+      end
+      output = stdout
+      if not wait_thr.value.success?
+        fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
+      end
+      exit_status = wait_thr.value
+    }
+    if exit_status != /0/
+      #check for deprecation warnings
+      if output =~ /Deprecation Warnings/
+        fail "DEPRECATION WARNINGS in spec generation, please fix!"
+      end
     end
     Dir.chdir( original_dir )
   end
@@ -100,7 +114,7 @@ namespace :docs do
     output = `bundle exec yard doc`
     puts output
     if output =~ /\[warn\]|\[error\]/
-      raise "Errors/Warnings during yard documentation generation"
+      fail "Errors/Warnings during yard documentation generation"
     end
     Dir.chdir( original_dir )
   end
