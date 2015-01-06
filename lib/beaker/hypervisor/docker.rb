@@ -43,12 +43,15 @@ module Beaker
         end
         port = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostPort"]
 
+        forward_ssh_agent = @options[:forward_ssh_agent] || false
+
         # Update host metadata
         host['ip']  = ip
         host['port'] = port
         host['ssh']  = {
           :password => root_password,
           :port => port,
+          :forward_agent => forward_ssh_agent,
         }
 
         @logger.debug("node available as  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@#{ip} -p #{port}")

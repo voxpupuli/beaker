@@ -2,7 +2,15 @@ require 'spec_helper'
 
 module Beaker
   describe Vagrant do
-    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object, :hosts_file => 'sample.cfg' }) }
+
+    let( :options ) {
+      make_opts.merge({
+        'logger' => double().as_null_object,
+        :hosts_file => 'sample.cfg',
+        :forward_ssh_agent => true,
+      })
+    }
+
     let( :vagrant ) { Beaker::Vagrant.new( @hosts, options ) }
 
     before :each do
@@ -58,6 +66,17 @@ Vagrant.configure("2") do |c|
   end
 end
 EOF
+    end
+
+    it "can make a Vagrantfile with ssh agent forwarding enabled" do
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+      hosts = make_hosts({},1)
+      vagrant.make_vfile( hosts, options )
+
+      vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+      expect( vagrantfile ).to match(/(ssh.forward_agent = true)/)
     end
 
     it "generates a valid windows config" do
