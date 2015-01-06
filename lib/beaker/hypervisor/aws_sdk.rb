@@ -169,7 +169,6 @@ module Beaker
       @logger.notify("aws-sdk: Kill Zombies! (keyname: #{key}, age: #{max_age} hrs)")
       #examine all available regions
       kill_count = 0
-      volume_count = 0
       time_now = Time.now.getgm #ec2 uses GM time
       @ec2.regions.each do |region|
         @logger.debug "Reviewing: #{region.name}"
@@ -181,17 +180,28 @@ module Beaker
               @logger.debug "Examining #{instance.id} (keyname: #{instance.key_name}, launch time: #{instance.launch_time}, status: #{instance.status})"
               if ((time_now - instance.launch_time) >  max_age*60*60) and instance.status.to_s !~ /terminated/
                 @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
-                  instance.terminate()
-                  kill_count += 1
+                instance.terminate()
+                kill_count += 1
               end
             end
           rescue AWS::Core::Resource::NotFound, AWS::EC2::Errors => e
             @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
           end
         end
-        # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
-        # This simply looks for EBS volumes that are not in use
-        # Note: don't use volumes.each here as that funtion doesn't allow proper rescue from error states
+      end
+
+      @logger.notify "#{key}: Killed #{kill_count} instance(s)"
+    end
+
+    # Destroy any volumes marked 'available', INCLUDING THOSE YOU DON'T OWN!  Use with care.
+    def kill_zombie_volumes
+      # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
+      # This simply looks for EBS volumes that are not in use
+      # Note: don't use volumes.each here as that funtion doesn't allow proper rescue from error states
+      @logger.notify("aws-sdk: Kill Zombie Volumes!")
+      volume_count = 0
+      @ec2.regions.each do |region|
+        @logger.debug "Reviewing: #{region.name}"
         volumes = @ec2.regions[region.name].volumes.map { |vol| vol.id }
         volumes.each do |vol|
           begin
@@ -206,7 +216,7 @@ module Beaker
           end
         end
       end
-      @logger.notify "#{key}: Killed #{kill_count} instance(s), freed #{volume_count} volume(s)"
+      @logger.notify "Freed #{volume_count} volume(s)"
 
     end
 
