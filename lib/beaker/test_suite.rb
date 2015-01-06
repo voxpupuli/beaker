@@ -148,156 +148,85 @@ module Beaker
         @logger.notify "  Test Case #{test_case.path} #{test_reported}"
       end
 
-      #Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/. 
-      #@param [String] text The string to remove color codes from
-      #@return [String] The text without color codes
-      def strip_color_codes(text)
-        text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
-      end
+      def write_junit_xml(xml_file)
+        stylesheet = File.join(@options[:project_root], @options[:xml_stylesheet])
 
-      # Determine if the provided number falls in the range of accepted xml unicode values
-      # See http://www.w3.org/TR/xml/#charsets for valid for valid character specifications.
-      # @param [Integer] int The number to check against
-      # @return [Boolean] True, if the number corresponds to a valid xml unicode character, otherwise false
-      def is_valid_xml(int)
-        return ( int == 0x9 or
-                 int == 0xA or
-               ( int >= 0x0020 and int <= 0xD7FF ) or
-               ( int >= 0xE000 and int <= 0xFFFD ) or
-               ( int >= 0x100000 and int <= 0x10FFFF )
-        )
-      end
-
-      # Escape invalid XML UTF-8 codes from provided string, see http://www.w3.org/TR/xml/#charsets for valid
-      # character specification
-      # @param [String] string The string to remove invalid codes from
-      def escape_invalid_xml_chars string
-        escaped_string = ""
-        string.chars.each do |i|
-          char_as_codestring = i.unpack("U*").join
-          if is_valid_xml(char_as_codestring.to_i)
-            escaped_string << i
-          else
-            escaped_string << "\\#{char_as_codestring}"
-          end
-        end
-        escaped_string
-      end
-
-      # Remove color codes and invalid XML characters from provided string
-      # @param [String] string The string to format
-      def format_cdata string
-        escape_invalid_xml_chars(strip_color_codes(string))
-      end
-
-      #Format and print the {TestSuiteResult} as JUnit XML
-      #@param [String] xml_file The full path to print the output to.
-      #@param [String] stylesheet The full path to a JUnit XML stylesheet
-      def write_junit_xml(xml_file, stylesheet)
         begin
+          LoggerJunit.write_xml(xml_file, stylesheet) do |doc, suites|
 
-          #copy stylesheet into xml directory
-          if not File.file?(File.join(File.dirname(xml_file), File.basename(stylesheet)))
-            FileUtils.copy(stylesheet, File.join(File.dirname(xml_file), File.basename(stylesheet)))
-          end
-          suites = nil
-          #check to see if an output file already exists, if it does add or replace test suite data
-          if File.file?(xml_file)
-            doc = Nokogiri::XML( File.open(xml_file, 'r') )
-            suites = doc.at_xpath('testsuites')
-            #remove old data
-            doc.search("//testsuite").each do |node|
-              if node['name'] =~ /#{@name}/
-                node.unlink
+            suite = Nokogiri::XML::Node.new('testsuite', doc)
+            suite['name']     = @name
+            suite['tests']    = test_count
+            suite['errors']   = errored_tests
+            suite['failures'] = failed_tests
+            suite['skip']     = skipped_tests
+            suite['pending']  = pending_tests
+            suite['total']    = @total_tests
+            suite['time']     = "%f" % (stop_time - start_time)
+            properties = Nokogiri::XML::Node.new('properties', doc)
+            @options.each_pair do | name, value |
+              property = Nokogiri::XML::Node.new('property', doc)
+              property['name']  = name
+              property['value'] = value
+              properties.add_child(property)
+            end
+            suite.add_child(properties)
+
+            @test_cases.each do |test|
+              item = Nokogiri::XML::Node.new('testcase', doc)
+              item['classname'] = File.dirname(test.path)
+              item['name']      = File.basename(test.path)
+              item['time']      = "%f" % test.runtime
+
+              # Did we fail?  If so, report that.
+              # We need to remove the escape character from colorized text, the
+              # substitution of other entities is handled well by Rexml
+              if test.test_status == :fail || test.test_status == :error then
+                status = Nokogiri::XML::Node.new('failure', doc)
+                status['type'] =  test.test_status.to_s
+                if test.exception then
+                  status['message'] = test.exception.to_s.gsub(/\e/, '')
+                  data = LoggerJunit.format_cdata(test.exception.backtrace.join('\n'))
+                  status.add_child(status.document.create_cdata(data))
+                end
+                item.add_child(status)
               end
-            end
-          else
-            #no existing file, create a new one
-            doc = Nokogiri::XML::Document.new()
-            doc.encoding = 'UTF-8'
-            pi = Nokogiri::XML::ProcessingInstruction.new(doc, "xml-stylesheet", "type=\"text/xsl\" href=\"#{File.basename(stylesheet)}\"")
-            pi.parent = doc
-            suites = Nokogiri::XML::Node.new('testsuites', doc)
-            suites.parent = doc
-          end
 
-          suite = Nokogiri::XML::Node.new('testsuite', doc)
-          suite['name']     = @name
-          suite['tests']    = test_count
-          suite['errors']   = errored_tests
-          suite['failures'] = failed_tests
-          suite['skip']     = skipped_tests
-          suite['pending']  = pending_tests
-          suite['total']    = @total_tests
-          suite['time']     = "%f" % (stop_time - start_time)
-          properties = Nokogiri::XML::Node.new('properties', doc)
-          @options.each_pair do | name, value |
-            property = Nokogiri::XML::Node.new('property', doc)
-            property['name']  = name
-            property['value'] = value
-            properties.add_child(property)
-          end
-          suite.add_child(properties)
-
-          @test_cases.each do |test|
-            item = Nokogiri::XML::Node.new('testcase', doc)
-            item['classname'] = File.dirname(test.path)
-            item['name']      = File.basename(test.path)
-            item['time']      = "%f" % test.runtime
-
-            # Did we fail?  If so, report that.
-            # We need to remove the escape character from colorized text, the
-            # substitution of other entities is handled well by Rexml
-            if test.test_status == :fail || test.test_status == :error then
-              status = Nokogiri::XML::Node.new('failure', doc)
-              status['type'] =  test.test_status.to_s
-              if test.exception then
-                status['message'] = test.exception.to_s.gsub(/\e/, '')
-                data = format_cdata(test.exception.backtrace.join('\n'))
-                status.add_child(status.document.create_cdata(data))
+              if test.test_status == :skip
+                status = Nokogiri::XML::Node.new('skip', doc)
+                status['type'] =  test.test_status.to_s
+                item.add_child(status)
               end
-              item.add_child(status)
-            end
 
-            if test.test_status == :skip
-              status = Nokogiri::XML::Node.new('skip', doc)
-              status['type'] =  test.test_status.to_s
-              item.add_child(status)
-            end
+              if test.test_status == :pending
+                status = Nokogiri::XML::Node.new('pending', doc)
+                status['type'] =  test.test_status.to_s
+                item.add_child(status)
+              end
 
-            if test.test_status == :pending
-              status = Nokogiri::XML::Node.new('pending', doc)
-              status['type'] =  test.test_status.to_s
-              item.add_child(status)
-            end
+              if test.sublog then
+                stdout = Nokogiri::XML::Node.new('system-out', doc)
+                data = LoggerJunit.format_cdata(test.sublog)
+                stdout.add_child(stdout.document.create_cdata(data))
+                item.add_child(stdout)
+              end
 
-            if test.sublog then
-              stdout = Nokogiri::XML::Node.new('system-out', doc)
-              data = format_cdata(test.sublog)
-              stdout.add_child(stdout.document.create_cdata(data))
-              item.add_child(stdout)
-            end
+              if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty? then
+                stderr = Nokogiri::XML::Node.new('system-err', doc)
+                data = LoggerJunit.format_cdata(test.last_result.stderr)
+                stderr.add_child(stderr.document.create_cdata(data))
+                item.add_child(stderr)
+              end
 
-            if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty? then
-              stderr = Nokogiri::XML::Node.new('system-err', doc)
-              data = format_cdata(test.last_result.stderr)
-              stderr.add_child(stderr.document.create_cdata(data))
-              item.add_child(stderr)
+              suite.add_child(item)
             end
-
-            suite.add_child(item)
+            suites.add_child(suite)
           end
-          suites.add_child(suite)
-
-          # junit/name.xml will be created in a directory relative to the CWD
-          # --  JLS 2/12
-          File.open(xml_file, 'w') { |fh| fh.write(doc.to_xml) }
-
         rescue Exception => e
           @logger.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
         end
-      end
 
+      end
     end
 
     attr_reader :name, :options, :fail_mode
@@ -380,7 +309,7 @@ module Beaker
       # of the suite – or, at least, making them highly confusing for anyone who
       # has not studied the implementation in detail. --daniel 2011-03-14
       @test_suite_results.summarize( Logger.new(log_path("#{name}-summary.txt", @options[:log_dated_dir]), STDOUT) )
-      @test_suite_results.write_junit_xml( log_path(@options[:xml_file], @options[:xml_dated_dir]), File.join(@options[:project_root], @options[:xml_stylesheet]) )
+      @test_suite_results.write_junit_xml( log_path(@options[:xml_file], @options[:xml_dated_dir]) )
 
       #All done with this run, remove run log
       @logger.remove_destination(run_log)

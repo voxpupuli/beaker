@@ -257,7 +257,7 @@ module Beaker
     # @return [Array<String>] An array of strings that do not have color codes
     def strip_colors_from lines
       Array( lines ).map do |line|
-        convert(line).gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
+        Logger.strip_color_codes(convert(line))
       end
     end
 
@@ -310,6 +310,13 @@ module Beaker
       log_dir = File.join(base_dir, timestamp.strftime("%F_%H_%M_%S"))
       FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
       log_dir
+    end
+
+    #Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/.
+    #@param [String] text The string to remove color codes from
+    #@return [String] The text without color codes
+    def Logger.strip_color_codes(text)
+      text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
     end
 
     private
