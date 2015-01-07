@@ -358,9 +358,9 @@ module Beaker
         dir_source.each do |s|
           s_path = Pathname.new(s)
           if s_path.absolute?
-            file_path = File.join(target, s.gsub(source,''))
+            file_path = File.join(target, File.dirname(s).gsub(source,''))
           else
-            file_path = File.join(target, s)
+            file_path = File.join(target, File.dirname(s))
           end
           result = connection.scp_to(s, file_path, options, $dry_run)
           @logger.trace result.stdout
