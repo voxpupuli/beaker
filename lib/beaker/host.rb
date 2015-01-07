@@ -48,7 +48,7 @@ module Beaker
       # a explict relationship between our defaults, our setup steps and how they're
       # related through 'type' and the differences between the assumption of our two
       # configurations we have for many of our products
-      type = is_pe? ? :pe : :foss
+      type = @options.get_type
       @defaults = merge_defaults_for_type @options, type
       pkg_initialize
     end

@@ -1113,6 +1113,50 @@ module Beaker
         end
       end
 
+      # Install development repo of the puppet-agent on the given host
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s interface
+      # @param [Hash{Symbol=>String}] opts An options hash
+      # @option opts [String] :version The version of puppet-agent to install
+      # @option opts [String] :copy_base_local Directory where puppet-agent artifact
+      #                       will be stored locally
+      #                       (default: 'tmp/repo_configs')
+      # @option opts [String] :copy_dir_external Directory where puppet-agent
+      #                       artifact will be pushed to on the external machine
+      #                       (default: '/root')
+      # @return nil
+      def install_puppetagent_dev_repo( host, opts )
+        opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
+        opts[:copy_dir_external]  ||= File.join('/', 'root')
+        variant, version, arch, codename = host['platform'].to_array
+        release_path = "#{options[:dev_builds_url]}/puppet-agent/#{opts[:version]}/artifacts/"
+        copy_dir_local = File.join(opts[:copy_base_local], variant)
+        onhost_copy_base = opts[:copy_dir_external]
+
+        case variant
+        when /^(fedora|el|centos)$/
+          release_path << "el/#{version}/products/#{arch}"
+          release_file = "puppet-agent-#{opts[:version]}-1.#{arch}.rpm"
+        when /^(debian|ubuntu|cumulus)$/
+          release_path << "deb/#{codename}"
+          release_file = "puppet-agent_#{opts[:version]}-1_#{arch}.deb"
+        else
+          raise "No repository installation step for #{variant} yet..."
+        end
+
+        onhost_copied_file = File.join(onhost_copy_base, release_file)
+        fetch_http_file( release_path, release_file, copy_dir_local)
+        scp_to host, File.join(copy_dir_local, release_file), onhost_copy_base
+
+        case variant
+        when /^(fedora|el|centos)$/
+          on host, "rpm -ivh #{onhost_copied_file}"
+        when /^(debian|ubuntu|cumulus)$/
+          on host, "dpkg -i --force-all #{onhost_copied_file}"
+          on host, "apt-get update"
+        end
+      end
+
       #Install Higgs up till the point where you need to continue installation in a web browser, defaults to execution
       #on the master node.
       #@param [Host] higgs_host The host to install Higgs on (supported on linux platform only)

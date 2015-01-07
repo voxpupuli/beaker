@@ -51,6 +51,28 @@ module Beaker
         self[:type] ? self[:type] =~ /pe/ : true
       end
 
+      # Determine the puppet type of the ObjectHash
+      #
+      # Default is FOSS
+      #
+      # @example Use this method to test if the :type setting is pe
+      #     a['type'] = 'pe'
+      #     a.get_type == :pe
+      #
+      # @return [Symbol] the type given in the options
+      def get_type
+        case self[:type]
+        when /pe/
+          :pe
+        when /foss/
+          :foss
+        when /aio/
+          :aio
+        else
+          :foss
+        end
+      end
+
       # Determine if key is stored in ObjectHash
       # @param [Object] k The key to find in ObjectHash, searches for
       #                   both k as String and k as Symbol

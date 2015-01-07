@@ -278,8 +278,8 @@ module Beaker
         end
 
         #check for valid type
-        if @options[:type] !~ /(pe)|(git)|(foss)/
-          parser_error "--type must be one of pe, git, or foss, not '#{@options[:type]}'"
+        if @options[:type] !~ /pe|git|foss|aio/
+          parser_error "--type must be one of pe, git, foss, or aio not '#{@options[:type]}'"
         end
 
         #check for valid fail mode

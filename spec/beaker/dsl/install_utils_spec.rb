@@ -812,6 +812,86 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe '#install_puppetagent_dev_repo' do
+
+    it 'raises an exception when host platform is unsupported' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['ptan', '5', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect{
+        subject.install_puppetagent_dev_repo( host, opts )
+      }.to raise_error(RuntimeError, /No repository installation step for/)
+    end
+
+    it 'runs the correct install for el-based platforms' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['el', '5', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/el\//, /-agent-/, /el/)
+      expect(subject).to receive(:scp_to).once.with(host, /-agent-/, "/root")
+      expect(subject).to receive(:on).once.with(host, /rpm\ -ivh/)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
+    it 'runs the correct install for debian-based platforms' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['debian', '5', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/deb\//, /-agent_/, /deb/)
+      expect(subject).to receive(:scp_to).once.with(host, /-agent_/, "/root")
+      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
+      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
+    it 'allows you to override the local copy directory' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['debian', '5', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0', :copy_base_local => 'face' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/deb\//, /-agent_/, /face/)
+      expect(subject).to receive(:scp_to).once.with(host, /face/, "/root")
+      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
+      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
+    it 'allows you to override the external copy directory' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['debian', '5', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0', :copy_dir_external => 'muppetsB' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/deb\//, /-agent_/, /deb/)
+      expect(subject).to receive(:scp_to).once.with(host, /-agent_/, /muppetsB/)
+      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
+      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
+  end
+
   describe '#install_dev_puppet_module_on' do
     context 'having set allow( a ).to receive forge' do
       it 'stubs the forge on the host' do
