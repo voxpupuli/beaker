@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 17 Dec, 2014 (747aacee)](#LATEST)
+* [LATEST - 8 Jan, 2015 (4dde5f3a)](#LATEST)
+* [beaker2.1.0 - 17 Dec, 2014 (ec089b1a)](#beaker2.1.0)
 * [beaker2.0.0 - 5 Dec, 2014 (fb4b620b)](#beaker2.0.0)
 * [beaker1.20.1 - 17 Oct, 2014 (be250ad6)](#beaker1.20.1)
 * [beaker1.20.0 - 17 Oct, 2014 (24acc2d3)](#beaker1.20.0)
@@ -66,7 +67,327 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 17 Dec, 2014 (747aacee)
+### <a name = "LATEST">LATEST - 8 Jan, 2015 (4dde5f3a)
+
+* (GEM) update beaker version to 2.2.0 (4dde5f3a)
+
+* Merge pull request #608 from chris-reeves/gh503_scp_to_dirs (1c6624bd)
+
+
+```
+Merge pull request #608 from chris-reeves/gh503_scp_to_dirs
+
+(gh-503) (QENG-1485) Fix recursive copying in do_scp_to
+```
+* Merge pull request #603 from kevpl/qeng1562_aio_supportadd (5e3e59aa)
+
+
+```
+Merge pull request #603 from kevpl/qeng1562_aio_supportadd
+
+(QENG-1562) added AIO installation support for yum/apt on FOSS
+```
+* Merge pull request #557 from kevpl/qeng1538_eos_fixhack (6776472e)
+
+
+```
+Merge pull request #557 from kevpl/qeng1538_eos_fixhack
+
+(QENG-1538) fixes EOS hack
+```
+* Add expectations to spec tests for do_scp_to (abb53aa2)
+
+
+```
+Add expectations to spec tests for do_scp_to
+
+Some tests which are supposed to test whether files and directories are
+excluded from copies were only testing that non-excluded files *were* copied,
+and didn't test that excluded files *weren't* copied. This commit explicitly
+tests that excluded files are not copied.
+```
+* (gh-503) Update spec tests for do_scp_to (467f62a7)
+
+
+```
+(gh-503) Update spec tests for do_scp_to
+
+Update spec tests following fix for recursive copying in do_scp_to
+```
+* (gh-503) Fix recursive copying in do_scp_to (b4fb0e66)
+
+
+```
+(gh-503) Fix recursive copying in do_scp_to
+
+Because of the functionality within do_scp_to which allows certain files and
+directories to be ignored when copying, each specific file/directory is copied
+individually. In the existing code the source and target paths are effectively
+the same, causing directories to be copied as subdirectories of themselves.
+This commit ensures that all files and directories are copied to their parent
+directories.
+```
+* Merge pull request #606 from kevpl/maint_prebuiltspec_fix (74e7ffb5)
+
+
+```
+Merge pull request #606 from kevpl/maint_prebuiltspec_fix
+
+(MAINT) fixed broken host_prebuilt_steps spec tests
+```
+* Merge pull request #607 from anodelman/maint (6fc8b78d)
+
+
+```
+Merge pull request #607 from anodelman/maint
+
+(QENG-1641) jenkins beaker spec testing reporting green on failure
+```
+* (QENG-1641) jenkins beaker spec testing reporting green on failure (ad97e32d)
+
+
+```
+(QENG-1641) jenkins beaker spec testing reporting green on failure
+
+- fix Rakefile to report correct exit code
+```
+* Merge pull request #588 from madAndroid/enable_ssh_agent_forwarding_docker_and_vagrant (2146bb6d)
+
+
+```
+Merge pull request #588 from madAndroid/enable_ssh_agent_forwarding_docker_and_vagrant
+
+(GH-587) SSH agent forwarding for Docker and Vagrant
+```
+* (MAINT) fixed broken host_prebuilt_steps spec tests (73a3a153)
+
+* Merge pull request #605 from anodelman/aws (406d09ce)
+
+
+```
+Merge pull request #605 from anodelman/aws
+
+(OPS-5099) [aws] -help with disappearing EBS volumes
+```
+* (OPS-5099) [aws] -help with disappearing EBS volumes (34c91223)
+
+
+```
+(OPS-5099) [aws] -help with disappearing EBS volumes
+
+- no longer kill all orphan volumes when zombie hunting
+```
+* Merge pull request #599 from kevpl/qeng1605_configure_option (b78580a7)
+
+
+```
+Merge pull request #599 from kevpl/qeng1605_configure_option
+
+(QENG-1605) added --no-configure option to skip configuration if needed
+```
+* Merge pull request #596 from nrvale0/fix_ssh_setup (3dd3da76)
+
+
+```
+Merge pull request #596 from nrvale0/fix_ssh_setup
+
+Fix ssh setup
+```
+* Merge pull request #600 from kbarber/ticket/master/qeng-1594-correct-carriage-return-placement (4d99b0c0)
+
+
+```
+Merge pull request #600 from kbarber/ticket/master/qeng-1594-correct-carriage-return-placement
+
+(QENG-1594) Prefix carriage returns during sshd_config append
+```
+* Merge pull request #601 from kevpl/qeng1627_spec_add (b8401e7f)
+
+
+```
+Merge pull request #601 from kevpl/qeng1627_spec_add
+
+(QENG-1627) added spec tests to flush out host and ssh_connection testin...
+```
+* (QENG-1627) added spec tests to flush out host and ssh_connection testing (eab653a5)
+
+* (QENG-1594) Prefix carriage returns during sshd_config append (52855b5f)
+
+
+```
+(QENG-1594) Prefix carriage returns during sshd_config append
+
+The original fix: f2c1b1efd4d36575032294d504b15c56e3cda4e7 was appending
+carriage returns instead of prefixing them. This patch corrects the order,
+so QENG-1594 can be closed again.
+
+Signed-off-by: Ken Barber <ken@bob.sh>
+```
+* Merge pull request #593 from electrical/symbol_to_string (c1c46b4b)
+
+
+```
+Merge pull request #593 from electrical/symbol_to_string
+
+(gh-573) force symbols into strings
+```
+* (QENG-1605) added --no-configure option to skip configuration if needed (014da7ce)
+
+* Merge pull request #586 from chris-reeves/gh585_vagrant_1_7_x (c05dc074)
+
+
+```
+Merge pull request #586 from chris-reeves/gh585_vagrant_1_7_x
+
+(gh-585) Add support for vagrant 1.7.x
+```
+* Merge pull request #569 from nemski/optional_snap (4dad0067)
+
+
+```
+Merge pull request #569 from nemski/optional_snap
+
+(gh-568) Make snapshot optional for vsphere
+```
+* (#592) make sure ssh dir is present with proper perms before enviornment file (3b06071b)
+
+* Merge pull request #578 from cassianoleal/patch-1 (d868494c)
+
+
+```
+Merge pull request #578 from cassianoleal/patch-1
+
+Fix copying module files to guest
+```
+* (GH-587) - Use regex to test for agent forwarding in Vagrantfile (eea7bf0e)
+
+
+```
+(GH-587) - Use regex to test for agent forwarding in Vagrantfile
+
+(GH-587) - Use regex to test for agent forwarding in Vagrantfile
+```
+* (GH-587) - Add additonal test for docker ssh_forwarding, and change forward_ssh_agent to be a symbol, instead of a string (8a965b4c)
+
+* (gh-573) force symbols into strings (32ed4cbc)
+
+
+```
+(gh-573) force symbols into strings
+
+Fixes #573
+```
+* Merge pull request #589 from anodelman/aws (69826745)
+
+
+```
+Merge pull request #589 from anodelman/aws
+
+(QENG-1530) beaker support to query aws instance/resource relationships
+```
+* Merge pull request #584 from myoung34/master (80641787)
+
+
+```
+Merge pull request #584 from myoung34/master
+
+(gh-581) Fix syntax for mac address specification in Vagrantfile
+```
+* (GH-587) don't use 'nil?' - check whether forward_ssh_agent is true rather (f40f9a8b)
+
+* (QENG-1530) beaker support to query aws instance/resource relationships (1003a0cc)
+
+
+```
+(QENG-1530) beaker support to query aws instance/resource relationships
+
+- adding query support against ec2 vpc and security_group objects
+```
+* Merge pull request #572 from hajee/master (4129461f)
+
+
+```
+Merge pull request #572 from hajee/master
+
+Make restarting sshd more robust on Redhat systems
+```
+* (GH-587) enable ssh agent forwarding for both vagrant and docker (a58fb6e4)
+
+* (gh-585) Add support for vagrant 1.7.x (3aa080c8)
+
+
+```
+(gh-585) Add support for vagrant 1.7.x
+
+As of version 1.7.x, vagrant will replace the default insecure keypair with a
+randomly generated keypair on first 'vagrant up'. As a result the generated
+ssh configs have changed and contain per-host private keys. Beaker was
+breaking the path to these new private key files due to a substitution which
+wasn't sufficiently constrained (the path to the private key now contains the
+hostname, which was being replaced with the host's IP). This commit adds the
+necessary constraint.
+```
+* (gh-577) Without the exact path to the service command, starting up a redhat vagrant box fails (99a4ef29)
+
+
+```
+(gh-577) Without the exact path to the service command, starting up a redhat vagrant box fails
+
+Fixes #577
+```
+* (gh-581) Fix syntax for mac address specification in Vagrantfile (f1b9d51b)
+
+* Merge pull request #560 from jlambert121/ignore_vendor (68090776)
+
+
+```
+Merge pull request #560 from jlambert121/ignore_vendor
+
+(MAINT) exclude copying vendor dir to clients
+```
+* (PUP-3770) Fix copying module files to guest (a99c7288)
+
+
+```
+(PUP-3770) Fix copying module files to guest
+
+In certain scenarios, no module files are copied to the guest. I have found this issue with modules residing under `/vagrant/module_path` and `/home/ci/.../module_path`.
+
+The regexp generated was `/(?-mix:((\/|\A).bundle(\/|\z))|((\/|\A).git(\/|\z))|((\/|\A).idea(\/|\z))|((\/|\A).vagrant(\/|\z))|((\/|\A).vendor(\/|\z))|((\/|\A)acceptance(\/|\z))|((\/|\A)spec(\/|\z))|((\/|\A)tests(\/|\z))|((\/|\A)log(\/|\z))|((\/|\A).(\/|\z))|((\/|\A)..(\/|\z)))/`. I tested this pattern in http://rubular.com/ and found that indeed it matches all files under those directories.
+
+The string substitution was not doing anything at all (`"\."` gets expanded to `.` instead of `\.`).
+
+It was also only trying to replace the first `.` of each entry as it was using `String#sub` instead of `String#gsub`.
+
+Once that was fixed, beaker worked.
+```
+* (gh-568) Throw descriptive exception when no snapshot exists (2496a73e)
+
+* (gh-568) Allow snapshot option to be optional (d7b6d4e6)
+
+* (gh-568) Allow snapshot option to be optional (838709b5)
+
+* (MAINT) exclude copying vendor dir to clients (5fec6251)
+
+* (QENG-1562) added AIO installation support for yum/apt on FOSS (eb4528c5)
+
+* (QENG-1538) fixes EOS hack (55f7d2b2)
+
+
+```
+(QENG-1538) fixes EOS hack
+
+In QENG-299, a hack was required to get around an issue w/EOS
+for root ssh key setup.  A change was submitted to the
+sshkeys repo to fix this.  This fix removes the hack, and
+sets up the correct root ssh key procedure in Beaker for EOS
+
+Conflicts:
+	spec/beaker/host_prebuilt_steps_spec.rb
+```
+### <a name = "beaker2.1.0">beaker2.1.0 - 17 Dec, 2014 (ec089b1a)
+
+* (HISTORY) update beaker history for gem release 2.1.0 (ec089b1a)
 
 * (GEM) update beaker version to 2.1.0 (747aacee)
 
