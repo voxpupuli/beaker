@@ -282,7 +282,8 @@ module Beaker
         ezbake_tools_available?
         #conditionally_clone "gitmirror@github.delivery.puppetlabs.net:puppetlabs-ezbake.git",
         #                    ezbake_dir
-        # TODO: will need removal before merging
+        # TODO: will need removal before merging, since we'll want to
+        # work against a shipped version of ezbake
         conditionally_clone "git@github.com:kbarber/ezbake.git",
                             ezbake_dir, "pdb-1034-ezbake-pr-testing"
 
@@ -295,15 +296,34 @@ module Beaker
         # Get the absolute path to the local repo
         m2_repo = File.join(Dir.pwd, 'tmp', 'm2-local')
 
-        lein_prefix = 'lein update-in : assoc :local-repo "\"' + m2_repo + '\"" --'
-        ezbake_local_cmd "#{lein_prefix} install", :throw_on_failure => true
+        lein_prefix = 'lein update-in : assoc :local-repo "\"' +
+                      m2_repo + '\"" --'
+
+        # Install the PuppetDB jar into the local repository
+        ezbake_local_cmd "#{lein_prefix} install",
+                         :throw_on_failure => true
 
         Dir.chdir(ezbake_dir) do
-          ezbake_local_cmd "#{lein_prefix} run -- stage #{project_name} #{project_param_string}",
-                           :throw_on_failure => true
+          # TODO: disabled this to test new lein plugin
+
+          # ezbake_local_cmd "#{lein_prefix} run -- stage #{project_name} #{project_param_string}",
+          #                  :throw_on_failure => true
+          # TODO: here we compile a development version of the plugin,
+          # but for prod we'll need to work something else out
+          ezbake_local_comd "#{lein_prefix} install",
+                            :throw_on_failure => true
         end
 
-        staging_dir = File.join(ezbake_dir, 'target', 'staging')
+        # TODO: should we also be passing through project_name &
+        # project_param_string if its provided? I'm guessing this is
+        # true for other projects, but we should allow nil for the
+        # sake of all-in-one projects like PDB.
+        ezbake_local_cmd "#{lein_prefix} with-profile ezbake ezbake build",
+                         :throw_on_failure => true
+
+
+        #staging_dir = File.join(ezbake_dir, 'target', 'staging')
+        staging_dir = File.join('target','staging')
         Dir.chdir(staging_dir) do
           ezbake_local_cmd 'rake package:bootstrap'
 
