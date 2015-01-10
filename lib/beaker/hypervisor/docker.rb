@@ -11,7 +11,12 @@ module Beaker
       ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }.merge(::Docker.options || {})
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
-      ::Docker.validate_version!
+      begin
+        ::Docker.validate_version!
+      rescue Excon::Errors::SocketError => e
+        raise "Docker instance not found.\nif you are on OSX, you might not have Boot2Docker setup correctly\nCheck your DOCKER_HOST variable has been set"
+      end
+
       # Pass on all the logging from docker-api to the beaker logger instance
       ::Docker.logger = @logger
     end
