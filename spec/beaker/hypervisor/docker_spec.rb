@@ -67,13 +67,26 @@ module Beaker
       allow( ::Docker ).to receive(:options).and_return(docker_options)
       allow( ::Docker ).to receive(:options=)
       allow( ::Docker ).to receive(:logger=)
-      allow( ::Docker ).to receive(:validate_version!)
       allow( ::Docker::Image ).to receive(:build).and_return(image)
       allow( ::Docker::Container ).to receive(:create).and_return(container)
       allow_any_instance_of( ::Docker::Container ).to receive(:start)
     end
 
+    describe '#initialize, failure to validate' do
+      before :each do
+        require 'excon'
+        allow( ::Docker ).to receive(:validate_version!).and_raise(Excon::Errors::SocketError.new( StandardError.new('oops') ))
+      end
+      it 'should fail when docker not present' do
+        expect { docker }.to raise_error(RuntimeError, /Docker instance not found/)
+      end
+    end
+
     describe '#initialize' do
+      before :each do
+        allow( ::Docker ).to receive(:validate_version!)
+      end
+
       it 'should require the docker gem' do
         expect_any_instance_of( ::Beaker::Docker ).to receive(:require).with('docker').once
 
@@ -116,6 +129,7 @@ module Beaker
 
     describe '#provision' do
       before :each do
+        allow( ::Docker ).to receive(:validate_version!)
         allow( docker ).to receive(:dockerfile_for)
       end
 
@@ -195,6 +209,7 @@ module Beaker
     describe '#cleanup' do
       before :each do
         # get into a state where there's something to clean
+        allow( ::Docker ).to receive(:validate_version!)
         allow( docker ).to receive(:dockerfile_for)
         docker.provision
       end
@@ -238,6 +253,9 @@ module Beaker
     end
 
     describe '#dockerfile_for' do
+      before :each do
+        allow( ::Docker ).to receive(:validate_version!)
+      end
       it 'should raise on an unsupported platform' do
         expect { docker.send(:dockerfile_for, {'platform' => 'a_sidewalk' }) }.to raise_error(/platform a_sidewalk not yet supported on docker/)
       end
