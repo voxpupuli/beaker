@@ -68,6 +68,13 @@ module Beaker
       expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
     end
 
+    it "creates a fog hypervisor for fog hosts" do
+      fog = double( 'fog' )
+      allow( fog ).to receive( :provision ).and_return( true )
+      expect( Fog ).to receive( :new ).once.and_return( fog )
+      expect( hypervisor.create( 'fog', [], make_opts() ) ).to be === fog
+    end
+
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
