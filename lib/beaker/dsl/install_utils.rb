@@ -511,7 +511,8 @@ module Beaker
               on host, puppet("config set server #{master}")
               on host, puppet("config set certname #{host}")
               #run once to request cert
-              on host, puppet_agent('-t'), :acceptable_exit_codes => [1]
+              acceptable_codes = host['platform'] =~ /osx/ ? [1] : [0, 1]
+              on host, puppet_agent('-t'), :acceptable_exit_codes => acceptable_codes
             else
               answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
               create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
