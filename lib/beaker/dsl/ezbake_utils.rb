@@ -310,7 +310,7 @@ module Beaker
           #                  :throw_on_failure => true
           # TODO: here we compile a development version of the plugin,
           # but for prod we'll need to work something else out
-          ezbake_local_comd "#{lein_prefix} install",
+          ezbake_local_cmd "#{lein_prefix} install",
                             :throw_on_failure => true
         end
 
