@@ -318,9 +318,8 @@ module Beaker
         # project_param_string if its provided? I'm guessing this is
         # true for other projects, but we should allow nil for the
         # sake of all-in-one projects like PDB.
-        ezbake_local_cmd "#{lein_prefix} with-profile ezbake ezbake build",
+        ezbake_local_cmd "#{lein_prefix} with-profile ezbake ezbake stage",
                          :throw_on_failure => true
-
 
         #staging_dir = File.join(ezbake_dir, 'target', 'staging')
         staging_dir = File.join('target','staging')
