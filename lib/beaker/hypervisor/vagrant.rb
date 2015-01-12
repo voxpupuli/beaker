@@ -163,12 +163,12 @@ module Beaker
             @logger.info(line)
           end
           if not wait_thr.value.success?
-            raise "Failed to exec 'vagrant #{args}'"
+            raise "Failed to exec 'vagrant #{args}'. Error was #{stderr.read}"
           end
           exit_status = wait_thr.value
         }
         if exit_status != 0
-          raise "Failed to execute vagrant_cmd ( #{args} )"
+          raise "Failed to execute vagrant_cmd ( #{args} ). Error was #{stderr.read}"
         end
       end
     end
