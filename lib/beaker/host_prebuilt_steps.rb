@@ -13,6 +13,7 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     UNIX_PACKAGES = ['curl', 'ntpdate']
+    FREEBSD_PACKAGES = ['curl']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
     SLES_PACKAGES = ['curl', 'ntp']
@@ -97,6 +98,8 @@ module Beaker
           check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
         when (host['platform'] =~ /windows/ and not host.is_cygwin?)
           check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)
+        when host['platform'] =~ /freebsd/
+          check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
@@ -289,7 +292,13 @@ module Beaker
     # @param [Host] host the host to act upon
     # @param [String] etc_hosts The string to append to the /etc/hosts file
     def set_etc_hosts(host, etc_hosts)
-      host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
+      if host['platform'] =~ /freebsd/
+        # FreeBSD gets weird about special characters, we have to go a little OTT here
+        freebsd_hosts = etc_hosts.gsub(/\t/,'\\t').gsub(/\n/,'\\n')
+        host.exec(Command.new("printf '#{freebsd_hosts}' > /etc/hosts"))
+      else
+        host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
+      end
     end
 
     #Make it possible to log in as root by copying the current users ssh keys to the root account
@@ -307,6 +316,8 @@ module Beaker
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e)"))
         elsif host['platform'] =~ /osx/
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
+        elsif host['platform'] =~ /freebsd/
+          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
@@ -342,6 +353,8 @@ module Beaker
         if host['platform'] =~ /osx/
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"))
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
+        elsif host['platform'] =~ /freebsd/
+          host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif host.is_cygwin?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         else
@@ -352,6 +365,8 @@ module Beaker
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
+        elsif host['platform'] =~ /freebsd/
+          host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -519,6 +534,10 @@ module Beaker
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("stopsrc -g ssh"))
           host.exec(Command.new("startsrc -g ssh"))
+        when /freebsd/
+          permit_user_environment_freebsd = "printf '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config".gsub(/\t/,'\\t').gsub(/\n/,'\\n')
+          host.exec(Command.new(permit_user_environment_freebsd))
+          host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         end
 
         if host['platform'] !~ /windows/ or (host['platform'] =~ /windows/ and host.is_cygwin?)

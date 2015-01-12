@@ -187,6 +187,8 @@ module Beaker
               install_puppet_from_msi host, opts
             elsif host['platform'] =~ /osx/
               install_puppet_from_dmg host, opts
+            elsif host['platform'] =~ /freebsd/
+              install_puppet_freebsd host, opts
             else
               if opts[:default_action] == 'gem_install'
                 install_puppet_from_gem host, opts
@@ -412,6 +414,28 @@ module Beaker
           on host, "installer -pkg /Volumes/puppet-#{puppet_ver}/puppet-#{puppet_ver}.pkg -target /"
           on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
           on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
+        end
+
+        # Installs Puppet and dependencies from FreeBSD
+        #
+        # @param [Host] host The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet to install, required
+        # @option opts [String] :facter_version The version of Facter to install, required
+        # @option opts [String] :hiera_version The version of Hiera to install, required
+        #
+        # @return nil
+        # @api private
+        def install_puppet_freebsd( host, opts )
+          puppet_ver = opts[:version]
+          facter_ver = opts[:facter_version]
+          hiera_ver = opts[:hiera_version]
+
+          if host['platform'] =~ /freebsd-9/
+            on host, "pkg_add -rF puppet"
+          else
+            on host, "pkg install -y sysutils/puppet"
+          end
         end
 
         # Installs Puppet and dependencies from gem

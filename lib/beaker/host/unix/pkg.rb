@@ -32,6 +32,10 @@ module Unix::Pkg
         result = exec(Beaker::Command.new("pkg info #{name}"), :acceptable_exit_codes => (0...127))
       when /solaris-10/
         result = exec(Beaker::Command.new("pkginfo #{name}"), :acceptable_exit_codes => (0...127))
+      when /freebsd-9/
+        result = exec(Beaker::Command.new("pkg_info #{name}"), :acceptable_exit_codes => (0...127))
+      when /freebsd-10/
+        result = exec(Beaker::Command.new("pkg info #{name}"), :acceptable_exit_codes => (0...127))
       else
         raise "Package #{name} cannot be queried on #{self}"
     end
@@ -70,6 +74,10 @@ module Unix::Pkg
         execute("pkg #{cmdline_args} install #{name}")
       when /solaris-10/
         execute("pkgutil -i -y #{cmdline_args} #{name}")
+      when /freebsd-9/
+        execute("pkg_add -fr #{cmdline_args} #{name}")
+      when /freebsd-10/
+        execute("pkg #{cmdline_args} install #{name}")
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
