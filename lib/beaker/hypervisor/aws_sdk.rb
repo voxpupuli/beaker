@@ -238,8 +238,8 @@ module Beaker
       @hosts.each do |host|
         amitype = host['vmname'] || host['platform']
         amisize = host['amisize'] || 'm1.small'
-        subnet_id = host['subnet_id'] || nil
-        vpc_id = host['vpc_id'] || nil
+        subnet_id = host['subnet_id'] || @options['subnet_id'] || nil
+        vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
 
         if vpc_id and !subnet_id
           raise RuntimeError, "A subnet_id must be provided with a vpc_id"
@@ -256,7 +256,18 @@ module Beaker
         # Main region object for ec2 operations
         region = @ec2.regions[ami_region]
 
-        # Obtain the VPC object if it exists
+        # If we haven't defined a vpc_id then we use the default vpc for the provided region
+        if !vpc_id
+          @logger.notify("aws-sdk: filtering available vpcs in region by 'isDefault")
+          filtered_vpcs = region.client.describe_vpcs(:filters => [{:name => 'isDefault', :values => ['true']}])
+          if !filtered_vpcs[:vpc_set].empty?
+            vpc_id = filtered_vpcs[:vpc_set].first[:vpc_id]
+          else #there's no default vpc, use nil
+            vpc_id = nil
+          end
+        end
+
+        # Grab the vpc object based upon provided id
         vpc = vpc_id ? region.vpcs[vpc_id] : nil
 
         # Grab image object
@@ -284,6 +295,8 @@ module Beaker
           }
         end
 
+        security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
+
         # Launch the node, filling in the blanks from previous work.
         @logger.notify("aws-sdk: Launch instance")
         config = {
@@ -291,7 +304,7 @@ module Beaker
           :image_id => image_id,
           :monitoring_enabled => true,
           :key_pair => ensure_key_pair(region),
-          :security_groups => [ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))],
+          :security_groups => [security_group],
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
@@ -527,20 +540,20 @@ module Beaker
 
     # Return an existing group, or create new one
     #
-    # Accepts a region or VPC as input for checking & creation.
+    # Accepts a VPC as input for checking & creation.
     #
-    # @param rv [AWS::EC2::Region, AWS::EC2::VPC] the AWS region or vpc control object
+    # @param vpc [AWS::EC2::VPC] the AWS vpc control object
     # @param ports [Array<Number>] an array of port numbers
     # @return [AWS::EC2::SecurityGroup] created security group
     # @api private
-    def ensure_group(rv, ports)
+    def ensure_group(vpc, ports)
       @logger.notify("aws-sdk: Ensure security group exists for ports #{ports.to_s}, create if not")
       name = group_id(ports)
 
-      group = rv.security_groups.filter('group-name', name).first
+      group = vpc.security_groups.filter('group-name', name).first
 
       if group.nil?
-        group = create_group(rv, ports)
+        group = create_group(vpc, ports)
       end
 
       group
