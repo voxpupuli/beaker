@@ -46,6 +46,27 @@ module Beaker
         a_host.first
       end
 
+      # Find at most a single host with the role provided.  Raise an error if
+      # more than one host is found to have the provided role.
+      # @param [Array<Host>] hosts The hosts to examine
+      # @param [String] role The host returned will have this role in its role list
+      # @return [Host] The single host with the desired role in its roles list
+      #                     or nil if no host is found
+      # @raise [ArgumentError] Raised if more than one host has the given role defined
+      def find_at_most_one_host_with_role(hosts, role)
+        role_hosts = hosts_with_role(hosts, role)
+        host_with_role = nil
+        case role_hosts.length
+        when 0
+        when 1
+          host_with_role = role_hosts[0]
+        else
+          host_string = ( role_hosts.map { |host| host.name } ).join( ', ')
+          raise ArgumentError, "There should be only one host with #{role} defined, but I found #{role_hosts.length} (#{host_string})"
+        end
+        host_with_role
+      end
+
       #Execute a block selecting the hosts that match with the provided criteria
       #@param [Array<Host>, Host] hosts The host or hosts to run the provided block against
       #@param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role

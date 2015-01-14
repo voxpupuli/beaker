@@ -6,6 +6,9 @@ module Beaker
   # @api private
   class Version34 < Version32
     def generate_answers
+      masterless = @options[:masterless]
+      return super if masterless
+
       dashboard = only_host_with_role(@hosts, 'dashboard')
       database = only_host_with_role(@hosts, 'database')
 

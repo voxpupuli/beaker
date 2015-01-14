@@ -31,10 +31,11 @@ module Beaker
 
       # The host for which ['roles'] include 'master'.
       # If no host has the 'master' role, then use the host defined as 'default'.
-      # If no host is defined as a 'master' and there is no 'default' host defined then
-      # raise an error.
+      # If no host is defined as a 'master' and there is no 'default' host defined
+      # then it either raises an error (has a master),
+      # or it returns nil (masterless)
       #
-      # @return [Array<Host>]
+      # @return [Host] Returns the host, or nil if not found & masterless
       # @raise [Beaker::DSL::Outcomes::FailTest] if there are less
       #   or more than 1 master is found.
       #
@@ -42,33 +43,33 @@ module Beaker
       #     on, master, 'cat /etc/puppet/puppet.conf'
       #
       def master
-        find_only_one :master
+        find_host_with_role :master
       end
 
       # The host for which ['roles'] include 'database'
       #
-      # @return [Array<Host>]
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are less
-      #   or more than 1 database is found.
+      # @return [Host] Returns the host, or nil if not found & masterless
+      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
       #     on, agent, "curl -k http://#{database}:8080"
       #
       def database
-        find_only_one :database
+        find_host_with_role :database
       end
 
       # The host for which ['roles'] include 'dashboard'
       #
-      # @return [Array<Host>]
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are less
-      #   or more than 1 dashboard is found.
+      # @return [Host] Returns the host, or nil if not found & masterless
+      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
       #     on, agent, "curl https://#{database}/nodes/#{agent}"
       #
       def dashboard
-        find_only_one :dashboard
+        find_host_with_role :dashboard
       end
 
       # The default host
@@ -78,14 +79,15 @@ module Beaker
       #   OR
       #   - host with 'master' as a role
       #
-      # @return [Array<Host>]
-      # @raise [Beaker::DSL::Outcomes::FailTest] if no default host is found
+      # @return [Host] Returns the host, or nil if not found & masterless
+      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
       #     on, default, "curl https://#{database}/nodes/#{agent}"
       #
       def default
-        find_only_one :default
+        find_host_with_role :default
       end
 
       #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
@@ -147,12 +149,38 @@ module Beaker
         hosts_with_role(hosts, desired_role)
       end
 
+      # finds the appropriate number of hosts for a given role
+      # determines whether to allow no server using the masterless option
+      #
+      # @param [Symbol, String] role The role to find a host for
+      # @return [Host] Returns the host, or nil if masterless and none are found
+      #   for that role
+      # @raise Throws an exception if an inappropriate number of hosts are found
+      #   for that role
+      def find_host_with_role role
+        if (defined? options) && options[:masterless]
+          find_at_most_one role
+        else
+          find_only_one role
+        end
+      end
+
       # @param [Symbol, String] role The role to find a host for
       # @return [Host] Returns the host, if one and only one is found
       # @raise Raises a failure exception if one and only one host that matches
       #   the specified role is NOT found.
       def find_only_one role
         only_host_with_role(hosts, role)
+      rescue ArgumentError => e
+        raise DSL::Outcomes::FailTest, e.to_s
+      end
+
+      # @param [Symbol, String] role The role to find a host for
+      # @return [Host] Returns the host, or nil if not found
+      # @raise Raises a failure exception if more than one host that matches
+      #   the specified role is found.
+      def find_at_most_one role
+        find_at_most_one_host_with_role(hosts, role)
       rescue ArgumentError => e
         raise DSL::Outcomes::FailTest, e.to_s
       end

@@ -10,6 +10,9 @@ module Beaker
     # @return [Hash] A hash (keyed from hosts) containing hashes of answer file
     #   data.
     def generate_answers
+      masterless = @options[:masterless]
+      return super if masterless
+
       dashboard = only_host_with_role(@hosts, 'dashboard')
       database = only_host_with_role(@hosts, 'database')
       master = only_host_with_role(@hosts, 'master')

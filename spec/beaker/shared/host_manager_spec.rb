@@ -56,6 +56,26 @@ module Beaker
         end
       end
 
+      context "find_at_most_one_host_with_role" do
+        it "can find the single master in a set of hosts" do
+
+          expect( host_handler.find_at_most_one_host_with_role( hosts, 'master' ) ).to be === hosts[1]
+
+        end
+
+        it "throws an error when more than one host with matching role is found" do
+
+          expect{ host_handler.find_at_most_one_host_with_role( hosts, 'agent' ) }.to raise_error(ArgumentError)
+
+        end
+
+        it "returns nil when no host is found matching the role" do
+
+          expect( host_handler.find_at_most_one_host_with_role( hosts, 'surprise' ) ).to be_nil
+
+        end
+      end
+
       context "run_block_on" do
         it "can execute a block against hosts identified by a string" do
           myhosts = host_handler.run_block_on( hosts, role0 ) do |hosts|
