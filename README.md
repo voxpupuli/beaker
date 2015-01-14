@@ -1,6 +1,6 @@
 # Beaker
 
-Puppet Labs cloud enabled acceptance testing tool.
+Puppet Labs cloud-enabled acceptance testing tool.
 
 # Installation
 
