@@ -148,9 +148,17 @@ module Beaker
         env_array << "#{key.to_s.upcase}=\"#{val}\""
       end
 
-      environment_string = env_array.join(' ')
+      if host['communicator'] =~ /bitvise/
+        environment_string = ''
+        env_array.each_with_index do |env|
+          environment_string += "set #{env} && "
+        end
+        environment_string
+      else
+        environment_string = env_array.join(' ')
+        "env #{environment_string}"
+      end
 
-      "env #{environment_string}"
     end
 
   end

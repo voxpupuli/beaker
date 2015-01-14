@@ -28,7 +28,13 @@ module Beaker
     def self.create name, options
       case options['HOSTS'][name]['platform']
       when /windows/
-        Windows::Host.new name, options
+        if options['HOSTS'][name]['communicator'].nil?
+          Windows::Host.new name, options
+        elsif options['HOSTS'][name]['communicator'].include?('bitvise')
+          PSWindows::Host.new name, options
+        else
+          raise "Unknown communicator #{options['HOSTS'][name]['communicator']}"
+        end
       when /aix/
         Aix::Host.new name, options
       when /osx/
@@ -294,7 +300,8 @@ module Beaker
     # @param [String] dir The directory structure to create on the host
     # @return [Boolean] True, if directory construction succeeded, otherwise False
     def mkdir_p dir
-      result = exec(Beaker::Command.new("mkdir -p #{dir}"), :acceptable_exit_codes => [0, 1])
+      cmd = self.defaults['communicator'] =~ /bitvise/ ? "if not exist #{dir.gsub!('/','\\')} (md #{dir.gsub!('/','\\')})" : "mkdir -p #{dir}"
+      result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
       result.exit_code == 0
     end
 
