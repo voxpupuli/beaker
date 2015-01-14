@@ -12,6 +12,8 @@ RSpec.configure do |c|
   c.add_setting :options, :default => {}
   # Define persistant logger object
   c.add_setting :logger, :default => nil
+  # Define persistant default node
+  c.add_setting :default_node, :default => nil
 
   #default option values
   defaults = {
