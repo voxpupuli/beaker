@@ -138,6 +138,7 @@ module Beaker
           :accept_all_exit_codes  => false,
           :timesync               => false,
           :disable_iptables       => false,
+          :set_env                => true,
           :repo_proxy             => false,
           :package_proxy          => false,
           :add_el_extras          => false,
