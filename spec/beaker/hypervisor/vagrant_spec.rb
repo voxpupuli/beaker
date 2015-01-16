@@ -79,6 +79,17 @@ EOF
       expect( vagrantfile ).to match(/(ssh.forward_agent = true)/)
     end
 
+    it "can make a Vagrantfile with synced_folder disabled" do
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+      hosts = make_hosts({:synced_folder => 'disabled'},1)
+      vagrant.make_vfile( hosts, options )
+
+      vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+      expect( vagrantfile ).to match(/v.vm.synced_folder .* disabled: true/)
+    end
+
     it "generates a valid windows config" do
       path = vagrant.instance_variable_get( :@vagrant_path )
       allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
