@@ -28,7 +28,12 @@ module Beaker
     def self.create name, options
       case options['HOSTS'][name]['platform']
       when /windows/
-        Windows::Host.new name, options
+        cygwin = options['HOSTS'][name]['is_cygwin']
+        if cygwin.nil? or cygwin == true
+          Windows::Host.new name, options
+        else
+          PSWindows::Host.new name, options
+        end
       when /aix/
         Aix::Host.new name, options
       when /osx/
@@ -294,7 +299,13 @@ module Beaker
     # @param [String] dir The directory structure to create on the host
     # @return [Boolean] True, if directory construction succeeded, otherwise False
     def mkdir_p dir
-      result = exec(Beaker::Command.new("mkdir -p #{dir}"), :acceptable_exit_codes => [0, 1])
+      if host['is_cygwin'].nil? or host['is_cygwin'] == true
+        cmd = "mkdir -p #{dir}"
+      else
+        cmd = "if not exist #{dir.gsub!('/','\\')} (md #{dir.gsub!('/','\\')})"
+      end
+
+      result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
       result.exit_code == 0
     end
 
@@ -380,7 +391,7 @@ module Beaker
 
   end
 
-  [ 'windows', 'unix', 'aix', 'mac' ].each do |lib|
+  [ 'windows', 'pswindows', 'unix', 'aix', 'mac' ].each do |lib|
     require "beaker/host/#{lib}"
   end
 end
