@@ -1256,7 +1256,8 @@ module Beaker
           avoid_puppet_at_all_costs ||= agent['pe_ver'] && version_is_less(agent['pe_ver'], '3.2') && agent['platform'] =~ /sles/
 
           if avoid_puppet_at_all_costs
-            on agent, "/etc/init.d/#{agent_service} stop"
+            # When upgrading, puppet is already stopped. On EL4, this causes an exit code of '1'
+            on agent, "/etc/init.d/#{agent_service} stop", :acceptable_exit_codes => [0, 1]
           else
             on agent, puppet_resource('service', agent_service, 'ensure=stopped')
           end
