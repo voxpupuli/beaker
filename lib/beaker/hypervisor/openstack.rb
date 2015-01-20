@@ -40,7 +40,7 @@ module Beaker
       if not @compute_client
         raise "Unable to create OpenStack Compute instance (api key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
       end
-      @network_client || Fog::Network.new(
+      @network_client ||= Fog::Network.new(
         :provider => :openstack,
         :openstack_api_key => @options[:openstack_api_key],
         :openstack_username => @options[:openstack_username],
