@@ -14,7 +14,7 @@ module Beaker
     #@option options [String] :openstack_auth_url The URL to access the OpenStack instance with (required)
     #@option options [String] :openstack_tenant The tenant to access the OpenStack instance with (required)
     #@option options [String] :openstack_network The network that each OpenStack instance should be contacted through (required)
-    #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each 
+    #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each
     #                                            OpenStack instance (optional)
     #@option options [String] :jenkins_build_url Added as metadata to each OpenStack instance
     #@option options [String] :department Added as metadata to each OpenStack instance
@@ -40,7 +40,7 @@ module Beaker
       if not @compute_client
         raise "Unable to create OpenStack Compute instance (api key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
       end
-      @network_client || Fog::Network.new(
+      @network_client ||= Fog::Network.new(
         :provider => :openstack,
         :openstack_api_key => @options[:openstack_api_key],
         :openstack_username => @options[:openstack_username],
