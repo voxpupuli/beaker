@@ -843,6 +843,32 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe '#install_packages_from_local_dev_repo' do
+    let( :package_name ) { 'puppet-agent' }
+    let( :platform ) { @platform || 'other' }
+    let( :host ) do
+      FakeHost.create('fakvm', platform, opts)
+    end
+
+    it 'sets the find command correctly for el-based systems' do
+      @platform = 'el-1-3'
+      expect( subject ).to receive( :on ).with( host, /\*\.rpm.+rpm\s-ivh/ )
+      subject.install_packages_from_local_dev_repo( host, package_name )
+    end
+
+    it 'sets the find command correctly for debian-based systems' do
+      @platform = 'debian-1-3'
+      expect( subject ).to receive( :on ).with( host, /\*\.deb.+dpkg\s-i/ )
+      subject.install_packages_from_local_dev_repo( host, package_name )
+    end
+
+    it 'fails correctly for systems not accounted for' do
+      @platform = 'eos-1-3'
+      expect{ subject.install_packages_from_local_dev_repo( host, package_name ) }.to raise_error RuntimeError
+    end
+
+  end
+
   describe '#install_puppetagent_dev_repo' do
 
     it 'raises an exception when host platform is unsupported' do
