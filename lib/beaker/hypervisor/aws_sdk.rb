@@ -287,6 +287,8 @@ module Beaker
           block_device_mappings << {
             :device_name => device_name,
             :ebs => {
+              # Change the default size of the root volume.
+              :volume_size => host['volume_size'] || rest[:volume_size],
               # This is required to override the images default for
               # delete_on_termination, forcing all volumes to be deleted once the
               # instance is terminated.
