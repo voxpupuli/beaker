@@ -132,6 +132,8 @@ module Beaker
                             :project           => @options[:project].to_s })
         @vms << vm
 
+        #enable root if user is not root
+        enable_root_on_hosts()
       end
     end
 
@@ -147,6 +149,29 @@ module Beaker
         end
         @logger.debug "Destroying OpenStack host #{vm.name}"
         vm.destroy
+      end
+    end
+
+    # Enables root for instances with custom username like ubuntu-amis
+    #
+    # @return [void]
+    # @api private
+    def enable_root_on_hosts
+      @hosts.each do |host|
+        enable_root(host)
+      end
+    end
+
+    # Enables root access for a host when username is not root
+    #
+    # @return [void]
+    # @api private
+    def enable_root(host)
+      if host['user'] != 'root'
+        copy_ssh_to_root(host, @options)
+        enable_root_login(host, @options)
+        host['user'] = 'root'
+        host.close
       end
     end
 
