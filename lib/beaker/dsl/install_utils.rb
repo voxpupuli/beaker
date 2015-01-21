@@ -827,9 +827,14 @@ module Beaker
       # @return nil
       # @api private
       def install_puppet_from_dmg( host, opts )
+
         puppet_ver = opts[:version]
         facter_ver = opts[:facter_version]
         hiera_ver = opts[:hiera_version]
+
+        if [puppet_ver, facter_ver, hiera_ver].include?(nil)
+          raise "You need to specify versions for OSX host\n eg. install_puppet({:version => '3.6.2',:facter_version => '2.1.0',:hiera_version  => '1.3.4',})"
+        end
 
         on host, "curl -O #{opts[:mac_download_url]}/puppet-#{puppet_ver}.dmg"
         on host, "curl -O #{opts[:mac_download_url]}/facter-#{facter_ver}.dmg"
