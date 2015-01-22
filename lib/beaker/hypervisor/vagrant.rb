@@ -39,6 +39,11 @@ module Beaker
           v_file << "    v.vm.guest = :windows"
         end
 
+        if /osx/i.match(host['platform'])
+          v_file << "    v.vm.network 'private_network', ip: '10.0.1.10'\n"
+          v_file << "    v.vm.synced_folder '.', '/vagrant', :nfs => true\n"
+        end
+
         v_file << self.class.provider_vfile_section(host, options)
 
         v_file << "  end\n"

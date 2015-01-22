@@ -227,7 +227,7 @@ module Beaker
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    # @option opts [String] :epel_url Link to download from 
+    # @option opts [String] :epel_url Link to download from
     # @option opts [String] :epel_arch Architecture of epel to download (i386, x86_64, etc)
     # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
     # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
@@ -299,6 +299,8 @@ module Beaker
         if host['platform'] =~ /windows/
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
           host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
+        elsif host['platform'] =~ /osx/
+          host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
@@ -332,8 +334,12 @@ module Beaker
       block_on host do |host|
         logger.debug "Update /etc/ssh/sshd_config to allow root login"
         # note: this sed command only works on gnu sed
-        host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true}
-        )
+        if host['platform'] =~ /osx/
+          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"))
+          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
+        else
+          host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
+        end
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
