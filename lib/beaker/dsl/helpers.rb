@@ -1355,6 +1355,46 @@ module Beaker
           on host, "curl %s" % cmd, opts, &block
         end
       end
+
+      # Write hiera config file on one or more provided hosts
+      #
+      # @param[Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                           or a role (String or Symbol) that identifies one or more hosts.
+      # @param[Array] One or more hierarchy paths
+      def write_hiera_config_on(host, hierarchy)
+
+        block_on host do |host|
+          hiera_config=Hash.new
+          hiera_config[:backends] = 'yaml'
+          hiera_config[:yaml] = {}
+          hiera_config[:yaml][:datadir] = host[:hieradatadir]
+          hiera_config[:hierarchy] = hierarchy
+          hiera_config[:logger] = 'console'
+          create_remote_file host, host[:hieraconf], hiera_config.to_yaml
+        end
+      end
+
+      # Write hiera config file for the default host
+      # @see #write_hiera_config_on
+      def write_hiera_config(hierarchy)
+        write_hiera_config_on(default, hierarchy)
+      end
+
+      # Copy hiera data files to one or more provided hosts
+      #
+      # @param[Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+      #                           or a role (String or Symbol) that identifies one or more hosts.
+      # @param[String]            Directory containing the hiera data files.
+      def copy_hiera_data_to(host, source)
+        scp_to host, File.expand_path(source), host[:hieradatadir]
+      end
+
+      # Copy hiera data files to the default host
+      # @see #copy_hiera_data_to
+      def copy_hiera_data(source)
+        copy_hiera_data_to(default, source)
+      end
+
     end
   end
 end

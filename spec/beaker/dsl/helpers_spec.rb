@@ -1294,4 +1294,56 @@ describe ClassMixedWithDSLHelpers do
       end
     end
   end
+
+  describe "#write_hiera_config_on" do
+    let(:hierarchy) { [ 'nodes/%{::fqdn}', 'common' ] }
+    it 'on FOSS host' do
+      host = make_host('testhost', { :platform => 'ubuntu' } )
+      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      subject.write_hiera_config_on(host, hierarchy)
+    end
+
+    it 'on PE host' do
+      host = make_host('testhost', { :platform => 'ubuntu', :type => 'pe' } )
+      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      subject.write_hiera_config_on(host, hierarchy)
+    end
+
+  end
+
+  describe "#write_hiera_config" do
+    let(:hierarchy) { [ 'nodes/%{::fqdn}', 'common' ] }
+    it 'delegates to #write_hiera_config_on with the default host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :write_hiera_config_on ).with( master, hierarchy).once
+      subject.write_hiera_config( hierarchy )
+    end
+
+  end
+
+  describe "#copy_hiera_data_to" do
+    let(:path) { 'spec/fixtures/hieradata' }
+    it 'on FOSS host' do
+      host = make_host('testhost', { :platform => 'ubuntu' } )
+      expect(subject).to receive(:scp_to).with(host, File.expand_path(path), host[:hieradatadir])
+      subject.copy_hiera_data_to(host, path)
+    end
+
+    it 'on PE host' do
+      host = make_host('testhost', { :platform => 'ubuntu', :type => 'pe' } )
+      expect(subject).to receive(:scp_to).with(host, File.expand_path(path), host[:hieradatadir])
+      subject.copy_hiera_data_to(host, path)
+    end
+  end
+
+  describe "#copy_hiera_data" do
+    let(:path) { 'spec/fixtures/hieradata' }
+    it 'delegates to #copy_hiera_data_to with the default host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :copy_hiera_data_to ).with( master, path).once
+      subject.copy_hiera_data( path )
+    end
+
+  end
+
 end
