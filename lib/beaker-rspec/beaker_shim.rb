@@ -62,6 +62,12 @@ module BeakerRSpec
       RSpec.configuration.hosts
     end
 
+    # Accessor for default node
+    # @return [Beaker::Host]
+    def default_node
+      RSpec.configuration.default_node ||= find_only_one :default
+    end
+
     # Cleanup the testing framework, shut down test boxen and tidy up
     def cleanup
       @network_manager.cleanup
