@@ -1130,6 +1130,30 @@ module Beaker
         end
       end
 
+      # Installs packages from the local development repository on the given host
+      #
+      # @param [Host] host An object implementing {Beaker::Hosts}'s
+      #                    interface.
+      # @param [Regexp] package_name The name of the package whose repository is
+      #                              being installed.
+      #
+      # @note This method only works on redhat-like and debian-like hosts.
+      # @note This method is paired to be run directly after {#install_puppetlabs_dev_repo}
+      #
+      def install_packages_from_local_dev_repo( host, package_name )
+        if host['platform'] =~ /debian|ubuntu|cumulus/
+          find_filename = '*.deb'
+          find_command  = 'dpkg -i'
+        elsif host['platform'] =~ /fedora|el|centos/
+          find_filename = '*.rpm'
+          find_command  = 'rpm -ivh'
+        else
+          raise "No repository installation step for #{host['platform']} yet..."
+        end
+        find_command = "find /root/#{package_name} -type f -name '#{find_filename}' -exec #{find_command} {} \\;"
+        on host, find_command
+      end
+
       # Install development repo of the puppet-agent on the given host
       #
       # @param [Host] host An object implementing {Beaker::Hosts}'s interface
