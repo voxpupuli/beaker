@@ -42,8 +42,8 @@ module Beaker
         default_server_options = {
           :name => host[:vmhostname],
           :image_id => host[:image_id],
-          :public_key_path => host[:public_key_path] || File.expand_path('~/.ssh/id_rsa.pub'),
-          :private_key_path => host[:private_key_path] || File.expand_path('~/.ssh/id_rsa'),
+          :public_key_path => host[:public_key_path] || @options[:fog_private_key],
+          :private_key_path => host[:private_key_path] || @options[:fog_public_key],
         }
 
         server_options = default_server_options.merge(extras)

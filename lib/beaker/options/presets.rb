@@ -191,6 +191,8 @@ module Beaker
           :ec2_yaml               => 'config/image_templates/ec2.yaml',
           :help                   => false,
           :collect_perf_data      => false,
+          :fog_private_key        => "#{ENV['HOME']}/.ssh/id_rsa",
+          :fog_public_key         => "#{ENV['HOME']}/.ssh/id_rsa.pub",
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,
