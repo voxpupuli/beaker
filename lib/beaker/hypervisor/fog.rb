@@ -28,7 +28,9 @@ module Beaker
       end
     end
 
-    #Create new instances in digitalocean
+    # Provision all hosts in cloud using the Fog API
+    #
+    # @return [void]
     def provision
       @hosts.each do |host|
         @logger.notify "Provisioning #{host[:cloud_provider]} using Fog"
@@ -60,7 +62,11 @@ module Beaker
       end
     end
 
-    #Destroy any digitalocean instances
+    # Cleanup all earlier provisioned machines on cloud of choice using Fog
+    #
+    # #cleanup does nothing without a #provision call first.
+    #
+    # @return [void]
     def cleanup
       @logger.notify "Cleaning up Fog Created Servers"
       @vms.each do |vm|
@@ -69,6 +75,13 @@ module Beaker
       end
     end
 
+    # Return a hash containing the auth credentials for the VPS of choice
+    #
+    # Every provider has different auth methods, so we have to specify the keys
+    #
+    # @param [Array<Beaker::Host>] hosts Array of Beaker::Host objects
+    # @return [Hash<Symbol, String>] fog_auth Auth keys for given provider
+    # @api private
     def get_cloud_auth_method(hosts)
       host = hosts.first
 
@@ -85,6 +98,13 @@ module Beaker
       end
     end
 
+    # Return a hash containing the provider specific fields for the VPS of choice
+    #
+    # Not everyone has region ids, some you have to specify networks and such
+    #
+    # @param [Array<Beaker::Host>] hosts Array of Beaker::Host objects
+    # @return [Hash<Symbol, String>] specific_fields Provider specific fields
+    # @api private
     def provider_specific_fields(host)
       provider = host[:cloud_provider]
 
