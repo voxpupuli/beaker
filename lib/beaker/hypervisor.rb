@@ -54,6 +54,8 @@ module Beaker
           Beaker::Docker
         when /^openstack$/
           Beaker::OpenStack
+        when /^vcenter_orchestrator$/
+          Beaker::VcenterOrchestrator
         when /^none$/
           Beaker::Hypervisor
         else
@@ -129,6 +131,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack', 'vcenter_orchestrator', 'vcenter_orchestrator_helper' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end

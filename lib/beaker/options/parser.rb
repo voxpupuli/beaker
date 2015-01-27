@@ -302,7 +302,7 @@ module Beaker
           if ['blimpy'].include?(visor)
             check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
           end
-          if ['aix', 'solaris', 'vcloud'].include?(visor)
+          if ['aix', 'solaris', 'vcloud', 'vco'].include?(visor)
             check_yaml_file(@options[:dot_fog], "required by #{visor}")
           end
         end
