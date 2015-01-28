@@ -65,6 +65,13 @@ module Beaker
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
+
+      #Make hypervisor available to each host.
+      #This is needed to support snapshotting the SUT
+      hosts_to_provision.each do |host|
+        host[:hypervisor] = hypervisor
+      end
+
       hypervisor.provision
 
       hypervisor
