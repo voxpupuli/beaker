@@ -4,7 +4,6 @@ module Beaker
   #
   # There is a specific pattern for using this class.
   # Here's a list of example usages:
-  # - {Beaker::NetworkManager#log_provisioning_summary_xml}
   # - {Beaker::TestSuite::TestSuiteResult#write_junit_xml}
   module LoggerJunit
 
