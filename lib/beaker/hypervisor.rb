@@ -92,6 +92,15 @@ module Beaker
       nil
     end
 
+    #Take a snapshot of a specific host running on this hypervisor.
+    def take_snapshot(host,snapshot_name)
+      @logger.warn("Snapshotting not implemented with this hypervisor")
+    end
+
+    #Revert to a snapshot of a specific host running on this hypervisor.
+    def restore_snapshot(host,snapshot_name)
+      @logger.warn("Snapshotting not implemented with this hypervisor")
+    end
     #Proxy package managers on tests hosts created by this hypervisor, runs before validation and configuration.
     def proxy_package_manager
       if @options[:package_proxy]
