@@ -56,6 +56,24 @@ module Beaker
         expect(host.is_using_passenger?).to be_truthy
         expect(host.graceful_restarts?).to be_truthy
       end
+
+      it 'can be an AIO host' do
+        options['type'] = 'aio'
+        expect(host.is_pe?).to be_falsy
+        expect(host.use_service_scripts?).to be_falsy
+        expect(host.is_using_passenger?).to be_falsy
+      end
+
+      it 'sets the paths correctly for an AIO agent host' do
+        options['type'] = 'aio'
+        expect(host['puppetvardir']).to be === Unix::Host::aio_defaults[:puppetvardir]
+      end
+
+      it 'sets the paths correctly for an AIO non-agent host' do
+        options['type'] = 'aio'
+        options['roles'] = ['master']
+        expect(host['puppetvardir']).to be === Unix::Host::foss_defaults[:puppetvardir]
+      end
     end
 
     describe "uses_passenger!" do
