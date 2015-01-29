@@ -50,4 +50,4 @@ _beaker_complete()
 }
 
 # Register _beaker_complete to provide completion for the following commands
-complete -F _beaker_complete beaker pe-beaker
+complete -F _beaker_complete -o default beaker pe-beaker
