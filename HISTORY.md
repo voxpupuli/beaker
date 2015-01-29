@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 8 Jan, 2015 (4dde5f3a)](#LATEST)
+* [LATEST - 29 Jan, 2015 (41028a79)](#LATEST)
+* [beaker2.2.0 - 8 Jan, 2015 (cba5f7ed)](#beaker2.2.0)
 * [beaker2.1.0 - 17 Dec, 2014 (ec089b1a)](#beaker2.1.0)
 * [beaker2.0.0 - 5 Dec, 2014 (fb4b620b)](#beaker2.0.0)
 * [beaker1.20.1 - 17 Oct, 2014 (be250ad6)](#beaker1.20.1)
@@ -67,7 +68,224 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 8 Jan, 2015 (4dde5f3a)
+### <a name = "LATEST">LATEST - 29 Jan, 2015 (41028a79)
+
+* (GEM) update beaker version to 2.3.0 (41028a79)
+
+* Merge pull request #644 from electrical/hiera_config (420b01f2)
+
+
+```
+Merge pull request #644 from electrical/hiera_config
+
+Add helper function to write hiera.yaml file
+```
+* Merge pull request #631 from mcanevet/feature/no_sync_folder (2920fe63)
+
+
+```
+Merge pull request #631 from mcanevet/feature/no_sync_folder
+
+(GH-630) Add synced_folder option
+```
+* Merge pull request #645 from kevpl/qeng1714_aio_masterrolepaths (b825c65a)
+
+
+```
+Merge pull request #645 from kevpl/qeng1714_aio_masterrolepaths
+
+(QENG-1714) fixed get_type for a machine with only non-agent roles
+```
+* (QENG-1714) fixed non-agent AIO path issue (eacd3d31)
+
+* Merge pull request #657 from mcanevet/fix/el (25296221)
+
+
+```
+Merge pull request #657 from mcanevet/fix/el
+
+(gh-656) fix "sudo: sorry, you must have a tty to run sudo"
+```
+* (gh-656) fix "sudo: sorry, you must have a tty to run sudo" (0cde5cc7)
+
+* Merge pull request #649 from branan/maint (60993e0c)
+
+
+```
+Merge pull request #649 from branan/maint
+
+(maint) Fix options access in PE 3.7 answers gen on upgrades
+```
+* (maint) Fix options access in PE 3.7 answers gen on upgrades (673015be)
+
+* Merge pull request #638 from kevpl/qeng1690_aio_installpackages (c9535a35)
+
+
+```
+Merge pull request #638 from kevpl/qeng1690_aio_installpackages
+
+(QENG-1690) added in helper installation method for packages
+```
+* Add helper functions to manage hiera config and data files (c464f5f6)
+
+
+```
+Add helper functions to manage hiera config and data files
+
+- Added helper functions to manage hiera.yaml config file.
+- Added helper functions to copy over hiera data files.
+```
+* Merge pull request #640 from petems/QENG-1695-improve_osx_support (5b050f6c)
+
+
+```
+Merge pull request #640 from petems/QENG-1695-improve_osx_support
+
+(QENG-1695) Improves OSX Support
+```
+* (QENG-1690) added in helper installation method for packages (bba212cf)
+
+
+```
+(QENG-1690) added in helper installation method for packages
+
+I had misunderstood the install_puppetlabs_dev_repo method before, thinking that it would install packages
+from within the dev repo, but it's actually just installing the dev repo itself.  These changes add a
+corresponding installation method to install the packages found in these repos after they've been installed
+```
+* (QENG-1695) Improves OSX Support (9f78eeed)
+
+
+```
+(QENG-1695) Improves OSX Support
+
+* Fixes for root key location copy
+* Adds a Vagrant VB OSX option
+* Fixes PermitRootLogin regex
+* Adds option to enable GUI
+* Raises error if version not given for DMG
+
+Now works with an example OSX Virtualbox image :+1:
+```
+* Merge pull request #621 from stefanmortensen/fix_root_login (a5d4d9b4)
+
+
+```
+Merge pull request #621 from stefanmortensen/fix_root_login
+
+(gh-620) Enable root if user is not root for the OpenStack hypervisor
+```
+* Merge pull request #622 from doug-rosser/volume_size (76b8def6)
+
+
+```
+Merge pull request #622 from doug-rosser/volume_size
+
+(QENG-1676) Enable root volume size changes with volume_size in the config file
+```
+* Merge pull request #564 from mcanevet/fix/openstack_hypervisor (7c1c52b1)
+
+
+```
+Merge pull request #564 from mcanevet/fix/openstack_hypervisor
+
+(GH-632) Fix Network creation
+```
+* Merge pull request #636 from branan/lol_old_el (e7545fa0)
+
+
+```
+Merge pull request #636 from branan/lol_old_el
+
+(QENG-1684) Allow exit code of '1' when stopping puppet agent on centos4
+```
+* (QENG-1684) Allow exit code of '1' when stopping puppet agent on centos4 (589ea1e1)
+
+
+```
+(QENG-1684) Allow exit code of '1' when stopping puppet agent on centos4
+
+When upgrading, the agent service is already stopped. On Centos4, this
+causes a failure from the init script. We want to ignore that failure.
+```
+* (GH-630) Add synced_folder option (619ead3d)
+
+* Merge pull request #597 from kevpl/qeng144_masterless_supportadd (7c88b74a)
+
+
+```
+Merge pull request #597 from kevpl/qeng144_masterless_supportadd
+
+(QENG-144) created masterless option, and support for masterless installs
+```
+* (QENG-1676) Enable root volume size changes with volume_size in the config file (f62ba27d)
+
+* Merge pull request #614 from anodelman/aws (981ab44d)
+
+
+```
+Merge pull request #614 from anodelman/aws
+
+(QENG-1662) beaker smoketests failing on ec2 with security group error
+```
+* (gh-620) Enable root if user is not root for the OpenStack hypervisor (3062d505)
+
+* (QENG-1662) beaker smoketests failing on ec2 with security group error (9948ff49)
+
+
+```
+(QENG-1662) beaker smoketests failing on ec2 with security group error
+
+- ensure when looking for an appropriate security group that you are
+  looking in a) the provided vpc, b) in the default vpc or c) the
+  appropriate region if no default vpc is defined - do not allow
+  a mix of vpcs.
+```
+* Merge pull request #602 from er0ck/feature/master/QENG-1628-add_bash_completion_scripts_for_beaker (1d6c9437)
+
+
+```
+Merge pull request #602 from er0ck/feature/master/QENG-1628-add_bash_completion_scripts_for_beaker
+
+(QENG-1628) Add bash completion scripts for beaker
+```
+* Merge pull request #604 from kevpl/qeng1631_eos_successfail (d93961d8)
+
+
+```
+Merge pull request #604 from kevpl/qeng1631_eos_successfail
+
+(QENG-1631) allowed exit code 0 for puppet agent call for EOS during install
+```
+* Merge pull request #610 from electrical/vagrant_stderr (1c2e33d4)
+
+
+```
+Merge pull request #610 from electrical/vagrant_stderr
+
+Add stderr output to stacktrace
+```
+* (QENG-1631) allowed exit code 0 for puppet agent call for EOS during install (8b466d81)
+
+* (MAINT) Add stderr output to stacktrace (f43a94c4)
+
+* (QENG-1628) Add bash completion scripts for beaker (a71896b4)
+
+
+```
+(QENG-1628) Add bash completion scripts for beaker
+
+using this script, one can press tab after any portion (or none)
+of a beaker option/command and bash will complete it or offer
+suggestions.
+```
+* (QENG-144) created masterless option, and support for masterless installs (57391c27)
+
+* (GH-632) Fix Network creation (3ffff71e)
+
+### <a name = "beaker2.2.0">beaker2.2.0 - 8 Jan, 2015 (cba5f7ed)
+
+* (HISTORY) update beaker history for gem release 2.2.0 (cba5f7ed)
 
 * (GEM) update beaker version to 2.2.0 (4dde5f3a)
 
@@ -363,9 +581,9 @@ Once that was fixed, beaker worked.
 ```
 * (gh-568) Throw descriptive exception when no snapshot exists (2496a73e)
 
-* (gh-568) Allow snapshot option to be optional (d7b6d4e6)
-
 * (gh-568) Allow snapshot option to be optional (838709b5)
+
+* (gh-568) Allow snapshot option to be optional (d7b6d4e6)
 
 * (MAINT) exclude copying vendor dir to clients (5fec6251)
 
