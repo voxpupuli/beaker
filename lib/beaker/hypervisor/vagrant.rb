@@ -162,14 +162,14 @@ module Beaker
     end
 
     #snapshotting depends on https://github.com/scalefactory/vagrant-multiprovider-snap
-    def take_snapshot(host,snapshot_name)
-      @logger.debug "Creating snapshot of #{host}"
-      vagrant_cmd("snap take #{host} --name=#{snapshot_name}")
+    def take_snapshot(hostname,snapshot_name)
+      @logger.debug "Creating snapshot of #{hostname}"
+      vagrant_cmd("snap take #{hostname} --name=#{snapshot_name}")
     end
 
-    def restore_snapshot(host,snapshot_name)
-      @logger.debug "Restoring snapshot of #{host}"
-      vagrant_cmd("snap rollback #{host} --name=#{snapshot_name}")
+    def restore_snapshot(hostname,snapshot_name)
+      @logger.debug "Restoring snapshot of #{hostname}"
+      vagrant_cmd("snap rollback #{hostname} --name=#{snapshot_name}")
     end
 
     def vagrant_cmd(args)
