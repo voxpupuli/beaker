@@ -59,7 +59,7 @@ module Unix
     def self.aio_defaults
       h = self.foss_defaults
       h['puppetbindir'] = '/opt/puppetlabs/agent/bin'
-      h['puppetpath'] = '/opt/puppetlabs/agent'
+      h['puppetpath'] = '/etc/puppetlabs/agent'
       h['puppetvardir'] = '/opt/puppetlabs/agent/cache'
       h['distmoduledir'] = '/opt/puppetlabs/agent/modules'
       h['sitemoduledir'] = '/etc/puppetlabs/agent/modules'
