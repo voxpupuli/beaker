@@ -27,7 +27,7 @@ describe Beaker::VagrantParallels do
     vagrant.make_vfile( @hosts )
 
     vagrantfile = File.read( File.expand_path( File.join( path, 'Vagrantfile' )))
-    expect( vagrantfile ).to include( %Q{    v.vm.provider :parallels do |prl|\n      prl.optimize_power_consumption = false\n      prl.memory = ', '#{options['vagrant_memsize'] ||= '1024'}']\n    end})
+    expect( vagrantfile ).to include( %Q{    v.vm.provider :parallels do |prl|\n      prl.optimize_power_consumption = false\n      prl.memory = '1024'\n    end})
   end
 
   it "can disable the auto-update functionality of the Parallels Guest Tools" do
