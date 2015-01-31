@@ -34,7 +34,7 @@ module Beaker
     def provision
       @hosts.each do |host|
         @logger.notify "Provisioning #{host[:cloud_provider]} using Fog"
-        host[:vmhostname] = generate_host_name
+        host[:vmhostname] = "beaker-#{generate_host_name}"
         @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
 
         extras = provider_specific_fields(host)
