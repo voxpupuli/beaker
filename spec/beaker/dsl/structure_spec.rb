@@ -5,7 +5,8 @@ class ClassMixedWithDSLStructure
 end
 
 describe ClassMixedWithDSLStructure do
-  let(:logger) { Object.new }
+  include Beaker::DSL::Assertions
+  let(:logger) { double }
   describe '#step' do
     it 'requires a name' do
       expect { subject.step do; end }.to raise_error ArgumentError
@@ -55,6 +56,32 @@ describe ClassMixedWithDSLStructure do
       block = lambda { 'blah' }
       expect( teardown_array ).to receive( :<< ).with( block )
       subject.teardown &block
+    end
+  end
+
+  describe '#expect_failure' do
+    it 'passes when a MiniTest assertion is raised' do
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      block = lambda { assert_equal('1', '2', '1 should not equal 2') }
+      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+    end
+
+    it 'passes when a Beaker assertion is raised' do
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      block = lambda { assert_no_match('1', '1', '1 and 1 should not match') }
+      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+    end
+
+    it 'fails when a non-Beaker, non-MiniTest assertion is raised' do
+      block = lambda { raise 'not a Beaker or MiniTest error' }
+      expect{ subject.expect_failure 'this has a non-Beaker, non-MiniTest exception', &block }.to raise_error(RuntimeError, /not a Beaker or MiniTest error/)
+    end
+
+    it 'fails when no assertion is raised' do
+      block = lambda { assert_equal('1', '1', '1 should equal 1') }
+      expect{ subject.expect_failure 'this has no failure', &block }.to raise_error(RuntimeError, /An assertion was expected to fail, but passed/)
     end
   end
 end
