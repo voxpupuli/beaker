@@ -805,14 +805,28 @@ module Beaker
         if not link_exists?( link )
           raise "Puppet #{version} at #{link} does not exist!"
         end
-        on host, "curl -O #{link}"
-        on host, "msiexec /qn /i #{host['dist']}.msi"
 
-        #Because the msi installer doesn't add Puppet to the environment path
-        #Add both potential paths for simplicity
-        #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
-        puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
-        on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
+        if host['is_cygwin'].nil? or host['is_cgywin'] == true
+          dest = "/cygdrive/c/Windows/Temp/#{host['dist']}.msi"
+          on host, "curl -O #{dest} #{link}"
+
+          #Because the msi installer doesn't add Puppet to the environment path
+          #Add both potential paths for simplicity
+          #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
+          puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
+          on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
+        else
+          dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
+
+          on host, "set PATH=\"%PATH%;#{host['puppetbindir']}\""
+          on host, "setx PATH \"%PATH%;#{host['puppetbindir']}\""
+
+          on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
+
+          on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
+        end
+
+        on host, "msiexec /qn /i #{dest}"
       end
 
       # Installs Puppet and dependencies from dmg
