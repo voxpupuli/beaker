@@ -452,7 +452,12 @@ module Beaker
     # @api private
     def set_hostnames
       @hosts.each do |host|
-        host.exec(Command.new("hostname #{host.name}"))
+        if host['platform'] =~ /el-7/
+          # on el-7 hosts, the hostname command doesn't "stick" randomly
+          host.exec(Command.new("hostnamectl set-hostname #{host.name}"))
+        else
+          host.exec(Command.new("hostname #{host.name}"))
+        end
       end
     end
 
