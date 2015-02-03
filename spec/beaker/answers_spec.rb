@@ -9,6 +9,16 @@ module Beaker
                           basic_hosts }
     let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
 
+    it 'generates 3.4 answers for 4.0 hosts' do
+      @ver = '4.0'
+      expect( answers ).to be_a_kind_of Version34
+    end
+
+    it 'generates 4.0 answers for 3.99 hosts' do
+      @ver = '3.99'
+      expect( answers ).to be_a_kind_of Version40
+    end
+
     it 'generates 3.4 answers for 3.4 hosts' do
       @ver = '3.4'
       expect( answers ).to be_a_kind_of Version34
@@ -151,6 +161,70 @@ module Beaker
       expect( hosts[0][:answers] ).to include :q_custom
     end
 
+  end
+
+  describe Version40 do
+    let( :options )     { Beaker::Options::Presets.new.presets }
+    let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
+    let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
+                    basic_hosts[1]['roles'] = ['dashboard', 'agent']
+                    basic_hosts[2]['roles'] = ['database', 'agent']
+                    basic_hosts }
+    let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
+    let( :upgrade_answers )     { Beaker::Answers.create(@ver, hosts, options.merge( {:type => :upgrade}) ) }
+
+    before :each do
+      @ver = '3.99'
+      @answers = answers.answers
+    end
+
+    it 'should not have q_puppet_cloud_install key' do
+      hosts.each do |host|
+        expect( host[:answers] ).to_not include :q_puppet_cloud_install
+      end
+    end
+
+# re-enable these tests once these keys are eliminated
+#
+#    it 'should not have q_puppet_enterpriseconsole_database_name key' do
+#      hosts.each do |host|
+#        expect( host[:answers] ).to_not include :q_puppet_enterpriseconsole_database_name
+#      end
+#    end
+#
+#    it 'should not have q_puppet_enterpriseconsole_database_password key' do
+#      hosts.each do |host|
+#        expect( host[:answers] ).to_not include :q_puppet_enterpriseconsole_database_password
+#      end
+#    end
+#
+#    it 'should not have q_puppet_enterpriseconsole_database_user key' do
+#      hosts.each do |host|
+#        expect( host[:answers] ).to_not include :q_puppet_enterpriseconsole_database_user
+#      end
+#    end
+
+    it ':q_update_server_host should default to the master' do
+      hosts.each do |host|
+        expect( host[:answers][:q_update_server_host] ).to be == hosts[0]
+      end
+    end
+
+    it 'only the master should have :q_install_update_server' do
+      hosts.each do |host|
+        if host[:roles].include? 'master'
+          expect( host[:answers][:q_install_update_server] ).to be == 'y'
+        else
+          expect( host[:answers] ).to_not include :q_install_update_server
+        end
+      end
+    end
+
+    it 'should add answers to the host objects' do
+      hosts.each do |host|
+        expect( host[:answers] ).to be === @answers[host.name]
+      end
+    end
   end
 
   describe Version32 do
