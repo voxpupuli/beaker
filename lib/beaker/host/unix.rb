@@ -38,7 +38,7 @@ module Unix
       h = Beaker::Options::OptionsHash.new
       h.merge({
         'user'              => 'root',
-        'group'             => 'puppet',
+        'group'             => 'root',
         'puppetserver-confdir' => '/etc/puppetserver/conf.d',
         'puppetservice'     => 'puppetmaster',
         'puppetpath'        => '/etc/puppet',
