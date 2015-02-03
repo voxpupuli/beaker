@@ -344,7 +344,8 @@ module Beaker
       if self.is_cygwin?
         cmd = "mkdir -p #{dir}"
       else
-        cmd = "if not exist #{dir.gsub!('/','\\')} (md #{dir.gsub!('/','\\')})"
+        windows_dirstring = dir.gsub('/','\\')
+        cmd = "if not exist #{windows_dirstring} (md #{windows_dirstring})"
       end
 
       result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
