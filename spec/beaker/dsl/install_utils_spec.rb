@@ -599,7 +599,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy", "Bypass", "-InputFormat", "None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "\"$text", "=", "\\\"[main]`nserver=testbox.test.local`n`n\\\";", "Set-Content", "-path", "'`cygpath", "-smF", "35`/PuppetLabs/puppet/etc\\puppet.conf'", "-value", "$text\""])
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
         end
         subject.configure_puppet_on(host, config)
       end
@@ -629,7 +629,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy", "Bypass", "-InputFormat", "None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "\"$text", "=", "\\\"[main]`nserver=testbox.test.local`n`n\\\";", "Set-Content", "-path", "'`cygpath", "-smF", "35`/PuppetLabs/puppet/etc\\puppet.conf'", "-value", "$text\""])
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
         end
         subject.configure_puppet(config)
       end
@@ -658,7 +658,7 @@ describe ClassMixedWithDSLInstallUtils do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(['-ExecutionPolicy','Bypass','-InputFormat','None','-NoLogo','-NoProfile','-NonInteractive','-Command', '"$text', '=', '\"23.251.154.122`t`tforge.puppetlabs.com\";', 'Add-Content', '-path', '\'C:\\Windows\\System32\\Drivers\\etc\\hosts\'', '-value', '$text"'])
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text"])
         end
 
 

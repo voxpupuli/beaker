@@ -129,9 +129,17 @@ module Beaker
           'NonInteractive'  => ''
         }
         ps_opts.merge!(args)
+        ps_args = []
+        ps_opts.each do |k, v|
+          if v.eql?('') or v.nil?
+            ps_args << "-#{k}"
+          else
+            ps_args << "-#{k} #{v}"
+          end
+        end
+        ps_args << "-Command #{command}"
 
-        arguments = " #{ps_opts.sort.map{|k,v| v.eql?('') ? "-#{k}" : "-#{k} #{v}" }.join(' ')} -Command \"#{command}\""
-        Command.new('powershell.exe', arguments.split(' '), {})
+        Command.new("powershell.exe", ps_args)
       end
     end
   end

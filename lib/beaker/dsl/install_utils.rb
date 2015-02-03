@@ -168,8 +168,11 @@ module Beaker
         if host['platform'] =~ /windows/
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
-
+          if host.is_cygwin?
+            "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
+          else
+            "cd #{host['working_dir']} &&  msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}#{pe_debug}"
+          end
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
@@ -347,7 +350,11 @@ module Beaker
           if not link_exists?("#{path}/#{filename}#{extension}")
             raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
           end
-          on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+          if host.is_cygwin?
+            on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+          else
+            on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['working_dir']}\\#{filename}#{extension}')")
+          end
         end
       end
 
@@ -509,6 +516,10 @@ module Beaker
         install_hosts.each do |host|
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
+            if not host.is_cygwin?
+              # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
+              host.close
+            end
           else
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
@@ -876,7 +887,7 @@ module Beaker
           raise "Puppet #{version} at #{link} does not exist!"
         end
 
-        if host['is_cygwin'].nil? or host['is_cygwin'] == true
+        if host.is_cygwin?
           dest = "#{host['dist']}.msi"
           on host, "curl -O #{link}"
 

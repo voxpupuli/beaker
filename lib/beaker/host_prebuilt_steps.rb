@@ -14,6 +14,7 @@ module Beaker
     TRIES = 5
     UNIX_PACKAGES = ['curl', 'ntpdate']
     WINDOWS_PACKAGES = ['curl']
+    PSWINDOWS_PACKAGES = []
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['addons', 'ntpdate', 'lsb-release']
@@ -76,7 +77,8 @@ module Beaker
     # {HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts,
     # {HostPrebuiltSteps::DEBIAN_PACKAGES} on debian platform hosts,
     # {HostPrebuiltSteps::CUMULUS_PACKAGES} on cumulus platform hosts,
-    # and {HostPrebuiltSteps::WINDOWS_PACKAGES} on windows platform hosts.
+    # {HostPrebuiltSteps::WINDOWS_PACKAGES} on cygwin-installed windows platform hosts,
+    # and {HostPrebuiltSteps::PSWINDOWS_PACKAGES} on non-cygwin windows platform hosts.
     #
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -91,8 +93,10 @@ module Beaker
           check_and_install_packages_if_needed(host, DEBIAN_PACKAGES)
         when host['platform'] =~ /cumulus/
           check_and_install_packages_if_needed(host, CUMULUS_PACKAGES)
-        when host['platform'] =~ /windows/
+        when (host['platform'] =~ /windows/ and host.is_cygwin?)
           check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
+        when (host['platform'] =~ /windows/ and not host.is_cygwin?)
+          check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
@@ -296,9 +300,11 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         logger.debug "Give root a copy of current user's keys, on #{host.name}"
-        if host['platform'] =~ /windows/
+        if host['platform'] =~ /windows/ and host.is_cygwin?
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
           host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
+        elsif host['platform'] =~ /windows/ and not host.is_cygwin?
+          host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e)"))
         elsif host['platform'] =~ /osx/
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         else
@@ -433,7 +439,11 @@ module Beaker
     # @param [String] val The string to 'echo' on the host
     def echo_on_host host, val
       #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
-      host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
+      if host.is_cygwin?
+        host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
+      else
+        host.exec(Command.new("echo #{val}")).stdout.chomp
+      end
     end
 
     # Create the hash of default environment from host (:host_env), global options hash (:host_env) and default PE/Foss puppet variables
@@ -463,7 +473,7 @@ module Beaker
       env['RUBYLIB'].map! { |val| echo_on_host(host, val) }
 
       env.each_key do |key|
-        env[key] = env[key].join(':')
+        env[key] = env[key].join(host['pathseparator'])
       end
       env
     end
@@ -479,10 +489,14 @@ module Beaker
         logger.debug("setting local environment on #{host.name}")
         case host['platform']
         when /windows/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-          host.exec(Command.new("cygrunsrv -E sshd"))
-          host.exec(Command.new("cygrunsrv -S sshd"))
-          env['CYGWIN'] = 'nodosfilewarning'
+          if host.is_cygwin?
+            host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
+            host.exec(Command.new("cygrunsrv -E sshd"))
+            host.exec(Command.new("cygrunsrv -S sshd"))
+            env['CYGWIN'] = 'nodosfilewarning'
+          else
+            #nothing to do here
+          end
         when /osx/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
           host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
@@ -505,22 +519,30 @@ module Beaker
           host.exec(Command.new("startsrc -g ssh"))
         end
 
-        #ensure that ~/.ssh/environment exists
-        host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
-        host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
-        host.exec(Command.new("touch #{host[:ssh_env_file]}"))
-
-        #add the constructed env vars to this host
-        host.add_env_var('RUBYLIB', '$RUBYLIB')
-        host.add_env_var('PATH', '$PATH')
+        if host['platform'] !~ /windows/ or (host['platform'] =~ /windows/ and host.is_cygwin?)
+          #ensure that ~/.ssh/environment exists
+          host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
+          host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
+          host.exec(Command.new("touch #{host[:ssh_env_file]}"))
+          #add the constructed env vars to this host
+          host.add_env_var('RUBYLIB', '$RUBYLIB')
+          host.add_env_var('PATH', '$PATH')
+        end
+        #add the env var set to this test host
         env.each_pair do |var, value|
           host.add_env_var(var, value)
         end
 
-        host.exec(Command.new("cat #{host[:ssh_env_file]}"))
-
         #close the host to re-establish the connection with the new sshd settings
         host.close
+
+        # print out the working env
+        if host.is_cygwin?
+          host.exec(Command.new("cat #{host[:ssh_env_file]}"))
+        else
+          host.exec(Command.new("SET"))
+        end
+
       end
     end
 

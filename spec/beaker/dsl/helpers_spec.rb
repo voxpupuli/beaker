@@ -815,12 +815,6 @@ describe ClassMixedWithDSLHelpers do
     let( :result_pass ) { Beaker::Result.new( [], "" ) }
     before :each do
       allow( subject ).to receive( :sleep ).and_return( true )
-      result_fail.stdout = 'stdout'
-      result_fail.stderr = 'stderr'
-      result_fail.exit_code = 1
-      result_pass.stdout = 'stdout'
-      result_pass.stderr = 'stderr'
-      result_pass.exit_code = 0
     end
 
     it 'runs the pe-puppet on a system without pe-puppet-agent' do
@@ -828,9 +822,9 @@ describe ClassMixedWithDSLHelpers do
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
       allow( deb_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
-      allow( subject ).to receive( :hosts ).and_return( hosts )
-      expect( subject ).to receive( :on ).with( deb_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      expect( subject ).to receive( :on ).with( deb_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      expect( deb_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+      expect( deb_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(false)
+
       expect( subject ).to receive( :puppet_resource ).with( "service", "pe-puppet", "ensure=stopped").once
       expect( subject ).to receive( :on ).once
 
@@ -843,10 +837,10 @@ describe ClassMixedWithDSLHelpers do
       el_agent = make_host( 'el', :platform => 'el-5-x86_64' )
       allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
-      allow( subject ).to receive( :hosts ).and_return( hosts )
-      expect( subject ).to receive( :on ).with( el_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      expect( subject ).to receive( :on ).with( el_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
-      expect( subject ).to receive( :puppet_resource ).with("service", "pe-puppet-agent", "ensure=stopped").once
+      expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+      expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
+
+      expect( subject ).to receive( :puppet_resource ).with( "service", "pe-puppet-agent", "ensure=stopped").once
       expect( subject ).to receive( :on ).once
 
       subject.stop_agent_on( el_agent )

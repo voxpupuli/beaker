@@ -1272,17 +1272,17 @@ module Beaker
           vardir = agent.puppet['vardir']
           agent_running = true
           while agent_running
-            result = on host, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
-            agent_running = (result.exit_code == 0)
-            sleep 2 unless agent_running
+            agent_running = agent.file_exist?("#{vardir}/state/agent_catalog_run.lock")
+            if agent_running
+              sleep 2
+            end
           end
 
           # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
           # In all the case that it is different, this init script will exist. So we can assume
           # that if the script doesn't exist, we should just use `pe-puppet`
-          result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
           agent_service = 'pe-puppet-agent'
-          if result.exit_code != 0
+          if not agent.file_exist?("/etc/init.d/pe-puppet-agent")
             if agent['pe_ver'] && !version_is_less(agent['pe_ver'], '4.0')
               agent_service = 'puppet'
             else
