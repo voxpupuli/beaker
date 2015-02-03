@@ -22,9 +22,11 @@ module Unix
         'puppetserver-confdir' => '/etc/puppetlabs/puppetserver/conf.d',
         'puppetservice'    => 'pe-httpd',
         'puppetpath'       => '/etc/puppetlabs/puppet',
+        'puppetconfdir'    => '/etc/puppetlabs/puppet',
         'puppetbin'        => '/opt/puppet/bin/puppet',
         'puppetbindir'     => '/opt/puppet/bin',
         'puppetsbindir'    => '/opt/puppet/sbin',
+        'systembindir'     => '/opt/puppet/bin',
         'puppetvardir'     => '/var/opt/lib/pe-puppet',
         'hieradatadir'     => '/var/lib/hiera',
         'hieraconf'        => '/etc/puppetlabs/puppet/hiera.yaml',
@@ -42,9 +44,11 @@ module Unix
         'puppetserver-confdir' => '/etc/puppetserver/conf.d',
         'puppetservice'     => 'puppetmaster',
         'puppetpath'        => '/etc/puppet',
+        'puppetconfdir'     => '/etc/puppet',
         'puppetvardir'      => '/var/lib/puppet',
         'puppetbin'         => '/usr/bin/puppet',
         'puppetbindir'      => '/usr/bin',
+        'systembindir'      => '/usr/bin',
         'hieralibdir'       => '/opt/puppet-git-repos/hiera/lib',
         'hierapuppetlibdir' => '/opt/puppet-git-repos/hiera-puppet/lib',
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
@@ -58,12 +62,16 @@ module Unix
 
     def self.aio_defaults
       h = self.foss_defaults
-      h['puppetbindir'] = '/opt/puppetlabs/agent/bin'
-      h['puppetpath'] = '/etc/puppetlabs/agent'
-      h['puppetvardir'] = '/opt/puppetlabs/agent/cache'
-      h['distmoduledir'] = '/opt/puppetlabs/agent/modules'
-      h['sitemoduledir'] = '/etc/puppetlabs/agent/modules'
-      h['hieraconf'] = ' /etc/puppetlabs/agent/hiera.conf'
+      h['puppetbindir']   = '/opt/puppetlabs/agent/bin'
+      h['puppetbin']      = "#{h['puppetbindir']}/puppet"
+      h['puppetpath']     = '/etc/puppetlabs/agent'
+      h['puppetconfdir']  = "#{h['puppetpath']}/config"
+      h['puppetcodedir']  = "#{h['puppetpath']}/code"
+      h['puppetvardir']   = '/opt/puppetlabs/agent/cache'
+      h['distmoduledir']  = "#{h['puppetcodedir']}/modules"
+      h['sitemoduledir']  = '/opt/puppetlabs/agent/modules'
+      h['hieraconf']      = "#{h['puppetcodedir']}/hiera.yaml"
+      h['hieradatadir']   = "#{h['puppetcodedir']}/hieradata"
       h
     end
   end
