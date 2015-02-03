@@ -1249,7 +1249,14 @@ module Beaker
           # In all the case that it is different, this init script will exist. So we can assume
           # that if the script doesn't exist, we should just use `pe-puppet`
           result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
-          agent_service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
+          agent_service = 'pe-puppet-agent'
+          if result.exit_code != 0
+            if agent['pe_ver'] && !version_is_less(agent['pe_ver'], '4.0')
+              agent_service = 'puppet'
+            else
+              agent_service = 'pe-puppet'
+            end
+          end
 
           # Under a number of stupid circumstances, we can't stop the
           # agent using puppet.  This is usually because of issues with
