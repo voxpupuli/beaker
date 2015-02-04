@@ -25,6 +25,11 @@ module Beaker
       @hosts = []
       @machines = {}
       @hypervisors = nil
+
+      @options[:timestamp]            = Time.now unless @options.has_key?(:timestamp)
+      @options[:xml_dated_dir]        = Beaker::Logger.generate_dated_log_folder(@options[:xml_dir], @options[:timestamp])
+      @options[:log_dated_dir]        = Beaker::Logger.generate_dated_log_folder(@options[:log_dir], @options[:timestamp])
+      @options[:logger_sut]  = Beaker::Logger.new(File.join(@options[:log_dated_dir], @options[:log_sut_event]), { :quiet => true })
     end
 
     #Provision all virtual machines.  Provision machines according to their set hypervisor, if no hypervisor
@@ -47,6 +52,9 @@ module Beaker
       @machines.each_key do |type|
         @hypervisors[type] = Beaker::Hypervisor.create(type, @machines[type], @options)
         @hosts << @machines[type]
+        @machines[type].each do |host|
+          log_sut_event host, true
+        end
       end
       @hosts = @hosts.flatten
       @hosts
@@ -91,9 +99,29 @@ module Beaker
       if @hypervisors
         @hypervisors.each_key do |type|
           @hypervisors[type].cleanup
+          @hypervisors[type].instance_variable_get(:@hosts).each do |host|
+            log_sut_event host, false
+          end
         end
       end
       @hypervisors = nil
+    end
+
+    # logs provisioning events
+    #
+    # @param [Host] host The host that the event is happening to
+    # @param [Boolean] create Whether the event is creation or cleaning up
+    #
+    # @return [String] the log line created for this event
+    def log_sut_event host, create
+      raise ArgumentError.new "log_sut_event called before sut logger created. skipping #{host}, #{create}" unless @options.has_key?(:logger_sut)
+      sut_logger = @options[:logger_sut]
+      time = Time.new
+      stamp = time.strftime('%Y-%m-%d %H:%M:%S')
+      verb = create ? '+' : '-'
+      line = "#{stamp}\t[#{verb}]\t#{host['hypervisor']}\t#{host['platform']}\t#{host}"
+      sut_logger.notify line
+      line
     end
 
   end

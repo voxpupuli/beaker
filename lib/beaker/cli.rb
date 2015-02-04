@@ -44,8 +44,6 @@ module Beaker
         require File.expand_path(helper)
       end
 
-      @options[:log_dated_dir] = Beaker::Logger.generate_dated_log_folder(@options[:log_dir], @timestamp)
-      @options[:xml_dated_dir] = Beaker::Logger.generate_dated_log_folder(@options[:xml_dir], @timestamp)
     end
 
     #Provision, validate and configure all hosts as defined in the hosts file

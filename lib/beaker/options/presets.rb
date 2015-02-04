@@ -135,6 +135,7 @@ module Beaker
           :xml_file               => 'beaker_junit.xml',
           :xml_stylesheet         => 'junit.xsl',
           :log_dir                => 'log',
+          :log_sut_event          => 'sut.log',
           :color                  => true,
           :dry_run                => false,
           :timeout                => 300,
