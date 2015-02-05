@@ -1,80 +1,176 @@
 require 'beaker/dsl/install_utils'
+require 'fileutils'
 
 module Beaker
   module DSL
-    #
     # This module contains methods to assist in installing projects from source
     # that use ezbake for packaging.
     #
     # @api dsl
     module EZBakeUtils
 
-      REMOTE_PACKAGES_REQUIRED = ['make']
+      # @!group Public DSL Methods
+
+      # Installs leiningen project with given name and version on remote host.
+      #
+      # @param [Host] host A single remote host on which to install the
+      #   specified leiningen project.
+      # @api dsl
+      def install_from_ezbake host
+        ezbake_validate_support host
+        ezbake_tools_available?
+        install_ezbake_tarball_on_host host
+        ezbake_installsh host, "service"
+      end
+
+      # Installs termini with given name and version on remote host.
+      #
+      # @param [Host] host A single remote host on which to install the
+      #   specified leiningen project.
+      # @api dsl
+      def install_termini_from_ezbake host
+        ezbake_validate_support host
+        ezbake_tools_available?
+        install_ezbake_tarball_on_host host
+        ezbake_installsh host, "termini"
+      end
+
+      # Install a development version of ezbake into the local m2 repository
+      #
+      # This can be useful if you want to work on a development branch of
+      # ezbake that hasn't been released yet. Ensure your project dependencies
+      # in your development branch include a reference to the -SNAPSHOT
+      # version of the project for it to successfully pickup a pre-shipped
+      # version of ezbake.
+      #
+      # @param url [String] git url
+      # @param branch [String] git branch
+      # @api dsl
+      def ezbake_dev_build url = "git@github.com:puppetlabs/ezbake.git",
+                           branch = "master"
+        ezbake_dir = 'tmp/ezbake'
+        conditionally_clone url, ezbake_dir, branch
+        lp = ezbake_lein_prefix
+
+        Dir.chdir(ezbake_dir) do
+          ezbake_local_cmd "#{lp} install",
+                            :throw_on_failure => true
+        end
+      end
+
+      # @!endgroup
+
+      class << self
+        attr_accessor :config
+      end
+
+      # @!group Private helpers
+
+      # Test for support in one place
+      #
+      # @param [Host] host host to check for support
+      # @raise [RuntimeError] if OS is not supported
+      # @api private
+      def ezbake_validate_support host
+        variant, version, _, _ = host['platform'].to_array
+        unless variant =~ /^(fedora|el|centos|debian|ubuntu)$/
+          raise RuntimeError,
+                "No support for #{variant} within ezbake_utils ..."
+        end
+      end
+
+      # Build, copy & unpack tarball on remote host
+      #
+      # @param [Host] host installation destination
+      # @api private
+      def install_ezbake_tarball_on_host host
+        if not ezbake_config
+          ezbake_stage
+        end
+
+        # Skip installation if the remote directory exists
+        result = on host, "test -d #{ezbake_install_dir}", :acceptable_exit_codes => [0, 1]
+        return if result.exit_code == 0
+
+        ezbake_staging_dir = File.join('target', 'staging')
+        Dir.chdir(ezbake_staging_dir) do
+          ezbake_local_cmd 'rake package:tar'
+        end
+
+        local_tarball = ezbake_staging_dir + "/pkg/" + ezbake_install_name + ".tar.gz"
+        remote_tarball = ezbake_install_dir + ".tar.gz"
+        scp_to host, local_tarball, remote_tarball
+
+        # untar tarball on host
+        on host, "tar -xzf " + remote_tarball
+
+        # Check to ensure directory exists
+        on host, "test -d #{ezbake_install_dir}"
+      end
+
       LOCAL_COMMANDS_REQUIRED = [
         ['leiningen', 'lein --version', nil],
-        ['lein-pprint', 'lein with-profile ci pprint :version', 
+        ['lein-pprint', 'lein with-profile ci pprint :version',
           'Must have lein-pprint installed under the :ci profile.'],
         ['java', 'java -version', nil],
         ['git', 'git --version', nil],
         ['rake', 'rake --version', nil],
       ]
-      class << self
-        attr_accessor :config
+
+      # Checks given host for the tools necessary to perform
+      # install_from_ezbake.
+      #
+      # @raise [RuntimeError] if tool is not found
+      # @api private
+      def ezbake_tools_available?
+        LOCAL_COMMANDS_REQUIRED.each do |software_name, command, additional_error_message|
+          if not system command
+            error_message = "Must have #{software_name} installed on development system.\n"
+            if additional_error_message
+              error_message += additional_error_message
+            end
+            raise RuntimeError, error_message
+          end
+        end
       end
 
       # Return the ezbake config.
       #
+      # @return [Hash] configuration for ezbake, usually from ezbake.rb
+      # @api private
       def ezbake_config
         EZBakeUtils.config
       end
 
-      # Checks given host for the tools necessary to perform
-      # install_from_ezbake. If no host is given then check the local machine
-      # for necessary available tools. If a tool is not found, then raise
-      # RuntimeError.
+      # Returns a leiningen prefix with local m2 repo capability
       #
-      def ezbake_tools_available? host = nil
-        if host
-          REMOTE_PACKAGES_REQUIRED.each do |package_name|
-            if not check_for_package host, package_name
-              raise "Required package, #{package_name}, not installed on #{host}" 
-            end
-          end
-        else
-          LOCAL_COMMANDS_REQUIRED.each do |software_name, command, additional_error_message|
-            if not system command
-              error_message = "Must have #{software_name} installed on development system.\n"
-              if additional_error_message
-                error_message += additional_error_message
-              end
-              raise error_message
-            end
-          end
-        end
+      # @return [String] lein prefix command that uses a local build
+      #   m2 repository.
+      # @api private
+      def ezbake_lein_prefix
+        # Get the absolute path to the local repo
+        m2_repo = File.join(Dir.pwd, 'tmp', 'm2-local')
+
+        'lein update-in : assoc :local-repo "\"' + m2_repo + '\"" --'
       end
 
       # Prepares a staging directory for the specified project.
       #
-      # @param [String] project_name The name of the ezbake project being worked
-      #                              on.
-      # @param [String] project_param_string Parameters to be passed to ezbake
-      #                                      on the command line.
-      # @param [String] ezbake_dir The local directory where the ezbake project
-      #                            resides or should reside if it doesn't exist
-      #                            already.
-      #
-      def ezbake_stage project_name, project_param_string, ezbake_dir="tmp/ezbake"
-        ezbake_tools_available?
-        conditionally_clone "gitmirror@github.delivery.puppetlabs.net:puppetlabs-ezbake.git", ezbake_dir
+      # @api private
+      def ezbake_stage
+        # Install the PuppetDB jar into the local repository
+        ezbake_local_cmd "#{ezbake_lein_prefix} install",
+                         :throw_on_failure => true
 
-        package_version = ''
-        Dir.chdir(ezbake_dir) do
-          `lein run -- stage #{project_name} #{project_param_string}`
-        end
+        # Run ezbake stage
+        ezbake_local_cmd "#{ezbake_lein_prefix} with-profile ezbake ezbake stage",
+                         :throw_on_failure => true
 
-        staging_dir = File.join(ezbake_dir, 'target/staging')
+        # Boostrap packaging, and grab configuration info from project
+        staging_dir = File.join('target','staging')
         Dir.chdir(staging_dir) do
-          output = `rake package:bootstrap`
+          ezbake_local_cmd 'rake package:bootstrap'
+
           load 'ezbake.rb'
           ezbake = EZBake::Config
           ezbake[:package_version] = `echo -n $(rake pl:print_build_param[ref] | tail -n 1)`
@@ -82,137 +178,79 @@ module Beaker
         end
       end
 
-      # Installs ezbake dependencies on given host.
+      # Executes a local command using system, logging the prepared command
       #
-      # @param [Host] host A single remote host on which to install the
-      # packaging dependencies of the ezbake project configuration currently in
-      # Beaker::DSL::EZBakeUtils.config
-      #
-      def install_ezbake_deps host
-        ezbake_tools_available? host
+      # @param [String] cmd command to execute
+      # @param [Hash] opts options
+      # @option opts [bool] :throw_on_failure If true, throws an
+      #   exception if the exit code is non-zero. Defaults to false.
+      # @return [bool] true if exit == 0 false if otherwise
+      # @raise [RuntimeError] if :throw_on_failure is true and
+      #   command fails
+      # @api private
+      def ezbake_local_cmd cmd, opts={}
+        opts = {
+          :throw_on_failure => false,
+        }.merge(opts)
 
-        if not ezbake_config
-          ezbake_stage project_name, project_param_string
+        logger.notify "localhost $ #{cmd}"
+        result = system cmd
+        if opts[:throw_on_failure] && result == false
+          raise RuntimeError, "Command failure #{cmd}"
         end
-
-        variant, version, arch, codename = host['platform'].to_array
-        ezbake = ezbake_config
-
-        case variant
-        when /^(fedora|el|centos)$/
-          dependency_list = ezbake[:redhat][:additional_dependencies]
-          dependency_list.each do |dependency|
-            package_name, _, package_version = dependency.split
-            install_package host, package_name, package_version
-          end
-
-        when /^(debian|ubuntu|cumulus)$/
-          dependency_list = ezbake[:debian][:additional_dependencies]
-          dependency_list.each do |dependency|
-            package_name, _, package_version = dependency.split
-            if package_version
-              package_version = package_version.chop
-            end
-            install_package host, package_name, package_version
-          end
-
-        else
-          raise "No repository installation step for #{variant} yet..."
-        end
-
+        result
       end
 
-      # Installs leiningen project with given name and version on remote host.
+      # Retrieve the tarball installation name. This is the name of
+      # the tarball without the .tar.gz extension, and the name of the
+      # path where it will unpack to.
       #
-      # @param [Host] host A single remote host on which to install the
-      # specified leiningen project.
-      # @param [String] project_name The name of the project. In ezbake context
-      # this is the name of both a subdirectory of the ezbake_dir/configs dir
-      # and the name of the .clj file in that directory which contains the
-      # project map used by ezbake to create the staging directory.
-      # @param [String] project_param_string The version of the project specified by
-      # project_name which is to be built and installed on the remote host.
-      # @param [String] ezbake_dir The directory to which ezbake should be
-      # cloned; alternatively, if ezbake is already at that directory, it will
-      # be updated from its github master before any ezbake operations are
-      # performed.
-      #
-      def install_from_ezbake host, project_name, project_param_string, env_args={}, ezbake_dir='tmp/ezbake'
-        ezbake_tools_available? host
-
-        if not ezbake_config
-          ezbake_stage project_name, project_param_string
-        end
-
-        variant, _, _, _ = host['platform'].to_array
-
-        case variant
-        when /^(osx|windows|solaris|aix)$/
-          raise "Beaker::DSL::EZBakeUtils unsupported platform: #{variant}"
-        end
-
+      # @return [String] name of the tarball and directory
+      # @api private
+      def ezbake_install_name
         ezbake = ezbake_config
         project_package_version = ezbake[:package_version]
         project_name = ezbake[:project]
+        "%s-%s" % [ project_name, project_package_version ]
+      end
 
-        ezbake_staging_dir = File.join(ezbake_dir, "target/staging")
+      # Returns the full path to the installed software on the remote host.
+      #
+      # This only returns the path, it doesn't work out if its installed or
+      # not.
+      #
+      # @return [String] path to the installation dir
+      # @api private
+      def ezbake_install_dir
+        "/root/#{ezbake_install_name}"
+      end
 
-        remote_tarball = ""
-        local_tarball = ""
-        dir_name = ""
-
-        Dir.chdir(ezbake_staging_dir) do
-          output = `rake package:tar`
-
-          pattern = "%s-%s"
-          dir_name = pattern % [
-            project_name,
-            project_package_version
-          ]
-          local_tarball = "./pkg/" + dir_name + ".tar.gz"
-          remote_tarball = "/root/" +  dir_name + ".tar.gz"
-
-          scp_to host, local_tarball, remote_tarball
-        end
-
-        # untar tarball on host
-        on host, "tar -xzf " + remote_tarball
-
-        # "make" on target
-        cd_to_package_dir = "cd /root/" + dir_name + "; "
-        env = ""
-        if not env_args.empty?
-          env = "env " + env_args.map {|k, v| "#{k}=#{v} "}.join(' ')
-        end
-        on host, cd_to_package_dir + env + "make -e install-" + project_name
-
-        # install init scripts and default settings, perform additional preinst
-        # TODO: figure out a better way to install init scripts and defaults
-        case variant
-          when /^(fedora|el|centos)$/
-            env += "defaultsdir=/etc/sysconfig "
-            on host, cd_to_package_dir + env + "make -e install-rpm-sysv-init"
-          when /^(debian|ubuntu|cumulus)$/
-            env += "defaultsdir=/etc/default "
-            on host, cd_to_package_dir + env + "make -e install-deb-sysv-init"
-          else
-            raise "No ezbake installation step for #{variant} yet..."
-        end
+      # A helper that wraps the execution of install.sh in the proper
+      # ezbake installation directory.
+      #
+      # @param [Host] host Host to run install.sh on
+      # @param [String] task Task to execute with install.sh
+      # @api private
+      def ezbake_installsh host, task=""
+        on host, "cd #{ezbake_install_dir}; bash install.sh #{task}"
       end
 
       # Only clone from given git URI if there is no existing git clone at the
       # given local_path location.
       #
-      # @!visibility private
-      def conditionally_clone(upstream_uri, local_path)
-        ezbake_tools_available?
-        if system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git status"
-          system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git fetch origin"
-          system "git --work-tree=#{local_path} --git-dir=#{local_path}/.git checkout origin/HEAD"
+      # @param [String] upstream_uri git URI
+      # @param [String] local_path path to conditionally install to
+      # @param [String] branch to checkout
+      # @api private
+      def conditionally_clone upstream_uri, local_path, branch="origin/HEAD"
+        if ezbake_local_cmd "git --work-tree=#{local_path} --git-dir=#{local_path}/.git status"
+          ezbake_local_cmd "git --work-tree=#{local_path} --git-dir=#{local_path}/.git fetch origin"
+          ezbake_local_cmd "git --work-tree=#{local_path} --git-dir=#{local_path}/.git checkout #{branch}"
         else
           parent_dir = File.dirname(local_path)
           FileUtils.mkdir_p(parent_dir)
-          system "git clone #{upstream_uri} #{local_path}"
+          ezbake_local_cmd "git clone #{upstream_uri} #{local_path}"
+          ezbake_local_cmd "git --work-tree=#{local_path} --git-dir=#{local_path}/.git checkout #{branch}"
         end
       end
 

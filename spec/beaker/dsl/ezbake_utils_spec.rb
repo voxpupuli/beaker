@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-EZBAKE_CONFIG_EXAMPLE= { 
+EZBAKE_CONFIG_EXAMPLE= {
   :project => 'puppetserver',
   :real_name => 'puppetserver',
   :user => 'puppet',
@@ -10,7 +10,7 @@ EZBAKE_CONFIG_EXAMPLE= {
   :terminus_info => {},
   :debian => { :additional_dependencies => ["puppet (= 3.6.1-puppetlabs1)"], },
   :redhat => { :additional_dependencies => ["puppet = 3.6.1"], },
-  :java_args => '-Xmx192m', 
+  :java_args => '-Xmx192m',
 }
 
 class ClassMixedWithEZBakeUtils
@@ -37,46 +37,117 @@ describe ClassMixedWithEZBakeUtils do
   let( :opts ) { Beaker::Options::Presets.env_vars }
   let( :host ) { double.as_null_object }
   let( :local_commands ) { Beaker::DSL::EZBakeUtils::LOCAL_COMMANDS_REQUIRED }
-  let( :remote_packages ) { Beaker::DSL::EZBakeUtils::REMOTE_PACKAGES_REQUIRED }
 
-  describe '#ezbake_config' do
-    it "returns a map with ezbake configuration parameters" do
+  describe '#install_from_ezbake' do
+    let(:platform) { Beaker::Platform.new('el-7-i386') }
+    let(:host) do
+      FakeHost.create('fakevm', platform.to_s)
+    end
+
+    before do
+      allow(subject).to receive(:ezbake_tools_available?) { true }
+    end
+
+    it "when ran with an el-7 machine runs correct installsh command" do
+      expect(subject).to receive(:install_ezbake_tarball_on_host).
+                          ordered
+      expect(subject).
+        to receive(:ezbake_installsh).with(host, "service")
+      subject.install_from_ezbake host
+    end
+  end
+
+  describe '#install_termini_from_ezbake' do
+    let(:platform) { Beaker::Platform.new('el-7-i386') }
+    let(:host) do
+      FakeHost.create('fakevm', platform.to_s)
+    end
+
+    before do
+      allow(subject).to receive(:ezbake_tools_available?) { true }
+    end
+
+    it "when ran with an el-7 machine runs correct installsh command" do
+      expect(subject).to receive(:ezbake_validate_support).with(host).ordered
+      expect(subject).to receive(:install_ezbake_tarball_on_host).
+                          with(host).ordered
+      expect(subject).
+        to receive(:ezbake_installsh).with(host, "termini")
+      subject.install_termini_from_ezbake host
+    end
+  end
+
+  describe '#ezbake_validate_support' do
+    context 'when OS supported' do
+      let(:platform) { Beaker::Platform.new('el-7-i386') }
+      let(:host) do
+        FakeHost.create('fakevm', platform.to_s)
+      end
+
+      it 'should do nothing' do
+        subject.ezbake_validate_support host
+      end
+    end
+
+    context 'when OS not supported' do
+      let(:platform) { Beaker::Platform.new('aix-12-ppc') }
+      let(:host) do
+        FakeHost.create('fakevm', platform.to_s)
+      end
+
+      it 'should throw exception' do
+        expect {
+          subject.ezbake_validate_support host
+        }.to raise_error(RuntimeError,
+                         "No support for aix within ezbake_utils ...")
+      end
+    end
+  end
+
+  def install_ezbake_tarball_on_host_common_expects
+    result = object_double(Beaker::Result.new(host, "foo"), :exit_code => 1)
+    expect(subject).to receive(:on).
+                        with(kind_of(Beaker::Host), /test -d/,
+                             anything()).ordered { result }
+    expect(Dir).to receive(:chdir).and_yield()
+    expect(subject).to receive(:ezbake_local_cmd).with(/rake package:tar/).ordered
+    expect(subject).to receive(:scp_to).
+                        with(kind_of(Beaker::Host), anything(), anything()).ordered
+    expect(subject).to receive(:on).
+                        with(kind_of(Beaker::Host), /tar -xzf/).ordered
+    expect(subject).to receive(:on).
+                        with(kind_of(Beaker::Host), /test -d/).ordered
+  end
+
+  describe '#install_ezbake_tarball_on_host' do
+    let(:platform) { Beaker::Platform.new('el-7-i386') }
+    let(:host) do
+      FakeHost.create('fakevm', platform.to_s)
+    end
+
+    it 'when invoked with configuration should run expected tasks' do
       subject.initialize_ezbake_config
-      config = subject.ezbake_config
-      expect(config).to include(EZBAKE_CONFIG_EXAMPLE)
+      install_ezbake_tarball_on_host_common_expects
+      subject.install_ezbake_tarball_on_host host
+    end
+
+    it 'when invoked with nil configuration runs ezbake_stage' do
+      subject.wipe_out_ezbake_config
+      expect(subject).to receive(:ezbake_stage) {
+        Beaker::DSL::EZBakeUtils.config = EZBAKE_CONFIG_EXAMPLE
+      }.ordered
+      install_ezbake_tarball_on_host_common_expects
+      subject.install_ezbake_tarball_on_host host
     end
   end
 
   describe '#ezbake_tools_available?' do
-
     before do
       allow(subject).to receive(:check_for_package) { true }
       allow(subject).to receive(:system) { true }
     end
 
-    describe "checks for remote packages when given a host" do
-
-      it "and succeeds if all packages are found" do
-        remote_packages.each do |package|
-          expect(subject).to receive(:check_for_package).with(host, package)
-        end
-        subject.ezbake_tools_available? host
-      end
-
-      it "and raises an exception if a package is missing" do
-        allow(subject).to receive(:check_for_package) { false }
-        remote_packages.each do |package|
-          expect(subject).to receive(:check_for_package).with(host, package)
-          break # just need first element
-        end
-      expect{
-        subject.ezbake_tools_available? host
-      }.to raise_error(RuntimeError, /Required package, .*, not installed on/)
-      end
-
-    end
-
-    describe "checks for local successful local commands when no host given" do
+    describe "checks for local successful commands" do
 
       it "and succeeds if all commands return successfully" do
         local_commands.each do |software_name, command, additional_error_messages|
@@ -100,6 +171,14 @@ describe ClassMixedWithEZBakeUtils do
 
   end
 
+  describe '#ezbake_config' do
+    it "returns a map with ezbake configuration parameters" do
+      subject.initialize_ezbake_config
+      config = subject.ezbake_config
+      expect(config).to include(EZBAKE_CONFIG_EXAMPLE)
+    end
+  end
+
   describe '#ezbake_stage' do
     before do
       allow(subject).to receive(:ezbake_tools_available?) { true }
@@ -107,132 +186,94 @@ describe ClassMixedWithEZBakeUtils do
     end
 
     it "initializes EZBakeUtils.config" do
-      allow( Dir ).to receive( :chdir ).and_yield()
-      allow(subject).to receive(:conditionally_clone) { true }
+      allow(Dir).to receive(:chdir).and_yield()
 
-      expect(subject).to receive(:`).with(/^lein.*/).ordered
-      expect(subject).to receive(:`).with("rake package:bootstrap").ordered
+      expect(subject).to receive(:ezbake_local_cmd).
+                          with(/^lein.*install/, :throw_on_failure =>
+                                                 true).ordered
+      expect(subject).to receive(:ezbake_local_cmd).
+                          with(/^lein.*with-profile ezbake ezbake stage/, :throw_on_failure =>
+                                                 true).ordered
+      expect(subject).to receive(:ezbake_local_cmd).with("rake package:bootstrap").ordered
       expect(subject).to receive(:load) { }.ordered
-      expect(subject).to receive(:`).with(anything()).ordered
+      expect(subject).to receive(:`).ordered
 
       config = subject.ezbake_config
       expect(config).to eq(nil)
 
-      subject.ezbake_stage "ruby", "is", "junky"
+      subject.ezbake_stage
 
       config = subject.ezbake_config
       expect(config).to include(EZBAKE_CONFIG_EXAMPLE)
     end
   end
 
-  RSpec.shared_examples "installs-ezbake-dependencies" do
-    it "installs ezbake dependencies" do
-      expect(subject).to receive(:install_package).
-        with( kind_of(Beaker::Host), anything(), anything())
-      subject.install_ezbake_deps host
+  describe '#ezbake_local_cmd' do
+    it 'should execute system on the command specified' do
+      expect(subject).to receive(:system).with("my command") { true }
+      subject.ezbake_local_cmd("my command")
+    end
+
+    it 'with :throw_on_failure should throw exeception when failed' do
+      expect(subject).to receive(:system).with("my failure") { false }
+      expect {
+        subject.ezbake_local_cmd("my failure", :throw_on_failure => true)
+      }.to raise_error(RuntimeError, "Command failure my failure")
+    end
+
+    it 'without :throw_on_failure should just fail and return false' do
+      expect(subject).to receive(:system).with("my failure") { false }
+      expect(subject.ezbake_local_cmd("my failure")).to eq(false)
     end
   end
 
-  describe '#install_ezbake_deps' do
-    let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
-    let(:host) do
-      FakeHost.create('fakevm', platform.to_s)
-    end
-
-    before do
-      allow(subject).to receive(:ezbake_tools_available?) { true }
-      subject.initialize_ezbake_config
-    end
-
-    it "Raises an exception for unsupported platforms." do
-      expect{ 
-        subject.install_ezbake_deps host
-      }.to raise_error(RuntimeError, /No repository installation step for/)
-    end
-
-    context "When host is a debian-like platform" do
-      let( :platform ) { Beaker::Platform.new('debian-7-i386') }
-      include_examples "installs-ezbake-dependencies"
-    end
-
-    context "When host is a redhat-like platform" do
-      let( :platform ) { Beaker::Platform.new('centos-7-i386') }
-      include_examples "installs-ezbake-dependencies"
+  describe '#ezbake_install_name' do
+    it 'should return the installation name from example configuration' do
+      expect(subject).to receive(:ezbake_config) {{
+        :package_version => '1.1.1',
+        :project => 'myproject',
+      }}
+      expect(subject.ezbake_install_name).to eq "myproject-1.1.1"
     end
   end
 
-  def install_from_ezbake_common_expects
-    expect(subject).to receive(:`).with(/rake package:tar/).ordered
-    expect(subject).to receive(:scp_to).
-      with( kind_of(Beaker::Host), anything(), anything()).ordered
-    expect(subject).to receive(:on).
-      with( kind_of(Beaker::Host), /tar -xzf/).ordered
-    expect(subject).to receive(:on).
-      with( kind_of(Beaker::Host), /make -e install-#{EZBAKE_CONFIG_EXAMPLE[:real_name]}/).ordered
+  describe '#ezbake_install_dir' do
+    it 'should return the full path from ezbake_install_name' do
+      expect(subject).to receive(:ezbake_install_name) {
+        "mynewproject-2.3.4"
+      }
+      expect(subject.ezbake_install_dir).to eq "/root/mynewproject-2.3.4"
+    end
   end
 
-  describe '#install_from_ezbake' do
-    let( :platform ) { Beaker::Platform.new('redhat-7-i386') }
-    let(:host) do
-      FakeHost.create('fakevm', platform.to_s)
+  describe '#ezbake_installsh' do
+    it 'run on command correctly when invoked' do
+      expect(subject).to receive(:on).with(host,
+                                           /install.sh my_task/)
+      subject.ezbake_installsh host, "my_task"
+    end
+  end
+
+  describe '#conditionally_clone' do
+    it 'when repo exists, just do fetch and checkout' do
+      expect(subject).to receive(:ezbake_local_cmd).
+        with(/git status/) { true }
+      expect(subject).to receive(:ezbake_local_cmd).
+        with(/git fetch origin/)
+      expect(subject).to receive(:ezbake_local_cmd).
+        with(/git checkout/)
+      subject.conditionally_clone("my_url", "my_local_path")
     end
 
-    before do
-      allow(subject).to receive(:ezbake_tools_available?) { true }
+    it 'when repo does not exist, do clone and checkout' do
+      expect(subject).to receive(:ezbake_local_cmd).
+                          with(/git status/) { false }
+      expect(subject).to receive(:ezbake_local_cmd).
+                          with(/git clone/)
+      expect(subject).to receive(:ezbake_local_cmd).
+                          with(/git checkout/)
+      subject.conditionally_clone("my_url", "my_local_path")
     end
-
-    context "for non *nix-like platforms" do
-      let( :platform ) { Beaker::Platform.new('windows-7-i386') }
-      it "raises an exception" do
-        expect{ 
-          subject.install_from_ezbake host, "blah", "blah"
-        }.to raise_error(RuntimeError, /Beaker::DSL::EZBakeUtils unsupported platform:/)
-      end
-    end
-
-    it "raises an exception for unsupported *nix-like platforms" do
-      allow( Dir ).to receive( :chdir ).and_yield()
-      install_from_ezbake_common_expects
-      expect{ 
-        subject.install_from_ezbake host, "blah", "blah"
-      }.to raise_error(RuntimeError, /No ezbake installation step for/)
-    end
-
-    context "When Beaker::DSL::EZBakeUtils.config is nil" do
-      let( :platform ) { Beaker::Platform.new('el-7-i386') }
-      before do
-        allow( Dir ).to receive( :chdir ).and_yield()
-        subject.wipe_out_ezbake_config
-      end
-
-      it "runs ezbake_stage" do
-        expect(subject).to receive(:ezbake_stage) {
-          Beaker::DSL::EZBakeUtils.config = EZBAKE_CONFIG_EXAMPLE
-        }.ordered
-        install_from_ezbake_common_expects
-        expect(subject).to receive(:on).
-          with( kind_of(Beaker::Host), /install-rpm-sysv-init/).ordered
-        subject.install_from_ezbake host, "blah", "blah"
-      end
-
-    end
-
-    context "When Beaker::DSL::EZBakeUtils.config is a hash" do
-      let( :platform ) { Beaker::Platform.new('el-7-i386') }
-      before do
-        allow( Dir ).to receive( :chdir ).and_yield()
-        subject.initialize_ezbake_config
-      end
-
-      it "skips ezbake_stage" do
-        install_from_ezbake_common_expects
-        expect(subject).to receive(:on).
-          with( kind_of(Beaker::Host), /install-rpm-sysv-init/).ordered
-        subject.install_from_ezbake host, "blah", "blah"
-      end
-
-    end
-
   end
 
 end
