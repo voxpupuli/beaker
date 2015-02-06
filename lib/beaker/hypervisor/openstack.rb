@@ -20,6 +20,7 @@ module Beaker
     #@option options [String] :department Added as metadata to each OpenStack instance
     #@option options [String] :project Added as metadata to each OpenStack instance
     #@option options [Integer] :timeout The amount of time to attempt execution before quiting and exiting with failure
+    #@option options [String] :pool The ip pool to allocate floating ips from
     def initialize(openstack_hosts, options)
       require 'fog'
       @options = options
@@ -120,7 +121,7 @@ module Beaker
         ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
         if ip.nil?
           @logger.debug "Creating IP for #{host.name} (#{host[:vmhostname]})"
-          ip = @compute_client.addresses.create
+          ip = @compute_client.addresses.create({:pool => @options[:pool]})
         end
         ip.server = vm
         host[:ip] = ip.ip
