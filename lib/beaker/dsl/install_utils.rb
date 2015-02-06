@@ -806,7 +806,7 @@ module Beaker
           raise "Puppet #{version} at #{link} does not exist!"
         end
 
-        if host['is_cygwin'].nil? or host['is_cgywin'] == true
+        if host['is_cygwin'].nil? or host['is_cygwin'] == true
           dest = "/cygdrive/c/Windows/Temp/#{host['dist']}.msi"
           on host, "curl -O #{dest} #{link}"
 
