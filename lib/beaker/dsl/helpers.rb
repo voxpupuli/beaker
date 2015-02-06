@@ -553,7 +553,7 @@ module Beaker
         end
 
         begin
-          backup_file = backup_the_file(host, host['puppetpath'], testdir, 'puppet.conf')
+          backup_file = backup_the_file(host, host['puppetconfdir'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
           if host.use_service_scripts? && !service_args[:bypass_service_script]
@@ -612,7 +612,7 @@ module Beaker
 
       # @!visibility private
       def restore_puppet_conf_from_backup( host, backup_file )
-        puppetpath = host['puppetpath']
+        puppetpath = host['puppetconfdir']
         puppet_conf = File.join(puppetpath, "puppet.conf")
 
         if backup_file
@@ -693,19 +693,22 @@ module Beaker
 
       # @!visibility private
       def lay_down_new_puppet_conf( host, configuration_options, testdir )
+        puppetconf_test = "#{testdir}/puppet.conf"
+        puppetconf_main = "#{host['puppetconfdir']}/puppet.conf"
+
         new_conf = puppet_conf_for( host, configuration_options )
-        create_remote_file host, "#{testdir}/puppet.conf", new_conf.to_s
+        create_remote_file host, puppetconf_test, new_conf.to_s
 
         host.exec(
-          Command.new( "cat #{testdir}/puppet.conf > #{host['puppetpath']}/puppet.conf" ),
+          Command.new( "cat #{puppetconf_test} > #{puppetconf_main}" ),
           :silent => true
         )
-        host.exec( Command.new( "cat #{host['puppetpath']}/puppet.conf" ) )
+        host.exec( Command.new( "cat #{puppetconf_main}" ) )
       end
 
       # @!visibility private
       def puppet_conf_for host, conf_opts
-        puppetconf = host.exec( Command.new( "cat #{host['puppetpath']}/puppet.conf" ) ).stdout
+        puppetconf = host.exec( Command.new( "cat #{host['puppetconfdir']}/puppet.conf" ) ).stdout
         new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
 
         new_conf
