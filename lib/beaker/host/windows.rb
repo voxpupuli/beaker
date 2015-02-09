@@ -43,8 +43,8 @@ module Windows
         'sitemoduledir'     => 'C:/usr/share/puppet/modules',
         'hieralibdir'       => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
         'hierapuppetlibdir' => '`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`',
-        #let's just add both potential bin dirs to the path
-        'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin',
+        #let's just add both potential bin dirs to the path, include ruby too for `gem`, `ruby`, etc
+        'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/sys/ruby/bin',
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
         'pathseparator'     => ';',
       })
