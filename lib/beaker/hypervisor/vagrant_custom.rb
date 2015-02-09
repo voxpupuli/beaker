@@ -1,7 +1,7 @@
 require 'beaker/hypervisor/vagrant'
 
 class Beaker::VagrantCustom < Beaker::Vagrant
-  def provision(provider = 'vagrant_custom')
+  def provision(provider = nil)
     super
   end
 
