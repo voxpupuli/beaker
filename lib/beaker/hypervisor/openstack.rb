@@ -44,7 +44,8 @@ module Beaker
         :provider => :openstack,
         :openstack_api_key => @options[:openstack_api_key],
         :openstack_username => @options[:openstack_username],
-        :openstack_auth_url => @options[:openstack_auth_url])
+        :openstack_auth_url => @options[:openstack_auth_url],
+        :openstack_tenant => @options[:openstack_tenant])
       if not @network_client
 
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
