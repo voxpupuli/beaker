@@ -17,6 +17,8 @@ module Beaker
       case version
       when /\A4\.0/
         return Version34.new(version, hosts, options)
+      when /\A3\.99/
+        return Version40.new(version, hosts, options)
       when /\A3\.7/
         return Version34.new(version, hosts, options)
       when /\A3\.4/
@@ -90,7 +92,7 @@ module Beaker
 
   end
 
-  [ 'version34', 'version32', 'version30', 'version28', 'version20' ].each do |lib|
+  [ 'version40', 'version34', 'version32', 'version30', 'version28', 'version20' ].each do |lib|
     require "beaker/answers/#{lib}"
   end
 end
