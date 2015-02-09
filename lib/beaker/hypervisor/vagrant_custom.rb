@@ -1,6 +1,6 @@
 require 'beaker/hypervisor/vagrant'
 
-class Beaker::VagrantVirtualbox < Beaker::Vagrant
+class Beaker::VagrantCustom < Beaker::Vagrant
   def provision(provider = 'vagrant_custom')
     super
   end

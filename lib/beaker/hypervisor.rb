@@ -38,6 +38,8 @@ module Beaker
           end
         when /^vagrant$/
           Beaker::Vagrant
+        when /^vagrant_custom$/
+          Beaker::VagrantCustom
         when /^vagrant_libvirt$/
           Beaker::VagrantLibvirt
         when /^vagrant_virtualbox$/
