@@ -54,7 +54,6 @@ module Beaker
       # related through 'type' and the differences between the assumption of our two
       # configurations we have for many of our products
       type = @options.get_type
-      type = :foss if type == :aio && !@options['HOSTS'][@name]['roles'].include?('agent')
       @defaults = merge_defaults_for_type @options, type
       pkg_initialize
     end

@@ -64,15 +64,9 @@ module Beaker
         expect(host.is_using_passenger?).to be_falsy
       end
 
-      it 'sets the paths correctly for an AIO agent host' do
+      it 'sets the paths correctly for an AIO host' do
         options['type'] = 'aio'
         expect(host['puppetvardir']).to be === Unix::Host::aio_defaults[:puppetvardir]
-      end
-
-      it 'sets the paths correctly for an AIO non-agent host' do
-        options['type'] = 'aio'
-        options['roles'] = ['master']
-        expect(host['puppetvardir']).to be === Unix::Host::foss_defaults[:puppetvardir]
       end
     end
 
