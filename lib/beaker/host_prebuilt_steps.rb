@@ -517,6 +517,8 @@ module Beaker
           host.add_env_var(var, value)
         end
 
+        host.exec(Command.new("cat #{host[:ssh_env_file]}"))
+
         #close the host to re-establish the connection with the new sshd settings
         host.close
       end
