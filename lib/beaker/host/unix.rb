@@ -62,6 +62,8 @@ module Unix
 
     def self.aio_defaults
       h = self.foss_defaults
+      h['puppetserver-confdir'] = '/etc/puppetlabs/puppetserver/conf.d'
+      h['puppetservice']  = 'puppetserver'
       h['puppetbindir']   = '/opt/puppetlabs/agent/bin'
       h['puppetbin']      = "#{h['puppetbindir']}/puppet"
       h['puppetpath']     = '/etc/puppetlabs/agent'
