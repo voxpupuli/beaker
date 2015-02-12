@@ -513,13 +513,14 @@ describe Beaker do
       expect( Beaker::Command ).to receive( :new ).with( "mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
       expect( Beaker::Command ).to receive( :new ).with( "chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
       expect( Beaker::Command ).to receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "cat #{host[:ssh_env_file]}" ).once
       expect( host ).to receive( :add_env_var ).with( 'RUBYLIB', '$RUBYLIB' ).once
       expect( host ).to receive( :add_env_var ).with( 'PATH', '$PATH' ).once
       opts.each_pair do |key, value|
         expect( host ).to receive( :add_env_var ).with( key, value ).once
       end
       expect( host ).to receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
-      expect( host ).to receive( :exec ).exactly( host_specific_commands_array.length + 3 ).times
+      expect( host ).to receive( :exec ).exactly( host_specific_commands_array.length + 4 ).times
 
       subject.set_env(host, options.merge( opts ))
     end
