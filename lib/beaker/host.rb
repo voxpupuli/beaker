@@ -299,7 +299,7 @@ module Beaker
     # @param [String] dir The directory structure to create on the host
     # @return [Boolean] True, if directory construction succeeded, otherwise False
     def mkdir_p dir
-      if host['is_cygwin'].nil? or host['is_cygwin'] == true
+      if self['is_cygwin'].nil? or self['is_cygwin'] == true
         cmd = "mkdir -p #{dir}"
       else
         cmd = "if not exist #{dir.gsub!('/','\\')} (md #{dir.gsub!('/','\\')})"
