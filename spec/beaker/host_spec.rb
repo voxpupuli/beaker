@@ -325,6 +325,44 @@ module Beaker
       end
     end
 
+    describe "#mkdir_p" do
+
+      it "does the right thing on a bash host, identified as is_cygwin=true" do
+        @options = {:is_cygwin => true}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("mkdir -p test/test/test")
+        expect( host.mkdir_p('test/test/test') ).to be == true
+
+      end
+
+      it "does the right thing on a bash host, identified as is_cygwin=nil" do
+        @options = {:is_cygwin => nil}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("mkdir -p test/test/test")
+        expect( host.mkdir_p('test/test/test') ).to be == true
+
+      end
+
+      it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
+        @options = {:is_cygwin => false}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("if not exist test\\test\\test (md )")
+        expect( host.mkdir_p('test/test/test') ).to be == true
+
+      end
+
+
+    end
+
     context 'do_scp_to' do
       # it takes a location and a destination
       # it basically proxies that to the connection object
