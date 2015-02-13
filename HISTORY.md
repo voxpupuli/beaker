@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 29 Jan, 2015 (41028a79)](#LATEST)
+* [LATEST - 13 Feb, 2015 (75d618b8)](#LATEST)
+* [beaker2.3.0 - 29 Jan, 2015 (3d185da0)](#beaker2.3.0)
 * [beaker2.2.0 - 8 Jan, 2015 (cba5f7ed)](#beaker2.2.0)
 * [beaker2.1.0 - 17 Dec, 2014 (ec089b1a)](#beaker2.1.0)
 * [beaker2.0.0 - 5 Dec, 2014 (fb4b620b)](#beaker2.0.0)
@@ -68,7 +69,370 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 29 Jan, 2015 (41028a79)
+### <a name = "LATEST">LATEST - 13 Feb, 2015 (75d618b8)
+
+* (GEM) update beaker version to 2.4.0 (75d618b8)
+
+* Merge pull request #678 from joshcooper/ticket/master/QENG-1812-print-ssh-environment (473f394e)
+
+
+```
+Merge pull request #678 from joshcooper/ticket/master/QENG-1812-print-ssh-environment
+
+(QENG-1812) Print beaker ssh environment
+```
+* Merge pull request #679 from joshcooper/ticket/master/QENG-1813-puppet-server-aio-paths (aeecafdf)
+
+
+```
+Merge pull request #679 from joshcooper/ticket/master/QENG-1813-puppet-server-aio-paths
+
+(QENG-1813) Use puppet-server service names
+```
+* (QENG-1813) Use puppet-server service names (4d63f00a)
+
+
+```
+(QENG-1813) Use puppet-server service names
+
+Previously, when executing AIO acceptance tests, the beaker method
+`with_puppet_running_on` would attempt to start and stop the
+`puppetmaster` service. This is because the AIO defaults for
+`puppetservice` and related conf.d were not specified, and would
+fallback to the FOSS defaults.
+
+This commit updates the AIO defaults to match the `puppetserver`
+service, and related conf.d.
+```
+* (QENG-1812) Print beaker ssh environment (dcfd31d6)
+
+
+```
+(QENG-1812) Print beaker ssh environment
+
+Beaker sets the PATH and RUBYLIB environment variables in
+~/.ssh/environment, but it was previously difficult to tell what the end
+result was.
+
+This commit cats the ~/.ssh/environment file so we know what the PATH
+and RUBYLIB environment variables are for the current SSH session.
+```
+* Merge pull request #676 from kevpl/qeng1809_aio_removemasterreset (ad6bc3b2)
+
+
+```
+Merge pull request #676 from kevpl/qeng1809_aio_removemasterreset
+
+(QENG-1809) removed master path resets for AIO test setups
+```
+* (QENG-1809) removed master path resets for AIO test setups (8cc03799)
+
+
+```
+(QENG-1809) removed master path resets for AIO test setups
+
+Originally, I had assumed that machines with the master role would keep their old paths, or be updated
+with a completely new set.  It looks like the master pathing will actually be based upon the agent though,
+since masters will be installed on top of agents now
+```
+* Merge pull request #669 from anodelman/answers (af4bb88c)
+
+
+```
+Merge pull request #669 from anodelman/answers
+
+(QENG-1734) PE 4.0.x/shallow-gravy answers file
+```
+* Merge pull request #598 from nrvale0/ignore_bundle_dir (b7612cf3)
+
+
+```
+Merge pull request #598 from nrvale0/ignore_bundle_dir
+
+(MAINT) also ignore the 'bundle' directory
+```
+* Merge pull request #672 from kevpl/qeng1795_aio_fixotherpaths (ae5f0ea2)
+
+
+```
+Merge pull request #672 from kevpl/qeng1795_aio_fixotherpaths
+
+(QENG-1795) added code & conf paths to non-unix hosts
+```
+* Merge pull request #674 from joshcooper/maint/aio_windows (cd73846e)
+
+
+```
+Merge pull request #674 from joshcooper/maint/aio_windows
+
+(maint) Add ruby to windows PATH
+```
+* (MAINT) also ignore the 'bundle' directory #598 (4d0aedb0)
+
+* (maint) Add ruby to windows PATH (21484320)
+
+
+```
+(maint) Add ruby to windows PATH
+
+Previously, beaker would add `puppetbindir` to the `~/.ssh/environment`,
+which on Windows, excluded the ruby that the MSI installs. As a result,
+puppet setup steps that rely on `gem`, e.g. when adding sources, would
+fail.
+
+This commit adds the ruby in the MSI to the `~/.ssh/environment` simply by
+it being included in `puppetbindir`. Note the actual location depends on
+whether we are installing x86 puppet on x64 windows, or not, so we
+include both possibilities like we do for puppet's main bin directory.
+```
+* Merge pull request #673 from kevpl/maint_windows_fixtypo (2fd6d969)
+
+
+```
+Merge pull request #673 from kevpl/maint_windows_fixtypo
+
+(MAINT) fixing windows cygwin check typo
+```
+* (MAINT) fixing windows cygwin check typo (de4612fb)
+
+* (QENG-1795) added code & conf paths to non-unix hosts (198bebb4)
+
+* Merge pull request #668 from kevpl/qeng1781_aio_pathupdate (1d89f2c8)
+
+
+```
+Merge pull request #668 from kevpl/qeng1781_aio_pathupdate
+
+(QENG-1781) updated unix path entries for AIO
+```
+* Merge pull request #671 from puppetlabs/revert-667-qeng1784_foss_grouproot (2e890309)
+
+
+```
+Merge pull request #671 from puppetlabs/revert-667-qeng1784_foss_grouproot
+
+Revert "(QENG-1784) updated FOSS group to be root instead of puppet"
+```
+* Merge pull request #663 from kbarber/pdb-1034-ezbake-pr-testing (34e5a230)
+
+
+```
+Merge pull request #663 from kbarber/pdb-1034-ezbake-pr-testing
+
+(PDB-1034) Ezbake changes to get PDB source based builds working
+```
+* Revert "(QENG-1784) updated FOSS group to be root instead of puppet" (e887ef4a)
+
+* Merge pull request #624 from kevpl/qeng1410_log_provisioningadd (e2c5df0c)
+
+
+```
+Merge pull request #624 from kevpl/qeng1410_log_provisioningadd
+
+(QENG-1410) implemented provisioning log
+```
+* (QENG-1781) updated unix path entries for AIO (7f55277a)
+
+* Merge pull request #667 from kevpl/qeng1784_foss_grouproot (b68442f7)
+
+
+```
+Merge pull request #667 from kevpl/qeng1784_foss_grouproot
+
+(QENG-1784) updated FOSS group to be root instead of puppet
+```
+* (QENG-1784) updated FOSS group to be root instead of puppet (8a4adfbd)
+
+* (QENG-1734) PE 4.0.x/shallow-gravy answers file (27449e22)
+
+
+```
+(QENG-1734) PE 4.0.x/shallow-gravy answers file
+
+- add 4.0/3.99 answer generation support
+```
+* Merge pull request #665 from doug-rosser/el7_hostname_fix (d029c7a0)
+
+
+```
+Merge pull request #665 from doug-rosser/el7_hostname_fix
+
+(QENG-1757) use a different command to set the hostname for AWS el-7 ins...
+```
+* (QENG-1757) use a different command to set the hostname for AWS el-7 instances (5dcc75a7)
+
+* Merge pull request #613 from petems/improve_error_message_when_docker_not_found (abc7becd)
+
+
+```
+Merge pull request #613 from petems/improve_error_message_when_docker_not_found
+
+(MAINT) Improve error message when docker not found
+```
+* Merge pull request #664 from dsbaars/vagrant_parallels_hypervisor (55fc8376)
+
+
+```
+Merge pull request #664 from dsbaars/vagrant_parallels_hypervisor
+
+Added Vagrant Parallels Hypervisor
+```
+* Merge pull request #635 from liamjbennett/bitvise_communicator (a420cdac)
+
+
+```
+Merge pull request #635 from liamjbennett/bitvise_communicator
+
+(gh-433) Adding support to use bitvise ssh server as an alternative ssh provider
+```
+* Merge pull request #651 from puppetlabs/MAINT-fix_vagrantfile_syntax_error (91723d68)
+
+
+```
+Merge pull request #651 from puppetlabs/MAINT-fix_vagrantfile_syntax_error
+
+(MAINT) Fix Vagrantfile syntax error
+```
+* Merge pull request #643 from mcanevet/feature/openstack/credentials_from_env (89c46146)
+
+
+```
+Merge pull request #643 from mcanevet/feature/openstack/credentials_from_env
+
+(gh-642) Lookup Openstack credentials from ENV
+```
+* Merge pull request #655 from anodelman/assertions (8f26cb82)
+
+
+```
+Merge pull request #655 from anodelman/assertions
+
+(QENG-1629) Add expect_failure() to Beaker DSL (the code is provided)
+```
+* (gh-664) Fix and better test (6a9474f1)
+
+* Added Vagrant Parallels Hypervisor (7d1a25a8)
+
+* Merge pull request #659 from er0ck/QENG-1758-beaker_bash_completion_script_should_not_prevent_filename_completion (8382ed98)
+
+
+```
+Merge pull request #659 from er0ck/QENG-1758-beaker_bash_completion_script_should_not_prevent_filename_completion
+
+(QENG-1758) beaker bash completion script should not prevent filename co...
+```
+* Merge pull request #661 from johnduarte/aio-default-paths (76427fbd)
+
+
+```
+Merge pull request #661 from johnduarte/aio-default-paths
+
+(gh-660) Update default aio puppetpath path for unix
+```
+* (gh-660) Update default aio puppetpath path for unix (30c30d3e)
+
+
+```
+(gh-660) Update default aio puppetpath path for unix
+
+This commit updates the default aio puppetpath to /etc/puppetlabs/agent
+```
+* (QENG-1758) beaker bash completion script should not prevent filename completion (293a6a82)
+
+
+```
+(QENG-1758) beaker bash completion script should not prevent filename completion
+
+This change specifies -o default to use the default completion method
+when a completion is not found with this script. This allows completion
+of filenames as well as beaker's options.
+```
+* (QENG-1629) Add expect_failure() to Beaker DSL (the code is provided) (1a14e50c)
+
+
+```
+(QENG-1629) Add expect_failure() to Beaker DSL (the code is provided)
+
+- add expect_failure method
+- add expect_failure spec tests
+```
+* (QENG-1410) implemented feedback from PR (f004e7b2)
+
+* (MAINT) Fix Vagrantfile syntax error (86fe7731)
+
+
+```
+(MAINT) Fix Vagrantfile syntax error
+
+Missed new line:
+
+
+
+/Users/petersouter/projects/puppet-chocolatey/.vagrant/beaker_vagrant_files/default.yml/Vagrantfile:9: syntax error, unexpected tIDENTIFIER, expecting keyword_end
+    v.vm.guest = :windows    v.vm.provider :virtualbox do |vb|
+
+
+```
+* (gh-642) Lookup Openstack credentials from ENV (d550bd08)
+
+* (gh-433) Adding support to use bitvise ssh server as an alternative ssh provider (f551c0ad)
+
+* (MAINT) Adds spec for `validate_version!` (25909d02)
+
+* (MAINT) Catch error when cant connect to docker (12a952c2)
+
+
+```
+(MAINT) Catch error when cant connect to docker
+
+Right now, if you try to run a beaker test with the docker hypervisor and Docker is not running, you get a big stack trace:
+
+
+
+Hypervisor for debian-7 is docker
+Beaker::Hypervisor, found some docker boxes to create
+/opt/rubies/2.0.0-p451/lib/ruby/gems/2.0.0/gems/excon-0.43.0/lib/excon/unix_socket.rb:14:in `connect_nonblock': No such file or directory - connect(2) (Errno::ENOENT) (Excon::Errors::SocketError)
+	from /opt/rubies/2.0.0-p451/lib/ruby/gems/2.0.0/gems/excon-0.43.0/lib/excon/unix_socket.rb:14:in `connect'
+	from /opt/rubies/2.0.0-p451/lib/ruby/gems/2.0.0/gems/excon-0.43.0/lib/excon/socket.rb:28:in `initialize'
+
+
+
+This improves the message a bit
+```
+* (QENG-1410) implemented provisioning log (0a478adb)
+
+* (PDB-1034) Ezbake changes to get PDB source based builds working (32af120c)
+
+
+```
+(PDB-1034) Ezbake changes to get PDB source based builds working
+
+This involves a rework of the ezbake_utils to provide more capability to fully
+install PuppetDB using these helpers.
+
+* Some of the original API has been simplified, and the YAGNI parts removed
+  since no one was using them today.
+* We now do the lein install process, but using a local maven repository to
+  avoid collision with other projects running on the same host.
+* install_termini_from_ezbake now added to install that component
+* I've switched to using the install.sh methodology on ezbake.
+* This now is compatible with lein-ezbake.
+* ezbake_local_cmd has been added to generalize this kind of system invocation
+  and simplify testing.
+* ezbake_installsh generalizes the way we invoke install.sh, and simplifies testing.
+* install_ezbake_tarball_on_host has been created to generalize this step for
+  the termini and service based installations to re-use. Its idempotent, in
+  that it checks to ensure its not already installed.
+* conditionally_clone was modified to support being passed a branch if required,
+  so in the future we can simplify working on a development branch.
+* Lots of yarddoc cleanups
+* Some rspec coverage
+
+Signed-off-by: Ken Barber <ken@bob.sh>
+```
+### <a name = "beaker2.3.0">beaker2.3.0 - 29 Jan, 2015 (3d185da0)
+
+* (HISTORY) update beaker history for gem release 2.3.0 (3d185da0)
 
 * (GEM) update beaker version to 2.3.0 (41028a79)
 
