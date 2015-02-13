@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Feb, 2015 (75d618b8)](#LATEST)
+* [LATEST - 13 Feb, 2015 (c3cffad8)](#LATEST)
+* [beaker2.4.0 - 13 Feb, 2015 (bc5a6676)](#beaker2.4.0)
 * [beaker2.3.0 - 29 Jan, 2015 (3d185da0)](#beaker2.3.0)
 * [beaker2.2.0 - 8 Jan, 2015 (cba5f7ed)](#beaker2.2.0)
 * [beaker2.1.0 - 17 Dec, 2014 (ec089b1a)](#beaker2.1.0)
@@ -69,7 +70,29 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Feb, 2015 (75d618b8)
+### <a name = "LATEST">LATEST - 13 Feb, 2015 (c3cffad8)
+
+* (GEM) update beaker version to 2.4.1 (c3cffad8)
+
+* Merge pull request #684 from anodelman/maint (7ff40a47)
+
+
+```
+Merge pull request #684 from anodelman/maint
+
+(QENG-1834) Regression in Beaker 2.4.0 using do_scp_to
+```
+* (QENG-1834) Regression in Beaker 2.4.0 using do_scp_to (2b8b6f74)
+
+
+```
+(QENG-1834) Regression in Beaker 2.4.0 using do_scp_to
+
+- repair bug and add spec test coverage
+```
+### <a name = "beaker2.4.0">beaker2.4.0 - 13 Feb, 2015 (bc5a6676)
+
+* (HISTORY) update beaker history for gem release 2.4.0 (bc5a6676)
 
 * (GEM) update beaker version to 2.4.0 (75d618b8)
 
