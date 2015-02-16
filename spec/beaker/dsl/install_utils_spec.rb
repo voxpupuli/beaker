@@ -600,7 +600,7 @@ describe ClassMixedWithDSLInstallUtils do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+          expect(command.args).to eq(['-ExecutionPolicy','Bypass','-InputFormat','None','-NoLogo','-NoProfile','-NonInteractive','-Command', '"$text', '=', '\"23.251.154.122`t`tforge.puppetlabs.com\";', 'Add-Content', '-path', '\'C:\\Windows\\System32\\Drivers\\etc\\hosts\'', '-value', '$text"'])
         end
 
 
