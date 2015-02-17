@@ -53,5 +53,9 @@ module Windows
         'pathseparator'     => ';',
       })
     end
+
+    def self.aio_defaults
+      self.foss_defaults
+    end
   end
 end
