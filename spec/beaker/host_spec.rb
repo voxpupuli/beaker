@@ -564,5 +564,67 @@ module Beaker
       end
 
     end
+
+    describe '#determine_if_x86_64' do
+      it 'does the right thing on a 64-bit linux host, identified as is_cygwin=nil' do
+        @options = {:is_cygwin => nil}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("arch | grep x86_64")
+        expect( host.determine_if_x86_64 ).to be == true
+      end
+
+      it 'does the right thing on a 32-bit linux host, identified as is_cygwin=nil' do
+        @options = {:is_cygwin => nil}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 1 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("arch | grep x86_64")
+        expect( host.determine_if_x86_64 ).to be == false
+      end
+
+      it 'does the right thing on a 64-bit windows host, identified as is_cygwin=true' do
+        @options = {:is_cygwin => true}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("arch | grep x86_64")
+        expect( host.determine_if_x86_64 ).to be == true
+      end
+
+      it 'does the right thing on a 32-bit windows host, identified as is_cygwin=true' do
+        @options = {:is_cygwin => true}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 1 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("arch | grep x86_64")
+        expect( host.determine_if_x86_64 ).to be == false
+      end
+
+      it 'does the right thing on a 64-bit windows host, identified as is_cygwin=false' do
+        @options = {:is_cygwin => false}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 0 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("echo '' | wmic os get osarchitecture | FindStr 64-bit")
+        expect( host.determine_if_x86_64 ).to be == true
+      end
+
+      it 'does the right thing on a 32-bit windows host, identified as is_cygwin=false' do
+        @options = {:is_cygwin => false}
+        result = double
+        allow( result ).to receive( :exit_code ).and_return( 1 )
+        allow( host ).to receive( :exec ).and_return( result )
+
+        expect( Beaker::Command ).to receive(:new).with("echo '' | wmic os get osarchitecture | FindStr 64-bit")
+        expect( host.determine_if_x86_64 ).to be == false
+      end
+    end
   end
 end
