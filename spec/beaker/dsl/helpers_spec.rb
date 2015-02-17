@@ -916,6 +916,12 @@ describe ClassMixedWithDSLHelpers do
       }.to raise_error(RuntimeError, /puppet conf backup failed/)
     end
 
+    it 'receives a Minitest::Assertion and fails the test correctly' do
+      allow( subject ).to receive( :backup_the_file ).and_raise( Minitest::Assertion.new('assertion failed!') )
+      expect( subject ).to receive( :fail_test )
+      subject.with_puppet_running_on(host, {})
+    end
+
     describe 'with puppet-server' do
       let(:default_confdir) { "/etc/puppet" }
       let(:default_vardir) { "/var/lib/puppet" }
