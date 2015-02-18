@@ -51,7 +51,9 @@ module Beaker
     end
 
     def provision
+      request_payload = {}
       start = Time.now
+
       @hosts.each_with_index do |h, i|
         if not h['template']
           raise ArgumentError, "You must specify a template name for #{h}"
@@ -61,39 +63,50 @@ module Beaker
           h['template'] = templatefolders.pop
         end
 
-        @logger.notify "Requesting '#{h['template']}' VM from vCloud host pool"
+        request_payload[h['template']] = (request_payload[h['template']].to_i + 1).to_s
+      end
 
-        last_wait, wait = 0, 1
-        waited = 0 #the amount of time we've spent waiting for this host to provision
-        begin
-          uri = URI.parse(get_template_url(@options['pooling_api'], h['template']))
+      @logger.notify "Requesting VM set from vCloud host pool"
 
-          http = Net::HTTP.new( uri.host, uri.port )
-          request = Net::HTTP::Post.new(uri.request_uri)
+      last_wait, wait = 0, 1
+      waited = 0 #the amount of time we've spent waiting for this host to provision
+      begin
+        uri = URI.parse(@options['pooling_api'] + 'vm/')
 
-          request.set_form_data({'pool' => @options['resourcepool'], 'folder' => 'foo'})
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Post.new(uri.request_uri)
 
-          response = http.request(request)
-          parsed_response = JSON.parse(response.body)
-          if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname']
-            hostname = parsed_response[h['template']]['hostname']
-            domain = parsed_response['domain']
+        request.body = request_payload.to_json
+
+        response = http.request(request)
+        parsed_response = JSON.parse(response.body)
+
+        if parsed_response['ok']
+          domain = parsed_response['domain']
+
+          @hosts.each_with_index do |h, i|
+            if parsed_response[h['template']]['hostname'].is_a?(Array)
+              hostname = parsed_response[h['template']]['hostname'].shift
+            else
+              hostname = parsed_response[h['template']]['hostname']
+            end
+
             h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
-          else
-            raise "VcloudPooled.provision - no vCloud host free for #{h.name} in pool"
-          end
-        rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
-          if waited <= @options[:timeout].to_i
-            @logger.debug("Retrying provision for vCloud host #{h.name} after waiting #{wait} second(s) (failed with #{e.class})")
-            sleep wait
-            waited += wait
-            last_wait, wait = wait, last_wait + wait
-            retry
-          end
-          report_and_raise(@logger, e, 'vCloudPooled.provision')
-        end
 
-        @logger.notify "Using available vCloud host '#{h['vmhostname']}' (#{h.name})"
+            @logger.notify "Using available vCloud host '#{h['vmhostname']}' (#{h.name})"
+          end
+        else
+          raise "VcloudPooled.provision - requested vCloud hosts not available"
+        end
+      rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
+        if waited <= @options[:timeout].to_i
+          @logger.debug("Retrying provision for vCloud host after waiting #{wait} second(s) (failed with #{e.class})")
+          sleep wait
+          waited += wait
+          last_wait, wait = wait, last_wait + wait
+        retry
+        end
+        report_and_raise(@logger, e, 'vCloudPooled.provision')
       end
 
       @logger.notify 'Spent %.2f seconds grabbing VMs' % (Time.now - start)

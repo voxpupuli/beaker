@@ -39,8 +39,8 @@ module MockNet
         @uri = uri
       end
 
-      def set_form_data hash
-
+      def body= *args
+        hash
       end
     end
 
