@@ -807,8 +807,8 @@ module Beaker
         end
 
         if host['is_cygwin'].nil? or host['is_cygwin'] == true
-          dest = "/cygdrive/c/Windows/Temp/#{host['dist']}.msi"
-          on host, "curl -O #{dest} #{link}"
+          dest = "#{host['dist']}.msi"
+          on host, "curl -O #{link}"
 
           #Because the msi installer doesn't add Puppet to the environment path
           #Add both potential paths for simplicity
@@ -826,7 +826,7 @@ module Beaker
           on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
         end
 
-        on host, "msiexec /qn /i #{dest}"
+        on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
       end
 
       # Installs Puppet and dependencies from dmg
