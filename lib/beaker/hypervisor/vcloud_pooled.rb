@@ -71,7 +71,7 @@ module Beaker
       last_wait, wait = 0, 1
       waited = 0 #the amount of time we've spent waiting for this host to provision
       begin
-        uri = URI.parse(@options['pooling_api'] + 'vm/')
+        uri = URI.parse(@options['pooling_api'] + '/vm/')
 
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri)
