@@ -7,10 +7,11 @@ module Beaker
       @logger = options[:logger]
       @hosts = hosts
 
-      # increase the http timeouts as provisioning images can be slow
+      # Set docker options to the entry in the options hash, unless we've already set them elsewhere:
       unless ::Docker.options.nil?
         docker_options = ::Docker.options.empty? ? @options[:docker_options] : ::Docker.options
       end
+      # increase the http timeouts as provisioning images can be slow
       ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }.merge(docker_options || {})
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
