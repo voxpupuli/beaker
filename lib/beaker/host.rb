@@ -81,7 +81,7 @@ module Beaker
           TCPSocket.new(reachable_name, port).close
           return true
         end
-      rescue Errno::ECONNREFUSED, Timeout::Error
+      rescue Errno::ECONNREFUSED, Timeout::Error, Errno::ETIMEDOUT
         return false
       end
     end
