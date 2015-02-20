@@ -1,6 +1,7 @@
 require 'socket'
 require 'timeout'
 require 'benchmark'
+require 'rsync'
 
 [ 'command', 'ssh_connection' ].each do |lib|
   require "beaker/#{lib}"
@@ -309,13 +310,37 @@ module Beaker
       result.exit_code == 0
     end
 
+    # Rsync files from the localhost to this test host, if a directory is provided it is recursively copied
+    # @param source [String] The path to the file/dir to upload
+    # @param target [String] The destination path on the host
+    # @param dry_run [Boolean] Return straight away without doing anything
+    def rsync_to source, target, dry_run = false
+      return if dry_run
+      result = Result.new(@name, [source, target])
+      result.stdout = "\n"
+
+      Rsync.run(source, "#{@name}:#{target}", ["-r"]) do |sync_result|
+        if sync_result.success?
+          sync_result.changes.each do |change|
+            result.stdout << "\tSynced #{change.filename} (#{change.summary})"
+          end
+        else
+          puts sync_result.error
+        end
+      end
+
+      result.finalize!
+      result
+    end
+
     # scp files from the localhost to this test host, if a directory is provided it is recursively copied
     # @param source [String] The path to the file/dir to upload
     # @param target [String] The destination path on the host
     # @param options [Hash{Symbol=>String}] Options to alter execution
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
     def do_scp_to source, target, options
-      @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
+      options[:copy_method] ||= :scp
+      @logger.notify "localhost $ #{options[:copy_method].to_s} #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
       result = Result.new(@name, [source, target])
       has_ignore = options[:ignore] and not options[:ignore].empty?
@@ -341,7 +366,11 @@ module Beaker
           result.exit_code = 1
         end
         if source_file
-          result = connection.scp_to(source_file, target, options, $dry_run)
+          if options[:copy_method] == :rsync
+            result = self.rsync_to(source_file, target, $dry_run)
+          else
+            result = connection.scp_to(source_file, target, options, $dry_run)
+          end
           @logger.trace result.stdout
         end
       else # a directory with ignores
@@ -373,7 +402,11 @@ module Beaker
           else
             file_path = File.join(target, File.dirname(s))
           end
-          result = connection.scp_to(s, file_path, options, $dry_run)
+          if options[:copy_method] == :rsync
+            result = self.rsync_to(s, file_path, $dry_run)
+          else
+            result = connection.scp_to(s, file_path, options, $dry_run)
+          end
           @logger.trace result.stdout
         end
       end

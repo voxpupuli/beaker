@@ -381,6 +381,19 @@ module Beaker
         host.do_scp_to *args
       end
 
+      it 'do_scp_to uses rsync when specified' do
+        create_files(['tmp/tests/source'])
+        @options = { :logger => logger }
+        conn = double(:connection)
+        host.instance_variable_set :@connection, conn
+        rsync_args = [ 'tmp/tests', 'target', nil ]
+        args = [ 'tmp/tests', 'target', :copy_method =>  :rsync ]
+
+        expect( host ).to receive( :rsync_to ).with( *rsync_args ).and_return(Beaker::Result.new(host, 'output!'))
+
+        host.do_scp_to *args
+      end
+
       it 'throws an IOError when the file given doesn\'t exist' do
         expect { host.do_scp_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
       end
