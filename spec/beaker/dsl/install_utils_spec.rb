@@ -1035,6 +1035,7 @@ describe ClassMixedWithDSLInstallUtils do
     let(:source){ File.expand_path('./')}
     let(:target){'/etc/puppetlabs/puppet/modules/testmodule'}
     let(:module_parse_name){'testmodule'}
+    let(:copy_method){:scp}
 
     shared_examples 'copy_module_to' do  |opts|
       it{
@@ -1056,7 +1057,7 @@ describe ClassMixedWithDSLInstallUtils do
         allow( File ).to receive(:exists?).with(any_args()).and_return(false)
         allow( File ).to receive(:directory?).with(any_args()).and_return(false)
 
-        expect( subject ).to receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
+        expect( subject ).to receive(:scp_to).with(host,source, target, {:ignore => ignore_list, :copy_method => copy_method})
         if opts.nil?
           subject.copy_module_to(host)
         else
@@ -1093,6 +1094,11 @@ describe ClassMixedWithDSLInstallUtils do
         expect( subject ).to receive( :scp_to ).twice
         subject.copy_module_to( hosts )
       end
+    end
+
+    describe 'should accept rsync copy_method and pass it to host' do
+      let(:copy_method){:rsync}
+      it_should_behave_like 'copy_module_to', {:module_name => 'testmodule', :copy_method => :rsync}
     end
   end
 

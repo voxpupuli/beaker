@@ -1318,13 +1318,17 @@ module Beaker
       #                   Location where the module should be installed, will default
       #                    to host['distmoduledir']/modules
       # @option opts [Array] :ignore_list
+      # @options opts [String] :copy_method (:scp)
+      #                   When copying modules from a local system the underyling protocol to use
+      #                     can be :scp or :rsync
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
       def copy_module_to(one_or_more_hosts, opts = {})
         block_on one_or_more_hosts do |host|
           opts = {:source => './',
                   :target_module_path => host['distmoduledir'],
-                  :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+                  :ignore_list => PUPPET_MODULE_INSTALL_IGNORE,
+                  :copy_method => :scp}.merge(opts)
           ignore_list = build_ignore_list(opts)
           target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
           source = File.expand_path( opts[:source] )
@@ -1333,7 +1337,7 @@ module Beaker
           else
             _, module_name = parse_for_modulename( source )
           end
-          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list, :copy_method => opts[:copy_method]}
         end
       end
       alias :copy_root_module_to :copy_module_to
