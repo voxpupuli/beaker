@@ -19,6 +19,8 @@ module Beaker
         return Version34.new(version, hosts, options)
       when /\A3\.99/
         return Version40.new(version, hosts, options)
+      when /\A3\.8/
+        return Version34.new(version, hosts, options)
       when /\A3\.7/
         return Version34.new(version, hosts, options)
       when /\A3\.4/
