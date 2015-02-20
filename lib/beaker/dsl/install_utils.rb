@@ -698,7 +698,7 @@ module Beaker
 
           # Certain install paths may not create the config dirs/files needed
           on host, "mkdir -p #{host['puppetpath']}"
-          on host, "echo '' >> #{host['hieraconf']}"
+          on host, "echo '' >> #{host.puppet['hiera_config']}"
         end
         nil
       end

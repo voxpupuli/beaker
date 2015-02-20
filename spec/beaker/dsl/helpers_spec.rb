@@ -958,8 +958,11 @@ describe ClassMixedWithDSLHelpers do
         stub_post_setup
         allow( subject ).to receive( :options) .and_return( {:is_puppetserver => true})
         allow( subject ).to receive( :modify_tk_config)
-        allow( host ).to receive(:puppet).with('master') .and_return({'confdir' => default_confdir,
-                                                       'vardir' => default_vardir})
+        allow( host ).to receive(:puppet).with( any_args ).and_return({
+          'confdir' => default_confdir,
+          'vardir' => default_vardir,
+          'config' => "#{default_confdir}/puppet.conf"
+        })
       end
 
       describe 'and command line args passed' do
@@ -1087,7 +1090,7 @@ describe ClassMixedWithDSLHelpers do
             execution = 0
             expect do
               subject.with_puppet_running_on(host, {}) do
-                expect(host).to execute_commands_matching(/^puppet master/).once
+                expect(host).to execute_commands_matching(/^puppet master/).exactly(4).times
                 execution += 1
               end
             end.to change { execution }.by(1)
@@ -1103,9 +1106,22 @@ describe ClassMixedWithDSLHelpers do
       end
 
       describe 'backup and restore of puppet.conf' do
-        let(:original_location) { "#{host['puppetpath']}/puppet.conf" }
-        let(:backup_location) { "#{tmpdir_path}/puppet.conf.bak" }
-        let(:new_location) { "#{tmpdir_path}/puppet.conf" }
+        before :each do
+          mock_puppetconf_reader = Object.new
+          allow( mock_puppetconf_reader ).to receive( :[] ).with( 'config' ).and_return( '/root/mock/puppet.conf' )
+          allow( mock_puppetconf_reader ).to receive( :[] ).with( 'confdir' ).and_return( '/root/mock' )
+          allow( host ).to receive( :puppet ).with( any_args ).and_return( mock_puppetconf_reader )
+        end
+
+        let(:original_location) { host.puppet['config'] }
+        let(:backup_location) {
+          filename = File.basename(host.puppet['config'])
+          File.join(tmpdir_path, "#{filename}.bak")
+        }
+        let(:new_location) {
+          filename = File.basename(host.puppet['config'])
+          File.join(tmpdir_path, filename)
+        }
 
         context 'when a puppetservice is used' do
           let(:use_service) { true }
@@ -1299,13 +1315,13 @@ describe ClassMixedWithDSLHelpers do
     let(:hierarchy) { [ 'nodes/%{::fqdn}', 'common' ] }
     it 'on FOSS host' do
       host = make_host('testhost', { :platform => 'ubuntu' } )
-      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      expect(subject).to receive(:create_remote_file).with(host, host.puppet['hiera_config'], /#{host[:hieradatadir]}/)
       subject.write_hiera_config_on(host, hierarchy)
     end
 
     it 'on PE host' do
       host = make_host('testhost', { :platform => 'ubuntu', :type => 'pe' } )
-      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      expect(subject).to receive(:create_remote_file).with(host, host.puppet['hiera_config'], /#{host[:hieradatadir]}/)
       subject.write_hiera_config_on(host, hierarchy)
     end
 
