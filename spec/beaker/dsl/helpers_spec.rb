@@ -258,7 +258,19 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
-  describe '#create_remote_file' do
+  describe '#rsync_to' do
+    it 'delegates to the host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      hosts.each do |host|
+        expect( host ).to receive( :do_rsync_to ).and_return( result )
+      end
+
+      subject.rsync_to( hosts, '/var/log/my.log', 'log/my.log' )
+    end
+  end
+
+  describe '#create_remote_file using scp' do
     it 'scps the contents passed in to the hosts' do
       my_opts = { :silent => true }
       tmpfile = double
@@ -271,6 +283,25 @@ describe ClassMixedWithDSLHelpers do
       expect( File ).to receive( :open )
 
       expect( subject ).to receive( :scp_to ).
+        with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
+
+      subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )
+    end
+  end
+
+  describe '#create_remote_file using rsync' do
+    it 'scps the contents passed in to the hosts' do
+      my_opts = { :silent => true, :protocol => 'rsync' }
+      tmpfile = double
+
+      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+        and_return( '/local/path/to/blah' )
+
+      expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
+
+      expect( File ).to receive( :open )
+
+      expect( subject ).to receive( :rsync_to ).
         with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
 
       subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )

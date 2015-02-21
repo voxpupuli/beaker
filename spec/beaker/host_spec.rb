@@ -553,6 +553,34 @@ module Beaker
       end
     end
 
+    context 'do_rsync_to' do
+      it 'do_rsync_to logs info and call Rsync class' do
+        create_files(['source'])
+        logger = host[:logger]
+        @options = { :logger => logger }
+        args = [ 'source', 'target', {:ignore => ['.bundle']} ]
+
+        key = host['ssh']['keys']
+        if key.is_a? Array
+          key = key.first
+        end
+
+        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+
+        expect( host ).to receive(:to_s).and_return('host.example.org')
+
+        expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Beaker::Result.new(host, 'output!'))
+
+        host.do_rsync_to *args
+
+        expect(Rsync.host).to eq('root@host.example.org')
+      end
+
+      it 'throws an IOError when the file given doesn\'t exist' do
+        expect { host.do_rsync_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
+      end
+    end
+
     it 'interpolates to its "name"' do
       expect( "#{host}" ).to be === 'name'
     end
