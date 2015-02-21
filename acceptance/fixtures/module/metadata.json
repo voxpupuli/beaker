@@ -1,0 +1,14 @@
+{
+  "name": "user-demo",
+  "version": "0.0.1",
+  "author": "alice.nodelman",
+  "summary": "For use in testing beaker.",
+  "license": "Apache 2.0",
+  "source": "no_source",
+  "project_page": "no_page",
+  "issues_url": "no_url",
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ]
+}
+
