@@ -1350,6 +1350,38 @@ module Beaker
         fact_on(default, name, opts)
       end
 
+      # Snapshot provided host
+      #
+      # Only vagrant hosts are supported
+      # and you must have https://github.com/scalefactory/vagrant-multiprovider-snap installed
+      #
+      # @param host [Host] The host to snapshot
+      # @param name [String] The name to use as the snapshot name
+      def take_snapshot_on(host, name)
+        host.do_take_snapshot(name)
+      end
+
+      # Snapshot default host
+      # @see #take_snapshot_on
+      def take_snapshot(name)
+        take_snapshot_on(default,name)
+      end
+
+      # Revert to a snapshot on provided host
+      #
+      # @param host [Host] The host being reverted
+      # @param name [String] The name of the snapshot to revert to
+      def restore_snapshot_on(host, name)
+        host.do_restore_snapshot(name)
+      end
+
+      # Revert to a snapshot on the default host
+      # @see #restore_snapshot_on
+      def restore_snapshot(name)
+        restore_snapshot_on(default,name)
+      end
+
+
       #Run a curl command on the provided host(s)
       #
       # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,

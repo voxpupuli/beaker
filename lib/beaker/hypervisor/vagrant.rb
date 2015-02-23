@@ -159,6 +159,17 @@ module Beaker
       FileUtils.rm_rf(@vagrant_path)
     end
 
+    #snapshotting depends on https://github.com/scalefactory/vagrant-multiprovider-snap
+    def take_snapshot(hostname,snapshot_name)
+      @logger.debug "Creating snapshot of #{hostname}"
+      vagrant_cmd("snap take #{hostname} --name=#{snapshot_name}")
+    end
+
+    def restore_snapshot(hostname,snapshot_name)
+      @logger.debug "Restoring snapshot of #{hostname}"
+      vagrant_cmd("snap rollback #{hostname} --name=#{snapshot_name}")
+    end
+
     def vagrant_cmd(args)
       Dir.chdir(@vagrant_path) do
         exit_status = 1

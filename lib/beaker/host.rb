@@ -389,6 +389,13 @@ module Beaker
       return result
     end
 
+    def do_take_snapshot snapshot_name
+      self[:hypervisor].take_snapshot(name, snapshot_name)
+    end
+
+    def do_restore_snapshot snapshot_name
+      self[:hypervisor].restore_snapshot(name, snapshot_name)
+    end
   end
 
   [ 'windows', 'pswindows', 'unix', 'aix', 'mac' ].each do |lib|
