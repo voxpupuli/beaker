@@ -354,6 +354,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :sign_certificate_for ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
       allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )

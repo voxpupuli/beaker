@@ -478,11 +478,18 @@ module Beaker
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
           elsif host['platform'] =~ /windows/
             version = host[:pe_ver] || opts['pe_ver_win']
+            should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !host['install_32'] && !opts['install_32']
             #only install 64bit builds if
             # - we are on pe version 3.4+
             # - we do not have install_32 set on host
             # - we do not have install_32 set globally
-            if !(version_is_less(version, '3.4')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+            if !(version_is_less(version, '4.0'))
+              if should_install_64bit
+                host['dist'] = "puppet-agent-#{version}-x64"
+              else
+                host['dist'] = "puppet-agent-#{version}-x86"
+              end
+            elsif should_install_64bit
               host['dist'] = "puppet-enterprise-#{version}-x64"
             else
               host['dist'] = "puppet-enterprise-#{version}"
