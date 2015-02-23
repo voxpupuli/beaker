@@ -548,15 +548,15 @@ describe ClassMixedWithDSLInstallUtils do
       let(:platform) { "windows-2008r2-i386" }
       it 'installs specific version of puppet when passed :version' do
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O /cygdrive/c/Windows/Temp/puppet-3000.msi http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
-        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i /cygdrive/c/Windows/Temp/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
         subject.install_puppet(:version => '3000')
       end
       it 'installs from custom url when passed :win_download_url' do
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O /cygdrive/c/Windows/Temp/puppet-3000.msi http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
-        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i /cygdrive/c/Windows/Temp/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
         subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
       end
     end
