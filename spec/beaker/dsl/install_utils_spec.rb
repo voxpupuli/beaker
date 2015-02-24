@@ -581,7 +581,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'configure_puppet_on' do
     before do
-      subject.stub(:on).and_return(Beaker::Result.new({},''))
+      allow(subject).to receive(:on).and_return(Beaker::Result.new({},''))
     end
     context 'on debian' do
       let(:platform) { 'debian-7-amd64' }
@@ -599,7 +599,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text\"")
+          expect(command.args).to eq(["-ExecutionPolicy", "Bypass", "-InputFormat", "None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "\"$text", "=", "\\\"[main]`nserver=testbox.test.local`n`n\\\";", "Set-Content", "-path", "'`cygpath", "-smF", "35`/PuppetLabs/puppet/etc\\puppet.conf'", "-value", "$text\""])
         end
         subject.configure_puppet_on(host, config)
       end
@@ -629,7 +629,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text\"")
+          expect(command.args).to eq(["-ExecutionPolicy", "Bypass", "-InputFormat", "None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "\"$text", "=", "\\\"[main]`nserver=testbox.test.local`n`n\\\";", "Set-Content", "-path", "'`cygpath", "-smF", "35`/PuppetLabs/puppet/etc\\puppet.conf'", "-value", "$text\""])
         end
         subject.configure_puppet(config)
       end
