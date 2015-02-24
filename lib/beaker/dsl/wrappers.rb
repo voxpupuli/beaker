@@ -131,7 +131,7 @@ module Beaker
         ps_opts.merge!(args)
 
         arguments = " #{ps_opts.sort.map{|k,v| v.eql?('') ? "-#{k}" : "-#{k} #{v}" }.join(' ')} -Command \"#{command}\""
-        Command.new('powershell.exe', arguments, {})
+        Command.new('powershell.exe', arguments.split(' '), {})
       end
     end
   end

@@ -62,14 +62,14 @@ describe ClassMixedWithDSLWrappers do
     it 'should pass "powershell.exe <args> -Command <command>" to Command' do
       command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'")
       expect(command.command ).to be === 'powershell.exe'
-      expect( command.args).to be === ' -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command "Set-Content -path \'fu.txt\' -value \'fu\'"'
+      expect( command.args).to be === [ '-ExecutionPolicy', 'Bypass', '-InputFormat', 'None', '-NoLogo', '-NoProfile', '-NonInteractive', '-Command', '"Set-Content', '-path', '\'fu.txt\'', '-value', '\'fu\'"' ]
       expect( command.options ).to be === {}
     end
 
     it 'should merge the arguments provided with the defaults' do
       command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'ExecutionPolicy' => 'Unrestricted'})
       expect( command.command).to be === 'powershell.exe'
-      expect( command.args ).to be === ' -ExecutionPolicy Unrestricted -InputFormat None -NoLogo -NoProfile -NonInteractive -Command "Set-Content -path \'fu.txt\' -value \'fu\'"'
+      expect( command.args ).to be === [ '-ExecutionPolicy', 'Unrestricted', '-InputFormat', 'None', '-NoLogo', '-NoProfile', '-NonInteractive', '-Command', '"Set-Content', '-path', '\'fu.txt\'', '-value', '\'fu\'"' ]
       expect( command.options ).to be === {}
     end
   end
