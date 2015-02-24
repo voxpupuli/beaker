@@ -1276,6 +1276,11 @@ module Beaker
         when /^(debian|ubuntu|cumulus)$/
           release_path << "deb/#{codename}"
           release_file = "puppet-agent_#{opts[:version]}-1_#{arch}.deb"
+        when /^windows$/
+          release_path << 'windows'
+          onhost_copy_base = '`cygpath -smF 35`/'
+          arch_suffix = arch =~ /64/ ? '64' : '86'
+          release_file = "puppet-agent-x#{arch_suffix}.msi"
         else
           raise "No repository installation step for #{variant} yet..."
         end
@@ -1290,6 +1295,10 @@ module Beaker
         when /^(debian|ubuntu|cumulus)$/
           on host, "dpkg -i --force-all #{onhost_copied_file}"
           on host, "apt-get update"
+        when /^windows$/
+          result = on host, "echo #{onhost_copied_file}"
+          onhost_copied_file = result.raw_output.chomp
+          on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
         end
       end
 
