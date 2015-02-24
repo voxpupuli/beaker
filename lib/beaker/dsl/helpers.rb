@@ -183,7 +183,7 @@ module Beaker
         end
       end
 
-      # Move a local file to a remote host
+      # Move a local file to a remote host using scp
       # @note If using {Beaker::Host} for the hosts *scp* is not
       #   required on the system as it uses Ruby's net/scp library.  The
       #   net-scp gem however is required (and specified in the gemspec.
@@ -206,6 +206,27 @@ module Beaker
           end
           @result = host.do_scp_to(from_path, to_path, opts)
           @result.log logger
+          @result
+        end
+      end
+
+      # Move a local file or directory to a remote host using rsync
+      # @note rsync is required on the local host.
+      #
+      # @param [Host, #do_scp_to] host A host object that responds like
+      #                                {Beaker::Host}.
+      # @param [String] from_path A local path to a file or directory.
+      # @param [String] to_path   A remote path to copy *from_path* to.
+      # @!macro common_opts
+      #
+      # @return [Result] Returns the result of the rsync operation
+      def rsync_to host, from_path, to_path, opts = {}
+        block_on host do | host |
+          if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            result = host.echo "#{to_path}"
+            to_path = result.raw_output.chomp
+          end
+          @result = host.do_rsync_to(from_path, to_path, opts)
           @result
         end
       end
@@ -238,13 +259,24 @@ module Beaker
       # @param [String] file_path A remote path to place *file_content* at.
       # @param [String] file_content The contents of the file to be placed.
       # @!macro common_opts
+      # @option opts [String] :protocol Name of the underlying transfer method.
+      #                                 Valid options are 'scp' or 'rsync'.
       #
       # @return [Result] Returns the result of the underlying SCP operation.
       def create_remote_file(hosts, file_path, file_content, opts = {})
         Tempfile.open 'beaker' do |tempfile|
           File.open(tempfile.path, 'w') {|file| file.puts file_content }
 
-          scp_to hosts, tempfile.path, file_path, opts
+          opts[:protocol] ||= 'scp'
+          case opts[:protocol]
+            when 'scp'
+              scp_to hosts, tempfile.path, file_path, opts
+            when 'rsync'
+              rsync_to hosts, tempfile.path, file_path, opts
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
+          end
         end
       end
 

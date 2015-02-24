@@ -1,6 +1,7 @@
 require 'socket'
 require 'timeout'
 require 'benchmark'
+require 'rsync'
 
 [ 'command', 'ssh_connection' ].each do |lib|
   require "beaker/#{lib}"
@@ -387,6 +388,79 @@ module Beaker
       result = connection.scp_from(source, target, options, $dry_run)
       @logger.debug result.stdout
       return result
+    end
+
+    # rsync a file or directory from the localhost to this test host
+    # @param from_path [String] The path to the file/dir to upload
+    # @param to_path [String] The destination path on the host
+    # @param opts [Hash{Symbol=>String}] Options to alter execution
+    # @option opts [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
+    def do_rsync_to from_path, to_path, opts = {}
+      ssh_opts = self['ssh']
+      rsync_args = []
+      ssh_args = []
+
+      if not File.file?(from_path) and not File.directory?(from_path)
+        raise IOError, "No such file or directory - #{from_path}"
+      end
+
+      # We enable achieve mode and compression
+      rsync_args << "-az"
+
+      if not self['user']
+        user = "root"
+      else
+        user = self['user']
+      end
+      hostname_with_user = "#{user}@#{self}"
+
+      Rsync.host = hostname_with_user
+
+      if ssh_opts.has_key?('keys') and
+        ssh_opts.has_key?('auth_methods') and
+        ssh_opts['auth_methods'].include?('publickey')
+
+        key = ssh_opts['keys']
+
+        # If an array was set, then we use the first value
+        if key.is_a? Array
+          key = key.first
+        end
+
+        # We need to expand tilde manually as rsync can be
+        # funny sometimes
+        key = File.expand_path(key)
+
+        ssh_args << "-i #{key}"
+      end
+
+      if ssh_opts.has_key?('port') and
+        ssh_args << "-p #{ssh_opts['port']}"
+      end
+
+      # We disable prompt when host isn't known
+      ssh_args << "-o 'StrictHostKeyChecking no'"
+
+      if not ssh_args.empty?
+        rsync_args << "-e \"ssh #{ssh_args.join(' ')}\""
+      end
+
+      if opts.has_key?(:ignore) and not opts[:ignore].empty?
+        opts[:ignore].map! do |value|
+          "--exclude '#{value}'"
+        end
+        rsync_args << opts[:ignore].join(' ')
+      end
+
+      # We assume that the *contents* of the directory 'from_path' needs to be
+      # copied into the directory 'to_path'
+      if File.directory?(from_path) and not from_path.end_with?('/')
+        from_path += '/'
+      end
+
+      @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
+      result = Rsync.run(from_path, to_path, rsync_args)
+      result
     end
 
   end

@@ -1388,6 +1388,8 @@ module Beaker
       #                   Location where the module should be installed, will default
       #                    to host['distmoduledir']/modules
       # @option opts [Array] :ignore_list
+      # @option opts [String] :protocol
+      #                   Name of the underlying transfer method. Valid options are 'scp' or 'rsync'.
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
       def copy_module_to(one_or_more_hosts, opts = {})
@@ -1403,7 +1405,17 @@ module Beaker
           else
             _, module_name = parse_for_modulename( source )
           end
-          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+
+          opts[:protocol] ||= 'scp'
+          case opts[:protocol]
+            when 'scp'
+              scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+            when 'rsync'
+              rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
+          end
         end
       end
       alias :copy_root_module_to :copy_module_to
