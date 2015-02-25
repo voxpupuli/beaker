@@ -974,6 +974,24 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_puppetagent_dev_repo( host, opts )
     end
 
+    it 'runs the correct install for windows platforms' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['windows', '5', 'x64']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+      mock_echo = Object.new()
+      allow( mock_echo ).to receive( :raw_output ).and_return( " " )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-x64.msi', /\/windows$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-x64.msi$/, /cygpath/)
+      expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
+      expect(subject).to receive(:on).ordered.with(host, anything)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
     it 'allows you to override the local copy directory' do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['debian', '5', 'x4']}
