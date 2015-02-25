@@ -203,7 +203,13 @@ module Beaker
     #Examine the host system to determine the architecture
     #@return [Boolean] true if x86_64, false otherwise
     def determine_if_x86_64
-      result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+      if self['is_cygwin'].nil? or self['is_cygwin'] == true
+        command = Beaker::Command.new("arch | grep x86_64")
+      else
+        command = Beaker::Command.new("echo '' | wmic os get osarchitecture | FindStr 64-bit")
+      end
+
+      result = exec(command, :acceptable_exit_codes => (0...127))
       result.exit_code == 0
     end
 
