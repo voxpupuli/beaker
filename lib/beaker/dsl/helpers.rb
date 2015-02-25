@@ -585,7 +585,7 @@ module Beaker
         end
 
         begin
-          backup_file = backup_the_file(host, host['puppetconfdir'], testdir, 'puppet.conf')
+          backup_file = backup_the_file(host, host.puppet('master')['confdir'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
           if host.use_service_scripts? && !service_args[:bypass_service_script]
@@ -644,8 +644,7 @@ module Beaker
 
       # @!visibility private
       def restore_puppet_conf_from_backup( host, backup_file )
-        puppetpath = host['puppetconfdir']
-        puppet_conf = File.join(puppetpath, "puppet.conf")
+        puppet_conf = host.puppet('master')['config']
 
         if backup_file
           host.exec( Command.new( "if [ -f '#{backup_file}' ]; then " +
@@ -725,8 +724,9 @@ module Beaker
 
       # @!visibility private
       def lay_down_new_puppet_conf( host, configuration_options, testdir )
-        puppetconf_test = "#{testdir}/puppet.conf"
-        puppetconf_main = "#{host['puppetconfdir']}/puppet.conf"
+        puppetconf_main = host.puppet('master')['config']
+        puppetconf_filename = File.basename(puppetconf_main)
+        puppetconf_test = File.join(testdir, puppetconf_filename)
 
         new_conf = puppet_conf_for( host, configuration_options )
         create_remote_file host, puppetconf_test, new_conf.to_s
@@ -740,7 +740,7 @@ module Beaker
 
       # @!visibility private
       def puppet_conf_for host, conf_opts
-        puppetconf = host.exec( Command.new( "cat #{host['puppetconfdir']}/puppet.conf" ) ).stdout
+        puppetconf = host.exec( Command.new( "cat #{host.puppet('master')['config']}" ) ).stdout
         new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
 
         new_conf
@@ -1412,7 +1412,7 @@ module Beaker
           hiera_config[:yaml][:datadir] = host[:hieradatadir]
           hiera_config[:hierarchy] = hierarchy
           hiera_config[:logger] = 'console'
-          create_remote_file host, host[:hieraconf], hiera_config.to_yaml
+          create_remote_file host, host.puppet['hiera_config'], hiera_config.to_yaml
         end
       end
 
