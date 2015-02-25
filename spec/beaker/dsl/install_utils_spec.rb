@@ -715,10 +715,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be === 'puppet-enterprise-upgrader'
@@ -731,10 +732,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.1', '3.0').and_return( false )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be nil
@@ -747,10 +749,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'

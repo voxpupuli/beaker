@@ -34,7 +34,6 @@ module Beaker
       master_a = {
         :q_puppetmaster_install => 'y',
         :q_puppetmaster_certname => master,
-        :q_puppetmaster_install => 'y',
         :q_puppetmaster_dnsaltnames => master_dns_altnames,
         :q_puppetmaster_enterpriseconsole_hostname => dashboard,
         :q_puppetmaster_enterpriseconsole_port => answer_for(options, :q_puppetmaster_enterpriseconsole_port, 443),

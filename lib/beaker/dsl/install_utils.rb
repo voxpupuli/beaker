@@ -444,6 +444,7 @@ module Beaker
       # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @option opts [Symbol] :type (:install) One of :upgrade or :install
+      # @option opts [Boolean] :set_console_password Should we set the PE console password in the answers file?  Used during upgrade only.
       # @option opts [Hash<String>] :answers Pre-set answers based upon ENV vars and defaults
       #                             (See {Beaker::Options::Presets.env_vars})
       #
@@ -1052,6 +1053,12 @@ module Beaker
       #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
       # @api dsl
       def upgrade_pe path=nil
+        set_console_password = false
+        # if we are upgrading from something lower than 3.4 then we need to set the pe console password
+        if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
+          set_console_password = true
+        end
+        # get new version information
         hosts.each do |host|
           host['pe_dir'] = host['pe_upgrade_dir'] || path
           if host['platform'] =~ /windows/
@@ -1065,8 +1072,8 @@ module Beaker
             host['pe_installer'] ||= 'puppet-enterprise-upgrader'
           end
         end
-        #send in the global options hash
-        do_install(sorted_hosts, options.merge({:type => :upgrade}))
+        # send in the global options hash
+        do_install(sorted_hosts, options.merge({:type => :upgrade, :set_console_password => set_console_password}))
         options['upgrade'] = true
       end
 
