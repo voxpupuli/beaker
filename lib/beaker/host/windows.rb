@@ -29,7 +29,7 @@ module Windows
         'sitemoduledir' => 'C:/usr/share/puppet/modules',
         #let's just add both potential bin dirs to the path
         'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet Enterprise/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/bin',
-        'pathseparator' => ';',
+        'pathseparator' => ':',
       })
     end
 
@@ -50,7 +50,7 @@ module Windows
         #let's just add both potential bin dirs to the path, include ruby too for `gem`, `ruby`, etc
         'puppetbindir'      => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/sys/ruby/bin',
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
-        'pathseparator'     => ';',
+        'pathseparator'     => ':',
       })
     end
 
