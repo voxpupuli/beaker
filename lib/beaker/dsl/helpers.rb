@@ -596,6 +596,8 @@ module Beaker
 
           yield self if block_given?
 
+        rescue Beaker::DSL::Assertions, Minitest::Assertion => early_assertion
+          fail_test(early_assertion)
         rescue Exception => early_exception
           original_exception = RuntimeError.new("PuppetAcceptance::DSL::Helpers.with_puppet_running_on failed (check backtrace for location) because: #{early_exception}\n#{early_exception.backtrace.join("\n")}\n")
           raise(original_exception)
