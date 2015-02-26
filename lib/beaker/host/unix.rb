@@ -64,7 +64,7 @@ module Unix
       h = self.foss_defaults
       h['puppetserver-confdir'] = '/etc/puppetlabs/puppetserver/conf.d'
       h['puppetservice']  = 'puppetserver'
-      h['puppetbindir']   = '/opt/puppetlabs/agent/bin'
+      h['puppetbindir']   = '/opt/puppetlabs/agent/bin:/opt/puppetlabs/bin'
       h['puppetbin']      = "#{h['puppetbindir']}/puppet"
       h['puppetpath']     = '/etc/puppetlabs/agent'
       h['puppetconfdir']  = "#{h['puppetpath']}/config"
