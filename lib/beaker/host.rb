@@ -212,8 +212,13 @@ module Beaker
     #@return [Boolean] true if x86_64, false otherwise
     def determine_if_x86_64
       if is_cygwin?
-        result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
-        result.exit_code == 0
+        if self[:platform] =~ /osx|solaris/
+          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result.exit_code == 0
+        else
+          result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result.exit_code == 0
+        end
       else
         result = exec(Beaker::Command.new("wmic os get osarchitecture"), :acceptable_exit_codes => (0...127))
         result.stdout =~ /64/
@@ -236,7 +241,7 @@ module Beaker
         escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
         env_file = self[:ssh_env_file]
         #see if the key/value pair already exists
-        if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
           return #nothing to do here, key value pair already exists
         #see if the key already exists
         elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
