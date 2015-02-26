@@ -1284,13 +1284,7 @@ module Beaker
           # In all the case that it is different, this init script will exist. So we can assume
           # that if the script doesn't exist, we should just use `pe-puppet`
           agent_service = 'pe-puppet-agent'
-          if not agent.file_exist?("/etc/init.d/pe-puppet-agent")
-            if agent['pe_ver'] && !version_is_less(agent['pe_ver'], '4.0')
-              agent_service = 'puppet'
-            else
-              agent_service = 'pe-puppet'
-            end
-          end
+          agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
 
           # Under a number of stupid circumstances, we can't stop the
           # agent using puppet.  This is usually because of issues with
