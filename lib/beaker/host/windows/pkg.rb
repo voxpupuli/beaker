@@ -38,7 +38,7 @@ module Windows::Pkg
   #Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
   #@return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    identify_windows_architecture =~ /64/
+    (identify_windows_architecture =~ /64/) == 0
   end
 
   private
