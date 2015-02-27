@@ -186,7 +186,7 @@ module Beaker
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).once.and_return(result)
 
         host.add_env_var('key', '/my/first/value')
@@ -195,7 +195,7 @@ module Beaker
       it "adds new line to environment file if no env var of that name already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         expect( Beaker::Command ).to receive(:new).with(/grep KEY ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
@@ -206,7 +206,7 @@ module Beaker
       it "updates existing line in environment file when adding additional value to existing variable" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
