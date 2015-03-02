@@ -29,7 +29,7 @@ module Windows
         'sitemoduledir' => 'C:/usr/share/puppet/modules',
         #let's just add both potential bin dirs to the path
         'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet Enterprise/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/bin',
-        'pathseparator' => ':',
+        'pathseparator' => ';',
       })
     end
 
@@ -50,12 +50,29 @@ module Windows
         #let's just add both potential bin dirs to the path, include ruby too for `gem`, `ruby`, etc
         'puppetbindir'      => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/sys/ruby/bin',
         'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
-        'pathseparator'     => ':',
+        'pathseparator'     => ';',
       })
     end
 
     def self.aio_defaults
-      self.foss_defaults
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
+        'user'              => 'Administrator',
+        'group'             => 'Administrators',
+        # 'puppetserver-confdir' not applicable on Windows
+        # 'puppetservice' not applicable on Windows
+        'puppetpath'        => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+        'puppetconfdir'     => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
+        'puppetvardir'      => '`cygpath -smF 35`/PuppetLabs/puppet/cache',
+        # 'puppetbin' not required on Windows
+        'puppetbindir'      => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/sys/ruby/bin',
+        # systembindir not required on Windows
+        'hieradatadir'      => '`cygpath -smF 35`/Puppetlabs/code/hieradata',
+        'hieraconf'         => '`cygpath -smF 35`/Puppetlabs/code/hiera.yaml',
+        'distmoduledir'     => '`cygpath -smF 35`/PuppetLabs/code/modules',
+        # sitemoduledir not included (check PUP-4049 for more info)
+        'pathseparator'     => ';',
+        })
     end
   end
 end
