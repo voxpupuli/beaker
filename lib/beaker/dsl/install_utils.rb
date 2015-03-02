@@ -1426,17 +1426,27 @@ module Beaker
                   :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
           ignore_list = build_ignore_list(opts)
           target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
-          source = File.expand_path( opts[:source] )
+          source_path = File.expand_path( opts[:source] )
+          source_dir = File.dirname(source_path)
+          source_name = File.basename(source_path)
           if opts.has_key?(:module_name)
             module_name = opts[:module_name]
           else
-            _, module_name = parse_for_modulename( source )
+            _, module_name = parse_for_modulename( source_path )
           end
 
           opts[:protocol] ||= 'scp'
           case opts[:protocol]
             when 'scp'
-              scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+              #move to the host
+              scp_to host, source_path, target_module_dir, {:ignore => ignore_list}
+              #rename to the selected module name, if not correct
+              cur_path = File.join(target_module_dir, source_name)
+              new_path = File.join(target_module_dir, module_name)
+              if cur_path != new_path
+                # NOTE: this will need to be updated to handle powershell only windows SUTs
+                on host, "mv #{cur_path} #{new_path}"
+              end
             when 'rsync'
               rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
             else

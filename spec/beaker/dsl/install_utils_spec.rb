@@ -1122,7 +1122,7 @@ describe ClassMixedWithDSLInstallUtils do
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
         allow( result ).to receive(:stdout).and_return( stdout )
-        allow( host ).to receive(:exec).with( any_args ).and_return( result )
+        expect( subject ).to receive(:on).with(host, "echo #{File.dirname(target)}" ).and_return(result )
         allow( Dir ).to receive(:getpwd).and_return(source)
 
         allow( subject ).to receive(:parse_for_moduleroot).and_return(source)
@@ -1135,7 +1135,8 @@ describe ClassMixedWithDSLInstallUtils do
         allow( File ).to receive(:exists?).with(any_args()).and_return(false)
         allow( File ).to receive(:directory?).with(any_args()).and_return(false)
 
-        expect( subject ).to receive(:scp_to).with(host,source, target, {:ignore => ignore_list})
+        expect( subject ).to receive(:scp_to).with(host,source, File.dirname(target), {:ignore => ignore_list})
+        expect( subject ).to receive(:on).with(host, "mv #{File.join(File.dirname(target), File.basename(source))} #{target}")
         if opts.nil?
           subject.copy_module_to(host)
         else

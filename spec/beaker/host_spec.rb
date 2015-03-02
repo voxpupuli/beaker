@@ -186,7 +186,7 @@ module Beaker
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).once.and_return(result)
 
         host.add_env_var('key', '/my/first/value')
@@ -195,7 +195,7 @@ module Beaker
       it "adds new line to environment file if no env var of that name already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         expect( Beaker::Command ).to receive(:new).with(/grep KEY ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
@@ -206,7 +206,7 @@ module Beaker
       it "updates existing line in environment file when adding additional value to existing variable" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep -e KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
@@ -221,7 +221,8 @@ module Beaker
     describe "#delete_env_var" do
       it "deletes env var" do
         expect( Beaker::SedCommand ).to receive(:new).with('unix', '/KEY=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/KEY=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/KEY=\\1/', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\(.*\\)[;:]\\/my\\/first\\/value/KEY=\\1/", "~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\/my\\/first\\/value[;:]/KEY=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
 
@@ -372,7 +373,7 @@ module Beaker
         conn = double(:connection)
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
-        args = [ 'source', 'target', {} ]
+        args = [ '/source', 'target', {} ]
         conn_args = args + [ nil ]
 
         expect( logger ).to receive(:trace)
@@ -419,6 +420,7 @@ module Beaker
           host.do_scp_to *args
         end
         it 'can take an ignore list that excludes a single file and scp the rest' do
+          created_target_path = File.join(target_path, File.basename(source_path))
           exclude_file = '07_InstallCACerts.rb'
           logger = host[:logger]
           conn = double(:connection)
@@ -429,16 +431,16 @@ module Beaker
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
           expect( logger ).to receive(:trace)
-          expect( host ).to receive( :mkdir_p ).with("#{target_path}/tests")
-          expect( host ).to receive( :mkdir_p ).with("#{target_path}/tests2")
+          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests")
+          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests2")
 
           (@fileset1 + @fileset2).each do |file|
             if file !~ /#{exclude_file}/
-              file_args = [ file, File.join(target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
               conn_args = file_args + [ nil ]
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join(target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
               conn_args = file_args + [ nil ]
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
