@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
   # Optional provisioner specific support
   s.add_runtime_dependency 'rbvmomi', '~> 1.8'
   s.add_runtime_dependency 'fission', '~> 0.4'
-  s.add_runtime_dependency 'google-api-client', '~> 0.7'
+  s.add_runtime_dependency 'google-api-client', '~> 0.8'
   s.add_runtime_dependency 'aws-sdk', '~> 1.57'
   s.add_runtime_dependency 'docker-api'
   s.add_runtime_dependency 'fog', '~> 1.25'
