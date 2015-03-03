@@ -3,7 +3,7 @@ require 'json'
 require 'net/http'
 
 module Beaker
-  class VcloudPooled < Beaker::Hypervisor
+  class Vmpooler < Beaker::Hypervisor
     SSH_EXCEPTIONS = [
       SocketError,
       Timeout::Error,
@@ -15,14 +15,10 @@ module Beaker
       Errno::ENETUNREACH,
     ]
 
-    def initialize(vcloud_hosts, options)
+    def initialize(vmpooler_hosts, options)
       @options = options
       @logger = options[:logger]
-      @hosts = vcloud_hosts
-
-      raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
-      raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
-      raise 'You must specify a folder for vCloud instances!' unless @options['folder']
+      @hosts = vmpooler_hosts
     end
 
     def check_url url
@@ -66,7 +62,7 @@ module Beaker
         request_payload[h['template']] = (request_payload[h['template']].to_i + 1).to_s
       end
 
-      @logger.notify "Requesting VM set from vCloud host pool"
+      @logger.notify "Requesting VM set from vmpooler"
 
       last_wait, wait = 0, 1
       waited = 0 #the amount of time we've spent waiting for this host to provision
@@ -93,20 +89,20 @@ module Beaker
 
             h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
 
-            @logger.notify "Using available vCloud host '#{h['vmhostname']}' (#{h.name})"
+            @logger.notify "Using available host '#{h['vmhostname']}' (#{h.name})"
           end
         else
-          raise "VcloudPooled.provision - requested vCloud hosts not available"
+          raise "Vmpooler.provision - requested host set not available"
         end
       rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
         if waited <= @options[:timeout].to_i
-          @logger.debug("Retrying provision for vCloud host after waiting #{wait} second(s) (failed with #{e.class})")
+          @logger.debug("Retrying provision for vmpooler host after waiting #{wait} second(s) (failed with #{e.class})")
           sleep wait
           waited += wait
           last_wait, wait = wait, last_wait + wait
         retry
         end
-        report_and_raise(@logger, e, 'vCloudPooled.provision')
+        report_and_raise(@logger, e, 'Vmpooler.provision')
       end
 
       @logger.notify 'Spent %.2f seconds grabbing VMs' % (Time.now - start)
@@ -120,7 +116,7 @@ module Beaker
 
       start = Time.now
       vm_names.each do |name|
-        @logger.notify "Handing '#{name}' back to pooling API for VM destruction"
+        @logger.notify "Handing '#{name}' back to vmpooler for VM destruction"
 
         uri = URI.parse(get_template_url(@options['pooling_api'], name))
 
@@ -130,7 +126,7 @@ module Beaker
         begin
           response = http.request(request)
         rescue *SSH_EXCEPTIONS => e
-          report_and_raise(@logger, e, 'vCloudPooled.cleanup (http.request)')
+          report_and_raise(@logger, e, 'Vmpooler.cleanup (http.request)')
         end
       end
 

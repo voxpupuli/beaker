@@ -30,9 +30,11 @@ module Beaker
           Beaker::Fusion
         when /^ec2$/
           Beaker::AwsSdk
+        when /^vmpooler$/
+          Beaker::Vmpooler
         when /^vcloud$/
           if options['pooling_api']
-            Beaker::VcloudPooled
+            Beaker::Vmpooler
           else
             Beaker::Vcloud
           end
@@ -129,6 +131,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vcloud', 'vcloud_pooled', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end
