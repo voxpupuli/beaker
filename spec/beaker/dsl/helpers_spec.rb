@@ -258,7 +258,19 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
-  describe '#create_remote_file' do
+  describe '#rsync_to' do
+    it 'delegates to the host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      hosts.each do |host|
+        expect( host ).to receive( :do_rsync_to ).and_return( result )
+      end
+
+      subject.rsync_to( hosts, '/var/log/my.log', 'log/my.log' )
+    end
+  end
+
+  describe '#create_remote_file using scp' do
     it 'scps the contents passed in to the hosts' do
       my_opts = { :silent => true }
       tmpfile = double
@@ -271,6 +283,25 @@ describe ClassMixedWithDSLHelpers do
       expect( File ).to receive( :open )
 
       expect( subject ).to receive( :scp_to ).
+        with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
+
+      subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )
+    end
+  end
+
+  describe '#create_remote_file using rsync' do
+    it 'scps the contents passed in to the hosts' do
+      my_opts = { :silent => true, :protocol => 'rsync' }
+      tmpfile = double
+
+      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+        and_return( '/local/path/to/blah' )
+
+      expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
+
+      expect( File ).to receive( :open )
+
+      expect( subject ).to receive( :rsync_to ).
         with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
 
       subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )
@@ -784,12 +815,6 @@ describe ClassMixedWithDSLHelpers do
     let( :result_pass ) { Beaker::Result.new( [], "" ) }
     before :each do
       allow( subject ).to receive( :sleep ).and_return( true )
-      result_fail.stdout = 'stdout'
-      result_fail.stderr = 'stderr'
-      result_fail.exit_code = 1
-      result_pass.stdout = 'stdout'
-      result_pass.stderr = 'stderr'
-      result_pass.exit_code = 0
     end
 
     it 'runs the pe-puppet on a system without pe-puppet-agent' do
@@ -797,9 +822,9 @@ describe ClassMixedWithDSLHelpers do
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
       allow( deb_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
-      allow( subject ).to receive( :hosts ).and_return( hosts )
-      expect( subject ).to receive( :on ).with( deb_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      expect( subject ).to receive( :on ).with( deb_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
+      expect( deb_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+      expect( deb_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(false)
+
       expect( subject ).to receive( :puppet_resource ).with( "service", "pe-puppet", "ensure=stopped").once
       expect( subject ).to receive( :on ).once
 
@@ -812,10 +837,10 @@ describe ClassMixedWithDSLHelpers do
       el_agent = make_host( 'el', :platform => 'el-5-x86_64' )
       allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
-      allow( subject ).to receive( :hosts ).and_return( hosts )
-      expect( subject ).to receive( :on ).with( el_agent, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_fail )
-      expect( subject ).to receive( :on ).with( el_agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1] ).once.and_return( result_pass )
-      expect( subject ).to receive( :puppet_resource ).with("service", "pe-puppet-agent", "ensure=stopped").once
+      expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+      expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
+
+      expect( subject ).to receive( :puppet_resource ).with( "service", "pe-puppet-agent", "ensure=stopped").once
       expect( subject ).to receive( :on ).once
 
       subject.stop_agent_on( el_agent )
@@ -916,6 +941,12 @@ describe ClassMixedWithDSLHelpers do
       }.to raise_error(RuntimeError, /puppet conf backup failed/)
     end
 
+    it 'receives a Minitest::Assertion and fails the test correctly' do
+      allow( subject ).to receive( :backup_the_file ).and_raise( Minitest::Assertion.new('assertion failed!') )
+      expect( subject ).to receive( :fail_test )
+      subject.with_puppet_running_on(host, {})
+    end
+
     describe 'with puppet-server' do
       let(:default_confdir) { "/etc/puppet" }
       let(:default_vardir) { "/var/lib/puppet" }
@@ -958,8 +989,11 @@ describe ClassMixedWithDSLHelpers do
         stub_post_setup
         allow( subject ).to receive( :options) .and_return( {:is_puppetserver => true})
         allow( subject ).to receive( :modify_tk_config)
-        allow( host ).to receive(:puppet).with('master') .and_return({'confdir' => default_confdir,
-                                                       'vardir' => default_vardir})
+        allow( host ).to receive(:puppet).with( any_args ).and_return({
+          'confdir' => default_confdir,
+          'vardir' => default_vardir,
+          'config' => "#{default_confdir}/puppet.conf"
+        })
       end
 
       describe 'and command line args passed' do
@@ -1087,7 +1121,7 @@ describe ClassMixedWithDSLHelpers do
             execution = 0
             expect do
               subject.with_puppet_running_on(host, {}) do
-                expect(host).to execute_commands_matching(/^puppet master/).once
+                expect(host).to execute_commands_matching(/^puppet master/).exactly(4).times
                 execution += 1
               end
             end.to change { execution }.by(1)
@@ -1103,9 +1137,22 @@ describe ClassMixedWithDSLHelpers do
       end
 
       describe 'backup and restore of puppet.conf' do
-        let(:original_location) { "#{host['puppetpath']}/puppet.conf" }
-        let(:backup_location) { "#{tmpdir_path}/puppet.conf.bak" }
-        let(:new_location) { "#{tmpdir_path}/puppet.conf" }
+        before :each do
+          mock_puppetconf_reader = Object.new
+          allow( mock_puppetconf_reader ).to receive( :[] ).with( 'config' ).and_return( '/root/mock/puppet.conf' )
+          allow( mock_puppetconf_reader ).to receive( :[] ).with( 'confdir' ).and_return( '/root/mock' )
+          allow( host ).to receive( :puppet ).with( any_args ).and_return( mock_puppetconf_reader )
+        end
+
+        let(:original_location) { host.puppet['config'] }
+        let(:backup_location) {
+          filename = File.basename(host.puppet['config'])
+          File.join(tmpdir_path, "#{filename}.bak")
+        }
+        let(:new_location) {
+          filename = File.basename(host.puppet['config'])
+          File.join(tmpdir_path, filename)
+        }
 
         context 'when a puppetservice is used' do
           let(:use_service) { true }
@@ -1299,13 +1346,13 @@ describe ClassMixedWithDSLHelpers do
     let(:hierarchy) { [ 'nodes/%{::fqdn}', 'common' ] }
     it 'on FOSS host' do
       host = make_host('testhost', { :platform => 'ubuntu' } )
-      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      expect(subject).to receive(:create_remote_file).with(host, host.puppet['hiera_config'], /#{host[:hieradatadir]}/)
       subject.write_hiera_config_on(host, hierarchy)
     end
 
     it 'on PE host' do
       host = make_host('testhost', { :platform => 'ubuntu', :type => 'pe' } )
-      expect(subject).to receive(:create_remote_file).with(host, host[:hieraconf], /#{host[:hieradatadir]}/)
+      expect(subject).to receive(:create_remote_file).with(host, host.puppet['hiera_config'], /#{host[:hieradatadir]}/)
       subject.write_hiera_config_on(host, hierarchy)
     end
 

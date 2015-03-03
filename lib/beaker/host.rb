@@ -1,6 +1,7 @@
 require 'socket'
 require 'timeout'
 require 'benchmark'
+require 'rsync'
 
 [ 'command', 'ssh_connection' ].each do |lib|
   require "beaker/#{lib}"
@@ -144,6 +145,14 @@ module Beaker
       @options.is_pe?
     end
 
+    def is_cygwin?
+      self['is_cygwin'] == nil || self['is_cygwin'] == true
+    end
+
+    def platform
+      self['platform']
+    end
+
     # True if this is a pe run, or if the host has had a 'use-service' property set.
     def use_service_scripts?
       is_pe? || self['use-service']
@@ -202,8 +211,13 @@ module Beaker
     #Examine the host system to determine the architecture
     #@return [Boolean] true if x86_64, false otherwise
     def determine_if_x86_64
-      result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
-      result.exit_code == 0
+      if is_cygwin?
+        result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+        result.exit_code == 0
+      else
+        result = exec(Beaker::Command.new("wmic os get osarchitecture"), :acceptable_exit_codes => (0...127))
+        result.stdout =~ /64/
+      end
     end
 
     #@return [Boolean] true if x86_64, false otherwise
@@ -218,16 +232,30 @@ module Beaker
     #  host.add_env_var('PATH', '/usr/bin:PATH')
     def add_env_var key, val
       key = key.to_s.upcase
-      escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-      env_file = self[:ssh_env_file]
-      #see if the key/value pair already exists
-      if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-        return #nothing to do here, key value pair already exists
-      #see if the key already exists
-      elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
-      else
-        exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
+      if self.is_cygwin?
+        env_file = self[:ssh_env_file]
+        escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
+        #see if the key/value pair already exists
+        if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+          return #nothing to do here, key value pair already exists
+        #see if the key already exists
+        elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+          exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
+        else
+          exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
+        end
+      else #powershell windows
+        #see if the key/value pair already exists
+        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
+        subbed_result = result.stdout.chomp
+        if result.exit_code == 0
+          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
+        end
+        #not present, add it
+        if subbed_result == result.stdout.chomp
+          exec(Beaker::Command.new("setx /M #{key} %#{key}%;#{val}"))
+          exec(Beaker::Command.new("set #{key}=%#{key}%;#{val}"))
+        end
       end
     end
 
@@ -237,11 +265,25 @@ module Beaker
     #@example
     #  host.delete_env_var('PATH', '/usr/bin:PATH')
     def delete_env_var key, val
-      val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-      #if the key only has that single value remove the entire line
-      exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
-      #if the key has multiple values and we only need to remove the provided val
-      exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/", self[:ssh_env_file]))
+      key = key.to_s.upcase
+      if self.is_cygwin?
+        val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
+        #if the key only has that single value remove the entire line
+        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
+        #if the key has multiple values and we only need to remove the provided val
+        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/", self[:ssh_env_file]))
+      else #powershell windows
+        #get the current value of the key
+        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
+        subbed_result = result.stdout.chomp
+        if result.exit_code == 0
+          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
+        end
+        if subbed_result != result
+          #set to the truncated value
+          self.add_env_var(key, subbed_result)
+        end
+      end
     end
 
     def connection
@@ -299,7 +341,7 @@ module Beaker
     # @param [String] dir The directory structure to create on the host
     # @return [Boolean] True, if directory construction succeeded, otherwise False
     def mkdir_p dir
-      if self['is_cygwin'].nil? or self['is_cygwin'] == true
+      if self.is_cygwin?
         cmd = "mkdir -p #{dir}"
       else
         cmd = "if not exist #{dir.gsub!('/','\\')} (md #{dir.gsub!('/','\\')})"
@@ -387,6 +429,79 @@ module Beaker
       result = connection.scp_from(source, target, options, $dry_run)
       @logger.debug result.stdout
       return result
+    end
+
+    # rsync a file or directory from the localhost to this test host
+    # @param from_path [String] The path to the file/dir to upload
+    # @param to_path [String] The destination path on the host
+    # @param opts [Hash{Symbol=>String}] Options to alter execution
+    # @option opts [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
+    def do_rsync_to from_path, to_path, opts = {}
+      ssh_opts = self['ssh']
+      rsync_args = []
+      ssh_args = []
+
+      if not File.file?(from_path) and not File.directory?(from_path)
+        raise IOError, "No such file or directory - #{from_path}"
+      end
+
+      # We enable achieve mode and compression
+      rsync_args << "-az"
+
+      if not self['user']
+        user = "root"
+      else
+        user = self['user']
+      end
+      hostname_with_user = "#{user}@#{self}"
+
+      Rsync.host = hostname_with_user
+
+      if ssh_opts.has_key?('keys') and
+        ssh_opts.has_key?('auth_methods') and
+        ssh_opts['auth_methods'].include?('publickey')
+
+        key = ssh_opts['keys']
+
+        # If an array was set, then we use the first value
+        if key.is_a? Array
+          key = key.first
+        end
+
+        # We need to expand tilde manually as rsync can be
+        # funny sometimes
+        key = File.expand_path(key)
+
+        ssh_args << "-i #{key}"
+      end
+
+      if ssh_opts.has_key?('port') and
+        ssh_args << "-p #{ssh_opts['port']}"
+      end
+
+      # We disable prompt when host isn't known
+      ssh_args << "-o 'StrictHostKeyChecking no'"
+
+      if not ssh_args.empty?
+        rsync_args << "-e \"ssh #{ssh_args.join(' ')}\""
+      end
+
+      if opts.has_key?(:ignore) and not opts[:ignore].empty?
+        opts[:ignore].map! do |value|
+          "--exclude '#{value}'"
+        end
+        rsync_args << opts[:ignore].join(' ')
+      end
+
+      # We assume that the *contents* of the directory 'from_path' needs to be
+      # copied into the directory 'to_path'
+      if File.directory?(from_path) and not from_path.end_with?('/')
+        from_path += '/'
+      end
+
+      @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
+      result = Rsync.run(from_path, to_path, rsync_args)
+      result
     end
 
   end

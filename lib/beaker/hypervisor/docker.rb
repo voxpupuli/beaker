@@ -8,7 +8,9 @@ module Beaker
       @hosts = hosts
 
       # increase the http timeouts as provisioning images can be slow
-      ::Docker.options = { :write_timeout => 300, :read_timeout => 300 }.merge(::Docker.options || {})
+      default_docker_options = { :write_timeout => 300, :read_timeout => 300 }.merge(::Docker.options || {})
+      # Merge docker options from the entry in hosts file
+      ::Docker.options = default_docker_options.merge(@options[:docker_options] || {})
       # assert that the docker-api gem can talk to your docker
       # enpoint.  Will raise if there is a version mismatch
       begin
@@ -117,15 +119,15 @@ module Beaker
       sshd_options = ''
 
       # add platform-specific actions
+      service_name = "sshd"
       case host['platform']
       when /ubuntu/, /debian/
-        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
+        service_name = "ssh"
         dockerfile += <<-EOF
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
         EOF
         when  /cumulus/
-          sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes"'
           dockerfile += <<-EOF
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
@@ -138,11 +140,11 @@ module Beaker
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
         EOF
       when /opensuse/, /sles/
-        sshd_options = '-o "PermitRootLogin yes" -o "PasswordAuthentication yes" -o "UsePAM no"'
         dockerfile += <<-EOF
           RUN zypper -n in openssh #{Beaker::HostPrebuiltSteps::SLES_PACKAGES.join(' ')}
           RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
           RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+          RUN sed -ri 's/^#?UsePAM .*/UsePAM no/' /etc/ssh/sshd_config
         EOF
       else
         # TODO add more platform steps here
@@ -155,6 +157,13 @@ module Beaker
         RUN echo root:#{root_password} | chpasswd
       EOF
 
+      # Configure sshd service to allowroot login using password
+      dockerfile += <<-EOF
+        RUN sed -ri 's/^#?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+        RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+      EOF
+
+
       # Any extra commands specified for the host
       dockerfile += (host['docker_image_commands'] || []).map { |command|
         "RUN #{command}\n"
@@ -166,7 +175,8 @@ module Beaker
       end
 
       # How to start a sshd on port 22.  May be an init for more supervision
-      cmd = host['docker_cmd'] || "/usr/sbin/sshd -D #{sshd_options}"
+      # Ensure that the ssh server can be restarted (done from set_env) and container keeps running
+      cmd = host['docker_cmd'] || ["sh","-c","service #{service_name} start ; tail -f /dev/null"]
       dockerfile += <<-EOF
         EXPOSE 22
         CMD #{cmd}

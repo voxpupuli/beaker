@@ -61,20 +61,24 @@ module Unix
     end
 
     def self.aio_defaults
-      h = self.foss_defaults
-      h['puppetserver-confdir'] = '/etc/puppetlabs/puppetserver/conf.d'
-      h['puppetservice']  = 'puppetserver'
-      h['puppetbindir']   = '/opt/puppetlabs/agent/bin'
-      h['puppetbin']      = "#{h['puppetbindir']}/puppet"
-      h['puppetpath']     = '/etc/puppetlabs/agent'
-      h['puppetconfdir']  = "#{h['puppetpath']}/config"
-      h['puppetcodedir']  = "#{h['puppetpath']}/code"
-      h['puppetvardir']   = '/opt/puppetlabs/agent/cache'
-      h['distmoduledir']  = "#{h['puppetcodedir']}/modules"
-      h['sitemoduledir']  = '/opt/puppetlabs/agent/modules'
-      h['hieraconf']      = "#{h['puppetcodedir']}/hiera.yaml"
-      h['hieradatadir']   = "#{h['puppetcodedir']}/hieradata"
-      h
+      h = Beaker::Options::OptionsHash.new
+      h.merge({
+        'user'                  => 'root',
+        'group'                 => 'puppet',
+        'puppetserver-confdir'  => '/etc/puppetlabs/puppetserver/conf.d',
+        'puppetservice'         => 'puppetserver',
+        'puppetpath'            => '/etc/puppetlabs/puppet',
+        'puppetconfdir'         => '/etc/puppetlabs/puppet',
+        'puppetvardir'          => '/opt/puppetlabs/puppet/cache',
+        'puppetbin'             => '/opt/puppetlabs/puppet/bin/puppet',
+        'puppetbindir'          => '/opt/puppetlabs/bin',
+        'systembindir'          => '/usr/bin',
+        'hieradatadir'          => '/etc/puppetlabs/code/hieradata',
+        'hieraconf'             => '/etc/puppetlabs/code/hiera.yaml',
+        'distmoduledir'         => '/etc/puppetlabs/code/modules',
+        'sitemoduledir'         => '/opt/puppetlabs/puppet/modules',
+        'pathseparator'         => ':',
+      })
     end
   end
 end

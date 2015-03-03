@@ -44,7 +44,8 @@ module Beaker
         :provider => :openstack,
         :openstack_api_key => @options[:openstack_api_key],
         :openstack_username => @options[:openstack_username],
-        :openstack_auth_url => @options[:openstack_auth_url])
+        :openstack_auth_url => @options[:openstack_auth_url],
+        :openstack_tenant => @options[:openstack_tenant])
       if not @network_client
 
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
@@ -88,10 +89,7 @@ module Beaker
           :nics => [ {'net_id' => network(@options[:openstack_network]).id } ],
           :name => host[:vmhostname],
         }
-        if @options[:openstack_keyname]
-          @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmhostname]})"
-          options[:key_name] = @options[:openstack_keyname]
-        end
+        options[:key_name] = key_name(host)
         vm = @compute_client.servers.create(options)
 
         #wait for the new instance to start up
@@ -149,6 +147,10 @@ module Beaker
         end
         @logger.debug "Destroying OpenStack host #{vm.name}"
         vm.destroy
+        if @options[:openstack_keyname].nil?
+          @logger.debug "Deleting random keypair"
+          @compute_client.delete_key_pair vm.name
+        end
       end
     end
 
@@ -175,5 +177,26 @@ module Beaker
       end
     end
 
+    #Get key_name from options or generate a new rsa key and add it to
+    #OpenStack keypairs
+    #
+    #@param [Host] host The OpenStack host to provision
+    #@return [String] key_name
+    #@api private
+    def key_name(host)
+      if @options[:openstack_keyname]
+        @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmhostname]})"
+        @options[:openstack_keyname]
+      else
+        @logger.debug "Generate a new rsa key"
+        key = OpenSSL::PKey::RSA.new 2048
+        type = key.ssh_type
+        data = [ key.to_blob ].pack('m0')
+        @logger.debug "Creating Openstack keypair for public key '#{type} #{data}'"
+        @compute_client.create_key_pair host[:vmhostname], "#{type} #{data}"
+        host['ssh'][:key_data] = [ key.to_pem ]
+        host[:vmhostname]
+      end
+    end
   end
 end

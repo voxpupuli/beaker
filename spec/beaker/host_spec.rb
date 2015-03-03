@@ -220,8 +220,8 @@ module Beaker
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/key=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/key=\\1/', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/KEY=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/KEY=\\(.*[:;]*\\)\\/my\\/first\\/value[:;]*/KEY=\\1/', '~/.ssh/environment')
         host.delete_env_var('key', '/my/first/value')
       end
 
@@ -550,6 +550,34 @@ module Beaker
         expect( conn ).to receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_scp_from *args
+      end
+    end
+
+    context 'do_rsync_to' do
+      it 'do_rsync_to logs info and call Rsync class' do
+        create_files(['source'])
+        logger = host[:logger]
+        @options = { :logger => logger }
+        args = [ 'source', 'target', {:ignore => ['.bundle']} ]
+
+        key = host['ssh']['keys']
+        if key.is_a? Array
+          key = key.first
+        end
+
+        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+
+        expect( host ).to receive(:to_s).and_return('host.example.org')
+
+        expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Beaker::Result.new(host, 'output!'))
+
+        host.do_rsync_to *args
+
+        expect(Rsync.host).to eq('root@host.example.org')
+      end
+
+      it 'throws an IOError when the file given doesn\'t exist' do
+        expect { host.do_rsync_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
       end
     end
 

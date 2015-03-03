@@ -70,7 +70,7 @@ module Beaker
     def cmd_line host, cmd = @command, env = @environment
       env_string = env.nil? ? '' : environment_string_for( host, env )
 
-      cygwin = ((host['platform'] =~ /windows/) and @cmdexe) ? 'cmd.exe /c' : nil
+      cygwin = ((host['platform'] =~ /windows/) and host.is_cygwin? and @cmdexe) ? 'cmd.exe /c' : nil
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
       [env_string, cygwin, cmd, options_string, args_string].compact.reject(&:empty?).join(' ')

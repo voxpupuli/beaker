@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Feb, 2015 (c3cffad8)](#LATEST)
+* [LATEST - 23 Feb, 2015 (9ad8bd4c)](#LATEST)
+* [beaker2.4.1 - 13 Feb, 2015 (84400ed1)](#beaker2.4.1)
 * [beaker2.4.0 - 13 Feb, 2015 (bc5a6676)](#beaker2.4.0)
 * [beaker2.3.0 - 29 Jan, 2015 (3d185da0)](#beaker2.3.0)
 * [beaker2.2.0 - 8 Jan, 2015 (cba5f7ed)](#beaker2.2.0)
@@ -70,7 +71,145 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Feb, 2015 (c3cffad8)
+### <a name = "LATEST">LATEST - 23 Feb, 2015 (9ad8bd4c)
+
+* (GEM) update beaker version to 2.5.0 (9ad8bd4c)
+
+* Merge pull request #701 from anodelman/win-fix (de652599)
+
+
+```
+Merge pull request #701 from anodelman/win-fix
+
+(QENG-1852) install_puppet unable to install windows msi (regression)
+```
+* Merge pull request #677 from kevpl/qeng1721_aio_windowsadd (566600ba)
+
+
+```
+Merge pull request #677 from kevpl/qeng1721_aio_windowsadd
+
+qeng1721: added AIO windows support
+```
+* Merge pull request #695 from liamjbennett/vagrant_windows_fix (a7a85f72)
+
+
+```
+Merge pull request #695 from liamjbennett/vagrant_windows_fix
+
+(MAINT) Rolling back change for windows in the vagrant hypervisor
+```
+* Merge pull request #706 from madAndroid/GH-700-add-docker-options (8e0a7e7d)
+
+
+```
+Merge pull request #706 from madAndroid/GH-700-add-docker-options
+
+GH-700 - Allow Docker::options to be set from config hash
+```
+* Merge pull request #709 from kevpl/qeng1868_3.8_answers (cd980c9e)
+
+
+```
+Merge pull request #709 from kevpl/qeng1868_3.8_answers
+
+(QENG-1868) added 3.8 answers file, based on 3.7
+```
+* (QENG-1868) added 3.8 answers file, based on 3.7 (5ee004d4)
+
+* Merge pull request #707 from johnduarte/QENG-1867 (badb17a0)
+
+
+```
+Merge pull request #707 from johnduarte/QENG-1867
+
+(QENG-1867) Add ETIMEDOUT rescue to host.rb
+```
+* (QENG-1867) Add ETIMEDOUT rescue to host.rb (e7a2ed2d)
+
+
+```
+(QENG-1867) Add ETIMEDOUT rescue to host.rb
+
+This commit adds `Errno::ETIMEDOUT` to the rescue logic of the
+port_open? method in lib/beaker/host.rb.
+
+Adding this this rescue prevents the ETIMEDOUT error from short circuiting of
+the logical intention of the port_open? method.
+```
+* GH-700 - amend merge as per suggestion in #706 (6d56290a)
+
+* GH-700 - amend comments to be more appropriate (02591293)
+
+* GH-700 - handle the use case where ::Docker.options is nil (81836988)
+
+* Merge pull request #703 from sschneid/pooling_api_syntax_fixup (041f04ad)
+
+
+```
+Merge pull request #703 from sschneid/pooling_api_syntax_fixup
+
+(MAINT) use implicit trailing '/' for pooling_api URI
+```
+* (MAINT) use implicit trailing '/' for pooling_api URI (4d2e6f32)
+
+* (QENG-1852) install_puppet unable to install windows msi (regression) (76aba308)
+
+
+```
+(QENG-1852) install_puppet unable to install windows msi (regression)
+
+- busted curl command on windows
+- busted msiexec command for installation
+- i cry myself to sleep every night
+```
+* Merge pull request #698 from sschneid/batch_vm_checkout (b8a64f74)
+
+
+```
+Merge pull request #698 from sschneid/batch_vm_checkout
+
+(QENG-780) request sets of VMs instead of one VM at a time
+```
+* GH-700 - set ::Docker.options from docker_options in options hash, if it's not set via ::Docker.options already (7db8b636)
+
+* (QENG-780) Updating MockNet::HTTP::Post methods (72a07bd2)
+
+* (QENG-780) request sets of VMs instead of one VM at a time (9e82d9b6)
+
+
+```
+(QENG-780) request sets of VMs instead of one VM at a time
+
+This PR facilitates use of vmpooler's batch-request POST API
+(https://github.com/puppetlabs/vmpooler#post-vm) within beaker.
+```
+* Merge pull request #696 from kevpl/qeng1721_aio_quickadd (831a6c4e)
+
+
+```
+Merge pull request #696 from kevpl/qeng1721_aio_quickadd
+
+(QENG-1721) added a quick AIO override for windows to unblock testing
+```
+* (QENG-1721) added a quick AIO override for windows to unblock testing (ba6ba605)
+
+* (MAINT) Rolling back change for windows in the vagrant hypervisor (16741375)
+
+
+```
+(MAINT) Rolling back change for windows in the vagrant hypervisor
+
+Rolling back the change made in bf353c1 as it is no longer required.
+
+The subsequent change in 3aa080c for vagrant 1.7 properly fixed the issue
+and so the work around can now be removed.
+```
+* qeng1721: added AIO windows support (6f8deb7d)
+
+### <a name = "beaker2.4.1">beaker2.4.1 - 13 Feb, 2015 (84400ed1)
+
+* (HISTORY) update beaker history for gem release 2.4.1 (84400ed1)
 
 * (GEM) update beaker version to 2.4.1 (c3cffad8)
 

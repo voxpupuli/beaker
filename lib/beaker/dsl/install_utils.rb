@@ -168,8 +168,11 @@ module Beaker
         if host['platform'] =~ /windows/
           log_file = "#{File.basename(host['working_dir'])}.log"
           pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-          "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
-
+          if host.is_cygwin?
+            "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
+          else
+            "cd #{host['working_dir']} &&  msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}#{pe_debug}"
+          end
         # Frictionless install didn't exist pre-3.2.0, so in that case we fall
         # through and do a regular install.
         elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
@@ -347,7 +350,11 @@ module Beaker
           if not link_exists?("#{path}/#{filename}#{extension}")
             raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
           end
-          on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+          if host.is_cygwin?
+            on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+          else
+            on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['working_dir']}\\#{filename}#{extension}')")
+          end
         end
       end
 
@@ -444,6 +451,7 @@ module Beaker
       # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
       #                  (Otherwise uses individual Windows hosts pe_ver)
       # @option opts [Symbol] :type (:install) One of :upgrade or :install
+      # @option opts [Boolean] :set_console_password Should we set the PE console password in the answers file?  Used during upgrade only.
       # @option opts [Hash<String>] :answers Pre-set answers based upon ENV vars and defaults
       #                             (See {Beaker::Options::Presets.env_vars})
       #
@@ -478,11 +486,18 @@ module Beaker
             host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
           elsif host['platform'] =~ /windows/
             version = host[:pe_ver] || opts['pe_ver_win']
+            should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !host['install_32'] && !opts['install_32']
             #only install 64bit builds if
             # - we are on pe version 3.4+
             # - we do not have install_32 set on host
             # - we do not have install_32 set globally
-            if !(version_is_less(version, '3.4')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+            if !(version_is_less(version, '4.0'))
+              if should_install_64bit
+                host['dist'] = "puppet-agent-#{version}-x64"
+              else
+                host['dist'] = "puppet-agent-#{version}-x86"
+              end
+            elsif should_install_64bit
               host['dist'] = "puppet-enterprise-#{version}-x64"
             else
               host['dist'] = "puppet-enterprise-#{version}"
@@ -502,6 +517,10 @@ module Beaker
         install_hosts.each do |host|
           if host['platform'] =~ /windows/
             on host, installer_cmd(host, opts)
+            if not host.is_cygwin?
+              # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
+              host.close
+            end
           else
             # We only need answers if we're using the classic installer
             version = host['pe_ver'] || opts[:pe_ver]
@@ -691,7 +710,7 @@ module Beaker
 
           # Certain install paths may not create the config dirs/files needed
           on host, "mkdir -p #{host['puppetpath']}"
-          on host, "echo '' >> #{host['hieraconf']}"
+          on host, "echo '' >> #{host.puppet['hiera_config']}"
         end
         nil
       end
@@ -709,6 +728,69 @@ module Beaker
           on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         else
           raise "nothing to do for #{host.name} on #{host['platform']}"
+        end
+      end
+
+      # Configure puppet.conf for all hosts based upon a provided Hash
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [Hash{String=>String}] :main configure the main section of puppet.conf
+      # @option opts [Hash{String=>String}] :agent configure the agent section of puppet.conf
+      #
+      # @api dsl
+      # @return nil
+      def configure_puppet(opts={})
+        hosts.each do |host|
+          configure_puppet_on(host,opts)
+        end
+      end
+
+      # Configure puppet.conf on the given host based upon a provided hash
+      # @param [Host] host The host to configure puppet.conf on
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [Hash{String=>String}] :main configure the main section of puppet.conf
+      # @option opts [Hash{String=>String}] :agent configure the agent section of puppet.conf
+      #
+      # @example will configure /etc/puppet.conf on the puppet master.
+      #   config = {
+      #     'main' => {
+      #       'server'   => 'testbox.test.local',
+      #       'certname' => 'testbox.test.local',
+      #       'logdir'   => '/var/log/puppet',
+      #       'vardir'   => '/var/lib/puppet',
+      #       'ssldir'   => '/var/lib/puppet/ssl',
+      #       'rundir'   => '/var/run/puppet'
+      #     },
+      #     'agent' => {
+      #       'environment' => 'dev'
+      #     }
+      #   }
+      #   configure_puppet(master, config)
+      #
+      # @api dsl
+      # @return nil
+      def configure_puppet_on(host, opts = {})
+        if host['platform'] =~ /windows/
+          puppet_conf = "#{host['puppetpath']}\\puppet.conf"
+          conf_data = ''
+          opts.each do |section,options|
+            conf_data << "[#{section}]`n"
+            options.each do |option,value|
+              conf_data << "#{option}=#{value}`n"
+            end
+            conf_data << "`n"
+          end
+          on host, powershell("\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text")
+        else
+          puppet_conf = "#{host['puppetpath']}/puppet.conf"
+          conf_data = ''
+          opts.each do |section,options|
+            conf_data << "[#{section}]\n"
+            options.each do |option,value|
+              conf_data << "#{option}=#{value}\n"
+            end
+            conf_data << "\n"
+          end
+          on host, "echo \"#{conf_data}\" > #{puppet_conf}"
         end
       end
 
@@ -806,9 +888,9 @@ module Beaker
           raise "Puppet #{version} at #{link} does not exist!"
         end
 
-        if host['is_cygwin'].nil? or host['is_cygwin'] == true
-          dest = "/cygdrive/c/Windows/Temp/#{host['dist']}.msi"
-          on host, "curl -O #{dest} #{link}"
+        if host.is_cygwin?
+          dest = "#{host['dist']}.msi"
+          on host, "curl -O #{link}"
 
           #Because the msi installer doesn't add Puppet to the environment path
           #Add both potential paths for simplicity
@@ -826,7 +908,7 @@ module Beaker
           on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
         end
 
-        on host, "msiexec /qn /i #{dest}"
+        on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
       end
 
       # Installs Puppet and dependencies from dmg
@@ -982,6 +1064,12 @@ module Beaker
       #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
       # @api dsl
       def upgrade_pe path=nil
+        set_console_password = false
+        # if we are upgrading from something lower than 3.4 then we need to set the pe console password
+        if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
+          set_console_password = true
+        end
+        # get new version information
         hosts.each do |host|
           host['pe_dir'] = host['pe_upgrade_dir'] || path
           if host['platform'] =~ /windows/
@@ -995,8 +1083,8 @@ module Beaker
             host['pe_installer'] ||= 'puppet-enterprise-upgrader'
           end
         end
-        #send in the global options hash
-        do_install(sorted_hosts, options.merge({:type => :upgrade}))
+        # send in the global options hash
+        do_install(sorted_hosts, options.merge({:type => :upgrade, :set_console_password => set_console_password}))
         options['upgrade'] = true
       end
 
@@ -1195,6 +1283,11 @@ module Beaker
         when /^(debian|ubuntu|cumulus)$/
           release_path << "deb/#{codename}"
           release_file = "puppet-agent_#{opts[:version]}-1_#{arch}.deb"
+        when /^windows$/
+          release_path << 'windows'
+          onhost_copy_base = '`cygpath -smF 35`/'
+          arch_suffix = arch =~ /64/ ? '64' : '86'
+          release_file = "puppet-agent-x#{arch_suffix}.msi"
         else
           raise "No repository installation step for #{variant} yet..."
         end
@@ -1209,6 +1302,10 @@ module Beaker
         when /^(debian|ubuntu|cumulus)$/
           on host, "dpkg -i --force-all #{onhost_copied_file}"
           on host, "apt-get update"
+        when /^windows$/
+          result = on host, "echo #{onhost_copied_file}"
+          onhost_copied_file = result.raw_output.chomp
+          on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
         end
       end
 
@@ -1318,6 +1415,8 @@ module Beaker
       #                   Location where the module should be installed, will default
       #                    to host['distmoduledir']/modules
       # @option opts [Array] :ignore_list
+      # @option opts [String] :protocol
+      #                   Name of the underlying transfer method. Valid options are 'scp' or 'rsync'.
       # @raise [ArgumentError] if not host is provided or module_name is not provided and can not be found in Modulefile
       #
       def copy_module_to(one_or_more_hosts, opts = {})
@@ -1333,7 +1432,17 @@ module Beaker
           else
             _, module_name = parse_for_modulename( source )
           end
-          scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+
+          opts[:protocol] ||= 'scp'
+          case opts[:protocol]
+            when 'scp'
+              scp_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+            when 'rsync'
+              rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
+          end
         end
       end
       alias :copy_root_module_to :copy_module_to

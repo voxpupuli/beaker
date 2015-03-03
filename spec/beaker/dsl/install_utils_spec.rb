@@ -354,6 +354,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :sign_certificate_for ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
       allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
@@ -547,15 +548,15 @@ describe ClassMixedWithDSLInstallUtils do
       let(:platform) { "windows-2008r2-i386" }
       it 'installs specific version of puppet when passed :version' do
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O /cygdrive/c/Windows/Temp/puppet-3000.msi http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
-        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i /cygdrive/c/Windows/Temp/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
         subject.install_puppet(:version => '3000')
       end
       it 'installs from custom url when passed :win_download_url' do
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O /cygdrive/c/Windows/Temp/puppet-3000.msi http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
-        expect(subject).to receive(:on).with(hosts[0], 'msiexec /qn /i /cygdrive/c/Windows/Temp/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
         subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
       end
     end
@@ -574,6 +575,63 @@ describe ClassMixedWithDSLInstallUtils do
         allow(subject).to receive(:on).with(host, /gem environment/).and_return result
         expect(subject).to receive(:on).with(host, /gem install/)
         subject.install_puppet :default_action => 'gem_install'
+      end
+    end
+  end
+
+  describe 'configure_puppet_on' do
+    before do
+      allow(subject).to receive(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on).with(host, "echo \"[main]\nserver=testbox.test.local\n\n\" > /etc/puppet/puppet.conf")
+        subject.configure_puppet_on(host, config)
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
+        end
+        subject.configure_puppet_on(host, config)
+      end
+    end
+  end
+
+  describe 'configure_puppet' do
+    let(:hosts) do
+      make_hosts({:platform => platform })
+    end
+
+    before do
+      allow( subject ).to receive(:hosts).and_return(hosts)
+      allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on).with(hosts[0], "echo \"[main]\nserver=testbox.test.local\n\n\" > /etc/puppet/puppet.conf")
+        subject.configure_puppet(config)
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      it 'it sets the puppet.conf file to the provided config' do
+        config = { 'main' => {'server' => 'testbox.test.local'} }
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
+        end
+        subject.configure_puppet(config)
       end
     end
   end
@@ -600,7 +658,7 @@ describe ClassMixedWithDSLInstallUtils do
         entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(" -ExecutionPolicy Bypass -InputFormat None -NoLogo -NoProfile -NonInteractive -Command \"$text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text\"")
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text"])
         end
 
 
@@ -657,10 +715,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be === 'puppet-enterprise-upgrader'
@@ -673,10 +732,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.1', '3.0').and_return( false )
       version = version_win = '3.1'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_installer'] ).to be nil
@@ -689,10 +749,11 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts = [ hosts[0].dup, hosts[1].dup, hosts[2].dup ]
       allow( subject ).to receive( :hosts ).and_return( the_hosts )
       allow( subject ).to receive( :options ).and_return( {} )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('2.8', '3.0').and_return( true )
       version = version_win = '2.8'
       path = "/path/to/upgradepkg"
-      expect( subject ).to receive( :do_install ).with( the_hosts, { :type => :upgrade } )
+      expect( subject ).to receive( :do_install ).with( the_hosts, {:type=>:upgrade, :set_console_password=>true} )
       subject.upgrade_pe( path )
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
@@ -912,6 +973,24 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:scp_to).once.with(host, /-agent_/, "/root")
       expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
       expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
+
+      subject.install_puppetagent_dev_repo( host, opts )
+    end
+
+    it 'runs the correct install for windows platforms' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['windows', '5', 'x64']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+      mock_echo = Object.new()
+      allow( mock_echo ).to receive( :raw_output ).and_return( " " )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-x64.msi', /\/windows$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-x64.msi$/, /cygpath/)
+      expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
+      expect(subject).to receive(:on).ordered.with(host, anything)
 
       subject.install_puppetagent_dev_repo( host, opts )
     end

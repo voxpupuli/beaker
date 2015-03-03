@@ -183,7 +183,7 @@ module Beaker
         end
       end
 
-      # Move a local file to a remote host
+      # Move a local file to a remote host using scp
       # @note If using {Beaker::Host} for the hosts *scp* is not
       #   required on the system as it uses Ruby's net/scp library.  The
       #   net-scp gem however is required (and specified in the gemspec.
@@ -206,6 +206,27 @@ module Beaker
           end
           @result = host.do_scp_to(from_path, to_path, opts)
           @result.log logger
+          @result
+        end
+      end
+
+      # Move a local file or directory to a remote host using rsync
+      # @note rsync is required on the local host.
+      #
+      # @param [Host, #do_scp_to] host A host object that responds like
+      #                                {Beaker::Host}.
+      # @param [String] from_path A local path to a file or directory.
+      # @param [String] to_path   A remote path to copy *from_path* to.
+      # @!macro common_opts
+      #
+      # @return [Result] Returns the result of the rsync operation
+      def rsync_to host, from_path, to_path, opts = {}
+        block_on host do | host |
+          if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            result = host.echo "#{to_path}"
+            to_path = result.raw_output.chomp
+          end
+          @result = host.do_rsync_to(from_path, to_path, opts)
           @result
         end
       end
@@ -238,13 +259,24 @@ module Beaker
       # @param [String] file_path A remote path to place *file_content* at.
       # @param [String] file_content The contents of the file to be placed.
       # @!macro common_opts
+      # @option opts [String] :protocol Name of the underlying transfer method.
+      #                                 Valid options are 'scp' or 'rsync'.
       #
       # @return [Result] Returns the result of the underlying SCP operation.
       def create_remote_file(hosts, file_path, file_content, opts = {})
         Tempfile.open 'beaker' do |tempfile|
           File.open(tempfile.path, 'w') {|file| file.puts file_content }
 
-          scp_to hosts, tempfile.path, file_path, opts
+          opts[:protocol] ||= 'scp'
+          case opts[:protocol]
+            when 'scp'
+              scp_to hosts, tempfile.path, file_path, opts
+            when 'rsync'
+              rsync_to hosts, tempfile.path, file_path, opts
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
+          end
         end
       end
 
@@ -553,7 +585,7 @@ module Beaker
         end
 
         begin
-          backup_file = backup_the_file(host, host['puppetconfdir'], testdir, 'puppet.conf')
+          backup_file = backup_the_file(host, host.puppet('master')['confdir'], testdir, 'puppet.conf')
           lay_down_new_puppet_conf host, conf_opts, testdir
 
           if host.use_service_scripts? && !service_args[:bypass_service_script]
@@ -564,6 +596,8 @@ module Beaker
 
           yield self if block_given?
 
+        rescue Beaker::DSL::Assertions, Minitest::Assertion => early_assertion
+          fail_test(early_assertion)
         rescue Exception => early_exception
           original_exception = RuntimeError.new("PuppetAcceptance::DSL::Helpers.with_puppet_running_on failed (check backtrace for location) because: #{early_exception}\n#{early_exception.backtrace.join("\n")}\n")
           raise(original_exception)
@@ -612,8 +646,7 @@ module Beaker
 
       # @!visibility private
       def restore_puppet_conf_from_backup( host, backup_file )
-        puppetpath = host['puppetconfdir']
-        puppet_conf = File.join(puppetpath, "puppet.conf")
+        puppet_conf = host.puppet('master')['config']
 
         if backup_file
           host.exec( Command.new( "if [ -f '#{backup_file}' ]; then " +
@@ -693,8 +726,9 @@ module Beaker
 
       # @!visibility private
       def lay_down_new_puppet_conf( host, configuration_options, testdir )
-        puppetconf_test = "#{testdir}/puppet.conf"
-        puppetconf_main = "#{host['puppetconfdir']}/puppet.conf"
+        puppetconf_main = host.puppet('master')['config']
+        puppetconf_filename = File.basename(puppetconf_main)
+        puppetconf_test = File.join(testdir, puppetconf_filename)
 
         new_conf = puppet_conf_for( host, configuration_options )
         create_remote_file host, puppetconf_test, new_conf.to_s
@@ -708,7 +742,7 @@ module Beaker
 
       # @!visibility private
       def puppet_conf_for host, conf_opts
-        puppetconf = host.exec( Command.new( "cat #{host['puppetconfdir']}/puppet.conf" ) ).stdout
+        puppetconf = host.exec( Command.new( "cat #{host.puppet('master')['config']}" ) ).stdout
         new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
 
         new_conf
@@ -1240,16 +1274,17 @@ module Beaker
           vardir = agent.puppet['vardir']
           agent_running = true
           while agent_running
-            result = on host, "[ -e '#{vardir}/state/agent_catalog_run.lock' ]", :acceptable_exit_codes => [0,1]
-            agent_running = (result.exit_code == 0)
-            sleep 2 unless agent_running
+            agent_running = agent.file_exist?("#{vardir}/state/agent_catalog_run.lock")
+            if agent_running
+              sleep 2
+            end
           end
 
           # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
           # In all the case that it is different, this init script will exist. So we can assume
           # that if the script doesn't exist, we should just use `pe-puppet`
-          result = on agent, "[ -e /etc/init.d/pe-puppet-agent ]", :acceptable_exit_codes => [0,1]
-          agent_service = (result.exit_code == 0) ? 'pe-puppet-agent' : 'pe-puppet'
+          agent_service = 'pe-puppet-agent'
+          agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
 
           # Under a number of stupid circumstances, we can't stop the
           # agent using puppet.  This is usually because of issues with
@@ -1373,7 +1408,7 @@ module Beaker
           hiera_config[:yaml][:datadir] = host[:hieradatadir]
           hiera_config[:hierarchy] = hierarchy
           hiera_config[:logger] = 'console'
-          create_remote_file host, host[:hieraconf], hiera_config.to_yaml
+          create_remote_file host, host.puppet['hiera_config'], hiera_config.to_yaml
         end
       end
 
