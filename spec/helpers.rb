@@ -19,7 +19,10 @@ module TestFileHelpers
                     :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
                     :vsphere_server => "vsphere.labs.net",
                     :vsphere_username => "vsphere@labs.com",
-                    :vsphere_password => "supersekritpassword"} }
+                    :vsphere_password => "supersekritpassword",
+                    :vco_server => "vsphere.labs.net",
+                    :vco_username => "vco@labs.com",
+                    :vco_password => "supersekritpassword",}, }
   end
 
 end
@@ -94,7 +97,20 @@ module HostHelpers
                :ip => HOST_IP % name,
                :template => HOST_TEMPLATE % name,
                :box => HOST_BOX % name,
-               :box_url => HOST_BOX_URL % name }.merge( preset_opts )
+               :box_url => HOST_BOX_URL % name,
+               :provision_workflow => {  :name => "Provision Workflow",
+                 :parameters => {
+                   :name => "vm_name",
+                   :result => "COMPLETED",
+                 }
+               },
+               :cleanup_workflow => {  :name => "Cleanup Workflow",
+                 :parameters => {
+                   :name => "vm_name",
+                   :result => "COMPLETED",
+                 }
+               }
+            }.merge( preset_opts )
       hosts << make_host(name, opts)
     end
     hosts

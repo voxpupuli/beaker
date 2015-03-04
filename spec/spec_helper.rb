@@ -6,6 +6,8 @@ require 'matchers'
 require 'mock_fission'
 require 'mock_vsphere'
 require 'mock_vsphere_helper'
+require 'mock_vcenter_orchestrator'
+require 'mock_vcenter_orchestrator_helper'
 
 require 'rspec/its'
 
