@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 23 Feb, 2015 (9ad8bd4c)](#LATEST)
+* [LATEST - 4 Mar, 2015 (958ab02d)](#LATEST)
+* [beaker2.5.0 - 23 Feb, 2015 (c421cf95)](#beaker2.5.0)
 * [beaker2.4.1 - 13 Feb, 2015 (84400ed1)](#beaker2.4.1)
 * [beaker2.4.0 - 13 Feb, 2015 (bc5a6676)](#beaker2.4.0)
 * [beaker2.3.0 - 29 Jan, 2015 (3d185da0)](#beaker2.3.0)
@@ -71,7 +72,262 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 23 Feb, 2015 (9ad8bd4c)
+### <a name = "LATEST">LATEST - 4 Mar, 2015 (958ab02d)
+
+* (GEM) update beaker version to 2.5.1 (958ab02d)
+
+* Merge pull request #719 from kevpl/qeng1841_aio_pathsupdate (c6a15c8f)
+
+
+```
+Merge pull request #719 from kevpl/qeng1841_aio_pathsupdate
+
+(QENG-1841) updated AIO pathing for linux & windows
+```
+* Merge pull request #726 from anodelman/maint (a23acbf2)
+
+
+```
+Merge pull request #726 from anodelman/maint
+
+(maint) Upgrade google-api-client dependency to fix Ruby 1.9.x...
+```
+* (maint) Upgrade google-api-client dependency to fix Ruby 1.9.x... (d5301654)
+
+
+```
+(maint) Upgrade google-api-client dependency to fix Ruby 1.9.x...
+
+- compatibility
+
+- for puppetdb project:
+
+"
+Retriable was upgraded today (Jan 30th) and they shipped a version 2.0.0
+that
+requires Ruby >=2.0.0.
+
+In google-api-client 0.7.1, we were pulling in version >= 1.4 of
+retriable. In 0.8.2
+they have a fix that pulls in ~> 1.4 version of retriable, thus pinning
+the ceiling
+on the upgrade to retriable 2.0.0.
+"
+```
+* Merge pull request #626 from carlossg/ssh-restart (31bc7aa4)
+
+
+```
+Merge pull request #626 from carlossg/ssh-restart
+
+[docker] No need to restart sshd
+```
+* Merge pull request #721 from kevpl/qeng1913_aio_pullback (69130a54)
+
+
+```
+Merge pull request #721 from kevpl/qeng1913_aio_pullback
+
+(QENG-1913) rolling back the name change for pe-puppet that was made for AIO
+```
+* Merge pull request #722 from puppetlabs/revert-715-acceptance (fdf906b8)
+
+
+```
+Merge pull request #722 from puppetlabs/revert-715-acceptance
+
+Revert "(QENG-1869) create beaker host.rb acceptance tests"
+```
+* Revert "(QENG-1869) create beaker host.rb acceptance tests" (d7e2c7c3)
+
+* (QENG-1913) rolling back the name change for pe-puppet that was made for AIO (d68fe7d7)
+
+* Merge pull request #716 from anodelman/maint (6e420185)
+
+
+```
+Merge pull request #716 from anodelman/maint
+
+(QENG-1681) upgrade_pe method is generating errors when attempted...
+```
+* (QENG-1841) updated AIO pathing for linux & windows (fdfa69be)
+
+* Merge pull request #715 from anodelman/acceptance (c6c377c8)
+
+
+```
+Merge pull request #715 from anodelman/acceptance
+
+(QENG-1869) create beaker host.rb acceptance tests
+```
+* Merge pull request #714 from kevpl/qeng1721_aio_windowsinstall (14f2239d)
+
+
+```
+Merge pull request #714 from kevpl/qeng1721_aio_windowsinstall
+
+(QENG-1721) added installation support of dev versions of windows puppet...
+```
+* (QENG-1681) upgrade_pe method is generating errors when attempted... (ae0d7333)
+
+
+```
+(QENG-1681) upgrade_pe method is generating errors when attempted...
+
+...on PE 3.7.0 and later
+
+- do pe version comparison in the upgrader method, not the answer file
+  generator
+- use proper semvar dot comparison of versions, not just string compare
+- handle not knowing what the pe_ver is currently installed
+- unrelated nit: remove duplicate key entries in answer file generation
+```
+* Merge pull request #647 from mcanevet/feature/openstack/generate_key_pair (32e123e9)
+
+
+```
+Merge pull request #647 from mcanevet/feature/openstack/generate_key_pair
+
+(gh-646) Create random keypair
+```
+* Merge pull request #699 from kevpl/qeng1429_should_fail_not_error (b757a552)
+
+
+```
+Merge pull request #699 from kevpl/qeng1429_should_fail_not_error
+
+(QENG-1429) added clause to catch Beaker & Minitest assertions
+```
+* Merge pull request #708 from kevpl/qeng1847_aio_hostparams (a321d264)
+
+
+```
+Merge pull request #708 from kevpl/qeng1847_aio_hostparams
+
+(QENG-1847) changed internal host path attribute usage to host.puppet me...
+```
+* Merge pull request #686 from mcanevet/fix/openstack/use_openstack_tenant (0aa7d5e6)
+
+
+```
+Merge pull request #686 from mcanevet/fix/openstack/use_openstack_tenant
+
+(gh-685) Add openstack_tenant to network_client init
+```
+* Merge pull request #697 from anodelman/cygwin-less (ebda7a6d)
+
+
+```
+Merge pull request #697 from anodelman/cygwin-less
+
+(QENG-1735) set up local windows vm without cygwin and get it working
+```
+* (QENG-1721) added installation support of dev versions of windows puppet-agent (45f92543)
+
+* Merge pull request #670 from petems/MAINT-ps_windows_reindent (1f3034c5)
+
+
+```
+Merge pull request #670 from petems/MAINT-ps_windows_reindent
+
+(MAINT) Fix indentation
+```
+* Merge pull request #711 from jonnytpuppet/rsync_support (27672383)
+
+
+```
+Merge pull request #711 from jonnytpuppet/rsync_support
+
+Added support for rsync
+```
+* Merge pull request #713 from anodelman/maint (539f176d)
+
+
+```
+Merge pull request #713 from anodelman/maint
+
+(MAINT) fix broken spec tests
+```
+* (MAINT) fix broken spec tests (76e06a75)
+
+
+```
+(MAINT) fix broken spec tests
+
+- accidental breakage of spec tests
+- also removed deprecated rspec method call
+```
+* Merge pull request #634 from liamjbennett/puppet_conf (baeee93d)
+
+
+```
+Merge pull request #634 from liamjbennett/puppet_conf
+
+(gh-474) Adding a utility method for puppet.conf file
+```
+* Merge pull request #689 from liamjbennett/powershell_fix (854d0aa0)
+
+
+```
+Merge pull request #689 from liamjbennett/powershell_fix
+
+(gh-688) Fixing the powershell wrapper to use an array of arguments
+```
+* QENG-1878 Added support for rsync (d2076dec)
+
+* (QENG-1869) create beaker host.rb acceptance tests (e4c0fcf9)
+
+
+```
+(QENG-1869) create beaker host.rb acceptance tests
+
+- tests that exercise basic host.rb functionality
+```
+* (QENG-1847) changed internal host path attribute usage to host.puppet method calls where possible (0179294e)
+
+* (QENG-1380) design beaker DSL based acceptance tests (8341e56d)
+
+
+```
+(QENG-1380) design beaker DSL based acceptance tests
+
+- initial directory hierarchy for beaker acceptance testing
+```
+* (QENG-1429) added clause to catch Beaker & Minitest assertions (d91692dd)
+
+* (gh-688) Fixing the powershell wrapper to use an array of arguments (b5ebc137)
+
+* (gh-685) Add openstack_tenant to network_client init (58c6eca1)
+
+* (MAINT) Fix indentation (62c23595)
+
+* (QENG-1735) set up local windows vm without cygwin and get it working (9c32cac7)
+
+
+```
+(QENG-1735) set up local windows vm without cygwin and get it working
+
+- ensure that you can install PE
+- deal with setting PATH/RUBY env vars
+- update DSL methods to work on windows without bash
+```
+* (gh-646) Create random keypair (7b660047)
+
+* (gh-474) Adding a utility method for puppet.conf file (8965fec0)
+
+* (gh-626) [docker] Ensure that the ssh server can be restarted and container keeps running (85123f12)
+
+
+```
+(gh-626) [docker] Ensure that the ssh server can be restarted and container keeps running
+
+If the sshd process dies then the container stops
+Allow configuring the execution or not of set_env
+Fix #611
+```
+### <a name = "beaker2.5.0">beaker2.5.0 - 23 Feb, 2015 (c421cf95)
+
+* (HISTORY) update beaker history for gem release 2.5.0 (c421cf95)
 
 * (GEM) update beaker version to 2.5.0 (9ad8bd4c)
 
