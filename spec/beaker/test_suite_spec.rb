@@ -207,5 +207,53 @@ module Beaker
 
 
     end
+
+    describe '#log_path' do
+      let( :sh_test   ) { '/my_shell_file.sh'   }
+      let( :files     ) { @files ? @files : [sh_test] }
+      let( :options   ) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(files) }) }
+      let( :hosts     ) { make_hosts() }
+      let( :testsuite ) { Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop ) }
+
+      it 'returns the simple joining of the log dir & file as required' do
+        expect(testsuite.log_path('foo.txt', 'man/date')).to be === 'man/date/foo.txt'
+      end
+
+      describe 'builds the base directory correctly' do
+        # the base directory is where the latest symlink itself should live
+
+        it 'in the usual case' do
+          expect( File.symlink?('man/latest') ).to be_falsy
+          testsuite.log_path('foo.txt', 'man/date')
+          expect( File.symlink?('man/latest') ).to be_truthy
+        end
+
+        it 'if given a nested directory' do
+          expect( File.symlink?('a/latest') ).to be_falsy
+          testsuite.log_path('foo.txt', 'a/b/c/d/e/f')
+          expect( File.symlink?('a/latest') ).to be_truthy
+        end
+
+      end
+
+      describe 'builds the symlink directory correctly' do
+        # the symlink directory is where the symlink points to
+
+        it 'in the usual case' do
+          expect( File.symlink?('d/latest') ).to be_falsy
+          testsuite.log_path('foo.txt', 'd/e')
+          expect( File.readlink('d/latest') ).to be === 'e'
+        end
+
+        it 'if given a nested directory' do
+          expect( File.symlink?('f/latest') ).to be_falsy
+          testsuite.log_path('foo.txt', 'f/g/h/i/j/k')
+          expect( File.readlink('f/latest') ).to be === 'g/h/i/j/k'
+        end
+
+      end
+
+    end
+
   end
 end

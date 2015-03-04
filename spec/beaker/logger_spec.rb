@@ -6,6 +6,7 @@ module Beaker
     let(:my_io)     { MockIO.new                         }
     let(:logger)    { Logger.new(my_io, :quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
+    let(:dummy_prefix)  { 'dummy' }
 
     context '#convert' do
       let(:valid_utf8)  { "/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\n" }
@@ -28,12 +29,18 @@ module Beaker
 
       it 'generates path for a given timestamp' do
         input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
-        expect( Logger.generate_dated_log_folder(test_dir, input_time) ).to be === File.join(test_dir, '2014-06-02_16_31_22')
+        expect( Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
       end
 
       it 'generates directory for a given timestamp' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, input_time) ).to be_truthy
+        expect( File.directory? Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be_truthy
+      end
+
+      it 'generates nested directories if given as a log_prefix' do
+        input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
+        prefix = 'a/man/a/plan/a/canal/panama'
+        expect( File.directory? Logger.generate_dated_log_folder(test_dir, prefix, input_time) ).to be_truthy
       end
 
     end

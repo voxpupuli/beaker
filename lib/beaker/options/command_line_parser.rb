@@ -137,6 +137,13 @@ module Beaker
             @cmd_options[:log_level] = val
           end
 
+          opts.on '--log-prefix PREFIX',
+                  'Use a custom prefix for your Beaker log files',
+                  'can provide nested directories (ie. face/man)',
+                  '(defaults to hostfile name. ie. ../i/07.yml --> "07")' do |val|
+            @cmd_options[:log_prefix] = val
+          end
+
           opts.on  '-d', '--[no-]dry-run',
                    'Report what would happen on targets',
                    '(default: false)' do |bool|

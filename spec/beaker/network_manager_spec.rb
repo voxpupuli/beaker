@@ -7,7 +7,13 @@ module Beaker
       mock_provisioning_logger = Object.new
       allow( mock_provisioning_logger ).to receive( :notify )
       mock_provisioning_logger }
-    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object, :logger_sut => mock_provisioning_logger }) }
+    let( :options ) {
+      make_opts.merge({
+        'logger' => double().as_null_object,
+        :logger_sut => mock_provisioning_logger,
+        :log_prefix => 'log_prefix_dummy'
+      })
+    }
     let( :network_manager ) { NetworkManager.new(options, options[:logger]) }
     let( :hosts ) { make_hosts }
     let( :host ) { hosts[0] }
