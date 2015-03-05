@@ -14,7 +14,7 @@ module Windows::File
   end
 
   def file_exist?(path)
-    result = exec(Beaker::Command.new("test -e #{path}"), :acceptable_exit_codes => [0, 1])
+    result = exec(Beaker::Command.new("test -e '#{path}'"), :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end
 end
