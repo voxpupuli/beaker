@@ -66,7 +66,7 @@ module Beaker
 
       it 'sets the paths correctly for an AIO host' do
         options['type'] = 'aio'
-        expect(host['puppetvardir']).to be === Unix::Host::aio_defaults[:puppetvardir]
+        expect(host['puppetvardir']).to be_nil
       end
     end
 

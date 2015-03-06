@@ -1393,4 +1393,20 @@ describe ClassMixedWithDSLHelpers do
 
   end
 
+  describe '#hiera_datadir' do
+    it 'returns the codedir based hieradatadir for AIO' do
+      host = hosts[0]
+      host['type'] = :aio
+      correct_answer = File.join(host.puppet['codedir'], 'hieradata')
+      expect( subject.hiera_datadir(host) ).to be === correct_answer
+    end
+
+    it 'returns the hieradata host value for anything not AIO (backwards compatible)' do
+      host_hieradatadir_value = '/home/fishing/man/pants'
+      host = hosts[0]
+      host[:hieradatadir] = host_hieradatadir_value
+      expect( subject.hiera_datadir(host) ).to be === host_hieradatadir_value
+    end
+  end
+
 end

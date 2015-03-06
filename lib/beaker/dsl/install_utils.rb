@@ -709,7 +709,7 @@ module Beaker
           end
 
           # Certain install paths may not create the config dirs/files needed
-          on host, "mkdir -p #{host['puppetpath']}"
+          on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
           on host, "echo '' >> #{host.puppet['hiera_config']}"
         end
         nil
@@ -770,7 +770,7 @@ module Beaker
       # @return nil
       def configure_puppet_on(host, opts = {})
         if host['platform'] =~ /windows/
-          puppet_conf = "#{host['puppetpath']}\\puppet.conf"
+          puppet_conf = host.puppet['config']
           conf_data = ''
           opts.each do |section,options|
             conf_data << "[#{section}]`n"
@@ -781,7 +781,7 @@ module Beaker
           end
           on host, powershell("\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text")
         else
-          puppet_conf = "#{host['puppetpath']}/puppet.conf"
+          puppet_conf = host.puppet['config']
           conf_data = ''
           opts.each do |section,options|
             conf_data << "[#{section}]\n"

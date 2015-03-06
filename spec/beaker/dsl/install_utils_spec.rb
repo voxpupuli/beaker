@@ -588,7 +588,7 @@ describe ClassMixedWithDSLInstallUtils do
       let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
       it 'it sets the puppet.conf file to the provided config' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on).with(host, "echo \"[main]\nserver=testbox.test.local\n\n\" > /etc/puppet/puppet.conf")
+        expect(subject).to receive(:on).with(host, "echo \"[main]\nserver=testbox.test.local\n\n\" > #{host.puppet['config']}")
         subject.configure_puppet_on(host, config)
       end
     end
@@ -599,7 +599,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '#{host.puppet['config']}' -value $text"])
         end
         subject.configure_puppet_on(host, config)
       end
@@ -619,7 +619,7 @@ describe ClassMixedWithDSLInstallUtils do
       let(:platform) { 'debian-7-amd64' }
       it 'it sets the puppet.conf file to the provided config' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on).with(hosts[0], "echo \"[main]\nserver=testbox.test.local\n\n\" > /etc/puppet/puppet.conf")
+        expect(subject).to receive(:on).with(hosts[0], "echo \"[main]\nserver=testbox.test.local\n\n\" > #{hosts[0].puppet['config']}")
         subject.configure_puppet(config)
       end
     end
@@ -629,7 +629,7 @@ describe ClassMixedWithDSLInstallUtils do
         config = { 'main' => {'server' => 'testbox.test.local'} }
         expect(subject).to receive(:on) do |host, command|
           expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '`cygpath -smF 35`/PuppetLabs/puppet/etc\\puppet.conf' -value $text"])
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '#{host.puppet['config']}' -value $text"])
         end
         subject.configure_puppet(config)
       end
