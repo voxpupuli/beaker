@@ -109,7 +109,7 @@ module Beaker
       master = only_host_with_role(@hosts, 'master')
       @hosts.each do |h|
         the_answers[h.name] = host_answers(h, master, dashboard, @options)
-        if h[:custom_answers]
+        if the_answers[h.name] && h[:custom_answers]
           the_answers[h.name] = the_answers[h.name].merge(h[:custom_answers])
         end
         h[:answers] = the_answers[h.name]

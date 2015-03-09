@@ -211,7 +211,7 @@ module Beaker
         else
           the_answers[h.name] = host_answers(h, master, database, dashboard, @options)
         end
-        if h[:custom_answers]
+        if the_answers[h.name] && h[:custom_answers]
           the_answers[h.name] = the_answers[h.name].merge(h[:custom_answers])
         end
         h[:answers] = the_answers[h.name]
