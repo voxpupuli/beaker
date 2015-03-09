@@ -26,7 +26,7 @@ module Unix
         'puppetbin'        => '/opt/puppet/bin/puppet',
         'puppetbindir'     => '/opt/puppet/bin',
         'puppetsbindir'    => '/opt/puppet/sbin',
-        'privatebindir'    => '/opt/puppet/bin',
+        'privatebindir'    => '/opt/puppetlabs/puppet/bin',
         'puppetvardir'     => '/var/opt/lib/pe-puppet',
         'hieradatadir'     => '/var/lib/hiera',
         'hieraconf'        => '/etc/puppetlabs/puppet/hiera.yaml',
