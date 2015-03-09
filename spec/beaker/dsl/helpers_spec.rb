@@ -723,6 +723,112 @@ describe ClassMixedWithDSLHelpers do
 
     end
   end
+  
+  describe "#run_agent_on" do
+    it 'calls puppet' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).
+        with( agent, 'puppet_command', :acceptable_exit_codes => [0] )
+
+      subject.run_agent_on( agent, {} )
+    end
+    
+    it 'adds acceptable exit codes with :catch_failures' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil, 'detailed-exitcodes'=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).
+        with( agent, 'puppet_command', :acceptable_exit_codes => [0,2] )
+
+      subject.run_agent_on( agent, {:catch_failures => true} )
+    end
+    
+    it 'enforces a 0 exit code through :catch_changes' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil, 'detailed-exitcodes'=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        agent,
+        'puppet_command',
+        :acceptable_exit_codes => [0]
+      )
+
+      subject.run_agent_on(
+        agent,
+        {:catch_changes => true}
+      )
+    end
+    
+    it 'enforces a 2 exit code through :expect_changes' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil, 'detailed-exitcodes'=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        agent,
+        'puppet_command',
+        :acceptable_exit_codes => [2]
+      )
+
+      subject.run_agent_on(
+        agent,
+        {:expect_changes => true}
+      )
+    end
+    
+    it 'enforces exit codes through :expect_failures' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil, 'detailed-exitcodes'=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        agent,
+        'puppet_command',
+        :acceptable_exit_codes => [1,4,6]
+      )
+
+      subject.run_agent_on(
+        agent,
+        {:expect_failures => true}
+      )
+    end
+    it 'enforces exit codes through :expect_failures' do
+      subject.stub( :hosts ).and_return( hosts )
+      expect {
+        subject.run_agent_on(
+          agent,
+          {:expect_failures => true, :catch_failures => true}
+        )
+      }.to raise_error ArgumentError, /catch_failures.+expect_failures/
+    end
+    it 'enforces added exit codes through :expect_failures' do
+      subject.stub( :hosts ).and_return( hosts )
+      subject.should_receive( :puppet ).
+        with( 'agent', {'no-daemonize'=>nil, :verbose=>nil, :onetime=>nil, :test=>nil, 'detailed-exitcodes'=>nil} ).
+        and_return( 'puppet_command' )
+
+      subject.should_receive( :on ).with(
+        agent,
+        'puppet_command',
+        :acceptable_exit_codes => [1,2,3,4,5,6]
+      )
+
+      subject.run_agent_on(
+        agent,
+        {:acceptable_exit_codes => (1..5), :expect_failures => true}
+      )
+    end
+  end
 
   describe '#stub_hosts_on' do
     it 'executes puppet on the host passed and ensures it is reverted' do
