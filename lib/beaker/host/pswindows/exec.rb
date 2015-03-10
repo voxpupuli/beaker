@@ -12,6 +12,10 @@ module PSWindows::Exec
     (abs ? ABS_CMD : CMD) + " /c echo. 2> #{file}"
   end
 
+  def rm_rf path
+    execute("del /s /q #{path}")
+  end
+
   def path
     'c:/windows/system32;c:/windows'
   end

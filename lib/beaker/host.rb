@@ -212,8 +212,13 @@ module Beaker
     #@return [Boolean] true if x86_64, false otherwise
     def determine_if_x86_64
       if is_cygwin?
-        result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
-        result.exit_code == 0
+        if self[:platform] =~ /osx|solaris/
+          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result.exit_code == 0
+        else
+          result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result.exit_code == 0
+        end
       else
         result = exec(Beaker::Command.new("wmic os get osarchitecture"), :acceptable_exit_codes => (0...127))
         result.stdout =~ /64/
@@ -236,11 +241,11 @@ module Beaker
         env_file = self[:ssh_env_file]
         escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
         #see if the key/value pair already exists
-        if exec(Beaker::Command.new("grep -e #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
           return #nothing to do here, key value pair already exists
         #see if the key already exists
         elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-          exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
+          exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
         else
           exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
         end
@@ -259,6 +264,15 @@ module Beaker
       end
     end
 
+    #Return the value of a specific env var
+    #@param [String] key The key to look for
+    #@example
+    #  host.get_env_var('path')
+    def get_env_var key
+      key = key.to_s.upcase
+      exec(Beaker::Command.new("env | grep #{key}"), :acceptable_exit_codes => (0..255)).stdout.chomp
+    end
+
     #Delete the provided key/val from the current ssh environment
     #@param [String] key The key to delete the value from
     #@param [String] val The value to delete for the key
@@ -269,9 +283,11 @@ module Beaker
       if self.is_cygwin?
         val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
         #if the key only has that single value remove the entire line
-        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
-        #if the key has multiple values and we only need to remove the provided val
-        exec(Beaker::SedCommand.new(self['HOSTS'][name]['platform'], "s/#{key}=\\(.*[:;]*\\)#{val}[:;]*/#{key}=\\1/", self[:ssh_env_file]))
+        exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
+        #value in middle of list
+        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", self[:ssh_env_file]))
+        #value in start of list
+        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", self[:ssh_env_file]))
       else #powershell windows
         #get the current value of the key
         result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
@@ -337,6 +353,12 @@ module Beaker
       end
     end
 
+    # Recursively remove the path provided
+    # @param [String] path The path to remove
+    def rm_rf path
+      exec(Beaker::Command.new("rm -rf #{path}"))
+    end
+
     # Create the provided directory structure on the host
     # @param [String] dir The directory structure to create on the host
     # @return [Boolean] True, if directory construction succeeded, otherwise False
@@ -351,11 +373,23 @@ module Beaker
       result.exit_code == 0
     end
 
-    # scp files from the localhost to this test host, if a directory is provided it is recursively copied
+    # scp files from the localhost to this test host, if a directory is provided it is recursively copied.
+    # If the provided source is a directory both the contents of the directory and the directory
+    # itself will be copied to the host, if you only want to copy directory contents you will either need to specify
+    # the contents file by file or do a separate 'mv' command post scp_to to create the directory structure as desired.
+    # To determine if a file/dir is 'ignored' we compare to any contents of the source dir and NOT any part of the path
+    # to that source dir.
+    #
     # @param source [String] The path to the file/dir to upload
     # @param target [String] The destination path on the host
     # @param options [Hash{Symbol=>String}] Options to alter execution
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
+    # @example
+    #   do_scp_to('source/dir1/dir2/dir3', 'target')
+    #   -> will result in creation of target/source/dir1/dir2/dir3 on host
+    #
+    #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
+    #   -> will result in not files copyed to the host, all are ignored
     def do_scp_to source, target, options
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
@@ -365,9 +399,10 @@ module Beaker
       ignore_re = nil
       if has_ignore
         ignore_arr = Array(options[:ignore]).map do |entry|
-          "((\/|\\A)#{entry}(\/|\\z))".gsub(/\./, '\.')
+          "((\/|\\A)#{Regexp.escape(entry)}(\/|\\z))"
         end
         ignore_re = Regexp.new(ignore_arr.join('|'))
+        @logger.debug("going to ignore #{ignore_re}")
       end
 
       # either a single file, or a directory with no ignores
@@ -388,7 +423,7 @@ module Beaker
         end
       else # a directory with ignores
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
-          f =~ ignore_re
+          f.gsub(/\A#{Regexp.escape(source)}/, '') =~ ignore_re #only match against subdirs, not full path
         end
         @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
 
@@ -400,7 +435,7 @@ module Beaker
         required_dirs.each do |dir|
           dir_path = Pathname.new(dir)
           if dir_path.absolute?
-            mkdir_p(File.join(target, dir.gsub(source, '')))
+            mkdir_p(File.join(target, dir.gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, '')))
           else
             mkdir_p( File.join(target, dir) )
           end
@@ -411,7 +446,7 @@ module Beaker
         dir_source.each do |s|
           s_path = Pathname.new(s)
           if s_path.absolute?
-            file_path = File.join(target, File.dirname(s).gsub(source,''))
+            file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/,''))
           else
             file_path = File.join(target, File.dirname(s))
           end
