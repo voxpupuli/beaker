@@ -356,7 +356,7 @@ module Beaker
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
 
-        expect( Beaker::Command ).to receive(:new).with("if not exist test\\test\\test (md )")
+        expect( Beaker::Command ).to receive(:new).with("if not exist test\\test\\test (md test\\test\\test)")
         expect( host.mkdir_p('test/test/test') ).to be == true
 
       end
