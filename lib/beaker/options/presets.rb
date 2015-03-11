@@ -160,6 +160,7 @@ module Beaker
           :pe_version_file_win    => 'LATEST-win',
           :host_env               => {},
           :ssh_env_file           => '~/.ssh/environment',
+          :profile_d_env_file     => '/etc/profile.d/beaker_env.sh',
           :answers                => {
                                      :q_puppet_enterpriseconsole_auth_user_email    => 'admin@example.com',
                                      :q_puppet_enterpriseconsole_auth_password      => '~!@#$%^*-/ aZ',
