@@ -230,6 +230,29 @@ module Beaker
       @x86_64 ||= determine_if_x86_64
     end
 
+    # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
+    # This is for sles based hosts.
+    # @param [String] env_file The ssh environment file to read from
+    def mirror_env_to_profile_d env_file
+      if self[:platform] =~ /sles-/
+        @logger.debug("mirroring environment to /etc/profile.d on sles platform host")
+        cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
+        shell_env = ''
+        cur_env.each_line do |env_line|
+          shell_env << "export #{env_line}"
+        end
+        #here doc it over
+        exec(Beaker::Command.new("cat << EOF > #{self[:profile_d_env_file]}\n#{shell_env}EOF"))
+        #set permissions
+        exec(Beaker::Command.new("chmod +x #{self[:profile_d_env_file]}"))
+        #keep it current
+        exec(Beaker::Command.new("source #{self[:profile_d_env_file]}"))
+      else
+        #noop
+        @logger.debug("will not mirror environment to /etc/profile.d on non-sles platform host")
+      end
+    end
+
     #Add the provided key/val to the current ssh environment
     #@param [String] key The key to add the value to
     #@param [String] val The value for the key
@@ -249,6 +272,9 @@ module Beaker
         else
           exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
         end
+        #update the profile.d to current state
+        #match it to the contents of ssh_env_file
+        mirror_env_to_profile_d(env_file)
       else #powershell windows
         #see if the key/value pair already exists
         result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
@@ -281,13 +307,17 @@ module Beaker
     def delete_env_var key, val
       key = key.to_s.upcase
       if self.is_cygwin?
+        env_file = self[:ssh_env_file]
         val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
         #if the key only has that single value remove the entire line
-        exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", self[:ssh_env_file]))
+        exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", env_file))
         #value in middle of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", self[:ssh_env_file]))
+        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
         #value in start of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", self[:ssh_env_file]))
+        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", env_file))
+        #update the profile.d to current state
+        #match it to the contents of ssh_env_file
+        mirror_env_to_profile_d(env_file)
       else #powershell windows
         #get the current value of the key
         result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
