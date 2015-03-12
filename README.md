@@ -21,5 +21,5 @@ See [LICENSE](LICENSE) file.
 
 #Support
 
-Please log tickets and issues at our [Beaker Issue Tracker](https://github.com/puppetlabs/beaker/issues).  In addition there is an active #puppet-dev channel on Freenode.
+Please log tickets and issues at our [Beaker Issue Tracker](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR).  In addition there is an active #puppet-dev channel on Freenode.
 
