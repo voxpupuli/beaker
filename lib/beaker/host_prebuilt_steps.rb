@@ -473,7 +473,11 @@ module Beaker
       env['RUBYLIB'].map! { |val| echo_on_host(host, val) }
 
       env.each_key do |key|
-        env[key] = env[key].join(host['pathseparator'])
+        separator = host['pathseparator']
+        if key == 'PATH' && host.is_cygwin?
+          separator = ':'
+        end
+        env[key] = env[key].join(separator)
       end
       env
     end
