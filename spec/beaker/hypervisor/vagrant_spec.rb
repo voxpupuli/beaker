@@ -34,6 +34,7 @@ module Beaker
       vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
       expect( vagrantfile ).to be === <<-EOF
 Vagrant.configure("2") do |c|
+  c.ssh.insert_key = false
   c.vm.define 'vm1' do |v|
     v.vm.hostname = 'vm1'
     v.vm.box = 'vm1_of_my_box'
@@ -185,7 +186,7 @@ EOF
       allow( file ).to receive( :path ).and_return( '/path/sshconfig' )
       allow( file ).to receive( :rewind ).and_return( true )
 
-      expect( Tempfile ).to receive( :new ).with( "#{host.name}").and_return( file ) 
+      expect( Tempfile ).to receive( :new ).with( "#{host.name}").and_return( file )
       expect( file ).to receive( :write ).with("Host ip.address.for.#{name}\n    HostName 127.0.0.1\n    User root\n    Port 2222\n    UserKnownHostsFile /dev/null\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    IdentityFile /home/root/.vagrant.d/insecure_private_key\n    IdentitiesOnly yes")
 
       vagrant.set_ssh_config( host, 'root' )
