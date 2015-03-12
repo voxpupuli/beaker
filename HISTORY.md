@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 4 Mar, 2015 (958ab02d)](#LATEST)
+* [LATEST - 12 Mar, 2015 (b63d3d11)](#LATEST)
+* [beaker2.5.1 - 4 Mar, 2015 (009c2c63)](#beaker2.5.1)
 * [beaker2.5.0 - 23 Feb, 2015 (c421cf95)](#beaker2.5.0)
 * [beaker2.4.1 - 13 Feb, 2015 (84400ed1)](#beaker2.4.1)
 * [beaker2.4.0 - 13 Feb, 2015 (bc5a6676)](#beaker2.4.0)
@@ -72,7 +73,188 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 4 Mar, 2015 (958ab02d)
+### <a name = "LATEST">LATEST - 12 Mar, 2015 (b63d3d11)
+
+* (GEM) update beaker version to 2.6.0 (b63d3d11)
+
+* Merge pull request #741 from anodelman/maint (d797fe23)
+
+
+```
+Merge pull request #741 from anodelman/maint
+
+ (BKR-8) PE 3.8 on Sles11 can't find puppet in path after install...
+```
+* (BKR-8) PE 3.8 on Sles11 can't find puppet in path after install... (d53d1db9)
+
+
+```
+(BKR-8) PE 3.8 on Sles11 can't find puppet in path after install...
+
+... completes successfully.
+
+- add the ~/.ssh/environment to a /etc/profile.d/beaker_env.sh script
+- ensure that beaker_env.sh is kept up to date and correct with state of
+  current env
+```
+* Merge pull request #666 from petems/MAINT-fix_mkdir_bug (9d59deab)
+
+
+```
+Merge pull request #666 from petems/MAINT-fix_mkdir_bug
+
+(MAINT) Fix mkdir bug on PSWindows and fix test
+```
+* Merge pull request #738 from demophoon/fix/master/qeng-1970-custom-answers-windows-guard (80de6cbe)
+
+
+```
+Merge pull request #738 from demophoon/fix/master/qeng-1970-custom-answers-windows-guard
+
+(QENG-1970) Guard against merging custom answers on Windows
+```
+* Merge pull request #739 from kevpl/qeng1969_aio_pathsupdate (c066aef1)
+
+
+```
+Merge pull request #739 from kevpl/qeng1969_aio_pathsupdate
+
+(QENG-1969) fixed PE privatebindir default
+```
+* Merge pull request #730 from anodelman/acceptance (2ba9cd51)
+
+
+```
+Merge pull request #730 from anodelman/acceptance
+
+(QENG-1869) create beaker host.rb acceptance tests
+```
+* Merge pull request #740 from anodelman/maint (24c90744)
+
+
+```
+Merge pull request #740 from anodelman/maint
+
+(gh-702) sshd restart doesn't work with some el6...
+```
+* (gh-702) sshd restart doesn't work with some el6... (f3b9035f)
+
+
+```
+(gh-702) sshd restart doesn't work with some el6...
+
+... variants especially centos - with vagrant provisioner
+
+For centos6 & vagrant, this pull fixed it: https://github.com/puppetlabs/beaker/pull/545
+& fixing https://github.com/puppetlabs/beaker/issues/656 re-broke it by undoing pull 545
+
+- Instead of service sshd restart, service sshd reload fixes the issue.
+  Even systemctl takes reload.
+```
+* (QENG-1969) fixed PE privatebindir default (768b1ed0)
+
+* (QENG-1970) Guard against merging custom answers on Windows (5c7e31c2)
+
+
+```
+(QENG-1970) Guard against merging custom answers on Windows
+
+Before this commit Beaker would attempt to merge custom answers on
+platforms where answers are not used. This commit guards against merging
+custom answers unless there are already answers specified.
+```
+* Merge pull request #736 from kevpl/qeng1946_aio_pathsupdate (7d0cccf2)
+
+
+```
+Merge pull request #736 from kevpl/qeng1946_aio_pathsupdate
+
+(QENG-1946) removed paths from AIO host defaults in windows & unix
+```
+* Merge pull request #735 from Iristyle/ticket/master/QENG-1955-Windows-File-exist-failures-on-Windows-2003 (a42d8ab5)
+
+
+```
+Merge pull request #735 from Iristyle/ticket/master/QENG-1955-Windows-File-exist-failures-on-Windows-2003
+
+(QENG-1955) Windows::File.file_exist? fails on 2003
+```
+* (QENG-1955) Windows::File.file_exist? fails on 2003 (f21d2226)
+
+
+```
+(QENG-1955) Windows::File.file_exist? fails on 2003
+
+ - In 9c32cac7a7a5bf52f21b628b14ddba9bfc44510c a change was
+   introduced to add a new Windows::File.file_exist? method
+   that relied on using test -e.  The code assumes that the
+   path does not contain spaces and does not need to be
+   quoted.
+
+   Unfortunately, this assumption is incorrect and causes
+   pre-suites to fail because this test is performed on
+   Puppets :vardir.  On Windows, Puppets :vardir is always
+   rooted at %ALLUSERSPROFILE%\PuppetLabs
+
+   When running on Windows 2008 or higher, the
+   %ALLUSERSPROFILE% directory is C:\ProgramData\
+
+   However, on Windows 2003, the path structure is different
+   and that directory is located at
+   C:\Documents and Settings\All Users\Application Data
+
+   With an unquoted path passed to test -e a failure is
+   generated, which breaks Windows pre-suites on 2003.
+```
+* (QENG-1946) removed paths from AIO host defaults in windows & unix (0b7afd49)
+
+* Merge pull request #729 from sschneid/rename_vcloudpooled_vmpooler (6cd29bbf)
+
+
+```
+Merge pull request #729 from sschneid/rename_vcloudpooled_vmpooler
+
+(maint) VcloudPooled -> Vmpooler
+```
+* (maint) VcloudPooled -> Vmpooler (e1723437)
+
+
+```
+(maint) VcloudPooled -> Vmpooler
+
+This PR renames the 'VcloudPooled' hypervisor to 'Vmpooler', and
+includes a few fixups as ride-alongs:
+
+  - resourcepool, folder, datastore not needed for Vmpooler
+  - small syntax/wording changes
+```
+* (QENG-1869) create beaker host.rb acceptance tests (3474a114)
+
+
+```
+(QENG-1869) create beaker host.rb acceptance tests
+
+- tests that exercise basic host.rb functionality
+```
+* (MAINT) Fixing mkdir_p POSH command (f57354de)
+
+
+```
+(MAINT) Fixing mkdir_p POSH command
+
+Test was set to test for the wrong command:
+
+
+ruby
+.with("if not exist test\\test\\test (md )")
+
+
+
+So the directory would never get made, as the `md` bit was empty. Fixed spec and code to create command
+```
+### <a name = "beaker2.5.1">beaker2.5.1 - 4 Mar, 2015 (009c2c63)
+
+* (HISTORY) update beaker history for gem release 2.5.1 (009c2c63)
 
 * (GEM) update beaker version to 2.5.1 (958ab02d)
 
