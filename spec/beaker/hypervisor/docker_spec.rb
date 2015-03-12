@@ -198,6 +198,15 @@ module Beaker
 
       end
 
+      it "should generate a new /etc/hosts file referencing each host" do
+        ENV['DOCKER_HOST'] = nil
+        docker.provision
+        hosts.each do |host|
+          expect( docker ).to receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\n192.0.2.1\tvm1\n192.0.2.1\tvm2\n192.0.2.1\tvm3\n" ).once
+        end
+        docker.hack_docker_etc_hosts( hosts, options )
+      end
+
       it 'should record the image and container for later' do
         docker.provision
 
