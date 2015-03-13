@@ -59,6 +59,26 @@ module Beaker
       pkg_initialize
     end
 
+    # Builds a deprecated keys array, for checking to see if a key is deprecated.
+    # The recommended check after using this method is +result.include?(key)+
+    #
+    # @note an unsupported host type (meaning it has no _aio_defaults_) will return
+    #   an empty hash
+    #
+    # @return [Array<Symbol>] An array of keys that are deprecated for a host
+    def build_deprecated_keys()
+      begin
+        deprecated_keys_hash = self.class.send "foss_defaults".to_sym
+        delete_exceptions_hash = self.class.send "aio_defaults".to_sym
+        deprecated_keys_hash.delete_if do |key, value|
+          delete_exceptions_hash.has_key?(key)
+        end
+      rescue NoMethodError
+        deprecated_keys_hash = {}
+      end
+      deprecated_keys_hash.keys()
+    end
+
     def pkg_initialize
       # This method should be overridden by platform-specific code to
       # handle whatever packaging-related initialization is necessary.
@@ -114,6 +134,9 @@ module Beaker
     end
 
     def [] k
+      @deprecated_keys ||= build_deprecated_keys()
+      deprecation_message = "deprecated host key '#{k}'. Perhaps you can use host.puppet[] to get what you're looking for."
+      @logger.warn( deprecation_message ) if @logger && @deprecated_keys.include?(k.to_sym)
       @defaults[k]
     end
 
