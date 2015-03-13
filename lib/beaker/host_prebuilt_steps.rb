@@ -453,7 +453,7 @@ module Beaker
     def construct_env host, opts
       env = additive_hash_merge(host[:host_env], opts[:host_env])
 
-      #Add PATH and RUBYLIB
+      #Add PATH
 
       #prepend any PATH already set for this host
 
@@ -464,16 +464,12 @@ module Beaker
       #run the paths through echo to see if they have any subcommands that need processing
       env['PATH'].map! { |val| echo_on_host(host, val) }
 
-      #prepend any RUBYLIB already set for this host
-      env['RUBYLIB'] =  (%w(hieralibdir hierapuppetlibdir pluginlibpath puppetlibdir facterlibdir) << env['RUBYLIB']).compact.reject(&:empty?)
-      #get the RUBYLIB defaults
-      env['RUBYLIB'].map! { |val| host[val] }
-      env['RUBYLIB'] = env['RUBYLIB'].compact.reject(&:empty?)
-      #run the paths through echo to see if they have any subcommands that need processing
-      env['RUBYLIB'].map! { |val| echo_on_host(host, val) }
-
       env.each_key do |key|
-        env[key] = env[key].join(host['pathseparator'])
+        separator = host['pathseparator']
+        if key == 'PATH' && host.is_cygwin?
+          separator = ':'
+        end
+        env[key] = env[key].join(separator)
       end
       env
     end
@@ -525,7 +521,6 @@ module Beaker
           host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
           host.exec(Command.new("touch #{host[:ssh_env_file]}"))
           #add the constructed env vars to this host
-          host.add_env_var('RUBYLIB', '$RUBYLIB')
           host.add_env_var('PATH', '$PATH')
         end
         #add the env var set to this test host
