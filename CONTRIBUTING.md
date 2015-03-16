@@ -8,8 +8,7 @@
   * Clearly describe the issue including steps to reproduce when it is a bug.
   * File in the appropriate location:
     * Using your [Jira account](http://tickets.puppetlabs.com)
-      * Beaker bugs are submitted in the `QENG` project with the `Beaker` component.
-    * As a [GitHub issue](https://github.com/puppetlabs/beaker/issues?direction=desc&sort=updated&state=open)
+      * Beaker bugs are submitted in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker)
 
 ## Making Changes
@@ -19,10 +18,10 @@
   * To quickly create a topic branch based on master use `git checkout -b my_contribution master`. Please avoid working directly on the `master` branch.
 * Make commits of logical units.
 * Check for unnecessary whitespace with `git diff --check` before committing.
-* Make sure your commit messages are in the proper format. 
+* Make sure your commit messages are in the proper format.
 
 ````
-    (QENG-1234 OR gh-1234) Make the example in CONTRIBUTING imperative and concrete
+    (BKR-1234) Make the example in CONTRIBUTING imperative and concrete
 
     Without this patch applied the example commit message in the CONTRIBUTING
     document is not a concrete example.  This is a problem because the
@@ -39,7 +38,7 @@
   * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
 * Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without apporpriate documentation will be rejected.
 * Run the tests to assure nothing else was accidentally broken, using `rake test`
-  * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 1.8, 2.0). Beaker supports Ruby 1.8+, and breakage of support for older/newer rubies will cause a patch to be rejected.
+  * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 2.0, etc). Beaker supports Ruby 1.9+, and breakage of support for older/newer rubies will cause a patch to be rejected.
 * During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) before you submit your PR with `git rebase master`.  A successful rebase ensures that your patch will cleanly merge into Beaker.
 * Submitted patches will be smoke tested through a series of acceptance level tests that ensures basic Beaker functionality - the results of these tests will be evaluated by a Beaker team member.  Failures associated with the submitted patch will result in the patch being rejected.
 
@@ -47,7 +46,7 @@
 
 ### Maintenance
 
-For changes of a trivial nature, it is not always necessary to create a new ticket in Jira or GitHub. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number. 
+For changes of a trivial nature, it is not always necessary to create a new ticket in Jira. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number. 
 
 ````
     (MAINT) Fix whitespace 
@@ -74,16 +73,15 @@ To prepare for a new gem release of Beaker (after the version has been bumped) t
 * Push your changes to a topic branch in your fork of the repository.
 * Submit a pull request to [Beaker](https://github.com/puppetlabs/beaker)
 * Update your ticket
-  * Update your [Jira](http://tickets.puppetlabs.com) ticket to mark that you have submitted code and are ready for it to be reviewed (Status: Ready for Review).
+  * Update your [Jira](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR) ticket to mark that you have submitted code and are ready for it to be considered for merge (Status: Ready for Merge).
     * Include a link to the pull request in the ticket.
-  * Update your [GitHub issue](https://github.com/puppetlabs/beaker/issues?direction=desc&sort=updated&state=open)
-    * Include a link to the pull request in the issue.
 * PRs are reviewed as time permits.  
 
 # Additional Resources
 
 * [More information on contributing](http://links.puppetlabs.com/contribute-to-puppet)
 * [Bug tracker (Jira)](http://tickets.puppetlabs.com)
+* [BKR Jira Project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * [Contributor License Agreement](http://links.puppetlabs.com/cla)
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
