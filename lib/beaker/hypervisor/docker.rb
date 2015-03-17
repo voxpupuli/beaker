@@ -66,18 +66,8 @@ module Beaker
         host['docker_image'] = image
       end
 
-      hack_docker_etc_hosts @hosts, @options
+      hack_etc_hosts @hosts, @options
 
-    end
-
-    def hack_docker_etc_hosts hosts, opts
-      etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
-      hosts.each do |host|
-        etc_hosts += "#{host['docker_container'].json["NetworkSettings"]["IPAddress"]}\t#{host.name}\n"
-      end
-      hosts.each do |host|
-        set_etc_hosts(host, etc_hosts)
-      end
     end
 
     def cleanup
