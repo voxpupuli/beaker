@@ -487,8 +487,13 @@ module Beaker
         when /windows/
           if host.is_cygwin?
             host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-            host.exec(Command.new("cygrunsrv -E sshd"))
-            host.exec(Command.new("cygrunsrv -S sshd"))
+            # we get periodic failures to restart the service, so looping these with re-attempts
+            repeat_fibonacci_style_for(5) do
+              0 == host.exec(Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
+            end
+            repeat_fibonacci_style_for(5) do
+              0 == host.exec(Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
+            end
             env['CYGWIN'] = 'nodosfilewarning'
           else
             #nothing to do here
