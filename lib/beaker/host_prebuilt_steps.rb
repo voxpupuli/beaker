@@ -339,12 +339,13 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         logger.debug "Update /etc/ssh/sshd_config to allow root login"
-        # note: this sed command only works on gnu sed
         if host['platform'] =~ /osx/
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"))
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
-        else
+        elsif host.is_cygwin?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
+        else
+          logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         end
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
@@ -352,7 +353,7 @@ module Beaker
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         else
-          @logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
+          logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
       end
     end

@@ -900,15 +900,21 @@ module Beaker
         else
           dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
 
-          on host, "set PATH=\"%PATH%;#{host['puppetbindir']}\""
-          on host, "setx PATH \"%PATH%;#{host['puppetbindir']}\""
+          set_path_string = host['puppetbindir'].gsub(/"/,'')
+
+          on host, "set PATH=\"%PATH%;#{set_path_string}\""
+          on host, "setx PATH \"%PATH%;#{set_path_string}\""
 
           on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
 
-          on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
+          host.mkdir_p host['distmoduledir']
         end
 
-        on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+        if host.is_cygwin?
+          on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+        else
+          on host, "start /w msiexec.exe /qn /i #{dest}"
+        end
       end
 
       # Installs Puppet and dependencies from dmg
@@ -1443,9 +1449,12 @@ module Beaker
               #rename to the selected module name, if not correct
               cur_path = File.join(target_module_dir, source_name)
               new_path = File.join(target_module_dir, module_name)
-              if cur_path != new_path
-                # NOTE: this will need to be updated to handle powershell only windows SUTs
-                on host, "mv #{cur_path} #{new_path}"
+              if (cur_path != new_path)
+                if host.is_cygwin?
+                  on host, "mv #{cur_path} #{new_path}"
+                else
+                  on host, "move /y #{cur_path} #{new_path}"
+                end
               end
             when 'rsync'
               rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}

@@ -28,6 +28,10 @@ describe ClassMixedWithDSLInstallUtils do
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp' } ) }
+  let(:winhost_non_cygwin) { make_host( 'winhost_non_cygwin', { :platform => 'windows',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp',
+                                                :is_cygwin => 'false' } ) }
   let(:machost)       { make_host( 'machost', { :platform => 'osx-10.9-x86_64',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp' } ) }
@@ -84,6 +88,33 @@ describe ClassMixedWithDSLInstallUtils do
       version = subject.find_git_repo_versions( host, path, repository )
 
       expect( version ).to be == { 'name' => '2' }
+    end
+  end
+
+  context 'install_puppet_from_msi' do
+
+    it 'installs puppet on cygwin windows' do
+      allow(subject).to receive(:link_exists?).and_return( true )
+
+      expect(subject).to receive(:on).with(winhost, 'curl -O http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi')
+      expect(subject).to receive(:on).with(winhost, " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
+      expect(subject).to receive(:on).with(winhost, 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.7.1.msi\'')
+
+      subject.install_puppet_from_msi( winhost, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}  )
+    end
+
+    it 'installs puppet on non-cygwin windows' do
+      allow(subject).to receive(:link_exists?).and_return( true )
+
+      expect(subject).to receive(:on).with(winhost_non_cygwin, "set PATH=\"%PATH%;C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin;C:\\Program Files\\Puppet Labs\\Puppet\\bin\"")
+      expect(subject).to receive(:on).with(winhost_non_cygwin, "setx PATH \"%PATH%;C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin;C:\\Program Files\\Puppet Labs\\Puppet\\bin\"")
+      expect(subject).to receive(:on) do |winhost_non_cygwin, beaker_command|
+        expect(beaker_command.command).to eq('powershell.exe')
+        expect(beaker_command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi','C:\\Windows\\Temp\\puppet-3.7.1.msi')"])
+      end
+      expect(subject).to receive(:on).with(winhost_non_cygwin, "start /w msiexec.exe /qn /i C:\\Windows\\Temp\\puppet-3.7.1.msi")
+
+      subject.install_puppet_from_msi( winhost_non_cygwin, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}   )
     end
   end
 
@@ -1117,7 +1148,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     shared_examples 'copy_module_to' do  |opts|
       it{
-        host = double("host")
+        host = unixhost
+        allow( host ).to receive(:[]).with('is_cygwin').and_return(nil)
         allow( host ).to receive(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
@@ -1168,7 +1200,7 @@ describe ClassMixedWithDSLInstallUtils do
         allow( subject ).to receive( :build_ignore_list ).and_return( [] )
         allow( subject ).to receive( :parse_for_modulename ).and_return( [nil, 'modulename'] )
         allow( subject ).to receive( :on ).and_return( double.as_null_object )
-        hosts = [{}, {}]
+        hosts = [unixhost, unixhost]
 
         expect( subject ).to receive( :scp_to ).twice
         subject.copy_module_to( hosts )
