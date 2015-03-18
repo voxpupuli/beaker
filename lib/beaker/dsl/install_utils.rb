@@ -1449,9 +1449,12 @@ module Beaker
               #rename to the selected module name, if not correct
               cur_path = File.join(target_module_dir, source_name)
               new_path = File.join(target_module_dir, module_name)
-              if cur_path != new_path
-                # NOTE: this will need to be updated to handle powershell only windows SUTs
-                on host, "mv #{cur_path} #{new_path}"
+              if (cur_path != new_path)
+                if host.is_cygwin?
+                  on host, "mv #{cur_path} #{new_path}"
+                else
+                  on host, "move /y #{cur_path} #{new_path}"
+                end
               end
             when 'rsync'
               rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
