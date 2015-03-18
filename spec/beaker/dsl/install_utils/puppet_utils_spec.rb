@@ -106,7 +106,6 @@ describe ClassMixedWithDSLInstallUtils do
     it 'installs puppet on non-cygwin windows' do
       allow(subject).to receive(:link_exists?).and_return( true )
 
-      expect(winhost_non_cygwin).to receive(:add_env_var).with("PATH", "%PATH%;C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin;C:\\Program Files\\Puppet Labs\\Puppet\\bin\"")
       expect(winhost_non_cygwin).to receive(:mkdir_p).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules')
 
       expect(subject).to receive(:on) do |winhost_non_cygwin, beaker_command|
@@ -631,7 +630,7 @@ describe ClassMixedWithDSLInstallUtils do
         5fEWCRE11azbJHFwLJhWC9kXtNHjUStedejV0NxPNO3CBWaAocvmMw==
         -----END CERTIFICATE-----
         EOM
-        
+
         expect(subject).to receive(:create_remote_file) do |host, file_path, file_content|
           expect(file_path).to eq("C:\\Windows\\Temp\\#{cert}.pem")
         end
