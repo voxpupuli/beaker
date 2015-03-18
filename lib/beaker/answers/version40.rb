@@ -1,10 +1,10 @@
-require 'beaker/answers/version34'
+require 'beaker/answers/version38'
 
 module Beaker
   # This class provides answer file information for PE version 4.0
   #
   # @api private
-  class Version40 < Version34
+  class Version40 < Version38
     def generate_answers
       masterless = @options[:masterless]
       return super if masterless
