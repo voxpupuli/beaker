@@ -13,7 +13,7 @@ module Beaker
       # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
       module ModuleUtils
 
-        # The directories in the module directory that will not be scp-ed to the test system when using 
+        # The directories in the module directory that will not be scp-ed to the test system when using
         # `copy_module_to`
         PUPPET_MODULE_INSTALL_IGNORE = ['.bundle', '.git', '.idea', '.vagrant', '.vendor', 'vendor', 'acceptance',
                                         'bundle', 'spec', 'tests', 'log']
@@ -123,22 +123,24 @@ module Beaker
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
-              when 'scp'
-                #move to the host
-                scp_to host, source_path, target_module_dir, {:ignore => ignore_list}
-                #rename to the selected module name, if not correct
-                cur_path = File.join(target_module_dir, source_name)
-                cur_path = File.join(target_module_dir, source_name)
-                new_path = File.join(target_module_dir, module_name)
-                if cur_path != new_path
-                  # NOTE: this will need to be updated to handle powershell only windows SUTs
+            when 'scp'
+              #move to the host
+              scp_to host, source_path, target_module_dir, {:ignore => ignore_list}
+              #rename to the selected module name, if not correct
+              cur_path = File.join(target_module_dir, source_name)
+              new_path = File.join(target_module_dir, module_name)
+              if (cur_path != new_path)
+                if host.is_cygwin?
                   on host, "mv #{cur_path} #{new_path}"
+                else
+                  on host, "move /y #{cur_path} #{new_path}"
                 end
-              when 'rsync'
-                rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
-              else
-                logger.debug "Unsupported transfer protocol, returning nil"
-                nil
+              end
+            when 'rsync'
+              rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
             end
           end
         end

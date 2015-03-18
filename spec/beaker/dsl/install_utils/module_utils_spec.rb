@@ -118,6 +118,7 @@ describe ClassMixedWithDSLInstallUtils do
       it{
         host = double("host")
         allow( host ).to receive(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
+        allow( host ).to receive(:is_cygwin?).and_return(true)
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
         allow( result ).to receive(:stdout).and_return( stdout )
@@ -167,10 +168,28 @@ describe ClassMixedWithDSLInstallUtils do
         allow( subject ).to receive( :build_ignore_list ).and_return( [] )
         allow( subject ).to receive( :parse_for_modulename ).and_return( [nil, 'modulename'] )
         allow( subject ).to receive( :on ).and_return( double.as_null_object )
-        hosts = [{}, {}]
 
-        expect( subject ).to receive( :scp_to ).twice
+        expect( subject ).to receive( :scp_to ).exactly(4).times
         subject.copy_module_to( hosts )
+      end
+    end
+
+    describe 'non-cygwin windows' do
+      it 'should have different commands than cygwin' do
+        host = double("host")
+        allow( host ).to receive(:[]).with('platform').and_return('windows')
+        allow( host ).to receive(:[]).with('distmoduledir').and_return('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules')
+        allow( host ).to receive(:is_cygwin?).and_return(false)
+
+        result = double
+        allow( result ).to receive(:stdout).and_return( 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules' )
+
+        expect( subject ).to receive(:on).with(host, "echo C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules" ).and_return( result )
+
+        expect( subject ).to receive(:scp_to).with(host, "/opt/testmodule2", "C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules", {:ignore => ignore_list})
+        expect( subject ).to receive(:on).with(host, 'move /y C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule2 C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule')
+
+        subject.copy_module_to(host, {:module_name => 'testmodule', :source => '/opt/testmodule2'})
       end
     end
   end
