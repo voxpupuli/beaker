@@ -1148,7 +1148,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     shared_examples 'copy_module_to' do  |opts|
       it{
-        host = double("host")
+        host = unixhost
+        allow( host ).to receive(:[]).with('is_cygwin').and_return(nil)
         allow( host ).to receive(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
@@ -1199,7 +1200,7 @@ describe ClassMixedWithDSLInstallUtils do
         allow( subject ).to receive( :build_ignore_list ).and_return( [] )
         allow( subject ).to receive( :parse_for_modulename ).and_return( [nil, 'modulename'] )
         allow( subject ).to receive( :on ).and_return( double.as_null_object )
-        hosts = [{}, {}]
+        hosts = [unixhost, unixhost]
 
         expect( subject ).to receive( :scp_to ).twice
         subject.copy_module_to( hosts )
