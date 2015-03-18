@@ -900,15 +900,21 @@ module Beaker
         else
           dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
 
-          on host, "set PATH=\"%PATH%;#{host['puppetbindir']}\""
-          on host, "setx PATH \"%PATH%;#{host['puppetbindir']}\""
+          set_path_string = host['puppetbindir'].gsub(/"/,'')
+
+          on host, "set PATH=\"%PATH%;#{set_path_string}\""
+          on host, "setx PATH \"%PATH%;#{set_path_string}\""
 
           on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
 
-          on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
+          host.mkdir_p host['distmoduledir']
         end
 
-        on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+        if host.is_cygwin?
+          on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+        else
+          on host, "start /w msiexec.exe /qn /i #{dest}"
+        end
       end
 
       # Installs Puppet and dependencies from dmg
