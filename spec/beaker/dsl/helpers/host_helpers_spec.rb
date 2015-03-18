@@ -1,0 +1,413 @@
+require 'spec_helper'
+
+class ClassMixedWithDSLHelpers
+  include Beaker::DSL::Helpers
+  include Beaker::DSL::Wrappers
+  include Beaker::DSL::Roles
+  include Beaker::DSL::Patterns
+
+  def logger
+    RSpec::Mocks::Double.new('logger').as_null_object
+  end
+
+end
+
+describe ClassMixedWithDSLHelpers do
+  let( :opts )   { Beaker::Options::Presets.env_vars }
+  let( :command ){ 'ls' }
+  let( :host )   { double.as_null_object }
+  let( :result ) { Beaker::Result.new( host, command ) }
+
+  let( :master ) { make_host( 'master',   :roles => %w( master agent default)    ) }
+  let( :agent )  { make_host( 'agent',    :roles => %w( agent )           ) }
+  let( :custom ) { make_host( 'custom',   :roles => %w( custom agent )    ) }
+  let( :dash )   { make_host( 'console',  :roles => %w( dashboard agent ) ) }
+  let( :db )     { make_host( 'db',       :roles => %w( database agent )  ) }
+  let( :hosts )  { [ master, agent, dash, db, custom ] }
+
+  describe '#on' do
+
+    before :each do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+    end
+
+    it 'allows the environment the command is run within to be specified' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      expect( Beaker::Command ).to receive( :new ).
+        with( 'ls ~/.bin', [], {'ENV' => { :HOME => '/tmp/test_home' }} )
+
+      subject.on( host, 'ls ~/.bin', :environment => {:HOME => '/tmp/test_home' } )
+    end
+
+    it 'if the host is a String Object, finds the matching hosts with that String as role' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      expect( master ).to receive( :exec ).once
+
+      subject.on( 'master', 'echo hello')
+
+    end
+
+    it 'if the host is a Symbol Object, finds the matching hsots with that Symbol as role' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      expect( master ).to receive( :exec ).once
+
+      subject.on( :master, 'echo hello')
+
+    end
+
+    it 'delegates to itself for each host passed' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expected = []
+      hosts.each_with_index do |host, i|
+        expected << i
+        expect( host ).to receive( :exec ).and_return( i )
+      end
+
+      results = subject.on( hosts, command )
+      expect( results ).to be == expected
+    end
+
+    context 'upon command completion' do
+      before :each do
+        allow( subject ).to receive( :hosts ).and_return( hosts )
+        expect( host ).to receive( :exec ).and_return( result )
+        @res = subject.on( host, command )
+      end
+
+      it 'returns the result of the action' do
+        expect( @res ).to be == result
+      end
+
+      it 'provides access to stdout' do
+        expect( @res.stdout ).to be == 'stdout'
+      end
+
+      it 'provides access to stderr' do
+        expect( @res.stderr ).to be == 'stderr'
+      end
+
+      it 'provides access to exit_code' do
+        expect( @res.exit_code ).to be == 0
+      end
+    end
+
+    context 'when passed a block with arity of 1' do
+      before :each do
+        allow( subject ).to receive( :hosts ).and_return( hosts )
+        expect( host ).to receive( :exec ).and_return( result )
+      end
+
+      it 'yields result' do
+        subject.on host, command do |containing_class|
+          expect( containing_class ).
+            to be_an_instance_of( Beaker::Result )
+        end
+      end
+
+      it 'provides access to stdout' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.stdout ).to be == 'stdout'
+        end
+      end
+
+      it 'provides access to stderr' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.stderr ).to be == 'stderr'
+        end
+      end
+
+      it 'provides access to exit_code' do
+        subject.on host, command do |containing_class|
+          expect( containing_class.exit_code ).to be == 0
+        end
+      end
+    end
+
+    context 'when passed a block with arity of 0' do
+      before :each do
+        allow( subject ).to receive( :hosts ).and_return( hosts )
+        expect( host ).to receive( :exec ).and_return( result )
+      end
+
+      it 'yields self' do
+        subject.on host, command do
+          expect( subject ).
+            to be_an_instance_of( ClassMixedWithDSLHelpers )
+        end
+      end
+
+      it 'provides access to stdout' do
+        subject.on host, command do
+          expect( subject.stdout ).to be == 'stdout'
+        end
+      end
+
+      it 'provides access to stderr' do
+        subject.on host, command do
+          expect( subject.stderr ).to be == 'stderr'
+        end
+      end
+
+      it 'provides access to exit_code' do
+        subject.on host, command do
+          expect( subject.exit_code ).to be == 0
+        end
+      end
+    end
+
+  end
+
+  describe "#retry_on" do
+    it 'fails correctly when command never succeeds' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 1
+
+      retries = 5
+
+      opts = {
+        :max_retries    => retries,
+        :retry_interval => 0.0001,
+      }
+
+      allow( subject ).to receive(:on).and_return(result)
+      expect( subject ).to receive(:on).exactly(retries+2)
+      expect { subject.retry_on(host, command, opts) }.to raise_error(RuntimeError)
+    end
+
+    it 'will return success correctly if it succeeds the first time' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+      result.exit_code = 0
+
+      opts = {
+        :max_retries    => 5,
+        :retry_interval => 0.0001,
+      }
+
+      allow( subject ).to receive(:on).and_return(result)
+      expect( subject ).to receive(:on).once
+
+      result_given = subject.retry_on(host, command, opts)
+      expect(result_given.exit_code).to be === 0
+    end
+
+    it 'will return success correctly if it succeeds after failing a few times' do
+      result.stdout = 'stdout'
+      result.stderr = 'stderr'
+
+      opts = {
+        :max_retries    => 10,
+        :retry_interval => 0.1,
+      }
+
+      reps_num = 4
+      count = 0
+      allow( subject ).to receive(:on) do
+        result.exit_code = count > reps_num ? 0 : 1
+        count += 1
+        result
+      end
+      expect( subject ).to receive(:on).exactly(reps_num + 2)
+
+      result_given = subject.retry_on(host, command, opts)
+      expect(result_given.exit_code).to be === 0
+    end
+  end
+
+  describe "shell" do
+    it 'delegates to #on with the default host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      expect( subject ).to receive( :on ).with( master, "echo hello", {}).once
+
+      subject.shell( "echo hello" )
+    end
+  end
+
+  describe '#scp_from' do
+    it 'delegates to the host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :logger ).exactly( hosts.length ).times
+      expect( result ).to receive( :log ).exactly( hosts.length ).times
+
+      hosts.each do |host|
+        expect( host ).to receive( :do_scp_from ).and_return( result )
+      end
+
+      subject.scp_from( hosts, '/var/log/my.log', 'log/my.log' )
+    end
+  end
+
+  describe '#scp_to' do
+    it 'delegates to the host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :logger ).exactly( hosts.length ).times
+      expect( result ).to receive( :log ).exactly( hosts.length ).times
+
+      hosts.each do |host|
+        expect( host ).to receive( :do_scp_to ).and_return( result )
+      end
+
+      subject.scp_to( hosts, '/var/log/my.log', 'log/my.log' )
+    end
+  end
+
+  describe '#rsync_to' do
+    it 'delegates to the host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      hosts.each do |host|
+        expect( host ).to receive( :do_rsync_to ).and_return( result )
+      end
+
+      subject.rsync_to( hosts, '/var/log/my.log', 'log/my.log' )
+    end
+  end
+
+  describe '#create_remote_file using scp' do
+    it 'scps the contents passed in to the hosts' do
+      my_opts = { :silent => true }
+      tmpfile = double
+
+      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+        and_return( '/local/path/to/blah' )
+
+      expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
+
+      expect( File ).to receive( :open )
+
+      expect( subject ).to receive( :scp_to ).
+        with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
+
+      subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )
+    end
+  end
+
+  describe '#create_remote_file using rsync' do
+    it 'scps the contents passed in to the hosts' do
+      my_opts = { :silent => true, :protocol => 'rsync' }
+      tmpfile = double
+
+      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+        and_return( '/local/path/to/blah' )
+
+      expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
+
+      expect( File ).to receive( :open )
+
+      expect( subject ).to receive( :rsync_to ).
+        with( hosts, '/local/path/to/blah', '/remote/path', my_opts )
+
+      subject.create_remote_file( hosts, '/remote/path', 'blah', my_opts )
+    end
+  end
+
+  describe '#create_tmpdir_on' do
+    let(:host) { {'user' => 'puppet'} }
+    let(:result) { double.as_null_object }
+
+    before :each do
+      allow(host).to receive(:result).and_return(result)
+      allow(result).to receive(:exit_code).and_return(0)
+      allow(result).to receive(:stdout).and_return('puppet')
+    end
+
+    context 'with no user argument' do
+
+      context 'with no path name argument' do
+        it 'executes chown once' do
+          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+          expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
+          expect(subject).to receive(:on).with(host, /chown puppet.puppet.*/)
+          subject.create_tmpdir_on(host, '/tmp/beaker')
+        end
+      end
+
+      context 'with path name argument' do
+        it 'executes chown once' do
+          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+          expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
+          expect(subject).to receive(:on).with(host, /chown puppet.puppet \/tmp\/bogus.*/)
+          subject.create_tmpdir_on(host, "/tmp/bogus")
+        end
+      end
+
+    end
+
+    context 'with an valid user argument' do
+      it 'executes chown once' do
+        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
+        expect(subject).to receive(:on).with(host, /chown curiousgeorge.curiousgeorge \/tmp\/bogus.*/)
+        subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
+      end
+    end
+
+    context 'with a invalid user argument' do
+      it 'executes chown once' do
+        allow(result).to receive(:exit_code).and_return(1)
+        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect{
+          subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
+        }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
+      end
+    end
+
+  end
+
+  describe '#run_script_on' do
+    it 'scps the script to a tmpdir and executes it on host(s)' do
+      expect( subject ).to receive( :scp_to )
+      expect( subject ).to receive( :on )
+      subject.run_script_on( 'host', '~/.bin/make-enterprisy' )
+    end
+  end
+
+  describe '#run_script' do
+    it 'delegates to #run_script_on with the default host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      expect( subject ).to receive( :run_script_on ).with( master, "/tmp/test.sh", {}).once
+
+      subject.run_script( '/tmp/test.sh' )
+    end
+  end
+
+  describe '#add_system32_hosts_entry' do
+    before do
+      allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
+    end
+    context 'on debian' do
+      let(:platform) { 'debian-7-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      it 'logs message - nothing to do on this host' do
+        expect( Beaker::Command ).to receive( :new ).never
+
+        expect {
+          subject.add_system32_hosts_entry(host, {})
+        }.to raise_error
+      end
+    end
+    context 'on windows' do
+      let(:platform) { 'windows-2008R2-amd64' }
+      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+      it 'it add an entry into the /etc/hosts file' do
+        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
+        expect(subject).to receive(:on) do |host, command|
+          expect(command.command).to eq('powershell.exe')
+          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text"])
+        end
+
+
+        subject.add_system32_hosts_entry(host, entry)
+      end
+    end
+  end
+
+end

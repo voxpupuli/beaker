@@ -35,7 +35,6 @@ module Beaker
       # Provides a method to help structure tests into coherent steps.
       # @param [String] step_name The name of the step to be logged.
       # @param [Proc] block The actions to be performed in this step.
-      # @api dsl
       def step step_name, &block
         logger.notify "\n  * #{step_name}\n"
         yield if block_given?
@@ -46,7 +45,6 @@ module Beaker
       # @param [String] my_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      # @api dsl
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
         yield if block_given?
@@ -61,7 +59,6 @@ module Beaker
       #     on(master, puppet_resource('file', '/etc/puppet/modules',
       #       'ensure=absent', 'purge=true'))
       #   end
-      # @api dsl
       def teardown &block
         @teardown_procs << block
       end
@@ -105,7 +102,6 @@ module Beaker
       #                       a {Beaker::Assertions} (i.e., if the assert
       #                       passes)
       # @author Chris Cowell-Shah (<tt>ccs@puppetlabs.com</tt>)
-      # @api dsl
       def expect_failure(explanation, &block)
         begin
           yield if block_given?  # code block should contain an assert that you expect to fail
@@ -124,6 +120,133 @@ module Beaker
                  'This is probably because a product bug was fixed, and ' +
                  '"expect_failure()" needs to be removed from this test. ' +
                  "Additional info: '#{explanation}'")
+      end
+
+      # Limit the hosts a test case is run against
+      # @note This will modify the {Beaker::TestCase#hosts} member
+      #   in place unless an array of hosts is passed into it and
+      #   {Beaker::TestCase#logger} yielding an object that responds
+      #   like {Beaker::Logger#warn}, as well as
+      #   {Beaker::DSL::Outcomes#skip_test}, and optionally
+      #   {Beaker::TestCase#hosts}.
+      #
+      # @param [Symbol] type The type of confinement to do. Valid parameters
+      #                      are *:to* to confine the hosts to only those that
+      #                      match *criteria* or *:except* to confine the test
+      #                      case to only those hosts that do not match
+      #                      criteria.
+      # @param [Hash{Symbol,String=>String,Regexp,Array<String,Regexp>}]
+      #   criteria Specify the criteria with which a host should be
+      #   considered for inclusion or exclusion.  The key is any attribute
+      #   of the host that will be yielded by {Beaker::Host#[]}.
+      #   The value can be any string/regex or array of strings/regexp.
+      #   The values are compared using [Enumerable#any?] so that if one
+      #   value of an array matches the host is considered a match for that
+      #   criteria.
+      # @param [Array<Host>] host_array This creatively named parameter is
+      #   an optional array of hosts to confine to.  If not passed in, this
+      #   method will modify {Beaker::TestCase#hosts} in place.
+      # @param [Proc] block Addition checks to determine suitability of hosts
+      #   for confinement.  Each host that is still valid after checking
+      #   *criteria* is then passed in turn into this block.  The block
+      #   should return true if the host matches this additional criteria.
+      #
+      # @example Basic usage to confine to debian OSes.
+      #     confine :to, :platform => 'debian'
+      #
+      # @example Confining to anything but Windows and Solaris
+      #     confine :except, :platform => ['windows', 'solaris']
+      #
+      # @example Using additional block to confine to Solaris global zone.
+      #     confine :to, :platform => 'solaris' do |solaris|
+      #       on( solaris, 'zonename' ) =~ /global/
+      #     end
+      #
+      # @return [Array<Host>] Returns an array of hosts that are still valid
+      #   targets for this tests case.
+      # @raise [SkipTest] Raises skip test if there are no valid hosts for
+      #   this test case after confinement.
+      def confine(type, criteria, host_array = nil, &block)
+        hosts_to_modify = host_array || hosts
+        case type
+        when :except
+          hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
+        when :to
+          hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+        else
+          raise "Unknown option #{type}"
+        end
+        if hosts_to_modify.empty?
+          logger.warn "No suitable hosts with: #{criteria.inspect}"
+          skip_test 'No suitable hosts found'
+        end
+        self.hosts = hosts_to_modify
+        hosts_to_modify
+      end
+
+      # Ensures that host restrictions as specifid by type, criteria and
+      # host_array are confined to activity within the passed block.
+      # TestCase#hosts is reset after block has executed.
+      #
+      # @see #confine
+      def confine_block(type, criteria, host_array = nil, &block)
+        begin
+          original_hosts = self.hosts.dup
+          confine(type, criteria, host_array)
+
+          yield
+
+        ensure
+          self.hosts = original_hosts
+        end
+      end
+
+      #Return a set of hosts that meet the given criteria
+      # @param [Hash{Symbol,String=>String,Regexp,Array<String,Regexp>}]
+      #   criteria Specify the criteria with which a host should be
+      #   considered for inclusion.  The key is any attribute
+      #   of the host that will be yielded by {Beaker::Host#[]}.
+      #   The value can be any string/regex or array of strings/regexp.
+      #   The values are compared using [Enumerable#any?] so that if one
+      #   value of an array matches the host is considered a match for that
+      #   criteria.
+      # @param [Array<Host>] host_array This creatively named parameter is
+      #   an optional array of hosts to confine to.  If not passed in, this
+      #   method will modify {Beaker::TestCase#hosts} in place.
+      # @param [Proc] block Addition checks to determine suitability of hosts
+      #   for selection.  Each host that is still valid after checking
+      #   *criteria* is then passed in turn into this block.  The block
+      #   should return true if the host matches this additional criteria.
+      #
+      # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
+      def select_hosts(criteria, host_array = nil, &block)
+        hosts_to_select_from = host_array || hosts
+        criteria.each_pair do |property, value|
+          hosts_to_select_from = hosts_to_select_from.select do |host|
+            inspect_host host, property, value
+          end
+        end
+        if block_given?
+          hosts_to_select_from = hosts_to_select_from.select do |host|
+            yield host
+          end
+        end
+        hosts_to_select_from
+      end
+
+      # @!visibility private
+      def inspect_host(host, property, one_or_more_values)
+        values = Array(one_or_more_values)
+        return values.any? do |value|
+          true_false = false
+          case value
+          when String
+            true_false = host[property.to_s].include? value
+          when Regexp
+            true_false = host[property.to_s] =~ value
+          end
+          true_false
+        end
       end
     end
   end

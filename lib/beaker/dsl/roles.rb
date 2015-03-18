@@ -13,7 +13,6 @@ module Beaker
     # Also the constant {FailTest} needs to be defined it will be raised
     # in error conditions
     #
-    # @api dsl
     module Roles
 
       # The hosts for which ['roles'] include 'agent'
@@ -127,7 +126,6 @@ module Beaker
       #   puts "master is defined"
       # end
       #
-      # @api public
       def any_hosts_as?(role)
         hosts_as(role).length > 0
       end
@@ -144,7 +142,6 @@ module Beaker
       #       on yak, 'shave'
       #     end
       #
-      # @api public
       def hosts_as(desired_role = nil)
         hosts_with_role(hosts, desired_role)
       end

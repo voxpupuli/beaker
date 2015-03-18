@@ -37,7 +37,6 @@ module Beaker
       #
       # @param [String] msg An optional message to log
       # @raise [FailTest]
-      # @api dsl
       def fail_test msg = nil
         message = formatted_message( msg, 'Failed' )
         logger.warn( [message, logger.pretty_backtrace].join("\n") )
@@ -49,7 +48,6 @@ module Beaker
       #
       # @param [String] msg An optional message to log
       # @raise [PassTest]
-      # @api dsl
       def pass_test msg = nil
         message = formatted_message( msg, 'Passed' )
         logger.notify( message )
@@ -61,7 +59,6 @@ module Beaker
       #
       # @param [String] msg An optional message to log
       # @raise [PendingTest]
-      # @api dsl
       def pending_test msg = nil
         message = formatted_message( msg, 'is Pending' )
         logger.warn( message )
@@ -73,7 +70,6 @@ module Beaker
       #
       # @param [String] msg An optional message to log
       # @raise [SkipTest]
-      # @api dsl
       def skip_test msg = nil
         message = formatted_message( msg, 'was Skipped' )
         logger.notify( message )
