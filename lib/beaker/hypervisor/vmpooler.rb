@@ -124,7 +124,7 @@ module Beaker
           hostname = parsed_response[h['template']]['hostname']
         end
 
-        uri = URI.parse(@options['pooling_api'] + '/vm/' + hostname)
+        uri = URI.parse(@options[:pooling_api] + '/vm/' + hostname)
 
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Put.new(uri.request_uri)
