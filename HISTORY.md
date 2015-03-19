@@ -1,6 +1,8 @@
 # default - History
 ## Tags
-* [LATEST - 12 Mar, 2015 (b63d3d11)](#LATEST)
+* [LATEST - 19 Mar, 2015 (2bf87b79)](#LATEST)
+* [beaker2.7.0 - 19 Mar, 2015 (38b14ef8)](#beaker2.7.0)
+* [beaker2.6.0 - 12 Mar, 2015 (d4e731ab)](#beaker2.6.0)
 * [beaker2.5.1 - 4 Mar, 2015 (009c2c63)](#beaker2.5.1)
 * [beaker2.5.0 - 23 Feb, 2015 (c421cf95)](#beaker2.5.0)
 * [beaker2.4.1 - 13 Feb, 2015 (84400ed1)](#beaker2.4.1)
@@ -73,7 +75,144 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 12 Mar, 2015 (b63d3d11)
+### <a name = "LATEST">LATEST - 19 Mar, 2015 (2bf87b79)
+
+* (GEM) update beaker version to 2.7.1 (2bf87b79)
+
+* Merge pull request #758 from anodelman/answers (ffbeacf5)
+
+
+```
+Merge pull request #758 from anodelman/answers
+
+(BKR-156) Error generating answer file for Windows agent install
+```
+* (BKR-156) Error generating answer file for Windows agent install (5f0be5ca)
+
+
+```
+(BKR-156) Error generating answer file for Windows agent install
+
+- was attempting to add answers for a windows host, when we don't pass
+  answers to windows hosts
+- updated spec test to include a windows style host to confirm that this
+  works
+```
+### <a name = "beaker2.7.0">beaker2.7.0 - 19 Mar, 2015 (38b14ef8)
+
+* (GEM) update beaker version to 2.7.0 (38b14ef8)
+
+* Merge pull request #756 from anodelman/answers (d2c0e2be)
+
+
+```
+Merge pull request #756 from anodelman/answers
+
+(BKR-154) missing q_enable_future_parser in answer file generated...
+```
+* (BKR-154) missing q_enable_future_parser in answer file generated... (bc7ee68e)
+
+
+```
+(BKR-154) missing q_enable_future_parser in answer file generated...
+
+...by beaker
+
+- add missing answer
+- update specs to ensure that 3.8 answers are correctly generated
+```
+* Merge pull request #750 from MosesMendoza/PE-8260/master/add_38_answer (c3c688e4)
+
+
+```
+Merge pull request #750 from MosesMendoza/PE-8260/master/add_38_answer
+
+(PE-8260) add answer for new NC migrate question
+```
+* (PE-8260) add answer for new NC migrate question (2b620f64)
+
+
+```
+(PE-8260) add answer for new NC migrate question
+
+This commit adds a 38-specific answer file to beaker, which introduces an
+answer for whether to stop the upgrade and proceed to do the NC database
+migration. It defaults to 'n' to enable upgrades to continue.
+
+Signed-off-by: Moses Mendoza <moses@puppetlabs.com>
+```
+* Merge pull request #743 from anodelman/maint (957d763f)
+
+
+```
+Merge pull request #743 from anodelman/maint
+
+(BKR-81) start using new public beaker jira project
+```
+* Merge pull request #746 from kevpl/bkr6_aio_privatebindirwindows (3ae5a02d)
+
+
+```
+Merge pull request #746 from kevpl/bkr6_aio_privatebindirwindows
+
+(BKR-6) added privatebindir for windows' old PE and FOSS types
+```
+* Merge pull request #747 from anodelman/gem-source (7204b3da)
+
+
+```
+Merge pull request #747 from anodelman/gem-source
+
+(BKR-60) failures caused by rubygems timeouts
+```
+* (BKR-60) failures caused by rubygems timeouts (db418b14)
+
+
+```
+(BKR-60) failures caused by rubygems timeouts
+
+- add ability to set GEM_SOURCE to internal rubygems mirror
+```
+* Merge pull request #744 from anodelman/win-fix (a2ab4bca)
+
+
+```
+Merge pull request #744 from anodelman/win-fix
+
+(BKR-7) beaker's prebuild_steps corrupts PATH on windows+cygwin
+```
+* (BKR-6) added privatebindir for windows' old PE and FOSS types (f0d8cdf3)
+
+* (BKR-7) beaker's prebuild_steps corrupts PATH on windows+cygwin (003688b8)
+
+
+```
+(BKR-7) beaker's prebuild_steps corrupts PATH on windows+cygwin
+
+- remove un-used RUBYLIB env var
+- no dependencies on this anywhere, might as well pull it out
+```
+* (BKR-7) beaker's prebuild_steps corrupts PATH on windows+cygwin (054f7849)
+
+
+```
+(BKR-7) beaker's prebuild_steps corrupts PATH on windows+cygwin
+
+- use correct path separator for cygwin vs. correct separator for
+  non-cygwin windows
+```
+* (BKR-81) start using new public beaker jira project (a45a045c)
+
+
+```
+(BKR-81) start using new public beaker jira project
+
+- update contributor and readme doc to point to correct ticket tracker
+  information
+```
+### <a name = "beaker2.6.0">beaker2.6.0 - 12 Mar, 2015 (d4e731ab)
+
+* (HISTORY) update beaker history for gem release 2.6.0 (d4e731ab)
 
 * (GEM) update beaker version to 2.6.0 (b63d3d11)
 
