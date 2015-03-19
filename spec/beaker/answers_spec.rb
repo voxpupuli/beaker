@@ -172,8 +172,9 @@ module Beaker
     let( :options )     { Beaker::Options::Presets.new.presets }
     let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
     let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
-                    basic_hosts[1]['roles'] = ['dashboard', 'agent']
-                    basic_hosts[2]['roles'] = ['database', 'agent']
+                    basic_hosts[1]['roles'] = ['dashboard', 'database', 'agent']
+                    basic_hosts[2]['roles'] = ['agent']
+                    basic_hosts[2]['platform'] = 'windows2008r2'
                     basic_hosts }
     let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
     let( :upgrade_answers )     { Beaker::Answers.create(@ver, hosts, options.merge( {:type => :upgrade}) ) }
@@ -185,14 +186,14 @@ module Beaker
 
     it 'adds :q_enable_future_parser to all hosts, default to "n"' do
       hosts.each do |host|
-        expect( host[:answers][:q_enable_future_parser] ).to be == 'n'
+        expect( basic_hosts[0][:answers][:q_enable_future_parser] ).to be == 'n'
+        expect( basic_hosts[1][:answers][:q_enable_future_parser] ).to be == 'n'
       end
     end
 
     it 'adds :q_exit_for_nc_migrate to all hosts, default to "n"' do
-      hosts.each do |host|
-        expect( host[:answers][:q_exit_for_nc_migrate] ).to be == 'n'
-      end
+      expect( basic_hosts[0][:answers][:q_exit_for_nc_migrate] ).to be == 'n'
+      expect( basic_hosts[1][:answers][:q_exit_for_nc_migrate] ).to be == 'n'
     end
 
     it 'should add answers to the host objects' do
