@@ -190,6 +190,8 @@ module Beaker
                                      :q_rbac_database_name                          => 'pe-rbac',
                                      :q_rbac_database_password                      => '~!@#$%^*-/ aZ',
                                      :q_install_update_server                       => 'y',
+                                     :q_exit_for_nc_migrate                         => 'n',
+                                     :q_enable_future_parser                        => 'n',
           },
           :dot_fog                => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml               => 'config/image_templates/ec2.yaml',
