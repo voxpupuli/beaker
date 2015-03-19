@@ -13,9 +13,11 @@ module Beaker
 
       # add new answers
       exit_for_nc_migrate = answer_for(@options, :q_exit_for_nc_migrate, 'n')
+      enable_future_parser = answer_for(@options, :q_enable_future_parser, 'n')
 
       the_answers.map do |key, value|
         the_answers[key][:q_exit_for_nc_migrate] = exit_for_nc_migrate
+        the_answers[key][:q_enable_future_parser] = enable_future_parser
       end
 
       return the_answers

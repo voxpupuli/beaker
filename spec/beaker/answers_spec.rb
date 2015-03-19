@@ -19,6 +19,11 @@ module Beaker
       expect( answers ).to be_a_kind_of Version40
     end
 
+    it 'generates 3.8 answers for 3.8 hosts' do
+      @ver = '3.8'
+      expect( answers ).to be_a_kind_of Version38
+    end
+
     it 'generates 3.4 answers for 3.4 hosts' do
       @ver = '3.4'
       expect( answers ).to be_a_kind_of Version34
@@ -161,6 +166,40 @@ module Beaker
       expect( hosts[0][:answers] ).to include :q_custom
     end
 
+  end
+
+  describe Version38 do
+    let( :options )     { Beaker::Options::Presets.new.presets }
+    let( :basic_hosts ) { make_hosts( {'pe_ver' => @ver } ) }
+    let( :hosts ) { basic_hosts[0]['roles'] = ['master', 'agent']
+                    basic_hosts[1]['roles'] = ['dashboard', 'agent']
+                    basic_hosts[2]['roles'] = ['database', 'agent']
+                    basic_hosts }
+    let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
+    let( :upgrade_answers )     { Beaker::Answers.create(@ver, hosts, options.merge( {:type => :upgrade}) ) }
+
+    before :each do
+      @ver = '3.8'
+      @answers = answers.answers
+    end
+
+    it 'adds :q_enable_future_parser to all hosts, default to "n"' do
+      hosts.each do |host|
+        expect( host[:answers][:q_enable_future_parser] ).to be == 'n'
+      end
+    end
+
+    it 'adds :q_exit_for_nc_migrate to all hosts, default to "n"' do
+      hosts.each do |host|
+        expect( host[:answers][:q_exit_for_nc_migrate] ).to be == 'n'
+      end
+    end
+
+    it 'should add answers to the host objects' do
+      hosts.each do |host|
+        expect( host[:answers] ).to be === @answers[host.name]
+      end
+    end
   end
 
   describe Version40 do
