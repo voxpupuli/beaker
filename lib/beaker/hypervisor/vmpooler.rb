@@ -106,6 +106,37 @@ module Beaker
       end
 
       @logger.notify 'Spent %.2f seconds grabbing VMs' % (Time.now - start)
+
+      start = Time.now
+      @logger.notify 'Tagging vmpooler VMs'
+
+      tags = {
+        'jenkins_build_url' => @options[:jenkins_build_url],
+        'department' => @options[:department],
+        'project' => @options[:project],
+        'created_by' => @options[:created_by]
+      }
+
+      @hosts.each_with_index do |h, i|
+        if parsed_response[h['template']]['hostname'].is_a?(Array)
+          hostname = parsed_response[h['template']]['hostname'].shift
+        else
+          hostname = parsed_response[h['template']]['hostname']
+        end
+
+        uri = URI.parse(@options['pooling_api'] + '/vm/' + hostname)
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Put.new(uri.request_uri)
+
+        request_payload = { 'tags' => tags }
+
+        request.body = request_payload.to_json
+
+        response = http.request(request)
+      end
+
+      @logger.notify 'Spent %.2f seconds tagging VMs' % (Time.now - start)
     end
 
     def cleanup
