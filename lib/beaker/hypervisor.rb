@@ -28,6 +28,8 @@ module Beaker
           Beaker::Vsphere
         when /^fusion$/
           Beaker::Fusion
+        when /^libvirt$/
+          Beaker::Libvirt
         when /^ec2$/
           Beaker::AwsSdk
         when /^vmpooler$/
@@ -133,6 +135,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'libvirt', 'docker', 'google_compute', 'openstack' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end
