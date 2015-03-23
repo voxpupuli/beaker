@@ -118,18 +118,28 @@ module Beaker
       }
 
       @hosts.each_with_index do |h, i|
-        uri = URI.parse(@options[:pooling_api] + '/vm/' + h['vmhostname'].split('.')[0])
+        begin
+          uri = URI.parse(@options[:pooling_api] + '/vm/' + h['vmhostname'].split('.')[0])
 
-        http = Net::HTTP.new(uri.host, uri.port)
-        request = Net::HTTP::Put.new(uri.request_uri)
+          http = Net::HTTP.new(uri.host, uri.port)
+          request = Net::HTTP::Put.new(uri.request_uri)
 
-        request.body = { 'tags' => tags }.to_json
+          request.body = { 'tags' => tags }.to_json
 
-        response = http.request(request)
-        parsed_response = JSON.parse(response.body)
+          response = http.request(request)
+        rescue RuntimeError, Error::EINVAL, Errno::ECONNRESET, EOFError,
+               Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
+          @logger.notify "Failed to connect to vmpooler for tagging!"
+        end
 
-        unless parsed_response['ok']
-          @logger.notify "Failed to tag host '#{h['vmhostname']}'!"
+        begin
+          parsed_response = JSON.parse(response.body)
+
+          unless parsed_response['ok']
+            @logger.notify "Failed to tag host '#{h['vmhostname']}'!"
+          end
+        rescue JSON::ParserError => e
+            @logger.notify "Failed to tag host '#{h['vmhostname']}'! (failed with #{e.class})"
         end
       end
 
