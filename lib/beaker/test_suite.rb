@@ -336,7 +336,7 @@ module Beaker
     # Gives a full file path for output to be written to, maintaining the latest symlink
     # @param [String] name The file name that we want to write to.
     # @param [String] log_dir The desired output directory.
-    #                         A symlink will be made from ./parentdir/latest to that.
+    #                         A symlink will be made from ./basedir/latest to that.
     # @example
     #   log_path('output.txt', 'log/2014-06-02_16_31_22')
     #
@@ -344,17 +344,31 @@ module Beaker
     #
     #   ./log/2014-06-02_16_31_22/output.txt
     #   ./log/latest -> 2014-06-02_16_31_22
+    #
+    # @example
+    #   log_path('foo.log', 'log/man/date')
+    #
+    #     This will create the structure:
+    #
+    #   ./log/man/date/foo.log
+    #   ./log/latest -> man/date
     def log_path(name, log_dir)
-      log_parent_dir = File.dirname(log_dir)
       FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
 
-      latest = File.join(log_parent_dir, "latest")
-      if !File.exist?(latest) or File.symlink?(latest) then
-        File.delete(latest) if File.exist?(latest)
-        File.symlink(File.basename(log_dir), latest)
+      base_dir = log_dir
+      link_dir = ''
+      while File.dirname(base_dir) != '.' do
+        link_dir = link_dir == '' ? File.basename(base_dir) : File.join(File.basename(base_dir), link_dir)
+        base_dir = File.dirname(base_dir)
       end
 
-      File.join(log_parent_dir, 'latest', name)
+      latest = File.join(base_dir, "latest")
+      if !File.exist?(latest) or File.symlink?(latest) then
+        File.delete(latest) if File.exist?(latest) || File.symlink?(latest)
+        File.symlink(link_dir, latest)
+      end
+
+      File.join(log_dir, name)
     end
 
   end

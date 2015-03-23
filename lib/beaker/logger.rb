@@ -302,12 +302,18 @@ module Beaker
 
     # Utility method to centralize dated log folder generation
     #
-    # @param [String] base_dir path of the directory for the dated log folder to live in
-    # @param [Time] timestamp the timestamp that should be used to generate the dated log folder
+    # @param [String] base_dir Path of the directory for the dated log folder to live in
+    # @param [String] log_prefix Prefix to use for the log files
+    # @param [Time] timestamp Timestamp that should be used to generate the dated log folder
+    #
+    # @example base_dir = 'junit', log_prefix = 'pants', timestamp = '2015-03-04 10:35:37 -0800'
+    #   returns 'junit/pants/2015-03-04_10_35_37'
+    #
+    # @note since this uses 'mkdir -p', log_prefix can be a number of nested directories
     #
     # @return [String] the path of the dated log folder generated
-    def Logger.generate_dated_log_folder(base_dir, timestamp)
-      log_dir = File.join(base_dir, timestamp.strftime("%F_%H_%M_%S"))
+    def Logger.generate_dated_log_folder(base_dir, log_prefix, timestamp)
+      log_dir = File.join(base_dir, log_prefix, timestamp.strftime("%F_%H_%M_%S"))
       FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
       log_dir
     end
