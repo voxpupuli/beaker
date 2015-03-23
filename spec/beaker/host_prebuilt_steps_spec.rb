@@ -21,6 +21,50 @@ describe Beaker do
                            hosts }
   let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps } }
 
+  shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
+    subject { dummy_class.new }
+    it "can enable root login on #{platform}" do
+      hosts = make_hosts( { :platform => platform, :is_cygwin => non_cygwin} )
+
+      if commands.empty?
+        expect( Beaker::Command ).to receive( :new ).exactly( 0 ).times
+      end
+
+      commands.each do | command |
+        expect( Beaker::Command ).to receive( :new ).with(command).exactly( 3 ).times
+      end
+
+      subject.enable_root_login( hosts, options )
+    end
+  end
+
+  # Non-cygwin Windows
+  it_should_behave_like 'enables_root_login', 'pswindows', [], false
+
+  # Non-cygwin Windows
+  it_should_behave_like 'enables_root_login', 'windows', [
+    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
+  ], true
+
+  it_should_behave_like 'enables_root_login', 'osx', [
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
+  ]
+
+  ['debian','ubuntu','cumulus'].each do | deb_like |
+    it_should_behave_like 'enables_root_login', deb_like, [
+      "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+      "sudo su -c \"service ssh restart\""
+    ]
+  end
+
+  ['centos','el-','redhat','fedora','eos'].each do | rhel_like |
+    it_should_behave_like 'enables_root_login', rhel_like, [
+      "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+      "sudo -E /sbin/service sshd reload"
+    ]
+  end
+
   context 'timesync' do
 
     subject { dummy_class.new }
