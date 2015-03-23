@@ -594,5 +594,46 @@ module Beaker
       end
 
     end
+
+    context 'deprecating host keys' do
+
+      describe '#build_deprecated_keys' do
+
+        it 'returns the correct array for a unix host' do
+          expect( host.build_deprecated_keys().include?(:puppetvardir) ).to be_truthy
+        end
+
+        it 'returns the correct array for a windows host' do
+          @platform = 'windows-xp-me-bla'
+          expect( host.build_deprecated_keys().include?(:hieraconf) ).to be_truthy
+        end
+
+        it 'can be called on an unsupported host type without an error being thrown' do
+          @platform = 'mac-osx-foo-tigerlion'
+          expect{ host.build_deprecated_keys() }.not_to raise_error
+        end
+
+        it 'returns an empty array for unsupported host types' do
+          @platform = 'mac-osx-foo-tigerlion'
+          expect( host.build_deprecated_keys().empty? ).to be_truthy
+        end
+
+      end
+
+      describe '#[]' do
+
+        it 'does not log for a key that isn\'t deprecated' do
+          expect( host ).to receive( :@logger ).exactly(0).times
+          host['puppetbindir']
+        end
+
+        it 'logs the warning message for a deprecated key' do
+          expect( host.instance_variable_get(:@logger) ).to receive( :warn ).once
+          host['hierapuppetlibdir']
+        end
+
+      end
+
+    end
   end
 end
