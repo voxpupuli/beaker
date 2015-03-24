@@ -10,7 +10,7 @@ end
 
 module Beaker
   describe Docker do
-    let(:hosts) { make_hosts(:hypervisor => 'docker') }
+    let(:hosts) { make_hosts }
 
     let(:logger) do
       logger = double('logger')

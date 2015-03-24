@@ -321,11 +321,7 @@ module Beaker
     def hack_etc_hosts hosts, opts
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       hosts.each do |host|
-        if host['hypervisor'] == 'docker'
-          etc_hosts += "#{host['docker_container'].json["NetworkSettings"]["IPAddress"]}\t#{host.name}\n"
-        else
-          etc_hosts += "#{host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
-        end
+        etc_hosts += "#{host['etc_host_ip'] || host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
       end
       hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
