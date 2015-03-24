@@ -78,7 +78,8 @@ module Beaker
         allow( ::Docker ).to receive(:validate_version!).and_raise(Excon::Errors::SocketError.new( StandardError.new('oops') ))
       end
       it 'should fail when docker not present' do
-        expect { docker }.to raise_error(RuntimeError, /Docker instance not found/)
+        expect { docker }.to raise_error(RuntimeError, /Docker instance not connectable./)
+        expect { docker }.to raise_error(RuntimeError, /Error was: oops/)
       end
     end
 
