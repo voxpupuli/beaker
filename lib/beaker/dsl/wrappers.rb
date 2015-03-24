@@ -12,7 +12,6 @@ module Beaker
       # work to disentangle all of the things that are being passed into
       # this catchall param.
       #
-      # @api dsl
       def facter(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
@@ -24,7 +23,6 @@ module Beaker
       # work to disentangle all of the things that are being passed into
       # this catchall param.
       #
-      # @api dsl
       def cfacter(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
@@ -36,7 +34,6 @@ module Beaker
       # work to disentangle all of the things that are being passed into
       # this catchall param.
       #
-      # @api dsl
       def hiera(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
@@ -57,7 +54,6 @@ module Beaker
       # work to disentangle all of the things that are being passed into
       # this catchall param.
       #
-      # @api dsl
       def puppet(*args)
         options = args.last.is_a?(Hash) ? args.pop : {}
         options['ENV'] ||= {}
