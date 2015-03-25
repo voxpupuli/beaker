@@ -44,6 +44,16 @@ module MockNet
       end
     end
 
+    class Put
+      def initialize uri
+        @uri = uri
+      end
+
+      def body= *args
+        hash
+      end
+    end
+
     class Delete
       def initialize uri
         @uri = uri
