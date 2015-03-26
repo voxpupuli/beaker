@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 19 Mar, 2015 (2bf87b79)](#LATEST)
+* [LATEST - 26 Mar, 2015 (f320c276)](#LATEST)
+* [beaker2.7.1 - 19 Mar, 2015 (45b2bf10)](#beaker2.7.1)
 * [beaker2.7.0 - 19 Mar, 2015 (38b14ef8)](#beaker2.7.0)
 * [beaker2.6.0 - 12 Mar, 2015 (d4e731ab)](#beaker2.6.0)
 * [beaker2.5.1 - 4 Mar, 2015 (009c2c63)](#beaker2.5.1)
@@ -75,7 +76,125 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 19 Mar, 2015 (2bf87b79)
+### <a name = "LATEST">LATEST - 26 Mar, 2015 (f320c276)
+
+* (GEM) update beaker version to 2.8.0 (f320c276)
+
+* Merge pull request #759 from sschneid/vmpooler_tagging (97052ab4)
+
+
+```
+Merge pull request #759 from sschneid/vmpooler_tagging
+
+(BKR-155) Add simple tagging to vmpooler hosts
+```
+* Merge pull request #755 from anodelman/acceptance (0ac1460d)
+
+
+```
+Merge pull request #755 from anodelman/acceptance
+
+(BKR-77) breakup dsl/helpers and dsl/install_utils
+```
+* Merge pull request #754 from anodelman/win-fix (f426a7cf)
+
+
+```
+Merge pull request #754 from anodelman/win-fix
+
+(BKR-151) periodic failure to restart ssh on windows
+```
+* Merge pull request #734 from kevpl/bkr5_log_prefix (4aaedb45)
+
+
+```
+Merge pull request #734 from kevpl/bkr5_log_prefix
+
+(BKR-5) added a default log_prefix of the hostfile name, and the --log-p...
+```
+* Wrap tagging attempt in a begin/rescue/end block (66f4629f)
+
+* Merge pull request #745 from puppetlabs/fix_vagrant_insecure (77c14f7b)
+
+
+```
+Merge pull request #745 from puppetlabs/fix_vagrant_insecure
+
+(BKR-148) Stop vagrant from generating ssh key
+```
+* Merge pull request #749 from kevpl/bkr79_deprecate_hostproperties (c7a6ef03)
+
+
+```
+Merge pull request #749 from kevpl/bkr79_deprecate_hostproperties
+
+(BKR-79) added deprecated warning to host defaults
+```
+* Merge pull request #751 from petems/MAINT-fix-non-cygwin-root-enable (47a942ae)
+
+
+```
+Merge pull request #751 from petems/MAINT-fix-non-cygwin-root-enable
+
+(MAINT) Fix enable root login on non-cygwin
+```
+* (BKR-155) Add simple tagging to vmpooler hosts (90d4e088)
+
+* (BKR-151) periodic failure to restart ssh on windows (beec5281)
+
+
+```
+(BKR-151) periodic failure to restart ssh on windows
+
+- wrap ssh stop/start in a repeat loop
+```
+* (BKR-77) breakup dsl/helpers and dsl/install_utils (73931bf3)
+
+
+```
+(BKR-77) breakup dsl/helpers and dsl/install_utils
+
+- dsl/helpers.rb and dsl/install_utils.rb have grown too large and no
+  longer make sense as discreet units
+- divide install_utils into modules with methods associated with
+  different applications (pe, puppet, modules)
+- divide helpers into modules with methods exercising different areas of
+  functionality (facter, hiera, host, puppet, web, trapperkeeper)
+- update spec testing stucture to reflect new install_utils/helpers
+  stucture
+```
+* (MAINT) Changes default to show warning (e17321ec)
+
+
+```
+(MAINT) Changes default to show warning
+
+This means that we won't try to run the sed command on Windows boxes if they have false for cygwin
+```
+* (MAINT) Adds spec for `enable_root_login` method (1f666bef)
+
+* (BKR-79) added deprecated warning to host defaults (f654a4f0)
+
+* (BRK-148) Stop vagrant from generating ssh key (d7470ed9)
+
+
+```
+(BRK-148) Stop vagrant from generating ssh key
+
+Hashicorp added new behavior that generates a new SSH key
+when generating a box, and will remove any existing "insecure"
+key found on a box. See https://github.com/mitchellh/vagrant/pull/4707
+
+This has the unfortunate side effect of breaking the automation
+used in Beaker to setup SSH keys, since it relied on the default
+"insecure" vagrant keys being used. Current workaround is to disable
+the new Vagrant behavior with a configuration option.
+```
+* (BKR-5) added a default log_prefix of the hostfile name, and the --log-prefix CLI option (6ce6cbd4)
+
+### <a name = "beaker2.7.1">beaker2.7.1 - 19 Mar, 2015 (45b2bf10)
+
+* (HISTORY) update beaker history for gem release 2.7.1 (45b2bf10)
 
 * (GEM) update beaker version to 2.7.1 (2bf87b79)
 
