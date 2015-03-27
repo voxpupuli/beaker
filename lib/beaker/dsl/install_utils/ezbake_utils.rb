@@ -169,7 +169,7 @@ module Beaker
 
             load 'ezbake.rb'
             ezbake = EZBake::Config
-            ezbake[:package_version] = `echo -n $(rake pl:print_build_param[ref] | tail -n 1)`
+            ezbake[:package_version] = `printf $(rake pl:print_build_param[ref] | tail -n 1)`
             EZBakeUtils.config = ezbake
           end
         end
