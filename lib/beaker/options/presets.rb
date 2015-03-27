@@ -11,9 +11,12 @@ module Beaker
       # us to define multiple environment variables for the same
       # configuration value. They are checked in the order they are arrayed
       # so that preferred and "fallback" values work as expected.
+      #
+      # 'JOB_NAME' and 'BUILD_URL' envs are supplied by Jenkins
+      # https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
       ENVIRONMENT_SPEC = {
         :home                 => 'HOME',
-        :project              => ['BEAKER_PROJECT', 'BEAKER_project'],
+        :project              => ['BEAKER_PROJECT', 'BEAKER_project', 'JOB_NAME'],
         :department           => ['BEAKER_DEPARTMENT', 'BEAKER_department'],
         :jenkins_build_url    => ['BEAKER_BUILD_URL', 'BUILD_URL'],
         :created_by           => ['BEAKER_CREATED_BY'],
