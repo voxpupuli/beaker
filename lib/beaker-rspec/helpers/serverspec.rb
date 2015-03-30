@@ -137,12 +137,7 @@ module Specinfra
 
     def self.run(meth, *args)
       backend = Specinfra.backend
-      node = get_working_node
-      if node['platform'] =~ /windows/
-        cmd = Specinfra.command.get_windows_cmd(meth, *args)
-      else
-        cmd = Specinfra.command.get(meth, *args)
-      end
+      cmd = Specinfra.command.get(meth, *args)
       backend = Specinfra.backend
       ret = backend.run_command(cmd)
       if meth.to_s =~ /^check/
