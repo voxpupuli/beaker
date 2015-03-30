@@ -16,7 +16,7 @@ module Beaker
       begin
         ::Docker.validate_version!
       rescue Excon::Errors::SocketError => e
-        raise "Docker instance not found.\nif you are on OSX, you might not have Boot2Docker setup correctly\nCheck your DOCKER_HOST variable has been set"
+        raise "Docker instance not connectable.\nError was: #{e}\nIf you are on OSX, you might not have Boot2Docker setup correctly\nCheck your DOCKER_HOST variable has been set"
       end
 
       # Pass on all the logging from docker-api to the beaker logger instance
