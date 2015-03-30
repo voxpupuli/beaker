@@ -46,6 +46,20 @@ module Beaker
           v_file << "    v.vm.synced_folder '.', '/vagrant', :nfs => true\n"
         end
 
+        if /freebsd/i.match(host['platform'])
+          v_file << "    v.ssh.shell = 'sh'\n"
+          v_file << "    v.vm.guest = :freebsd\n"
+
+          # FreeBSD NFS has a character restriction of 88 characters
+          # So you can enable it but if your module has a long name it probably won't work...
+          # Further links and reading in git commit message
+          if host['vagrant_freebsd_nfs'].nil?
+            v_file << "    v.vm.synced_folder '.', '/vagrant', type: 'rsync'\n"
+          else
+            v_file << "    v.vm.synced_folder '.', '/vagrant', :nfs => true\n"
+          end
+        end
+
         v_file << self.class.provider_vfile_section(host, options)
 
         v_file << "  end\n"
