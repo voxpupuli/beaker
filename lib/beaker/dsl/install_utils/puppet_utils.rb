@@ -347,7 +347,8 @@ module Beaker
           # - we do not have install_32 set on host
           # - we do not have install_32 set globally
           version = opts[:version]
-          if !(version_is_less(version, '3.7')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+          is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
+          if !(version_is_less(version, '3.7')) && host.is_x86_64? && !is_config_32
             host['dist'] = "puppet-#{version}-x64"
           else
             host['dist'] = "puppet-#{version}"
@@ -693,7 +694,8 @@ module Beaker
           when /^windows$/
             release_path << 'windows'
             onhost_copy_base = '`cygpath -smF 35`/'
-            should_install_64bit = host.is_x86_64? && !host['install_32'] && !opts['install_32']
+            is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
+            should_install_64bit = host.is_x86_64? && !is_config_32
             # only install 64bit builds if
             # - we do not have install_32 set on host
             # - we do not have install_32 set globally
