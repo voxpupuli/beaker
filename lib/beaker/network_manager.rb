@@ -26,7 +26,7 @@ module Beaker
       @machines = {}
       @hypervisors = nil
 
-      @options[:log_prefix]     = File.basename(@options[:hosts_file], '.yml') unless @options[:log_prefix]
+      @options[:log_prefix]     = File.basename(@options[:hosts_file] ? @options[:hosts_file] : '', '.yml') unless @options[:log_prefix]
       @options[:timestamp]      = Time.now unless @options.has_key?(:timestamp)
       @options[:xml_dated_dir]  = Beaker::Logger.generate_dated_log_folder(@options[:xml_dir], @options[:log_prefix], @options[:timestamp])
       @options[:log_dated_dir]  = Beaker::Logger.generate_dated_log_folder(@options[:log_dir], @options[:log_prefix], @options[:timestamp])

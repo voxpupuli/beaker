@@ -1,5 +1,5 @@
-require 'beaker-rspec/beaker_shim'
-require "beaker-rspec/helpers/serverspec"
+require 'beaker/rspec/beaker_shim'
+require "beaker/rspec/helpers/serverspec"
 include BeakerRSpec::BeakerShim
 
 RSpec.configure do |c|

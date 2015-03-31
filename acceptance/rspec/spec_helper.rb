@@ -1,3 +1,3 @@
-ENV['RS_SETFILE'] ||= 'sample.cfg'
+ENV['RS_SETFILE'] ||= 'acceptance/fixtures/module/spec/acceptance/nodesets/default.yml'
 
-require "beaker-rspec"
+require "beaker/rspec"

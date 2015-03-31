@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative 'spec_helper'
 
 describe "ignore" do
 
@@ -6,10 +6,6 @@ describe "ignore" do
     hosts.each do |host|
       on host, 'echo hello'
     end
-  end
-
-  example "access options hash" do
-    install_pe
   end
 
   example "access the logger" do
