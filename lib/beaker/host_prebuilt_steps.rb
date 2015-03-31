@@ -313,15 +313,18 @@ module Beaker
       end
     end
 
-    #Update /etc/hosts to make it possible for each provided host to reach each other host by name.
-    #Assumes that each provided host has host[:ip] set.
+    # Update /etc/hosts to make it possible for each provided host to reach each other host by name.
+    # Assumes that each provided host has host[:ip] set; in the instance where a provider sets
+    # host['ip'] to an address which facilitates access to the host externally, but the actual host
+    # addresses differ from this, we check first for the presence of a host['vm_ip'] key first,
+    # and use that if present.
     # @param [Host, Array<Host>] hosts An array of hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     def hack_etc_hosts hosts, opts
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       hosts.each do |host|
-        etc_hosts += "#{host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
+        etc_hosts += "#{host['vm_ip'] || host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
       end
       hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
