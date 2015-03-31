@@ -1,8 +1,8 @@
 require 'beaker/rspec/beaker_shim'
 require "beaker/rspec/helpers/serverspec"
-include BeakerRSpec::BeakerShim
+include Beaker::RSpec::BeakerShim
 
-RSpec.configure do |c|
+::RSpec.configure do |c|
   # Enable color
   c.tty = true
 
@@ -49,7 +49,7 @@ RSpec.configure do |c|
     when 'no'
       # Don't cleanup
     when 'onpass'
-      c.cleanup if RSpec.world.filtered_examples.values.flatten.none?(&:exception)
+      c.cleanup if ::RSpec.world.filtered_examples.values.flatten.none?(&:exception)
     else
       c.cleanup
     end
