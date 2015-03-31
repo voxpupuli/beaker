@@ -693,7 +693,11 @@ module Beaker
           when /^windows$/
             release_path << 'windows'
             onhost_copy_base = '`cygpath -smF 35`/'
-            arch_suffix = arch =~ /64/ ? '64' : '86'
+            should_install_64bit = host.is_x86_64? && !host['install_32'] && !opts['install_32']
+            # only install 64bit builds if
+            # - we do not have install_32 set on host
+            # - we do not have install_32 set globally
+            arch_suffix = should_install_64bit ? '64' : '86'
             release_file = "puppet-agent-x#{arch_suffix}.msi"
           else
             raise "No repository installation step for #{variant} yet..."
