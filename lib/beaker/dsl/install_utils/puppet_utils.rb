@@ -551,7 +551,7 @@ module Beaker
           platform_configs_dir = File.join(repo_configs_dir, variant)
 
           # some of the uses of dev_builds_url below can't include protocol info,
-          # pluse this opens up possibility of switching the behavior on provided
+          # plus this opens up possibility of switching the behavior on provided
           # url type
           _, protocol, hostname = options[:dev_builds_url].partition /.*:\/\//
           dev_builds_url = protocol + hostname
@@ -583,9 +583,15 @@ module Beaker
                           repo_filename,
                           platform_configs_dir)
 
-            link = "%s/%s/%s/repos/%s/%s%s/products/%s/" %
+            link = "%s/%s/%s/repos/%s/%s%s/PC1/%s/" %
               [ dev_builds_url, package_name, build_version, variant,
                 fedora_prefix, version, arch ]
+
+            if not link_exists?( link )
+              link = "%s/%s/%s/repos/%s/%s%s/products/%s/" %
+                [ dev_builds_url, package_name, build_version, variant,
+                  fedora_prefix, version, arch ]
+            end
 
             if not link_exists?( link )
               link = "%s/%s/%s/repos/%s/%s%s/devel/%s/" %
@@ -626,8 +632,13 @@ module Beaker
             scp_to host, list, config_dir
             scp_to host, repo_dir, "/root/#{package_name}"
 
+            pc1_check = on( host,
+                           "[[ -d /root/#{package_name}/#{codename}/PC1 ]]",
+                            :acceptable_exit_codes => [0,1] )
+
+            repo_name = pc1_check.exit_code == 0 ? 'PC1' : 'main'
             search = "deb\\s\\+http:\\/\\/#{hostname}.*$"
-            replace = "deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} main"
+            replace = "deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} #{repo_name}"
             sed_command = "sed -i 's/#{search}/#{replace}/'"
             find_and_sed = "find #{config_dir} -name \"*.list\" -exec #{sed_command} {} \\;"
 

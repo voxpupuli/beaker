@@ -344,18 +344,10 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   RSpec.shared_examples "install-dev-repo" do
-    let( :repo_config ) { "repoconfig" }
-    let( :repo_dir ) { "repodir" }
-
-    before do
-      allow(subject).to receive(:fetch_http_file) { repo_config }
-      allow(subject).to receive(:fetch_http_dir) { repo_dir }
-      allow(subject).to receive(:on).with(host, "apt-get update") { }
-      allow(subject).to receive(:options) { opts }
-      allow(subject).to receive(:link_exists?) { true }
-    end
 
     it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
+      allow(rez).to receive(:exit_code) { 0 }
+      allow(subject).to receive(:link_exists?).and_return(true)
       expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
       expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
       expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
@@ -382,19 +374,72 @@ describe ClassMixedWithDSLInstallUtils do
           subject.install_puppetlabs_dev_repo host, package_name, package_version
         }.to raise_error(RuntimeError, /No repository installation step for/)
       end
-
     end
 
-    describe "When host is a debian-like platform" do
-      let( :platform ) { Beaker::Platform.new('debian-7-i386') }
-      include_examples "install-dev-repo"
-    end
+    describe 'When on supported platforms' do
+      # These are not factored into the `before` block above because they
+      # are expectations in the share examples, but aren't interesting
+      # beyond those basic tests
+      def stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+        allow(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
+        allow(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
+        allow(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
+      end
 
-    describe "When host is a redhat-like platform" do
-      let( :platform ) { Beaker::Platform.new('el-7-i386') }
-      include_examples "install-dev-repo"
-    end
+      let( :repo_config ) { "repoconfig" }
+      let( :repo_dir ) { "repodir" }
+      let( :rez ) { double }
 
+      before do
+        allow(subject).to receive(:fetch_http_file) { repo_config }
+        allow(subject).to receive(:fetch_http_dir) { repo_dir }
+        allow(subject).to receive(:on).with(host, "apt-get update") { }
+        allow(subject).to receive(:options) { opts }
+        allow(subject).to receive(:on).with( host, /^.* -d .*/, {:acceptable_exit_codes =>[0,1]} ).and_return(rez)
+      end
+
+      describe "that are debian-like" do
+        let( :platform ) { Beaker::Platform.new('debian-7-i386') }
+        before { allow(subject).to receive(:link_exists?).and_return(true) }
+
+        include_examples "install-dev-repo"
+
+        it 'sets up the PC1 repository if that was downloaded' do
+          allow(rez).to receive(:exit_code) { 0 }
+
+          stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+
+          expect(subject).to receive(:on).with( host, /^find .* sed .*PC1.*/ )
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        end
+
+        it 'sets up the main repository if that was downloaded' do
+          allow(rez).to receive(:exit_code) { 1 }
+
+          stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+
+          expect(subject).to receive(:on).with( host, /^find .* sed .*main.*/ )
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        end
+
+      end
+
+      describe "that are redhat-like" do
+        let( :platform ) { Beaker::Platform.new('el-7-i386') }
+        include_examples "install-dev-repo"
+
+        it 'downloads PC1, products, or devel repo -- in that order' do
+          allow(subject).to receive(:on).with( host, /^find .* sed .*/ )
+          stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+
+          expect(subject).to receive(:link_exists?).with(/.*PC1.*/).and_return( false )
+          expect(subject).to receive(:link_exists?).with(/.*products.*/).and_return( false )
+          expect(subject).to receive(:link_exists?).with(/.*devel.*/).and_return( true )
+
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        end
+      end
+    end
   end
 
   describe '#install_packages_from_local_dev_repo' do
