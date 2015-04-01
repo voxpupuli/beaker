@@ -111,6 +111,7 @@ module Beaker
       @logger.notify 'Tagging vmpooler VMs'
 
       tags = {
+        'beaker_version' => Beaker::Version::STRING,
         'jenkins_build_url' => @options[:jenkins_build_url],
         'department' => @options[:department],
         'project' => @options[:project],
