@@ -350,6 +350,8 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
+        elsif host['platform'] =~ /centos-7|el-7|redhat-7/
+          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:ptry => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         else
@@ -506,6 +508,9 @@ module Beaker
         when /debian|ubuntu|cumulus/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("service ssh restart"))
+        when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
+          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+          host.exec(Command.new("systemctl restart sshd.service"))
         when /el-|centos|fedora|redhat|oracle|scientific|eos/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("/sbin/service sshd restart"))
