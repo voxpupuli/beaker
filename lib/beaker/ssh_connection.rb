@@ -62,8 +62,14 @@ module Beaker
     def close
       begin
         @ssh.close if @ssh
-      rescue
-        @ssh.shutdown!
+      rescue => e
+        @logger.warn "Attemped ssh.close.  Caught an error: #{e.message}  Attempting ssh.shutdown!..."
+        begin
+          @ssh.shutdown!
+        rescue => e
+          @logger.warn "Attemped ssh.shutdown!.  Caught an error: #{e.message}. Giving up and destorying ssh."
+          @ssh = nil
+        end
       end
       @ssh = nil
     end
