@@ -64,7 +64,12 @@ module Beaker
         @logger.debug("node available as  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@#{ip} -p #{port}")
         host['docker_container'] = container
         host['docker_image'] = image
+        host['vm_ip'] = container.json["NetworkSettings"]["IPAddress"].to_s
+
       end
+
+      hack_etc_hosts @hosts, @options
+
     end
 
     def cleanup
