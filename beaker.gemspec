@@ -29,7 +29,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'yard'
   s.add_development_dependency 'markdown'
   s.add_development_dependency 'thin'
-  s.add_development_dependency 'gitlab-grit'
 
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
