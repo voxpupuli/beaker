@@ -727,6 +727,16 @@ module Beaker
           end
         end
 
+        # This method will install a pem file certifcate on a windows host
+        # 
+        # @param [Host] host                 A host object
+        # @param [String] cert_name          The name of the pem file
+        # @param [String] cert               The contents of the certificate
+        #                  
+        def install_cert_on_windows(host, cert_name, cert)
+          create_remote_file(host, "C:\\Windows\\Temp\\#{cert_name}.pem", cert)
+          on host, "certutil -v -addstore Root C:\\Windows\\Temp\\#{cert_name}.pem"
+        end
       end
     end
   end
