@@ -28,7 +28,7 @@ module Beaker
         expect( pieces[1] ).to be === '[+]'
         expect( pieces[2] ).to be === hypervisor_value
         expect( pieces[3] ).to be === platform_value
-        expect( pieces[4] ).to be === host.name
+        expect( pieces[4] ).to be === host.log_prefix
       end
 
       it 'follows the create parameter correctly' do
