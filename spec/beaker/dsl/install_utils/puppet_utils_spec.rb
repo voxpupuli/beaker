@@ -375,25 +375,32 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
-  RSpec.shared_examples "install-dev-repo" do
-
-    it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
-      allow(rez).to receive(:exit_code) { 0 }
-      allow(subject).to receive(:link_exists?).and_return(true)
-      expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
-      expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
-      expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
-      expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
-      subject.install_puppetlabs_dev_repo host, package_name, package_version
-    end
-
-  end
-
   describe "#install_puppetlabs_dev_repo" do
     let( :package_name ) { "puppet" }
     let( :package_version ) { "7.5.6" }
     let( :host ) do
       FakeHost.create('fakvm', platform.to_s, opts)
+    end
+    let( :logger_double ) do
+      logger_double = Object.new
+      allow(logger_double).to receive(:debug)
+      subject.instance_variable_set(:@logger, logger_double)
+      logger_double
+    end
+
+    RSpec.shared_examples "install-dev-repo" do
+
+      it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
+        allow(rez).to receive(:exit_code) { 0 }
+        allow(logger_double).to receive(:debug)
+        allow(subject).to receive(:link_exists?).and_return(true)
+        expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
+        expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
+        expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
+        expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
+        subject.install_puppetlabs_dev_repo host, package_name, package_version
+      end
+
     end
 
     describe "When host is unsupported platform" do
@@ -438,15 +445,18 @@ describe ClassMixedWithDSLInstallUtils do
 
         it 'sets up the PC1 repository if that was downloaded' do
           allow(rez).to receive(:exit_code) { 0 }
+          allow(logger_double).to receive(:debug)
 
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
+          opts[:dev_builds_repos] = ['PC1']
           expect(subject).to receive(:on).with( host, /^find .* sed .*PC1.*/ )
           subject.install_puppetlabs_dev_repo host, package_name, package_version
         end
 
         it 'sets up the main repository if that was downloaded' do
-          allow(rez).to receive(:exit_code) { 1 }
+          allow(rez).to receive(:exit_code) { 0 }
+          allow(logger_double).to receive(:debug)
 
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
@@ -460,13 +470,29 @@ describe ClassMixedWithDSLInstallUtils do
         let( :platform ) { Beaker::Platform.new('el-7-i386') }
         include_examples "install-dev-repo"
 
-        it 'downloads PC1, products, or devel repo -- in that order' do
+        it 'downloads products or devel repo -- in that order, by default' do
           allow(subject).to receive(:on).with( host, /^find .* sed .*/ )
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
-          expect(subject).to receive(:link_exists?).with(/.*PC1.*/).and_return( false )
+          expect(logger_double).to receive(:debug).exactly( 2 ).times
           expect(subject).to receive(:link_exists?).with(/.*products.*/).and_return( false )
-          expect(subject).to receive(:link_exists?).with(/.*devel.*/).and_return( true )
+          expect(subject).to receive(:link_exists?).with(/.*devel.*/).twice.and_return( true )
+
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        end
+
+        it 'allows ordered customization of repos based on the :dev_builds_repos option' do
+          opts[:dev_builds_repos] = ['PC17', 'yomama', 'McGuyver', 'McGruber', 'panama']
+          allow(subject).to receive(:on).with( host, /^find .* sed .*/ )
+          stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+
+          logger_call_num = opts[:dev_builds_repos].length + 2
+          expect(logger_double).to receive(:debug).exactly( logger_call_num ).times
+          opts[:dev_builds_repos].each do |repo|
+            expect(subject).to receive(:link_exists?).with(/.*repo.*/).ordered.and_return( false )
+          end
+          expect(subject).to receive(:link_exists?).with(/.*products.*/).ordered.and_return( false )
+          expect(subject).to receive(:link_exists?).with(/.*devel.*/).twice.ordered.and_return( true )
 
           subject.install_puppetlabs_dev_repo host, package_name, package_version
         end
@@ -599,7 +625,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_cert_on_windows' do
     before do
-      subject.stub(:on).and_return(Beaker::Result.new({},''))
+      allow(subject).to receive(:on).and_return(Beaker::Result.new({},''))
     end
 
     context 'on windows' do

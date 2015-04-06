@@ -543,18 +543,23 @@ module Beaker
         # @param [String] repo_configs_dir A local directory where repository files will be
         #                                  stored as an intermediate step before
         #                                  pushing them to the given host.
+        # @param [Hash{Symbol=>String}] opts Options to alter execution.
+        # @option opts [String] :dev_builds_url The URL to look for dev builds.
+        # @option opts [String, Array<String>] :dev_builds_repos The repo(s)
+        #                                       to check for dev builds in.
         #
         # @note This method only works on redhat-like and debian-like hosts.
         #
         def install_puppetlabs_dev_repo ( host, package_name, build_version,
-                                  repo_configs_dir = 'tmp/repo_configs' )
+                                  repo_configs_dir = 'tmp/repo_configs',
+                                  opts = options )
           variant, version, arch, codename = host['platform'].to_array
           platform_configs_dir = File.join(repo_configs_dir, variant)
 
           # some of the uses of dev_builds_url below can't include protocol info,
           # plus this opens up possibility of switching the behavior on provided
           # url type
-          _, protocol, hostname = options[:dev_builds_url].partition /.*:\/\//
+          _, protocol, hostname = opts[:dev_builds_url].partition /.*:\/\//
           dev_builds_url = protocol + hostname
 
           on host, "mkdir -p /root/#{package_name}"
@@ -584,25 +589,22 @@ module Beaker
                           repo_filename,
                           platform_configs_dir)
 
-            link = "%s/%s/%s/repos/%s/%s%s/PC1/%s/" %
-              [ dev_builds_url, package_name, build_version, variant,
-                fedora_prefix, version, arch ]
-
-            if not link_exists?( link )
-              link = "%s/%s/%s/repos/%s/%s%s/products/%s/" %
+            link = nil
+            package_repos = opts[:dev_builds_repos].nil? ? [] : [opts[:dev_builds_repos]]
+            package_repos.push(['products', 'devel']).flatten!
+            package_repos.each do |repo|
+              link =  "%s/%s/%s/repos/%s/%s%s/%s/%s/" %
                 [ dev_builds_url, package_name, build_version, variant,
-                  fedora_prefix, version, arch ]
-            end
+                  fedora_prefix, version, repo, arch ]
 
-            if not link_exists?( link )
-              link = "%s/%s/%s/repos/%s/%s%s/devel/%s/" %
-                [ dev_builds_url, package_name, build_version, variant,
-                  fedora_prefix, version, arch ]
+              unless link_exists?( link )
+                @logger.debug("couldn't find link at '#{repo}', falling back to next option...")
+              else
+                @logger.debug("found link at '#{repo}'")
+                break
+              end
             end
-
-            if not link_exists?( link )
-              raise "Unable to reach a repo directory at #{link}"
-            end
+            raise "Unable to reach a repo directory at #{link}" unless link_exists?( link )
 
             repo_dir = fetch_http_dir( link, platform_configs_dir )
 
@@ -633,11 +635,25 @@ module Beaker
             scp_to host, list, config_dir
             scp_to host, repo_dir, "/root/#{package_name}"
 
-            pc1_check = on( host,
-                           "[[ -d /root/#{package_name}/#{codename}/PC1 ]]",
-                            :acceptable_exit_codes => [0,1] )
+            repo_name = nil
+            package_repos = opts[:dev_builds_repos].nil? ? [] : [opts[:dev_builds_repos]]
+            package_repos.flatten!
+            package_repos.each do |repo|
+              repo_path = "/root/#{package_name}/#{codename}/#{repo}"
+              repo_check = on(host, "[[ -d #{repo_path} ]]", :acceptable_exit_codes => [0,1])
+              if repo_check.exit_code == 0
+                @logger.debug("found repo at '#{repo_path}'")
+                repo_name = repo
+                break
+              else
+                @logger.debug("couldn't find repo at '#{repo_path}', falling back to next option...")
+              end
+            end
+            if repo_name.nil?
+              repo_name = 'main'
+              @logger.debug("using default repo '#{repo_name}'")
+            end
 
-            repo_name = pc1_check.exit_code == 0 ? 'PC1' : 'main'
             search = "deb\\s\\+http:\\/\\/#{hostname}.*$"
             replace = "deb file:\\/\\/\\/root\\/#{package_name}\\/#{codename} #{codename} #{repo_name}"
             sed_command = "sed -i 's/#{search}/#{replace}/'"
