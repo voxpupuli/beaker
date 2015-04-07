@@ -1,3 +1,4 @@
+require 'simplecov'
 require 'beaker'
 require 'fakefs/spec_helpers'
 require 'mocks'
