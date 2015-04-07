@@ -137,6 +137,7 @@ module Beaker
           :xml_dir                => 'junit',
           :xml_file               => 'beaker_junit.xml',
           :xml_stylesheet         => 'junit.xsl',
+          :default_log_prefix     => 'beaker_logs',
           :log_dir                => 'log',
           :log_sut_event          => 'sut.log',
           :color                  => true,

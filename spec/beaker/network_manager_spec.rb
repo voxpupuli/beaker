@@ -11,7 +11,9 @@ module Beaker
       make_opts.merge({
         'logger' => double().as_null_object,
         :logger_sut => mock_provisioning_logger,
-        :log_prefix => 'log_prefix_dummy'
+        :log_prefix => @log_prefix,
+        :hosts_file => @hosts_file,
+        :default_log_prefix => 'hello_default',
       })
     }
     let( :network_manager ) { NetworkManager.new(options, options[:logger]) }
@@ -19,6 +21,10 @@ module Beaker
     let( :host ) { hosts[0] }
 
     describe '#log_sut_event' do
+      before :each do
+        @log_prefix = 'log_prefix_dummy'
+        @hosts_file = 'dummy_hosts'
+      end
 
       it 'creates the correct content for an event' do
         log_line = network_manager.log_sut_event host, true
@@ -53,6 +59,30 @@ module Beaker
         options.delete(:logger_sut)
         expect{ nm.log_sut_event(host, true) }.to raise_error(ArgumentError)
       end
+    end
+
+    it 'uses user defined log prefix if it is provided' do
+      @log_prefix = 'dummy_log_prefix'
+      @hosts_file = 'dummy_hosts'
+      nm = network_manager
+      cur_prefix = options[:log_prefix]
+      expect(cur_prefix).to be === @log_prefix
+    end
+
+    it 'uses host based log prefix, when there is not user defined log prefix' do
+      @log_prefix = nil
+      @hosts_file = 'dummy_hosts'
+      nm = network_manager
+      cur_prefix = options[:log_prefix]
+      expect(cur_prefix).to be === @hosts_file
+    end
+
+    it 'uses default log prefix, when there is no user defined and no host file' do
+      @log_prefix = nil
+      @hosts_file = nil
+      nm = network_manager
+      cur_prefix = options[:log_prefix]
+      expect(cur_prefix).to be === 'hello_default'
     end
   end
 end
