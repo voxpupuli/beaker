@@ -2,6 +2,10 @@ require 'open3'
 
 task :default => [ 'test:spec' ]
 
+task :test do
+  Rake::Task['test:spec'].invoke
+end
+
 task :spec do
   Rake::Task['test:spec'].invoke
 end
