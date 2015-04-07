@@ -62,10 +62,16 @@ module Beaker
     def close
       begin
         @ssh.close if @ssh
-      rescue
-        @ssh.shutdown!
+      rescue IOError => detail
+        if !( detail.message == 'closed stream' ) then
+          @ssh.shutdown!
+          @ssh = nil
+          raise detail
+        else
+          @logger.warn "Attemped ssh.close.  Caught IOError.close stream.  Destroying ssh instance."
+          @ssh = nil
+        end
       end
-      @ssh = nil
     end
 
     def try_to_execute command, options = {}, stdout_callback = nil,
