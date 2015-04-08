@@ -37,7 +37,7 @@ module Beaker
     end
 
     def log(logger)
-      logger.debug "Exited: #{exit_code}" unless exit_code == 0
+      logger.debug "Exited: #{exit_code}" unless exit_code == 0 or !exit_code
     end
 
     def formatted_output(limit=10)

@@ -18,6 +18,7 @@ module Beaker
       Errno::ENETUNREACH,
       Net::SSH::Disconnect,
       Net::SSH::AuthenticationFailed,
+      IOError,
     ]
 
     def initialize hostname, user = nil, ssh_opts = {}, options = {}
@@ -34,38 +35,47 @@ module Beaker
       connection
     end
 
+    # connect to the host
     def connect
       try = 1
       last_wait = 0
       wait = 1
       @ssh ||= begin
+                 @logger.debug "Attempting ssh connection to #{@hostname}, user: #{@user}, opts: #{@ssh_opts}"
                  Net::SSH.start(@hostname, @user, @ssh_opts)
                rescue *RETRYABLE_EXCEPTIONS => e
                  if try <= 11
-                   @logger.warn "Try #{try} -- Host #{@hostname} unreachable: #{e.message}"
+                   @logger.warn "Try #{try} -- Host #{@hostname} unreachable: #{e.class.name} - #{e.message}"
                    @logger.warn "Trying again in #{wait} seconds"
                    sleep wait
                   (last_wait, wait) = wait, last_wait + wait
                    try += 1
                    retry
                  else
-                   # why is the logger not passed into this class?
                    @logger.error "Failed to connect to #{@hostname}"
                    raise
                  end
                end
-      @logger.debug "Created ssh connection to #{@hostname}, user: #{@user}, opts: #{@ssh_opts}"
-      self
     end
 
     # closes this SshConnection
     def close
       begin
-        @ssh.close if @ssh
-      rescue
+        if @ssh and not @ssh.closed?
+          @ssh.close
+        else
+          @logger.warn("ssh.close: connection is already closed, no action needed")
+        end
+      rescue *RETRYABLE_EXCEPTIONS => e
+        @logger.warn "Attemped ssh.close, (caught #{e.class.name} - #{e.message})."
+      rescue => e
+        @logger.warn "ssh.close threw unexpected Error: #{e.class.name} - #{e.message}.  Shutting down, and re-raising error below"
         @ssh.shutdown!
+        raise e
+      ensure
+        @ssh = nil
+        @logger.warn("ssh connection to #{@hostname} has been terminated")
       end
-      @ssh = nil
     end
 
     def try_to_execute command, options = {}, stdout_callback = nil,
@@ -93,7 +103,13 @@ module Beaker
 
       # Process SSH activity until we stop doing that - which is when our
       # channel is finished with...
-      @ssh.loop
+      begin
+        @ssh.loop
+      rescue *RETRYABLE_EXCEPTIONS => e
+        # this would indicate that the connection failed post execution, since the channel exec was successful
+        @logger.warn "ssh channel on #{@hostname} received exception post command execution #{e.class.name} - #{e.message}"
+        close
+      end
 
       result.finalize!
       @logger.last_result = result
@@ -102,15 +118,21 @@ module Beaker
 
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
-      attempt = true
+      try = 1
+      wait = 1
+      last_wait = 0
       begin
+        # ensure that we have a current connection object
+        connect
         result = try_to_execute(command, options, stdout_callback, stderr_callback)
       rescue *RETRYABLE_EXCEPTIONS => e
-        if attempt
-          attempt = false
-          @logger.error "Command execution failed, attempting to reconnect to #{@hostname}"
+        if try < 11
+           sleep wait
+          (last_wait, wait) = wait, last_wait + wait
+           try += 1
+          @logger.error "Command execution '#{@hostname}$ #{command}' failed (#{e.class.name} - #{e.message})"
           close
-          connect
+          @logger.debug "Preparing to retry: closed ssh object"
           retry
         else
           raise

@@ -9,6 +9,10 @@ module Beaker
     let( :options )  { { :logger => double('logger').as_null_object }  }
     subject(:connection) { SshConnection.new host, user, ssh_opts, options }
 
+    before :each do
+      allow( subject ).to receive(:sleep)
+    end
+
     it 'self.connect creates connects and returns a proxy for that connection' do
       # grrr
       expect( Net::SSH ).to receive(:start).with( host, user, ssh_opts )
@@ -27,34 +31,42 @@ module Beaker
       connection.connect
     end
 
-    it 'close runs ssh close' do
-      mock_ssh = Object.new
-      expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
-      connection.connect
+    describe '#close' do
 
-      expect( mock_ssh ).to receive( :close ).once
-      connection.close
-    end
+      it 'runs ssh close' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
 
-    it 'close sets the @ssh variable to nil' do
-      mock_ssh = Object.new
-      expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
-      connection.connect
+        allow( mock_ssh).to receive( :closed? ).once.and_return(false)
+        expect( mock_ssh ).to receive( :close ).once
+        connection.close
+      end
 
-      expect( mock_ssh ).to receive( :close ).once
-      connection.close
+      it 'sets the @ssh variable to nil' do
+        mock_ssh = Object.new
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
 
-      expect( connection.instance_variable_get(:@ssh) ).to be_nil
-    end
+        allow( mock_ssh).to receive( :closed? ).once.and_return(false)
+        expect( mock_ssh ).to receive( :close ).once
+        connection.close
 
-    it 'close calls ssh shutdown if ssh close fails' do
-      mock_ssh = Object.new
-      allow( mock_ssh ).to receive( :close ) { raise Error }
-      expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
-      connection.connect
+        expect( connection.instance_variable_get(:@ssh) ).to be_nil
+      end
 
-      expect( mock_ssh ).to receive( :shutdown! ).once
-      connection.close
+      it 'calls ssh shutdown & re-raises if ssh close fails with an unexpected Error' do
+        mock_ssh = Object.new
+        allow( mock_ssh ).to receive( :close ) { raise StandardError }
+        expect( Net::SSH ).to receive( :start ).with( host, user, ssh_opts) { mock_ssh }
+        connection.connect
+
+        allow( mock_ssh).to receive( :closed? ).once.and_return(false)
+        expect( mock_ssh ).to receive( :shutdown! ).once
+        expect{ connection.close }.to raise_error(StandardError)
+        expect( connection.instance_variable_get(:@ssh) ).to be_nil
+      end
+
     end
 
     describe '#execute' do
