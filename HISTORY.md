@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 26 Mar, 2015 (f320c276)](#LATEST)
+* [LATEST - 9 Apr, 2015 (901c4a94)](#LATEST)
+* [beaker2.8.0 - 26 Mar, 2015 (2d25d06d)](#beaker2.8.0)
 * [beaker2.7.1 - 19 Mar, 2015 (45b2bf10)](#beaker2.7.1)
 * [beaker2.7.0 - 19 Mar, 2015 (38b14ef8)](#beaker2.7.0)
 * [beaker2.6.0 - 12 Mar, 2015 (d4e731ab)](#beaker2.6.0)
@@ -76,7 +77,245 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 26 Mar, 2015 (f320c276)
+### <a name = "LATEST">LATEST - 9 Apr, 2015 (901c4a94)
+
+* (GEM) update beaker version to 2.9.0 (901c4a94)
+
+* Merge pull request #783 from anodelman/maint (62b5ac60)
+
+
+```
+Merge pull request #783 from anodelman/maint
+
+(BKR-70) Make SshConnection.close more robust...
+```
+* (BKR-70) Make SshConnection.close more robust... (3bb4f7ca)
+
+
+```
+(BKR-70) Make SshConnection.close more robust...
+
+...(so that on(host, "reboot") works correctly)
+
+- catch IOErrors
+- added additional execution option ':expect_connection_failure' for
+  operations that you believe should result in the connection to the
+  host being dropped or broken
+- tested with rebooting centos7 box, successfully rebuilds connection
+  and continues test execution
+```
+* Merge pull request #781 from anodelman/zombie (959952a7)
+
+
+```
+Merge pull request #781 from anodelman/zombie
+
+(BKR-192) can't run beaker without a host file specified
+```
+* (BKR-192) can't run beaker without a host file specified (5cf28b4c)
+
+
+```
+(BKR-192) can't run beaker without a host file specified
+
+- the hosts file was being defaulted to to provide a log name prefix -
+  it needs a default value for when there is no user provided value plus
+  no hosts file
+```
+* Merge pull request #778 from anodelman/maint (e2d23066)
+
+
+```
+Merge pull request #778 from anodelman/maint
+
+(BKR-188) have beaker support a 'test' raketask.
+```
+* Merge pull request #780 from anodelman/spec-tests (a64a3a10)
+
+
+```
+Merge pull request #780 from anodelman/spec-tests
+
+(BKR-183) simplecov busted in beaker
+```
+* (BKR-183) simplecov busted in beaker (3ae9cd7f)
+
+
+```
+(BKR-183) simplecov busted in beaker
+
+- accidentally busted when we dropped ruby 1.8 support
+- updated to look nice with the current beaker directory structure
+- updated env var to meet beaker standards
+```
+* (BKR-188) have beaker support a 'test' raketask. (93faeffa)
+
+
+```
+(BKR-188) have beaker support a 'test' raketask.
+
+- meets our gem standards
+```
+* Merge pull request #767 from petems/BKR-113-freebsd_pkg_commands (a18ff029)
+
+
+```
+Merge pull request #767 from petems/BKR-113-freebsd_pkg_commands
+
+(BKR-113) Add pkg commands for FreeBSD
+```
+* Merge pull request #764 from petems/BKR-113-add_freebsd_host_class (cc6b606e)
+
+
+```
+Merge pull request #764 from petems/BKR-113-add_freebsd_host_class
+
+(BKR-113) Add FreeBSD host class
+```
+* Merge pull request #768 from anodelman/maint (5a8d8b0c)
+
+
+```
+Merge pull request #768 from anodelman/maint
+
+(QENG-2083) share out beaker's history file generation tool
+```
+* Merge pull request #770 from madAndroid/BKR-165-hack_etc_hosts_docker (bfd12ca9)
+
+
+```
+Merge pull request #770 from madAndroid/BKR-165-hack_etc_hosts_docker
+
+(BKR-165) hack_etc_hosts method doesn't work for Docker provider
+```
+* Merge pull request #773 from liamjbennett/install_windows_cert (3aa42917)
+
+
+```
+Merge pull request #773 from liamjbennett/install_windows_cert
+
+(gh-691) Add function to install certs on windows agents
+```
+* Merge pull request #771 from justinstoller/maint/master/pc1 (8909e35a)
+
+
+```
+Merge pull request #771 from justinstoller/maint/master/pc1
+
+(QENG-2096) Update dev repo for new AIO repo name
+```
+* Merge pull request #762 from sschneid/bkr-161_tagging (084ee947)
+
+
+```
+Merge pull request #762 from sschneid/bkr-161_tagging
+
+(BKR-161) Beaker tagging improvements
+```
+* (gh-691) Add function to install certs on windows agents (ccf0bb7e)
+
+
+```
+(gh-691) Add function to install certs on windows agents
+
+This fixes the issue raised in PUP-2365
+```
+* BKR-165 - Add spec test to check for presence of /etc/hosts for docker provider (d5da2ee2)
+
+* BKR-165 - Amend hack_etc_hosts to set host file entry to host['vm_ip'], if present; add comments to that affect (9c8874b8)
+
+* BKR-165 - add hack_etc_hosts method to beaker hypervisor, and set host['vm_ip'] to correct container IP (b324abe7)
+
+* (QENG-2096) Update dev repo for new AIO repo name (06e3da46)
+
+
+```
+(QENG-2096) Update dev repo for new AIO repo name
+
+Soon AIO builds will only be published to the repo "PC1" (not
+products/devel or main as previously). This allows Beaker to install
+from both new AIO repos or legacy repos.
+```
+* (QENG-2083) share out beaker's history file generation tool (afe0d24c)
+
+
+```
+(QENG-2083) share out beaker's history file generation tool
+
+- remove the history file generator used exclusively by beaker in favor of the
+  new, general use tool
+```
+* Merge pull request #763 from mullr/fix-ezbake-package-version (3e2e1e6d)
+
+
+```
+Merge pull request #763 from mullr/fix-ezbake-package-version
+
+Fix ezbake version string extraction
+```
+* Merge pull request #753 from petems/MAINT-fix_copy_module_to_on_non_cygwin (30a9ee04)
+
+
+```
+Merge pull request #753 from petems/MAINT-fix_copy_module_to_on_non_cygwin
+
+(MAINT) Fix copy module to on non-cygwin
+```
+* Merge pull request #761 from petems/MAINT-show_error_from_docker (a6198bb4)
+
+
+```
+Merge pull request #761 from petems/MAINT-show_error_from_docker
+
+(MAINT) Show error from docker
+```
+* (BKR-113) Add pkg commands for FreeBSD (efb39f8e)
+
+* (BKR-113) Add FreeBSD host class (e288f713)
+
+
+```
+(BKR-113) Add FreeBSD host class
+
+* Also add to supported platforms
+* Main change is location of Puppet data under `/usr/local/etc` rather than `/etc/`
+```
+* (BKR-162) Fix ezbake version string extraction (3b1bf59b)
+
+
+```
+(BKR-162) Fix ezbake version string extraction
+
+This previously used 'echo -n', which is not a universally available
+feature of echo. When running with an OS X host, this caused the string
+to look like "-n PACKAGE-1.2.3\n", which caused cascading failures in
+the code that uses this data. printf is a more portable replacement.
+```
+* (BKR-161) Beaker tagging improvements (da9fe1ed)
+
+
+```
+(BKR-161) Beaker tagging improvements
+
+- Use JOB_NAME for 'project' tag default if it exists
+- Set 'beaker_version' tag in vmpooler hypervisor
+```
+* (MAINT) Updates spec to detect error string (58d7a031)
+
+* (MAINT) Changes error message to help debugging (2d9bc305)
+
+
+```
+(MAINT) Changes error message to help debugging
+
+* Changes the wording to say it was not connectable rather than found
+* Adds error string to help debugging the issue
+```
+* (MAINT) Adds non-cygwin block for copy_module_to (8e5cdd0c)
+
+### <a name = "beaker2.8.0">beaker2.8.0 - 26 Mar, 2015 (2d25d06d)
+
+* (HISTORY) update beaker history for gem release 2.8.0 (2d25d06d)
 
 * (GEM) update beaker version to 2.8.0 (f320c276)
 
