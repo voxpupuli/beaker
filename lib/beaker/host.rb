@@ -396,10 +396,19 @@ module Beaker
         unless options[:silent]
           # What?
           result.log(@logger)
+          if !options[:expect_connection_failure] && !result.exit_code
+            # no exit code was collected, so the stream failed
+            raise CommandFailure, "Host '#{self}' connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+
+          end
+          if options[:expect_connection_failure] && result.exit_code
+            # should have had a connection failure, but didn't
+            raise CommandFailure, "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+          end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
           # is it necessary to break execution??
-          if !options[:accept_all_exit_codes] && !result.exit_code_in?(Array(options[:acceptable_exit_codes] || 0))
+          if !options[:accept_all_exit_codes] && !result.exit_code_in?(Array(options[:acceptable_exit_codes] || [0, nil]))
             raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
           end
         end
