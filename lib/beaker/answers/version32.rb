@@ -23,6 +23,11 @@ module Beaker
         the_answers[dashboard.name][:q_puppetmaster_certname] = master
       end
 
+      # do we want to check for updates?
+      pe_check_for_updates = answer_for(@options, :q_pe_check_for_updates, 'n')
+      the_answers[dashboard.name][:q_pe_check_for_updates] = pe_check_for_updates
+      the_answers[master.name][:q_pe_check_for_updates] = pe_check_for_updates
+
       if @options[:type] == :upgrade && dashboard != database
         # In a split configuration, there is no way for the upgrader
         # to know how much disk space is available for the database

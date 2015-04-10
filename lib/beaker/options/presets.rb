@@ -196,6 +196,7 @@ module Beaker
                                      :q_install_update_server                       => 'y',
                                      :q_exit_for_nc_migrate                         => 'n',
                                      :q_enable_future_parser                        => 'n',
+                                     :q_pe_check_for_updates                        => 'n',
           },
           :dot_fog                => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml               => 'config/image_templates/ec2.yaml',
