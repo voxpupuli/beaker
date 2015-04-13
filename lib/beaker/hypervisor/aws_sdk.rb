@@ -217,108 +217,104 @@ module Beaker
 
     end
 
-    # Launch all nodes
+    # Create an EC2 instance for host, tag it, and return it.
     #
-    # This is where the main launching work occurs for each node. Here we take
-    # care of feeding the information from the image required into the config
-    # for the new host, we perform the launch operation and ensure that the
-    # instance is properly tagged for identification.
+    # @return [AWS::EC2::Instance)]
+    # @api private
+    def create_instance(host, ami_spec)
+      amitype = host['vmname'] || host['platform']
+      amisize = host['amisize'] || 'm1.small'
+      subnet_id = host['subnet_id'] || @options['subnet_id'] || nil
+      vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
+
+      if vpc_id and !subnet_id
+        raise RuntimeError, "A subnet_id must be provided with a vpc_id"
+      end
+
+      # Use snapshot provided for this host
+      image_type = host['snapshot']
+      if not image_type
+        raise RuntimeError, "No snapshot/image_type provided for EC2 provisioning"
+      end
+      ami = ami_spec[amitype]
+      ami_region = ami[:region]
+
+      # Main region object for ec2 operations
+      region = @ec2.regions[ami_region]
+
+      # If we haven't defined a vpc_id then we use the default vpc for the provided region
+      if !vpc_id
+        @logger.notify("aws-sdk: filtering available vpcs in region by 'isDefault")
+        filtered_vpcs = region.client.describe_vpcs(:filters => [{:name => 'isDefault', :values => ['true']}])
+        if !filtered_vpcs[:vpc_set].empty?
+          vpc_id = filtered_vpcs[:vpc_set].first[:vpc_id]
+        else #there's no default vpc, use nil
+          vpc_id = nil
+        end
+      end
+
+      # Grab the vpc object based upon provided id
+      vpc = vpc_id ? region.vpcs[vpc_id] : nil
+
+      # Grab image object
+      image_id = ami[:image][image_type.to_sym]
+      @logger.notify("aws-sdk: Checking image #{image_id} exists and getting its root device")
+      image = region.images[image_id]
+      if image.nil? and not image.exists?
+        raise RuntimeError, "Image not found: #{image_id}"
+      end
+
+      # Transform the images block_device_mappings output into a format
+      # ready for a create.
+      orig_bdm = image.block_device_mappings()
+      @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
+      block_device_mappings = []
+      orig_bdm.each do |device_name, rest|
+        block_device_mappings << {
+          :device_name => device_name,
+          :ebs => {
+            # Change the default size of the root volume.
+            :volume_size => host['volume_size'] || rest[:volume_size],
+            # This is required to override the images default for
+            # delete_on_termination, forcing all volumes to be deleted once the
+            # instance is terminated.
+            :delete_on_termination => true,
+          }
+        }
+      end
+
+      security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
+
+      msg = "aws-sdk: launching %p on %p using %p/%p%s" %
+            [host.name, amitype, amisize, image_type,
+             subnet_id ? ("in %p" % subnet_id) : '']
+      @logger.notify(msg)
+      config = {
+        :count => 1,
+        :image_id => image_id,
+        :monitoring_enabled => true,
+        :key_pair => ensure_key_pair(region),
+        :security_groups => [security_group],
+        :instance_type => amisize,
+        :disable_api_termination => false,
+        :instance_initiated_shutdown_behavior => "terminate",
+        :block_device_mappings => block_device_mappings,
+        :subnet => subnet_id,
+      }
+      region.instances.create(config)
+    end
+
+    # Create EC2 instances for all hosts, tag them, and wait until
+    # they're running.
     #
     # @return [void]
     # @api private
     def launch_all_nodes
-      # Load the ec2_yaml spec file
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
-
-      # Iterate across all hosts and launch them, adding tags along the way
       @logger.notify("aws-sdk: Iterate across all hosts in configuration and launch them")
       @hosts.each do |host|
-        amitype = host['vmname'] || host['platform']
-        amisize = host['amisize'] || 'm1.small'
-        subnet_id = host['subnet_id'] || @options['subnet_id'] || nil
-        vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
-
-        if vpc_id and !subnet_id
-          raise RuntimeError, "A subnet_id must be provided with a vpc_id"
-        end
-
-        # Use snapshot provided for this host
-        image_type = host['snapshot']
-        if not image_type
-          raise RuntimeError, "No snapshot/image_type provided for EC2 provisioning"
-        end
-        ami = ami_spec[amitype]
-        ami_region = ami[:region]
-
-        # Main region object for ec2 operations
-        region = @ec2.regions[ami_region]
-
-        # If we haven't defined a vpc_id then we use the default vpc for the provided region
-        if !vpc_id
-          @logger.notify("aws-sdk: filtering available vpcs in region by 'isDefault")
-          filtered_vpcs = region.client.describe_vpcs(:filters => [{:name => 'isDefault', :values => ['true']}])
-          if !filtered_vpcs[:vpc_set].empty?
-            vpc_id = filtered_vpcs[:vpc_set].first[:vpc_id]
-          else #there's no default vpc, use nil
-            vpc_id = nil
-          end
-        end
-
-        # Grab the vpc object based upon provided id
-        vpc = vpc_id ? region.vpcs[vpc_id] : nil
-
-        # Grab image object
-        image_id = ami[:image][image_type.to_sym]
-        @logger.notify("aws-sdk: Checking image #{image_id} exists and getting its root device")
-        image = region.images[image_id]
-        if image.nil? and not image.exists?
-          raise RuntimeError, "Image not found: #{image_id}"
-        end
-
-        # Transform the images block_device_mappings output into a format
-        # ready for a create.
-        orig_bdm = image.block_device_mappings()
-        @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
-        block_device_mappings = []
-        orig_bdm.each do |device_name, rest|
-          block_device_mappings << {
-            :device_name => device_name,
-            :ebs => {
-              # Change the default size of the root volume.
-              :volume_size => host['volume_size'] || rest[:volume_size],
-              # This is required to override the images default for
-              # delete_on_termination, forcing all volumes to be deleted once the
-              # instance is terminated.
-              :delete_on_termination => true,
-            }
-          }
-        end
-
-        security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
-
-        # Launch the node, filling in the blanks from previous work.
-        @logger.notify("aws-sdk: Launch instance")
-        config = {
-          :count => 1,
-          :image_id => image_id,
-          :monitoring_enabled => true,
-          :key_pair => ensure_key_pair(region),
-          :security_groups => [security_group],
-          :instance_type => amisize,
-          :disable_api_termination => false,
-          :instance_initiated_shutdown_behavior => "terminate",
-          :block_device_mappings => block_device_mappings,
-          :subnet => subnet_id,
-        }
-        instance = region.instances.create(config)
-
-        # Persist the instance object for this host, so later it can be
-        # manipulated by 'cleanup' for example.
-        host['instance'] = instance
-
-        @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
+        host['instance'] = create_instance(host, ami_spec)
       end
-
       wait_for_status(:running)
       nil
     end
