@@ -129,7 +129,7 @@ module Beaker
       time = Time.new
       stamp = time.strftime('%Y-%m-%d %H:%M:%S')
       verb = create ? '+' : '-'
-      line = "#{stamp}\t[#{verb}]\t#{host['hypervisor']}\t#{host['platform']}\t#{host}"
+      line = "#{stamp}\t[#{verb}]\t#{host['hypervisor']}\t#{host['platform']}\t#{host.log_prefix}"
       sut_logger.notify line
       line
     end
