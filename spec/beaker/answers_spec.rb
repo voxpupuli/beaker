@@ -184,6 +184,14 @@ module Beaker
       @answers = answers.answers
     end
 
+    it 'should add q_pe_check_for_updates to master' do
+      expect( @answers['vm1'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
+    it 'should add q_pe_check_for_updates to dashboard' do
+      expect( @answers['vm2'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
     it 'adds :q_enable_future_parser to all hosts, default to "n"' do
       hosts.each do |host|
         expect( basic_hosts[0][:answers][:q_enable_future_parser] ).to be == 'n'
@@ -222,6 +230,18 @@ module Beaker
       hosts.each do |host|
         expect( host[:answers] ).to_not include :q_puppet_cloud_install
       end
+    end
+
+    it 'should add q_pe_check_for_updates to master' do
+      expect( @answers['vm1'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
+    it 'should add q_pe_check_for_updates to dashboard' do
+      expect( @answers['vm2'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
+    it 'should not add q_pe_check_for_updates to agent/database' do
+      expect( @answers['vm3']).to_not include :q_pe_check_for_updates
     end
 
 # re-enable these tests once these keys are eliminated
@@ -280,6 +300,18 @@ module Beaker
     before :each do
       @ver = '3.2'
       @answers = answers.answers
+    end
+
+    it 'should add q_pe_check_for_updates to master' do
+      expect( @answers['vm1'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
+    it 'should add q_pe_check_for_updates to dashboard' do
+      expect( @answers['vm2'][:q_pe_check_for_updates] ).to be === 'n'
+    end
+
+    it 'should not add q_pe_check_for_updates to agent/database' do
+      expect( @answers['vm3']).to_not include :q_pe_check_for_updates
     end
 
     # The only difference between 3.2 and 3.0 is the addition of the
