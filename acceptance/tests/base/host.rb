@@ -152,3 +152,9 @@ hosts.each do |host|
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
 end
+
+step "#reboot: can reboot the host"
+hosts.each do |host|
+  host.reboot
+  on host, "echo #{host} rebooted!"
+end

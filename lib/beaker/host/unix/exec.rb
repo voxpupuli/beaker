@@ -1,6 +1,14 @@
 module Unix::Exec
   include Beaker::CommandFactory
 
+  def reboot
+    if self['platform'] =~ /solaris/
+      exec(Beaker::Command.new("reboot"), :expect_connection_failure => true)
+    else
+      exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
+    end
+  end
+
   def echo(msg, abs=true)
     (abs ? '/bin/echo' : 'echo') + " #{msg}"
   end
