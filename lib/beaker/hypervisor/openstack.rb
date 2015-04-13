@@ -131,7 +131,7 @@ module Beaker
         @vms << vm
 
         #enable root if user is not root
-        enable_root_on_hosts()
+        enable_root(host)
       end
     end
 
@@ -154,8 +154,10 @@ module Beaker
       end
     end
 
-    # Enables root for instances with custom username like ubuntu-amis
-    #
+    # Enables root access for a host when username is not root
+    # This method ripped from the aws_sdk implementation and is probably wrong
+    # because it iterates on a collection when there's no guarantee the collection
+    # has all been brought up in openstack yet and will thus explode
     # @return [void]
     # @api private
     def enable_root_on_hosts
@@ -164,10 +166,8 @@ module Beaker
       end
     end
 
-    # Enables root access for a host when username is not root
-    #
-    # @return [void]
-    # @api private
+    # enable root on a single host (the current one presumably) but only
+    # if the username isn't 'root'
     def enable_root(host)
       if host['user'] != 'root'
         copy_ssh_to_root(host, @options)
