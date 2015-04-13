@@ -369,15 +369,16 @@ module Beaker
           else
             dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
 
-            on host, "set PATH=\"%PATH%;#{host['puppetbindir']}\""
-            on host, "setx PATH \"%PATH%;#{host['puppetbindir']}\""
-
             on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
 
-            on host, "if not exist #{host['distmoduledir']} (md #{host['distmoduledir']})"
+            host.mkdir_p host['distmoduledir']
           end
 
-          on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+          if host.is_cygwin?
+            on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
+          else
+            on host, "start /w msiexec.exe /qn /i #{dest}"
+          end
         end
 
         # Installs Puppet and dependencies from dmg
@@ -728,11 +729,11 @@ module Beaker
         end
 
         # This method will install a pem file certifcate on a windows host
-        # 
+        #
         # @param [Host] host                 A host object
         # @param [String] cert_name          The name of the pem file
         # @param [String] cert               The contents of the certificate
-        #                  
+        #
         def install_cert_on_windows(host, cert_name, cert)
           create_remote_file(host, "C:\\Windows\\Temp\\#{cert_name}.pem", cert)
           on host, "certutil -v -addstore Root C:\\Windows\\Temp\\#{cert_name}.pem"
