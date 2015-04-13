@@ -46,9 +46,6 @@ module Beaker
       # Perform the main launch work
       launch_all_nodes()
 
-      # Wait for each node to reach status :running
-      wait_for_status(:running)
-
       # Add metadata tags to each instance
       add_tags()
 
@@ -322,6 +319,7 @@ module Beaker
         @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
       end
 
+      wait_for_status(:running)
       nil
     end
 
