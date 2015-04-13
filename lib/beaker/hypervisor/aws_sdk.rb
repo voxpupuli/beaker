@@ -66,6 +66,20 @@ module Beaker
       nil #void
     end
 
+    # Kill all instances.
+    #
+    # @param instances [Enumerable<EC2::Instance>]
+    # @return [void]
+    def kill_instances(instances)
+      instances.each do |instance|
+        if !instance.nil? and instance.exists?
+          @logger.notify("aws-sdk: killing EC2 instance #{instance.id}")
+          instance.terminate
+        end
+      end
+      nil
+    end
+
     # Cleanup all earlier provisioned hosts on EC2 using the AWS::EC2 library
     #
     # It goes without saying, but a #cleanup does nothing without a #provision
@@ -73,19 +87,9 @@ module Beaker
     #
     # @return [void]
     def cleanup
-      @logger.notify("aws-sdk: Cleanup, iterating across all hosts and terminating them")
-      @hosts.each do |host|
-        # This was set previously during provisioning
-        instance = host['instance']
-
-        # Only attempt a terminate if the instance actually is set by provision
-        # and the instance actually 'exists'.
-        if !instance.nil? and instance.exists?
-          instance.terminate
-        end
-      end
-
-      nil #void
+      # Provisioning should have set the host 'instance' values.
+      kill_instances(@hosts.map{|h| h['instance']}.select{|x| !x.nil?})
+      nil
     end
 
     # Print instances to the logger. Instances will be from all regions
@@ -312,27 +316,42 @@ module Beaker
     def launch_all_nodes
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
       @logger.notify("aws-sdk: Iterate across all hosts in configuration and launch them")
-      @hosts.each do |host|
-        host['instance'] = create_instance(host, ami_spec)
+      instances = [] # Each element is {:instance => i, :host => h}
+      begin
+        @hosts.each do |host|
+          instances.push({:instance => create_instance(host, ami_spec),
+                          :host => host})
+        end
+        wait_for_status(:running, instances)
+      rescue Exception => ex
+        @logger.notify("aws-sdk: exception - #{ex}")
+        kill_instances(instances.map{|x| x[:instance]})
+        raise ex
       end
-      wait_for_status(:running)
+      # At this point, all instances should be running since wait
+      # either returns on success or throws an exception.
+      if instances.empty?
+        raise RuntimeError, "Didn't manage to launch any EC2 instances"
+      end
+      # Assign the now known running instances to their hosts.
+      instances.each {|x| x[:host]['instance'] = x[:instance]}
       nil
     end
 
-    # Waits until all boxes reach the desired status
+    # Wait until all instances reach the desired state.  Each Hash in
+    # instances must contain an :instance and :host value.
     #
     # @param status [Symbol] EC2 state to wait for, :running :stopped etc.
+    # @param instances Enumerable<Hash{Symbol=>EC2::Instance,Host}>
     # @return [void]
     # @api private
-    def wait_for_status(status)
+    def wait_for_status(status, instances)
       # Wait for each node to reach status :running
-      @logger.notify("aws-sdk: Now wait for all hosts to reach state #{status}")
-      @hosts.each do |host|
-        instance = host['instance']
-        name = host.name
-
-        @logger.notify("aws-sdk: Wait for status #{status} for node #{name}")
-
+      @logger.notify("aws-sdk: Waiting for all hosts to be #{status}")
+      instances.each do |x|
+        name = x[:name]
+        instance = x[:instance]
+        @logger.notify("aws-sdk: Wait for node #{name} to be #{status}")
         # Here we keep waiting for the machine state to reach ':running' with an
         # exponential backoff for each poll.
         # TODO: should probably be a in a shared method somewhere
@@ -350,7 +369,6 @@ module Beaker
           end
           backoff_sleep(tries)
         end
-
       end
     end
 
