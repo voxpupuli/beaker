@@ -5,6 +5,14 @@ end
 module FreeBSD
   class Host < Unix::Host
 
+    [
+      'exec',
+    ].each do |lib|
+        require "beaker/host/freebsd/#{lib}"
+    end
+
+    include FreeBSD::Exec
+
     def self.foss_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
