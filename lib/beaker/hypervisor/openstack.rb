@@ -115,13 +115,28 @@ module Beaker
         # Associate a public IP to the server
         # Create if there are no floating ips available
         #
-        ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
-        if ip.nil?
-          @logger.debug "Creating IP for #{host.name} (#{host[:vmhostname]})"
-          ip = @compute_client.addresses.create
+        # Do we already have an address?
+        @logger.debug vm.addresses
+
+        begin
+          if vm.addresses[@options[:openstack_network]]
+            address = vm.addresses[@options[:openstack_network]].map{ |network| network['addr'] }.first
+          end
+        rescue NoMethodError
+          @logger.debug "No current address retrievable from OpenStack data"
         end
-        ip.server = vm
-        host[:ip] = ip.ip
+        unless address
+          ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
+
+          if ip.nil?
+            @logger.debug "Creating IP for #{host.name} (#{host[:vmhostname]})"
+            ip = @compute_client.addresses.create
+          end
+          ip.server = vm
+          address = ip.ip
+        end
+        host[:ip] = address
+
         @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"
 
         #set metadata
