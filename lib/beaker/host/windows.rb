@@ -27,6 +27,7 @@ module Windows
         'puppetvardir'  => '`cygpath -smF 35`/PuppetLabs/puppet/var',
         'distmoduledir' => '`cygpath -smF 35`/PuppetLabs/puppet/etc/modules',
         'sitemoduledir' => 'C:/usr/share/puppet/modules',
+        'facter-factsd' => '`cygpath -smF 35`/PuppetLabs/facter/facts.d/',
         #let's just add both potential bin dirs to the path
         'puppetbindir'  => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet Enterprise/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/bin',
         'privatebindir' => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet Enterprise/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/sys/ruby/bin',
@@ -46,6 +47,7 @@ module Windows
         'puppetvardir'      => '`cygpath -smF 35`/PuppetLabs/puppet/var',
         'distmoduledir'     => '`cygpath -smF 35`/PuppetLabs/puppet/etc/modules',
         'sitemoduledir'     => 'C:/usr/share/puppet/modules',
+        'facter-factsd'     => '`cygpath -smF 35`/PuppetLabs/facter/facts.d/',
         'hieralibdir'       => '`cygpath -w /opt/puppet-git-repos/hiera/lib`',
         'hierapuppetlibdir' => '`cygpath -w /opt/puppet-git-repos/hiera-puppet/lib`',
         #let's just add both potential bin dirs to the path

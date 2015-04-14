@@ -42,6 +42,24 @@ module Beaker
           fact_on(default, name, opts)
         end
 
+        # Create a custom fact on the provided host
+        # We do this by setting a static value in the facts.d directory
+        #
+        # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] name The name of the fact to create
+        # @param [String, Array] value  The value of the fact to create
+        def create_fact_on(host, name, value)
+          block_on host do | host |
+            create_remote_file(host, File.join(host.puppet['facter-factsd'], "#{name}.yaml"), value.to_yaml)
+          end
+        end
+
+        # Create a fact on the default host
+        # @see #create_fact_on
+        def create_fact(name, value)
+          create_fact_on(default, name, value)
+        end
       end
     end
   end

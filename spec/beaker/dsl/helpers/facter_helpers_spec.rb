@@ -56,4 +56,29 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#create_fact_on' do
+    it 'creates a fact on a single host' do
+      expect(subject).to receive(:create_remote_file).with(host, File.join(host.puppet['facter-factsd'], 'key.yaml'), 'value'.to_yaml )
+
+      subject.create_fact_on(host, 'key', 'value')
+    end
+
+    it 'creates a fact on multiple hosts' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      hosts.each do |host|
+        expect(subject).to receive(:create_remote_file).with(host, File.join(host.puppet['facter-factsd'], 'key.yaml'), 'value'.to_yaml )
+      end
+
+      subject.create_fact_on(hosts, 'key', 'value')
+    end
+  end
+
+  describe '#create_fact' do
+    it 'delegates to #create_fact_on with the default host' do
+      allow( subject ).to receive(:hosts).and_return(hosts)
+      expect( subject ).to receive(:create_fact_on).with( master, 'key', 'value')
+
+      subject.create_fact('key', 'value')
+    end
+  end
 end
