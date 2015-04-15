@@ -403,7 +403,8 @@ module Beaker
           end
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
-            raise CommandFailure, "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            # this can happen because of timing issues, so just raise a warning for now
+            @logger.warn "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
           end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
