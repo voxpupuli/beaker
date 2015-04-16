@@ -16,6 +16,7 @@ module Beaker
     FREEBSD_PACKAGES = ['curl']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
+    SLES10_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['addons', 'ntpdate', 'lsb-release']
@@ -88,6 +89,8 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
+        when host['platform'] =~ /sles-10/
+          check_and_install_packages_if_needed(host, SLES10_PACKAGES)
         when host['platform'] =~ /sles-/
           check_and_install_packages_if_needed(host, SLES_PACKAGES)
         when host['platform'] =~ /debian/
