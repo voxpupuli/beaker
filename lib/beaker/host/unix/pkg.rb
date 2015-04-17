@@ -19,6 +19,9 @@ module Unix::Pkg
 
   def check_for_package(name)
     case self['platform']
+      when /sles-10/
+        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}"), :acceptable_exit_codes => (0...127))
+        result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
       when /sles-/
         result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}"), :acceptable_exit_codes => (0...127))
       when /el-4/
