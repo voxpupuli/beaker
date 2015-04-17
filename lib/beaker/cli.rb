@@ -126,6 +126,8 @@ module Beaker
           if @network_manager
             @network_manager.cleanup
           end
+        else
+          preserve_hosts_file if @options[:provision]
         end
 
         if @logger.is_debug?
@@ -149,7 +151,38 @@ module Beaker
       ).run_and_raise_on_failure
     end
 
-    # @see print_env_vars_affecting_beaker & print_command_line
+    # Sets aside the current hosts file for re-use with the --no-provision flag.
+    # This is originally intended for use on a successful tests where the hosts
+    # are preserved (the --preserve-hosts option is set accordingly).
+    # It copies the current hosts file to the log directory, and rewrites the SUT
+    # names to match their names during the finishing run.
+    #
+    # @return nil
+    def preserve_hosts_file
+      preserved_hosts_filename = File.join(@options[:log_dated_dir], File.basename(@options[:hosts_file]))
+      FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
+      hosts_yaml = YAML.load_file(preserved_hosts_filename)
+      newly_keyed_hosts_entries = {}
+      hosts_yaml['HOSTS'].each do |host_name, host_hash|
+        @hosts.each do |host|
+          if host_name == host.instance_variable_get(:@name)
+            newly_keyed_hosts_entries[host.to_s] = host_hash
+            break
+          end
+        end
+      end
+      hosts_yaml['HOSTS'] = newly_keyed_hosts_entries
+      File.open(preserved_hosts_filename, 'w') do |file|
+        YAML.dump(hosts_yaml, file)
+      end
+      @options[:hosts_preserved_yaml_file] = preserved_hosts_filename
+    end
+
+    # Prints all information required to reproduce the current run & results to the log
+    # @see #print_env_vars_affecting_beaker
+    # @see #print_command_line
+    #
+    # @return nil
     def print_reproduction_info( log_level = :debug )
       print_command_line( log_level )
       print_env_vars_affecting_beaker( log_level )
@@ -187,13 +220,66 @@ module Beaker
     # Prints the command line that can be called to reproduce this run
     # (assuming the environment is the same)
     # @param [Symbol] log_level The log level (coloring) to print the message at
-    # @example Print pertinent env vars using error leve reporting (red)
+    # @example Print pertinent env vars using error level reporting (red)
     #     print_command_line :error
+    #
+    # @note Re-use of already provisioned SUTs has been tested against the vmpooler & vagrant boxes.
+    #     Fusion doesn't need this, as it has no cleanup steps. Docker is untested at this time.
+    #     Please contact @electrical or the Puppet QE Team for more info, or for requests to support this.
     #
     # @return nil
     def print_command_line( log_level = :debug )
       @logger.send(log_level, "\nYou can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
+      if @options[:hosts_preserved_yaml_file]
+        set_docker_warning = false
+        has_supported_hypervisor = false
+        @hosts.each do |host|
+          case host[:hypervisor]
+          when /vagrant|fusion|vmpooler|vcloud/
+            has_supported_hypervisor = true
+          when /docker/
+            set_docker_warning = true
+          end
+        end
+        if has_supported_hypervisor
+          reproducing_command = build_hosts_preserved_reproducing_command(@options[:command_line], @options[:hosts_preserved_yaml_file])
+          @logger.send(log_level, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
+          @logger.send(log_level, '(docker support is untested for this feature. please reference the docs for more info)') if set_docker_warning
+          @logger.send(log_level, reproducing_command)
+        end
+      end
+    end
+
+    # provides a new version of the command given, edited for re-use with a
+    # preserved host.  It does this by swapping the hosts file out for the
+    # new_hostsfile argument and setting the --no-provision flag, removing
+    # any previously set provisioning flags that it finds.
+    #
+    # @param [String] command Command line parameters to edit.
+    # @param [String] new_hostsfile Path to the new hosts file to use.
+    #
+    # @return [String] The command line parameters edited for re-use
+    def build_hosts_preserved_reproducing_command(command, new_hostsfile)
+      command_parts = command.split(' ')
+      has_no_provision_flag = false
+      replace_hosts_file_next = false
+      reproducing_command = []
+      command_parts.each do |part|
+        if replace_hosts_file_next
+          reproducing_command << new_hostsfile
+          replace_hosts_file_next = false
+          next
+        elsif part == '--provision' || part == '--no-provision'
+          has_no_provision_flag = true
+          next
+        elsif part == '--hosts'
+          replace_hosts_file_next = true
+        end
+        reproducing_command << part
+      end
+      reproducing_command << '--no-provision' unless has_no_provision_flag
+      reproducing_command.join(' ')
     end
   end
 end
