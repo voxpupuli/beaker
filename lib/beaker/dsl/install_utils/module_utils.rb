@@ -61,6 +61,7 @@ module Beaker
         # @option opts [String] :module_name The short name of the module to be installed
         # @option opts [String] :version The version of the module to be installed
         def install_puppet_module_via_pmt_on( host, opts = {} )
+          opts = {:source => './'}.merge(opts)
           block_on host do |h|
             version_info = opts[:version] ? "-v #{opts[:version]}" : ""
             if opts[:source]
