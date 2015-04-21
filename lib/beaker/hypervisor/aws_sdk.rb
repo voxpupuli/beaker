@@ -225,10 +225,9 @@ module Beaker
     #
     # @return [AWS::EC2::Instance)]
     # @api private
-    def create_instance(host, ami_spec)
+    def create_instance(host, ami_spec, subnet_id)
       amitype = host['vmname'] || host['platform']
       amisize = host['amisize'] || 'm1.small'
-      subnet_id = host['subnet_id'] || @options['subnet_id'] || nil
       vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
 
       if vpc_id and !subnet_id
@@ -308,19 +307,92 @@ module Beaker
       region.instances.create(config)
     end
 
+    # For each host, create an EC2 instance in one of the specified
+    # subnets and push it onto instances_created.  Each subnet will be
+    # tried at most once for each host, and more than one subnet may
+    # be tried if capacity constraints are encountered.  Each Hash in
+    # instances_created will contain an :instance and :host value.
+    #
+    # @param hosts [Enumerable<Host>]
+    # @param subnets [Enumerable<String>]
+    # @param ami_spec [Hash]
+    # @param instances_created Enumerable<Hash{Symbol=>EC2::Instance,Host}>
+    # @return [void]
+    # @api private
+    def launch_nodes_on_some_subnet(hosts, subnets, ami_spec, instances_created)
+      # Shuffle the subnets so we don't always hit the same one
+      # first, and cycle though the subnets independently of the
+      # host, so we stick with one that's working.  Try each subnet
+      # once per-host.
+      if subnets.nil? or subnets.empty?
+        return
+      end
+      subnet_i = 0
+      shuffnets = subnets.shuffle
+      hosts.each do |host|
+        instance = nil
+        shuffnets.length.times do
+          begin
+            subnet_id = shuffnets[subnet_i]
+            instance = create_instance(host, ami_spec, subnet_id)
+            instances_created.push({:instance => instance, :host => host})
+            break
+          rescue AWS::EC2::Errors::InsufficientInstanceCapacity => ex
+            @logger.notify("aws-sdk: hit #{subnet_id} capacity limit; moving on")
+            subnet_i = (subnet_i + 1) % shuffnets.length
+          end
+        end
+        if instance.nil?
+          raise RuntimeError, "unable to launch host in any requested subnet"
+        end
+      end
+    end
+
     # Create EC2 instances for all hosts, tag them, and wait until
-    # they're running.
+    # they're running.  When a host provides a subnet_id, create the
+    # instance in that subnet, otherwise prefer a CONFIG subnet_id.
+    # If neither are set but there is a CONFIG subnet_ids list,
+    # attempt to create the host in each specified subnet, which might
+    # fail due to capacity constraints, for example.  Specifying both
+    # a CONFIG subnet_id and subnet_ids will provoke an error.
     #
     # @return [void]
     # @api private
     def launch_all_nodes
+      @logger.notify("aws-sdk: launch all hosts in configuration")
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
-      @logger.notify("aws-sdk: Iterate across all hosts in configuration and launch them")
+      global_subnet_id = @options['subnet_id']
+      global_subnets = @options['subnet_ids']
+      if global_subnet_id and global_subnets
+        raise RuntimeError, 'Config specifies both subnet_id and subnet_ids'
+      end
+      no_subnet_hosts = []
+      specific_subnet_hosts = []
+      some_subnet_hosts = []
+      @hosts.each do |host|
+        if global_subnet_id or host['subnet_id']
+          specific_subnet_hosts.push(host)
+        elsif global_subnets
+          some_subnet_hosts.push(host)
+        else
+          no_subnet_hosts.push(host)
+        end
+      end
       instances = [] # Each element is {:instance => i, :host => h}
       begin
-        @hosts.each do |host|
-          instances.push({:instance => create_instance(host, ami_spec),
-                          :host => host})
+        @logger.notify("aws-sdk: launch instances not particular about subnet")
+        launch_nodes_on_some_subnet(some_subnet_hosts, global_subnets, ami_spec,
+                                    instances)
+        @logger.notify("aws-sdk: launch instances requiring a specific subnet")
+        specific_subnet_hosts.each do |host|
+          subnet_id = host['subnet_id'] || global_subnet_id
+          instance = create_instance(host, ami_spec, subnet_id)
+          instances.push({:instance => instance, :host => host})
+        end
+        @logger.notify("aws-sdk: launch instances requiring no subnet")
+        no_subnet_hosts.each do |host|
+          instance = create_instance(host, ami_spec, nil)
+          instances.push({:instance => instance, :host => host})
         end
         wait_for_status(:running, instances)
       rescue Exception => ex
