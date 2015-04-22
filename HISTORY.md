@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 9 Apr, 2015 (901c4a94)](#LATEST)
+* [LATEST - 22 Apr, 2015 (2f834676)](#LATEST)
+* [2.9.0 - 9 Apr, 2015 (b161d325)](#2.9.0)
 * [beaker2.8.0 - 26 Mar, 2015 (2d25d06d)](#beaker2.8.0)
 * [beaker2.7.1 - 19 Mar, 2015 (45b2bf10)](#beaker2.7.1)
 * [beaker2.7.0 - 19 Mar, 2015 (38b14ef8)](#beaker2.7.0)
@@ -77,7 +78,195 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 9 Apr, 2015 (901c4a94)
+### <a name = "LATEST">LATEST - 22 Apr, 2015 (2f834676)
+
+* (GEM) update beaker version to 2.10.0 (2f834676)
+
+* Merge pull request #777 from kevpl/bkr184_repos_addoption (c68967e3)
+
+
+```
+Merge pull request #777 from kevpl/bkr184_repos_addoption
+
+(BKR-184) generalized repo selection code for install_puppetlabs_dev_repo
+```
+* Merge pull request #775 from kevpl/bkr4_hostsfile_reuse (433d7ccd)
+
+
+```
+Merge pull request #775 from kevpl/bkr4_hostsfile_reuse
+
+(BKR-4) Beaker now dumps re-usable hosts file when SUTs are preserved
+```
+* Merge pull request #787 from er0ck/fix/master/BKR-209-check_for_package_and_host_prebuild_sles10 (c256ebd7)
+
+
+```
+Merge pull request #787 from er0ck/fix/master/BKR-209-check_for_package_and_host_prebuild_sles10
+
+(BKR-209) check for package and host prebuild sles10
+```
+* (BKR-209) check for package and host prebuild sles10 (f21ad513)
+
+
+```
+(BKR-209) check for package and host prebuild sles10
+
+this change fixes check_for_package on sles10 in which zypper always
+returns 0, even if a package is not found.
+This change also removes ntp package from the host pre-build steps.
+sles10 comes with ntp_command installed.
+```
+* Merge pull request #785 from anodelman/cherry (8eb9a543)
+
+
+```
+Merge pull request #785 from anodelman/cherry
+
+(BKR-196) add 'reboot' host method
+```
+* (BKR-196) add 'reboot' host method (53cd051b)
+
+
+```
+(BKR-196) add 'reboot' host method
+
+- added host.reboot method
+- added acceptance test to ensure functionality
+```
+* Merge pull request #733 from fiddyspence/feature/better_openstack_ip_assignment_handling (d854fcae)
+
+
+```
+Merge pull request #733 from fiddyspence/feature/better_openstack_ip_assignment_handling
+
+(gh-732) Better Openstack IP address assignment
+```
+* Merge pull request #752 from petems/MAINT-fix_install_puppet_from_msi_on_cygwin (1333f9bd)
+
+
+```
+Merge pull request #752 from petems/MAINT-fix_install_puppet_from_msi_on_cygwin
+
+(MAINT) Fix install_puppet_from msi_on non-cygwin
+```
+* Merge pull request #765 from petems/BKR-113-add_freesbd_vagrant_options (6bec19f7)
+
+
+```
+Merge pull request #765 from petems/BKR-113-add_freesbd_vagrant_options
+
+(BKR-113) Adds FreeBSD Vagrantfile logic
+```
+* Merge pull request #766 from petems/BKR-113-host_prebuild_steps_for_freebsd (59873206)
+
+
+```
+Merge pull request #766 from petems/BKR-113-host_prebuild_steps_for_freebsd
+
+(BKR-113) Host Prebuilt commands for FreeBSD
+```
+* Merge pull request #774 from electrical/centos7 (00434a4f)
+
+
+```
+Merge pull request #774 from electrical/centos7
+
+modifications for CentOS-7
+```
+* Merge pull request #779 from kevpl/bkr150_sut_changename (85e45d64)
+
+
+```
+Merge pull request #779 from kevpl/bkr150_sut_changename
+
+(BKR-150) changed host name to host.log_prefix for extra context in sut.log
+```
+* Merge pull request #683 from fiddyspence/bug/openstack_multi_host_blurn (57e398a5)
+
+
+```
+Merge pull request #683 from fiddyspence/bug/openstack_multi_host_blurn
+
+(gh-687) [openstack] multi node root user enable
+```
+* Merge pull request #784 from anodelman/answers (35632798)
+
+
+```
+Merge pull request #784 from anodelman/answers
+
+(BKR-182) Disable check_for_updates by default with beaker
+```
+* (BKR-182) Disable check_for_updates by default with beaker (75384994)
+
+
+```
+(BKR-182) Disable check_for_updates by default with beaker
+
+- added to version 3.2+
+```
+* (BKR-150) changed host name to host.log_prefix for extra context in sut.log (7ec8d8e8)
+
+* (BKR-184) generalized repo selection code for install_puppetlabs_dev_repo (b3b519ea)
+
+* (BKR-4) Beaker now dumps re-usable hosts file when SUTs are preserved (03f7262f)
+
+* (BKR-116) modifications for CentOS-7 (1d961ccc)
+
+* (BKR-113) Host Prebuilt commands for FreeBSD (39038ad3)
+
+
+```
+(BKR-113) Host Prebuilt commands for FreeBSD
+
+Since FreeBSD echo is different from Linux-y echo, it's much easier to just use printf and escape the strings using gsub.
+```
+* (BKR-113) Adds FreeBSD Vagrantfile logic (95429ad7)
+
+
+```
+(BKR-113) Adds FreeBSD Vagrantfile logic
+
+With Vagrant we use rsync for folder sync, as nfs has a character restriction of 88 characters. So depending on the module name and where it's being stored, it can error out:
+
+
+
+==> default: Mounting NFS shared folders...
+The following SSH command responded with a non-zero exit status.
+Vagrant assumes that this means the command failed!
+
+mount -t nfs '10.0.1.1:/Users/petersouter/projects/reallylongpathnameover88characterssothatmountfswillfail12345678910111213141516' '/vagrant'
+
+Stdout from the command:
+
+Stderr from the command:
+
+mount_nfs: 10.0.1.1:/Users/petersouter/projects/reallylongpathnameover88characterssothatmountfswillfail12345678910111213141516: File name too long
+
+
+
+Further reading if interested:
+http://www.secnetix.de/olli/FreeBSD/mnamelen.hawk
+https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=167105
+```
+* (MAINT) Changes msi install commands run when on non-cygwin (89dabc69)
+
+* (MAINT) Changes msi install commands ran... (effcde41)
+
+
+```
+(MAINT) Changes msi install commands ran...
+
+When on non-cygwin Windows, use `start` not cmd
+```
+* (gh-732) Better Openstack IP address assignment (e1fcd580)
+
+* (gh-687) [openstack] Previously, the method attemped to set root on all nodes, even if the node was not up yet (802db0e9)
+
+### <a name = "2.9.0">2.9.0 - 9 Apr, 2015 (b161d325)
+
+* (HISTORY) update beaker history for gem release 2.9.0 (b161d325)
 
 * (GEM) update beaker version to 2.9.0 (901c4a94)
 
