@@ -167,6 +167,25 @@ describe ClassMixedWithDSLInstallUtils do
       subject.fetch_pe( [unixhost], {} )
     end
 
+    it 'can download a PE .tar from a URL to #fetch_and_push_pe' do
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ) do |arg|
+        if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
+          false
+        else
+          true
+        end
+      end
+      allow( subject ).to receive( :on ).and_return( true )
+
+      path = unixhost['pe_dir']
+      filename = "#{ unixhost['dist'] }"
+      extension = '.tar'
+      expect( subject ).to receive( :fetch_and_push_pe ).with( unixhost, anything, filename, extension ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; cat #{ filename }#{ extension } | tar -xvf -" ).once
+      subject.fetch_pe( [unixhost], {:fetch_local_then_push_to_host => true} )
+    end
+
     it 'can download a PE .tar.gz from a URL to a host and unpack it' do
       allow( File ).to receive( :directory? ).and_return( false ) #is not local
       allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
@@ -177,6 +196,19 @@ describe ClassMixedWithDSLInstallUtils do
       extension = '.tar.gz'
       expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_pe( [unixhost], {} )
+    end
+
+    it 'can download a PE .tar.gz from a URL to #fetch_and_push_pe' do
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
+      allow( subject ).to receive( :on ).and_return( true )
+
+      path = unixhost['pe_dir']
+      filename = "#{ unixhost['dist'] }"
+      extension = '.tar.gz'
+      expect( subject ).to receive( :fetch_and_push_pe ).with( unixhost, anything, filename, extension ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; cat #{ filename }#{ extension } | gunzip | tar -xvf -" ).once
+      subject.fetch_pe( [unixhost], {:fetch_local_then_push_to_host => true} )
     end
 
     it 'can download a PE .swix from a URL to an EOS host and unpack it' do
@@ -468,6 +500,41 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
       end
+    end
+
+  end
+
+  describe 'fetch_and_push_pe' do
+
+    it 'fetches the file' do
+      allow( subject ).to receive( :scp_to )
+
+      path = 'abcde/fg/hij'
+      filename = 'pants'
+      extension = '.txt'
+      expect( subject ).to receive( :fetch_http_file ).with( path, "#{filename}#{extension}", 'tmp/pe' )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension)
+    end
+
+    it 'allows you to set the local copy dir' do
+      allow( subject ).to receive( :scp_to )
+
+      path = 'defg/hi/j'
+      filename = 'pants'
+      extension = '.txt'
+      local_dir = '/root/domes'
+      expect( subject ).to receive( :fetch_http_file ).with( path, "#{filename}#{extension}", local_dir )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension, local_dir)
+    end
+
+    it 'scp\'s to the host' do
+      allow( subject ).to receive( :fetch_http_file )
+
+      path = 'abcde/fg/hij'
+      filename = 'pants'
+      extension = '.txt'
+      expect( subject ).to receive( :scp_to ).with( unixhost, "tmp/pe/#{filename}#{extension}", unixhost['working_dir'] )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension)
     end
 
   end
