@@ -19,7 +19,7 @@ module Beaker
     SLES10_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
-    CUMULUS_PACKAGES = ['addons', 'ntpdate', 'lsb-release']
+    CUMULUS_PACKAGES = ['curl', 'ntpdate']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
