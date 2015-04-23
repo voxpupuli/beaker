@@ -92,6 +92,9 @@ module Beaker
         # @param  [Hash{Symbol=>Symbol, String}] opts The options
         # @option opts [String] :pe_dir Default directory or URL to pull PE package from
         #                  (Otherwise uses individual hosts pe_dir)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_mac(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -107,7 +110,11 @@ module Beaker
             if not link_exists?("#{path}/#{filename}#{extension}")
               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
             end
-            on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+            if opts[:fetch_local_then_push_to_host]
+              fetch_and_push_pe(host, path, filename, extension)
+            else
+              on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+            end
           end
         end
 
@@ -119,6 +126,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_dir)
         # @option opts [String] :pe_ver_win Default PE version to install or upgrade to
         #                  (Otherwise uses individual hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_windows(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -135,11 +145,13 @@ module Beaker
             if not link_exists?("#{path}/#{filename}#{extension}")
               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
             end
-            if host.is_cygwin?
+            if opts[:fetch_local_then_push_to_host]
+              fetch_and_push_pe(host, path, filename, extension)
+              on host, "cd #{host['working_dir']}; chmod 644 #{filename}#{extension}"
+            elsif host.is_cygwin?
               on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
             else
-              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['wor
-  king_dir']}\\#{filename}#{extension}')")
+              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['working_dir']}\\#{filename}#{extension}')")
             end
           end
         end
@@ -150,6 +162,9 @@ module Beaker
         # @param  [Hash{Symbol=>Symbol, String}] opts The options
         # @option opts [String] :pe_dir Default directory or URL to pull PE package from
         #                  (Otherwise uses individual hosts pe_dir)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_unix(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -184,7 +199,14 @@ module Beaker
             else
               unpack = 'tar -xvf -'
               unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack
-              on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} | #{unpack}"
+              if opts[:fetch_local_then_push_to_host]
+                fetch_and_push_pe(host, path, filename, extension)
+                command_file_push = 'cat '
+              else
+                command_file_push = "curl #{path}/"
+              end
+              on host, "cd #{host['working_dir']}; #{command_file_push}#{filename}#{extension} | #{unpack}"
+
             end
           end
         end
@@ -199,6 +221,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_ver)
         # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
         #                  (Otherwise uses individual Windows hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe(hosts, opts)
           hosts.each do |host|
@@ -240,6 +265,9 @@ module Beaker
         # @option opts [Boolean] :set_console_password Should we set the PE console password in the answers file?  Used during upgrade only.
         # @option opts [Hash<String>] :answers Pre-set answers based upon ENV vars and defaults
         #                             (See {Beaker::Options::Presets.env_vars})
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         #
         # @example
         #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
@@ -448,6 +476,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_dir)
         # @option opts [String] :pe_ver Default PE version to install
         #                  (Otherwise uses individual hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @raise [StandardError] When installation times out
         #
         # @example
@@ -510,6 +541,23 @@ module Beaker
           end
           #send in the global options hash
           do_higgs_install higgs_host, options
+        end
+
+        # Grabs the pe file from a remote host to the machine running Beaker, then
+        # scp's the file out to the host.
+        #
+        # @param [Host] host The host to install on
+        # @param [String] path path to the install file
+        # @param [String] filename the filename of the pe file (without the extension)
+        # @param [String] extension the extension of the pe file
+        # @param [String] local_dir the directory to store the pe file in on
+        #                   the Beaker-running-machine
+        #
+        # @api private
+        # @return nil
+        def fetch_and_push_pe(host, path, filename, extension, local_dir='tmp/pe')
+          fetch_http_file("#{path}", "#{filename}#{extension}", local_dir)
+          scp_to host, "#{local_dir}/#{filename}#{extension}", host['working_dir']
         end
 
       end
