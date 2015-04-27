@@ -572,13 +572,13 @@ module Beaker
 
         rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
 
-        expect( host ).to receive(:to_s).and_return('host.example.org')
+        expect( host ).to receive(:reachable_name).and_return('default.ip.address')
 
         expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_rsync_to *args
 
-        expect(Rsync.host).to eq('root@host.example.org')
+        expect(Rsync.host).to eq('root@default.ip.address')
       end
 
       it 'throws an IOError when the file given doesn\'t exist' do

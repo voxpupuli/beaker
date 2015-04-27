@@ -420,7 +420,7 @@ module Beaker
       else
         user = self['user']
       end
-      hostname_with_user = "#{user}@#{self}"
+      hostname_with_user = "#{user}@#{reachable_name}"
 
       Rsync.host = hostname_with_user
 
@@ -442,8 +442,8 @@ module Beaker
         ssh_args << "-i #{key}"
       end
 
-      if ssh_opts.has_key?('port') and
-        ssh_args << "-p #{ssh_opts['port']}"
+      if ssh_opts.has_key?(:port)
+        ssh_args << "-p #{ssh_opts[:port]}"
       end
 
       # We disable prompt when host isn't known
@@ -468,6 +468,7 @@ module Beaker
 
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
       result = Rsync.run(from_path, to_path, rsync_args)
+      @logger.debug("rsync returned #{result.inspect}")
       result
     end
 
