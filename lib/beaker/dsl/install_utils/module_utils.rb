@@ -22,7 +22,7 @@ module Beaker
         #   staging forge
         #
         # @see install_dev_puppet_module
-        def install_dev_puppet_module_on( host, opts )
+        def install_dev_puppet_module_on( host, opts = {} )
           if options[:forge_host]
             with_forge_stubbed_on( host ) do
               install_puppet_module_via_pmt_on( host, opts )
@@ -50,7 +50,7 @@ module Beaker
         #
         # @see install_puppet_module_via_pmt
         # @see copy_module_to
-        def install_dev_puppet_module( opts )
+        def install_dev_puppet_module( opts = {} )
           block_on( hosts ) {|h| install_dev_puppet_module_on( h, opts ) }
         end
         alias :puppet_module_install :install_dev_puppet_module
@@ -61,6 +61,7 @@ module Beaker
         # @option opts [String] :module_name The short name of the module to be installed
         # @option opts [String] :version The version of the module to be installed
         def install_puppet_module_via_pmt_on( host, opts = {} )
+          opts = {:source => './'}.merge(opts)
           block_on host do |h|
             version_info = opts[:version] ? "-v #{opts[:version]}" : ""
             if opts[:source]
@@ -137,7 +138,7 @@ module Beaker
                 end
               end
             when 'rsync'
-              rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+              rsync_to host, source_path, File.join(target_module_dir, module_name), {:ignore => ignore_list}
             else
               logger.debug "Unsupported transfer protocol, returning nil"
               nil
