@@ -88,8 +88,17 @@ module Beaker
           end
         end
         if block_hosts.is_a? Array
-          result = block_hosts.map do |h|
-            run_block_on h, nil, &block
+          if block_hosts.length > 0
+            result = block_hosts.map do |h|
+              run_block_on h, nil, &block
+            end
+          else
+            # there are no matching hosts to execute against
+            # should warn here
+            # check if logger is defined in this context
+            if ( cur_logger = (logger || @logger ) )
+              cur_logger.warn "Attempting to execute against an empty array of hosts (#{hosts}, filtered to #{block_hosts}), no execution will occur"
+            end
           end
         else
           result = yield block_hosts
