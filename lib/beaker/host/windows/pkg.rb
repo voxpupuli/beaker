@@ -2,12 +2,12 @@ module Windows::Pkg
   include Beaker::CommandFactory
 
   def check_for_command(name)
-    result = exec(Beaker::Command.new("which #{name}"), :acceptable_exit_codes => (0...127))
+    result = exec(Beaker::Command.new("which #{name}"), :accept_all_exit_codes => true)
     result.exit_code == 0
   end
 
   def check_for_package(name)
-    result = exec(Beaker::Command.new("cygcheck #{name}"), :acceptable_exit_codes => (0...127))
+    result = exec(Beaker::Command.new("cygcheck #{name}"), :accept_all_exit_codes => true)
     result.exit_code == 0
   end
 
@@ -46,9 +46,7 @@ module Windows::Pkg
   # @api private
   def identify_windows_architecture
     arch = nil
-    execute("echo '' | wmic os get osarchitecture",
-            :acceptable_exit_codes => (0...127)) do |result|
-
+    execute("echo '' | wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
       arch = if result.exit_code == 0
         result.stdout =~ /64/ ? '64' : '32'
       else
@@ -61,8 +59,7 @@ module Windows::Pkg
   # @api private
   def identify_windows_architecture_from_os_name_for_win2003
     arch = nil
-    execute("echo '' | wmic os get name | grep x64",
-            :acceptable_exit_codes => (0...127)) do |result|
+    execute("echo '' | wmic os get name | grep x64", :accept_all_exit_codes => true) do |result|
       arch = result.exit_code == 0 ? '64' : '32'
     end
     arch

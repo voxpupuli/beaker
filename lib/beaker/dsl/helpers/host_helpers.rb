@@ -414,11 +414,11 @@ module Beaker
           logger.debug "  Trying command #{max_retries} times."
           logger.debug ".", add_newline=false
 
-          result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
+          result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
           num_retries = 0
           until desired_exit_codes.include?(result.exit_code)
             sleep retry_interval
-            result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
+            result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
             num_retries += 1
             logger.debug ".", add_newline=false
             if (num_retries > max_retries)

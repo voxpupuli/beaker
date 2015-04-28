@@ -388,7 +388,7 @@ describe ClassMixedWithDSLInstallUtils do
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).and_return( @fail_result, @success_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :accept_all_exit_codes => true }).and_return( @fail_result, @success_result )
       subject.do_higgs_install( hosts[0], opts )
     end
 
@@ -403,7 +403,7 @@ describe ClassMixedWithDSLInstallUtils do
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).exactly(10).times.and_return( @fail_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :accept_all_exit_codes => true }).exactly(10).times.and_return( @fail_result )
       expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error
     end
 

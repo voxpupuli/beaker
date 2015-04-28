@@ -55,7 +55,7 @@ module Beaker
           try = 0
           until try >= TRIES do
             try += 1
-            if host.exec(Command.new(ntp_command), :acceptable_exit_codes => (0..255)).exit_code == 0
+            if host.exec(Command.new(ntp_command), :accept_all_exit_codes => true).exit_code == 0
               success=true
               break
             end
@@ -139,9 +139,9 @@ module Beaker
       logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
         if host['platform'] =~ /solaris|eos/
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
         else
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :acceptable_exit_codes => (0..255))
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
         end
       end
     rescue => e
