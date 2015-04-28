@@ -9,18 +9,6 @@ module Beaker
       # Convenience methods for modifying and reading TrapperKeeper configs
       module TKHelpers
 
-        # @!macro common_opts
-        #   @param [Hash{Symbol=>String}] opts Options to alter execution.
-        #   @option opts [Boolean] :silent (false) Do not produce log output
-        #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
-        #     (or range) of integer exit codes that should be considered
-        #     acceptable.  An error will be thrown if the exit code does not
-        #     match one of the values in this list.
-        #   @option opts [Hash{String=>String}] :environment ({}) These will be
-        #     treated as extra environment variables that should be set before
-        #     running the command.
-        #
-
         # Modify the given TrapperKeeper config file.
         #
         # @param [Host] host  A host object

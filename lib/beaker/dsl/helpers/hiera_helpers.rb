@@ -5,17 +5,6 @@ module Beaker
       # for these methods to execute correctly
       module HieraHelpers
 
-        # @!macro common_opts
-        #   @param [Hash{Symbol=>String}] opts Options to alter execution.
-        #   @option opts [Boolean] :silent (false) Do not produce log output
-        #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
-        #     (or range) of integer exit codes that should be considered
-        #     acceptable.  An error will be thrown if the exit code does not
-        #     match one of the values in this list.
-        #   @option opts [Hash{String=>String}] :environment ({}) These will be
-        #     treated as extra environment variables that should be set before
-        #     running the command.
-        
         # Write hiera config file on one or more provided hosts
         #
         # @param[Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,

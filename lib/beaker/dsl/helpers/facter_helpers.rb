@@ -6,13 +6,22 @@ module Beaker
       #
       module FacterHelpers
 
-        # @!macro common_opts
+        # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
         #   @option opts [Boolean] :silent (false) Do not produce log output
         #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #     exit codes as passing.
+        #   @option opts [Boolean] :dry_run (false) Do not actually execute any
+        #     commands on the SUT
+        #   @option opts [String] :stdin (nil) Input to be provided during command
+        #     execution on the SUT.
+        #   @option opts [Boolean] :pty (false) Execute this command in a pseudoterminal.
+        #   @option opts [Boolean] :expect_connection_failure (false) Expect this command
+        #     to result in a connection failure, reconnect and continue execution.
         #   @option opts [Hash{String=>String}] :environment ({}) These will be
         #     treated as extra environment variables that should be set before
         #     running the command.
