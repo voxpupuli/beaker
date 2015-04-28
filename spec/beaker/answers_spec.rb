@@ -446,4 +446,21 @@ module Beaker
       end
     end
   end
+
+  describe 'Customization' do
+    let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
+    let( :options )     { Beaker::Options::Presets.new.presets }
+    let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
+                          basic_hosts[1]['platform'] = 'windows'
+                          basic_hosts }
+    let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
+
+    it 'allows puppetdb_hostname to be set' do
+      @ver = '3.0'
+      answer = 'myPuppetDbHost'
+      options[:answers][:q_puppetdb_hostname] = answer
+      host_answers = answers.answers['vm1']
+      expect( host_answers[:q_puppetdb_hostname] ).to be === answer
+    end
+  end
 end
