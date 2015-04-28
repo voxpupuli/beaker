@@ -238,14 +238,14 @@ module Beaker
     def determine_if_x86_64
       if is_cygwin?
         if self[:platform] =~ /osx|solaris/
-          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
           result.exit_code == 0
         else
-          result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
+          result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
           result.exit_code == 0
         end
       else
-        result = exec(Beaker::Command.new("wmic os get osarchitecture"), :acceptable_exit_codes => (0...127))
+        result = exec(Beaker::Command.new("wmic os get osarchitecture"), :accept_all_exit_codes => true)
         result.stdout =~ /64/
       end
     end
@@ -289,10 +289,10 @@ module Beaker
         env_file = self[:ssh_env_file]
         escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
         #see if the key/value pair already exists
-        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
           return #nothing to do here, key value pair already exists
         #see if the key already exists
-        elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
+        elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
           exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
         else
           exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
@@ -302,7 +302,7 @@ module Beaker
         mirror_env_to_profile_d(env_file)
       else #powershell windows
         #see if the key/value pair already exists
-        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
+        result = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true)
         subbed_result = result.stdout.chomp
         if result.exit_code == 0
           subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
@@ -321,7 +321,7 @@ module Beaker
     #  host.get_env_var('path')
     def get_env_var key
       key = key.to_s.upcase
-      exec(Beaker::Command.new("env | grep #{key}"), :acceptable_exit_codes => (0..255)).stdout.chomp
+      exec(Beaker::Command.new("env | grep #{key}"), :accept_all_exit_codes => true).stdout.chomp
     end
 
     #Delete the provided key/val from the current ssh environment
@@ -345,7 +345,7 @@ module Beaker
         mirror_env_to_profile_d(env_file)
       else #powershell windows
         #get the current value of the key
-        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
+        result = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true)
         subbed_result = result.stdout.chomp
         if result.exit_code == 0
           subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
