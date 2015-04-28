@@ -50,8 +50,8 @@ module Beaker
 
         # Master/dashboard answers
         master_console_a = {
-          :q_puppetdb_hostname => database,
-          :q_puppetdb_port => answer_for(options, :q_puppetdb_port, 8081)
+          :q_puppetdb_hostname  => answer_for(options, :q_puppetdb_hostname, database),
+          :q_puppetdb_port      => answer_for(options, :q_puppetdb_port, 8081)
         }
 
         # Master only answers
