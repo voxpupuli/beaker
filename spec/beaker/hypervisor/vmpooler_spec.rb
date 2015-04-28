@@ -13,6 +13,7 @@ module Beaker
         arg
       end
       allow( Socket ).to receive( :getaddrinfo ).and_return( true )
+      allow_any_instance_of( Beaker::Vmpooler ).to receive(:load_credentials).and_return(fog_file_contents)
     end
 
     describe '#get_template_url' do
