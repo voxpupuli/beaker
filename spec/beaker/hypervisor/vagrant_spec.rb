@@ -151,6 +151,7 @@ EOF
       it "can copy to Administrator on windows" do
         host = @hosts[0]
         host[:platform] = 'windows'
+        expect( host ).to receive( :is_cygwin? ).and_return(true)
 
         expect( Command ).to receive( :new ).with("cp -r .ssh /cygdrive/c/Users/Administrator/.").once
         expect( Command ).to receive( :new ).with("chown -R Administrator /cygdrive/c/Users/Administrator/.ssh").once

@@ -3,7 +3,8 @@
 end
 
 module Windows
-  class Host < Beaker::Host
+  # A windows host with cygwin tools installed
+  class Host < Unix::Host
     [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
           require "beaker/host/windows/#{lib}"
     end

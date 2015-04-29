@@ -3,19 +3,15 @@
 end
 
 module Mac
-  class Host < Beaker::Host
+    class Host < Unix::Host
 
-    [ 'exec', 'file' ].each do |lib|
-      require "beaker/host/unix/#{lib}"
-    end
-    [ 'user', 'group' ].each do |lib|
+    [ 'user', 'group', 'pkg' ].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
 
     include Mac::User
     include Mac::Group
-    include Unix::File
-    include Unix::Exec
+    include Mac::Pkg
 
     def self.pe_defaults
       h = Beaker::Options::OptionsHash.new
