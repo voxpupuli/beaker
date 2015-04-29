@@ -376,6 +376,7 @@ describe Beaker do
 
       hosts.each do |host|
         windows_pkgs.each do |pkg|
+          allow( host ).to receive( :is_cygwin? ).and_return( true )
           expect( host ).to receive( :check_for_package ).with( pkg ).once.and_return( false )
           expect( host ).to receive( :install_package ).with( pkg ).once
         end
@@ -542,7 +543,8 @@ describe Beaker do
     def set_env_helper(platform_name, host_specific_commands_array)
       host = make_host('name', {
           :platform     => platform_name,
-          :ssh_env_file => 'ssh_env_file'
+          :ssh_env_file => 'ssh_env_file',
+          :is_cygwin   => true,
       } )
       opts = {
           :env1_key => :env1_value,

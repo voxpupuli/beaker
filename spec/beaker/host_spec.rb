@@ -330,6 +330,7 @@ module Beaker
 
       it "does the right thing on a bash host, identified as is_cygwin=true" do
         @options = {:is_cygwin => true}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -341,6 +342,7 @@ module Beaker
 
       it "does the right thing on a bash host, identified as is_cygwin=nil" do
         @options = {:is_cygwin => nil}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -352,6 +354,7 @@ module Beaker
 
       it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
         @options = {:is_cygwin => false}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -609,12 +612,15 @@ module Beaker
         end
 
         it 'can be called on an unsupported host type without an error being thrown' do
-          @platform = 'mac-osx-foo-tigerlion'
+          @options = { :is_cygwin => false }
+          @platform = 'windows-stuff-stuff'
           expect{ host.build_deprecated_keys() }.not_to raise_error
+          expect( host.build_deprecated_keys().empty? ).to be_truthy
         end
 
         it 'returns an empty array for unsupported host types' do
-          @platform = 'mac-osx-foo-tigerlion'
+          @options = { :is_cygwin => false }
+          @platform = 'windows-stuff-stuff'
           expect( host.build_deprecated_keys().empty? ).to be_truthy
         end
 

@@ -148,7 +148,7 @@ module Beaker
         env_array << "#{key.to_s.upcase}=\"#{val}\""
       end
 
-      if host['is_cygwin'].nil? or host['is_cygwin'] == true
+      if not host.is_powershell?
         environment_string = env_array.join(' ')
         "env #{environment_string}"
       else

@@ -211,4 +211,17 @@ module Unix::Pkg
         raise "Package repo cannot be deployed on #{self}; the platform is not supported"
     end
   end
+
+  #Examine the host system to determine the architecture
+  #@return [Boolean] true if x86_64, false otherwise
+  def determine_if_x86_64
+    if self[:platform] =~ /solaris/
+      result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
+        result.exit_code == 0
+    else
+      result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
+      result.exit_code == 0
+    end
+  end
+
 end

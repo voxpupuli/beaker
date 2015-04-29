@@ -171,7 +171,11 @@ module Beaker
     end
 
     def is_cygwin?
-      self['is_cygwin'] == nil || self['is_cygwin'] == true
+      self.class == Windows::Host
+    end
+
+    def is_powershell?
+      self.class == PSWindows::Host
     end
 
     def platform
@@ -233,128 +237,9 @@ module Beaker
       self[:ip] ||= get_ip
     end
 
-    #Examine the host system to determine the architecture
-    #@return [Boolean] true if x86_64, false otherwise
-    def determine_if_x86_64
-      if is_cygwin?
-        if self[:platform] =~ /osx|solaris/
-          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
-          result.exit_code == 0
-        else
-          result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
-          result.exit_code == 0
-        end
-      else
-        result = exec(Beaker::Command.new("wmic os get osarchitecture"), :accept_all_exit_codes => true)
-        result.stdout =~ /64/
-      end
-    end
-
     #@return [Boolean] true if x86_64, false otherwise
     def is_x86_64?
       @x86_64 ||= determine_if_x86_64
-    end
-
-    # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
-    # This is for sles based hosts.
-    # @param [String] env_file The ssh environment file to read from
-    def mirror_env_to_profile_d env_file
-      if self[:platform] =~ /sles-/
-        @logger.debug("mirroring environment to /etc/profile.d on sles platform host")
-        cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
-        shell_env = ''
-        cur_env.each_line do |env_line|
-          shell_env << "export #{env_line}"
-        end
-        #here doc it over
-        exec(Beaker::Command.new("cat << EOF > #{self[:profile_d_env_file]}\n#{shell_env}EOF"))
-        #set permissions
-        exec(Beaker::Command.new("chmod +x #{self[:profile_d_env_file]}"))
-        #keep it current
-        exec(Beaker::Command.new("source #{self[:profile_d_env_file]}"))
-      else
-        #noop
-        @logger.debug("will not mirror environment to /etc/profile.d on non-sles platform host")
-      end
-    end
-
-    #Add the provided key/val to the current ssh environment
-    #@param [String] key The key to add the value to
-    #@param [String] val The value for the key
-    #@example
-    #  host.add_env_var('PATH', '/usr/bin:PATH')
-    def add_env_var key, val
-      key = key.to_s.upcase
-      if self.is_cygwin?
-        env_file = self[:ssh_env_file]
-        escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-        #see if the key/value pair already exists
-        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
-          return #nothing to do here, key value pair already exists
-        #see if the key already exists
-        elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
-          exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
-        else
-          exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
-        end
-        #update the profile.d to current state
-        #match it to the contents of ssh_env_file
-        mirror_env_to_profile_d(env_file)
-      else #powershell windows
-        #see if the key/value pair already exists
-        result = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true)
-        subbed_result = result.stdout.chomp
-        if result.exit_code == 0
-          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
-        end
-        #not present, add it
-        if subbed_result == result.stdout.chomp
-          exec(Beaker::Command.new("setx /M #{key} %#{key}%;#{val}"))
-          exec(Beaker::Command.new("set #{key}=%#{key}%;#{val}"))
-        end
-      end
-    end
-
-    #Return the value of a specific env var
-    #@param [String] key The key to look for
-    #@example
-    #  host.get_env_var('path')
-    def get_env_var key
-      key = key.to_s.upcase
-      exec(Beaker::Command.new("env | grep #{key}"), :accept_all_exit_codes => true).stdout.chomp
-    end
-
-    #Delete the provided key/val from the current ssh environment
-    #@param [String] key The key to delete the value from
-    #@param [String] val The value to delete for the key
-    #@example
-    #  host.delete_env_var('PATH', '/usr/bin:PATH')
-    def delete_env_var key, val
-      key = key.to_s.upcase
-      if self.is_cygwin?
-        env_file = self[:ssh_env_file]
-        val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-        #if the key only has that single value remove the entire line
-        exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", env_file))
-        #value in middle of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
-        #value in start of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", env_file))
-        #update the profile.d to current state
-        #match it to the contents of ssh_env_file
-        mirror_env_to_profile_d(env_file)
-      else #powershell windows
-        #get the current value of the key
-        result = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true)
-        subbed_result = result.stdout.chomp
-        if result.exit_code == 0
-          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
-        end
-        if subbed_result != result
-          #set to the truncated value
-          self.add_env_var(key, subbed_result)
-        end
-      end
     end
 
     def connection
@@ -403,8 +288,10 @@ module Beaker
           end
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
-            # this can happen because of timing issues, so just raise a warning for now
-            @logger.warn "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            # wait to see if the connection failure will be generation, otherwise raise error
+            if not connection.wait_for_connection_failure
+              raise CommandFailure,  "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            end
           end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
@@ -416,27 +303,6 @@ module Beaker
         # Danger, so we have to return this result?
         result
       end
-    end
-
-    # Recursively remove the path provided
-    # @param [String] path The path to remove
-    def rm_rf path
-      exec(Beaker::Command.new("rm -rf #{path}"))
-    end
-
-    # Create the provided directory structure on the host
-    # @param [String] dir The directory structure to create on the host
-    # @return [Boolean] True, if directory construction succeeded, otherwise False
-    def mkdir_p dir
-      if self.is_cygwin?
-        cmd = "mkdir -p #{dir}"
-      else
-        windows_dirstring = dir.gsub('/','\\')
-        cmd = "if not exist #{windows_dirstring} (md #{windows_dirstring})"
-      end
-
-      result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
-      result.exit_code == 0
     end
 
     # scp files from the localhost to this test host, if a directory is provided it is recursively copied.
@@ -608,12 +474,12 @@ module Beaker
   end
 
   [
-    'windows',
-    'pswindows',
      'unix',
      'aix',
      'mac',
      'freebsd',
+     'windows',
+     'pswindows',
   ].each do |lib|
     require "beaker/host/#{lib}"
   end
