@@ -97,6 +97,22 @@ module Beaker
 
       end
 
+      it 'sets :current_test_info' do
+        allow( Logger ).to receive('new')
+        @files = [sh_test]
+        File.open(sh_test, 'w') { |file| file.write(okay_script) }
+
+        testsuite_name = 'name'
+        ts = Beaker::TestSuite.new( testsuite_name, hosts, options, Time.now, :slow )
+        tsr = ts.instance_variable_get( :@test_suite_results )
+        allow( tsr ).to receive(:write_junit_xml).and_return( true )
+        allow( tsr ).to receive(:summarize).and_return( true )
+
+        ts.run
+        expect( options[:current_test_info][:suite][:name]).to be === testsuite_name
+        expect( options[:current_test_info][:suite][:actual]).to be === ts
+      end
+
 
     end
 

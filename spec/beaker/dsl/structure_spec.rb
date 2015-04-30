@@ -26,6 +26,16 @@ describe ClassMixedWithDSLStructure do
         subject.foo
       end
     end
+
+    it 'sets :current_test_info' do
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      opts = {}
+      subject.instance_variable_set(:@options, opts)
+      answer = 'pierceBrosnan'
+      subject.step answer
+      expect( opts[:current_test_info][:step][:name] ).to be === answer
+    end
   end
 
   describe '#test_name' do
@@ -46,6 +56,16 @@ describe ClassMixedWithDSLStructure do
       subject.test_name 'blah' do
         subject.foo
       end
+    end
+
+    it 'sets :current_test_info' do
+      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( logger ).to receive( :notify )
+      opts = {}
+      subject.instance_variable_set(:@options, opts)
+      answer = '15-05-05 had great weather'
+      subject.test_name answer
+      expect( opts[:current_test_info][:case][:name] ).to be === answer
     end
   end
 

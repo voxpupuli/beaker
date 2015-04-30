@@ -37,6 +37,11 @@ module Beaker
       # @param [Proc] block The actions to be performed in this step.
       def step step_name, &block
         logger.notify "\n  * #{step_name}\n"
+        if @options
+          @options[:current_test_info] ||= {}
+          @options[:current_test_info][:step] ||= {}
+          @options[:current_test_info][:step][:name] = step_name
+        end
         yield if block_given?
       end
 
@@ -47,6 +52,11 @@ module Beaker
       #
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
+        if @options
+          @options[:current_test_info] ||= {}
+          @options[:current_test_info][:case] ||= {}
+          @options[:current_test_info][:case][:name] = my_name
+        end
         yield if block_given?
       end
 
