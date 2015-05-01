@@ -455,12 +455,51 @@ module Beaker
                           basic_hosts }
     let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
 
-    it 'allows puppetdb_hostname to be set' do
+    def test_answer_customization(answer_key, value_to_set)
       @ver = '3.0'
-      answer = 'myPuppetDbHost'
-      options[:answers][:q_puppetdb_hostname] = answer
+      options[:answers][answer_key] = value_to_set
       host_answers = answers.answers['vm1']
-      expect( host_answers[:q_puppetdb_hostname] ).to be === answer
+      expect( host_answers[answer_key] ).to be === value_to_set
     end
+
+    it 'sets :q_puppetdb_hostname' do
+      test_answer_customization(:q_puppetdb_hostname, 'q_puppetdb_hostname_custom01')
+    end
+
+    it 'sets :q_puppetdb_database_user' do
+      test_answer_customization(:q_puppetdb_database_user, 'q_puppetdb_database_user_custom02')
+    end
+
+    it 'sets :q_puppetdb_database_password' do
+      test_answer_customization(:q_puppetdb_database_password, 'q_puppetdb_database_password_custom03')
+    end
+
+    it 'sets :q_puppet_enterpriseconsole_auth_database_password' do
+      answer = 'q_puppet_enterpriseconsole_auth_database_password_custom04'
+      test_answer_customization(:q_puppet_enterpriseconsole_auth_database_password, answer)
+    end
+
+    it 'sets :q_puppet_enterpriseconsole_database_user' do
+      answer = 'q_puppet_enterpriseconsole_database_user_custom05'
+      test_answer_customization(:q_puppet_enterpriseconsole_database_user, answer)
+    end
+
+    it 'sets :q_puppet_enterpriseconsole_database_password' do
+      answer = 'q_puppet_enterpriseconsole_database_password_custom06'
+      test_answer_customization(:q_puppet_enterpriseconsole_database_password, answer)
+    end
+
+    it 'sets :q_database_host' do
+      test_answer_customization(:q_database_host, 'q_database_host_custom07')
+    end
+
+    it 'sets :q_database_install' do
+      test_answer_customization(:q_database_install, 'q_database_install_custom08')
+    end
+
+    it 'sets :q_pe_database' do
+      test_answer_customization(:q_pe_database, 'q_pe_database_custom08')
+    end
+
   end
 end
