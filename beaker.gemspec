@@ -53,6 +53,9 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
 
+  s.add_runtime_dependency 'winrm', '~> 1.3.0'
+  s.add_runtime_dependency 'winrm-fs', '~> 0.1.0'
+
   # Optional provisioner specific support
   s.add_runtime_dependency 'rbvmomi', '~> 1.9'
   s.add_runtime_dependency 'fission', '~> 0.4'
