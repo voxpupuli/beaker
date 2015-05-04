@@ -46,9 +46,6 @@ module Beaker
       # Perform the main launch work
       launch_all_nodes()
 
-      # Wait for each node to reach status :running
-      wait_for_status(:running)
-
       # Add metadata tags to each instance
       add_tags()
 
@@ -69,6 +66,20 @@ module Beaker
       nil #void
     end
 
+    # Kill all instances.
+    #
+    # @param instances [Enumerable<EC2::Instance>]
+    # @return [void]
+    def kill_instances(instances)
+      instances.each do |instance|
+        if !instance.nil? and instance.exists?
+          @logger.notify("aws-sdk: killing EC2 instance #{instance.id}")
+          instance.terminate
+        end
+      end
+      nil
+    end
+
     # Cleanup all earlier provisioned hosts on EC2 using the AWS::EC2 library
     #
     # It goes without saying, but a #cleanup does nothing without a #provision
@@ -76,19 +87,9 @@ module Beaker
     #
     # @return [void]
     def cleanup
-      @logger.notify("aws-sdk: Cleanup, iterating across all hosts and terminating them")
-      @hosts.each do |host|
-        # This was set previously during provisioning
-        instance = host['instance']
-
-        # Only attempt a terminate if the instance actually is set by provision
-        # and the instance actually 'exists'.
-        if !instance.nil? and instance.exists?
-          instance.terminate
-        end
-      end
-
-      nil #void
+      # Provisioning should have set the host 'instance' values.
+      kill_instances(@hosts.map{|h| h['instance']}.select{|x| !x.nil?})
+      nil
     end
 
     # Print instances to the logger. Instances will be from all regions
@@ -220,125 +221,209 @@ module Beaker
 
     end
 
-    # Launch all nodes
+    # Create an EC2 instance for host, tag it, and return it.
     #
-    # This is where the main launching work occurs for each node. Here we take
-    # care of feeding the information from the image required into the config
-    # for the new host, we perform the launch operation and ensure that the
-    # instance is properly tagged for identification.
+    # @return [AWS::EC2::Instance)]
+    # @api private
+    def create_instance(host, ami_spec, subnet_id)
+      amitype = host['vmname'] || host['platform']
+      amisize = host['amisize'] || 'm1.small'
+      vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
+
+      if vpc_id and !subnet_id
+        raise RuntimeError, "A subnet_id must be provided with a vpc_id"
+      end
+
+      # Use snapshot provided for this host
+      image_type = host['snapshot']
+      if not image_type
+        raise RuntimeError, "No snapshot/image_type provided for EC2 provisioning"
+      end
+      ami = ami_spec[amitype]
+      ami_region = ami[:region]
+
+      # Main region object for ec2 operations
+      region = @ec2.regions[ami_region]
+
+      # If we haven't defined a vpc_id then we use the default vpc for the provided region
+      if !vpc_id
+        @logger.notify("aws-sdk: filtering available vpcs in region by 'isDefault")
+        filtered_vpcs = region.client.describe_vpcs(:filters => [{:name => 'isDefault', :values => ['true']}])
+        if !filtered_vpcs[:vpc_set].empty?
+          vpc_id = filtered_vpcs[:vpc_set].first[:vpc_id]
+        else #there's no default vpc, use nil
+          vpc_id = nil
+        end
+      end
+
+      # Grab the vpc object based upon provided id
+      vpc = vpc_id ? region.vpcs[vpc_id] : nil
+
+      # Grab image object
+      image_id = ami[:image][image_type.to_sym]
+      @logger.notify("aws-sdk: Checking image #{image_id} exists and getting its root device")
+      image = region.images[image_id]
+      if image.nil? and not image.exists?
+        raise RuntimeError, "Image not found: #{image_id}"
+      end
+
+      # Transform the images block_device_mappings output into a format
+      # ready for a create.
+      orig_bdm = image.block_device_mappings()
+      @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
+      block_device_mappings = []
+      orig_bdm.each do |device_name, rest|
+        block_device_mappings << {
+          :device_name => device_name,
+          :ebs => {
+            # Change the default size of the root volume.
+            :volume_size => host['volume_size'] || rest[:volume_size],
+            # This is required to override the images default for
+            # delete_on_termination, forcing all volumes to be deleted once the
+            # instance is terminated.
+            :delete_on_termination => true,
+          }
+        }
+      end
+
+      security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
+
+      msg = "aws-sdk: launching %p on %p using %p/%p%s" %
+            [host.name, amitype, amisize, image_type,
+             subnet_id ? ("in %p" % subnet_id) : '']
+      @logger.notify(msg)
+      config = {
+        :count => 1,
+        :image_id => image_id,
+        :monitoring_enabled => true,
+        :key_pair => ensure_key_pair(region),
+        :security_groups => [security_group],
+        :instance_type => amisize,
+        :disable_api_termination => false,
+        :instance_initiated_shutdown_behavior => "terminate",
+        :block_device_mappings => block_device_mappings,
+        :subnet => subnet_id,
+      }
+      region.instances.create(config)
+    end
+
+    # For each host, create an EC2 instance in one of the specified
+    # subnets and push it onto instances_created.  Each subnet will be
+    # tried at most once for each host, and more than one subnet may
+    # be tried if capacity constraints are encountered.  Each Hash in
+    # instances_created will contain an :instance and :host value.
+    #
+    # @param hosts [Enumerable<Host>]
+    # @param subnets [Enumerable<String>]
+    # @param ami_spec [Hash]
+    # @param instances_created Enumerable<Hash{Symbol=>EC2::Instance,Host}>
+    # @return [void]
+    # @api private
+    def launch_nodes_on_some_subnet(hosts, subnets, ami_spec, instances_created)
+      # Shuffle the subnets so we don't always hit the same one
+      # first, and cycle though the subnets independently of the
+      # host, so we stick with one that's working.  Try each subnet
+      # once per-host.
+      if subnets.nil? or subnets.empty?
+        return
+      end
+      subnet_i = 0
+      shuffnets = subnets.shuffle
+      hosts.each do |host|
+        instance = nil
+        shuffnets.length.times do
+          begin
+            subnet_id = shuffnets[subnet_i]
+            instance = create_instance(host, ami_spec, subnet_id)
+            instances_created.push({:instance => instance, :host => host})
+            break
+          rescue AWS::EC2::Errors::InsufficientInstanceCapacity => ex
+            @logger.notify("aws-sdk: hit #{subnet_id} capacity limit; moving on")
+            subnet_i = (subnet_i + 1) % shuffnets.length
+          end
+        end
+        if instance.nil?
+          raise RuntimeError, "unable to launch host in any requested subnet"
+        end
+      end
+    end
+
+    # Create EC2 instances for all hosts, tag them, and wait until
+    # they're running.  When a host provides a subnet_id, create the
+    # instance in that subnet, otherwise prefer a CONFIG subnet_id.
+    # If neither are set but there is a CONFIG subnet_ids list,
+    # attempt to create the host in each specified subnet, which might
+    # fail due to capacity constraints, for example.  Specifying both
+    # a CONFIG subnet_id and subnet_ids will provoke an error.
     #
     # @return [void]
     # @api private
     def launch_all_nodes
-      # Load the ec2_yaml spec file
+      @logger.notify("aws-sdk: launch all hosts in configuration")
       ami_spec = YAML.load_file(@options[:ec2_yaml])["AMI"]
-
-      # Iterate across all hosts and launch them, adding tags along the way
-      @logger.notify("aws-sdk: Iterate across all hosts in configuration and launch them")
-      @hosts.each do |host|
-        amitype = host['vmname'] || host['platform']
-        amisize = host['amisize'] || 'm1.small'
-        subnet_id = host['subnet_id'] || @options['subnet_id'] || nil
-        vpc_id = host['vpc_id'] || @options['vpc_id'] || nil
-
-        if vpc_id and !subnet_id
-          raise RuntimeError, "A subnet_id must be provided with a vpc_id"
-        end
-
-        # Use snapshot provided for this host
-        image_type = host['snapshot']
-        if not image_type
-          raise RuntimeError, "No snapshot/image_type provided for EC2 provisioning"
-        end
-        ami = ami_spec[amitype]
-        ami_region = ami[:region]
-
-        # Main region object for ec2 operations
-        region = @ec2.regions[ami_region]
-
-        # If we haven't defined a vpc_id then we use the default vpc for the provided region
-        if !vpc_id
-          @logger.notify("aws-sdk: filtering available vpcs in region by 'isDefault")
-          filtered_vpcs = region.client.describe_vpcs(:filters => [{:name => 'isDefault', :values => ['true']}])
-          if !filtered_vpcs[:vpc_set].empty?
-            vpc_id = filtered_vpcs[:vpc_set].first[:vpc_id]
-          else #there's no default vpc, use nil
-            vpc_id = nil
-          end
-        end
-
-        # Grab the vpc object based upon provided id
-        vpc = vpc_id ? region.vpcs[vpc_id] : nil
-
-        # Grab image object
-        image_id = ami[:image][image_type.to_sym]
-        @logger.notify("aws-sdk: Checking image #{image_id} exists and getting its root device")
-        image = region.images[image_id]
-        if image.nil? and not image.exists?
-          raise RuntimeError, "Image not found: #{image_id}"
-        end
-
-        # Transform the images block_device_mappings output into a format
-        # ready for a create.
-        orig_bdm = image.block_device_mappings()
-        @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
-        block_device_mappings = []
-        orig_bdm.each do |device_name, rest|
-          block_device_mappings << {
-            :device_name => device_name,
-            :ebs => {
-              # Change the default size of the root volume.
-              :volume_size => host['volume_size'] || rest[:volume_size],
-              # This is required to override the images default for
-              # delete_on_termination, forcing all volumes to be deleted once the
-              # instance is terminated.
-              :delete_on_termination => true,
-            }
-          }
-        end
-
-        security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
-
-        # Launch the node, filling in the blanks from previous work.
-        @logger.notify("aws-sdk: Launch instance")
-        config = {
-          :count => 1,
-          :image_id => image_id,
-          :monitoring_enabled => true,
-          :key_pair => ensure_key_pair(region),
-          :security_groups => [security_group],
-          :instance_type => amisize,
-          :disable_api_termination => false,
-          :instance_initiated_shutdown_behavior => "terminate",
-          :block_device_mappings => block_device_mappings,
-          :subnet => subnet_id,
-        }
-        instance = region.instances.create(config)
-
-        # Persist the instance object for this host, so later it can be
-        # manipulated by 'cleanup' for example.
-        host['instance'] = instance
-
-        @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
+      global_subnet_id = @options['subnet_id']
+      global_subnets = @options['subnet_ids']
+      if global_subnet_id and global_subnets
+        raise RuntimeError, 'Config specifies both subnet_id and subnet_ids'
       end
-
+      no_subnet_hosts = []
+      specific_subnet_hosts = []
+      some_subnet_hosts = []
+      @hosts.each do |host|
+        if global_subnet_id or host['subnet_id']
+          specific_subnet_hosts.push(host)
+        elsif global_subnets
+          some_subnet_hosts.push(host)
+        else
+          no_subnet_hosts.push(host)
+        end
+      end
+      instances = [] # Each element is {:instance => i, :host => h}
+      begin
+        @logger.notify("aws-sdk: launch instances not particular about subnet")
+        launch_nodes_on_some_subnet(some_subnet_hosts, global_subnets, ami_spec,
+                                    instances)
+        @logger.notify("aws-sdk: launch instances requiring a specific subnet")
+        specific_subnet_hosts.each do |host|
+          subnet_id = host['subnet_id'] || global_subnet_id
+          instance = create_instance(host, ami_spec, subnet_id)
+          instances.push({:instance => instance, :host => host})
+        end
+        @logger.notify("aws-sdk: launch instances requiring no subnet")
+        no_subnet_hosts.each do |host|
+          instance = create_instance(host, ami_spec, nil)
+          instances.push({:instance => instance, :host => host})
+        end
+        wait_for_status(:running, instances)
+      rescue Exception => ex
+        @logger.notify("aws-sdk: exception - #{ex}")
+        kill_instances(instances.map{|x| x[:instance]})
+        raise ex
+      end
+      # At this point, all instances should be running since wait
+      # either returns on success or throws an exception.
+      if instances.empty?
+        raise RuntimeError, "Didn't manage to launch any EC2 instances"
+      end
+      # Assign the now known running instances to their hosts.
+      instances.each {|x| x[:host]['instance'] = x[:instance]}
       nil
     end
 
-    # Waits until all boxes reach the desired status
+    # Wait until all instances reach the desired state.  Each Hash in
+    # instances must contain an :instance and :host value.
     #
     # @param status [Symbol] EC2 state to wait for, :running :stopped etc.
+    # @param instances Enumerable<Hash{Symbol=>EC2::Instance,Host}>
     # @return [void]
     # @api private
-    def wait_for_status(status)
+    def wait_for_status(status, instances)
       # Wait for each node to reach status :running
-      @logger.notify("aws-sdk: Now wait for all hosts to reach state #{status}")
-      @hosts.each do |host|
-        instance = host['instance']
-        name = host.name
-
-        @logger.notify("aws-sdk: Wait for status #{status} for node #{name}")
-
+      @logger.notify("aws-sdk: Waiting for all hosts to be #{status}")
+      instances.each do |x|
+        name = x[:name]
+        instance = x[:instance]
+        @logger.notify("aws-sdk: Wait for node #{name} to be #{status}")
         # Here we keep waiting for the machine state to reach ':running' with an
         # exponential backoff for each poll.
         # TODO: should probably be a in a shared method somewhere
@@ -356,7 +441,6 @@ module Beaker
           end
           backoff_sleep(tries)
         end
-
       end
     end
 
