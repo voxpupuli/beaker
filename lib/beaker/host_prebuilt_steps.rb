@@ -368,7 +368,7 @@ module Beaker
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /centos-7|el-7|redhat-7/
-          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:ptry => true})
+          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         elsif host['platform'] =~ /freebsd/
