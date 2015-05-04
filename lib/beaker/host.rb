@@ -3,7 +3,7 @@ require 'timeout'
 require 'benchmark'
 require 'rsync'
 
-[ 'command', 'ssh_connection' ].each do |lib|
+[ 'command', 'ssh_connection', 'winrm_connection' ].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -358,9 +358,14 @@ module Beaker
     end
 
     def connection
-      @connection ||= SshConnection.connect( reachable_name,
+      if self[:platform] =~ /windows-/ and self[:communicator] == 'winrm'
+        @connection ||= WinrmConnection.connect( reachable_name,
+                                             self['winrm'], { :logger => @logger } )
+      else
+        @connection ||= SshConnection.connect( reachable_name,
                                              self['user'],
                                              self['ssh'], { :logger => @logger } )
+      end
     end
 
     def close
