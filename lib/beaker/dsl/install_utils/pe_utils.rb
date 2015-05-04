@@ -479,7 +479,7 @@ module Beaker
           prev_sleep = 0
           cur_sleep = 1
           while (res.stdout !~ higgs_re) and (attempts < tries)
-            res = on host, "cd #{host['working_dir']}/#{host['dist']} && cat #{host['higgs_file']}", :acceptable_exit_codes => (0..255)
+            res = on host, "cd #{host['working_dir']}/#{host['dist']} && cat #{host['higgs_file']}", :accept_all_exit_codes => true
             attempts += 1
             sleep( cur_sleep )
             prev_sleep = cur_sleep
