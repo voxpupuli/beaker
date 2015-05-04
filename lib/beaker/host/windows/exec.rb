@@ -2,7 +2,7 @@ module Windows::Exec
   include Beaker::CommandFactory
 
   def reboot
-    exec(Beaker::Command.new("shutdown /r /t 0"), :expect_connection_failure => true)
+    exec(Beaker::Command.new('shutdown /r /t 0 /d p:4:1 /c "Beaker::Host reboot command issued"'), :expect_connection_failure => true)
   end
 
   ABS_CMD = 'c:\\\\windows\\\\system32\\\\cmd.exe'
