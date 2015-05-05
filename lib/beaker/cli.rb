@@ -111,6 +111,8 @@ module Beaker
           if @network_manager
             @network_manager.cleanup
           end
+        else
+          preserve_hosts_file
         end
 
         @perf.print_perf_info if @options[:collect_perf_data]
@@ -127,7 +129,7 @@ module Beaker
             @network_manager.cleanup
           end
         else
-          preserve_hosts_file if @options[:provision]
+          preserve_hosts_file
         end
 
         if @logger.is_debug?
@@ -159,7 +161,7 @@ module Beaker
     #
     # @return nil
     def preserve_hosts_file
-      preserved_hosts_filename = File.join(@options[:log_dated_dir], File.basename(@options[:hosts_file]))
+      preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
       FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
       hosts_yaml = YAML.load_file(preserved_hosts_filename)
       newly_keyed_hosts_entries = {}
@@ -172,6 +174,8 @@ module Beaker
         end
       end
       hosts_yaml['HOSTS'] = newly_keyed_hosts_entries
+      hosts_yaml['CONFIG'] ||= {}
+      hosts_yaml['CONFIG']['provision'] = false
       File.open(preserved_hosts_filename, 'w') do |file|
         YAML.dump(hosts_yaml, file)
       end
@@ -253,8 +257,9 @@ module Beaker
 
     # provides a new version of the command given, edited for re-use with a
     # preserved host.  It does this by swapping the hosts file out for the
-    # new_hostsfile argument and setting the --no-provision flag, removing
-    # any previously set provisioning flags that it finds.
+    # new_hostsfile argument and removing any previously set provisioning
+    # flags that it finds
+    # (we add +:provision => false+ in the new_hostsfile itself).
     #
     # @param [String] command Command line parameters to edit.
     # @param [String] new_hostsfile Path to the new hosts file to use.
@@ -262,7 +267,6 @@ module Beaker
     # @return [String] The command line parameters edited for re-use
     def build_hosts_preserved_reproducing_command(command, new_hostsfile)
       command_parts = command.split(' ')
-      has_no_provision_flag = false
       replace_hosts_file_next = false
       reproducing_command = []
       command_parts.each do |part|
@@ -271,14 +275,12 @@ module Beaker
           replace_hosts_file_next = false
           next
         elsif part == '--provision' || part == '--no-provision'
-          has_no_provision_flag = true
-          next
+          next # skip any provisioning flag.  This is handled in the new_hostsfile itself
         elsif part == '--hosts'
           replace_hosts_file_next = true
         end
         reproducing_command << part
       end
-      reproducing_command << '--no-provision' unless has_no_provision_flag
       reproducing_command.join(' ')
     end
   end
