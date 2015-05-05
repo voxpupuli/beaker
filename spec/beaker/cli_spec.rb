@@ -235,7 +235,7 @@ module Beaker
 
             cli.execute!
 
-            copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
+            copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
             expect( File.exists?(copied_hosts_file) ).to be_truthy
           end
         end
@@ -247,8 +247,21 @@ module Beaker
 
             cli.execute!
 
-            copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
+            copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
             expect{ YAML.load_file(copied_hosts_file) }.to_not raise_error
+          end
+        end
+
+        it 'sets :provision to false in the copied hosts file' do
+          options = cli.instance_variable_get(:@options)
+          Dir.mktmpdir do |dir|
+            options[:log_dated_dir] = File.absolute_path(dir)
+
+            cli.execute!
+
+            copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
+            yaml_content = YAML.load_file(copied_hosts_file)
+            expect( yaml_content['CONFIG']['provision'] ).to be_falsy
           end
         end
 
@@ -261,7 +274,7 @@ module Beaker
             cli.execute!
             expect( options.has_key?(:hosts_preserved_yaml_file) ).to be_truthy
 
-            copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
+            copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
             expect( options[:hosts_preserved_yaml_file] ).to be === copied_hosts_file
           end
         end
@@ -380,15 +393,6 @@ module Beaker
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/bears.yml')
           expect( answer.start_with?(command_correct) ).to be_truthy
-        end
-
-        it 'adds a --no-provision flag to the end of the command' do
-          new_hosts_file  = 'john/deer/was/here.txt'
-          command_to_sub  = 'p --log-level debug johnnypantaloons7 --jankies --flag-business'
-          command_correct = command_to_sub + ' --no-provision'
-
-          answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, new_hosts_file)
-          expect( answer ).to be === command_correct
         end
       end
     end
