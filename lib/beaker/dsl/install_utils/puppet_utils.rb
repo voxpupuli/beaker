@@ -341,13 +341,17 @@ module Beaker
         # @param [Hash{Symbol=>String}] opts An options hash
         # @option opts [String] :version The version of Puppet to install, required
         # @option opts [String] :win_download_url The url to download puppet from
+        #
+        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
+        # to other settings whether the 32 or 64bit install is used
         def install_puppet_from_msi( host, opts )
           #only install 64bit builds if
           # - we are on puppet version 3.7+
           # - we do not have install_32 set on host
           # - we do not have install_32 set globally
           version = opts[:version]
-          if !(version_is_less(version, '3.7')) and host.is_x86_64? and not host['install_32'] and not opts['install_32']
+          is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
+          if !(version_is_less(version, '3.7')) && host.is_x86_64? && !is_config_32
             host['dist'] = "puppet-#{version}-x64"
           else
             host['dist'] = "puppet-#{version}"
@@ -702,6 +706,10 @@ module Beaker
         # @option opts [String] :copy_dir_external Directory where puppet-agent
         #                       artifact will be pushed to on the external machine
         #                       (default: '/root')
+        #
+        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
+        # to other settings whether the 32 or 64bit install is used
+        #
         # @return nil
         def install_puppetagent_dev_repo( host, opts )
           opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
@@ -721,7 +729,12 @@ module Beaker
           when /^windows$/
             release_path << 'windows'
             onhost_copy_base = '`cygpath -smF 35`/'
-            arch_suffix = arch =~ /64/ ? '64' : '86'
+            is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
+            should_install_64bit = host.is_x86_64? && !is_config_32
+            # only install 64bit builds if
+            # - we do not have install_32 set on host
+            # - we do not have install_32 set globally
+            arch_suffix = should_install_64bit ? '64' : '86'
             release_file = "puppet-agent-x#{arch_suffix}.msi"
           else
             raise "No repository installation step for #{variant} yet..."

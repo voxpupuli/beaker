@@ -272,6 +272,9 @@ module Beaker
         # @example
         #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
         #
+        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
+        # to other settings whether the 32 or 64bit install is used
+        #
         # @api private
         #
         def do_install hosts, opts = {}
@@ -300,7 +303,8 @@ module Beaker
               host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
             elsif host['platform'] =~ /windows/
               version = host[:pe_ver] || opts['pe_ver_win']
-              should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !host['install_32'] && !opts['install_32']
+              is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
+              should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !is_config_32
               #only install 64bit builds if
               # - we are on pe version 3.4+
               # - we do not have install_32 set on host
