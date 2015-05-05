@@ -93,7 +93,7 @@ module Beaker
         def add_pe_defaults_on(hosts)
           block_on hosts do | host |
             case host.class.to_s.downcase
-            when /aix|freebsd|unix/
+            when /aix|(free|open)bsd|unix/
               platform = 'unix'
             when /mac/
               platform = 'mac'
@@ -123,10 +123,8 @@ module Beaker
         def remove_pe_defaults_on(hosts)
           block_on hosts do | host |
             case host.class.to_s.downcase
-            when /aix|unix/
+            when /aix|(free|open)bsd|unix/
               platform = 'unix'
-            when /freebsd/
-              platform = 'freebsd'
             when /mac/
               platform = 'mac'
             when /pswindows/

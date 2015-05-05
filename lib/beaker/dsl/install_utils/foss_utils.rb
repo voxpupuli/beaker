@@ -239,6 +239,8 @@ module Beaker
                 install_puppet_from_msi_on(host, opts)
               elsif host['platform'] =~ /osx/
                 install_puppet_from_dmg_on(host, opts)
+              elsif host['platform'] =~ /openbsd/
+                install_puppet_from_openbsd_packages_on(host, opts)
               else
                 if opts[:default_action] == 'gem_install'
                   opts[:version] ||= '~> 3.x'
@@ -669,6 +671,26 @@ module Beaker
           end
         end
 
+        # Installs Puppet and dependencies from OpenBSD packages
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet to install (shows warning)
+        #
+        # @return nil
+        # @api private
+        def install_puppet_from_openbsd_packages_on(hosts, opts)
+          if (opts[:version])
+            logger.warn "If you wish to choose a specific Puppet version, use `install_puppet_from_gem_on('~> 3.*')`"
+          end
+
+          block_on hosts do |host|
+            host.install_package('puppet')
+
+            configure_foss_defaults_on(host)
+          end
+        end
+
         # Installs Puppet and dependencies from gem on provided host(s)
         #
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
@@ -704,6 +726,7 @@ module Beaker
                        when /solaris-11/                            then 'ruby-18'
                        when /ubuntu-14/                             then 'ruby'
                        when /solaris-10|ubuntu|debian|el-|cumulus/  then 'rubygems'
+                       when /openbsd/                               then 'ruby'
                        else
                          raise "install_puppet() called with default_action " +
                                "'gem_install' but program `gem' is " +
@@ -725,16 +748,18 @@ module Beaker
               on host, "echo '#{path_with_gem}' >> ~/.bashrc"
             end
 
+            gemflags = '--no-ri --no-rdoc --no-format-executable'
+
             if opts[:facter_version]
-              on host, "gem install facter -v'#{opts[:facter_version]}' --no-ri --no-rdoc"
+              on host, "gem install facter -v'#{opts[:facter_version]}' #{gemflags}"
             end
 
             if opts[:hiera_version]
-              on host, "gem install hiera -v'#{opts[:hiera_version]}' --no-ri --no-rdoc"
+              on host, "gem install hiera -v'#{opts[:hiera_version]}' #{gemflags}"
             end
 
             ver_cmd = opts[:version] ? "-v '#{opts[:version]}'" : ''
-            on host, "gem install puppet #{ver_cmd} --no-ri --no-rdoc"
+            on host, "gem install puppet #{ver_cmd} #{gemflags}"
 
             # Similar to the treatment of 'gem' above.
             # This avoids adding /opt/csw/bin to PATH.
@@ -750,6 +775,12 @@ module Beaker
               on host, "ln -s #{gem_exec_dir}/facter /usr/bin/facter"
               on host, "ln -s #{gem_exec_dir}/puppet /usr/bin/puppet"
             end
+
+            # A gem install might not necessarily create these
+            ['confdir', 'logdir', 'codedir'].each do |key|
+              host.mkdir_p host.puppet[key] if host.puppet.has_key?(key)
+            end
+
             configure_foss_defaults_on( host )
           end
         end

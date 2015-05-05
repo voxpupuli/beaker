@@ -102,11 +102,11 @@ module Unix::Exec
     env_file = self[:ssh_env_file]
     escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
     #see if the key/value pair already exists
-    if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
+    if exec(Beaker::Command.new("grep ^#{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
       return #nothing to do here, key value pair already exists
     #see if the key already exists
-    elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
-      exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
+    elsif exec(Beaker::Command.new("grep ^#{key} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
+      exec(Beaker::SedCommand.new(self['platform'], "s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
     end

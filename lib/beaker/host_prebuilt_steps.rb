@@ -14,6 +14,7 @@ module Beaker
     TRIES = 5
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5']
+    OPENBSD_PACKAGES = ['curl']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
     SLES10_PACKAGES = ['curl']
@@ -103,6 +104,8 @@ module Beaker
           check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)
         when host['platform'] =~ /freebsd/
           check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
+        when host['platform'] =~ /openbsd/
+          check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
@@ -319,6 +322,8 @@ module Beaker
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         elsif host['platform'] =~ /freebsd/
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
+        elsif host['platform'] =~ /openbsd/
+          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
@@ -359,6 +364,8 @@ module Beaker
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
         elsif host['platform'] =~ /freebsd/
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+        elsif host['platform'] =~ /openbsd/
+          host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), {:pty => true} )
         elsif not host.is_powershell?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         else
@@ -371,7 +378,7 @@ module Beaker
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
-        elsif host['platform'] =~ /freebsd/
+        elsif host['platform'] =~ /(free|open)bsd/
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
@@ -520,7 +527,7 @@ module Beaker
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("stopsrc -g ssh"))
           host.exec(Command.new("startsrc -g ssh"))
-        when /freebsd/
+        when /(free|open)bsd/
           host.exec(Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         end
@@ -532,6 +539,13 @@ module Beaker
           host.exec(Command.new("touch #{host[:ssh_env_file]}"))
           #add the constructed env vars to this host
           host.add_env_var('PATH', '$PATH')
+          # FIXME
+          if host['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
+            version = "#{$1}.#{$2}"
+            arch = $3
+            arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
+            host.add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
+          end
         end
         #add the env var set to this test host
         env.each_pair do |var, value|
