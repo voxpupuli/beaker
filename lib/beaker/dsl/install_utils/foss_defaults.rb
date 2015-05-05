@@ -34,6 +34,21 @@ module Beaker
             'distmoduledir'     => '/usr/local/etc/puppet/modules',
             'sitemoduledir'     => '/usr/share/puppet/modules',
           },
+          'openbsd' => {
+            'puppetserver-confdir' => '/etc/puppetserver/conf.d',
+            'puppetservice'     => 'puppetmaster',
+            'puppetpath'        => '/etc/puppet/modules',
+            'puppetvardir'      => '/var/puppet',
+            'puppetbin'         => '/usr/local/bin/puppet',
+            'puppetbindir'      => '/usr/local/bin',
+            'hieralibdir'       => '/opt/puppet-git-repos/hiera/lib',
+            'hierapuppetlibdir' => '/opt/puppet-git-repos/hiera-puppet/lib',
+            'hierabindir'       => '/opt/puppet-git-repos/hiera/bin',
+            'hieradatadir'      => '/etc/puppet/hieradata',
+            'hieraconf'         => '/etc/puppet/hiera.yaml',
+            'distmoduledir'     => '/etc/puppet/modules',
+            'sitemoduledir'     => '/usr/local/share/puppet/modules',
+          },
           'mac' => {
             'puppetserver-confdir' => '/etc/puppetserver/conf.d',
             'puppetservice'     => 'puppetmaster',
@@ -123,6 +138,8 @@ module Beaker
               platform = 'unix'
             when /freebsd/
               platform = 'freebsd'
+            when /openbsd/
+              platform = 'openbsd'
             when /mac/
               platform = 'mac'
             when /pswindows/
@@ -155,6 +172,8 @@ module Beaker
               platform = 'unix'
             when /freebsd/
               platform = 'freebsd'
+            when /openbsd/
+              platform = 'openbsd'
             when /mac/
               platform = 'mac'
             when /pswindows/

@@ -40,6 +40,8 @@ module Unix::Pkg
         result = execute("pkg_info #{name}", opts) { |result| result }
       when /freebsd-10/
         result = execute("pkg info #{name}", opts) { |result| result }
+      when /openbsd/
+        result = execute("pkg_info #{name}", opts) { |result| result }
       else
         raise "Package #{name} cannot be queried on #{self}"
     end
@@ -82,6 +84,32 @@ module Unix::Pkg
         execute("pkg_add -fr #{cmdline_args} #{name}", opts)
       when /freebsd-10/
         execute("pkg #{cmdline_args} install #{name}", opts)
+      when /openbsd/
+        begin
+          execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
+            # Handles where there are multiple rubies, installs the latest one
+            if command.stderr =~ /^Ambiguous: #{name} could be (.+)$/
+              name = $1.chomp.split(' ').collect { |x|
+                x =~ /-(\d[^-p]+)/
+                [x, $1]
+              }.select { |x|
+                # Blacklist Ruby 2.2.0+ for the sake of Puppet 3.x
+                Gem::Version.new(x[1]) < Gem::Version.new('2.2.0')
+              }.sort { |a,b|
+                Gem::Version.new(b[1]) <=> Gem::Version.new(a[1])
+              }.collect { |x|
+                x[0]
+              }.first
+              raise ArgumentException
+            end
+            # If the package advises symlinks to be created, do it
+            command.stdout.split(/\n/).select { |x| x =~ /^\s+ln\s/ }.each do |ln|
+              execute(ln, opts)
+            end
+          end
+        rescue
+          retry
+        end
       else
         raise "Package #{name} cannot be installed on #{self}"
     end

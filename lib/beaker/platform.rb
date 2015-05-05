@@ -3,7 +3,7 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(cisco|freebsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus|f5)\-.+\-.+$/
+    PLATFORMS = /^(cisco|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus|f5)\-.+\-.+$/
 
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
@@ -44,6 +44,8 @@ module Beaker
     # Creates the Platform object.  Checks to ensure that the platform String
     # provided meets the platform formatting rules.  Platforms name must be of
     # the format /^OSFAMILY-VERSION-ARCH.*$/ where OSFAMILY is one of:
+    # * freebsd
+    # * openbsd
     # * osx
     # * centos
     # * fedora
