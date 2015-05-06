@@ -64,6 +64,7 @@ describe ClassMixedWithDSLInstallUtils do
     it 'generates a windows PE install command for a windows host' do
       winhost['dist'] = 'puppet-enterprise-3.0'
       allow( subject ).to receive( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
+      allow( winhost ).to receive( :is_cygwin?).and_return(true)
       expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
 

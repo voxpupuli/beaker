@@ -27,7 +27,8 @@ describe ClassMixedWithDSLInstallUtils do
   let(:hosts_sorted)  { [ hosts[1], hosts[0], hosts[2], hosts[3] ] }
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
-                                                :working_dir => '/tmp' } ) }
+                                                :working_dir => '/tmp',
+                                                :is_cygwin => true} ) }
   let(:winhost_non_cygwin) { make_host( 'winhost_non_cygwin', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
@@ -242,6 +243,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on windows' do
       let(:platform) { "windows-2008r2-i386" }
       it 'installs specific version of puppet when passed :version' do
+        allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
@@ -249,6 +251,7 @@ describe ClassMixedWithDSLInstallUtils do
         subject.install_puppet(:version => '3000')
       end
       it 'installs from custom url when passed :win_download_url' do
+        allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')

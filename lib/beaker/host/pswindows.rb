@@ -1,4 +1,4 @@
-[ 'host', 'command_factory', 'command', 'options' ].each do |lib|
+[ 'host', 'command_factory', 'command', 'options', 'dsl/wrappers' ].each do |lib|
   require "beaker/#{lib}"
 end
 

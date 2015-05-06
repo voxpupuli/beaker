@@ -132,10 +132,10 @@ module Beaker
               #rename to the selected module name, if not correct
               cur_path = File.join(target_module_dir, source_name)
               if (cur_path != target_path)
-                if host.is_cygwin?
-                  on host, "mv #{cur_path} #{target_path}"
-                else
+                if host.is_powershell?
                   on host, "move /y #{cur_path} #{target_path}"
+                else
+                  on host, "mv #{cur_path} #{target_path}"
                 end
               end
             when 'rsync'

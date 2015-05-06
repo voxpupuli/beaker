@@ -118,7 +118,7 @@ describe ClassMixedWithDSLInstallUtils do
       it{
         host = double("host")
         allow( host ).to receive(:[]).with('distmoduledir').and_return('/etc/puppetlabs/puppet/modules')
-        allow( host ).to receive(:is_cygwin?).and_return(true)
+        allow( host ).to receive(:is_powershell?).and_return(false)
         result = double
         stdout = target.split('/')[0..-2].join('/') + "\n"
         allow( result ).to receive(:stdout).and_return( stdout )
@@ -179,7 +179,7 @@ describe ClassMixedWithDSLInstallUtils do
         host = double("host")
         allow( host ).to receive(:[]).with('platform').and_return('windows')
         allow( host ).to receive(:[]).with('distmoduledir').and_return('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules')
-        allow( host ).to receive(:is_cygwin?).and_return(false)
+        allow( host ).to receive(:is_powershell?).and_return(true)
 
         result = double
         allow( result ).to receive(:stdout).and_return( 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules' )

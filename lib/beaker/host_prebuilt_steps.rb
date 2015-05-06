@@ -359,7 +359,7 @@ module Beaker
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
         elsif host['platform'] =~ /freebsd/
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host.is_cygwin?
+        elsif not host.is_powershell?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         else
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
@@ -461,10 +461,10 @@ module Beaker
     # @param [String] val The string to 'echo' on the host
     def echo_on_host host, val
       #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
-      if host.is_cygwin?
-        host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
-      else
+      if host.is_powershell?
         host.exec(Command.new("echo #{val}")).stdout.chomp
+      else
+        host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
       end
     end
 
@@ -488,7 +488,7 @@ module Beaker
 
       env.each_key do |key|
         separator = host['pathseparator']
-        if key == 'PATH' && host.is_cygwin?
+        if key == 'PATH' && (not host.is_powershell?)
           separator = ':'
         end
         env[key] = env[key].join(separator)
@@ -548,7 +548,7 @@ module Beaker
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         end
 
-        if host['platform'] !~ /windows/ or (host['platform'] =~ /windows/ and host.is_cygwin?)
+        if not host.is_powershell?
           #ensure that ~/.ssh/environment exists
           host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
           host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
@@ -565,10 +565,10 @@ module Beaker
         host.close
 
         # print out the working env
-        if host.is_cygwin?
-          host.exec(Command.new("cat #{host[:ssh_env_file]}"))
-        else
+        if host.is_powershell?
           host.exec(Command.new("SET"))
+        else
+          host.exec(Command.new("cat #{host[:ssh_env_file]}"))
         end
 
       end
