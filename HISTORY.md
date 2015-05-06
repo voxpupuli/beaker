@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 22 Apr, 2015 (2f834676)](#LATEST)
+* [LATEST - 6 May, 2015 (50128ac0)](#LATEST)
+* [2.10.0 - 22 Apr, 2015 (c4f37479)](#2.10.0)
 * [2.9.0 - 9 Apr, 2015 (b161d325)](#2.9.0)
 * [beaker2.8.0 - 26 Mar, 2015 (2d25d06d)](#beaker2.8.0)
 * [beaker2.7.1 - 19 Mar, 2015 (45b2bf10)](#beaker2.7.1)
@@ -78,7 +79,294 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 22 Apr, 2015 (2f834676)
+### <a name = "LATEST">LATEST - 6 May, 2015 (50128ac0)
+
+* (GEM) update beaker version to 2.11.0 (50128ac0)
+
+* Merge pull request #806 from kevpl/bkr240_windows_rebootfix (7455593a)
+
+
+```
+Merge pull request #806 from kevpl/bkr240_windows_rebootfix
+
+(BKR-240) added a reason code on reboot for windows
+```
+* Merge pull request #803 from puppetlabs/fix/qeng-2009_3.99_windows_msi_name (4098e30c)
+
+
+```
+Merge pull request #803 from puppetlabs/fix/qeng-2009_3.99_windows_msi_name
+
+(QENG-2009) Fix windows MSI name for 3.99
+```
+* Merge pull request #804 from davemcdonnell/fix_pty_typo_el7 (0de90408)
+
+
+```
+Merge pull request #804 from davemcdonnell/fix_pty_typo_el7
+
+Fix typo ptry => pty, sudo failing on el7
+```
+* Merge pull request #802 from anodelman/win-fix (d17a309e)
+
+
+```
+Merge pull request #802 from anodelman/win-fix
+
+(BKR-191) replace is_cygwin? with a more understandable name
+```
+* Merge pull request #808 from kevpl/bkr235_answers_puppetdbcustomize (441bf997)
+
+
+```
+Merge pull request #808 from kevpl/bkr235_answers_puppetdbcustomize
+
+(BKR-235) Added Customization for External Postgres
+```
+* Merge pull request #807 from kevpl/bkr241_windows_install32bitpuppetagent (cacb37e0)
+
+
+```
+Merge pull request #807 from kevpl/bkr241_windows_install32bitpuppetagent
+
+Bkr241 windows install32bitpuppetagent
+```
+* Merge pull request #809 from kevpl/bkr243_preservedhosts_v2 (5d74773c)
+
+
+```
+Merge pull request #809 from kevpl/bkr243_preservedhosts_v2
+
+(BKR-243) improved preserved-hosts file saving
+```
+* (BKR-243) improved preserved-hosts file saving (282bb9e4)
+
+* (BKR-240) added a reason code on reboot for windows (24fc8038)
+
+* Merge pull request #791 from rbrw/ticket/master/bkr-217-rotate-ec2-subnets (61b3b1bd)
+
+
+```
+Merge pull request #791 from rbrw/ticket/master/bkr-217-rotate-ec2-subnets
+
+(BKR-217) aws_sdk: given CONFIG subnet_ids, try each in turn
+```
+* Merge pull request #793 from kevpl/bkr180_install_middleman (90eb818e)
+
+
+```
+Merge pull request #793 from kevpl/bkr180_install_middleman
+
+(BKR-180) added ability to use Beaker machine as scp middle-man for PE
+```
+* Merge pull request #797 from anodelman/sweep (f40ed598)
+
+
+```
+Merge pull request #797 from anodelman/sweep
+
+(BKR-224) on(node, 'puppet agent -t') raises no warning when node = []
+```
+* Merge pull request #798 from fiddyspence/bug/move_round_openstack_address_assignments (30019ce0)
+
+
+```
+Merge pull request #798 from fiddyspence/bug/move_round_openstack_address_assignments
+
+(BKR-223) Change order of how we assign IPs to openstack instances
+```
+* Merge pull request #801 from anodelman/maint (40b18ed0)
+
+
+```
+Merge pull request #801 from anodelman/maint
+
+(BKR-215) Document all of the options to #on and friends
+```
+* BKR-245 Fix typo ptry => pty, restart sshd failing on el7 when running sudo (07f69955)
+
+* (QENG-2009) Update beaker specs for 3.99 windows msi fix (8b5401f7)
+
+* (QENG-2009) Fix windows MSI name for 3.99 (cd07eb83)
+
+
+```
+(QENG-2009) Fix windows MSI name for 3.99
+
+We were only using puppet-agent for 4.0, this
+commit bumps that down to 3.99.
+```
+* (BKR-235) all necessary answers to use an external postgres host are now customizable (493fea00)
+
+* (BKR-191) replace is_cygwin? with a more understandable name (2c67d735)
+
+
+```
+(BKR-191) replace is_cygwin? with a more understandable name
+
+- create is_powershell?, update usages of is_cygwin as appropriate
+- move powershell only code into pswindows host object
+- fixes related to breakages discovered when this code was moved
+```
+* (BKR-215) Document all of the options to #on and friends (1dda76e3)
+
+
+```
+(BKR-215) Document all of the options to #on and friends
+
+- updates shared options to be current (with info for
+  accept_all_exit_codes and friends)
+- yard doc does a single pass and you can't guarantee file ordering, so
+  you have to have the common options macro in each file that needs it -
+  duplication yay!
+```
+* (MAINT) update acceptable_exit_codes usage to accept_all_exit_codes (402b4d85)
+
+
+```
+(MAINT) update acceptable_exit_codes usage to accept_all_exit_codes
+
+- we are abusing acceptable_exit_codes all over the place by giving it a
+  mega-array, basically recreating the functionality of
+  accept_all_exit_codes
+```
+* (BKR-235) added ability to customize puppetdb_hostname answer (3d5d5b64)
+
+* (BKR-223) Change order of how we assign IPs to openstack instances (f6d2c521)
+
+* (BKR-224) on(node, 'puppet agent -t') raises no warning when node = [] (69315874)
+
+
+```
+(BKR-224) on(node, 'puppet agent -t') raises no warning when node = []
+
+- if a logger is defined then send a warning message if attempting to
+  run a command against an array of 0 nodes
+```
+* Merge pull request #794 from kevpl/bkr199_cumulus_packageupdate (4e556c5b)
+
+
+```
+Merge pull request #794 from kevpl/bkr199_cumulus_packageupdate
+
+(BKR-199) updated cumulus packages required to reflect current package structure
+```
+* Merge pull request #795 from fiddyspence/bug/rsync_source_always_nil (7bc2c62e)
+
+
+```
+Merge pull request #795 from fiddyspence/bug/rsync_source_always_nil
+
+(BKR-225) rsync module_utils method source is always nil
+```
+* Merge pull request #788 from fiddyspence/feature/do_you_want_openstack_region_support_this_time (c35ec983)
+
+
+```
+Merge pull request #788 from fiddyspence/feature/do_you_want_openstack_region_support_this_time
+
+[openstack] enable support for multiple regions
+```
+* (BKR-225) rsync module_utils method source is always nil (e3db6871)
+
+
+```
+(BKR-225) rsync module_utils method source is always nil
+
+sadfs
+```
+* (BKR-199) updated cumulus packages required to reflect current package structure (790c5d44)
+
+* (BKR-180) added ability to use Beaker machine as scp middle-man for PE (b97640c0)
+
+* (BKR-217) aws_sdk: given CONFIG subnet_ids, try each in turn (08e4f79d)
+
+
+```
+(BKR-217) aws_sdk: given CONFIG subnet_ids, try each in turn
+
+This should help alleviate the EC2 InsufficientInstanceCapacity.
+
+The new policy will only be applied to a host if there isn't a CONFIG
+subnet_id and there isn't a host-specific subnet_id.  When it does
+apply, try each subnet in subnet_ids once for each relevant host.
+
+The new option can be used like this:
+
+  CONFIG
+    vpc_id: foo
+    subnet_ids:
+      - x
+      - y
+      - z
+```
+* (BKR-27)[openstack] enable support for multiple regions (e32e0b54)
+
+* (BKR-217) aws_sdk: Kill EC2 instances on exception (6b0cf490)
+
+
+```
+(BKR-217) aws_sdk: Kill EC2 instances on exception
+
+Move EC2 cleanup code to kill_instances() and call that from cleanup(),
+and from a new exception handler in launch_all_nodes(), to be sure we
+don't leave instances running when something goes wrong.
+
+Adjust wait_for_status() to handle a specific list of hosts rather than
+just @hosts.
+```
+* (BKR-217) aws_sdk: add create_instance() (d4d6521d)
+
+
+```
+(BKR-217) aws_sdk: add create_instance()
+
+Move the per-host core of launch_all_nodes() to create_instance() to
+prepare for the addition of launch exception
+handlers (InsufficientCapacity, etc.).
+```
+* (BKR-217) aws_sdk: move wait_for_status() to launch_all_nodes() (023437e1)
+
+* (maint) Allow :ruby_arch to select Windows builds (a0d76866)
+
+
+```
+(maint) Allow :ruby_arch to select Windows builds
+
+ - Puppet puppetlabs/puppet@92c539f8626467690321c875d5f2746f56fec6ac
+   added :ruby_arch to support the notion of choosing a Windows
+   installer architecture.  A node could set :ruby_arch to either
+   x64 or x86 to choose to install a 64-bit or 32-bit Ruby MSI on a
+   64-bit version of Windows.
+
+   When similar behavior was introduced to Beaker, it didn't follow
+   prior art, and a new setting called :install_32 was introduced to
+   manage this functionality in 6f8deb7dbc7bc75b8624df754c261f4d2b58b999
+
+   This commit adds in :ruby_arch, with the hope that :install_32 will
+   be deprecated on a future major version boundary to simplify the
+   logic around settings evaluation here.
+```
+* (maint) Allow installing 32-bit Puppet Agent (23c06fa9)
+
+
+```
+(maint) Allow installing 32-bit Puppet Agent
+
+ - Previously, install_utils was modified to be able to install PE
+   based on a configuration switch called `install_32` in
+   6f8deb7dbc7bc75b8624df754c261f4d2b58b999
+
+   This allows a 64-bit Windows OS to ask to install a 32-bit Ruby /
+   Puppet version.  This is important given 64-bit support wasn't
+   added to Puppet or PE until 3.7.
+
+   When installing the puppet-agent through install_puppetagent_dev_repo
+   helper, allow for selecting the build in a similar fashion.
+```
+### <a name = "2.10.0">2.10.0 - 22 Apr, 2015 (c4f37479)
+
+* (HISTORY) update beaker history for gem release 2.10.0 (c4f37479)
 
 * (GEM) update beaker version to 2.10.0 (2f834676)
 
@@ -250,8 +538,6 @@ Further reading if interested:
 http://www.secnetix.de/olli/FreeBSD/mnamelen.hawk
 https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=167105
 ```
-* (MAINT) Changes msi install commands run when on non-cygwin (89dabc69)
-
 * (MAINT) Changes msi install commands ran... (effcde41)
 
 
@@ -260,6 +546,8 @@ https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=167105
 
 When on non-cygwin Windows, use `start` not cmd
 ```
+* (MAINT) Changes msi install commands run when on non-cygwin (89dabc69)
+
 * (gh-732) Better Openstack IP address assignment (e1fcd580)
 
 * (gh-687) [openstack] Previously, the method attemped to set root on all nodes, even if the node was not up yet (802db0e9)
