@@ -286,7 +286,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :version_is_less ).with('3.0', '4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
-      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.99').and_return( true )
       allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
       allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"

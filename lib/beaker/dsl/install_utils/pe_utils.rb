@@ -309,7 +309,7 @@ module Beaker
               # - we are on pe version 3.4+
               # - we do not have install_32 set on host
               # - we do not have install_32 set globally
-              if !(version_is_less(version, '4.0'))
+              if !(version_is_less(version, '3.99'))
                 if should_install_64bit
                   host['dist'] = "puppet-agent-#{version}-x64"
                 else
