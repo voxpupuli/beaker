@@ -50,8 +50,8 @@ module Beaker
 
         # Master/dashboard answers
         master_console_a = {
-          :q_puppetdb_hostname => database,
-          :q_puppetdb_port => answer_for(options, :q_puppetdb_port, 8081)
+          :q_puppetdb_hostname  => answer_for(options, :q_puppetdb_hostname, database),
+          :q_puppetdb_port      => answer_for(options, :q_puppetdb_port, 8081)
         }
 
         # Master only answers
@@ -76,16 +76,16 @@ module Beaker
 
         console_database_a = {
           :q_puppetdb_database_name => database_name,
-          :q_puppetdb_database_user => database_user,
-          :q_puppetdb_database_password => puppetdb_password,
+          :q_puppetdb_database_user => answer_for(options, :q_puppetdb_database_user, database_user),
+          :q_puppetdb_database_password => answer_for(options, :q_puppetdb_database_password, puppetdb_password),
           :q_puppet_enterpriseconsole_auth_database_name => auth_database_name,
           :q_puppet_enterpriseconsole_auth_database_user => auth_database_user,
-          :q_puppet_enterpriseconsole_auth_database_password => dashboard_password,
+          :q_puppet_enterpriseconsole_auth_database_password => answer_for(options, :q_puppet_enterpriseconsole_auth_database_password, dashboard_password),
           :q_puppet_enterpriseconsole_database_name => console_database_name,
-          :q_puppet_enterpriseconsole_database_user => console_database_user,
-          :q_puppet_enterpriseconsole_database_password => dashboard_password,
+          :q_puppet_enterpriseconsole_database_user => answer_for(options, :q_puppet_enterpriseconsole_database_user, console_database_user),
+          :q_puppet_enterpriseconsole_database_password => answer_for(options, :q_puppet_enterpriseconsole_database_password, dashboard_password),
 
-          :q_database_host => database,
+          :q_database_host => answer_for(options, :q_database_host, database),
           :q_database_port => database_port,
         }
 
@@ -130,7 +130,7 @@ module Beaker
         # Database only answers
         database_a = {
           :q_puppetdb_install => 'y',
-          :q_database_install => 'y',
+          :q_database_install => answer_for(options, :q_database_install, 'y'),
           :q_database_root_password => "'#{answer_for(options, :q_database_root_password, '=ZYdjiP3jCwV5eo9s1MBd')}'",
           :q_database_root_user => answer_for(options, :q_database_root_user, 'pe-postgres'),
         }
@@ -158,7 +158,7 @@ module Beaker
       if host == dashboard
         answers.merge! master_console_a
         answers.merge! console_database_a
-        answers[:q_pe_database] = 'y'
+        answers[:q_pe_database] = answer_for(options, :q_pe_database, 'y')
         unless options[:type] == :upgrade
           answers.merge! console_a
         else
