@@ -21,6 +21,13 @@ module Beaker
 
       # Pass on all the logging from docker-api to the beaker logger instance
       ::Docker.logger = @logger
+
+      if ::Docker.version['Version'] =~ /swarm/
+        @docker_type = 'swarm'
+      else
+        @docker_type = 'docker'
+      end
+
     end
 
     def provision
@@ -42,12 +49,24 @@ module Beaker
         container.start({"PublishAllPorts" => true, "Privileged" => true})
 
         # Find out where the ssh port is from the container
-        if ENV['DOCKER_HOST']
-          ip = URI.parse(ENV['DOCKER_HOST']).host
-          @logger.info("Using docker server at #{ip}")
-        else
+        
+        # When running on swarm DOCKER_HOST points to the swarm manager so we have to get the
+        # IP of the swarm slave via the container data
+        if @docker_type == 'swarm'
           ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
+        else
+          # We are running against a normal docker container
+          
+          # Talking against a remove docker host
+          if ENV['DOCKER_HOST']
+            ip = URI.parse(ENV['DOCKER_HOST']).host
+            @logger.info("Using docker server at #{ip}")
+          else
+            # Normal local docker host
+            ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
+          end
         end
+
         port = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostPort"]
 
         forward_ssh_agent = @options[:forward_ssh_agent] || false
