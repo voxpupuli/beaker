@@ -532,7 +532,7 @@ module Beaker
           host.exec(Command.new("systemctl restart sshd.service"))
         when /el-|centos|fedora|redhat|oracle|scientific|eos/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("/sbin/service sshd restart"))
+          host.exec(Command.new("/sbin/service sshd restart")) unless host['hypervisor'] == 'docker'
         when /sles/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
           host.exec(Command.new("rcsshd restart"))
