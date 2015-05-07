@@ -269,6 +269,13 @@ module Beaker
       @run = true
       start_time = Time.now
 
+      if @options
+        @options[:current_test_info] ||= {}
+        @options[:current_test_info][:suite] ||= {}
+        @options[:current_test_info][:suite][:name] = @name
+        @options[:current_test_info][:suite][:actual] = self
+      end
+
       #Create a run log for this TestSuite.
       run_log = log_path("#{@name}-run.log", @options[:log_dated_dir])
       @logger.add_destination(run_log)

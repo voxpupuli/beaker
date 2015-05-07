@@ -98,6 +98,7 @@ module Beaker
       @runtime = nil
       @teardown_procs = []
 
+      @file_name = @path ? File.basename(@path, '.rb') : nil
 
       #
       # We put this on each wrapper (rather than the class) so that methods
@@ -106,6 +107,15 @@ module Beaker
         def run_test
           @logger.start_sublog
           @logger.last_result = nil
+
+          if @options
+            @options[:current_test_info] ||= {}
+            @options[:current_test_info][:case] ||= {}
+            @options[:current_test_info][:case][:file_name] = @file_name
+            @options[:current_test_info][:case][:actual] = self
+            @options[:current_test_info][:step] ||= {}
+            @options[:current_test_info][:step][:name] = nil
+          end
 
           #add arbitrary role methods
           roles = []
