@@ -1,6 +1,13 @@
 module Beaker
   class Docker < Beaker::Hypervisor
 
+    # Docker hypvervisor initializtion
+    # Env variables supported:
+    # DOCKER_REGISTRY: Docker registry URL
+    # DOCKER_HOST: Remote docker host
+    # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+    #                            or a role (String or Symbol) that identifies one or more hosts.
+    # @param [Hash{Symbol=>String}] options Options to pass on to the hypervisor
     def initialize(hosts, options)
       require 'docker'
       @options = options
@@ -22,8 +29,14 @@ module Beaker
       # Pass on all the logging from docker-api to the beaker logger instance
       ::Docker.logger = @logger
 
+      # Find out what kind of remote instance we are talking against
       if ::Docker.version['Version'] =~ /swarm/
         @docker_type = 'swarm'
+        unless ENV['DOCKER_REGISTRY']
+          raise "Using Swarm with beaker requires a private registry. Please setup the private registry and set the 'DOCKER_REGISTRY' env var"
+        else
+          @registry = ENV['DOCKER_REGISTRY']
+        end
       else
         @docker_type = 'docker'
       end
@@ -39,9 +52,21 @@ module Beaker
         @logger.debug("Creating image")
         image = ::Docker::Image.build(dockerfile_for(host), { :rm => true })
 
-        @logger.debug("Creating container from image #{image.id}")
+        if @docker_type == 'swarm'
+          image_name = "#{@registry}/beaker/#{image.id}"
+          ret = ::Docker::Image.search(:term => image_name)
+          if ret.first.nil?
+            @logger.debug("Image does not exist on registry. Pushing.")
+            image.tag({:repo => image_name, :force => true})
+            image.push
+          end
+        else
+          image_name = image.id
+        end
+
+        @logger.debug("Creating container from image #{image_name}")
         container = ::Docker::Container.create({
-          'Image' => image.id,
+          'Image' => image_name,
           'Hostname' => host.name,
         })
 
@@ -49,24 +74,19 @@ module Beaker
         container.start({"PublishAllPorts" => true, "Privileged" => true})
 
         # Find out where the ssh port is from the container
-        
         # When running on swarm DOCKER_HOST points to the swarm manager so we have to get the
         # IP of the swarm slave via the container data
-        if @docker_type == 'swarm'
-          ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
+        # When we are talking to a normal docker instance DOCKER_HOST can point to a remote docker instance.
+
+        # Talking against a remote docker host which is a normal docker host
+        if @docker_type == 'docker' && ENV['DOCKER_HOST']
+          ip = URI.parse(ENV['DOCKER_HOST']).host
         else
-          # We are running against a normal docker container
-          
-          # Talking against a remove docker host
-          if ENV['DOCKER_HOST']
-            ip = URI.parse(ENV['DOCKER_HOST']).host
-            @logger.info("Using docker server at #{ip}")
-          else
-            # Normal local docker host
-            ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
-          end
+          # Swarm or local docker host
+          ip = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostIp"]
         end
 
+        @logger.info("Using docker server at #{ip}")
         port = container.json["NetworkSettings"]["Ports"]["22/tcp"][0]["HostPort"]
 
         forward_ssh_agent = @options[:forward_ssh_agent] || false
