@@ -37,6 +37,7 @@ module Beaker
       # @param [Proc] block The actions to be performed in this step.
       def step step_name, &block
         logger.notify "\n  * #{step_name}\n"
+        set_current_step_name(step_name)
         yield if block_given?
       end
 
@@ -47,6 +48,7 @@ module Beaker
       #
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
+        set_current_test_name(my_name)
         yield if block_given?
       end
 

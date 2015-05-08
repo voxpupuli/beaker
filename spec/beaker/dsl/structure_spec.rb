@@ -2,6 +2,7 @@ require 'spec_helper'
 
 class ClassMixedWithDSLStructure
   include Beaker::DSL::Structure
+  include Beaker::DSL::Helpers::TestHelpers
 end
 
 describe ClassMixedWithDSLStructure do
@@ -13,18 +14,31 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'notifies the logger' do
+      subject.instance_variable_set(:@metadata, {})
+      allow( subject ).to receive( :set_current_step_name )
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       subject.step 'blah'
     end
 
     it 'yields if a block is given' do
+      subject.instance_variable_set(:@metadata, {})
       expect( subject ).to receive( :logger ).and_return( logger )
+      allow(  subject ).to receive( :set_current_step_name )
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
         subject.foo
       end
+    end
+
+    it 'sets the metadata' do
+      subject.instance_variable_set(:@metadata, {})
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow( logger ).to receive( :notify )
+      step_name = 'pierceBrosnanTests'
+      subject.step step_name
+      expect( subject.instance_variable_get(:@metadata)[:step][:name] ).to be === step_name
     end
   end
 
@@ -34,18 +48,29 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'notifies the logger' do
+      subject.instance_variable_set(:@metadata, {})
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       subject.test_name 'blah'
     end
 
     it 'yields if a block is given' do
+      subject.instance_variable_set(:@metadata, {})
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo
       end
+    end
+
+    it 'sets the metadata' do
+      subject.instance_variable_set(:@metadata, {})
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow( logger ).to receive( :notify )
+      test_name = '15-05-08\'s weather is beautiful'
+      subject.test_name test_name
+      expect( subject.instance_variable_get(:@metadata)[:case][:name] ).to be === test_name
     end
   end
 
