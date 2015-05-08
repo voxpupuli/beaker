@@ -96,5 +96,35 @@ module Beaker
       end
     end
 
+    context 'metadata' do
+      it 'sets the filename correctly from the path' do
+        answer = 'jacket'
+        path = "#{answer}.rb"
+        File.open(path, 'w') do |f|
+          f.write ""
+        end
+        @path = path
+        testcase.run_test
+        metadata = testcase.instance_variable_get(:@metadata)
+        expect(metadata[:case][:file_name]).to be === answer
+      end
+
+      it 'resets the step name' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write ""
+        end
+        @path = path
+        # we have to create a TestCase by hand, so that we can set old
+        tc = TestCase.new({}, logger, {}, path)
+        # metadata on it, so that we can test that it's being reset correctly
+        old_metadata = { :step => { :name => 'CharlieBrown' } }
+        tc.instance_variable_set(:@metadata, old_metadata)
+        tc.run_test
+        metadata = tc.instance_variable_get(:@metadata)
+        expect(metadata[:step][:name]).to be_nil
+      end
+    end
+
   end
 end
