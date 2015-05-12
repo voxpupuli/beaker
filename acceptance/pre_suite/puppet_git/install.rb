@@ -88,6 +88,48 @@ end
 
 install_packages_on(hosts, PACKAGES, :check_if_exists => true)
 
+def lookup_in_env(env_variable_name, project_name, default)
+  project_specific_name = "#{project_name.upcase.gsub("-","_")}_#{env_variable_name}"
+  ENV[project_specific_name] || ENV[env_variable_name] || default
+end
+
+def build_giturl(project_name, git_fork = nil, git_server = nil)
+  git_fork ||= lookup_in_env('FORK', project_name, 'puppetlabs')
+  git_server ||= lookup_in_env('GIT_SERVER', project_name, 'github.com')
+  repo = (git_server == 'github.com') ?
+    "#{git_fork}/#{project_name}.git" :
+    "#{git_fork}-#{project_name}.git"
+  "git://#{git_server}/#{repo}"
+end
+
+hosts.each do |host|
+  case host['platform']
+  when /windows/
+    arch = host[:ruby_arch] || 'x86'
+    step "#{host} Selected architecture #{arch}"
+
+    revision = if arch == 'x64'
+                 '2.0.0-x64'
+               else
+                 '1.9.3-x86'
+               end
+
+    step "#{host} Install ruby from git using revision #{revision}"
+    # TODO remove this step once we are installing puppet from msi packages
+    install_from_git(host, "/opt/puppet-git-repos",
+                     :name => 'puppet-win32-ruby',
+                     :path => build_giturl('puppet-win32-ruby'),
+                     :rev  => revision)
+    on host, 'cd /opt/puppet-git-repos/puppet-win32-ruby; cp -r ruby/* /'
+    on host, 'cd /lib; icacls ruby /grant "Everyone:(OI)(CI)(RX)"'
+    on host, 'cd /lib; icacls ruby /reset /T'
+    on host, 'cd /; icacls bin /grant "Everyone:(OI)(CI)(RX)"'
+    on host, 'cd /; icacls bin /reset /T'
+    on host, 'ruby --version'
+    on host, 'cmd /c gem list'
+  end
+end
+
 tmp_repos = []
 install.each do |reponame|
   tmp_repos << extract_repo_info_from("https://github.com/puppetlabs/#{reponame}")
