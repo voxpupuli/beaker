@@ -19,6 +19,22 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @hosts = vmpooler_hosts
+      @credentials = load_credentials(@options[:dot_fog])
+    end
+
+    def load_credentials(dot_fog = '.fog')
+      creds = {}
+
+      begin
+        fog = YAML.load_file(dot_fog)
+        default = fog[:default]
+
+        creds[:vmpooler_token] = default[:vmpooler_token]
+      rescue Errno::ENOENT
+        @logger.warn "Credentials file (#{@options[:dot_fog]}) not found; proceeding without authentication"
+      end
+
+      creds
     end
 
     def check_url url
@@ -62,8 +78,6 @@ module Beaker
         request_payload[h['template']] = (request_payload[h['template']].to_i + 1).to_s
       end
 
-      @logger.notify "Requesting VM set from vmpooler"
-
       last_wait, wait = 0, 1
       waited = 0 #the amount of time we've spent waiting for this host to provision
       begin
@@ -71,6 +85,13 @@ module Beaker
 
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri)
+
+        if @credentials[:vmpooler_token]
+          request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+          @logger.notify "Requesting VM set from vmpooler (with authentication token)"
+        else
+          @logger.notify "Requesting VM set from vmpooler"
+        end
 
         request.body = request_payload.to_json
 
