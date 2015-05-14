@@ -21,6 +21,7 @@ PACKAGES = {
   ],
   :solaris_11 => [
     ['git', 'developer/versioning/git'],
+    ['ruby', 'runtime/ruby-18'],
   ],
   :solaris_10 => [
     'coreutils',
@@ -127,6 +128,8 @@ hosts.each do |host|
     on host, 'cd /; icacls bin /reset /T'
     on host, 'ruby --version'
     on host, 'cmd /c gem list'
+  when /solaris/
+    on host, 'gem install json'
   end
 end
 
