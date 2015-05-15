@@ -64,6 +64,10 @@ module Beaker
                   'Do not provision vm images before testing',
                   '(default: true)' do |bool|
             @cmd_options[:provision] = bool
+            unless bool
+              @cmd_options[:validate]  = false
+              @cmd_options[:configure] = false
+            end
           end
 
           opts.on '--[no-]configure',
