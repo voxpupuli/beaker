@@ -35,6 +35,9 @@ PACKAGES = {
     'git',
   # there isn't a need for json on windows because it is bundled in ruby 1.9
   ],
+  :sles => [
+    'git-core',
+  ]
 }
 
 PLATFORM_PATTERNS = {
@@ -44,6 +47,7 @@ PLATFORM_PATTERNS = {
   :solaris_10    => /solaris-10/,
   :solaris_11    => /solaris-11/,
   :windows       => /windows/,
+  :sles          => /sles/,
 }.freeze
 
 # Installs packages on the hosts.
