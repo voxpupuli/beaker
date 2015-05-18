@@ -86,6 +86,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( host, cmd ).and_yield
       expect( subject ).to receive( :stdout ).and_return( '2' )
 
+      subject.instance_variable_set( :@metadata, {} )
       version = subject.find_git_repo_versions( host, path, repository )
 
       expect( version ).to be == { 'name' => '2' }
@@ -132,6 +133,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).exactly( 4 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
 
@@ -152,6 +154,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
 
@@ -173,6 +176,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
    end
