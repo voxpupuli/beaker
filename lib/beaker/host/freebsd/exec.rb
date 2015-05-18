@@ -5,6 +5,6 @@ module FreeBSD::Exec
     # FreeBSD gets weird about special characters, we have to go a little OTT here
     escaped_str = str.gsub(/\t/,'\\t').gsub(/\n/,'\\n')
 
-    exec(Beaker::Command.new("printf #{escaped_str} > #{filename}"))
+    exec(Beaker::Command.new("printf \"#{escaped_str}\" > #{filename}"))
   end
 end
