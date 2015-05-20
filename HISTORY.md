@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 6 May, 2015 (50128ac0)](#LATEST)
+* [LATEST - 20 May, 2015 (88efb0d6)](#LATEST)
+* [2.11.0 - 6 May, 2015 (b775cc73)](#2.11.0)
 * [2.10.0 - 22 Apr, 2015 (c4f37479)](#2.10.0)
 * [2.9.0 - 9 Apr, 2015 (b161d325)](#2.9.0)
 * [beaker2.8.0 - 26 Mar, 2015 (2d25d06d)](#beaker2.8.0)
@@ -79,7 +80,88 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 6 May, 2015 (50128ac0)
+### <a name = "LATEST">LATEST - 20 May, 2015 (88efb0d6)
+
+* (GEM) update beaker version to 2.12.0 (88efb0d6)
+
+* Merge pull request #790 from kevpl/bkr76_acceptance_addpresuite (4d43e91d)
+
+
+```
+Merge pull request #790 from kevpl/bkr76_acceptance_addpresuite
+
+(BKR-76) created first pre-suite acceptance tests
+```
+* Merge pull request #814 from kevpl/bkr186_test_addaccessors2 (121ee9f8)
+
+
+```
+Merge pull request #814 from kevpl/bkr186_test_addaccessors2
+
+(BKR-186) added current test info accessors to DSL
+```
+* Merge pull request #815 from kevpl/bkr232_option_noprovision_implies_no_configure_validate (f60724a6)
+
+
+```
+Merge pull request #815 from kevpl/bkr232_option_noprovision_implies_no_configure_validate
+
+(BKR-232) --no-provision now implies --no-configure & --no-validate
+```
+* Merge pull request #816 from petems/BKR-276-fix_freebsd_file_making (158273ef)
+
+
+```
+Merge pull request #816 from petems/BKR-276-fix_freebsd_file_making
+
+(BKR-276) Fixes `#echo_to_file` for FreeBSD
+```
+* (BKR-276) Fixes `#echo_to_file` for FreeBSD (d1e36080)
+
+
+```
+(BKR-276) Fixes `#echo_to_file` for FreeBSD
+
+Previous command didn't wrap printf string in `"`
+Stops command working:
+
+
+
+
+freebsd-9-x64 executed in 0.04 seconds
+Warning: ssh connection to 10.255.52.108 has been terminated
+
+freebsd-9-x64 20:12:47$ printf 127.0.0.1\tlocalhost localhost.localdomain\n10.255.52.108\tfreebsd-9-x64\n > /etc/hosts
+Attempting ssh connection to 10.255.52.108, user: root, opts: {:config=>"/var/folders/nn/408ddhln26s1b356ry19q6yr0000gp/T/freebsd-9-x6420150518-65951-3jag0b"}
+printf: missing format character
+
+
+```
+* (BKR-232) --no-provision now implies --no-configure & --no-validate (e2200d2e)
+
+* (BKR-76) sles: fixed git & gem install issues (d0d0b95d)
+
+* (BKR-76) fixed solaris 11 issues with git install (8909ff3b)
+
+* Merge pull request #799 from sschneid/vmpooler_tokens (3e545182)
+
+
+```
+Merge pull request #799 from sschneid/vmpooler_tokens
+
+(BKR-218) Support using vmpooler API tokens
+```
+* (BKR-76) added windows ruby setup steps (1f45fc57)
+
+* (BKR-186) added current test info accessors to DSL (76b07a5a)
+
+* (BKR-218) Support using vmpooler API tokens (4c860f93)
+
+* (BKR-76) created first pre-suite acceptance tests (b5d1dd1f)
+
+### <a name = "2.11.0">2.11.0 - 6 May, 2015 (b775cc73)
+
+* (HISTORY) update beaker history for gem release 2.11.0 (b775cc73)
 
 * (GEM) update beaker version to 2.11.0 (50128ac0)
 
