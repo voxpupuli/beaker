@@ -230,7 +230,7 @@ module Beaker
 
     describe "executing commands" do
       let(:command) { Beaker::Command.new('ls') }
-      let(:host) { Beaker::Host.create('host', make_host_opts('host', options.merge(platform))) }
+      let(:host) { Beaker::Host.create('host', {}, make_host_opts('host', options.merge(platform))) }
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do
@@ -590,56 +590,5 @@ module Beaker
       expect( "#{host}" ).to be === 'name'
     end
 
-    context 'merging defaults' do
-      it 'knows the difference between foss and pe' do
-        @options = { :type => 'pe' }
-        expect( host['puppetpath'] ).to be === '/etc/puppetlabs/puppet'
-      end
-
-    end
-
-    context 'deprecating host keys' do
-
-      describe '#build_deprecated_keys' do
-
-        it 'returns the correct array for a unix host' do
-          expect( host.build_deprecated_keys().include?(:puppetvardir) ).to be_truthy
-        end
-
-        it 'returns the correct array for a windows host' do
-          @platform = 'windows-xp-me-bla'
-          expect( host.build_deprecated_keys().include?(:hieraconf) ).to be_truthy
-        end
-
-        it 'can be called on an unsupported host type without an error being thrown' do
-          @options = { :is_cygwin => false }
-          @platform = 'windows-stuff-stuff'
-          expect{ host.build_deprecated_keys() }.not_to raise_error
-          expect( host.build_deprecated_keys().empty? ).to be_truthy
-        end
-
-        it 'returns an empty array for unsupported host types' do
-          @options = { :is_cygwin => false }
-          @platform = 'windows-stuff-stuff'
-          expect( host.build_deprecated_keys().empty? ).to be_truthy
-        end
-
-      end
-
-      describe '#[]' do
-
-        it 'does not log for a key that isn\'t deprecated' do
-          expect( host ).to receive( :@logger ).exactly(0).times
-          host['puppetbindir']
-        end
-
-        it 'logs the warning message for a deprecated key' do
-          expect( host.instance_variable_get(:@logger) ).to receive( :warn ).once
-          host['hierapuppetlibdir']
-        end
-
-      end
-
-    end
   end
 end

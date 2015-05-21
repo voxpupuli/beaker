@@ -23,7 +23,7 @@ module Beaker
       }
 
       @logger.notify "Connecting to hypervisor at #{hypername}"
-      hypervisor = Beaker::Host.create( hypername, hyperopts )
+      hypervisor = Beaker::Host.create( hypername, hyperopts, @options )
       hypervisor[:user] = @fog_file[:default][:aix_hypervisor_username] || hypervisor[:user]
       hypervisor[:ssh][:keys] = [@fog_file[:default][:aix_hypervisor_keyfile]] || hypervisor[:ssh][:keys]
 

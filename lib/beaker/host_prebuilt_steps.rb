@@ -1,6 +1,6 @@
 require 'pathname'
 
-[ 'command', "dsl/patterns" ].each do |lib|
+[ 'command', "dsl" ].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -456,35 +456,12 @@ module Beaker
       merged_hash
     end
 
-    # 'echo' the provided value on the given host
-    # @param [Host] host The host to execute the 'echo' on
-    # @param [String] val The string to 'echo' on the host
-    def echo_on_host host, val
-      #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
-      if host.is_powershell?
-        host.exec(Command.new("echo #{val}")).stdout.chomp
-      else
-        host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
-      end
-    end
-
     # Create the hash of default environment from host (:host_env), global options hash (:host_env) and default PE/Foss puppet variables
     # @param [Host] host The host to construct the environment hash for, host specific environment should be in :host_env in a hash
     # @param [Hash] opts Hash of options, including optional global  host_env to be applied to each provided host
     # @return [Hash] A hash of environment variables for provided host
     def construct_env host, opts
       env = additive_hash_merge(host[:host_env], opts[:host_env])
-
-      #Add PATH
-
-      #prepend any PATH already set for this host
-
-      env['PATH'] = (%w(puppetbindir facterbindir hierabindir) << env['PATH']).compact.reject(&:empty?)
-      #get the PATH defaults
-      env['PATH'].map! { |val| host[val] }
-      env['PATH'] = env['PATH'].compact.reject(&:empty?)
-      #run the paths through echo to see if they have any subcommands that need processing
-      env['PATH'].map! { |val| echo_on_host(host, val) }
 
       env.each_key do |key|
         separator = host['pathseparator']
@@ -559,6 +536,16 @@ module Beaker
         #add the env var set to this test host
         env.each_pair do |var, value|
           host.add_env_var(var, value)
+        end
+        # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
+        # this is the worst and i hate it
+        if host[:type]
+          case host[:type]
+          when /git|foss|aio/
+            Class.new.extend(Beaker::DSL).configure_foss_defaults_on(host)
+          when /pe/
+            Class.new.extend(Beaker::DSL).configure_pe_defaults_on(host)
+          end
         end
 
         #close the host to re-establish the connection with the new sshd settings

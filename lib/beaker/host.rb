@@ -3,7 +3,7 @@ require 'timeout'
 require 'benchmark'
 require 'rsync'
 
-[ 'command', 'ssh_connection' ].each do |lib|
+[ 'command', 'ssh_connection'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -26,69 +26,39 @@ module Beaker
       end
     end
 
-    def self.create name, options
-      case options['HOSTS'][name]['platform']
+    def self.create name, host_hash, options
+      case host_hash['platform']
       when /windows/
-        cygwin = options['HOSTS'][name]['is_cygwin']
+        cygwin = host_hash['is_cygwin']
         if cygwin.nil? or cygwin == true
-          Windows::Host.new name, options
+          Windows::Host.new name, host_hash, options
         else
-          PSWindows::Host.new name, options
+          PSWindows::Host.new name, host_hash, options
         end
       when /aix/
-        Aix::Host.new name, options
+        Aix::Host.new name, host_hash, options
       when /osx/
-        Mac::Host.new name, options
+        Mac::Host.new name, host_hash, options
       when /freebsd/
-        FreeBSD::Host.new name, options
+        FreeBSD::Host.new name, host_hash, options
       else
-        Unix::Host.new name, options
+        Unix::Host.new name, host_hash, options
       end
     end
 
     attr_accessor :logger
-    attr_reader :name, :defaults
-    def initialize name, options
-      @logger = options[:logger]
-      @name, @options = name.to_s, options.dup
+    attr_reader :name, :host_hash, :options
+    def initialize name, host_hash, options
+      @logger = host_hash[:logger] || options[:logger]
+      @name, @host_hash, @options = name.to_s, host_hash.dup, options.dup
 
-      # This is annoying and its because of drift/lack of enforcement/lack of having
-      # a explict relationship between our defaults, our setup steps and how they're
-      # related through 'type' and the differences between the assumption of our two
-      # configurations we have for many of our products
-      type = @options.get_type
-      @defaults = merge_defaults_for_type @options, type
+      @host_hash = self.platform_defaults.merge(@host_hash)
       pkg_initialize
-    end
-
-    # Builds a deprecated keys array, for checking to see if a key is deprecated.
-    # The recommended check after using this method is +result.include?(key)+
-    #
-    # @note an unsupported host type (meaning it has no _aio_defaults_) will return
-    #   an empty hash
-    #
-    # @return [Array<Symbol>] An array of keys that are deprecated for a host
-    def build_deprecated_keys()
-      begin
-        deprecated_keys_hash = self.class.send "foss_defaults".to_sym
-        delete_exceptions_hash = self.class.send "aio_defaults".to_sym
-        deprecated_keys_hash.delete_if do |key, value|
-          delete_exceptions_hash.has_key?(key)
-        end
-      rescue NoMethodError
-        deprecated_keys_hash = {}
-      end
-      deprecated_keys_hash.keys()
     end
 
     def pkg_initialize
       # This method should be overridden by platform-specific code to
       # handle whatever packaging-related initialization is necessary.
-    end
-
-    def merge_defaults_for_type options, type
-      defaults = self.class.send "#{type}_defaults".to_sym
-      defaults.merge(options.merge((options['HOSTS'][name])))
     end
 
     def node_name
@@ -132,18 +102,21 @@ module Beaker
     end
 
     def []= k, v
-      @defaults[k] = v
+      host_hash[k] = v
     end
 
+    # Does this host have this key?  Either as defined in the host itself, or globally? 
     def [] k
-      @deprecated_keys ||= build_deprecated_keys()
-      deprecation_message = "deprecated host key '#{k}'. Perhaps you can use host.puppet[] to get what you're looking for."
-      @logger.warn( deprecation_message ) if @logger && @deprecated_keys.include?(k.to_sym)
-      @defaults[k]
+      host_hash[k] || options[k]
     end
 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def has_key? k
-      @defaults.has_key?(k)
+      host_hash.has_key?(k) || options.has_key?(k)
+    end
+
+    def delete k
+      host_hash.delete(k)
     end
 
     # The {#hostname} of this host.
@@ -159,7 +132,7 @@ module Beaker
     # Return the public name of the particular host, which may be different then the name of the host provided in
     # the configuration file as some provisioners create random, unique hostnames.
     def hostname
-      @defaults['vmhostname'] || @name
+      host_hash['vmhostname'] || @name
     end
 
     def + other
@@ -167,7 +140,7 @@ module Beaker
     end
 
     def is_pe?
-      @options.is_pe?
+      self['type'] && self['type'].to_s =~ /pe/
     end
 
     def is_cygwin?
@@ -220,7 +193,7 @@ module Beaker
     end
 
     def log_prefix
-      if @defaults['vmhostname']
+      if host_hash['vmhostname']
         "#{self} (#{@name})"
       else
         self.to_s

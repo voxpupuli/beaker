@@ -374,11 +374,7 @@ module Beaker
         # @!macro common_opts
         #
         def curl_on(host, cmd, opts = {}, &block)
-          if options.is_pe? #check global options hash
-            on host, "curl --tlsv1 %s" % cmd, opts, &block
-          else
-            on host, "curl %s" % cmd, opts, &block
-          end
+          on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
 
@@ -504,6 +500,22 @@ module Beaker
               dir
             else
               raise "Host platform not supported by `create_tmpdir_on`."
+            end
+          end
+        end
+
+        # 'echo' the provided value on the given host(s)
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] val The string to 'echo' on the host(s)
+        # @return [String, Array<String> The echo'ed value(s) returned by the host(s)
+        def echo_on hosts, val
+          #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
+          block_on hosts do |host|
+            if host.is_powershell?
+              host.exec(Command.new("echo #{val}")).stdout.chomp
+            else
+              host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
             end
           end
         end

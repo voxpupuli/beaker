@@ -21,8 +21,8 @@ module Beaker
         :q_puppet_cloud_install => 'y',
         :q_puppet_symlinks_install => 'y',
         :q_vendor_packages_install => 'y',
-        :q_puppetagent_certname => host,
-        :q_puppetagent_server => master,
+        :q_puppetagent_certname => host.to_s,
+        :q_puppetagent_server => master.to_s,
 
         # Disable console and master by default
         # This will be overridden by other blocks being merged in
@@ -33,15 +33,15 @@ module Beaker
       master_dns_altnames = [master.to_s, master['ip'], 'puppet'].compact.uniq.join(',')
       master_a = {
         :q_puppetmaster_install => 'y',
-        :q_puppetmaster_certname => master,
+        :q_puppetmaster_certname => master.to_s,
         :q_puppetmaster_dnsaltnames => master_dns_altnames,
-        :q_puppetmaster_enterpriseconsole_hostname => dashboard,
+        :q_puppetmaster_enterpriseconsole_hostname => dashboard.to_s,
         :q_puppetmaster_enterpriseconsole_port => answer_for(options, :q_puppetmaster_enterpriseconsole_port, 443),
         :q_puppetmaster_forward_facts => 'y',
       }
 
       dashboard_user = "'#{answer_for(options, :q_puppet_enterpriseconsole_auth_user_email)}'"
-      smtp_host = "'#{answer_for(options, :q_puppet_enterpriseconsole_smtp_host, dashboard)}'"
+      smtp_host = "'#{answer_for(options, :q_puppet_enterpriseconsole_smtp_host, dashboard.to_s)}'"
       dashboard_password = "'#{answer_for(options, :q_puppet_enterpriseconsole_auth_password)}'"
       smtp_port = "'#{answer_for(options, :q_puppet_enterpriseconsole_smtp_port)}'"
       smtp_username = answer_for(options, :q_puppet_enterpriseconsole_smtp_username)
@@ -64,11 +64,11 @@ module Beaker
         :q_puppet_enterpriseconsole_database_user => console_database_user,
         :q_puppet_enterpriseconsole_database_root_password => dashboard_password,
         :q_puppet_enterpriseconsole_database_password => dashboard_password,
-        :q_puppet_enterpriseconsole_inventory_hostname => host,
-        :q_puppet_enterpriseconsole_inventory_certname => host,
-        :q_puppet_enterpriseconsole_inventory_dnsaltnames => master,
+        :q_puppet_enterpriseconsole_inventory_hostname => host.to_s,
+        :q_puppet_enterpriseconsole_inventory_certname => host.to_s,
+        :q_puppet_enterpriseconsole_inventory_dnsaltnames => master.to_s,
         :q_puppet_enterpriseconsole_inventory_port => console_inventory_port,
-        :q_puppet_enterpriseconsole_master_hostname => master,
+        :q_puppet_enterpriseconsole_master_hostname => master.to_s,
         :q_puppet_enterpriseconsole_auth_user_email => dashboard_user,
         :q_puppet_enterpriseconsole_auth_password => dashboard_password,
         :q_puppet_enterpriseconsole_httpd_port => console_httpd_port,

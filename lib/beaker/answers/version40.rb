@@ -28,7 +28,7 @@ module Beaker
       end
 
       # add some new answers
-      update_server_host    = answer_for(@options, :q_update_server_host, master)
+      update_server_host    = answer_for(@options, :q_update_server_host, master.to_s)
       install_update_server = answer_for(@options, :q_install_update_server, 'y')
 
       the_answers.map do |key, value|
