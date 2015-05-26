@@ -70,6 +70,7 @@ module Unix
         'privatebindir'         => '/opt/puppetlabs/puppet/bin',
         'distmoduledir'         => '/etc/puppetlabs/code/modules',
         'sitemoduledir'         => '/opt/puppetlabs/puppet/modules',
+        'facter-factsd'         => '/opt/puppetlabs/facter/facts.d',
         'pathseparator'         => ':',
       })
     end

@@ -27,6 +27,7 @@ module PSWindows
         'puppetconfdir' => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc',
         'puppetcodedir' => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc',
         'hieraconf'     => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\hiera.yaml',
+        'facter-factsd' => 'C:\\ProgramData\\PuppetLabs\\facter\\facts.d',
         'puppetvardir'  => 'C:\\ProgramData\\PuppetLabs\\puppet\\var',
         'puppetbindir'  => '"C:\\Program Files (x86)\\PuppetLabs\\Puppet Enterprise\\bin";"C:\\Program Files\\PuppetLabs\\Puppet Enterprise\\bin"'
       })
@@ -45,6 +46,7 @@ module PSWindows
         'pathseparator'     => ';',
         'puppetpath'        => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\etc";"C:\\Program Files\\Puppet Labs\\Puppet\\etc"',
         'hieraconf'         => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\etc\\hiera.yaml";"C:\\Program Files\\Puppet Labs\\Puppet\\etc\\hiera.yaml"',
+        'facter-factsd'     => 'C:\\ProgramData\\PuppetLabs\\facter\\facts.d',
         'puppetvardir'      => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\var";"C:\\Program Files\\Puppet Labs\\Puppet\\var"',
         'puppetbindir'      => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\bin"',
       })
