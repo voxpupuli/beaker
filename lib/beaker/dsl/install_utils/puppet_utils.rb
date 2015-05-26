@@ -602,9 +602,9 @@ module Beaker
                   fedora_prefix, version, repo, arch ]
 
               unless link_exists?( link )
-                @logger.debug("couldn't find link at '#{repo}', falling back to next option...")
+                logger.debug("couldn't find link at '#{repo}', falling back to next option...")
               else
-                @logger.debug("found link at '#{repo}'")
+                logger.debug("found link at '#{repo}'")
                 break
               end
             end
@@ -646,16 +646,16 @@ module Beaker
               repo_path = "/root/#{package_name}/#{codename}/#{repo}"
               repo_check = on(host, "[[ -d #{repo_path} ]]", :acceptable_exit_codes => [0,1])
               if repo_check.exit_code == 0
-                @logger.debug("found repo at '#{repo_path}'")
+                logger.debug("found repo at '#{repo_path}'")
                 repo_name = repo
                 break
               else
-                @logger.debug("couldn't find repo at '#{repo_path}', falling back to next option...")
+                logger.debug("couldn't find repo at '#{repo_path}', falling back to next option...")
               end
             end
             if repo_name.nil?
               repo_name = 'main'
-              @logger.debug("using default repo '#{repo_name}'")
+              logger.debug("using default repo '#{repo_name}'")
             end
 
             search = "deb\\s\\+http:\\/\\/#{hostname}.*$"

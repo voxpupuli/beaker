@@ -10,7 +10,7 @@ module Beaker
         #
         # @return [String] Test name, or nil if it hasn't been set
         def current_test_name()
-          @metadata[:case] && @metadata[:case][:name] ? @metadata[:case][:name] : nil
+          metadata[:case] && metadata[:case][:name] ? metadata[:case][:name] : nil
         end
 
         # Gets the currently executing test's filename, which is set from the
@@ -22,7 +22,7 @@ module Beaker
         #
         # @return [String] Test filename, or nil if it hasn't been set
         def current_test_filename()
-          @metadata[:case] && @metadata[:case][:file_name] ? @metadata[:case][:file_name] : nil
+          metadata[:case] && metadata[:case][:file_name] ? metadata[:case][:file_name] : nil
         end
 
         # Gets the currently executing test's currently executing step name.
@@ -30,7 +30,7 @@ module Beaker
         #
         # @return [String] Step name, or nil if it hasn't been set
         def current_step_name()
-          @metadata[:step] && @metadata[:step][:name] ? @metadata[:step][:name] : nil
+          metadata[:step] && metadata[:step][:name] ? metadata[:step][:name] : nil
         end
 
         # Sets the currently executing test's name.
@@ -40,8 +40,8 @@ module Beaker
         # @return nil
         # @api private
         def set_current_test_name(name)
-          @metadata[:case] ||= {}
-          @metadata[:case][:name] = name
+          metadata[:case] ||= {}
+          metadata[:case][:name] = name
         end
 
         # Sets the currently executing test's filename.
@@ -51,8 +51,8 @@ module Beaker
         # @return nil
         # @api private
         def set_current_test_filename(filename)
-          @metadata[:case] ||= {}
-          @metadata[:case][:file_name] = filename
+          metadata[:case] ||= {}
+          metadata[:case][:file_name] = filename
         end
 
         # Sets the currently executing step's name.
@@ -62,8 +62,8 @@ module Beaker
         # @return nil
         # @api private
         def set_current_step_name(name)
-          @metadata[:step] ||= {}
-          @metadata[:step][:name] = name
+          metadata[:step] ||= {}
+          metadata[:step][:name] = name
         end
 
       end

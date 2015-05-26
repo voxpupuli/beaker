@@ -18,6 +18,7 @@ module Beaker
     # * the module {Beaker::DSL::Roles} that provides access to the various hosts implementing
     #   {Beaker::Host}'s interface to act upon
     # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
+    # * a method *metadata* that yields a hash
     #
     #
     module Helpers
