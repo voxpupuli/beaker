@@ -50,6 +50,11 @@ module Beaker
       @args    = args
       @environment = {}
       @cmdexe = @options.delete(:cmdexe) || false
+      @prepend_cmds = {}
+      if @options[:prepend_cmds]
+        @prepend_cmds = @options[:prepend_cmds]
+        @options.delete(:prepend_cmds)
+      end
 
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
@@ -67,13 +72,13 @@ module Beaker
     # @param [Hash]   env  An optional hash of environment variables to be used
     #
     # @return [String] This returns the fully formed command line invocation.
-    def cmd_line host, cmd = @command, env = @environment
+    def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
       env_string = env.nil? ? '' : environment_string_for( host, env )
 
       cygwin = ((host['platform'] =~ /windows/) and host.is_cygwin? and @cmdexe) ? 'cmd.exe /c' : nil
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      [env_string, cygwin, cmd, options_string, args_string].compact.reject(&:empty?).join(' ')
+      [env_string, cygwin, pc, cmd, options_string, args_string].compact.reject(&:empty?).join(' ')
     end
 
     # @param [Hash] opts These are the options that the command takes

@@ -19,28 +19,29 @@ module Unix::Pkg
 
   def check_for_package(name, opts = {})
     opts = {:accept_all_exit_codes => true}.merge(opts)
-    opts[:prepend_cmds] ? pc = "#{opts[:prepend_cmds]} " : pc = ""
+    opts[:prepend_cmds] ? pc = opts.select {|k,v| k == :prepend_cmds} :
+                          pc = {:prepend_cmds => ""}
     case self['platform']
       when /sles-10/
-        result = exec(Beaker::Command.new("#{pc}zypper se -i --match-exact #{name}"), opts)
+        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}", [], pc), opts)
         result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
       when /sles-/
-        result = exec(Beaker::Command.new("#{pc}zypper se -i --match-exact #{name}"), opts)
+        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}", [], pc), opts)
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
       when /cisco|fedora|centos|eos|el-/
-        result = exec(Beaker::Command.new("#{pc}rpm -q #{name}"), opts)
+        result = exec(Beaker::Command.new("rpm -q #{name}", [], pc), opts)
       when /ubuntu|debian|cumulus/
-        result = exec(Beaker::Command.new("#{pc}dpkg -s #{name}"), opts)
+        result = exec(Beaker::Command.new("dpkg -s #{name}", [], pc), opts)
       when /solaris-11/
-        result = exec(Beaker::Command.new("#{pc}pkg info #{name}"), opts)
+        result = exec(Beaker::Command.new("pkg info #{name}", [], pc), opts)
       when /solaris-10/
-        result = exec(Beaker::Command.new("#{pc}pkginfo #{name}"), opts)
+        result = exec(Beaker::Command.new("pkginfo #{name}", [], pc), opts)
       when /freebsd-9/
-        result = exec(Beaker::Command.new("#{pc}pkg_info #{name}"), opts)
+        result = exec(Beaker::Command.new("pkg_info #{name}", [], pc), opts)
       when /freebsd-10/
-        result = exec(Beaker::Command.new("#{pc}pkg info #{name}"), opts)
+        result = exec(Beaker::Command.new("pkg info #{name}", [], pc), opts)
       else
         raise "Package #{name} cannot be queried on #{self}"
     end
@@ -59,51 +60,49 @@ module Unix::Pkg
   end
 
   def install_package(name, cmdline_args = '', version = nil, opts = {})
-    opts[:prepend_cmds] ? pc = "#{opts[:prepend_cmds]} " : pc = ""
     case self['platform']
       when /sles-/
-        execute("#{pc}zypper --non-interactive in #{name}", opts)
+        execute("zypper --non-interactive in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
       when /cisco|fedora|centos|eos|el-/
         if version
           name = "#{name}-#{version}"
         end
-        execute("#{pc}yum -y #{cmdline_args} install #{name}", opts)
+        execute("yum -y #{cmdline_args} install #{name}", opts)
       when /ubuntu|debian|cumulus/
         if version
           name = "#{name}=#{version}"
         end
         update_apt_if_needed
-        execute("#{pc}apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
+        execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
-        execute("#{pc}pkg #{cmdline_args} install #{name}", opts)
+        execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
-        execute("#{pc}pkgutil -i -y #{cmdline_args} #{name}", opts)
+        execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
       when /freebsd-9/
-        execute("#{pc}pkg_add -fr #{cmdline_args} #{name}", opts)
+        execute("pkg_add -fr #{cmdline_args} #{name}", opts)
       when /freebsd-10/
-        execute("#{pc}pkg #{cmdline_args} install #{name}", opts)
+        execute("pkg #{cmdline_args} install #{name}", opts)
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
   end
 
   def uninstall_package(name, cmdline_args = '', opts = {})
-    opts[:prepend_cmds] ? pc = "#{opts[:prepend_cmds]} " : pc = ""
     case self['platform']
       when /sles-/
-        execute("#{pc}zypper --non-interactive rm #{name}", opts)
+        execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
       when /cisco|fedora|centos|eos|el-/
-        execute("#{pc}yum -y #{cmdline_args} remove #{name}", opts)
+        execute("yum -y #{cmdline_args} remove #{name}", opts)
       when /ubuntu|debian|cumulus/
-        execute("#{pc}apt-get purge #{cmdline_args} -y #{name}", opts)
+        execute("apt-get purge #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
-        execute("#{pc}pkg #{cmdline_args} uninstall #{name}", opts)
+        execute("pkg #{cmdline_args} uninstall #{name}", opts)
       when /solaris-10/
-        execute("#{pc}pkgutil -r -y #{cmdline_args} #{name}", opts)
+        execute("pkgutil -r -y #{cmdline_args} #{name}", opts)
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
@@ -115,21 +114,20 @@ module Unix::Pkg
   # @param [String] cmdline_args  Additional command line arguments for
   #                               the package manager
   def upgrade_package(name, cmdline_args = '', opts = {})
-    opts[:prepend_cmds] ? pc = "#{opts[:prepend_cmds]} " : pc = ""
     case self['platform']
       when /sles-/
-        execute("#{pc}zypper --non-interactive --no-gpg-checks up #{name}", opts)
+        execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
       when /cisco|fedora|centos|eos|el-/
-        execute("#{pc}yum -y #{cmdline_args} update #{name}", opts)
+        execute("yum -y #{cmdline_args} update #{name}", opts)
       when /ubuntu|debian|cumulus/
         update_apt_if_needed
-        execute("#{pc}apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
+        execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
       when /solaris-11/
-        execute("#{pc}pkg #{cmdline_args} update #{name}", opts)
+        execute("pkg #{cmdline_args} update #{name}", opts)
       when /solaris-10/
-        execute("#{pc}pkgutil -u -y #{cmdline_args} ${name}", opts)
+        execute("pkgutil -u -y #{cmdline_args} ${name}", opts)
       else
         raise "Package #{name} cannot be upgraded on #{self}"
     end

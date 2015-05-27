@@ -16,7 +16,10 @@ module Beaker
     end
 
     def execute(command, options={}, &block)
-      result = self.exec(Command.new(command), options)
+      options[:prepend_cmds] ? 
+        pc = options.select {|k,v| k == :prepend_cmds} :
+        pc = {:prepend_cmds => ""}
+      result = self.exec(Command.new(command, [], pc), options)
 
       if block_given?
         yield result
