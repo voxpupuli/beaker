@@ -70,6 +70,7 @@ module Beaker
     #                      interface.
     # @param [String] cmd  An command to call.
     # @param [Hash]   env  An optional hash of environment variables to be used
+    # @param [String] pc   An optional list of commands to prepend 
     #
     # @return [String] This returns the fully formed command line invocation.
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
