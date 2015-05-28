@@ -33,6 +33,10 @@ module Beaker
     # an instance of {Beaker::Logger}.
     attr_accessor :logger
 
+    # Necessary for many methods in {Beaker::DSL::Helpers}.  Assumed to be 
+    # a hash.
+    attr_accessor :metadata
+
     #The full log for this test
     attr_accessor :sublog
 

@@ -14,6 +14,7 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
+  let(:metadata)      { @metadata ||= {} }
   let(:presets)       { Beaker::Options::Presets.new }
   let(:opts)          { presets.presets.merge(presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
@@ -82,6 +83,7 @@ describe ClassMixedWithDSLInstallUtils do
       cmd         = 'cd /path/to/repo/name && git describe || true'
       logger = double.as_null_object
 
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( subject ).to receive( :on ).with( host, cmd ).and_yield
       expect( subject ).to receive( :stdout ).and_return( '2' )
@@ -130,6 +132,7 @@ describe ClassMixedWithDSLInstallUtils do
       host = { 'platform' => 'debian' }
       logger = double.as_null_object
 
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).exactly( 4 ).times
 
@@ -147,6 +150,7 @@ describe ClassMixedWithDSLInstallUtils do
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:rev]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
@@ -169,6 +173,7 @@ describe ClassMixedWithDSLInstallUtils do
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
