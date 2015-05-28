@@ -8,6 +8,8 @@ class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::Roles
   include Beaker::DSL::Patterns
 
+  attr_accessor :hosts
+
   def logger
     @logger ||= RSpec::Mocks::Double.new('logger').as_null_object
   end

@@ -144,9 +144,15 @@ module Beaker
           end
         end
 
-        #Install FOSS based upon host configuration and options
+        # @deprecated Use {#install_puppet_on} instead.
+        def install_puppet(opts = {})
+          #send in the global hosts!
+          install_puppet_on(hosts, opts)
+        end
+
+        #Install FOSS based on specified hosts using provided options
         # @example will install puppet 3.6.1 from native puppetlabs provided packages wherever possible and will fail over to gem installation when impossible
-        #  install_puppet({
+        #  install_puppet_on(hosts, {
         #    :version          => '3.6.1',
         #    :facter_version   => '2.0.1',
         #    :hiera_version    => '1.3.3',
@@ -156,11 +162,14 @@ module Beaker
         #
         #
         # @example Will install latest packages on Enterprise Linux and Debian based distros and fail hard on all othere platforms.
-        #  install_puppet()
+        #  install_puppet(hosts)
         #
         # @note This will attempt to add a repository for apt.puppetlabs.com on
         #       Debian, Ubuntu, or Cumulus machines, or yum.puppetlabs.com on EL or Fedora
         #       machines, then install the package 'puppet'.
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts
         # @option opts [String] :version Version of puppet to download
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
@@ -169,11 +178,11 @@ module Beaker
         # @return nil
         # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
         # @raise [FailTest] When error occurs during the actual installation process
-        def install_puppet(opts = {})
+        def install_puppet_on(hosts, opts={})
           default_download_url = 'http://downloads.puppetlabs.com'
           opts = {:win_download_url => "#{default_download_url}/windows",
                   :mac_download_url => "#{default_download_url}/mac"}.merge(opts)
-          hosts.each do |host|
+          block_on hosts do |host|
             if host['platform'] =~ /el-(5|6|7)/
               relver = $1
               install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'el')
@@ -199,23 +208,18 @@ module Beaker
             on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
             on host, "echo '' >> #{host.puppet['hiera_config']}"
           end
-          nil
         end
 
-        # Configure puppet.conf for all hosts based upon a provided Hash
-        # @param [Hash{Symbol=>String}] opts
-        # @option opts [Hash{String=>String}] :main configure the main section of puppet.conf
-        # @option opts [Hash{String=>String}] :agent configure the agent section of puppet.conf
-        #
-        # @return nil
+        # @deprecated Use {#configure_puppet_on} instead.
         def configure_puppet(opts={})
           hosts.each do |host|
             configure_puppet_on(host,opts)
           end
         end
 
-        # Configure puppet.conf on the given host based upon a provided hash
-        # @param [Host] host The host to configure puppet.conf on
+        # Configure puppet.conf on the given host(s) based upon a provided hash
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts
         # @option opts [Hash{String=>String}] :main configure the main section of puppet.conf
         # @option opts [Hash{String=>String}] :agent configure the agent section of puppet.conf
@@ -237,29 +241,31 @@ module Beaker
         #   configure_puppet(master, config)
         #
         # @return nil
-        def configure_puppet_on(host, opts = {})
-          if host['platform'] =~ /windows/
-            puppet_conf = host.puppet['config']
-            conf_data = ''
-            opts.each do |section,options|
-              conf_data << "[#{section}]`n"
-              options.each do |option,value|
-                conf_data << "#{option}=#{value}`n"
+        def configure_puppet_on(hosts, opts = {})
+          block_on hosts do |host|
+            if host['platform'] =~ /windows/
+              puppet_conf = host.puppet['config']
+              conf_data = ''
+              opts.each do |section,options|
+                conf_data << "[#{section}]`n"
+                options.each do |option,value|
+                  conf_data << "#{option}=#{value}`n"
+                end
+                conf_data << "`n"
               end
-              conf_data << "`n"
-            end
-            on host, powershell("\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text")
-          else
-            puppet_conf = host.puppet['config']
-            conf_data = ''
-            opts.each do |section,options|
-              conf_data << "[#{section}]\n"
-              options.each do |option,value|
-                conf_data << "#{option}=#{value}\n"
+              on host, powershell("\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text")
+            else
+              puppet_conf = host.puppet['config']
+              conf_data = ''
+              opts.each do |section,options|
+                conf_data << "[#{section}]\n"
+                options.each do |option,value|
+                  conf_data << "#{option}=#{value}\n"
+                end
+                conf_data << "\n"
               end
-              conf_data << "\n"
+              on host, "echo \"#{conf_data}\" > #{puppet_conf}"
             end
-            on host, "echo \"#{conf_data}\" > #{puppet_conf}"
           end
         end
 

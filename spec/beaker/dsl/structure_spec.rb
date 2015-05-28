@@ -128,6 +128,14 @@ describe ClassMixedWithDSLStructure do
       subject.confine( :to, {} )
     end
 
+    it 'uses a provided host subset when no criteria is provided' do
+
+      subset = ['host1', 'host2']
+      hosts = subset.dup << 'host3'
+      expect( subject ).to receive( :hosts= ).with( subset )
+      subject.confine :to, {}, subset
+    end
+
     it 'raises when given mode is not :to or :except' do
       allow( subject ).to receive( :hosts )
       allow( subject ).to receive( :hosts= )

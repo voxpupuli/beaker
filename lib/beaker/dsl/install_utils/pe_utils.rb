@@ -13,6 +13,27 @@ module Beaker
       # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
       module PEUtils
 
+
+        # @!macro [new] common_opts
+        #   @param [Hash{Symbol=>String}] opts Options to alter execution.
+        #   @option opts [Boolean] :silent (false) Do not produce log output
+        #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
+        #     (or range) of integer exit codes that should be considered
+        #     acceptable.  An error will be thrown if the exit code does not
+        #     match one of the values in this list.
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
+        #     exit codes as passing.
+        #   @option opts [Boolean] :dry_run (false) Do not actually execute any
+        #     commands on the SUT
+        #   @option opts [String] :stdin (nil) Input to be provided during command
+        #     execution on the SUT.
+        #   @option opts [Boolean] :pty (false) Execute this command in a pseudoterminal.
+        #   @option opts [Boolean] :expect_connection_failure (false) Expect this command
+        #     to result in a connection failure, reconnect and continue execution.
+        #   @option opts [Hash{String=>String}] :environment ({}) These will be
+        #     treated as extra environment variables that should be set before
+        #     running the command.
+
         #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
         # @example
         #  h = sorted_hosts
@@ -403,63 +424,84 @@ module Beaker
           end
         end
 
+        #Install PE based on global hosts with global options
+        #@see #install_pe_on
+        def install_pe
+          install_pe_on(hosts, options)
+        end
+
         #Install PE based upon host configuration and options
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @!macro common_opts
         # @example
-        #  install_pe
+        #  install_pe_on(hosts, {})
         #
         # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
         #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
         #
-        def install_pe
+        def install_pe_on(hosts, opts)
           #process the version files if necessary
-          hosts.each do |host|
-            host['pe_dir'] ||= options[:pe_dir]
-            if host['platform'] =~ /windows/
-              host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-                Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file_win])
-            else
-              host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-                Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
+          confine_block(:to, {}, hosts) do
+            hosts.each do |host|
+              host['pe_dir'] ||= opts[:pe_dir]
+              if host['platform'] =~ /windows/
+                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
+                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file_win])
+              else
+                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
+                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file])
+              end
             end
+            do_install sorted_hosts, opts
           end
-          #send in the global options hash
-          do_install sorted_hosts, options
+        end
+
+        #Upgrade PE based upon global host configuration and global options
+        #@see #upgrade_pe_on
+        def upgrade_pe path=nil
+          upgrade_pe_on(hosts, options, path)
         end
 
         #Upgrade PE based upon host configuration and options
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @!macro common_opts
         # @param [String] path A path (either local directory or a URL to a listing of PE builds).
         #                      Will contain a LATEST file indicating the latest build to install.
         #                      This is ignored if a pe_upgrade_ver and pe_upgrade_dir are specified
         #                      in the host configuration file.
         # @example
-        #  upgrade_pe("http://neptune.puppetlabs.lan/3.0/ci-ready/")
+        #  upgrade_pe_on(agents, {}, "http://neptune.puppetlabs.lan/3.0/ci-ready/")
         #
         # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
-        def upgrade_pe path=nil
-          set_console_password = false
-          # if we are upgrading from something lower than 3.4 then we need to set the pe console password
-          if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
-            set_console_password = true
-          end
-          # get new version information
-          hosts.each do |host|
-            host['pe_dir'] = host['pe_upgrade_dir'] || path
-            if host['platform'] =~ /windows/
-              host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
-                Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file_win])
-            else
-              host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
-                Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file])
+        def upgrade_pe_on hosts, opts, path=nil
+          confine_block(:to, {}, hosts) do
+            set_console_password = false
+            # if we are upgrading from something lower than 3.4 then we need to set the pe console password
+            if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
+              set_console_password = true
             end
-            if version_is_less(host['pe_ver'], '3.0')
-              host['pe_installer'] ||= 'puppet-enterprise-upgrader'
+            # get new version information
+            hosts.each do |host|
+              host['pe_dir'] = host['pe_upgrade_dir'] || path
+              if host['platform'] =~ /windows/
+                host['pe_ver'] = host['pe_upgrade_ver'] || opts['pe_upgrade_ver'] ||
+                  Options::PEVersionScraper.load_pe_version(host['pe_dir'], opts[:pe_version_file_win])
+              else
+                host['pe_ver'] = host['pe_upgrade_ver'] || opts['pe_upgrade_ver'] ||
+                  Options::PEVersionScraper.load_pe_version(host['pe_dir'], opts[:pe_version_file])
+              end
+              if version_is_less(host['pe_ver'], '3.0')
+                host['pe_installer'] ||= 'puppet-enterprise-upgrader'
+              end
             end
+            do_install(sorted_hosts, opts.merge({:type => :upgrade, :set_console_password => set_console_password}))
+            opts['upgrade'] = true
           end
-          # send in the global options hash
-          do_install(sorted_hosts, options.merge({:type => :upgrade, :set_console_password => set_console_password}))
-          options['upgrade'] = true
         end
 
         #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a
