@@ -19,29 +19,27 @@ module Unix::Pkg
 
   def check_for_package(name, opts = {})
     opts = {:accept_all_exit_codes => true}.merge(opts)
-    opts[:prepend_cmds] ? pc = opts.select {|k,v| k == :prepend_cmds} :
-                          pc = {:prepend_cmds => ""}
     case self['platform']
       when /sles-10/
-        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}", [], pc), opts)
+        result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
         result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
       when /sles-/
-        result = exec(Beaker::Command.new("zypper se -i --match-exact #{name}", [], pc), opts)
+        result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
       when /cisco|fedora|centos|eos|el-/
-        result = exec(Beaker::Command.new("rpm -q #{name}", [], pc), opts)
+        result = execute("rpm -q #{name}", opts) { |result| result }
       when /ubuntu|debian|cumulus/
-        result = exec(Beaker::Command.new("dpkg -s #{name}", [], pc), opts)
+        result = execute("dpkg -s #{name}", opts) { |result| result }
       when /solaris-11/
-        result = exec(Beaker::Command.new("pkg info #{name}", [], pc), opts)
+        result = execute("pkg info #{name}", opts) { |result| result }
       when /solaris-10/
-        result = exec(Beaker::Command.new("pkginfo #{name}", [], pc), opts)
+        result = execute("pkginfo #{name}", opts) { |result| result }
       when /freebsd-9/
-        result = exec(Beaker::Command.new("pkg_info #{name}", [], pc), opts)
+        result = execute("pkg_info #{name}", opts) { |result| result }
       when /freebsd-10/
-        result = exec(Beaker::Command.new("pkg info #{name}", [], pc), opts)
+        result = execute("pkg info #{name}", opts) { |result| result }
       else
         raise "Package #{name} cannot be queried on #{self}"
     end
