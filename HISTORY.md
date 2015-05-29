@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 20 May, 2015 (88efb0d6)](#LATEST)
+* [LATEST - 29 May, 2015 (c801d4c8)](#LATEST)
+* [2.12.0 - 20 May, 2015 (62845ce9)](#2.12.0)
 * [2.11.0 - 6 May, 2015 (b775cc73)](#2.11.0)
 * [2.10.0 - 22 Apr, 2015 (c4f37479)](#2.10.0)
 * [2.9.0 - 9 Apr, 2015 (b161d325)](#2.9.0)
@@ -80,7 +81,105 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 20 May, 2015 (88efb0d6)
+### <a name = "LATEST">LATEST - 29 May, 2015 (c801d4c8)
+
+* (GEM) update beaker version to 2.13.0 (c801d4c8)
+
+* Merge pull request #824 from anodelman/remove-rake-task (32d49e16)
+
+
+```
+Merge pull request #824 from anodelman/remove-rake-task
+
+(BKR-239) Remove dependency on puppet-dashboard rake tasks...
+```
+* (BKR-239) Remove dependency on puppet-dashboard rake tasks... (a334fe40)
+
+
+```
+(BKR-239) Remove dependency on puppet-dashboard rake tasks...
+
+... for shallow gravy.
+
+- do that
+```
+* Merge pull request #817 from justinstoller/maint/master/hocon-update (ddc7d948)
+
+
+```
+Merge pull request #817 from justinstoller/maint/master/hocon-update
+
+(maint) Relax constraint on hocon
+```
+* Merge pull request #820 from anodelman/fix-accessors (aeedd651)
+
+
+```
+Merge pull request #820 from anodelman/fix-accessors
+
+(BKR-283)/(BKR-262) missing @metadata/@logger accessors for beaker-rspec
+```
+* Merge pull request #819 from spjmurray/virtualbox_volumes (85bbc4dd)
+
+
+```
+Merge pull request #819 from spjmurray/virtualbox_volumes
+
+(BKR-281) VirtualBox: Add support for storage arrays
+```
+* (BKR-283)/(BKR-262) missing @metadata/@logger accessors for beaker-rspec (d230c2cc)
+
+
+```
+(BKR-283)/(BKR-262) missing @metadata/@logger accessors for beaker-rspec
+
+- beaker-rspec needs access to @metadata, broken with beaker 2.12.0
+- Beaker-rspec missing @logger accessor
+
+Added both logger and metadata accessors so that beaker-rspec can be
+repaired to work with latest beaker releases.
+```
+* (BKR-287) Relax constraint on hocon (f8f44deb)
+
+
+```
+(BKR-287) Relax constraint on hocon
+
+Prior to this we were using the hocon gem and pinning to a z release.
+
+This commit relaxes the version dependency to pull in an pre-1.0 hocon
+release.
+
+This is necessary for testing the hocon module itself.
+```
+* (BKR-281) VirtualBox: Add support for storage arrays (3b0b2443)
+
+
+```
+(BKR-281) VirtualBox: Add support for storage arrays
+
+Extends the Vagrant VirtualBox hypervisor to allow per host definitions
+of storage volumes, for testing things like ceph and other storage
+technologies.
+
+An example nodeset provisions the VM with 3 attached storage volumes
+available as sdb, sdc, sdd (on linux systems) at at SCSI addresses
+2:0:0:0, 3:0:0:0, 4:0:0:0.  Sizes are specified in MB.
+
+  HOSTS:
+    osd0:
+      hypervisor: vagrant
+      volumes:
+        osd0_0:
+          size: 10000
+        osd0_1:
+          size: 10000
+        journal:
+          size: 1000
+```
+### <a name = "2.12.0">2.12.0 - 20 May, 2015 (62845ce9)
+
+* (HISTORY) update beaker history for gem release 2.12.0 (62845ce9)
 
 * (GEM) update beaker version to 2.12.0 (88efb0d6)
 
