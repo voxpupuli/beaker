@@ -390,12 +390,15 @@ module Beaker
               wait_for_host_in_dashboard(host)
             end
 
-            if pre30master
-              task = 'nodegroup:add_all_nodes group=default'
-            else
-              task = 'defaultgroup:ensure_default_group'
+            # only appropriate for pre-3.9 builds
+            if version_is_less(master[:pe_ver], '3.99')
+              if pre30master
+                task = 'nodegroup:add_all_nodes group=default'
+              else
+                task = 'defaultgroup:ensure_default_group'
+              end
+              on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
             end
-            on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
 
             # Now that all hosts are in the dashbaord, run puppet one more
             # time to configure mcollective

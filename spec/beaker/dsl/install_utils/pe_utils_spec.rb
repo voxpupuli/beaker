@@ -328,6 +328,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
+
       expect( subject ).to receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
       #run puppet agent now that installation is complete
