@@ -171,7 +171,7 @@ module Beaker
     def request_terminal_for channel, command
       channel.request_pty do |ch, success|
         if success
-          @logger.info "Allocated a PTY on #{@hostname} for #{command.inspect}"
+          @logger.debug "Allocated a PTY on #{@hostname} for #{command.inspect}"
         else
           abort "FAILED: could not allocate a pty when requested on " +
             "#{@hostname} for #{command.inspect}"
