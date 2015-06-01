@@ -136,6 +136,9 @@ module Beaker
       result.finalize!
       @logger.last_result = result
       result
+      # Close the shell to avoid the quota of 5 concurrent shells for a user by default.
+      close
+      @sid = nil
     end
 
     def scp_to source, target, options = {}, dry_run = false
