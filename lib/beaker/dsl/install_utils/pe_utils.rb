@@ -345,7 +345,10 @@ module Beaker
               if host['roles'].include?('frictionless') &&  (! version_is_less(version, '3.2.0'))
                 # If We're *not* running the classic installer, we want
                 # to make sure the master has packages for us.
-                deploy_frictionless_to_master(host)
+                # Only for pre 3.99
+                if version_is_less(version, '3.99')
+                  deploy_frictionless_to_master(host)
+                end
                 on host, installer_cmd(host, opts)
               elsif host['platform'] =~ /osx|eos/
                 # If we're not frictionless, we need to run the OSX special-case
