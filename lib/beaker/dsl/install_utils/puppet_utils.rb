@@ -80,17 +80,17 @@ module Beaker
         #                the output from git describe.
         #
         # @note This requires the helper methods:
-        #       * {Beaker::DSL::Structure#step}
         #       * {Beaker::DSL::Helpers#on}
         #
         def find_git_repo_versions host, path, repository
+          logger.notify("\n  * Grab version for #{repository[:name]}")
+
           version = {}
-          step "Grab version for #{repository[:name]}" do
-            on host, "cd #{path}/#{repository[:name]} && " +
-                      "git describe || true" do
-              version[repository[:name]] = stdout.chomp
-            end
+          on host, "cd #{path}/#{repository[:name]} && " +
+                    "git describe || true" do
+            version[repository[:name]] = stdout.chomp
           end
+
           version
         end
 
@@ -113,35 +113,34 @@ module Beaker
             clone_cmd = "git clone --branch #{depth_branch} --depth #{depth} #{repo} #{target}"
           end
 
-          step "Clone #{repo} if needed" do
-            on host, "test -d #{path} || mkdir -p #{path}"
-            on host, "test -d #{target} || #{clone_cmd}"
-          end
+          logger.notify("\n  * Clone #{repo} if needed")
 
-          step "Update #{name} and check out revision #{rev}" do
-            commands = ["cd #{target}",
-                        "remote rm origin",
-                        "remote add origin #{repo}",
-                        "fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/*",
-                        "clean -fdx",
-                        "checkout -f #{rev}"]
-            on host, commands.join(" && git ")
-          end
+          on host, "test -d #{path} || mkdir -p #{path}"
+          on host, "test -d #{target} || #{clone_cmd}"
 
-          step "Install #{name} on the system" do
-            # The solaris ruby IPS package has bindir set to /usr/ruby/1.8/bin.
-            # However, this is not the path to which we want to deliver our
-            # binaries. So if we are using solaris, we have to pass the bin and
-            # sbin directories to the install.rb
-            install_opts = ''
-            install_opts = '--bindir=/usr/bin --sbindir=/usr/sbin' if
-              host['platform'].include? 'solaris'
+          logger.notify("\n  * Update #{name} and check out revision #{rev}")
 
-              on host,  "cd #{target} && " +
-                        "if [ -f install.rb ]; then " +
-                        "ruby ./install.rb #{install_opts}; " +
-                        "else true; fi"
-          end
+          commands = ["cd #{target}",
+                      "remote rm origin",
+                      "remote add origin #{repo}",
+                      "fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/*",
+                      "clean -fdx",
+                      "checkout -f #{rev}"]
+          on host, commands.join(" && git ")
+
+          logger.notify("\n  * Install #{name} on the system")
+          # The solaris ruby IPS package has bindir set to /usr/ruby/1.8/bin.
+          # However, this is not the path to which we want to deliver our
+          # binaries. So if we are using solaris, we have to pass the bin and
+          # sbin directories to the install.rb
+          install_opts = ''
+          install_opts = '--bindir=/usr/bin --sbindir=/usr/sbin' if
+            host['platform'].include? 'solaris'
+
+            on host,  "cd #{target} && " +
+                      "if [ -f install.rb ]; then " +
+                      "ruby ./install.rb #{install_opts}; " +
+                      "else true; fi"
         end
 
         #Install FOSS based upon host configuration and options
