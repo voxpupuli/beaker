@@ -164,6 +164,9 @@ module Beaker
       #       on( solaris, 'zonename' ) =~ /global/
       #     end
       #
+      # @example Confining to an already defined subset of hosts
+      #     confine :to, {}, agents
+      #
       # @return [Array<Host>] Returns an array of hosts that are still valid
       #   targets for this tests case.
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
@@ -174,7 +177,9 @@ module Beaker
         when :except
           hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
         when :to
-          hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+          if criteria and ( not criteria.empty? )
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+          end
         else
           raise "Unknown option #{type}"
         end
@@ -193,6 +198,7 @@ module Beaker
       # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
         begin
+          host_array ||= hosts
           original_hosts = self.hosts.dup
           confine(type, criteria, host_array)
 
