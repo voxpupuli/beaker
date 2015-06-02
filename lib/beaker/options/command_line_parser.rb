@@ -223,6 +223,13 @@ module Beaker
             @cmd_options[:type] = type
           end
 
+          opts.on '--tag TAGS', 'Run the set of tests matching ALL of the provided single or comma separated list of tags' do |value|
+            @cmd_options[:tag_includes] = value
+          end
+
+          opts.on '--exclude-tag TAGS', 'Run the set of tests that do not contain ANY of the provided single or command separated list of tags' do |value|
+            @cmd_options[:tag_excludes] = value
+          end
         end
 
       end

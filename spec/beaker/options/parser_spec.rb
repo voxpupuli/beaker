@@ -277,6 +277,65 @@ module Beaker
         end
 
       end
+
+      describe '#normalize_and_validate_tags' do
+        let ( :tag_includes ) { @tag_includes || [] }
+        let ( :tag_excludes ) { @tag_excludes || [] }
+        let ( :options )      {
+          opts = Beaker::Options::OptionsHash.new
+          opts[:tag_includes] = tag_includes
+          opts[:tag_excludes] = tag_excludes
+          opts
+        }
+
+        it 'does not error if no tags overlap' do
+          @tag_includes = 'can,tommies,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants'
+          parser.instance_variable_set(:@options, options)
+
+          expect( parser ).to_not receive( :parser_error )
+          parser.normalize_and_validate_tags()
+        end
+
+        it 'does error if tags overlap' do
+          @tag_includes = 'can,tommies,should_error,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants,should_error'
+          parser.instance_variable_set(:@options, options)
+
+          expect( parser ).to receive( :parser_error )
+          parser.normalize_and_validate_tags()
+        end
+
+        it 'splits the basic case correctly' do
+          @tag_includes = 'can,tommies,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants'
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === ['can', 'tommies', 'potatoes', 'plant']
+          expect( options[:tag_excludes] ).to be === ['joey', 'long_running', 'pants']
+        end
+
+        it 'returns empty arrays for empty strings' do
+          @tag_includes = ''
+          @tag_excludes = ''
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === []
+          expect( options[:tag_excludes] ).to be === []
+        end
+
+        it 'lowercases all tags correctly for later use' do
+          @tag_includes = 'jeRRy_And_tOM,PARka'
+          @tag_excludes = 'lEet_spEAK,pOland'
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === ['jerry_and_tom', 'parka']
+          expect( options[:tag_excludes] ).to be === ['leet_speak', 'poland']
+        end
+      end
     end
   end
 end
