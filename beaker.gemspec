@@ -38,6 +38,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'net-scp', '~> 1.2'
   s.add_runtime_dependency 'inifile', '~> 2.0'
   s.add_runtime_dependency 'rsync', '~> 1.0.9'
+  s.add_runtime_dependency 'winrm', '~> 1.3.0'
+  s.add_runtime_dependency 'winrm-fs', '~> 0.1.0'
 
   # Optional provisioner specific support
   s.add_runtime_dependency 'rbvmomi', '~> 1.8'
