@@ -144,12 +144,6 @@ module Beaker
     def scp_to source, target, options = {}, dry_run = false
       return if dry_run
 
-      local_opts = options.dup
-      if local_opts[:recursive].nil?
-        local_opts[:recursive] = File.directory?(source)
-      end
-      local_opts[:chunk_size] ||= 16384
-
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
       file_manager = WinRM::FS::FileManager.new(@winrm)
@@ -169,12 +163,6 @@ module Beaker
 
     def scp_from source, target, options = {}, dry_run = false
       return if dry_run
-
-      local_opts = options.dup
-      if local_opts[:recursive].nil?
-        local_opts[:recursive] = true
-      end
-      local_opts[:chunk_size] ||= 16384
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
