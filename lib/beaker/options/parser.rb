@@ -332,6 +332,8 @@ module Beaker
           end
         end
 
+        normalize_and_validate_tags()
+
         #set the default role
         set_default_host!(@options[:HOSTS])
 
@@ -343,6 +345,29 @@ module Beaker
           end
         end
 
+      end
+
+      # Takes tag arguments given at this point, which are strings, converts
+      # them into the proper format (an array of strings) for Beaker use,
+      # and lastly, validates them.
+      #
+      # @return nil
+      # @api public
+      def normalize_and_validate_tags()
+        @options[:tag_includes] ||= ''
+        @options[:tag_excludes] ||= ''
+        @options[:tag_includes] = @options[:tag_includes].split(',') if @options[:tag_includes].respond_to?(:split)
+        @options[:tag_excludes] = @options[:tag_excludes].split(',') if @options[:tag_excludes].respond_to?(:split)
+        @options[:tag_includes].map!(&:downcase)
+        @options[:tag_excludes].map!(&:downcase)
+
+        #check that a tag is not both included & excluded sets
+        @options[:tag_includes].each do |included_tag|
+          @options[:tag_excludes].each do |excluded_tag|
+            parser_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets" \
+              if included_tag == excluded_tag
+          end
+        end
       end
 
       private
