@@ -1,6 +1,6 @@
 install = [
-  'facter#stable',
-  'hiera#stable',
+  'facter#2.1.0',
+  'hiera#1.3.4',
   'puppet#3.7.5'
 ]
 
