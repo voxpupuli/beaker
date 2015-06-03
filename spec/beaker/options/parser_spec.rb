@@ -211,16 +211,22 @@ module Beaker
 
       describe "normalize_args" do
         let(:hosts) do
-          {
+          Beaker::Options::OptionsHash.new.merge({
             'HOSTS' => {
               :master => {
                 :roles => ["master","agent","arbitrary_role"],
+                :platform => 'el-7-x86_64',
+                :user => 'root',
               },
               :agent => {
                 :roles => ["agent","default","other_abitrary_role"],
+                :platform => 'el-7-x86_64',
+                :user => 'root',
               },
-            }
-          }
+            },
+            'fail_mode' => 'slow',
+            'preserve_hosts' => 'always',
+          })
         end
 
         def fake_hosts_file_for_platform(hosts, platform)
@@ -245,6 +251,29 @@ module Beaker
         context "restricts agents" do
           it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch')
           it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch')
+        end
+
+        context "ssh user" do
+
+          it 'uses the ssh[:user] if it is provided' do
+            hosts['HOSTS'][:master][:ssh] = { :user => 'hello' }
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'hello'
+          end
+
+          it 'uses default user if there is an ssh hash, but no ssh[:user]' do
+            hosts['HOSTS'][:master][:ssh] = { :hello => 'hello' }
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'root'
+          end
+
+          it 'uses default user if no ssh hash' do
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'root'
+          end
         end
 
       end
