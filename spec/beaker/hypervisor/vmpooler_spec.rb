@@ -103,6 +103,11 @@ module Beaker
       end
 
       it 'continues without credentials when fog file is empty' do
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_return(false)
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == {}
       end
     end
   end
