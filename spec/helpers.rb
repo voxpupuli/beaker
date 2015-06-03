@@ -100,4 +100,8 @@ module HostHelpers
     hosts
   end
 
+  def make_instance instance_data = {}
+    OpenStruct.new instance_data
+  end
+
 end

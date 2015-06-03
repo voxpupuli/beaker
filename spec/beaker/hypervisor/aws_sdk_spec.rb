@@ -92,5 +92,70 @@ module Beaker
         expect { aws.group_id([]) }.to raise_error(ArgumentError, "Ports list cannot be nil or empty")
       end
     end
+
+    describe '#populate_dns' do
+      let( :vpc_instance ) { {ip_address: nil, private_ip_address: "vpc_private_ip", dns_name: "vpc_dns_name"} }
+      let( :ec2_instance ) { {ip_address: "ec2_public_ip", private_ip_address: "ec2_private_ip", dns_name: "ec2_dns_name"} }
+
+      context 'on a public EC2 instance' do
+        before :each do
+          @hosts.each {|host| host['instance'] = make_instance ec2_instance}
+        end
+
+        it 'sets host ip to instance.ip_address' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['ip']).to eql(ec2_instance[:ip_address])
+          end
+        end
+
+        it 'sets host private_ip to instance.private_ip_address' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['private_ip']).to eql(ec2_instance[:private_ip_address])
+          end
+        end
+
+        it 'sets host dns_name to instance.dns_name' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['dns_name']).to eql(ec2_instance[:dns_name])
+          end
+        end
+      end
+
+      context 'on a VPC based instance' do
+        before :each do
+          @hosts.each {|host| host['instance'] = make_instance vpc_instance}
+        end
+
+        it 'sets host ip to instance.private_ip_address' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['ip']).to eql(vpc_instance[:private_ip_address])
+          end
+        end
+
+        it 'sets host private_ip to instance.private_ip_address' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['private_ip']).to eql(vpc_instance[:private_ip_address])
+          end
+        end
+
+        it 'sets host dns_name to instance.dns_name' do
+          aws.populate_dns();
+          hosts =  aws.instance_variable_get( :@hosts )
+          hosts.each do |host|
+            expect(host['dns_name']).to eql(vpc_instance[:dns_name])
+          end
+        end
+      end
+    end
   end
 end
