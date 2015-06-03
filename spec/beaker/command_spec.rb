@@ -23,6 +23,24 @@ module Beaker
 
     end
 
+    describe '#:prepend_cmds' do
+      it 'can prepend commands' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar', :prepend_cmds => 'aloha!' }
+
+        expect( cmd.cmd_line({}) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz"
+      end
+
+      it 'can handle no prepend_cmds' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar', :prepend_cmds => nil }
+
+        expect( cmd.cmd_line({}) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
+      end
+    end
+
     describe '#options_string' do
       it 'parses things' do
         subject.options = { :v => nil, :test => nil,

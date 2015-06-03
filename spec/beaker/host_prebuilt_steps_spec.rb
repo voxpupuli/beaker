@@ -430,7 +430,7 @@ describe Beaker do
     it "can exec the get_ip command" do
       host = make_host('name', { :stdout => "192.168.2.130\n" } )
 
-      expect( Beaker::Command ).to receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1", [], {:prepend_cmds=>nil, :cmdexe=>false} ).once
 
       expect( subject.get_ip( host ) ).to be === "192.168.2.130"
 
