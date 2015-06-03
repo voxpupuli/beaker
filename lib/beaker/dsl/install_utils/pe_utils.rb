@@ -291,10 +291,40 @@ module Beaker
         def deploy_frictionless_to_master(host)
           klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
           klass = "pe_repo::platform::#{klass}"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
-          on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          if version_is_less(host['pe_ver'], '3.8')
+            # use the old rake tasks
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
+            on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          else
+            # the new hotness
+            begin
+              require 'scooter'
+            rescue LoadError => e
+              @logger.notify('WARNING: gem scooter is required for frictionless installation post 3.8')
+              raise e
+            end
+            dispatcher = Scooter::HttpDispatchers::ConsoleDispatcher.new(dashboard)
+
+            # Check if we've already created a frictionless agent node group
+            # to avoid errors creating the same node group when the beaker hosts file contains
+            # multiple hosts with the same platform
+            node_group = dispatcher.get_node_group_by_name('Beaker Frictionless Agent')
+            if node_group.nil? || node_group.empty?
+              node_group = {}
+              node_group['name'] = "Beaker Frictionless Agent"
+              # Pin the master to the node
+              node_group['rule'] = [ "and",  [ '=', 'name', master.to_s ]]
+              node_group['classes'] ||= {}
+            end
+
+            # add the pe_repo platform class
+            node_group['classes'][klass] = {}
+
+            dispatcher.create_new_node_group_model(node_group)
+            on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          end
         end
 
         #Perform a Puppet Enterprise upgrade or install
@@ -391,7 +421,9 @@ module Beaker
               if host['roles'].include?('frictionless') &&  (! version_is_less(version, '3.2.0'))
                 # If We're *not* running the classic installer, we want
                 # to make sure the master has packages for us.
-                deploy_frictionless_to_master(host)
+                if host['platform'] != master['platform'] # only need to do this if platform differs
+                  deploy_frictionless_to_master(host)
+                end
                 on host, installer_cmd(host, opts)
                 configure_pe_defaults_on(host)
               elsif host['platform'] =~ /osx|eos/
