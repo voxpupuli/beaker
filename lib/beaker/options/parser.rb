@@ -246,6 +246,7 @@ module Beaker
       #  - that one and only one master is defined per set of hosts
       #  - that solaris/windows/aix hosts are agent only for PE tests OR
       #  - sets the default host based upon machine definitions
+      #  - if an ssh user has been defined make it the host user
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
@@ -333,6 +334,14 @@ module Beaker
 
         #set the default role
         set_default_host!(@options[:HOSTS])
+
+        #check to see if a custom user account has been provided, if so use it
+        @options[:HOSTS].each_key do |name|
+          host = @options[:HOSTS][name]
+          if host[:ssh] && host[:ssh][:user]
+            host[:user] = host[:ssh][:user]
+          end
+        end
 
       end
 
