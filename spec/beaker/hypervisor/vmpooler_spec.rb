@@ -109,6 +109,36 @@ module Beaker
         vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
         expect( vmpooler.credentials ).to be == {}
       end
+
+      it 'continues without credentials when fog file contains no :default section' do
+        data = { :some => { :other => :data } }
+
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_return(data)
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == { }
+      end
+
+      it 'continues without credentials when fog file :default section has no :vmpooler_token' do
+        data = { :default => { :something_else => "TOKEN" } }
+
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_return(data)
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == { }
+      end
+
+      it 'stores vmpooler token when found in fog file' do
+        data = { :default => { :vmpooler_token => "TOKEN" } }
+
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_return(data)
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == { :vmpooler_token => "TOKEN" }
+      end
     end
   end
 end

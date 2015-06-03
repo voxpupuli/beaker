@@ -28,7 +28,11 @@ module Beaker
       creds = {}
 
       if fog = read_fog_file(dot_fog)
-        creds[:vmpooler_token] = fog[:default][:vmpooler_token]
+        if fog[:default] && fog[:default][:vmpooler_token]
+          creds[:vmpooler_token] = fog[:default][:vmpooler_token]
+        else
+          @logger.warn "Credentials file (#{dot_fog}) is missing a :default section with a :vmpooler_token value; proceeding without authentication"
+        end
       else
         @logger.warn "Credentials file (#{dot_fog}) is empty; proceeding without authentication"
       end
