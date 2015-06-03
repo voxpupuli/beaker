@@ -75,10 +75,35 @@ module Beaker
           expect( vm.runtime.powerState ).to be === "poweredOn" #handed back to the pool, stays on
         end
       end
-
-
     end
-
   end
 
+  describe Vmpooler do
+
+    before :each do
+      vms = make_hosts()
+      MockVsphereHelper.set_config( fog_file_contents )
+      MockVsphereHelper.set_vms( vms )
+      stub_const( "VsphereHelper", MockVsphereHelper )
+      stub_const( "Net", MockNet )
+      allow( JSON ).to receive( :parse ) do |arg|
+        arg
+      end
+      allow( Socket ).to receive( :getaddrinfo ).and_return( true )
+    end
+
+    describe "#load_credentials" do
+
+      it 'continues without credentials when fog file is missing' do
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_raise(Errno::ENOENT.new)
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == {}
+      end
+
+      it 'continues without credentials when fog file is empty' do
+      end
+    end
+  end
 end

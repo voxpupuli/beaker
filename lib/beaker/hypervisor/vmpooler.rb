@@ -15,6 +15,8 @@ module Beaker
       Errno::ENETUNREACH,
     ]
 
+    attr_reader :options, :logger, :hosts, :credentials
+
     def initialize(vmpooler_hosts, options)
       @options = options
       @logger = options[:logger]
@@ -26,7 +28,7 @@ module Beaker
       creds = {}
 
       begin
-        fog = YAML.load_file(dot_fog)
+        fog = read_fog_file(dot_fog)
         default = fog[:default]
 
         creds[:vmpooler_token] = default[:vmpooler_token]
@@ -35,6 +37,10 @@ module Beaker
       end
 
       creds
+    end
+
+    def read_fog_file(dot_fog = '.fog')
+      YAML.load_file(dot_fog)
     end
 
     def check_url url
