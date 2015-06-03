@@ -50,13 +50,14 @@ module Beaker
       end
       @hypervisors = {}
       #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
+      hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select{ |k,v| k.to_s !~ /HOSTS/})
       @options['HOSTS'].each_key do |name|
-        host = @options['HOSTS'][name]
-        hypervisor = host['hypervisor']
-        hypervisor = provision?(@options, host) ? host['hypervisor'] : 'none'
+        host_hash = @options['HOSTS'][name]
+        hypervisor = host_hash['hypervisor']
+        hypervisor = provision?(@options, host_hash) ? host_hash['hypervisor'] : 'none'
         @logger.debug "Hypervisor for #{name} is #{hypervisor}"
         @machines[hypervisor] = [] unless @machines[hypervisor]
-        @machines[hypervisor] << Beaker::Host.create(name, @options)
+        @machines[hypervisor] << Beaker::Host.create(name, host_hash, hostless_options)
       end
 
       @machines.each_key do |type|

@@ -169,9 +169,9 @@ module Beaker
       #
       # Order of priority is as follows:
       #   1.  environment variables are given top priority
-      #   2.  host file options
-      #   3.  the 'CONFIG' section of the hosts file
-      #   4.  ARGV or provided arguments array
+      #   2.  ARGV or provided arguments array
+      #   3.  host file options
+      #   4.  the 'CONFIG' section of the hosts file
       #   5.  options file values
       #   6.  default or preset values are given the lowest priority
       #
@@ -184,6 +184,7 @@ module Beaker
 
         @options = @presets.presets
         cmd_line_options = @command_line_parser.parse(args)
+        cmd_line_options[:command_line] = ([$0] + args).join(' ')
         file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
 
         # merge together command line and file_options
@@ -193,15 +194,18 @@ module Beaker
         # merge command line and file options with defaults
         #   overwrite defaults with command line and file options
         @options = @options.merge(cmd_line_and_file_options)
-        @options[:command_line] = ([$0] + args).join(' ')
 
         if not @options[:help] and not @options[:version]
           #read the hosts file that contains the node configuration and hypervisor info
           hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
 
           # merge in host file vars
-          #   overwrite options (default, file options, command line, env) with host file options
+          #   overwrite options (default, file options, command line) with host file options
           @options = @options.merge(hosts_options)
+
+          # re-merge the command line options
+          #   overwrite options (default, file options, hosts file ) with command line arguments
+          @options = @options.merge(cmd_line_options)
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
@@ -236,13 +240,11 @@ module Beaker
       #  - each host has a valid platform
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
-      #  - --type is one of 'pe' or 'git'
       #  - --fail-mode is one of 'fast', 'stop' or nil
       #  - if using blimpy hypervisor an EC2 YAML file exists
       #  - if using the aix, solaris, or vcloud hypervisors a .fog file exists
       #  - that one and only one master is defined per set of hosts
       #  - that solaris/windows/aix hosts are agent only for PE tests OR
-      #  - that windows/aix host are agent only if type is not 'pe'
       #  - sets the default host based upon machine definitions
       #
       #@raise [ArgumentError] Raise if argument/options values are invalid
@@ -266,7 +268,7 @@ module Beaker
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
             @options[opt] = split_arg(@options[opt])
-            if RB_FILE_OPTS.include?(opt)
+            if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
               @options[opt] = file_list(@options[opt])
             end
             if opt == :install
@@ -275,11 +277,6 @@ module Beaker
           else
             @options[opt] = []
           end
-        end
-
-        #check for valid type
-        if @options[:type] !~ /pe|git|foss|aio/
-          parser_error "--type must be one of pe, git, foss, or aio not '#{@options[:type]}'"
         end
 
         #check for valid fail mode
@@ -326,12 +323,10 @@ module Beaker
           parser_error "Only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
         end
 
-        #check that solaris/windows/el-4 boxes are only agents
+        #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          if (host[:platform] =~ /windows|el-4/) ||
-             (@options.is_pe? && host[:platform] =~ /solaris/)
-
+          if host[:platform] =~ /windows|el-4/
             test_host_roles(name, host)
           end
         end

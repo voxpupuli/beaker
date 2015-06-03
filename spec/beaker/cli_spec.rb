@@ -203,8 +203,8 @@ module Beaker
           options[:hosts_file] = 'sample.cfg'
 
           hosts = [
-            { :hypervisor => 'peterPan' },
-            { :hypervisor => 'theMadHatter' },
+            make_host('petey', { :hypervisor => 'peterPan' }),
+            make_host('hatty', { :hypervisor => 'theMadHatter' }),
           ]
           cli.instance_variable_set(:@hosts, hosts)
 
@@ -303,7 +303,7 @@ module Beaker
               copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
-              hosts << { :hypervisor => 'fusion' }
+              hosts << make_host('fusion', { :hypervisor => 'fusion' })
 
               reproducing_cmd = "the faith of the people"
               allow( cli ).to receive( :build_hosts_preserved_reproducing_command ).and_return( reproducing_cmd )
@@ -323,8 +323,8 @@ module Beaker
               copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
-              hosts << { :hypervisor => 'fusion' }
-              hosts << { :hypervisor => 'docker' }
+              hosts << make_host('fusion', { :hypervisor => 'fusion' })
+              hosts << make_host('docker', { :hypervisor => 'docker' })
 
               reproducing_cmd = "the crow flies true says the shoe to you"
               allow( cli ).to receive( :build_hosts_preserved_reproducing_command ).and_return( reproducing_cmd )
@@ -345,7 +345,7 @@ module Beaker
               copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
-              hosts << { :hypervisor => 'docker' }
+              hosts << make_host('docker', { :hypervisor => 'docker' })
 
               logger = cli.instance_variable_get(:@logger)
               expect( logger ).to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) with:\n").never

@@ -167,10 +167,6 @@ module Beaker
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end
 
-        it "ensures that type is one of pe/git" do
-          args = ["-h", hosts_path, "--log-level", "debug", "--type", "unkowns"]
-          expect{parser.parse_args(args)}.to raise_error(ArgumentError)
-        end
       end
 
       context "set_default_host!" do
@@ -237,34 +233,20 @@ module Beaker
         end
 
         shared_examples_for(:a_platform_supporting_only_agents) do |platform,type|
-          let(:args) { ["--type", type] }
 
-          it "restricts #{platform} hosts to agent for #{type}" do
+          it "restricts #{platform} hosts to agent" do
+            args = []
             hosts_file = fake_hosts_file_for_platform(hosts, platform)
             args << "--hosts" << hosts_file
             expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*may not have roles 'master', 'dashboard', or 'database'/)
           end
         end
 
-        context "for pe" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'solaris-version-arch', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'pe')
+        context "restricts agents" do
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch')
         end
 
-        context "for foss" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'git')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'git')
-
-          it "allows master role for solaris" do
-            hosts_file = fake_hosts_file_for_platform(hosts, 'solaris-version-arch')
-            args = ["--type", "git", "--hosts", hosts_file]
-            options_hash = parser.parse_args(args)
-            expect(options_hash[:HOSTS][:master][:platform]).to match(/solaris/)
-            expect(options_hash[:HOSTS][:master][:roles]).to include('master')
-            expect(options_hash[:type]).to eq('git')
-          end
-        end
       end
     end
   end

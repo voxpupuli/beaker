@@ -133,6 +133,8 @@ describe ClassMixedWithDSLInstallUtils do
       logger = double.as_null_object
 
       allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).exactly( 4 ).times
 
@@ -151,6 +153,7 @@ describe ClassMixedWithDSLInstallUtils do
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
       allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
@@ -172,6 +175,7 @@ describe ClassMixedWithDSLInstallUtils do
       path   = '/path/to/repos'
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       logger = double.as_null_object
       allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
@@ -351,6 +355,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     before do
       allow(subject).to receive(:options) { opts }
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
     end
 
     describe "When host is unsupported platform" do
@@ -396,6 +401,7 @@ describe ClassMixedWithDSLInstallUtils do
     let( :logger_double ) do
       logger_double = Object.new
       allow(logger_double).to receive(:debug)
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       subject.instance_variable_set(:@logger, logger_double)
       logger_double
     end
@@ -517,6 +523,10 @@ describe ClassMixedWithDSLInstallUtils do
     let( :platform ) { @platform || 'other' }
     let( :host ) do
       FakeHost.create('fakvm', platform, opts)
+    end
+
+    before :each do
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
     end
 
     it 'sets the find command correctly for el-based systems' do

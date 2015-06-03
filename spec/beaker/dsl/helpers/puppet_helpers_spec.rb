@@ -540,6 +540,7 @@ describe ClassMixedWithDSLHelpers do
 
       describe 'and command line args passed' do
         it 'modifies SUT trapperkeeper configuration w/ command line args' do
+          host['puppetserver-confdir'] = '/etc/puppetserver/conf.d'
           expect( subject ).to receive( :modify_tk_config).with(host, puppetserver_conf,
                                                           custom_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)
@@ -549,6 +550,7 @@ describe ClassMixedWithDSLHelpers do
       describe 'and no command line args passed' do
         let(:command_line_args) { nil }
         it 'modifies SUT trapperkeeper configuration w/ puppet defaults' do
+          host['puppetserver-confdir'] = '/etc/puppetserver/conf.d'
           expect( subject ).to receive( :modify_tk_config).with(host, puppetserver_conf,
                                                           default_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)

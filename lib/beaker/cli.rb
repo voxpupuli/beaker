@@ -161,20 +161,27 @@ module Beaker
     #
     # @return nil
     def preserve_hosts_file
+      # things that don't belong in the preserved host file
+      dontpreserve = /HOSTS|logger|timestamp|log_prefix|_dated_dir|logger_sut|pre_suite|post_suite|tests/
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
       FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
       hosts_yaml = YAML.load_file(preserved_hosts_filename)
       newly_keyed_hosts_entries = {}
-      hosts_yaml['HOSTS'].each do |host_name, host_hash|
+      hosts_yaml['HOSTS'].each do |host_name, file_host_hash|
+        h = Beaker::Options::OptionsHash.new
+        file_host_hash = h.merge(file_host_hash)
         @hosts.each do |host|
-          if host_name == host.instance_variable_get(:@name)
-            newly_keyed_hosts_entries[host.to_s] = host_hash
+          if host_name == host.name
+            newly_keyed_hosts_entries[host.reachable_name] = file_host_hash.merge(host.host_hash)
             break
           end
         end
       end
       hosts_yaml['HOSTS'] = newly_keyed_hosts_entries
-      hosts_yaml['CONFIG'] ||= {}
+      hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
+      # save the rest of the options, excepting the HOSTS that we have already processed
+      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
+      # remove copy of HOSTS information
       hosts_yaml['CONFIG']['provision'] = false
       File.open(preserved_hosts_filename, 'w') do |file|
         YAML.dump(hosts_yaml, file)
