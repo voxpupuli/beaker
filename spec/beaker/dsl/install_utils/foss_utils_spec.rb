@@ -196,65 +196,68 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     before do
+      allow( subject ).to receive(:options).and_return(opts)
       allow( subject ).to receive(:hosts).and_return(hosts)
       allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
     end
     context 'on el-6' do
-      let(:platform) { "el-6-i386" }
+      let(:platform) { Beaker::Platform.new('el-6-i386') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-6\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet-3000')
+        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
         subject.install_puppet( :version => '3000' )
       end
       it 'can install specific versions of puppets dependencies' do
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet-3000')
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y hiera-2001')
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y facter-1999')
+        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
+        expect(hosts[0]).to receive(:install_package).with('hiera-2001')
+        expect(hosts[0]).to receive(:install_package).with('facter-1999')
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on el-5' do
-      let(:platform) { "el-5-i386" }
+      let(:platform) { Beaker::Platform.new('el-5-i386') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-5\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
     end
     context 'on fedora' do
-      let(:platform) { "fedora-18-x86_84" }
+      let(:platform) { Beaker::Platform.new('fedora-18-x86_84') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-fedora-18\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
     end
     context 'on debian' do
-      let(:platform) { "debian-7-amd64" }
+      let(:platform) { Beaker::Platform.new('debian-7-amd64') }
       it 'installs latest if given no version info' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
-        expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get update')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
+        hosts.each do |host|
+          expect(subject).to receive(:install_puppetlabs_release_repo).with(host)
+        end
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
         subject.install_puppet( :version => '3000' )
       end
       it 'can install specific versions of puppets dependencies' do
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet=3000-1puppetlabs1')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y hiera=2001-1puppetlabs1')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y facter=1999-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('facter=1999-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('hiera=2001-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on windows' do
-      let(:platform) { "windows-2008r2-i386" }
+      let(:platform) { Beaker::Platform.new('windows-2008r2-i386') }
       it 'installs specific version of puppet when passed :version' do
         allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
@@ -272,7 +275,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
     describe 'on unsupported platforms' do
-      let(:platform) { 'solaris-11-x86_64' }
+      let(:platform) { Beaker::Platform.new('solaris-11-x86_64') }
       let(:host) { make_host('henry', :platform => 'solaris-11-x86_64') }
       let(:hosts) { [host] }
       it 'by default raises an error' do

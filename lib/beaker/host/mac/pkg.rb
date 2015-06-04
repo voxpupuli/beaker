@@ -6,7 +6,8 @@ module Mac::Pkg
   end
 
   def install_package(name, cmdline_args = '', version = nil)
-    raise "Package #{name} cannot be installed on #{self}"
+    execute("hdiutil attach #{name}.dmg")
+    execute("installer -pkg /Volumes/#{name}/#{name}.pkg -target /")
   end
 
   def uninstall_package(name, cmdline_args = '')
