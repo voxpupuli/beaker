@@ -427,10 +427,10 @@ module Beaker
       end
 
       if opts.has_key?(:ignore) and not opts[:ignore].empty?
-        opts[:ignore].map! do |value|
+        ignoreargs = opts[:ignore].map do |value|
           "--exclude '#{value}'"
         end
-        rsync_args << opts[:ignore].join(' ')
+        rsync_args << ignoreargs.join(' ')
       end
 
       # We assume that the *contents* of the directory 'from_path' needs to be

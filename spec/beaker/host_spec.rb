@@ -579,6 +579,7 @@ module Beaker
         host.do_rsync_to *args
 
         expect(Rsync.host).to eq('root@host.example.org')
+        expect(args[2][:ignore]).to eq(['.bundle'])
       end
 
       it 'throws an IOError when the file given doesn\'t exist' do
