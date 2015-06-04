@@ -149,7 +149,7 @@ module Beaker
           request.body = { 'tags' => tags }.to_json
 
           response = http.request(request)
-        rescue RuntimeError, Error::EINVAL, Errno::ECONNRESET, EOFError,
+        rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
                Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
           @logger.notify "Failed to connect to vmpooler for tagging!"
         end
