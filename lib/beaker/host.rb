@@ -349,6 +349,9 @@ module Beaker
 
         # copy each file to the host
         dir_source.each do |s|
+          # Copy files, not directories (as they are copied recursively)
+          next if File.directory?(s)
+
           s_path = Pathname.new(s)
           if s_path.absolute?
             file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/,''))
