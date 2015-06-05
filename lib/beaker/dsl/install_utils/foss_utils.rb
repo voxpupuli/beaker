@@ -395,7 +395,7 @@ module Beaker
         # @return nil
         # @api private
         def install_puppet_from_rpm_on( host, opts )
-          install_puppetlabs_release_repo(host)
+          install_puppetlabs_release_repo(host, nil, opts)
 
           if opts[:facter_version]
             host.install_package("facter-#{opts[:facter_version]}")
@@ -422,7 +422,7 @@ module Beaker
         # @return nil
         # @api private
         def install_puppet_from_deb_on( host, opts )
-          install_puppetlabs_release_repo(host)
+          install_puppetlabs_release_repo(host, nil, opts)
 
           if opts[:facter_version]
             host.install_package("facter=#{opts[:facter_version]}-1puppetlabs1")
