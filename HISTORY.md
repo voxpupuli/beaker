@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 29 May, 2015 (c801d4c8)](#LATEST)
+* [LATEST - 4 Jun, 2015 (656f30be)](#LATEST)
+* [2.13.0 - 29 May, 2015 (dd70aa66)](#2.13.0)
 * [2.12.0 - 20 May, 2015 (62845ce9)](#2.12.0)
 * [2.11.0 - 6 May, 2015 (b775cc73)](#2.11.0)
 * [2.10.0 - 22 Apr, 2015 (c4f37479)](#2.10.0)
@@ -81,7 +82,339 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 29 May, 2015 (c801d4c8)
+### <a name = "LATEST">LATEST - 4 Jun, 2015 (656f30be)
+
+* (GEM) update beaker version to 2.14.0 (656f30be)
+
+* Merge pull request #837 from justinstoller/maint/master/bkrsomethingsomething (0d0ceab9)
+
+
+```
+Merge pull request #837 from justinstoller/maint/master/bkrsomethingsomething
+
+[WIP] add install_puppet_agent_on method to install_utils
+```
+* Merge pull request #836 from rick/bkr-301/add-warning-when-empty-fog-file-is-encountered (0d102203)
+
+
+```
+Merge pull request #836 from rick/bkr-301/add-warning-when-empty-fog-file-is-encountered
+
+[BKR-301] add warning when empty fog file is encountered
+```
+* Merge pull request #838 from thallgren/master (4e8be4e2)
+
+
+```
+Merge pull request #838 from thallgren/master
+
+(maint) Fix typo Error -> Errno
+```
+* (maint) Fix typo Error -> Errno (670b1509)
+
+* (BKR-195) Simplified install of released puppet-agent (fcac8e03)
+
+
+```
+(BKR-195) Simplified install of released puppet-agent
+
+Previously installing the puppet-agent package required writing a
+pre-suite to manually install the correct dev repositories and
+installing a dev build of puppet-agent.
+
+This is problematic for downstream consumers that do not want to test
+puppet-agent or the code in it, but want to test that their code works
+with puppet-agent (eg module authors).
+
+This commit creates the DSL method `install_puppet_agent_on()`, an
+analog to the `install_puppet_on()` method that allows installing
+puppet-agent.
+
+It also allows the `install_puppet()` method to install puppet-agent if
+given a version of Puppet greater than 4.0.0 (by delegating to
+`install_puppet_agent_on()`).
+
+Errata:
+ * Follows the pattern of naming helpers `*_on` and
+   normalizes the helpers it touches to follow the same pattern.
+ * Updates the MSI and DMG methods to allow for latest builds
+   (prior to this they required explicit versions and so were rarely
+   used even by our internal teams).
+ * Also updates legacy puppet MSI and DMG install helpers to
+   delegate to newer install puppet-agent helpers using the same
+   criteria as used in `install_puppet_on()` (despite being marked as
+   api private they are used internally).
+ * Uses newer `install_puppetlabs_release_repo_on` and
+   `Host#install_package` and updates old helpers to do the same
+```
+* Merge pull request #833 from thallgren/issue/bkr-304/redundant-scp-copying (adb9c37a)
+
+
+```
+Merge pull request #833 from thallgren/issue/bkr-304/redundant-scp-copying
+
+(BKR-304) Prevent redundant copying when doing scp
+```
+* Merge pull request #796 from fiddyspence/bug/rsync_fails_with_docker (82286b54)
+
+
+```
+Merge pull request #796 from fiddyspence/bug/rsync_fails_with_docker
+
+(BKR-226) - rsync fails because of NATted ports
+```
+* (BKR-301) Add "happy path" tests for credential loading (22c39286)
+
+
+```
+(BKR-301) Add "happy path" tests for credential loading
+
+Since we've tested that `#load_credentials` behaves ok during hard times, let's
+actually test that it does what it's supposed to do.
+```
+* (BKR-301) Tests and code for empty fog file case (d33ac6d6)
+
+
+```
+(BKR-301) Tests and code for empty fog file case
+
+Numerous small refactorings in `#load_credentials` after getting the test green.
+```
+* (BKR-301) New test and testing seams (bf8a9a26)
+
+
+```
+(BKR-301) New test and testing seams
+
+This splits off tests for #load_credentials, as we have untested
+behavior there, and the point of this work is to fix a mis-feature
+in that area (not catching the hard-to-decipher exception when
+an empty fog file is presented).  The main tests all stub out the
+fog file loading, so here we introduce a different stub.
+
+This also modifies the `Vmpooler` class to split out a testing seam:
+the `#read_fog_file` method can be stubbed now independently of the
+`#load_credentials method`, so we can feed in post-YAML output to
+the `#load_credentials` under test.
+
+Since `#load_credentials` is called as part of the constructor (a mild
+anti-pattern, but lazy loading can be cumbersome), we need to validate
+its results via testing post-constructed object state.  Unfortunately,
+we can't get the resultant credentials state without piercing the
+instance-variable boundary of the `Vmpooler` object, so we added another
+seam: the `attr_reader` for `:credentials`.
+
+While we're there, we added the reader for the remainder of the
+options handed into the constructor, as it makes sense to at least
+be uniform in the library, even if it is under-tested.
+```
+* (MAINT) clean up whitespace in spec file (98631575)
+
+* Merge pull request #835 from waynr/bkr-307 (5c17aaec)
+
+
+```
+Merge pull request #835 from waynr/bkr-307
+
+(BKR-307) Add Beaker::Platform support for debian jessie (aka 8)
+```
+* Merge pull request #832 from anodelman/login-as-user (33f4d6b7)
+
+
+```
+Merge pull request #832 from anodelman/login-as-user
+
+(BKR-248) support connecting to SUTs with user/password
+```
+* (BKR-307) Add Beaker::Platform support for debian jessie (aka 8) (f87fc3fe)
+
+* Merge pull request #826 from anodelman/cisco (a7c0cce2)
+
+
+```
+Merge pull request #826 from anodelman/cisco
+
+(BKR-292) Cisco platform changes + prepend command functionality
+```
+* Merge pull request #831 from anodelman/remove-rake-task (ddf4a989)
+
+
+```
+Merge pull request #831 from anodelman/remove-rake-task
+
+(BKR-239) Remove dependency on puppet-dashboard rake tasks for...
+```
+* Merge pull request #821 from anodelman/shallow (a22c86f1)
+
+
+```
+Merge pull request #821 from anodelman/shallow
+
+(BKR-273) Allow Setting Type by Host
+```
+* (BKR-304) Prevent redundant copying when doing scp (7db1d724)
+
+
+```
+(BKR-304) Prevent redundant copying when doing scp
+
+Before this commit, the method Beaker::Host.do_scp_to would request
+copying of both directories and files from the underlying scp
+connection. This resulted in a lot of redundant copying since the
+scp connection, when handed a directory, would copy it recursively.
+
+This commit ensures that only the files are copied. This is safe
+because all remote directories are already created in a preceding
+step.
+```
+* (BKR-248) support connecting to SUTs with user/password (4da57c9f)
+
+
+```
+(BKR-248) support connecting to SUTs with user/password
+
+- check to see if a custom ssh user has been defined, if so then use
+  that instead of the default user per-OS type
+```
+* Merge pull request #830 from kevpl/puppet_git_branch_change (cc52b1e4)
+
+
+```
+Merge pull request #830 from kevpl/puppet_git_branch_change
+
+(MAINT) moving from stable to a release for facter & hiera
+```
+* Merge pull request #829 from kevpl/bkr231_answers_update (4975d36f)
+
+
+```
+Merge pull request #829 from kevpl/bkr231_answers_update
+
+(BKR-231) updated answers to use v4 answers for puppet 4
+```
+* (MAINT) moving from stable to a release for facter & hiera in puppet_git acceptance testing (89d6f425)
+
+* Merge pull request #823 from anodelman/subset-hosts (e62404db)
+
+
+```
+Merge pull request #823 from anodelman/subset-hosts
+
+(BKR-280) ability to install pe/foss on subset of hosts
+```
+* Merge pull request #813 from electrical/docker_swarm (b5818852)
+
+
+```
+Merge pull request #813 from electrical/docker_swarm
+
+(BKR-242) Docker swarm
+```
+* (BKR-231) updated answers to use v4 answers for puppet 4 (49eed580)
+
+* (BKR-239) Remove dependency on puppet-dashboard rake tasks for... (ce9aa43c)
+
+
+```
+(BKR-239) Remove dependency on puppet-dashboard rake tasks for...
+
+... shallow gravy.
+
+- wrap rake test call in version check, only run if pre 3.99
+- use scooter for new frictionless workflow
+```
+* (BKR-292) Cisco platform changes + prepend command functionality (685e43aa)
+
+
+```
+(BKR-292) Cisco platform changes + prepend command functionality
+
+- add cisco to supported platforms
+- add ability to send a prepend_cmd string to a command object
+```
+* Merge pull request #822 from justinstoller/maint/master/remove-step (b7915485)
+
+
+```
+Merge pull request #822 from justinstoller/maint/master/remove-step
+
+(maint) Remove step dsl usage from inside Beaker
+```
+* Merge pull request #825 from mcanevet/dev/user_data (98453297)
+
+
+```
+Merge pull request #825 from mcanevet/dev/user_data
+
+(BKR-300) Always manage_etc_hosts in cloud-init
+```
+* (BKR-300) Always manage_etc_hosts in cloud-init (b5a0885b)
+
+* (BKR-280) ability to install pe/foss on subset of hosts (83accb53)
+
+
+```
+(BKR-280) ability to install pe/foss on subset of hosts
+
+- created install_pe_on, upgrade_pe_on, install_puppet_on that accept a
+  first argument of a host array and then correctly install pe/puppet on
+  provided hosts
+```
+* (maint) Remove step dsl usage from inside Beaker (5d1cf55a)
+
+
+```
+(maint) Remove step dsl usage from inside Beaker
+
+Prior to this we would use the `step` DSL method in a couple of places
+inside Beaker.  This can be problematic when using Beaker as a library
+and requires loading more of Beaker than is necessary for executing
+certain helper methods.  This commit removes the internal usage of step
+and replaces it with calls to the the logger that will output the same
+style of notification that calling step does.
+```
+* (BKR-273) Allow Setting Type by Host (5c40b0d7)
+
+
+```
+(BKR-273) Allow Setting Type by Host
+
+- no longer use 'type' to control path/default host settings
+- set environment and defaults post pe/foss installation
+- dump more information post testing so that you can correctly pick up
+  the host again
+```
+* (BKR-242) Add Swarm support to docker run (7d447a46)
+
+
+```
+(BKR-242) Add Swarm support to docker run
+
+To distribute the same built image between all swarm slaves we need to
+push the image to a private registry.
+If the image does not exist yet ( first build ) we tag + push it.
+If it does exist we will re-use it.
+If we built the image on Node A but then the run command is executed on
+node B we will pull the image automatically and run it.
+
+The only downside is that we will always build the image since we need
+to know the resulting image ID.
+Hopefully this can be improved in the future.
+```
+* (BKR-242) Add logic to support swarm (917a2306)
+
+
+```
+(BKR-242) Add logic to support swarm
+
+When we want the IP address of the container with running swarm we have
+to fetch the IP of the swarm slave it self.
+```
+* (BKR-226) - rsync fails because of NATted ports fix (89c4d6ab)
+
+### <a name = "2.13.0">2.13.0 - 29 May, 2015 (dd70aa66)
+
+* (HISTORY) update beaker history for gem release 2.13.0 (dd70aa66)
 
 * (GEM) update beaker version to 2.13.0 (c801d4c8)
 
