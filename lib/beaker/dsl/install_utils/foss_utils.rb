@@ -19,6 +19,11 @@ module Beaker
         include FOSSDefaults
         include PuppetUtils
 
+        DEFAULT_DOWNLOAD_URLS = {
+          :win_download_url => "http://downloads.puppetlabs.com/windows",
+          :mac_download_url => "http://downloads.puppetlabs.com/mac"
+        }
+
         # The default install path
         SourcePath  = "/opt/puppet-git-repos"
 
@@ -180,8 +185,21 @@ module Beaker
         #    :facter_version   => '2.0.1',
         #    :hiera_version    => '1.3.3',
         #    :default_action   => 'gem_install',
-        #
         #   })
+        #
+        # @example will install puppet 4 from native puppetlabs provided puppet-agent 1.x package wherever possible and will fail over to gem installation when impossible
+        #   install_puppet({
+        #     :version              => '4',
+        #     :default_action       => 'gem_install'
+        #   })
+        #
+        # @example will install puppet 4.1.0 from native puppetlabs provided puppet-agent 1.1.0 package wherever possible and will fail over to gem installation when impossible
+        #   install_puppet({
+        #     :version              => '4.1.0',
+        #     :puppet_agent_version => '1.1.0',
+        #     :default_action       => 'gem_install'
+        #   })
+        #
         #
         #
         # @example Will install latest packages on Enterprise Linux and Debian based distros and fail hard on all othere platforms.
@@ -189,7 +207,7 @@ module Beaker
         #
         # @note This will attempt to add a repository for apt.puppetlabs.com on
         #       Debian, Ubuntu, or Cumulus machines, or yum.puppetlabs.com on EL or Fedora
-        #       machines, then install the package 'puppet'.
+        #       machines, then install the package 'puppet' or 'puppet-agent'.
         #
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
@@ -202,36 +220,107 @@ module Beaker
         # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
         # @raise [FailTest] When error occurs during the actual installation process
         def install_puppet_on(hosts, opts={})
-          default_download_url = 'http://downloads.puppetlabs.com'
-          opts = {:win_download_url => "#{default_download_url}/windows",
-                  :mac_download_url => "#{default_download_url}/mac"}.merge(opts)
+          opts = DEFAULT_DOWNLOAD_URLS.merge(opts)
+
+          # If version isn't specified assume the latest in the 3.x series
+          if opts[:version] and not version_is_less(opts[:version], '4.0.0')
+            opts[:version] = opts[:puppet_agent_version]
+            install_puppet_agent_on(hosts, opts)
+
+          else
+            block_on hosts do |host|
+              if host['platform'] =~ /el-(5|6|7)/
+                relver = $1
+                install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'el'))
+              elsif host['platform'] =~ /fedora-(\d+)/
+                relver = $1
+                install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'fedora'))
+              elsif host['platform'] =~ /(ubuntu|debian|cumulus)/
+                install_puppet_from_deb_on(host, opts)
+              elsif host['platform'] =~ /windows/
+                relver = opts[:version]
+                install_puppet_from_msi_on(host, opts)
+              elsif host['platform'] =~ /osx/
+                install_puppet_from_dmg_on(host, opts)
+              else
+                if opts[:default_action] == 'gem_install'
+                  opts[:version] ||= '~> 3.x'
+                  install_puppet_from_gem_on(host, opts)
+                else
+                  raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+                end
+              end
+
+              # Certain install paths may not create the config dirs/files needed
+              on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
+              on host, "echo '' >> #{host.puppet['hiera_config']}"
+            end
+          end
+
+          nil
+        end
+
+        #Install Puppet Agent based on specified hosts using provided options
+        # @example will install puppet-agent 1.1.0 from native puppetlabs provided packages wherever possible and will fail over to gem installing latest puppet
+        #  install_puppet_agent_on(hosts, {
+        #    :version          => '1.1.0',
+        #    :default_action   => 'gem_install',
+        #   })
+        #
+        #
+        # @example Will install latest packages on Enterprise Linux, Debian based distros, Windows, OSX and fail hard on all othere platforms.
+        #  install_puppet_agent_on(hosts)
+        #
+        # @note This will attempt to add a repository for apt.puppetlabs.com on
+        #       Debian, Ubuntu, or Cumulus machines, or yum.puppetlabs.com on EL or Fedora
+        #       machines, then install the package 'puppet-agent'.
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Hash{Symbol=>String}] opts
+        # @option opts [String] :version Version of puppet to download
+        # @option opts [String] :puppet_gem_version Version of puppet to install via gem if no puppet-agent package is available
+        # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-agent-%version%.msi
+        # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/puppet-agent-%version%.msi
+        #
+        # @return nil
+        # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
+        # @raise [FailTest] When error occurs during the actual installation process
+        def install_puppet_agent_on(hosts, opts)
+          opts = DEFAULT_DOWNLOAD_URLS.merge(opts)
+          opts[:repo] ||= 'pc1'
+
           block_on hosts do |host|
-            if host['platform'] =~ /el-(5|6|7)/
-              relver = $1
-              install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'el')
-            elsif host['platform'] =~ /fedora-(\d+)/
-              relver = $1
-              install_puppet_from_rpm host, opts.merge(:release => relver, :family => 'fedora')
-            elsif host['platform'] =~ /(ubuntu|debian|cumulus)/
-              install_puppet_from_deb host, opts
-            elsif host['platform'] =~ /windows/
-              relver = opts[:version]
-              install_puppet_from_msi host, opts
-            elsif host['platform'] =~ /osx/
-              install_puppet_from_dmg host, opts
+            case host['platform']
+            when /el-|fedora/
+              install_puppetlabs_release_repo(host, opts[:repo])
+              if opts[:version]
+                host.install_package("puppet-agent-#{opts[:version]}")
+              else
+                host.install_package('puppet-agent')
+              end
+            when /debian|ubuntu|cumulus/
+              install_puppetlabs_release_repo(host, opts[:repo])
+              if opts[:version]
+                host.install_package("puppet-agent=#{opts[:version]}-1#{host['platform'].codename}")
+              else
+                host.install_package('puppet-agent')
+              end
+            when /windows/
+              install_puppet_agent_from_msi_on(host, opts)
+            when /osx/
+              install_puppet_agent_from_dmg_on(host, opts)
             else
               if opts[:default_action] == 'gem_install'
-                install_puppet_from_gem host, opts
+                opts[:version] = opts[:puppet_gem_version]
+                install_puppet_from_gem_on(host, opts)
+                on host, "echo '' >> #{host.puppet['hiera_config']}"
               else
-                raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
+                raise "install_puppet_agent_on() called for unsupported " +
+                      "platform '#{host['platform']}' on '#{host.name}'"
               end
             end
-
-            # Certain install paths may not create the config dirs/files needed
-            on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
-            on host, "echo '' >> #{host.puppet['hiera_config']}"
           end
-          nil
         end
 
         # @deprecated Use {#configure_puppet_on} instead.
@@ -300,32 +389,27 @@ module Beaker
         # @option opts [String] :version The version of Puppet to install, if nil installs latest version
         # @option opts [String] :facter_version The version of Facter to install, if nil installs latest version
         # @option opts [String] :hiera_version The version of Hiera to install, if nil installs latest version
-        # @option opts [String] :default_action What to do if we don't know how to install native packages on host.
-        #                                       Valid value is 'gem_install' or nil. If nil raises an exception when
-        #                                       on an unsupported platform. When 'gem_install' attempts to install
-        #                                       Puppet via gem.
         # @option opts [String] :release The major release of the OS
         # @option opts [String] :family The OS family (one of 'el' or 'fedora')
         #
         # @return nil
         # @api private
-        def install_puppet_from_rpm( host, opts )
-          release_package_string = "http://yum.puppetlabs.com/puppetlabs-release-#{opts[:family]}-#{opts[:release]}.noarch.rpm"
-
-          on host, "rpm -q --quiet puppetlabs-release || rpm -ivh #{release_package_string}"
+        def install_puppet_from_rpm_on( host, opts )
+          install_puppetlabs_release_repo(host)
 
           if opts[:facter_version]
-            on host, "yum install -y facter-#{opts[:facter_version]}"
+            host.install_package("facter-#{opts[:facter_version]}")
           end
 
           if opts[:hiera_version]
-            on host, "yum install -y hiera-#{opts[:hiera_version]}"
+            host.install_package("hiera-#{opts[:hiera_version]}")
           end
 
           puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
-          on host, "yum install -y #{puppet_pkg}"
+          host.install_package("#{puppet_pkg}")
           configure_foss_defaults_on( host )
         end
+        alias_method :install_puppet_from_rpm, :install_puppet_from_rpm_on
 
         # Installs Puppet and dependencies from deb
         #
@@ -337,57 +421,115 @@ module Beaker
         #
         # @return nil
         # @api private
-        def install_puppet_from_deb( host, opts )
-          if ! host.check_for_package 'lsb-release'
-            host.install_package('lsb-release')
-          end
-
-          if ! host.check_for_command 'curl'
-            on host, 'apt-get install -y curl'
-          end
-
-          on host, 'curl -O http://apt.puppetlabs.com/puppetlabs-release-$(lsb_release -c -s).deb'
-          on host, 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb'
-          on host, 'apt-get update'
+        def install_puppet_from_deb_on( host, opts )
+          install_puppetlabs_release_repo(host)
 
           if opts[:facter_version]
-            on host, "apt-get install -y facter=#{opts[:facter_version]}-1puppetlabs1"
+            host.install_package("facter=#{opts[:facter_version]}-1puppetlabs1")
           end
 
           if opts[:hiera_version]
-            on host, "apt-get install -y hiera=#{opts[:hiera_version]}-1puppetlabs1"
+            host.install_package("hiera=#{opts[:hiera_version]}-1puppetlabs1")
           end
 
           if opts[:version]
-            on host, "apt-get install -y puppet-common=#{opts[:version]}-1puppetlabs1"
-            on host, "apt-get install -y puppet=#{opts[:version]}-1puppetlabs1"
+            host.install_package("puppet-common=#{opts[:version]}-1puppetlabs1")
+            host.install_package("puppet=#{opts[:version]}-1puppetlabs1")
           else
-            on host, 'apt-get install -y puppet'
+            host.install_package('puppet')
           end
           configure_foss_defaults_on( host )
         end
+        alias_method :install_puppet_from_deb, :install_puppet_from_deb_on
 
         # Installs Puppet and dependencies from msi
         #
         # @param [Host] host The host to install packages on
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of Puppet to install, required
+        # @option opts [String] :version The version of Puppet to install
+        # @option opts [String] :puppet_agent_version The version of the
+        #     puppet-agent package to install, required if version is 4.0.0 or greater
         # @option opts [String] :win_download_url The url to download puppet from
         #
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
         # to other settings whether the 32 or 64bit install is used
-        def install_puppet_from_msi( host, opts )
-          #only install 64bit builds if
-          # - we are on puppet version 3.7+
-          # - we do not have install_32 set on host
-          # - we do not have install_32 set globally
+        def install_puppet_from_msi_on( host, opts )
+
           version = opts[:version]
-          is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
-          if !(version_is_less(version, '3.7')) && host.is_x86_64? && !is_config_32
-            host['dist'] = "puppet-#{version}-x64"
+
+          if version && !version_is_less(version, '4.0.0')
+            if opts[:puppet_agent_version].nil?
+              raise "You must specify the version of puppet agent you " +
+                    "want to install if you want to install Puppet 4.0 " +
+                    "or greater on Windows"
+            end
+
+            opts[:version] = opts[:puppet_agent_version]
+            install_puppet_agent_from_msi_on(host, opts)
+
           else
-            host['dist'] = "puppet-#{version}"
+            compute_puppet_msi_name(host, opts)
+            install_a_puppet_msi_on(host, opts)
+
           end
+        end
+        alias_method :install_puppet_from_msi, :install_puppet_from_msi_on
+
+        # @api private
+        def compute_puppet_msi_name(host, opts)
+          version = opts[:version]
+          install_32 = host['install_32'] || opts['install_32']
+          less_than_3_dot_7 = version && version_is_less(version, '3.7')
+
+          # If there's no version declared, install the latest in the 3.x series
+          if not version
+            if !host.is_x86_64? || install_32
+              host['dist'] = 'puppet-latest'
+            else
+              host['dist'] = 'puppet-x64-latest'
+            end
+
+          # Install Puppet 3.x with the x86 installer if:
+          # - we are on puppet < 3.7, or
+          # - we are less than puppet 4.0 and on an x86 host, or
+          # - we have install_32 set on host or globally
+          # Install Puppet 3.x with the x64 installer if:
+          # - we are otherwise trying to install Puppet 3.x on a x64 host
+          elsif less_than_3_dot_7 or not host.is_x86_64? or install_32
+            host['dist'] = "puppet-#{version}"
+
+          elsif host.is_x86_64?
+             host['dist'] = "puppet-#{version}-x64"
+
+          else
+            raise "I don't understand how to install Puppet version: #{version}"
+          end
+        end
+
+        # Installs Puppet Agent and dependencies from msi
+        #
+        # @param [Host] host The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet Agent to install
+        # @option opts [String] :win_download_url The url to download puppet from
+        #
+        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
+        # to other settings whether the 32 or 64bit install is used
+        def install_puppet_agent_from_msi_on(host, opts)
+          arch = host.is_x86_64? ? 'x64' : 'x86'
+
+          # If we don't specify a version install the latest MSI for puppet-agent
+          if opts['version']
+            host['dist'] = "puppet-agent-#{opts[:version]}-#{arch}"
+          else
+            host['dist'] = "puppet-agent-#{arch}-latest"
+          end
+
+          install_a_puppet_msi_on(host, opts)
+        end
+
+        # @api private
+        def install_a_puppet_msi_on(host, opts)
           link = "#{opts[:win_download_url]}/#{host['dist']}.msi"
           if not link_exists?( link )
             raise "Puppet #{version} at #{link} does not exist!"
@@ -402,17 +544,16 @@ module Beaker
             #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
             puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
             on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
+
+            on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
           else
             dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
 
             on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
-          end
 
-          if host.is_cygwin?
-            on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
-          else
             on host, "start /w msiexec.exe /qn /i #{dest}"
           end
+
           configure_foss_defaults_on( host )
           if not host.is_cygwin?
             host.mkdir_p host['distmoduledir']
@@ -423,34 +564,62 @@ module Beaker
         #
         # @param [Host] host The host to install packages on
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of Puppet to install, required
-        # @option opts [String] :facter_version The version of Facter to install, required
-        # @option opts [String] :hiera_version The version of Hiera to install, required
+        # @option opts [String] :version The version of Puppet to install
+        # @option opts [String] :facter_version The version of Facter to install
+        # @option opts [String] :hiera_version The version of Hiera to install
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
         #
         # @return nil
         # @api private
-        def install_puppet_from_dmg( host, opts )
+        def install_puppet_from_dmg_on( host, opts )
 
-          puppet_ver = opts[:version]
-          facter_ver = opts[:facter_version]
-          hiera_ver = opts[:hiera_version]
+          if opts[:version] && !version_is_less(opts[:version], '4.0.0')
+            if opts[:puppet_agent_version].nil?
+              raise "You must specify the version of puppet-agent you " +
+                    "want to install if you want to install Puppet 4.0 " +
+                    "or greater on OSX"
+            end
 
-          if [puppet_ver, facter_ver, hiera_ver].include?(nil)
-            raise "You need to specify versions for OSX host\n eg. install_puppet({:version => '3.6.2',:facter_version => '2.1.0',:hiera_version  => '1.3.4',})"
+            opts[:version] = opts[:puppet_agent_version]
+            install_puppet_agent_from_dmg_on(host, opts)
+
+          else
+            puppet_ver = opts[:version] || 'latest'
+            facter_ver = opts[:facter_version] || 'latest'
+            hiera_ver = opts[:hiera_version] || 'latest'
+
+            if [puppet_ver, facter_ver, hiera_ver].include?(nil)
+              raise "You need to specify versions for OSX host\n eg. install_puppet({:version => '3.6.2',:facter_version => '2.1.0',:hiera_version  => '1.3.4',})"
+            end
+
+            on host, "curl -O #{opts[:mac_download_url]}/puppet-#{puppet_ver}.dmg"
+            on host, "curl -O #{opts[:mac_download_url]}/facter-#{facter_ver}.dmg"
+            on host, "curl -O #{opts[:mac_download_url]}/hiera-#{hiera_ver}.dmg"
+
+            host.install_package("puppet-#{puppet_ver}")
+            host.install_package("facter-#{facter_ver}")
+            host.install_package("hiera-#{hiera_ver}")
+
+            configure_foss_defaults_on( host )
           end
+        end
+        alias_method :install_puppet_from_dmg, :install_puppet_from_dmg_on
 
-          on host, "curl -O #{opts[:mac_download_url]}/puppet-#{puppet_ver}.dmg"
-          on host, "curl -O #{opts[:mac_download_url]}/facter-#{facter_ver}.dmg"
-          on host, "curl -O #{opts[:mac_download_url]}/hiera-#{hiera_ver}.dmg"
+        # Installs Puppet and dependencies from dmg
+        #
+        # @param [Host] host The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet Agent to install
+        # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
+        #
+        # @return nil
+        # @api private
+        def install_puppet_agent_from_dmg_on(host, opts)
+          version = opts[:version] || 'latest'
+          on host, "curl -O #{opts[:mac_download_url]}/puppet-agent-#{version}.dmg"
 
-          on host, "hdiutil attach puppet-#{puppet_ver}.dmg"
-          on host, "hdiutil attach facter-#{facter_ver}.dmg"
-          on host, "hdiutil attach hiera-#{hiera_ver}.dmg"
+          host.install_package("puppet-agent-#{version}")
 
-          on host, "installer -pkg /Volumes/puppet-#{puppet_ver}/puppet-#{puppet_ver}.pkg -target /"
-          on host, "installer -pkg /Volumes/facter-#{facter_ver}/facter-#{facter_ver}.pkg -target /"
-          on host, "installer -pkg /Volumes/hiera-#{hiera_ver}/hiera-#{hiera_ver}.pkg -target /"
           configure_foss_defaults_on( host )
         end
 
@@ -465,7 +634,7 @@ module Beaker
         # @return nil
         # @raise [StandardError] if gem does not exist on target host
         # @api private
-        def install_puppet_from_gem( host, opts )
+        def install_puppet_from_gem_on( host, opts )
           # There are a lot of special things to do for Solaris and Solaris 10.
           # This is easier than checking host['platform'] every time.
           is_solaris10 = host['platform'] =~ /solaris-10/
@@ -509,14 +678,14 @@ module Beaker
           end
 
           if opts[:facter_version]
-            on host, "gem install facter -v#{opts[:facter_version]} --no-ri --no-rdoc"
+            on host, "gem install facter -v'#{opts[:facter_version]}' --no-ri --no-rdoc"
           end
 
           if opts[:hiera_version]
-            on host, "gem install hiera -v#{opts[:hiera_version]} --no-ri --no-rdoc"
+            on host, "gem install hiera -v'#{opts[:hiera_version]}' --no-ri --no-rdoc"
           end
 
-          ver_cmd = opts[:version] ? "-v#{opts[:version]}" : ''
+          ver_cmd = opts[:version] ? "-v '#{opts[:version]}'" : ''
           on host, "gem install puppet #{ver_cmd} --no-ri --no-rdoc"
 
           # Similar to the treatment of 'gem' above.
@@ -535,6 +704,8 @@ module Beaker
           end
           configure_foss_defaults_on( host )
         end
+        alias_method :install_puppet_from_gem,          :install_puppet_from_gem_on
+        alias_method :install_puppet_agent_from_gem_on, :install_puppet_from_gem_on
 
         # Install official puppetlabs release repository configuration on host.
         #
@@ -543,22 +714,25 @@ module Beaker
         #
         # @note This method only works on redhat-like and debian-like hosts.
         #
-        def install_puppetlabs_release_repo ( host )
+        def install_puppetlabs_release_repo_on( host, repo = nil, opts = options )
           variant, version, arch, codename = host['platform'].to_array
+          repo_name = repo.nil? ? '' : '-' + repo
 
           case variant
           when /^(fedora|el|centos)$/
             variant = (($1 == 'centos') ? 'el' : $1)
 
-            rpm = options[:release_yum_repo_url] +
-              "/puppetlabs-release-%s-%s.noarch.rpm" % [variant, version]
+            rpm = "puppetlabs-release%s-%s-%s.noarch.rpm" % [repo_name, variant, version]
+            remote = URI.join( options[:release_yum_repo_url], rpm )
 
-            on host, "rpm -ivh #{rpm}"
+            on host, "rpm -ivh #{remote}"
 
           when /^(debian|ubuntu|cumulus)$/
-            deb = URI.join(options[:release_apt_repo_url],  "puppetlabs-release-%s.deb" % codename)
+            deb = "puppetlabs-release%s-%s.deb" % [repo_name, codename]
 
-            on host, "wget -O /tmp/puppet.deb #{deb}"
+            remote = URI.join( options[:release_apt_repo_url], deb )
+
+            on host, "wget -O /tmp/puppet.deb #{remote}"
             on host, "dpkg -i --force-all /tmp/puppet.deb"
             on host, "apt-get update"
           else
@@ -566,6 +740,7 @@ module Beaker
           end
           configure_foss_defaults_on( host )
         end
+        alias_method :install_puppetlabs_release_repo, :install_puppetlabs_release_repo_on
 
         # Install development repository on the given host. This method pushes all
         # repository information including package files for the specified
