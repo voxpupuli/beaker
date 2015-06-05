@@ -359,10 +359,6 @@ module Beaker
           unless masterless
             pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
             pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
-
-            unless version_is_less(opts[:pe_ver] || master['pe_ver'], '3.4')
-              master['puppetservice'] = 'pe-puppetserver'
-            end
           end
 
           # Set PE distribution for all the hosts, create working dir

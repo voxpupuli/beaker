@@ -79,6 +79,12 @@ module Beaker
             host['group'] = 'pe-puppet'
           end
           host['type'] = 'pe'
+          # newer pe requires a different puppetservice name, set it here on the master
+          if host['roles'].include?('master')
+            if host['pe_ver'] and (not version_is_less(host['pe_ver'], '3.4'))
+              host['puppetservice'] = 'pe-puppetserver'
+            end
+          end
         end
 
         # Add the appropriate pe defaults to an array of hosts
