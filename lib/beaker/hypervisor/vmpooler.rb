@@ -15,6 +15,8 @@ module Beaker
       Errno::ENETUNREACH,
     ]
 
+    attr_reader :options, :logger, :hosts, :credentials
+
     def initialize(vmpooler_hosts, options)
       @options = options
       @logger = options[:logger]
@@ -25,16 +27,25 @@ module Beaker
     def load_credentials(dot_fog = '.fog')
       creds = {}
 
-      begin
-        fog = YAML.load_file(dot_fog)
-        default = fog[:default]
-
-        creds[:vmpooler_token] = default[:vmpooler_token]
-      rescue Errno::ENOENT
-        @logger.warn "Credentials file (#{@options[:dot_fog]}) not found; proceeding without authentication"
+      if fog = read_fog_file(dot_fog)
+        if fog[:default] && fog[:default][:vmpooler_token]
+          creds[:vmpooler_token] = fog[:default][:vmpooler_token]
+        else
+          @logger.warn "Credentials file (#{dot_fog}) is missing a :default section with a :vmpooler_token value; proceeding without authentication"
+        end
+      else
+        @logger.warn "Credentials file (#{dot_fog}) is empty; proceeding without authentication"
       end
 
       creds
+
+    rescue Errno::ENOENT
+      @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
+      creds
+    end
+
+    def read_fog_file(dot_fog = '.fog')
+      YAML.load_file(dot_fog)
     end
 
     def check_url url
