@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 4 Jun, 2015 (656f30be)](#LATEST)
+* [LATEST - 5 Jun, 2015 (8539687f)](#LATEST)
+* [2.14.0 - 4 Jun, 2015 (c0ebcd16)](#2.14.0)
 * [2.13.0 - 29 May, 2015 (dd70aa66)](#2.13.0)
 * [2.12.0 - 20 May, 2015 (62845ce9)](#2.12.0)
 * [2.11.0 - 6 May, 2015 (b775cc73)](#2.11.0)
@@ -82,7 +83,41 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 4 Jun, 2015 (656f30be)
+### <a name = "LATEST">LATEST - 5 Jun, 2015 (8539687f)
+
+* (GEM) update beaker version to 2.14.1 (8539687f)
+
+* Merge pull request #842 from anodelman/fix-puppetservice-default (28a4ef9c)
+
+
+```
+Merge pull request #842 from anodelman/fix-puppetservice-default
+
+(BKR-313) Beaker is using pe-httpd as the puppet master service...
+```
+* Merge pull request #841 from kevpl/bkr295_ubuntu_stopagenton_fix (eb8cc39c)
+
+
+```
+Merge pull request #841 from kevpl/bkr295_ubuntu_stopagenton_fix
+
+(BKR-295) use 'puppet' in stop_agent_on for 4.0+
+```
+* (BKR-313) Beaker is using pe-httpd as the puppet master service... (a27eb5ae)
+
+
+```
+(BKR-313) Beaker is using pe-httpd as the puppet master service...
+
+... in method 'with_puppet_running_on'
+
+- use pe-httpd pre 3.4, pe-puppetserver post 3.4
+```
+* (BKR-295) use 'puppet' in stop_agent_on for 4.0+ (9604315c)
+
+### <a name = "2.14.0">2.14.0 - 4 Jun, 2015 (c0ebcd16)
+
+* (HISTORY) update beaker history for gem release 2.14.0 (c0ebcd16)
 
 * (GEM) update beaker version to 2.14.0 (656f30be)
 
