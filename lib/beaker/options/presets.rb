@@ -138,6 +138,8 @@ module Beaker
           :project_root           => File.expand_path(File.join(File.dirname(__FILE__), "../")),
           :xml_dir                => 'junit',
           :xml_file               => 'beaker_junit.xml',
+          :xml_time               => 'beaker_times.xml',
+          :xml_time_enabled       => false,
           :xml_stylesheet         => 'junit.xsl',
           :default_log_prefix     => 'beaker_logs',
           :log_dir                => 'log',

@@ -22,7 +22,33 @@
 
     <div class="container-fluid">
       <div class="page-header">
-        <h1>Beaker <small>Puppet Labs Automated Acceptance Testing System</small></h1>
+        <div class="row">
+          <div class="col-md-8">
+            <h1>Beaker <small>Puppet Labs Automated Acceptance Testing System</small></h1>
+          </div>
+          <xsl:variable name="page_active"><xsl:value-of select="meta_test_info/@page_active"/></xsl:variable>
+          <xsl:choose>
+            <xsl:when test="$page_active != 'no-links'">
+              <div class="col-md-2 pull-right">
+                <br />
+                <ol class="breadcrumb text-center" style="margin-bottom: 0px; margin-top: 20px;">
+                  <xsl:variable name="link_url"><xsl:value-of select="meta_test_info/@link_url"/></xsl:variable>
+                  <xsl:choose>
+                    <xsl:when test="$page_active = 'execution'">
+                      <li class="active">execution order</li>
+                      <li><a href="{$link_url}">performance order</a></li>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <li><a href="{$link_url}">execution order</a></li>
+                      <li class="active">performance order</li>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </ol>
+              </div>
+            </xsl:when>
+          </xsl:choose>
+
+        </div>
       </div>
 
       <!-- calculate overall stats for this run -->

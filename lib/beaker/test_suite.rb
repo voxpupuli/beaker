@@ -148,11 +148,34 @@ module Beaker
         @logger.notify "  Test Case #{test_case.path} #{test_reported}"
       end
 
-      def write_junit_xml(xml_file)
+      # Writes Junit XML of this {TestSuiteResult}
+      #
+      # @param [String] xml_file      Path to the XML file (from Beaker's running directory)
+      # @param [String] file_to_link  Path to the paired file that should be linked
+      #                               from this one (this is relative to the XML
+      #                               file itself, so it would just be the different
+      #                               file name if they're in the same directory)
+      # @param [Boolean] time_sort    Whether the test results should be output in
+      #                               order of time spent in the test, or in the
+      #                               order of test execution (default)
+      #
+      # @return nil
+      # @api private
+      def write_junit_xml(xml_file, file_to_link = nil, time_sort = false)
         stylesheet = File.join(@options[:project_root], @options[:xml_stylesheet])
 
         begin
           LoggerJunit.write_xml(xml_file, stylesheet) do |doc, suites|
+
+            meta_info = Nokogiri::XML::Node.new('meta_test_info', doc)
+            unless file_to_link.nil?
+              meta_info['page_active'] = time_sort ? 'performance' : 'execution'
+              meta_info['link_url'] = file_to_link
+            else
+              meta_info['page_active'] = 'no-links'
+              meta_info['link_url'] = ''
+            end
+            suites.add_child(meta_info)
 
             suite = Nokogiri::XML::Node.new('testsuite', doc)
             suite['name']     = @name
@@ -172,7 +195,9 @@ module Beaker
             end
             suite.add_child(properties)
 
-            @test_cases.each do |test|
+            test_cases_to_report = @test_cases
+            test_cases_to_report = @test_cases.sort { |x,y| y.runtime <=> x.runtime } if time_sort
+            test_cases_to_report.each do |test|
               item = Nokogiri::XML::Node.new('testcase', doc)
               item['classname'] = File.dirname(test.path)
               item['name']      = File.basename(test.path)
@@ -309,8 +334,15 @@ module Beaker
       # of the suite – or, at least, making them highly confusing for anyone who
       # has not studied the implementation in detail. --daniel 2011-03-14
       @test_suite_results.summarize( Logger.new(log_path("#{name}-summary.txt", @options[:log_dated_dir]), STDOUT) )
-      @test_suite_results.write_junit_xml( log_path(@options[:xml_file], @options[:xml_dated_dir]) )
 
+      junit_file_log  = log_path(@options[:xml_file], @options[:xml_dated_dir])
+      if @options[:xml_time_enabled]
+        junit_file_time = log_path(@options[:xml_time], @options[:xml_dated_dir])
+        @test_suite_results.write_junit_xml( junit_file_log, @options[:xml_time] )
+        @test_suite_results.write_junit_xml( junit_file_time, @options[:xml_file], true )
+      else
+        @test_suite_results.write_junit_xml( junit_file_log )
+      end
       #All done with this run, remove run log
       @logger.remove_destination(run_log)
 
