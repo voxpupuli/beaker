@@ -230,6 +230,12 @@ module Beaker
           opts.on '--exclude-tag TAGS', 'Run the set of tests that do not contain ANY of the provided single or command separated list of tags' do |value|
             @cmd_options[:tag_excludes] = value
           end
+
+          opts.on '--xml-time-order',
+                  'Output an additional JUnit XML file, sorted by execution time' do |bool|
+            @cmd_options[:xml_time_enabled] = bool
+          end
+
         end
 
       end
