@@ -20,10 +20,12 @@ module Beaker
       # - q_puppet_enterpriseconsole_database_user
 
       the_answers.map do |vm, as|
-        as.delete_if do |key, value|
-          key =~ /q_puppet_cloud_install/
-          #to be deleted in the future
-          #|q_puppet_enterpriseconsole_database_name|q_puppet_enterpriseconsole_database_password|q_puppet_enterpriseconsole_database_user/
+        if as
+          as.delete_if do |key, value|
+            key =~ /q_puppet_cloud_install/
+            #to be deleted in the future
+            #|q_puppet_enterpriseconsole_database_name|q_puppet_enterpriseconsole_database_password|q_puppet_enterpriseconsole_database_user/
+          end
         end
       end
 
