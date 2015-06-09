@@ -60,6 +60,14 @@ module Beaker
         # 6. Revert Puppet to the pre-test state
         # 7. Testing artifacts are saved in a folder named for the test
         #
+        # @note Whether Puppet is started or restarted depends on what kind of
+        #   server you're running.  Passenger and puppetserver are restarted before.
+        #   Webrick is started before and stopped after yielding, unless you're using
+        #   service scripts, then it'll behave like passenger & puppetserver.
+        #   Passenger and puppetserver (or webrick using service scripts)
+        #   restart after yielding by default.  You can stop this from happening
+        #   by setting the :restart_when_done flag of the conf_opts argument.
+        #
         # @param [Host] host        One object that act like Host
         #
         # @param [Hash{Symbol=>String}] conf_opts  Represents puppet settings.
@@ -85,6 +93,13 @@ module Beaker
         #                            even if it seems the host has passenger.
         #                            This is needed in FOSS tests to initialize
         #                            SSL.
+        # @option conf_opts [Boolean] :restart_when_done  determines whether a restart
+        #                            should be run after the test has been yielded to.
+        #                            Will stop puppet if false. Default behavior
+        #                            is to restart, but you can override this on the
+        #                            host or with this option.
+        #                            (Note: only works for passenger & puppetserver
+        #                            masters (or webrick using the service scripts))
         # @param [File] testdir      The temporary directory which will hold backup
         #                            configuration, and other test artifacts.
         #
@@ -110,7 +125,10 @@ module Beaker
           raise(ArgumentError, "with_puppet_running_on's conf_opts must be a Hash. You provided a #{conf_opts.class}: '#{conf_opts}'") if !conf_opts.kind_of?(Hash)
           cmdline_args = conf_opts[:__commandline_args__]
           service_args = conf_opts[:__service_args__] || {}
-          conf_opts = conf_opts.reject { |k,v| [:__commandline_args__, :__service_args__].include?(k) }
+          restart_when_done = true
+          restart_when_done = host[:restart_when_done] if host[:restart_when_done]
+          restart_when_done = conf_opts.fetch(:restart_when_done, restart_when_done)
+          conf_opts = conf_opts.reject { |k,v| [:__commandline_args__, :__service_args__, :restart_when_done].include?(k) }
 
           curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
           logger.debug "Setting curl retries to #{curl_retries}"
@@ -163,7 +181,11 @@ module Beaker
 
               if host.use_service_scripts? && !service_args[:bypass_service_script]
                 restore_puppet_conf_from_backup( host, backup_file )
-                bounce_service( host, host['puppetservice'], curl_retries )
+                if restart_when_done
+                  bounce_service( host, host['puppetservice'], curl_retries )
+                else
+                  host.exec puppet_resource('service', host['puppetservice'], 'ensure=stopped')
+                end
               else
                 if puppet_master_started
                   stop_puppet_from_source_on( host )

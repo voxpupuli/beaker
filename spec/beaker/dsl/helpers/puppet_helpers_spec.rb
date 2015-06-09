@@ -587,7 +587,7 @@ describe ClassMixedWithDSLHelpers do
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
         end
 
-        it 'yields to a block after bouncing service' do
+        it 'yields to a block in between bouncing service calls' do
           execution = 0
           allow( subject ).to receive(:curl_with_retries)
           expect do
@@ -600,13 +600,33 @@ describe ClassMixedWithDSLHelpers do
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(2).times
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
         end
+
+        context ':restart_when_done flag set false' do
+          it 'starts puppet once, stops it twice' do
+            subject.with_puppet_running_on(host, { :restart_when_done => false })
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).once
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+          end
+
+          it 'yields to a block after bouncing service' do
+            execution = 0
+            allow( subject ).to receive(:curl_with_retries)
+            expect do
+              subject.with_puppet_running_on(host, { :restart_when_done => false }) do
+                expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(1).times
+                expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(1).times
+                execution += 1
+              end
+            end.to change { execution }.by(1)
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+          end
+        end
       end
 
       context 'for foss packaged hosts using passenger' do
         before(:each) do
           host.uses_passenger!
         end
-
         it 'bounces puppet twice' do
           allow( subject ).to receive(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
@@ -624,19 +644,38 @@ describe ClassMixedWithDSLHelpers do
           end.to change { execution }.by(1)
           expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
         end
+
+        context ':restart_when_done flag set false' do
+          it 'bounces puppet once' do
+            allow( subject ).to receive(:curl_with_retries)
+            subject.with_puppet_running_on(host, { :restart_when_done => false })
+            expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+          end
+
+          it 'yields to a block after bouncing service' do
+            execution = 0
+            allow( subject ).to receive(:curl_with_retries)
+            expect do
+              subject.with_puppet_running_on(host, { :restart_when_done => false }) do
+                expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+                execution += 1
+              end
+            end.to change { execution }.by(1)
+          end
+        end
       end
 
       context 'for foss packaged hosts using webrick' do
         let(:use_service) { true }
 
-        it 'stops and starts master using service scripts' do
+        it 'stops and starts master using service scripts twice' do
           allow( subject ).to receive(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(2).times
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
         end
 
-        it 'yields to a block after stopping and starting service' do
+        it 'yields to a block in between bounce calls for the service' do
           execution = 0
           expect do
             subject.with_puppet_running_on(host, {}) do
@@ -647,6 +686,26 @@ describe ClassMixedWithDSLHelpers do
           end.to change { execution }.by(1)
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).exactly(2).times
           expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+        end
+
+        context ':restart_when_done flag set false' do
+          it 'stops (twice) and starts (once) master using service scripts' do
+            allow( subject ).to receive(:curl_with_retries)
+            subject.with_puppet_running_on(host, { :restart_when_done => false })
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).once
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+          end
+
+          it 'yields to a block after stopping and starting service' do
+            execution = 0
+            expect do
+              subject.with_puppet_running_on(host, { :restart_when_done => false }) do
+                expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).once
+                expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).once
+                execution += 1
+              end
+            end.to change { execution }.by(1)
+          end
         end
       end
 
@@ -691,6 +750,18 @@ describe ClassMixedWithDSLHelpers do
             subject.with_puppet_running_on(host, {:__commandline_args__ => '--with arg'})
             expect(host).to execute_commands_matching(/^puppet master --with arg/).once
           end
+
+          it 'is not affected by the :restart_when_done flag' do
+            execution = 0
+            expect do
+              subject.with_puppet_running_on(host, { :restart_when_done => true }) do
+                expect(host).to execute_commands_matching(/^puppet master/).exactly(4).times
+                execution += 1
+              end
+            end.to change { execution }.by(1)
+            expect(host).to execute_commands_matching(/^kill [^-]/).once
+            expect(host).to execute_commands_matching(/^kill -0/).once
+          end
         end
       end
 
@@ -722,7 +793,7 @@ describe ClassMixedWithDSLHelpers do
           end
 
           it 'restores puppet.conf before restarting' do
-            subject.with_puppet_running_on(host, {})
+            subject.with_puppet_running_on(host, { :restart_when_done => true })
             expect(host).to execute_commands_matching_in_order(/cat '#{backup_location}' > '#{original_location}'/,
                                                                /ensure=stopped/,
                                                                /ensure=running/)
@@ -807,9 +878,9 @@ describe ClassMixedWithDSLHelpers do
     it 'delegates to #with_puppet_running_on with the default host' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
 
-      expect( subject ).to receive( :with_puppet_running_on ).with( master, {:opt => 'value'}, '/dir').once
+      expect( subject ).to receive( :with_puppet_running_on ).with( master, {:opt => 'value'}, '/dir' ).once
 
-      subject.with_puppet_running( {:opt => 'value'}, '/dir'  )
+      subject.with_puppet_running( {:opt => 'value'}, '/dir' )
 
 
     end
