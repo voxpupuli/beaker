@@ -209,6 +209,41 @@ module Beaker
         end
       end
 
+      # Sets tags on the current {Beaker::TestCase}, and skips testing
+      # if necessary after checking this case's tags against the ones that are
+      # being included or excluded.
+      #
+      # @param [Array<String>] tags Tags to be assigned to the current test
+      #
+      # @return nil
+      # @api public
+      def tag(*tags)
+        metadata[:case] ||= {}
+        metadata[:case][:tags] = []
+        tags.each do |tag|
+          metadata[:case][:tags] << tag.downcase
+        end
+
+        @options[:tag_includes] ||= []
+        @options[:tag_excludes] ||= []
+
+        tags_needed_to_include_this_test = []
+        @options[:tag_includes].each do |tag_to_include|
+          tags_needed_to_include_this_test << tag_to_include \
+            unless metadata[:case][:tags].include?(tag_to_include)
+        end
+        skip_test "#{self.path} does not include necessary tag(s): #{tags_needed_to_include_this_test}" \
+          if tags_needed_to_include_this_test.length > 0
+
+        tags_to_remove_to_include_this_test = []
+        @options[:tag_excludes].each do |tag_to_exclude|
+          tags_to_remove_to_include_this_test << tag_to_exclude \
+            if metadata[:case][:tags].include?(tag_to_exclude)
+        end
+        skip_test "#{self.path} includes excluded tag(s): #{tags_to_remove_to_include_this_test}" \
+          if tags_to_remove_to_include_this_test.length > 0
+      end
+
       #Return a set of hosts that meet the given criteria
       # @param [Hash{Symbol,String=>String,Regexp,Array<String,Regexp>}]
       #   criteria Specify the criteria with which a host should be
