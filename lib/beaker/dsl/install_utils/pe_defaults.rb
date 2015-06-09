@@ -110,7 +110,7 @@ module Beaker
         # @param [Host] host    A single host to act upon
         # @param [String] platform The platform type of this host, one of windows, freebsd, mac & unix
         def remove_platform_pe_defaults(host, platform)
-          FOSS_DEFAULTS[platform].each_pair do |key, val|
+          PE_DEFAULTS[platform].each_pair do |key, val|
             host.delete(key)
           end
           host['group'] = nil
