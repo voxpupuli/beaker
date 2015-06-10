@@ -50,7 +50,26 @@ module Beaker
         # @param [String] type One of 'aio', 'pe' or 'foss'
         def configure_defaults_on( hosts, type )
           block_on hosts do |host|
+
             # check to see if the host already has a type associated with it
+            remove_defaults_on(host)
+
+            add_method = "add_#{type}_defaults_on"
+            if self.respond_to?(add_method, host)
+              self.send(add_method, host)
+            else
+              raise "cannot add defaults of type #{type} for host #{host.name} (#{add_method} not present)"
+            end
+            # add pathing env
+            add_puppet_paths_on(host)
+          end
+        end
+
+        #If the host is associated with a type remove all defaults and environment associated with that type.
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        def remove_defaults_on( hosts )
+          block_on hosts do |host|
             if host['type']
               remove_puppet_paths_on(hosts)
               remove_method = "remove_#{host['type']}_defaults_on"
@@ -60,14 +79,6 @@ module Beaker
                 raise "cannot remove defaults of type #{host['type']} associated with host #{host.name} (#{remove_method} not present)"
               end
             end
-            add_method = "add_#{type}_defaults_on"
-            if self.respond_to?(add_method, host)
-              self.send(add_method, host)
-            else
-              raise "cannot add defaults of type #{type} for host #{host.name} (#{add_method} not present)"
-            end
-            # add pathing env
-            add_puppet_paths_on(host)
           end
         end
 
