@@ -243,7 +243,7 @@ module Beaker
     #@option options [String] :xml_stylesheet The path to a stylesheet to be applied to the generated XML output
     #@param [Symbol] fail_mode One of :slow, :fast
     #@param [Time] timestamp Beaker execution start time
-    def initialize(name, hosts, options, timestamp, fail_mode = :slow)
+    def initialize(name, hosts, options, timestamp, fail_mode=nil)
       @logger     = options[:logger]
       @test_cases = []
       @test_files = options[name]
@@ -251,7 +251,7 @@ module Beaker
       @hosts      = hosts
       @run        = false
       @options    = options
-      @fail_mode  = fail_mode || @options[:fail_mode]
+      @fail_mode  = fail_mode || @options[:fail_mode] || :slow
       @test_suite_results = TestSuiteResult.new(@options, name)
       @timestamp = timestamp
 
