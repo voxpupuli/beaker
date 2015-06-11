@@ -24,6 +24,27 @@ module Beaker
         expect(tfs).to include rb_test
       end
 
+      it 'defaults to :slow fail_mode if not provided through parameter or options' do
+        @files = [ rb_test ]
+        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now)
+        tfm = ts.instance_variable_get(:@fail_mode)
+        expect(tfm).to be == :slow
+      end
+
+      it 'uses provided parameter fail_mode' do
+        @files = [ rb_test ]
+        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now, :fast)
+        tfm = ts.instance_variable_get(:@fail_mode)
+        expect(tfm).to be == :fast
+      end
+
+      it 'uses options fail_mode if fail_mode parameter is not provided' do
+        @files = [ rb_test ]
+        options[:fail_mode] = :fast
+        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now)
+        tfm = ts.instance_variable_get(:@fail_mode)
+        expect(tfm).to be == :fast
+      end
     end
 
     context 'run' do
