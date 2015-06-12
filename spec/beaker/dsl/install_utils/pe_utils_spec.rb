@@ -41,6 +41,55 @@ describe ClassMixedWithDSLInstallUtils do
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
+  context '#configure_pe_defaults_on' do
+    it 'uses aio paths for hosts of type aio' do
+      hosts.each do |host|
+        host[:type] = 'aio'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts of type pe' do
+      hosts.each do |host|
+        host[:type] = 'pe'
+      end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts with no type and version < 4.0' do
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+    it 'uses aio paths for hosts of version >= 4.0' do
+      hosts.each do |host|
+        host[:pe_ver] = '4.0'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts of version < 4.0' do
+      hosts.each do |host|
+        host[:pe_ver] = '3.8'
+      end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+  end
 
   describe 'sorted_hosts' do
     it 'can reorder so that the master comes first' do
@@ -351,6 +400,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :create_remote_file ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
       allow( subject ).to receive( :version_is_less ).with(anything, '3.2.0').exactly(hosts.length + 1).times.and_return( false )
+      allow( subject ).to receive( :version_is_less ).with(anything, '4.0').exactly(hosts.length + 1).times.and_return( true )
 
       expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
       expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
