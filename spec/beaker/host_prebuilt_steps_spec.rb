@@ -46,6 +46,11 @@ describe Beaker do
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
   ], true
 
+  # FreeBSD
+  it_should_behave_like 'enables_root_login', 'freesbd', [
+    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
+  ], true
+
   it_should_behave_like 'enables_root_login', 'osx', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
@@ -538,6 +543,14 @@ describe Beaker do
         "startsrc -g ssh"
       ]
       set_env_helper('aix', commands)
+    end
+
+    it "can set the environment on a FreeBSD host" do
+      commands = [
+        "sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config",
+        "sudo /etc/rc.d/sshd restart",
+      ]
+      set_env_helper('freebsd', commands)
     end
 
     def set_env_helper(platform_name, host_specific_commands_array)
