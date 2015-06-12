@@ -47,6 +47,56 @@ describe ClassMixedWithDSLInstallUtils do
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
 
 
+  context '#configure_foss_defaults_on' do
+    it 'uses aio paths for hosts of type aio' do
+      hosts.each do |host|
+        host[:type] = 'aio'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts of type foss' do
+      hosts.each do |host|
+        host[:type] = 'foss'
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts with no type and version < 4.0' do
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses aio paths for hosts of version >= 4.0' do
+      hosts.each do |host|
+        host[:version] = '4.0'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for hosts of version < 4.0' do
+      hosts.each do |host|
+        host[:version] = '3.8'
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+  end
+
   context 'extract_repo_info_from' do
     [{ :protocol => 'git', :path => 'git://github.com/puppetlabs/project.git' },
      { :protocol => 'ssh', :path => 'git@github.com:puppetlabs/project.git' },

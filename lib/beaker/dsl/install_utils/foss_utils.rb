@@ -40,7 +40,7 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def configure_foss_defaults_on( hosts )
           block_on hosts do |host|
-            if host['type'] && host['type'] =~ /aio/
+            if (host[:version] && (not version_is_less(host[:version], '4.0'))) or host['type'] && host['type'] =~ /aio/
               # add foss defaults to host
               add_aio_defaults_on(host)
             else
@@ -250,6 +250,8 @@ module Beaker
                   raise "install_puppet() called for unsupported platform '#{host['platform']}' on '#{host.name}'"
                 end
               end
+
+              host[:version] = opts[:version]
 
               # Certain install paths may not create the config dirs/files needed
               on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
@@ -472,6 +474,7 @@ module Beaker
             install_a_puppet_msi_on(host, opts)
 
           end
+          configure_foss_defaults_on( host )
         end
         alias_method :install_puppet_from_msi, :install_puppet_from_msi_on
 
