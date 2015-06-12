@@ -521,7 +521,7 @@ module Beaker
           host.exec(Command.new("stopsrc -g ssh"))
           host.exec(Command.new("startsrc -g ssh"))
         when /freebsd/
-          host.echo_to_file('\nPermitUserEnvironment yes', '/etc/ssh/sshd_config')
+          host.exec(Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         end
 
