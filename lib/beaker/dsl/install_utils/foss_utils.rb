@@ -244,6 +244,8 @@ module Beaker
                 install_puppet_from_dmg_on(host, opts)
               elsif host['platform'] =~ /openbsd/
                 install_puppet_from_openbsd_packages_on(host, opts)
+              elsif host['platform'] =~ /freebsd/
+                install_puppet_from_freebsd_ports_on(host, opts)
               else
                 if opts[:default_action] == 'gem_install'
                   opts[:version] ||= '~> 3.x'
@@ -590,6 +592,31 @@ module Beaker
             end
           end
         end
+
+        # Installs Puppet and dependencies from FreeBSD ports
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet to install (shows warning)
+        #
+        # @return nil
+        # @api private
+        def install_puppet_from_freebsd_ports_on( hosts, opts )
+          if (opts[:version])
+            logger.warn "If you wish to choose a specific Puppet version, use `install_puppet_from_gem_on('~> 3.*')`"
+          end
+
+          block_on hosts do |host|
+            if host['platform'] =~ /freebsd-9/
+              host.install_package("puppet")
+            else
+              host.install_package("sysutils/puppet")
+            end
+          end
+
+        end
+        alias_method :install_puppet_from_freebsd_ports, :install_puppet_from_freebsd_ports_on
 
         # Installs Puppet and dependencies from dmg on provided host(s).
         #
