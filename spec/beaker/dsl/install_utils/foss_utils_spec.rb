@@ -387,7 +387,7 @@ describe ClassMixedWithDSLInstallUtils do
       let( :platform ) { Beaker::Platform.new('el-7-i386') }
 
       it "installs an rpm" do
-        expect(subject).to receive(:on).with( host, /rpm .*/ ).ordered
+        expect(subject).to receive(:on).with( host, /^(rpm --replacepkgs -ivh).*/ ).ordered
         subject.install_puppetlabs_release_repo host
       end
 
