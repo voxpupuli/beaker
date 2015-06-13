@@ -728,7 +728,7 @@ module Beaker
             rpm = "puppetlabs-release%s-%s-%s.noarch.rpm" % [repo_name, variant, version]
             remote = URI.join( options[:release_yum_repo_url], rpm )
 
-            on host, "rpm -ivh #{remote}"
+            on host, "rpm --replacepkgs -ivh #{remote}"
 
           when /^(debian|ubuntu|cumulus)$/
             deb = "puppetlabs-release%s-%s.deb" % [repo_name, codename]
