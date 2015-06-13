@@ -14,6 +14,7 @@ class ClassMixedWithDSLInstallUtils
 end
 
 describe ClassMixedWithDSLInstallUtils do
+  let(:metadata)      { @metadata ||= {} }
   let(:presets)       { Beaker::Options::Presets.new }
   let(:opts)          { presets.presets.merge(presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
@@ -27,7 +28,8 @@ describe ClassMixedWithDSLInstallUtils do
   let(:hosts_sorted)  { [ hosts[1], hosts[0], hosts[2], hosts[3] ] }
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
-                                                :working_dir => '/tmp' } ) }
+                                                :working_dir => '/tmp',
+                                                :is_cygwin => true} ) }
   let(:winhost_non_cygwin) { make_host( 'winhost_non_cygwin', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
@@ -81,10 +83,12 @@ describe ClassMixedWithDSLInstallUtils do
       cmd         = 'cd /path/to/repo/name && git describe || true'
       logger = double.as_null_object
 
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( subject ).to receive( :on ).with( host, cmd ).and_yield
       expect( subject ).to receive( :stdout ).and_return( '2' )
 
+      subject.instance_variable_set( :@metadata, {} )
       version = subject.find_git_repo_versions( host, path, repository )
 
       expect( version ).to be == { 'name' => '2' }
@@ -128,9 +132,13 @@ describe ClassMixedWithDSLInstallUtils do
       host = { 'platform' => 'debian' }
       logger = double.as_null_object
 
+      allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).exactly( 4 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
 
@@ -144,6 +152,8 @@ describe ClassMixedWithDSLInstallUtils do
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:rev]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
       logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
@@ -151,6 +161,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
 
@@ -164,7 +175,9 @@ describe ClassMixedWithDSLInstallUtils do
       path   = '/path/to/repos'
       cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
       host   = { 'platform' => 'debian' }
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
       expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
       # this is the the command we want to test
@@ -172,6 +185,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
       expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
 
+      subject.instance_variable_set( :@metadata, {} )
       subject.install_from_git( host, path, repo )
     end
    end
@@ -182,66 +196,70 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     before do
+      allow( subject ).to receive(:options).and_return(opts)
       allow( subject ).to receive(:hosts).and_return(hosts)
       allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
     end
     context 'on el-6' do
-      let(:platform) { "el-6-i386" }
+      let(:platform) { Beaker::Platform.new('el-6-i386') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-6\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet-3000')
+        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
         subject.install_puppet( :version => '3000' )
       end
       it 'can install specific versions of puppets dependencies' do
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet-3000')
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y hiera-2001')
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y facter-1999')
+        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
+        expect(hosts[0]).to receive(:install_package).with('hiera-2001')
+        expect(hosts[0]).to receive(:install_package).with('facter-1999')
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on el-5' do
-      let(:platform) { "el-5-i386" }
+      let(:platform) { Beaker::Platform.new('el-5-i386') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-5\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
     end
     context 'on fedora' do
-      let(:platform) { "fedora-18-x86_84" }
+      let(:platform) { Beaker::Platform.new('fedora-18-x86_84') }
       it 'installs' do
         expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-fedora-18\.noarch\.rpm/)
-        expect(subject).to receive(:on).with(hosts[0], 'yum install -y puppet')
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
     end
     context 'on debian' do
-      let(:platform) { "debian-7-amd64" }
+      let(:platform) { Beaker::Platform.new('debian-7-amd64') }
       it 'installs latest if given no version info' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-\$\(lsb_release -c -s\)\.deb/)
-        expect(subject).to receive(:on).with(hosts[0], 'dpkg -i puppetlabs-release-$(lsb_release -c -s).deb')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get update')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet')
+        hosts.each do |host|
+          expect(subject).to receive(:install_puppetlabs_release_repo).with(host)
+        end
+        expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
         subject.install_puppet( :version => '3000' )
       end
       it 'can install specific versions of puppets dependencies' do
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y puppet=3000-1puppetlabs1')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y hiera=2001-1puppetlabs1')
-        expect(subject).to receive(:on).with(hosts[0], 'apt-get install -y facter=1999-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('facter=1999-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('hiera=2001-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
         subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on windows' do
-      let(:platform) { "windows-2008r2-i386" }
+      let(:platform) { Beaker::Platform.new('windows-2008r2-i386') }
       it 'installs specific version of puppet when passed :version' do
+        allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
@@ -249,6 +267,7 @@ describe ClassMixedWithDSLInstallUtils do
         subject.install_puppet(:version => '3000')
       end
       it 'installs from custom url when passed :win_download_url' do
+        allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
         expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
         expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
@@ -256,7 +275,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
     describe 'on unsupported platforms' do
-      let(:platform) { 'solaris-11-x86_64' }
+      let(:platform) { Beaker::Platform.new('solaris-11-x86_64') }
       let(:host) { make_host('henry', :platform => 'solaris-11-x86_64') }
       let(:hosts) { [host] }
       it 'by default raises an error' do
@@ -339,6 +358,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     before do
       allow(subject).to receive(:options) { opts }
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
     end
 
     describe "When host is unsupported platform" do
@@ -375,25 +395,33 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
-  RSpec.shared_examples "install-dev-repo" do
-
-    it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
-      allow(rez).to receive(:exit_code) { 0 }
-      allow(subject).to receive(:link_exists?).and_return(true)
-      expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
-      expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
-      expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
-      expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
-      subject.install_puppetlabs_dev_repo host, package_name, package_version
-    end
-
-  end
-
   describe "#install_puppetlabs_dev_repo" do
     let( :package_name ) { "puppet" }
     let( :package_version ) { "7.5.6" }
     let( :host ) do
       FakeHost.create('fakvm', platform.to_s, opts)
+    end
+    let( :logger_double ) do
+      logger_double = Object.new
+      allow(logger_double).to receive(:debug)
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+      subject.instance_variable_set(:@logger, logger_double)
+      logger_double
+    end
+
+    RSpec.shared_examples "install-dev-repo" do
+
+      it "scp's files to SUT then modifies them with find-and-sed 2-hit combo" do
+        allow(rez).to receive(:exit_code) { 0 }
+        allow(logger_double).to receive(:debug)
+        allow(subject).to receive(:link_exists?).and_return(true)
+        expect(subject).to receive(:on).with( host, /^mkdir -p .*$/ ).ordered
+        expect(subject).to receive(:scp_to).with( host, repo_config, /.*/ ).ordered
+        expect(subject).to receive(:scp_to).with( host, repo_dir, /.*/ ).ordered
+        expect(subject).to receive(:on).with( host, /^find .* sed .*/ ).ordered
+        subject.install_puppetlabs_dev_repo host, package_name, package_version
+      end
+
     end
 
     describe "When host is unsupported platform" do
@@ -438,15 +466,18 @@ describe ClassMixedWithDSLInstallUtils do
 
         it 'sets up the PC1 repository if that was downloaded' do
           allow(rez).to receive(:exit_code) { 0 }
+          allow(logger_double).to receive(:debug)
 
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
+          opts[:dev_builds_repos] = ['PC1']
           expect(subject).to receive(:on).with( host, /^find .* sed .*PC1.*/ )
           subject.install_puppetlabs_dev_repo host, package_name, package_version
         end
 
         it 'sets up the main repository if that was downloaded' do
-          allow(rez).to receive(:exit_code) { 1 }
+          allow(rez).to receive(:exit_code) { 0 }
+          allow(logger_double).to receive(:debug)
 
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
@@ -460,13 +491,29 @@ describe ClassMixedWithDSLInstallUtils do
         let( :platform ) { Beaker::Platform.new('el-7-i386') }
         include_examples "install-dev-repo"
 
-        it 'downloads PC1, products, or devel repo -- in that order' do
+        it 'downloads products or devel repo -- in that order, by default' do
           allow(subject).to receive(:on).with( host, /^find .* sed .*/ )
           stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
 
-          expect(subject).to receive(:link_exists?).with(/.*PC1.*/).and_return( false )
+          expect(logger_double).to receive(:debug).exactly( 2 ).times
           expect(subject).to receive(:link_exists?).with(/.*products.*/).and_return( false )
-          expect(subject).to receive(:link_exists?).with(/.*devel.*/).and_return( true )
+          expect(subject).to receive(:link_exists?).with(/.*devel.*/).twice.and_return( true )
+
+          subject.install_puppetlabs_dev_repo host, package_name, package_version
+        end
+
+        it 'allows ordered customization of repos based on the :dev_builds_repos option' do
+          opts[:dev_builds_repos] = ['PC17', 'yomama', 'McGuyver', 'McGruber', 'panama']
+          allow(subject).to receive(:on).with( host, /^find .* sed .*/ )
+          stub_uninteresting_portions_of_install_puppetlabs_dev_repo!
+
+          logger_call_num = opts[:dev_builds_repos].length + 2
+          expect(logger_double).to receive(:debug).exactly( logger_call_num ).times
+          opts[:dev_builds_repos].each do |repo|
+            expect(subject).to receive(:link_exists?).with(/.*repo.*/).ordered.and_return( false )
+          end
+          expect(subject).to receive(:link_exists?).with(/.*products.*/).ordered.and_return( false )
+          expect(subject).to receive(:link_exists?).with(/.*devel.*/).twice.ordered.and_return( true )
 
           subject.install_puppetlabs_dev_repo host, package_name, package_version
         end
@@ -479,6 +526,10 @@ describe ClassMixedWithDSLInstallUtils do
     let( :platform ) { @platform || 'other' }
     let( :host ) do
       FakeHost.create('fakvm', platform, opts)
+    end
+
+    before :each do
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
     end
 
     it 'sets the find command correctly for el-based systems' do
@@ -599,7 +650,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_cert_on_windows' do
     before do
-      subject.stub(:on).and_return(Beaker::Result.new({},''))
+      allow(subject).to receive(:on).and_return(Beaker::Result.new({},''))
     end
 
     context 'on windows' do

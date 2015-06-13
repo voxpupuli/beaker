@@ -13,8 +13,9 @@ module Beaker
     #@option options [String] :openstack_username The username to access the OpenStack instance with (required)
     #@option options [String] :openstack_auth_url The URL to access the OpenStack instance with (required)
     #@option options [String] :openstack_tenant The tenant to access the OpenStack instance with (required)
+    #@option options [String] :openstack_region The region that each OpenStack instance should be provisioned on (optional)
     #@option options [String] :openstack_network The network that each OpenStack instance should be contacted through (required)
-    #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each 
+    #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each
     #                                            OpenStack instance (optional)
     #@option options [String] :jenkins_build_url Added as metadata to each OpenStack instance
     #@option options [String] :department Added as metadata to each OpenStack instance
@@ -27,25 +28,36 @@ module Beaker
       @hosts = openstack_hosts
       @vms = []
 
-      raise 'You must specify an Openstack API key (:oopenstack_api_key) for OpenStack instances!' unless @options[:openstack_api_key]
+      raise 'You must specify an Openstack API key (:openstack_api_key) for OpenStack instances!' unless @options[:openstack_api_key]
       raise 'You must specify an Openstack username (:openstack_username) for OpenStack instances!' unless @options[:openstack_username]
       raise 'You must specify an Openstack auth URL (:openstack_auth_url) for OpenStack instances!' unless @options[:openstack_auth_url]
       raise 'You must specify an Openstack tenant (:openstack_tenant) for OpenStack instances!' unless @options[:openstack_tenant]
       raise 'You must specify an Openstack network (:openstack_network) for OpenStack instances!' unless @options[:openstack_network]
-      @compute_client ||= Fog::Compute.new(:provider => :openstack,
-                                           :openstack_api_key => @options[:openstack_api_key],
-                                           :openstack_username => @options[:openstack_username],
-                                           :openstack_auth_url => @options[:openstack_auth_url],
-                                           :openstack_tenant => @options[:openstack_tenant])
+
+      optionhash = {}
+      optionhash[:provider]           = :openstack
+      optionhash[:openstack_api_key]  = @options[:openstack_api_key]
+      optionhash[:openstack_username] = @options[:openstack_username]
+      optionhash[:openstack_auth_url] = @options[:openstack_auth_url]
+      optionhash[:openstack_tenant]   = @options[:openstack_tenant]
+      optionhash[:openstack_region]   = @options[:openstack_region] if @options[:openstack_region]
+
+      @compute_client ||= Fog::Compute.new(optionhash)
+
       if not @compute_client
         raise "Unable to create OpenStack Compute instance (api key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
       end
-      @network_client ||= Fog::Network.new(
-        :provider => :openstack,
-        :openstack_api_key => @options[:openstack_api_key],
-        :openstack_username => @options[:openstack_username],
-        :openstack_auth_url => @options[:openstack_auth_url],
-        :openstack_tenant => @options[:openstack_tenant])
+
+      networkoptionhash = {}
+      networkoptionhash[:provider]           = :openstack
+      networkoptionhash[:openstack_api_key]  = @options[:openstack_api_key]
+      networkoptionhash[:openstack_username] = @options[:openstack_username]
+      networkoptionhash[:openstack_auth_url] = @options[:openstack_auth_url]
+      networkoptionhash[:openstack_tenant]   = @options[:openstack_tenant]
+      networkoptionhash[:openstack_region]   = @options[:openstack_region] if @options[:openstack_region]
+
+      @network_client ||= Fog::Network.new(networkoptionhash)
+
       if not @network_client
 
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
@@ -85,9 +97,10 @@ module Beaker
         @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
         options = {
           :flavor_ref => flavor(host[:flavor]).id,
-          :image_ref => image(host[:image]).id,
-          :nics => [ {'net_id' => network(@options[:openstack_network]).id } ],
-          :name => host[:vmhostname],
+          :image_ref  => image(host[:image]).id,
+          :nics       => [ {'net_id' => network(@options[:openstack_network]).id } ],
+          :name       => host[:vmhostname],
+          :user_data  => "#cloud-config\nmanage_etc_hosts: true\n",
         }
         options[:key_name] = key_name(host)
         vm = @compute_client.servers.create(options)
@@ -117,24 +130,35 @@ module Beaker
         #
         # Do we already have an address?
         @logger.debug vm.addresses
-
+        address=nil
         begin
-          if vm.addresses[@options[:openstack_network]]
-            address = vm.addresses[@options[:openstack_network]].map{ |network| network['addr'] }.first
-          end
-        rescue NoMethodError
-          @logger.debug "No current address retrievable from OpenStack data"
-        end
-        unless address
+          # Here we try and assign an address from a floating IP pool
+          # This seems to fail on some implementations (FloatingIpPoolNotFound)
           ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
-
           if ip.nil?
             @logger.debug "Creating IP for #{host.name} (#{host[:vmhostname]})"
             ip = @compute_client.addresses.create
           end
           ip.server = vm
           address = ip.ip
+
+        rescue Fog::Compute::OpenStack::NotFound
+          # Here, we fail to just trying to use an address that's already assigned if there is one
+          # There may be better logic, but this worked in the original implementation
+          # There might be an argument for checking whether an address is reachable a la
+          # port_open? logic in host.rb but maybe race conditions
+
+          begin
+            if vm.addresses[@options[:openstack_network]]
+              address = vm.addresses[@options[:openstack_network]].map{ |network| network['addr'] }.first
+            end
+          rescue NoMethodError
+            @logger.debug "No current address retrievable from OpenStack data"
+          end
+
         end
+
+        raise 'Could not find or assign an address to the instance' unless address
         host[:ip] = address
 
         @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"

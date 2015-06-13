@@ -23,6 +23,24 @@ module Beaker
 
     end
 
+    describe '#:prepend_cmds' do
+      it 'can prepend commands' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar', :prepend_cmds => 'aloha!' }
+
+        expect( cmd.cmd_line({}) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz"
+      end
+
+      it 'can handle no prepend_cmds' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar', :prepend_cmds => nil }
+
+        expect( cmd.cmd_line({}) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
+      end
+    end
+
     describe '#options_string' do
       it 'parses things' do
         subject.options = { :v => nil, :test => nil,
@@ -45,15 +63,18 @@ module Beaker
       let(:host) { {'pathseparator' => ':'} }
 
       it 'returns a blank string if theres no env' do
+        expect( host ).to receive( :is_powershell? ).never
         expect( subject.environment_string_for(host, {}) ).to be == ''
       end
 
       it 'takes an env hash with var_name/value pairs' do
+        expect( host ).to receive( :is_powershell? ).and_return(false)
         expect( subject.environment_string_for(host, {:HOME => '/'}) ).
           to be == "env HOME=\"/\""
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
+        expect( host ).to receive( :is_powershell? ).and_return(false)
         expect( subject.environment_string_for(host, {:LD_PATH => ['/', '/tmp']}) ).
           to be == "env LD_PATH=\"/:/tmp\""
       end

@@ -376,6 +376,7 @@ describe Beaker do
 
       hosts.each do |host|
         windows_pkgs.each do |pkg|
+          allow( host ).to receive( :is_cygwin? ).and_return( true )
           expect( host ).to receive( :check_for_package ).with( pkg ).once.and_return( false )
           expect( host ).to receive( :install_package ).with( pkg ).once
         end
@@ -429,7 +430,7 @@ describe Beaker do
     it "can exec the get_ip command" do
       host = make_host('name', { :stdout => "192.168.2.130\n" } )
 
-      expect( Beaker::Command ).to receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1", [], {:prepend_cmds=>nil, :cmdexe=>false} ).once
 
       expect( subject.get_ip( host ) ).to be === "192.168.2.130"
 
@@ -542,7 +543,8 @@ describe Beaker do
     def set_env_helper(platform_name, host_specific_commands_array)
       host = make_host('name', {
           :platform     => platform_name,
-          :ssh_env_file => 'ssh_env_file'
+          :ssh_env_file => 'ssh_env_file',
+          :is_cygwin   => true,
       } )
       opts = {
           :env1_key => :env1_value,

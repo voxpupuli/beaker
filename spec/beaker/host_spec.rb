@@ -230,7 +230,7 @@ module Beaker
 
     describe "executing commands" do
       let(:command) { Beaker::Command.new('ls') }
-      let(:host) { Beaker::Host.create('host', make_host_opts('host', options.merge(platform))) }
+      let(:host) { Beaker::Host.create('host', {}, make_host_opts('host', options.merge(platform))) }
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do
@@ -330,6 +330,7 @@ module Beaker
 
       it "does the right thing on a bash host, identified as is_cygwin=true" do
         @options = {:is_cygwin => true}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -341,6 +342,7 @@ module Beaker
 
       it "does the right thing on a bash host, identified as is_cygwin=nil" do
         @options = {:is_cygwin => nil}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -352,6 +354,7 @@ module Beaker
 
       it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
         @options = {:is_cygwin => false}
+        @platform = 'windows'
         result = double
         allow( result ).to receive( :exit_code ).and_return( 0 )
         allow( host ).to receive( :exec ).and_return( result )
@@ -569,13 +572,13 @@ module Beaker
 
         rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
 
-        expect( host ).to receive(:to_s).and_return('host.example.org')
+        expect( host ).to receive(:reachable_name).and_return('default.ip.address')
 
         expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Beaker::Result.new(host, 'output!'))
 
         host.do_rsync_to *args
 
-        expect(Rsync.host).to eq('root@host.example.org')
+        expect(Rsync.host).to eq('root@default.ip.address')
       end
 
       it 'throws an IOError when the file given doesn\'t exist' do
@@ -587,53 +590,5 @@ module Beaker
       expect( "#{host}" ).to be === 'name'
     end
 
-    context 'merging defaults' do
-      it 'knows the difference between foss and pe' do
-        @options = { :type => 'pe' }
-        expect( host['puppetpath'] ).to be === '/etc/puppetlabs/puppet'
-      end
-
-    end
-
-    context 'deprecating host keys' do
-
-      describe '#build_deprecated_keys' do
-
-        it 'returns the correct array for a unix host' do
-          expect( host.build_deprecated_keys().include?(:puppetvardir) ).to be_truthy
-        end
-
-        it 'returns the correct array for a windows host' do
-          @platform = 'windows-xp-me-bla'
-          expect( host.build_deprecated_keys().include?(:hieraconf) ).to be_truthy
-        end
-
-        it 'can be called on an unsupported host type without an error being thrown' do
-          @platform = 'mac-osx-foo-tigerlion'
-          expect{ host.build_deprecated_keys() }.not_to raise_error
-        end
-
-        it 'returns an empty array for unsupported host types' do
-          @platform = 'mac-osx-foo-tigerlion'
-          expect( host.build_deprecated_keys().empty? ).to be_truthy
-        end
-
-      end
-
-      describe '#[]' do
-
-        it 'does not log for a key that isn\'t deprecated' do
-          expect( host ).to receive( :@logger ).exactly(0).times
-          host['puppetbindir']
-        end
-
-        it 'logs the warning message for a deprecated key' do
-          expect( host.instance_variable_get(:@logger) ).to receive( :warn ).once
-          host['hierapuppetlibdir']
-        end
-
-      end
-
-    end
   end
 end

@@ -15,10 +15,37 @@ module Beaker
       Errno::ENETUNREACH,
     ]
 
+    attr_reader :options, :logger, :hosts, :credentials
+
     def initialize(vmpooler_hosts, options)
       @options = options
       @logger = options[:logger]
       @hosts = vmpooler_hosts
+      @credentials = load_credentials(@options[:dot_fog])
+    end
+
+    def load_credentials(dot_fog = '.fog')
+      creds = {}
+
+      if fog = read_fog_file(dot_fog)
+        if fog[:default] && fog[:default][:vmpooler_token]
+          creds[:vmpooler_token] = fog[:default][:vmpooler_token]
+        else
+          @logger.warn "Credentials file (#{dot_fog}) is missing a :default section with a :vmpooler_token value; proceeding without authentication"
+        end
+      else
+        @logger.warn "Credentials file (#{dot_fog}) is empty; proceeding without authentication"
+      end
+
+      creds
+
+    rescue Errno::ENOENT
+      @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
+      creds
+    end
+
+    def read_fog_file(dot_fog = '.fog')
+      YAML.load_file(dot_fog)
     end
 
     def check_url url
@@ -62,8 +89,6 @@ module Beaker
         request_payload[h['template']] = (request_payload[h['template']].to_i + 1).to_s
       end
 
-      @logger.notify "Requesting VM set from vmpooler"
-
       last_wait, wait = 0, 1
       waited = 0 #the amount of time we've spent waiting for this host to provision
       begin
@@ -71,6 +96,13 @@ module Beaker
 
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri)
+
+        if @credentials[:vmpooler_token]
+          request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+          @logger.notify "Requesting VM set from vmpooler (with authentication token)"
+        else
+          @logger.notify "Requesting VM set from vmpooler"
+        end
 
         request.body = request_payload.to_json
 
@@ -128,7 +160,7 @@ module Beaker
           request.body = { 'tags' => tags }.to_json
 
           response = http.request(request)
-        rescue RuntimeError, Error::EINVAL, Errno::ECONNRESET, EOFError,
+        rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
                Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
           @logger.notify "Failed to connect to vmpooler for tagging!"
         end

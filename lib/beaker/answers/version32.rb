@@ -20,7 +20,7 @@ module Beaker
       the_answers = super
       if dashboard != master
         # in 3.2, dashboard needs the master certname
-        the_answers[dashboard.name][:q_puppetmaster_certname] = master
+        the_answers[dashboard.name][:q_puppetmaster_certname] = master.to_s
       end
 
       # do we want to check for updates?

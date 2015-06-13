@@ -33,6 +33,10 @@ module Beaker
     # an instance of {Beaker::Logger}.
     attr_accessor :logger
 
+    # Necessary for many methods in {Beaker::DSL::Helpers}.  Assumed to be 
+    # a hash.
+    attr_accessor :metadata
+
     #The full log for this test
     attr_accessor :sublog
 
@@ -97,6 +101,8 @@ module Beaker
       @exception = nil
       @runtime = nil
       @teardown_procs = []
+      @metadata = {}
+      set_current_test_filename(@path ? File.basename(@path, '.rb') : nil)
 
 
       #
@@ -106,6 +112,8 @@ module Beaker
         def run_test
           @logger.start_sublog
           @logger.last_result = nil
+
+          set_current_step_name(nil)
 
           #add arbitrary role methods
           roles = []

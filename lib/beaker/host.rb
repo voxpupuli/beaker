@@ -3,7 +3,7 @@ require 'timeout'
 require 'benchmark'
 require 'rsync'
 
-[ 'command', 'ssh_connection' ].each do |lib|
+[ 'command', 'ssh_connection'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -26,69 +26,39 @@ module Beaker
       end
     end
 
-    def self.create name, options
-      case options['HOSTS'][name]['platform']
+    def self.create name, host_hash, options
+      case host_hash['platform']
       when /windows/
-        cygwin = options['HOSTS'][name]['is_cygwin']
+        cygwin = host_hash['is_cygwin']
         if cygwin.nil? or cygwin == true
-          Windows::Host.new name, options
+          Windows::Host.new name, host_hash, options
         else
-          PSWindows::Host.new name, options
+          PSWindows::Host.new name, host_hash, options
         end
       when /aix/
-        Aix::Host.new name, options
+        Aix::Host.new name, host_hash, options
       when /osx/
-        Mac::Host.new name, options
+        Mac::Host.new name, host_hash, options
       when /freebsd/
-        FreeBSD::Host.new name, options
+        FreeBSD::Host.new name, host_hash, options
       else
-        Unix::Host.new name, options
+        Unix::Host.new name, host_hash, options
       end
     end
 
     attr_accessor :logger
-    attr_reader :name, :defaults
-    def initialize name, options
-      @logger = options[:logger]
-      @name, @options = name.to_s, options.dup
+    attr_reader :name, :host_hash, :options
+    def initialize name, host_hash, options
+      @logger = host_hash[:logger] || options[:logger]
+      @name, @host_hash, @options = name.to_s, host_hash.dup, options.dup
 
-      # This is annoying and its because of drift/lack of enforcement/lack of having
-      # a explict relationship between our defaults, our setup steps and how they're
-      # related through 'type' and the differences between the assumption of our two
-      # configurations we have for many of our products
-      type = @options.get_type
-      @defaults = merge_defaults_for_type @options, type
+      @host_hash = self.platform_defaults.merge(@host_hash)
       pkg_initialize
-    end
-
-    # Builds a deprecated keys array, for checking to see if a key is deprecated.
-    # The recommended check after using this method is +result.include?(key)+
-    #
-    # @note an unsupported host type (meaning it has no _aio_defaults_) will return
-    #   an empty hash
-    #
-    # @return [Array<Symbol>] An array of keys that are deprecated for a host
-    def build_deprecated_keys()
-      begin
-        deprecated_keys_hash = self.class.send "foss_defaults".to_sym
-        delete_exceptions_hash = self.class.send "aio_defaults".to_sym
-        deprecated_keys_hash.delete_if do |key, value|
-          delete_exceptions_hash.has_key?(key)
-        end
-      rescue NoMethodError
-        deprecated_keys_hash = {}
-      end
-      deprecated_keys_hash.keys()
     end
 
     def pkg_initialize
       # This method should be overridden by platform-specific code to
       # handle whatever packaging-related initialization is necessary.
-    end
-
-    def merge_defaults_for_type options, type
-      defaults = self.class.send "#{type}_defaults".to_sym
-      defaults.merge(options.merge((options['HOSTS'][name])))
     end
 
     def node_name
@@ -132,18 +102,21 @@ module Beaker
     end
 
     def []= k, v
-      @defaults[k] = v
+      host_hash[k] = v
     end
 
+    # Does this host have this key?  Either as defined in the host itself, or globally? 
     def [] k
-      @deprecated_keys ||= build_deprecated_keys()
-      deprecation_message = "deprecated host key '#{k}'. Perhaps you can use host.puppet[] to get what you're looking for."
-      @logger.warn( deprecation_message ) if @logger && @deprecated_keys.include?(k.to_sym)
-      @defaults[k]
+      host_hash[k] || options[k]
     end
 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def has_key? k
-      @defaults.has_key?(k)
+      host_hash.has_key?(k) || options.has_key?(k)
+    end
+
+    def delete k
+      host_hash.delete(k)
     end
 
     # The {#hostname} of this host.
@@ -159,7 +132,7 @@ module Beaker
     # Return the public name of the particular host, which may be different then the name of the host provided in
     # the configuration file as some provisioners create random, unique hostnames.
     def hostname
-      @defaults['vmhostname'] || @name
+      host_hash['vmhostname'] || @name
     end
 
     def + other
@@ -167,11 +140,15 @@ module Beaker
     end
 
     def is_pe?
-      @options.is_pe?
+      self['type'] && self['type'].to_s =~ /pe/
     end
 
     def is_cygwin?
-      self['is_cygwin'] == nil || self['is_cygwin'] == true
+      self.class == Windows::Host
+    end
+
+    def is_powershell?
+      self.class == PSWindows::Host
     end
 
     def platform
@@ -216,7 +193,7 @@ module Beaker
     end
 
     def log_prefix
-      if @defaults['vmhostname']
+      if host_hash['vmhostname']
         "#{self} (#{@name})"
       else
         self.to_s
@@ -233,128 +210,9 @@ module Beaker
       self[:ip] ||= get_ip
     end
 
-    #Examine the host system to determine the architecture
-    #@return [Boolean] true if x86_64, false otherwise
-    def determine_if_x86_64
-      if is_cygwin?
-        if self[:platform] =~ /osx|solaris/
-          result = exec(Beaker::Command.new("uname -a | grep x86_64"), :acceptable_exit_codes => (0...127))
-          result.exit_code == 0
-        else
-          result = exec(Beaker::Command.new("arch | grep x86_64"), :acceptable_exit_codes => (0...127))
-          result.exit_code == 0
-        end
-      else
-        result = exec(Beaker::Command.new("wmic os get osarchitecture"), :acceptable_exit_codes => (0...127))
-        result.stdout =~ /64/
-      end
-    end
-
     #@return [Boolean] true if x86_64, false otherwise
     def is_x86_64?
       @x86_64 ||= determine_if_x86_64
-    end
-
-    # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
-    # This is for sles based hosts.
-    # @param [String] env_file The ssh environment file to read from
-    def mirror_env_to_profile_d env_file
-      if self[:platform] =~ /sles-/
-        @logger.debug("mirroring environment to /etc/profile.d on sles platform host")
-        cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
-        shell_env = ''
-        cur_env.each_line do |env_line|
-          shell_env << "export #{env_line}"
-        end
-        #here doc it over
-        exec(Beaker::Command.new("cat << EOF > #{self[:profile_d_env_file]}\n#{shell_env}EOF"))
-        #set permissions
-        exec(Beaker::Command.new("chmod +x #{self[:profile_d_env_file]}"))
-        #keep it current
-        exec(Beaker::Command.new("source #{self[:profile_d_env_file]}"))
-      else
-        #noop
-        @logger.debug("will not mirror environment to /etc/profile.d on non-sles platform host")
-      end
-    end
-
-    #Add the provided key/val to the current ssh environment
-    #@param [String] key The key to add the value to
-    #@param [String] val The value for the key
-    #@example
-    #  host.add_env_var('PATH', '/usr/bin:PATH')
-    def add_env_var key, val
-      key = key.to_s.upcase
-      if self.is_cygwin?
-        env_file = self[:ssh_env_file]
-        escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-        #see if the key/value pair already exists
-        if exec(Beaker::Command.new("grep #{key}=.*#{escaped_val} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-          return #nothing to do here, key value pair already exists
-        #see if the key already exists
-        elsif exec(Beaker::Command.new("grep #{key} #{env_file}"), :acceptable_exit_codes => (0..255) ).exit_code == 0
-          exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=/#{key}=#{escaped_val}:/", env_file))
-        else
-          exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
-        end
-        #update the profile.d to current state
-        #match it to the contents of ssh_env_file
-        mirror_env_to_profile_d(env_file)
-      else #powershell windows
-        #see if the key/value pair already exists
-        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
-        subbed_result = result.stdout.chomp
-        if result.exit_code == 0
-          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
-        end
-        #not present, add it
-        if subbed_result == result.stdout.chomp
-          exec(Beaker::Command.new("setx /M #{key} %#{key}%;#{val}"))
-          exec(Beaker::Command.new("set #{key}=%#{key}%;#{val}"))
-        end
-      end
-    end
-
-    #Return the value of a specific env var
-    #@param [String] key The key to look for
-    #@example
-    #  host.get_env_var('path')
-    def get_env_var key
-      key = key.to_s.upcase
-      exec(Beaker::Command.new("env | grep #{key}"), :acceptable_exit_codes => (0..255)).stdout.chomp
-    end
-
-    #Delete the provided key/val from the current ssh environment
-    #@param [String] key The key to delete the value from
-    #@param [String] val The value to delete for the key
-    #@example
-    #  host.delete_env_var('PATH', '/usr/bin:PATH')
-    def delete_env_var key, val
-      key = key.to_s.upcase
-      if self.is_cygwin?
-        env_file = self[:ssh_env_file]
-        val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-        #if the key only has that single value remove the entire line
-        exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", env_file))
-        #value in middle of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
-        #value in start of list
-        exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", env_file))
-        #update the profile.d to current state
-        #match it to the contents of ssh_env_file
-        mirror_env_to_profile_d(env_file)
-      else #powershell windows
-        #get the current value of the key
-        result = exec(Beaker::Command.new("set #{key}"), :acceptable_exit_codes => (0..255))
-        subbed_result = result.stdout.chomp
-        if result.exit_code == 0
-          subbed_result = subbed_result.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
-        end
-        if subbed_result != result
-          #set to the truncated value
-          self.add_env_var(key, subbed_result)
-        end
-      end
     end
 
     def connection
@@ -403,7 +261,10 @@ module Beaker
           end
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
-            raise CommandFailure, "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            # wait to see if the connection failure will be generation, otherwise raise error
+            if not connection.wait_for_connection_failure
+              raise CommandFailure,  "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+            end
           end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
@@ -415,27 +276,6 @@ module Beaker
         # Danger, so we have to return this result?
         result
       end
-    end
-
-    # Recursively remove the path provided
-    # @param [String] path The path to remove
-    def rm_rf path
-      exec(Beaker::Command.new("rm -rf #{path}"))
-    end
-
-    # Create the provided directory structure on the host
-    # @param [String] dir The directory structure to create on the host
-    # @return [Boolean] True, if directory construction succeeded, otherwise False
-    def mkdir_p dir
-      if self.is_cygwin?
-        cmd = "mkdir -p #{dir}"
-      else
-        windows_dirstring = dir.gsub('/','\\')
-        cmd = "if not exist #{windows_dirstring} (md #{windows_dirstring})"
-      end
-
-      result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
-      result.exit_code == 0
     end
 
     # scp files from the localhost to this test host, if a directory is provided it is recursively copied.
@@ -509,6 +349,9 @@ module Beaker
 
         # copy each file to the host
         dir_source.each do |s|
+          # Copy files, not directories (as they are copied recursively)
+          next if File.directory?(s)
+
           s_path = Pathname.new(s)
           if s_path.absolute?
             file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/,''))
@@ -553,7 +396,7 @@ module Beaker
       else
         user = self['user']
       end
-      hostname_with_user = "#{user}@#{self}"
+      hostname_with_user = "#{user}@#{reachable_name}"
 
       Rsync.host = hostname_with_user
 
@@ -575,8 +418,8 @@ module Beaker
         ssh_args << "-i #{key}"
       end
 
-      if ssh_opts.has_key?('port') and
-        ssh_args << "-p #{ssh_opts['port']}"
+      if ssh_opts.has_key?(:port)
+        ssh_args << "-p #{ssh_opts[:port]}"
       end
 
       # We disable prompt when host isn't known
@@ -601,18 +444,19 @@ module Beaker
 
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
       result = Rsync.run(from_path, to_path, rsync_args)
+      @logger.debug("rsync returned #{result.inspect}")
       result
     end
 
   end
 
   [
-    'windows',
-    'pswindows',
      'unix',
      'aix',
      'mac',
      'freebsd',
+     'windows',
+     'pswindows',
   ].each do |lib|
     require "beaker/host/#{lib}"
   end

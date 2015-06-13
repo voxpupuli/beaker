@@ -78,6 +78,32 @@ module Beaker
       end
     end
 
+    #We expect the connection to close so wait for that to happen
+    def wait_for_connection_failure
+      try = 1
+      last_wait = 0
+      wait = 1
+      while try < 11
+        begin
+          @logger.debug "Waiting for connection failure on #{@hostname} (attempt #{try}, try again in #{wait} second(s))"
+          @ssh.open_channel do |channel|
+            channel.exec('') #Just send something down the pipe
+          end
+          loop_tries = 0
+          #loop is actually loop_forver, so let it try 3 times and then quit instead of endless blocking
+          @ssh.loop { loop_tries += 1 ; loop_tries < 4 }
+        rescue *RETRYABLE_EXCEPTIONS => e
+          @logger.debug "Connection on #{@hostname} failed as expected (#{e.class.name} - #{e.message})"
+          close #this connection is bad, shut it down
+          return true
+        end
+        sleep wait
+        (last_wait, wait) = wait, last_wait + wait
+        try += 1
+      end
+      false
+    end
+
     def try_to_execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
 
@@ -145,7 +171,7 @@ module Beaker
     def request_terminal_for channel, command
       channel.request_pty do |ch, success|
         if success
-          @logger.info "Allocated a PTY on #{@hostname} for #{command.inspect}"
+          @logger.debug "Allocated a PTY on #{@hostname} for #{command.inspect}"
         else
           abort "FAILED: could not allocate a pty when requested on " +
             "#{@hostname} for #{command.inspect}"

@@ -5,13 +5,22 @@ module Beaker
       # methods do not require puppet to be installed to execute correctly
       module HostHelpers
 
-        # @!macro common_opts
+        # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
         #   @option opts [Boolean] :silent (false) Do not produce log output
         #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #     exit codes as passing.
+        #   @option opts [Boolean] :dry_run (false) Do not actually execute any
+        #     commands on the SUT
+        #   @option opts [String] :stdin (nil) Input to be provided during command
+        #     execution on the SUT.
+        #   @option opts [Boolean] :pty (false) Execute this command in a pseudoterminal.
+        #   @option opts [Boolean] :expect_connection_failure (false) Expect this command
+        #     to result in a connection failure, reconnect and continue execution.
         #   @option opts [Hash{String=>String}] :environment ({}) These will be
         #     treated as extra environment variables that should be set before
         #     running the command.
@@ -365,11 +374,7 @@ module Beaker
         # @!macro common_opts
         #
         def curl_on(host, cmd, opts = {}, &block)
-          if options.is_pe? #check global options hash
-            on host, "curl --tlsv1 %s" % cmd, opts, &block
-          else
-            on host, "curl %s" % cmd, opts, &block
-          end
+          on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
 
@@ -414,11 +419,11 @@ module Beaker
           logger.debug "  Trying command #{max_retries} times."
           logger.debug ".", add_newline=false
 
-          result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
+          result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
           num_retries = 0
           until desired_exit_codes.include?(result.exit_code)
             sleep retry_interval
-            result = on host, command, {:acceptable_exit_codes => (0...127), :silent => !verbose}, &block
+            result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
             num_retries += 1
             logger.debug ".", add_newline=false
             if (num_retries > max_retries)
@@ -495,6 +500,22 @@ module Beaker
               dir
             else
               raise "Host platform not supported by `create_tmpdir_on`."
+            end
+          end
+        end
+
+        # 'echo' the provided value on the given host(s)
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] val The string to 'echo' on the host(s)
+        # @return [String, Array<String> The echo'ed value(s) returned by the host(s)
+        def echo_on hosts, val
+          #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
+          block_on hosts do |host|
+            if host.is_powershell?
+              host.exec(Command.new("echo #{val}")).stdout.chomp
+            else
+              host.exec(Command.new("echo \"#{val}\"")).stdout.chomp
             end
           end
         end

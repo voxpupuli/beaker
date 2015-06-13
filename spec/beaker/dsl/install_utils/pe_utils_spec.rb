@@ -8,6 +8,8 @@ class ClassMixedWithDSLInstallUtils
   include Beaker::DSL::Roles
   include Beaker::DSL::Patterns
 
+  attr_accessor :hosts
+
   def logger
     @logger ||= RSpec::Mocks::Double.new('logger').as_null_object
   end
@@ -64,6 +66,7 @@ describe ClassMixedWithDSLInstallUtils do
     it 'generates a windows PE install command for a windows host' do
       winhost['dist'] = 'puppet-enterprise-3.0'
       allow( subject ).to receive( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
+      allow( winhost ).to receive( :is_cygwin?).and_return(true)
       expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
     end
 
@@ -167,6 +170,25 @@ describe ClassMixedWithDSLInstallUtils do
       subject.fetch_pe( [unixhost], {} )
     end
 
+    it 'can download a PE .tar from a URL to #fetch_and_push_pe' do
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ) do |arg|
+        if arg =~ /.tar.gz/ #there is no .tar.gz link, only a .tar
+          false
+        else
+          true
+        end
+      end
+      allow( subject ).to receive( :on ).and_return( true )
+
+      path = unixhost['pe_dir']
+      filename = "#{ unixhost['dist'] }"
+      extension = '.tar'
+      expect( subject ).to receive( :fetch_and_push_pe ).with( unixhost, anything, filename, extension ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; cat #{ filename }#{ extension } | tar -xvf -" ).once
+      subject.fetch_pe( [unixhost], {:fetch_local_then_push_to_host => true} )
+    end
+
     it 'can download a PE .tar.gz from a URL to a host and unpack it' do
       allow( File ).to receive( :directory? ).and_return( false ) #is not local
       allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
@@ -177,6 +199,19 @@ describe ClassMixedWithDSLInstallUtils do
       extension = '.tar.gz'
       expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; curl #{ path }/#{ filename }#{ extension } | gunzip | tar -xvf -" ).once
       subject.fetch_pe( [unixhost], {} )
+    end
+
+    it 'can download a PE .tar.gz from a URL to #fetch_and_push_pe' do
+      allow( File ).to receive( :directory? ).and_return( false ) #is not local
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
+      allow( subject ).to receive( :on ).and_return( true )
+
+      path = unixhost['pe_dir']
+      filename = "#{ unixhost['dist'] }"
+      extension = '.tar.gz'
+      expect( subject ).to receive( :fetch_and_push_pe ).with( unixhost, anything, filename, extension ).once
+      expect( subject ).to receive( :on ).with( unixhost, "cd #{ unixhost['working_dir'] }; cat #{ filename }#{ extension } | gunzip | tar -xvf -" ).once
+      subject.fetch_pe( [unixhost], {:fetch_local_then_push_to_host => true} )
     end
 
     it 'can download a PE .swix from a URL to an EOS host and unpack it' do
@@ -253,7 +288,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :version_is_less ).with('3.0', '4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
-      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.99').and_return( true )
       allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
       allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"
@@ -295,6 +330,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).with( hosts[2], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       expect( subject ).to receive( :on ).with( hosts[3], /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
       #run rake task on dashboard
+
       expect( subject ).to receive( :on ).with( hosts[0], /\/opt\/puppet\/bin\/rake -sf \/opt\/puppet\/share\/puppet-dashboard\/Rakefile .* RAILS_ENV=production/ ).once
       #wait for all hosts to appear in the dashboard
       #run puppet agent now that installation is complete
@@ -356,7 +392,7 @@ describe ClassMixedWithDSLInstallUtils do
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).and_return( @fail_result, @success_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :accept_all_exit_codes => true }).and_return( @fail_result, @success_result )
       subject.do_higgs_install( hosts[0], opts )
     end
 
@@ -371,7 +407,7 @@ describe ClassMixedWithDSLInstallUtils do
                                          "cd /tmp/2014-07-01_15.27.53/puppet-enterprise-3.0-linux ; nohup ./pe-installer <<<Y > higgs_2014-07-01_15.27.53.log 2>&1 &",
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
-      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :acceptable_exit_codes => 0..255 }).exactly(10).times.and_return( @fail_result )
+      expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :accept_all_exit_codes => true }).exactly(10).times.and_return( @fail_result )
       expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error
     end
 
@@ -468,6 +504,41 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
       end
+    end
+
+  end
+
+  describe 'fetch_and_push_pe' do
+
+    it 'fetches the file' do
+      allow( subject ).to receive( :scp_to )
+
+      path = 'abcde/fg/hij'
+      filename = 'pants'
+      extension = '.txt'
+      expect( subject ).to receive( :fetch_http_file ).with( path, "#{filename}#{extension}", 'tmp/pe' )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension)
+    end
+
+    it 'allows you to set the local copy dir' do
+      allow( subject ).to receive( :scp_to )
+
+      path = 'defg/hi/j'
+      filename = 'pants'
+      extension = '.txt'
+      local_dir = '/root/domes'
+      expect( subject ).to receive( :fetch_http_file ).with( path, "#{filename}#{extension}", local_dir )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension, local_dir)
+    end
+
+    it 'scp\'s to the host' do
+      allow( subject ).to receive( :fetch_http_file )
+
+      path = 'abcde/fg/hij'
+      filename = 'pants'
+      extension = '.txt'
+      expect( subject ).to receive( :scp_to ).with( unixhost, "tmp/pe/#{filename}#{extension}", unixhost['working_dir'] )
+      subject.fetch_and_push_pe(unixhost, path, filename, extension)
     end
 
   end

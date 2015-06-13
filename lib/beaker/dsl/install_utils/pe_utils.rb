@@ -1,3 +1,6 @@
+[ 'aio_defaults', 'pe_defaults', 'puppet_utils' ].each do |lib|
+    require "beaker/dsl/install_utils/#{lib}"
+end
 module Beaker
   module DSL
     module InstallUtils
@@ -12,6 +15,48 @@ module Beaker
       #   {Beaker::Host}'s interface to act upon
       # * the module {Beaker::DSL::Wrappers} the provides convenience methods for {Beaker::DSL::Command} creation
       module PEUtils
+        include AIODefaults
+        include PEDefaults
+        include PuppetUtils
+
+        # Set defaults and PATH for these hosts to be either pe or aio, have host['type'] == aio for aio settings, defaults
+        # to pe.
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        def configure_pe_defaults_on( hosts )
+          block_on hosts do |host|
+            if host['type'] && host['type'] =~ /aio/
+              # add pe defaults to host
+              add_aio_defaults_on(host)
+            else
+              add_pe_defaults_on(host)
+            end
+            # add pathing env
+            add_puppet_paths_on(host)
+          end
+        end
+
+
+        # @!macro [new] common_opts
+        #   @param [Hash{Symbol=>String}] opts Options to alter execution.
+        #   @option opts [Boolean] :silent (false) Do not produce log output
+        #   @option opts [Array<Fixnum>] :acceptable_exit_codes ([0]) An array
+        #     (or range) of integer exit codes that should be considered
+        #     acceptable.  An error will be thrown if the exit code does not
+        #     match one of the values in this list.
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
+        #     exit codes as passing.
+        #   @option opts [Boolean] :dry_run (false) Do not actually execute any
+        #     commands on the SUT
+        #   @option opts [String] :stdin (nil) Input to be provided during command
+        #     execution on the SUT.
+        #   @option opts [Boolean] :pty (false) Execute this command in a pseudoterminal.
+        #   @option opts [Boolean] :expect_connection_failure (false) Expect this command
+        #     to result in a connection failure, reconnect and continue execution.
+        #   @option opts [Hash{String=>String}] :environment ({}) These will be
+        #     treated as extra environment variables that should be set before
+        #     running the command.
 
         #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
         # @example
@@ -92,6 +137,9 @@ module Beaker
         # @param  [Hash{Symbol=>Symbol, String}] opts The options
         # @option opts [String] :pe_dir Default directory or URL to pull PE package from
         #                  (Otherwise uses individual hosts pe_dir)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_mac(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -107,7 +155,11 @@ module Beaker
             if not link_exists?("#{path}/#{filename}#{extension}")
               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
             end
-            on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+            if opts[:fetch_local_then_push_to_host]
+              fetch_and_push_pe(host, path, filename, extension)
+            else
+              on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
+            end
           end
         end
 
@@ -119,6 +171,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_dir)
         # @option opts [String] :pe_ver_win Default PE version to install or upgrade to
         #                  (Otherwise uses individual hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_windows(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -135,11 +190,13 @@ module Beaker
             if not link_exists?("#{path}/#{filename}#{extension}")
               raise "attempting installation on #{host}, #{path}/#{filename}#{extension} does not exist"
             end
-            if host.is_cygwin?
+            if opts[:fetch_local_then_push_to_host]
+              fetch_and_push_pe(host, path, filename, extension)
+              on host, "cd #{host['working_dir']}; chmod 644 #{filename}#{extension}"
+            elsif host.is_cygwin?
               on host, "cd #{host['working_dir']}; curl -O #{path}/#{filename}#{extension}"
             else
-              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['wor
-  king_dir']}\\#{filename}#{extension}')")
+              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{path}/#{filename}#{extension}','#{host['working_dir']}\\#{filename}#{extension}')")
             end
           end
         end
@@ -150,6 +207,9 @@ module Beaker
         # @param  [Hash{Symbol=>Symbol, String}] opts The options
         # @option opts [String] :pe_dir Default directory or URL to pull PE package from
         #                  (Otherwise uses individual hosts pe_dir)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe_on_unix(host, opts)
           path = host['pe_dir'] || opts[:pe_dir]
@@ -184,7 +244,14 @@ module Beaker
             else
               unpack = 'tar -xvf -'
               unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack
-              on host, "cd #{host['working_dir']}; curl #{path}/#{filename}#{extension} | #{unpack}"
+              if opts[:fetch_local_then_push_to_host]
+                fetch_and_push_pe(host, path, filename, extension)
+                command_file_push = 'cat '
+              else
+                command_file_push = "curl #{path}/"
+              end
+              on host, "cd #{host['working_dir']}; #{command_file_push}#{filename}#{extension} | #{unpack}"
+
             end
           end
         end
@@ -199,6 +266,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_ver)
         # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
         #                  (Otherwise uses individual Windows hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @api private
         def fetch_pe(hosts, opts)
           hosts.each do |host|
@@ -221,10 +291,40 @@ module Beaker
         def deploy_frictionless_to_master(host)
           klass = host['platform'].gsub(/-/, '_').gsub(/\./,'')
           klass = "pe_repo::platform::#{klass}"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
-          on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
-          on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          if version_is_less(host['pe_ver'], '3.8')
+            # use the old rake tasks
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake nodeclass:add[#{klass},skip]"
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:add[#{master},,,skip]"
+            on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
+            on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          else
+            # the new hotness
+            begin
+              require 'scooter'
+            rescue LoadError => e
+              @logger.notify('WARNING: gem scooter is required for frictionless installation post 3.8')
+              raise e
+            end
+            dispatcher = Scooter::HttpDispatchers::ConsoleDispatcher.new(dashboard)
+
+            # Check if we've already created a frictionless agent node group
+            # to avoid errors creating the same node group when the beaker hosts file contains
+            # multiple hosts with the same platform
+            node_group = dispatcher.get_node_group_by_name('Beaker Frictionless Agent')
+            if node_group.nil? || node_group.empty?
+              node_group = {}
+              node_group['name'] = "Beaker Frictionless Agent"
+              # Pin the master to the node
+              node_group['rule'] = [ "and",  [ '=', 'name', master.to_s ]]
+              node_group['classes'] ||= {}
+            end
+
+            # add the pe_repo platform class
+            node_group['classes'][klass] = {}
+
+            dispatcher.create_new_node_group_model(node_group)
+            on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
+          end
         end
 
         #Perform a Puppet Enterprise upgrade or install
@@ -240,9 +340,15 @@ module Beaker
         # @option opts [Boolean] :set_console_password Should we set the PE console password in the answers file?  Used during upgrade only.
         # @option opts [Hash<String>] :answers Pre-set answers based upon ENV vars and defaults
         #                             (See {Beaker::Options::Presets.env_vars})
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         #
         # @example
         #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
+        #
+        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
+        # to other settings whether the 32 or 64bit install is used
         #
         # @api private
         #
@@ -253,10 +359,6 @@ module Beaker
           unless masterless
             pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
             pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
-
-            unless version_is_less(opts[:pe_ver] || master['pe_ver'], '3.4')
-              master['puppetservice'] = 'pe-puppetserver'
-            end
           end
 
           # Set PE distribution for all the hosts, create working dir
@@ -272,12 +374,13 @@ module Beaker
               host['dist'] = "puppet-enterprise-#{version}-#{host['platform']}"
             elsif host['platform'] =~ /windows/
               version = host[:pe_ver] || opts['pe_ver_win']
-              should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !host['install_32'] && !opts['install_32']
+              is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
+              should_install_64bit = !(version_is_less(version, '3.4')) && host.is_x86_64? && !is_config_32
               #only install 64bit builds if
               # - we are on pe version 3.4+
               # - we do not have install_32 set on host
               # - we do not have install_32 set globally
-              if !(version_is_less(version, '4.0'))
+              if !(version_is_less(version, '3.99'))
                 if should_install_64bit
                   host['dist'] = "puppet-agent-#{version}-x64"
                 else
@@ -303,6 +406,7 @@ module Beaker
           install_hosts.each do |host|
             if host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
+              configure_pe_defaults_on(host)
               if not host.is_cygwin?
                 # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
                 host.close
@@ -313,11 +417,15 @@ module Beaker
               if host['roles'].include?('frictionless') &&  (! version_is_less(version, '3.2.0'))
                 # If We're *not* running the classic installer, we want
                 # to make sure the master has packages for us.
-                deploy_frictionless_to_master(host)
+                if host['platform'] != master['platform'] # only need to do this if platform differs
+                  deploy_frictionless_to_master(host)
+                end
                 on host, installer_cmd(host, opts)
+                configure_pe_defaults_on(host)
               elsif host['platform'] =~ /osx|eos/
                 # If we're not frictionless, we need to run the OSX special-case
                 on host, installer_cmd(host, opts)
+                configure_pe_defaults_on(host)
                 #set the certname and master
                 on host, puppet("config set server #{master}")
                 on host, puppet("config set certname #{host}")
@@ -328,6 +436,7 @@ module Beaker
                 answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
                 create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
                 on host, installer_cmd(host, opts)
+                configure_pe_defaults_on(host)
               end
             end
 
@@ -358,12 +467,15 @@ module Beaker
               wait_for_host_in_dashboard(host)
             end
 
-            if pre30master
-              task = 'nodegroup:add_all_nodes group=default'
-            else
-              task = 'defaultgroup:ensure_default_group'
+            # only appropriate for pre-3.9 builds
+            if version_is_less(master[:pe_ver], '3.99')
+              if pre30master
+                task = 'nodegroup:add_all_nodes group=default'
+              else
+                task = 'defaultgroup:ensure_default_group'
+              end
+              on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
             end
-            on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
 
             # Now that all hosts are in the dashbaord, run puppet one more
             # time to configure mcollective
@@ -371,63 +483,84 @@ module Beaker
           end
         end
 
+        #Install PE based on global hosts with global options
+        #@see #install_pe_on
+        def install_pe
+          install_pe_on(hosts, options)
+        end
+
         #Install PE based upon host configuration and options
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @!macro common_opts
         # @example
-        #  install_pe
+        #  install_pe_on(hosts, {})
         #
         # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
         #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
         #
-        def install_pe
+        def install_pe_on(hosts, opts)
           #process the version files if necessary
-          hosts.each do |host|
-            host['pe_dir'] ||= options[:pe_dir]
-            if host['platform'] =~ /windows/
-              host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-                Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file_win])
-            else
-              host['pe_ver'] = host['pe_ver'] || options['pe_ver'] ||
-                Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || options[:pe_dir], options[:pe_version_file])
+          confine_block(:to, {}, hosts) do
+            hosts.each do |host|
+              host['pe_dir'] ||= opts[:pe_dir]
+              if host['platform'] =~ /windows/
+                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
+                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file_win])
+              else
+                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
+                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file])
+              end
             end
+            do_install sorted_hosts, opts
           end
-          #send in the global options hash
-          do_install sorted_hosts, options
+        end
+
+        #Upgrade PE based upon global host configuration and global options
+        #@see #upgrade_pe_on
+        def upgrade_pe path=nil
+          upgrade_pe_on(hosts, options, path)
         end
 
         #Upgrade PE based upon host configuration and options
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @!macro common_opts
         # @param [String] path A path (either local directory or a URL to a listing of PE builds).
         #                      Will contain a LATEST file indicating the latest build to install.
         #                      This is ignored if a pe_upgrade_ver and pe_upgrade_dir are specified
         #                      in the host configuration file.
         # @example
-        #  upgrade_pe("http://neptune.puppetlabs.lan/3.0/ci-ready/")
+        #  upgrade_pe_on(agents, {}, "http://neptune.puppetlabs.lan/3.0/ci-ready/")
         #
         # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
-        def upgrade_pe path=nil
-          set_console_password = false
-          # if we are upgrading from something lower than 3.4 then we need to set the pe console password
-          if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
-            set_console_password = true
-          end
-          # get new version information
-          hosts.each do |host|
-            host['pe_dir'] = host['pe_upgrade_dir'] || path
-            if host['platform'] =~ /windows/
-              host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
-                Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file_win])
-            else
-              host['pe_ver'] = host['pe_upgrade_ver'] || options['pe_upgrade_ver'] ||
-                Options::PEVersionScraper.load_pe_version(host['pe_dir'], options[:pe_version_file])
+        def upgrade_pe_on hosts, opts, path=nil
+          confine_block(:to, {}, hosts) do
+            set_console_password = false
+            # if we are upgrading from something lower than 3.4 then we need to set the pe console password
+            if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
+              set_console_password = true
             end
-            if version_is_less(host['pe_ver'], '3.0')
-              host['pe_installer'] ||= 'puppet-enterprise-upgrader'
+            # get new version information
+            hosts.each do |host|
+              host['pe_dir'] = host['pe_upgrade_dir'] || path
+              if host['platform'] =~ /windows/
+                host['pe_ver'] = host['pe_upgrade_ver'] || opts['pe_upgrade_ver'] ||
+                  Options::PEVersionScraper.load_pe_version(host['pe_dir'], opts[:pe_version_file_win])
+              else
+                host['pe_ver'] = host['pe_upgrade_ver'] || opts['pe_upgrade_ver'] ||
+                  Options::PEVersionScraper.load_pe_version(host['pe_dir'], opts[:pe_version_file])
+              end
+              if version_is_less(host['pe_ver'], '3.0')
+                host['pe_installer'] ||= 'puppet-enterprise-upgrader'
+              end
             end
+            do_install(sorted_hosts, opts.merge({:type => :upgrade, :set_console_password => set_console_password}))
+            opts['upgrade'] = true
           end
-          # send in the global options hash
-          do_install(sorted_hosts, options.merge({:type => :upgrade, :set_console_password => set_console_password}))
-          options['upgrade'] = true
         end
 
         #Create the Higgs install command string based upon the host and options settings.  Installation command will be run as a
@@ -448,6 +581,9 @@ module Beaker
         #                  (Otherwise uses individual hosts pe_dir)
         # @option opts [String] :pe_ver Default PE version to install
         #                  (Otherwise uses individual hosts pe_ver)
+        # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
+        #                 you use Beaker as the middleman for this (true), or curl the
+        #                 file from the host (false; default behavior)
         # @raise [StandardError] When installation times out
         #
         # @example
@@ -479,7 +615,7 @@ module Beaker
           prev_sleep = 0
           cur_sleep = 1
           while (res.stdout !~ higgs_re) and (attempts < tries)
-            res = on host, "cd #{host['working_dir']}/#{host['dist']} && cat #{host['higgs_file']}", :acceptable_exit_codes => (0..255)
+            res = on host, "cd #{host['working_dir']}/#{host['dist']} && cat #{host['higgs_file']}", :accept_all_exit_codes => true
             attempts += 1
             sleep( cur_sleep )
             prev_sleep = cur_sleep
@@ -510,6 +646,23 @@ module Beaker
           end
           #send in the global options hash
           do_higgs_install higgs_host, options
+        end
+
+        # Grabs the pe file from a remote host to the machine running Beaker, then
+        # scp's the file out to the host.
+        #
+        # @param [Host] host The host to install on
+        # @param [String] path path to the install file
+        # @param [String] filename the filename of the pe file (without the extension)
+        # @param [String] extension the extension of the pe file
+        # @param [String] local_dir the directory to store the pe file in on
+        #                   the Beaker-running-machine
+        #
+        # @api private
+        # @return nil
+        def fetch_and_push_pe(host, path, filename, extension, local_dir='tmp/pe')
+          fetch_http_file("#{path}", "#{filename}#{extension}", local_dir)
+          scp_to host, "#{local_dir}/#{filename}#{extension}", host['working_dir']
         end
 
       end

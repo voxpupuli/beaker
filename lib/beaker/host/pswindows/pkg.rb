@@ -2,7 +2,7 @@ module PSWindows::Pkg
   include Beaker::CommandFactory
 
   def check_for_command(name)
-    result = exec(Beaker::Command.new("where #{name}"), :acceptable_exit_codes => (0...127))
+    result = exec(Beaker::Command.new("where #{name}"), :accept_all_exit_codes => true)
     result.exit_code == 0
   end
 
@@ -24,14 +24,18 @@ module PSWindows::Pkg
     0
   end
 
+  #Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
+  #@return [Boolean] true if x86_64, false otherwise
+  def determine_if_x86_64
+    (identify_windows_architecture =~ /64/) == 0
+  end
+
   private
 
   # @api private
   def identify_windows_architecture
     arch = nil
-    execute("wmic os get osarchitecture",
-    :acceptable_exit_codes => (0...127)) do |result|
-
+    execute("wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
       arch = if result.exit_code == 0
         result.stdout =~ /64/ ? '64' : '32'
       else
@@ -44,8 +48,7 @@ module PSWindows::Pkg
   # @api private
   def identify_windows_architecture_from_os_name_for_win2003
     arch = nil
-    execute("wmic os get name",
-    :acceptable_exit_codes => (0...127)) do |result|
+    execute("wmic os get name", :accept_all_exit_codes => true) do |result|
       arch = result.stdout =~ /64/ ? '64' : '32'
     end
     arch

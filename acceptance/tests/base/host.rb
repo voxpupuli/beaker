@@ -27,6 +27,7 @@ end
 
 step "#add_env_var : can add an environment variable"
 hosts.each do |host|
+  host.clear_env_var("test")
   logger.debug("add TEST=1")
   host.add_env_var("TEST", "1")
   logger.debug("add TEST=1 again (shouldn't create duplicate entry)")
@@ -151,4 +152,10 @@ hosts.each do |host|
     end
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
+end
+
+step "#reboot: can reboot the host"
+hosts.each do |host|
+  host.reboot
+  on host, "echo #{host} rebooted!"
 end

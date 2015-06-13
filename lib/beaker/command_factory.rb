@@ -16,7 +16,11 @@ module Beaker
     end
 
     def execute(command, options={}, &block)
-      result = self.exec(Command.new(command), options)
+      cmd_create_options = {}
+      exec_opts = options.dup
+      cmd_create_options[:prepend_cmds] = exec_opts.delete(:prepend_cmds) || nil
+      cmd_create_options[:cmdexe] = exec_opts.delete(:cmdexe) || false
+      result = self.exec(Command.new(command, [], cmd_create_options), exec_opts)
 
       if block_given?
         yield result

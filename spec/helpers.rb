@@ -50,7 +50,7 @@ module HostHelpers
     opts = Beaker::Options::Presets.new
     opts.presets.merge( opts.env_vars ).merge( { :logger => logger,
                                                :host_config => 'sample.config',
-                                               :type => :foss,
+                                               :type => nil,
                                                :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
                                                :datastore => 'instance0',
                                                :folder => 'Delivery/Quality Assurance/Staging/Dynamic',
@@ -77,12 +77,12 @@ module HostHelpers
     make_opts.merge( { 'HOSTS' => { name => opts } } ).merge( opts )
   end
 
-  def make_host name, opts
-    opts = HOST_DEFAULTS.merge(opts)
+  def make_host name, host_hash
+    host_hash = Beaker::Options::OptionsHash.new.merge(HOST_DEFAULTS.merge(host_hash))
 
-    host = Beaker::Host.create( name, make_host_opts(name, opts) )
+    host = Beaker::Host.create( name, host_hash, make_opts)
 
-    allow(host).to receive( :exec ).and_return( generate_result( name, opts ) )
+    allow(host).to receive( :exec ).and_return( generate_result( name, host_hash ) )
     host
   end
 

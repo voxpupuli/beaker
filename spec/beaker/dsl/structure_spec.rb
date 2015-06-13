@@ -2,17 +2,26 @@ require 'spec_helper'
 
 class ClassMixedWithDSLStructure
   include Beaker::DSL::Structure
+  include Beaker::DSL::Helpers::TestHelpers
 end
 
 describe ClassMixedWithDSLStructure do
   include Beaker::DSL::Assertions
-  let(:logger) { double }
+
+  let (:logger) { double }
+  let (:metadata) { @metadata ||= {} }
+
+  before :each do
+    allow( subject ).to receive(:metadata).and_return(metadata)
+  end
+
   describe '#step' do
     it 'requires a name' do
       expect { subject.step do; end }.to raise_error ArgumentError
     end
 
     it 'notifies the logger' do
+      allow( subject ).to receive( :set_current_step_name )
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       subject.step 'blah'
@@ -20,15 +29,25 @@ describe ClassMixedWithDSLStructure do
 
     it 'yields if a block is given' do
       expect( subject ).to receive( :logger ).and_return( logger )
+      allow(  subject ).to receive( :set_current_step_name )
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
         subject.foo
       end
     end
+
+    it 'sets the metadata' do
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow( logger ).to receive( :notify )
+      step_name = 'pierceBrosnanTests'
+      subject.step step_name
+      expect( metadata[:step][:name] ).to be === step_name
+    end
   end
 
   describe '#test_name' do
+
     it 'requires a name' do
       expect { subject.test_name do; end }.to raise_error ArgumentError
     end
@@ -46,6 +65,14 @@ describe ClassMixedWithDSLStructure do
       subject.test_name 'blah' do
         subject.foo
       end
+    end
+
+    it 'sets the metadata' do
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow( logger ).to receive( :notify )
+      test_name = '15-05-08\'s weather is beautiful'
+      subject.test_name test_name
+      expect( metadata[:case][:name] ).to be === test_name
     end
   end
 
@@ -99,6 +126,14 @@ describe ClassMixedWithDSLStructure do
         with( 'No suitable hosts found' )
 
       subject.confine( :to, {} )
+    end
+
+    it 'uses a provided host subset when no criteria is provided' do
+
+      subset = ['host1', 'host2']
+      hosts = subset.dup << 'host3'
+      expect( subject ).to receive( :hosts= ).with( subset )
+      subject.confine :to, {}, subset
     end
 
     it 'raises when given mode is not :to or :except' do
@@ -191,5 +226,72 @@ describe ClassMixedWithDSLStructure do
       end
       expect( selected_hosts ).to be == [ host1 ]
     end
+  end
+
+  describe '#tag' do
+    let ( :tag_includes ) { @tag_includes || [] }
+    let ( :tag_excludes ) { @tag_excludes || [] }
+    let ( :options )      {
+      opts = Beaker::Options::OptionsHash.new
+      opts[:tag_includes] = tag_includes
+      opts[:tag_excludes] = tag_excludes
+      opts
+    }
+
+    it 'sets tags on the TestCase\'s metadata object' do
+      subject.instance_variable_set(:@options, options)
+      tags = ['pants', 'jayjay', 'moguely']
+      subject.tag(*tags)
+      expect( metadata[:case][:tags] ).to be === tags
+    end
+
+    it 'lowercases the tags' do
+      subject.instance_variable_set(:@options, options)
+      tags_upper = ['pANTs', 'jAYJAy', 'moGUYly']
+      tags_lower = tags_upper.map(&:downcase)
+      subject.tag(*tags_upper)
+      expect( metadata[:case][:tags] ).to be === tags_lower
+    end
+
+    it 'skips the test if any of the requested tags isn\'t included in this test' do
+      test_tags = ['pants', 'jayjay', 'moguely']
+      @tag_includes = test_tags.compact.push('needed_tag_not_in_test')
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test )
+      subject.tag(*test_tags)
+    end
+
+    it 'runs the test if all requested tags are included in this test' do
+      @tag_includes = ['pants_on_head', 'jayjay_jayjay', 'mo']
+      test_tags = @tag_includes.compact.push('extra_asdf')
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test ).never
+      subject.tag(*test_tags)
+    end
+
+    it 'skips the test if any of the excluded tags are included in this test' do
+      test_tags = ['ports', 'jay_john_mary', 'mog_the_dog']
+      @tag_excludes = [test_tags[0]]
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test )
+      subject.tag(*test_tags)
+    end
+
+    it 'runs the test if none of the excluded tags are included in this test' do
+      @tag_excludes = ['pants_on_head', 'jayjay_jayjay', 'mo']
+      test_tags     = ['pants_at_head', 'jayj00_jayjay', 'motly_crew']
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test ).never
+      subject.tag(*test_tags)
+    end
+
   end
 end

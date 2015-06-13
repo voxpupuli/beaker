@@ -121,23 +121,26 @@ module Beaker
               _, module_name = parse_for_modulename( source_path )
             end
 
+            target_path = File.join(target_module_dir, module_name)
+
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
             when 'scp'
               #move to the host
+              logger.debug "Using scp to transfer #{source_path} to #{target_path}"
               scp_to host, source_path, target_module_dir, {:ignore => ignore_list}
               #rename to the selected module name, if not correct
               cur_path = File.join(target_module_dir, source_name)
-              new_path = File.join(target_module_dir, module_name)
-              if (cur_path != new_path)
-                if host.is_cygwin?
-                  on host, "mv #{cur_path} #{new_path}"
+              if (cur_path != target_path)
+                if host.is_powershell?
+                  on host, "move /y #{cur_path} #{target_path}"
                 else
-                  on host, "move /y #{cur_path} #{new_path}"
+                  on host, "mv #{cur_path} #{target_path}"
                 end
               end
             when 'rsync'
-              rsync_to host, source, File.join(target_module_dir, module_name), {:ignore => ignore_list}
+              logger.debug "Using rsync to transfer #{source_path} to #{target_path}"
+              rsync_to host, source_path, target_path, {:ignore => ignore_list}
             else
               logger.debug "Unsupported transfer protocol, returning nil"
               nil

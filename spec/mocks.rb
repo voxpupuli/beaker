@@ -77,8 +77,7 @@ module FakeHost
 
   def self.create(name = 'fakevm', platform = 'redhat-version-arch', options = {})
     options_hash = Beaker::Options::OptionsHash.new.merge(options)
-    options_hash['HOSTS'] = { name => { 'platform' => Beaker::Platform.new(platform) } }
-    host = Beaker::Host.create(name, options_hash)
+    host = Beaker::Host.create(name, { 'platform' => Beaker::Platform.new(platform) } , options_hash)
     host.extend(MockedExec)
     host
   end

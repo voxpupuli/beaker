@@ -3,14 +3,18 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(freebsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus)\-.+\-.+$/
+    PLATFORMS = /^(cisco|freebsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus)\-.+\-.+$/
 
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
-      { :debian => { "wheezy"  => "7",
+      { :debian => { "jessie"  => "8",
+                     "wheezy"  => "7",
                      "squeeze" => "6",
                    },
-        :ubuntu => { "trusty"  => "1404",
+        :ubuntu => { "wily"    => "1510",
+                     "vivid"   => "1504",
+                     "utopic"  => "1410",
+                     "trusty"  => "1404",
                      "saucy"   => "1310",
                      "raring"  => "1304",
                      "quantal" => "1210",

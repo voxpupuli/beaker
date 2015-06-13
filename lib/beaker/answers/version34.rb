@@ -16,13 +16,13 @@ module Beaker
 
       classifier_database_user     = answer_for(@options, :q_classifier_database_user, 'DFGhjlkj')
       classifier_database_name     = answer_for(@options, :q_database_name, 'pe-classifier')
-      classifier_database_password = "'#{@options[:answers][:q_classifier_database_password]}'"
+      classifier_database_password = "'#{answer_for(@options, :q_classifier_database_password)}'"
       activity_database_user       = answer_for(@options, :q_activity_database_user, 'adsfglkj')
       activity_database_name       = answer_for(@options, :q_activity_database_name, 'pe-activity')
-      activity_database_password   = "'#{@options[:answers][:q_activity_database_password]}'"
+      activity_database_password   = "'#{answer_for(@options, :q_activity_database_password)}'"
       rbac_database_user           = answer_for(@options, :q_rbac_database_user, 'RbhNBklm')
       rbac_database_name           = answer_for(@options, :q_rbac_database_name, 'pe-rbac')
-      rbac_database_password       = "'#{@options[:answers][:q_rbac_database_password]}'"
+      rbac_database_password       = "'#{answer_for(@options, :q_rbac_database_password)}'"
 
       console_services_hash = {
         :q_classifier_database_user     => classifier_database_user,
@@ -38,7 +38,7 @@ module Beaker
 
       # If we're installing or upgrading from a non-RBAC version, set the 'admin' password
       if @options[:type] == :upgrade && @options[:set_console_password]
-        dashboard_password = "'#{@options[:answers][:q_puppet_enterpriseconsole_auth_password]}'"
+        dashboard_password = "'#{answer_for(@options, :q_puppet_enterpriseconsole_auth_password)}'"
         the_answers[dashboard.name][:q_puppet_enterpriseconsole_auth_password] = dashboard_password
       end
 

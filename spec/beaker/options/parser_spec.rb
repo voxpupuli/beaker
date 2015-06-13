@@ -167,10 +167,6 @@ module Beaker
           expect{parser.parse_args(args)}.to raise_error(ArgumentError)
         end
 
-        it "ensures that type is one of pe/git" do
-          args = ["-h", hosts_path, "--log-level", "debug", "--type", "unkowns"]
-          expect{parser.parse_args(args)}.to raise_error(ArgumentError)
-        end
       end
 
       context "set_default_host!" do
@@ -215,16 +211,22 @@ module Beaker
 
       describe "normalize_args" do
         let(:hosts) do
-          {
+          Beaker::Options::OptionsHash.new.merge({
             'HOSTS' => {
               :master => {
                 :roles => ["master","agent","arbitrary_role"],
+                :platform => 'el-7-x86_64',
+                :user => 'root',
               },
               :agent => {
                 :roles => ["agent","default","other_abitrary_role"],
+                :platform => 'el-7-x86_64',
+                :user => 'root',
               },
-            }
-          }
+            },
+            'fail_mode' => 'slow',
+            'preserve_hosts' => 'always',
+          })
         end
 
         def fake_hosts_file_for_platform(hosts, platform)
@@ -237,33 +239,101 @@ module Beaker
         end
 
         shared_examples_for(:a_platform_supporting_only_agents) do |platform,type|
-          let(:args) { ["--type", type] }
 
-          it "restricts #{platform} hosts to agent for #{type}" do
+          it "restricts #{platform} hosts to agent" do
+            args = []
             hosts_file = fake_hosts_file_for_platform(hosts, platform)
             args << "--hosts" << hosts_file
             expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*may not have roles 'master', 'dashboard', or 'database'/)
           end
         end
 
-        context "for pe" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'solaris-version-arch', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'pe')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'pe')
+        context "restricts agents" do
+          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch')
+          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch')
         end
 
-        context "for foss" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch', 'git')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch', 'git')
+        context "ssh user" do
 
-          it "allows master role for solaris" do
-            hosts_file = fake_hosts_file_for_platform(hosts, 'solaris-version-arch')
-            args = ["--type", "git", "--hosts", hosts_file]
-            options_hash = parser.parse_args(args)
-            expect(options_hash[:HOSTS][:master][:platform]).to match(/solaris/)
-            expect(options_hash[:HOSTS][:master][:roles]).to include('master')
-            expect(options_hash[:type]).to eq('git')
+          it 'uses the ssh[:user] if it is provided' do
+            hosts['HOSTS'][:master][:ssh] = { :user => 'hello' }
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'hello'
           end
+
+          it 'uses default user if there is an ssh hash, but no ssh[:user]' do
+            hosts['HOSTS'][:master][:ssh] = { :hello => 'hello' }
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'root'
+          end
+
+          it 'uses default user if no ssh hash' do
+            parser.instance_variable_set(:@options, hosts)
+            parser.normalize_args
+            expect( hosts['HOSTS'][:master][:user] ).to be ==  'root'
+          end
+        end
+
+      end
+
+      describe '#normalize_and_validate_tags' do
+        let ( :tag_includes ) { @tag_includes || [] }
+        let ( :tag_excludes ) { @tag_excludes || [] }
+        let ( :options )      {
+          opts = Beaker::Options::OptionsHash.new
+          opts[:tag_includes] = tag_includes
+          opts[:tag_excludes] = tag_excludes
+          opts
+        }
+
+        it 'does not error if no tags overlap' do
+          @tag_includes = 'can,tommies,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants'
+          parser.instance_variable_set(:@options, options)
+
+          expect( parser ).to_not receive( :parser_error )
+          parser.normalize_and_validate_tags()
+        end
+
+        it 'does error if tags overlap' do
+          @tag_includes = 'can,tommies,should_error,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants,should_error'
+          parser.instance_variable_set(:@options, options)
+
+          expect( parser ).to receive( :parser_error )
+          parser.normalize_and_validate_tags()
+        end
+
+        it 'splits the basic case correctly' do
+          @tag_includes = 'can,tommies,potatoes,plant'
+          @tag_excludes = 'joey,long_running,pants'
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === ['can', 'tommies', 'potatoes', 'plant']
+          expect( options[:tag_excludes] ).to be === ['joey', 'long_running', 'pants']
+        end
+
+        it 'returns empty arrays for empty strings' do
+          @tag_includes = ''
+          @tag_excludes = ''
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === []
+          expect( options[:tag_excludes] ).to be === []
+        end
+
+        it 'lowercases all tags correctly for later use' do
+          @tag_includes = 'jeRRy_And_tOM,PARka'
+          @tag_excludes = 'lEet_spEAK,pOland'
+          parser.instance_variable_set(:@options, options)
+
+          parser.normalize_and_validate_tags()
+          expect( options[:tag_includes] ).to be === ['jerry_and_tom', 'parka']
+          expect( options[:tag_excludes] ).to be === ['leet_speak', 'poland']
         end
       end
     end

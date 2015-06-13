@@ -361,7 +361,7 @@ describe ClassMixedWithDSLHelpers do
 
     it 'runs the pe-puppet on a system without pe-puppet-agent' do
       vardir = '/var'
-      deb_agent = make_host( 'deb', :platform => 'debian-7-amd64' )
+      deb_agent = make_host( 'deb', :platform => 'debian-7-amd64', :pe_ver => '3.7' )
       allow( deb_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
       expect( deb_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
@@ -376,13 +376,27 @@ describe ClassMixedWithDSLHelpers do
 
     it 'runs the pe-puppet-agent on a unix system with pe-puppet-agent' do
       vardir = '/var'
-      el_agent = make_host( 'el', :platform => 'el-5-x86_64' )
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '3.7' )
       allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
       expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
 
       expect( subject ).to receive( :puppet_resource ).with( "service", "pe-puppet-agent", "ensure=stopped").once
+      expect( subject ).to receive( :on ).once
+
+      subject.stop_agent_on( el_agent )
+    end
+
+    it 'runs puppet on a unix system 4.0 or newer' do
+      vardir = '/var'
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+      allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+
+      expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+      expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
+
+      expect( subject ).to receive( :puppet_resource ).with( "service", "puppet", "ensure=stopped").once
       expect( subject ).to receive( :on ).once
 
       subject.stop_agent_on( el_agent )
@@ -540,6 +554,7 @@ describe ClassMixedWithDSLHelpers do
 
       describe 'and command line args passed' do
         it 'modifies SUT trapperkeeper configuration w/ command line args' do
+          host['puppetserver-confdir'] = '/etc/puppetserver/conf.d'
           expect( subject ).to receive( :modify_tk_config).with(host, puppetserver_conf,
                                                           custom_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)
@@ -549,6 +564,7 @@ describe ClassMixedWithDSLHelpers do
       describe 'and no command line args passed' do
         let(:command_line_args) { nil }
         it 'modifies SUT trapperkeeper configuration w/ puppet defaults' do
+          host['puppetserver-confdir'] = '/etc/puppetserver/conf.d'
           expect( subject ).to receive( :modify_tk_config).with(host, puppetserver_conf,
                                                           default_puppetserver_opts)
           subject.with_puppet_running_on(host, conf_opts)

@@ -37,6 +37,7 @@ module Beaker
       # @param [Proc] block The actions to be performed in this step.
       def step step_name, &block
         logger.notify "\n  * #{step_name}\n"
+        set_current_step_name(step_name)
         yield if block_given?
       end
 
@@ -47,6 +48,7 @@ module Beaker
       #
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
+        set_current_test_name(my_name)
         yield if block_given?
       end
 
@@ -162,6 +164,9 @@ module Beaker
       #       on( solaris, 'zonename' ) =~ /global/
       #     end
       #
+      # @example Confining to an already defined subset of hosts
+      #     confine :to, {}, agents
+      #
       # @return [Array<Host>] Returns an array of hosts that are still valid
       #   targets for this tests case.
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
@@ -172,7 +177,9 @@ module Beaker
         when :except
           hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
         when :to
-          hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+          if criteria and ( not criteria.empty? )
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+          end
         else
           raise "Unknown option #{type}"
         end
@@ -191,6 +198,7 @@ module Beaker
       # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
         begin
+          host_array ||= hosts
           original_hosts = self.hosts.dup
           confine(type, criteria, host_array)
 
@@ -199,6 +207,41 @@ module Beaker
         ensure
           self.hosts = original_hosts
         end
+      end
+
+      # Sets tags on the current {Beaker::TestCase}, and skips testing
+      # if necessary after checking this case's tags against the ones that are
+      # being included or excluded.
+      #
+      # @param [Array<String>] tags Tags to be assigned to the current test
+      #
+      # @return nil
+      # @api public
+      def tag(*tags)
+        metadata[:case] ||= {}
+        metadata[:case][:tags] = []
+        tags.each do |tag|
+          metadata[:case][:tags] << tag.downcase
+        end
+
+        @options[:tag_includes] ||= []
+        @options[:tag_excludes] ||= []
+
+        tags_needed_to_include_this_test = []
+        @options[:tag_includes].each do |tag_to_include|
+          tags_needed_to_include_this_test << tag_to_include \
+            unless metadata[:case][:tags].include?(tag_to_include)
+        end
+        skip_test "#{self.path} does not include necessary tag(s): #{tags_needed_to_include_this_test}" \
+          if tags_needed_to_include_this_test.length > 0
+
+        tags_to_remove_to_include_this_test = []
+        @options[:tag_excludes].each do |tag_to_exclude|
+          tags_to_remove_to_include_this_test << tag_to_exclude \
+            if metadata[:case][:tags].include?(tag_to_exclude)
+        end
+        skip_test "#{self.path} includes excluded tag(s): #{tags_to_remove_to_include_this_test}" \
+          if tags_to_remove_to_include_this_test.length > 0
       end
 
       #Return a set of hosts that meet the given criteria
