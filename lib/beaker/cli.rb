@@ -90,7 +90,7 @@ module Beaker
 
         #testing phase
         begin
-          run_suite(:tests)
+          run_suite(:tests, @options[:fail_mode])
         #post acceptance phase
         rescue => e
           #post acceptance on failure
@@ -143,7 +143,7 @@ module Beaker
     #@param [Symbol] suite_name The test suite to execute
     #@param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
     #                                 continue to execute tests.
-    def run_suite(suite_name, failure_strategy = :slow)
+    def run_suite(suite_name, failure_strategy = nil)
       if (@options[suite_name].empty?)
         @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
         return
