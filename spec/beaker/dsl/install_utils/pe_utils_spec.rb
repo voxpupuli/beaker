@@ -338,6 +338,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.99').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.8', '3.99').and_return( true )
       allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
       allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"
@@ -399,6 +400,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :fetch_pe ).and_return( true )
       allow( subject ).to receive( :create_remote_file ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with(anything, '3.99').and_return( true )
       allow( subject ).to receive( :version_is_less ).with(anything, '3.2.0').exactly(hosts.length + 1).times.and_return( false )
       allow( subject ).to receive( :version_is_less ).with(anything, '4.0').exactly(hosts.length + 1).times.and_return( true )
 
@@ -410,6 +412,57 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to_not receive( :wait_for_host_in_dashboard )
       expect( subject ).to_not receive( :on ).with( hosts[0], /puppet agent -t/, :acceptable_exit_codes => [0,2] )
       subject.do_install( hosts, opts)
+    end
+
+    it 'can perform a 4+ installation using AIO agents' do
+      hosts = make_hosts({
+        :pe_ver => '4.0',
+        :roles => ['agent'],
+      }, 3)
+      hosts[0][:roles] = ['master', 'database', 'dashboard']
+      hosts[1][:platform] = 'windows'
+      hosts[2][:platform] = Beaker::Platform.new('el-6-x86_64')
+
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :options ).and_return(Beaker::Options::Presets.new.presets)
+      allow( subject ).to receive( :on ).and_return( Beaker::Result.new( {}, '' ) )
+      allow( subject ).to receive( :fetch_pe ).and_return( true )
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      allow( subject ).to receive( :sign_certificate_for ).and_return( true )
+      allow( subject ).to receive( :stop_agent_on ).and_return( true )
+      allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '4.0').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.4').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.0').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.99').and_return( false )
+      # pe_ver is only set on the hosts for this test, not the opt
+      allow( subject ).to receive( :version_is_less ).with('3.8', '3.99').and_return( true )
+      allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
+      allow( subject ).to receive( :puppet_agent ) do |arg|
+        "puppet agent #{arg}"
+      end
+      allow( subject ).to receive( :puppet ) do |arg|
+        "puppet #{arg}"
+      end
+
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      #create answers file per-host, except windows
+      expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
+      #run installer on all hosts
+      expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
+      expect( subject ).to receive( :install_puppet_agent_on ).with( hosts[1], opts ).once
+      expect( subject ).to receive( :install_puppet_agent_on ).with( hosts[2], opts ).once
+      hosts.each do |host|
+        expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
+        expect( subject ).to receive( :sign_certificate_for ).with( host ).once
+        expect( subject ).to receive( :stop_agent_on ).with( host ).once
+        expect( subject ).to receive( :on ).with( host, /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
+      end
+      #wait for puppetdb to start
+      expect( subject ).to receive( :sleep_until_puppetdb_started ).with( hosts[0] ).once#wait for all hosts to appear in the dashboard
+      #run puppet agent now that installation is complete
+      expect( subject ).to receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] ).once
+      subject.do_install( hosts, opts )
     end
   end
 

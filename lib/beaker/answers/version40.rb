@@ -34,7 +34,7 @@ module Beaker
       install_update_server = answer_for(@options, :q_install_update_server, 'y')
 
       the_answers.map do |key, value|
-        the_answers[key][:q_update_server_host] = update_server_host
+        the_answers[key][:q_update_server_host] = update_server_host if the_answers[key]
       end
       the_answers[master.name][:q_install_update_server] = install_update_server
 
