@@ -42,7 +42,7 @@ module Beaker
       when /freebsd/
         FreeBSD::Host.new name, host_hash, options
       else
-        # Custom hypervisor
+        # Custom Host
         begin
           require "beaker/host/#{type}"
         rescue LoadError
