@@ -41,7 +41,16 @@ module Unix::Exec
   # Recursively remove the path provided
   # @param [String] path The path to remove
   def rm_rf path
-    exec(Beaker::Command.new("rm -rf #{path}"))
+    execute("rm -rf #{path}")
+  end
+
+  # Move the origin to destination. The destination is removed prior to moving.
+  # @param [String] orig The origin path
+  # @param [String] dest the destination path
+  # @param [Boolean] rm Remove the destination prior to move
+  def mv orig, dest, rm=true
+    rm_rf dest unless !rm
+    execute("mv #{orig} #{dest}")
   end
 
   # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
