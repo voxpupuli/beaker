@@ -136,7 +136,7 @@ describe ClassMixedWithDSLInstallUtils do
         allow( File ).to receive(:directory?).with(any_args()).and_return(false)
 
         expect( subject ).to receive(:scp_to).with(host,source, File.dirname(target), {:ignore => ignore_list})
-        expect( subject ).to receive(:on).with(host, "mv #{File.join(File.dirname(target), File.basename(source))} #{target}")
+        expect( host ).to receive(:mv).with(File.join(File.dirname(target), File.basename(source)), target)
         if opts.nil?
           subject.copy_module_to(host)
         else
@@ -187,7 +187,7 @@ describe ClassMixedWithDSLInstallUtils do
         expect( subject ).to receive(:on).with(host, "echo C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules" ).and_return( result )
 
         expect( subject ).to receive(:scp_to).with(host, "/opt/testmodule2", "C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules", {:ignore => ignore_list})
-        expect( subject ).to receive(:on).with(host, 'move /y C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule2 C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule')
+        expect( host ).to receive(:mv).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule2', 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule')
 
         subject.copy_module_to(host, {:module_name => 'testmodule', :source => '/opt/testmodule2'})
       end

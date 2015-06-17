@@ -21,6 +21,15 @@ module PSWindows::Exec
     execute("del /s /q #{path}")
   end
 
+  # Move the origin to destination. The destination is removed prior to moving.
+  # @param [String] orig The origin path
+  # @param [String] dest the destination path
+  # @param [Boolean] rm Remove the destination prior to move
+  def mv(orig, dest, rm=true)
+    rm_rf dest unless !rm
+    execute("move /y #{orig} #{dest}")
+  end
+
   def path
     'c:/windows/system32;c:/windows'
   end
