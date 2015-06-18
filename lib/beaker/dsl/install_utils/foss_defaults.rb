@@ -6,6 +6,16 @@ module Beaker
       #
       module FOSSDefaults
 
+        #Here be the default download URLs
+        FOSS_DEFAULT_DOWNLOAD_URLS = {
+          :win_download_url       => "http://downloads.puppetlabs.com/windows",
+          :mac_download_url       => "http://downloads.puppetlabs.com/mac",
+          :pe_promoted_builds_url => "http://pm.puppetlabs.com",
+          :release_apt_repo_url   => "http://apt.puppetlabs.com",
+          :release_yum_repo_url   => "http://yum.puppetlabs.com",
+          :dev_builds_url         => "http://builds.delivery.puppetlabs.net",
+        }
+
         #Here be the pathing and default values for FOSS installs
         #
         FOSS_DEFAULTS = {
