@@ -35,6 +35,27 @@ module Beaker
         end
         return false
       end
+
+      # Gets the max semver version from a list of them
+      # @param [Array<String>]  versions  List of versions to get max from
+      # @param [String]         default   Default version if list is nil or empty
+      #
+      # @note nil values will be skipped
+      # @note versions parameter will be copied so that the original
+      #   won't be tampered with
+      #
+      # @return [String, nil] the max string out of the versions list or the
+      #   default value if the list is faulty, which can either be set or nil
+      def max_version(versions, default=nil)
+        return default if !versions || versions.empty?
+        versions_copy = versions.dup
+        highest = versions_copy.shift
+        versions_copy.each do |version|
+          next if !version
+          highest = version if version_is_less(highest, version)
+        end
+        highest
+      end
     end
   end
 end
