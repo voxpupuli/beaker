@@ -30,6 +30,37 @@ module Beaker
           expect( subject.version_is_less( '2.8', '2.9' ) ).to be === true
         end
       end
+
+      describe 'max_version' do
+
+        it 'returns nil if versions isn\'t defined' do
+          expect( subject.max_version(nil) ).to be_nil
+        end
+
+        it 'returns nil if versions is empty' do
+          expect( subject.max_version([]) ).to be_nil
+        end
+
+        it 'allows you to set the default, & will return it with faulty input' do
+          expect( subject.max_version([], '5.9') ).to be === '5.9'
+        end
+
+        it 'returns the one value if given a length 1 array' do
+          expect( subject.max_version(['7.3']) ).to be === '7.3'
+        end
+
+        it 'does not mangle the versions array passed in' do
+          first_array = ['1.4.3', '8.4.5', '3.5.7', '2.7.5']
+          array_to_pass = first_array.dup
+          subject.max_version(array_to_pass)
+          expect( array_to_pass ).to be === first_array
+        end
+
+        it 'returns 5.8.9 from [5.8.9, 1.2.3, 0.3.5, 5.7.11]' do
+          expect( subject.max_version(['5.8.9', '1.2.3', '0.3.5', '5.7.11']) ).to be === '5.8.9'
+        end
+
+      end
     end
 
   end

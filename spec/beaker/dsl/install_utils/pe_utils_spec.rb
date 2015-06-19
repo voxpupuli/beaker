@@ -334,11 +334,12 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :sign_certificate_for ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
       allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :max_version ).with(anything, '3.8').and_return('3.0')
       allow( subject ).to receive( :version_is_less ).with('3.0', '4.0').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.4').and_return( true )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('3.0', '3.99').and_return( true )
-      allow( subject ).to receive( :version_is_less ).with('3.8', '3.99').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.99', '3.0').and_return( false )
       allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
       allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"
@@ -400,7 +401,8 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :fetch_pe ).and_return( true )
       allow( subject ).to receive( :create_remote_file ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
-      allow( subject ).to receive( :version_is_less ).with(anything, '3.99').and_return( true )
+      allow( subject ).to receive( :max_version ).with(['3.0'], '3.8').and_return('3.0')
+      allow( subject ).to receive( :version_is_less ).with('3.99', '3.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with(anything, '3.2.0').exactly(hosts.length + 1).times.and_return( false )
       allow( subject ).to receive( :version_is_less ).with(anything, '4.0').exactly(hosts.length + 1).times.and_return( true )
 
@@ -431,12 +433,13 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :sign_certificate_for ).and_return( true )
       allow( subject ).to receive( :stop_agent_on ).and_return( true )
       allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :max_version ).with(anything, '3.8').and_return('4.0')
       allow( subject ).to receive( :version_is_less ).with('4.0', '4.0').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('4.0', '3.4').and_return( false )
       allow( subject ).to receive( :version_is_less ).with('4.0', '3.0').and_return( false )
-      allow( subject ).to receive( :version_is_less ).with('4.0', '3.99').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('3.99', '4.0').and_return( true )
       # pe_ver is only set on the hosts for this test, not the opt
-      allow( subject ).to receive( :version_is_less ).with('3.8', '3.99').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.99').and_return( true )
       allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
       allow( subject ).to receive( :puppet_agent ) do |arg|
         "puppet agent #{arg}"

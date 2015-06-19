@@ -361,8 +361,14 @@ module Beaker
             pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
           end
 
-          agent_only_check_needed, hosts_agent_only, hosts_not_agent_only = \
-            create_hosts_agent_only_specified_arrays_helper(hosts, opts['pe_ver'])
+          pe_versions = ( [] << opts['pe_ver'] << hosts.map{ |host| host['pe_ver'] } ).flatten.compact
+          agent_only_check_needed = version_is_less('3.99', max_version(pe_versions, '3.8'))
+          if agent_only_check_needed
+            hosts_agent_only, hosts_not_agent_only = create_agent_specified_arrays(hosts)
+          else
+            hosts_agent_only, hosts_not_agent_only = [], hosts.dup
+          end
+
           # Set PE distribution for all the hosts, create working dir
           use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
           hosts.each do |host|
@@ -485,45 +491,28 @@ module Beaker
           end
         end
 
-        # Builds the agent_only and not_agent_only arrays needed for installation
-        # as well as setting the agent_only_check_needed flag.  Note that it
-        # needs to know whether the check is needed to determine which hosts go
-        # in each array.
+        # Builds the agent_only and not_agent_only arrays needed for installation.
         #
-        # @param [Array<Host>]  hosts   hosts to split up into the arrays
-        # @param [String]       pe_ver  overall pe_ver option, will be used if
-        #                               set rather than the hosts pe_ver
+        # @param [Array<Host>]          hosts hosts to split up into the arrays
+        #
+        # @note should only be called against versions 4.0+, as this method
+        #   assumes AIO packages will be required.
         #
         # @api private
-        # @return [Boolean, Array<Host>, Array<Host>] whether a version (overall
-        #   overall or on a host) is over 3.99, so agent_only is possible;
-        #   the array of hosts to do an agent_only install on;
+        # @return [Array<Host>, Array<Host>]
+        #   the array of hosts to do an agent_only install on and
         #   the array of hosts to do our usual install methods on
-        def create_hosts_agent_only_specified_arrays_helper(hosts, pe_ver)
-          pe_ver ||= '3.8'
+        def create_agent_specified_arrays(hosts)
           hosts_agent_only = []
           hosts_not_agent_only = []
-          agent_only_check_needed = !version_is_less(pe_ver, '3.99')
-          unless agent_only_check_needed
-            hosts.each do |host|
-              if host['pe_ver'] && !version_is_less(host['pe_ver'], '3.99')
-                agent_only_check_needed = true
-                break
-              end
+          hosts.each do |host|
+            if host['roles'] && host['roles'].length == 1 && host['roles'][0] == 'agent'
+              hosts_agent_only << host
+            else
+              hosts_not_agent_only << host
             end
           end
-          if agent_only_check_needed
-            hosts.each do |host|
-              if host['roles'] && host['roles'].length == 1 && host['roles'][0] == 'agent'
-                hosts_agent_only << host
-              else
-                hosts_not_agent_only << host
-              end
-            end
-          else
-            hosts_not_agent_only = hosts.dup
-          end
-          return agent_only_check_needed, hosts_agent_only, hosts_not_agent_only
+          return hosts_agent_only, hosts_not_agent_only
         end
 
         # Helper for setting up pe_defaults & setting up the cert on the host
