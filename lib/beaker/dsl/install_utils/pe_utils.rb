@@ -361,9 +361,18 @@ module Beaker
             pre30master = version_is_less(opts[:pe_ver] || master['pe_ver'], '3.0')
           end
 
+          pe_versions = ( [] << opts['pe_ver'] << hosts.map{ |host| host['pe_ver'] } ).flatten.compact
+          agent_only_check_needed = version_is_less('3.99', max_version(pe_versions, '3.8'))
+          if agent_only_check_needed
+            hosts_agent_only, hosts_not_agent_only = create_agent_specified_arrays(hosts)
+          else
+            hosts_agent_only, hosts_not_agent_only = [], hosts.dup
+          end
+
           # Set PE distribution for all the hosts, create working dir
           use_all_tar = ENV['PE_USE_ALL_TAR'] == 'true'
           hosts.each do |host|
+            next if agent_only_check_needed && hosts_agent_only.include?(host)
             host['pe_installer'] ||= 'puppet-enterprise-installer'
             if host['platform'] !~ /windows|osx/
               platform = use_all_tar ? 'all' : host['platform']
@@ -395,7 +404,7 @@ module Beaker
             host['working_dir'] = host.tmpdir(Time.new.strftime("%Y-%m-%d_%H.%M.%S"))
           end
 
-          fetch_pe(hosts, opts)
+          fetch_pe(hosts_not_agent_only, opts)
 
           install_hosts = hosts.dup
           unless masterless
@@ -404,7 +413,11 @@ module Beaker
           end
 
           install_hosts.each do |host|
-            if host['platform'] =~ /windows/
+            if agent_only_check_needed && hosts_agent_only.include?(host)
+              install_puppet_agent_on(host, opts)
+              host['type'] = 'aio'
+              setup_defaults_and_config_helper_on(host, master)
+            elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
               configure_pe_defaults_on(host)
               if not host.is_cygwin?
@@ -425,13 +438,8 @@ module Beaker
               elsif host['platform'] =~ /osx|eos/
                 # If we're not frictionless, we need to run the OSX special-case
                 on host, installer_cmd(host, opts)
-                configure_pe_defaults_on(host)
-                #set the certname and master
-                on host, puppet("config set server #{master}")
-                on host, puppet("config set certname #{host}")
-                #run once to request cert
                 acceptable_codes = host['platform'] =~ /osx/ ? [1] : [0, 1]
-                on host, puppet_agent('-t'), :acceptable_exit_codes => acceptable_codes
+                setup_defaults_and_config_helper_on(host, master, acceptable_codes)
               else
                 answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
                 create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
@@ -481,6 +489,46 @@ module Beaker
             # time to configure mcollective
             on install_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2]
           end
+        end
+
+        # Builds the agent_only and not_agent_only arrays needed for installation.
+        #
+        # @param [Array<Host>]          hosts hosts to split up into the arrays
+        #
+        # @note should only be called against versions 4.0+, as this method
+        #   assumes AIO packages will be required.
+        #
+        # @api private
+        # @return [Array<Host>, Array<Host>]
+        #   the array of hosts to do an agent_only install on and
+        #   the array of hosts to do our usual install methods on
+        def create_agent_specified_arrays(hosts)
+          hosts_agent_only = []
+          hosts_not_agent_only = []
+          hosts.each do |host|
+            if host['roles'] && host['roles'].length == 1 && host['roles'][0] == 'agent'
+              hosts_agent_only << host
+            else
+              hosts_not_agent_only << host
+            end
+          end
+          return hosts_agent_only, hosts_not_agent_only
+        end
+
+        # Helper for setting up pe_defaults & setting up the cert on the host
+        # @param [Host] host                            host to setup
+        # @param [Host] master                          the master host, for setting up the relationship
+        # @param [Array<Fixnum>] acceptable_exit_codes  The exit codes that we want to ignore
+        #
+        # @return nil
+        # @api private
+        def setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes=nil)
+          configure_pe_defaults_on(host)
+          #set the certname and master
+          on host, puppet("config set server #{master}")
+          on host, puppet("config set certname #{host}")
+          #run once to request cert
+          on host, puppet_agent('-t'), :acceptable_exit_codes => acceptable_exit_codes
         end
 
         #Install PE based on global hosts with global options
