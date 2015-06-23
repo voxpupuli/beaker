@@ -59,9 +59,9 @@ module Beaker
       @network_client ||= Fog::Network.new(networkoptionhash)
 
       if not @network_client
-
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
-                                                                                                                                      end
+      end
+
     end
 
     #Provided a flavor name return the OpenStack id for that flavor
@@ -86,6 +86,75 @@ module Beaker
     def network n
       @logger.debug "OpenStack: Looking up network '#{n}'"
       @network_client.networks.find { |x| x.name == n } || raise("Couldn't find network: #{n}")
+    end
+
+    # Create a volume client on request
+    # @return [Fog::OpenStack::Volume] OpenStack volume client
+    def volume_client_create
+      options = {
+        :provider           => :openstack,
+        :openstack_api_key  => @options[:openstack_api_key],
+        :openstack_username => @options[:openstack_username],
+        :openstack_auth_url => @options[:openstack_auth_url],
+        :openstack_tenant   => @options[:openstack_tenant],
+        :openstack_region   => @options[:openstack_region],
+      }
+      @volume_client ||= Fog::Volume.new(options)
+      unless @volume_client
+        raise "Unable to create OpenStack Volume instance"\
+              " (api_key: #{@options[:openstack_api_key]},"\
+              " username: #{@options[:openstack_username]},"\
+              " auth_url: #{@options[:openstack_auth_url]},"\
+              " tenant: #{@options[:openstack_tenant]})"
+      end
+    end
+
+    # Create and attach dynamic volumes
+    #
+    # Creates an array of volumes and attaches them to the current host.
+    # The host bus type is determined by the image type, so by default
+    # devices appear as /dev/vdb, /dev/vdc etc.  Setting the glance
+    # properties hw_disk_bus=scsi, hw_scsi_model=virtio-scsi will present
+    # them as /dev/sdb, /dev/sdc (or 2:0:0:1, 2:0:0:2 in SCSI addresses)
+    #
+    # @param host [Hash] thet current host defined in the nodeset
+    # @param vm [Fog::Compute::OpenStack::Server] the server to attach to
+    def provision_storage host, vm
+      if host['volumes']
+        # Lazily create the volume client if needed
+        volume_client_create
+        host['volumes'].keys.each_with_index do |volume, index|
+          @logger.debug "Creating volume #{volume} for OpenStack host #{host.name}"
+
+          # The node defintion file defines volume sizes in MB (due to precedent
+          # with the vagrant virtualbox implementation) however OpenStack requires
+          # this translating into GB
+          openstack_size = host['volumes'][volume]['size'].to_i / 1000
+
+          # Create the volume and wait for it to become available
+          vol = @volume_client.volumes.create(
+            :size         => openstack_size,
+            :display_name => volume,
+            :description  => "Beaker volume: host=#{host.name} volume=#{volume}",
+          )
+          vol.wait_for { ready? }
+
+          # Fog needs a device name to attach as, so invent one.  The guest
+          # doesn't pay any attention to this
+          device = "/dev/vd#{('b'.ord + index).chr}"
+          vm.attach_volume(vol.id, device)
+        end
+      end
+    end
+
+    # Detach and delete guest volumes
+    # @param vm [Fog::Compute::OpenStack::Server] the server to detach from
+    def cleanup_storage vm
+      vm.volumes.each do |vol|
+        @logger.debug "Deleting volume #{vol.name} for OpenStack host #{vm.name}"
+        vm.detach_volume(vol.id)
+        vol.destroy
+      end
     end
 
     #Create new instances in OpenStack
@@ -171,6 +240,8 @@ module Beaker
 
         #enable root if user is not root
         enable_root(host)
+
+        provision_storage(host, vm)
       end
     end
 
@@ -178,6 +249,7 @@ module Beaker
     def cleanup
       @logger.notify "Cleaning up OpenStack"
       @vms.each do |vm|
+        cleanup_storage(vm)
         @logger.debug "Release floating IPs for OpenStack host #{vm.name}"
         floating_ips = vm.all_addresses # fetch and release its floating IPs
         floating_ips.each do |address|
