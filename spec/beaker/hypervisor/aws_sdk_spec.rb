@@ -109,45 +109,45 @@ module Beaker
       end
     end
 
-    context 'enabling root' do
-      it 'enables root once on the ubuntu host through the main code path' do
-        expect( aws ).to receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
-        expect( aws ).to receive(:enable_root_login).with( @hosts[3], options).once()
-        aws.enable_root_on_hosts();
+    describe '#enable_root_on_hosts' do
+      context 'enabling root shall be called once for the ubuntu machine' do
+        it "should enable root once" do
+          expect( aws ).to receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
+          expect( aws ).to receive(:enable_root_login).with( @hosts[3], options).once()
+          aws.enable_root_on_hosts();
+        end
       end
 
       it 'enables root once on the f5 host through its code path' do
         expect( aws ).to receive(:enable_root_f5).with( @hosts[4] ).once()
         aws.enable_root_on_hosts()
       end
+    end
 
-      describe '#enable_root_f5' do
+    describe '#enable_root_f5' do
+      it 'creates a password on the host' do
+        f5_host = @hosts[4]
+        result_mock = Beaker::Result.new(f5_host, '')
+        result_mock.exit_code = 0
+        allow( f5_host ).to receive( :exec ).and_return(result_mock)
+        allow( aws ).to receive( :backoff_sleep )
+        sha_mock = Object.new
+        allow( Digest::SHA256 ).to receive( :new ).and_return(sha_mock)
+        expect( sha_mock ).to receive( :hexdigest ).once()
+        aws.enable_root_f5(f5_host)
+      end
 
-        it 'creates a password on the host' do
-          f5_host = @hosts[4]
-          result_mock = Beaker::Result.new(f5_host, '')
-          result_mock.exit_code = 0
-          allow( f5_host ).to receive( :exec ).and_return(result_mock)
-          allow( aws ).to receive( :backoff_sleep )
-          sha_mock = Object.new
-          allow( Digest::SHA256 ).to receive( :new ).and_return(sha_mock)
-          expect( sha_mock ).to receive( :hexdigest ).once()
-          aws.enable_root_f5(f5_host)
-        end
-
-        it 'tries 10x before failing correctly' do
-          f5_host = @hosts[4]
-          result_mock = Beaker::Result.new(f5_host, '')
-          result_mock.exit_code = 2
-          allow( f5_host ).to receive( :exec ).and_return(result_mock)
-          expect( aws ).to receive( :backoff_sleep ).exactly(9).times
-          expect{ aws.enable_root_f5(f5_host) }.to raise_error( RuntimeError, /unable/ )
-        end
-
+      it 'tries 10x before failing correctly' do
+        f5_host = @hosts[4]
+        result_mock = Beaker::Result.new(f5_host, '')
+        result_mock.exit_code = 2
+        allow( f5_host ).to receive( :exec ).and_return(result_mock)
+        expect( aws ).to receive( :backoff_sleep ).exactly(9).times
+        expect{ aws.enable_root_f5(f5_host) }.to raise_error( RuntimeError, /unable/ )
       end
     end
 
-    context '#backoff_sleep' do
+    describe '#backoff_sleep' do
       it "should call sleep 1024 times at attempt 10" do
         expect_any_instance_of( Object ).to receive(:sleep).with(1024)
         aws.backoff_sleep(10)
@@ -169,7 +169,7 @@ module Beaker
       end
     end
 
-    context '#key_name' do
+    describe '#key_name' do
       it 'returns a key name from the local hostname' do
         # Mock out the hostname and local user calls
         expect( Socket ).to receive(:gethostname) { "foobar" }
@@ -180,7 +180,7 @@ module Beaker
       end
     end
 
-    context '#group_id' do
+    describe '#group_id' do
       it 'should return a predicatable group_id from a port list' do
         expect(aws.group_id([22, 1024])).to eq("Beaker-2799478787")
       end
