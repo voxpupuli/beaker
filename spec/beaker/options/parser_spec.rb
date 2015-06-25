@@ -137,12 +137,78 @@ module Beaker
         end
       end
 
-      describe 'parse_args' do
+      describe '#parse_args' do
         before { FakeFS.deactivate! }
 
         it 'pulls the args into key called :command_line' do
           my_args = [ '--log-level', 'debug', '-h', hosts_path]
           expect(parser.parse_args( my_args )[:command_line]).to include(my_args.join(' '))
+        end
+
+        describe 'does prioritization correctly' do
+          let(:env)       { @env || {:level => 'highest'} }
+          let(:argv)      { @argv || {:level => 'second'} }
+          let(:host_file) { @host_file || {:level => 'third'} }
+          let(:opt_file)  { @opt_file || {:level => 'fourth' } }
+          let(:presets)   { {:level => 'lowest' } }
+
+          before :each do
+            expect(parser).to receive( :normalize_args ).and_return( true )
+          end
+
+          def mock_out_parsing
+            presets_obj = double()
+            allow( presets_obj ).to receive( :presets ).and_return( presets )
+            allow( presets_obj ).to receive( :env_vars ).and_return( env )
+            parser.instance_variable_set( :@presets, presets_obj )
+
+            command_line_parser_obj = double()
+            allow( command_line_parser_obj ).to receive( :parse ).and_return( argv )
+            parser.instance_variable_set( :@command_line_parser, command_line_parser_obj )
+
+            allow( OptionsFileParser ).to receive( :parse_options_file ).and_return( opt_file )
+            allow( HostsFileParser ).to receive( :parse_hosts_file ).and_return( host_file )
+          end
+
+          it 'presets have the lowest priority' do
+            @env = @argv = @host_file = @opt_file = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            expect( opts[:level] ).to be == 'lowest'
+          end
+
+          it 'options file has fourth priority' do
+            @env = @argv = @host_file = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            expect( opts[:level] ).to be == 'fourth'
+          end
+
+          it 'host file CONFIG section has third priority' do
+            @env = @argv = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            expect( opts[:level] ).to be == 'third'
+          end
+
+          it 'command line arguments have second priority' do
+            @env = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            expect( opts[:level] ).to be == 'second'
+          end
+
+          it 'env vars have highest priority' do
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            expect( opts[:level] ).to be == 'highest'
+          end
+
         end
 
         it "can correctly combine arguments from different sources" do
