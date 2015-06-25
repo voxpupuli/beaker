@@ -400,22 +400,28 @@ module Beaker
 
       Rsync.host = hostname_with_user
 
-      if ssh_opts.has_key?('keys') and
-        ssh_opts.has_key?('auth_methods') and
-        ssh_opts['auth_methods'].include?('publickey')
+      # vagrant uses temporary ssh configs in order to use dynamic keys
+      # without this config option using ssh may prompt for password
+      if ssh_opts[:config] and File.exists?(ssh_opts[:config])
+        ssh_args << "-F #{ssh_opts[:config]}"
+      else
+        if ssh_opts.has_key?('keys') and
+            ssh_opts.has_key?('auth_methods') and
+            ssh_opts['auth_methods'].include?('publickey')
 
-        key = ssh_opts['keys']
+          key = ssh_opts['keys']
 
-        # If an array was set, then we use the first value
-        if key.is_a? Array
-          key = key.first
+          # If an array was set, then we use the first value
+          if key.is_a? Array
+            key = key.first
+          end
+
+          # We need to expand tilde manually as rsync can be
+          # funny sometimes
+          key = File.expand_path(key)
+
+          ssh_args << "-i #{key}"
         end
-
-        # We need to expand tilde manually as rsync can be
-        # funny sometimes
-        key = File.expand_path(key)
-
-        ssh_args << "-i #{key}"
       end
 
       if ssh_opts.has_key?(:port)
