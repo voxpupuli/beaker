@@ -63,7 +63,116 @@ module Beaker
       end
     end
 
-    describe '#kill_instances', :wip do
+    describe '#kill_instances' do
+      let( :ec2_instance ) { double('ec2_instance', :nil? => false, :exists? => true, :id => "ec2", :terminate => nil) }
+      let( :vpc_instance ) { double('vpc_instance', :nil? => false, :exists? => true, :id => "vpc", :terminate => nil) }
+      let( :nil_instance ) { double('vpc_instance', :nil? => true, :exists? => true, :id => "nil", :terminate => nil) }
+      let( :unreal_instance ) { double('vpc_instance', :nil? => false, :exists? => false, :id => "unreal", :terminate => nil) }
+
+      it 'should return nil' do
+        instance_set = [ec2_instance, vpc_instance, nil_instance, unreal_instance]
+        expect(aws.kill_instances(instance_set)).to be_nil
+      end
+  
+      it 'cleanly handles an empty instance list' do
+        instance_set = []
+        expect(aws.kill_instances(instance_set)).to be_nil
+      end
+  
+      context 'in general use' do
+        it 'terminates each running instance' do
+          instance_set = [ec2_instance, vpc_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+  
+        it 'verifies instances are not nil' do
+          instance_set = [ec2_instance, vpc_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:nil?)
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+  
+        it 'verifies instances exist in AWS' do
+          instance_set = [ec2_instance, vpc_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:exists?)
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+      end
+
+      context 'for a single running instance' do
+        it 'terminates the running instance' do
+          instance_set = [ec2_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+  
+        it 'verifies instance is not nil' do
+          instance_set = [ec2_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:nil?)
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+  
+        it 'verifies instance exists in AWS' do
+          instance_set = [ec2_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:exists?)
+            expect(instance).to receive(:terminate).once
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+      end
+
+      context 'when an instance does not exist' do
+        it 'does not call terminate' do
+          instance_set = [unreal_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:terminate).exactly(0).times
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+
+        it 'verifies instance does not exist' do
+          instance_set = [unreal_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:exists?).once
+            expect(instance).to receive(:terminate).exactly(0).times
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+      end
+
+      context 'when an instance is nil' do
+        it 'does not call terminate' do
+          instance_set = [nil_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:terminate).exactly(0).times
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+
+        it 'verifies instance is nil' do
+          instance_set = [nil_instance]
+          instance_set.each do |instance|
+            expect(instance).to receive(:nil?).once
+            expect(instance).to receive(:terminate).exactly(0).times
+          end
+          expect(aws.kill_instances(instance_set)).to be_nil
+        end
+      end
+
     end
 
     describe '#cleanup', :wip do
