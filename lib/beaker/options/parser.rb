@@ -170,18 +170,13 @@ module Beaker
       # Order of priority is as follows:
       #   1.  environment variables are given top priority
       #   2.  ARGV or provided arguments array
-      #   3.  host file options
-      #   4.  the 'CONFIG' section of the hosts file
-      #   5.  options file values
-      #   6.  default or preset values are given the lowest priority
+      #   3.  the 'CONFIG' section of the hosts file
+      #   4.  options file values
+      #   5.  default or preset values are given the lowest priority
       #
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
-        # NOTE on argument precedence:
-        # Will use env, then hosts/config file, then command line, then file options
-
-
         @options = @presets.presets
         cmd_line_options = @command_line_parser.parse(args)
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
