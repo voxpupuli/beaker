@@ -14,9 +14,9 @@ module Beaker
         b_nums = b.split('-')[0].split('.')
         (0...a_nums.length).each do |i|
           if i < b_nums.length
-            if a_nums[i] < b_nums[i]
+            if a_nums[i].to_i < b_nums[i].to_i
               return true
-            elsif a_nums[i] > b_nums[i]
+            elsif a_nums[i].to_i > b_nums[i].to_i
               return false
             end
           else
