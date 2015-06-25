@@ -6,6 +6,18 @@ module Beaker
 
       describe 'version_is_less' do
 
+        it 'reports 2015.3.0-rc0-8-gf80879a is less than 2016' do
+          expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '2016' ) ).to be === true
+        end
+
+        it 'reports 2015.3.0-rc0-8-gf80879a is not less than 2015.3.0' do
+          expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '2015.3.0' ) ).to be === false
+        end
+
+        it 'reports 2015.3.0-rc0-8-gf80879a is not less than 3.0.0' do
+          expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '3.0.0' ) ).to be === false
+        end
+
         it 'reports 3.0.0-160-gac44cfb is not less than 3.0.0' do
           expect( subject.version_is_less( '3.0.0-160-gac44cfb', '3.0.0' ) ).to be === false
         end

@@ -49,7 +49,7 @@ module Beaker
     #   data.
     def self.create version, hosts, options
       case version
-      when /\A4\.0/
+      when /\A(4\.0|2015)/
         return Version40.new(version, hosts, options)
       when /\A3\.99/
         return Version40.new(version, hosts, options)

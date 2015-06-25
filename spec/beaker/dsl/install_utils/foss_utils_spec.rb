@@ -258,14 +258,14 @@ describe ClassMixedWithDSLInstallUtils do
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
-        subject.install_puppet( :version => '3000' )
+        expect(hosts[0]).to receive(:install_package).with('puppet-3')
+        subject.install_puppet( :version => '3' )
       end
       it 'can install specific versions of puppets dependencies' do
-        expect(hosts[0]).to receive(:install_package).with('puppet-3000')
+        expect(hosts[0]).to receive(:install_package).with('puppet-3')
         expect(hosts[0]).to receive(:install_package).with('hiera-2001')
         expect(hosts[0]).to receive(:install_package).with('facter-1999')
-        subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
+        subject.install_puppet( :version => '3', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on el-5' do
@@ -294,16 +294,16 @@ describe ClassMixedWithDSLInstallUtils do
         subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
-        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
-        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
-        subject.install_puppet( :version => '3000' )
+        expect(hosts[0]).to receive(:install_package).with('puppet=3-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3-1puppetlabs1')
+        subject.install_puppet( :version => '3' )
       end
       it 'can install specific versions of puppets dependencies' do
         expect(hosts[0]).to receive(:install_package).with('facter=1999-1puppetlabs1')
         expect(hosts[0]).to receive(:install_package).with('hiera=2001-1puppetlabs1')
-        expect(hosts[0]).to receive(:install_package).with('puppet-common=3000-1puppetlabs1')
-        expect(hosts[0]).to receive(:install_package).with('puppet=3000-1puppetlabs1')
-        subject.install_puppet( :version => '3000', :facter_version => '1999', :hiera_version => '2001' )
+        expect(hosts[0]).to receive(:install_package).with('puppet-common=3-1puppetlabs1')
+        expect(hosts[0]).to receive(:install_package).with('puppet=3-1puppetlabs1')
+        subject.install_puppet( :version => '3', :facter_version => '1999', :hiera_version => '2001' )
       end
     end
     context 'on windows' do
@@ -311,17 +311,17 @@ describe ClassMixedWithDSLInstallUtils do
       it 'installs specific version of puppet when passed :version' do
         allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3000.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3.msi')
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
-        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
-        subject.install_puppet(:version => '3000')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.msi\'')
+        subject.install_puppet(:version => '3')
       end
       it 'installs from custom url when passed :win_download_url' do
         allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3000.msi')
-        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3000.msi\'')
-        subject.install_puppet( :version => '3000', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
+        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3.msi')
+        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.msi\'')
+        subject.install_puppet( :version => '3', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
       end
     end
     describe 'on unsupported platforms' do
