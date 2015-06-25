@@ -44,7 +44,23 @@ module Beaker
       @hosts[4][:user] = 'notroot'
     end
 
-    describe '#provision', :wip do
+    describe '#provision' do
+      before :each do
+        expect(aws).to receive(:launch_all_nodes)
+        expect(aws).to receive(:add_tags)
+        expect(aws).to receive(:populate_dns)
+        expect(aws).to receive(:enable_root_on_hosts)
+        expect(aws).to receive(:set_hostnames)
+        expect(aws).to receive(:configure_hosts)
+      end
+
+      it 'should step through provisioning' do
+        aws.provision
+      end
+
+      it 'should return nil' do
+        expect(aws.provision).to be_nil
+      end
     end
 
     describe '#kill_instances', :wip do
