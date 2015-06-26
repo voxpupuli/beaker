@@ -176,16 +176,33 @@ module Beaker
     end
 
     describe '#cleanup' do
+      subject { aws.cleanup }
       let( :ec2_instance ) { double('ec2_instance', :nil? => false, :exists? => true, :terminate => nil, :id => 'id') }
 
-      it 'returns nil' do
-        @hosts.each {|host| host['instance'] = ec2_instance}
-        expect(aws.cleanup).to be_nil
+      context 'with a list of hosts' do
+        before :each do
+          @hosts.each {|host| host['instance'] = ec2_instance}
+        end
+
+        it { is_expected.to be_nil }
+
+        it 'kills instances' do
+          expect(aws).to receive(:kill_instances).once
+          is_expected.to be_nil
+        end
       end
 
-      it 'allows an empty host list' do
-        @hosts = []
-        expect(aws.cleanup).to be_nil
+      context 'with an empty host list' do
+        before :each do
+          @hosts = []
+        end
+
+        it { is_expected.to be_nil }
+
+        it 'kills instances' do
+          expect(aws).to receive(:kill_instances).once
+          is_expected.to be_nil
+        end
       end
     end
 
