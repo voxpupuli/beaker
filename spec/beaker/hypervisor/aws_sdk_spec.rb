@@ -189,9 +189,6 @@ module Beaker
       end
     end
 
-    describe '#log_instances', :wip do
-    end
-
     describe '#instance_by_id', :wip do
     end
 
