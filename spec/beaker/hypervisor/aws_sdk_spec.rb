@@ -206,7 +206,9 @@ module Beaker
       end
     end
 
-    describe '#instance_by_id', :wip do
+    describe '#instance_by_id' do
+      subject { aws.instance_by_id('my_id') }
+      it { is_expected.to be_instance_of(AWS::EC2::Instance) }
     end
 
     describe '#instances', :wip do
