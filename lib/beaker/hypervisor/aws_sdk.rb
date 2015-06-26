@@ -103,7 +103,7 @@ module Beaker
 
     # Return all instances currently on ec2.
     # @see AwsSdk#instance_by_id
-    # @return [Array<AWS::EC2::Instance>] An array of AWS::EC2 instance objects
+    # @return [AWS::EC2::InstanceCollection] An array of AWS::EC2 instance objects
     def instances
       @ec2.instances
     end
