@@ -56,6 +56,8 @@ module Beaker
           Beaker::Docker
         when /^openstack$/
           Beaker::OpenStack
+        when /^lxc$/
+          Beaker::Lxc
         when /^none$/
           Beaker::Hypervisor
         else
