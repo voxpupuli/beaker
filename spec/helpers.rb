@@ -7,8 +7,8 @@ module TestFileHelpers
   end
 
   def fog_file_contents
-    { :default => { :aws_access_key_id => "IMANACCESSKEY",
-                    :aws_secret_access_key => "supersekritkey",
+    { :default => { :access_key => "IMANACCESSKEY",
+                    :secret_access => "supersekritkey",
                     :aix_hypervisor_server => "aix_hypervisor.labs.net",
                     :aix_hypervisor_username => "aixer",
                     :aix_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-acceptance",
