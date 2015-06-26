@@ -529,10 +529,13 @@ module Beaker
         # to other settings whether the 32 or 64bit install is used
         def install_puppet_agent_from_msi_on(hosts, opts)
           block_on hosts do |host|
-            arch = host.is_x86_64? ? 'x64' : 'x86'
+
+            is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
+            should_install_64bit = host.is_x86_64? && !is_config_32
+            arch = should_install_64bit ? 'x64' : 'x86'
 
             # If we don't specify a version install the latest MSI for puppet-agent
-            if opts['version']
+            if opts[:version]
               host['dist'] = "puppet-agent-#{opts[:version]}-#{arch}"
             else
               host['dist'] = "puppet-agent-#{arch}-latest"
