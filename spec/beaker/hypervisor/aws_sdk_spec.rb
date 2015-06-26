@@ -175,7 +175,18 @@ module Beaker
 
     end
 
-    describe '#cleanup', :wip do
+    describe '#cleanup' do
+      let( :ec2_instance ) { double('ec2_instance', :nil? => false, :exists? => true, :terminate => nil, :id => 'id') }
+
+      it 'returns nil' do
+        @hosts.each {|host| host['instance'] = ec2_instance}
+        expect(aws.cleanup).to be_nil
+      end
+
+      it 'allows an empty host list' do
+        @hosts = []
+        expect(aws.cleanup).to be_nil
+      end
     end
 
     describe '#log_instances', :wip do
