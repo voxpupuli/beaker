@@ -601,6 +601,65 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe '#install_puppet_agent_from_msi_on' do
+    let( :opts )     { { :version => 'VERSION' } }
+    let( :platform ) { 'windows' }
+    let( :host )     { { :platform => platform } }
+
+    it 'uses x86 msi when host is_x86_64 and install_32 is set on the host' do
+      host['install_32'] = true
+
+      expect( host ).to receive( :is_x86_64? ).and_return( true )
+      expect( subject ).to receive( :install_a_puppet_msi_on ).with( host, opts )
+
+      subject.install_puppet_agent_from_msi_on( host, opts )
+      expect( host['dist'] ).to be == "puppet-agent-VERSION-x86"
+
+    end
+
+    it 'uses x86 msi when host is_x86_64 and install_32 is set on the options' do
+      opts['install_32'] = true
+
+      expect( host ).to receive( :is_x86_64? ).and_return( true )
+      expect( subject ).to receive( :install_a_puppet_msi_on ).with( host, opts )
+
+      subject.install_puppet_agent_from_msi_on( host, opts )
+      expect( host['dist'] ).to be == "puppet-agent-VERSION-x86"
+
+    end
+
+    it 'uses x86 msi when host is_x86_64 and ruby_arch is x86 on the host' do
+      host['ruby_arch'] = 'x86'
+
+      expect( host ).to receive( :is_x86_64? ).and_return( true )
+      expect( subject ).to receive( :install_a_puppet_msi_on ).with( host, opts )
+
+      subject.install_puppet_agent_from_msi_on( host, opts )
+      expect( host['dist'] ).to be == "puppet-agent-VERSION-x86"
+
+    end
+
+    it 'uses x86 msi when host !is_x86_64' do
+
+      expect( host ).to receive( :is_x86_64? ).and_return( false )
+      expect( subject ).to receive( :install_a_puppet_msi_on ).with( host, opts )
+
+      subject.install_puppet_agent_from_msi_on( host, opts )
+      expect( host['dist'] ).to be == "puppet-agent-VERSION-x86"
+
+    end
+
+    it 'uses x64 msi when host is_x86_64, no install_32 and ruby_arch != x86' do
+
+      expect( host ).to receive( :is_x86_64? ).and_return( true )
+      expect( subject ).to receive( :install_a_puppet_msi_on ).with( host, opts )
+
+      subject.install_puppet_agent_from_msi_on( host, opts )
+      expect( host['dist'] ).to be == "puppet-agent-VERSION-x64"
+
+    end
+  end
+
   describe '#install_puppetagent_dev_repo' do
 
     it 'raises an exception when host platform is unsupported' do
