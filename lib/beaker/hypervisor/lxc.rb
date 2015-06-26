@@ -21,7 +21,7 @@ module Beaker
 
       template = host['template']
       arch = host['arch'] || "amd64"
-
+      
       if match = template.match(/(.*):(.*)/)
         image = match.captures[0]
         release = match.captures[1]
@@ -44,6 +44,9 @@ module Beaker
             puts `apt-get update`
             puts `apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}`
           when /^el-/, /centos/, /fedora/, /redhat/, /eos/
+            if release =~  /7/
+              puts `cp -fr /var/run/* /run/ && rm -frv /var/run >/dev/null && ln -s /run /var/run`
+            end
             puts `ifup eth0`
             puts `yum clean all`
             puts `yum install -y sudo initscripts openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}`
@@ -67,6 +70,9 @@ module Beaker
       ip = container.ip_addresses.join(",")
       forward_ssh_agent = false
 
+      @logger.notify "Adding hostname #{host} in /etc/hosts"
+      system "echo -e '#{ip}\t#{host}' >> /etc/hosts"
+
       # Update host metadata
       host['ip']  = ip
       host['ssh']  = {
@@ -78,11 +84,15 @@ module Beaker
 
   def cleanup
     @logger.notify "Cleaning up Lxc Container"
-
+  
     @hosts.each do | host |
       if container = host['lxc_container']
         @logger.debug("stop container #{host}")
         begin
+          ip = container.ip_addresses.join(",")
+          @logger.notify "Deleting hostname #{host} in /etc/host"
+          system "sed -i '/^#{ip}/d' /etc/hosts"
+          # Stop the container
           container.stop
           sleep 2
         rescue Excon::Errors::ClientError => e
