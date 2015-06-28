@@ -234,7 +234,11 @@ module Beaker
         output_callback = nil
       else
         @logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{cmdline}"
-        output_callback = logger.method(:host_output)
+        if @options[:preserve_host_output]
+          output_callback = logger.method(:preserve_host_output)
+        else
+          output_callback = logger.method(:host_output)
+        end
       end
 
       unless $dry_run
