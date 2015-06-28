@@ -203,6 +203,45 @@ module Beaker
           it( 'errors' )        { info_logger.error 'ERROR!'      }
         end
       end
+
+      context 'SUT output logging' do
+
+        context 'host output logging' do
+          subject( :host_output ) { Logger.new( my_io,
+                                              :log_level => :verbose,
+                                              :quiet     => true,
+                                              :color     => true )}
+
+          it 'should output GREY when @color is set to true' do
+            colorized_logger = host_output
+
+            expect( my_io ).to receive( :print ).with "\e[01;30m"
+            expect( my_io ).to receive( :print )
+            expect( my_io ).to receive( :puts ).with 'my string'
+
+            colorized_logger.optionally_color "\e[01;30m", 'my string'
+          end
+
+        end
+
+        context 'preserve host output' do
+          subject( :preserve_host_output ) { Logger.new( my_io,
+                                              :log_level => :verbose,
+                                              :quiet     => true,
+                                              :color     => true )}
+
+          it 'preserves host_output' do
+            colorized_logger = preserve_host_output
+
+            expect( my_io ).to receive( :print ).with ""
+            expect( my_io ).to receive( :puts ).with 'my string'
+
+            colorized_logger.optionally_color "", 'my string'
+          end
+
+        end
+      end
+
     end
   end
 end
