@@ -30,4 +30,21 @@ module Windows::Exec
     end
     ip
   end
+
+  # Attempt to ping the provided target hostname
+  # @param [String] target The hostname to ping
+  # @param [Integer] attempts Amount of times to attempt ping before giving up
+  # @return [Boolean] true of ping successful, overwise false
+  def ping target, attempts=5
+    try = 0
+    while try < attempts do
+      result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
+      if result.exit_code == 0
+        return true
+      end
+      try+=1
+    end
+    result.exit_code == 0
+  end
+
 end
