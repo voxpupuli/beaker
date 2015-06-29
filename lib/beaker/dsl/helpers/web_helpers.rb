@@ -41,6 +41,8 @@ module Beaker
         #
         # @!visibility private
         def fetch_http_file(base_url, file_name, dst_dir)
+          require 'open-uri'
+          require 'open_uri_redirections'
           FileUtils.makedirs(dst_dir)
           src = "#{base_url}/#{file_name}"
           dst = File.join(dst_dir, file_name)
@@ -49,7 +51,7 @@ module Beaker
           else
             logger.notify "Fetching: #{src}"
             logger.notify "  and saving to #{dst}"
-            open(src) do |remote|
+            open(src, :allow_redirections => :all) do |remote|
               File.open(dst, "w") do |file|
                 FileUtils.copy_stream(remote, file)
               end

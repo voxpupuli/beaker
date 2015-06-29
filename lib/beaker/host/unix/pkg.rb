@@ -61,8 +61,6 @@ module Unix::Pkg
     case self['platform']
       when /sles-/
         execute("zypper --non-interactive in #{name}", opts)
-      when /el-4/
-        @logger.debug("Package installation not supported on rhel4")
       when /cisco|fedora|centos|eos|el-/
         if version
           name = "#{name}-#{version}"
