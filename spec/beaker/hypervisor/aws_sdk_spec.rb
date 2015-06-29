@@ -226,7 +226,9 @@ module Beaker
       it { is_expected.to be_instance_of(AWS::EC2::VPCCollection) }
     end
 
-    describe '#security_group_by_id', :wip do
+    describe '#security_group_by_id' do
+      subject { aws.security_group_by_id('my_id') }
+      it { is_expected.to be_instance_of(AWS::EC2::SecurityGroup) }
     end
 
     describe '#security_groups', :wip do
