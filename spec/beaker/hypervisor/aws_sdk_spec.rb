@@ -291,7 +291,54 @@ module Beaker
       end
     end
 
-    describe '#add_tags', :wip do
+    describe '#add_tags' do
+      let( :aws_instance ) { double('aws_instance', :add_tag => nil) }
+
+      it 'returns nil' do
+        @hosts.each {|host| host['instance'] = aws_instance}
+        expect(aws.add_tags).to be_nil
+      end
+
+      it 'handles a single host' do
+        @hosts[0]['instance'] = aws_instance
+        @hosts = [@hosts[0]]
+        expect(aws.add_tags).to be_nil
+      end
+
+      context 'with multiple hosts' do
+        before :each do
+          @hosts.each {|host| host['instance'] = aws_instance}
+        end
+
+        it 'adds tag for jenkins_build_url' do
+          aws.instance_eval('@options[:jenkins_build_url] = "my_build_url"')
+          expect(aws_instance).to receive(:add_tag).with('jenkins_build_url', hash_including(:value => 'my_build_url')).at_least(:once)
+          expect(aws.add_tags).to be_nil
+        end
+
+        it 'adds tag for Name' do
+          expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(4).times
+          expect(aws.add_tags).to be_nil
+        end
+
+        it 'adds tag for department' do
+          aws.instance_eval('@options[:department] = "my_department"')
+          expect(aws_instance).to receive(:add_tag).with('department', hash_including(:value => 'my_department')).at_least(:once)
+          expect(aws.add_tags).to be_nil
+        end
+
+        it 'adds tag for project' do
+          aws.instance_eval('@options[:project] = "my_project"')
+          expect(aws_instance).to receive(:add_tag).with('project', hash_including(:value => 'my_project')).at_least(:once)
+          expect(aws.add_tags).to be_nil
+        end
+
+        it 'adds tag for created_by' do
+          aws.instance_eval('@options[:created_by] = "my_created_by"')
+          expect(aws_instance).to receive(:add_tag).with('created_by', hash_including(:value => 'my_created_by')).at_least(:once)
+          expect(aws.add_tags).to be_nil
+        end
+      end
     end
 
     describe '#populate_dns' do
