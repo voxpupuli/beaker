@@ -245,7 +245,50 @@ module Beaker
     describe '#launch_all_nodes', :wip do
     end
 
-    describe '#wait_for_status', :wip do
+    describe '#wait_for_status' do
+      let( :aws_instance ) { double('aws_instance', :id => "ec2", :terminate => nil) }
+      it 'handles a single instance' do
+        instance_set = [ {:instance => aws_instance} ]
+        allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
+        expect(aws).to receive(:backoff_sleep).exactly(3).times
+        expect(aws.wait_for_status(:running, instance_set)).to eq(instance_set)
+      end
+
+      context 'with multiple instances' do
+        before :each do
+          @instance_set = [ {:instance => aws_instance}, {:instance => aws_instance} ]
+        end
+
+        it 'returns the instance set passed to it' do
+          allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running, :waiting, :waiting, :running)
+          allow(aws).to receive(:backoff_sleep).exactly(6).times
+          expect(aws.wait_for_status(:running, @instance_set)).to eq(@instance_set)
+        end
+
+        it 'calls backoff_sleep once per instance.status call' do
+          allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running, :waiting, :waiting, :running)
+          expect(aws).to receive(:backoff_sleep).exactly(6).times
+          expect(aws.wait_for_status(:running, @instance_set)).to eq(@instance_set)
+        end
+      end
+
+      context 'after 10 tries' do
+        it 'raises RuntimeError' do
+          instance_set = [ {:instance => aws_instance} ]
+          allow(aws_instance).to receive(:status).and_return(:waiting)
+          expect(aws).to receive(:backoff_sleep).exactly(9).times
+          expect { aws.wait_for_status(:running, instance_set) }.to raise_error('Instance never reached state running')
+        end
+      end
+
+      context 'with an invalid instance' do
+        it 'raises AWS::EC2::Errors::InvalidInstanceID::NotFound' do
+          instance_set = [ {:instance => aws_instance} ]
+          allow(aws_instance).to receive(:status).and_raise(AWS::EC2::Errors::InvalidInstanceID::NotFound)
+          allow(aws).to receive(:backoff_sleep).at_most(10).times
+          expect(aws.wait_for_status(:running, instance_set)).to eq(instance_set)
+        end
+      end
     end
 
     describe '#add_tags', :wip do
