@@ -526,11 +526,46 @@ module Beaker
     # @api private
     def enable_root(host)
       if host['user'] != 'root'
-        copy_ssh_to_root(host, @options)
-        enable_root_login(host, @options)
-        host['user'] = 'root'
+        if host['platform'] =~ /f5-/
+          enable_root_f5(host)
+        else
+          copy_ssh_to_root(host, @options)
+          enable_root_login(host, @options)
+          host['user'] = 'root'
+        end
         host.close
       end
+    end
+
+    # Enables root access for a host on an f5 platform
+    # @note This method does not support other platforms
+    #
+    # @return nil
+    # @api private
+    def enable_root_f5(host)
+      for tries in 1..10
+        begin
+          #This command is problematic as the F5 is not always done loading
+          if host.exec(Command.new("modify sys db systemauth.disablerootlogin value false"), :acceptable_exit_codes => [0,1]).exit_code == 0 \
+              and host.exec(Command.new("modify sys global-settings gui-setup disabled"), :acceptable_exit_codes => [0,1]).exit_code == 0 \
+              and host.exec(Command.new("save sys config"), :acceptable_exit_codes => [0,1]).exit_code == 0
+            backoff_sleep(tries)
+            break
+          elsif tries == 10
+            raise "Instance was unable to be configured"
+          end
+        rescue Beaker::Host::CommandFailure => e
+          @logger.debug("Instance not yet configured (#{e})")
+        end
+        backoff_sleep(tries)
+      end
+      host['user'] = 'root'
+      host.close
+      sha256 = Digest::SHA256.new
+      password = sha256.hexdigest((1..50).map{(rand(86)+40).chr}.join.gsub(/\\/,'\&\&'))
+      host['ssh'] = {:password => password}
+      host.exec(Command.new("echo -e '#{password}\\n#{password}' | tmsh modify auth password admin"))
+      @logger.notify("f5: Configured admin password to be #{password}")
     end
 
     # Set the hostname of all instances to be the hostname defined in the
