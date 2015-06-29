@@ -65,10 +65,24 @@ module Beaker
         end
 
         @logger.debug("Creating container from image #{image_name}")
-        container = ::Docker::Container.create({
-          'Image' => image_name,
-          'Hostname' => host.name,
-        })
+        image_hash = {
+           'Image' => image_name,
+           'Hostname' => host.name,
+        }
+
+        if options[:dockeropts]
+          options[:dockeropts].each do |k,v|
+            image_hash[k] = v
+          end
+        end
+
+        if host[:dockeropts]
+          host[:dockeropts].each do |k,v|
+            image_hash[k] = v
+          end
+        end
+
+        container = ::Docker::Container.create(image_hash)
 
         @logger.debug("Starting container #{container.id}")
         container.start({"PublishAllPorts" => true, "Privileged" => true})
