@@ -138,66 +138,6 @@ module Beaker
       @ec2.security_groups
     end
 
-    # Shutdown and destroy ec2 instances idenfitied by key that have been alive
-    # longer than ZOMBIE hours.
-    #
-    # @param [Integer] max_age The age in hours that a machine needs to be older than to be considered a zombie
-    # @param [String] key The key_name to match for
-    def kill_zombies(max_age = ZOMBIE, key = key_name)
-      @logger.notify("aws-sdk: Kill Zombies! (keyname: #{key}, age: #{max_age} hrs)")
-      #examine all available regions
-      kill_count = 0
-      time_now = Time.now.getgm #ec2 uses GM time
-      @ec2.regions.each do |region|
-        @logger.debug "Reviewing: #{region.name}"
-        # Note: don't use instances.each here as that funtion doesn't allow proper rescue from error states
-        instances = @ec2.regions[region.name].instances
-        instances.each do |instance|
-          begin
-            if (instance.key_name =~ /#{key}/)
-              @logger.debug "Examining #{instance.id} (keyname: #{instance.key_name}, launch time: #{instance.launch_time}, status: #{instance.status})"
-              if ((time_now - instance.launch_time) >  max_age*60*60) and instance.status.to_s !~ /terminated/
-                @logger.debug "Kill! #{instance.id}: #{instance.key_name} (Current status: #{instance.status})"
-                instance.terminate()
-                kill_count += 1
-              end
-            end
-          rescue AWS::Core::Resource::NotFound, AWS::EC2::Errors => e
-            @logger.debug "Failed to remove instance: #{instance.id}, #{e}"
-          end
-        end
-      end
-
-      @logger.notify "#{key}: Killed #{kill_count} instance(s)"
-    end
-
-    # Destroy any volumes marked 'available', INCLUDING THOSE YOU DON'T OWN!  Use with care.
-    def kill_zombie_volumes
-      # Occasionaly, tearing down ec2 instances leaves orphaned EBS volumes behind -- these stack up quickly.
-      # This simply looks for EBS volumes that are not in use
-      # Note: don't use volumes.each here as that funtion doesn't allow proper rescue from error states
-      @logger.notify("aws-sdk: Kill Zombie Volumes!")
-      volume_count = 0
-      @ec2.regions.each do |region|
-        @logger.debug "Reviewing: #{region.name}"
-        volumes = @ec2.regions[region.name].volumes.map { |vol| vol.id }
-        volumes.each do |vol|
-          begin
-            vol = @ec2.regions[region.name].volumes[vol]
-            if ( vol.status.to_s =~ /available/ )
-              @logger.debug "Tear down available volume: #{vol.id}"
-              vol.delete()
-              volume_count += 1
-            end
-          rescue AWS::EC2::Errors::InvalidVolume::NotFound => e
-            @logger.debug "Failed to remove volume: #{vol.id}, #{e}"
-          end
-        end
-      end
-      @logger.notify "Freed #{volume_count} volume(s)"
-
-    end
-
     # Create an EC2 instance for host, tag it, and return it.
     #
     # @return [AWS::EC2::Instance)]

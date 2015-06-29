@@ -236,12 +236,6 @@ module Beaker
       it { is_expected.to be_instance_of(AWS::EC2::SecurityGroupCollection) }
     end
 
-    describe '#kill_zombies', :wip do
-    end
-
-    describe '#kill_zombie_volumes', :wip do
-    end
-
     describe '#create_instance', :wip do
     end
 
