@@ -231,7 +231,9 @@ module Beaker
       it { is_expected.to be_instance_of(AWS::EC2::SecurityGroup) }
     end
 
-    describe '#security_groups', :wip do
+    describe '#security_groups' do
+      subject { aws.security_groups }
+      it { is_expected.to be_instance_of(AWS::EC2::SecurityGroupCollection) }
     end
 
     describe '#kill_zombies', :wip do
