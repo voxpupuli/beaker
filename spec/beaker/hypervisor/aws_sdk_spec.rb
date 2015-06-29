@@ -216,7 +216,9 @@ module Beaker
       it { is_expected.to be_instance_of(AWS::EC2::InstanceCollection) }
     end
 
-    describe '#vpc_by_id', :wip do
+    describe '#vpc_by_id' do
+      subject { aws.vpc_by_id('my_id') }
+      it { is_expected.to be_instance_of(AWS::EC2::VPC) }
     end
 
     describe '#vpcs', :wip do
