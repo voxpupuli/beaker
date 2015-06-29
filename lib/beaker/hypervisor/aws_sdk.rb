@@ -133,7 +133,7 @@ module Beaker
 
     # Return all security groups currently on ec2.
     # @see AwsSdk#security_goup_by_id
-    # @return [Array<AWS::EC2::SecurityGroup>] An array of AWS::EC2 security group objects
+    # @return [AWS::EC2::SecurityGroupCollection] An array of AWS::EC2 security group objects
     def security_groups
       @ec2.security_groups
     end
