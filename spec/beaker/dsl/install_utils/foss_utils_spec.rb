@@ -37,6 +37,12 @@ describe ClassMixedWithDSLInstallUtils do
   let(:machost)       { make_host( 'machost', { :platform => 'osx-10.9-x86_64',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp' } ) }
+  let(:freebsdhost9)   { make_host( 'freebsdhost9', { :platform => 'freebsd-9-x64',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp' } ) }
+  let(:freebsdhost10)   { make_host( 'freebsdhost10', { :platform => 'freebsd-10-x64',
+                                                :pe_ver => '3.0',
+                                                :working_dir => '/tmp' } ) }
   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
                                                  :pe_ver => '3.0',
                                                  :working_dir => '/tmp',
@@ -142,6 +148,20 @@ describe ClassMixedWithDSLInstallUtils do
       version = subject.find_git_repo_versions( host, path, repository )
 
       expect( version ).to be == { 'name' => '2' }
+    end
+  end
+
+  context 'install_puppet_from_freebsd_ports_on' do
+    it 'installs puppet on FreeBSD 9' do
+      expect(subject).to receive(:on).with(freebsdhost9, 'pkg_add -rF puppet')
+
+      subject.install_puppet_from_freebsd_ports_on( freebsdhost9, {}  )
+    end
+
+    it 'installs puppet on FreeBSD 10' do
+      expect(subject).to receive(:on).with(freebsdhost10, 'pkg install -y sysutils/puppet')
+
+      subject.install_puppet_from_freebsd_ports_on( freebsdhost10, {}  )
     end
   end
 

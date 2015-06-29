@@ -242,6 +242,8 @@ module Beaker
                 install_puppet_from_msi_on(host, opts)
               elsif host['platform'] =~ /osx/
                 install_puppet_from_dmg_on(host, opts)
+              elsif host['platform'] =~ /freebsd/
+                install_puppet_from_freebsd_ports_on(host, opts)
               else
                 if opts[:default_action] == 'gem_install'
                   opts[:version] ||= '~> 3.x'
@@ -562,6 +564,28 @@ module Beaker
             host.mkdir_p host['distmoduledir']
           end
         end
+
+        # Installs Puppet and dependencies from FreeBSD ports
+        #
+        # @param [Host] host The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet to install (shows warning)
+        #
+        # @return nil
+        # @api private
+        def install_puppet_from_freebsd_ports_on( host, opts )
+          if (opts[:version])
+            logger.warn "FreeBSD's port system doesnt accept versions, using latest"
+            logger.warn "If you wish to choose a specific Puppet version, use `install_puppet_from_gem_on('~> 3.*')`"
+          end
+
+          if host['platform'] =~ /freebsd-9/
+            on host, "pkg_add -rF puppet"
+          else
+            on host, "pkg install -y sysutils/puppet"
+          end
+        end
+        alias_method :install_puppet_from_freebsd_ports, :install_puppet_from_freebsd_ports_on
 
         # Installs Puppet and dependencies from dmg
         #
