@@ -118,7 +118,7 @@ module Beaker
 
     # Return all VPCs currently on ec2.
     # @see AwsSdk#vpc_by_id
-    # @return [Array<AWS::EC2::VPC>] An array of AWS::EC2 vpc objects
+    # @return [AWS::EC2::VPCCollection] An array of AWS::EC2 vpc objects
     def vpcs
       @ec2.vpcs
     end
