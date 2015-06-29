@@ -317,7 +317,7 @@ module Beaker
         end
 
         it 'adds tag for Name' do
-          expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(4).times
+          expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(@hosts.size).times
           expect(aws.add_tags).to be_nil
         end
 
@@ -447,7 +447,24 @@ module Beaker
       end
     end
 
-    describe '#set_hostnames', :wip do
+    describe '#set_hostnames' do
+      it 'returns @hosts' do
+        expect(aws.set_hostnames).to eq(@hosts)
+      end
+
+      context 'for each host' do
+        it 'calls exec' do
+          @hosts.each {|host| expect(host).to receive(:exec).once}
+          expect(aws.set_hostnames).to eq(@hosts)
+        end
+  
+        it 'passes a Command instance to exec' do
+          @hosts.each do |host|
+            expect(host).to receive(:exec).with( instance_of(Beaker::Command) ).once
+          end
+          expect(aws.set_hostnames).to eq(@hosts)
+        end
+      end
     end
 
     describe '#backoff_sleep' do
