@@ -638,18 +638,36 @@ module Beaker
       end
     end
 
-    describe '#load_fog_credentials', :wip do
-      it 'returns fog credentials' do
+    describe '#load_fog_credentials' do
+      # Receive#and_call_original below allows us to test the core load_fog_credentials method
+      let(:creds) { {:access_key => 'awskey', :secret_key => 'awspass'} }
+
+      it 'returns loaded fog credentials' do
+        fog_hash = {:default => {:aws_access_key_id => 'awskey', :aws_secret_access_key => 'awspass'}} 
+        expect(aws).to receive(:load_fog_credentials).and_call_original
+        expect(YAML).to receive(:load_file).and_return(fog_hash)
+        expect(aws.load_fog_credentials).to eq(creds)
       end
 
       context 'raises errors' do
         it 'if missing access_key credential' do
+          dot_fog = '.fog'
+          fog_hash = {:default => {:aws_secret_access_key => 'awspass'}} 
+          err_text = "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!"
+          expect(aws).to receive(:load_fog_credentials).and_call_original
+          expect(YAML).to receive(:load_file).and_return(fog_hash)
+          expect { aws.load_fog_credentials(dot_fog) }.to raise_error(err_text)
         end
   
         it 'if missing secret_key credential' do
+          dot_fog = '.fog'
+          fog_hash = {:default => {:aws_access_key_id => 'awskey'}} 
+          err_text = "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!"
+          expect(aws).to receive(:load_fog_credentials).and_call_original
+          expect(YAML).to receive(:load_file).and_return(fog_hash)
+          expect { aws.load_fog_credentials(dot_fog) }.to raise_error(err_text)
         end
       end
     end
-
   end
 end
