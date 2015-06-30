@@ -559,12 +559,35 @@ module Beaker
     end
 
     describe '#ensure_group', :wip do
+      it 'returns group from vpc lookup' do
+      end
+
+      it 'creates group if group.nil?' do
+      end
     end
 
     describe '#create_group', :wip do
+      it 'returns a newly created group' do
+      end
+
+      it 'requests group_id for ports given' do
+      end
+
+      it 'authorizes requested ports for group' do
+      end
     end
 
     describe '#load_fog_credentials', :wip do
+      it 'returns fog credentials' do
+      end
+
+      context 'raises errors' do
+        it 'if missing access_key credential' do
+        end
+  
+        it 'if missing secret_key credential' do
+        end
+      end
     end
 
   end
