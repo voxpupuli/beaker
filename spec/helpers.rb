@@ -31,6 +31,7 @@ module HostHelpers
                     :roles => ['agent'],
                     :snapshot => 'snap',
                     :ip => 'default.ip.address',
+                    :private_ip => 'private.ip.address',
                     :box => 'default_box_name',
                     :box_url => 'http://default.box.url',
   }
@@ -41,6 +42,7 @@ module HostHelpers
   HOST_BOX      = "%s_of_my_box"
   HOST_BOX_URL  = "http://address.for.my.box.%s"
   HOST_TEMPLATE = "%s_has_a_template"
+  HOST_PRIVATE_IP = "private.ip.for.%s"
 
   def logger
     double( 'logger' ).as_null_object
@@ -92,6 +94,7 @@ module HostHelpers
       name = HOST_NAME % num
       opts = { :snapshot => HOST_SNAPSHOT % num,
                :ip => HOST_IP % name,
+               :private_ip => HOST_PRIVATE_IP % name,
                :template => HOST_TEMPLATE % name,
                :box => HOST_BOX % name,
                :box_url => HOST_BOX_URL % name }.merge( preset_opts )
