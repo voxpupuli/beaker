@@ -29,6 +29,40 @@ module Beaker
         # Github's ssh signature for cloning via ssh
         GitHubSig   = 'github.com,207.97.227.239 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
 
+        # lookup project-specific git environment variables
+        # PROJECT_VAR or VAR otherwise return the default
+        #
+        # @!visibility private
+        def lookup_in_env(env_variable_name, project_name=nil, default=nil)
+          env_variable_name     = "#{env_variable_name.upcase.gsub('-','_')}"
+          project_specific_name = "#{project_name.upcase.gsub('-','_')}_#{env_variable_name}" if project_name
+          project_name && ENV[project_specific_name] || ENV[env_variable_name] || default
+        end
+
+        # @param [String] project_name
+        # @param [String] git_fork     When not provided will use PROJECT_FORK environment variable
+        # @param [String] git_server   When not provided will use PROJECT_SERVER environment variable
+        # @param [String] git_protocol 'git','ssh','https'
+        #
+        # @return [String] Returns a git-usable url
+        #
+        # TODO: enable other protocols, clarify, http://git-scm.com/book/ch4-1.html
+        def build_git_url(project_name, git_fork = nil, git_server = nil, git_protocol='https')
+          git_fork   ||= lookup_in_env('FORK',   project_name, 'puppetlabs')
+          git_server ||= lookup_in_env('SERVER', project_name, 'github.com')
+
+          case git_protocol
+          when /(ssh|git)/
+            git_protocol = 'git@'
+          when /https/
+            git_protocol = 'https://'
+          end
+
+          repo = (git_server == 'github.com') ? "#{git_fork}/#{project_name}.git" : "#{git_fork}-#{project_name}.git"
+          return git_protocol == 'git@' ? "#{git_protocol}#{git_server}:#{repo}" : "#{git_protocol}#{git_server}/#{repo}"
+        end
+        alias_method :build_giturl, :build_git_url
+
         # @param [String] uri A uri in the format of <git uri>#<revision>
         #                     the `git://`, `http://`, `https://`, and ssh
         #                     (if cloning as the remote git user) protocols
@@ -101,9 +135,18 @@ module Beaker
           version
         end
 
+        # @param [Host] host An object implementing {Beaker::Hosts}'s
+        #                    interface.
+        # @param [String] path The path on the remote [host] to the repository
+        # @param [Hash{Symbol=>String}] repository A hash representing repo
+        #                                          info like that emitted by
+        #                                          {#extract_repo_info_from}
         #
-        # @see #find_git_repo_versions
-        def install_from_git host, path, repository
+        # @note This requires the helper methods:
+        #       * {Beaker::DSL::Helpers#on}
+        #
+        def clone_git_repo_on host, path, repository, opts = {}
+          opts = {:accept_all_exit_codes => true}.merge(opts)
           name          = repository[:name]
           repo          = repository[:path]
           rev           = repository[:rev]
@@ -122,33 +165,41 @@ module Beaker
 
           logger.notify("\n  * Clone #{repo} if needed")
 
-          on host, "test -d #{path} || mkdir -p #{path}"
-          on host, "test -d #{target} || #{clone_cmd}"
+          on host, "test -d #{path} || mkdir -p #{path}", opts
+          on host, "test -d #{target} || #{clone_cmd}", opts
 
           logger.notify("\n  * Update #{name} and check out revision #{rev}")
-
           commands = ["cd #{target}",
                       "remote rm origin",
                       "remote add origin #{repo}",
                       "fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/*",
                       "clean -fdx",
                       "checkout -f #{rev}"]
-          on host, commands.join(" && git ")
+          on host, commands.join(" && git "), opts
+        end
 
+        # @see #find_git_repo_versions
+        # @note This assumes the target repository application
+        #   can be installed via an install.rb ruby script.
+        def install_from_git_on host, path, repository, opts = {}
+          opts = {:accept_all_exit_codes => true}.merge(opts)
+          clone_git_repo_on host, path, repository, opts
+          name          = repository[:name]
           logger.notify("\n  * Install #{name} on the system")
           # The solaris ruby IPS package has bindir set to /usr/ruby/1.8/bin.
           # However, this is not the path to which we want to deliver our
           # binaries. So if we are using solaris, we have to pass the bin and
           # sbin directories to the install.rb
+          target        = "#{path}/#{name}"
           install_opts = ''
-          install_opts = '--bindir=/usr/bin --sbindir=/usr/sbin' if
-            host['platform'].include? 'solaris'
+          install_opts = '--bindir=/usr/bin --sbindir=/usr/sbin' if host['platform'].include? 'solaris'
 
-            on host,  "cd #{target} && " +
-                      "if [ -f install.rb ]; then " +
-                      "ruby ./install.rb #{install_opts}; " +
-                      "else true; fi"
+          on host,  "cd #{target} && " +
+                    "if [ -f install.rb ]; then " +
+                    "ruby ./install.rb #{install_opts}; " +
+                    "else true; fi", opts
         end
+        alias_method :install_from_git, :install_from_git_on
 
         # @deprecated Use {#install_puppet_on} instead.
         def install_puppet(opts = {})

@@ -136,6 +136,54 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  context 'lookup_in_env' do
+    it 'returns a default properly' do
+      env_var = subject.lookup_in_env('noway', 'nonesuch', 'returnme')
+      expect(env_var).to be == 'returnme'
+      env_var = subject.lookup_in_env('noway', nil, 'returnme')
+      expect(env_var).to be == 'returnme'
+    end
+    it 'finds correct env variable' do
+      allow(ENV).to receive(:[]).with(nil).and_return(nil)
+      allow(ENV).to receive(:[]).with('REALLYNONE').and_return(nil)
+      allow(ENV).to receive(:[]).with('NONESUCH').and_return('present')
+      allow(ENV).to receive(:[]).with('NOWAY_PROJ_NONESUCH').and_return('exists')
+      env_var = subject.lookup_in_env('nonesuch', 'noway-proj', 'fail')
+      expect(env_var).to be == 'exists'
+      env_var = subject.lookup_in_env('nonesuch')
+      expect(env_var).to be == 'present'
+      env_var = subject.lookup_in_env('reallynone')
+      expect(env_var).to be == nil
+      env_var = subject.lookup_in_env('reallynone',nil,'default')
+      expect(env_var).to be == 'default'
+    end
+  end
+
+  context 'build_giturl' do
+    it 'returns urls properly' do
+      allow(ENV).to receive(:[]).with('SERVER').and_return(nil)
+      allow(ENV).to receive(:[]).with('FORK').and_return(nil)
+      allow(ENV).to receive(:[]).with('PUPPET_FORK').and_return(nil)
+      allow(ENV).to receive(:[]).with('PUPPET_SERVER').and_return(nil)
+      url = subject.build_giturl('puppet')
+      expect(url).to be == 'https://github.com/puppetlabs/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck')
+      expect(url).to be == 'https://github.com/er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'bitbucket.com')
+      expect(url).to be == 'https://bitbucket.com/er0ck-puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https://')
+      expect(url).to be == 'https://github.com/er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https')
+      expect(url).to be == 'https://github.com/er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git@')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'ssh')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+    end
+  end
+
   context 'extract_repo_info_from' do
     [{ :protocol => 'git', :path => 'git://github.com/puppetlabs/project.git' },
      { :protocol => 'ssh', :path => 'git@github.com:puppetlabs/project.git' },
@@ -228,6 +276,71 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
+  context 'clone_git_repo_on' do
+    it 'does a ton of stuff it probably shouldnt' do
+      repo = { :name => 'puppet',
+               :path => 'git://my.server.net/puppet.git',
+               :rev => 'master' }
+      path = '/path/to/repos'
+      host = { 'platform' => 'debian' }
+      logger = double.as_null_object
+
+      allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+
+      expect( subject ).to receive( :logger ).exactly( 2 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).exactly( 3 ).times
+
+      subject.instance_variable_set( :@metadata, {} )
+      subject.clone_git_repo_on( host, path, repo )
+    end
+
+    it 'allows a checkout depth of 1' do
+      repo   = { :name => 'puppet',
+                 :path => 'git://my.server.net/puppet.git',
+                 :rev => 'master',
+                 :depth => 1 }
+
+      path   = '/path/to/repos'
+      cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:rev]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
+      host   = { 'platform' => 'debian' }
+      logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+      expect( subject ).to receive( :logger ).exactly( 2 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).with( host, "test -d #{path} || mkdir -p #{path}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      # this is the the command we want to test
+      expect( subject ).to receive( :on ).with( host, cmd, {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+
+      subject.instance_variable_set( :@metadata, {} )
+      subject.clone_git_repo_on( host, path, repo )
+    end
+
+    it 'allows a checkout depth with a rev from a specific branch' do
+      repo   = { :name => 'puppet',
+                 :path => 'git://my.server.net/puppet.git',
+                 :rev => 'a2340acddadfeafd234230faf',
+                 :depth => 50,
+                 :depth_branch => 'master' }
+
+      path   = '/path/to/repos'
+      cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
+      host   = { 'platform' => 'debian' }
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+      logger = double.as_null_object
+      allow( subject ).to receive( :metadata ).and_return( metadata )
+      expect( subject ).to receive( :logger ).exactly( 2 ).times.and_return( logger )
+      expect( subject ).to receive( :on ).with( host, "test -d #{path} || mkdir -p #{path}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      # this is the the command we want to test
+      expect( subject ).to receive( :on ).with( host, cmd, {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+
+      subject.instance_variable_set( :@metadata, {} )
+      subject.clone_git_repo_on( host, path, repo )
+    end
+  end
+
   context 'install_from_git' do
     it 'does a ton of stuff it probably shouldnt' do
       repo = { :name => 'puppet',
@@ -247,7 +360,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_from_git( host, path, repo )
     end
 
-    it 'allows a checkout depth of 1' do
+    it 'should attempt to install ruby code' do
       repo   = { :name => 'puppet',
                  :path => 'git://my.server.net/puppet.git',
                  :rev => 'master',
@@ -260,38 +373,13 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :metadata ).and_return( metadata )
       allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
       expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
-      expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
-      # this is the the command we want to test
-      expect( subject ).to receive( :on ).with( host, cmd ).exactly( 1 ).times
-      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
-      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "test -d #{path} || mkdir -p #{path}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, cmd, {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
+      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi", {:accept_all_exit_codes=>true} ).exactly( 1 ).times
 
       subject.instance_variable_set( :@metadata, {} )
-      subject.install_from_git( host, path, repo )
-    end
-
-    it 'allows a checkout depth with a rev from a specific branch' do
-      repo   = { :name => 'puppet',
-                 :path => 'git://my.server.net/puppet.git',
-                 :rev => 'a2340acddadfeafd234230faf',
-                 :depth => 50,
-                 :depth_branch => 'master' }
-
-      path   = '/path/to/repos'
-      cmd    = "test -d #{path}/#{repo[:name]} || git clone --branch #{repo[:depth_branch]} --depth #{repo[:depth]} #{repo[:path]} #{path}/#{repo[:name]}"
-      host   = { 'platform' => 'debian' }
-      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
-      logger = double.as_null_object
-      allow( subject ).to receive( :metadata ).and_return( metadata )
-      expect( subject ).to receive( :logger ).exactly( 3 ).times.and_return( logger )
-      expect( subject ).to receive( :on ).with( host,"test -d #{path} || mkdir -p #{path}").exactly( 1 ).times
-      # this is the the command we want to test
-      expect( subject ).to receive( :on ).with( host, cmd ).exactly( 1 ).times
-      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && git remote rm origin && git remote add origin #{repo[:path]} && git fetch origin +refs/pull/*:refs/remotes/origin/pr/* +refs/heads/*:refs/remotes/origin/* && git clean -fdx && git checkout -f #{repo[:rev]}" ).exactly( 1 ).times
-      expect( subject ).to receive( :on ).with( host, "cd #{path}/#{repo[:name]} && if [ -f install.rb ]; then ruby ./install.rb ; else true; fi" ).exactly( 1 ).times
-
-      subject.instance_variable_set( :@metadata, {} )
-      subject.install_from_git( host, path, repo )
+      subject.install_from_git_on( host, path, repo )
     end
    end
 

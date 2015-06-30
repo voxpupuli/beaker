@@ -1,3 +1,9 @@
+begin
+  require 'beaker/acceptance/install_utils'
+  extend Beaker::Acceptance::InstallUtils
+end
+test_name 'Puppet git pre-suite'
+
 install = [
   'facter#2.1.0',
   'hiera#1.3.4',
@@ -40,72 +46,7 @@ PACKAGES = {
   ]
 }
 
-PLATFORM_PATTERNS = {
-  :redhat        => /fedora|el|centos/,
-  :debian        => /debian|ubuntu/,
-  :debian_ruby18 => /debian|ubuntu-lucid|ubuntu-precise/,
-  :solaris_10    => /solaris-10/,
-  :solaris_11    => /solaris-11/,
-  :windows       => /windows/,
-  :sles          => /sles/,
-}.freeze
-
-# Installs packages on the hosts.
-#
-# @param hosts [Array<Host>] Array of hosts to install packages to.
-# @param package_hash [Hash{Symbol=>Array<String,Array<String,String>>}]
-#   Keys should be a symbol for a platform in PLATFORM_PATTERNS.  Values
-#   should be an array of package names to install, or of two element
-#   arrays where a[0] is the command we expect to find on the platform
-#   and a[1] is the package name (when they are different).
-# @param options [Hash{Symbol=>Boolean}]
-# @option options [Boolean] :check_if_exists First check to see if
-#   command is present before installing package.  (Default false)
-# @return true
-def install_packages_on(hosts, package_hash, options = {})
-  return true if hosts == nil
-  check_if_exists = options[:check_if_exists]
-  hosts = [hosts] unless hosts.kind_of?(Array)
-  hosts.each do |host|
-    package_hash.each do |platform_key,package_list|
-      if pattern = PLATFORM_PATTERNS[platform_key]
-        if pattern.match(host['platform'])
-          package_list.each do |cmd_pkg|
-            if cmd_pkg.kind_of?(Array)
-              command, package = cmd_pkg
-            else
-              command = package = cmd_pkg
-            end
-            if !check_if_exists || !host.check_for_package(command)
-              host.logger.notify("Installing #{package}")
-              additional_switches = '--allow-unauthenticated' if platform_key == :debian
-              host.install_package(package, additional_switches)
-            end
-          end
-        end
-      else
-        raise("Unknown platform '#{platform_key}' in package_hash")
-      end
-    end
-  end
-  return true
-end
-
 install_packages_on(hosts, PACKAGES, :check_if_exists => true)
-
-def lookup_in_env(env_variable_name, project_name, default)
-  project_specific_name = "#{project_name.upcase.gsub("-","_")}_#{env_variable_name}"
-  ENV[project_specific_name] || ENV[env_variable_name] || default
-end
-
-def build_giturl(project_name, git_fork = nil, git_server = nil)
-  git_fork ||= lookup_in_env('FORK', project_name, 'puppetlabs')
-  git_server ||= lookup_in_env('GIT_SERVER', project_name, 'github.com')
-  repo = (git_server == 'github.com') ?
-    "#{git_fork}/#{project_name}.git" :
-    "#{git_fork}-#{project_name}.git"
-  "git://#{git_server}/#{repo}"
-end
 
 hosts.each do |host|
   case host['platform']
