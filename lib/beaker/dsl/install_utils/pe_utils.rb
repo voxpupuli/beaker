@@ -414,9 +414,9 @@ module Beaker
 
           install_hosts.each do |host|
             if agent_only_check_needed && hosts_agent_only.include?(host)
-              install_puppet_agent_on(host, opts)
               host['type'] = 'aio'
-              setup_defaults_and_config_helper_on(host, master)
+              install_puppet_agent_pe_promoted_repo_on(host, opts)
+              setup_defaults_and_config_helper_on(host, master, [0, 1])
             elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
               configure_pe_defaults_on(host)
@@ -542,6 +542,12 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @!macro common_opts
+        # @option opts [String] :sha      The sha of puppet-agent to install. Required for PE agent
+        #                                 only hosts on 4.0+
+        # @option opts [String] :version  Version of puppet-agent to install. Required for PE agent
+        #                                 only hosts on 4.0+
+        # @option opts [String] :pe_ver   The version of PE (will also use host['pe_ver']), defaults to '4.0'
+        #
         # @example
         #  install_pe_on(hosts, {})
         #
