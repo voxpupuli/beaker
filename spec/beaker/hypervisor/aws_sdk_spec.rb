@@ -558,11 +558,43 @@ module Beaker
       end
     end
 
-    describe '#ensure_group', :wip do
-      it 'returns group from vpc lookup' do
+    describe '#ensure_group' do
+      let( :vpc ) { double('vpc') }
+      let( :ports ) { [22, 80, 8080] }
+
+      context 'for an existing group' do
+        before :each do
+          @group = double(:nil? => false)
+        end
+
+        it 'returns group from vpc lookup' do
+          expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(@group)
+          expect(aws.ensure_group(vpc, ports)).to eq(@group)
+        end
+
+        context 'during group lookup' do
+          it 'performs group_id lookup for ports' do
+            expect(aws).to receive(:group_id).with(ports)
+            expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(@group)
+            expect(aws.ensure_group(vpc, ports)).to eq(@group)
+          end
+
+          it 'filters on group_id' do
+            expect(vpc).to receive(:security_groups).and_return(vpc)
+            expect(vpc).to receive(:filter).with('group-name', 'Beaker-1521896090').and_return(vpc)
+            expect(vpc).to receive(:first).and_return(@group)
+            expect(aws.ensure_group(vpc, ports)).to eq(@group)
+          end
+        end
       end
 
-      it 'creates group if group.nil?' do
+      context 'when group does not exist' do
+        it 'creates group if group.nil?' do
+          group = double(:nil? => true)
+          expect(aws).to receive(:create_group).with(vpc, ports).and_return(group)
+          expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(group)
+          expect(aws.ensure_group(vpc, ports)).to eq(group)
+        end
       end
     end
 
