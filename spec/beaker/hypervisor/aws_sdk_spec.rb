@@ -598,14 +598,43 @@ module Beaker
       end
     end
 
-    describe '#create_group', :wip do
+    describe '#create_group' do
+      let( :rv ) { double('rv') }
+      let( :ports ) { [22, 80, 8080] }
+
+      before :each do
+        @group = double(:nil? => false)
+      end
+
       it 'returns a newly created group' do
+        allow(rv).to receive_message_chain('security_groups.create').and_return(@group)
+        allow(@group).to receive(:authorize_ingress).at_least(:once)
+        expect(aws.create_group(rv, ports)).to eq(@group)
       end
 
       it 'requests group_id for ports given' do
+        expect(aws).to receive(:group_id).with(ports)
+        allow(rv).to receive_message_chain('security_groups.create').and_return(@group)
+        allow(@group).to receive(:authorize_ingress).at_least(:once)
+        expect(aws.create_group(rv, ports)).to eq(@group)
+      end
+
+      it 'creates group with expected arguments' do
+        group_name = "Beaker-1521896090"
+        group_desc = "Custom Beaker security group for #{ports.to_a}"
+        expect(rv).to receive_message_chain('security_groups.create')
+                  .with(group_name, :description => group_desc)
+                  .and_return(@group)
+        allow(@group).to receive(:authorize_ingress).at_least(:once)
+        expect(aws.create_group(rv, ports)).to eq(@group)
       end
 
       it 'authorizes requested ports for group' do
+        expect(rv).to receive_message_chain('security_groups.create').and_return(@group)
+        ports.each do |port|
+          expect(@group).to receive(:authorize_ingress).with(:tcp, port).once
+        end
+        expect(aws.create_group(rv, ports)).to eq(@group)
       end
     end
 
