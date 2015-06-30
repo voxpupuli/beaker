@@ -507,7 +507,45 @@ module Beaker
       end
     end
 
-    describe '#ensure_key_pair', :wip do
+    describe '#ensure_key_pair' do
+      let( :region ) { double('region') }
+
+      context 'when a beaker keypair already exists' do
+        it 'returns the keypair if available' do
+          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
+          key_pair = double(:exists? => true, :secret => 'supersekritkey')
+          key_pairs = { "Beaker-rspec-SUT" => key_pair }
+
+          expect( region ).to receive(:key_pairs).and_return(key_pairs).once
+          expect( Socket ).to receive(:gethostname).and_return("SUT")
+          expect(aws.ensure_key_pair(region)).to eq(key_pair)
+        end
+      end
+
+      context 'when a pre-existing keypair cannot be found' do
+        let( :key_name ) { "Beaker-rspec-SUT" }
+        let( :key_pair ) { double(:exists? => false) }
+        let( :key_pairs ) { { key_name => key_pair } }
+        let( :pubkey ) { "Beaker-rspec-SUT_secret-key" }
+
+        before :each do
+          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
+          expect( region ).to receive(:key_pairs).and_return(key_pairs).once
+          expect( Socket ).to receive(:gethostname).and_return("SUT")
+        end
+
+        it 'imports a new key based on user pubkey' do
+          allow(aws).to receive(:public_key).and_return(pubkey)
+          expect( key_pairs ).to receive(:import).with(key_name, pubkey)
+          expect(aws.ensure_key_pair(region))
+        end
+
+        it 'returns imported keypair' do
+          allow(aws).to receive(:public_key)
+          expect( key_pairs ).to receive(:import).and_return(key_pair).once
+          expect(aws.ensure_key_pair(region)).to eq(key_pair)
+        end
+      end
     end
 
     describe '#group_id' do
