@@ -500,7 +500,11 @@ module Beaker
       end
     end
 
-    describe '#local_user', :wip do
+    describe '#local_user' do
+      it 'returns ENV["USER"]' do
+        stub_const('ENV', ENV.to_hash.merge('USER' => 'SuperUser'))
+        expect(aws.local_user).to eq("SuperUser")
+      end
     end
 
     describe '#ensure_key_pair', :wip do
