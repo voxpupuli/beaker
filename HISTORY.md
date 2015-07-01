@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 1 Jul, 2015 (4b71df0e)](#LATEST)
+* [LATEST - 1 Jul, 2015 (eb1f373a)](#LATEST)
+* [2.15.0 - 1 Jul, 2015 (07c416fb)](#2.15.0)
 * [2.14.1 - 5 Jun, 2015 (35026603)](#2.14.1)
 * [2.14.0 - 4 Jun, 2015 (c0ebcd16)](#2.14.0)
 * [2.13.0 - 29 May, 2015 (dd70aa66)](#2.13.0)
@@ -83,7 +84,23 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 1 Jul, 2015 (4b71df0e)
+### <a name = "LATEST">LATEST - 1 Jul, 2015 (eb1f373a)
+
+* (GEM) update beaker version to 2.15.1 (eb1f373a)
+
+* Merge pull request #872 from anodelman/maint (3c2a8179)
+
+
+```
+Merge pull request #872 from anodelman/maint
+
+(BKR-374) apt/yum.puppetlabs use 'pc1' not 'PC1'
+```
+* (BKR-374) apt/yum.puppetlabs use 'pc1' not 'PC1' (358fcad4)
+
+### <a name = "2.15.0">2.15.0 - 1 Jul, 2015 (07c416fb)
+
+* (HISTORY) update beaker history for gem release 2.15.0 (07c416fb)
 
 * (GEM) update beaker version to 2.15.0 (4b71df0e)
 
