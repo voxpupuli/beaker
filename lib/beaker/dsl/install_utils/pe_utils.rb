@@ -415,7 +415,10 @@ module Beaker
           install_hosts.each do |host|
             if agent_only_check_needed && hosts_agent_only.include?(host)
               host['type'] = 'aio'
-              install_puppet_agent_pe_promoted_repo_on(host, opts)
+              install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => opts[:puppet_agent_version],
+                                                               :puppet_agent_sha => opts[:puppet_agent_sha],
+                                                               :pe_ver => opts[:pe_ver],
+                                                               :puppet_collection => opts[:puppet_collection] })
               setup_defaults_and_config_helper_on(host, master, [0, 1])
             elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
@@ -542,11 +545,12 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @!macro common_opts
-        # @option opts [String] :sha      The sha of puppet-agent to install. Required for PE agent
+        # @option opts [String] :puppet_agent_version  Version of puppet-agent to install. Required for PE agent
         #                                 only hosts on 4.0+
-        # @option opts [String] :version  Version of puppet-agent to install. Required for PE agent
-        #                                 only hosts on 4.0+
+        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to puppet-agent-version.
+        #                                 Required for PE agent only hosts on 4.0+
         # @option opts [String] :pe_ver   The version of PE (will also use host['pe_ver']), defaults to '4.0'
+        # @option opts [String] :puppet_collection   The puppet collection for puppet-agent install.
         #
         # @example
         #  install_pe_on(hosts, {})
