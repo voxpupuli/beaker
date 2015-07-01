@@ -406,7 +406,44 @@ module Beaker
       end
     end
 
-    describe '#configure_hosts', :wip do
+    describe '#etc_hosts_entry' do
+      it 'returns a predictable host entry' do
+        host = @hosts[0]
+        expect(aws).to receive(:get_domain_name).and_return('lan')
+        expect(aws.etc_hosts_entry(host)).to eq("ip.address.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
+      end
+
+      context 'when :private_ip is requested' do
+        it 'returns host entry for the private_ip' do
+          host = @hosts[0]
+          expect(aws).to receive(:get_domain_name).and_return('lan')
+          expect(aws.etc_hosts_entry(host, :private_ip)).to eq("private.ip.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
+        end
+      end
+    end
+
+    describe '#configure_hosts' do
+      it 'returns nil' do
+        expect(aws.configure_hosts).to be_nil
+      end
+
+      context 'calls #set_etc_hosts' do
+        it 'for each host' do
+          expect(aws).to receive(:set_etc_hosts).exactly(@hosts.size).times
+          expect(aws.configure_hosts).to be_nil
+        end
+
+        it 'with predictable host entries' do
+          @hosts = [@hosts[0], @hosts[1]]
+          entries = "127.0.0.1\tlocalhost localhost.localdomain\n"\
+                    "private.ip.for.vm1\tvm1 vm1.lan vm1.box.tld\n"\
+                    "ip.address.for.vm2\tvm2 vm2.lan vm2.box.tld\n"
+          allow(aws).to receive(:get_domain_name).and_return('lan')
+          expect(aws).to receive(:set_etc_hosts).with(@hosts[0], entries)
+          expect(aws).to receive(:set_etc_hosts).with(@hosts[1], anything)
+          expect(aws.configure_hosts).to be_nil
+        end
+      end
     end
 
     describe '#enable_root_on_hosts' do
