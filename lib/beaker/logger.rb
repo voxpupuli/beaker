@@ -191,7 +191,7 @@ module Beaker
     # Will not print unless we are at {LOG_LEVELS} 'verbose' or higher.
     # Preserves outout by not stripping out colour codes
     # @param args[Array<String>] Strings to be reported
-    def preserve_host_output *args
+    def color_host_output *args
       return unless is_verbose?
       string = args.join
       optionally_color NONE, string, false

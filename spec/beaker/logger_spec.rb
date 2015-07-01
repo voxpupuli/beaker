@@ -224,14 +224,14 @@ module Beaker
 
         end
 
-        context 'preserve host output' do
-          subject( :preserve_host_output ) { Logger.new( my_io,
+        context 'color host output' do
+          subject( :color_host_output ) { Logger.new( my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
                                               :color     => true )}
 
-          it 'preserves host_output' do
-            colorized_logger = preserve_host_output
+          it 'colors host_output' do
+            colorized_logger = color_host_output
 
             expect( my_io ).to receive( :print ).with ""
             expect( my_io ).to receive( :puts ).with 'my string'
