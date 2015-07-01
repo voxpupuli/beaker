@@ -602,7 +602,7 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe '#install_puppet_agent_from_msi_on' do
-    let( :opts )     { { :version => 'VERSION' } }
+    let( :opts )     { { :puppet_agent_version => 'VERSION' } }
     let( :platform ) { 'windows' }
     let( :host )     { { :platform => platform } }
 
