@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 5 Jun, 2015 (8539687f)](#LATEST)
+* [LATEST - 1 Jul, 2015 (4b71df0e)](#LATEST)
+* [2.14.1 - 5 Jun, 2015 (35026603)](#2.14.1)
 * [2.14.0 - 4 Jun, 2015 (c0ebcd16)](#2.14.0)
 * [2.13.0 - 29 May, 2015 (dd70aa66)](#2.13.0)
 * [2.12.0 - 20 May, 2015 (62845ce9)](#2.12.0)
@@ -78,12 +79,294 @@
 * [pe2.0.3 - 21 Feb, 2012 (492ff756)](#pe2.0.3)
 * [pe2.0.2 - 3 Feb, 2012 (e36f0d22)](#pe2.0.2)
 * [pe2.0.1 - 31 Jan, 2012 (3a118201)](#pe2.0.1)
-* [pe2.0.0 - 31 Jan, 2012 (8d064e33)](#pe2.0.0)
 * [pe2.0 - 11 Nov, 2011 (4d7b65b6)](#pe2.0)
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 5 Jun, 2015 (8539687f)
+### <a name = "LATEST">LATEST - 1 Jul, 2015 (4b71df0e)
+
+* (GEM) update beaker version to 2.15.0 (4b71df0e)
+
+* Merge pull request #869 from kevpl/bkr253_installpe_pe_aio_url (b243648e)
+
+
+```
+Merge pull request #869 from kevpl/bkr253_installpe_pe_aio_url
+
+(BKR-253) install_pe_on uses pe_promoted puppet-agent for 4.0+
+```
+* (BKR-253) install_pe_on uses pe_promoted puppet-agent for 4.0+ (c0d47643)
+
+* Merge pull request #860 from anodelman/shallow (11f9a9ba)
+
+
+```
+Merge pull request #860 from anodelman/shallow
+
+(BKR-323) Allow install_puppet_agent_on to support "pe only" platforms
+```
+* Merge pull request #862 from anodelman/support-date-version (dbc4b535)
+
+
+```
+Merge pull request #862 from anodelman/support-date-version
+
+(BKR-344) Support year.release versioning (e.g. 2015.2)
+```
+* Merge pull request #863 from anodelman/maint (b444c507)
+
+
+```
+Merge pull request #863 from anodelman/maint
+
+(MAINT) add spec testing to option parsing prioritization
+```
+* (BKR-352) Beaker install_puppet_agent_on helper does not... (521e4791)
+
+
+```
+(BKR-352) Beaker install_puppet_agent_on helper does not...
+
+...respect the host install_32 or ruby_arch setting on Windows
+
+- install x86 msi when
+  * host['install_32'] == true
+  * opts['install_32'] == true
+  * host['ruby_arch'] == 'x86'
+  * host.is_x86_64? == false
+- install x64 msi when
+  * (host.is_x86_64? == true) && !host['install_32'] &&
+      !opts['install_32'] && !(host['ruby_arch'] == 'x86')
+```
+* (MAINT) add spec testing to option parsing prioritization (701c5aed)
+
+
+```
+(MAINT) add spec testing to option parsing prioritization
+
+- make sure that we are sorting through env variables, command line
+  arguments, host file options, options file argument and presets
+  correctly
+```
+* (BKR-344) Support year.release versioning (e.g. 2015.2) (048e6708)
+
+
+```
+(BKR-344) Support year.release versioning (e.g. 2015.2)
+
+- update semver matching to understand that 3.0.0 < 2015.3.0.0
+- update answer file generation to provide 4.0 answers for version 2015+
+```
+* Merge pull request #855 from bstopp/bug/copy_module_to_mv_fix (9631b55a)
+
+
+```
+Merge pull request #855 from bstopp/bug/copy_module_to_mv_fix
+
+(BKR-339) Remove the target module directory on host during copy_module_to
+```
+* Merge pull request #853 from kevpl/bkr319_installpe_puppetagent (6ddec170)
+
+
+```
+Merge pull request #853 from kevpl/bkr319_installpe_puppetagent
+
+(BKR-319) added puppet-agent install for install_pe for versions over 4.0
+```
+* Merge pull request #851 from madAndroid/BKR-314-idempotent-EL-install-release-repo (d7fccf8f)
+
+
+```
+Merge pull request #851 from madAndroid/BKR-314-idempotent-EL-install-release-repo
+
+(BKR-314) Ensure install_puppetlabs_release_repo is idempotent for EL
+```
+* (BKR-319) review feedback refactor (4b7235ec)
+
+* (BKR-323) Allow install_puppet_agent_on to support "pe only" platforms (cc906f1d)
+
+
+```
+(BKR-323) Allow install_puppet_agent_on to support "pe only" platforms
+
+- support both pm.puppetlabs.com and builds.puppetlabs.com for
+  downloading puppet-agent
+- use install_puppet_agent_on for yum|apt.puppetlabs.com
+- use install_puppet_agent_dev_repo_on for builds.puppetlabs.com
+- use install_puppet_agent_pe_promoted_repo_on for pm.puppetlabs.com
+
+example usage:
+  install_puppet_agent_on(host, { :version => '1.1.0', :default_action => 'gem_install'})
+  install_puppet_agent_dev_repo_on(host, { :sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :version => '1.1.1.225.gd3377fe'  })
+  install_puppet_agent_pe_promoted_repo_on(host, { :sha => '1.1.0.227', :version => '1.1.0.227.g1d8334c', :pe_ver => '4.0.0-rc1'})
+```
+* Merge pull request #844 from kevpl/bkr53_withpuppetrunningon_restart (36c9ae20)
+
+
+```
+Merge pull request #844 from kevpl/bkr53_withpuppetrunningon_restart
+
+(BKR-53) with_puppet_running_on only restarts before yielding
+```
+* (BKR-339) Remove the target module directory on host during copy_module_to (1d1d7eb6)
+
+
+```
+(BKR-339) Remove the target module directory on host during copy_module_to
+
+Without this patch, the copy_module_to function will not work correctly to copy updated module files into the target directory on the hosts. Instead accpetance test spec files can be updated, but not module sources. Additionally the module copy will fail on the second non-provisioning run.
+
+The patch simply executes a delete of the target directory on the host, ensuring it does not exist prior to the mv command.
+```
+* Merge pull request #847 from anodelman/fail-fast (923c7857)
+
+
+```
+Merge pull request #847 from anodelman/fail-fast
+
+(BKR-322) --fail-mode fast doesn't seem to be failing fast
+```
+* (BKR-319) added puppet-agent install for install_pe for versions over 4.0 (2749c051)
+
+* Merge pull request #850 from anodelman/aio-paths (19511298)
+
+
+```
+Merge pull request #850 from anodelman/aio-paths
+
+(BKR-325) AIO detection for install_puppet() and install_pe()
+```
+* Merge pull request #846 from anodelman/shallow (b00942f0)
+
+
+```
+Merge pull request #846 from anodelman/shallow
+
+(BKR-317) More usable configure_foss_defaults_on
+```
+* Merge pull request #848 from petems/BKR-326-fix_freebsd_ssh_root_setup (3491f13d)
+
+
+```
+Merge pull request #848 from petems/BKR-326-fix_freebsd_ssh_root_setup
+
+(BKR-326) Fixes enabling user environments
+```
+* Merge pull request #839 from vindir/feature/aws_ip_failover (837b2673)
+
+
+```
+Merge pull request #839 from vindir/feature/aws_ip_failover
+
+(BKR-311) Allow AWS IP Fallback
+```
+* (BKR-326) Adds requirement of perl for FreeBSD (476b3860)
+
+
+```
+(BKR-326) Adds requirement of perl for FreeBSD
+
+Makes regex sed replacement easier
+```
+* BKR-314 - expect more explicit rpm command - with --replacepkgs (cca0046e)
+
+* BKR-314 - Use --replacepkgs to ensure repo install is idempotent (dd73ca21)
+
+* (BKR-325) AIO detection for install_puppet() and install_pe() (8e6347ab)
+
+
+```
+(BKR-325) AIO detection for install_puppet() and install_pe()
+
+- check the pe_ver/version to see if aio pathing should be installed
+  instead of foss/pe
+```
+* (BKR-326) Adds FreeBSD specs for root login enable (a8ffadbe)
+
+* (BKR-326) Fixes enabling user environments (e5bc2451)
+
+
+```
+(BKR-326) Fixes enabling user environments
+
+Currently this step uses `echo_to_file`, which actually overwrites the file with the one line. This changes it to use the perl regex instead.
+```
+* (BKR-322) --fail-mode fast doesn't seem to be failing fast (7dfb56e0)
+
+
+```
+(BKR-322) --fail-mode fast doesn't seem to be failing fast
+
+- was using the default value instead of the setting value
+```
+* (BKR-317) More usable configure_foss_defaults_on (74df91d1)
+
+
+```
+(BKR-317) More usable configure_foss_defaults_on
+
+- add support for remove_defaults_on
+- add some spec test coverage
+```
+* Merge pull request #828 from kevpl/bkr220_tagging_add (5f71cdb3)
+
+
+```
+Merge pull request #828 from kevpl/bkr220_tagging_add
+
+(BKR-220) test tagging implemented
+```
+* (BKR-317) More usable configure_foss_defaults_on (12c51454)
+
+
+```
+(BKR-317) More usable configure_foss_defaults_on
+
+- create configure_defaults_on that provided a type sets the correct
+  defaults per-host, will also remove any existing defaults
+```
+* Merge pull request #845 from kevpl/bkr320_answers_40nilproblems (56fbc872)
+
+
+```
+Merge pull request #845 from kevpl/bkr320_answers_40nilproblems
+
+(BKR-320) added nil-check so we don't call methods on empty answer maps
+```
+* (BKR-320) added nil-check so we don't call methods on empty answer maps (2d38a720)
+
+* (BKR-53) with_puppet_running_on can not restart after yielding (9da3b99f)
+
+
+```
+(BKR-53) with_puppet_running_on can not restart after yielding
+
+Before, with_puppet_running_on bounced the puppet service before and after runs.
+This was causing us a lot of pain as the last restart proved unnecessary for the
+most part, and added 30 seconds to each test run on avg in our CI.
+
+We've decided to improve this by adding the ability to remove the second bounce.
+Mosts tests use `with_puppet_running_on`, so they'll be setup accordingly before
+yielding, so that second one is unnecessary.
+```
+* (BKR-311) Allow AWS IP Fallback (098daef0)
+
+
+```
+(BKR-311) Allow AWS IP Fallback
+
+When bringing up an instance in a VPC there won't always be a public address.
+This allows the AWS hypervisor to fallback and assign an instance's private
+ip to host['ip'] for new instances without a public address.
+
+This PR includes tests for the .AwsSdk#populate_dns method to verify this new
+behavior persists in the future.
+```
+* (BKR-220) test tagging implemented (f41c29f9)
+
+### <a name = "2.14.1">2.14.1 - 5 Jun, 2015 (35026603)
+
+* (HISTORY) update beaker history for gem release 2.14.1 (35026603)
 
 * (GEM) update beaker version to 2.14.1 (8539687f)
 
@@ -19157,30 +19440,6 @@ effect a dhcp lease renewal after ntpdate is run
 effect a dhcp lease renewal after ntpdate is run
 
 Some VMs, after reverting to snapshot, are renewing their dhcp lease after our tests are running, causing apparent network errors. This test will renew the lease early so it's good for a day (or whatever is configured at the dhcp server), rather than just a few seconds.
-```
-### <a name = "pe2.0.0">pe2.0.0 - 31 Jan, 2012 (8d064e33)
-
-* (maint) remove version checking for --pe-version option (8d064e33)
-
-
-```
-(maint) remove version checking for --pe-version option
-
-Checking for a specific PE version serves no real purpose; if
-an invalid version is passed the hassness will halt with an
-apporiate error indicating the vesrion needed is not found.
-```
-* (maint) Add support to install alt versions of PE (15bfaeed)
-
-
-```
-(maint) Add support to install alt versions of PE
-
-Need the ability to install more than just the LASTEST tarball
-of PE; passing --pe-version 2.0.0 will install PE 2.0.0 from
-/opt/enterptise/dists/pe2.0.0
-If --pe-version is ommited, version is derived from LATEST and
-/opt/enterprise/dist is used for the path.
 ```
 ### <a name = "pe2.0">pe2.0 - 11 Nov, 2011 (4d7b65b6)
 
