@@ -279,14 +279,14 @@ module Beaker
         # @option opts [String] :puppet_gem_version Version of puppet to install via gem if no puppet-agent package is available
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-agent-%version%.msi
         # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/puppet-agent-%version%.msi
-        # @option opts [String] :puppet_collection Defaults to 'PC1'
+        # @option opts [String] :puppet_collection Defaults to 'pc1'
         #
         # @return nil
         # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
         # @raise [FailTest] When error occurs during the actual installation process
         def install_puppet_agent_on(hosts, opts)
           opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-          opts[:puppet_collection] ||= 'PC1'
+          opts[:puppet_collection] ||= 'pc1' #hi!  i'm case sensitive!  be careful!
 
           block_on hosts do |host|
             host[:type] = 'aio' #we are installing agent, so we want aio type
