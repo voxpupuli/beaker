@@ -140,7 +140,7 @@ module Beaker
 
     # Create an EC2 instance for host, tag it, and return it.
     #
-    # @return [AWS::EC2::Instance)]
+    # @return [void]
     # @api private
     def create_instance(host, ami_spec, subnet_id)
       amitype = host['vmname'] || host['platform']
