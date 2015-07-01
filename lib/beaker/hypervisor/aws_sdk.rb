@@ -430,6 +430,7 @@ module Beaker
         host_entries.unshift "127.0.0.1\tlocalhost localhost.localdomain\n"
         set_etc_hosts(host, host_entries.join(''))
       end
+      nil
     end
 
     # Enables root for instances with custom username like ubuntu-amis
