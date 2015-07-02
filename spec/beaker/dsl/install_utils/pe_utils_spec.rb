@@ -453,8 +453,10 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts
       expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
-      expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[1], opts ).once
-      expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[2], opts ).once
+      expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[1],
+                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
+      expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[2],
+                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
       hosts.each do |host|
         expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
         expect( subject ).to receive( :sign_certificate_for ).with( host ).once

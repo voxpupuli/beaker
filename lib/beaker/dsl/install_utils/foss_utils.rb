@@ -208,6 +208,7 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts
         # @option opts [String] :version Version of puppet to download
+        # @option opts [String] :puppet_agent_version Version of puppet agent to download
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
         # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/(puppet|hiera|facter)-%version%.msi
         #
@@ -219,7 +220,8 @@ module Beaker
 
           # If version isn't specified assume the latest in the 3.x series
           if opts[:version] and not version_is_less(opts[:version], '4.0.0')
-            opts[:version] = opts[:puppet_agent_version]
+            # backwards compatability
+            opts[:puppet_agent_version] ||= opts[:version]
             install_puppet_agent_on(hosts, opts)
 
           else
@@ -260,8 +262,8 @@ module Beaker
         #Install Puppet Agent based on specified hosts using provided options
         # @example will install puppet-agent 1.1.0 from native puppetlabs provided packages wherever possible and will fail over to gem installing latest puppet
         #  install_puppet_agent_on(hosts, {
-        #    :version          => '1.1.0',
-        #    :default_action   => 'gem_install',
+        #    :puppet_agent_version          => '1.1.0',
+        #    :default_action                => 'gem_install',
         #   })
         #
         #
@@ -275,7 +277,7 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts
-        # @option opts [String] :version Version of puppet to download
+        # @option opts [String] :puppet_agent_version Version of puppet to download
         # @option opts [String] :puppet_gem_version Version of puppet to install via gem if no puppet-agent package is available
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-agent-%version%.msi
         # @option opts [String] :win_download_url Url to download dmg  pattern of %url%/puppet-agent-%version%.msi
@@ -287,6 +289,10 @@ module Beaker
         def install_puppet_agent_on(hosts, opts)
           opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
           opts[:puppet_collection] ||= 'pc1' #hi!  i'm case sensitive!  be careful!
+          opts[:puppet_agent_version] ||= opts[:version] #backwards compatability with old parameter name
+          if not opts[:puppet_agent_version]
+            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_on"
+          end
 
           block_on hosts do |host|
             host[:type] = 'aio' #we are installing agent, so we want aio type
@@ -296,15 +302,15 @@ module Beaker
               logger.warn("install_puppet_agent_on for pe-only platform #{host['platform']} - use install_puppet_agent_pe_promoted_repo_on")
             when /el-|fedora/
               install_puppetlabs_release_repo(host, opts[:puppet_collection])
-              if opts[:version]
-                host.install_package("puppet-agent-#{opts[:version]}")
+              if opts[:puppet_agent_version]
+                host.install_package("puppet-agent-#{opts[:puppet_agent_version]}")
               else
                 host.install_package('puppet-agent')
               end
             when /debian|ubuntu|cumulus/
               install_puppetlabs_release_repo(host, opts[:puppet_collection])
-              if opts[:version]
-                host.install_package("puppet-agent=#{opts[:version]}-1#{host['platform'].codename}")
+              if opts[:puppet_agent_version]
+                host.install_package("puppet-agent=#{opts[:puppet_agent_version]}-1#{host['platform'].codename}")
               else
                 host.install_package('puppet-agent')
               end
@@ -522,7 +528,7 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of Puppet Agent to install
+        # @option opts [String] :puppet_agent_version The version of Puppet Agent to install
         # @option opts [String] :win_download_url The url to download puppet from
         #
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
@@ -530,13 +536,14 @@ module Beaker
         def install_puppet_agent_from_msi_on(hosts, opts)
           block_on hosts do |host|
 
+            host[:type] = 'aio' #we are installing agent, so we want aio type
             is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
             should_install_64bit = host.is_x86_64? && !is_config_32
             arch = should_install_64bit ? 'x64' : 'x86'
 
             # If we don't specify a version install the latest MSI for puppet-agent
-            if opts[:version]
-              host['dist'] = "puppet-agent-#{opts[:version]}-#{arch}"
+            if opts[:puppet_agent_version]
+              host['dist'] = "puppet-agent-#{opts[:puppet_agent_version]}-#{arch}"
             else
               host['dist'] = "puppet-agent-#{arch}-latest"
             end
@@ -600,7 +607,6 @@ module Beaker
                       "or greater on OSX"
               end
 
-              opts[:version] = opts[:puppet_agent_version]
               install_puppet_agent_from_dmg_on(host, opts)
 
             else
@@ -631,14 +637,17 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of Puppet Agent to install
+        # @option opts [String] :puppet_agent_version The version of Puppet Agent to install
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
         #
         # @return nil
         # @api private
         def install_puppet_agent_from_dmg_on(hosts, opts)
           block_on hosts do |host|
-            version = opts[:version] || 'latest'
+
+            host[:type] = 'aio' #we are installing agent, so we want aio type
+
+            version = opts[:puppet_agent_version] || 'latest'
             on host, "curl -O #{opts[:mac_download_url]}/puppet-agent-#{version}.dmg"
 
             host.install_package("puppet-agent-#{version}")
@@ -946,7 +955,7 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of puppet-agent to install
+        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
         #                       will be stored locally
         #                       (default: 'tmp/repo_configs')
@@ -966,6 +975,7 @@ module Beaker
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
             opts[:copy_dir_external]  ||= File.join('/', 'root')
             opts[:puppet_collection] ||= 'PC1'
+            host[:type] = 'aio' #we are installing agent, so we want aio type
             release_path = opts[:download_url]
             variant, version, arch, codename = host['platform'].to_array
             copy_dir_local = File.join(opts[:copy_base_local], variant)
@@ -975,10 +985,10 @@ module Beaker
             when /^(fedora|el|centos|sles)$/
               variant = ((variant == 'centos') ? 'el' : variant)
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
-              release_file = "puppet-agent-#{opts[:version]}-1.#{variant}#{version}.#{arch}.rpm"
+              release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
             when /^(debian|ubuntu|cumulus)$/
               release_path << "deb/#{codename}/#{opts[:puppet_collection]}"
-              release_file = "puppet-agent_#{opts[:version]}-1#{codename}_#{arch}.deb"
+              release_file = "puppet-agent_#{opts[:puppet_agent_version]}-1#{codename}_#{arch}.deb"
             when /^windows$/
               release_path << 'windows'
               onhost_copy_base = '`cygpath -smF 35`/'
@@ -1008,7 +1018,7 @@ module Beaker
               onhost_copied_file = result.raw_output.chomp
               on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
             end
-            add_aio_defaults_on( host )
+            configure_foss_defaults_on( host )
           end
         end
 
@@ -1018,8 +1028,8 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of puppet-agent to install
-        # @option opts [String] :sha The sha of puppet-agent to install
+        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
+        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided :puppet_agent_version
         # @option opts [String] :pe_ver The version of PE (will also use host['pe_ver']), defaults to '4.0'
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
         #                       will be stored locally
@@ -1034,15 +1044,18 @@ module Beaker
         # to other settings whether the 32 or 64bit install is used
         #
         # @example
-        #   install_puppet_agent_pe_promoted_repo_on(host, { :sha => '1.1.0.227', :version => '1.1.0.227.g1d8334c', :pe_ver => '4.0.0-rc1'})
+        #   install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_sha => '1.1.0.227', :puppet_agent_version => '1.1.0.227.g1d8334c', :pe_ver => '4.0.0-rc1'})
         #
         # @return nil
         def install_puppet_agent_pe_promoted_repo_on( hosts, opts )
+          if not opts[:puppet_agent_version]
+            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_pre_promoted_repo_on"
+          end
           block_on hosts do |host|
             pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0'
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{pe_ver}/#{opts[:sha]}/repos/"
+            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             install_puppet_agent_repo_on( host, opts )
           end
         end
@@ -1054,8 +1067,9 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :version The version of puppet-agent to install
-        # @option opts [String] :sha The sha of puppet-agent to install
+        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
+        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided
+        #                       puppet_agent_version
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
         #                       will be stored locally
         #                       (default: 'tmp/repo_configs')
@@ -1069,14 +1083,18 @@ module Beaker
         # to other settings whether the 32 or 64bit install is used
         #
         # @example
-        #   install_puppet_agent_dev_repo_on(host, { :sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :version => '1.1.1.225.gd3377fe'  })
+        #   install_puppet_agent_dev_repo_on(host, { :puppet_agent_sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :puppet_agent_version => '1.1.1.225.gd3377fe'  })
         #
         # @return nil
         def install_puppet_agent_dev_repo_on( hosts, opts )
+          opts[:puppet_agent_version] ||= opts[:version] #backward compatability
+          if not opts[:puppet_agent_version]
+            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
+          end
           block_on hosts do |host|
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{opts[:sha]}/repos/"
+            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             install_puppet_agent_repo_on( host, opts )
           end
         end
