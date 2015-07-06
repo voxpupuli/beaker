@@ -34,19 +34,51 @@ module Beaker
     }}
 
     before :each do
-      @hosts = make_hosts({:snapshot => :pe}, 4)
+      @hosts = make_hosts({:snapshot => :pe}, 5)
       @hosts[0][:platform] = "centos-5-x86-64-west"
       @hosts[1][:platform] = "centos-6-x86-64-west"
       @hosts[2][:platform] = "centos-7-x86-64-west"
       @hosts[3][:platform] = "ubuntu-12.04-amd64-west"
       @hosts[3][:user] = "ubuntu"
+      @hosts[4][:platform] = 'f5-host'
+      @hosts[4][:user] = 'notroot'
     end
 
-    context 'enabling root shall be called once for the ubuntu machine' do
-      it "should enable root once" do
+    context 'enabling root' do
+      it 'enables root once on the ubuntu host through the main code path' do
         expect( aws ).to receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
         expect( aws ).to receive(:enable_root_login).with( @hosts[3], options).once()
         aws.enable_root_on_hosts();
+      end
+
+      it 'enables root once on the f5 host through its code path' do
+        expect( aws ).to receive(:enable_root_f5).with( @hosts[4] ).once()
+        aws.enable_root_on_hosts()
+      end
+
+      describe '#enable_root_f5' do
+
+        it 'creates a password on the host' do
+          f5_host = @hosts[4]
+          result_mock = Beaker::Result.new(f5_host, '')
+          result_mock.exit_code = 0
+          allow( f5_host ).to receive( :exec ).and_return(result_mock)
+          allow( aws ).to receive( :backoff_sleep )
+          sha_mock = Object.new
+          allow( Digest::SHA256 ).to receive( :new ).and_return(sha_mock)
+          expect( sha_mock ).to receive( :hexdigest ).once()
+          aws.enable_root_f5(f5_host)
+        end
+
+        it 'tries 10x before failing correctly' do
+          f5_host = @hosts[4]
+          result_mock = Beaker::Result.new(f5_host, '')
+          result_mock.exit_code = 2
+          allow( f5_host ).to receive( :exec ).and_return(result_mock)
+          expect( aws ).to receive( :backoff_sleep ).exactly(9).times
+          expect{ aws.enable_root_f5(f5_host) }.to raise_error( RuntimeError, /unable/ )
+        end
+
       end
     end
 
