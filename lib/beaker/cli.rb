@@ -16,6 +16,8 @@ module Beaker
       @logger = Beaker::Logger.new(@options)
       @options[:logger] = @logger
       @options[:timestamp] = @timestamp
+      @options[:beaker_version] = Beaker::Version::STRING
+      beaker_version_string = VERSION_STRING % @options[:beaker_version]
       @execute = true
 
       if @options[:help]
@@ -23,11 +25,13 @@ module Beaker
         @execute = false
         return
       end
-      if @options[:version]
-        @logger.notify(VERSION_STRING % Beaker::Version::STRING)
+      if @options[:beaker_version_print]
+        @logger.notify(beaker_version_string)
         @execute = false
         return
       end
+      @logger.info("Beaker!")
+      @logger.info(beaker_version_string)
       @logger.info(@options.dump)
       if @options[:parse_only]
         @execute = false
