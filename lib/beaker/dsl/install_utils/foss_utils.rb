@@ -1020,6 +1020,11 @@ module Beaker
               # - we do not have install_32 set globally
               arch_suffix = should_install_64bit ? '64' : '86'
               release_file = "puppet-agent-x#{arch_suffix}.msi"
+            when /^osx$/
+              onhost_copy_base = File.join('/var', 'root')
+              mac_pkg_name = "puppet-agent-#{opts[:puppet_agent_version]}"
+              release_path << "/apple/#{opts[:puppet_collection]}"
+              release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
             else
               raise "No repository installation step for #{variant} yet..."
             end
@@ -1038,6 +1043,8 @@ module Beaker
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
               on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
+            when /^osx$/
+              host.install_package("#{mac_pkg_name}*")
             end
             configure_foss_defaults_on( host )
           end
@@ -1111,7 +1118,7 @@ module Beaker
               release_file = "/repos/apple/#{opts[:puppet_collection]}/puppet-agent-*"
               download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
             else
-              raise "No repository installation step for #{variant} yet..."
+              raise "No pe-promoted installation step for #{variant} yet..."
             end
 
             onhost_copied_download = File.join(onhost_copy_base, download_file)
