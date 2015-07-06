@@ -226,6 +226,43 @@ module Beaker
         expect( test_suite_result.elapsed_time ).to be == 111
       end
 
+      describe '#write_junit_xml' do
+        let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.'}) }
+        let(:rb_test)       { 'my_ruby_file.rb'     }
+
+        it 'doesn\'t re-order test cases themselves on time_sort' do
+          nokogiri_mock = Hash.new
+          allow( nokogiri_mock ).to receive( :add_child )
+          allow( Nokogiri::XML::Node ).to receive( :new ) { nokogiri_mock }
+          allow( LoggerJunit ).to receive( :write_xml ).and_yield( Object.new, nokogiri_mock )
+
+          @files = [ rb_test, rb_test, rb_test]
+          ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :fast )
+          tsr = ts.instance_variable_get( :@test_suite_results )
+
+          allow( tsr ).to receive( :start_time ).and_return(0)
+          allow( tsr ).to receive( :stop_time ).and_return(10)
+          expect( tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+
+          test_cases = []
+          3.times do
+            tc = Beaker::TestCase.new( hosts, options[:logger], options, rb_test)
+            allow( tc ).to receive( :sublog ).and_return( false )
+            test_cases << tc
+          end
+          test_cases[0].instance_variable_set(:@runtime, 3)
+          test_cases[1].instance_variable_set(:@runtime, 301)
+          test_cases[2].instance_variable_set(:@runtime, 101)
+          test_cases.map { |tc| tsr.add_test_case( tc ) }
+
+          original_testcase_order = test_suite_result.instance_variable_get( :@test_cases ).dup
+          tsr.write_junit_xml( 'fakeFilePath07', 'fakeFileToLink09', true )
+          after_testcase_order = test_suite_result.instance_variable_get( :@test_cases ).dup
+          expect( after_testcase_order ).to be === original_testcase_order
+        end
+
+      end
+
 
     end
 
