@@ -584,6 +584,29 @@ module Beaker
       it 'throws an IOError when the file given doesn\'t exist' do
         expect { host.do_rsync_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
       end
+
+      it 'uses the ssh config file' do
+        @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
+        create_files(['source'])
+        args = [ 'source', 'target',
+                 {:ignore => ['.bundle']} ]
+        # since were using fakefs we need to create the file and directories
+        FileUtils.mkdir_p('/var/folders/v0/')
+        FileUtils.touch('/var/folders/v0/centos-64-x6420150625-48025-lu3u86')
+        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -F /var/folders/v0/centos-64-x6420150625-48025-lu3u86 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+        expect(Rsync).to receive(:run).with(*rsync_args).and_return(Beaker::Result.new(host, 'output!'))
+        expect(host.do_rsync_to(*args).cmd).to eq('output!')
+      end
+
+      it 'does not use the ssh config file when config does not exist' do
+        @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
+        create_files(['source'])
+        args = [ 'source', 'target',
+                 {:ignore => ['.bundle']} ]
+        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+        expect(Rsync).to receive(:run).with(*rsync_args).and_return(Beaker::Result.new(host, 'output!'))
+        expect(host.do_rsync_to(*args).cmd).to eq('output!')
+      end
     end
 
     it 'interpolates to its "name"' do
