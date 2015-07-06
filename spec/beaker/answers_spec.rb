@@ -3,11 +3,50 @@ require 'spec_helper'
 module Beaker
   describe Answers do
     let( :basic_hosts ) { make_hosts( { 'pe_ver' => @ver } ) }
-    let( :options )     { Beaker::Options::Presets.new.presets }
+    let( :options )     { @options || Beaker::Options::Presets.new.presets }
     let( :hosts )       { basic_hosts[0]['roles'] = ['master', 'database', 'dashboard']
                           basic_hosts[1]['platform'] = 'windows'
                           basic_hosts }
     let( :answers )     { Beaker::Answers.create(@ver, hosts, options) }
+
+    after :each do
+      ENV.delete('q_puppet_cloud_install')
+    end
+
+    it 'uses options[:answers] if they are set (override q_puppet_cloud_install for 3.8' do
+      @ver = '3.8'
+      options[:answers] = Beaker::Options::OptionsHash.new
+      options[:answers]['q_puppet_cloud_install'] = 'n'
+      opts = answers.instance_variable_get(:@options)
+      @answers = answers.answers
+      # confirm that the answers were correctly added to the answers object
+      expect(opts).to be_a_kind_of Beaker::Options::OptionsHash
+      expect(opts[:answers]['q_puppet_cloud_install']).to be == 'n'
+      expect(opts[:answers][:q_puppet_cloud_install]).to be == 'n'
+      hosts.each do |host|
+        if @answers[host.name]
+          expect( @answers[host.name][:q_puppet_cloud_install] ).to be == 'n'
+        end
+      end
+    end
+
+    it 'uses ENV[:q_*] if they are set (override q_puppet_cloud_install for 3.8' do
+      @ver = '3.8'
+      ENV['q_puppet_cloud_install'] = 'n'
+      @options = Beaker::Options::Parser.new.parse_args([])
+
+      opts = answers.instance_variable_get(:@options)
+      @answers = answers.answers
+      # confirm that the answers were correctly added to the answers object
+      expect(opts).to be_a_kind_of Beaker::Options::OptionsHash
+      expect(opts[:answers]['q_puppet_cloud_install']).to be == 'n'
+      expect(opts[:answers][:q_puppet_cloud_install]).to be == 'n'
+      hosts.each do |host|
+        if @answers[host.name]
+          expect( @answers[host.name][:q_puppet_cloud_install] ).to be == 'n'
+        end
+      end
+    end
 
     it 'generates 3.4 answers for 4.0 hosts' do
       @ver = '4.0'
@@ -208,7 +247,7 @@ module Beaker
     it 'should add answers to the host objects' do
       answers = @answers
       hosts.each do |host|
-        expect( host[:answers] ).to be === answers[host.name]
+        expect( host[:answers] ).to be === @answers[host.name]
       end
     end
   end
@@ -459,9 +498,7 @@ module Beaker
 
     def test_answer_customization(answer_key, value_to_set)
       @ver = '3.0'
-      if not options[:answers]
-        options[:answers] = {}
-      end
+      options[:answers] ||= Beaker::Options::OptionsHash.new
       options[:answers][answer_key] = value_to_set
       host_answers = answers.answers['vm1']
       expect( host_answers[answer_key] ).to be === value_to_set
