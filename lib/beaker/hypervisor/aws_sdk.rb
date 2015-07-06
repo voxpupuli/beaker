@@ -11,6 +11,7 @@ module Beaker
   # vendor API.
   class AwsSdk < Beaker::Hypervisor
     ZOMBIE = 3 #anything older than 3 hours is considered a zombie
+    PING_SECURITY_GROUP_NAME = 'beaker-ping'
 
     # Initialize AwsSdk hypervisor driver
     #
@@ -287,6 +288,8 @@ module Beaker
       end
 
       security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
+      #check if ping is enabled
+      ping_security_group = ensure_ping_group(vpc || region)
 
       msg = "aws-sdk: launching %p on %p using %p/%p%s" %
             [host.name, amitype, amisize, image_type,
@@ -297,7 +300,7 @@ module Beaker
         :image_id => image_id,
         :monitoring_enabled => true,
         :key_pair => ensure_key_pair(region),
-        :security_groups => [security_group],
+        :security_groups => [security_group, ping_security_group],
         :instance_type => amisize,
         :disable_api_termination => false,
         :instance_initiated_shutdown_behavior => "terminate",
@@ -669,6 +672,25 @@ module Beaker
     # Accepts a VPC as input for checking & creation.
     #
     # @param vpc [AWS::EC2::VPC] the AWS vpc control object
+    # @return [AWS::EC2::SecurityGroup] created security group
+    # @api private
+    def ensure_ping_group(vpc)
+      @logger.notify("aws-sdk: Ensure security group exists that enables ping, create if not")
+
+      group = vpc.security_groups.filter('group-name', PING_SECURITY_GROUP_NAME).first
+
+      if group.nil?
+        group = create_ping_group(vpc)
+      end
+
+      group
+    end
+
+    # Return an existing group, or create new one
+    #
+    # Accepts a VPC as input for checking & creation.
+    #
+    # @param vpc [AWS::EC2::VPC] the AWS vpc control object
     # @param ports [Array<Number>] an array of port numbers
     # @return [AWS::EC2::SecurityGroup] created security group
     # @api private
@@ -681,6 +703,23 @@ module Beaker
       if group.nil?
         group = create_group(vpc, ports)
       end
+
+      group
+    end
+
+    # Create a new ping enabled security group
+    #
+    # Accepts a region or VPC for group creation.
+    #
+    # @param rv [AWS::EC2::Region, AWS::EC2::VPC] the AWS region or vpc control object
+    # @return [AWS::EC2::SecurityGroup] created security group
+    # @api private
+    def create_ping_group(rv)
+      @logger.notify("aws-sdk: Creating group #{PING_SECURITY_GROUP_NAME}")
+      group = rv.security_groups.create(PING_SECURITY_GROUP_NAME,
+                                        :description => "Custom Beaker security group to enable ping")
+
+      group.allow_ping
 
       group
     end

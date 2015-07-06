@@ -53,6 +53,22 @@ module Unix::Exec
     execute("mv #{orig} #{dest}")
   end
 
+  # Attempt to ping the provided target hostname
+  # @param [String] target The hostname to ping
+  # @param [Integer] attempts Amount of times to attempt ping before giving up
+  # @return [Boolean] true of ping successful, overwise false
+  def ping target, attempts=5
+    try = 0
+    while try < attempts do
+      result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
+      if result.exit_code == 0
+        return true
+      end
+      try+=1
+    end
+    result.exit_code == 0
+  end
+
   # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
   # This is for sles based hosts.
   # @param [String] env_file The ssh environment file to read from
