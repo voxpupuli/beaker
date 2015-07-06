@@ -950,12 +950,14 @@ module Beaker
         end
 
         # Install development repo of the puppet-agent on the given host(s).  Downloaded from 
-        # location of the form DOWNLOAD_URL/puppet-agent/AGENT_VERSION
+        # location of the form DEV_BUILDS_URL/puppet-agent/AGENT_VERSION/repos
         #
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
         # @option opts [String] :puppet_agent_version The version of puppet-agent to install
+        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided
+        #                       puppet_agent_version
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
         #                       will be stored locally
         #                       (default: 'tmp/repo_configs')
@@ -963,15 +965,31 @@ module Beaker
         #                       artifact will be pushed to on the external machine
         #                       (default: '/root')
         # @option opts [String] :puppet_collection Defaults to 'PC1'
-        # @option opts [String] :download_url Base url to look for build at
+        # @option opts [String] :dev_builds_url Base URL to pull artifacts from
+        # @option opts [String] :copy_base_local Directory where puppet-agent artifact
+        #                       will be stored locally
+        #                       (default: 'tmp/repo_configs')
+        # @option opts [String] :copy_dir_external Directory where puppet-agent
+        #                       artifact will be pushed to on the external machine
+        #                       (default: '/root')
         #
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
         # to other settings whether the 32 or 64bit install is used
         #
+        # @example
+        #   install_puppet_agent_dev_repo_on(host, { :puppet_agent_sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :puppet_agent_version => '1.1.1.225.gd3377fe'  })
+        #
         # @return nil
-        def install_puppet_agent_repo_on( hosts, opts )
+        def install_puppet_agent_dev_repo_on( hosts, opts )
 
+          opts[:puppet_agent_version] ||= opts[:version] #backward compatability
+          if not opts[:puppet_agent_version]
+            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
+          end
           block_on hosts do |host|
+            variant, version, arch, codename = host['platform'].to_array
+            opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
+            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
             opts[:copy_dir_external]  ||= File.join('/', 'root')
             opts[:puppet_collection] ||= 'PC1'
@@ -987,6 +1005,9 @@ module Beaker
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
             when /^(debian|ubuntu|cumulus)$/
+              if arch == 'x86_64'
+                arch = 'amd64'
+              end
               release_path << "deb/#{codename}/#{opts[:puppet_collection]}"
               release_file = "puppet-agent_#{opts[:puppet_agent_version]}-1#{codename}_#{arch}.deb"
             when /^windows$/
@@ -1021,6 +1042,7 @@ module Beaker
             configure_foss_defaults_on( host )
           end
         end
+        alias_method :install_puppetagent_dev_repo, :install_puppet_agent_dev_repo_on
 
         # Install shared repo of the puppet-agent on the given host(s).  Downloaded from 
         # location of the form PE_PROMOTED_BUILDS_URL/PE_VER/puppet-agent/AGENT_VERSION/repo
@@ -1028,8 +1050,7 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
-        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided :puppet_agent_version
+        # @option opts [String] :puppet_agent_version The version of puppet-agent to install, defaults to 'latest'
         # @option opts [String] :pe_ver The version of PE (will also use host['pe_ver']), defaults to '4.0'
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
         #                       will be stored locally
@@ -1044,61 +1065,82 @@ module Beaker
         # to other settings whether the 32 or 64bit install is used
         #
         # @example
-        #   install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_sha => '1.1.0.227', :puppet_agent_version => '1.1.0.227.g1d8334c', :pe_ver => '4.0.0-rc1'})
+        #   install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => '1.1.0.227', :pe_ver => '4.0.0-rc1'})
         #
         # @return nil
         def install_puppet_agent_pe_promoted_repo_on( hosts, opts )
-          if not opts[:puppet_agent_version]
-            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_pre_promoted_repo_on"
-          end
+          opts[:puppet_agent_version] ||= 'latest'
           block_on hosts do |host|
             pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0'
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
-            install_puppet_agent_repo_on( host, opts )
-          end
-        end
-
-
-        # Install development repo of the puppet-agent on the given host(s).  Downloaded from 
-        # location of the form DEV_BUILDS_URL/puppet-agent/AGENT_VERSION/repos
-        #
-        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
-        # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
-        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided
-        #                       puppet_agent_version
-        # @option opts [String] :copy_base_local Directory where puppet-agent artifact
-        #                       will be stored locally
-        #                       (default: 'tmp/repo_configs')
-        # @option opts [String] :copy_dir_external Directory where puppet-agent
-        #                       artifact will be pushed to on the external machine
-        #                       (default: '/root')
-        # @option opts [String] :puppet_collection Defaults to 'PC1'
-        # @option opts [String] :dev_builds_url Base URL to pull artifacts from
-        #
-        # @note on windows, the +:ruby_arch+ host parameter can determine in addition
-        # to other settings whether the 32 or 64bit install is used
-        #
-        # @example
-        #   install_puppet_agent_dev_repo_on(host, { :puppet_agent_sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :puppet_agent_version => '1.1.1.225.gd3377fe'  })
-        #
-        # @return nil
-        def install_puppet_agent_dev_repo_on( hosts, opts )
-          opts[:puppet_agent_version] ||= opts[:version] #backward compatability
-          if not opts[:puppet_agent_version]
-            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
-          end
-          block_on hosts do |host|
+            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos/"
+            opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
+            opts[:copy_dir_external]  ||= File.join('/', 'root')
+            opts[:puppet_collection] ||= 'PC1'
+            host[:type] = 'aio' #we are installing agent, so we want aio type
+            release_path = opts[:download_url]
             variant, version, arch, codename = host['platform'].to_array
-            opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
-            install_puppet_agent_repo_on( host, opts )
+            copy_dir_local = File.join(opts[:copy_base_local], variant)
+            onhost_copy_base = opts[:copy_dir_external]
+
+            case variant
+            when /^(fedora|el|centos|sles)$/
+              variant = ((variant == 'centos') ? 'el' : variant)
+              release_file = "/repos/#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}/puppet-agent-*.rpm"
+              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
+            when /^(debian|ubuntu|cumulus)$/
+              if arch == 'x86_64'
+                arch = 'amd64'
+              end
+              release_file = "/repos/apt/#{codename}/pool/#{opts[:puppet_collection]}/p/puppet-agent/puppet-agent*#{arch}.deb"
+              download_file = "puppet-agent-debian-#{version}-#{arch}.tar.gz"
+            when /^windows$/
+              onhost_copy_base = '`cygpath -smF 35`/'
+              is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
+              should_install_64bit = host.is_x86_64? && !is_config_32
+              # only install 64bit builds if
+              # - we do not have install_32 set on host
+              # - we do not have install_32 set globally
+              arch_suffix = should_install_64bit ? '64' : '86'
+              release_path += "windows/"
+              release_file = "/puppet-agent-x#{arch_suffix}.msi"
+              download_file = "puppet-agent-x#{arch_suffix}.msi"
+            when /^osx$/
+              onhost_copy_base = File.join('/var', 'root')
+              release_file = "/repos/apple/#{opts[:puppet_collection]}/puppet-agent-*"
+              download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
+            else
+              raise "No repository installation step for #{variant} yet..."
+            end
+
+            onhost_copied_download = File.join(onhost_copy_base, download_file)
+            onhost_copied_file = File.join(onhost_copy_base, release_file)
+            fetch_http_file( release_path, download_file, copy_dir_local)
+            scp_to host, File.join(copy_dir_local, download_file), onhost_copy_base
+
+            case variant
+            when /^(fedora|el|centos|sles)$/
+              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
+              on host, "rpm -ivh #{onhost_copied_file}"
+            when /^(debian|ubuntu|cumulus)$/
+              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
+              on host, "dpkg -i --force-all #{onhost_copied_file}"
+              on host, "apt-get update"
+            when /^windows$/
+              result = on host, "echo #{onhost_copied_file}"
+              onhost_copied_file = result.raw_output.chomp
+              on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
+            when /^osx$/
+              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
+              # move to better location
+              on host, "mv #{onhost_copied_file}.dmg ."
+              host.install_package("puppet-agent-*")
+            end
+            configure_foss_defaults_on( host )
           end
         end
-        alias_method :install_puppetagent_dev_repo, :install_puppet_agent_dev_repo_on
+
 
         # This method will install a pem file certifcate on a windows host
         #
