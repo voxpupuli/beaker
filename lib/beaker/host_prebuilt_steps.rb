@@ -164,16 +164,21 @@ module Beaker
       end
 
       version = host['platform'].version
-      if version == '6'
-        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
-        pkg = host[:epel_pkg] || opts[:epel_6_pkg]
+      url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
+      if version == '7'
+        pkg  = host[:epel_pkg] || opts[:epel_7_pkg]
+        arch = host[:epel_arch] || opts[:epel_7_arch] || 'x86_64'
+        url  = "#{host[:epel_url] || opts[:epel_url]}/#{version}/e"
+      elsif version == '6'
+        pkg  = host[:epel_pkg] || opts[:epel_6_pkg]
+        arch = host[:epel_arch] || opts[:epel_6_arch] || 'i386'
       elsif version == '5'
-        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
-        pkg = host[:epel_pkg] || opts[:epel_5_pkg]
+        pkg  = host[:epel_pkg] || opts[:epel_5_pkg]
+        arch = host[:epel_arch] || opts[:epel_5_arch] || 'i386'
       else
         raise "epel_info_for does not support el version #{version}, on #{host.name}"
       end
-      return url, host[:epel_arch] || opts[:epel_arch] || 'i386', pkg
+      return url, arch, pkg
     end
 
     # Run 'apt-get update' on the provided host or hosts.
@@ -248,7 +253,7 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when el_based?(host) && ['5','6'].include?(host['platform'].version)
+        when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
             url, arch, pkg = epel_info_for host, opts
