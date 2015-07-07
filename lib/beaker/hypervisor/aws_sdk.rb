@@ -268,23 +268,27 @@ module Beaker
         raise RuntimeError, "Image not found: #{image_id}"
       end
 
+      @logger.notify("Image Storage Type: #{image.root_device_type}")
+
       # Transform the images block_device_mappings output into a format
       # ready for a create.
-      orig_bdm = image.block_device_mappings()
-      @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
       block_device_mappings = []
-      orig_bdm.each do |device_name, rest|
-        block_device_mappings << {
-          :device_name => device_name,
-          :ebs => {
-            # Change the default size of the root volume.
-            :volume_size => host['volume_size'] || rest[:volume_size],
-            # This is required to override the images default for
-            # delete_on_termination, forcing all volumes to be deleted once the
-            # instance is terminated.
-            :delete_on_termination => true,
+      if image.root_device_type == :ebs
+        orig_bdm = image.block_device_mappings()
+        @logger.notify("aws-sdk: Image block_device_mappings: #{orig_bdm.to_hash}")
+        orig_bdm.each do |device_name, rest|
+          block_device_mappings << {
+            :device_name => device_name,
+            :ebs => {
+              # Change the default size of the root volume.
+              :volume_size => host['volume_size'] || rest[:volume_size],
+              # This is required to override the images default for
+              # delete_on_termination, forcing all volumes to be deleted once the
+              # instance is terminated.
+              :delete_on_termination => true,
+            }
           }
-        }
+        end
       end
 
       security_group = ensure_group(vpc || region, Beaker::EC2Helper.amiports(host))
@@ -304,9 +308,9 @@ module Beaker
         :instance_type => amisize,
         :disable_api_termination => false,
         :instance_initiated_shutdown_behavior => "terminate",
-        :block_device_mappings => block_device_mappings,
         :subnet => subnet_id,
       }
+      config[:block_device_mappings] = block_device_mappings if image.root_device_type == :ebs
       region.instances.create(config)
     end
 
