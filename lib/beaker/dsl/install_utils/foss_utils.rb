@@ -1094,7 +1094,7 @@ module Beaker
                 arch = 'amd64'
               end
               release_file = "/repos/apt/#{codename}/pool/#{opts[:puppet_collection]}/p/puppet-agent/puppet-agent*#{arch}.deb"
-              download_file = "puppet-agent-debian-#{version}-#{arch}.tar.gz"
+              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
             when /^windows$/
               onhost_copy_base = '`cygpath -smF 35`/'
               is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
