@@ -42,6 +42,25 @@ hosts.each do |host|
   assert_match(/TEST=3(;|:)2(;|:)1$/, val, "add_env_var can correctly add env vars")
 end
 
+step "#add_env_var : can preserve an environment between ssh connections"
+hosts.each do |host|
+  host.clear_env_var("test")
+  logger.debug("add TEST=1")
+  host.add_env_var("TEST", "1")
+  logger.debug("add TEST=1 again (shouldn't create duplicate entry)")
+  host.add_env_var("test", "1")
+  logger.debug("add test=2")
+  host.add_env_var("test", "2")
+  logger.debug("ensure that TEST env var has correct setting")
+  logger.debug("add test=3")
+  host.add_env_var("test", "3")
+  logger.debug("close the connection")
+  host.close
+  logger.debug("ensure that TEST env var has correct setting")
+  val = host.get_env_var("test")
+  assert_match(/TEST=3(;|:)2(;|:)1$/, val, "can preserve an environment between ssh connections")
+end
+
 step "#delete_env_var : can delete an environment"
 hosts.each do |host|
   logger.debug("remove TEST=3")
