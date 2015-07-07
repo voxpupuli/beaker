@@ -5,10 +5,11 @@ end
 module Mac
     class Host < Unix::Host
 
-    [ 'user', 'group', 'pkg' ].each do |lib|
+    [ 'exec', 'user', 'group', 'pkg' ].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
 
+    include Mac::Exec
     include Mac::User
     include Mac::Group
     include Mac::Pkg
