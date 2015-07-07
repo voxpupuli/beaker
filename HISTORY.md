@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 1 Jul, 2015 (eb1f373a)](#LATEST)
+* [LATEST - 6 Jul, 2015 (6b0a9ca2)](#LATEST)
+* [2.15.1 - 1 Jul, 2015 (cd6f0bab)](#2.15.1)
 * [2.15.0 - 1 Jul, 2015 (07c416fb)](#2.15.0)
 * [2.14.1 - 5 Jun, 2015 (35026603)](#2.14.1)
 * [2.14.0 - 4 Jun, 2015 (c0ebcd16)](#2.14.0)
@@ -84,7 +85,242 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 1 Jul, 2015 (eb1f373a)
+### <a name = "LATEST">LATEST - 6 Jul, 2015 (6b0a9ca2)
+
+* (GEM) update beaker version to 2.16.0 (6b0a9ca2)
+
+* Merge pull request #876 from anodelman/shallow (6edc61fe)
+
+
+```
+Merge pull request #876 from anodelman/shallow
+
+(BKR-383) puppet-agent dmg installation doesn't work for anything...
+```
+* Merge pull request #877 from anodelman/osx (35d266b0)
+
+
+```
+Merge pull request #877 from anodelman/osx
+
+(BKR-384) & (BKR-385) support for dev puppet-agent installation on osx
+```
+* Merge pull request #878 from anodelman/maint (c011ff05)
+
+
+```
+Merge pull request #878 from anodelman/maint
+
+(MAINT) bad hardcoded 'debian' in puppet-agent promoted installation
+```
+* Merge pull request #856 from kevpl/bkr336_executiontime_add (fbe5b300)
+
+
+```
+Merge pull request #856 from kevpl/bkr336_executiontime_add
+
+(BKR-336) added command-line arg to get test results in timing order
+```
+* (MAINT) bad hardcoded 'debian' in puppet-agent promoted installation (441de9ea)
+
+
+```
+(MAINT) bad hardcoded 'debian' in puppet-agent promoted installation
+
+- should use #{variant} and not hardcoded debian, otherwise pukes on
+  ubuntu
+```
+* (BKR-384) install_puppet_agent_dev_repo needs to support osx (9772fcfb)
+
+
+```
+(BKR-384) install_puppet_agent_dev_repo needs to support osx
+
+- able to install dev puppet-agent on osx
+
+example:
+
+install_puppet_agent_dev_repo_on(host,
+   { :puppet_agent_sha => 'c2946821d1bcd7e43a34bd1f9cd2f86160ca4fe0',
+     :puppet_agent_version => '1.2.1.23.gc294682'    })
+```
+* (BKR-385) beaker needs to be able to convert mac codename to... (dee9b7c6)
+
+
+```
+(BKR-385) beaker needs to be able to convert mac codename to...
+
+...version number
+
+- add support to the platform object to handle yosemite -> 10.10 and
+  mavericks -> 10.9 conversions for osx variant
+```
+* Merge pull request #875 from anodelman/puppet-agent (0a4318a2)
+
+
+```
+Merge pull request #875 from anodelman/puppet-agent
+
+(BKR-377) Installing the Latest Puppet Agent Package
+```
+* (BKR-383) puppet-agent dmg installation doesn't work for anything... (6361cd78)
+
+
+```
+(BKR-383) puppet-agent dmg installation doesn't work for anything...
+
+... other than 'latest'
+
+- fix up the url construction for downloading a release mac puppet-agent
+- tested locally
+- there currently is not puppet-agent-latest.dmg file, so that won't
+  work until that is posted
+```
+* Merge pull request #861 from logicminds/BKR-365 (c6bcdc9c)
+
+
+```
+Merge pull request #861 from logicminds/BKR-365
+
+BKR-365 - allow beaker to use ssh config with rsync
+```
+* Merge pull request #867 from anodelman/hypervisor-acceptance (20e12ca7)
+
+
+```
+Merge pull request #867 from anodelman/hypervisor-acceptance
+
+(BKR-367) create beaker ec2 smoketest
+```
+* Merge pull request #866 from kevpl/bkr318_f5_added (2cedf59a)
+
+
+```
+Merge pull request #866 from kevpl/bkr318_f5_added
+
+(BKR-318) added platform support for f5
+```
+* Merge pull request #871 from anodelman/answers (66b3d8e1)
+
+
+```
+Merge pull request #871 from anodelman/answers
+
+(BKR-370) beaker doesn't use answers set as env vars
+```
+* (BKR-377) Installing the Latest Puppet Agent Package (ffaada1e)
+
+
+```
+(BKR-377) Installing the Latest Puppet Agent Package
+
+- support 'latest' as puppet_agent_version in
+  install_puppet_agent_pe_promoted_on
+- default to 'latest' for
+  install_puppet_agent_pe_promoted_on::puppet_agent_version
+```
+* Merge pull request #873 from anodelman/shallow (a14f1624)
+
+
+```
+Merge pull request #873 from anodelman/shallow
+
+(BKR-376) better interface to install puppet-agent through install_pe
+```
+* Merge pull request #874 from anodelman/maint (a0959a20)
+
+
+```
+Merge pull request #874 from anodelman/maint
+
+(BKR-378) RHEL4 runs fail due to the absence of yum
+```
+* (BKR-378) RHEL4 runs fail due to the absence of yum (e7276d32)
+
+
+```
+(BKR-378) RHEL4 runs fail due to the absence of yum
+
+- regression: accidentally changed as a ride along to puppet-agent installation
+  work, return to correct state
+```
+* (BKR-376) better interface to install puppet-agent through install_pe (bfb9f006)
+
+
+```
+(BKR-376) better interface to install puppet-agent through install_pe
+
+- standardize on parameter names puppet_agent_version, puppet_agent_sha
+- if no puppet_agent_sha is provided default to puppet_agent_version
+- support new env vars
+  * BEAKER_PUPPET_AGENT_VERSION
+  * BEAKER_PUPPET_AGENT_SHA
+  * BEAKER_PUPPET_COLLECTION
+
+- examples (puppet-agent installation):
+  install_puppet_agent_on(host, { :version => '1.1.0', :default_action => 'gem_install'})
+  install_puppet_agent_dev_repo_on(host, { :puppet_agent_sha => 'd3377feaeac173aada3a2c2cedd141eb610960a7', :puppet_agent_version => '1.1.1.225.gd3
+377fe'  })
+  install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_sha => '1.1.0.227', :puppet_agent_version => '1.1.0.227.g1d8334c', :pe_ver => '4.0
+.0-rc1'})
+
+- using install_pe/install_pe_on (for versions of PE > 4.0)
+set the puppet-agent version through an env var:
+  export BEAKER_PUPPET_AGENT_VERSION=1.2.0
+can then just call:
+  install_pe or install_pe_on(hosts, options)
+
+set the puppet-agent version through the options hash
+  options[:puppet_agent_version] = '1.2.0'
+  install_pe
+```
+* (BKR-370) beaker doesn't use answers set as env vars (521780ec)
+
+
+```
+(BKR-370) beaker doesn't use answers set as env vars
+
+- not correctly using 'answer_for' to determine if there is a provided
+  value for all questions
+- fixed up some variable naming for clarity
+```
+* (BKR-367) create beaker ec2 smoketest (56aa9438)
+
+
+```
+(BKR-367) create beaker ec2 smoketest
+
+- add acceptance/tests/hypervisor/communication.rb, checks to ensure
+  that hosts can ping each other
+- enable ping for aws ec2 instances created by beaker
+- create host.ping method to ping from host to a second host, return
+  'true' when ping is successful, 'false' otherwise
+```
+* (BKR-318) added platform support for f5 (308cb672)
+
+* BKR-365 - allow beaker to use ssh config with rsync (691823fc)
+
+
+```
+BKR-365 - allow beaker to use ssh config with rsync
+
+   * fixes a bug that vagrant introduced when using dynamic ssh configs
+```
+* (BKR-336) added command-line arg to get test results in timing order (806ff012)
+
+
+```
+(BKR-336) added command-line arg to get test results in timing order
+
+The new argument will allow a second beaker_*.xml file to be
+created next to the first one in timing order.
+
+Conflicts:
+	lib/beaker/options/command_line_parser.rb
+```
+### <a name = "2.15.1">2.15.1 - 1 Jul, 2015 (cd6f0bab)
+
+* (HISTORY) update beaker history for gem release 2.15.1 (cd6f0bab)
 
 * (GEM) update beaker version to 2.15.1 (eb1f373a)
 
