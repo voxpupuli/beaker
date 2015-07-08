@@ -89,6 +89,35 @@ module Beaker
         find_host_with_role :default
       end
 
+      # Determine if host is not a controller, does not have roles 'master',
+      # 'dashboard' or 'database'.
+      #
+      # @return [Boolean]      True if agent-only, false otherwise
+      #
+      # @example Basic usage
+      #     if not_controller(host)
+      #       puts "this host isn't in charge!"
+      #     end
+      #
+      def not_controller(host)
+        controllers = ['dashboard', 'database', 'master', 'console']
+        matched_roles = host['roles'].select { |v| controllers.include?(v) }
+        matched_roles.length == 0
+      end
+
+      # Determine if this host is exclusively an agent (only has a single role 'agent')
+      #
+      #
+      # @return [Boolean]      True if agent-only, false otherwise
+      #
+      # @example Basic usage
+      #     if agent_only(host)
+      #       puts "this host is ONLY an agent!"
+      #     end
+      def agent_only(host)
+        host['roles'].length == 1 && host['roles'].include?('agent')
+      end
+
       #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
       #commands without having to refer to role by String or Symbol.  Will not add a new method 
       #definition if the name is already in use.

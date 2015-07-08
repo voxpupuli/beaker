@@ -96,6 +96,25 @@ describe ClassMixedWithDSLRoles do
       expect( subject.database ).to be_nil
     end
   end
+  describe '#not_controller' do
+    it 'returns true when a host does not have the roles master/database/dashboard' do
+      expect( subject.not_controller(agent1) ).to be == true
+    end
+    it 'returns false when a host has one of the roles master/database/dashboard' do
+      expect( subject.not_controller(a_and_dash) ).to be == false
+    end
+  end
+  describe '#agent_only' do
+    it 'returns true when a host has the single role agent' do
+      expect( subject.agent_only(agent1) ).to be == true
+    end
+    it 'returns false when a host has more than a single role' do
+      expect( subject.agent_only(a_and_dash) ).to be == false
+    end
+    it 'returns false when a host has the role master' do
+      expect( subject.agent_only(master) ).to be == false
+    end
+  end
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
