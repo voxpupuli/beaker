@@ -191,7 +191,7 @@ module Beaker
           end
 
           opts.on('--version', 'Report currently running version of beaker' ) do
-            @cmd_options[:version] = true
+            @cmd_options[:beaker_version_print] = true
           end
 
           opts.on('--parse-only', 'Display beaker parsed options and exit' ) do
