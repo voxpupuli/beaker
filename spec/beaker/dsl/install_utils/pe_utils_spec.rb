@@ -52,7 +52,7 @@ describe ClassMixedWithDSLInstallUtils do
       subject.configure_pe_defaults_on( hosts )
     end
 
-    it 'uses foss paths for hosts of type pe' do
+    it 'uses pe paths for hosts of type pe' do
       hosts.each do |host|
         host[:type] = 'pe'
       end
@@ -69,11 +69,19 @@ describe ClassMixedWithDSLInstallUtils do
       subject.configure_pe_defaults_on( hosts )
     end
 
-    it 'uses aio paths for hosts of version >= 4.0' do
+    it 'uses aio paths for hosts of version >= 4.0, except for master/dashboard/database' do
+      agents = []
+      not_agents = []
       hosts.each do |host|
         host[:pe_ver] = '4.0'
+        if subject.agent_only(host)
+          agents << host
+        else
+          not_agents << host
+        end
       end
-      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(agents.length).times
+      expect(subject).to receive(:add_pe_defaults_on).exactly(not_agents.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_pe_defaults_on( hosts )
@@ -458,7 +466,11 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[2],
                                                                                      {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
       hosts.each do |host|
-        expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
+        if subject.agent_only(host)
+          expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
+        else
+          expect( subject ).to receive( :add_pe_defaults_on ).with( host ).once
+        end
         expect( subject ).to receive( :sign_certificate_for ).with( host ).once
         expect( subject ).to receive( :stop_agent_on ).with( host ).once
         expect( subject ).to receive( :on ).with( host, /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
