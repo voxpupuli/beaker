@@ -26,7 +26,8 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def configure_pe_defaults_on( hosts )
           block_on hosts do |host|
-            if (host[:pe_ver] && (not version_is_less(host[:pe_ver], '4.0'))) or (host['type'] && host['type'] =~ /aio/)
+            if (not_controller(host) && host[:pe_ver] && (not version_is_less(host[:pe_ver], '4.0'))) \
+              or (host['type'] && host['type'] =~ /aio/)
               # add pe defaults to host
               add_aio_defaults_on(host)
             else

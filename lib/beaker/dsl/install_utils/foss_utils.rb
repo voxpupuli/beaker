@@ -35,8 +35,9 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def configure_foss_defaults_on( hosts )
           block_on hosts do |host|
-            if (host[:version] && (not version_is_less(host[:version], '4.0'))) or host['type'] && host['type'] =~ /aio/
-              # add foss defaults to host
+            if (not_controller(host) && host[:version] && (not version_is_less(host[:version], '4.0'))) \
+              or (host['type'] && host['type'] =~ /aio/)
+              # add aio defaults to host
               add_aio_defaults_on(host)
             else
               add_foss_defaults_on(host)

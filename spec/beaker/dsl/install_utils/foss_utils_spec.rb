@@ -75,11 +75,19 @@ describe ClassMixedWithDSLInstallUtils do
       subject.configure_foss_defaults_on( hosts )
     end
 
-    it 'uses aio paths for hosts of version >= 4.0' do
+    it 'uses aio paths for hosts of version >= 4.0, except for master/database/dashboard' do
+      agents = []
+      not_agents = []
       hosts.each do |host|
         host[:version] = '4.0'
+        if subject.agent_only(host)
+          agents << host
+        else
+          not_agents << host
+        end
       end
-      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(agents.length).times
+      expect(subject).to receive(:add_foss_defaults_on).exactly(not_agents.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_foss_defaults_on( hosts )
