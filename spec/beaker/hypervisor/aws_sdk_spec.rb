@@ -68,6 +68,7 @@ module Beaker
       let( :vpc_instance ) { double('vpc_instance', :nil? => false, :exists? => true, :id => "vpc", :terminate => nil) }
       let( :nil_instance ) { double('vpc_instance', :nil? => true, :exists? => true, :id => "nil", :terminate => nil) }
       let( :unreal_instance ) { double('vpc_instance', :nil? => false, :exists? => false, :id => "unreal", :terminate => nil) }
+      subject(:kill_instances) { aws.kill_instances(instance_set) }
 
       it 'should return nil' do
         instance_set = [ec2_instance, vpc_instance, nil_instance, unreal_instance]
@@ -80,103 +81,101 @@ module Beaker
       end
   
       context 'in general use' do
+        let( :instance_set ) { [ec2_instance, vpc_instance] }
+
         it 'terminates each running instance' do
-          instance_set = [ec2_instance, vpc_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
   
         it 'verifies instances are not nil' do
-          instance_set = [ec2_instance, vpc_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:nil?)
-            expect(instance).to receive(:terminate).once
+            allow(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
   
         it 'verifies instances exist in AWS' do
-          instance_set = [ec2_instance, vpc_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:exists?)
-            expect(instance).to receive(:terminate).once
+            allow(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
       end
 
       context 'for a single running instance' do
+        let( :instance_set ) { [ec2_instance] }
+
         it 'terminates the running instance' do
-          instance_set = [ec2_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
   
         it 'verifies instance is not nil' do
-          instance_set = [ec2_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:nil?)
-            expect(instance).to receive(:terminate).once
+            allow(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
   
         it 'verifies instance exists in AWS' do
-          instance_set = [ec2_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:exists?)
-            expect(instance).to receive(:terminate).once
+            allow(instance).to receive(:terminate).once
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
       end
 
       context 'when an instance does not exist' do
+        let( :instance_set ) { [unreal_instance] }
+
         it 'does not call terminate' do
-          instance_set = [unreal_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:terminate).exactly(0).times
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
 
         it 'verifies instance does not exist' do
-          instance_set = [unreal_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:exists?).once
-            expect(instance).to receive(:terminate).exactly(0).times
+            allow(instance).to receive(:terminate).exactly(0).times
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
       end
 
       context 'when an instance is nil' do
+        let( :instance_set ) { [nil_instance] }
+
         it 'does not call terminate' do
-          instance_set = [nil_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:terminate).exactly(0).times
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
 
         it 'verifies instance is nil' do
-          instance_set = [nil_instance]
           instance_set.each do |instance|
             expect(instance).to receive(:nil?).once
-            expect(instance).to receive(:terminate).exactly(0).times
+            allow(instance).to receive(:terminate).exactly(0).times
           end
-          expect(aws.kill_instances(instance_set)).to be_nil
+          expect(kill_instances).to be_nil
         end
       end
 
     end
 
     describe '#cleanup' do
-      subject { aws.cleanup }
+      subject(:cleanup) { aws.cleanup }
       let( :ec2_instance ) { double('ec2_instance', :nil? => false, :exists? => true, :terminate => nil, :id => 'id') }
 
       context 'with a list of hosts' do
@@ -188,7 +187,7 @@ module Beaker
 
         it 'kills instances' do
           expect(aws).to receive(:kill_instances).once
-          is_expected.to be_nil
+          expect(cleanup).to be_nil
         end
       end
 
@@ -201,7 +200,7 @@ module Beaker
 
         it 'kills instances' do
           expect(aws).to receive(:kill_instances).once
-          is_expected.to be_nil
+          expect(cleanup).to be_nil
         end
       end
     end
@@ -256,62 +255,61 @@ module Beaker
 
     describe '#wait_for_status' do
       let( :aws_instance ) { double('aws_instance', :id => "ec2", :terminate => nil) }
+      let( :instance_set ) { [{:instance => aws_instance}] }
+      subject(:wait_for_status) { aws.wait_for_status(:running, instance_set) }
+
       it 'handles a single instance' do
-        instance_set = [ {:instance => aws_instance} ]
         allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
         expect(aws).to receive(:backoff_sleep).exactly(3).times
-        expect(aws.wait_for_status(:running, instance_set)).to eq(instance_set)
+        expect(wait_for_status).to eq(instance_set)
       end
 
       context 'with multiple instances' do
-        before :each do
-          @instance_set = [ {:instance => aws_instance}, {:instance => aws_instance} ]
-        end
+        let( :instance_set ) { [{:instance => aws_instance}, {:instance => aws_instance}] }
 
         it 'returns the instance set passed to it' do
           allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running, :waiting, :waiting, :running)
           allow(aws).to receive(:backoff_sleep).exactly(6).times
-          expect(aws.wait_for_status(:running, @instance_set)).to eq(@instance_set)
+          expect(wait_for_status).to eq(instance_set)
         end
 
         it 'calls backoff_sleep once per instance.status call' do
           allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running, :waiting, :waiting, :running)
           expect(aws).to receive(:backoff_sleep).exactly(6).times
-          expect(aws.wait_for_status(:running, @instance_set)).to eq(@instance_set)
+          expect(wait_for_status).to eq(instance_set)
         end
       end
 
       context 'after 10 tries' do
         it 'raises RuntimeError' do
-          instance_set = [ {:instance => aws_instance} ]
-          allow(aws_instance).to receive(:status).and_return(:waiting)
+          expect(aws_instance).to receive(:status).and_return(:waiting).exactly(10).times
           expect(aws).to receive(:backoff_sleep).exactly(9).times
-          expect { aws.wait_for_status(:running, instance_set) }.to raise_error('Instance never reached state running')
+          expect { wait_for_status }.to raise_error('Instance never reached state running')
         end
       end
 
       context 'with an invalid instance' do
         it 'raises AWS::EC2::Errors::InvalidInstanceID::NotFound' do
-          instance_set = [ {:instance => aws_instance} ]
-          allow(aws_instance).to receive(:status).and_raise(AWS::EC2::Errors::InvalidInstanceID::NotFound)
+          expect(aws_instance).to receive(:status).and_raise(AWS::EC2::Errors::InvalidInstanceID::NotFound).exactly(10).times
           allow(aws).to receive(:backoff_sleep).at_most(10).times
-          expect(aws.wait_for_status(:running, instance_set)).to eq(instance_set)
+          expect(wait_for_status).to eq(instance_set)
         end
       end
     end
 
     describe '#add_tags' do
       let( :aws_instance ) { double('aws_instance', :add_tag => nil) }
+      subject(:add_tags) { aws.add_tags }
 
       it 'returns nil' do
         @hosts.each {|host| host['instance'] = aws_instance}
-        expect(aws.add_tags).to be_nil
+        expect(add_tags).to be_nil
       end
 
       it 'handles a single host' do
         @hosts[0]['instance'] = aws_instance
         @hosts = [@hosts[0]]
-        expect(aws.add_tags).to be_nil
+        expect(add_tags).to be_nil
       end
 
       context 'with multiple hosts' do
@@ -322,30 +320,30 @@ module Beaker
         it 'adds tag for jenkins_build_url' do
           aws.instance_eval('@options[:jenkins_build_url] = "my_build_url"')
           expect(aws_instance).to receive(:add_tag).with('jenkins_build_url', hash_including(:value => 'my_build_url')).at_least(:once)
-          expect(aws.add_tags).to be_nil
+          expect(add_tags).to be_nil
         end
 
         it 'adds tag for Name' do
           expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(@hosts.size).times
-          expect(aws.add_tags).to be_nil
+          expect(add_tags).to be_nil
         end
 
         it 'adds tag for department' do
           aws.instance_eval('@options[:department] = "my_department"')
           expect(aws_instance).to receive(:add_tag).with('department', hash_including(:value => 'my_department')).at_least(:once)
-          expect(aws.add_tags).to be_nil
+          expect(add_tags).to be_nil
         end
 
         it 'adds tag for project' do
           aws.instance_eval('@options[:project] = "my_project"')
           expect(aws_instance).to receive(:add_tag).with('project', hash_including(:value => 'my_project')).at_least(:once)
-          expect(aws.add_tags).to be_nil
+          expect(add_tags).to be_nil
         end
 
         it 'adds tag for created_by' do
           aws.instance_eval('@options[:created_by] = "my_created_by"')
           expect(aws_instance).to receive(:add_tag).with('created_by', hash_including(:value => 'my_created_by')).at_least(:once)
-          expect(aws.add_tags).to be_nil
+          expect(add_tags).to be_nil
         end
       end
     end
@@ -353,6 +351,7 @@ module Beaker
     describe '#populate_dns' do
       let( :vpc_instance ) { {ip_address: nil, private_ip_address: "vpc_private_ip", dns_name: "vpc_dns_name"} }
       let( :ec2_instance ) { {ip_address: "ec2_public_ip", private_ip_address: "ec2_private_ip", dns_name: "ec2_dns_name"} }
+      subject(:populate_dns) { aws.populate_dns }
 
       context 'on a public EC2 instance' do
         before :each do
@@ -360,7 +359,7 @@ module Beaker
         end
 
         it 'sets host ip to instance.ip_address' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['ip']).to eql(ec2_instance[:ip_address])
@@ -368,7 +367,7 @@ module Beaker
         end
 
         it 'sets host private_ip to instance.private_ip_address' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['private_ip']).to eql(ec2_instance[:private_ip_address])
@@ -376,7 +375,7 @@ module Beaker
         end
 
         it 'sets host dns_name to instance.dns_name' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['dns_name']).to eql(ec2_instance[:dns_name])
@@ -390,7 +389,7 @@ module Beaker
         end
 
         it 'sets host ip to instance.private_ip_address' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['ip']).to eql(vpc_instance[:private_ip_address])
@@ -398,7 +397,7 @@ module Beaker
         end
 
         it 'sets host private_ip to instance.private_ip_address' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['private_ip']).to eql(vpc_instance[:private_ip_address])
@@ -406,7 +405,7 @@ module Beaker
         end
 
         it 'sets host dns_name to instance.dns_name' do
-          aws.populate_dns();
+          populate_dns
           hosts =  aws.instance_variable_get( :@hosts )
           hosts.each do |host|
             expect(host['dns_name']).to eql(vpc_instance[:dns_name])
@@ -416,30 +415,34 @@ module Beaker
     end
 
     describe '#etc_hosts_entry' do
+      let( :host ) { @hosts[0] }
+      let( :interface ) { :ip }
+      subject(:etc_hosts_entry) { aws.etc_hosts_entry(host, interface) }
+
       it 'returns a predictable host entry' do
-        host = @hosts[0]
         expect(aws).to receive(:get_domain_name).and_return('lan')
-        expect(aws.etc_hosts_entry(host)).to eq("ip.address.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
+        expect(etc_hosts_entry).to eq("ip.address.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
       end
 
       context 'when :private_ip is requested' do
+        let( :interface ) { :private_ip }
         it 'returns host entry for the private_ip' do
           host = @hosts[0]
           expect(aws).to receive(:get_domain_name).and_return('lan')
-          expect(aws.etc_hosts_entry(host, :private_ip)).to eq("private.ip.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
+          expect(etc_hosts_entry).to eq("private.ip.for.vm1\tvm1 vm1.lan vm1.box.tld\n")
         end
       end
     end
 
     describe '#configure_hosts' do
-      it 'returns nil' do
-        expect(aws.configure_hosts).to be_nil
-      end
+      subject(:configure_hosts) { aws.configure_hosts }
+
+      it { is_expected.to be_nil }
 
       context 'calls #set_etc_hosts' do
         it 'for each host' do
           expect(aws).to receive(:set_etc_hosts).exactly(@hosts.size).times
-          expect(aws.configure_hosts).to be_nil
+          expect(configure_hosts).to be_nil
         end
 
         it 'with predictable host entries' do
@@ -450,7 +453,7 @@ module Beaker
           allow(aws).to receive(:get_domain_name).and_return('lan')
           expect(aws).to receive(:set_etc_hosts).with(@hosts[0], entries)
           expect(aws).to receive(:set_etc_hosts).with(@hosts[1], anything)
-          expect(aws.configure_hosts).to be_nil
+          expect(configure_hosts).to be_nil
         end
       end
     end
@@ -471,8 +474,10 @@ module Beaker
     end
 
     describe '#enable_root_f5' do
+      let( :f5_host ) { @hosts[4] }
+      subject(:enable_root_f5) { aws.enable_root_f5(f5_host) }
+
       it 'creates a password on the host' do
-        f5_host = @hosts[4]
         result_mock = Beaker::Result.new(f5_host, '')
         result_mock.exit_code = 0
         allow( f5_host ).to receive( :exec ).and_return(result_mock)
@@ -480,35 +485,35 @@ module Beaker
         sha_mock = Object.new
         allow( Digest::SHA256 ).to receive( :new ).and_return(sha_mock)
         expect( sha_mock ).to receive( :hexdigest ).once()
-        aws.enable_root_f5(f5_host)
+        enable_root_f5
       end
 
       it 'tries 10x before failing correctly' do
-        f5_host = @hosts[4]
         result_mock = Beaker::Result.new(f5_host, '')
         result_mock.exit_code = 2
         allow( f5_host ).to receive( :exec ).and_return(result_mock)
         expect( aws ).to receive( :backoff_sleep ).exactly(9).times
-        expect{ aws.enable_root_f5(f5_host) }.to raise_error( RuntimeError, /unable/ )
+        expect{ enable_root_f5 }.to raise_error( RuntimeError, /unable/ )
       end
     end
 
     describe '#set_hostnames' do
+      subject(:set_hostnames) { aws.set_hostnames }
       it 'returns @hosts' do
-        expect(aws.set_hostnames).to eq(@hosts)
+        expect(set_hostnames).to eq(@hosts)
       end
 
       context 'for each host' do
         it 'calls exec' do
           @hosts.each {|host| expect(host).to receive(:exec).once}
-          expect(aws.set_hostnames).to eq(@hosts)
+          expect(set_hostnames).to eq(@hosts)
         end
   
         it 'passes a Command instance to exec' do
           @hosts.each do |host|
             expect(host).to receive(:exec).with( instance_of(Beaker::Command) ).once
           end
-          expect(aws.set_hostnames).to eq(@hosts)
+          expect(set_hostnames).to eq(@hosts)
         end
       end
     end
@@ -520,18 +525,20 @@ module Beaker
       end
     end
 
-    context '#public_key' do
+    describe '#public_key' do
+      subject(:public_key) { aws.public_key }
+
       it "retrieves contents from local ~/.ssh/ssh_rsa.pub file" do
         # Stub calls to file read/exists
         allow(File).to receive(:exists?).with(/id_rsa.pub/) { true }
         allow(File).to receive(:read).with(/id_rsa.pub/) { "foobar" }
 
         # Should return contents of allow( previously ).to receivebed id_rsa.pub
-        expect(aws.public_key).to eq("foobar")
+        expect(public_key).to eq("foobar")
       end
 
       it "should return an error if the files do not exist" do
-        expect { aws.public_key }.to raise_error(RuntimeError, /Expected either/)
+        expect { public_key }.to raise_error(RuntimeError, /Expected either/)
       end
     end
 
@@ -555,6 +562,7 @@ module Beaker
 
     describe '#ensure_key_pair' do
       let( :region ) { double('region') }
+      subject(:ensure_key_pair) { aws.ensure_key_pair(region) }
 
       context 'when a beaker keypair already exists' do
         it 'returns the keypair if available' do
@@ -564,7 +572,7 @@ module Beaker
 
           expect( region ).to receive(:key_pairs).and_return(key_pairs).once
           expect( Socket ).to receive(:gethostname).and_return("SUT")
-          expect(aws.ensure_key_pair(region)).to eq(key_pair)
+          expect(ensure_key_pair).to eq(key_pair)
         end
       end
 
@@ -583,13 +591,13 @@ module Beaker
         it 'imports a new key based on user pubkey' do
           allow(aws).to receive(:public_key).and_return(pubkey)
           expect( key_pairs ).to receive(:import).with(key_name, pubkey)
-          expect(aws.ensure_key_pair(region))
+          expect(ensure_key_pair)
         end
 
         it 'returns imported keypair' do
           allow(aws).to receive(:public_key)
           expect( key_pairs ).to receive(:import).and_return(key_pair).once
-          expect(aws.ensure_key_pair(region)).to eq(key_pair)
+          expect(ensure_key_pair).to eq(key_pair)
         end
       end
     end
@@ -607,6 +615,7 @@ module Beaker
     describe '#ensure_group' do
       let( :vpc ) { double('vpc') }
       let( :ports ) { [22, 80, 8080] }
+      subject(:ensure_group) { aws.ensure_group(vpc, ports) }
 
       context 'for an existing group' do
         before :each do
@@ -615,21 +624,21 @@ module Beaker
 
         it 'returns group from vpc lookup' do
           expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(@group)
-          expect(aws.ensure_group(vpc, ports)).to eq(@group)
+          expect(ensure_group).to eq(@group)
         end
 
         context 'during group lookup' do
           it 'performs group_id lookup for ports' do
             expect(aws).to receive(:group_id).with(ports)
             expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(@group)
-            expect(aws.ensure_group(vpc, ports)).to eq(@group)
+            expect(ensure_group).to eq(@group)
           end
 
           it 'filters on group_id' do
             expect(vpc).to receive(:security_groups).and_return(vpc)
             expect(vpc).to receive(:filter).with('group-name', 'Beaker-1521896090').and_return(vpc)
             expect(vpc).to receive(:first).and_return(@group)
-            expect(aws.ensure_group(vpc, ports)).to eq(@group)
+            expect(ensure_group).to eq(@group)
           end
         end
       end
@@ -639,7 +648,7 @@ module Beaker
           group = double(:nil? => true)
           expect(aws).to receive(:create_group).with(vpc, ports).and_return(group)
           expect(vpc).to receive_message_chain('security_groups.filter.first').and_return(group)
-          expect(aws.ensure_group(vpc, ports)).to eq(group)
+          expect(ensure_group).to eq(group)
         end
       end
     end
@@ -647,6 +656,7 @@ module Beaker
     describe '#create_group' do
       let( :rv ) { double('rv') }
       let( :ports ) { [22, 80, 8080] }
+      subject(:create_group) { aws.create_group(rv, ports) }
 
       before :each do
         @group = double(:nil? => false)
@@ -655,14 +665,14 @@ module Beaker
       it 'returns a newly created group' do
         allow(rv).to receive_message_chain('security_groups.create').and_return(@group)
         allow(@group).to receive(:authorize_ingress).at_least(:once)
-        expect(aws.create_group(rv, ports)).to eq(@group)
+        expect(create_group).to eq(@group)
       end
 
       it 'requests group_id for ports given' do
         expect(aws).to receive(:group_id).with(ports)
         allow(rv).to receive_message_chain('security_groups.create').and_return(@group)
         allow(@group).to receive(:authorize_ingress).at_least(:once)
-        expect(aws.create_group(rv, ports)).to eq(@group)
+        expect(create_group).to eq(@group)
       end
 
       it 'creates group with expected arguments' do
@@ -672,7 +682,7 @@ module Beaker
                   .with(group_name, :description => group_desc)
                   .and_return(@group)
         allow(@group).to receive(:authorize_ingress).at_least(:once)
-        expect(aws.create_group(rv, ports)).to eq(@group)
+        expect(create_group).to eq(@group)
       end
 
       it 'authorizes requested ports for group' do
@@ -680,29 +690,30 @@ module Beaker
         ports.each do |port|
           expect(@group).to receive(:authorize_ingress).with(:tcp, port).once
         end
-        expect(aws.create_group(rv, ports)).to eq(@group)
+        expect(create_group).to eq(@group)
       end
     end
 
     describe '#load_fog_credentials' do
       # Receive#and_call_original below allows us to test the core load_fog_credentials method
       let(:creds) { {:access_key => 'awskey', :secret_key => 'awspass'} }
+      let(:dot_fog) { '.fog' }
+      subject(:load_fog_credentials) { aws.load_fog_credentials(dot_fog) }
 
       it 'returns loaded fog credentials' do
         fog_hash = {:default => {:aws_access_key_id => 'awskey', :aws_secret_access_key => 'awspass'}} 
         expect(aws).to receive(:load_fog_credentials).and_call_original
         expect(YAML).to receive(:load_file).and_return(fog_hash)
-        expect(aws.load_fog_credentials).to eq(creds)
+        expect(load_fog_credentials).to eq(creds)
       end
 
       context 'raises errors' do
         it 'if missing access_key credential' do
-          dot_fog = '.fog'
           fog_hash = {:default => {:aws_secret_access_key => 'awspass'}} 
           err_text = "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!"
           expect(aws).to receive(:load_fog_credentials).and_call_original
           expect(YAML).to receive(:load_file).and_return(fog_hash)
-          expect { aws.load_fog_credentials(dot_fog) }.to raise_error(err_text)
+          expect { load_fog_credentials }.to raise_error(err_text)
         end
   
         it 'if missing secret_key credential' do
@@ -711,7 +722,7 @@ module Beaker
           err_text = "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!"
           expect(aws).to receive(:load_fog_credentials).and_call_original
           expect(YAML).to receive(:load_file).and_return(fog_hash)
-          expect { aws.load_fog_credentials(dot_fog) }.to raise_error(err_text)
+          expect { load_fog_credentials }.to raise_error(err_text)
         end
       end
     end
