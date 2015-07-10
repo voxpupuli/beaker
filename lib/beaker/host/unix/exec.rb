@@ -70,10 +70,10 @@ module Unix::Exec
   end
 
   # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
-  # This is for sles based hosts.
+  # This is for sles and debian based hosts.
   # @param [String] env_file The ssh environment file to read from
   def mirror_env_to_profile_d env_file
-    if self[:platform] =~ /sles-/
+    if self[:platform] =~ /sles-|debian/
       @logger.debug("mirroring environment to /etc/profile.d on sles platform host")
       cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
       shell_env = ''
@@ -88,7 +88,7 @@ module Unix::Exec
       exec(Beaker::Command.new("source #{self[:profile_d_env_file]}"))
     else
       #noop
-      @logger.debug("will not mirror environment to /etc/profile.d on non-sles platform host")
+      @logger.debug("will not mirror environment to /etc/profile.d on non-sles/debian platform host")
     end
   end
 
