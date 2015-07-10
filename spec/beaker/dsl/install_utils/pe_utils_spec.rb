@@ -663,4 +663,87 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe 'create_agent_specified_arrays' do
+    let(:master)        { make_host( 'master',       { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['master', 'agent']})}
+    let(:db)            { make_host( 'db',           { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['database', 'agent']})}
+    let(:console)       { make_host( 'console',      { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['dashboard', 'agent']})}
+    let(:monolith)      { make_host( 'monolith',     { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => %w(master dashboard database)})}
+    let(:frictionless)  { make_host( 'frictionless', { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['agent', 'frictionless']})}
+    let(:agent1)        { make_host( 'agent1',       { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['agent']})}
+    let(:agent2)        { make_host( 'agent2',       { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['agent']})}
+    let(:default_agent) { make_host( 'default',      { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['default', 'agent']})}
+    let(:masterless)    { make_host( 'masterless',   { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['agent', 'masterless']})}
+    let(:compiler)      { make_host( 'compiler',     { :platform => 'linux',
+                                                       :pe_ver   => '4.0',
+                                                       :roles => ['agent', 'compile_master']})}
+
+    it 'sorts hosts with common PE roles' do
+      these_hosts = [master, db, console, agent1, frictionless]
+      agent_only, non_agent = subject.create_agent_specified_arrays(these_hosts)
+      expect(agent_only.length).to be 1
+      expect(agent_only).to include(agent1)
+      expect(non_agent.length).to be 4
+      expect(non_agent).to include(master)
+      expect(non_agent).to include(db)
+      expect(non_agent).to include(console)
+      expect(non_agent).to include(frictionless)
+    end
+
+    # Possibly needed for NetDev and Scale testing
+    it 'defaults to classifying custom roles as "agent only"' do
+      these_hosts = [monolith, compiler, agent1, agent2]
+      agent_only, non_agent = subject.create_agent_specified_arrays(these_hosts)
+      expect(agent_only.length).to be 3
+      expect(agent_only).to include(agent1)
+      expect(agent_only).to include(agent2)
+      expect(agent_only).to include(compiler)
+      expect(non_agent.length).to be 1
+      expect(non_agent).to include(monolith)
+    end
+
+    # Most common form of module testing
+    it 'allows a puppet-agent host to be the default test target' do
+      these_hosts = [monolith, default_agent]
+      agent_only, non_agent = subject.create_agent_specified_arrays(these_hosts)
+      expect(agent_only.length).to be 1
+      expect(agent_only).to include(default_agent)
+      expect(non_agent.length).to be 1
+      expect(non_agent).to include(monolith)
+    end
+
+    # Preferred module on commit scenario
+    it 'handles masterless scenarios' do
+      these_hosts = [masterless]
+      agent_only, non_agent = subject.create_agent_specified_arrays(these_hosts)
+      expect(agent_only.length).to be 1
+      expect(non_agent).to be_empty
+    end
+
+    # IIRC, this is the basic PE integration smoke test
+    it 'handles agent-only-less scenarios' do
+      these_hosts = [monolith, frictionless]
+      agent_only, non_agent = subject.create_agent_specified_arrays(these_hosts)
+      expect(agent_only).to be_empty
+      expect(non_agent.length).to be 2
+    end
+  end
+
 end

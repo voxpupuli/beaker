@@ -509,8 +509,9 @@ module Beaker
         def create_agent_specified_arrays(hosts)
           hosts_agent_only = []
           hosts_not_agent_only = []
+          non_agent_only_roles = %w(master database dashboard console frictionless)
           hosts.each do |host|
-            if host['roles'] && host['roles'].length == 1 && host['roles'][0] == 'agent'
+            if host['roles'].none? {|role| non_agent_only_roles.include?(role) }
               hosts_agent_only << host
             else
               hosts_not_agent_only << host
