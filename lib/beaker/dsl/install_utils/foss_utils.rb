@@ -1171,6 +1171,7 @@ module Beaker
               if arch == 'x86_64'
                 arch = 'amd64'
               end
+              version = version[0,2] + '.' + version[2,2] if variant =~ /ubuntu/ && version =~ /\.{0}/
               release_file = "/repos/apt/#{codename}/pool/#{opts[:puppet_collection]}/p/puppet-agent/puppet-agent*#{arch}.deb"
               download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
             when /^windows$/
