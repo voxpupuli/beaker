@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 6 Jul, 2015 (6b0a9ca2)](#LATEST)
+* [LATEST - 10 Jul, 2015 (745d9116)](#LATEST)
+* [2.16.0 - 6 Jul, 2015 (b3e76227)](#2.16.0)
 * [2.15.1 - 1 Jul, 2015 (cd6f0bab)](#2.15.1)
 * [2.15.0 - 1 Jul, 2015 (07c416fb)](#2.15.0)
 * [2.14.1 - 5 Jun, 2015 (35026603)](#2.14.1)
@@ -85,7 +86,109 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 6 Jul, 2015 (6b0a9ca2)
+### <a name = "LATEST">LATEST - 10 Jul, 2015 (745d9116)
+
+* (GEM) update beaker version to 2.17.0 (745d9116)
+
+* Merge pull request #884 from justinstoller/maint/master/moar-puppet-agent (7ba09f8f)
+
+
+```
+Merge pull request #884 from justinstoller/maint/master/moar-puppet-agent
+
+(maint) Allow PE puppet-agent installs on custom roles
+```
+* (maint) Allow PE puppet-agent installs on custom roles (cfe9c834)
+
+
+```
+(maint) Allow PE puppet-agent installs on custom roles
+
+Previously we installed puppet-agent on a host if there was the agent
+role and no other role assigned to it. This prevents assigning a
+puppet-agent node the "default" role to be used as the default test
+target, or allow any other custom roles.
+
+To allow assigning the "default" or custom roles to a puppet-agent node
+we list the non-puppet-agnet roles we know how to generate installation answers
+for and use that list to determine what nodes are puppet-agent or not.
+```
+* Merge pull request #883 from anodelman/puppetservice (2822e415)
+
+
+```
+Merge pull request #883 from anodelman/puppetservice
+
+(BKR-390) Scooter pipeline is using pe-httpd instead of pe-puppetserver
+```
+* Merge pull request #882 from anodelman/osx (b64ee262)
+
+
+```
+Merge pull request #882 from anodelman/osx
+
+(BKR-388) Beaker::Host::Mac#touch returns non-existent path
+```
+* Merge pull request #879 from anodelman/maint (df169767)
+
+
+```
+Merge pull request #879 from anodelman/maint
+
+(BKR-386) beaker does not work with host_preserved.yaml file anymore
+```
+* (BKR-390) Scooter pipeline is using pe-httpd instead of pe-puppetserver (3a7830cc)
+
+
+```
+(BKR-390) Scooter pipeline is using pe-httpd instead of pe-puppetserver
+
+- only use aio defaults on agents that are not master, database or
+  dashboard (was previously using aio defaults/paths on all hosts
+  identified as being >= 4.0)
+```
+* (BKR-388) Beaker::Host::Mac#touch returns non-existent path (21e885e0)
+
+
+```
+(BKR-388) Beaker::Host::Mac#touch returns non-existent path
+
+- ensure that the mac host.touch method returns a correct, absolute
+  path to the touch command
+```
+* Merge pull request #859 from vindir/feature/instancestores (a3429c39)
+
+
+```
+Merge pull request #859 from vindir/feature/instancestores
+
+(BKR-348) AWS: Adding instance storage support
+```
+* (BKR-386) beaker does not work with host_preserved.yaml file anymore (c1b471fc)
+
+
+```
+(BKR-386) beaker does not work with host_preserved.yaml file anymore
+
+- puppet-agent installation was causing a 'version' argument to be added
+  to the preserved host file, causing beaker to output --version
+  information upon re-use of that file
+- fix is just renaming --version to use beaker_version instead of
+  version as a flag
+```
+* (BKR-348) instance storage now supported (e607b2d5)
+
+
+```
+(BKR-348) instance storage now supported
+
+AMIs using the instance storage root device type are now supported
+allowing users who don't want/need EBS backed AMIs to add nodesets
+more easily.
+```
+### <a name = "2.16.0">2.16.0 - 6 Jul, 2015 (b3e76227)
+
+* (HISTORY) update beaker history for gem release 2.16.0 (b3e76227)
 
 * (GEM) update beaker version to 2.16.0 (6b0a9ca2)
 
