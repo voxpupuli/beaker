@@ -341,7 +341,10 @@ module Beaker
     def hack_etc_hosts hosts, opts
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       hosts.each do |host|
-        etc_hosts += "#{host['vm_ip'] || host['ip'].to_s}\t#{host[:vmhostname] || host.name}\n"
+        ip = host['vm_ip'] || host['ip'].to_s
+        hostname = host[:vmhostname] || host.name
+        domain = get_domain_name(host)
+        etc_hosts += "#{ip}\t#{hostname}.#{domain} #{hostname}\n"
       end
       hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
