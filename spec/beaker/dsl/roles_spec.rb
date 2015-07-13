@@ -115,6 +115,38 @@ describe ClassMixedWithDSLRoles do
       expect( subject.agent_only(master) ).to be == false
     end
   end
+  describe '#aio_version?' do
+    it 'returns true if the host doesn\'t have a :pe_ver' do
+      agent1[:pe_ver] = nil
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns false if the host :pe_ver is set < 4.0' do
+      agent1[:pe_ver] = '3.8'
+      expect( subject.aio_version?(agent1) ).to be === false
+    end
+    it 'returns true if the host :pe_ver is 4.0' do
+      agent1[:pe_ver] = '4.0'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns true if the host :pe_ver is 2015.5' do
+      agent1[:pe_ver] = '2015.5'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+  end
+  describe '#aio_agent?' do
+    it 'returns false if agent_only check doesn\'t pass' do
+      agent1[:roles] = ['agent', 'headless']
+      expect( subject.aio_agent?(agent1) ).to be === false
+    end
+    it 'returns false if aio_capable? check doesn\'t pass' do
+      agent1[:pe_ver] = '3.8'
+      expect( subject.aio_agent?(agent1) ).to be === false
+    end
+    it 'returns true if both checks pass' do
+      agent1[:pe_ver] = '4.0'
+      expect( subject.aio_agent?(agent1) ).to be === true
+    end
+  end
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]

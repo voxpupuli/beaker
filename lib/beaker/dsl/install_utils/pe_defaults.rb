@@ -32,7 +32,7 @@ module Beaker
             'puppetbin'        => '/opt/puppet/bin/puppet',
             'puppetbindir'     => '/opt/puppet/bin',
             'puppetsbindir'    => '/opt/puppet/sbin',
-            'privatebindir'    => '/opt/puppetlabs/puppet/bin',
+            'privatebindir'    => '/opt/puppet/bin',
             'puppetvardir'     => '/var/opt/lib/pe-puppet',
             'hieradatadir'     => '/var/lib/hiera',
             'hieraconf'        => '/etc/puppetlabs/puppet/hiera.yaml',
