@@ -1143,7 +1143,7 @@ module Beaker
             case variant
             when /^(fedora|el|centos|sles)$/
               on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              on host, "rpm -ivh #{onhost_copied_file}"
+              on host, "yum --nogpgcheck localinstall -y #{onhost_copied_file}"
             when /^(debian|ubuntu|cumulus)$/
               on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
               on host, "dpkg -i --force-all #{onhost_copied_file}"
