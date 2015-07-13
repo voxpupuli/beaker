@@ -1,6 +1,7 @@
 [ 'aio_defaults', 'pe_defaults', 'puppet_utils' ].each do |lib|
     require "beaker/dsl/install_utils/#{lib}"
 end
+require "beaker-answers"
 module Beaker
   module DSL
     module InstallUtils
@@ -428,7 +429,7 @@ module Beaker
                 acceptable_codes = host['platform'] =~ /osx/ ? [1] : [0, 1]
                 setup_defaults_and_config_helper_on(host, master, acceptable_codes)
               else
-                answers = Beaker::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
+                answers = BeakerAnswers::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
                 create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
                 on host, installer_cmd(host, opts)
                 configure_type_defaults_on(host)
