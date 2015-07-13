@@ -26,9 +26,7 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def configure_pe_defaults_on( hosts )
           block_on hosts do |host|
-            if (not_controller(host) && host[:pe_ver] && (not version_is_less(host[:pe_ver], '4.0'))) \
-              or (host['type'] && host['type'] =~ /aio/)
-              # add pe defaults to host
+            if host[:pe_ver] && aio_version?(host) or (host['type'] && host['type'] =~ /aio/)
               add_aio_defaults_on(host)
             else
               add_pe_defaults_on(host)
@@ -502,6 +500,10 @@ module Beaker
         # @note should only be called against versions 4.0+, as this method
         #   assumes AIO packages will be required.
         #
+        # @note agent_only hosts with the :pe_ver setting < 4.0 will not be
+        #   included in the agent_only array, as AIO install can only happen
+        #   in versions > 4.0
+        #
         # @api private
         # @return [Array<Host>, Array<Host>]
         #   the array of hosts to do an agent_only install on and
@@ -512,7 +514,11 @@ module Beaker
           non_agent_only_roles = %w(master database dashboard console frictionless)
           hosts.each do |host|
             if host['roles'].none? {|role| non_agent_only_roles.include?(role) }
-              hosts_agent_only << host
+              if !aio_version?(host)
+                hosts_not_agent_only << host
+              else
+                hosts_agent_only << host
+              end
             else
               hosts_not_agent_only << host
             end

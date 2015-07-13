@@ -10,6 +10,7 @@ module Beaker
         #
         AIO_DEFAULTS = {
           'unix' => {
+            'puppetservice'         => 'pe-puppetserver',
             'puppetbindir'          => '/opt/puppetlabs/bin',
             'privatebindir'         => '/opt/puppetlabs/puppet/bin',
             'distmoduledir'         => '/etc/puppetlabs/code/modules',

@@ -80,6 +80,7 @@ describe ClassMixedWithDSLInstallUtils do
       not_agents = []
       hosts.each do |host|
         host[:version] = '4.0'
+        host[:pe_ver] = nil
         if subject.agent_only(host)
           agents << host
         else
