@@ -153,6 +153,7 @@ module Beaker
       vm.volumes.each do |vol|
         @logger.debug "Deleting volume #{vol.name} for OpenStack host #{vm.name}"
         vm.detach_volume(vol.id)
+        vol.wait_for { ready? }
         vol.destroy
       end
     end
