@@ -39,6 +39,8 @@ module Beaker
               or (host['type'] && host['type'] =~ /aio/)
               # add aio defaults to host
               add_aio_defaults_on(host)
+              # provide a sane default here for puppetservice
+              host['puppetservice'] ||= 'puppetserver'
             else
               add_foss_defaults_on(host)
             end
