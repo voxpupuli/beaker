@@ -107,15 +107,37 @@ module Beaker
 
       # Determine if this host is exclusively an agent (only has a single role 'agent')
       #
-      #
-      # @return [Boolean]      True if agent-only, false otherwise
+      # @param [Host] host Beaker host to check
       #
       # @example Basic usage
       #     if agent_only(host)
       #       puts "this host is ONLY an agent!"
       #     end
+      #
+      # @return [Boolean]      True if agent-only, false otherwise
       def agent_only(host)
-        host['roles'].length == 1 && host['roles'].include?('agent')
+          host['roles'].length == 1 && host['roles'].include?('agent')
+      end
+
+      # Determine whether a host has an AIO version or not. If a host :pe_ver
+      # is not specified, then it is open-ended, and as such, can be an AIO
+      # version depending on the context.
+      #
+      # @note aio version is just a base-line condition.  If you want to check
+      #   that a host is an aio agent, refer to {#aio_agent?}.
+      #
+      # @return [Boolean] whether or not a host is AIO-capable
+      def aio_version?(host)
+        return !( host[:pe_ver] && version_is_less(host[:pe_ver], '4.0') )
+      end
+
+      # Determine if the host is an AIO agent
+      #
+      # @param [Host] host Beaker host to check
+      #
+      # @return [Boolean] whether this host is an AIO agent or not
+      def aio_agent?(host)
+        aio_version?(host) && agent_only(host)
       end
 
       #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
