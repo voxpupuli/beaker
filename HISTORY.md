@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Jul, 2015 (268ce21e)](#LATEST)
+* [LATEST - 14 Jul, 2015 (f9939536)](#LATEST)
+* [2.18.0 - 13 Jul, 2015 (e018f2fc)](#2.18.0)
 * [2.17.0 - 10 Jul, 2015 (aaac4771)](#2.17.0)
 * [2.16.0 - 6 Jul, 2015 (b3e76227)](#2.16.0)
 * [2.15.1 - 1 Jul, 2015 (cd6f0bab)](#2.15.1)
@@ -87,7 +88,53 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Jul, 2015 (268ce21e)
+### <a name = "LATEST">LATEST - 14 Jul, 2015 (f9939536)
+
+* (GEM) update beaker version to 2.18.1 (f9939536)
+
+* Merge pull request #891 from anodelman/shallow (c4b30018)
+
+
+```
+Merge pull request #891 from anodelman/shallow
+
+(BKR-402) Regression in Beaker 2.18.0 AIO testing for PuppetDB usage
+```
+* Merge pull request #890 from justinstoller/bug/master/BKR-403_sless (e52b0af4)
+
+
+```
+Merge pull request #890 from justinstoller/bug/master/BKR-403_sless
+
+(BKR-403) Use rpm on sles for pe puppet-agent
+```
+* (BKR-402) Regression in Beaker 2.18.0 AIO testing for PuppetDB usage (8c262979)
+
+
+```
+(BKR-402) Regression in Beaker 2.18.0 AIO testing for PuppetDB usage
+
+- provide a sane default for puppetservice for aio defaults, but allow
+  override with a user setting
+```
+* (BKR-403) Use rpm on sles for pe puppet-agent (6acd9938)
+
+
+```
+(BKR-403) Use rpm on sles for pe puppet-agent
+
+In BKR-397 we updated rpm using platforms to use yum instead of rpm in
+the install_puppet_agent_pe_promoted_repo, however it wasn't noticed
+that SLES was also an rpm using platform in the match that doesn't also
+include yum.
+
+This patch moves SLES platforms into their own branch of logic that uses
+the old rpm installation method while retaining the yum based
+installation for other platforms.
+```
+### <a name = "2.18.0">2.18.0 - 13 Jul, 2015 (e018f2fc)
+
+* (HISTORY) update beaker history for gem release 2.18.0 (e018f2fc)
 
 * (GEM) update beaker version to 2.18.0 (268ce21e)
 
