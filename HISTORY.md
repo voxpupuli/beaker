@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 10 Jul, 2015 (745d9116)](#LATEST)
+* [LATEST - 13 Jul, 2015 (268ce21e)](#LATEST)
+* [2.17.0 - 10 Jul, 2015 (aaac4771)](#2.17.0)
 * [2.16.0 - 6 Jul, 2015 (b3e76227)](#2.16.0)
 * [2.15.1 - 1 Jul, 2015 (cd6f0bab)](#2.15.1)
 * [2.15.0 - 1 Jul, 2015 (07c416fb)](#2.15.0)
@@ -86,7 +87,83 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 10 Jul, 2015 (745d9116)
+### <a name = "LATEST">LATEST - 13 Jul, 2015 (268ce21e)
+
+* (GEM) update beaker version to 2.18.0 (268ce21e)
+
+* Merge pull request #887 from kevpl/bkr394_aio_mixedinstall (28f9d26d)
+
+
+```
+Merge pull request #887 from kevpl/bkr394_aio_mixedinstall
+
+(BKR-394) added support for 3.8/AIO mixed installations
+```
+* Merge pull request #888 from justinstoller/maint/master/BKR-397_use_yum (a76abdd9)
+
+
+```
+Merge pull request #888 from justinstoller/maint/master/BKR-397_use_yum
+
+(BKR-397) Use yum for installing pe promoted puppet-agent
+```
+* (BKR-397) Use yum for installing pe promoted puppet-agent (d6d37145)
+
+
+```
+(BKR-397) Use yum for installing pe promoted puppet-agent
+
+Previously we used the rpm command to install a local rpm file. However
+puppet-agent requires dmidecode for EL platforms and this dependency
+won't be resolved by using rpm.
+
+This commit uses yum's localinstal command to install the local rpm file
+so that dependencies are resolved.
+```
+* Merge pull request #858 from spjmurray/openstack_cinder_volumes (f5ecb177)
+
+
+```
+Merge pull request #858 from spjmurray/openstack_cinder_volumes
+
+(BKR-347) Openstack: Add support for cinder attached volumes
+```
+* (BKR-394) added support for 3.8/AIO mixed installations (d715cb1d)
+
+* Merge pull request #881 from anodelman/env-support (788aae5c)
+
+
+```
+Merge pull request #881 from anodelman/env-support
+
+(BKR-387) environment not being preserved between ssh connections...
+```
+* (BKR-387) environment not being preserved between ssh connections... (41e64c50)
+
+
+```
+(BKR-387) environment not being preserved between ssh connections...
+
+... on debian
+
+- mirror the env to /etc/profile.d/beaker_env.sh
+- add and acceptance test to ensure that environment variables are
+  preserved between ssh connections for a SUT
+```
+* (BKR-347) Openstack: Add support for cinder attached volumes (4c2c5f23)
+
+
+```
+(BKR-347) Openstack: Add support for cinder attached volumes
+
+Implement the storage array feature introduced for vagrant virtual box
+to OpenStack users.  Unlike virtual box the bus type is outside of our
+control.  If you need SCSI support this must be attached to the image
+in glance.  How to do this is in the method documentation
+```
+### <a name = "2.17.0">2.17.0 - 10 Jul, 2015 (aaac4771)
+
+* (HISTORY) update beaker history for gem release 2.17.0 (aaac4771)
 
 * (GEM) update beaker version to 2.17.0 (745d9116)
 
