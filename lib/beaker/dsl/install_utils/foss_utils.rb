@@ -1141,9 +1141,12 @@ module Beaker
             scp_to host, File.join(copy_dir_local, download_file), onhost_copy_base
 
             case variant
-            when /^(fedora|el|centos|sles)$/
+            when /^(fedora|el|centos)$/
               on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
               on host, "yum --nogpgcheck localinstall -y #{onhost_copied_file}"
+            when /^(sles)$/
+              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
+              on host, "rpm -ihv #{onhost_copied_file}"
             when /^(debian|ubuntu|cumulus)$/
               on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
               on host, "dpkg -i --force-all #{onhost_copied_file}"
