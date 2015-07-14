@@ -11,7 +11,7 @@ module Beaker
         PE_DEFAULTS = {
           'mac' => {
             'puppetserver-confdir' => '/etc/puppetlabs/puppetserver/conf.d',
-            'puppetservice'    => 'pe-httpd',
+            'puppetservice'    => 'pe-puppetserver',
             'puppetpath'       => '/etc/puppetlabs/puppet',
             'puppetconfdir'    => '/etc/puppetlabs/puppet',
             'puppetcodedir'    => '/etc/puppetlabs/puppet',
@@ -26,7 +26,7 @@ module Beaker
           },
           'unix' => {
             'puppetserver-confdir' => '/etc/puppetlabs/puppetserver/conf.d',
-            'puppetservice'    => 'pe-httpd',
+            'puppetservice'    => 'pe-puppetserver',
             'puppetpath'       => '/etc/puppetlabs/puppet',
             'puppetconfdir'    => '/etc/puppetlabs/puppet',
             'puppetbin'        => '/opt/puppet/bin/puppet',
@@ -40,7 +40,7 @@ module Beaker
             'sitemoduledir'    => '/opt/puppet/share/puppet/modules',
           },
           'windows' => { #cygwin windows
-            'puppetservice' => 'pe-httpd',
+            'puppetservice' => 'pe-puppetserver',
             'puppetpath'    => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
             'puppetconfdir' => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
             'puppetcodedir' => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
@@ -53,7 +53,7 @@ module Beaker
             'privatebindir' => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet Enterprise/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet Enterprise/sys/ruby/bin',
           },
           'pswindows' => { #windows windows
-            'puppetservice' => 'pe-httpd',
+            'puppetservice' => 'pe-puppetserver',
             'puppetpath'    => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc',
             'puppetconfdir' => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc',
             'puppetcodedir' => 'C:\\ProgramData\\PuppetLabs\\puppet\\etc',
@@ -79,10 +79,10 @@ module Beaker
             host['group'] = 'pe-puppet'
           end
           host['type'] = 'pe'
-          # newer pe requires a different puppetservice name, set it here on the master
+          # older pe requires a different puppetservice name, set it here on the master
           if host['roles'].include?('master')
-            if host['pe_ver'] and (not version_is_less(host['pe_ver'], '3.4'))
-              host['puppetservice'] = 'pe-puppetserver'
+            if host['pe_ver'] and (version_is_less(host['pe_ver'], '3.4'))
+              host['puppetservice'] = 'pe-httpd'
             end
           end
         end

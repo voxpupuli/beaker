@@ -28,6 +28,8 @@ module Beaker
           block_on hosts do |host|
             if host[:pe_ver] && aio_version?(host) or (host['type'] && host['type'] =~ /aio/)
               add_aio_defaults_on(host)
+              # provide a sane default here for puppetservice
+              host['puppetservice'] ||= 'pe-puppetserver'
             else
               add_pe_defaults_on(host)
             end
