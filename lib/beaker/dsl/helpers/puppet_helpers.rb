@@ -623,13 +623,15 @@ module Beaker
               end
             end
 
-            # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
-            # In all the case that it is different, this init script will exist. So we can assume
-            # that if the script doesn't exist, we should just use `pe-puppet`
-            agent_service = 'pe-puppet-agent'
-            agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
             # In 4.0 this was changed to just be `puppet`
-            agent_service = 'puppet' unless version_is_less(agent['pe_ver'], '4.0')
+            agent_service = 'puppet'
+            if !aio_version?(agent)
+              # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
+              # In all the case that it is different, this init script will exist. So we can assume
+              # that if the script doesn't exist, we should just use `pe-puppet`
+              agent_service = 'pe-puppet-agent'
+              agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
+            end
 
             # Under a number of stupid circumstances, we can't stop the
             # agent using puppet.  This is usually because of issues with

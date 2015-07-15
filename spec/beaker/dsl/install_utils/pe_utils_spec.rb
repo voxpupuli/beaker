@@ -394,9 +394,9 @@ describe ClassMixedWithDSLInstallUtils do
         :pe_ver => '3.0',
         :roles => ['agent']
       }, 1)
+      opts[:masterless] = true
 
       allow( subject ).to receive( :hosts ).and_return( hosts )
-      allow( subject ).to receive( :options ).and_return({ :masterless => true })
       allow( subject ).to receive( :on ).and_return( Beaker::Result.new( {}, '' ) )
       allow( subject ).to receive( :fetch_pe ).and_return( true )
       allow( subject ).to receive( :create_remote_file ).and_return( true )
@@ -454,9 +454,9 @@ describe ClassMixedWithDSLInstallUtils do
       #run installer on all hosts
       expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
       expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[1],
-                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
+                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[1][:pe_ver], :puppet_collection=>nil} ).once
       expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[2],
-                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
+                                                                                     {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[2][:pe_ver], :puppet_collection=>nil} ).once
       hosts.each do |host|
         expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
         expect( subject ).to receive( :sign_certificate_for ).with( host ).once
@@ -510,7 +510,7 @@ describe ClassMixedWithDSLInstallUtils do
       #run installer on all hosts
       expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
       expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[1],
-                                                                                      {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>nil, :puppet_collection=>nil} ).once
+                                                                                      {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[1][:pe_ver], :puppet_collection=>nil} ).once
       expect( subject ).to receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
       hosts.each do |host|
         if subject.aio_version?(host)

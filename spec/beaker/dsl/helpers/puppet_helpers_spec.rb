@@ -394,7 +394,6 @@ describe ClassMixedWithDSLHelpers do
       allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
-      expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
 
       expect( subject ).to receive( :puppet_resource ).with( "service", "puppet", "ensure=stopped").once
       expect( subject ).to receive( :on ).once

@@ -1094,10 +1094,10 @@ module Beaker
         def install_puppet_agent_pe_promoted_repo_on( hosts, opts )
           opts[:puppet_agent_version] ||= 'latest'
           block_on hosts do |host|
-            pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0'
+            pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0.0-rc1'
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos/"
+            opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
             opts[:copy_dir_external]  ||= File.join('/', 'root')
             opts[:puppet_collection] ||= 'PC1'
@@ -1126,7 +1126,7 @@ module Beaker
               # - we do not have install_32 set on host
               # - we do not have install_32 set globally
               arch_suffix = should_install_64bit ? '64' : '86'
-              release_path += "windows/"
+              release_path += "/windows/"
               release_file = "/puppet-agent-x#{arch_suffix}.msi"
               download_file = "puppet-agent-x#{arch_suffix}.msi"
             when /^osx$/
