@@ -167,6 +167,10 @@ module Beaker
       # @example Confining to an already defined subset of hosts
       #     confine :to, {}, agents
       #
+      # @example Confining from  an already defined subset of hosts
+      #     confine :except, {}, agents
+      #
+      #
       # @return [Array<Host>] Returns an array of hosts that are still valid
       #   targets for this tests case.
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
@@ -175,10 +179,17 @@ module Beaker
         hosts_to_modify = host_array || hosts
         case type
         when :except
-          hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
+          if criteria and ( not criteria.empty? )
+            hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
+          else
+            # confining to all hosts *except* provided array of hosts
+            hosts_to_modify = hosts - host_array
+          end
         when :to
           if criteria and ( not criteria.empty? )
             hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+          else
+            # confining to only hosts in provided array of hosts
           end
         else
           raise "Unknown option #{type}"
