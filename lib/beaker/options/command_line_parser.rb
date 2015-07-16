@@ -121,6 +121,15 @@ module Beaker
             @cmd_options[:color] = bool
           end
 
+          opts.on '--[no-]color-host-output',
+                  'Ensure SUT colored output is preserved',
+                  '(default: false)' do |bool|
+            @cmd_options[:color_host_output] = bool
+            if bool
+              @cmd_options[:color_host_output] = true
+            end
+          end
+
           opts.on '--log-level LEVEL',
                   'Log level',
                   'Supported LEVEL keywords:',
