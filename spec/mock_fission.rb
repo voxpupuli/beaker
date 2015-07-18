@@ -38,6 +38,10 @@ class MockFissionVM
   def exists?
     true
   end
+
+  def network_info
+    Response.new(0, '', {'eth0' => {'ip_address' => '1.2.3.4'} })
+  end
 end
 
 class MockFission 

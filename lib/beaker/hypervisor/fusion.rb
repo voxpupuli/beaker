@@ -54,6 +54,15 @@ module Beaker
         end
         time = Time.now - start
         @logger.notify "Spent %.2f seconds resuming VM" % time
+
+        @logger.notify "Obtaining IP information for #{host.name}"
+        ip = vm.network_info.data[vm.network_info.data.keys[0]]['ip_address']
+        if ip.empty?
+          @logger.notify "Unable to obtain IP information for #{host.name}. Continuing."
+        else
+          @logger.notify "Found IP address #{ip} for #{host.name}. Setting host.ip value"
+          host[:ip] = ip
+        end
       end
       end #revert_fusion
 
