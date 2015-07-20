@@ -553,7 +553,7 @@ module Beaker
 
         #Install PE based upon host configuration and options
         #
-        # @param [Host, Array<Host>] hosts    One or more hosts to act upon
+        # @param [Host, Array<Host>] install_hosts    One or more hosts to act upon
         # @!macro common_opts
         # @option opts [Boolean] :masterless Are we performing a masterless installation?
         # @option opts [String] :puppet_agent_version  Version of puppet-agent to install. Required for PE agent
@@ -599,7 +599,7 @@ module Beaker
         end
 
         #Upgrade PE based upon host configuration and options
-        # @param [Host, Array<Host>]    One or more hosts to act upon
+        # @param [Host, Array<Host>]  upgrade_hosts   One or more hosts to act upon
         # @!macro common_opts
         # @param [String] path A path (either local directory or a URL to a listing of PE builds).
         #                      Will contain a LATEST file indicating the latest build to install.
