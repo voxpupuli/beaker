@@ -176,7 +176,7 @@ module Beaker
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
       #   this test case after confinement.
       def confine(type, criteria, host_array = nil, &block)
-        hosts_to_modify = host_array || hosts
+        hosts_to_modify = Array( host_array || hosts )
         case type
         when :except
           if criteria and ( not criteria.empty? )
@@ -209,7 +209,7 @@ module Beaker
       # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
         begin
-          host_array ||= hosts
+          host_array = Array( host_array || hosts )
           original_hosts = self.hosts.dup
           confine(type, criteria, host_array)
 
