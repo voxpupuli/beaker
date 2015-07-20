@@ -605,6 +605,13 @@ describe ClassMixedWithDSLInstallUtils do
         expect( h['pe_ver'] ).to be === '2.8'
       end
     end
+
+    it 'can act upon a single host' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :sorted_hosts ).and_return( [hosts[0]] )
+      expect( subject ).to receive( :do_install ).with( [hosts[0]], {} )
+      subject.install_pe_on(hosts[0], {})
+    end
   end
 
   describe 'install_higgs' do
@@ -672,6 +679,19 @@ describe ClassMixedWithDSLInstallUtils do
       the_hosts.each do |h|
         expect( h['pe_ver'] ).to be === '2.8'
       end
+    end
+
+    it 'can act upon a single host' do
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version ).and_return( '3.1' )
+      allow( Beaker::Options::PEVersionScraper ).to receive( :load_pe_version_win ).and_return( '3.1' )
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :version_is_less ).with('3.0', '3.4.0').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.1', '3.0').and_return( false )
+      allow( subject ).to receive( :sorted_hosts ).and_return( [hosts[0]] )
+      version = version_win = '3.1'
+      path = "/path/to/upgradepkg"
+      expect( subject ).to receive( :do_install ).with( [hosts[0]], {:type=>:upgrade, :set_console_password=>true} )
+      subject.upgrade_pe_on(hosts[0], {}, path)
     end
 
   end
