@@ -20,6 +20,14 @@ module Beaker
         @command = command
       end
 
+      def has_key?(k)
+        cmd = PuppetCommand.new(@command, '--configprint all')
+        keys = @host.exec(cmd).stdout.split("\n").collect do |x|
+          x[/^[^\s]+/]
+        end
+        keys.include?(k)
+      end
+
       def [](k)
         cmd = PuppetCommand.new(@command, "--configprint #{k.to_s}")
         @host.exec(cmd).stdout.strip
@@ -457,12 +465,12 @@ module Beaker
   end
 
   [
-     'unix',
-     'aix',
-     'mac',
-     'freebsd',
-     'windows',
-     'pswindows',
+    'unix',
+    'aix',
+    'mac',
+    'freebsd',
+    'windows',
+    'pswindows',
   ].each do |lib|
     require "beaker/host/#{lib}"
   end
