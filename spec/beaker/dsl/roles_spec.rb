@@ -116,20 +116,51 @@ describe ClassMixedWithDSLRoles do
     end
   end
   describe '#aio_version?' do
-    it 'returns true if the host doesn\'t have a :pe_ver' do
+    it 'returns false if the host doesn\'t have a :pe_ver or :version' do
       agent1[:pe_ver] = nil
-      expect( subject.aio_version?(agent1) ).to be === true
+      agent1[:version] = nil
+      expect( subject.aio_version?(agent1) ).to be === false
+    end
+    it 'returns false if :version < 4.0 and pe_ver is nil, type foss' do
+      agent1[:pe_ver] = nil
+      agent1[:version] = '3.8'
+      agent1[:type] = 'foss'
+      expect( subject.aio_version?(agent1) ).to be === false
     end
     it 'returns false if the host :pe_ver is set < 4.0' do
       agent1[:pe_ver] = '3.8'
+      expect( subject.aio_version?(agent1) ).to be === false
+    end
+    it 'returns false if the host :version is set < 4.0' do
+      agent1[:version] = '3.8'
       expect( subject.aio_version?(agent1) ).to be === false
     end
     it 'returns true if the host :pe_ver is 4.0' do
       agent1[:pe_ver] = '4.0'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+    it 'returns true if the host :version is 4.0' do
+      agent1[:version] = '4.0'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
     it 'returns true if the host :pe_ver is 2015.5' do
       agent1[:pe_ver] = '2015.5'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns true if the host has role aio' do
+      agent1[:roles] = agent1[:roles] | ['aio']
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns true if the host is type aio' do
+      agent1[:type] = 'aio'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns true if the host is type aio-foss' do
+      agent1[:type] = 'aio-foss'
+      expect( subject.aio_version?(agent1) ).to be === true
+    end
+    it 'returns true if the host is type foss-aio' do
+      agent1[:type] = 'aio-foss'
       expect( subject.aio_version?(agent1) ).to be === true
     end
   end
@@ -172,13 +203,13 @@ describe ClassMixedWithDSLRoles do
   end
   describe '#add_role_def' do
     it 'raises an error on unsupported role format "1role"' do
-      expect { subject.add_role_def( "1role" ) }.to raise_error
+      expect { subject.add_role_def( "1role" ) }.to raise_error ArgumentError
     end
     it 'raises an error on unsupported role format "role_!a"' do
-      expect { subject.add_role_def( "role_!a" ) }.to raise_error
+      expect { subject.add_role_def( "role_!a" ) }.to raise_error ArgumentError
     end
     it 'raises an error on unsupported role format "role=="' do
-      expect { subject.add_role_def( "role==" ) }.to raise_error
+      expect { subject.add_role_def( "role==" ) }.to raise_error ArgumentError
     end
     it 'creates new method for role "role_correct!"' do
       test_role = "role_correct!"

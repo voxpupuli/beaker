@@ -65,6 +65,46 @@ module Beaker
           end
         end
 
+        # Configure the provided hosts to be of their host[:type], it host[type] == nil do nothing
+        def configure_type_defaults_on( hosts )
+          block_on hosts do |host|
+            has_defaults = false
+            if host[:type]
+              host_type = host[:type]
+              # clean up the naming conventions here (some teams use foss-package, git-whatever, we need
+              # to correctly handle that
+              # don't worry about aio, that happens in the aio_version? check
+              host_type = case host_type
+                          when /(\A|-)(git)|(foss)(\Z|-)/
+                            'foss'
+                          when /(\A|-)pe(\Z|-)/
+                            'pe'
+                          else
+                            nil
+                          end
+              if host_type
+                add_method = "add_#{host_type}_defaults_on"
+                if self.respond_to?(add_method, host)
+                  self.send(add_method, host)
+                else
+                  raise "cannot add defaults of type #{host_type} for host #{host.name} (#{add_method} not present)"
+                end
+                has_defaults = true
+              end
+            end
+            if aio_version?(host)
+              add_aio_defaults_on(host)
+              has_defaults = true
+            end
+            # add pathing env
+            if has_defaults
+              add_puppet_paths_on(host)
+            end
+          end
+        end
+        alias_method :configure_foss_defaults_on, :configure_type_defaults_on
+        alias_method :configure_pe_defaults_on, :configure_type_defaults_on
+
         #If the host is associated with a type remove all defaults and environment associated with that type.
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
@@ -77,6 +117,9 @@ module Beaker
                 self.send(remove_method, host)
               else
                 raise "cannot remove defaults of type #{host['type']} associated with host #{host.name} (#{remove_method} not present)"
+              end
+              if aio_version?(host)
+                remove_aio_defaults_on(host)
               end
             end
           end
