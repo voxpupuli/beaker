@@ -7,12 +7,13 @@ class Response
   end
 end
 
-class MockFissionVM 
+class MockFissionVM
   attr_accessor :name
   @@snaps = []
   def initialize name
     @name = name
     @running = true
+    @network_info = {'eth0' => {'ip_address' => '1.2.3.4'} }
   end
 
   def self.set_snapshots snaps
@@ -28,11 +29,11 @@ class MockFissionVM
   end
 
   def running?
-    Response.new(0, '', @running) 
+    Response.new(0, '', @running)
   end
 
   def start opt
-    @running = true 
+    @running = true
   end
 
   def exists?
@@ -40,11 +41,11 @@ class MockFissionVM
   end
 
   def network_info
-    Response.new(0, '', {'eth0' => {'ip_address' => '1.2.3.4'} })
+    Response.new(0, '', @network_info)
   end
 end
 
-class MockFission 
+class MockFission
   @@vms = []
   def self.presets hosts
     snaps = []

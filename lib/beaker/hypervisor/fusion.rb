@@ -1,3 +1,4 @@
+require 'beaker/ssh_connection'
 module Beaker
   class Fusion < Beaker::Hypervisor
 
@@ -55,20 +56,64 @@ module Beaker
         time = Time.now - start
         @logger.notify "Spent %.2f seconds resuming VM" % time
 
-        @logger.notify "Obtaining IP information for #{host.name}"
-        ip = vm.network_info.data[vm.network_info.data.keys[0]]['ip_address']
-        if ip.empty?
-          @logger.notify "Unable to obtain IP information for #{host.name}. Continuing."
-        else
-          @logger.notify "Found IP address #{ip} for #{host.name}. Setting host.ip value"
-          host[:ip] = ip
+        begin
+          try_ssh_connection(host.name, host['user'], host['ssh'])
+        rescue *Beaker::SshConnection::RETRYABLE_EXCEPTIONS => e
+          @logger.notify "Obtaining IP information for #{host.name}"
+          ip = vm.network_info.data[vm.network_info.data.keys[0]]['ip_address']
+          if not ip
+            raise "Unable to connect to vm via hostname #{host.name}, and ip address is unavailable via vmname #{host[:vmname]}."
+          else
+            @logger.notify "Found IP address #{ip} for #{host.name}. Setting host.ip value"
+            begin
+              try_ssh_connection(ip, host['user'], host['ssh'])
+            rescue *Beaker::SshConnection::RETRYABLE_EXCEPTIONS => e
+              raise "Unable to connect to vm via IP address #{ip} for #{host.name}"
+            end
+            host[:ip] = ip
+          end
+          set_hostnames @hosts, @options
+
         end
       end
+      hack_etc_hosts @hosts, @options
+
       end #revert_fusion
 
       def cleanup
         @logger.notify "No cleanup for fusion boxes"
       end
 
+      # Set the hostname of all instances to be the hostname defined in the
+      # beaker configuration.
+      #
+      # @param [Host, Array<Host>] hosts An array of hosts to act upon
+      # @param [Hash{Symbol=>String}] opts Options to alter execution.
+      #
+      # @return [void]
+      # @api private
+      def set_hostnames hosts, opts
+        hosts.each do |host|
+          if host['platform'] =~ /el-7/
+            # on el-7 hosts, the hostname command doesn't "stick" randomly
+            host.exec(Command.new("hostnamectl set-hostname #{host.name}"))
+          else
+            host.exec(Command.new("hostname #{host.name}"))
+          end
+        end
+      end
+
+      # Attempt SSH connection to given host
+      #
+      # @param host [String] the hostname or IP address to connect to
+      # @param user [String] the username to use for the connection
+      # @param ssh [Hash] SSH parameters to use for the connection
+      #
+      # @return [void]
+      # @api private
+      def try_ssh_connection(host, user, ssh)
+        @logger.notify "Attempting SSH connection to #{host}"
+        Net::SSH.start(host,user,ssh)
+      end
   end
 end
