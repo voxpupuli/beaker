@@ -97,7 +97,7 @@ describe Beaker do
 
       expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
 
-      expect{ subject.timesync( hosts, options ) }.to raise_error
+      expect{ subject.timesync( hosts, options ) }.to raise_error(/NTP date was not successful after/)
     end
 
     it "can sync time on windows hosts" do
@@ -170,7 +170,7 @@ describe Beaker do
     it "raises an error on non el-5/6 host" do
       host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-4-platform') } )
 
-      expect{ subject.epel_info_for( host, options )}.to raise_error
+      expect{ subject.epel_info_for( host, options )}.to raise_error(RuntimeError, /epel_info_for does not support el version/)
 
     end
 
@@ -572,6 +572,7 @@ describe Beaker do
       expect( Beaker::Command ).to receive( :new ).with( "mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
       expect( Beaker::Command ).to receive( :new ).with( "chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
       expect( Beaker::Command ).to receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
+      expect_any_instance_of( Class ).to receive( :extend ).and_return( double( 'class' ).as_null_object )
       expect( Beaker::Command ).to receive( :new ).with( "cat #{host[:ssh_env_file]}" ).once
       expect( host ).to receive( :add_env_var ).with( 'PATH', '$PATH' ).once
       opts.each_pair do |key, value|

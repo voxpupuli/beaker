@@ -28,27 +28,6 @@ module Beaker
         # Github's ssh signature for cloning via ssh
         GitHubSig   = 'github.com,207.97.227.239 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
 
-        # Set defaults and PATH for these hosts to be either foss or aio, have host['type'] == aio for aio settings, defaults
-        # to foss.
-        #
-        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
-        def configure_foss_defaults_on( hosts )
-          block_on hosts do |host|
-            if (not_controller(host) && host[:version] && (not version_is_less(host[:version], '4.0'))) \
-              or (host['type'] && host['type'] =~ /aio/)
-              # add aio defaults to host
-              add_aio_defaults_on(host)
-              # provide a sane default here for puppetservice
-              host['puppetservice'] ||= 'puppetserver'
-            else
-              add_foss_defaults_on(host)
-            end
-            # add pathing env
-            add_puppet_paths_on(host)
-          end
-        end
-
         # @param [String] uri A uri in the format of <git uri>#<revision>
         #                     the `git://`, `http://`, `https://`, and ssh
         #                     (if cloning as the remote git user) protocols
@@ -299,7 +278,7 @@ module Beaker
           opts[:puppet_agent_version] ||= opts[:version] #backwards compatability with old parameter name
 
           block_on hosts do |host|
-            host[:type] = 'aio' #we are installing agent, so we want aio type
+            add_role(host, 'aio') #we are installing agent, so we want aio role
             case host['platform']
             when /el-4|sles/
               # pe-only agent, get from dev repo
@@ -421,7 +400,7 @@ module Beaker
 
             puppet_pkg = opts[:version] ? "puppet-#{opts[:version]}" : 'puppet'
             host.install_package("#{puppet_pkg}")
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppet_from_rpm, :install_puppet_from_rpm_on
@@ -455,7 +434,7 @@ module Beaker
             else
               host.install_package('puppet')
             end
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppet_from_deb, :install_puppet_from_deb_on
@@ -491,7 +470,7 @@ module Beaker
               install_a_puppet_msi_on(host, opts)
 
             end
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppet_from_msi, :install_puppet_from_msi_on
@@ -540,7 +519,7 @@ module Beaker
         def install_puppet_agent_from_msi_on(hosts, opts)
           block_on hosts do |host|
 
-            host[:type] = 'aio' #we are installing agent, so we want aio type
+            add_role(host, 'aio') #we are installing agent, so we want aio role
             is_config_32 = true == (host['ruby_arch'] == 'x86') || host['install_32'] || opts['install_32']
             should_install_64bit = host.is_x86_64? && !is_config_32
             arch = should_install_64bit ? 'x64' : 'x86'
@@ -583,7 +562,7 @@ module Beaker
               on host, "start /w msiexec.exe /qn /i #{dest}"
             end
 
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
             if not host.is_cygwin?
               host.mkdir_p host['distmoduledir']
             end
@@ -657,7 +636,7 @@ module Beaker
               host.install_package("facter-#{facter_ver}")
               host.install_package("hiera-#{hiera_ver}")
 
-              configure_foss_defaults_on( host )
+              configure_type_defaults_on( host )
             end
           end
         end
@@ -679,7 +658,7 @@ module Beaker
           opts[:puppet_collection] = opts[:puppet_collection].upcase #needs to be upcase, more lovely consistency
           block_on hosts do |host|
 
-            host[:type] = 'aio' #we are installing agent, so we want aio type
+            add_role(host, 'aio') #we are installing agent, so we want aio role
 
             variant, version, arch, codename = host['platform'].to_array
             agent_version = opts[:puppet_agent_version] || 'latest'
@@ -694,7 +673,7 @@ module Beaker
 
             host.install_package(pkg_name)
 
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
 
@@ -714,7 +693,7 @@ module Beaker
           block_on hosts do |host|
             host.install_package('puppet')
 
-            configure_foss_defaults_on(host)
+            configure_type_defaults_on(host)
           end
         end
 
@@ -808,7 +787,7 @@ module Beaker
               host.mkdir_p host.puppet[key] if host.puppet.has_key?(key)
             end
 
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppet_from_gem,          :install_puppet_from_gem_on
@@ -847,7 +826,7 @@ module Beaker
             else
               raise "No repository installation step for #{variant} yet..."
             end
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppetlabs_release_repo, :install_puppetlabs_release_repo_on
@@ -988,7 +967,7 @@ module Beaker
 
             on host, find_and_sed
             on host, "apt-get update"
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
 
           else
             raise "No repository installation step for #{variant} yet..."
@@ -1017,7 +996,7 @@ module Beaker
           end
           find_command = "find /root/#{package_name} -type f -name '#{find_filename}' -exec #{find_command} {} \\;"
           on host, find_command
-          configure_foss_defaults_on( host )
+          configure_type_defaults_on( host )
         end
 
         # Install development repo of the puppet-agent on the given host(s).  Downloaded from 
@@ -1064,7 +1043,7 @@ module Beaker
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
             opts[:copy_dir_external]  ||= File.join('/', 'root')
             opts[:puppet_collection] ||= 'PC1'
-            host[:type] = 'aio' #we are installing agent, so we want aio type
+            add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
             variant, version, arch, codename = host['platform'].to_array
             copy_dir_local = File.join(opts[:copy_base_local], variant)
@@ -1117,7 +1096,7 @@ module Beaker
             when /^osx$/
               host.install_package("#{mac_pkg_name}*")
             end
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
         alias_method :install_puppetagent_dev_repo, :install_puppet_agent_dev_repo_on
@@ -1156,7 +1135,7 @@ module Beaker
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
             opts[:copy_dir_external]  ||= File.join('/', 'root')
             opts[:puppet_collection] ||= 'PC1'
-            host[:type] = 'aio' #we are installing agent, so we want aio type
+            add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
             variant, version, arch, codename = host['platform'].to_array
             copy_dir_local = File.join(opts[:copy_base_local], variant)
@@ -1219,12 +1198,12 @@ module Beaker
               on host, "mv #{onhost_copied_file}.dmg ."
               host.install_package("puppet-agent-*")
             end
-            configure_foss_defaults_on( host )
+            configure_type_defaults_on( host )
           end
         end
 
 
-        # This method will install a pem file certifcate on a windows host
+        # This method will install a pem file certificate on a windows host
         #
         # @param [Host] host                 A host object
         # @param [String] cert_name          The name of the pem file

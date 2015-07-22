@@ -16,10 +16,11 @@ end
 describe ClassMixedWithDSLInstallUtils do
   let(:metadata)      { @metadata ||= {} }
   let(:presets)       { Beaker::Options::Presets.new }
-  let(:opts)          { presets.presets.merge(presets.env_vars) }
+  let(:opts)          { presets.presets.merge(presets.env_vars).merge({ :type => 'foss' }) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
-                                       :platform => 'linux',
-                                       :roles => [ 'agent' ] }, 4 ) }
+                                      :platform => 'linux',
+                                      :roles => [ 'agent' ],
+                                      :type  => 'foss' }, 4 ) }
   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
                         basic_hosts[1][:platform] = 'windows'
                         basic_hosts[2][:platform] = 'osx-10.9-x86_64'
@@ -29,13 +30,16 @@ describe ClassMixedWithDSLInstallUtils do
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
+                                                :type => 'foss',
                                                 :is_cygwin => true} ) }
   let(:winhost_non_cygwin) { make_host( 'winhost_non_cygwin', { :platform => 'windows',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
+                                                :type => 'foss',
                                                 :is_cygwin => 'false' } ) }
   let(:machost)       { make_host( 'machost', { :platform => 'osx-10.9-x86_64',
                                                 :pe_ver => '3.0',
+                                                :type => 'foss',
                                                 :working_dir => '/tmp' } ) }
   let(:freebsdhost9)   { make_host( 'freebsdhost9', { :platform => 'freebsd-9-x64',
                                                 :pe_ver => '3.0',
@@ -46,55 +50,59 @@ describe ClassMixedWithDSLInstallUtils do
   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
                                                  :pe_ver => '3.0',
                                                  :working_dir => '/tmp',
+                                                :type => 'foss',
                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
   let(:eoshost)       { make_host( 'eoshost', { :platform => 'eos',
                                                 :pe_ver => '3.0',
                                                 :working_dir => '/tmp',
+                                                :type => 'foss',
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
 
 
   context '#configure_foss_defaults_on' do
-    it 'uses aio paths for hosts of type aio' do
+    it 'uses aio paths for hosts with role aio' do
       hosts.each do |host|
-        host[:type] = 'aio'
+        host[:pe_ver] = nil
+        host[:version] = nil
+        host[:roles] = host[:roles] | ['aio']
       end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_foss_defaults_on( hosts )
     end
 
-    it 'uses foss paths for hosts of type foss' do
+    it 'uses no paths for hosts with no type' do
       hosts.each do |host|
-        host[:type] = 'foss'
+        host[:type] = nil
       end
-      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).never
+      expect(subject).to receive(:add_foss_defaults_on).never
+      expect(subject).to receive(:add_puppet_paths_on).never
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses aio paths for hosts with aio type (backwards compatability)' do
+      hosts.each do |host|
+        host[:type] = 'aio'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_foss_defaults_on).never
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_foss_defaults_on( hosts )
     end
 
-    it 'uses foss paths for hosts with no type and version < 4.0' do
-      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
-      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
-
-      subject.configure_foss_defaults_on( hosts )
-    end
-
-    it 'uses aio paths for hosts of version >= 4.0, except for master/database/dashboard' do
-      agents = []
-      not_agents = []
+    it 'uses aio paths for hosts of version >= 4.0' do
       hosts.each do |host|
         host[:version] = '4.0'
         host[:pe_ver] = nil
-        if subject.agent_only(host)
-          agents << host
-        else
-          not_agents << host
-        end
+        host[:roles] = host[:roles] - ['aio']
       end
-      expect(subject).to receive(:add_aio_defaults_on).exactly(agents.length).times
-      expect(subject).to receive(:add_foss_defaults_on).exactly(not_agents.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_foss_defaults_on( hosts )
@@ -103,8 +111,23 @@ describe ClassMixedWithDSLInstallUtils do
     it 'uses foss paths for hosts of version < 4.0' do
       hosts.each do |host|
         host[:version] = '3.8'
+        host[:pe_ver] = nil
       end
       expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).never
+      expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_foss_defaults_on( hosts )
+    end
+
+    it 'uses foss paths for foss-like type foss-package' do
+      hosts.each do |host|
+        host[:type] = 'foss-package'
+        host[:version] = '3.8'
+        host[:pe_ver] = nil
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).never
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_foss_defaults_on( hosts )
@@ -866,6 +889,7 @@ describe ClassMixedWithDSLInstallUtils do
     def test_fetch_http_file_no_ending_slash(platform)
       @platform = platform
       allow( subject ).to receive( :scp_to )
+      allow( subject ).to receive( :configure_type_defaults_on ).with(host)
 
       expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
       subject.install_puppet_agent_pe_promoted_repo_on( host, opts )

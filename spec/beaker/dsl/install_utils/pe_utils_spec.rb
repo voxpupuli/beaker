@@ -19,8 +19,9 @@ describe ClassMixedWithDSLInstallUtils do
   let(:presets)       { Beaker::Options::Presets.new }
   let(:opts)          { presets.presets.merge(presets.env_vars) }
   let(:basic_hosts)   { make_hosts( { :pe_ver => '3.0',
-                                       :platform => 'linux',
-                                       :roles => [ 'agent' ] }, 4 ) }
+                                      :platform => 'linux',
+                                      :roles => [ 'agent' ],
+                                      :type => 'pe'}, 4 ) }
   let(:hosts)         { basic_hosts[0][:roles] = ['master', 'database', 'dashboard']
                         basic_hosts[1][:platform] = 'windows'
                         basic_hosts[2][:platform] = 'osx-10.9-x86_64'
@@ -29,23 +30,28 @@ describe ClassMixedWithDSLInstallUtils do
   let(:hosts_sorted)  { [ hosts[1], hosts[0], hosts[2], hosts[3] ] }
   let(:winhost)       { make_host( 'winhost', { :platform => 'windows',
                                                 :pe_ver => '3.0',
+                                                :type => 'pe',
                                                 :working_dir => '/tmp' } ) }
   let(:machost)       { make_host( 'machost', { :platform => 'osx-10.9-x86_64',
                                                 :pe_ver => '3.0',
+                                                :type => 'pe',
                                                 :working_dir => '/tmp' } ) }
   let(:unixhost)      { make_host( 'unixhost', { :platform => 'linux',
                                                  :pe_ver => '3.0',
+                                                :type => 'pe',
                                                  :working_dir => '/tmp',
                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-debian-7-i386' } ) }
   let(:eoshost)       { make_host( 'eoshost', { :platform => 'eos',
                                                 :pe_ver => '3.0',
+                                                :type => 'pe',
                                                 :working_dir => '/tmp',
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
   context '#configure_pe_defaults_on' do
-    it 'uses aio paths for hosts of type aio' do
+    it 'uses aio paths for hosts of role aio' do
       hosts.each do |host|
-        host[:type] = 'aio'
+        host[:roles] = host[:roles] | ['aio']
       end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
@@ -57,14 +63,29 @@ describe ClassMixedWithDSLInstallUtils do
         host[:type] = 'pe'
       end
       expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).never
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_pe_defaults_on( hosts )
     end
 
-    it 'uses foss paths for hosts with no type and version < 4.0' do
-      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+    it 'uses aio paths for hosts of type aio' do
+      hosts.each do |host|
+        host[:type] = 'aio'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
+
+      subject.configure_pe_defaults_on( hosts )
+    end
+
+    it 'uses no paths for hosts with no type' do
+      hosts.each do |host|
+        host[:type] = nil
+      end
+      expect(subject).to receive(:add_pe_defaults_on).never
+      expect(subject).to receive(:add_aio_defaults_on).never
+      expect(subject).to receive(:add_puppet_paths_on).never
 
       subject.configure_pe_defaults_on( hosts )
     end
@@ -73,17 +94,19 @@ describe ClassMixedWithDSLInstallUtils do
       hosts.each do |host|
         host[:pe_ver] = '4.0'
         end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_pe_defaults_on( hosts )
     end
 
-    it 'uses foss paths for hosts of version < 4.0' do
+    it 'uses pe paths for hosts of version < 4.0' do
       hosts.each do |host|
         host[:pe_ver] = '3.8'
       end
       expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).never
       expect(subject).to receive(:add_puppet_paths_on).exactly(hosts.length).times
 
       subject.configure_pe_defaults_on( hosts )
@@ -458,7 +481,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[2],
                                                                                      {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[2][:pe_ver], :puppet_collection=>nil} ).once
       hosts.each do |host|
-        expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
+        expect( subject ).to receive( :configure_type_defaults_on ).with( host ).once
         expect( subject ).to receive( :sign_certificate_for ).with( host ).once
         expect( subject ).to receive( :stop_agent_on ).with( host ).once
         expect( subject ).to receive( :on ).with( host, /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
@@ -513,11 +536,7 @@ describe ClassMixedWithDSLInstallUtils do
                                                                                       {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[1][:pe_ver], :puppet_collection=>nil} ).once
       expect( subject ).to receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
       hosts.each do |host|
-        if subject.aio_version?(host)
-          expect( subject ).to receive( :add_aio_defaults_on ).with( host ).once
-        else
-          expect( subject ).to receive( :add_pe_defaults_on ).with( host ).once
-        end
+        expect( subject ).to receive( :configure_type_defaults_on ).with( host ).once
         expect( subject ).to receive( :sign_certificate_for ).with( host ).once
         expect( subject ).to receive( :stop_agent_on ).with( host ).once
         expect( subject ).to receive( :on ).with( host, /puppet agent -t/, :acceptable_exit_codes => [0,2] ).once
@@ -632,7 +651,7 @@ describe ClassMixedWithDSLInstallUtils do
                                         opts ).once
       #check to see if the higgs installation has proceeded correctly, works on second check
       expect( subject ).to receive( :on ).with( hosts[0], /cat #{hosts[0]['higgs_file']}/, { :accept_all_exit_codes => true }).exactly(10).times.and_return( @fail_result )
-      expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error
+      expect{ subject.do_higgs_install( hosts[0], opts ) }.to raise_error RuntimeError, "Failed to kick off PE (Higgs) web installation"
     end
 
   end

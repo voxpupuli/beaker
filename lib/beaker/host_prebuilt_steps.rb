@@ -556,14 +556,7 @@ module Beaker
         end
         # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
         # this is the worst and i hate it
-        if host[:type]
-          case host[:type]
-          when /git|foss|aio/
-            Class.new.extend(Beaker::DSL).configure_foss_defaults_on(host)
-          when /pe/
-            Class.new.extend(Beaker::DSL).configure_pe_defaults_on(host)
-          end
-        end
+        Class.new.extend(Beaker::DSL).configure_type_defaults_on(host)
 
         #close the host to re-establish the connection with the new sshd settings
         host.close
