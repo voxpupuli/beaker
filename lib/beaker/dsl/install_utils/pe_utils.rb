@@ -95,7 +95,10 @@ module Beaker
           version = host['pe_ver'] || opts[:pe_ver]
           if host['platform'] =~ /windows/
             log_file = "#{File.basename(host['working_dir'])}.log"
-            pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
+            # cat may not be available with strictly Windows environments
+            # Prefer `type` as an alternative to `cat` if non-cygwin
+            win_cat = host.is_cygwin? ? "cat" : "type"
+            pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && #{win_cat} #{log_file}" : ''
             "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
           # Frictionless install didn't exist pre-3.2.0, so in that case we fall
           # through and do a regular install.
