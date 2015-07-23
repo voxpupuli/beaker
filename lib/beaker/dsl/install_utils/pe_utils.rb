@@ -96,11 +96,7 @@ module Beaker
           if host['platform'] =~ /windows/
             log_file = "#{File.basename(host['working_dir'])}.log"
             pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && cat #{log_file}" : ''
-            if host.is_cygwin?
-              "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
-            else
-              "cd #{host['working_dir']} &&  msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}#{pe_debug}"
-            end
+            "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
           # Frictionless install didn't exist pre-3.2.0, so in that case we fall
           # through and do a regular install.
           elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
