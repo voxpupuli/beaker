@@ -343,6 +343,7 @@ module Beaker
         # @option opts [Boolean] :fetch_local_then_push_to_host determines whether
         #                 you use Beaker as the middleman for this (true), or curl the
         #                 file from the host (false; default behavior)
+        # @option opts [Boolean] :masterless Are we performing a masterless installation?
         #
         # @example
         #  do_install(hosts, {:type => :upgrade, :pe_dir => path, :pe_ver => version, :pe_ver_win =>  version_win})
@@ -353,8 +354,7 @@ module Beaker
         # @api private
         #
         def do_install hosts, opts = {}
-          masterless = (defined? options) ? options[:masterless] : false
-          opts[:masterless] = masterless # has to pass masterless down for answer generation awareness
+          masterless = opts[:masterless]
           opts[:type] = opts[:type] || :install
           unless masterless
             pre30database = version_is_less(opts[:pe_ver] || database['pe_ver'], '3.0')
@@ -415,10 +415,10 @@ module Beaker
           install_hosts.each do |host|
             if agent_only_check_needed && hosts_agent_only.include?(host)
               host['type'] = 'aio'
-              install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => opts[:puppet_agent_version],
-                                                               :puppet_agent_sha => opts[:puppet_agent_sha],
-                                                               :pe_ver => opts[:pe_ver],
-                                                               :puppet_collection => opts[:puppet_collection] })
+              install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => host[:puppet_agent_version] || opts[:puppet_agent_version],
+                                                               :puppet_agent_sha => host[:puppet_agent_sha] || opts[:puppet_agent_sha],
+                                                               :pe_ver => host[:pe_ver] || opts[:pe_ver],
+                                                               :puppet_collection => host[:puppet_collection] || opts[:puppet_collection] })
               setup_defaults_and_config_helper_on(host, master, [0, 1])
             elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
@@ -554,9 +554,10 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @!macro common_opts
+        # @option opts [Boolean] :masterless Are we performing a masterless installation?
         # @option opts [String] :puppet_agent_version  Version of puppet-agent to install. Required for PE agent
         #                                 only hosts on 4.0+
-        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to puppet-agent-version.
+        # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to puppet_agent_version.
         #                                 Required for PE agent only hosts on 4.0+
         # @option opts [String] :pe_ver   The version of PE (will also use host['pe_ver']), defaults to '4.0'
         # @option opts [String] :puppet_collection   The puppet collection for puppet-agent install.
@@ -571,14 +572,19 @@ module Beaker
         def install_pe_on(hosts, opts)
           #process the version files if necessary
           confine_block(:to, {}, hosts) do
-            hosts.each do |host|
+            sorted_hosts.each do |host|
               host['pe_dir'] ||= opts[:pe_dir]
               if host['platform'] =~ /windows/
-                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
-                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file_win])
+                # we don't need the pe_version if:
+                # * master pe_ver > 4.0
+                if not (!opts[:masterless] && master[:pe_ver] && !version_is_less(master[:pe_ver], '3.99'))
+                  host['pe_ver'] ||= Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file_win])
+                else
+                  # inherit the master's version
+                  host['pe_ver'] ||= master[:pe_ver]
+                end
               else
-                host['pe_ver'] = host['pe_ver'] || opts['pe_ver'] ||
-                  Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file])
+                host['pe_ver'] ||= Beaker::Options::PEVersionScraper.load_pe_version(host[:pe_dir] || opts[:pe_dir], opts[:pe_version_file])
               end
             end
             do_install sorted_hosts, opts
