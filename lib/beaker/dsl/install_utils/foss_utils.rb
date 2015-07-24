@@ -297,9 +297,6 @@ module Beaker
           opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
           opts[:puppet_collection] ||= 'pc1' #hi!  i'm case sensitive!  be careful!
           opts[:puppet_agent_version] ||= opts[:version] #backwards compatability with old parameter name
-          if not opts[:puppet_agent_version]
-            raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_on"
-          end
 
           block_on hosts do |host|
             host[:type] = 'aio' #we are installing agent, so we want aio type
