@@ -135,13 +135,6 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'installer_cmd' do
 
-    it 'generates a windows PE install command for a windows host' do
-      winhost['dist'] = 'puppet-enterprise-3.0'
-      allow( subject ).to receive( :hosts ).and_return( [ hosts[1], hosts[0], hosts[2], winhost ] )
-      allow( winhost ).to receive( :is_cygwin?).and_return(true)
-      expect( subject.installer_cmd( winhost, {} ) ).to be === "cd /tmp && cmd /C 'start /w msiexec.exe /qn /L*V tmp.log /i puppet-enterprise-3.0.msi PUPPET_MASTER_SERVER=vm1 PUPPET_AGENT_CERTNAME=winhost'"
-    end
-
     it 'generates a unix PE install command for a unix host' do
       the_host = unixhost.dup
       the_host['pe_installer'] = 'puppet-enterprise-installer'
@@ -376,7 +369,9 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ ).once
       #run installer on all hosts
       expect( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ ).once
-      expect( subject ).to receive( :on ).with( hosts[1], /msiexec.exe/ ).once
+      expect( subject ).to receive( :install_msi_on ).with ( any_args ) do | host, msi_path, msi_opts, opts |
+        expect( host ).to eq( hosts[1] )
+      end.once
       expect( subject ).to receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
       expect( subject ).to receive( :on ).with( hosts[3], /^Cli/ ).once
       #does extra mac/EOS specific commands
