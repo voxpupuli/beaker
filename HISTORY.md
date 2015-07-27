@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 14 Jul, 2015 (f9939536)](#LATEST)
+* [LATEST - 27 Jul, 2015 (15c0496b)](#LATEST)
+* [2.18.1 - 14 Jul, 2015 (6a82f99f)](#2.18.1)
 * [2.18.0 - 13 Jul, 2015 (e018f2fc)](#2.18.0)
 * [2.17.0 - 10 Jul, 2015 (aaac4771)](#2.17.0)
 * [2.16.0 - 6 Jul, 2015 (b3e76227)](#2.16.0)
@@ -88,7 +89,202 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 14 Jul, 2015 (f9939536)
+### <a name = "LATEST">LATEST - 27 Jul, 2015 (15c0496b)
+
+* (GEM) update beaker version to 2.18.2 (15c0496b)
+
+* Merge pull request #894 from anodelman/shallow (d2860c7a)
+
+
+```
+Merge pull request #894 from anodelman/shallow
+
+(BKR-405) The "install_pe" DSL Method Fails to Install SG...
+```
+* Merge pull request #880 from petems/BKR-326-fix_freebsd_install (6383f3d6)
+
+
+```
+Merge pull request #880 from petems/BKR-326-fix_freebsd_install
+
+(BKR-326) Fixes FreeBSD install to use ports
+```
+* Merge pull request #896 from bstopp/master (35f8e63e)
+
+
+```
+Merge pull request #896 from bstopp/master
+
+(BKR-417) Add support for specifying # of CPUs in VirtualBox
+```
+* Merge pull request #900 from ferventcoder/maint/issue/start-wait-winrm (f8f01651)
+
+
+```
+Merge pull request #900 from ferventcoder/maint/issue/start-wait-winrm
+
+(maint) Always wait for Windows agent installs
+```
+* Merge pull request #901 from justinstoller/bug/master/bkr-420_no-more-latest (282371b4)
+
+
+```
+Merge pull request #901 from justinstoller/bug/master/bkr-420_no-more-latest
+
+(BKR-420) Allow easily installing latest puppet-agent
+```
+* (BKR-420) Allow easily installing latest puppet-agent (460a6247)
+
+
+```
+(BKR-420) Allow easily installing latest puppet-agent
+
+Prior to this we were over eagerly failing if there was no puppet-agent
+version explicitly set.  Having install_puppet_agent install the latest
+released version of puppet-agent is a desired and common workflow.
+
+This patch removes the aggressive failing on non-specified puppet-agent
+versions in `install_puppet_agent_on`
+```
+* (maint) use type over cat in pure Windows (f53a9f6d)
+
+
+```
+(maint) use type over cat in pure Windows
+
+If the host is not a cygwin environment, prefer `type` to produce the
+contents of the log file over `cat`. `type` is built-in, where `cat` is
+only available if someone has put *nix tools on the path, whether
+through a git install (MinGW tools), installing GnuWin utils or some
+other method.
+```
+* (maint) Always wait for Windows agent installs (c8cb9384)
+
+
+```
+(maint) Always wait for Windows agent installs
+
+When installing Windows agents with cygwin or any other means, always
+prefer `start /w` over just calling msiexec.
+
+This adds to what was first introduced in 9c32cac7a7a5bf.
+```
+* Merge branch 'master' of github.com:bstopp/beaker (4452e5a9)
+
+* Merge pull request #889 from spjmurray/bkr_401_os_volume_races (5c17bca4)
+
+
+```
+Merge pull request #889 from spjmurray/bkr_401_os_volume_races
+
+(BKR-401) fix race in OpenStack volume deletion
+```
+* Merge pull request #892 from petems/maint_move_vb_vagrant_out_of_disk_path (17fe242f)
+
+
+```
+Merge pull request #892 from petems/maint_move_vb_vagrant_out_of_disk_path
+
+(maint) Moves various VB options out of `disk_path` logic
+```
+* Merge pull request #812 from bodgit/openbsd (e37685d0)
+
+
+```
+Merge pull request #812 from bodgit/openbsd
+
+(BKR-249) Add OpenBSD support
+```
+* Merge pull request #898 from kevpl/bkr415_acceptance_fix (888788a9)
+
+
+```
+Merge pull request #898 from kevpl/bkr415_acceptance_fix
+
+(BKR-415) re-targeted puppet_pkg acceptance from 3.7.5 -> 3.8.1
+```
+* (BKR-415) re-targeted puppet_pkg acceptance from 3.7.5 -> 3.8.1 (c37cc8d7)
+
+* This patch adds support for configuring the number of CPUs for (c3fae736)
+
+
+```
+This patch adds support for configuring the number of CPUs for
+vagrant VirtualBox instances. The `vagrant_cpus` config option is
+used to set the value.
+```
+* (BKR-417) This patch adds support for configuring the number of CPUs for (837fe37e)
+
+
+```
+(BKR-417) This patch adds support for configuring the number of CPUs for
+vagrant VirtualBox instances. The `vagrant_cpus` config option is
+used to set the value.
+```
+* (BKR-405) The "install_pe" DSL Method Fails to Install SG... (c31f2d9d)
+
+
+```
+(BKR-405) The "install_pe" DSL Method Fails to Install SG...
+
+...if "Latest-win" Version File is Missing
+
+- do not attempt to determine windows pe_ver if master version is
+  greater than 3.99, just inherit from the master (if it exists)
+- there's probably more edge cases here, but I don't believe that
+  install_pe can handle every combinations of platforms/versions
+```
+* (maint) Moves out of `disk_path` logic... (c8f98aa6)
+
+
+```
+(maint) Moves out of `disk_path` logic...
+
+Looks like these got moved into the `if` logic for `disk_path` accidentally around v2.8. This means that you can no longer use these options without adding disk_path logic in later versions of Beaker. This moves them back into their own section.
+```
+* (BKR-401) fix race in OpenStack volume deletion (b93046ed)
+
+
+```
+(BKR-401) fix race in OpenStack volume deletion
+
+There is a delay between a volume being detached from a virtual machine and
+when it is ready to be deleted.  The code as it stands is likely to hit a 400
+error as the volume is still in the 'detaching' state.  Add in a wait_for
+statement to allow the volume to get back into the 'available' state before
+deleting
+```
+* (BKR-326) Fixes FreeBSD install to use ports (a0d47d14)
+
+
+```
+(BKR-326) Fixes FreeBSD install to use ports
+
+* Adds helper method to `FreeBSD:Pkg` to install packages on FreeBSD using ports with sensible default arguments
+```
+* (BKR-249) Add OpenBSD support (3f72ecfc)
+
+
+```
+(BKR-249) Add OpenBSD support
+
+Add install method to prefer installing the OpenBSD-maintained Puppet package
+which tends to work better than vanilla gem versions. Also add enough smarts
+to be able to do gem installations. The shell is not a login shell therefore
+it doesn't pick up the .profile that contains the PKG_PATH variable so pkg_add
+doesn't automatically install from the network so add the PKG_PATH to the
+.ssh/environment too.
+
+The packaging support handles the case when there are multiple rubies
+available. Currently it will install the newest in the list that is older than
+2.2.x as that doesn't work with all versions of Puppet. Also, if installing the
+package advises to create symlinks to make this package the default, perform
+this step automatically. This handles for example when installing ruby-1.9.3
+and all the commands have a 19 suffix, etc.
+```
+### <a name = "2.18.1">2.18.1 - 14 Jul, 2015 (6a82f99f)
+
+* (HISTORY) update beaker history for gem release 2.18.1 (6a82f99f)
 
 * (GEM) update beaker version to 2.18.1 (f9939536)
 
