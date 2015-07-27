@@ -128,6 +128,12 @@ exit /B %errorlevel%
               # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
               host.close
             end
+
+            # verify service status post install
+            # if puppet service exists, then pe-puppet is not queried
+            # if puppet service does not exist, pe-puppet is queried and that exit code is used
+            # therefore, this command will always exit 0 if either service is installed
+            on host, Command.new("sc query puppet || sc query pe-puppet", [], { :cmdexe => true })
           end
         end
 
