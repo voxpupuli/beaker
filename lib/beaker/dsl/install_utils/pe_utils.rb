@@ -66,8 +66,6 @@ module Beaker
         # @param [Host] host The host that PE is to be installed on
         #                    For UNIX machines using the full PE installer, the host object must have the 'pe_installer' field set correctly.
         # @param [Hash{Symbol=>String}] opts The options
-        # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
-        #                          (Othersie uses individual Windows hosts pe_ver)
         # @option opts [String]  :pe_ver Default PE version to install or upgrade to
         #                          (Otherwise uses individual hosts pe_ver)
         # @option opts [Boolean] :pe_debug (false) Should we run the installer in debug mode?
