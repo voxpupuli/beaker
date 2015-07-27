@@ -35,23 +35,25 @@ module Beaker
     end
 
     def self.create name, host_hash, options
-      case host_hash['platform']
+      host_class = case host_hash['platform']
       when /windows/
         cygwin = host_hash['is_cygwin']
         if cygwin.nil? or cygwin == true
-          Windows::Host.new name, host_hash, options
+          Windows::Host
         else
-          PSWindows::Host.new name, host_hash, options
+          PSWindows::Host
         end
       when /aix/
-        Aix::Host.new name, host_hash, options
+        Aix::Host
       when /osx/
-        Mac::Host.new name, host_hash, options
+        Mac::Host
       when /freebsd/
-        FreeBSD::Host.new name, host_hash, options
+        FreeBSD::Host
       else
-        Unix::Host.new name, host_hash, options
+        Unix::Host
       end
+
+      host_class.new name, host_hash, options
     end
 
     attr_accessor :logger
@@ -113,7 +115,7 @@ module Beaker
       host_hash[k] = v
     end
 
-    # Does this host have this key?  Either as defined in the host itself, or globally? 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def [] k
       host_hash[k] || options[k]
     end
