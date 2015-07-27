@@ -57,6 +57,7 @@ describe ClassMixedWithDSLInstallUtils do
                                                 :working_dir => '/tmp',
                                                 :type => 'foss',
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
+  let(:win_temp)      { 'C:\\Windows\\Temp' }
 
 
   context '#configure_foss_defaults_on' do
@@ -198,13 +199,15 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   context 'install_puppet_from_msi' do
+    before :each do
+      expect(subject).to receive(:get_temp_path).and_return(win_temp)
+    end
 
     it 'installs puppet on cygwin windows' do
       allow(subject).to receive(:link_exists?).and_return( true )
-
-      expect(subject).to receive(:on).with(winhost, 'curl -O http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi')
+      expect(subject).to receive(:on).with(winhost, "curl -o \"#{win_temp}\\puppet-3.7.1.msi\" -O http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi")
       expect(subject).to receive(:on).with(winhost, " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
-      expect(subject).to receive(:on).with(winhost, 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.7.1.msi\'')
+      expect(subject).to receive(:install_msi_on).with(winhost, "#{win_temp}\\puppet-3.7.1.msi", {}, {:debug => nil})
 
       subject.install_puppet_from_msi( winhost, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}  )
     end
@@ -214,12 +217,12 @@ describe ClassMixedWithDSLInstallUtils do
 
       expect(winhost_non_cygwin).to receive(:mkdir_p).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules')
 
-      expect(subject).to receive(:on) do |winhost_non_cygwin, beaker_command|
+      expect(subject).to receive(:on).with(winhost_non_cygwin, instance_of( Beaker::Command )) do |host, beaker_command|
         expect(beaker_command.command).to eq('powershell.exe')
-        expect(beaker_command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi','C:\\Windows\\Temp\\puppet-3.7.1.msi')"])
-      end
+        expect(beaker_command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi','#{win_temp}\\puppet-3.7.1.msi')"])
+      end.once
 
-      expect(subject).to receive(:on).with(winhost_non_cygwin, "start /w msiexec.exe /qn /i C:\\Windows\\Temp\\puppet-3.7.1.msi")
+      expect(subject).to receive(:install_msi_on).with(winhost_non_cygwin, "#{win_temp}\\puppet-3.7.1.msi", {}, {:debug => nil})
 
       subject.install_puppet_from_msi( winhost_non_cygwin, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}   )
     end
@@ -360,19 +363,28 @@ describe ClassMixedWithDSLInstallUtils do
     end
     context 'on windows' do
       let(:platform) { Beaker::Platform.new('windows-2008r2-i386') }
+
+      before :each do
+        expect(subject).to receive(:get_temp_path).exactly(hosts.length).times.and_return(win_temp)
+      end
+
       it 'installs specific version of puppet when passed :version' do
         allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://downloads.puppetlabs.com/windows/puppet-3.msi')
+        expect(subject).to receive(:on).with(hosts[0], "curl -o \"#{win_temp}\\puppet-3.msi\" -O http://downloads.puppetlabs.com/windows/puppet-3.msi")
         expect(subject).to receive(:on).with(hosts[0], " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
-        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.msi\'')
+        expect(subject).to receive(:install_msi_on).with(hosts[0], "#{win_temp}\\puppet-3.msi", {}, {:debug => nil}).exactly(1).times
+        allow(subject).to receive(:install_msi_on).with(any_args)
+
         subject.install_puppet(:version => '3')
       end
       it 'installs from custom url when passed :win_download_url' do
         allow(hosts[0]).to receive(:is_cygwin?).and_return(true)
         allow(subject).to receive(:link_exists?).and_return( true )
-        expect(subject).to receive(:on).with(hosts[0], 'curl -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3.msi')
-        expect(subject).to receive(:on).with(hosts[0], 'cmd /C \'start /w msiexec.exe /qn /i puppet-3.msi\'')
+        expect(subject).to receive(:on).with(hosts[0], "curl -o \"#{win_temp}\\puppet-3.msi\" -O http://nightlies.puppetlabs.com/puppet-latest/repos/windows/puppet-3.msi")
+        expect(subject).to receive(:install_msi_on).with(hosts[0], "#{win_temp}\\puppet-3.msi", {}, {:debug => nil})
+        allow(subject).to receive(:install_msi_on).with(any_args)
+
         subject.install_puppet( :version => '3', :win_download_url => 'http://nightlies.puppetlabs.com/puppet-latest/repos/windows' )
       end
     end
@@ -765,13 +777,14 @@ describe ClassMixedWithDSLInstallUtils do
       host['platform'] = platform
       opts = { :version => '0.1.0' }
       allow( subject ).to receive( :options ).and_return( {} )
+      copied_path = "#{win_temp}\\puppet-agent-x64.msi"
       mock_echo = Object.new()
-      allow( mock_echo ).to receive( :raw_output ).and_return( " " )
+      allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
 
       expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-x64.msi', /\/windows$/)
       expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-x64.msi$/, /cygpath/)
+      expect(subject).to receive(:install_msi_on).with(host, copied_path, {}, {:debug => nil}).once
       expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
-      expect(subject).to receive(:on).ordered.with(host, anything)
 
       subject.install_puppetagent_dev_repo( host, opts )
     end
@@ -884,6 +897,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     before :each do
       allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+      allow( subject ).to receive( :install_msi_on ).with( any_args )
     end
 
     def test_fetch_http_file_no_ending_slash(platform)

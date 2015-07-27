@@ -1,4 +1,4 @@
-[ 'aio_defaults', 'foss_defaults', 'puppet_utils' ].each do |lib|
+[ 'aio_defaults', 'foss_defaults', 'puppet_utils', 'windows_utils' ].each do |lib|
     require "beaker/dsl/install_utils/#{lib}"
 end
 module Beaker
@@ -18,6 +18,7 @@ module Beaker
         include AIODefaults
         include FOSSDefaults
         include PuppetUtils
+        include WindowsUtils
 
         # The default install path
         SourcePath  = "/opt/puppet-git-repos"
@@ -543,24 +544,24 @@ module Beaker
               raise "Puppet #{version} at #{link} does not exist!"
             end
 
+
+            msi_download_path = "#{get_temp_path(host)}\\#{host['dist']}.msi"
+
             if host.is_cygwin?
-              dest = "#{host['dist']}.msi"
-              on host, "curl -O #{link}"
+              # NOTE: it is critical that -o be before -O on Windows
+              on host, "curl -o \"#{msi_download_path}\" -O #{link}"
 
               #Because the msi installer doesn't add Puppet to the environment path
               #Add both potential paths for simplicity
               #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
               puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
               on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
-
-              on host, "cmd /C 'start /w msiexec.exe /qn /i #{dest}'"
             else
-              dest = "C:\\Windows\\Temp\\#{host['dist']}.msi"
-
-              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{dest}')")
-
-              on host, "start /w msiexec.exe /qn /i #{dest}"
+              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{msi_download_path}')")
             end
+
+            opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+            install_msi_on(host, msi_download_path, {}, opts)
 
             configure_type_defaults_on( host )
             if not host.is_cygwin?
@@ -1092,7 +1093,8 @@ module Beaker
             when /^windows$/
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
-              on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
+              opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+              install_msi_on(host, onhost_copied_file, {}, opts)
             when /^osx$/
               host.install_package("#{mac_pkg_name}*")
             end
@@ -1191,7 +1193,8 @@ module Beaker
             when /^windows$/
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
-              on host, Command.new("start /w #{onhost_copied_file}", [], { :cmdexe => true })
+              opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+              install_msi_on(host, onhost_copied_file, {}, opts)
             when /^osx$/
               on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
               # move to better location
