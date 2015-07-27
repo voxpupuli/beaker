@@ -33,6 +33,12 @@ describe ClassMixedWithDSLInstallUtils do
     yield result if block_given?
   end
 
+  def expect_status_called(times = hosts.length)
+    expect( Beaker::Command ).to receive( :new )
+      .with( "sc query puppet || sc query pe-puppet", [], {:cmdexe => true} )
+      .exactly( times ).times
+  end
+
   def expect_script_matches(hosts, contents)
     hosts.each do |host|
       expect( host )
@@ -53,6 +59,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will not specify a PUPPET_AGENT_STARTUP_MODE by default" do
       expect_install_called
+      expect_status_called
       expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log $/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_path, {})
@@ -60,6 +67,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "allows configuration of PUPPET_AGENT_STARTUP_MODE" do
       expect_install_called
+      expect_status_called
       expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log PUPPET_AGENT_STARTUP_MODE=Automatic$/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_path, {'PUPPET_AGENT_STARTUP_MODE' => 'Automatic'})
@@ -67,6 +75,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will generate an appropriate command with a MSI file path using non-Windows slashes" do
       expect_install_called
+      expect_status_called
       msi_path = 'c:/foo/puppet.msi'
       expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log $/
       expect_script_matches(hosts, expected_cmd)
@@ -75,6 +84,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will generate an appropriate command with a MSI http(s) url" do
       expect_install_called
+      expect_status_called
       msi_url = "https://downloads.puppetlabs.com/puppet.msi"
       expected_cmd = /^start \/w msiexec\.exe \/i "https\:\/\/downloads\.puppetlabs\.com\/puppet\.msi" \/qn \/L\*V .*\.log $/
       expect_script_matches(hosts, expected_cmd)
@@ -83,6 +93,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will generate an appropriate command with a MSI file url" do
       expect_install_called
+      expect_status_called
       msi_url = "file://c:\\foo\\puppet.msi"
       expected_cmd = /^start \/w msiexec\.exe \/i "file\:\/\/c:\\foo\\puppet\.msi" \/qn \/L\*V .*\.log $/
       expect_script_matches(hosts, expected_cmd)
@@ -91,6 +102,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will not generate a command to emit a log file without the :debug option set" do
       expect_install_called
+      expect_status_called
       hosts.each { |h| allow( h ).to receive( :do_scp_to ).and_return( true ) }
       expect( Beaker::Command ).not_to receive( :new ).with( /^type .*\.log$/, [], {:cmdexe => true} )
       subject.install_msi_on(hosts, msi_path)
@@ -101,6 +113,7 @@ describe ClassMixedWithDSLInstallUtils do
       hosts_affected = 1
 
       expect_install_called(hosts_affected) { |e| e.and_raise }
+      expect_status_called(0)
       hosts.each { |h| allow( h ).to receive( :do_scp_to ).and_return( true ) }
 
       expect( Beaker::Command ).to receive( :new ).with( /^type \".*\.log\"$/, [], {:cmdexe => true} ).exactly( hosts_affected ).times
@@ -109,6 +122,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "will generate a command to emit a log file with the :debug option set" do
       expect_install_called
+      expect_status_called
       hosts.each { |h| allow( h ).to receive( :do_scp_to ).and_return( true ) }
 
       expect( Beaker::Command ).to receive( :new ).with( /^type \".*\.log\"$/, [], {:cmdexe => true} ).exactly( hosts.length ).times
