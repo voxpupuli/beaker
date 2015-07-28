@@ -33,14 +33,23 @@ module Beaker
         #
         # @param [String] base_url The base url from which to recursively download
         #                          files.
-        # @param [String] file_name The trailing name compnent of both the source url
+        # @param [String] file_name The trailing name component of both the source url
         #                           and the destination file.
         # @param [String] dst_dir The local destination directory.
+        #
+        # @note the +base_url+ param must not end with a '/' character. This has been an
+        #   issue in AWS before ({https://tickets.puppetlabs.com/browse/BKR-424 BKR-424}),
+        #   and the URL concatenation is done in this method, so it's not needed.
         #
         # @return [String] dst The name of the newly-created file.
         #
         # @!visibility private
         def fetch_http_file(base_url, file_name, dst_dir)
+          if base_url =~ /\/\z/
+            fail_message = "fetch_http_file called incorrectly:"
+            fail_message << "\n    base url '#{base_url}' should not end in a '/' character"
+            raise fail_message
+          end
           require 'open-uri'
           require 'open_uri_redirections'
           FileUtils.makedirs(dst_dir)
