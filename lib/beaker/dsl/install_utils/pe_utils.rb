@@ -394,15 +394,18 @@ module Beaker
                                                                :puppet_agent_sha => host[:puppet_agent_sha] || opts[:puppet_agent_sha],
                                                                :pe_ver => host[:pe_ver] || opts[:pe_ver],
                                                                :puppet_collection => host[:puppet_collection] || opts[:puppet_collection] })
+              # 1 since no certificate found and waitforcert disabled
               acceptable_exit_codes = [0, 1]
               acceptable_exit_codes << 2 if opts[:type] == :upgrade
               setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             elsif host['platform'] =~ /windows/
-              msi_opts = { 'PUPPET_MASTER_SERVER' => master, 'PUPPET_AGENT_CERTNAME' => host }
               opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
               msi_path = "#{host['working_dir']}\\#{host['dist']}.msi"
-              install_msi_on(host, msi_path, msi_opts, opts)
-              configure_type_defaults_on(host)
+              install_msi_on(host, msi_path, {}, opts)
+
+              # 1 since no certificate found and waitforcert disabled
+              acceptable_exit_codes = 1
+              setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             else
               # We only need answers if we're using the classic installer
               version = host['pe_ver'] || opts[:pe_ver]
