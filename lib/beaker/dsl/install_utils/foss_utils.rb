@@ -1181,7 +1181,7 @@ module Beaker
               # - we do not have install_32 set on host
               # - we do not have install_32 set globally
               arch_suffix = should_install_64bit ? '64' : '86'
-              release_path += "/windows/"
+              release_path += "/windows"
               release_file = "/puppet-agent-x#{arch_suffix}.msi"
               download_file = "puppet-agent-x#{arch_suffix}.msi"
             when /^osx$/
