@@ -5,7 +5,13 @@ module Beaker
     let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
     let(:aws) {
       # Mock out the call to load_fog_credentials
-      allow_any_instance_of( Beaker::AwsSdk ).to receive(:load_fog_credentials).and_return(fog_file_contents)
+      allow_any_instance_of( Beaker::AwsSdk ).
+        to receive(:load_fog_credentials).
+        and_return({
+          :access_key => fog_file_contents[:default][:aws_access_key_id],
+          :secret_key => fog_file_contents[:default][:aws_secret_access_key],
+        })
+
 
       # This is needed because the EC2 api looks up a local endpoints.json file
       FakeFS.deactivate!
@@ -42,6 +48,28 @@ module Beaker
       @hosts[3][:user] = "ubuntu"
       @hosts[4][:platform] = 'f5-host'
       @hosts[4][:user] = 'notroot'
+
+      ENV['AWS_ACCESS_KEY'] = nil
+      ENV['AWS_ACCESS_KEY_ID'] = nil
+    end
+
+    context 'loading credentials' do
+
+      it 'from .fog file' do
+        creds = aws.load_fog_credentials
+        expect( creds[:access_key] ).to eq("IMANACCESSKEY")
+        expect( creds[:secret_key] ).to eq("supersekritkey")
+      end
+
+
+      it 'from environment variables' do
+        ENV['AWS_ACCESS_KEY'] = "IAMANACCESSKEY"
+        ENV['AWS_ACCESS_KEY_ID'] = "supersekritkey"
+
+        creds = aws.load_credentials
+        expect( creds[:access_key] ).to eq("IMANACCESSKEY")
+        expect( creds[:secret_key] ).to eq("supersekritkey")
+      end
     end
 
     describe '#provision' do

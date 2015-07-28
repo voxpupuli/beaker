@@ -22,8 +22,8 @@ module Beaker
       @options = options
       @logger = options[:logger]
 
-      # Get fog credentials from the local .fog file
-      creds = load_fog_credentials(@options[:dot_fog])
+      # Get AWS credentials
+      creds = load_credentials()
 
       config = {
         :access_key_id => creds[:access_key],
@@ -757,6 +757,32 @@ module Beaker
       group
     end
 
+    # Return a hash containing AWS credentials
+    #
+    # @return [Hash<Symbol, String>] AWS credentials
+    # @api private
+    def load_credentials
+      return load_env_credentials unless load_env_credentials.empty?
+      load_fog_credentials(@options[:dot_fog])
+    end
+
+    # Return AWS credentials loaded from environment variables
+    #
+    # @param prefix [String] environment variable prefix
+    # @return [Hash<Symbol, String>] ec2 credentials
+    # @api private
+    def load_env_credentials(prefix='ENV')
+      provider = AWS::Core::CredentialProviders::ENVProvider.new prefix
+
+      if provider.set?
+        {
+          :access_key => provider.access_key_id,
+          :secret_key => provider.secret_access_key,
+        }
+      else
+        {}
+      end
+    end
     # Return a hash containing the fog credentials for EC2
     #
     # @param dot_fog [String] dot fog path
@@ -764,16 +790,15 @@ module Beaker
     # @api private
     def load_fog_credentials(dot_fog = '.fog')
       fog = YAML.load_file( dot_fog )
-
       default = fog[:default]
 
-      creds = {}
-      creds[:access_key] = default[:aws_access_key_id]
-      creds[:secret_key] = default[:aws_secret_access_key]
-      raise "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!" unless creds[:access_key]
-      raise "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!" unless creds[:secret_key]
+      raise "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:access_key]
+      raise "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:secret_key]
 
-      creds
+      {
+        :access_key => default[:aws_access_key_id],
+        :secret_key => default[:aws_secret_access_key],
+      }
     end
   end
 end
