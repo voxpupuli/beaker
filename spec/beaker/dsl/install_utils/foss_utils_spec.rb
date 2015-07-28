@@ -832,4 +832,37 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
   end
+
+  describe '#install_puppet_agent_pe_promoted_repo_on' do
+    let( :package_name ) { 'puppet-agent' }
+    let( :platform ) { @platform || 'other' }
+    let( :host ) do
+      FakeHost.create( 'fakvm', platform, opts )
+    end
+
+    before :each do
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+    end
+
+    def test_fetch_http_file_no_ending_slash(platform)
+      @platform = platform
+      allow( subject ).to receive( :scp_to )
+
+      expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
+      subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
+    end
+
+    context 'on windows' do
+
+      it 'calls fetch_http_file with no ending slash' do
+        test_fetch_http_file_no_ending_slash( 'windows-7-x86_64' )
+      end
+
+    end
+
+    it 'calls fetch_http_file with no ending slash' do
+      test_fetch_http_file_no_ending_slash( 'debian-5-x86_64' )
+    end
+
+  end
 end
