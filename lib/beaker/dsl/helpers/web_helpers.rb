@@ -33,7 +33,7 @@ module Beaker
         #
         # @param [String] base_url The base url from which to recursively download
         #                          files.
-        # @param [String] file_name The trailing name compnent of both the source url
+        # @param [String] file_name The trailing name component of both the source url
         #                           and the destination file.
         # @param [String] dst_dir The local destination directory.
         #
@@ -44,6 +44,7 @@ module Beaker
           require 'open-uri'
           require 'open_uri_redirections'
           FileUtils.makedirs(dst_dir)
+          base_url.chomp!('/')
           src = "#{base_url}/#{file_name}"
           dst = File.join(dst_dir, file_name)
           if File.exists?(dst)
