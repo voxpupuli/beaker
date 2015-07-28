@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 27 Jul, 2015 (15c0496b)](#LATEST)
+* [LATEST - 28 Jul, 2015 (c0553c0c)](#LATEST)
+* [2.18.2 - 27 Jul, 2015 (c84f6f23)](#2.18.2)
 * [2.18.1 - 14 Jul, 2015 (6a82f99f)](#2.18.1)
 * [2.18.0 - 13 Jul, 2015 (e018f2fc)](#2.18.0)
 * [2.17.0 - 10 Jul, 2015 (aaac4771)](#2.17.0)
@@ -89,7 +90,23 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 27 Jul, 2015 (15c0496b)
+### <a name = "LATEST">LATEST - 28 Jul, 2015 (c0553c0c)
+
+* (GEM) update beaker version to 2.18.3 (c0553c0c)
+
+* Merge pull request #908 from kevpl/bkr424_windows_doubleslash (cec8965d)
+
+
+```
+Merge pull request #908 from kevpl/bkr424_windows_doubleslash
+
+(BKR-424) eliminated extra '/' on windows download URL
+```
+* (BKR-424) eliminated extra '/' on windows download URL (6b9735e0)
+
+### <a name = "2.18.2">2.18.2 - 27 Jul, 2015 (c84f6f23)
+
+* (HISTORY) update beaker history for gem release 2.18.2 (c84f6f23)
 
 * (GEM) update beaker version to 2.18.2 (15c0496b)
 
