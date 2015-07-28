@@ -29,8 +29,18 @@ describe ClassMixedWithDSLHelpers do
 
       it "returns its second and third arguments concatenated." do
         create_files(['destdir/name'])
-        result = subject.fetch_http_file "http://beaker.tool/", "name", "destdir"
+        result = subject.fetch_http_file "http://beaker.tool", "name", "destdir"
         expect(result).to eq("destdir/name")
+      end
+
+    end
+
+    describe 'given invalid arguments' do
+
+      it 'fails correctly when given a URL ending with a / character' do
+        expect {
+          subject.fetch_http_file( "http://beaker.tool/", "name", "destdir" )
+        }.to raise_error( /fetch_http_file\ called\ incorrectly/ )
       end
 
     end
