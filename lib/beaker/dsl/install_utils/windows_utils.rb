@@ -88,7 +88,7 @@ exit /B %errorlevel%
         #                  (Defaults to production)
         #                  Requires Puppet 3.3.1 / PE 3.1.0
         # @option msi_opts [String] PUPPET_AGENT_STARTUP_MODE Whether the puppet agent service should run (or be allowed to run)
-        #                  (Defaults to Automatic - valid values are Automatic, Manual or Disabled)
+        #                  (Defaults to Manual - valid values are Automatic, Manual or Disabled)
         #                  Requires Puppet 3.4.0 / PE 3.2.0
         # @option msi_opts [String] PUPPET_AGENT_ACCOUNT_USER Whether the puppet agent service should run (or be allowed to run)
         #                  (Defaults to LocalSystem)
@@ -108,6 +108,7 @@ exit /B %errorlevel%
         # @api private
         def install_msi_on(hosts, msi_path, msi_opts = {}, opts = {})
           block_on hosts do | host |
+            msi_opts['PUPPET_AGENT_STARTUP_MODE'] ||= 'Manual'
             batch_path, log_file = create_install_msi_batch_on(host, msi_path, msi_opts)
 
             # begin / rescue here so that we can reuse existing error msg propagation

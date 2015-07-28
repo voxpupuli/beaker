@@ -57,10 +57,10 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :get_temp_path ).and_return( windows_temp )
     end
 
-    it "will not specify a PUPPET_AGENT_STARTUP_MODE by default" do
+    it "will specify a PUPPET_AGENT_STARTUP_MODE of Manual (disabling the service) by default" do
       expect_install_called
       expect_status_called
-      expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log $/
+      expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log PUPPET_AGENT_STARTUP_MODE=Manual$/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_path, {})
     end
@@ -77,7 +77,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect_install_called
       expect_status_called
       msi_path = 'c:/foo/puppet.msi'
-      expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log $/
+      expected_cmd = /^start \/w msiexec\.exe \/i "c:\\foo\\puppet.msi" \/qn \/L\*V .*\.log PUPPET_AGENT_STARTUP_MODE=Manual$/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_path)
     end
@@ -86,7 +86,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect_install_called
       expect_status_called
       msi_url = "https://downloads.puppetlabs.com/puppet.msi"
-      expected_cmd = /^start \/w msiexec\.exe \/i "https\:\/\/downloads\.puppetlabs\.com\/puppet\.msi" \/qn \/L\*V .*\.log $/
+      expected_cmd = /^start \/w msiexec\.exe \/i "https\:\/\/downloads\.puppetlabs\.com\/puppet\.msi" \/qn \/L\*V .*\.log PUPPET_AGENT_STARTUP_MODE=Manual$/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_url)
     end
@@ -95,7 +95,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect_install_called
       expect_status_called
       msi_url = "file://c:\\foo\\puppet.msi"
-      expected_cmd = /^start \/w msiexec\.exe \/i "file\:\/\/c:\\foo\\puppet\.msi" \/qn \/L\*V .*\.log $/
+      expected_cmd = /^start \/w msiexec\.exe \/i "file\:\/\/c:\\foo\\puppet\.msi" \/qn \/L\*V .*\.log PUPPET_AGENT_STARTUP_MODE=Manual$/
       expect_script_matches(hosts, expected_cmd)
       subject.install_msi_on(hosts, msi_url)
     end
