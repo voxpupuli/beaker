@@ -6,6 +6,7 @@ module Beaker
   class SshConnection
 
     attr_accessor :logger
+    attr_accessor :ip, :vmhostname, :hostname
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,
@@ -21,41 +22,65 @@ module Beaker
       IOError,
     ]
 
-    def initialize hostname, user = nil, ssh_opts = {}, options = {}
-      @hostname = hostname
+    def initialize name_hash, user = nil, ssh_opts = {}, options = {}
+      @vmhostname = name_hash[:vmhostname]
+      @ip = name_hash[:ip]
+      @hostname = name_hash[:hostname]
       @user = user
       @ssh_opts = ssh_opts
       @logger = options[:logger]
       @options = options
     end
 
-    def self.connect hostname, user = 'root', ssh_opts = {}, options = {}
-      connection = new hostname, user, ssh_opts, options
+    def self.connect name_hash, user = 'root', ssh_opts = {}, options = {}
+      connection = new name_hash, user, ssh_opts, options
       connection.connect
       connection
     end
 
+    def connect_block host, user, ssh_opts
+      try = 1
+      last_wait = 2
+      wait = 3
+      begin
+         @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
+         Net::SSH.start(host, user, ssh_opts)
+       rescue *RETRYABLE_EXCEPTIONS => e
+         if try <= 8
+           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
+           @logger.warn "Trying again in #{wait} seconds"
+           sleep wait
+          (last_wait, wait) = wait, last_wait + wait
+           try += 1
+           retry
+         else
+           @logger.warn "Failed to connect to #{host}, after #{try} attempts"
+           nil
+         end
+       end
+    end
+
     # connect to the host
     def connect
-      try = 1
-      last_wait = 0
-      wait = 1
-      @ssh ||= begin
-                 @logger.debug "Attempting ssh connection to #{@hostname}, user: #{@user}, opts: #{@ssh_opts}"
-                 Net::SSH.start(@hostname, @user, @ssh_opts)
-               rescue *RETRYABLE_EXCEPTIONS => e
-                 if try <= 11
-                   @logger.warn "Try #{try} -- Host #{@hostname} unreachable: #{e.class.name} - #{e.message}"
-                   @logger.warn "Trying again in #{wait} seconds"
-                   sleep wait
-                  (last_wait, wait) = wait, last_wait + wait
-                   try += 1
-                   retry
-                 else
-                   @logger.error "Failed to connect to #{@hostname}"
-                   raise
-                 end
-               end
+      #try three ways to connect to host (ip, vmhostname, hostname)
+      methods = []
+      if @ip
+        @ssh ||= connect_block(@ip, @user, @ssh_opts)
+        methods << "ip (#{@ip})"
+      end
+      if @vmhostname && !@ssh
+        @ssh ||= connect_block(@vmhostname, @user, @ssh_opts)
+        methods << "vmhostname (#{@vmhostname})"
+      end
+      if @hostname && !@ssh
+        @ssh ||= connect_block(@hostname, @user, @ssh_opts)
+        methods << "hostname (#{@hostname})"
+      end
+      if not @ssh
+        @logger.error "Failed to connect to #{@hostname}, attempted #{methods.join(', ')}"
+        raise RuntimeError, "Cannot connect to #{@hostname}"
+      end
+      @ssh
     end
 
     # closes this SshConnection

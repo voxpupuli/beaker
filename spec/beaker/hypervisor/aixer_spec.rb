@@ -16,7 +16,7 @@ module Beaker
         expect( Command ).to receive( :new ).with( "cd pe-aix && rake restore:#{host.name}" ).once
 
       end
-
+      allow_any_instance_of(Host).to receive(:close)
       aixer.provision
 
     end

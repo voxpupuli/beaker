@@ -214,8 +214,9 @@ module Beaker
     end
 
     #Return the ip address of this host
+    #Always pull fresh, because this can sometimes change
     def ip
-      self[:ip] ||= get_ip
+      self['ip'] = get_ip
     end
 
     #@return [Boolean] true if x86_64, false otherwise
@@ -224,13 +225,29 @@ module Beaker
     end
 
     def connection
-      @connection ||= SshConnection.connect( reachable_name,
+      # create new connection object if necessary
+      @connection ||= SshConnection.connect( { :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
                                              self['user'],
                                              self['ssh'], { :logger => @logger } )
+      # update connection information
+      if self['ip'] && (@connection.ip != self['ip'])
+        @connection.ip = self['ip']
+      end
+      if self['vmhostname'] && (@connection.vmhostname != self['vmhostname'])
+        @connection.vmhostname = self['vmhostname']
+      end
+      if @name && (@connection.hostname != @name)
+        @connection.hostname = @name
+      end
+      @connection
     end
 
     def close
       @connection.close if @connection
+      # update connection information
+      @connection.ip = self['ip'] if self['ip']
+      @connection.vmhostname = self['vmhostname'] if self['vmhostname']
+      @connection.hostname = @name
       @connection = nil
     end
 
