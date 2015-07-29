@@ -60,6 +60,7 @@ module Beaker
         #     running the command.
 
         #Sort array of hosts so that it has the correct order for PE installation based upon each host's role
+        #@param subset [Array<Host>] An array of hosts to sort, defaults to global 'hosts' object
         # @example
         #  h = sorted_hosts
         #
@@ -70,12 +71,13 @@ module Beaker
         #        Fourth: everything else
         #
         # @!visibility private
-        def sorted_hosts
+        def sorted_hosts subset = hosts
           special_nodes = []
           [master, database, dashboard].uniq.each do |host|
-            special_nodes << host if host != nil
+            special_nodes << host if host != nil && subset.include?(host)
           end
           real_agents = agents - special_nodes
+          real_agents = real_agents.delete_if{ |host| !subset.include?(host) }
           special_nodes + real_agents
         end
 
@@ -551,8 +553,7 @@ module Beaker
 
         #Install PE based upon host configuration and options
         #
-        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Host, Array<Host>] install_hosts    One or more hosts to act upon
         # @!macro common_opts
         # @option opts [Boolean] :masterless Are we performing a masterless installation?
         # @option opts [String] :puppet_agent_version  Version of puppet-agent to install. Required for PE agent
@@ -569,10 +570,10 @@ module Beaker
         #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
         #
-        def install_pe_on(hosts, opts)
-          #process the version files if necessary
-          confine_block(:to, {}, hosts) do
+        def install_pe_on(install_hosts, opts)
+          confine_block(:to, {}, install_hosts) do
             sorted_hosts.each do |host|
+              #process the version files if necessary
               host['pe_dir'] ||= opts[:pe_dir]
               if host['platform'] =~ /windows/
                 # we don't need the pe_version if:
@@ -598,8 +599,7 @@ module Beaker
         end
 
         #Upgrade PE based upon host configuration and options
-        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Host, Array<Host>]  upgrade_hosts   One or more hosts to act upon
         # @!macro common_opts
         # @param [String] path A path (either local directory or a URL to a listing of PE builds).
         #                      Will contain a LATEST file indicating the latest build to install.
@@ -610,8 +610,8 @@ module Beaker
         #
         # @note Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
-        def upgrade_pe_on hosts, opts, path=nil
-          confine_block(:to, {}, hosts) do
+        def upgrade_pe_on upgrade_hosts, opts, path=nil
+          confine_block(:to, {}, upgrade_hosts) do
             set_console_password = false
             # if we are upgrading from something lower than 3.4 then we need to set the pe console password
             if (dashboard[:pe_ver] ? version_is_less(dashboard[:pe_ver], "3.4.0") : true)
