@@ -86,6 +86,7 @@ module HostHelpers
     host = Beaker::Host.create( name, host_hash, make_opts)
 
     allow(host).to receive( :exec ).and_return( generate_result( name, host_hash ) )
+    allow(host).to receive( :close )
     host
   end
 

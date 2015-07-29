@@ -22,6 +22,7 @@ module Beaker
         expect( Command ).to receive( :new ).with("sudo /sbin/zfs rollback -Rf #{vmpath}/#{vm_name}/#{spath}@#{snapshot}").once
         expect( Command ).to receive( :new ).with("sudo /sbin/zoneadm -z #{vm_name} boot").once
       end
+      allow_any_instance_of(Host).to receive(:close)
 
       solaris.provision
     end
