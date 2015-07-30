@@ -7,8 +7,8 @@ module TestFileHelpers
   end
 
   def fog_file_contents
-    { :default => { :aws_access_key_id => "IMANACCESSKEY",
-                    :aws_secret_access_key => "supersekritkey",
+    { :default => { :access_key => "IMANACCESSKEY",
+                    :secret_access => "supersekritkey",
                     :aix_hypervisor_server => "aix_hypervisor.labs.net",
                     :aix_hypervisor_username => "aixer",
                     :aix_hypervisor_keyfile => "/Users/user/.ssh/id_rsa-acceptance",
@@ -27,10 +27,11 @@ end
 module HostHelpers
   HOST_DEFAULTS = { :platform => 'unix',
                     :snapshot => 'pe',
-                    :box => 'box_name',
                     :roles => ['agent'],
                     :snapshot => 'snap',
                     :ip => 'default.ip.address',
+                    :private_ip => 'private.ip.address',
+                    :dns_name => 'default.box.tld',
                     :box => 'default_box_name',
                     :box_url => 'http://default.box.url',
   }
@@ -40,7 +41,9 @@ module HostHelpers
   HOST_IP       = "ip.address.for.%s"
   HOST_BOX      = "%s_of_my_box"
   HOST_BOX_URL  = "http://address.for.my.box.%s"
+  HOST_DNS_NAME = "%s.box.tld"
   HOST_TEMPLATE = "%s_has_a_template"
+  HOST_PRIVATE_IP = "private.ip.for.%s"
 
   def logger
     double( 'logger' ).as_null_object
@@ -92,6 +95,8 @@ module HostHelpers
       name = HOST_NAME % num
       opts = { :snapshot => HOST_SNAPSHOT % num,
                :ip => HOST_IP % name,
+               :private_ip => HOST_PRIVATE_IP % name,
+               :dns_name => HOST_DNS_NAME % name,
                :template => HOST_TEMPLATE % name,
                :box => HOST_BOX % name,
                :box_url => HOST_BOX_URL % name }.merge( preset_opts )

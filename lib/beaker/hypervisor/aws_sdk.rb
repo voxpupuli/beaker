@@ -127,7 +127,7 @@ module Beaker
 
     # Return all instances currently on ec2.
     # @see AwsSdk#instance_by_id
-    # @return [Array<AWS::EC2::Instance>] An array of AWS::EC2 instance objects
+    # @return [AWS::EC2::InstanceCollection] An array of AWS::EC2 instance objects
     def instances
       @ec2.instances
     end
@@ -142,7 +142,7 @@ module Beaker
 
     # Return all VPCs currently on ec2.
     # @see AwsSdk#vpc_by_id
-    # @return [Array<AWS::EC2::VPC>] An array of AWS::EC2 vpc objects
+    # @return [AWS::EC2::VPCCollection] An array of AWS::EC2 vpc objects
     def vpcs
       @ec2.vpcs
     end
@@ -157,7 +157,7 @@ module Beaker
 
     # Return all security groups currently on ec2.
     # @see AwsSdk#security_goup_by_id
-    # @return [Array<AWS::EC2::SecurityGroup>] An array of AWS::EC2 security group objects
+    # @return [AWS::EC2::SecurityGroupCollection] An array of AWS::EC2 security group objects
     def security_groups
       @ec2.security_groups
     end
@@ -224,7 +224,7 @@ module Beaker
 
     # Create an EC2 instance for host, tag it, and return it.
     #
-    # @return [AWS::EC2::Instance)]
+    # @return [void]
     # @api private
     def create_instance(host, ami_spec, subnet_id)
       amitype = host['vmname'] || host['platform']
@@ -489,28 +489,32 @@ module Beaker
       nil
     end
 
+    # Return a valid /etc/hosts line for a given host
+    #
+    # @param [Beaker::Host] host Beaker::Host object for generating /etc/hosts entry
+    # @param [Symbol] interface Symbol identifies which ip should be used for host
+    # @return [String] formatted hosts entry for host
+    # @api private
+    def etc_hosts_entry(host, interface = :ip)
+      name = host.name
+      domain = get_domain_name(host)
+      ip = host[interface.to_s]
+      "#{ip}\t#{name} #{name}.#{domain} #{host['dns_name']}\n"
+    end
+
     # Configure /etc/hosts for each node
     #
     # @return [void]
     # @api private
     def configure_hosts
       @hosts.each do |host|
-        etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
-        name = host.name
-        domain = get_domain_name(host)
-        ip = host['private_ip']
-        etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{host['dns_name']}\n"
-        @hosts.each do |neighbor|
-          if neighbor == host
-            next
-          end
-          name = neighbor.name
-          domain = get_domain_name(neighbor)
-          ip = neighbor['ip']
-          etc_hosts += "#{ip}\t#{name} #{name}.#{domain} #{neighbor['dns_name']}\n"
+        host_entries = @hosts.map do |h|
+          h == host ? etc_hosts_entry(h, :private_ip) : etc_hosts_entry(h)
         end
-        set_etc_hosts(host, etc_hosts)
+        host_entries.unshift "127.0.0.1\tlocalhost localhost.localdomain\n"
+        set_etc_hosts(host, host_entries.join(''))
       end
+      nil
     end
 
     # Enables root for instances with custom username like ubuntu-amis
