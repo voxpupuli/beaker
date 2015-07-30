@@ -143,7 +143,8 @@ EOF
     it "can generate a new /etc/hosts file referencing each host" do
 
       @hosts.each do |host|
-        expect( vagrant ).to receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1\nip.address.for.vm2\tvm2\nip.address.for.vm3\tvm3\n" ).once
+        expect( vagrant ).to receive( :get_domain_name ).with( host ).and_return( 'labs.lan' )
+        expect( vagrant ).to receive( :set_etc_hosts ).with( host, "127.0.0.1\tlocalhost localhost.localdomain\nip.address.for.vm1\tvm1.labs.lan vm1\nip.address.for.vm2\tvm2.labs.lan vm2\nip.address.for.vm3\tvm3.labs.lan vm3\n" ).once
       end
 
       vagrant.hack_etc_hosts( @hosts, options )
