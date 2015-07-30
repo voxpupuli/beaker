@@ -178,7 +178,6 @@ module Beaker
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,
-                                     :timeout               => 300,
                                      :auth_methods          => ["publickey"],
                                      :port                  => 22,
                                      :forward_agent         => true,
