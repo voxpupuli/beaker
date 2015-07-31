@@ -529,6 +529,62 @@ describe ClassMixedWithDSLInstallUtils do
       subject.do_install( hosts, opts )
     end
 
+    it 'sets puppet-agent acceptable_exit_codes correctly for config helper on upgrade' do
+      hosts = make_hosts({
+                           :pe_ver => '4.0',
+                           :roles => ['agent'],
+                         }, 2)
+      hosts[0][:roles] = ['master', 'database', 'dashboard']
+      hosts[1][:platform] = Beaker::Platform.new('el-6-x86_64')
+
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :options ).and_return(Beaker::Options::Presets.new.presets)
+      allow( subject ).to receive( :on ).and_return( Beaker::Result.new( {}, '' ) )
+      allow( subject ).to receive( :fetch_pe ).and_return( true )
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      allow( subject ).to receive( :sign_certificate_for ).and_return( true )
+      allow( subject ).to receive( :stop_agent_on ).and_return( true )
+      allow( subject ).to receive( :sleep_until_puppetdb_started ).and_return( true )
+      allow( subject ).to receive( :max_version ).with(anything, '3.8').and_return('4.0')
+      allow( subject ).to receive( :version_is_less ).with('4.0', '4.0').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.4').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.0').and_return( false )
+      allow( subject ).to receive( :version_is_less ).with('3.99', '4.0').and_return( true )
+      allow( subject ).to receive( :version_is_less ).with('3.8', '4.0').and_return( true )
+      # pe_ver is only set on the hosts for this test, not the opt
+      allow( subject ).to receive( :version_is_less ).with('4.0', '3.99').and_return( true )
+      allow( subject ).to receive( :wait_for_host_in_dashboard ).and_return( true )
+      allow( subject ).to receive( :puppet_agent ) do |arg|
+        "puppet agent #{arg}"
+      end
+      allow( subject ).to receive( :puppet ) do |arg|
+        "puppet #{arg}"
+      end
+
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      #create answers file per-host, except windows
+      allow( subject ).to receive( :create_remote_file ).with( hosts[0], /answers/, /q/ )
+      #run installer on all hosts
+      allow( subject ).to receive( :on ).with( hosts[0], /puppet-enterprise-installer/ )
+      allow( subject ).to receive( :install_puppet_agent_pe_promoted_repo_on ).with( hosts[1],
+                                                                                      {:puppet_agent_version=>nil, :puppet_agent_sha=>nil, :pe_ver=>hosts[1][:pe_ver], :puppet_collection=>nil} )
+      # expect( subject ).to receive( :on ).with( hosts[2], /puppet-enterprise-installer/ ).once
+      hosts.each do |host|
+        allow( subject ).to receive( :add_pe_defaults_on ).with( host ) unless subject.aio_version?(host)
+        allow( subject ).to receive( :sign_certificate_for ).with( host )
+        allow( subject ).to receive( :stop_agent_on ).with( host )
+        allow( subject ).to receive( :on ).with( host, /puppet agent -t/, :acceptable_exit_codes => [0,2] )
+      end
+      #wait for puppetdb to start
+      allow( subject ).to receive( :sleep_until_puppetdb_started ).with( hosts[0] ) #wait for all hosts to appear in the dashboard
+      #run puppet agent now that installation is complete
+      allow( subject ).to receive( :on ).with( hosts, /puppet agent/, :acceptable_exit_codes => [0,2] )
+
+      opts[:type] = :upgrade
+      expect( subject ).to receive( :setup_defaults_and_config_helper_on ).with( hosts[1], hosts[0], [0, 1, 2] )
+      subject.do_install( hosts, opts )
+    end
+
   end
 
   describe 'do_higgs_install' do
