@@ -421,7 +421,9 @@ module Beaker
                                                                :puppet_agent_sha => host[:puppet_agent_sha] || opts[:puppet_agent_sha],
                                                                :pe_ver => host[:pe_ver] || opts[:pe_ver],
                                                                :puppet_collection => host[:puppet_collection] || opts[:puppet_collection] })
-              setup_defaults_and_config_helper_on(host, master, [0, 1])
+              acceptable_exit_codes = [0, 1]
+              acceptable_exit_codes << 2 if opts[:type] == :upgrade
+              setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
               configure_pe_defaults_on(host)
