@@ -194,6 +194,10 @@ module Beaker
         http = Net::HTTP.new( uri.host, uri.port )
         request = Net::HTTP::Delete.new(uri.request_uri)
 
+        if @credentials[:vmpooler_token]
+          request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+        end
+
         begin
           response = http.request(request)
         rescue *SSH_EXCEPTIONS => e
