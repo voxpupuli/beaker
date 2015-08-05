@@ -243,6 +243,9 @@ module Beaker
         host.instance_variable_set :@logger, logger
         conn = double(:connection)
         allow( conn ).to receive(:execute).and_return(result)
+        allow( conn ).to receive(:ip).and_return(host['ip'])
+        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow( conn ).to receive(:hostname).and_return(host.name)
         host.instance_variable_set :@connection, conn
       end
 
@@ -399,6 +402,9 @@ module Beaker
 
         expect( logger ).to receive(:trace)
         expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+        allow( conn ).to receive(:ip).and_return(host['ip'])
+        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow( conn ).to receive(:hostname).and_return(host.name)
 
         host.do_scp_to *args
       end
@@ -466,6 +472,9 @@ module Beaker
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
+          allow( conn ).to receive(:ip).and_return(host['ip'])
+          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow( conn ).to receive(:hostname).and_return(host.name)
 
           host.do_scp_to *args
         end
@@ -527,6 +536,9 @@ module Beaker
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
+          allow( conn ).to receive(:ip).and_return(host['ip'])
+          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow( conn ).to receive(:hostname).and_return(host.name)
 
           host.do_scp_to *args
         end
@@ -555,6 +567,9 @@ module Beaker
             expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
           end
 
+          allow( conn ).to receive(:ip).and_return(host['ip'])
+          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow( conn ).to receive(:hostname).and_return(host.name)
           host.do_scp_to *args
         end
       end
@@ -572,6 +587,9 @@ module Beaker
         expect( logger ).to receive(:debug)
         expect( conn ).to receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
 
+        allow( conn ).to receive(:ip).and_return(host['ip'])
+        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow( conn ).to receive(:hostname).and_return(host.name)
         host.do_scp_from *args
       end
     end
