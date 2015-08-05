@@ -33,8 +33,6 @@ module Beaker
           :pe
         when /foss/
           :foss
-        when /aio/
-          :aio
         else
           :foss
         end

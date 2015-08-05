@@ -70,4 +70,61 @@ describe ClassMixedWithDSLInstallUtils do
       subject.configure_defaults_on(hosts, 'foss')
     end
   end
+
+  describe "#configure_type_defaults_on" do
+
+    it "can set foss defaults for foss type" do
+      hosts.each do |host|
+        host['type'] = 'foss'
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+    it "adds aio defaults to foss hosts when they have an aio foss puppet version" do
+      hosts.each do |host|
+        host['type'] = 'foss'
+        host['version'] = '4.0'
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+    it "adds aio defaults to foss hosts when they have type foss-aio" do
+      hosts.each do |host|
+        host['type'] = 'foss-aio'
+      end
+      expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+    it "can set aio defaults for aio type (backwards compatability)" do
+      hosts.each do |host|
+        host['type'] = 'aio'
+      end
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+    it "can set pe defaults for pe type" do
+      hosts.each do |host|
+        host['type'] = 'pe'
+      end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+    it "adds aio defaults to pe hosts when they an aio pe version" do
+      hosts.each do |host|
+        host['type'] = 'pe'
+        host['pe_ver'] = '4.0'
+      end
+      expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
+      expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
+      subject.configure_type_defaults_on(hosts)
+    end
+
+  end
 end

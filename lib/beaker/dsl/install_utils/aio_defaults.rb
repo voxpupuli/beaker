@@ -36,7 +36,6 @@ module Beaker
           else
             host['group'] = 'puppet'
           end
-          host['type'] = 'aio'
         end
 
         # Add the appropriate aio defaults to an array of hosts
@@ -60,7 +59,6 @@ module Beaker
           AIO_DEFAULTS[platform].each_pair do |key, val|
             host.delete(key)
           end
-          host['type'] = nil
           host['group'] = nil
         end
 

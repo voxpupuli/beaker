@@ -28,11 +28,6 @@ module Beaker
           expect(newhash.get_type).to be === :foss
         end
 
-        it 'returns aio as expected in the normal case' do
-          newhash = options.merge({:type => 'aio'})
-          expect(newhash.get_type).to be === :aio
-        end
-
         it 'returns foss as the default' do
           newhash = options.merge({:type => 'git'})
           expect(newhash.get_type).to be === :foss

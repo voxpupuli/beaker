@@ -20,26 +20,6 @@ module Beaker
         include PEDefaults
         include PuppetUtils
 
-        # Set defaults and PATH for these hosts to be either pe or aio, have host['type'] == aio for aio settings, defaults
-        # to pe.
-        #
-        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
-        def configure_pe_defaults_on( hosts )
-          block_on hosts do |host|
-            if host[:pe_ver] && aio_version?(host) or (host['type'] && host['type'] =~ /aio/)
-              add_aio_defaults_on(host)
-              # provide a sane default here for puppetservice
-              host['puppetservice'] ||= 'pe-puppetserver'
-            else
-              add_pe_defaults_on(host)
-            end
-            # add pathing env
-            add_puppet_paths_on(host)
-          end
-        end
-
-
         # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
         #   @option opts [Boolean] :silent (false) Do not produce log output
@@ -427,7 +407,7 @@ module Beaker
               setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             elsif host['platform'] =~ /windows/
               on host, installer_cmd(host, opts)
-              configure_pe_defaults_on(host)
+              configure_type_defaults_on(host)
               if not host.is_cygwin?
                 # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
                 host.close
@@ -442,7 +422,7 @@ module Beaker
                   deploy_frictionless_to_master(host)
                 end
                 on host, installer_cmd(host, opts)
-                configure_pe_defaults_on(host)
+                configure_type_defaults_on(host)
               elsif host['platform'] =~ /osx|eos/
                 # If we're not frictionless, we need to run the OSX special-case
                 on host, installer_cmd(host, opts)
@@ -452,7 +432,7 @@ module Beaker
                 answers = BeakerAnswers::Answers.create(opts[:pe_ver] || host['pe_ver'], hosts, opts)
                 create_remote_file host, "#{host['working_dir']}/answers", answers.answer_string(host)
                 on host, installer_cmd(host, opts)
-                configure_pe_defaults_on(host)
+                configure_type_defaults_on(host)
               end
             end
 
@@ -540,7 +520,7 @@ module Beaker
         # @return nil
         # @api private
         def setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes=nil)
-          configure_pe_defaults_on(host)
+          configure_type_defaults_on(host)
           #set the certname and master
           on host, puppet("config set server #{master}")
           on host, puppet("config set certname #{host}")
