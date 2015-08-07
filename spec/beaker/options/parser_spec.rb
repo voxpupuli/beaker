@@ -402,6 +402,25 @@ module Beaker
           expect( options[:tag_excludes] ).to be === ['leet_speak', 'poland']
         end
       end
+
+      describe '#resolve_symlinks' do
+        let ( :options )  { Beaker::Options::OptionsHash.new }
+
+        it 'calls File.realpath if hosts_file is set' do
+          options[:hosts_file] = opts_path
+          parser.instance_variable_set(:@options, options)
+
+          parser.resolve_symlinks()
+          expect( parser.instance_variable_get(:@options)[:hosts_file] ).to be === opts_path
+        end
+
+        it 'does not throw an error if hosts_file is not set' do
+          options[:hosts_file] = nil
+          parser.instance_variable_set(:@options, options)
+
+          expect{ parser.resolve_symlinks() }.to_not raise_error
+        end
+      end
     end
   end
 end

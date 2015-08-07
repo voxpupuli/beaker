@@ -328,6 +328,7 @@ module Beaker
         end
 
         normalize_and_validate_tags()
+        resolve_symlinks()
 
         #set the default role
         set_default_host!(@options[:HOSTS])
@@ -363,6 +364,17 @@ module Beaker
               if included_tag == excluded_tag
           end
         end
+      end
+
+      # resolves all file symlinks that require it.
+      #
+      # @note doing it here allows us to not need duplicate logic, which we
+      #   would need if we were doing it in the parser (--hosts & --config)
+      #
+      # @return nil
+      # @api public
+      def resolve_symlinks()
+        @options[:hosts_file] = File.realpath(@options[:hosts_file]) if @options[:hosts_file]
       end
 
       private
