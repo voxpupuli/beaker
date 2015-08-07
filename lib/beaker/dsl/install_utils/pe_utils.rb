@@ -1,4 +1,4 @@
-[ 'aio_defaults', 'pe_defaults', 'puppet_utils' ].each do |lib|
+[ 'aio_defaults', 'pe_defaults', 'puppet_utils', 'windows_utils' ].each do |lib|
     require "beaker/dsl/install_utils/#{lib}"
 end
 require "beaker-answers"
@@ -19,6 +19,7 @@ module Beaker
         include AIODefaults
         include PEDefaults
         include PuppetUtils
+        include WindowsUtils
 
         # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -66,8 +67,6 @@ module Beaker
         # @param [Host] host The host that PE is to be installed on
         #                    For UNIX machines using the full PE installer, the host object must have the 'pe_installer' field set correctly.
         # @param [Hash{Symbol=>String}] opts The options
-        # @option opts [String] :pe_ver_win Default PE version to install or upgrade to on Windows hosts
-        #                          (Othersie uses individual Windows hosts pe_ver)
         # @option opts [String]  :pe_ver Default PE version to install or upgrade to
         #                          (Otherwise uses individual hosts pe_ver)
         # @option opts [Boolean] :pe_debug (false) Should we run the installer in debug mode?
@@ -76,16 +75,9 @@ module Beaker
         # @api private
         def installer_cmd(host, opts)
           version = host['pe_ver'] || opts[:pe_ver]
-          if host['platform'] =~ /windows/
-            log_file = "#{File.basename(host['working_dir'])}.log"
-            # cat may not be available with strictly Windows environments
-            # Prefer `type` as an alternative to `cat` if non-cygwin
-            win_cat = host.is_cygwin? ? "cat" : "type"
-            pe_debug = host[:pe_debug] || opts[:pe_debug] ? " && #{win_cat} #{log_file}" : ''
-            "cd #{host['working_dir']} && cmd /C 'start /w msiexec.exe /qn /L*V #{log_file} /i #{host['dist']}.msi PUPPET_MASTER_SERVER=#{master} PUPPET_AGENT_CERTNAME=#{host}'#{pe_debug}"
           # Frictionless install didn't exist pre-3.2.0, so in that case we fall
           # through and do a regular install.
-          elsif host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
+          if host['roles'].include? 'frictionless' and ! version_is_less(version, '3.2.0')
             # PE 3.4 introduced the ability to pass in config options to the bash script in the form
             # of <section>:<key>=<value>
             frictionless_install_opts = []
@@ -402,16 +394,18 @@ module Beaker
                                                                :puppet_agent_sha => host[:puppet_agent_sha] || opts[:puppet_agent_sha],
                                                                :pe_ver => host[:pe_ver] || opts[:pe_ver],
                                                                :puppet_collection => host[:puppet_collection] || opts[:puppet_collection] })
+              # 1 since no certificate found and waitforcert disabled
               acceptable_exit_codes = [0, 1]
               acceptable_exit_codes << 2 if opts[:type] == :upgrade
               setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             elsif host['platform'] =~ /windows/
-              on host, installer_cmd(host, opts)
-              configure_type_defaults_on(host)
-              if not host.is_cygwin?
-                # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
-                host.close
-              end
+              opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+              msi_path = "#{host['working_dir']}\\#{host['dist']}.msi"
+              install_msi_on(host, msi_path, {}, opts)
+
+              # 1 since no certificate found and waitforcert disabled
+              acceptable_exit_codes = 1
+              setup_defaults_and_config_helper_on(host, master, acceptable_exit_codes)
             else
               # We only need answers if we're using the classic installer
               version = host['pe_ver'] || opts[:pe_ver]
