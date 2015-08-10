@@ -1,4 +1,5 @@
 test_name 'confirm packages on hosts behave correctly'
+confine :except, :platform => %w(osx)
 
 def get_host_pkg(host)
   case

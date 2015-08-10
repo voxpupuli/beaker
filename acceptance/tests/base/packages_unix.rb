@@ -1,5 +1,5 @@
 test_name 'confirm unix-specific package methods work'
-confine :except, :platform => %w(windows solaris)
+confine :except, :platform => %w(windows solaris osx)
 
 current_dir  = File.dirname(__FILE__)
 pkg_fixtures = File.expand_path(File.join(current_dir, '../../fixtures/package'))
