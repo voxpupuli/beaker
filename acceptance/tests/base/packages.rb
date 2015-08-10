@@ -27,7 +27,7 @@ end
 step '#check_for_command : can determine where a command exists'
 hosts.each do |host|
   logger.debug "echo package should be installed on #{host}"
-  assert_equal(true, host.check_for_command('echo'), "'echo' should be a command")
+  assert(host.check_for_command('echo'), "'echo' should be a command")
   logger.debug("doesnotexist package should not be installed on #{host}")
   assert_equal(false, host.check_for_command('doesnotexist'), '"doesnotexist" should not be a command')
 end
@@ -37,7 +37,7 @@ hosts.each do |host|
   package = get_host_pkg(host)[0]
 
   logger.debug "#{package} package should be installed on #{host}"
-  assert_equal(true, host.check_for_package(package), "'#{package}' should be installed")
+  assert(host.check_for_package(package), "'#{package}' should be installed")
   logger.debug("doesnotexist package should not be installed on #{host}")
   assert_equal(false, host.check_for_package('doesnotexist'), '"doesnotexist" should not be installed')
 end
@@ -48,16 +48,26 @@ hosts.each do |host|
   # a lot of dependencies.
   package = 'zsh'
 
-  assert_equal(false, host.check_for_package(package), "'#{package}' should be installed")
+  if host['platform'] =~ /solaris/
+    logger.debug("#{package} should be uninstalled on #{host}")
+    host.uninstall_package(package)
+    assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
+  end
+
+  assert_equal(false, host.check_for_package(package), "'#{package}' not should be installed")
   logger.debug("#{package} should be installed on #{host}")
   host.install_package(package)
-  assert_equal(true, host.check_for_package(package), "'#{package}' should be installed")
+  assert(host.check_for_package(package), "'#{package}' should be installed")
 
   # windows does not support uninstall_package
   unless host['platform'] =~ /windows/
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
-    assert_equal(false, host.check_for_package(package), "'#{package}' should be installed")
+    if host['platform'] =~ /debian/
+      assert_equal(false, host.check_for_command(package), "'#{package}' should not be installed or available")
+    else
+      assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
+    end
   end
 
 end

@@ -24,7 +24,7 @@ hosts.each do |host|
 
     clean_file(host, pkg_file)
     host.deploy_apt_repo(pkg_fixtures, 'puppetserver', 'latest')
-    assert_equal(true, host.file_exist?(pkg_file), 'apt file should exist')
+    assert(host.file_exist?(pkg_file), 'apt file should exist')
     clean_file(host, pkg_file)
   end
 
@@ -38,7 +38,7 @@ hosts.each do |host|
 
     clean_file(host, pkg_file)
     host.deploy_yum_repo(pkg_fixtures, pkg_name, 'latest')
-    assert_equal(true, host.file_exist?(pkg_file), 'yum file should exist')
+    assert(host.file_exist?(pkg_file), 'yum file should exist')
     clean_file(host, pkg_file)
   end
 
