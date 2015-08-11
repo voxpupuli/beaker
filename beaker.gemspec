@@ -49,6 +49,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'aws-sdk', '~> 1.57'
   s.add_runtime_dependency 'docker-api'
   s.add_runtime_dependency 'fog', '~> 1.25'
+  s.add_runtime_dependency 'ruby-lxc'
 
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
