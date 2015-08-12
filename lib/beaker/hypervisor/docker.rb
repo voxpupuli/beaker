@@ -176,6 +176,13 @@ module Beaker
           RUN apt-get update
           RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
         EOF
+      when /fedora-22/
+        dockerfile += <<-EOF
+          RUN dnf clean all
+          RUN dnf install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
+          RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+          RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+        EOF
       when /^el-/, /centos/, /fedora/, /redhat/, /eos/
         dockerfile += <<-EOF
           RUN yum clean all

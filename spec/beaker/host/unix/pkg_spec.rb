@@ -122,9 +122,29 @@ module Beaker
         expect{ instance.check_for_package(pkg) }.to raise_error
 
       end
-       
-     end
- 
-   end
- end
- 
+
+    end
+
+    context "install_package" do
+
+      it "uses yum on fedora-20" do
+        @opts = {'platform' => 'fedora-20-is-me'}
+        pkg = 'fedora_package'
+        expect( Beaker::Command ).to receive(:new).with("yum -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package(pkg) ).to be == "hello"
+      end
+
+      it "uses dnf on fedora-22" do
+        @opts = {'platform' => 'fedora-22-is-me'}
+        pkg = 'fedora_package'
+        expect( Beaker::Command ).to receive(:new).with("dnf -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package(pkg) ).to be == "hello"
+      end
+
+    end
+
+  end
+end
+

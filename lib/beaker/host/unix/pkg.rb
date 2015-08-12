@@ -65,6 +65,11 @@ module Unix::Pkg
         execute("zypper --non-interactive in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
+      when /fedora-22/
+        if version
+          name = "#{name}-#{version}"
+        end
+        execute("dnf -y #{cmdline_args} install #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         if version
           name = "#{name}-#{version}"
@@ -121,6 +126,8 @@ module Unix::Pkg
         execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
+      when /fedora-22/
+        execute("dnf -y #{cmdline_args} remove #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
       when /ubuntu|debian|cumulus/
@@ -145,6 +152,8 @@ module Unix::Pkg
         execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
+      when /fedora-22/
+        execute("dnf -y #{cmdline_args} update #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}", opts)
       when /ubuntu|debian|cumulus/
