@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 28 Jul, 2015 (c0553c0c)](#LATEST)
+* [LATEST - 13 Aug, 2015 (821aefba)](#LATEST)
+* [2.18.3 - 28 Jul, 2015 (d9a02474)](#2.18.3)
 * [2.18.2 - 27 Jul, 2015 (c84f6f23)](#2.18.2)
 * [2.18.1 - 14 Jul, 2015 (6a82f99f)](#2.18.1)
 * [2.18.0 - 13 Jul, 2015 (e018f2fc)](#2.18.0)
@@ -90,7 +91,443 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 28 Jul, 2015 (c0553c0c)
+### <a name = "LATEST">LATEST - 13 Aug, 2015 (821aefba)
+
+* (GEM) update beaker version to 2.19.0 (821aefba)
+
+* Merge pull request #918 from johnduarte/dnf_fed22 (d9a52536)
+
+
+```
+Merge pull request #918 from johnduarte/dnf_fed22
+
+(BKR-439) Add DNF for fedora-22
+```
+* (BKR-439) Add DNF for fedora-22 (f13a1e3c)
+
+
+```
+(BKR-439) Add DNF for fedora-22
+
+This commit adds a case condition for fedora-22 to use the 'dnf'
+command where the 'yum' command would previously have been executed.
+```
+* Merge pull request #917 from kevpl/bkr346_hostspreserved_multiple (fbeaf7fc)
+
+
+```
+Merge pull request #917 from kevpl/bkr346_hostspreserved_multiple
+
+(BKR-346) fixed repeat hosts_preserved issue
+```
+* Merge pull request #868 from er0ck/improvement/master/BKR-366-merge_up_install_from_git_changes_from_deployer_puppet (0029295b)
+
+
+```
+Merge pull request #868 from er0ck/improvement/master/BKR-366-merge_up_install_from_git_changes_from_deployer_puppet
+
+(BKR-366) merge-up install_from_git changes from deployer and puppet
+```
+* Merge pull request #906 from Iristyle/ticket/master/BKR-421-refactor-msi-installation (d7ae5ea7)
+
+
+```
+Merge pull request #906 from Iristyle/ticket/master/BKR-421-refactor-msi-installation
+
+(BKR-421) Refactor MSI installation
+```
+* (BKR-346) fixed repeat hosts_preserved issue (c2f713cc)
+
+* Merge pull request #916 from sschneid/use_token_during_cleanup (8b500667)
+
+
+```
+Merge pull request #916 from sschneid/use_token_during_cleanup
+
+(maint) Supply token (if exists) during VM cleanup
+```
+* Merge pull request #902 from anodelman/type (4737c014)
+
+
+```
+Merge pull request #902 from anodelman/type
+
+(BKR-412) clarify 'types' in beaker
+```
+* Merge pull request #914 from anodelman/answers (4d462c12)
+
+
+```
+Merge pull request #914 from anodelman/answers
+
+(BKR-340) separate answer file generation into a library
+```
+* Merge pull request #911 from anodelman/deb7 (b573ed80)
+
+
+```
+Merge pull request #911 from anodelman/deb7
+
+(BKR-422) debian7 fails to reboot during smoketest
+```
+* (maint) Supply token (if exists) during VM cleanup (2e1b91ae)
+
+* Merge pull request #865 from madAndroid/BKR-208-preserve-SUT-host-output (1d267e8a)
+
+
+```
+Merge pull request #865 from madAndroid/BKR-208-preserve-SUT-host-output
+
+(BKR-208) Preserve SUT host output
+```
+* Merge pull request #913 from kevpl/bkr389_upgradepe_agentupgrades (e3784f1a)
+
+
+```
+Merge pull request #913 from kevpl/bkr389_upgradepe_agentupgrades
+
+(BKR-389) fixed upgrade_pe issues for agent upgrade module
+```
+* (BKR-389) fixed upgrade_pe issues for agent upgrade module (c5d10577)
+
+* Merge pull request #912 from anodelman/new-platform (b611d502)
+
+
+```
+Merge pull request #912 from anodelman/new-platform
+
+(BKR-372) add support for ubuntu 15.04, Vivid, amd64 & i386
+```
+* Merge pull request #886 from kevpl/bkr393_pm_ubuntu_fix (a7395ce7)
+
+
+```
+Merge pull request #886 from kevpl/bkr393_pm_ubuntu_fix
+
+(BKR-393) fixed ubuntu PM URLs, didn't match package versions
+```
+* Merge pull request #870 from vindir/feature/aws-specs (41568f1f)
+
+
+```
+Merge pull request #870 from vindir/feature/aws-specs
+
+(BKR-349) AwsSdk Hypervisor Specs (for review <3)
+```
+* Merge pull request #885 from mcanevet/fix/fqdn (3a9d36f1)
+
+
+```
+Merge pull request #885 from mcanevet/fix/fqdn
+
+(BKR-391) Add fqdn to /etc/hosts
+```
+* (BKR-372) add support for ubuntu 15.04, Vivid, amd64 & i386 (f9a2e1ef)
+
+
+```
+(BKR-372) add support for ubuntu 15.04, Vivid, amd64 & i386
+
+- not quite sure what is going on here, but removing the timeout and
+  using the Net::SSH default allows ubuntu15.04 to reboot successfully
+  (was stuck on a blocking call to Net::SSH.start)
+```
+* Merge pull request #910 from kevpl/bkr426_fetchhttpfile_longersolution (2b252ce0)
+
+
+```
+Merge pull request #910 from kevpl/bkr426_fetchhttpfile_longersolution
+
+(BKR-426) long-term fix to end '/' issue in fetch_http_file
+```
+* Merge pull request #895 from anodelman/maint (7467e09c)
+
+
+```
+Merge pull request #895 from anodelman/maint
+
+(BKR-410) `confine :except, {}, [host1,host2]` does not work as expected
+```
+* (BKR-422) debian7 fails to reboot during smoketest (f96a15aa)
+
+
+```
+(BKR-422) debian7 fails to reboot during smoketest
+
+- to fix current smoketest redness change how we connect to beaker boxes
+- do three separate connection attempts (with retries)
+  * first with ip
+  * then the virtual hostname (vmhostname)
+  * then the name of the box provided by the user (hostname)
+- Only when all three fail do we fail out
+- decrease the Net::SSH timeout so that we can move through the various
+  attempts in a reasonable amount of time
+- add a sleep post windows reboot, getting reds here because windows
+  takes so long to come back up
+```
+* Merge pull request #899 from anodelman/install (f4cc4c9b)
+
+
+```
+Merge pull request #899 from anodelman/install
+
+(BKR-414) install_pe_on assumes hosts will be an array
+```
+* (BKR-426) long-term fix to end '/' issue in fetch_http_file (013a7e3c)
+
+* (BKR-421) Windows installs with service Disabled (4eae7d02)
+
+
+```
+(BKR-421) Windows installs with service Disabled
+
+ - Modify the default behavior to install Puppet with a disabled service
+   instead of Automatic
+ - Modify do_install so that on a Windows MSI install the method
+   setup_defaults_and_config_helper_on is called.  This replaces the
+   existing configure_pe_defaults_on behavior and augments it with an
+   additional `puppet agent -t` run that generates certificates.  Since
+   it calls puppet commands for configuring the server and certname,
+   additionally remove the redundant passing of these values to the
+   Windows installer.
+```
+* (BKR-421) Verify Windows puppet service status (5c70e60c)
+
+
+```
+(BKR-421) Verify Windows puppet service status
+
+ - After completing an MSI install, verify the service status of the
+   puppet service.
+```
+* (BKR-421) Refactor foss_utils to use WindowsUtils (9b37abb5)
+
+
+```
+(BKR-421) Refactor foss_utils to use WindowsUtils
+
+ - There are 4 separate points in the code where an MSI installation can
+   be launched from, that all differ.  Unify all entry points to use the
+   helper install_msi_on from WindowUtils.
+
+   Simplify the logic in the foss_utils install_a_puppet_msi_on and
+   instead of verifying which command Beaker sends (since the actual
+   code execution is thorougly tested for install_msi_on), simply
+   verify that the proper method is being called
+```
+* (BKR-421) Add WindowsUtils with MSI helper (49920a8b)
+
+
+```
+(BKR-421) Add WindowsUtils with MSI helper
+
+ - Refactor the do_install portion of pe_utils so that it no longer uses
+   the installer_cmd helper when on Windows.  Instead, extract out a new
+   MSI installation helper to WindowsUtils called install_msi_on.
+
+ - install_msi_on expects 4 parameters
+     hosts - to run the installer on
+     msi_path - can be a local path on disk or uri
+     msi_opts - options passed to the installer to configure behavior
+     opts - additional options, currently only :debug to emit the log
+        after installation
+
+ - install_msi_on will generate a batch file and SCP it to the host
+   to avoid any potential command line quoting issues with Cygwin
+   and will properly propagate the msiexec exit code
+
+ - MSI exit codes 0, 1641 and 3010 are acceptable since they may
+   simply indicate a reboot is required
+   install_msi_on will automatically dump the MSI log to the output
+   when a different failure code is encountered
+```
+* (maint) remove errant pe_utils docs for installer_cmd (cae4fc68)
+
+* (BKR-412) clarify 'types' in beaker (72e82f58)
+
+
+```
+(BKR-412) clarify 'types' in beaker
+
+- having made 'aio' a type meant that we were losing pe/foss specific
+  information (like the puppet service)
+- make 'aio' a role that a host can have, meaning that the aio defaults
+  will be installed overtop of any foss/pe defaults
+- stay backwards compatible with some of our weirder test types occuring
+  in the wild (like git-package)
+```
+* (BKR-413) beaker incorrectly reading preview 'LATEST' file (81077e35)
+
+
+```
+(BKR-413) beaker incorrectly reading preview 'LATEST' file
+
+- unable to reproduce bug as reported, but found errors in spec test
+  coverage while poking around.
+```
+* (BKR-414) install_pe_on assumes hosts will be an array (7ac2ca96)
+
+
+```
+(BKR-414) install_pe_on assumes hosts will be an array
+
+- ensure that we only confine to an array of hosts
+```
+* (BKR-410) `confine :except, {}, [host1,host2]` does not work as expected (3a27e489)
+
+
+```
+(BKR-410) `confine :except, {}, [host1,host2]` does not work as expected
+
+- add support to confine to all hosts *except* those in provided host
+  array
+```
+* (BKR-208) - add commandline option, as requested by @anodelman (81139678)
+
+* (BKR-340) separate answer file generation into a library (2a3d9dc5)
+
+
+```
+(BKR-340) separate answer file generation into a library
+
+- remove answer file generation from beaker
+- add dependencies to new beaker-answers gem and stringify-hash
+```
+* (BKR-393) fixed ubuntu PM URLs, didn't match package versions (2b820611)
+
+* (BKR-391) Add fqdn to /etc/hosts (033dc9a8)
+
+* (BKR-349) awsSdk pass-through to make specs more idiomatic and DRY things up (a3e1fa83)
+
+* (BKR-349) Revert "(BKR-349) Clean out unused methods AwsSdk#kill_zombies and AwsSdk#kill_zombie_volumes" (76969db6)
+
+
+```
+(BKR-349) Revert "(BKR-349) Clean out unused methods AwsSdk#kill_zombies and AwsSdk#kill_zombie_volumes"
+
+This reverts commit e2da888de350d9c9f98e0bb20533d61a35ad419e.
+```
+* (BKR-349) Revert "(BKR-349) Remove unused AWS hypervisor method for log_instances" (bc6535ac)
+
+
+```
+(BKR-349) Revert "(BKR-349) Remove unused AWS hypervisor method for log_instances"
+
+This reverts commit b33ae4b49175dc30da71dcdff56045aed9ca7c49.
+```
+* (BKR-208) - Rename option and method to color_host_output, as per suggestion fron @anodelman (02223524)
+
+* (BKR-349) Add specs to test out configuration of /etc/hosts for new instances (ebe312d0)
+
+
+```
+(BKR-349) Add specs to test out configuration of /etc/hosts for new instances
+
+Includes tests for AwsSdk#configure_hosts and AwsSdk#etc_hosts_entry
+```
+* (BKR-349) Add Host#dns_name to spec/helpers.rb host defaults. (b586da67)
+
+* (BKR-349) AwsSdk#configure_hosts now returns nil as api docs indicate (433b9033)
+
+* (BKR-349) Remove redundant entry in spec/helpers.rb host defaults (974bd4a3)
+
+* (BKR-349) Refactor AwsSdk#configure_hosts for improved testability (0b28c5d2)
+
+* (BKR-349) Update yard doc for create_instance to the proper @return type. (1d2b5322)
+
+* (BKR-349) Add specs to test AwsSdk#load_fog_credentials (1d3545d4)
+
+* (BKR-349) Specs added for AwsSdk#create_group (99470010)
+
+* (BKR-349) Specs added for AwsSdk#ensure_group (66eb22fb)
+
+* (BKR-349) Add private ip to host creation in the spec helpers (2b1a1fb8)
+
+* (BKR-349) Stub out remaining simple methods for AwsSdk spec testing (0eb22705)
+
+* (BKR-349) Add new specs for AwsSdk#ensure_key_pair (82231282)
+
+* (BKR-366) merge up install from git changes from deployer and puppet (953423ce)
+
+
+```
+(BKR-366) merge up install from git changes from deployer and puppet
+
+This change merges changes to install_from_git that were overloaded into
+puppet and other repos' acceptance libraries.
+We also split the cloning portion of install_from_git into its own
+method, added options that are passed through to on() and moved a method
+to beaker's acceptance library that needs to be shared across tests
+(install_packages_on).
+This addition of an acceptance library for beaker may require changes to
+the jenkins CI configuration, to add the library to the test-runner's
+load-path.
+The merge-up also brought in helpers for install_from_git,
+build_git_url() and lookup_in_env().
+This change also adds a few more features to build_git_url that were required
+for deployer, including giturl protocol.
+```
+* (BKR-349) Add new specs for AwsSdk#local_user (a280d073)
+
+* (BKR-349) Add new specs for AwsSdk#set_hostnames (1ae376a2)
+
+* (BKR-349) Add new specs for AwsSdk#add_tags (0ee05d39)
+
+* (BKR-349) Add new specs for AwsSdk#wait_for_status (8d331dfc)
+
+* (BKR-349) Clean out unused methods AwsSdk#kill_zombies and AwsSdk#kill_zombie_volumes (e60692eb)
+
+* (BKR-349) Update yard docs with actual return type for AwsSdk#security_groups (dc7401cd)
+
+* (BKR-349) New spec test for AwsSdk#security_groups (bd40500f)
+
+* (BKR-349) Add specs to test AwsSdk#security_group_by_id (5509c3fc)
+
+* (BKR-349) Update yard docs with actual return type for AwsSdk#vpcs (e016a375)
+
+* (BKR-349) New spec test for AwsSdk#vpcs (0c800e52)
+
+* (BKR-349) Add specs to test AwsSdk#vpc_by_id (e13d7e18)
+
+* (BKR-208) - Add spec for preserving SUT host output (97a9a1df)
+
+* (BKR-208) - Add preserve_host_output method, to set allow us to not strip colour for beaker runs (07f06d7b)
+
+* (BKR-349) Add specs to test AwsSdk#instances (b28c39ed)
+
+* (BKR-349) Update yard docs with actual return type for AwsSdk#instances (ce44abac)
+
+* (BKR-349) Add specs to test AwsSdk#instance_by_id (538458a3)
+
+* (BKR-349) Improved specs for AwsSdk#cleanup (68f8a5d4)
+
+* (BKR-349) Fix incorrect key name for access credentials in spec helper for fog creds (90b88e57)
+
+
+```
+(BKR-349) Fix incorrect key name for access credentials in spec helper for fog creds
+
+PS: This still doesn't appear to play nicely when attempting to work with
+resulting instance objects. Seems like it has to be mocked any time it digs
+into the aws lib.
+```
+* (BKR-349) Remove unused AWS hypervisor method for log_instances (16d506ef)
+
+* (BKR-349) Add spec tests for AWS hypervisor cleanup method (6f3c8fa8)
+
+* (BKR-349) Add spec tests for AwsSdk#kill_instances (72c53781)
+
+* (BKR-349) Add tests for AwsSdk#provision (3fbb8a3e)
+
+* (BKR-349) Stub out describes for missing method tests (784102ff)
+
+* (BKR-349) Clean up describe/context naming for existing tests (147e78aa)
+
+* (BKR-349) Sort tests based on method appearance (e1920ade)
+
+### <a name = "2.18.3">2.18.3 - 28 Jul, 2015 (d9a02474)
+
+* (HISTORY) update beaker history for gem release 2.18.3 (d9a02474)
 
 * (GEM) update beaker version to 2.18.3 (c0553c0c)
 
