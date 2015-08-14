@@ -94,6 +94,20 @@ module Beaker
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
         testcase.run_test
       end
+
+      it 'records a test failure if an assertion fails in a teardown block' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write <<-EOF
+            teardown do
+              assert_equal(1, 2, 'Oh noes!')
+            end
+          EOF
+        end
+        @path = path
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion))
+        testcase.run_test
+      end
     end
 
     context 'metadata' do

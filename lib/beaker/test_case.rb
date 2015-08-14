@@ -33,7 +33,7 @@ module Beaker
     # an instance of {Beaker::Logger}.
     attr_accessor :logger
 
-    # Necessary for many methods in {Beaker::DSL::Helpers}.  Assumed to be 
+    # Necessary for many methods in {Beaker::DSL::Helpers}.  Assumed to be
     # a hash.
     attr_accessor :metadata
 
@@ -139,7 +139,7 @@ module Beaker
               @teardown_procs.each do |teardown|
                 begin
                   teardown.call
-                rescue StandardError, SignalException => e
+                rescue StandardError, SignalException, TEST_EXCEPTION_CLASS => e
                   log_and_fail_test(e)
                 end
               end
