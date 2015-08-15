@@ -17,13 +17,14 @@ module Beaker
         end
       end
 
-      #Find hosts from a given array of hosts that all have the desired name.
+      #Find hosts from a given array of hosts that all have the desired name, match against host name,
+      #vmhostname and ip (the three valid ways to identify an individual host)
       #@param [Array<Host>] hosts The hosts to examine
-      #@param [String] name The hosts returned will have this name
-      #@return [Array<Host>] The hosts that have the desired name
+      #@param [String] name The hosts returned will have this name/vmhostname/ip
+      #@return [Array<Host>] The hosts that have the desired name/vmhostname/ip
       def hosts_with_name(hosts, name = nil)
         hosts.select do |host|
-          name.nil? or host.name =~ /\A#{name}/
+          name.nil? or host.name =~ /\A#{name}/ or host[:vmhostname] =~ /\A#{name}/ or host[:ip] =~ /\A#{name}/
         end
       end
 

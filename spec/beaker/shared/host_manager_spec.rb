@@ -15,7 +15,44 @@ module Beaker
                                hosts[2][:roles] = ['agent', role2]
                                hosts }
 
-      context "hosts_with_role" do
+      context "#hosts_with_name" do
+
+        it "can identify the host by name" do
+
+            expect( host_handler.hosts_with_name( hosts, 'vm1' )).to be === [hosts[0]]
+
+        end
+
+        it "can identify the host by vmhostname" do
+
+            hosts[0][:vmhostname] = 'myname.whatever'
+
+            expect( host_handler.hosts_with_name( hosts, 'myname.whatever' )).to be === [hosts[0]]
+
+        end
+
+        it "can identify the host by ip" do
+
+            hosts[0][:ip] = '0.0.0.0'
+
+            expect( host_handler.hosts_with_name( hosts, '0.0.0.0' )).to be === [hosts[0]]
+
+        end
+
+        it "returns [] when no match is found in a set of hosts" do
+
+            hosts[0][:ip] = '0.0.0.0'
+            hosts[0][:vmhostname] = 'myname.whatever'
+
+            expect( host_handler.hosts_with_name( hosts, 'surprise' )).to be === []
+
+        end
+
+
+
+      end
+
+      context "#hosts_with_role" do
         it "can find the master in a set of hosts" do
 
           expect( host_handler.hosts_with_role( hosts, 'master' ) ).to be === [hosts[1]]
@@ -36,7 +73,7 @@ module Beaker
 
       end
 
-      context "only_host_with_role" do
+      context "#only_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.only_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -56,7 +93,7 @@ module Beaker
         end
       end
 
-      context "find_at_most_one_host_with_role" do
+      context "#find_at_most_one_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.find_at_most_one_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -76,7 +113,7 @@ module Beaker
         end
       end
 
-      context "run_block_on" do
+      context "#run_block_on" do
         it "can execute a block against hosts identified by a string" do
           myhosts = host_handler.run_block_on( hosts, role0 ) do |hosts|
             hosts
