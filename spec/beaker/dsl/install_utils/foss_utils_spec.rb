@@ -912,9 +912,24 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_puppet_agent_pe_promoted_repo_on' do
 
-    it 'splits the platform string version correctly to get ubuntu puppet-agent packages' do
+    it 'splits the platform string version correctly to get ubuntu puppet-agent packages (format 9999)' do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['ubuntu', '9999', 'x42']}
+      host = basic_hosts.first
+      host['platform'] = platform
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\//, "puppet-agent-ubuntu-99.99-x42.tar.gz", /ubuntu/)
+      expect(subject).to receive(:scp_to).once.with(host, /-ubuntu-99.99-x42\./, "/root")
+      expect(subject).to receive(:on).ordered.with(host, /^tar.*-ubuntu-99.99-x42/)
+      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
+      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
+
+      subject.install_puppet_agent_pe_promoted_repo_on( host, {} )
+    end
+
+    it 'doesn\'t split the platform string version correctly to get ubuntu puppet-agent packages when unnecessary (format 99.99)' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['ubuntu', '99.99', 'x42']}
       host = basic_hosts.first
       host['platform'] = platform
 
