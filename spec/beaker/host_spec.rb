@@ -649,5 +649,18 @@ module Beaker
       expect( "#{host}" ).to be === 'name'
     end
 
+    describe 'host close' do
+      context 'with a nil connection object' do
+        before do
+          conn = nil
+          host.instance_variable_set :@connection, conn
+          allow(host).to receive(:close).and_call_original
+        end
+        it 'does not raise an error' do
+          expect { host.close }.to_not raise_error
+        end
+      end
+    end
+
   end
 end
