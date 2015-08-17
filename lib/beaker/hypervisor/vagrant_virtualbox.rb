@@ -16,9 +16,13 @@ class Beaker::VagrantVirtualbox < Beaker::Vagrant
   end
 
   def self.provider_vfile_section(host, options)
+    # Allow memory and CPUs to be set at a per node level or overall, and take the most specific setting
+    host_memory = host['vagrant_memsize'] ? host['vagrant_memsize'] : (options['vagrant_memsize'] ? options['vagrant_memsize'] : 1024)
+    host_cpus = host['vagrant_cpus'] ? host['vagrant_cpus'] : (options['vagrant_cpus'] ? options['vagrant_cpus'] : 1)
+
     provider_section  = ""
     provider_section << "    v.vm.provider :virtualbox do |vb|\n"
-    provider_section << "      vb.customize ['modifyvm', :id, '--memory', '#{options['vagrant_memsize'] ||= '1024'}', '--cpus', '#{options['vagrant_cpus'] ||= '1'}']\n"
+    provider_section << "      vb.customize ['modifyvm', :id, '--memory', '#{host_memory}', '--cpus', '#{host_cpus}']\n"
     provider_section << "      vb.vbguest.auto_update = false" if options[:vbguest_plugin] == 'disable'
 
     # Guest volume support
