@@ -126,5 +126,39 @@ module Beaker
       end
     end
 
+    context 'teardown procs' do
+      it 'calls a given block properly' do
+        teardown_mock = Object.new
+        expect( teardown_mock ).to receive( :call ).once
+        expect( teardown_mock ).to receive( :log_and_fail_test ).never
+        testcase.instance_variable_set( :@teardown_procs, [teardown_mock])
+        testcase.run_test
+      end
+
+      def expect_error_to_call_log_and_fail_test(error)
+        # sets up the file, so that log_and_fail_test isn't called during test execution
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write ""
+        end
+        @path = path
+
+        teardown_mock = Object.new
+        allow( teardown_mock ).to receive( :call ) { raise error }
+        expect( testcase ).to receive( :log_and_fail_test ).once
+        testcase.instance_variable_set( :@teardown_procs, [teardown_mock])
+        testcase.run_test
+      end
+
+      it 'exits correctly on failure' do
+        expect_error_to_call_log_and_fail_test(StandardError)
+      end
+
+      it 'catches assertion failures & treats them like other failures' do
+        expect_error_to_call_log_and_fail_test(Beaker::TestCase::TEST_EXCEPTION_CLASS)
+      end
+
+    end
+
   end
 end
