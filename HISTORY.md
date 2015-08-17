@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Aug, 2015 (821aefba)](#LATEST)
+* [LATEST - 17 Aug, 2015 (1d735a7a)](#LATEST)
+* [2.19.0 - 13 Aug, 2015 (80897129)](#2.19.0)
 * [2.18.3 - 28 Jul, 2015 (d9a02474)](#2.18.3)
 * [2.18.2 - 27 Jul, 2015 (c84f6f23)](#2.18.2)
 * [2.18.1 - 14 Jul, 2015 (6a82f99f)](#2.18.1)
@@ -91,7 +92,100 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Aug, 2015 (821aefba)
+### <a name = "LATEST">LATEST - 17 Aug, 2015 (1d735a7a)
+
+* (GEM) update beaker version to 2.20.0 (1d735a7a)
+
+* Merge pull request #925 from objectverbobject/BKR-448 (d76d2a4a)
+
+
+```
+Merge pull request #925 from objectverbobject/BKR-448
+
+(BKR-448) Check for connection object during host.close
+```
+* Merge pull request #924 from anodelman/puppet-agent (ba4b3d4e)
+
+
+```
+Merge pull request #924 from anodelman/puppet-agent
+
+(BKR-447) Ubuntu PE puppet-agent urls not being generated correctly
+```
+* Merge pull request #904 from dylanratcliffe/add-per-node-memory (cc3d716a)
+
+
+```
+Merge pull request #904 from dylanratcliffe/add-per-node-memory
+
+(BKR-423) Added the ability to set CPUs and memory per node
+```
+* Merge pull request #923 from puppetlabs/bkr-428/change-assertion-in-teardown-behavior (5f60c353)
+
+
+```
+Merge pull request #923 from puppetlabs/bkr-428/change-assertion-in-teardown-behavior
+
+[BKR-428] gracefully handle assert failure in teardown
+```
+* (BKR-448) Check for connection object during host.close (255f43f6)
+
+
+```
+(BKR-448) Check for connection object during host.close
+
+The close method for hosts assumed the connection object existed when
+trying to set the hostname; this fix checks to ensure the connection
+object exists prior to calling any methods on it.
+```
+* (BKR-447) Ubuntu PE puppet-agent urls not being generated correctly (bb71b7ba)
+
+
+```
+(BKR-447) Ubuntu PE puppet-agent urls not being generated correctly
+
+- incorrectly adding additional '.' to ubuntu version strings that were
+  already correct
+- added spec test to ensure correct behavior
+- passed local testing
+```
+* Merge pull request #922 from anodelman/many-names (334d63a8)
+
+
+```
+Merge pull request #922 from anodelman/many-names
+
+(BKR-446) add ability to identify a host by vmhostname/ip
+```
+* (BKR-428) gracefully handle assert failure in teardown (f8b97d7b)
+
+
+```
+(BKR-428) gracefully handle assert failure in teardown
+
+Prior to this commit, if a teardown method ran code which contained assertions,
+and an assertion failed, the exception raised by the assertion failure was
+uncaught and beaker would crash.
+
+This change treats the assertion failure as a test failure and allows beaker
+to continue running.
+```
+* (BKR-446) add ability to identify a host by vmhostname/ip (24ecdf4b)
+
+
+```
+(BKR-446) add ability to identify a host by vmhostname/ip
+
+- make it possible to run commands like:
+
+on 'vmhostname', "command"
+on '0.0.0.0', "command"
+```
+* (BKR-423) Added the ability to set CPUs and memory per node (132b6b7e)
+
+### <a name = "2.19.0">2.19.0 - 13 Aug, 2015 (80897129)
+
+* (HISTORY) update beaker history for gem release 2.19.0 (80897129)
 
 * (GEM) update beaker version to 2.19.0 (821aefba)
 
