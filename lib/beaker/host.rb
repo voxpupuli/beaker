@@ -243,11 +243,13 @@ module Beaker
     end
 
     def close
-      @connection.close if @connection
-      # update connection information
-      @connection.ip = self['ip'] if self['ip']
-      @connection.vmhostname = self['vmhostname'] if self['vmhostname']
-      @connection.hostname = @name
+      if @connection
+        @connection.close
+        # update connection information
+        @connection.ip         = self['ip'] if self['ip']
+        @connection.vmhostname = self['vmhostname'] if self['vmhostname']
+        @connection.hostname   = @name
+      end
       @connection = nil
     end
 
