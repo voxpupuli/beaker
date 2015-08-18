@@ -244,6 +244,9 @@ module Beaker
 
         provision_storage(host, vm)
       end
+
+      hack_etc_hosts @hosts, @options
+
     end
 
     #Destroy any OpenStack instances
