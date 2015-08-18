@@ -7,6 +7,7 @@ module Unix::Exec
     else
       exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
     end
+    sleep(10) #if we attempt a reconnect too quickly we end up blocking ¯\_(ツ)_/¯
   end
 
   def echo(msg, abs=true)

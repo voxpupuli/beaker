@@ -5,7 +5,7 @@ module Windows::Exec
     exec(Beaker::Command.new('shutdown /r /t 0 /d p:4:1 /c "Beaker::Host reboot command issued"'), :expect_connection_failure => true)
     # rebooting on windows is sloooooow
     # give it some breathing room before attempting a reconnect
-    sleep(30)
+    sleep(40)
   end
 
   ABS_CMD = 'c:\\\\windows\\\\system32\\\\cmd.exe'
