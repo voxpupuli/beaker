@@ -324,6 +324,10 @@ module Beaker
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         elsif host['platform'] =~ /openbsd/
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
+        elsif host['platform'] =~ /solaris-10/
+          host.exec(Command.new('sudo cp -r .ssh /.'), {:pty => true})
+        elsif host['platform'] =~ /solaris-11/
+          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
@@ -369,6 +373,11 @@ module Beaker
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif host['platform'] =~ /openbsd/
           host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), {:pty => true} )
+        elsif host['platform'] =~ /solaris-10/
+          host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+        elsif host['platform'] =~ /solaris-11/
+          host.exec(Command.new("sudo rolemod -K type=normal root"), {:pty => true} )
+          host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif not host.is_powershell?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         else
@@ -383,6 +392,8 @@ module Beaker
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         elsif host['platform'] =~ /(free|open)bsd/
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
+        elsif host['platform'] =~ /solaris/
+          host.exec(Command.new("sudo -E svcadm restart network/ssh"), {:pty => true} )
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
