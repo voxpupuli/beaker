@@ -4,6 +4,8 @@ module PSWindows::Exec
 
   def reboot
     exec(Beaker::Command.new("shutdown /r /t 0"), :expect_connection_failure => true)
+    # rebooting on windows is slooooow
+    sleep(40)
   end
 
   ABS_CMD = 'c:\\\\windows\\\\system32\\\\cmd.exe'
