@@ -1,4 +1,5 @@
 begin
+  $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'lib'))
   require 'beaker/acceptance/install_utils'
   extend Beaker::Acceptance::InstallUtils
 end
