@@ -1,4 +1,5 @@
 begin
+  $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'lib'))
   require 'beaker/acceptance/install_utils'
   extend Beaker::Acceptance::InstallUtils
 end
@@ -40,10 +41,10 @@ hosts.each do |host|
 
   step 'should find fork name from the correct environment variable'
   results = clone_git_repo_on(host, "#{testdir}", extract_repo_info_from(build_git_url('puppet')))
-  assert_match( /github\.com:fail/, result.cmd, 'Did not find correct fork name')
+  assert_match( /github\.com\/fail/, result.cmd, 'Did not find correct fork name')
   assert_equal( 1, result.exit_code, 'Did not produce error exit_code of 1')
 
   step 'should clone hiera from correct fork'
   results = clone_git_repo_on(host, "#{testdir}", extract_repo_info_from(build_git_url('hiera')))
-  assert_match( /From github\.com:puppetlabs\/hiera/, result.output, 'Did not find clone')
+  assert_match( /From.*github\.com\/puppetlabs\/hiera/, result.output, 'Did not find clone')
 end
