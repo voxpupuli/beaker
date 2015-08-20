@@ -21,6 +21,11 @@ module Beaker
             'distmoduledir'     => '`cygpath -smF 35`/PuppetLabs/code/modules',
             # sitemoduledir not included (check PUP-4049 for more info)
           },
+          'pwindows' => { #pure windows
+            'puppetbindir'      => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\bin"',
+            'privatebindir'     => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\sys\\ruby\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\sys\\ruby\\bin"',
+            'distmoduledir'     => 'C:\\ProgramData\\PuppetLabs\\code\\environments\\production\\modules',
+          }
         }
 
         # Add the appropriate aio defaults to the host object so that they can be accessed using host[option], set host[:type] = aio
@@ -43,7 +48,9 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def add_aio_defaults_on(hosts)
           block_on hosts do | host |
-            if host['platform'] =~ /windows/
+            if host.is_powershell?
+              platform = 'pwindows'
+            elsif host['platform'] =~ /windows/
               platform = 'windows'
             else
               platform = 'unix'
@@ -67,7 +74,9 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def remove_aio_defaults_on(hosts)
           block_on hosts do | host |
-            if host['platform'] =~ /windows/
+            if host.is_powershell?
+              platform = 'pswindows'
+            elsif host['platform'] =~ /windows/
               platform = 'windows'
             else
               platform = 'unix'

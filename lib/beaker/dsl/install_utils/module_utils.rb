@@ -110,6 +110,7 @@ module Beaker
             opts = {:source => './',
                     :target_module_path => host['distmoduledir'],
                     :ignore_list => PUPPET_MODULE_INSTALL_IGNORE}.merge(opts)
+
             ignore_list = build_ignore_list(opts)
             target_module_dir = on( host, "echo #{opts[:target_module_path]}" ).stdout.chomp
             source_path = File.expand_path( opts[:source] )
@@ -122,6 +123,9 @@ module Beaker
             end
 
             target_path = File.join(target_module_dir, module_name)
+            if host.is_powershell? #make sure our slashes are correct
+              target_path = target_path.gsub(/\//,'\\')
+            end
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
