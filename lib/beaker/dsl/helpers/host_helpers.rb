@@ -12,7 +12,7 @@ module Beaker
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
-        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
         #     exit codes as passing.
         #   @option opts [Boolean] :dry_run (false) Do not actually execute any
         #     commands on the SUT
@@ -377,7 +377,6 @@ module Beaker
           on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
-
         def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
           opts = {
             :desired_exit_codes => desired_exit_codes,
@@ -519,8 +518,6 @@ module Beaker
             end
           end
         end
-
-
       end
     end
   end
