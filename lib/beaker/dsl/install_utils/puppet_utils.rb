@@ -6,6 +6,32 @@ module Beaker
       #
       module PuppetUtils
 
+        #Given a type return an understood host type
+        #@param [String] type The host type to be normalized
+        #@return [String] The normalized type
+        #
+        #@example
+        #  normalize_type('pe-aio')
+        #    'pe'
+        #@example
+        #  normalize_type('git')
+        #    'foss'
+        #@example
+        #  normalize_type('foss-internal')
+        #    'foss'
+        def normalize_type type
+          case type
+          when /(\A|-)(git)|(foss)(\Z|-)/
+            'foss'
+          when /(\A|-)pe(\Z|-)/
+            'pe'
+          when /(\A|-)aio(\Z|-)/
+            'aio'
+          else
+            nil
+          end
+        end
+
         #Given a host construct a PATH that includes puppetbindir, facterbindir and hierabindir
         # @param [Host] host    A single host to construct pathing for
         def construct_puppet_path(host)
@@ -28,7 +54,8 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def add_puppet_paths_on(hosts)
           block_on hosts do | host |
-            host.add_env_var('PATH', construct_puppet_path(host))
+            puppet_path = construct_puppet_path(host)
+            host.add_env_var('PATH', puppet_path)
             host.add_env_var('PATH', 'PATH') # don't destroy the path!
           end
         end
@@ -39,7 +66,9 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def remove_puppet_paths_on(hosts)
           block_on hosts do | host |
-            host.delete_env_var('PATH', construct_puppet_path(host))
+            puppet_path = construct_puppet_path(host)
+            host.delete_env_var('PATH', puppet_path)
+            host.add_env_var('PATH', 'PATH') # don't destroy the path!
           end
         end
 
@@ -74,15 +103,8 @@ module Beaker
               # clean up the naming conventions here (some teams use foss-package, git-whatever, we need
               # to correctly handle that
               # don't worry about aio, that happens in the aio_version? check
-              host_type = case host_type
-                          when /(\A|-)(git)|(foss)(\Z|-)/
-                            'foss'
-                          when /(\A|-)pe(\Z|-)/
-                            'pe'
-                          else
-                            nil
-                          end
-              if host_type
+              host_type = normalize_type(host_type)
+              if host_type and host_type !~ /aio/
                 add_method = "add_#{host_type}_defaults_on"
                 if self.respond_to?(add_method, host)
                   self.send(add_method, host)
@@ -111,12 +133,16 @@ module Beaker
         def remove_defaults_on( hosts )
           block_on hosts do |host|
             if host['type']
+              # clean up the naming conventions here (some teams use foss-package, git-whatever, we need
+              # to correctly handle that
+              # don't worry about aio, that happens in the aio_version? check
+              host_type = normalize_type(host['type'])
               remove_puppet_paths_on(hosts)
-              remove_method = "remove_#{host['type']}_defaults_on"
+              remove_method = "remove_#{host_type}_defaults_on"
               if self.respond_to?(remove_method, host)
                 self.send(remove_method, host)
               else
-                raise "cannot remove defaults of type #{host['type']} associated with host #{host.name} (#{remove_method} not present)"
+                raise "cannot remove defaults of type #{host_type} associated with host #{host.name} (#{remove_method} not present)"
               end
               if aio_version?(host)
                 remove_aio_defaults_on(host)
