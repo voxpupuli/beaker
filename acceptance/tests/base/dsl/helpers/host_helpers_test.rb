@@ -287,6 +287,22 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#scp_from CURRENTLY creates and repeatedly overwrites the file on the local system" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      remotetmpdir = create_tmpdir_on hosts.first
+      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      on hosts, "mkdir -p #{remotetmpdir}"
+      results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remotefilename}}
+
+      scp_from hosts, remotefilename, localdir
+
+      remotecontents = on(hosts.last, "cat #{remotefilename}").stdout
+      localcontents = File.read(localfilename)
+      assert_equal remotecontents, localcontents
+    end
+  end
+
   if test_scp_error_on_close?
     step "#create_remote_file fails when the remote path does not exist" do
       assert_raises Beaker::Host::CommandFailure do
