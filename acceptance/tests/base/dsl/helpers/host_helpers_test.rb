@@ -426,6 +426,62 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
+    remote_source = create_tmpdir_on hosts.first
+    remote_destination = create_tmpdir_on hosts.first
+    result = backup_the_file hosts.first, remote_source, remote_destination
+    assert_nil result
+  end
+
+  step "#backup_the_file will fail if the destination directory does not exist" do
+    remote_source = create_tmpdir_on hosts.first
+    remote_source_filename = File.join(remote_source, "puppet.conf")
+    create_remote_file hosts.first, remote_source_filename, "contents"
+
+    assert_raises Beaker::Host::CommandFailure do
+      result = backup_the_file hosts.first, remote_source, "/non/existent/"
+    end
+  end
+
+  step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
+    remote_source = create_tmpdir_on hosts.first
+    remote_source_filename = File.join(remote_source, "puppet.conf")
+    create_remote_file hosts.first, remote_source_filename, "contents"
+
+    remote_destination = create_tmpdir_on hosts.first
+    remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
+
+    result = backup_the_file hosts.first, remote_source, remote_destination
+    assert_equal remote_destination_filename, result
+    contents = on(hosts.first, "cat #{remote_destination_filename}").stdout
+    assert_equal "contents\n", contents
+  end
+
+  step "#backup_the_file copies a named file from the source to the destination directory" do
+    remote_source = create_tmpdir_on hosts.first
+    remote_source_filename = File.join(remote_source, "testfile.txt")
+    create_remote_file hosts.first, remote_source_filename, "contents"
+    remote_destination = create_tmpdir_on hosts.first
+    remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
+
+    result = backup_the_file hosts.first, remote_source, remote_destination, "testfile.txt"
+    assert_equal remote_destination_filename, result
+    contents = on(hosts.first, "cat #{remote_destination_filename}").stdout
+    assert_equal "contents\n", contents
+  end
+
+  step "#backup_the_file CURRENTLY will fail if given a hosts array" do
+    remote_source = create_tmpdir_on hosts.first
+    remote_source_filename = File.join(remote_source, "testfile.txt")
+    create_remote_file hosts.first, remote_source_filename, "contents"
+    remote_destination = create_tmpdir_on hosts.first
+    remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
+
+    assert_raises NoMethodError do
+      result = backup_the_file hosts, remote_source, remote_destination
+    end
+  end
+
   step "#create_tmpdir_on returns a temporary directory on the remote system" do
     tmpdir = create_tmpdir_on hosts.first
     assert_match %r{/}, tmpdir
