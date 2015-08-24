@@ -163,4 +163,81 @@ test_name "dsl::helpers::host_helpers" do
       assert_match /\d+:\d+/, stdout
     end
   end
+
+  step "`create_tmpdir_on` returns a temporary directory on the remote system" do
+    tmpdir = create_tmpdir_on hosts.first
+    assert_match %r{/}, tmpdir
+    assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
+  end
+
+  step "`create_tmpdir_on` uses the specified path prefix when provided" do
+    tmpdir = create_tmpdir_on(hosts.first, "mypathprefix")
+    assert_match %r{/mypathprefix}, tmpdir
+    assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
+  end
+
+  step "`create_tmpdir_on` chowns the created tempdir to the host user + group" do
+    tmpdir = create_tmpdir_on hosts.first
+    listing = on(hosts.first, "ls -al #{tmpdir}").stdout
+    tmpdir_ls = listing.split("\n").grep %r{\s+\./?\s*$}
+    assert_equal 1, tmpdir_ls.size
+    perms, inodes, owner, group, *rest = tmpdir_ls.first.split(/\s+/)
+    assert_equal hosts.first['user'], owner
+    assert_equal hosts.first['user'], group
+  end
+
+  step "`create_tmpdir_on` fails if a non-existent user is specified" do
+    assert_raises Beaker::Host::CommandFailure do
+      tmpdir = create_tmpdir_on hosts.first, '', "fakeuser"
+    end
+  end
+
+  step "`create_tmpdir_on` operates on all hosts if given a hosts array" do
+    tmpdirs = create_tmpdir_on hosts
+    hosts.zip(tmpdirs).each do |(host, tmpdir)|
+      assert_match %r{/}, tmpdir
+      assert_equal 0, on(host, "touch #{tmpdir}/testfile").exit_code
+    end
+  end
+
+  step "`create_tmpdir_on` fails if the host platform is not supported" do
+    # TODO - which platform(s) are not supported for create_tmpdir_on?
+    # TODO - and, given that, how do we set up a sane test to exercise this?
+  end
+
+  step "`scp_to` fails if the local file cannot be found" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    assert_raises IOError do
+      scp_to hosts.first, "/non/existent/file.txt", remotetmpdir
+    end
+  end
+
+  step "`scp_to` fails if the remote path cannot be found" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "contents"
+      end
+
+      assert_raises RuntimeError do
+        scp_to hosts.first, localfilename, "/non/existent/remote/file.txt"
+      end
+    end
+  end
+
+  step "`scp_to` creates the file on the remote system" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "contents"
+      end
+
+      scp_to hosts.first, localfilename, remotetmpdir
+
+      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
 end
