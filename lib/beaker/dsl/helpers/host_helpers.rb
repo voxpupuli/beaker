@@ -509,7 +509,6 @@ module Beaker
         # @param [String] val The string to 'echo' on the host(s)
         # @return [String, Array<String> The echo'ed value(s) returned by the host(s)
         def echo_on hosts, val
-          #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
           block_on hosts do |host|
             if host.is_powershell?
               host.exec(Command.new("echo #{val}")).stdout.chomp
