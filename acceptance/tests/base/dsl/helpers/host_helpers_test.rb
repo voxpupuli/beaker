@@ -1,3 +1,4 @@
+require "fileutils"
 
 # Currently scp failures throw a Net::SCP::Error exception in SSH connection
 # close, which ends up not being caught properly, and which ultimately results
@@ -6,7 +7,7 @@
 #
 # TODO: fix this problem
 def test_scp_error_on_close?
-  !!ENV['TEST_SCP_ERROR_ON_CLOSE']
+  !!ENV["TEST_SCP_ERROR_ON_CLOSE"]
 end
 
 test_name "dsl::helpers::host_helpers" do
@@ -423,6 +424,148 @@ test_name "dsl::helpers::host_helpers" do
     hosts.each do |host|
       remote_contents = on(host, "cat #{remotefilename}").stdout
       assert_equal "contents\n", remote_contents
+    end
+  end
+
+  step "#run_script_on fails when the local script cannot be found" do
+    assert_raises IOError do
+      run_script_on hosts.first, "/non/existent/testfile.sh"
+    end
+  end
+
+  step "#run_script_on fails when there is an error running the remote script" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "exit 1"
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      assert_raises Beaker::Host::CommandFailure do
+        run_script_on hosts.first, localfilename
+      end
+    end
+  end
+
+  step "#run_script_on passes along options when running the remote command" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "exit 1"
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      result = run_script_on hosts.first, localfilename, { :accept_all_exit_codes => true }
+      assert_equal 1, result.exit_code
+    end
+  end
+
+  step "#run_script_on runs the script on the remote host" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts %Q{echo "contents"}
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      results = run_script_on hosts.first, localfilename
+      assert_equal 0, results.exit_code
+      assert_equal "contents\n", results.stdout
+    end
+  end
+
+  step "#run_script_on allows assertions in an optional block" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts %Q{echo "contents"}
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      results = run_script_on hosts.first, localfilename do
+        assert_equal 0, exit_code
+        assert_equal "contents\n", stdout
+      end
+    end
+  end
+
+  step "#run_script_on runs the script on all remote hosts when a host array is provided" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts %Q{echo "contents"}
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      results = run_script_on hosts, localfilename
+
+      assert_equal hosts.size, results.size
+      results.each do |result|
+        assert_equal 0, result.exit_code
+        assert_equal "contents\n", result.stdout
+      end
+    end
+  end
+
+  step "#run_script fails when the local script cannot be found" do
+    assert_raises IOError do
+      run_script "/non/existent/testfile.sh"
+    end
+  end
+
+  step "#run_script fails when there is an error running the remote script" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "exit 1"
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      assert_raises Beaker::Host::CommandFailure do
+        run_script localfilename
+      end
+    end
+  end
+
+  step "#run_script passes along options when running the remote command" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "exit 1"
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      result = run_script localfilename, { :accept_all_exit_codes => true }
+      assert_equal 1, result.exit_code
+    end
+  end
+
+  step "#run_script runs the script on the remote host" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts %Q{echo "contents"}
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      results = run_script localfilename
+      assert_equal 0, results.exit_code
+      assert_equal "contents\n", results.stdout
+    end
+  end
+
+  step "#run_script allows assertions in an optional block" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.sh")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts %Q{echo "contents"}
+      end
+      FileUtils.chmod "a+x", localfilename
+
+      results = run_script localfilename do
+        assert_equal 0, exit_code
+        assert_equal "contents\n", stdout
+      end
     end
   end
 
