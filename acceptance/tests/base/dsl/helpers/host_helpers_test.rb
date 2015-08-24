@@ -282,6 +282,63 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#rsync_to fails if the local file cannot be found" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    assert_raises IOError do
+      rsync_to hosts.first, "/non/existent/file.txt", remotetmpdir
+    end
+  end
+
+  step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "contents"
+      end
+
+      rsync_to hosts.first, localfilename, "/non/existent/testfile.txt"
+      assert_raises Beaker::Host::CommandFailure do
+        on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+      end
+    end
+  end
+
+  step "#rsync_to creates the file on the remote system" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "contents"
+      end
+      remotetmpdir = create_tmpdir_on hosts.first
+
+      rsync_to hosts.first, localfilename, remotetmpdir
+
+      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
+
+  step "#rsync_to creates the file on all remote systems when a host array is provided" do
+    Dir.mktmpdir do |localdir|
+      localfilename = File.join(localdir, "testfile.txt")
+      File.open(localfilename, "w") do |localfile|
+        localfile.puts "contents"
+      end
+
+      remotetmpdir = create_tmpdir_on hosts.first
+      on hosts, "mkdir -p #{remotetmpdir}"
+      remotefilename = File.join(remotetmpdir, "testfile.txt")
+
+      rsync_to hosts, localfilename, remotetmpdir
+
+      hosts.each do |host|
+        remote_contents = on(host, "cat #{remotefilename}").stdout
+        assert_equal "contents\n", remote_contents
+      end
+    end
+  end
+
   if test_scp_error_on_close?
     step "#create_remote_file fails when the remote path does not exist" do
       assert_raises Beaker::Host::CommandFailure do
@@ -417,6 +474,6 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#echo_on echoes the supplied string on all hosts when given a hosts array" do
     results = echo_on(hosts, "contents")
-    assert_equal ["contents"] * hosts.sizex, results
+    assert_equal ["contents"] * hosts.size, results
   end
 end
