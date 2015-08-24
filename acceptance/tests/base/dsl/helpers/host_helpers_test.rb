@@ -286,4 +286,91 @@ test_name "dsl::helpers::host_helpers" do
       assert_equal "contents\n", File.read(localfilename)
     end
   end
+
+  if test_scp_error_on_close?
+    step "`create_remote_file` fails when the remote path does not exist" do
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n"
+      end
+    end
+
+    step "`create_remote_file` fails when the remote path does not exist, using scp" do
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'scp' }
+      end
+    end
+  end
+
+  step "`create_remote_file` CURRENTLY does not fail and does not create a remote file when the remote path does not exist, using rsync" do
+    create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+    assert_raises Beaker::Host::CommandFailure do
+      on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+    end
+  end
+
+  step "`create_remote_file` creates a remote file with the specified contents" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts.first, remotefilename, "contents\n"
+    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    assert_equal "contents\n", remote_contents
+  end
+
+  step "`create_remote_file` creates a remote file with the specified contents, using scp" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => "scp" }
+    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    assert_equal "contents\n", remote_contents
+  end
+
+  step "`create_remote_file` creates a remote file with the specified contents, using rsync" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => "rsync" }
+    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    assert_equal "contents\n", remote_contents
+  end
+
+  step "`create_remote_file`' does not create a remote file when an unknown protocol is specified" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => 'unknown' }
+    assert_raises Beaker::Host::CommandFailure do
+      on(hosts.first, "cat #{remotefilename}").exit_code
+    end
+  end
+
+  step "`create_remote_file` create remote files on all remote hosts, when given an array" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remotetmpdir}"
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts, remotefilename, "contents\n"
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remotefilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
+
+  step "`create_remote_file` create remote files on all remote hosts, when given an array, using scp" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remotetmpdir}"
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts, remotefilename, "contents\n", { :protocol => 'scp' }
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remotefilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
+
+  step "`create_remote_file` create remote files on all remote hosts, when given an array, using rsync" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remotetmpdir}"
+    remotefilename = File.join(remotetmpdir, "testfile.txt")
+    create_remote_file hosts, remotefilename, "contents\n", { :protocol => 'rsync' }
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remotefilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
 end
