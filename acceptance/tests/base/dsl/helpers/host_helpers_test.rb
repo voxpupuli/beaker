@@ -1,3 +1,14 @@
+
+# Currently scp failures throw a Net::SCP::Error exception in SSH connection
+# close, which ends up not being caught properly, and which ultimately results
+# in a RuntimeError. The SSH Connection is left in an unusable state and all
+# later remote commands will hang indefinitely.
+#
+# TODO: fix this problem
+def test_scp_error_on_close?
+  !!ENV['TEST_SCP_ERROR_ON_CLOSE']
+end
+
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
     assert (hosts.size > 1),
@@ -212,27 +223,21 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-if false
-  # Currently this scp failure condition throws a Net::SCP::Error exception
-  # at a low level, during SSH connection close, which ends up not being caught
-  # properly, and which ultimately results in a RuntimeError. The SSH Connection
-  # is left in an unusable state and all later remote commands will fail.
-  #
-  # TODO: fix this problem
-  step "`scp_to` fails if the remote path cannot be found" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
-      end
+  if test_scp_error_on_close?
+    step "`scp_to` fails if the remote path cannot be found" do
+      Dir.mktmpdir do |localdir|
+        localfilename = File.join(localdir, "testfile.txt")
+        File.open(localfilename, "w") do |localfile|
+          localfile.puts "contents"
+        end
 
-      # assert_raises Beaker::Host::CommandFailure do
-      assert_raises RuntimeError do
-        scp_to hosts.first, localfilename, "/non/existent/remote/file.txt"
+        # assert_raises Beaker::Host::CommandFailure do
+        assert_raises RuntimeError do
+          scp_to hosts.first, localfilename, "/non/existent/remote/file.txt"
+        end
       end
     end
   end
-end
 
   step "`scp_to` creates the file on the remote system" do
     remotetmpdir = create_tmpdir_on hosts.first
@@ -250,30 +255,24 @@ end
     end
   end
 
-if false
-  # Currently these scp failure conditions throw a Net::SCP::Error exception
-  # at a low level, during SSH connection close, which ends up not being caught
-  # properly, and which ultimately results in a RuntimeError. The SSH Connection
-  # is left in an unusable state and all later remote commands will fail.
-  #
-  # TODO: fix this problem
-  step "`scp_from` fails if the local path cannot be found" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    on hosts.first, %Q{echo "contents" > #{remotefilename}}
-    assert_raises Beaker::Host::CommandFailure do
-      scp_from hosts.first, remotefilename, "/non/existent/file.txt"
-    end
-  end
-
-  step "`scp_from` fails if the remote file cannot be found" do
-    Dir.mktmpdir do |localdir|
+  if test_scp_error_on_close?
+    step "`scp_from` fails if the local path cannot be found" do
+      remotetmpdir = create_tmpdir_on hosts.first
+      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      on hosts.first, %Q{echo "contents" > #{remotefilename}}
       assert_raises Beaker::Host::CommandFailure do
-        scp_from hosts.first, "/non/existent/remote/file.txt", localdir
+        scp_from hosts.first, remotefilename, "/non/existent/file.txt"
+      end
+    end
+
+    step "`scp_from` fails if the remote file cannot be found" do
+      Dir.mktmpdir do |localdir|
+        assert_raises Beaker::Host::CommandFailure do
+          scp_from hosts.first, "/non/existent/remote/file.txt", localdir
+        end
       end
     end
   end
-end
 
   step "`scp_from` creates the file on the local system" do
     Dir.mktmpdir do |localdir|
