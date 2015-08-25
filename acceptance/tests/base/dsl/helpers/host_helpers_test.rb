@@ -609,6 +609,26 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#upgrade_package fails if package is not already installed" do
+    assert_raises Beaker::Host::CommandFailure do
+      upgrade_package hosts.first, "non-existent-package-name"
+    end
+  end
+
+  step "#upgrade_package succeeds if package is installed" do
+    # TODO: anyone have any bright ideas on how to portably install an old
+    # version of a package, to really test an upgrade?
+    install_package hosts.first, "rsync"
+    upgrade_package hosts.first, "rsync"
+    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed/upgraded"
+  end
+
+  step "#upgrade_package CURRENTLY fails when given a host array" do
+    assert_raises NoMethodError do
+      upgrade_package hosts, "rsync"
+    end
+  end
+
   step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
     remote_source = create_tmpdir_on hosts.first
     remote_destination = create_tmpdir_on hosts.first
