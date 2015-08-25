@@ -569,6 +569,23 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#check_for_package will return false if the specified package is not installed on the remote host" do
+    result = check_for_package hosts.first, "non-existent-package-name"
+    assert !result
+  end
+
+  step "#check_for_package will return true if the specified package is installed on the remote host" do
+    install_package hosts.first, "rsync"
+    result = check_for_package hosts.first, "rsync"
+    assert result
+  end
+
+  step "#check_for_package CURRENTLY fails if given a host array" do
+    assert_raises NoMethodError do
+      check_for_package hosts, "rsync"
+    end
+  end
+
   step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
     remote_source = create_tmpdir_on hosts.first
     remote_destination = create_tmpdir_on hosts.first
