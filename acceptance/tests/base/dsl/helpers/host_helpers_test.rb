@@ -569,6 +569,29 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#install_package fails if package is not known on the OS" do
+    assert_raises Beaker::Host::CommandFailure do
+      install_package hosts.first, "non-existent-package-name"
+    end
+  end
+
+  step "#install_package installs a known package successfully" do
+    result = install_package hosts.first, "rsync"
+    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+  end
+
+  step "#install_package succeeds when installing an already-installed package" do
+    result = install_package hosts.first, "rsync"
+    result = install_package hosts.first, "rsync"
+    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+  end
+
+  step "#install_package CURRENTLY fails if given a host array" do
+    assert_raises NoMethodError do
+      install_package hosts, "rsync"
+    end
+  end
+
   step "#check_for_package will return false if the specified package is not installed on the remote host" do
     result = check_for_package hosts.first, "non-existent-package-name"
     assert !result
