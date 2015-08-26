@@ -685,6 +685,61 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  step "#curl_on fails if the URL in question cannot be reached" do
+    assert Beaker::Host::CommandFailure do
+      curl_on hosts.first, "file:///non/existent.html"
+    end
+  end
+
+  step "#curl_on can retrieve the contents of a URL, using standard curl options" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join remotetmpdir, "testfile.txt"
+    remotetargetfilename = File.join remotetmpdir, "outfile.txt"
+    create_remote_file hosts.first, remotefilename, "contents"
+    result = curl_on hosts.first, "-o #{remotetargetfilename} file:///#{remotefilename}"
+    assert_equal 0, result.exit_code
+    remote_contents = on(hosts.first, "cat #{remotetargetfilename}").stdout
+    assert_equal "contents\n", remote_contents
+  end
+
+  step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
+    remotetmpdir = create_tmpdir_on hosts.first
+    remotefilename = File.join remotetmpdir, "testfile.txt"
+    remotetargetfilename = File.join remotetmpdir, "outfile.txt"
+    on hosts, "mkdir -p #{remotetmpdir}"
+    create_remote_file hosts, remotefilename, "contents"
+
+    result = curl_on hosts, "-o #{remotetargetfilename} file:///#{remotefilename}"
+
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remotetargetfilename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
+  end
+
+  step "#curl_with_retries CURRENTLY fails with a RuntimeError if retries are exhausted without fetching the specified URL" do
+    # NOTE: would expect that this would raise Beaker::Host::CommandFailure
+    assert_raises RuntimeError do
+      curl_with_retries \
+        "description",
+        hosts.first,
+        "file:///non/existent.html",
+        desired_exit_codes = [0],
+        max_retries = 2,
+        retry_interval = 0.01
+    end
+  end
+
+  step "#curl_with_retries retrieves the contents of a URL after retrying" do
+    # TODO: testing curl_with_retries relies on having a portable means of
+    # making an unavailable URL available after a period of time.
+  end
+
+  step "#curl_with_retries can retrieve the contents of a URL after retrying, when given a hosts array" do
+    # TODO: testing curl_with_retries relies on having a portable means of
+    # making an unavailable URL available after a period of time.
+  end
+
   step "#create_tmpdir_on returns a temporary directory on the remote system" do
     tmpdir = create_tmpdir_on hosts.first
     assert_match %r{/}, tmpdir
