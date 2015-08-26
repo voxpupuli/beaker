@@ -177,59 +177,59 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#scp_to fails if the local file cannot be found" do
-    remotetmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = create_tmpdir_on hosts.first
     assert_raises IOError do
-      scp_to hosts.first, "/non/existent/file.txt", remotetmpdir
+      scp_to hosts.first, "/non/existent/file.txt", remote_tmpdir
     end
   end
 
   if test_scp_error_on_close?
     step "#scp_to fails if the remote path cannot be found" do
-      Dir.mktmpdir do |localdir|
-        localfilename = File.join(localdir, "testfile.txt")
-        File.open(localfilename, "w") do |localfile|
-          localfile.puts "contents"
+      Dir.mktmpdir do |local_dir|
+        local_filename = File.join(local_dir, "testfile.txt")
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
         end
 
         # assert_raises Beaker::Host::CommandFailure do
         assert_raises RuntimeError do
-          scp_to hosts.first, localfilename, "/non/existent/remote/file.txt"
+          scp_to hosts.first, local_filename, "/non/existent/remote/file.txt"
         end
       end
     end
   end
 
   step "#scp_to creates the file on the remote system" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "contents"
       end
-      remotetmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = create_tmpdir_on hosts.first
 
-      scp_to hosts.first, localfilename, remotetmpdir
+      scp_to hosts.first, local_filename, remote_tmpdir
 
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
-      remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
 
   step "#scp_to creates the file on all remote systems when a host array is provided" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "contents"
       end
 
-      remotetmpdir = create_tmpdir_on hosts.first
-      on hosts, "mkdir -p #{remotetmpdir}"
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      remote_tmpdir = create_tmpdir_on hosts.first
+      on hosts, "mkdir -p #{remote_tmpdir}"
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-      scp_to hosts, localfilename, remotetmpdir
+      scp_to hosts, local_filename, remote_tmpdir
 
       hosts.each do |host|
-        remote_contents = on(host, "cat #{remotefilename}").stdout
+        remote_contents = on(host, "cat #{remote_filename}").stdout
         assert_equal "contents\n", remote_contents
       end
     end
@@ -237,67 +237,67 @@ test_name "dsl::helpers::host_helpers" do
 
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
-      remotetmpdir = create_tmpdir_on hosts.first
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
-      on hosts.first, %Q{echo "contents" > #{remotefilename}}
+      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      on hosts.first, %Q{echo "contents" > #{remote_filename}}
       assert_raises Beaker::Host::CommandFailure do
-        scp_from hosts.first, remotefilename, "/non/existent/file.txt"
+        scp_from hosts.first, remote_filename, "/non/existent/file.txt"
       end
     end
 
     step "#scp_from fails if the remote file cannot be found" do
-      Dir.mktmpdir do |localdir|
+      Dir.mktmpdir do |local_dir|
         assert_raises Beaker::Host::CommandFailure do
-          scp_from hosts.first, "/non/existent/remote/file.txt", localdir
+          scp_from hosts.first, "/non/existent/remote/file.txt", local_dir
         end
       end
     end
   end
 
   step "#scp_from creates the file on the local system" do
-    Dir.mktmpdir do |localdir|
-      remotetmpdir = create_tmpdir_on hosts.first
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
-      on hosts.first, %Q{echo "contents" > #{remotefilename}}
+    Dir.mktmpdir do |local_dir|
+      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      on hosts.first, %Q{echo "contents" > #{remote_filename}}
 
-      scp_from hosts.first, remotefilename, localdir
+      scp_from hosts.first, remote_filename, local_dir
 
-      localfilename = File.join(localdir, "testfile.txt")
-      assert_equal "contents\n", File.read(localfilename)
+      local_filename = File.join(local_dir, "testfile.txt")
+      assert_equal "contents\n", File.read(local_filename)
     end
   end
 
   step "#scp_from CURRENTLY creates and repeatedly overwrites the file on the local system" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      remotetmpdir = create_tmpdir_on hosts.first
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
-      on hosts, "mkdir -p #{remotetmpdir}"
-      results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remotefilename}}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      on hosts, "mkdir -p #{remote_tmpdir}"
+      results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
 
-      scp_from hosts, remotefilename, localdir
+      scp_from hosts, remote_filename, local_dir
 
-      remotecontents = on(hosts.last, "cat #{remotefilename}").stdout
-      localcontents = File.read(localfilename)
-      assert_equal remotecontents, localcontents
+      remote_contents = on(hosts.last, "cat #{remote_filename}").stdout
+      local_contents = File.read(local_filename)
+      assert_equal remote_contents, local_contents
     end
   end
 
   step "#rsync_to fails if the local file cannot be found" do
-    remotetmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = create_tmpdir_on hosts.first
     assert_raises IOError do
-      rsync_to hosts.first, "/non/existent/file.txt", remotetmpdir
+      rsync_to hosts.first, "/non/existent/file.txt", remote_tmpdir
     end
   end
 
   step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "contents"
       end
 
-      rsync_to hosts.first, localfilename, "/non/existent/testfile.txt"
+      rsync_to hosts.first, local_filename, "/non/existent/testfile.txt"
       assert_raises Beaker::Host::CommandFailure do
         on(hosts.first, "cat /non/existent/testfile.txt").exit_code
       end
@@ -305,36 +305,36 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#rsync_to creates the file on the remote system" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "contents"
       end
-      remotetmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = create_tmpdir_on hosts.first
 
-      rsync_to hosts.first, localfilename, remotetmpdir
+      rsync_to hosts.first, local_filename, remote_tmpdir
 
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
-      remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
 
   step "#rsync_to creates the file on all remote systems when a host array is provided" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.txt")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "contents"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.txt")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "contents"
       end
 
-      remotetmpdir = create_tmpdir_on hosts.first
-      on hosts, "mkdir -p #{remotetmpdir}"
-      remotefilename = File.join(remotetmpdir, "testfile.txt")
+      remote_tmpdir = create_tmpdir_on hosts.first
+      on hosts, "mkdir -p #{remote_tmpdir}"
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-      rsync_to hosts, localfilename, remotetmpdir
+      rsync_to hosts, local_filename, remote_tmpdir
 
       hosts.each do |host|
-        remote_contents = on(host, "cat #{remotefilename}").stdout
+        remote_contents = on(host, "cat #{remote_filename}").stdout
         assert_equal "contents\n", remote_contents
       end
     end
@@ -362,67 +362,67 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts.first, remotefilename, "contents\n"
-    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts.first, remote_filename, "contents\n"
+    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => "scp" }
-    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "scp" }
+    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using rsync" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => "rsync" }
-    remote_contents = on(hosts.first, "cat #{remotefilename}").stdout
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
+    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts.first, remotefilename, "contents\n", { :protocol => 'unknown' }
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => 'unknown' }
     assert_raises Beaker::Host::CommandFailure do
-      on(hosts.first, "cat #{remotefilename}").exit_code
+      on(hosts.first, "cat #{remote_filename}").exit_code
     end
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    on hosts, "mkdir -p #{remotetmpdir}"
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts, remotefilename, "contents\n"
+    remote_tmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remote_tmpdir}"
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts, remote_filename, "contents\n"
     hosts.each do |host|
-      remote_contents = on(host, "cat #{remotefilename}").stdout
+      remote_contents = on(host, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array, using scp" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    on hosts, "mkdir -p #{remotetmpdir}"
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts, remotefilename, "contents\n", { :protocol => 'scp' }
+    remote_tmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remote_tmpdir}"
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'scp' }
     hosts.each do |host|
-      remote_contents = on(host, "cat #{remotefilename}").stdout
+      remote_contents = on(host, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    on hosts, "mkdir -p #{remotetmpdir}"
-    remotefilename = File.join(remotetmpdir, "testfile.txt")
-    create_remote_file hosts, remotefilename, "contents\n", { :protocol => 'rsync' }
+    remote_tmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remote_tmpdir}"
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
     hosts.each do |host|
-      remote_contents = on(host, "cat #{remotefilename}").stdout
+      remote_contents = on(host, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
@@ -434,55 +434,55 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#run_script_on fails when there is an error running the remote script" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "exit 1"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "exit 1"
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
       assert_raises Beaker::Host::CommandFailure do
-        run_script_on hosts.first, localfilename
+        run_script_on hosts.first, local_filename
       end
     end
   end
 
   step "#run_script_on passes along options when running the remote command" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "exit 1"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "exit 1"
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      result = run_script_on hosts.first, localfilename, { :accept_all_exit_codes => true }
+      result = run_script_on hosts.first, local_filename, { :accept_all_exit_codes => true }
       assert_equal 1, result.exit_code
     end
   end
 
   step "#run_script_on runs the script on the remote host" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts %Q{echo "contents"}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts %Q{echo "contents"}
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      results = run_script_on hosts.first, localfilename
+      results = run_script_on hosts.first, local_filename
       assert_equal 0, results.exit_code
       assert_equal "contents\n", results.stdout
     end
   end
 
   step "#run_script_on allows assertions in an optional block" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts %Q{echo "contents"}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts %Q{echo "contents"}
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      results = run_script_on hosts.first, localfilename do
+      results = run_script_on hosts.first, local_filename do
         assert_equal 0, exit_code
         assert_equal "contents\n", stdout
       end
@@ -490,14 +490,14 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#run_script_on runs the script on all remote hosts when a host array is provided" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts %Q{echo "contents"}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts %Q{echo "contents"}
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      results = run_script_on hosts, localfilename
+      results = run_script_on hosts, local_filename
 
       assert_equal hosts.size, results.size
       results.each do |result|
@@ -514,55 +514,55 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#run_script fails when there is an error running the remote script" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "exit 1"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "exit 1"
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
       assert_raises Beaker::Host::CommandFailure do
-        run_script localfilename
+        run_script local_filename
       end
     end
   end
 
   step "#run_script passes along options when running the remote command" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts "exit 1"
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts "exit 1"
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      result = run_script localfilename, { :accept_all_exit_codes => true }
+      result = run_script local_filename, { :accept_all_exit_codes => true }
       assert_equal 1, result.exit_code
     end
   end
 
   step "#run_script runs the script on the remote host" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts %Q{echo "contents"}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts %Q{echo "contents"}
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      results = run_script localfilename
+      results = run_script local_filename
       assert_equal 0, results.exit_code
       assert_equal "contents\n", results.stdout
     end
   end
 
   step "#run_script allows assertions in an optional block" do
-    Dir.mktmpdir do |localdir|
-      localfilename = File.join(localdir, "testfile.sh")
-      File.open(localfilename, "w") do |localfile|
-        localfile.puts %Q{echo "contents"}
+    Dir.mktmpdir do |local_dir|
+      local_filename = File.join(local_dir, "testfile.sh")
+      File.open(local_filename, "w") do |local_file|
+        local_file.puts %Q{echo "contents"}
       end
-      FileUtils.chmod "a+x", localfilename
+      FileUtils.chmod "a+x", local_filename
 
-      results = run_script localfilename do
+      results = run_script local_filename do
         assert_equal 0, exit_code
         assert_equal "contents\n", stdout
       end
@@ -692,27 +692,27 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#curl_on can retrieve the contents of a URL, using standard curl options" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join remotetmpdir, "testfile.txt"
-    remotetargetfilename = File.join remotetmpdir, "outfile.txt"
-    create_remote_file hosts.first, remotefilename, "contents"
-    result = curl_on hosts.first, "-o #{remotetargetfilename} file:///#{remotefilename}"
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join remote_tmpdir, "testfile.txt"
+    remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
+    create_remote_file hosts.first, remote_filename, "contents"
+    result = curl_on hosts.first, "-o #{remote_targetfilename} file:///#{remote_filename}"
     assert_equal 0, result.exit_code
-    remote_contents = on(hosts.first, "cat #{remotetargetfilename}").stdout
+    remote_contents = on(hosts.first, "cat #{remote_targetfilename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
-    remotetmpdir = create_tmpdir_on hosts.first
-    remotefilename = File.join remotetmpdir, "testfile.txt"
-    remotetargetfilename = File.join remotetmpdir, "outfile.txt"
-    on hosts, "mkdir -p #{remotetmpdir}"
-    create_remote_file hosts, remotefilename, "contents"
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_filename = File.join remote_tmpdir, "testfile.txt"
+    remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
+    on hosts, "mkdir -p #{remote_tmpdir}"
+    create_remote_file hosts, remote_filename, "contents"
 
-    result = curl_on hosts, "-o #{remotetargetfilename} file:///#{remotefilename}"
+    result = curl_on hosts, "-o #{remote_targetfilename} file:///#{remote_filename}"
 
     hosts.each do |host|
-      remote_contents = on(host, "cat #{remotetargetfilename}").stdout
+      remote_contents = on(host, "cat #{remote_targetfilename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
