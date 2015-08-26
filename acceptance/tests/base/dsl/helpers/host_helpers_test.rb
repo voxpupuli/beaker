@@ -740,6 +740,62 @@ test_name "dsl::helpers::host_helpers" do
     # making an unavailable URL available after a period of time.
   end
 
+  # Return the body of a script which will fail the first `retry_limit` times
+  # when run and then will exit successfully on later runs. It will store counter
+  # state in a file in the provided `basedir` directory.
+  def retry_script_body(basedir, retry_limit)
+    %Q{
+      current=`cat #{basedir}/value.txt || echo '0'`
+      current=$((current+1))
+      echo "${current}" > #{basedir}/value.txt
+      if [ "$current" -gt "#{retry_limit}" ]; then exit 0; fi
+      exit 1
+    }
+  end
+
+  step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
+    # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
+    # instead of with RuntimeError
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_script_file = File.join(remote_tmpdir, "test.sh")
+    create_remote_file \
+      hosts.first,
+      remote_script_file,
+      retry_script_body(remote_tmpdir, failure_count = 10)
+
+    assert_raises RuntimeError do
+      retry_on hosts.first, remote_script_file, { :max_retries => 2, :retry_interval => 0.1 }
+    end
+  end
+
+  step "#retry_on succeeds if command passes before retries are exhausted" do
+    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_script_file = File.join(remote_tmpdir, "test.sh")
+    create_remote_file \
+      hosts.first,
+      remote_script_file,
+      retry_script_body(remote_tmpdir, failure_count = 2)
+
+    result = retry_on hosts.first, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
+    assert_equal 0, result.exit_code
+    assert_equal "", result.stdout
+  end
+
+  step "#retry_on CURRENTLY fails when provided a host array" do
+    remote_tmpdir = create_tmpdir_on hosts.first
+    on hosts, "mkdir -p #{remote_tmpdir}"
+
+    remote_script_file = File.join(remote_tmpdir, "test.sh")
+    create_remote_file \
+      hosts,
+      remote_script_file,
+      retry_script_body(remote_tmpdir, failure_count = 2)
+
+    assert_raises do
+      result = retry_on hosts, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
+    end
+  end
+
   step "#create_tmpdir_on returns a temporary directory on the remote system" do
     tmpdir = create_tmpdir_on hosts.first
     assert_match %r{/}, tmpdir
