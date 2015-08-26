@@ -102,12 +102,12 @@ module Beaker
         instance_set = [ec2_instance, vpc_instance, nil_instance, unreal_instance]
         expect(aws.kill_instances(instance_set)).to be_nil
       end
-  
+
       it 'cleanly handles an empty instance list' do
         instance_set = []
         expect(aws.kill_instances(instance_set)).to be_nil
       end
-  
+
       context 'in general use' do
         let( :instance_set ) { [ec2_instance, vpc_instance] }
 
@@ -117,7 +117,7 @@ module Beaker
           end
           expect(kill_instances).to be_nil
         end
-  
+
         it 'verifies instances are not nil' do
           instance_set.each do |instance|
             expect(instance).to receive(:nil?)
@@ -125,7 +125,7 @@ module Beaker
           end
           expect(kill_instances).to be_nil
         end
-  
+
         it 'verifies instances exist in AWS' do
           instance_set.each do |instance|
             expect(instance).to receive(:exists?)
@@ -144,7 +144,7 @@ module Beaker
           end
           expect(kill_instances).to be_nil
         end
-  
+
         it 'verifies instance is not nil' do
           instance_set.each do |instance|
             expect(instance).to receive(:nil?)
@@ -152,7 +152,7 @@ module Beaker
           end
           expect(kill_instances).to be_nil
         end
-  
+
         it 'verifies instance exists in AWS' do
           instance_set.each do |instance|
             expect(instance).to receive(:exists?)
@@ -536,7 +536,7 @@ module Beaker
           @hosts.each {|host| expect(host).to receive(:exec).once}
           expect(set_hostnames).to eq(@hosts)
         end
-  
+
         it 'passes a Command instance to exec' do
           @hosts.each do |host|
             expect(host).to receive(:exec).with( instance_of(Beaker::Command) ).once
@@ -729,7 +729,7 @@ module Beaker
       subject(:load_fog_credentials) { aws.load_fog_credentials(dot_fog) }
 
       it 'returns loaded fog credentials' do
-        fog_hash = {:default => {:aws_access_key_id => 'awskey', :aws_secret_access_key => 'awspass'}} 
+        fog_hash = {:default => {:aws_access_key_id => 'awskey', :aws_secret_access_key => 'awspass'}}
         expect(aws).to receive(:load_fog_credentials).and_call_original
         expect(YAML).to receive(:load_file).and_return(fog_hash)
         expect(load_fog_credentials).to eq(creds)
@@ -737,16 +737,16 @@ module Beaker
 
       context 'raises errors' do
         it 'if missing access_key credential' do
-          fog_hash = {:default => {:aws_secret_access_key => 'awspass'}} 
+          fog_hash = {:default => {:aws_secret_access_key => 'awspass'}}
           err_text = "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!"
           expect(aws).to receive(:load_fog_credentials).and_call_original
           expect(YAML).to receive(:load_file).and_return(fog_hash)
           expect { load_fog_credentials }.to raise_error(err_text)
         end
-  
+
         it 'if missing secret_key credential' do
           dot_fog = '.fog'
-          fog_hash = {:default => {:aws_access_key_id => 'awskey'}} 
+          fog_hash = {:default => {:aws_access_key_id => 'awskey'}}
           err_text = "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!"
           expect(aws).to receive(:load_fog_credentials).and_call_original
           expect(YAML).to receive(:load_file).and_return(fog_hash)

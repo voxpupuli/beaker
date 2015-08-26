@@ -792,8 +792,8 @@ module Beaker
       fog = YAML.load_file( dot_fog )
       default = fog[:default]
 
-      raise "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:access_key]
-      raise "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:secret_key]
+      raise "You must specify an aws_access_key_id in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:aws_access_key_id]
+      raise "You must specify an aws_secret_access_key in your .fog file (#{dot_fog}) for ec2 instances!" unless default[:aws_secret_access_key]
 
       {
         :access_key => default[:aws_access_key_id],
