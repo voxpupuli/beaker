@@ -50,7 +50,7 @@ module Beaker
       @hosts[4][:user] = 'notroot'
 
       ENV['AWS_ACCESS_KEY'] = nil
-      ENV['AWS_ACCESS_KEY_ID'] = nil
+      ENV['AWS_SECRET_ACCESS_KEY'] = nil
     end
 
     context 'loading credentials' do
@@ -63,10 +63,10 @@ module Beaker
 
 
       it 'from environment variables' do
-        ENV['AWS_ACCESS_KEY'] = "IAMANACCESSKEY"
-        ENV['AWS_ACCESS_KEY_ID'] = "supersekritkey"
+        ENV['AWS_ACCESS_KEY_ID'] = "IMANACCESSKEY"
+        ENV['AWS_SECRET_ACCESS_KEY'] = "supersekritkey"
 
-        creds = aws.load_credentials
+        creds = aws.load_env_credentials
         expect( creds[:access_key] ).to eq("IMANACCESSKEY")
         expect( creds[:secret_key] ).to eq("supersekritkey")
       end

@@ -771,7 +771,7 @@ module Beaker
     # @param prefix [String] environment variable prefix
     # @return [Hash<Symbol, String>] ec2 credentials
     # @api private
-    def load_env_credentials(prefix='ENV')
+    def load_env_credentials(prefix='AWS')
       provider = AWS::Core::CredentialProviders::ENVProvider.new prefix
 
       if provider.set?
