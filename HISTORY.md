@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 17 Aug, 2015 (1d735a7a)](#LATEST)
+* [LATEST - 26 Aug, 2015 (a6ef010f)](#LATEST)
+* [2.20.0 - 17 Aug, 2015 (8a419e98)](#2.20.0)
 * [2.19.0 - 13 Aug, 2015 (80897129)](#2.19.0)
 * [2.18.3 - 28 Jul, 2015 (d9a02474)](#2.18.3)
 * [2.18.2 - 27 Jul, 2015 (c84f6f23)](#2.18.2)
@@ -92,7 +93,227 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 17 Aug, 2015 (1d735a7a)
+### <a name = "LATEST">LATEST - 26 Aug, 2015 (a6ef010f)
+
+* (GEM) update beaker version to 2.21.0 (a6ef010f)
+
+* Merge pull request #933 from sschneid/license_update (978b2ede)
+
+
+```
+Merge pull request #933 from sschneid/license_update
+
+(maint) Update license copyright
+```
+* Merge pull request #932 from anodelman/win-fix (a5b8f291)
+
+
+```
+Merge pull request #932 from anodelman/win-fix
+
+(BKR-293) PowerShell Hangs on Windows 2008 R2 WMF 5.0 Beta
+```
+* Merge pull request #919 from colinPL/pkg_acceptance (cb6fa705)
+
+
+```
+Merge pull request #919 from colinPL/pkg_acceptance
+
+(maint) Add Package Acceptance Tests
+```
+* (maint) Update license copyright (ed0a84ec)
+
+* Merge pull request #926 from anodelman/aio-paths (dce6c683)
+
+
+```
+Merge pull request #926 from anodelman/aio-paths
+
+(BKR-395) Calling `remove_defaults_on` twice with `type: aio` in...
+```
+* Merge pull request #931 from colinPL/bkr452_deb_code (9885aab1)
+
+
+```
+Merge pull request #931 from colinPL/bkr452_deb_code
+
+(BRK-452) Use Platform To Get Code Name
+```
+* (BKR-293) PowerShell Hangs on Windows 2008 R2 WMF 5.0 Beta (0d99ed70)
+
+
+```
+(BKR-293) PowerShell Hangs on Windows 2008 R2 WMF 5.0 Beta
+
+- beaker powershell regressions discovered while working on this bug,
+  mostly around ensuring that we are using the correct path separator on
+  pswindowns machines
+```
+* Merge pull request #929 from puppetlabs/maint/fix-git-install-load-path-issue (f1e1ef00)
+
+
+```
+Merge pull request #929 from puppetlabs/maint/fix-git-install-load-path-issue
+
+(MAINT) Fix acceptance puppet_git load path
+```
+* Merge pull request #927 from anodelman/maint (87b094d1)
+
+
+```
+Merge pull request #927 from anodelman/maint
+
+(BKR-449) beaker acceptance base smoketest intermittant failure...
+```
+* (maint) fix old issue with clone_git_repo_on test (27bae4b5)
+
+
+```
+(maint) fix old issue with clone_git_repo_on test
+
+Prior to this change clone_git_repo_on acceptance test would fail as we
+reverted the method's behavior to be backwards compatible.  it appears
+this tests is not getting run in CI. Also add install_utils to the
+load_path so the user doesn't have to.
+```
+* (BRK-452) Use Platform To Get Code Name (518f25ae)
+
+
+```
+(BRK-452) Use Platform To Get Code Name
+
+The unix/pkg.rb had its own mapping of platform to debian code name.
+However, this is available through the Platform class. This commit
+removes the duplicate data in pkg.rb and uses self['platform'].codename
+in its place.
+```
+* (maint) Add vivid Repo Fixture (fc5afde6)
+
+
+```
+(maint) Add vivid Repo Fixture
+
+Add repo fixture for Ubuntu 15.04 (vivid).
+```
+* (MAINT) Fix acceptance puppet_git load path (efa36129)
+
+
+```
+(MAINT) Fix acceptance puppet_git load path
+
+Prior to this commit, running the acceptance tests locally without specifying a
+specific load path would result in a require failure if attempting to test against
+puppet installed via git.
+
+This updates the load path to fix the problem.
+```
+* (maint) Add trusty Repo Template (c5ed7a0d)
+
+
+```
+(maint) Add trusty Repo Template
+
+Add repo fixture for trusty instances.
+```
+* (BKR-449) beaker acceptance base smoketest intermittant failure... (f626b057)
+
+
+```
+(BKR-449) beaker acceptance base smoketest intermittant failure...
+
+...on ubuntu 1504
+
+- when attempting to reconnect post reboot we are getting into a
+  blocking state, most likely an issue with the Net::SSH gem
+- just give some breathing room before moving on from a reboot and
+  everything is okay
+```
+* (maint) Add Missing Fedora Templates (485dcefa)
+
+
+```
+(maint) Add Missing Fedora Templates
+
+Add missing fedora rpm repo templates for packaging tests.
+```
+* Merge pull request #921 from mcanevet/fix/hack_etc_host_on_openstack (cf09c58b)
+
+
+```
+Merge pull request #921 from mcanevet/fix/hack_etc_host_on_openstack
+
+(BKR-443) Hack /etc/hosts when using openstack
+```
+* Merge pull request #893 from biemond/solaris-fixes (b402911a)
+
+
+```
+Merge pull request #893 from biemond/solaris-fixes
+
+BKR-408 Supporting solaris as a beakernode
+```
+* (BKR-395) Calling `remove_defaults_on` twice with `type: aio` in... (97cbc1a9)
+
+
+```
+(BKR-395) Calling `remove_defaults_on` twice with `type: aio` in...
+
+...config file throws exception
+
+- ensure that we don't blow away the PATH and break the world
+```
+* (BKR-443) Hack /etc/hosts when using openstack (a701c7cc)
+
+* (maint) Exclude OS X From Most Things (c9c224aa)
+
+
+```
+(maint) Exclude OS X From Most Things
+
+Exclude OS X systems from running the generic and unix-specific package
+tests. A special test suite will need to be created for these systems.
+```
+* (maint) Change assert Method; Workaround debian Check for Package (09b7c9fb)
+
+
+```
+(maint) Change assert Method; Workaround debian Check for Package
+
+assert_equal(true,...) is the same as just assert(...). Change all
+of those matching calls to just assert.
+
+beaker can incorrectly report a package as being installed when in fact it is not. This is specific to debian systems. As a work around to the above, debian systems will use check_for_command to determine whether the specific package is installed.
+```
+* (maint) Add Package Acceptance Tests (a9919557)
+
+
+```
+(maint) Add Package Acceptance Tests
+
+Add acceptance tests that exercise the host packages functionality. There are two files: one for all hosts and one targeting unix hosts specifically.
+
+This includes fixtures for support the deploy_*_repo methods.
+```
+* BKR-408 Supporting solaris as a beakernode #893 (45f1f6c5)
+
+
+```
+BKR-408 Supporting solaris as a beakernode #893
+
+- copy certs to solaris root home folder  /
+- gsed of CSW to allow ssh root login
+- restart sshd daemon
+
+solaris 11 fixes
+
+- root home is /root and not /
+- PermitRootLogin in solaris 11 is not in comment
+- change security of the user root for solaris else no ssh login without
+password
+```
+### <a name = "2.20.0">2.20.0 - 17 Aug, 2015 (8a419e98)
+
+* (HISTORY) update beaker history for gem release 2.20.0 (8a419e98)
 
 * (GEM) update beaker version to 2.20.0 (1d735a7a)
 

@@ -20,6 +20,8 @@ module PSWindows::Exec
   end
 
   def rm_rf path
+    # ensure that we have the right slashes for windows
+    path = path.gsub(/\//, '\\')
     execute("del /s /q #{path}")
   end
 
@@ -28,6 +30,9 @@ module PSWindows::Exec
   # @param [String] dest the destination path
   # @param [Boolean] rm Remove the destination prior to move
   def mv(orig, dest, rm=true)
+    # ensure that we have the right slashes for windows
+    orig = orig.gsub(/\//,'\\')
+    dest = dest.gsub(/\//,'\\')
     rm_rf dest unless !rm
     execute("move /y #{orig} #{dest}")
   end
@@ -122,6 +127,7 @@ module PSWindows::Exec
     if val.empty?
       return ''
     else
+      val = val.split(/\n/)[0] # only take the first result
       if clean
         val.gsub(/#{key}=/,'')
       else
