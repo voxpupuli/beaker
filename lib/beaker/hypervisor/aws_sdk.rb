@@ -570,8 +570,8 @@ module Beaker
       host.close
       sha256 = Digest::SHA256.new
       password = sha256.hexdigest((1..50).map{(rand(86)+40).chr}.join.gsub(/\\/,'\&\&'))
-      host['ssh'] = {:password => password}
       host.exec(Command.new("echo -e '#{password}\\n#{password}' | tmsh modify auth password admin"))
+      host['ssh'][:password] = password host['ssh'] = {:password => password}
       @logger.notify("f5: Configured admin password to be #{password}")
     end
 
