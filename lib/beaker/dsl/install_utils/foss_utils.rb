@@ -1144,7 +1144,10 @@ module Beaker
               if arch == 'x86_64'
                 arch = 'i386'
               end
-              onhost_copy_base = '/'
+              if version == '10'
+                # Solaris 10 uses / as the root user directory. Solaris 11 uses /root.
+                onhost_copy_base = '/'
+              end
               release_path << "/solaris/#{version}/#{opts[:puppet_collection]}"
               release_file = "puppet-agent-#{opts[:puppet_agent_version]}.#{arch}.pkg.gz"
             else
