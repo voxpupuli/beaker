@@ -12,6 +12,9 @@ end
 
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
+    # NOTE: to generate a suitable windows platform config, I use:
+    #       `genconfig2 windows81-64default.a-64a`
+
     assert (hosts.size > 1),
       "dsl::helpers::host_helpers acceptance tests require at least two hosts"
 
@@ -626,6 +629,51 @@ test_name "dsl::helpers::host_helpers" do
   step "#upgrade_package CURRENTLY fails when given a host array" do
     assert_raises NoMethodError do
       upgrade_package hosts, "rsync"
+    end
+  end
+
+  step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
+    if hosts.first.is_powershell?
+      logger.info "Skipping failure test on powershell platforms..."
+    elsif hosts.first['platform'] =~ /windows/
+      assert_raises Beaker::Host::CommandFailure do
+        add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+      end
+    else
+      logger.info "Skipping failure tests on non-windows platforms..."
+      # NOTE: see test below for the reason for this conditional
+    end
+  end
+
+  step "#add_system32_hosts_entry CURRENTLY fails with RuntimeError when run on a non-windows platform" do
+    # NOTE: would expect this to behave the same way it does on a windows
+    #       non-powershell platform (raises Beaker::Host::CommandFailure), or
+    #       as requested in the original PR:
+    #       https://github.com/puppetlabs/beaker/pull/420/files#r17990622
+    if hosts.first['platform'] =~ /windows/
+      logger.info "Skipping failure test on powershell platforms..."
+    else
+      assert_raises RuntimeError do
+        add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+      end
+    end
+  end
+
+  step "#add_system32_hosts_entry, when run on a powershell platform, adds a host entry to system32 etc\\hosts" do
+    if hosts.first.is_powershell?
+      add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+
+      # TODO: how do we assert, via powershell, that the entry was added?
+
+    else
+      logger.info "Skipping test on non-powershell platforms..."
+    end
+  end
+
+  step "#add_system32_hosts_entry CURRENTLY fails with a TypeError when given a hosts array" do
+    # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+    assert_raises TypeError do
+      add_system32_hosts_entry hosts, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
     end
   end
 
