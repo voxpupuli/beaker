@@ -1,6 +1,6 @@
 require "fileutils"
 
-# Currently scp failures throw a Net::SCP::Error exception in SSH connection
+# NOTE: Currently scp failures throw a Net::SCP::Error exception in SSH connection
 # close, which ends up not being caught properly, and which ultimately results
 # in a RuntimeError. The SSH Connection is left in an unusable state and all
 # later remote commands will hang indefinitely.
@@ -8,6 +8,33 @@ require "fileutils"
 # TODO: fix this problem
 def test_scp_error_on_close?
   !!ENV["TEST_SCP_ERROR_ON_CLOSE"]
+end
+
+# NOTE: currently there is an issue with the tmpdir_on helper on cygwin
+#       platforms:  the `chown` command always fails with an error about not
+#       recognizing the Administrator:Administrator user/group.  Until this is
+#       fixed, we add this shim that delegates to a non-`chown`-executing version
+#       for the purposes of our test setup.
+def tmpdir_on(hosts, path_prefix = '', user=nil)
+  return create_tmpdir_on(hosts, path_prefix, user) unless Array(hosts).first.is_cygwin?
+
+  block_on hosts do | host |
+    # use default user logged into this host
+    if not user
+      user = host['user']
+    end
+
+    if not on(host, "getent passwd #{user}").exit_code == 0
+      raise "User #{user} does not exist on #{host}."
+    end
+
+    if defined? host.tmpdir
+      # NOTE: here we skip the `chown` call:
+      host.tmpdir(path_prefix)
+    else
+      raise "Host platform not supported by `tmpdir_on`."
+    end
+  end
 end
 
 test_name "dsl::helpers::host_helpers" do
@@ -180,7 +207,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#scp_to fails if the local file cannot be found" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     assert_raises IOError do
       scp_to hosts.first, "/non/existent/file.txt", remote_tmpdir
     end
@@ -208,7 +235,7 @@ test_name "dsl::helpers::host_helpers" do
       File.open(local_filename, "w") do |local_file|
         local_file.puts "contents"
       end
-      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on hosts.first
 
       scp_to hosts.first, local_filename, remote_tmpdir
 
@@ -225,7 +252,7 @@ test_name "dsl::helpers::host_helpers" do
         local_file.puts "contents"
       end
 
-      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on hosts.first
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
@@ -240,7 +267,7 @@ test_name "dsl::helpers::host_helpers" do
 
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
-      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on hosts.first
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts.first, %Q{echo "contents" > #{remote_filename}}
       assert_raises Beaker::Host::CommandFailure do
@@ -259,7 +286,7 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#scp_from creates the file on the local system" do
     Dir.mktmpdir do |local_dir|
-      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on hosts.first
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts.first, %Q{echo "contents" > #{remote_filename}}
 
@@ -273,7 +300,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#scp_from CURRENTLY creates and repeatedly overwrites the file on the local system" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.txt")
-      remote_tmpdir = create_tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on hosts.first
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
       results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
@@ -286,59 +313,81 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#rsync_to fails if the local file cannot be found" do
-    remote_tmpdir = create_tmpdir_on hosts.first
-    assert_raises IOError do
-      rsync_to hosts.first, "/non/existent/file.txt", remote_tmpdir
+  if hosts.first.is_cygwin?
+    # NOTE: rsync methods are not working currently on windows platforms
+
+    step "#rsync_to CURRENTLY fails on windows systems" do
+      Dir.mktmpdir do |local_dir|
+        local_filename = File.join(local_dir, "testfile.txt")
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+        remote_tmpdir = tmpdir_on hosts.first
+
+        rsync_to hosts.first, local_filename, remote_tmpdir
+
+        remote_filename = File.join(remote_tmpdir, "testfile.txt")
+        assert_raises Beaker::Host::CommandFailure do
+          remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+          # assert_equal "contents\n", remote_contents
+        end
+      end
     end
-  end
 
-  step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
-    Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "contents"
-      end
+  else
 
-      rsync_to hosts.first, local_filename, "/non/existent/testfile.txt"
-      assert_raises Beaker::Host::CommandFailure do
-        on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+    step "#rsync_to fails if the local file cannot be found" do
+      remote_tmpdir = tmpdir_on hosts.first
+      assert_raises IOError do
+        rsync_to hosts.first, "/non/existent/file.txt", remote_tmpdir
       end
     end
-  end
 
-  step "#rsync_to creates the file on the remote system" do
-    Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "contents"
+    step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
+      Dir.mktmpdir do |local_dir|
+        local_filename = File.join(local_dir, "testfile.txt")
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        rsync_to hosts.first, local_filename, "/non/existent/testfile.txt"
+        assert_raises Beaker::Host::CommandFailure do
+          on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+        end
       end
-      remote_tmpdir = create_tmpdir_on hosts.first
-
-      rsync_to hosts.first, local_filename, remote_tmpdir
-
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
     end
-  end
 
-  step "#rsync_to creates the file on all remote systems when a host array is provided" do
-    Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "contents"
+    step "#rsync_to creates the file on the remote system" do
+      Dir.mktmpdir do |local_dir|
+        local_filename = File.join(local_dir, "testfile.txt")
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+        remote_tmpdir = tmpdir_on hosts.first
+
+        rsync_to hosts.first, local_filename, remote_tmpdir
+
+        remote_filename = File.join(remote_tmpdir, "testfile.txt")
       end
+    end
 
-      remote_tmpdir = create_tmpdir_on hosts.first
-      on hosts, "mkdir -p #{remote_tmpdir}"
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    step "#rsync_to creates the file on all remote systems when a host array is provided" do
+      Dir.mktmpdir do |local_dir|
+        local_filename = File.join(local_dir, "testfile.txt")
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
 
-      rsync_to hosts, local_filename, remote_tmpdir
+        remote_tmpdir = tmpdir_on hosts.first
+        on hosts, "mkdir -p #{remote_tmpdir}"
+        remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-      hosts.each do |host|
-        remote_contents = on(host, "cat #{remote_filename}").stdout
-        assert_equal "contents\n", remote_contents
+        rsync_to hosts, local_filename, remote_tmpdir
+
+        hosts.each do |host|
+          remote_contents = on(host, "cat #{remote_filename}").stdout
+          assert_equal "contents\n", remote_contents
+        end
       end
     end
   end
@@ -365,7 +414,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts.first, remote_filename, "contents\n"
     remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
@@ -373,23 +422,38 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "scp" }
     remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
-  step "#create_remote_file creates a remote file with the specified contents, using rsync" do
-    remote_tmpdir = create_tmpdir_on hosts.first
-    remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
-    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
-    assert_equal "contents\n", remote_contents
+  if hosts.first.is_cygwin?
+    # NOTE: rsync methods are not working currently on windows platforms
+
+    step "#create_remote_file CURRENTLY fails on windows systems, using rsync" do
+      remote_tmpdir = tmpdir_on hosts.first
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
+      assert_raises Beaker::Host::CommandFailure do
+        remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+      end
+    end
+
+  else
+
+    step "#create_remote_file creates a remote file with the specified contents, using rsync" do
+      remote_tmpdir = tmpdir_on hosts.first
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
+      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+      assert_equal "contents\n", remote_contents
+    end
   end
 
   step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => 'unknown' }
     assert_raises Beaker::Host::CommandFailure do
@@ -398,7 +462,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts, remote_filename, "contents\n"
@@ -409,7 +473,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array, using scp" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'scp' }
@@ -419,14 +483,32 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
-    remote_tmpdir = create_tmpdir_on hosts.first
-    on hosts, "mkdir -p #{remote_tmpdir}"
-    remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
-    hosts.each do |host|
-      remote_contents = on(host, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
+  if hosts.first.is_cygwin?
+    # NOTE: rsync methods are not working currently on windows platforms
+
+    step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
+      remote_tmpdir = tmpdir_on hosts.first
+      on hosts, "mkdir -p #{remote_tmpdir}"
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
+      hosts.each do |host|
+        assert_raises Beaker::Host::CommandFailure do
+          remote_contents = on(host, "cat #{remote_filename}").stdout
+        end
+      end
+    end
+
+  else
+
+    step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
+      remote_tmpdir = tmpdir_on hosts.first
+      on hosts, "mkdir -p #{remote_tmpdir}"
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
+      hosts.each do |host|
+        remote_contents = on(host, "cat #{remote_filename}").stdout
+        assert_equal "contents\n", remote_contents
+      end
     end
   end
 
@@ -572,63 +654,102 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#install_package fails if package is not known on the OS" do
-    assert_raises Beaker::Host::CommandFailure do
-      install_package hosts.first, "non-existent-package-name"
+  if hosts.first.is_cygwin?
+    # NOTE: install_package, check_for_package, and upgrade_package on windows
+    # currently fail as follows:
+    #
+    #       ArgumentError: wrong number of arguments (3 for 1..2)
+
+
+    step "#install_package CURRENTLY fails on windows platforms" do
+      assert_raises ArgumentError do
+        install_package hosts.first, "rsync"
+      end
     end
-  end
 
-  step "#install_package installs a known package successfully" do
-    result = install_package hosts.first, "rsync"
-    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
-  end
-
-  step "#install_package succeeds when installing an already-installed package" do
-    result = install_package hosts.first, "rsync"
-    result = install_package hosts.first, "rsync"
-    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
-  end
-
-  step "#install_package CURRENTLY fails if given a host array" do
-    assert_raises NoMethodError do
-      install_package hosts, "rsync"
+    step "#check_for_package will return false if the specified package is not installed on the remote host" do
+      result = check_for_package hosts.first, "non-existent-package-name"
+      assert !result
     end
-  end
 
-  step "#check_for_package will return false if the specified package is not installed on the remote host" do
-    result = check_for_package hosts.first, "non-existent-package-name"
-    assert !result
-  end
-
-  step "#check_for_package will return true if the specified package is installed on the remote host" do
-    install_package hosts.first, "rsync"
-    result = check_for_package hosts.first, "rsync"
-    assert result
-  end
-
-  step "#check_for_package CURRENTLY fails if given a host array" do
-    assert_raises NoMethodError do
-      check_for_package hosts, "rsync"
+    step "#check_for_package will return true if the specified package is installed on the remote host" do
+      result = check_for_package hosts.first, "bash"
+      assert result
     end
-  end
 
-  step "#upgrade_package fails if package is not already installed" do
-    assert_raises Beaker::Host::CommandFailure do
-      upgrade_package hosts.first, "non-existent-package-name"
+    step "#check_for_package CURRENTLY fails if given a host array" do
+      assert_raises NoMethodError do
+        check_for_package hosts, "rsync"
+      end
     end
-  end
 
-  step "#upgrade_package succeeds if package is installed" do
-    # TODO: anyone have any bright ideas on how to portably install an old
-    # version of a package, to really test an upgrade?
-    install_package hosts.first, "rsync"
-    upgrade_package hosts.first, "rsync"
-    assert check_for_package(hosts.first, "rsync"), "package was not successfully installed/upgraded"
-  end
+    step "#upgrade_package CURRENTLY fails on windows platforms with a RuntimeError" do
+      # NOTE: this is not a supported platform but would expect a Beaker::Host::CommandFailure
+      assert_raises RuntimeError do
+        upgrade_package hosts.first, "bash"
+      end
+    end
 
-  step "#upgrade_package CURRENTLY fails when given a host array" do
-    assert_raises NoMethodError do
-      upgrade_package hosts, "rsync"
+  else
+
+    step "#install_package fails if package is not known on the OS" do
+      assert_raises Beaker::Host::CommandFailure do
+        install_package hosts.first, "non-existent-package-name"
+      end
+    end
+
+    step "#install_package installs a known package successfully" do
+      result = install_package hosts.first, "rsync"
+      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+    end
+
+    step "#install_package succeeds when installing an already-installed package" do
+      result = install_package hosts.first, "rsync"
+      result = install_package hosts.first, "rsync"
+      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+    end
+
+    step "#install_package CURRENTLY fails if given a host array" do
+      assert_raises NoMethodError do
+        install_package hosts, "rsync"
+      end
+    end
+
+    step "#check_for_package will return false if the specified package is not installed on the remote host" do
+      result = check_for_package hosts.first, "non-existent-package-name"
+      assert !result
+    end
+
+    step "#check_for_package will return true if the specified package is installed on the remote host" do
+      install_package hosts.first, "rsync"
+      result = check_for_package hosts.first, "rsync"
+      assert result
+    end
+
+    step "#check_for_package CURRENTLY fails if given a host array" do
+      assert_raises NoMethodError do
+        check_for_package hosts, "rsync"
+      end
+    end
+
+    step "#upgrade_package fails if package is not already installed" do
+      assert_raises Beaker::Host::CommandFailure do
+        upgrade_package hosts.first, "non-existent-package-name"
+      end
+    end
+
+    step "#upgrade_package succeeds if package is installed" do
+      # TODO: anyone have any bright ideas on how to portably install an old
+      # version of a package, to really test an upgrade?
+      install_package hosts.first, "rsync"
+      upgrade_package hosts.first, "rsync"
+      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed/upgraded"
+    end
+
+    step "#upgrade_package CURRENTLY fails when given a host array" do
+      assert_raises NoMethodError do
+        upgrade_package hosts, "rsync"
+      end
     end
   end
 
@@ -664,6 +785,7 @@ test_name "dsl::helpers::host_helpers" do
       add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
 
       # TODO: how do we assert, via powershell, that the entry was added?
+      # NOTE: see: https://github.com/puppetlabs/beaker/commit/685628f4babebe9cb4663418da6a8ff528dd32da#commitcomment-12957573
 
     else
       logger.info "Skipping test on non-powershell platforms..."
@@ -678,14 +800,14 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
-    remote_source = create_tmpdir_on hosts.first
-    remote_destination = create_tmpdir_on hosts.first
+    remote_source = tmpdir_on hosts.first
+    remote_destination = tmpdir_on hosts.first
     result = backup_the_file hosts.first, remote_source, remote_destination
     assert_nil result
   end
 
   step "#backup_the_file will fail if the destination directory does not exist" do
-    remote_source = create_tmpdir_on hosts.first
+    remote_source = tmpdir_on hosts.first
     remote_source_filename = File.join(remote_source, "puppet.conf")
     create_remote_file hosts.first, remote_source_filename, "contents"
 
@@ -695,11 +817,11 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
-    remote_source = create_tmpdir_on hosts.first
+    remote_source = tmpdir_on hosts.first
     remote_source_filename = File.join(remote_source, "puppet.conf")
     create_remote_file hosts.first, remote_source_filename, "contents"
 
-    remote_destination = create_tmpdir_on hosts.first
+    remote_destination = tmpdir_on hosts.first
     remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
 
     result = backup_the_file hosts.first, remote_source, remote_destination
@@ -709,10 +831,10 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#backup_the_file copies a named file from the source to the destination directory" do
-    remote_source = create_tmpdir_on hosts.first
+    remote_source = tmpdir_on hosts.first
     remote_source_filename = File.join(remote_source, "testfile.txt")
     create_remote_file hosts.first, remote_source_filename, "contents"
-    remote_destination = create_tmpdir_on hosts.first
+    remote_destination = tmpdir_on hosts.first
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
     result = backup_the_file hosts.first, remote_source, remote_destination, "testfile.txt"
@@ -722,10 +844,10 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#backup_the_file CURRENTLY will fail if given a hosts array" do
-    remote_source = create_tmpdir_on hosts.first
+    remote_source = tmpdir_on hosts.first
     remote_source_filename = File.join(remote_source, "testfile.txt")
     create_remote_file hosts.first, remote_source_filename, "contents"
-    remote_destination = create_tmpdir_on hosts.first
+    remote_destination = tmpdir_on hosts.first
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
     assert_raises NoMethodError do
@@ -739,25 +861,33 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  def host_local_url(host, path)
+    if host.is_cygwin?
+      "file://#{path.gsub('/', '\\\\\\\\')}"
+    else
+      "file:///#{path}"
+    end
+  end
+
   step "#curl_on can retrieve the contents of a URL, using standard curl options" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
     create_remote_file hosts.first, remote_filename, "contents"
-    result = curl_on hosts.first, "-o #{remote_targetfilename} file:///#{remote_filename}"
+    result = curl_on hosts.first, "-o #{remote_targetfilename} #{host_local_url hosts.first, remote_filename}"
     assert_equal 0, result.exit_code
     remote_contents = on(hosts.first, "cat #{remote_targetfilename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
     on hosts, "mkdir -p #{remote_tmpdir}"
     create_remote_file hosts, remote_filename, "contents"
 
-    result = curl_on hosts, "-o #{remote_targetfilename} file:///#{remote_filename}"
+    result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url hosts.first, remote_filename}"
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_targetfilename}").stdout
@@ -804,7 +934,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
     # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
     # instead of with RuntimeError
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file \
       hosts.first,
@@ -817,7 +947,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#retry_on succeeds if command passes before retries are exhausted" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file \
       hosts.first,
@@ -830,7 +960,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#retry_on CURRENTLY fails when provided a host array" do
-    remote_tmpdir = create_tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on hosts.first
     on hosts, "mkdir -p #{remote_tmpdir}"
 
     remote_script_file = File.join(remote_tmpdir, "test.sh")
@@ -844,45 +974,56 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#create_tmpdir_on returns a temporary directory on the remote system" do
-    tmpdir = create_tmpdir_on hosts.first
-    assert_match %r{/}, tmpdir
-    assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
-  end
+  if hosts.first.is_cygwin?
 
-  step "#create_tmpdir_on uses the specified path prefix when provided" do
-    tmpdir = create_tmpdir_on(hosts.first, "mypathprefix")
-    assert_match %r{/mypathprefix}, tmpdir
-    assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
-  end
-
-  step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
-    tmpdir = create_tmpdir_on hosts.first
-    listing = on(hosts.first, "ls -al #{tmpdir}").stdout
-    tmpdir_ls = listing.split("\n").grep %r{\s+\./?\s*$}
-    assert_equal 1, tmpdir_ls.size
-    perms, inodes, owner, group, *rest = tmpdir_ls.first.split(/\s+/)
-    assert_equal hosts.first['user'], owner
-    assert_equal hosts.first['user'], group
-  end
-
-  step "#create_tmpdir_on fails if a non-existent user is specified" do
-    assert_raises Beaker::Host::CommandFailure do
-      tmpdir = create_tmpdir_on hosts.first, '', "fakeuser"
+    step "#create_tmpdir_on CURRENTLY fails when attempting to chown the created tempdir to the host user + group, on windows platforms" do
+      assert_raises Beaker::Host::CommandFailure do
+        tmpdir = create_tmpdir_on hosts.first
+      end
     end
-  end
 
-  step "#create_tmpdir_on operates on all hosts if given a hosts array" do
-    tmpdirs = create_tmpdir_on hosts
-    hosts.zip(tmpdirs).each do |(host, tmpdir)|
+  else
+
+    step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
+      tmpdir = create_tmpdir_on hosts.first
+      listing = on(hosts.first, "ls -al #{tmpdir}").stdout
+      tmpdir_ls = listing.split("\n").grep %r{\s+\./?\s*$}
+      assert_equal 1, tmpdir_ls.size
+      perms, inodes, owner, group, *rest = tmpdir_ls.first.split(/\s+/)
+      assert_equal hosts.first['user'], owner
+      assert_equal hosts.first['user'], group
+    end
+
+    step "#create_tmpdir_on returns a temporary directory on the remote system" do
+      tmpdir = create_tmpdir_on hosts.first
       assert_match %r{/}, tmpdir
-      assert_equal 0, on(host, "touch #{tmpdir}/testfile").exit_code
+      assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
     end
-  end
 
-  step "#create_tmpdir_on fails if the host platform is not supported" do
-    # TODO - which platform(s) are not supported for create_tmpdir_on?
-    # TODO - and, given that, how do we set up a sane test to exercise this?
+    step "#create_tmpdir_on uses the specified path prefix when provided" do
+      tmpdir = create_tmpdir_on(hosts.first, "mypathprefix")
+      assert_match %r{/mypathprefix}, tmpdir
+      assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
+    end
+
+    step "#create_tmpdir_on fails if a non-existent user is specified" do
+      assert_raises Beaker::Host::CommandFailure do
+        tmpdir = create_tmpdir_on hosts.first, '', "fakeuser"
+      end
+    end
+
+    step "#create_tmpdir_on operates on all hosts if given a hosts array" do
+      tmpdirs = create_tmpdir_on hosts
+      hosts.zip(tmpdirs).each do |(host, tmpdir)|
+        assert_match %r{/}, tmpdir
+        assert_equal 0, on(host, "touch #{tmpdir}/testfile").exit_code
+      end
+    end
+
+    step "#create_tmpdir_on fails if the host platform is not supported" do
+      # TODO - which platform(s) are not supported for tmpdir_on?
+      # TODO - and, given that, how do we set up a sane test to exercise this?
+    end
   end
 
   step "#echo_on echoes the supplied string on the remote host" do
