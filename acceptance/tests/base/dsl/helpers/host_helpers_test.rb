@@ -974,6 +974,125 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  if hosts.first.is_cygwin? or hosts.first.is_powershell?
+
+    step "#run_cron_on fails on windows platforms when listing cron jobs for a user on a host" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :list, hosts.first['user']
+      end
+    end
+
+  else
+
+    step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
+      # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
+      assert_nil run_cron_on hosts.first, :nonexistent_action, hosts.first['user']
+    end
+
+    step "#run_cron_on fails when listing cron jobs for an unknown user" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :list, "nonexistentuser"
+      end
+    end
+
+    step "#run_cron_on fails when listing cron jobs for a user with no cron entries" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :list, hosts.first['user']
+      end
+    end
+
+    step "#run_cron_on returns a list of cron jobs for a user with cron entries" do
+      # this basically requires us to add a cron entry to make this work
+      run_cron_on hosts.first, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
+      result = run_cron_on hosts.first, :list, hosts.first['user']
+      assert_equal 0, result.exit_code
+      assert_match %r{/bin/ls}, result.stdout
+    end
+
+    step "#run_cron_on fails when adding cron jobs for an unknown user" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
+      end
+    end
+
+    step "#run_cron_on fails when attempting to add a bad cron entry" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :add, hosts.first['user'], "* * * * /bin/ls >/dev/null"
+      end
+    end
+
+    step "#run_cron_on can add a cron job for a user on a host" do
+      run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
+      result = run_cron_on hosts.first, :list, hosts.first['user']
+      assert_equal 0, result.exit_code
+      assert_match %r{/bin/echo}, result.stdout
+    end
+
+    step "#run_cron_on CURRENTLY replaces all of user's cron jobs with any newly added jobs" do
+      # NOTE: would have expected this to append new entries, or manage them as puppet manages
+      #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
+      1.upto(3) do |job_number|
+        run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
+      end
+
+      result = run_cron_on hosts.first, :list, hosts.first['user']
+
+      assert_no_match %r{job :1:}, result.stdout
+      assert_no_match %r{job :2:}, result.stdout
+      assert_match %r{job :3:}, result.stdout
+    end
+
+    step "#run_cron_on can remove all cron jobs for a user on a host" do
+      run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
+      result = run_cron_on hosts.first, :list, hosts.first['user']
+      assert_match %r{quality: job 1}, result.stdout
+
+      run_cron_on hosts.first, :remove, hosts.first['user']
+
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :list, hosts.first['user']
+      end
+    end
+
+    step "#run_cron_on fails when removing cron jobs for an unknown user" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on hosts.first, :remove, "nonexistentuser"
+      end
+    end
+
+    step "#run_cron_on can list cron jobs for a user on all hosts when given a host array" do
+      hosts.each do |host|
+        # this basically requires us to add a cron entry to make this work
+        run_cron_on host, :add, host['user'], "* * * * * /bin/ls >/dev/null"
+      end
+
+      results = run_cron_on hosts, :list, hosts.first['user']
+      results.each do |result|
+        assert_match %r{/bin/ls}, result.stdout
+      end
+    end
+
+    step "#run_cron_on can add cron jobs for a user on all hosts when given a host array" do
+      run_cron_on hosts, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
+
+      results = run_cron_on hosts, :list, hosts.first['user']
+      results.each do |result|
+        assert_match %r{/bin/ls}, result.stdout
+      end
+    end
+
+    step "#run_cron_on can remove cron jobs for a user on all hosts when given a host array" do
+      run_cron_on hosts, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
+      run_cron_on hosts, :remove, hosts.first['user']
+
+      hosts.each do |host|
+        assert_raises Beaker::Host::CommandFailure do
+          results = run_cron_on host, :list, host['user']
+        end
+      end
+    end
+  end
+
   if hosts.first.is_cygwin?
 
     step "#create_tmpdir_on CURRENTLY fails when attempting to chown the created tempdir to the host user + group, on windows platforms" do
