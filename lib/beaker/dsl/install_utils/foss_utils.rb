@@ -1088,12 +1088,17 @@ module Beaker
           if not opts[:puppet_agent_version]
             raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
           end
+
+          copy_base_external_defaults = Hash.new('/root').merge({
+            :windows => '`cygpath -smF 35`/',
+            :osx => '/var/root'
+          })
           block_on hosts do |host|
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:copy_dir_external]  ||= File.join('/', 'root')
+            opts[:copy_dir_external]  ||= copy_base_external_defaults[variant.to_sym]
             opts[:puppet_collection] ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
@@ -1114,7 +1119,6 @@ module Beaker
               release_file = "puppet-agent_#{opts[:puppet_agent_version]}-1#{codename}_#{arch}.deb"
             when /^windows$/
               release_path << 'windows'
-              onhost_copy_base = '`cygpath -smF 35`/'
               is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
               should_install_64bit = host.is_x86_64? && !is_config_32
               # only install 64bit builds if
@@ -1123,10 +1127,19 @@ module Beaker
               arch_suffix = should_install_64bit ? '64' : '86'
               release_file = "puppet-agent-x#{arch_suffix}.msi"
             when /^osx$/
-              onhost_copy_base = File.join('/var', 'root')
               mac_pkg_name = "puppet-agent-#{opts[:puppet_agent_version]}"
-              release_path << "/apple/#{opts[:puppet_collection]}"
-              release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
+              version = version[0,2] + '.' + version[2,2] if (variant =~ /osx/ && !version.include?("."))
+              path_chunk = ''
+              # new hotness
+              path_chunk = "apple/#{version}/#{opts[:puppet_collection]}/#{arch}"
+              release_path << path_chunk
+              release_file = "#{mac_pkg_name}-1.#{codename}.dmg"
+              if not link_exists?("#{release_path}/") # oops, try the old stuff
+                # the old school
+                release_path.chomp!(path_chunk) #remove chunk that didn't work
+                release_path << "apple/#{opts[:puppet_collection]}"
+                release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
+              end
             else
               raise "No repository installation step for #{variant} yet..."
             end
@@ -1180,13 +1193,18 @@ module Beaker
         # @return nil
         def install_puppet_agent_pe_promoted_repo_on( hosts, opts )
           opts[:puppet_agent_version] ||= 'latest'
+
+          copy_base_external_defaults = Hash.new('/root').merge({
+            :windows => '`cygpath -smF 35`/',
+            :osx => '/var/root'
+          })
           block_on hosts do |host|
             pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0.0-rc1'
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:copy_dir_external]  ||= File.join('/', 'root')
+            opts[:copy_dir_external]  ||= copy_base_external_defaults[variant.to_sym]
             opts[:puppet_collection] ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
@@ -1207,7 +1225,6 @@ module Beaker
               release_file = "/repos/apt/#{codename}/pool/#{opts[:puppet_collection]}/p/puppet-agent/puppet-agent*#{arch}.deb"
               download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
             when /^windows$/
-              onhost_copy_base = '`cygpath -smF 35`/'
               is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
               should_install_64bit = host.is_x86_64? && !is_config_32
               # only install 64bit builds if
@@ -1218,7 +1235,6 @@ module Beaker
               release_file = "/puppet-agent-x#{arch_suffix}.msi"
               download_file = "puppet-agent-x#{arch_suffix}.msi"
             when /^osx$/
-              onhost_copy_base = File.join('/var', 'root')
               release_file = "/repos/apple/#{opts[:puppet_collection]}/puppet-agent-*"
               download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
             else
@@ -1258,7 +1274,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-
 
         # This method will install a pem file certificate on a windows host
         #
