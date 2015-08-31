@@ -56,7 +56,9 @@ module Beaker
           Beaker::Docker
         when /^openstack$/
           Beaker::OpenStack
-        when /^none$/
+        when /^noop$/
+          Beaker::Noop
+        when /^(default)|(none)$/
           Beaker::Hypervisor
         else
           # Custom hypervisor
@@ -133,6 +135,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack', 'noop' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end
