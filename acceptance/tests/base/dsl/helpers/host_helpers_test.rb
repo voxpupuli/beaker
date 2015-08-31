@@ -969,7 +969,7 @@ test_name "dsl::helpers::host_helpers" do
       remote_script_file,
       retry_script_body(remote_tmpdir, failure_count = 2)
 
-    assert_raises do
+    assert_raises NoMethodError do
       result = retry_on hosts, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
     end
   end
