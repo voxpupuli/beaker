@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 26 Aug, 2015 (a6ef010f)](#LATEST)
+* [LATEST - 1 Sep, 2015 (e693a4e7)](#LATEST)
+* [2.21.0 - 26 Aug, 2015 (40281eb2)](#2.21.0)
 * [2.20.0 - 17 Aug, 2015 (8a419e98)](#2.20.0)
 * [2.19.0 - 13 Aug, 2015 (80897129)](#2.19.0)
 * [2.18.3 - 28 Jul, 2015 (d9a02474)](#2.18.3)
@@ -93,7 +94,88 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 26 Aug, 2015 (a6ef010f)
+### <a name = "LATEST">LATEST - 1 Sep, 2015 (e693a4e7)
+
+* (GEM) update beaker version to 2.22.0 (e693a4e7)
+
+* Merge pull request #935 from MikaelSmith/feat/master/BKR-470 (9a96c210)
+
+
+```
+Merge pull request #935 from MikaelSmith/feat/master/BKR-470
+
+(BKR-470) Add Solaris to install_puppet_agent_dev_repo_on
+```
+* Merge pull request #938 from anodelman/none-hypervisor (c5ae989f)
+
+
+```
+Merge pull request #938 from anodelman/none-hypervisor
+
+(BKR-458) add beaker notouch hypervisor
+```
+* Merge pull request #934 from anodelman/puppet-agent (8a495267)
+
+
+```
+Merge pull request #934 from anodelman/puppet-agent
+
+(BKR-459) update osx package name and directory to correspond...
+```
+* (BKR-458) add beaker notouch hypervisor (f31ba283)
+
+
+```
+(BKR-458) add beaker notouch hypervisor
+
+- support for a 'noop' hypervisor that does no
+  configuration/validation/provision/cleanup/proxy-ing
+```
+* (maint) Add spec test for install_puppet_agent_dev_repo_on (0a6eb377)
+
+* (BKR-472) Add Solaris 11 support for installing puppet-agent (6960c09b)
+
+
+```
+(BKR-472) Add Solaris 11 support for installing puppet-agent
+
+Solaris 11 re-uses most of the setup for Solaris 10, but the root user's
+home directory on Solaris 10 is special. Fix up the configuration to
+special-case Solaris 10.
+```
+* (BKR-470) Add Solaris to install_puppet_agent_dev_repo_on (265f6ec3)
+
+
+```
+(BKR-470) Add Solaris to install_puppet_agent_dev_repo_on
+
+Adds Solaris support for installing packages in the
+install_puppet_agent_dev_repo_on helper.
+```
+* (MAINT) fix ability to set external file dir through opts (65d2bbb7)
+
+
+```
+(MAINT) fix ability to set external file dir through opts
+
+- we were overriding for windows/mac hosts to a different default, so
+  anything passed in by the user was ignored
+```
+* (BKR-459) update osx package name and directory to correspond... (db9090ef)
+
+
+```
+(BKR-459) update osx package name and directory to correspond...
+
+... to RE changes
+
+- updated install_puppet_agent_dev_repo_on to handle new directory
+  structure and name change
+- backwards compatible, handles both old and new
+```
+### <a name = "2.21.0">2.21.0 - 26 Aug, 2015 (40281eb2)
+
+* (HISTORY) update beaker history for gem release 2.21.0 (40281eb2)
 
 * (GEM) update beaker version to 2.21.0 (a6ef010f)
 
