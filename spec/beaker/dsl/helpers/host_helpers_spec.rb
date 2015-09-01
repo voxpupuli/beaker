@@ -48,7 +48,6 @@ describe ClassMixedWithDSLHelpers do
       expect( master ).to receive( :exec ).once
 
       subject.on( 'master', 'echo hello')
-
     end
 
     it 'if the host is a Symbol Object, finds the matching hsots with that Symbol as role' do
@@ -57,7 +56,6 @@ describe ClassMixedWithDSLHelpers do
       expect( master ).to receive( :exec ).once
 
       subject.on( :master, 'echo hello')
-
     end
 
     it 'delegates to itself for each host passed' do
@@ -159,7 +157,6 @@ describe ClassMixedWithDSLHelpers do
         end
       end
     end
-
   end
 
   describe "#retry_on" do
@@ -337,7 +334,6 @@ describe ClassMixedWithDSLHelpers do
           subject.create_tmpdir_on(host, "/tmp/bogus")
         end
       end
-
     end
 
     context 'with an valid user argument' do
@@ -358,7 +354,6 @@ describe ClassMixedWithDSLHelpers do
         }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
       end
     end
-
   end
 
   describe '#run_script_on' do
@@ -378,36 +373,4 @@ describe ClassMixedWithDSLHelpers do
       subject.run_script( '/tmp/test.sh' )
     end
   end
-
-  describe '#add_system32_hosts_entry' do
-    before do
-      allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
-    end
-    context 'on debian' do
-      let(:platform) { 'debian-7-amd64' }
-      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
-      it 'logs message - nothing to do on this host' do
-        expect( Beaker::Command ).to receive( :new ).never
-
-        expect {
-          subject.add_system32_hosts_entry(host, {})
-        }.to raise_error
-      end
-    end
-    context 'on windows' do
-      let(:platform) { 'windows-2008R2-amd64' }
-      let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
-      it 'it add an entry into the /etc/hosts file' do
-        entry = { 'ip' => '23.251.154.122', 'name' => 'forge.puppetlabs.com' }
-        expect(subject).to receive(:on) do |host, command|
-          expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"23.251.154.122`t`tforge.puppetlabs.com\\\"; Add-Content -path 'C:\\Windows\\System32\\Drivers\\etc\\hosts' -value $text"])
-        end
-
-
-        subject.add_system32_hosts_entry(host, entry)
-      end
-    end
-  end
-
 end

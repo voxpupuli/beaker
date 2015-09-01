@@ -12,7 +12,7 @@ module Beaker
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
-        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
         #     exit codes as passing.
         #   @option opts [Boolean] :dry_run (false) Do not actually execute any
         #     commands on the SUT
@@ -331,7 +331,7 @@ module Beaker
         #
         # @return nil
         def add_system32_hosts_entry(host, opts = {})
-          if host['platform'] =~ /windows/
+          if host.is_powershell?
             hosts_file = "C:\\Windows\\System32\\Drivers\\etc\\hosts"
             host_entry = "#{opts['ip']}`t`t#{opts['name']}"
             on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
