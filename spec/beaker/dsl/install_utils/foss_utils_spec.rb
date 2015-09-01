@@ -1032,6 +1032,75 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
+  describe '#install_puppet_agent_dev_repo_on' do
+    let( :package_name ) { 'puppet-agent' }
+    let( :platform ) { @platform || 'other' }
+    let( :host ) do
+      FakeHost.create( 'fakvm', platform, opts )
+    end
+
+    before :each do
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+    end
+
+    def test_fetch_http_file()
+      expect( subject ).to receive( :configure_type_defaults_on ).with(host)
+      expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
+      subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )
+    end
+
+    context 'on windows' do
+      before :each do
+        @platform = 'windows-7-x86_64'
+      end
+
+      it 'copies package to the cygwin root directory and installs it' do
+        expect( subject ).to receive( :install_msi_on ).with( any_args )
+        expect( subject ).to receive( :scp_to ).with( host, /puppet-agent-x86\.msi/, '`cygpath -smF 35`/' )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on debian' do
+      before :each do
+        @platform = 'debian-5-x86_64'
+      end
+
+      it 'copies repo_config to the root user directory and installs it' do
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent_1\.0\.0-1_amd64\.deb/, '/root' )
+        expect( subject ).to receive( :on ).with( host, /dpkg -i --force-all .+puppet-agent_1\.0\.0-1_amd64\.deb/ )
+        expect( subject ).to receive( :on ).with( host, /apt-get update/ )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on solaris 10' do
+      before :each do
+        @platform = 'solaris-10-x86_64'
+      end
+
+      it "copies package to the root directory and installs it" do
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on solaris 11' do
+      before :each do
+        @platform = 'solaris-11-x86_64'
+      end
+
+      it "copies package to the root user directory and installs it" do
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/root' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+    end
+  end
+
   describe '#install_puppet_agent_pe_promoted_repo_on' do
     let( :package_name ) { 'puppet-agent' }
     let( :platform ) { @platform || 'other' }

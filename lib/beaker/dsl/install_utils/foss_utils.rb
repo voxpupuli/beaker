@@ -1140,6 +1140,16 @@ module Beaker
                 release_path << "apple/#{opts[:puppet_collection]}"
                 release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
               end
+            when /^solaris$/
+              if arch == 'x86_64'
+                arch = 'i386'
+              end
+              if version == '10'
+                # Solaris 10 uses / as the root user directory. Solaris 11 uses /root.
+                onhost_copy_base = '/'
+              end
+              release_path << "/solaris/#{version}/#{opts[:puppet_collection]}"
+              release_file = "puppet-agent-#{opts[:puppet_agent_version]}.#{arch}.pkg.gz"
             else
               raise "No repository installation step for #{variant} yet..."
             end
@@ -1161,6 +1171,39 @@ module Beaker
               install_msi_on(host, onhost_copied_file, {}, opts)
             when /^osx$/
               host.install_package("#{mac_pkg_name}*")
+            when /^solaris$/
+              noask = <<NOASK
+# Write the noask file to a temporary directory
+# please see man -s 4 admin for details about this file:
+# http://www.opensolarisforum.org/man/man4/admin.html
+#
+# The key thing we don't want to prompt for are conflicting files.
+# The other nocheck settings are mostly defensive to prevent prompts
+# We _do_ want to check for available free space and abort if there is
+# not enough
+mail=
+# Overwrite already installed instances
+instance=overwrite
+# Do not bother checking for partially installed packages
+partial=nocheck
+# Do not bother checking the runlevel
+runlevel=nocheck
+# Do not bother checking package dependencies (We take care of this)
+idepend=nocheck
+rdepend=nocheck
+# DO check for available free space and abort if there isn't enough
+space=quit
+# Do not check for setuid files.
+setuid=nocheck
+# Do not check if files conflict with other packages
+conflict=nocheck
+# We have no action scripts.  Do not check for them.
+action=nocheck
+# Install to the default base directory.
+basedir=default
+NOASK
+              create_remote_file host, File.join(onhost_copy_base, 'noask'), noask
+              on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
             end
             configure_type_defaults_on( host )
           end
