@@ -406,6 +406,180 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+
+  def el4_platform?(host)
+    !!(host['platform'] =~ /el-4/)
+  end
+
+  def yum_platform?(host)
+    !!(host['platform'] =~ /fedora|centos|eos|el-/)
+  end
+
+  def apt_platform?(host)
+    !!(host['platform'] =~ /ubuntu|debian|cumulus/)
+  end
+
+  def zyp_platform?(host)
+    !!(host['platform'] =~ /sles/)
+  end
+
+  if el4_platform?(hosts.first)
+
+      step "#deploy_package_repo CURRENTLY does nothing and throws no error on the #{hosts.first['platform']} platform" do
+        Dir.mktmpdir do |local_dir|
+          name = "puppet-server"
+          version = "9.9.9"
+          platform = hosts.first['platform']
+          local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+
+          File.open(local_filename, "w") do |local_file|
+            local_file.puts "contents"
+          end
+
+          assert_nil deploy_package_repo(hosts.first, local_dir, name, version)
+        end
+      end
+
+  elsif yum_platform?(hosts.first)
+
+    step "#deploy_package_repo pushes repo package to /etc/yum.repos.d on the remote host" do
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        platform = hosts.first['platform']
+
+        FileUtils.mkdir(File.join(local_dir, "rpm"))
+        local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        deploy_package_repo hosts.first, local_dir, name, version
+
+        result = on hosts.first, "cat /etc/yum.repos.d/#{name}.repo"
+        assert_equal "contents\n", result.stdout
+
+        # teardown
+        on hosts.first, "rm /etc/yum.repos.d/#{name}.repo"
+      end
+    end
+
+    step "#deploy_package_repo CURRENTLY fails with NoMethodError when passed a hosts array" do
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        platform = hosts.first['platform']
+        local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        assert_raises NoMethodError do
+          deploy_package_repo hosts, local_dir, name, version
+        end
+      end
+    end
+
+  elsif apt_platform?(hosts.first)
+
+    step "#deploy_package_repo pushes repo package to /etc/apt/sources.list.d on the remote host" do
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        codename = hosts.first['platform'].codename
+
+        FileUtils.mkdir(File.join(local_dir, "deb"))
+        local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
+
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        deploy_package_repo hosts.first, local_dir, name, version
+
+        result = on hosts.first, "cat /etc/apt/sources.list.d/#{name}.list"
+        assert_equal "contents\n", result.stdout
+
+        # teardown
+        on hosts.first, "rm /etc/apt/sources.list.d/#{name}.list"
+      end
+    end
+
+    step "#deploy_package_repo CURRENTLY fails with NoMethodError when passed a hosts array" do
+      # NOTE: would expect this to handle host arrays, or raise Beaker::Host::CommandFailure
+
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        codename = hosts.first['platform'].codename
+
+        FileUtils.mkdir(File.join(local_dir, "deb"))
+        local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
+
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        assert_raises NoMethodError do
+          deploy_package_repo hosts, local_dir, name, version
+        end
+      end
+    end
+
+  elsif zyp_platform?(hosts.first)
+
+    step "#deploy_package_repo updates zypper repository list on the remote host" do
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        platform = hosts.first['platform']
+
+        FileUtils.mkdir(File.join(local_dir, "rpm"))
+        local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+
+        # source: http://enterprise.delivery.puppetlabs.net/3.8/repos/sles-11-x86_64/sles-11-x86_64.repo
+        inifile = "[PE-3.8-sles-11-x86_64]\nname=PE-3.8-sles-11-x86_64\n" +
+          "baseurl=http://enterprise.delivery.puppetlabs.net/3.8/repos/sles-11-x86_64\n" +
+          "enabled=1\ngpgcheck=0\n"
+
+        File.open(local_filename, "w") { |file| file.puts inifile }
+
+        deploy_package_repo hosts.first, local_dir, name, version
+
+        result = on hosts.first, "zypper repos -d"
+        assert_match "PE-3.8-sles-11-x86_64", result.stdout
+
+        # teardown
+        on hosts.first, "zypper rr PE-3.8-sles-11-x86_64"
+      end
+    end
+
+  else
+
+    # OS X, windows (cygwin, powershell), solaris, etc.
+
+    step "#deploy_package_repo CURRENTLY fails with a RuntimeError on on the #{hosts.first['platform']} platform" do
+      # NOTE: would expect this to raise Beaker::Host::CommandFailure instead of RuntimeError
+
+      Dir.mktmpdir do |local_dir|
+        name = "puppet-server"
+        version = "9.9.9"
+        platform = hosts.first['platform']
+        local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+
+        File.open(local_filename, "w") do |local_file|
+          local_file.puts "contents"
+        end
+
+        assert_raises RuntimeError do
+          deploy_package_repo hosts.first, local_dir, name, version
+        end
+      end
+    end
+  end
+
   step "#create_remote_file CURRENTLY does not fail and does not create a remote file when the remote path does not exist, using rsync" do
     create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
     assert_raises Beaker::Host::CommandFailure do
