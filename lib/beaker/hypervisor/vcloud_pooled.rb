@@ -19,10 +19,35 @@ module Beaker
       @options = options
       @logger = options[:logger]
       @hosts = vcloud_hosts
+      @credentials = load_credentials(@options[:dot_fog])
 
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
       raise 'You must specify a resource pool for vCloud instances!' unless @options['resourcepool']
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
+    end
+
+    def load_credentials(dot_fog = '.fog')
+      creds = {}
+
+      if fog = read_fog_file(dot_fog)
+        if fog[:default] && fog[:default][:vmpooler_token]
+          creds[:vmpooler_token] = fog[:default][:vmpooler_token]
+        else
+          @logger.warn "Credentials file (#{dot_fog}) is missing a :default section with a :vmpooler_token value; proceeding without authentication"
+        end
+      else
+        @logger.warn "Credentials file (#{dot_fog}) is empty; proceeding without authentication"
+      end
+
+      creds
+
+    rescue Errno::ENOENT
+      @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
+      creds
+    end
+
+    def read_fog_file(dot_fog = '.fog')
+      YAML.load_file(dot_fog)
     end
 
     def check_url url
@@ -70,12 +95,16 @@ module Beaker
           http = Net::HTTP.new( uri.host, uri.port )
           request = Net::HTTP::Post.new(uri.request_uri)
 
+          if @credentials[:vmpooler_token]
+            request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+          end
+
           request.set_form_data({'pool' => @options['resourcepool'], 'folder' => 'foo'})
 
           attempts = @options[:timeout].to_i / 5
           response = http.request(request)
           parsed_response = JSON.parse(response.body)
-          if parsed_response[h['template']] && parsed_response[h['template']]['ok'] && parsed_response[h['template']]['hostname']
+          if parsed_response[h['template']] && parsed_response['ok'] && parsed_response[h['template']]['hostname']
             hostname = parsed_response[h['template']]['hostname']
             domain = parsed_response['domain']
             h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
@@ -111,6 +140,10 @@ module Beaker
 
         http = Net::HTTP.new( uri.host, uri.port )
         request = Net::HTTP::Delete.new(uri.request_uri)
+
+        if @credentials[:vmpooler_token]
+          request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+        end
 
         begin
           response = http.request(request)
