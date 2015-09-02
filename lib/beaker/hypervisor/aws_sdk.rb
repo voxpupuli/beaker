@@ -611,15 +611,22 @@ module Beaker
     # @return [String] contents of public key
     # @api private
     def public_key
-      filename = File.expand_path('~/.ssh/id_rsa.pub')
-      unless File.exists? filename
-        filename = File.expand_path('~/.ssh/id_dsa.pub')
-        unless File.exists? filename
-          raise RuntimeError, 'Expected either ~/.ssh/id_rsa.pub or ~/.ssh/id_dsa.pub but found neither'
-        end
+      keys = Array(@options[:ssh][:keys])
+      keys << '~/.ssh/id_rsa'
+      keys << '~/.ssh/id_dsa'
+      puts "keys #{keys}"
+      key_file = nil
+      keys.each do |key|
+        key_filename = File.expand_path(key + '.pub')
+        key_file = key_filename if File.exists?(key_filename)
       end
 
-      File.read(filename)
+      if key_file
+        @logger.debug("Using public key: #{key_file}")
+      else
+        raise RuntimeError, "Expected to find a public key, but couldn't in #{keys}"
+      end
+      File.read(key_file)
     end
 
     # Generate a reusable key name from the local hosts hostname

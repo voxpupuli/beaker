@@ -528,17 +528,42 @@ module Beaker
     describe '#public_key' do
       subject(:public_key) { aws.public_key }
 
-      it "retrieves contents from local ~/.ssh/ssh_rsa.pub file" do
+      it "retrieves contents from local ~/.ssh/id_rsa.pub file" do
         # Stub calls to file read/exists
+        key_value = 'foobar_Rsa'
+        allow(File).to receive(:exists?).with(/id_dsa.pub/) { false }
         allow(File).to receive(:exists?).with(/id_rsa.pub/) { true }
-        allow(File).to receive(:read).with(/id_rsa.pub/) { "foobar" }
+        allow(File).to receive(:read).with(/id_rsa.pub/) { key_value }
 
         # Should return contents of allow( previously ).to receivebed id_rsa.pub
-        expect(public_key).to eq("foobar")
+        expect(public_key).to be === key_value
+      end
+
+      it "retrieves contents from local ~/.ssh/id_dsa.pub file" do
+        # Stub calls to file read/exists
+        key_value = 'foobar_Dsa'
+        allow(File).to receive(:exists?).with(/id_rsa.pub/) { false }
+        allow(File).to receive(:exists?).with(/id_dsa.pub/) { true }
+        allow(File).to receive(:read).with(/id_dsa.pub/) { key_value }
+
+        expect(public_key).to be === key_value
       end
 
       it "should return an error if the files do not exist" do
-        expect { public_key }.to raise_error(RuntimeError, /Expected either/)
+        expect { public_key }.to raise_error(RuntimeError, /Expected to find a public key/)
+      end
+
+      it "uses options-provided keys" do
+        opts = aws.instance_variable_get( :@options )
+        opts[:ssh][:keys] = ['fake_key1', 'fake_key2']
+        aws.instance_variable_set( :@options, opts )
+
+        key_value = 'foobar_Custom2'
+        allow(File).to receive(:exists?).with(anything) { false }
+        allow(File).to receive(:exists?).with(/fake_key2/) { true }
+        allow(File).to receive(:read).with(/fake_key2/) { key_value }
+
+        expect(public_key).to be === key_value
       end
     end
 
