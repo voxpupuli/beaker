@@ -5,7 +5,7 @@ require "fileutils"
 # in a RuntimeError. The SSH Connection is left in an unusable state and all
 # later remote commands will hang indefinitely.
 #
-# TODO: fix this problem
+# TODO: fix via: https://tickets.puppetlabs.com/browse/BKR-464
 def test_scp_error_on_close?
   !!ENV["TEST_SCP_ERROR_ON_CLOSE"]
 end
@@ -15,6 +15,8 @@ end
 #       recognizing the Administrator:Administrator user/group.  Until this is
 #       fixed, we add this shim that delegates to a non-`chown`-executing version
 #       for the purposes of our test setup.
+#
+# TODO: fix via: https://tickets.puppetlabs.com/browse/BKR-496
 def tmpdir_on(hosts, path_prefix = '', user=nil)
   return create_tmpdir_on(hosts, path_prefix, user) unless Array(hosts).first.is_cygwin?
 
@@ -39,8 +41,8 @@ end
 
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
-    # NOTE: to generate a suitable windows platform config, I use:
-    #       `genconfig2 windows81-64default.a-64a`
+    # NOTE: to generate a suitable config, I use:
+    #       `genconfig2 ${PLATFORM}-64default.a-64a`
 
     assert (hosts.size > 1),
       "dsl::helpers::host_helpers acceptance tests require at least two hosts"
@@ -297,7 +299,10 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#scp_from CURRENTLY creates and repeatedly overwrites the file on the local system" do
+  step "#scp_from CURRENTLY creates and repeatedly overwrites the file on the local system when given a hosts array" do
+    # NOTE: expect this behavior to be well-documented, or for overwriting a
+    #       file repeatedly to generate an error
+
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.txt")
       remote_tmpdir = tmpdir_on hosts.first
@@ -314,7 +319,8 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   if hosts.first.is_cygwin?
-    # NOTE: rsync methods are not working currently on windows platforms
+    # NOTE: rsync methods are not working currently on windows platforms. Would
+    #       expect this to be documented better.
 
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
@@ -344,6 +350,8 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
+      # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+
       Dir.mktmpdir do |local_dir|
         local_filename = File.join(local_dir, "testfile.txt")
         File.open(local_filename, "w") do |local_file|
@@ -426,6 +434,8 @@ test_name "dsl::helpers::host_helpers" do
   if el4_platform?(hosts.first)
 
       step "#deploy_package_repo CURRENTLY does nothing and throws no error on the #{hosts.first['platform']} platform" do
+        # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+
         Dir.mktmpdir do |local_dir|
           name = "puppet-server"
           version = "9.9.9"
@@ -466,6 +476,8 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#deploy_package_repo CURRENTLY fails with NoMethodError when passed a hosts array" do
+      # NOTE: would expect this to handle host arrays, or raise Beaker::Host::CommandFailure
+
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
@@ -581,6 +593,8 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file CURRENTLY does not fail and does not create a remote file when the remote path does not exist, using rsync" do
+    # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+
     create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
     assert_raises Beaker::Host::CommandFailure do
       on(hosts.first, "cat /non/existent/testfile.txt").exit_code
@@ -658,7 +672,8 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   if hosts.first.is_cygwin?
-    # NOTE: rsync methods are not working currently on windows platforms
+    # NOTE: rsync methods are not working currently on windows platforms. Would
+    #       expect this to be documented better.
 
     step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on hosts.first
@@ -833,7 +848,8 @@ test_name "dsl::helpers::host_helpers" do
     # currently fail as follows:
     #
     #       ArgumentError: wrong number of arguments (3 for 1..2)
-
+    #
+    #       Would expect this to be documented better, and to fail with Beaker::Host::CommandFailure
 
     step "#install_package CURRENTLY fails on windows platforms" do
       assert_raises ArgumentError do
@@ -884,6 +900,9 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#install_package CURRENTLY fails if given a host array" do
+      # NOTE: would expect this to work across hosts, or to be better documented,
+      #       if not support, should raise Beaker::Host::CommandFailure
+
       assert_raises NoMethodError do
         install_package hosts, "rsync"
       end
@@ -901,6 +920,9 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#check_for_package CURRENTLY fails if given a host array" do
+      # NOTE: would expect this to work across hosts, or to be better documented,
+      #       if not support, should raise Beaker::Host::CommandFailure
+
       assert_raises NoMethodError do
         check_for_package hosts, "rsync"
       end
@@ -915,12 +937,16 @@ test_name "dsl::helpers::host_helpers" do
     step "#upgrade_package succeeds if package is installed" do
       # TODO: anyone have any bright ideas on how to portably install an old
       # version of a package, to really test an upgrade?
+
       install_package hosts.first, "rsync"
       upgrade_package hosts.first, "rsync"
       assert check_for_package(hosts.first, "rsync"), "package was not successfully installed/upgraded"
     end
 
     step "#upgrade_package CURRENTLY fails when given a host array" do
+      # NOTE: would expect this to work across hosts, or to be better documented,
+      #       if not support, should raise Beaker::Host::CommandFailure
+
       assert_raises NoMethodError do
         upgrade_package hosts, "rsync"
       end
@@ -928,6 +954,9 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
+    # NOTE: would expect this to be better documented.
+    #       Also, this method should probably live outside the core hosts helpers,
+    #       and should probably be a more generalized method.
     if hosts.first.is_powershell?
       logger.info "Skipping failure test on powershell platforms..."
     elsif hosts.first['platform'] =~ /windows/
@@ -974,6 +1003,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
+    # NOTE: would expect this to fail with Beaker::Host::CommandFailure
     remote_source = tmpdir_on hosts.first
     remote_destination = tmpdir_on hosts.first
     result = backup_the_file hosts.first, remote_source, remote_destination
@@ -1035,6 +1065,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  # construct an appropriate local file URL for curl testing
   def host_local_url(host, path)
     if host.is_cygwin?
       "file://#{path.gsub('/', '\\\\\\\\')}"
@@ -1071,6 +1102,7 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#curl_with_retries CURRENTLY fails with a RuntimeError if retries are exhausted without fetching the specified URL" do
     # NOTE: would expect that this would raise Beaker::Host::CommandFailure
+
     assert_raises RuntimeError do
       curl_with_retries \
         "description",
@@ -1107,7 +1139,7 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
     # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
-    # instead of with RuntimeError
+
     remote_tmpdir = tmpdir_on hosts.first
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file \
@@ -1134,6 +1166,9 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#retry_on CURRENTLY fails when provided a host array" do
+    # NOTE: would expect this to work across hosts, or be better documented and
+    #       to raise Beaker::Host::CommandFailure
+
     remote_tmpdir = tmpdir_on hosts.first
     on hosts, "mkdir -p #{remote_tmpdir}"
 
@@ -1160,6 +1195,7 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
+
       assert_nil run_cron_on hosts.first, :nonexistent_action, hosts.first['user']
     end
 
@@ -1205,6 +1241,7 @@ test_name "dsl::helpers::host_helpers" do
     step "#run_cron_on CURRENTLY replaces all of user's cron jobs with any newly added jobs" do
       # NOTE: would have expected this to append new entries, or manage them as puppet manages
       #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
+
       1.upto(3) do |job_number|
         run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
       end
@@ -1216,7 +1253,10 @@ test_name "dsl::helpers::host_helpers" do
       assert_match %r{job :3:}, result.stdout
     end
 
-    step "#run_cron_on can remove all cron jobs for a user on a host" do
+    step "#run_cron_on :remove CURRENTLY removes all cron jobs for a user on a host" do
+      # NOTE: would have expected a more granular approach to removing cron jobs
+      #       for a user on a host.  This should otherwise be better documented.
+
       run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
       result = run_cron_on hosts.first, :list, hosts.first['user']
       assert_match %r{quality: job 1}, result.stdout
@@ -1270,6 +1310,9 @@ test_name "dsl::helpers::host_helpers" do
   if hosts.first.is_cygwin?
 
     step "#create_tmpdir_on CURRENTLY fails when attempting to chown the created tempdir to the host user + group, on windows platforms" do
+      # NOTE: would have expected this to work.
+      # TODO: fix via https://tickets.puppetlabs.com/browse/BKR-496
+
       assert_raises Beaker::Host::CommandFailure do
         tmpdir = create_tmpdir_on hosts.first
       end
@@ -1313,9 +1356,12 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
 
-    step "#create_tmpdir_on fails if the host platform is not supported" do
-      # TODO - which platform(s) are not supported for tmpdir_on?
-      # TODO - and, given that, how do we set up a sane test to exercise this?
+    step "#create_tmpdir_on CURRENTLY fails with a RuntimeError if the host platform is not supported" do
+      # TODO - identify a platform which does not support tmpdir
+      #
+      # assert_raises RuntimeError do
+      #   create_tmpdir_on hosts.first
+      # end
     end
   end
 
