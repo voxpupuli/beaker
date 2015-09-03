@@ -55,10 +55,12 @@ module Beaker
       end
 
       it 'should step through provisioning' do
+        allow( aws ).to receive( :wait_for_status_f5 )
         aws.provision
       end
 
       it 'should return nil' do
+        allow( aws ).to receive( :wait_for_status_f5 )
         expect(aws.provision).to be_nil
       end
     end
@@ -258,10 +260,23 @@ module Beaker
       let( :instance_set ) { [{:instance => aws_instance}] }
       subject(:wait_for_status) { aws.wait_for_status(:running, instance_set) }
 
-      it 'handles a single instance' do
-        allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
-        expect(aws).to receive(:backoff_sleep).exactly(3).times
-        expect(wait_for_status).to eq(instance_set)
+      context 'single instance' do
+        it 'behaves correctly in typical case' do
+          allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
+          expect(aws).to receive(:backoff_sleep).exactly(3).times
+          expect(wait_for_status).to eq(instance_set)
+        end
+
+        it 'executes block correctly instead of status if given one' do
+          barn_value = 'did you grow up in a barn?'
+          allow(aws_instance).to receive( :[] ).with( :barn ) { barn_value }
+          expect(aws_instance).to receive(:status).exactly(0).times
+          expect(aws).to receive(:backoff_sleep).exactly(1).times
+          aws.wait_for_status(:running, instance_set) do |instance|
+            expect( instance[:barn] ).to be === barn_value
+            true
+          end
+        end
       end
 
       context 'with multiple instances' do
@@ -278,6 +293,17 @@ module Beaker
           expect(aws).to receive(:backoff_sleep).exactly(6).times
           expect(wait_for_status).to eq(instance_set)
         end
+
+        it 'executes block correctly instead of status if given one' do
+          barn_value = 'did you grow up in a barn?'
+          not_barn_value = 'notabarn'
+          allow(aws_instance).to receive( :[] ).with( :barn ).and_return(not_barn_value, barn_value, not_barn_value, barn_value)
+          allow(aws_instance).to receive(:status).and_return(:waiting)
+          expect(aws).to receive(:backoff_sleep).exactly(4).times
+          aws.wait_for_status(:running, instance_set) do |instance|
+            instance[:barn] == barn_value
+          end
+        end
       end
 
       context 'after 10 tries' do
@@ -285,6 +311,12 @@ module Beaker
           expect(aws_instance).to receive(:status).and_return(:waiting).exactly(10).times
           expect(aws).to receive(:backoff_sleep).exactly(9).times
           expect { wait_for_status }.to raise_error('Instance never reached state running')
+        end
+
+        it 'still raises RuntimeError if given a block' do
+          expect(aws_instance).to receive(:status).and_return(:waiting).exactly(10).times
+          expect(aws).to receive(:backoff_sleep).exactly(9).times
+          expect { wait_for_status { false } }.to raise_error('Instance never reached state running')
         end
       end
 
