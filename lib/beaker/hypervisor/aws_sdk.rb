@@ -47,6 +47,8 @@ module Beaker
       # Perform the main launch work
       launch_all_nodes()
 
+      wait_for_status_f5()
+
       # Add metadata tags to each instance
       add_tags()
 
@@ -422,9 +424,13 @@ module Beaker
     #
     # @param status [Symbol] EC2 state to wait for, :running :stopped etc.
     # @param instances Enumerable<Hash{Symbol=>EC2::Instance,Host}>
+    # @param block [Proc] more complex checks can be made by passing a
+    #                     block in.  This overrides the status parameter.
+    #                     EC2::Instance objects from the hosts will be
+    #                     yielded to the passed block
     # @return [void]
     # @api private
-    def wait_for_status(status, instances)
+    def wait_for_status(status, instances, &block)
       # Wait for each node to reach status :running
       @logger.notify("aws-sdk: Waiting for all hosts to be #{status}")
       instances.each do |x|
@@ -436,7 +442,12 @@ module Beaker
         # TODO: should probably be a in a shared method somewhere
         for tries in 1..10
           begin
-            if instance.status == status
+            if block_given?
+              test_result = yield instance
+            else
+              test_result = instance.status == status
+            end
+            if test_result
               # Always sleep, so the next command won't cause a throttle
               backoff_sleep(tries)
               break
@@ -447,6 +458,29 @@ module Beaker
             @logger.debug("Instance #{name} not yet available (#{e})")
           end
           backoff_sleep(tries)
+        end
+      end
+    end
+
+    # Handles special checks needed for f5 platforms.
+    #
+    # @note if any host is an f5 one, these checks will happen once across all
+    #   of the hosts, and then we'll exit
+    #
+    # @return [void]
+    # @api private
+    def wait_for_status_f5()
+      @hosts.each do |host|
+        if host['platform'] =~ /f5/
+          wait_for_status(:running, @hosts)
+
+          wait_for_status(nil, @hosts) do |instance|
+            instance_status_collection = instance.client.describe_instance_status({:instance_ids => [instance.id]})
+            first_instance = instance_status_collection[:instance_status_set].first
+            first_instance[:system_status][:status] == "ok"
+          end
+
+          break
         end
       end
     end
@@ -611,15 +645,21 @@ module Beaker
     # @return [String] contents of public key
     # @api private
     def public_key
-      filename = File.expand_path('~/.ssh/id_rsa.pub')
-      unless File.exists? filename
-        filename = File.expand_path('~/.ssh/id_dsa.pub')
-        unless File.exists? filename
-          raise RuntimeError, 'Expected either ~/.ssh/id_rsa.pub or ~/.ssh/id_dsa.pub but found neither'
-        end
+      keys = Array(@options[:ssh][:keys])
+      keys << '~/.ssh/id_rsa'
+      keys << '~/.ssh/id_dsa'
+      key_file = nil
+      keys.each do |key|
+        key_filename = File.expand_path(key + '.pub')
+        key_file = key_filename if File.exists?(key_filename)
       end
 
-      File.read(filename)
+      if key_file
+        @logger.debug("Using public key: #{key_file}")
+      else
+        raise RuntimeError, "Expected to find a public key, but couldn't in #{keys}"
+      end
+      File.read(key_file)
     end
 
     # Generate a reusable key name from the local hosts hostname
