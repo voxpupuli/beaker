@@ -538,10 +538,13 @@ module Beaker
 
     # Configure /etc/hosts for each node
     #
+    # @note f5 hosts are skipped since this isn't a valid step there
+    #
     # @return [void]
     # @api private
     def configure_hosts
       @hosts.each do |host|
+        next if host['platform'] =~ /f5/
         host_entries = @hosts.map do |h|
           h == host ? etc_hosts_entry(h, :private_ip) : etc_hosts_entry(h)
         end
