@@ -501,6 +501,7 @@ module Beaker
       logger = opts[:logger]
 
       block_on host do |host|
+        next if host['platform'] =~ /f5/
         env = construct_env(host, opts)
         logger.debug("setting local environment on #{host.name}")
         case host['platform']
