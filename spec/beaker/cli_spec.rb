@@ -191,6 +191,39 @@ module Beaker
         end
       end
 
+      describe "#preserve_hosts_file" do
+        it 'removes the pre-suite/post-suite/tests and sets to []' do
+          hosts =  make_hosts
+          options = cli.instance_variable_get(:@options)
+          options[:log_dated_dir] = Dir.mktmpdir
+          File.open("sample.cfg", "w+") do |file|
+            file.write("HOSTS:\n")
+            hosts.each do |host|
+              file.write("  #{host.name}:\n")
+              file.write("    roles:\n")
+              host[:roles].each do |role|
+                file.write("      - #{role}\n")
+              end
+              file.write("    platform: #{host[:platform]}\n")
+            end
+            file.write("CONFIG:\n")
+          end
+          options[:hosts_file] = 'sample.cfg'
+          options[:pre_suite] = ['pre1', 'pre2', 'pre3']
+          options[:post_suite] = ['post1']
+          options[:tests] = ['test1', 'test2']
+
+          cli.instance_variable_set(:@options, options)
+          cli.instance_variable_set(:@hosts, hosts)
+
+          preserved_file = cli.preserve_hosts_file
+          hosts_yaml = YAML.load_file(preserved_file)
+          expect(hosts_yaml['CONFIG'][:tests]).to be == []
+          expect(hosts_yaml['CONFIG'][:pre_suite]).to be == []
+          expect(hosts_yaml['CONFIG'][:post_suite]).to be == []
+        end
+      end
+
       describe 'hosts file saving when preserve_hosts should happen' do
 
         before :each do

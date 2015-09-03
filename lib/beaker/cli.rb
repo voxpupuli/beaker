@@ -166,7 +166,11 @@ module Beaker
     # @return nil
     def preserve_hosts_file
       # things that don't belong in the preserved host file
-      dontpreserve = /HOSTS|logger|timestamp|log_prefix|_dated_dir|logger_sut|pre_suite|post_suite|tests/
+      dontpreserve = /HOSTS|logger|timestamp|log_prefix|_dated_dir|logger_sut/
+      # set the pre/post/tests to be none
+      @options[:pre_suite] = []
+      @options[:post_suite] = []
+      @options[:tests] = []
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
       FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
       hosts_yaml = YAML.load_file(preserved_hosts_filename)
