@@ -57,27 +57,27 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#on raises an exception when remote command fails" do
     assert_raises(Beaker::Host::CommandFailure) do
-      on hosts.first, "/bin/nonexistent-command"
+      on default, "/bin/nonexistent-command"
     end
   end
 
   step "#on makes command output available via `.stdout` on success" do
-    output = on(hosts.first, %Q{echo "echo via on"}).stdout
+    output = on(default, %Q{echo "echo via on"}).stdout
     assert_equal "echo via on\n", output
   end
 
   step "#on makes command error output available via `.stderr` on success" do
-    output = on(hosts.first, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]).stderr
+    output = on(default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]).stderr
     assert_match /No such file/, output
   end
 
   step "#on makes exit status available via `.exit_code`" do
-    status = on(hosts.first, %Q{echo "echo via on"}).exit_code
+    status = on(default, %Q{echo "echo via on"}).exit_code
     assert_equal 0, status
   end
 
   step "#on with :acceptable_exit_codes will not fail for named exit codes" do
-    result = on hosts.first, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]
+    result = on default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]
     output = result.stderr
     assert_match /No such file/, output
     status = result.exit_code
@@ -86,12 +86,12 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#on with :acceptable_exit_codes will fail for other exit codes" do
     assert_raises(Beaker::Host::CommandFailure) do
-      on hosts.first, %Q{echo "echo via on"}, :acceptable_exit_codes => [127]
+      on default, %Q{echo "echo via on"}, :acceptable_exit_codes => [127]
     end
   end
 
   step "#on will pass :environment options to the remote host as ENV settings" do
-    result = on hosts.first, "env", { :environment => { 'FOO' => 'bar' } }
+    result = on default, "env", { :environment => { 'FOO' => 'bar' } }
     output = result.stdout
 
     assert_match /\nFOO=bar\n/, output
@@ -209,9 +209,9 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#scp_to fails if the local file cannot be found" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     assert_raises IOError do
-      scp_to hosts.first, "/non/existent/file.txt", remote_tmpdir
+      scp_to default, "/non/existent/file.txt", remote_tmpdir
     end
   end
 
@@ -225,7 +225,7 @@ test_name "dsl::helpers::host_helpers" do
 
         # assert_raises Beaker::Host::CommandFailure do
         assert_raises RuntimeError do
-          scp_to hosts.first, local_filename, "/non/existent/remote/file.txt"
+          scp_to default, local_filename, "/non/existent/remote/file.txt"
         end
       end
     end
@@ -237,12 +237,12 @@ test_name "dsl::helpers::host_helpers" do
       File.open(local_filename, "w") do |local_file|
         local_file.puts "contents"
       end
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
 
-      scp_to hosts.first, local_filename, remote_tmpdir
+      scp_to default, local_filename, remote_tmpdir
 
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+      remote_contents = on(default, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
@@ -254,7 +254,7 @@ test_name "dsl::helpers::host_helpers" do
         local_file.puts "contents"
       end
 
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
@@ -269,18 +269,18 @@ test_name "dsl::helpers::host_helpers" do
 
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      on hosts.first, %Q{echo "contents" > #{remote_filename}}
+      on default, %Q{echo "contents" > #{remote_filename}}
       assert_raises Beaker::Host::CommandFailure do
-        scp_from hosts.first, remote_filename, "/non/existent/file.txt"
+        scp_from default, remote_filename, "/non/existent/file.txt"
       end
     end
 
     step "#scp_from fails if the remote file cannot be found" do
       Dir.mktmpdir do |local_dir|
         assert_raises Beaker::Host::CommandFailure do
-          scp_from hosts.first, "/non/existent/remote/file.txt", local_dir
+          scp_from default, "/non/existent/remote/file.txt", local_dir
         end
       end
     end
@@ -288,11 +288,11 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#scp_from creates the file on the local system" do
     Dir.mktmpdir do |local_dir|
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      on hosts.first, %Q{echo "contents" > #{remote_filename}}
+      on default, %Q{echo "contents" > #{remote_filename}}
 
-      scp_from hosts.first, remote_filename, local_dir
+      scp_from default, remote_filename, local_dir
 
       local_filename = File.join(local_dir, "testfile.txt")
       assert_equal "contents\n", File.read(local_filename)
@@ -305,7 +305,7 @@ test_name "dsl::helpers::host_helpers" do
 
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.txt")
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
       results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
@@ -318,7 +318,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if hosts.first.is_cygwin?
+  if default.is_cygwin?
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
 
@@ -328,13 +328,13 @@ test_name "dsl::helpers::host_helpers" do
         File.open(local_filename, "w") do |local_file|
           local_file.puts "contents"
         end
-        remote_tmpdir = tmpdir_on hosts.first
+        remote_tmpdir = tmpdir_on default
 
-        rsync_to hosts.first, local_filename, remote_tmpdir
+        rsync_to default, local_filename, remote_tmpdir
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         assert_raises Beaker::Host::CommandFailure do
-          remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+          remote_contents = on(default, "cat #{remote_filename}").stdout
           # assert_equal "contents\n", remote_contents
         end
       end
@@ -343,9 +343,9 @@ test_name "dsl::helpers::host_helpers" do
   else
 
     step "#rsync_to fails if the local file cannot be found" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       assert_raises IOError do
-        rsync_to hosts.first, "/non/existent/file.txt", remote_tmpdir
+        rsync_to default, "/non/existent/file.txt", remote_tmpdir
       end
     end
 
@@ -358,9 +358,9 @@ test_name "dsl::helpers::host_helpers" do
           local_file.puts "contents"
         end
 
-        rsync_to hosts.first, local_filename, "/non/existent/testfile.txt"
+        rsync_to default, local_filename, "/non/existent/testfile.txt"
         assert_raises Beaker::Host::CommandFailure do
-          on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+          on(default, "cat /non/existent/testfile.txt").exit_code
         end
       end
     end
@@ -371,9 +371,9 @@ test_name "dsl::helpers::host_helpers" do
         File.open(local_filename, "w") do |local_file|
           local_file.puts "contents"
         end
-        remote_tmpdir = tmpdir_on hosts.first
+        remote_tmpdir = tmpdir_on default
 
-        rsync_to hosts.first, local_filename, remote_tmpdir
+        rsync_to default, local_filename, remote_tmpdir
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
       end
@@ -386,7 +386,7 @@ test_name "dsl::helpers::host_helpers" do
           local_file.puts "contents"
         end
 
-        remote_tmpdir = tmpdir_on hosts.first
+        remote_tmpdir = tmpdir_on default
         on hosts, "mkdir -p #{remote_tmpdir}"
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
@@ -403,13 +403,13 @@ test_name "dsl::helpers::host_helpers" do
   if test_scp_error_on_close?
     step "#create_remote_file fails when the remote path does not exist" do
       assert_raises Beaker::Host::CommandFailure do
-        create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n"
+        create_remote_file default, "/non/existent/testfile.txt", "contents\n"
       end
     end
 
     step "#create_remote_file fails when the remote path does not exist, using scp" do
       assert_raises Beaker::Host::CommandFailure do
-        create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'scp' }
+        create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'scp' }
       end
     end
   end
@@ -431,32 +431,32 @@ test_name "dsl::helpers::host_helpers" do
     !!(host['platform'] =~ /sles/)
   end
 
-  if el4_platform?(hosts.first)
+  if el4_platform?(default)
 
-      step "#deploy_package_repo CURRENTLY does nothing and throws no error on the #{hosts.first['platform']} platform" do
+      step "#deploy_package_repo CURRENTLY does nothing and throws no error on the #{default['platform']} platform" do
         # NOTE: would expect this to fail with Beaker::Host::CommandFailure
 
         Dir.mktmpdir do |local_dir|
           name = "puppet-server"
           version = "9.9.9"
-          platform = hosts.first['platform']
+          platform = default['platform']
           local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
           File.open(local_filename, "w") do |local_file|
             local_file.puts "contents"
           end
 
-          assert_nil deploy_package_repo(hosts.first, local_dir, name, version)
+          assert_nil deploy_package_repo(default, local_dir, name, version)
         end
       end
 
-  elsif yum_platform?(hosts.first)
+  elsif yum_platform?(default)
 
     step "#deploy_package_repo pushes repo package to /etc/yum.repos.d on the remote host" do
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        platform = hosts.first['platform']
+        platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
         local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
@@ -465,13 +465,13 @@ test_name "dsl::helpers::host_helpers" do
           local_file.puts "contents"
         end
 
-        deploy_package_repo hosts.first, local_dir, name, version
+        deploy_package_repo default, local_dir, name, version
 
-        result = on hosts.first, "cat /etc/yum.repos.d/#{name}.repo"
+        result = on default, "cat /etc/yum.repos.d/#{name}.repo"
         assert_equal "contents\n", result.stdout
 
         # teardown
-        on hosts.first, "rm /etc/yum.repos.d/#{name}.repo"
+        on default, "rm /etc/yum.repos.d/#{name}.repo"
       end
     end
 
@@ -481,7 +481,7 @@ test_name "dsl::helpers::host_helpers" do
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        platform = hosts.first['platform']
+        platform = default['platform']
         local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         File.open(local_filename, "w") do |local_file|
@@ -494,13 +494,13 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
 
-  elsif apt_platform?(hosts.first)
+  elsif apt_platform?(default)
 
     step "#deploy_package_repo pushes repo package to /etc/apt/sources.list.d on the remote host" do
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        codename = hosts.first['platform'].codename
+        codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
         local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
@@ -509,13 +509,13 @@ test_name "dsl::helpers::host_helpers" do
           local_file.puts "contents"
         end
 
-        deploy_package_repo hosts.first, local_dir, name, version
+        deploy_package_repo default, local_dir, name, version
 
-        result = on hosts.first, "cat /etc/apt/sources.list.d/#{name}.list"
+        result = on default, "cat /etc/apt/sources.list.d/#{name}.list"
         assert_equal "contents\n", result.stdout
 
         # teardown
-        on hosts.first, "rm /etc/apt/sources.list.d/#{name}.list"
+        on default, "rm /etc/apt/sources.list.d/#{name}.list"
       end
     end
 
@@ -525,7 +525,7 @@ test_name "dsl::helpers::host_helpers" do
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        codename = hosts.first['platform'].codename
+        codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
         local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
@@ -540,13 +540,13 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
 
-  elsif zyp_platform?(hosts.first)
+  elsif zyp_platform?(default)
 
     step "#deploy_package_repo updates zypper repository list on the remote host" do
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        platform = hosts.first['platform']
+        platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
         local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
@@ -558,13 +558,13 @@ test_name "dsl::helpers::host_helpers" do
 
         File.open(local_filename, "w") { |file| file.puts inifile }
 
-        deploy_package_repo hosts.first, local_dir, name, version
+        deploy_package_repo default, local_dir, name, version
 
-        result = on hosts.first, "zypper repos -d"
+        result = on default, "zypper repos -d"
         assert_match "PE-3.8-sles-11-x86_64", result.stdout
 
         # teardown
-        on hosts.first, "zypper rr PE-3.8-sles-11-x86_64"
+        on default, "zypper rr PE-3.8-sles-11-x86_64"
       end
     end
 
@@ -572,13 +572,13 @@ test_name "dsl::helpers::host_helpers" do
 
     # OS X, windows (cygwin, powershell), solaris, etc.
 
-    step "#deploy_package_repo CURRENTLY fails with a RuntimeError on on the #{hosts.first['platform']} platform" do
+    step "#deploy_package_repo CURRENTLY fails with a RuntimeError on on the #{default['platform']} platform" do
       # NOTE: would expect this to raise Beaker::Host::CommandFailure instead of RuntimeError
 
       Dir.mktmpdir do |local_dir|
         name = "puppet-server"
         version = "9.9.9"
-        platform = hosts.first['platform']
+        platform = default['platform']
         local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         File.open(local_filename, "w") do |local_file|
@@ -586,7 +586,7 @@ test_name "dsl::helpers::host_helpers" do
         end
 
         assert_raises RuntimeError do
-          deploy_package_repo hosts.first, local_dir, name, version
+          deploy_package_repo default, local_dir, name, version
         end
       end
     end
@@ -595,62 +595,62 @@ test_name "dsl::helpers::host_helpers" do
   step "#create_remote_file CURRENTLY does not fail and does not create a remote file when the remote path does not exist, using rsync" do
     # NOTE: would expect this to fail with Beaker::Host::CommandFailure
 
-    create_remote_file hosts.first, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+    create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
     assert_raises Beaker::Host::CommandFailure do
-      on(hosts.first, "cat /non/existent/testfile.txt").exit_code
+      on(default, "cat /non/existent/testfile.txt").exit_code
     end
   end
 
   step "#create_remote_file creates a remote file with the specified contents" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts.first, remote_filename, "contents\n"
-    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+    create_remote_file default, remote_filename, "contents\n"
+    remote_contents = on(default, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "scp" }
-    remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+    create_remote_file default, remote_filename, "contents\n", { :protocol => "scp" }
+    remote_contents = on(default, "cat #{remote_filename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
-  if hosts.first.is_cygwin?
+  if default.is_cygwin?
     # NOTE: rsync methods are not working currently on windows platforms
 
     step "#create_remote_file CURRENTLY fails on windows systems, using rsync" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
+      create_remote_file default, remote_filename, "contents\n", { :protocol => "rsync" }
       assert_raises Beaker::Host::CommandFailure do
-        remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+        remote_contents = on(default, "cat #{remote_filename}").stdout
       end
     end
 
   else
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => "rsync" }
-      remote_contents = on(hosts.first, "cat #{remote_filename}").stdout
+      create_remote_file default, remote_filename, "contents\n", { :protocol => "rsync" }
+      remote_contents = on(default, "cat #{remote_filename}").stdout
       assert_equal "contents\n", remote_contents
     end
   end
 
   step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts.first, remote_filename, "contents\n", { :protocol => 'unknown' }
+    create_remote_file default, remote_filename, "contents\n", { :protocol => 'unknown' }
     assert_raises Beaker::Host::CommandFailure do
-      on(hosts.first, "cat #{remote_filename}").exit_code
+      on(default, "cat #{remote_filename}").exit_code
     end
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts, remote_filename, "contents\n"
@@ -661,7 +661,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#create_remote_file create remote files on all remote hosts, when given an array, using scp" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'scp' }
@@ -671,12 +671,12 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if hosts.first.is_cygwin?
+  if default.is_cygwin?
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
 
     step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
@@ -690,7 +690,7 @@ test_name "dsl::helpers::host_helpers" do
   else
 
     step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = tmpdir_on hosts.first
+      remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
@@ -703,7 +703,7 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#run_script_on fails when the local script cannot be found" do
     assert_raises IOError do
-      run_script_on hosts.first, "/non/existent/testfile.sh"
+      run_script_on default, "/non/existent/testfile.sh"
     end
   end
 
@@ -716,7 +716,7 @@ test_name "dsl::helpers::host_helpers" do
       FileUtils.chmod "a+x", local_filename
 
       assert_raises Beaker::Host::CommandFailure do
-        run_script_on hosts.first, local_filename
+        run_script_on default, local_filename
       end
     end
   end
@@ -729,7 +729,7 @@ test_name "dsl::helpers::host_helpers" do
       end
       FileUtils.chmod "a+x", local_filename
 
-      result = run_script_on hosts.first, local_filename, { :accept_all_exit_codes => true }
+      result = run_script_on default, local_filename, { :accept_all_exit_codes => true }
       assert_equal 1, result.exit_code
     end
   end
@@ -742,7 +742,7 @@ test_name "dsl::helpers::host_helpers" do
       end
       FileUtils.chmod "a+x", local_filename
 
-      results = run_script_on hosts.first, local_filename
+      results = run_script_on default, local_filename
       assert_equal 0, results.exit_code
       assert_equal "contents\n", results.stdout
     end
@@ -756,7 +756,7 @@ test_name "dsl::helpers::host_helpers" do
       end
       FileUtils.chmod "a+x", local_filename
 
-      results = run_script_on hosts.first, local_filename do
+      results = run_script_on default, local_filename do
         assert_equal 0, exit_code
         assert_equal "contents\n", stdout
       end
@@ -843,7 +843,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if hosts.first.is_cygwin?
+  if default.is_cygwin?
     # NOTE: install_package, check_for_package, and upgrade_package on windows
     # currently fail as follows:
     #
@@ -853,17 +853,17 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#install_package CURRENTLY fails on windows platforms" do
       assert_raises ArgumentError do
-        install_package hosts.first, "rsync"
+        install_package default, "rsync"
       end
     end
 
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
-      result = check_for_package hosts.first, "non-existent-package-name"
+      result = check_for_package default, "non-existent-package-name"
       assert !result
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
-      result = check_for_package hosts.first, "bash"
+      result = check_for_package default, "bash"
       assert result
     end
 
@@ -876,7 +876,7 @@ test_name "dsl::helpers::host_helpers" do
     step "#upgrade_package CURRENTLY fails on windows platforms with a RuntimeError" do
       # NOTE: this is not a supported platform but would expect a Beaker::Host::CommandFailure
       assert_raises RuntimeError do
-        upgrade_package hosts.first, "bash"
+        upgrade_package default, "bash"
       end
     end
 
@@ -884,19 +884,19 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#install_package fails if package is not known on the OS" do
       assert_raises Beaker::Host::CommandFailure do
-        install_package hosts.first, "non-existent-package-name"
+        install_package default, "non-existent-package-name"
       end
     end
 
     step "#install_package installs a known package successfully" do
-      result = install_package hosts.first, "rsync"
-      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+      result = install_package default, "rsync"
+      assert check_for_package(default, "rsync"), "package was not successfully installed"
     end
 
     step "#install_package succeeds when installing an already-installed package" do
-      result = install_package hosts.first, "rsync"
-      result = install_package hosts.first, "rsync"
-      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed"
+      result = install_package default, "rsync"
+      result = install_package default, "rsync"
+      assert check_for_package(default, "rsync"), "package was not successfully installed"
     end
 
     step "#install_package CURRENTLY fails if given a host array" do
@@ -909,13 +909,13 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
-      result = check_for_package hosts.first, "non-existent-package-name"
+      result = check_for_package default, "non-existent-package-name"
       assert !result
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
-      install_package hosts.first, "rsync"
-      result = check_for_package hosts.first, "rsync"
+      install_package default, "rsync"
+      result = check_for_package default, "rsync"
       assert result
     end
 
@@ -930,7 +930,7 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#upgrade_package fails if package is not already installed" do
       assert_raises Beaker::Host::CommandFailure do
-        upgrade_package hosts.first, "non-existent-package-name"
+        upgrade_package default, "non-existent-package-name"
       end
     end
 
@@ -938,9 +938,9 @@ test_name "dsl::helpers::host_helpers" do
       # TODO: anyone have any bright ideas on how to portably install an old
       # version of a package, to really test an upgrade?
 
-      install_package hosts.first, "rsync"
-      upgrade_package hosts.first, "rsync"
-      assert check_for_package(hosts.first, "rsync"), "package was not successfully installed/upgraded"
+      install_package default, "rsync"
+      upgrade_package default, "rsync"
+      assert check_for_package(default, "rsync"), "package was not successfully installed/upgraded"
     end
 
     step "#upgrade_package CURRENTLY fails when given a host array" do
@@ -957,11 +957,11 @@ test_name "dsl::helpers::host_helpers" do
     # NOTE: would expect this to be better documented.
     #       Also, this method should probably live outside the core hosts helpers,
     #       and should probably be a more generalized method.
-    if hosts.first.is_powershell?
+    if default.is_powershell?
       logger.info "Skipping failure test on powershell platforms..."
-    elsif hosts.first['platform'] =~ /windows/
+    elsif default['platform'] =~ /windows/
       assert_raises Beaker::Host::CommandFailure do
-        add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+        add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
       end
     else
       logger.info "Skipping failure tests on non-windows platforms..."
@@ -974,18 +974,18 @@ test_name "dsl::helpers::host_helpers" do
     #       non-powershell platform (raises Beaker::Host::CommandFailure), or
     #       as requested in the original PR:
     #       https://github.com/puppetlabs/beaker/pull/420/files#r17990622
-    if hosts.first['platform'] =~ /windows/
+    if default['platform'] =~ /windows/
       logger.info "Skipping failure test on powershell platforms..."
     else
       assert_raises RuntimeError do
-        add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+        add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
       end
     end
   end
 
   step "#add_system32_hosts_entry, when run on a powershell platform, adds a host entry to system32 etc\\hosts" do
-    if hosts.first.is_powershell?
-      add_system32_hosts_entry hosts.first, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+    if default.is_powershell?
+      add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
 
       # TODO: how do we assert, via powershell, that the entry was added?
       # NOTE: see: https://github.com/puppetlabs/beaker/commit/685628f4babebe9cb4663418da6a8ff528dd32da#commitcomment-12957573
@@ -1004,54 +1004,54 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#backup_the_file CURRENTLY will return nil if the file does not exist in the source directory" do
     # NOTE: would expect this to fail with Beaker::Host::CommandFailure
-    remote_source = tmpdir_on hosts.first
-    remote_destination = tmpdir_on hosts.first
-    result = backup_the_file hosts.first, remote_source, remote_destination
+    remote_source = tmpdir_on default
+    remote_destination = tmpdir_on default
+    result = backup_the_file default, remote_source, remote_destination
     assert_nil result
   end
 
   step "#backup_the_file will fail if the destination directory does not exist" do
-    remote_source = tmpdir_on hosts.first
+    remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    create_remote_file hosts.first, remote_source_filename, "contents"
+    create_remote_file default, remote_source_filename, "contents"
 
     assert_raises Beaker::Host::CommandFailure do
-      result = backup_the_file hosts.first, remote_source, "/non/existent/"
+      result = backup_the_file default, remote_source, "/non/existent/"
     end
   end
 
   step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
-    remote_source = tmpdir_on hosts.first
+    remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    create_remote_file hosts.first, remote_source_filename, "contents"
+    create_remote_file default, remote_source_filename, "contents"
 
-    remote_destination = tmpdir_on hosts.first
+    remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
 
-    result = backup_the_file hosts.first, remote_source, remote_destination
+    result = backup_the_file default, remote_source, remote_destination
     assert_equal remote_destination_filename, result
-    contents = on(hosts.first, "cat #{remote_destination_filename}").stdout
+    contents = on(default, "cat #{remote_destination_filename}").stdout
     assert_equal "contents\n", contents
   end
 
   step "#backup_the_file copies a named file from the source to the destination directory" do
-    remote_source = tmpdir_on hosts.first
+    remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    create_remote_file hosts.first, remote_source_filename, "contents"
-    remote_destination = tmpdir_on hosts.first
+    create_remote_file default, remote_source_filename, "contents"
+    remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
-    result = backup_the_file hosts.first, remote_source, remote_destination, "testfile.txt"
+    result = backup_the_file default, remote_source, remote_destination, "testfile.txt"
     assert_equal remote_destination_filename, result
-    contents = on(hosts.first, "cat #{remote_destination_filename}").stdout
+    contents = on(default, "cat #{remote_destination_filename}").stdout
     assert_equal "contents\n", contents
   end
 
   step "#backup_the_file CURRENTLY will fail if given a hosts array" do
-    remote_source = tmpdir_on hosts.first
+    remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    create_remote_file hosts.first, remote_source_filename, "contents"
-    remote_destination = tmpdir_on hosts.first
+    create_remote_file default, remote_source_filename, "contents"
+    remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
     assert_raises NoMethodError do
@@ -1061,7 +1061,7 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#curl_on fails if the URL in question cannot be reached" do
     assert Beaker::Host::CommandFailure do
-      curl_on hosts.first, "file:///non/existent.html"
+      curl_on default, "file:///non/existent.html"
     end
   end
 
@@ -1075,24 +1075,24 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   step "#curl_on can retrieve the contents of a URL, using standard curl options" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
-    create_remote_file hosts.first, remote_filename, "contents"
-    result = curl_on hosts.first, "-o #{remote_targetfilename} #{host_local_url hosts.first, remote_filename}"
+    create_remote_file default, remote_filename, "contents"
+    result = curl_on default, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
     assert_equal 0, result.exit_code
-    remote_contents = on(hosts.first, "cat #{remote_targetfilename}").stdout
+    remote_contents = on(default, "cat #{remote_targetfilename}").stdout
     assert_equal "contents\n", remote_contents
   end
 
   step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
     on hosts, "mkdir -p #{remote_tmpdir}"
     create_remote_file hosts, remote_filename, "contents"
 
-    result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url hosts.first, remote_filename}"
+    result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_targetfilename}").stdout
@@ -1106,7 +1106,7 @@ test_name "dsl::helpers::host_helpers" do
     assert_raises RuntimeError do
       curl_with_retries \
         "description",
-        hosts.first,
+        default,
         "file:///non/existent.html",
         desired_exit_codes = [0],
         max_retries = 2,
@@ -1140,27 +1140,27 @@ test_name "dsl::helpers::host_helpers" do
   step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
     # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
 
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file \
-      hosts.first,
+      default,
       remote_script_file,
       retry_script_body(remote_tmpdir, failure_count = 10)
 
     assert_raises RuntimeError do
-      retry_on hosts.first, remote_script_file, { :max_retries => 2, :retry_interval => 0.1 }
+      retry_on default, remote_script_file, { :max_retries => 2, :retry_interval => 0.1 }
     end
   end
 
   step "#retry_on succeeds if command passes before retries are exhausted" do
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file \
-      hosts.first,
+      default,
       remote_script_file,
       retry_script_body(remote_tmpdir, failure_count = 2)
 
-    result = retry_on hosts.first, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
+    result = retry_on default, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
     assert_equal 0, result.exit_code
     assert_equal "", result.stdout
   end
@@ -1169,7 +1169,7 @@ test_name "dsl::helpers::host_helpers" do
     # NOTE: would expect this to work across hosts, or be better documented and
     #       to raise Beaker::Host::CommandFailure
 
-    remote_tmpdir = tmpdir_on hosts.first
+    remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
 
     remote_script_file = File.join(remote_tmpdir, "test.sh")
@@ -1183,11 +1183,11 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if hosts.first.is_cygwin? or hosts.first.is_powershell?
+  if default.is_cygwin? or default.is_powershell?
 
     step "#run_cron_on fails on windows platforms when listing cron jobs for a user on a host" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :list, hosts.first['user']
+        run_cron_on default, :list, default['user']
       end
     end
 
@@ -1196,44 +1196,44 @@ test_name "dsl::helpers::host_helpers" do
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
 
-      assert_nil run_cron_on hosts.first, :nonexistent_action, hosts.first['user']
+      assert_nil run_cron_on default, :nonexistent_action, default['user']
     end
 
     step "#run_cron_on fails when listing cron jobs for an unknown user" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :list, "nonexistentuser"
+        run_cron_on default, :list, "nonexistentuser"
       end
     end
 
     step "#run_cron_on fails when listing cron jobs for a user with no cron entries" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :list, hosts.first['user']
+        run_cron_on default, :list, default['user']
       end
     end
 
     step "#run_cron_on returns a list of cron jobs for a user with cron entries" do
       # this basically requires us to add a cron entry to make this work
-      run_cron_on hosts.first, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
-      result = run_cron_on hosts.first, :list, hosts.first['user']
+      run_cron_on default, :add, default['user'], "* * * * * /bin/ls >/dev/null"
+      result = run_cron_on default, :list, default['user']
       assert_equal 0, result.exit_code
       assert_match %r{/bin/ls}, result.stdout
     end
 
     step "#run_cron_on fails when adding cron jobs for an unknown user" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
+        run_cron_on default, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
       end
     end
 
     step "#run_cron_on fails when attempting to add a bad cron entry" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :add, hosts.first['user'], "* * * * /bin/ls >/dev/null"
+        run_cron_on default, :add, default['user'], "* * * * /bin/ls >/dev/null"
       end
     end
 
     step "#run_cron_on can add a cron job for a user on a host" do
-      run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
-      result = run_cron_on hosts.first, :list, hosts.first['user']
+      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
+      result = run_cron_on default, :list, default['user']
       assert_equal 0, result.exit_code
       assert_match %r{/bin/echo}, result.stdout
     end
@@ -1243,10 +1243,10 @@ test_name "dsl::helpers::host_helpers" do
       #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
 
       1.upto(3) do |job_number|
-        run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
+        run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
       end
 
-      result = run_cron_on hosts.first, :list, hosts.first['user']
+      result = run_cron_on default, :list, default['user']
 
       assert_no_match %r{job :1:}, result.stdout
       assert_no_match %r{job :2:}, result.stdout
@@ -1257,20 +1257,20 @@ test_name "dsl::helpers::host_helpers" do
       # NOTE: would have expected a more granular approach to removing cron jobs
       #       for a user on a host.  This should otherwise be better documented.
 
-      run_cron_on hosts.first, :add, hosts.first['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
-      result = run_cron_on hosts.first, :list, hosts.first['user']
+      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
+      result = run_cron_on default, :list, default['user']
       assert_match %r{quality: job 1}, result.stdout
 
-      run_cron_on hosts.first, :remove, hosts.first['user']
+      run_cron_on default, :remove, default['user']
 
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :list, hosts.first['user']
+        run_cron_on default, :list, default['user']
       end
     end
 
     step "#run_cron_on fails when removing cron jobs for an unknown user" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on hosts.first, :remove, "nonexistentuser"
+        run_cron_on default, :remove, "nonexistentuser"
       end
     end
 
@@ -1280,24 +1280,24 @@ test_name "dsl::helpers::host_helpers" do
         run_cron_on host, :add, host['user'], "* * * * * /bin/ls >/dev/null"
       end
 
-      results = run_cron_on hosts, :list, hosts.first['user']
+      results = run_cron_on hosts, :list, default['user']
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end
     end
 
     step "#run_cron_on can add cron jobs for a user on all hosts when given a host array" do
-      run_cron_on hosts, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
+      run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
 
-      results = run_cron_on hosts, :list, hosts.first['user']
+      results = run_cron_on hosts, :list, default['user']
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end
     end
 
     step "#run_cron_on can remove cron jobs for a user on all hosts when given a host array" do
-      run_cron_on hosts, :add, hosts.first['user'], "* * * * * /bin/ls >/dev/null"
-      run_cron_on hosts, :remove, hosts.first['user']
+      run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
+      run_cron_on hosts, :remove, default['user']
 
       hosts.each do |host|
         assert_raises Beaker::Host::CommandFailure do
@@ -1307,44 +1307,44 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if hosts.first.is_cygwin?
+  if default.is_cygwin?
 
     step "#create_tmpdir_on CURRENTLY fails when attempting to chown the created tempdir to the host user + group, on windows platforms" do
       # NOTE: would have expected this to work.
       # TODO: fix via https://tickets.puppetlabs.com/browse/BKR-496
 
       assert_raises Beaker::Host::CommandFailure do
-        tmpdir = create_tmpdir_on hosts.first
+        tmpdir = create_tmpdir_on default
       end
     end
 
   else
 
     step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
-      tmpdir = create_tmpdir_on hosts.first
-      listing = on(hosts.first, "ls -al #{tmpdir}").stdout
+      tmpdir = create_tmpdir_on default
+      listing = on(default, "ls -al #{tmpdir}").stdout
       tmpdir_ls = listing.split("\n").grep %r{\s+\./?\s*$}
       assert_equal 1, tmpdir_ls.size
       perms, inodes, owner, group, *rest = tmpdir_ls.first.split(/\s+/)
-      assert_equal hosts.first['user'], owner
-      assert_equal hosts.first['user'], group
+      assert_equal default['user'], owner
+      assert_equal default['user'], group
     end
 
     step "#create_tmpdir_on returns a temporary directory on the remote system" do
-      tmpdir = create_tmpdir_on hosts.first
+      tmpdir = create_tmpdir_on default
       assert_match %r{/}, tmpdir
-      assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
+      assert_equal 0, on(default, "touch #{tmpdir}/testfile").exit_code
     end
 
     step "#create_tmpdir_on uses the specified path prefix when provided" do
-      tmpdir = create_tmpdir_on(hosts.first, "mypathprefix")
+      tmpdir = create_tmpdir_on(default, "mypathprefix")
       assert_match %r{/mypathprefix}, tmpdir
-      assert_equal 0, on(hosts.first, "touch #{tmpdir}/testfile").exit_code
+      assert_equal 0, on(default, "touch #{tmpdir}/testfile").exit_code
     end
 
     step "#create_tmpdir_on fails if a non-existent user is specified" do
       assert_raises Beaker::Host::CommandFailure do
-        tmpdir = create_tmpdir_on hosts.first, '', "fakeuser"
+        tmpdir = create_tmpdir_on default, '', "fakeuser"
       end
     end
 
@@ -1360,13 +1360,13 @@ test_name "dsl::helpers::host_helpers" do
       # TODO - identify a platform which does not support tmpdir
       #
       # assert_raises RuntimeError do
-      #   create_tmpdir_on hosts.first
+      #   create_tmpdir_on default
       # end
     end
   end
 
   step "#echo_on echoes the supplied string on the remote host" do
-    output = echo_on(hosts.first, "contents")
+    output = echo_on(default, "contents")
     assert_equal output, "contents"
   end
 
