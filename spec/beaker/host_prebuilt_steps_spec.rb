@@ -553,6 +553,32 @@ describe Beaker do
       set_env_helper('freebsd', commands)
     end
 
+    it "skips an f5 host correctly" do
+      host = make_host('name', {
+         :platform     => 'f5-stuff',
+         :ssh_env_file => 'ssh_env_file',
+         :is_cygwin   => true,
+      } )
+      opts = {
+        :env1_key => :env1_value,
+        :env2_key => :env2_value
+      }
+
+      expect( subject ).to receive( :construct_env ).exactly(0).times
+
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( host ).to receive( :add_env_var ).exactly(0).times
+      opts.each_pair do |key, value|
+        expect( host ).to receive( :add_env_var ).with( key, value ).exactly(0).times
+      end
+      expect( host ).to receive( :exec ).exactly(0).times
+
+      subject.set_env(host, options.merge( opts ))
+    end
+
     def set_env_helper(platform_name, host_specific_commands_array)
       host = make_host('name', {
           :platform     => platform_name,

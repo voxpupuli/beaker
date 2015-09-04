@@ -472,8 +472,9 @@ module Beaker
       it { is_expected.to be_nil }
 
       context 'calls #set_etc_hosts' do
-        it 'for each host' do
-          expect(aws).to receive(:set_etc_hosts).exactly(@hosts.size).times
+        it 'for each host (except the f5 ones)' do
+          non_f5_hosts = @hosts.select{ |h| !(h['platform'] =~ /f5/) }
+          expect(aws).to receive(:set_etc_hosts).exactly(non_f5_hosts.size).times
           expect(configure_hosts).to be_nil
         end
 
