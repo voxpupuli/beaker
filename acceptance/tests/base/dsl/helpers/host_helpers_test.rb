@@ -7,7 +7,7 @@ require "fileutils"
 #
 # TODO: fix via: https://tickets.puppetlabs.com/browse/BKR-464
 def test_scp_error_on_close?
-  !!ENV["TEST_SCP_ERROR_ON_CLOSE"]
+  !!ENV["BEAKER_TEST_SCP_ERROR_ON_CLOSE"]
 end
 
 # NOTE: currently there is an issue with the tmpdir_on helper on cygwin
