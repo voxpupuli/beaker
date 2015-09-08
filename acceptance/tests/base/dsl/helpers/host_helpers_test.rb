@@ -77,6 +77,26 @@ def create_local_file_from_fixture(fixture, local_path, filename, perms = nil)
   [ full_filename, contents ]
 end
 
+def el4_platform?(host)
+  !!(host['platform'] =~ /^el-4/i)
+end
+
+def yum_platform?(host)
+  !!(host['platform'] =~ /fedora|centos|eos|el-/i)
+end
+
+def apt_platform?(host)
+  !!(host['platform'] =~ /ubuntu|debian|cumulus/i)
+end
+
+def zyp_platform?(host)
+  !!(host['platform'] =~ /sles/i)
+end
+
+def centos_platform?(host)
+  !!(host['platform'] =~ /(^el-\d)|centos/i)
+end
+
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
     # NOTE: to generate a suitable config, I use:
@@ -346,16 +366,38 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default['platform'] =~ /centos/
-    step "#rsync_to will fail on newly installed CentOS due to lack of installed rsync" do
+  if centos_platform?(default)
 
+    step "#rsync_to CURRENTLY will fail without error, but not copy the requested file, on newly installed CentOS due to lack of installed rsync" do
+      Dir.mktmpdir do |local_dir|
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+        remote_tmpdir = tmpdir_on default
+
+        rsync_to default, local_filename, remote_tmpdir
+
+        remote_filename = File.join(remote_tmpdir, "testfile.txt")
+
+        assert_raises Beaker::Host::CommandFailure do
+          remote_contents = on(default, "cat #{remote_filename}").stdout
+        end
+      end
     end
 
-    step "#create_remote_file with protocol 'rsync' fails on CentOS due to lack of installed rsync"
+    step "#create_remote_file with protocol 'rsync' fails on CentOS due to lack of installed rsync" do
+      remote_tmpdir = tmpdir_on default
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      contents = fixture_contents("simple_text_file")
+
+      create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+
+      assert_raises Beaker::Host::CommandFailure do
+        remote_contents = on(default, "cat #{remote_filename}").stdout
+      end
+    end
 
     step "installing `rsync` on CentOS for all later test steps" do
       hosts.each do |host|
-        on host, "yum install rsync"
+        install_package host, "rsync"
       end
     end
   end
@@ -444,21 +486,6 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  def el4_platform?(host)
-    !!(host['platform'] =~ /el-4/)
-  end
-
-  def yum_platform?(host)
-    !!(host['platform'] =~ /fedora|centos|eos|el-/)
-  end
-
-  def apt_platform?(host)
-    !!(host['platform'] =~ /ubuntu|debian|cumulus/)
-  end
-
-  def zyp_platform?(host)
-    !!(host['platform'] =~ /sles/)
-  end
 
   if el4_platform?(default)
 
@@ -730,14 +757,15 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default['platform'] =~ /centos/
+  if centos_platform?(default)
+
     step "uninstall rsync package on CentOS for later test runs" do
       # NOTE: this is basically a #teardown section for test isolation
       #       Could we reorganize tests into different files to make this
       #       clearer?
 
       hosts.each do |host|
-        on host, "yum remove rsync"
+        on host, "yum -y remove rsync"
       end
     end
   end
@@ -942,9 +970,28 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
 
-    step "#upgrade_package fails if package is not already installed" do
-      assert_raises Beaker::Host::CommandFailure do
-        upgrade_package default, "non-existent-package-name"
+    if centos_platform?(default)
+
+      step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
+        # NOTE: I would expect this to fail with an Beaker::Host::CommandFailure,
+        #       but maybe it's because yum doesn't really care:
+        #
+        #       > Loaded plugins: fastestmirror
+        #       > Loading mirror speeds from cached hostfile
+        #       > Setting up Update Process
+        #       > No package non-existent-package-name available.
+        #       > No Packages marked for Update
+
+        result = upgrade_package default, "non-existent-package-name"
+        assert_match /No Packages marked for Update/, result
+      end
+
+    else
+
+      step "#upgrade_package fails if package is not already installed" do
+        assert_raises Beaker::Host::CommandFailure do
+          upgrade_package default, "non-existent-package-name"
+        end
       end
     end
 
