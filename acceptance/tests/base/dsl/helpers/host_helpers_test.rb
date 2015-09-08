@@ -39,6 +39,44 @@ def tmpdir_on(hosts, path_prefix = '', user=nil)
   end
 end
 
+# Returns the absolute path where file fixtures are located.
+def fixture_path
+  @fixture_path ||=
+    File.expand_path(File.join(__FILE__, '..', '..', '..','..', '..', 'fixtures', 'files'))
+end
+
+# Returns the contents of a named fixture file, to be found in `fixture_path`.
+def fixture_contents(fixture)
+  fixture_file = File.join(fixture_path, "#{fixture}.txt")
+  File.read(fixture_file)
+end
+
+# Create a file on `host` in the `remote_path` with file name `filename`,
+# containing the contents of the fixture file named `fixture`.  Returns
+# the full remote path to the created file.
+def create_remote_file_from_fixture(fixture, host, remote_path, filename)
+  full_filename = File.join(remote_path, filename)
+  contents = fixture_contents fixture
+  create_remote_file host, full_filename, contents
+  [ full_filename, contents ]
+end
+
+# Create a file locally, in the `local_path`, with file name `filename`,
+# containing the contents of the fixture file named `fixture`; optionally
+# setting the file permissions to `perms`. Returns the full path to the created
+# file, and the file contents.
+def create_local_file_from_fixture(fixture, local_path, filename, perms = nil)
+  full_filename = File.join(local_path, filename)
+  contents = fixture_contents fixture
+
+  File.open(full_filename, "w") do |local_file|
+    local_file.puts contents
+  end
+  FileUtils.chmod perms, full_filename if perms
+
+  [ full_filename, contents ]
+end
+
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
     # NOTE: to generate a suitable config, I use:
@@ -218,10 +256,7 @@ test_name "dsl::helpers::host_helpers" do
   if test_scp_error_on_close?
     step "#scp_to fails if the remote path cannot be found" do
       Dir.mktmpdir do |local_dir|
-        local_filename = File.join(local_dir, "testfile.txt")
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
         # assert_raises Beaker::Host::CommandFailure do
         assert_raises RuntimeError do
@@ -233,26 +268,20 @@ test_name "dsl::helpers::host_helpers" do
 
   step "#scp_to creates the file on the remote system" do
     Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "contents"
-      end
+      local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
       remote_tmpdir = tmpdir_on default
 
       scp_to default, local_filename, remote_tmpdir
 
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       remote_contents = on(default, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
+      assert_equal contents, remote_contents
     end
   end
 
   step "#scp_to creates the file on all remote systems when a host array is provided" do
     Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "contents"
-      end
+      local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
       remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
@@ -262,7 +291,7 @@ test_name "dsl::helpers::host_helpers" do
 
       hosts.each do |host|
         remote_contents = on(host, "cat #{remote_filename}").stdout
-        assert_equal "contents\n", remote_contents
+        assert_equal contents, remote_contents
       end
     end
   end
@@ -270,8 +299,8 @@ test_name "dsl::helpers::host_helpers" do
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
       remote_tmpdir = tmpdir_on default
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      on default, %Q{echo "contents" > #{remote_filename}}
+      remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+
       assert_raises Beaker::Host::CommandFailure do
         scp_from default, remote_filename, "/non/existent/file.txt"
       end
@@ -289,13 +318,12 @@ test_name "dsl::helpers::host_helpers" do
   step "#scp_from creates the file on the local system" do
     Dir.mktmpdir do |local_dir|
       remote_tmpdir = tmpdir_on default
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      on default, %Q{echo "contents" > #{remote_filename}}
+      remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
 
       scp_from default, remote_filename, local_dir
 
       local_filename = File.join(local_dir, "testfile.txt")
-      assert_equal "contents\n", File.read(local_filename)
+      assert_equal contents, File.read(local_filename)
     end
   end
 
@@ -304,15 +332,15 @@ test_name "dsl::helpers::host_helpers" do
     #       file repeatedly to generate an error
 
     Dir.mktmpdir do |local_dir|
-      local_filename = File.join(local_dir, "testfile.txt")
       remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
       results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
 
       scp_from hosts, remote_filename, local_dir
-
       remote_contents = on(hosts.last, "cat #{remote_filename}").stdout
+
+      local_filename = File.join(local_dir, "testfile.txt")
       local_contents = File.read(local_filename)
       assert_equal remote_contents, local_contents
     end
@@ -324,10 +352,7 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
-        local_filename = File.join(local_dir, "testfile.txt")
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
 
         rsync_to default, local_filename, remote_tmpdir
@@ -335,7 +360,6 @@ test_name "dsl::helpers::host_helpers" do
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         assert_raises Beaker::Host::CommandFailure do
           remote_contents = on(default, "cat #{remote_filename}").stdout
-          # assert_equal "contents\n", remote_contents
         end
       end
     end
@@ -353,10 +377,7 @@ test_name "dsl::helpers::host_helpers" do
       # NOTE: would expect this to fail with Beaker::Host::CommandFailure
 
       Dir.mktmpdir do |local_dir|
-        local_filename = File.join(local_dir, "testfile.txt")
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
         rsync_to default, local_filename, "/non/existent/testfile.txt"
         assert_raises Beaker::Host::CommandFailure do
@@ -367,25 +388,20 @@ test_name "dsl::helpers::host_helpers" do
 
     step "#rsync_to creates the file on the remote system" do
       Dir.mktmpdir do |local_dir|
-        local_filename = File.join(local_dir, "testfile.txt")
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
 
         rsync_to default, local_filename, remote_tmpdir
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
+        remote_contents = on(default, "cat #{remote_filename}").stdout
+        assert_equal contents, remote_contents
       end
     end
 
     step "#rsync_to creates the file on all remote systems when a host array is provided" do
       Dir.mktmpdir do |local_dir|
-        local_filename = File.join(local_dir, "testfile.txt")
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
-
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
         on hosts, "mkdir -p #{remote_tmpdir}"
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -394,7 +410,7 @@ test_name "dsl::helpers::host_helpers" do
 
         hosts.each do |host|
           remote_contents = on(host, "cat #{remote_filename}").stdout
-          assert_equal "contents\n", remote_contents
+          assert_equal contents, remote_contents
         end
       end
     end
@@ -440,11 +456,8 @@ test_name "dsl::helpers::host_helpers" do
           name = "puppet-server"
           version = "9.9.9"
           platform = default['platform']
-          local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
-          File.open(local_filename, "w") do |local_file|
-            local_file.puts "contents"
-          end
+          local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
           assert_nil deploy_package_repo(default, local_dir, name, version)
         end
@@ -459,16 +472,12 @@ test_name "dsl::helpers::host_helpers" do
         platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
-        local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
-
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         deploy_package_repo default, local_dir, name, version
 
-        result = on default, "cat /etc/yum.repos.d/#{name}.repo"
-        assert_equal "contents\n", result.stdout
+        remote_contents = on(default, "cat /etc/yum.repos.d/#{name}.repo").stdout
+        assert_equal contents, remote_contents
 
         # teardown
         on default, "rm /etc/yum.repos.d/#{name}.repo"
@@ -482,11 +491,8 @@ test_name "dsl::helpers::host_helpers" do
         name = "puppet-server"
         version = "9.9.9"
         platform = default['platform']
-        local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         assert_raises NoMethodError do
           deploy_package_repo hosts, local_dir, name, version
@@ -503,16 +509,12 @@ test_name "dsl::helpers::host_helpers" do
         codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
-        local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
-
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
 
         deploy_package_repo default, local_dir, name, version
 
-        result = on default, "cat /etc/apt/sources.list.d/#{name}.list"
-        assert_equal "contents\n", result.stdout
+        remote_contents = on(default, "cat /etc/apt/sources.list.d/#{name}.list").stdout
+        assert_equal remote_contents, result
 
         # teardown
         on default, "rm /etc/apt/sources.list.d/#{name}.list"
@@ -528,11 +530,7 @@ test_name "dsl::helpers::host_helpers" do
         codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
-        local_filename = File.join(local_dir, "deb", "pl-#{name}-#{version}-#{codename}.list")
-
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
 
         assert_raises NoMethodError do
           deploy_package_repo hosts, local_dir, name, version
@@ -549,14 +547,7 @@ test_name "dsl::helpers::host_helpers" do
         platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
-        local_filename = File.join(local_dir, "rpm", "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
-
-        # source: http://enterprise.delivery.puppetlabs.net/3.8/repos/sles-11-x86_64/sles-11-x86_64.repo
-        inifile = "[PE-3.8-sles-11-x86_64]\nname=PE-3.8-sles-11-x86_64\n" +
-          "baseurl=http://enterprise.delivery.puppetlabs.net/3.8/repos/sles-11-x86_64\n" +
-          "enabled=1\ngpgcheck=0\n"
-
-        File.open(local_filename, "w") { |file| file.puts inifile }
+        local_filename, contents = create_local_file_from_fixture("sles-11-x86_64.repo", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         deploy_package_repo default, local_dir, name, version
 
@@ -579,11 +570,8 @@ test_name "dsl::helpers::host_helpers" do
         name = "puppet-server"
         version = "9.9.9"
         platform = default['platform']
-        local_filename = File.join(local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
-        File.open(local_filename, "w") do |local_file|
-          local_file.puts "contents"
-        end
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         assert_raises RuntimeError do
           deploy_package_repo default, local_dir, name, version
@@ -596,6 +584,7 @@ test_name "dsl::helpers::host_helpers" do
     # NOTE: would expect this to fail with Beaker::Host::CommandFailure
 
     create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+
     assert_raises Beaker::Host::CommandFailure do
       on(default, "cat /non/existent/testfile.txt").exit_code
     end
@@ -604,17 +593,23 @@ test_name "dsl::helpers::host_helpers" do
   step "#create_remote_file creates a remote file with the specified contents" do
     remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file default, remote_filename, "contents\n"
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file default, remote_filename, contents
+
     remote_contents = on(default, "cat #{remote_filename}").stdout
-    assert_equal "contents\n", remote_contents
+    assert_equal contents, remote_contents
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
     remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file default, remote_filename, "contents\n", { :protocol => "scp" }
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file default, remote_filename, contents, { :protocol => "scp" }
+
     remote_contents = on(default, "cat #{remote_filename}").stdout
-    assert_equal "contents\n", remote_contents
+    assert_equal contents, remote_contents
   end
 
   if default.is_cygwin?
@@ -623,7 +618,10 @@ test_name "dsl::helpers::host_helpers" do
     step "#create_remote_file CURRENTLY fails on windows systems, using rsync" do
       remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file default, remote_filename, "contents\n", { :protocol => "rsync" }
+      contents = fixture_contents("simple_text_file")
+
+      create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+
       assert_raises Beaker::Host::CommandFailure do
         remote_contents = on(default, "cat #{remote_filename}").stdout
       end
@@ -634,16 +632,22 @@ test_name "dsl::helpers::host_helpers" do
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
       remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file default, remote_filename, "contents\n", { :protocol => "rsync" }
+      contents = fixture_contents("simple_text_file")
+
+      create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+
       remote_contents = on(default, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
+      assert_equal contents, remote_contents
     end
   end
 
   step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
     remote_tmpdir = tmpdir_on default
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file default, remote_filename, "contents\n", { :protocol => 'unknown' }
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file default, remote_filename, contents, { :protocol => 'unknown' }
+
     assert_raises Beaker::Host::CommandFailure do
       on(default, "cat #{remote_filename}").exit_code
     end
@@ -653,10 +657,13 @@ test_name "dsl::helpers::host_helpers" do
     remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts, remote_filename, "contents\n"
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file hosts, remote_filename, contents
+
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
+      assert_equal contents, remote_contents
     end
   end
 
@@ -664,10 +671,13 @@ test_name "dsl::helpers::host_helpers" do
     remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'scp' }
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file hosts, remote_filename, contents, { :protocol => 'scp' }
+
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
-      assert_equal "contents\n", remote_contents
+      assert_equal contents, remote_contents
     end
   end
 
@@ -679,7 +689,10 @@ test_name "dsl::helpers::host_helpers" do
       remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
+      contents = fixture_contents("simple_text_file")
+
+      create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+
       hosts.each do |host|
         assert_raises Beaker::Host::CommandFailure do
           remote_contents = on(host, "cat #{remote_filename}").stdout
@@ -693,10 +706,13 @@ test_name "dsl::helpers::host_helpers" do
       remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      create_remote_file hosts, remote_filename, "contents\n", { :protocol => 'rsync' }
+      contents = fixture_contents("simple_text_file")
+
+      create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+
       hosts.each do |host|
         remote_contents = on(host, "cat #{remote_filename}").stdout
-        assert_equal "contents\n", remote_contents
+        assert_equal contents, remote_contents
       end
     end
   end
@@ -710,10 +726,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script_on fails when there is an error running the remote script" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "exit 1"
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("failing_shell_script", local_dir, "testfile.sh", "a+x")
 
       assert_raises Beaker::Host::CommandFailure do
         run_script_on default, local_filename
@@ -724,10 +737,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script_on passes along options when running the remote command" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "exit 1"
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("failing_shell_script", local_dir, "testfile.sh", "a+x")
 
       result = run_script_on default, local_filename, { :accept_all_exit_codes => true }
       assert_equal 1, result.exit_code
@@ -737,28 +747,22 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script_on runs the script on the remote host" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts %Q{echo "contents"}
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script_on default, local_filename
       assert_equal 0, results.exit_code
-      assert_equal "contents\n", results.stdout
+      assert_equal "output\n", results.stdout
     end
   end
 
   step "#run_script_on allows assertions in an optional block" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts %Q{echo "contents"}
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script_on default, local_filename do
         assert_equal 0, exit_code
-        assert_equal "contents\n", stdout
+        assert_equal "output\n", stdout
       end
     end
   end
@@ -766,17 +770,14 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script_on runs the script on all remote hosts when a host array is provided" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts %Q{echo "contents"}
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script_on hosts, local_filename
 
       assert_equal hosts.size, results.size
       results.each do |result|
         assert_equal 0, result.exit_code
-        assert_equal "contents\n", result.stdout
+        assert_equal "output\n", result.stdout
       end
     end
   end
@@ -790,10 +791,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script fails when there is an error running the remote script" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "exit 1"
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("failing_shell_script", local_dir, "testfile.sh", "a+x")
 
       assert_raises Beaker::Host::CommandFailure do
         run_script local_filename
@@ -804,10 +802,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script passes along options when running the remote command" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts "exit 1"
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("failing_shell_script", local_dir, "testfile.sh", "a+x")
 
       result = run_script local_filename, { :accept_all_exit_codes => true }
       assert_equal 1, result.exit_code
@@ -817,28 +812,22 @@ test_name "dsl::helpers::host_helpers" do
   step "#run_script runs the script on the remote host" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts %Q{echo "contents"}
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script local_filename
       assert_equal 0, results.exit_code
-      assert_equal "contents\n", results.stdout
+      assert_equal "output\n", results.stdout
     end
   end
 
   step "#run_script allows assertions in an optional block" do
     Dir.mktmpdir do |local_dir|
       local_filename = File.join(local_dir, "testfile.sh")
-      File.open(local_filename, "w") do |local_file|
-        local_file.puts %Q{echo "contents"}
-      end
-      FileUtils.chmod "a+x", local_filename
+      local_filename, contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script local_filename do
         assert_equal 0, exit_code
-        assert_equal "contents\n", stdout
+        assert_equal "output\n", stdout
       end
     end
   end
@@ -1013,7 +1002,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file will fail if the destination directory does not exist" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    create_remote_file default, remote_source_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "puppet.conf")
 
     assert_raises Beaker::Host::CommandFailure do
       result = backup_the_file default, remote_source, "/non/existent/"
@@ -1023,35 +1012,39 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    create_remote_file default, remote_source_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "puppet.conf")
 
     remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
 
     result = backup_the_file default, remote_source, remote_destination
+
     assert_equal remote_destination_filename, result
-    contents = on(default, "cat #{remote_destination_filename}").stdout
-    assert_equal "contents\n", contents
+    remote_contents = on(default, "cat #{remote_destination_filename}").stdout
+    assert_equal contents, remote_contents
   end
 
   step "#backup_the_file copies a named file from the source to the destination directory" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    create_remote_file default, remote_source_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+
     remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
     result = backup_the_file default, remote_source, remote_destination, "testfile.txt"
+
     assert_equal remote_destination_filename, result
-    contents = on(default, "cat #{remote_destination_filename}").stdout
-    assert_equal "contents\n", contents
+    remote_contents = on(default, "cat #{remote_destination_filename}").stdout
+    assert_equal contents, remote_contents
   end
 
   step "#backup_the_file CURRENTLY will fail if given a hosts array" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    create_remote_file default, remote_source_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
     remote_destination = tmpdir_on default
+
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
 
     assert_raises NoMethodError do
@@ -1078,11 +1071,13 @@ test_name "dsl::helpers::host_helpers" do
     remote_tmpdir = tmpdir_on default
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
-    create_remote_file default, remote_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+
     result = curl_on default, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
+
     assert_equal 0, result.exit_code
     remote_contents = on(default, "cat #{remote_targetfilename}").stdout
-    assert_equal "contents\n", remote_contents
+    assert_equal contents, remote_contents
   end
 
   step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
@@ -1090,13 +1085,13 @@ test_name "dsl::helpers::host_helpers" do
     remote_filename = File.join remote_tmpdir, "testfile.txt"
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
     on hosts, "mkdir -p #{remote_tmpdir}"
-    create_remote_file hosts, remote_filename, "contents"
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
 
     result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_targetfilename}").stdout
-      assert_equal "contents\n", remote_contents
+      assert_equal contents, remote_contents
     end
   end
 
@@ -1124,43 +1119,24 @@ test_name "dsl::helpers::host_helpers" do
     # making an unavailable URL available after a period of time.
   end
 
-  # Return the body of a script which will fail the first `retry_limit` times
-  # when run and then will exit successfully on later runs. It will store counter
-  # state in a file in the provided `basedir` directory.
-  def retry_script_body(basedir, retry_limit)
-    %Q{
-      current=`cat #{basedir}/value.txt || echo '0'`
-      current=$((current+1))
-      echo "${current}" > #{basedir}/value.txt
-      if [ "$current" -gt "#{retry_limit}" ]; then exit 0; fi
-      exit 1
-    }
-  end
-
   step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
     # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
 
     remote_tmpdir = tmpdir_on default
     remote_script_file = File.join(remote_tmpdir, "test.sh")
-    create_remote_file \
-      default,
-      remote_script_file,
-      retry_script_body(remote_tmpdir, failure_count = 10)
+    remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
 
     assert_raises RuntimeError do
-      retry_on default, remote_script_file, { :max_retries => 2, :retry_interval => 0.1 }
+      retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 10", { :max_retries => 2, :retry_interval => 0.1 }
     end
   end
 
   step "#retry_on succeeds if command passes before retries are exhausted" do
     remote_tmpdir = tmpdir_on default
     remote_script_file = File.join(remote_tmpdir, "test.sh")
-    create_remote_file \
-      default,
-      remote_script_file,
-      retry_script_body(remote_tmpdir, failure_count = 2)
+    remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
 
-    result = retry_on default, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
+    result = retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
     assert_equal 0, result.exit_code
     assert_equal "", result.stdout
   end
@@ -1170,16 +1146,15 @@ test_name "dsl::helpers::host_helpers" do
     #       to raise Beaker::Host::CommandFailure
 
     remote_tmpdir = tmpdir_on default
-    on hosts, "mkdir -p #{remote_tmpdir}"
-
     remote_script_file = File.join(remote_tmpdir, "test.sh")
-    create_remote_file \
-      hosts,
-      remote_script_file,
-      retry_script_body(remote_tmpdir, failure_count = 2)
+
+    hosts.each do |host|
+      on host, "mkdir -p #{remote_tmpdir}"
+      remote_filename, contents = create_remote_file_from_fixture("retry_script", host, remote_tmpdir, "test.sh")
+    end
 
     assert_raises NoMethodError do
-      result = retry_on hosts, "bash #{remote_script_file}", { :max_retries => 4, :retry_interval => 0.1 }
+      result = retry_on hosts, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
     end
   end
 
