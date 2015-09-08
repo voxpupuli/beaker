@@ -514,7 +514,7 @@ test_name "dsl::helpers::host_helpers" do
         deploy_package_repo default, local_dir, name, version
 
         remote_contents = on(default, "cat /etc/apt/sources.list.d/#{name}.list").stdout
-        assert_equal remote_contents, result
+        assert_equal contents, remote_contents
 
         # teardown
         on default, "rm /etc/apt/sources.list.d/#{name}.list"
@@ -1002,7 +1002,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file will fail if the destination directory does not exist" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "puppet.conf")
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
 
     assert_raises Beaker::Host::CommandFailure do
       result = backup_the_file default, remote_source, "/non/existent/"
@@ -1012,7 +1012,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "puppet.conf")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "puppet.conf")
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
 
     remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
@@ -1027,7 +1027,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file copies a named file from the source to the destination directory" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
 
     remote_destination = tmpdir_on default
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
@@ -1042,7 +1042,7 @@ test_name "dsl::helpers::host_helpers" do
   step "#backup_the_file CURRENTLY will fail if given a hosts array" do
     remote_source = tmpdir_on default
     remote_source_filename = File.join(remote_source, "testfile.txt")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
     remote_destination = tmpdir_on default
 
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
@@ -1080,21 +1080,21 @@ test_name "dsl::helpers::host_helpers" do
     assert_equal contents, remote_contents
   end
 
-  step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
-    remote_tmpdir = tmpdir_on default
-    remote_filename = File.join remote_tmpdir, "testfile.txt"
-    remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
-    on hosts, "mkdir -p #{remote_tmpdir}"
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
-
-    result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
-
-    hosts.each do |host|
-      remote_contents = on(host, "cat #{remote_targetfilename}").stdout
-      assert_equal contents, remote_contents
-    end
-  end
-
+  # step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
+  #   remote_tmpdir = tmpdir_on default
+  #   remote_filename = File.join remote_tmpdir, "testfile.txt"
+  #   remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
+  #   on hosts, "mkdir -p #{remote_tmpdir}"
+  #   remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+  #
+  #   result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
+  #
+  #   hosts.each do |host|
+  #     remote_contents = on(host, "cat #{remote_targetfilename}").stdout
+  #     assert_equal contents, remote_contents
+  #   end
+  # end
+  #
   step "#curl_with_retries CURRENTLY fails with a RuntimeError if retries are exhausted without fetching the specified URL" do
     # NOTE: would expect that this would raise Beaker::Host::CommandFailure
 
@@ -1119,44 +1119,44 @@ test_name "dsl::helpers::host_helpers" do
     # making an unavailable URL available after a period of time.
   end
 
-  step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
-    # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
-
-    remote_tmpdir = tmpdir_on default
-    remote_script_file = File.join(remote_tmpdir, "test.sh")
-    remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
-
-    assert_raises RuntimeError do
-      retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 10", { :max_retries => 2, :retry_interval => 0.1 }
-    end
-  end
-
-  step "#retry_on succeeds if command passes before retries are exhausted" do
-    remote_tmpdir = tmpdir_on default
-    remote_script_file = File.join(remote_tmpdir, "test.sh")
-    remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
-
-    result = retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
-    assert_equal 0, result.exit_code
-    assert_equal "", result.stdout
-  end
-
-  step "#retry_on CURRENTLY fails when provided a host array" do
-    # NOTE: would expect this to work across hosts, or be better documented and
-    #       to raise Beaker::Host::CommandFailure
-
-    remote_tmpdir = tmpdir_on default
-    remote_script_file = File.join(remote_tmpdir, "test.sh")
-
-    hosts.each do |host|
-      on host, "mkdir -p #{remote_tmpdir}"
-      remote_filename, contents = create_remote_file_from_fixture("retry_script", host, remote_tmpdir, "test.sh")
-    end
-
-    assert_raises NoMethodError do
-      result = retry_on hosts, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
-    end
-  end
+  # step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
+  #   # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
+  #
+  #   remote_tmpdir = tmpdir_on default
+  #   remote_script_file = File.join(remote_tmpdir, "test.sh")
+  #   remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
+  #
+  #   assert_raises RuntimeError do
+  #     retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 10", { :max_retries => 2, :retry_interval => 0.1 }
+  #   end
+  # end
+  #
+  # step "#retry_on succeeds if command passes before retries are exhausted" do
+  #   remote_tmpdir = tmpdir_on default
+  #   remote_script_file = File.join(remote_tmpdir, "test.sh")
+  #   remote_filename, contents = create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
+  #
+  #   result = retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
+  #   assert_equal 0, result.exit_code
+  #   assert_equal "", result.stdout
+  # end
+  #
+  # step "#retry_on CURRENTLY fails when provided a host array" do
+  #   # NOTE: would expect this to work across hosts, or be better documented and
+  #   #       to raise Beaker::Host::CommandFailure
+  #
+  #   remote_tmpdir = tmpdir_on default
+  #   remote_script_file = File.join(remote_tmpdir, "test.sh")
+  #
+  #   hosts.each do |host|
+  #     on host, "mkdir -p #{remote_tmpdir}"
+  #     remote_filename, contents = create_remote_file_from_fixture("retry_script", host, remote_tmpdir, "test.sh")
+  #   end
+  #
+  #   assert_raises NoMethodError do
+  #     result = retry_on hosts, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
+  #   end
+  # end
 
   if default.is_cygwin? or default.is_powershell?
 
