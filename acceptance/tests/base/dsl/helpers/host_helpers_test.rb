@@ -346,6 +346,20 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
+  if default['platform'] =~ /centos/
+    step "#rsync_to will fail on newly installed CentOS due to lack of installed rsync" do
+
+    end
+
+    step "#create_remote_file with protocol 'rsync' fails on CentOS due to lack of installed rsync"
+
+    step "installing `rsync` on CentOS for all later test steps" do
+      hosts.each do |host|
+        on host, "yum install rsync"
+      end
+    end
+  end
+
   if default.is_cygwin?
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
@@ -429,7 +443,6 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
   end
-
 
   def el4_platform?(host)
     !!(host['platform'] =~ /el-4/)
@@ -713,6 +726,18 @@ test_name "dsl::helpers::host_helpers" do
       hosts.each do |host|
         remote_contents = on(host, "cat #{remote_filename}").stdout
         assert_equal contents, remote_contents
+      end
+    end
+  end
+
+  if default['platform'] =~ /centos/
+    step "uninstall rsync package on CentOS for later test runs" do
+      # NOTE: this is basically a #teardown section for test isolation
+      #       Could we reorganize tests into different files to make this
+      #       clearer?
+
+      hosts.each do |host|
+        on host, "yum remove rsync"
       end
     end
   end
