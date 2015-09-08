@@ -1080,6 +1080,15 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       it "copies package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\-1.i386\.pkg\.gz/, '/' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+
+      it "copies old package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
         expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/' )
         expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
         expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
@@ -1093,6 +1102,15 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       it "copies package to the root user directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/, '/root' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+
+      it "copies old package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
         expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/root' )
         expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
         expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
