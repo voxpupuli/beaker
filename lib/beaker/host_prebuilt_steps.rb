@@ -283,8 +283,12 @@ module Beaker
           search = $1
         end
       }
-      return domain if domain
-      return search if search
+      return_value ||= domain
+      return_value ||= search
+
+      if return_value
+        return_value.gsub(/\.$/, '')
+      end
     end
 
     #Determine the ip address of the provided host
