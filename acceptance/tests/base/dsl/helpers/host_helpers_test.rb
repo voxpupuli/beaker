@@ -152,7 +152,7 @@ test_name "dsl::helpers::host_helpers" do
     result = on default, "env", { :environment => { 'FOO' => 'bar' } }
     output = result.stdout
 
-    assert_match /\nFOO=bar\n/, output
+    assert_match /\bFOO=bar\b/, output
   end
 
   step "#on runs command on all hosts when given a host array" do
@@ -257,7 +257,7 @@ test_name "dsl::helpers::host_helpers" do
     result = shell "env", { :environment => { 'FOO' => 'bar' } }
     output = result.stdout
 
-    assert_match /\nFOO=bar\n/, output
+    assert_match /\bFOO=bar\b/, output
   end
 
   step "#shell allows assertions to be used in the optional block" do
