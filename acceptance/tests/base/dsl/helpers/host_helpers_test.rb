@@ -366,9 +366,9 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if centos_platform?(default)
+  confine_block :to, :platform => /^el-\d|solaris/ do
 
-    step "#rsync_to CURRENTLY will fail without error, but not copy the requested file, on newly installed CentOS due to lack of installed rsync" do
+    step "#rsync_to CURRENTLY will fail without error, but not copy the requested file, on newly installed CentOS or Solaris due to lack of installed rsync" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
@@ -383,7 +383,7 @@ test_name "dsl::helpers::host_helpers" do
       end
     end
 
-    step "#create_remote_file with protocol 'rsync' fails on CentOS due to lack of installed rsync" do
+    step "#create_remote_file with protocol 'rsync' fails on CentOS or Solaris due to lack of installed rsync" do
       remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
@@ -394,7 +394,9 @@ test_name "dsl::helpers::host_helpers" do
         remote_contents = on(default, "cat #{remote_filename}").stdout
       end
     end
+  end
 
+  confine_block :to, :platform => /^el-\d/ do
     step "installing `rsync` on CentOS for all later test steps" do
       hosts.each do |host|
         install_package host, "rsync"
