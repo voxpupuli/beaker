@@ -404,7 +404,9 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default.is_cygwin?
+  # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
+  confine_block :to, :platform => /windows/ do
+
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
 
@@ -421,8 +423,9 @@ test_name "dsl::helpers::host_helpers" do
         end
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = tmpdir_on default
@@ -489,7 +492,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
 
-  if el4_platform?(default)
+  confine_block :to, :platform => /^el-4/ do
 
       step "#deploy_package_repo CURRENTLY does nothing and throws no error on the #{default['platform']} platform" do
         # NOTE: would expect this to fail with Beaker::Host::CommandFailure
@@ -504,8 +507,9 @@ test_name "dsl::helpers::host_helpers" do
           assert_nil deploy_package_repo(default, local_dir, name, version)
         end
       end
+  end
 
-  elsif yum_platform?(default)
+  confine_block :to, :platform => /fedora|centos|eos|el-[56789]/i do
 
     step "#deploy_package_repo pushes repo package to /etc/yum.repos.d on the remote host" do
       Dir.mktmpdir do |local_dir|
@@ -541,8 +545,9 @@ test_name "dsl::helpers::host_helpers" do
         end
       end
     end
+  end
 
-  elsif apt_platform?(default)
+  confine_block :to, :platform => /ubuntu|debian|cumulus/i do
 
     step "#deploy_package_repo pushes repo package to /etc/apt/sources.list.d on the remote host" do
       Dir.mktmpdir do |local_dir|
@@ -579,8 +584,9 @@ test_name "dsl::helpers::host_helpers" do
         end
       end
     end
+  end
 
-  elsif zyp_platform?(default)
+  confine_block :to, :platform => /sles/i do
 
     step "#deploy_package_repo updates zypper repository list on the remote host" do
       Dir.mktmpdir do |local_dir|
@@ -600,8 +606,9 @@ test_name "dsl::helpers::host_helpers" do
         on default, "zypper rr PE-3.8-sles-11-x86_64"
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /el-\d|fedora|centos|eos|ubuntu|debian|cumulus|sles/i do
 
     # OS X, windows (cygwin, powershell), solaris, etc.
 
@@ -654,7 +661,9 @@ test_name "dsl::helpers::host_helpers" do
     assert_equal contents, remote_contents
   end
 
-  if default.is_cygwin?
+  # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
+  confine_block :to, :platform => /windows/ do
+
     # NOTE: rsync methods are not working currently on windows platforms
 
     step "#create_remote_file CURRENTLY fails on windows systems, using rsync" do
@@ -668,8 +677,9 @@ test_name "dsl::helpers::host_helpers" do
         remote_contents = on(default, "cat #{remote_filename}").stdout
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -723,7 +733,9 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default.is_cygwin?
+  # NOTE: there does not appear to be a way to confine just to cygwin hosts
+  confine_block :to, :platform => /windows/ do
+
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
 
@@ -741,8 +753,9 @@ test_name "dsl::helpers::host_helpers" do
         end
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -759,7 +772,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if centos_platform?(default)
+  confine_block :to, :platform => /centos|el-\d/ do
 
     step "uninstall rsync package on CentOS for later test runs" do
       # NOTE: this is basically a #teardown section for test isolation
@@ -887,7 +900,9 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default.is_cygwin?
+  # NOTE: there does not appear to be a way to confine just to cygwin hosts
+  confine_block :to, :platform => /windows/ do
+
     # NOTE: install_package, check_for_package, and upgrade_package on windows
     # currently fail as follows:
     #
@@ -923,8 +938,9 @@ test_name "dsl::helpers::host_helpers" do
         upgrade_package default, "bash"
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#install_package fails if package is not known on the OS" do
       assert_raises Beaker::Host::CommandFailure do
@@ -944,8 +960,9 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#install_package CURRENTLY fails if given a host array" do
-      # NOTE: would expect this to work across hosts, or to be better documented,
-      #       if not support, should raise Beaker::Host::CommandFailure
+      # NOTE: would expect this to work across hosts, or to be better
+      #       documented. If not supported, should raise
+      #       Beaker::Host::CommandFailure
 
       assert_raises NoMethodError do
         install_package hosts, "rsync"
@@ -964,15 +981,16 @@ test_name "dsl::helpers::host_helpers" do
     end
 
     step "#check_for_package CURRENTLY fails if given a host array" do
-      # NOTE: would expect this to work across hosts, or to be better documented,
-      #       if not support, should raise Beaker::Host::CommandFailure
+      # NOTE: would expect this to work across hosts, or to be better
+      #       documented. If not supported, should raise
+      #       Beaker::Host::CommandFailure
 
       assert_raises NoMethodError do
         check_for_package hosts, "rsync"
       end
     end
 
-    if centos_platform?(default)
+    confine_block :to, :platform => /centos|el-\d/ do
 
       step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
         # NOTE: I would expect this to fail with an Beaker::Host::CommandFailure,
@@ -987,8 +1005,9 @@ test_name "dsl::helpers::host_helpers" do
         result = upgrade_package default, "non-existent-package-name"
         assert_match /No Packages marked for Update/, result
       end
+    end
 
-    else
+    confine_block :except, :platform => /centos|el-\d/ do
 
       step "#upgrade_package fails if package is not already installed" do
         assert_raises Beaker::Host::CommandFailure do
@@ -1016,52 +1035,51 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
-    # NOTE: would expect this to be better documented.
-    #       Also, this method should probably live outside the core hosts helpers,
-    #       and should probably be a more generalized method.
-    if default.is_powershell?
-      logger.info "Skipping failure test on powershell platforms..."
-    elsif default['platform'] =~ /windows/
-      assert_raises Beaker::Host::CommandFailure do
-        add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+  confine_block :to, :platform => /windows/ do
+
+    step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
+      # NOTE: would expect this to be better documented.
+      #       Also, this method should probably live outside the core hosts helpers,
+      #       and should probably be a more generalized method.
+      if default.is_powershell?
+        logger.info "Skipping failure test on powershell platforms..."
+      else
+        assert_raises Beaker::Host::CommandFailure do
+          add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+        end
       end
-    else
-      logger.info "Skipping failure tests on non-windows platforms..."
-      # NOTE: see test below for the reason for this conditional
+    end
+
+    step "#add_system32_hosts_entry, when run on a powershell platform, adds a host entry to system32 etc\\hosts" do
+      if default.is_powershell?
+        add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+
+        # TODO: how do we assert, via powershell, that the entry was added?
+        # NOTE: see: https://github.com/puppetlabs/beaker/commit/685628f4babebe9cb4663418da6a8ff528dd32da#commitcomment-12957573
+
+      else
+        logger.info "Skipping test on non-powershell platforms..."
+      end
+    end
+
+    step "#add_system32_hosts_entry CURRENTLY fails with a TypeError when given a hosts array" do
+      # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+      assert_raises TypeError do
+        add_system32_hosts_entry hosts, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
+      end
     end
   end
 
-  step "#add_system32_hosts_entry CURRENTLY fails with RuntimeError when run on a non-windows platform" do
-    # NOTE: would expect this to behave the same way it does on a windows
-    #       non-powershell platform (raises Beaker::Host::CommandFailure), or
-    #       as requested in the original PR:
-    #       https://github.com/puppetlabs/beaker/pull/420/files#r17990622
-    if default['platform'] =~ /windows/
-      logger.info "Skipping failure test on powershell platforms..."
-    else
+  confine_block :except, :platform => /windows/ do
+
+    step "#add_system32_hosts_entry CURRENTLY fails with RuntimeError when run on a non-windows platform" do
+      # NOTE: would expect this to behave the same way it does on a windows
+      #       non-powershell platform (raises Beaker::Host::CommandFailure), or
+      #       as requested in the original PR:
+      #       https://github.com/puppetlabs/beaker/pull/420/files#r17990622
       assert_raises RuntimeError do
         add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
       end
-    end
-  end
-
-  step "#add_system32_hosts_entry, when run on a powershell platform, adds a host entry to system32 etc\\hosts" do
-    if default.is_powershell?
-      add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
-
-      # TODO: how do we assert, via powershell, that the entry was added?
-      # NOTE: see: https://github.com/puppetlabs/beaker/commit/685628f4babebe9cb4663418da6a8ff528dd32da#commitcomment-12957573
-
-    else
-      logger.info "Skipping test on non-powershell platforms..."
-    end
-  end
-
-  step "#add_system32_hosts_entry CURRENTLY fails with a TypeError when given a hosts array" do
-    # NOTE: would expect this to fail with Beaker::Host::CommandFailure
-    assert_raises TypeError do
-      add_system32_hosts_entry hosts, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
     end
   end
 
@@ -1234,15 +1252,16 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default.is_cygwin? or default.is_powershell?
+  confine_block :to, :platform => /windows/ do
 
     step "#run_cron_on fails on windows platforms when listing cron jobs for a user on a host" do
       assert_raises Beaker::Host::CommandFailure do
         run_cron_on default, :list, default['user']
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
@@ -1358,7 +1377,8 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  if default.is_cygwin?
+  # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
+  confine_block :to, :platform => /windows/ do
 
     step "#create_tmpdir_on CURRENTLY fails when attempting to chown the created tempdir to the host user + group, on windows platforms" do
       # NOTE: would have expected this to work.
@@ -1368,8 +1388,9 @@ test_name "dsl::helpers::host_helpers" do
         tmpdir = create_tmpdir_on default
       end
     end
+  end
 
-  else
+  confine_block :except, :platform => /windows/ do
 
     step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
       tmpdir = create_tmpdir_on default
