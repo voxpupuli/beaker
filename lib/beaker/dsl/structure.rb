@@ -208,16 +208,15 @@ module Beaker
       #
       # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
-        begin
-          host_array = Array( host_array || hosts )
-          original_hosts = self.hosts.dup
-          confine(type, criteria, host_array)
+        host_array = Array( host_array || hosts )
+        original_hosts = self.hosts.dup
+        confine(type, criteria, host_array)
 
-          yield
+        yield
 
-        ensure
-          self.hosts = original_hosts
-        end
+      rescue Beaker::DSL::Outcomes::SkipTest
+      ensure
+        self.hosts = original_hosts
       end
 
       # Sets tags on the current {Beaker::TestCase}, and skips testing
