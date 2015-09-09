@@ -77,26 +77,6 @@ def create_local_file_from_fixture(fixture, local_path, filename, perms = nil)
   [ full_filename, contents ]
 end
 
-def el4_platform?(host)
-  !!(host['platform'] =~ /^el-4/i)
-end
-
-def yum_platform?(host)
-  !!(host['platform'] =~ /fedora|centos|eos|el-/i)
-end
-
-def apt_platform?(host)
-  !!(host['platform'] =~ /ubuntu|debian|cumulus/i)
-end
-
-def zyp_platform?(host)
-  !!(host['platform'] =~ /sles/i)
-end
-
-def centos_platform?(host)
-  !!(host['platform'] =~ /(^el-\d)|centos/i)
-end
-
 test_name "dsl::helpers::host_helpers" do
   step "Validate hosts configuration" do
     # NOTE: to generate a suitable config, I use:
@@ -425,7 +405,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :except, :platform => /windows|solaris/ do
 
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = tmpdir_on default
@@ -662,7 +642,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
-  confine_block :to, :platform => /windows/ do
+  confine_block :to, :platform => /windows|solaris/ do
 
     # NOTE: rsync methods are not working currently on windows platforms
 
@@ -679,7 +659,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :except, :platform => /windows|solaris/ do
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -734,7 +714,7 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
-  confine_block :to, :platform => /windows/ do
+  confine_block :to, :platform => /windows|solaris/ do
 
     # NOTE: rsync methods are not working currently on windows platforms. Would
     #       expect this to be documented better.
@@ -755,7 +735,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :except, :platform => /windows|solaris/ do
 
     step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -901,6 +881,47 @@ test_name "dsl::helpers::host_helpers" do
   end
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
+  confine_block :to, :platform => /solaris/ do
+
+    # NOTE: install_package, check_for_package, and upgrade_package on windows
+    # currently fail as follows:
+    #
+    #       ArgumentError: wrong number of arguments (3 for 1..2)
+    #
+    #       Would expect this to be documented better, and to fail with Beaker::Host::CommandFailure
+
+    step "#install_package CURRENTLY fails on solaris platforms" do
+      assert_raises Beaker::Host::CommandFailure do
+        install_package default, "rsync"
+      end
+    end
+
+    step "#check_for_package will return false if the specified package is not installed on the remote host" do
+      result = check_for_package default, "non-existent-package-name"
+      assert !result
+    end
+
+    step "#check_for_package will return true if the specified package is installed on the remote host" do
+      result = check_for_package default, "SUNWbash"
+      assert result
+    end
+
+    step "#check_for_package CURRENTLY fails if given a host array" do
+      assert_raises NoMethodError do
+        check_for_package hosts, "rsync"
+      end
+    end
+
+    step "#upgrade_package CURRENTLY fails on solaris platforms" do
+      # NOTE: pkgutil doesn't appear to be installed by default -- documentation
+      #       could be better here.
+      assert_raises Beaker::Host::CommandFailure do
+        upgrade_package default, "bash"
+      end
+    end
+  end
+
+  # NOTE: there does not appear to be a way to confine just to cygwin hosts
   confine_block :to, :platform => /windows/ do
 
     # NOTE: install_package, check_for_package, and upgrade_package on windows
@@ -940,7 +961,7 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :except, :platform => /windows|solaris/ do
 
     step "#install_package fails if package is not known on the OS" do
       assert_raises Beaker::Host::CommandFailure do
@@ -1261,7 +1282,120 @@ test_name "dsl::helpers::host_helpers" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :to, :platform => /solaris/ do
+
+    step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
+      # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
+
+      assert_nil run_cron_on default, :nonexistent_action, default['user']
+    end
+
+    step "#run_cron_on CURRENTLY does not fail when listing cron jobs for an unknown user" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on default, :list, "nonexistentuser"
+      end
+    end
+
+    step "#run_cron_on CURRENTLY does not fail when listing cron jobs for a user with no cron entries" do
+      result = run_cron_on default, :list, default['user']
+      assert_equal 0, result.exit_code
+    end
+
+    step "#run_cron_on returns a list of cron jobs for a user with cron entries" do
+      # this basically requires us to add a cron entry to make this work
+      run_cron_on default, :add, default['user'], "* * * * * /bin/ls >/dev/null"
+      result = run_cron_on default, :list, default['user']
+      assert_equal 0, result.exit_code
+      assert_match %r{/bin/ls}, result.stdout
+    end
+
+    step "#run_cron_on CURRENTLY does not fail, but returns nil, when adding cron jobs for an unknown user" do
+      result = run_cron_on default, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
+      assert_nil result
+    end
+
+    step "#run_cron_on CURRENTLY does not fail, but returns nil, when attempting to add a bad cron entry" do
+      result = run_cron_on default, :add, default['user'], "* * * * /bin/ls >/dev/null"
+      assert_nil result
+    end
+
+    step "#run_cron_on can add a cron job for a user on a host" do
+      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
+      result = run_cron_on default, :list, default['user']
+      assert_equal 0, result.exit_code
+      assert_match %r{/bin/echo}, result.stdout
+    end
+
+    step "#run_cron_on CURRENTLY replaces all of user's cron jobs with any newly added jobs" do
+      # NOTE: would have expected this to append new entries, or manage them as puppet manages
+      #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
+
+      1.upto(3) do |job_number|
+        run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
+      end
+
+      result = run_cron_on default, :list, default['user']
+
+      assert_no_match %r{job :1:}, result.stdout
+      assert_no_match %r{job :2:}, result.stdout
+      assert_match %r{job :3:}, result.stdout
+    end
+
+    step "#run_cron_on :remove CURRENTLY removes all cron jobs for a user on a host" do
+      # NOTE: would have expected a more granular approach to removing cron jobs
+      #       for a user on a host.  This should otherwise be better documented.
+
+      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
+      result = run_cron_on default, :list, default['user']
+      assert_match %r{quality: job 1}, result.stdout
+
+      run_cron_on default, :remove, default['user']
+
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on default, :list, default['user']
+      end
+    end
+
+    step "#run_cron_on fails when removing cron jobs for an unknown user" do
+      assert_raises Beaker::Host::CommandFailure do
+        run_cron_on default, :remove, "nonexistentuser"
+      end
+    end
+
+    step "#run_cron_on can list cron jobs for a user on all hosts when given a host array" do
+      hosts.each do |host|
+        # this basically requires us to add a cron entry to make this work
+        run_cron_on host, :add, host['user'], "* * * * * /bin/ls >/dev/null"
+      end
+
+      results = run_cron_on hosts, :list, default['user']
+      results.each do |result|
+        assert_match %r{/bin/ls}, result.stdout
+      end
+    end
+
+    step "#run_cron_on can add cron jobs for a user on all hosts when given a host array" do
+      run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
+
+      results = run_cron_on hosts, :list, default['user']
+      results.each do |result|
+        assert_match %r{/bin/ls}, result.stdout
+      end
+    end
+
+    step "#run_cron_on can remove cron jobs for a user on all hosts when given a host array" do
+      run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
+      run_cron_on hosts, :remove, default['user']
+
+      hosts.each do |host|
+        assert_raises Beaker::Host::CommandFailure do
+          results = run_cron_on host, :list, host['user']
+        end
+      end
+    end
+  end
+
+  confine_block :except, :platform => /windows|solaris/ do
 
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
