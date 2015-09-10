@@ -3,6 +3,10 @@ $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..
 require 'helpers/test_helper'
 
 test_name "dsl::helpers::host_helpers #install_package" do
+  # NOTE: vivid packages are not ready on nightlies.puppetlabs.com,
+  #       see:  https://tickets.puppetlabs.com/browse/CPR-173
+  #       also: https://tickets.puppetlabs.com/browse/BKR-513
+  confine :except, :platform => /ubuntu.*15/
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
   confine_block :to, :platform => /windows/ do
