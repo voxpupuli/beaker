@@ -8,11 +8,12 @@ def test_scp_error_on_close?
   !!ENV["BEAKER_TEST_SCP_ERROR_ON_CLOSE"]
 end
 
-# NOTE: currently there is an issue with the tmpdir_on helper on cygwin
+# NOTE: currently there is an issue with the tmpdir_on helper on cygwin and OS X
 # platforms:  the `chown` command always fails with an error about not
-# recognizing the Administrator:Administrator user/group.  Until this is fixed,
-# we add this shim that delegates to a non-`chown`-executing version for the
-# purposes of our test setup.
+# recognizing the Administrator:Administrator user/group.  Also, the call to
+# check user presence via `getent` also fails. Until this is fixed, we add this
+# shim that delegates to a non-`chown`-executing version for the purposes of our
+# test setup.
 #
 # TODO: fix via: https://tickets.puppetlabs.com/browse/BKR-496
 def tmpdir_on(hosts, path_prefix = '', user=nil)

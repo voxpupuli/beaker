@@ -1,5 +1,8 @@
 begin
   $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'lib'))
+
+  require 'helpers/test_helper'
+
   require 'beaker/acceptance/install_utils'
   extend Beaker::Acceptance::InstallUtils
 end
@@ -37,7 +40,7 @@ ENV['FORK']='fail'
 # implicitly tests build_giturl() and lookup_in_env()
 hosts.each do |host|
   on host, "echo #{GitHubSig} >> $HOME/.ssh/known_hosts"
-  testdir = create_tmpdir_on(host, File.basename(__FILE__))
+  testdir = tmpdir_on(host, File.basename(__FILE__))
 
   step 'should find fork name from the correct environment variable'
   results = clone_git_repo_on(host, "#{testdir}", extract_repo_info_from(build_git_url('puppet')))
