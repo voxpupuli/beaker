@@ -1,6 +1,8 @@
 # default - History
 ## Tags
-* [LATEST - 26 Aug, 2015 (a6ef010f)](#LATEST)
+* [LATEST - 9 Sep, 2015 (db33f827)](#LATEST)
+* [2.22.0 - 1 Sep, 2015 (96ec20a7)](#2.22.0)
+* [2.21.0 - 26 Aug, 2015 (40281eb2)](#2.21.0)
 * [2.20.0 - 17 Aug, 2015 (8a419e98)](#2.20.0)
 * [2.19.0 - 13 Aug, 2015 (80897129)](#2.19.0)
 * [2.18.3 - 28 Jul, 2015 (d9a02474)](#2.18.3)
@@ -93,7 +95,190 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 26 Aug, 2015 (a6ef010f)
+### <a name = "LATEST">LATEST - 9 Sep, 2015 (db33f827)
+
+* (GEM) update beaker version to 2.23.0 (db33f827)
+
+* Merge pull request #943 from MikaelSmith/imp/master/BKR-504 (e10c5491)
+
+
+```
+Merge pull request #943 from MikaelSmith/imp/master/BKR-504
+
+(BKR-504) Update Solaris package name for release version
+```
+* (BKR-504) Update Solaris package name for release version (44602018)
+
+
+```
+(BKR-504) Update Solaris package name for release version
+
+The planned Solaris package names for the puppet-agent package were
+changed to incorporate a release version, as already handled for other
+platforms. Update the Solaris package name to include the hard-coded
+release `1` naming.
+```
+* Merge pull request #942 from kevpl/bkr497_f5_skipconfigure (5a783a91)
+
+
+```
+Merge pull request #942 from kevpl/bkr497_f5_skipconfigure
+
+(BKR-497) skip configuration for f5 hosts
+```
+* Merge pull request #940 from anodelman/preserved-hosts (fe8df0b0)
+
+
+```
+Merge pull request #940 from anodelman/preserved-hosts
+
+(BKR-440) host_preserved.yml file should disable the pre_suite
+```
+* (BKR-497) fixed set_env to skip f5 platforms (a6301f24)
+
+* (BKR-497) skip configuration for f5 hosts (87bdf9b7)
+
+* Merge pull request #941 from kevpl/bkr469_ec2_keys (d16fef00)
+
+
+```
+Merge pull request #941 from kevpl/bkr469_ec2_keys
+
+(BKR-469) added f5 wait checks
+```
+* (BKR-469) added f5 platform specific provisioning wait checks (8f5a9464)
+
+* (BKR-440) host_preserved.yml file should disable the pre_suite (1b6e0bec)
+
+
+```
+(BKR-440) host_preserved.yml file should disable the pre_suite
+
+- instead of just removing the pre_suite/post_suite/tests from
+the options, explicitly set it to be []
+- this means that you don't end up accidentally running a pre-suite
+  defined in a secondary options file
+```
+* (BKR-469) added options_hash-provided keys to aws public_key check (274d5df9)
+
+* Merge pull request #937 from puppetlabs/maint/constrain-add_system32_hosts_entry-to-pswindows (a7857fab)
+
+
+```
+Merge pull request #937 from puppetlabs/maint/constrain-add_system32_hosts_entry-to-pswindows
+
+(MAINT) constrain `add_system32_hosts_entry`
+```
+* (MAINT) remove spec tests for add_system32_hosts_entry (bd76ee56)
+
+
+```
+(MAINT) remove spec tests for add_system32_hosts_entry
+
+These tests do not actually exercise the code path in question -- had they
+exercised that code path, we would have known earlier that this helper only
+works on powershell systems.
+
+We have replacement tests coming in BKR-358 which will exercise this code path
+more fully (they are what exposed this problem), so removing these tests in
+favor landing those.
+```
+* (MAINT) constrain `add_system32_hosts_entry` (88e86059)
+
+
+```
+(MAINT) constrain `add_system32_hosts_entry`
+
+Prior to this commit, this method was available to any windows platform,
+including cygwin-enabled windows installed. This method only actually works
+on non-cygwin windows platforms, and this discrepancy was uncovered during
+work for BKR-358, where we are adding acceptance tests for the host helper
+methods.
+```
+### <a name = "2.22.0">2.22.0 - 1 Sep, 2015 (96ec20a7)
+
+* (HISTORY) update beaker history for gem release 2.22.0 (96ec20a7)
+
+* (GEM) update beaker version to 2.22.0 (e693a4e7)
+
+* Merge pull request #935 from MikaelSmith/feat/master/BKR-470 (9a96c210)
+
+
+```
+Merge pull request #935 from MikaelSmith/feat/master/BKR-470
+
+(BKR-470) Add Solaris to install_puppet_agent_dev_repo_on
+```
+* Merge pull request #938 from anodelman/none-hypervisor (c5ae989f)
+
+
+```
+Merge pull request #938 from anodelman/none-hypervisor
+
+(BKR-458) add beaker notouch hypervisor
+```
+* Merge pull request #934 from anodelman/puppet-agent (8a495267)
+
+
+```
+Merge pull request #934 from anodelman/puppet-agent
+
+(BKR-459) update osx package name and directory to correspond...
+```
+* (BKR-458) add beaker notouch hypervisor (f31ba283)
+
+
+```
+(BKR-458) add beaker notouch hypervisor
+
+- support for a 'noop' hypervisor that does no
+  configuration/validation/provision/cleanup/proxy-ing
+```
+* (maint) Add spec test for install_puppet_agent_dev_repo_on (0a6eb377)
+
+* (BKR-472) Add Solaris 11 support for installing puppet-agent (6960c09b)
+
+
+```
+(BKR-472) Add Solaris 11 support for installing puppet-agent
+
+Solaris 11 re-uses most of the setup for Solaris 10, but the root user's
+home directory on Solaris 10 is special. Fix up the configuration to
+special-case Solaris 10.
+```
+* (BKR-470) Add Solaris to install_puppet_agent_dev_repo_on (265f6ec3)
+
+
+```
+(BKR-470) Add Solaris to install_puppet_agent_dev_repo_on
+
+Adds Solaris support for installing packages in the
+install_puppet_agent_dev_repo_on helper.
+```
+* (MAINT) fix ability to set external file dir through opts (65d2bbb7)
+
+
+```
+(MAINT) fix ability to set external file dir through opts
+
+- we were overriding for windows/mac hosts to a different default, so
+  anything passed in by the user was ignored
+```
+* (BKR-459) update osx package name and directory to correspond... (db9090ef)
+
+
+```
+(BKR-459) update osx package name and directory to correspond...
+
+... to RE changes
+
+- updated install_puppet_agent_dev_repo_on to handle new directory
+  structure and name change
+- backwards compatible, handles both old and new
+```
+### <a name = "2.21.0">2.21.0 - 26 Aug, 2015 (40281eb2)
+
+* (HISTORY) update beaker history for gem release 2.21.0 (40281eb2)
 
 * (GEM) update beaker version to 2.21.0 (a6ef010f)
 

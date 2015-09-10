@@ -812,7 +812,7 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
-  describe '#install_puppetagent_dev_repo' do
+  describe '#install_puppet_agent_dev_repo_on' do
 
     it 'raises an exception when host platform is unsupported' do
       platform = Object.new()
@@ -823,7 +823,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :options ).and_return( {} )
 
       expect{
-        subject.install_puppetagent_dev_repo( host, opts )
+        subject.install_puppet_agent_dev_repo_on( host, opts )
       }.to raise_error(RuntimeError, /No repository installation step for/)
     end
 
@@ -839,7 +839,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:scp_to).once.with(host, /-agent-/, "/root")
       expect(subject).to receive(:on).once.with(host, /rpm\ -ivh/)
 
-      subject.install_puppetagent_dev_repo( host, opts )
+      subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
     it 'runs the correct install for debian-based platforms' do
@@ -855,7 +855,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
       expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
 
-      subject.install_puppetagent_dev_repo( host, opts )
+      subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
     it 'runs the correct install for windows platforms' do
@@ -874,7 +874,48 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:install_msi_on).with(host, copied_path, {}, {:debug => nil}).once
       expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
 
-      subject.install_puppetagent_dev_repo( host, opts )
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+    end
+
+    it 'runs the correct install for osx platforms (new link format)' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['osx', '10.9', 'x86_64', 'mavericks']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+      copied_path = "#{win_temp}\\puppet-agent-x64.msi"
+      mock_echo = Object.new()
+      allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
+
+      expect(subject).to receive(:link_exists?).with(/\/puppet-agent\/0.1.0\/repos\/apple\/10.9\/PC1\/x86_64\//).and_return(true)
+      expect(subject).to receive(:fetch_http_file).once.with(/\/apple\/10.9\/PC1\/x86_64$/, 'puppet-agent-0.1.0-1.mavericks.dmg', /\/osx$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-1.mavericks.dmg$/, /var\/root/)
+      expect(host).to receive( :install_package ).with(/puppet-agent-0.1.0\*/)
+
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+
+    end
+
+    it 'runs the correct install for osx platforms (old link format)' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['osx', '10.9', 'x86_64', 'mavericks']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+      copied_path = "#{win_temp}\\puppet-agent-x64.msi"
+      mock_echo = Object.new()
+      allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
+
+      expect(subject).to receive(:link_exists?).with(/\/puppet-agent\/0.1.0\/repos\/apple\/10.9\/PC1\/x86_64\//).and_return(false)
+      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\/0.1.0\/repos\/apple\/PC1$/, 'puppet-agent-0.1.0-osx-10.9-x86_64.dmg', /\/osx$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-osx-10.9-x86_64.dmg$/, /var\/root/)
+      expect(host).to receive( :install_package ).with(/puppet-agent-0.1.0\*/)
+
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+
+
     end
 
     it 'allows you to override the local copy directory' do
@@ -890,7 +931,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
       expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
 
-      subject.install_puppetagent_dev_repo( host, opts )
+      subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
     it 'allows you to override the external copy directory' do
@@ -906,7 +947,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
       expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
 
-      subject.install_puppetagent_dev_repo( host, opts )
+      subject.install_puppet_agent_dev_repo_on( host, opts )
     end
   end
 
@@ -987,6 +1028,93 @@ describe ClassMixedWithDSLInstallUtils do
         end
 
         subject.install_cert_on_windows(host, cert, content)
+      end
+    end
+  end
+
+  describe '#install_puppet_agent_dev_repo_on' do
+    let( :package_name ) { 'puppet-agent' }
+    let( :platform ) { @platform || 'other' }
+    let( :host ) do
+      FakeHost.create( 'fakvm', platform, opts )
+    end
+
+    before :each do
+      allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
+    end
+
+    def test_fetch_http_file()
+      expect( subject ).to receive( :configure_type_defaults_on ).with(host)
+      expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
+      subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )
+    end
+
+    context 'on windows' do
+      before :each do
+        @platform = 'windows-7-x86_64'
+      end
+
+      it 'copies package to the cygwin root directory and installs it' do
+        expect( subject ).to receive( :install_msi_on ).with( any_args )
+        expect( subject ).to receive( :scp_to ).with( host, /puppet-agent-x86\.msi/, '`cygpath -smF 35`/' )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on debian' do
+      before :each do
+        @platform = 'debian-5-x86_64'
+      end
+
+      it 'copies repo_config to the root user directory and installs it' do
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent_1\.0\.0-1_amd64\.deb/, '/root' )
+        expect( subject ).to receive( :on ).with( host, /dpkg -i --force-all .+puppet-agent_1\.0\.0-1_amd64\.deb/ )
+        expect( subject ).to receive( :on ).with( host, /apt-get update/ )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on solaris 10' do
+      before :each do
+        @platform = 'solaris-10-x86_64'
+      end
+
+      it "copies package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\-1.i386\.pkg\.gz/, '/' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+
+      it "copies old package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+    end
+
+    context 'on solaris 11' do
+      before :each do
+        @platform = 'solaris-11-x86_64'
+      end
+
+      it "copies package to the root user directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/, '/root' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
+      end
+
+      it "copies old package to the root directory and installs it" do
+        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
+        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/root' )
+        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
+        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
+        test_fetch_http_file
       end
     end
   end

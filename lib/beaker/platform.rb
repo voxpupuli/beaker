@@ -21,10 +21,8 @@ module Beaker
                      "precise" => "1204",
                      "lucid"   => "1004",
                    },
-        :osx =>    { "yosemite"  => "10.10",
-                     "mavericks" => "10.9",
-                     "1010"      => "10.10",
-                     "109"       => "10.9"
+        :osx =>    { "yosemite"  => "1010",
+                     "mavericks" => "109",
                    }
       }
 

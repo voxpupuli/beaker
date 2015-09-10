@@ -331,7 +331,7 @@ module Beaker
         #
         # @return nil
         def add_system32_hosts_entry(host, opts = {})
-          if host['platform'] =~ /windows/
+          if host.is_powershell?
             hosts_file = "C:\\Windows\\System32\\Drivers\\etc\\hosts"
             host_entry = "#{opts['ip']}`t`t#{opts['name']}"
             on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")

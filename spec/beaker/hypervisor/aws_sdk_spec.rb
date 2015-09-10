@@ -55,10 +55,12 @@ module Beaker
       end
 
       it 'should step through provisioning' do
+        allow( aws ).to receive( :wait_for_status_f5 )
         aws.provision
       end
 
       it 'should return nil' do
+        allow( aws ).to receive( :wait_for_status_f5 )
         expect(aws.provision).to be_nil
       end
     end
@@ -258,10 +260,23 @@ module Beaker
       let( :instance_set ) { [{:instance => aws_instance}] }
       subject(:wait_for_status) { aws.wait_for_status(:running, instance_set) }
 
-      it 'handles a single instance' do
-        allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
-        expect(aws).to receive(:backoff_sleep).exactly(3).times
-        expect(wait_for_status).to eq(instance_set)
+      context 'single instance' do
+        it 'behaves correctly in typical case' do
+          allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running)
+          expect(aws).to receive(:backoff_sleep).exactly(3).times
+          expect(wait_for_status).to eq(instance_set)
+        end
+
+        it 'executes block correctly instead of status if given one' do
+          barn_value = 'did you grow up in a barn?'
+          allow(aws_instance).to receive( :[] ).with( :barn ) { barn_value }
+          expect(aws_instance).to receive(:status).exactly(0).times
+          expect(aws).to receive(:backoff_sleep).exactly(1).times
+          aws.wait_for_status(:running, instance_set) do |instance|
+            expect( instance[:barn] ).to be === barn_value
+            true
+          end
+        end
       end
 
       context 'with multiple instances' do
@@ -278,6 +293,17 @@ module Beaker
           expect(aws).to receive(:backoff_sleep).exactly(6).times
           expect(wait_for_status).to eq(instance_set)
         end
+
+        it 'executes block correctly instead of status if given one' do
+          barn_value = 'did you grow up in a barn?'
+          not_barn_value = 'notabarn'
+          allow(aws_instance).to receive( :[] ).with( :barn ).and_return(not_barn_value, barn_value, not_barn_value, barn_value)
+          allow(aws_instance).to receive(:status).and_return(:waiting)
+          expect(aws).to receive(:backoff_sleep).exactly(4).times
+          aws.wait_for_status(:running, instance_set) do |instance|
+            instance[:barn] == barn_value
+          end
+        end
       end
 
       context 'after 10 tries' do
@@ -285,6 +311,12 @@ module Beaker
           expect(aws_instance).to receive(:status).and_return(:waiting).exactly(10).times
           expect(aws).to receive(:backoff_sleep).exactly(9).times
           expect { wait_for_status }.to raise_error('Instance never reached state running')
+        end
+
+        it 'still raises RuntimeError if given a block' do
+          expect(aws_instance).to receive(:status).and_return(:waiting).exactly(10).times
+          expect(aws).to receive(:backoff_sleep).exactly(9).times
+          expect { wait_for_status { false } }.to raise_error('Instance never reached state running')
         end
       end
 
@@ -440,8 +472,9 @@ module Beaker
       it { is_expected.to be_nil }
 
       context 'calls #set_etc_hosts' do
-        it 'for each host' do
-          expect(aws).to receive(:set_etc_hosts).exactly(@hosts.size).times
+        it 'for each host (except the f5 ones)' do
+          non_f5_hosts = @hosts.select{ |h| !(h['platform'] =~ /f5/) }
+          expect(aws).to receive(:set_etc_hosts).exactly(non_f5_hosts.size).times
           expect(configure_hosts).to be_nil
         end
 
@@ -528,17 +561,42 @@ module Beaker
     describe '#public_key' do
       subject(:public_key) { aws.public_key }
 
-      it "retrieves contents from local ~/.ssh/ssh_rsa.pub file" do
+      it "retrieves contents from local ~/.ssh/id_rsa.pub file" do
         # Stub calls to file read/exists
+        key_value = 'foobar_Rsa'
+        allow(File).to receive(:exists?).with(/id_dsa.pub/) { false }
         allow(File).to receive(:exists?).with(/id_rsa.pub/) { true }
-        allow(File).to receive(:read).with(/id_rsa.pub/) { "foobar" }
+        allow(File).to receive(:read).with(/id_rsa.pub/) { key_value }
 
         # Should return contents of allow( previously ).to receivebed id_rsa.pub
-        expect(public_key).to eq("foobar")
+        expect(public_key).to be === key_value
+      end
+
+      it "retrieves contents from local ~/.ssh/id_dsa.pub file" do
+        # Stub calls to file read/exists
+        key_value = 'foobar_Dsa'
+        allow(File).to receive(:exists?).with(/id_rsa.pub/) { false }
+        allow(File).to receive(:exists?).with(/id_dsa.pub/) { true }
+        allow(File).to receive(:read).with(/id_dsa.pub/) { key_value }
+
+        expect(public_key).to be === key_value
       end
 
       it "should return an error if the files do not exist" do
-        expect { public_key }.to raise_error(RuntimeError, /Expected either/)
+        expect { public_key }.to raise_error(RuntimeError, /Expected to find a public key/)
+      end
+
+      it "uses options-provided keys" do
+        opts = aws.instance_variable_get( :@options )
+        opts[:ssh][:keys] = ['fake_key1', 'fake_key2']
+        aws.instance_variable_set( :@options, opts )
+
+        key_value = 'foobar_Custom2'
+        allow(File).to receive(:exists?).with(anything) { false }
+        allow(File).to receive(:exists?).with(/fake_key2/) { true }
+        allow(File).to receive(:read).with(/fake_key2/) { key_value }
+
+        expect(public_key).to be === key_value
       end
     end
 
