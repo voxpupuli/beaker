@@ -4,8 +4,8 @@ require 'helpers/test_helper'
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
 
-  confine_block :to, :platform => /^el-\d/ do
-    step "installing `rsync` on CentOS for all later test steps" do
+  confine_block :to, :platform => /^centos|el-\d|fedora/ do
+    step "installing `rsync` on #{default['platform']} for all later test steps" do
       hosts.each do |host|
         install_package host, "rsync"
       end
@@ -59,11 +59,11 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
-  confine_block :to, :platform => /windows|solaris/ do
+  confine_block :to, :platform => /windows|solaris.*10/ do
 
-    # NOTE: rsync methods are not working currently on windows platforms
+    # NOTE: rsync methods are not working currently on windows and solaris 10 platforms
 
-    step "#create_remote_file CURRENTLY fails on windows systems, using rsync" do
+    step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
       remote_tmpdir = tmpdir_on default
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
@@ -76,7 +76,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :except, :platform => /windows|solaris/ do
+  confine_block :except, :platform => /windows|solaris.*10/ do
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -102,7 +102,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  step "#create_remote_file create remote files on all remote hosts, when given an array" do
+  step "#create_remote_file creates remote files on all remote hosts, when given an array" do
     remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -116,7 +116,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  step "#create_remote_file create remote files on all remote hosts, when given an array, using scp" do
+  step "#create_remote_file creates remote files on all remote hosts, when given an array, using scp" do
     remote_tmpdir = tmpdir_on default
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -131,12 +131,12 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
-  confine_block :to, :platform => /windows|solaris/ do
+  confine_block :to, :platform => /windows|solaris.*10/ do
 
-    # NOTE: rsync methods are not working currently on windows platforms. Would
-    #       expect this to be documented better.
+    # NOTE: rsync methods are not working currently on windows and solaris 10
+    #       platforms. Would expect this to be documented better.
 
-    step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
+    step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -152,9 +152,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :except, :platform => /windows|solaris/ do
+  confine_block :except, :platform => /windows|solaris.*10|fedora/ do
 
-    step "#create_remote_file create remote files on all remote hosts, when given an array, using rsync" do
+    step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -169,9 +169,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :to, :platform => /centos|el-\d/ do
+  confine_block :to, :platform => /centos|el-\d|fedora/ do
 
-    step "uninstall rsync package on CentOS for later test runs" do
+    step "uninstall rsync package on #{default['platform']} for later test runs" do
       # NOTE: this is basically a #teardown section for test isolation
       #       Could we reorganize tests into different files to make this
       #       clearer?

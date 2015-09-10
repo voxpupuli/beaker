@@ -16,16 +16,15 @@ end
 #
 # TODO: fix via: https://tickets.puppetlabs.com/browse/BKR-496
 def tmpdir_on(hosts, path_prefix = '', user=nil)
-  return create_tmpdir_on(hosts, path_prefix, user) unless Array(hosts).first.is_cygwin?
+  first_host = Array(hosts).first
+
+  return create_tmpdir_on(hosts, path_prefix, user) unless \
+    first_host.is_cygwin? or first_host.platform =~ /osx/
 
   block_on hosts do | host |
     # use default user logged into this host
     if not user
       user = host['user']
-    end
-
-    if not on(host, "getent passwd #{user}").exit_code == 0
-      raise "User #{user} does not exist on #{host}."
     end
 
     if defined? host.tmpdir

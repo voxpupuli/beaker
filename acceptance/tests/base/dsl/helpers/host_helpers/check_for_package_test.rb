@@ -2,6 +2,20 @@ $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..
 
 require 'helpers/test_helper'
 
+# Return the name of a platform-specific package known to be installed on a system
+def known_installed_package
+  case default['platform']
+  when /solaris.*11/
+    "shell/bash"
+  when /solaris.*10/
+    "SUNWbash"
+  when /windows/
+    "bash"
+  else
+    "rsync"
+  end
+end
+
 test_name "dsl::helpers::host_helpers #check_for_package" do
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
@@ -19,13 +33,13 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
-      result = check_for_package default, "bash"
+      result = check_for_package default, known_installed_package
       assert result
     end
 
     step "#check_for_package CURRENTLY fails if given a host array" do
       assert_raises NoMethodError do
-        check_for_package hosts, "rsync"
+        check_for_package hosts, known_installed_package
       end
     end
   end
@@ -38,18 +52,26 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
-      result = check_for_package default, "SUNWbash"
+      result = check_for_package default, known_installed_package
       assert result
     end
 
     step "#check_for_package CURRENTLY fails if given a host array" do
       assert_raises NoMethodError do
-        check_for_package hosts, "rsync"
+        check_for_package hosts, known_installed_package
       end
     end
   end
 
-  confine_block :except, :platform => /windows|solaris/ do
+  confine_block :to, :platform => /osx/ do
+    step "#check_for_package CURRENTLY fails with a RuntimeError on OS X" do
+      assert_raises RuntimeError do
+        check_for_package default, known_installed_package
+      end
+    end
+  end
+
+  confine_block :except, :platform => /windows|solaris|osx/ do
 
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
@@ -57,8 +79,8 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
-      install_package default, "rsync"
-      result = check_for_package default, "rsync"
+      install_package default, known_installed_package
+      result = check_for_package default, known_installed_package
       assert result
     end
 
@@ -68,7 +90,7 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
       #       Beaker::Host::CommandFailure
 
       assert_raises NoMethodError do
-        check_for_package hosts, "rsync"
+        check_for_package hosts, known_installed_package
       end
     end
   end

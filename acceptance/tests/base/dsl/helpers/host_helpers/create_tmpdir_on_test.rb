@@ -17,7 +17,19 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
     end
   end
 
-  confine_block :except, :platform => /windows/ do
+  confine_block :to, :platform => /osx/ do
+
+    step "#create_tmpdir_on CURRENTLY fails when attempting to call getent to check the creating user" do
+      # NOTE: would have expected this to work.
+      # TODO: fix via https://tickets.puppetlabs.com/browse/BKR-496
+
+      assert_raises Beaker::Host::CommandFailure do
+        tmpdir = create_tmpdir_on default
+      end
+    end
+  end
+
+  confine_block :except, :platform => /windows|osx/ do
 
     step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
       tmpdir = create_tmpdir_on default

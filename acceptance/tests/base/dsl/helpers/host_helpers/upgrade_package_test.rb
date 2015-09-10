@@ -21,6 +21,16 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
     end
   end
 
+  confine_block :to, :platform => /osx/ do
+
+    step "#upgrade_package CURRENTLY fails with a RuntimeError on OS X" do
+      # NOTE: documentation could be better on this method
+      assert_raises RuntimeError do
+        upgrade_package default, "bash"
+      end
+    end
+  end
+
   confine_block :to, :platform => /solaris/ do
 
     step "#upgrade_package CURRENTLY fails on solaris platforms" do
@@ -32,7 +42,7 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
     end
   end
 
-  confine_block :except, :platform => /windows|solaris/ do
+  confine_block :except, :platform => /windows|solaris|osx/ do
     confine_block :to, :platform => /centos|el-\d/ do
 
       step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
@@ -46,7 +56,7 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
         #       > No Packages marked for Update
 
         result = upgrade_package default, "non-existent-package-name"
-        assert_match /No Packages marked for Update/, result
+        assert_match /No Packages marked for Update/i, result
       end
     end
 

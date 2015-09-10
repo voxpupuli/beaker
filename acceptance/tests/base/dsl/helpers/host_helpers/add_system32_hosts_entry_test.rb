@@ -8,12 +8,10 @@ test_name "dsl::helpers::host_helpers #add_system32_hosts_entry" do
 
     step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
       # NOTE: would expect this to be better documented.
-      #       Also, this method should probably live outside the core hosts helpers,
-      #       and should probably be a more generalized method.
       if default.is_powershell?
         logger.info "Skipping failure test on powershell platforms..."
       else
-        assert_raises Beaker::Host::CommandFailure do
+        assert_raises RuntimeError do
           add_system32_hosts_entry default, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
         end
       end
@@ -33,7 +31,7 @@ test_name "dsl::helpers::host_helpers #add_system32_hosts_entry" do
 
     step "#add_system32_hosts_entry CURRENTLY fails with a TypeError when given a hosts array" do
       # NOTE: would expect this to fail with Beaker::Host::CommandFailure
-      assert_raises TypeError do
+      assert_raises NoMethodError do
         add_system32_hosts_entry hosts, { :ip => '123.45.67.89', :name => 'beaker.puppetlabs.com' }
       end
     end
