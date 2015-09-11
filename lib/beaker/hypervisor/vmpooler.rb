@@ -127,8 +127,9 @@ module Beaker
           raise "Vmpooler.provision - requested host set not available"
         end
       rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
+        @logger.debug "Failed vmpooler provision: #{e.class} : #{e.message}"
         if waited <= @options[:timeout].to_i
-          @logger.debug("Retrying provision for vmpooler host after waiting #{wait} second(s) (failed with #{e.class})")
+          @logger.debug("Retrying provision for vmpooler host after waiting #{wait} second(s)")
           sleep wait
           waited += wait
           last_wait, wait = wait, last_wait + wait
