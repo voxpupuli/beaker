@@ -7,6 +7,7 @@ begin
   extend Beaker::Acceptance::InstallUtils
 end
 test_name 'Clone from git'
+skip_test
 
 PACKAGES = {
   :redhat => [
