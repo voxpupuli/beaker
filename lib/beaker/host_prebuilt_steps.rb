@@ -519,6 +519,10 @@ module Beaker
           else
             #nothing to do here
           end
+        when /osx-10\.*11/
+          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /private/etc/ssh/sshd_config"))
+          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
+          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
         when /osx/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
           host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
