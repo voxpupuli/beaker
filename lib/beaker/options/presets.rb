@@ -169,6 +169,7 @@ module Beaker
           :pe_version_file        => 'LATEST',
           :pe_version_file_win    => 'LATEST-win',
           :host_env               => {},
+          :host_name_prefix       => nil,
           :ssh_env_file           => '~/.ssh/environment',
           :profile_d_env_file     => '/etc/profile.d/beaker_env.sh',
           :dot_fog                => File.join(ENV['HOME'], '.fog'),
