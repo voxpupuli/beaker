@@ -658,7 +658,12 @@ module Beaker
         #wait for a given host to appear in the dashboard
         def wait_for_host_in_dashboard(host)
           hostname = host.node_name
-          retry_on(dashboard, "! curl --tlsv1 -k -I https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+          if host['platform'] =~ /aix/ then
+            curl_opts = '--tlsv1 -I'
+          else
+            curl_opts = '--tlsv1 -k -I'
+          end
+          retry_on(dashboard, "! curl #{curl_opts} https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
         end
 
         # Ensure the host has requested a cert, then sign it
