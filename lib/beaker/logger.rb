@@ -18,7 +18,7 @@ module Beaker
     MAGENTA        = "\e[00;35m"
     CYAN           = "\e[00;36m"
     WHITE          = "\e[00;37m"
-    GREY           = "\e[01;30m"
+    GREY           = "\e[00;00m"  # Some terms can't handle grey, use normal
     BRIGHT_RED     = "\e[01;31m"
     BRIGHT_GREEN   = "\e[01;32m"
     BRIGHT_YELLOW  = "\e[01;33m"
