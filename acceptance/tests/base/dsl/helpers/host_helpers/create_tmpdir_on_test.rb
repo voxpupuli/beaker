@@ -66,13 +66,5 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
         assert_equal 0, on(host, "touch #{tmpdir}/testfile").exit_code
       end
     end
-
-    step "#create_tmpdir_on CURRENTLY fails with a RuntimeError if the host platform is not supported" do
-      # TODO - identify a platform which does not support tmpdir
-      #
-      # assert_raises RuntimeError do
-      #   create_tmpdir_on default
-      # end
-    end
   end
 end
