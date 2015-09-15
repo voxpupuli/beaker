@@ -154,7 +154,7 @@ module Beaker
           :dry_run                => false,
           :tag_includes           => '',
           :tag_excludes           => '',
-          :timeout                => 300,
+          :timeout                => 900, # 15 minutes
           :fail_mode              => 'slow',
           :accept_all_exit_codes  => false,
           :timesync               => false,
