@@ -274,9 +274,11 @@ module Beaker
         # and they shouldn't be ssh specific
         result = nil
 
+        @logger.step_in()
         seconds = Benchmark.realtime {
           result = connection.execute(cmdline, options, output_callback)
         }
+        @logger.step_out()
 
         if not options[:silent]
           @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
