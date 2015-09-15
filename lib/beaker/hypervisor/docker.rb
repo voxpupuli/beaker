@@ -137,6 +137,8 @@ module Beaker
             image.delete
           rescue Excon::Errors::ClientError => e
             @logger.warn("deletion of image #{image.id} failed: #{e.response.body}")
+          rescue ::Docker::Error::DockerError => e
+            @logger.warn("deletion of image #{image.id} caused internal Docker error: #{e.message}")
           end
         end
       end
