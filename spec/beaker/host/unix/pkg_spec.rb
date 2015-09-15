@@ -97,7 +97,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
- 
+
       it "checks correctly on fedora" do
         @opts = {'platform' => 'fedora-is-me'}
         pkg = 'fedora_package'
@@ -177,6 +177,14 @@ module Beaker
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
+      it "checks correctly on archlinux" do
+        @opts = {'platform' => 'archlinux-is-me'}
+        pkg = 'archlinux_package'
+        expect( Beaker::Command ).to receive(:new).with("pacman -Q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.check_for_package(pkg) ).to be === true
+      end
+
       it "returns false for el-4" do
         @opts = {'platform' => 'el-4-is-me'}
         pkg = 'el-4_package'
@@ -232,6 +240,14 @@ module Beaker
           expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
           expect( instance.install_package(pkg) ).to be == "hello"
         end
+      end
+
+      it "uses pacman on archlinux" do
+        @opts = {'platform' => 'archlinux-is-me'}
+        pkg = 'archlinux_package'
+        expect( Beaker::Command ).to receive(:new).with("pacman -S --noconfirm  #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package(pkg) ).to be == "hello"
       end
     end
 

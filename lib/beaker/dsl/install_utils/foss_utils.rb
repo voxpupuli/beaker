@@ -280,6 +280,8 @@ module Beaker
                 install_puppet_from_openbsd_packages_on(host, opts)
               elsif host['platform'] =~ /freebsd/
                 install_puppet_from_freebsd_ports_on(host, opts)
+              elsif host['platform'] =~ /archlinux/
+                install_puppet_from_pacman_on(host, opts)
               else
                 if opts[:default_action] == 'gem_install'
                   opts[:version] ||= '~> 3.x'
@@ -759,6 +761,27 @@ module Beaker
         # @api private
         def install_puppet_from_openbsd_packages_on(hosts, opts)
           if (opts[:version])
+            logger.warn "If you wish to choose a specific Puppet version, use `install_puppet_from_gem_on('~> 3.*')`"
+          end
+
+          block_on hosts do |host|
+            host.install_package('puppet')
+
+            configure_type_defaults_on(host)
+          end
+        end
+
+        # Installs Puppet and dependencies from Arch Linux Pacman
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts The host to install packages on
+        # @param [Hash{Symbol=>String}] opts An options hash
+        # @option opts [String] :version The version of Puppet to install (shows warning)
+        #
+        # @return nil
+        # @api private
+        def install_puppet_from_pacman_on(hosts, opts)
+          if (opts[:version])
+            # Arch is rolling release, only the latest package versions are supported
             logger.warn "If you wish to choose a specific Puppet version, use `install_puppet_from_gem_on('~> 3.*')`"
           end
 
