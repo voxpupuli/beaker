@@ -1130,11 +1130,14 @@ module Beaker
               mac_pkg_name = "puppet-agent-#{opts[:puppet_agent_version]}"
               version = version[0,2] + '.' + version[2,2] if (variant =~ /osx/ && !version.include?("."))
               path_chunk = ''
-              # new hotness
+              # newest hotness
               path_chunk = "apple/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_path << path_chunk
-              release_file = "#{mac_pkg_name}-1.#{codename}.dmg"
-              if not link_exists?("#{release_path}/") # oops, try the old stuff
+              release_file = "#{mac_pkg_name}-1.osx#{version}.dmg"
+              if not link_exists?("#{release_path}/#{release_file}") # new hotness
+                release_file = "#{mac_pkg_name}-1.#{codename}.dmg"
+              end
+              if not link_exists?("#{release_path}/#{release_file}") # oops, try the old stuff
                 # the old school
                 release_path.chomp!(path_chunk) #remove chunk that didn't work
                 release_path << "apple/#{opts[:puppet_collection]}"
