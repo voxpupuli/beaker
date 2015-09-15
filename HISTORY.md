@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 9 Sep, 2015 (db33f827)](#LATEST)
+* [LATEST - 15 Sep, 2015 (96d9104d)](#LATEST)
+* [2.23.0 - 9 Sep, 2015 (2532324a)](#2.23.0)
 * [2.22.0 - 1 Sep, 2015 (96ec20a7)](#2.22.0)
 * [2.21.0 - 26 Aug, 2015 (40281eb2)](#2.21.0)
 * [2.20.0 - 17 Aug, 2015 (8a419e98)](#2.20.0)
@@ -95,7 +96,212 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 9 Sep, 2015 (db33f827)
+### <a name = "LATEST">LATEST - 15 Sep, 2015 (96d9104d)
+
+* (GEM) update beaker version to 2.24.0 (96d9104d)
+
+* Merge pull request #956 from kevpl/bkr531_osx_update (ca365d15)
+
+
+```
+Merge pull request #956 from kevpl/bkr531_osx_update
+
+(BKR-531) updated osx name structure to match RE changes
+```
+* (BKR-531) review clarifications & clean-up (308815d7)
+
+* Merge pull request #950 from anodelman/timeout (1a528f21)
+
+
+```
+Merge pull request #950 from anodelman/timeout
+
+(BKR-514) increase polling timeout when requesting vpool instances
+```
+* (BKR-531) updated osx name structure to match RE changes (f4512f99)
+
+* Merge pull request #949 from cybercom-finland/bkr-516/more-openstack-credentials-from-env (11243052)
+
+
+```
+Merge pull request #949 from cybercom-finland/bkr-516/more-openstack-credentials-from-env
+
+(BKR-516) Lookup more openstack credentials from ENV
+```
+* Merge pull request #953 from GeoffWilliams/docker_error_catch (5d79e90a)
+
+
+```
+Merge pull request #953 from GeoffWilliams/docker_error_catch
+
+(BKR-523) Beaker prints error message on exit when using docker containers
+```
+* Merge pull request #952 from GeoffWilliams/no_more_grey (c13914a0)
+
+
+```
+Merge pull request #952 from GeoffWilliams/no_more_grey
+
+(BKR-519) Beaker prints invisible messages in debug mode (black-on-bl…
+```
+* (BKR-523) Beaker prints error message on exit when using docker containers (ddd05816)
+
+
+```
+(BKR-523) Beaker prints error message on exit when using docker containers
+
+Capture the strange error message from docker (and all other internal docker errors) and display the message as a logged warning instead of a stack trace.  This will preven the message from causing a CI test failure as the exit status is now zero
+```
+* (BKR-519) Beaker prints invisible messages in debug mode (black-on-black) (20cfbdd2)
+
+
+```
+(BKR-519) Beaker prints invisible messages in debug mode (black-on-black)
+Use normal colour instead of bold as some terminals (mac) can't handle the grey without additional configuration
+```
+* Merge pull request #951 from johnduarte/aix-curl-opts (3b1fd835)
+
+
+```
+Merge pull request #951 from johnduarte/aix-curl-opts
+
+(BKR-520) Add curl options for AIX
+```
+* Merge pull request #945 from mcanevet/fix/BKR-506 (673ac239)
+
+
+```
+Merge pull request #945 from mcanevet/fix/BKR-506
+
+(BKR-506) Fix FQDN
+```
+* Merge pull request #915 from jstremick/feature/aws_credential_sources (e643f054)
+
+
+```
+Merge pull request #915 from jstremick/feature/aws_credential_sources
+
+BRK-431: Find AWS credentials from environment variables
+```
+* Merge pull request #946 from kevpl/bkr455_exitcodes_logging (b19d1238)
+
+
+```
+Merge pull request #946 from kevpl/bkr455_exitcodes_logging
+
+(BKR-455) added warning message for conflicting exit code handling
+```
+* Merge pull request #948 from cybercom-finland/bkr-515/host_name_prefix (8b8b2cc2)
+
+
+```
+Merge pull request #948 from cybercom-finland/bkr-515/host_name_prefix
+
+(BKR-515) add config option host_name_prefix
+```
+* (BKR-520) Add curl options for AIX (f6438338)
+
+
+```
+(BKR-520) Add curl options for AIX
+
+The curl command on AIX does not support the `-k flag`. This commit
+creates condition statements to replace the `-k` flag in the curl
+options with `--tlsv1` when the platform is AIX.
+```
+* (BKR-514) increase polling timeout when requesting vpool instances (05fa681e)
+
+
+```
+(BKR-514) increase polling timeout when requesting vpool instances
+
+- increase timeout to 15 minutes
+- write out failure message to get more information about why the pool
+  request failed
+```
+* Merge pull request #947 from anodelman/osx (9258e8ec)
+
+
+```
+Merge pull request #947 from anodelman/osx
+
+(BKR-482) Add support for OSX 10.11 El Capitan (x86_64)
+```
+* (BKR-482) Add support for OSX 10.11 El Capitan (x86_64) (439568c4)
+
+
+```
+(BKR-482) Add support for OSX 10.11 El Capitan (x86_64)
+
+- correctly turn on ssh user environment support
+- update platform list
+```
+* (BKR-455) added warning message for conflicting exit code handling (44f55339)
+
+* Merge pull request #944 from puppetlabs/bkr-505/fix-broken-confine_block-behavior (a5cd36a1)
+
+
+```
+Merge pull request #944 from puppetlabs/bkr-505/fix-broken-confine_block-behavior
+
+(BKR-505) rescue `SkipTest` in `confine_block`
+```
+* (BKR-505) Add acceptance tests for #confine_block (0d73ff10)
+
+
+```
+(BKR-505) Add acceptance tests for #confine_block
+
+These tests fail when the code patch in this PR is not present, and
+succeed when the patch is present.
+```
+* (BKR-515) Add config option host_name_prefix (66cbd292)
+
+
+```
+(BKR-515) Add config option host_name_prefix
+
+This helps to identify hosts if you do not destroy them.
+
+If defined, hostname is prefixed.
+```
+* (BKR-516) Lookup more openstack credentials from ENV (34b4054a)
+
+
+```
+(BKR-516) Lookup more openstack credentials from ENV
+
+Add support to configure openstack via these environment
+variables (environment variable name, configuration option)
+- OS_KEYNAME openstack_keyname
+- OS_NETWORK openstack_network
+- OS_REGION  openstack_region
+```
+* (BKR-506) Fix FQDN (ab283113)
+
+* (BKR-505) rescue SkipTest in confine_block (efd0c3e3)
+
+
+```
+(BKR-505) rescue SkipTest in confine_block
+
+Prior to this, use of confine_block would result in all following code in the
+test case being skipped in situations where the host list had no matches for
+the confine_block.  The entire purpose of confine_block is to limit the scope
+of the confine to the passed block.
+
+Also, ensure and rescue at the method level do not require an additional
+wrapping begin..end block.
+```
+* BRK-431: Correct env variable names and prefix (3026cd88)
+
+* BRK-431: Corrected AWS keys used in .fog file (f43460e6)
+
+* BRK-431: Find AWS credentials from environment variables (5e085999)
+
+### <a name = "2.23.0">2.23.0 - 9 Sep, 2015 (2532324a)
+
+* (HISTORY) update beaker history for gem release 2.23.0 (2532324a)
 
 * (GEM) update beaker version to 2.23.0 (db33f827)
 
