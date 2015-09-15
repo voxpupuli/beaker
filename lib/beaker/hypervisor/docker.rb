@@ -158,6 +158,8 @@ module Beaker
       # specify base image
       dockerfile = <<-EOF
         FROM #{host['image']}
+        ENV container docker
+        VOLUME [ "/sys/fs/cgroup" ]
       EOF
 
       # additional options to specify to the sshd
