@@ -1133,14 +1133,20 @@ module Beaker
               # newest hotness
               path_chunk = "apple/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_path << path_chunk
+              # moved to doing this when 'el capitan' came out & the objection was
+              # raised that the code name wasn't a fact, & as such can be hard to script
+              # example: puppet-agent-0.1.0-1.osx10.9.dmg
               release_file = "#{mac_pkg_name}-1.osx#{version}.dmg"
               if not link_exists?("#{release_path}/#{release_file}") # new hotness
+                # little older change involved the code name as only difference from above
+                # example: puppet-agent-0.1.0-1.mavericks.dmg
                 release_file = "#{mac_pkg_name}-1.#{codename}.dmg"
               end
               if not link_exists?("#{release_path}/#{release_file}") # oops, try the old stuff
                 # the old school
                 release_path.chomp!(path_chunk) #remove chunk that didn't work
                 release_path << "apple/#{opts[:puppet_collection]}"
+                # example: puppet-agent-0.1.0-osx-10.9-x86_64.dmg
                 release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
               end
             when /^solaris$/
