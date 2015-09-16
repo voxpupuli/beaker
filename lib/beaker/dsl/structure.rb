@@ -214,7 +214,13 @@ module Beaker
 
         yield
 
-      rescue Beaker::DSL::Outcomes::SkipTest
+      rescue Beaker::DSL::Outcomes::SkipTest => e
+        # I don't like this much, but adding options to confine is a breaking change
+        # to the DSL that would involve a major version bump
+        if e.message !~ /No suitable hosts found/
+          # a skip generated from the provided block, pass it up the chain
+          raise e
+        end
       ensure
         self.hosts = original_hosts
       end
