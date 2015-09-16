@@ -160,62 +160,71 @@ module Beaker
         FROM #{host['image']}
       EOF
 
-      # additional options to specify to the sshd
-      # may vary by platform
-      sshd_options = ''
+      if not host.has_key?("ssh_installed") then
+        # additional options to specify to the sshd
+        # may vary by platform
+        sshd_options = ''
 
-      # add platform-specific actions
-      service_name = "sshd"
-      case host['platform']
-      when /ubuntu/, /debian/
-        service_name = "ssh"
-        dockerfile += <<-EOF
-          RUN apt-get update
-          RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
-        EOF
-        when  /cumulus/
+        # add platform-specific actions
+        service_name = "sshd"
+        case host['platform']
+        when /ubuntu/, /debian/
+          service_name = "ssh"
           dockerfile += <<-EOF
-          RUN apt-get update
-          RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
-        EOF
-      when /fedora-22/
+            RUN apt-get update
+            RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
+          EOF
+          when  /cumulus/
+            dockerfile += <<-EOF
+            RUN apt-get update
+            RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
+          EOF
+        when /fedora-22/
+          dockerfile += <<-EOF
+            RUN dnf clean all
+            RUN dnf install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
+            RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+            RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+          EOF
+        when /^el-/, /centos/, /fedora/, /redhat/, /eos/
+          dockerfile += <<-EOF
+            RUN yum clean all
+            RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
+            RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+            RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+          EOF
+        when /opensuse/, /sles/
+          dockerfile += <<-EOF
+            RUN zypper -n in openssh #{Beaker::HostPrebuiltSteps::SLES_PACKAGES.join(' ')}
+            RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+            RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+            RUN sed -ri 's/^#?UsePAM .*/UsePAM no/' /etc/ssh/sshd_config
+          EOF
+        else
+          # TODO add more platform steps here
+          raise "platform #{host['platform']} not yet supported on docker"
+        end
+
+        # Make sshd directory, set root password
         dockerfile += <<-EOF
-          RUN dnf clean all
-          RUN dnf install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
-          RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-          RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+          RUN mkdir -p /var/run/sshd
+          RUN echo root:#{root_password} | chpasswd
         EOF
-      when /^el-/, /centos/, /fedora/, /redhat/, /eos/
+
+        # Configure sshd service to allowroot login using password
         dockerfile += <<-EOF
-          RUN yum clean all
-          RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
-          RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-          RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+          RUN sed -ri 's/^#?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+          RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
         EOF
-      when /opensuse/, /sles/
+
+        cmd = host['docker_cmd'] || ["sh","-c","service #{service_name} start ; tail -f /dev/null"]
         dockerfile += <<-EOF
-          RUN zypper -n in openssh #{Beaker::HostPrebuiltSteps::SLES_PACKAGES.join(' ')}
-          RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-          RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
-          RUN sed -ri 's/^#?UsePAM .*/UsePAM no/' /etc/ssh/sshd_config
+          EXPOSE 22
+          CMD #{cmd}
         EOF
       else
-        # TODO add more platform steps here
-        raise "platform #{host['platform']} not yet supported on docker"
+        @logger.debug("Node indicates that it already has ssh installed")
       end
-
-      # Make sshd directory, set root password
-      dockerfile += <<-EOF
-        RUN mkdir -p /var/run/sshd
-        RUN echo root:#{root_password} | chpasswd
-      EOF
-
-      # Configure sshd service to allowroot login using password
-      dockerfile += <<-EOF
-        RUN sed -ri 's/^#?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
-        RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-      EOF
-
 
       # Any extra commands specified for the host
       dockerfile += (host['docker_image_commands'] || []).map { |command|
@@ -226,14 +235,6 @@ module Beaker
       if host['docker_image_entrypoint']
         dockerfile += "ENTRYPOINT #{host['docker_image_entrypoint']}\n"
       end
-
-      # How to start a sshd on port 22.  May be an init for more supervision
-      # Ensure that the ssh server can be restarted (done from set_env) and container keeps running
-      cmd = host['docker_cmd'] || ["sh","-c","service #{service_name} start ; tail -f /dev/null"]
-      dockerfile += <<-EOF
-        EXPOSE 22
-        CMD #{cmd}
-      EOF
 
       @logger.debug("Dockerfile is #{dockerfile}")
       return dockerfile
