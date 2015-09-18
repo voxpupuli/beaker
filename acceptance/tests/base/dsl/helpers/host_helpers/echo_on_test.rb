@@ -1,6 +1,4 @@
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'lib'))
-
-require 'helpers/test_helper'
+require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #echo_on" do
   step "#echo_on echoes the supplied string on the remote host" do

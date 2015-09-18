@@ -1,6 +1,4 @@
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'lib'))
-
-require 'helpers/test_helper'
+require "helpers/test_helper"
 
 # construct an appropriate local file URL for curl testing
 def host_local_url(host, path)

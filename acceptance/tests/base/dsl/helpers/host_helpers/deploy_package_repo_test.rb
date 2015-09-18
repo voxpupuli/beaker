@@ -1,6 +1,4 @@
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'lib'))
-
-require 'helpers/test_helper'
+require "helpers/test_helper"
 require "fileutils"
 
 test_name "dsl::helpers::host_helpers #deploy_package_repo" do

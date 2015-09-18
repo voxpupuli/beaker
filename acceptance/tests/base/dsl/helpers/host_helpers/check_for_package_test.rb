@@ -1,6 +1,4 @@
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'lib'))
-
-require 'helpers/test_helper'
+require "helpers/test_helper"
 
 # Return the name of a platform-specific package known to be installed on a system
 def known_installed_package
