@@ -1153,14 +1153,36 @@ module Beaker
               if arch == 'x86_64'
                 arch = 'i386'
               end
+              release_path << "solaris/#{version}/#{opts[:puppet_collection]}"
+              solaris_revision_conjunction = '-'
+              revision = '1'
               if version == '10'
                 # Solaris 10 uses / as the root user directory. Solaris 11 uses /root.
                 onhost_copy_base = '/'
+                solaris_release_version = ''
+                pkg_suffix = 'pkg.gz'
+                solaris_name_conjunction = '-'
+                component_version = opts[:puppet_agent_version]
+              elsif version == '11'
+                # Ref:
+                # http://www.oracle.com/technetwork/articles/servers-storage-admin/ips-package-versioning-2232906.html
+                #
+                # Example to show package name components:
+                #   Full package name: puppet-agent@1.2.5.38.6813,5.11-1.sparc.p5p
+                #   Schema: <component-name><solaris_name_conjunction><component_version><solaris_release_version><solaris_revision_conjunction><revision>.<arch>.<pkg_suffix>
+                solaris_release_version = ',5.11' # injecting comma to prevent from adding another var
+                pkg_suffix = 'p5p'
+                solaris_name_conjunction = '@'
+                component_version = opts[:puppet_agent_version]
+                component_version.gsub!(/[a-zA-Z]/, '')
+                component_version.gsub!(/(^-)|(-$)/, '')
+                # Here we strip leading 0 from version components but leave
+                # singular 0 on their own.
+                component_version = component_version.split('.').map(&:to_i).join('.')
               end
-              release_path << "solaris/#{version}/#{opts[:puppet_collection]}"
-              release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{arch}.pkg.gz"
+              release_file = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}#{solaris_revision_conjunction}#{revision}.#{arch}.#{pkg_suffix}"
               if not link_exists?("#{release_path}/#{release_file}")
-                release_file = "puppet-agent-#{opts[:puppet_agent_version]}.#{arch}.pkg.gz"
+                release_file = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}.#{arch}.#{pkg_suffix}"
               end
             else
               raise "No repository installation step for #{variant} yet..."
@@ -1184,7 +1206,8 @@ module Beaker
             when /^osx$/
               host.install_package("#{mac_pkg_name}*")
             when /^solaris$/
-              noask = <<NOASK
+              if version == '10'
+                noask = <<NOASK
 # Write the noask file to a temporary directory
 # please see man -s 4 admin for details about this file:
 # http://www.opensolarisforum.org/man/man4/admin.html
@@ -1214,8 +1237,11 @@ action=nocheck
 # Install to the default base directory.
 basedir=default
 NOASK
-              create_remote_file host, File.join(onhost_copy_base, 'noask'), noask
-              on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
+                create_remote_file host, File.join(onhost_copy_base, 'noask'), noask
+                on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
+              elsif version == '11'
+                on host, "pkg install -g #{release_file} puppet-agent"
+              end
             end
             configure_type_defaults_on( host )
           end
