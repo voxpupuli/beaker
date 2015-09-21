@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-[ 'facter', 'hiera', 'host', 'puppet', 'test', 'tk', 'web' ].each do |lib|
+[ 'facter', 'host', 'puppet', 'test', 'tk', 'web' ].each do |lib|
       require "beaker/dsl/helpers/#{lib}_helpers"
 end
 
+require "beaker-hiera"
 module Beaker
   module DSL
 
@@ -23,12 +24,12 @@ module Beaker
     #
     module Helpers
       include Beaker::DSL::Helpers::FacterHelpers
-      include Beaker::DSL::Helpers::HieraHelpers
       include Beaker::DSL::Helpers::HostHelpers
       include Beaker::DSL::Helpers::PuppetHelpers
       include Beaker::DSL::Helpers::TestHelpers
       include Beaker::DSL::Helpers::TKHelpers
       include Beaker::DSL::Helpers::WebHelpers
+      include Beaker::DSL::Helpers::Hiera
     end
   end
 end
