@@ -240,6 +240,8 @@ module Beaker
         logger = double(:logger)
         allow( logger ).to receive(:host_output)
         allow( logger ).to receive(:debug)
+        allow( logger ).to receive(:step_in)
+        allow( logger ).to receive(:step_out)
         host.instance_variable_set :@logger, logger
         conn = double(:connection)
         allow( conn ).to receive(:execute).and_return(result)

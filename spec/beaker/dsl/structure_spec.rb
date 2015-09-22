@@ -28,8 +28,10 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
       allow(  subject ).to receive( :set_current_step_name )
+      expect( logger ).to receive( :step_in )
+      expect( logger ).to receive( :step_out )
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
@@ -59,8 +61,10 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger )
+      expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
       expect( logger ).to receive( :notify )
+      expect( logger ).to receive( :step_in )
+      expect( logger ).to receive( :step_out )
       expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo

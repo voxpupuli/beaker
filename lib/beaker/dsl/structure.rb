@@ -36,9 +36,13 @@ module Beaker
       # @param [String] step_name The name of the step to be logged.
       # @param [Proc] block The actions to be performed in this step.
       def step step_name, &block
-        logger.notify "\n  * #{step_name}\n"
+        logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
-        yield if block_given?
+        if block_given?
+          logger.step_in()
+          yield
+          logger.step_out()
+        end
       end
 
       # Provides a method to name tests.
@@ -49,7 +53,11 @@ module Beaker
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
-        yield if block_given?
+        if block_given?
+          logger.step_in()
+          yield
+          logger.step_out()
+        end
       end
 
       # Declare a teardown process that will be called after a test case is
