@@ -170,6 +170,12 @@ module Beaker
       # @example Confining from  an already defined subset of hosts
       #     confine :except, {}, agents
       #
+      # @example Confining to all ubuntu agents + all non-agents
+      #     confine :to, { :platform => 'ubuntu' }, agents
+      #
+      # @example Confining to any non-windows agents + all non-agents
+      #     confine :except, { :platform => 'windows' }, agents
+      #
       #
       # @return [Array<Host>] Returns an array of hosts that are still valid
       #   targets for this tests case.
@@ -177,17 +183,18 @@ module Beaker
       #   this test case after confinement.
       def confine(type, criteria, host_array = nil, &block)
         hosts_to_modify = Array( host_array || hosts )
+        hosts_not_modified = hosts - hosts_to_modify #we aren't examining these hosts
         case type
         when :except
           if criteria and ( not criteria.empty? )
-            hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block)
+            hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to all hosts *except* provided array of hosts
-            hosts_to_modify = hosts - host_array
+            hosts_to_modify = hosts_not_modified
           end
         when :to
           if criteria and ( not criteria.empty? )
-            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block)
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to only hosts in provided array of hosts
           end
