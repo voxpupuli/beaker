@@ -900,24 +900,35 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
+    it 'runs the correct install for osx platforms (newest link format)' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['osx', '10.9', 'x86_64', 'mavericks']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+
+
+      expect(subject).to receive(:link_exists?).with(/#{Regexp.escape('puppet-agent/0.1.0/repos/apple/10.9/PC1/x86_64')}/).and_return(true).twice
+      expect(subject).to receive(:fetch_http_file).once.with(/#{Regexp.escape('apple/10.9/PC1/x86_64')}$/, 'puppet-agent-0.1.0-1.osx10.9.dmg', /\/osx$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-1.osx10.9.dmg$/, /var\/root/)
+      expect(host).to receive( :install_package ).with(/puppet-agent-0.1.0\*/)
+
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+    end
+
     it 'runs the correct install for osx platforms (new link format)' do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['osx', '10.9', 'x86_64', 'mavericks']}
       host = basic_hosts.first
       host['platform'] = platform
       opts = { :version => '0.1.0' }
-      allow( subject ).to receive( :options ).and_return( {} )
-      copied_path = "#{win_temp}\\puppet-agent-x64.msi"
-      mock_echo = Object.new()
-      allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
 
-      expect(subject).to receive(:link_exists?).with(/\/puppet-agent\/0.1.0\/repos\/apple\/10.9\/PC1\/x86_64\//).and_return(true)
-      expect(subject).to receive(:fetch_http_file).once.with(/\/apple\/10.9\/PC1\/x86_64$/, 'puppet-agent-0.1.0-1.mavericks.dmg', /\/osx$/)
+      expect(subject).to receive(:link_exists?).with(/#{Regexp.escape('puppet-agent/0.1.0/repos/apple/10.9/PC1/x86_64/')}/).and_return(false, true)
+      expect(subject).to receive(:fetch_http_file).once.with(/#{Regexp.escape('/apple/10.9/PC1/x86_64')}$/, 'puppet-agent-0.1.0-1.mavericks.dmg', /\/osx$/)
       expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-1.mavericks.dmg$/, /var\/root/)
       expect(host).to receive( :install_package ).with(/puppet-agent-0.1.0\*/)
 
       subject.install_puppet_agent_dev_repo_on( host, opts )
-
     end
 
     it 'runs the correct install for osx platforms (old link format)' do
@@ -926,19 +937,13 @@ describe ClassMixedWithDSLInstallUtils do
       host = basic_hosts.first
       host['platform'] = platform
       opts = { :version => '0.1.0' }
-      allow( subject ).to receive( :options ).and_return( {} )
-      copied_path = "#{win_temp}\\puppet-agent-x64.msi"
-      mock_echo = Object.new()
-      allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
 
-      expect(subject).to receive(:link_exists?).with(/\/puppet-agent\/0.1.0\/repos\/apple\/10.9\/PC1\/x86_64\//).and_return(false)
-      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\/0.1.0\/repos\/apple\/PC1$/, 'puppet-agent-0.1.0-osx-10.9-x86_64.dmg', /\/osx$/)
+      expect(subject).to receive(:link_exists?).with(/#{Regexp.escape('/puppet-agent/0.1.0/repos/apple/10.9/PC1/x86_64/')}/).and_return(false, false)
+      expect(subject).to receive(:fetch_http_file).once.with(/#{Regexp.escape('/puppet-agent/0.1.0/repos/apple/PC1')}$/, 'puppet-agent-0.1.0-osx-10.9-x86_64.dmg', /\/osx$/)
       expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-osx-10.9-x86_64.dmg$/, /var\/root/)
       expect(host).to receive( :install_package ).with(/puppet-agent-0.1.0\*/)
 
       subject.install_puppet_agent_dev_repo_on( host, opts )
-
-
     end
 
     it 'allows you to override the local copy directory' do

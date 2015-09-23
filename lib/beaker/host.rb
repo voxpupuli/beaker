@@ -274,9 +274,11 @@ module Beaker
         # and they shouldn't be ssh specific
         result = nil
 
+        @logger.step_in()
         seconds = Benchmark.realtime {
           result = connection.execute(cmdline, options, output_callback)
         }
+        @logger.step_out()
 
         if not options[:silent]
           @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
@@ -300,6 +302,9 @@ module Beaker
           # No, TestCase has the knowledge about whether its failed, checking acceptable
           # exit codes at the host level and then raising...
           # is it necessary to break execution??
+          if options[:accept_all_exit_codes] && options[:acceptable_exit_codes]
+            @logger.warn ":accept_all_exit_codes & :acceptable_exit_codes set. :accept_all_exit_codes overrides, but they shouldn't both be set at once"
+          end
           if !options[:accept_all_exit_codes] && !result.exit_code_in?(Array(options[:acceptable_exit_codes] || [0, nil]))
             raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
           end

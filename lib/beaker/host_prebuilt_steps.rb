@@ -25,6 +25,7 @@ module Beaker
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
+    ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
     IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
@@ -143,6 +144,8 @@ module Beaker
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
         if host['platform'] =~ /solaris|eos/
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
+        elsif host['platform'] =~ /aix/
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
         else
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
         end
@@ -283,8 +286,12 @@ module Beaker
           search = $1
         end
       }
-      return domain if domain
-      return search if search
+      return_value ||= domain
+      return_value ||= search
+
+      if return_value
+        return_value.gsub(/\.$/, '')
+      end
     end
 
     #Determine the ip address of the provided host
@@ -519,6 +526,10 @@ module Beaker
           else
             #nothing to do here
           end
+        when /osx-10\.*11/
+          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /private/etc/ssh/sshd_config"))
+          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
+          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
         when /osx/
           host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
           host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))

@@ -240,6 +240,8 @@ module Beaker
         logger = double(:logger)
         allow( logger ).to receive(:host_output)
         allow( logger ).to receive(:debug)
+        allow( logger ).to receive(:step_in)
+        allow( logger ).to receive(:step_out)
         host.instance_variable_set :@logger, logger
         conn = double(:connection)
         allow( conn ).to receive(:execute).and_return(result)
@@ -297,6 +299,18 @@ module Beaker
           :acceptable_exit_codes  => [0, 1],
           :accept_all_exit_codes  => true
         }
+        allow( host.logger ).to receive( :warn )
+
+        expect { host.exec(command, opts) }.to_not raise_error
+      end
+
+      it 'sends a warning when both :acceptable_exit_codes & :accept_all_exit_codes are set' do
+        result.exit_code = 7
+        opts = {
+          :acceptable_exit_codes  => [0, 1],
+          :accept_all_exit_codes  => true
+        }
+        expect( host.logger ).to receive( :warn ).with( /overrides/ )
 
         expect { host.exec(command, opts) }.to_not raise_error
       end

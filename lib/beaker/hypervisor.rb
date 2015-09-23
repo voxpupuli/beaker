@@ -16,6 +16,7 @@ module Beaker
     #                     blimpy, vcloud or vagrant
     #@param [Array<Host>] hosts_to_provision The hosts to be provisioned with the selected hypervisor
     #@param [Hash] options options Options to alter execution
+    #@option options [String] :host_name_prefix (nil) Prefix host name if set
     def self.create(type, hosts_to_provision, options)
       @logger = options[:logger]
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
@@ -128,8 +129,13 @@ module Beaker
     end
 
     #Generate a random string composted of letter and numbers
+    #prefixed with value of {Beaker::Hypervisor::create} option :host_name_prefix
     def generate_host_name
-      CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
+      n = CHARMAP[rand(25)] + (0...14).map{CHARMAP[rand(CHARMAP.length)]}.join
+      if @options[:host_name_prefix]
+        return @options[:host_name_prefix] + n
+      end
+      n
     end
 
   end

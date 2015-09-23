@@ -45,6 +45,76 @@ module Beaker
 
     end
 
+    context '#prefix_log_line' do
+      def prefix_log_line_test_compare_helper(in_test, out_answer, step_in_loop=1)
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+        step_in_loop.times { logger.step_in() }
+        expect( logger.prefix_log_line(in_test) ).to be === out_answer
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+      end
+
+      it 'can be successfully called with a arrays' do
+        line_arg = ['who done that', 'who wears da pants']
+        answer_list = line_arg.map { |item| "  " + item }
+        prefix_log_line_test_compare_helper(line_arg, answer_list)
+      end
+
+      it 'removes carriage returns' do
+        line_arg = "  \r\n god doing this sucked"
+        answer = "    \n   god doing this sucked"
+        prefix_log_line_test_compare_helper(line_arg, answer)
+      end
+
+      it 'includes a newline at the end if it was on the input' do
+        line_arg = "why should this matter\n"
+        answer = "  why should this matter\n"
+        prefix_log_line_test_compare_helper(line_arg, answer)
+      end
+
+      it 'prepends multiple lines in one string' do
+        line_arg = "\n\nwhy should this matter\n"
+        answer = "  \n  \n  why should this matter\n"
+        prefix_log_line_test_compare_helper(line_arg, answer)
+      end
+
+      it 'can be nested' do
+        line_arg = "\n\nwhy should this matter"
+        answer = "      \n      \n      why should this matter"
+        prefix_log_line_test_compare_helper(line_arg, answer, 3)
+      end
+    end
+
+    context '#step_* methods' do
+      it 'steps in correctly (simple case)' do
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+        logger.step_in()
+        expect( logger.instance_variable_get( :@line_prefix_length ) ).to be === 2
+        expect( logger.line_prefix ).to be === '  '
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+      end
+
+      it 'sets length correctly in mixed scenario ' do
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+        logger.step_in()
+        logger.step_in()
+        logger.step_out()
+        logger.step_in()
+        logger.step_in()
+        logger.step_out()
+        expect( logger.instance_variable_get( :@line_prefix_length ) ).to be === 4
+        expect( logger.line_prefix ).to be === '    '
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+      end
+
+      it 'can be unevenly stepped out, will remain at base: 0' do
+        logger.instance_variable_set( :@line_prefix_length, 0 )
+        logger.step_in()
+        10.times { logger.step_out() }
+        expect( logger.instance_variable_get( :@line_prefix_length ) ).to be === 0
+        expect( logger.line_prefix ).to be === ''
+      end
+    end
+
     context 'new' do
       it 'does not duplicate STDOUT when directly passed to it' do
         stdout_logger = Logger.new STDOUT

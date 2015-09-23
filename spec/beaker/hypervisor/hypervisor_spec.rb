@@ -96,11 +96,13 @@ module Beaker
           options[:root_keys]         = true
           options[:add_el_extras]     = true
           options[:disable_iptables]  = true
+          options[:host_name_prefix]  = "test-"
           expect( hypervisor ).to_not receive( :timesync )
           expect( hypervisor ).to_not receive( :sync_root_keys )
           expect( hypervisor ).to_not receive( :add_el_extras )
           expect( hypervisor ).to_not receive( :disable_iptables )
           expect( hypervisor ).to_not receive( :set_env )
+          expect( hypervisor ).to_not receive( :host_name_prefix )
           hypervisor.configure
         end
       end
@@ -110,6 +112,15 @@ module Beaker
           options[:configure] = true
           expect( hypervisor ).to receive( :set_env ).once
           hypervisor.configure
+        end
+      end
+
+      context 'if :host_name_prefix is set' do
+        it "generates hostname with prefix" do
+          prefix = "testing-prefix-to-test-"
+          options[:host_name_prefix] = prefix
+	  expect( hypervisor.generate_host_name().start_with?(prefix) ).to be true
+	  expect( hypervisor.generate_host_name().length - prefix.length >= 15 ).to be true
         end
       end
 
