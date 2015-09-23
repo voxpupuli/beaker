@@ -1,0 +1,5 @@
+[PE-3.8-sles-11-x86_64]
+name=PE-3.8-sles-11-x86_64
+baseurl=http://enterprise.delivery.puppetlabs.net/3.8/repos/sles-11-x86_64
+enabled=1
+gpgcheck=0

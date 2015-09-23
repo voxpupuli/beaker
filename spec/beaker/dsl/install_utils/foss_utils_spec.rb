@@ -182,6 +182,29 @@ describe ClassMixedWithDSLInstallUtils do
       url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'ssh')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
     end
+
+    it 'uses ENV to build urls properly' do
+      allow(ENV).to receive(:[]).with('SERVER').and_return(nil)
+      allow(ENV).to receive(:[]).with('FORK').and_return(nil)
+      allow(ENV).to receive(:[]).with('PUPPET_FORK').and_return('er0ck/repo')
+      allow(ENV).to receive(:[]).with('PUPPET_SERVER').and_return('gitlab.com')
+      url = subject.build_giturl('puppet')
+      expect(url).to be == 'https://gitlab.com/er0ck/repo-puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck')
+      expect(url).to be == 'https://gitlab.com/er0ck-puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'bitbucket.com')
+      expect(url).to be == 'https://bitbucket.com/er0ck-puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https://')
+      expect(url).to be == 'https://github.com/er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https')
+      expect(url).to be == 'https://github.com/er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git@')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'ssh')
+      expect(url).to be == 'git@github.com:er0ck/puppet.git'
+    end
   end
 
   context 'extract_repo_info_from' do
