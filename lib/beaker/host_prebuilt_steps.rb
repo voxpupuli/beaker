@@ -160,7 +160,7 @@ module Beaker
     # @return [String, String, String] The URL, arch  and package name for EPL for the provided host
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [String] :epel_url Link to download
-    # @option opts [String] :epel_arch Architecture to download (i386, x86_64, etc), defaults to i386
+    # @option opts [String] :epel_arch Architecture to download (i386, x86_64, etc), defaults to i386 for 5 and 6, x86_64 for 7
     # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
     # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
@@ -170,16 +170,23 @@ module Beaker
       end
 
       version = host['platform'].version
-      if version == '6'
-        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
+      url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
+      if version == '7'
+        if opts[:epel_7_arch] == 'i386'
+          raise "epel-7 does not provide packages for i386"
+        end
+        pkg = host[:epel_pkg] || opts[:epel_7_pkg]
+        arch = opts[:epel_7_arch] || 'x86_64'
+      elsif version == '6'
         pkg = host[:epel_pkg] || opts[:epel_6_pkg]
+        arch = host[:epel_arch] || opts[:epel_6_arch] || 'i386'
       elsif version == '5'
-        url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
         pkg = host[:epel_pkg] || opts[:epel_5_pkg]
+        arch = host[:epel_arch] || opts[:epel_5_arch] || 'i386'
       else
         raise "epel_info_for does not support el version #{version}, on #{host.name}"
       end
-      return url, host[:epel_arch] || opts[:epel_arch] || 'i386', pkg
+      return url, arch, pkg
     end
 
     # Run 'apt-get update' on the provided host or hosts.
@@ -237,7 +244,7 @@ module Beaker
       report_and_raise(logger, e, "proxy_config")
     end
 
-    #Install EPEL on host or hosts with platform = /el-(5|6)/.  Do nothing on host or hosts of other platforms.
+    #Install EPEL on host or hosts with platform = /el-(5|6|7)/.  Do nothing on host or hosts of other platforms.
     # @param [Host, Array<Host>] host One or more hosts to act upon.  Will use individual host epel_url, epel_arch
     #                                 and epel_pkg before using defaults provided in opts.
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -245,6 +252,7 @@ module Beaker
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     # @option opts [String] :epel_url Link to download from
     # @option opts [String] :epel_arch Architecture of epel to download (i386, x86_64, etc)
+    # @option opts [String] :epel_7_pkg Package to download from provided link for el-7
     # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
     # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     def add_el_extras( host, opts )
@@ -254,11 +262,15 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when el_based?(host) && ['5','6'].include?(host['platform'].version)
+        when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
             url, arch, pkg = epel_info_for host, opts
-            host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/#{pkg}"))
+            if host['platform'].version == '7'
+              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/e/#{pkg}"))
+            else
+              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/#{pkg}"))
+            end
             #update /etc/yum.repos.d/epel.repo for new baseurl
             host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape(url)}/\$basearch;' /etc/yum.repos.d/epel.repo"))
             #remove mirrorlist
