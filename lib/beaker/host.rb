@@ -295,7 +295,7 @@ module Beaker
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
             # wait to see if the connection failure will be generation, otherwise raise error
-            if not connection.wait_for_connection_failure
+            if not connection.wait_for_connection_failure(options, output_callback)
               raise CommandFailure,  "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
             end
           end
