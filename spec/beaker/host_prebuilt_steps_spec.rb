@@ -176,7 +176,7 @@ describe Beaker do
     it "raises an error on non el-5/6 host" do
       host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-4-platform') } )
 
-      expect{ subject.epel_info_for( host, options )}.to raise_error(RuntimeError, /epel_info_for does not support el version/)
+      expect{ subject.epel_info_for( host, options )}.to raise_error(ArgumentError, /epel_info_for does not support el version/)
 
     end
 
