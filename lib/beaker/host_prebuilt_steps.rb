@@ -173,7 +173,7 @@ module Beaker
       url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
       if version == '7'
         if opts[:epel_7_arch] == 'i386'
-          raise "epel-7 does not provide packages for i386"
+          raise ArgumentError.new("epel-7 does not provide packages for i386")
         end
         pkg = host[:epel_pkg] || opts[:epel_7_pkg]
         arch = opts[:epel_7_arch] || 'x86_64'
@@ -184,7 +184,7 @@ module Beaker
         pkg = host[:epel_pkg] || opts[:epel_5_pkg]
         arch = host[:epel_arch] || opts[:epel_5_arch] || 'i386'
       else
-        raise "epel_info_for does not support el version #{version}, on #{host.name}"
+        raise ArgumentError.new("epel_info_for does not support el version #{version}, on #{host.name}")
       end
       return url, arch, pkg
     end
