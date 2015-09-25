@@ -165,6 +165,7 @@ module Beaker
           :add_el_extras          => false,
           :epel_url               => "http://mirrors.kernel.org/fedora-epel",
           :epel_arch              => "i386",
+          :epel_7_pkg             => "epel-release-7-5.noarch.rpm",
           :epel_6_pkg             => "epel-release-6-8.noarch.rpm",
           :epel_5_pkg             => "epel-release-5-4.noarch.rpm",
           :consoleport            => 443,
