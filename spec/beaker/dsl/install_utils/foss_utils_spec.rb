@@ -1048,10 +1048,10 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :configure_foss_defaults_on ).and_return( true )
     end
 
-    def test_fetch_http_file()
+    def test_fetch_http_file(agent_version = '1.0.0')
       expect( subject ).to receive( :configure_type_defaults_on ).with(host)
       expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
-      subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )
+      subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => agent_version }) )
     end
 
     context 'on windows' do
@@ -1084,20 +1084,31 @@ describe ClassMixedWithDSLInstallUtils do
         @platform = 'solaris-10-x86_64'
       end
 
-      it "copies package to the root directory and installs it" do
-        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
-        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\-1.i386\.pkg\.gz/, '/' )
-        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
-        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
-        test_fetch_http_file
-      end
+      [
+          ['1.0.1.786.477', '1.0.1.786.477'],
+          ['1.0.1.786.a477', '1.0.1.786.a477'],
+          ['1.0.1.786.477-', '1.0.1.786.477-'],
+          ['1.0.1.0000786.477', '1.0.1.0000786.477'],
+          ['1.000000.1.786.477', '1.000000.1.786.477'],
+          ['-1.0.1.786.477', '-1.0.1.786.477'],
+          ['1.2.5.38.6813', '1.2.5.38.6813']
+      ].each do |val, expected|
 
-      it "copies old package to the root directory and installs it" do
-        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
-        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/' )
-        expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
-        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
-        test_fetch_http_file
+        it "copies package to the root directory and installs it" do
+          expect( subject ).to receive( :link_exists? ).with(/puppet-agent-#{expected}-1\.i386\.pkg\.gz/).and_return( true )
+          expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-#{expected}-1.i386\.pkg\.gz/, '/' )
+          expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+          expect( subject ).to receive( :on ).with( host, "gunzip -c puppet-agent-#{expected}-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all" )
+          test_fetch_http_file(val)
+        end
+
+        it "copies old package to the root directory and installs it" do
+          expect( subject ).to receive( :link_exists? ).with(/puppet-agent-#{expected}-1\.i386\.pkg\.gz/).and_return( false )
+          expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-#{expected}.i386\.pkg\.gz/, '/' )
+          expect( subject ).to receive( :create_remote_file ).with( host, '/noask', /noask file/m )
+          expect( subject ).to receive( :on ).with( host, "gunzip -c puppet-agent-#{expected}.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all" )
+          test_fetch_http_file(val)
+        end
       end
     end
 
@@ -1106,20 +1117,30 @@ describe ClassMixedWithDSLInstallUtils do
         @platform = 'solaris-11-x86_64'
       end
 
-      it "copies package to the root user directory and installs it" do
-        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( true )
-        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/, '/root' )
-        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
-        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0-1.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
-        test_fetch_http_file
-      end
+      [
+          ['1.0.1.786.477', '1.0.1.786.477'],
+          ['1.0.1.786.a477', '1.0.1.786.477'],
+          ['1.0.1.786.477-', '1.0.1.786.477'],
+          ['1.0.1.0000786.477', '1.0.1.786.477'],
+          ['1.000000.1.786.477', '1.0.1.786.477'],
+          ['-1.0.1.786.477', '1.0.1.786.477'],
+          ['1.2.5.38.6813', '1.2.5.38.6813']
+      ].each do |val, expected|
 
-      it "copies old package to the root directory and installs it" do
-        expect( subject ).to receive( :link_exists? ).with(/puppet-agent-1\.0\.0-1\.i386\.pkg\.gz/).and_return( false )
-        expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent-1\.0\.0\.i386\.pkg\.gz/, '/root' )
-        expect( subject ).to receive( :create_remote_file ).with( host, '/root/noask', /noask file/m )
-        expect( subject ).to receive( :on ).with( host, 'gunzip -c puppet-agent-1.0.0.i386.pkg.gz | pkgadd -d /dev/stdin -a noask -n all' )
-        test_fetch_http_file
+        it "copies package to the root user directory and installs it" do
+          # version = 1.0.0
+          expect( subject ).to receive( :link_exists? ).with(/puppet-agent@#{expected},5\.11-1\.i386\.p5p/).and_return( true )
+          expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent@#{expected},5\.11-1\.i386\.p5p/, '/root' )
+          expect( subject ).to receive( :on ).with( host, "pkg install -g puppet-agent@#{expected},5.11-1.i386.p5p puppet-agent" )
+          test_fetch_http_file(val)
+        end
+
+        it "copies old package to the root directory and installs it" do
+          expect( subject ).to receive( :link_exists? ).with(/puppet-agent@#{expected},5\.11-1\.i386\.p5p/).and_return( false )
+          expect( subject ).to receive( :scp_to ).with( host, /\/puppet-agent@#{expected},5\.11\.i386\.p5p/, '/root' )
+          expect( subject ).to receive( :on ).with( host, "pkg install -g puppet-agent@#{expected},5.11.i386.p5p puppet-agent" )
+          test_fetch_http_file(val)
+        end
       end
     end
   end
