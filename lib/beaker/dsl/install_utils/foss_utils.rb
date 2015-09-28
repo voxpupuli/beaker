@@ -1111,6 +1111,10 @@ module Beaker
               variant = ((variant == 'centos') ? 'el' : variant)
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
+            when /^(aix)$/
+              if arch == 'power' then arch = 'ppc' end
+              release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
+              release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
             when /^(debian|ubuntu|cumulus)$/
               if arch == 'x86_64'
                 arch = 'amd64'
@@ -1172,6 +1176,25 @@ module Beaker
 
             case variant
             when /^(fedora|el|centos|sles)$/
+              on host, "rpm -ivh #{onhost_copied_file}"
+            when /^(aix)$/
+              # NOTE: AIX does not support repo management. This block assumes
+              # that the desired rpm has been mirrored to the 'repos' location.
+              #
+              # NOTE: tar is a dependency for puppet packages on AIX. So,
+              # we install it prior to the 'repo' file.
+              tar_pkg_path = "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/tar"
+              if version == "5.3" then
+                tar_pkg_file = "tar-1.14-2.aix5.1.ppc.rpm"
+              else
+                tar_pkg_file = "tar-1.22-1.aix6.1.ppc.rpm"
+              end
+              fetch_http_file( tar_pkg_path, tar_pkg_file, copy_dir_local)
+              scp_to host, File.join(copy_dir_local, tar_pkg_file), onhost_copy_base
+              onhost_copied_tar_file = File.join(onhost_copy_base, tar_pkg_file)
+              on host, "rpm -ivh #{onhost_copied_tar_file}"
+
+              # install the repo file
               on host, "rpm -ivh #{onhost_copied_file}"
             when /^(debian|ubuntu|cumulus)$/
               on host, "dpkg -i --force-all #{onhost_copied_file}"
