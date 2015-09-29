@@ -1177,7 +1177,7 @@ module Beaker
                 solaris_release_version = ',5.11' # injecting comma to prevent from adding another var
                 pkg_suffix = 'p5p'
                 solaris_name_conjunction = '@'
-                component_version = opts[:puppet_agent_version]
+                component_version = opts[:puppet_agent_version].dup
                 component_version.gsub!(/[a-zA-Z]/, '')
                 component_version.gsub!(/(^-)|(-$)/, '')
                 # Here we strip leading 0 from version components but leave
