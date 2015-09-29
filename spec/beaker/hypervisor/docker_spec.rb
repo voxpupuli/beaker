@@ -39,6 +39,9 @@ module Beaker
       container = double('Docker::Container')
       allow( container ).to receive(:id)
       allow( container ).to receive(:start)
+      allow( container ).to receive(:info).and_return(
+        *(0..2).map { |index| { 'Names' => ["/spec-container-#{index}"] } }
+      )
       allow( container ).to receive(:json).and_return({
         'NetworkSettings' => {
           'IPAddress' => '192.0.2.1',
@@ -157,6 +160,35 @@ module Beaker
             'Image' => image.id,
             'Hostname' => host.name,
           })
+        end
+
+        docker.provision
+      end
+
+      it 'should create a named container based on the Image (identified by image.id)' do
+        hosts.each_with_index do |host, index|
+          container_name = "spec-container-#{index}"
+          host['docker_container_name'] = container_name
+
+          expect( ::Docker::Container ).to receive(:all).and_return([])
+
+          expect( ::Docker::Container ).to receive(:create).with({
+            'Image' => image.id,
+            'Hostname' => host.name,
+            'name' => container_name,
+          })
+        end
+
+        docker.provision
+      end
+
+      it 'should not create a container if a named one already exists' do
+        hosts.each_with_index do |host, index|
+          container_name = "spec-container-#{index}"
+          host['docker_container_name'] = container_name
+
+          expect( ::Docker::Container ).to receive(:all).and_return([container])
+          expect( ::Docker::Container ).not_to receive(:create)
         end
 
         docker.provision

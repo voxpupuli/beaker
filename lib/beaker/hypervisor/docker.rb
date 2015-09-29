@@ -64,11 +64,28 @@ module Beaker
           image_name = image.id
         end
 
-        @logger.debug("Creating container from image #{image_name}")
-        container = ::Docker::Container.create({
+        container_opts = {
           'Image' => image_name,
           'Hostname' => host.name,
-        })
+        }
+
+        unless host['docker_container_name'].nil?
+          @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
+          existing_container = ::Docker::Container.all.select do |container| container.info['Names'].include? "/#{host['docker_container_name']}" end
+
+          # Prepare to use the existing container or else create it
+          if existing_container.any?
+            container = existing_container[0]
+          else
+            container_opts['name'] = host['docker_container_name']
+          end
+        end
+
+        # If the specified container exists, then use it rather creating a new one
+        if container.nil?
+          @logger.debug("Creating container from image #{image_name}")
+          container = ::Docker::Container.create(container_opts)
+        end
 
         @logger.debug("Starting container #{container.id}")
         container.start({"PublishAllPorts" => true, "Privileged" => true})
