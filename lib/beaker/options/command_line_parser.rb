@@ -195,8 +195,14 @@ module Beaker
             @cmd_options[:validate] = bool
           end
 
-          opts.on '--collect-perf-data', 'Use sysstat on linux hosts to collect performance and load data' do
-            @cmd_options[:collect_perf_data] = true
+          opts.on '--collect-perf-data [MODE]',
+                  'Collect SUT performance and load data',
+                  'Possible values:',
+                  'aggressive (poll every minute)',
+                  'normal (poll every 10 minutes)',
+                  'none (do not collect perf data)',
+                  '(default: normal)' do |mode|
+            @cmd_options[:collect_perf_data] = mode || 'normal'
           end
 
           opts.on('--version', 'Report currently running version of beaker' ) do
