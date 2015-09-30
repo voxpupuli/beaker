@@ -255,7 +255,7 @@ module Beaker
         has_supported_hypervisor = false
         @hosts.each do |host|
           case host[:hypervisor]
-          when /vagrant|fusion|vmpooler|vcloud/
+          when /vagrant|fusion|vmpooler|vcloud|lxc/
             has_supported_hypervisor = true
           when /docker/
             set_docker_warning = true
