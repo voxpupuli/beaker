@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-* If it is accessible to you, create a [Jira account](http://tickets.puppetlabs.com)
+* Create a [Jira account](http://tickets.puppetlabs.com)
 * Make sure you have a [GitHub account](https://github.com/signup/free)
 * Submit a ticket for your issue, assuming one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
@@ -46,13 +46,8 @@
 
 ### Maintenance
 
-For changes of a trivial nature, it is not always necessary to create a new ticket in Jira. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number. 
+**We are no longer accepting PRs marked as `(MAINT)` - all PRs must be associated with a Beaker Jira ticket number for book keeping purposes.**
 
-````
-    (MAINT) Fix whitespace 
-
-    - remove additional spaces that appear at EOL
-````
 ### Version Bump For Gem Release
 
 To prepare for a new gem release of Beaker the `version.rb` file is updated with the upcoming gem version number.  This is submitted with `(GEM)` instead of a ticket/issue number.
