@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 15 Sep, 2015 (96d9104d)](#LATEST)
+* [LATEST - 1 Oct, 2015 (e21f5581)](#LATEST)
+* [2.24.0 - 15 Sep, 2015 (c12e9054)](#2.24.0)
 * [2.23.0 - 9 Sep, 2015 (2532324a)](#2.23.0)
 * [2.22.0 - 1 Sep, 2015 (96ec20a7)](#2.22.0)
 * [2.21.0 - 26 Aug, 2015 (40281eb2)](#2.21.0)
@@ -96,7 +97,242 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 15 Sep, 2015 (96d9104d)
+### <a name = "LATEST">LATEST - 1 Oct, 2015 (e21f5581)
+
+* (GEM) update beaker version to 2.25.0 (e21f5581)
+
+* Merge pull request #974 from anodelman/maint (65664e45)
+
+
+```
+Merge pull request #974 from anodelman/maint
+
+(BKR-568) no longer accept PRs marked as "(MAINT)"
+```
+* Merge pull request #964 from kevpl/bkr522_ec2_nocachedkeys (3ec3e14d)
+
+
+```
+Merge pull request #964 from kevpl/bkr522_ec2_nocachedkeys
+
+(BKR-522) now creates new ec2 keys per run
+```
+* (BKR-568) no longer accept PRs marked as "(MAINT)" (47d9d1ba)
+
+
+```
+(BKR-568) no longer accept PRs marked as "(MAINT)"
+
+- update CONTRIBUTING.md to indicate change in policy
+```
+* Merge pull request #973 from anodelman/ruby-test (9b52fe4e)
+
+
+```
+Merge pull request #973 from anodelman/ruby-test
+
+(BKR-564) beaker no longer works on ruby 1.9.3
+```
+* (BKR-564) beaker no longer works on ruby 1.9.3 (4f94d048)
+
+
+```
+(BKR-564) beaker no longer works on ruby 1.9.3
+
+- pin fog-google to 0.0.9, 0.1 release removed ruby 1.9 support
+```
+* Merge pull request #970 from johnduarte/bkr-545-frozen-string (deb4377f)
+
+
+```
+Merge pull request #970 from johnduarte/bkr-545-frozen-string
+
+(BKR-545) Dup solaris puppet_agent_version
+```
+* (BKR-545) Dup solaris puppet_agent_version (f1d2068b)
+
+
+```
+(BKR-545) Dup solaris puppet_agent_version
+
+This commit dups the `opts[:puppet_agent_version]` in the foss_utils to
+prevent a `RuntimeError: can't modify frozen String` error
+```
+* Merge pull request #963 from johnduarte/p5p-for-sol11 (b9e6a23e)
+
+
+```
+Merge pull request #963 from johnduarte/p5p-for-sol11
+
+(BKR-545) Use p5p for Solaris 11 puppet-agent pkgs
+```
+* Merge pull request #969 from johnduarte/aix-repo-install (a7280515)
+
+
+```
+Merge pull request #969 from johnduarte/aix-repo-install
+
+(BKR-554) Install AIX packages via install repo
+```
+* (BKR-554) Install AIX packages via install repo (973ff502)
+
+
+```
+(BKR-554) Install AIX packages via install repo
+
+This commit adds support for installing AIX 'packages' via the
+install repo logic. AIX does not support repository management
+and can only install 'RPM' files directly. Since this logic
+is contained in the install repo logic in Beaker, we can use
+this to install a package that has been mirrored to the standard
+repo location.
+
+This assumes that the package is mirrored to the repo location.
+In other words, that the following files are the same.
+  * http://builds.delivery.puppetlabs.net/puppet-agent/1214e51d63b84a82df0c55cab99abc2a3f90a597/artifacts/aix/7.1/PC1/ppc/puppet-agent-1.2.5.49.g1214e51-1.aix7.1.ppc.rpm
+  * http://builds.delivery.puppetlabs.net/puppet-agent/1214e51d63b84a82df0c55cab99abc2a3f90a597/repos/aix/7.1/PC1/ppc/puppet-agent-1.2.5.49.g1214e51-1.aix7.1.ppc.rpm
+
+It also assumes that the desired package is not defined for AIX
+in the acceptance pre-suite for the project.
+```
+* Merge pull request #967 from bkero/master (7852e6b3)
+
+
+```
+Merge pull request #967 from bkero/master
+
+(BKR-327) Add support for EL7 to epel_info_for and add_el_extras method
+```
+* fix spec tests to match ArgumentError for epel_info_for (d78a8de4)
+
+* Raise ArgumentErrors instead of generic errors (839b75e4)
+
+* (BKR-327) add epel7 support to get_el_info and el_install (0e5a0257)
+
+
+```
+(BKR-327) add epel7 support to get_el_info and el_install
+
+Base work courtesy of Andrew Stangl <andrewstangl@gmail.com>
+```
+* (BKR-327) add epel_7_pkg preset (0e9485d3)
+
+* (BKR-327) add tests for retrieving epel el7 url (41730085)
+
+* Merge pull request #960 from kevpl/bkr351_indent_add (7e91e61e)
+
+
+```
+Merge pull request #960 from kevpl/bkr351_indent_add
+
+(BKR-351) added indentation based on test/step nesting level
+```
+* Merge pull request #959 from anodelman/subset-hosts (1810fae0)
+
+
+```
+Merge pull request #959 from anodelman/subset-hosts
+
+(BKR-535) Regression: confine_block does not skip tests...
+```
+* Merge pull request #957 from anodelman/confine (8de4ee64)
+
+
+```
+Merge pull request #957 from anodelman/confine
+
+(BKR-533) Beaker's `confine` overwrites the array of all hosts
+```
+* (BKR-522) now creates new ec2 keys per run (07bb7405)
+
+
+```
+(BKR-522) now creates new ec2 keys per run
+
+Before, ec2 keys would only be created if this was the first run for
+a particular user/coordinator. This is a problem for F5 testing, in
+which F5 hosts needed to be created with a particular key. We were
+using cached keys, which weren't the ones being used in ec2.
+
+The original solution was to delete the keys in ec2, so that they'd
+be recreated as if this was the first run by a user. @justinstoller
+brought up the good point that if this were to happen, certain
+Beaker runs would have their keys deleted from a new F5 run. The
+solution became that each Beaker run would generate its own key,
+deleting it on cleanup.
+```
+* (BKR-545) Use p5p for Solaris 11 puppet-agent pkgs (831b0bb5)
+
+
+```
+(BKR-545) Use p5p for Solaris 11 puppet-agent pkgs
+
+This commit updates install_utils/foss_utils to use `p5p` as
+the expected package suffix for puppet-agent when the platform
+is Solaris 11. Solaris 10 will continue to use `pkg.gz` as its
+expected suffix.
+
+The `p5p` package naming format is much more stringent. See
+http://www.oracle.com/technetwork/articles/servers-storage-admin/ips-package-versioning-2232906.html
+for details.
+```
+* Merge pull request #955 from kevpl/bkr532_beakerhiera_merge (b181c059)
+
+
+```
+Merge pull request #955 from kevpl/bkr532_beakerhiera_merge
+
+(BKR-532) added beaker-hiera library usage
+```
+* (BKR-535) Regression: confine_block does not skip tests... (72955d58)
+
+
+```
+(BKR-535) Regression: confine_block does not skip tests...
+
+...with beaker 2.24.0
+
+- allow users to include skip_test in block parameter for confine_block
+- added acceptance test to ensure correct behavior
+```
+* (BKR-533) Beaker's `confine` overwrites the array of all hosts (be1cc5dc)
+
+
+```
+(BKR-533) Beaker's `confine` overwrites the array of all hosts
+
+- make it possible to confine to a subset of hosts + all hosts not in
+  the subset.
+
+  To confine to only windows agents + any non-agent hosts
+
+    confine :to, { :platform => 'windows' }, agents
+
+  To confine to non-windows agents + any non-agent hosts
+
+    confine :except, { :platform => 'windows' }, agent
+
+- Useful for cases where you want to use your master, but only operate
+  on a subset of agents
+```
+* (BKR-351) added indentation based on test/step nesting level (cec66d21)
+
+
+```
+(BKR-351) added indentation based on test/step nesting level
+
+This will only affect tests where `test_name` or `step` has
+been passed a block to execute.
+
+The only exception to that statement is `host.exec`'s
+logic, as it's more presentable to nest command output one
+level under the command itself.
+```
+* (BKR-532) added beaker-hiera library usage (127aa3de)
+
+### <a name = "2.24.0">2.24.0 - 15 Sep, 2015 (c12e9054)
+
+* (HISTORY) update beaker history for gem release 2.24.0 (c12e9054)
 
 * (GEM) update beaker version to 2.24.0 (96d9104d)
 
