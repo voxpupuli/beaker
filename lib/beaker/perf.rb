@@ -48,7 +48,11 @@ module Beaker
       end
       if @options[:collect_perf_data] =~ /aggressive/
         @logger.perf_output("Enabling aggressive sysstat polling")
-        host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
+        if host['platform'] =~ /debian|ubuntu/
+          host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
+        elsif host['platform'] =~ /centos|el|fedora|oracle|redhats|scientific/
+          host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
+        end
       end
       if host['platform'] =~ PERF_START_PLATFORMS # SLES doesn't need this step
         host.exec(Command.new('service sysstat start'))
