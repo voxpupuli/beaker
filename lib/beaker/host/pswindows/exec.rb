@@ -129,7 +129,7 @@ module PSWindows::Exec
     else
       val = val.split(/\n/)[0] # only take the first result
       if clean
-        val.gsub(/#{key}=/,'')
+        val.gsub(/#{key}=/i,'')
       else
         val
       end

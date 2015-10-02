@@ -1,3 +1,4 @@
+require 'base64'
 module Beaker
   module DSL
     # These are wrappers to equivalent {Beaker::Command} objects
@@ -107,13 +108,19 @@ module Beaker
       # Returns a {Beaker::Command} object for executing powershell commands on a host
       #
       # @param [String]   command   The powershell command to execute
-      # @param [Hash]     args      The commandline paramaeters to be passed to powershell
+      # @param [Hash]     args      The commandline parameters to be passed to powershell
       #
       # @example Setting the contents of a file
       #     powershell("Set-Content -path 'fu.txt' -value 'fu'")
       #
       # @example Using an alternative execution policy
       #     powershell("Set-Content -path 'fu.txt' -value 'fu'", {'ExecutionPolicy' => 'Unrestricted'})
+      #
+      # @example Using an EncodedCommand (defaults to non-encoded)
+      #     powershell("Set Content -path 'fu.txt', -value 'fu'", {'EncodedCommand => true})
+      #
+      # @example executing from a file
+      #     powershell("", {'-File' => '/path/to/file'})
       #
       # @return [Command]
       def powershell(command, args={})
@@ -124,19 +131,47 @@ module Beaker
           'NoProfile'       => '',
           'NonInteractive'  => ''
         }
+        encoded = false
         ps_opts.merge!(args)
         ps_args = []
         ps_opts.each do |k, v|
           if v.eql?('') or v.nil?
             ps_args << "-#{k}"
+          elsif k.eql?('EncodedCommand') && v
+            encoded = true
           else
             ps_args << "-#{k} #{v}"
           end
         end
-        ps_args << "-Command #{command}"
+
+        # may not have a command if executing a file
+        if command && !command.empty?
+          if encoded
+            ps_args << "-EncodedCommand #{encode_command(command)}"
+          else
+            ps_args << "-Command #{command}"
+          end
+        end
 
         Command.new("powershell.exe", ps_args)
       end
+
+      # Convert the provided command string to Base64
+      # @param [String] cmd The command to convert to Base64
+      # @return [String] The converted string
+      # @api private
+      def encode_command(cmd)
+        cmd = cmd.chars.to_a.join("\x00").chomp
+        cmd << "\x00" unless cmd[-1].eql? "\x00"
+        if(defined?(cmd.encode))
+          cmd = cmd.encode('ASCII-8BIT')
+          cmd = Base64.strict_encode64(cmd)
+        else
+          cmd = Base64.encode64(cmd).chomp
+        end
+        cmd
+      end
+
     end
   end
 end
