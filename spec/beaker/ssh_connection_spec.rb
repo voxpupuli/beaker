@@ -113,7 +113,7 @@ module Beaker
     end
 
     describe '#request_terminal_for' do
-      it 'fails correctly by calling the abort method' do
+      it 'fails correctly by raising Net::SSH::Exception' do
         mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
         connection.connect
@@ -121,8 +121,7 @@ module Beaker
         mock_channel = Object.new
         allow( mock_channel ).to receive( :request_pty ).and_yield(nil, false)
 
-        expect( subject ).to receive( :abort ).once
-        connection.request_terminal_for mock_channel, 'ls'
+        expect{ connection.request_terminal_for mock_channel, 'ls' }.to raise_error Net::SSH::Exception
       end
     end
 
