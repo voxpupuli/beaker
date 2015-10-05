@@ -134,11 +134,17 @@ module Beaker
         encoded = false
         ps_opts.merge!(args)
         ps_args = []
+
+        # determine if the command should be encoded
+        if ps_opts.has_key?('EncodedCommand')
+          v = ps_opts.delete('EncodedCommand')
+          # encode the commend if v is true, nil or empty
+          encoded = v || v.eql?('') || v.nil?
+        end
+
         ps_opts.each do |k, v|
           if v.eql?('') or v.nil?
             ps_args << "-#{k}"
-          elsif k.eql?('EncodedCommand') && v
-            encoded = true
           else
             ps_args << "-#{k} #{v}"
           end
@@ -163,12 +169,8 @@ module Beaker
       def encode_command(cmd)
         cmd = cmd.chars.to_a.join("\x00").chomp
         cmd << "\x00" unless cmd[-1].eql? "\x00"
-        if(defined?(cmd.encode))
-          cmd = cmd.encode('ASCII-8BIT')
-          cmd = Base64.strict_encode64(cmd)
-        else
-          cmd = Base64.encode64(cmd).chomp
-        end
+        # use strict_encode because linefeeds are not correctly handled in our model
+        cmd = Base64.strict_encode64(cmd).chomp
         cmd
       end
 
