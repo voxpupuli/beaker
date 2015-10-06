@@ -263,6 +263,34 @@ describe ClassMixedWithDSLHelpers do
         :expect_failures       => true
       )
     end
+
+    it 'returns a array of results' do
+      agent_results = [Object.new, Object.new]
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expect( subject ).to receive( :create_remote_file ).and_return( true ).twice
+      allow( subject ).to receive( :on ).and_return(agent_results[0], agent_results[1])
+      test_results = subject.apply_manifest_on(
+        [agent, agent],
+        'class { "boo": }',
+        :acceptable_exit_codes => (1..5),
+        :noop                  => true,
+        :expect_failures       => true
+      )
+      expect( test_results ).to be === agent_results
+    end
+
+    it 'returns an empty array if given empty hosts argument' do
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      returned = subject.apply_manifest_on(
+        [],
+        'class { "boo": }',
+        :acceptable_exit_codes => (1..5),
+        :noop                  => true,
+        :expect_failures       => true
+      )
+      puts "returned '#{returned}'"
+      expect( returned ).to be === []
+    end
   end
 
   it 'can set the --debug flag' do
