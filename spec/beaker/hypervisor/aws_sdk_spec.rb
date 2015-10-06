@@ -385,7 +385,14 @@ module Beaker
 
       context 'with multiple hosts' do
         before :each do
-          @hosts.each {|host| host['instance'] = aws_instance}
+          @hosts.each do |host|
+            host[:host_tags] = {
+                :department => 'my_department',
+                :project    => 'my_project',
+                :created_by => 'my_created_by'
+            }
+            host['instance'] = aws_instance
+          end
         end
 
         it 'adds tag for jenkins_build_url' do
@@ -400,19 +407,16 @@ module Beaker
         end
 
         it 'adds tag for department' do
-          aws.instance_eval('@options[:department] = "my_department"')
           expect(aws_instance).to receive(:add_tag).with('department', hash_including(:value => 'my_department')).at_least(:once)
           expect(add_tags).to be_nil
         end
 
         it 'adds tag for project' do
-          aws.instance_eval('@options[:project] = "my_project"')
           expect(aws_instance).to receive(:add_tag).with('project', hash_including(:value => 'my_project')).at_least(:once)
           expect(add_tags).to be_nil
         end
 
         it 'adds tag for created_by' do
-          aws.instance_eval('@options[:created_by] = "my_created_by"')
           expect(aws_instance).to receive(:add_tag).with('created_by', hash_including(:value => 'my_created_by')).at_least(:once)
           expect(add_tags).to be_nil
         end

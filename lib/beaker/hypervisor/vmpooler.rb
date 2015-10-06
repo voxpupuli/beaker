@@ -145,10 +145,7 @@ module Beaker
 
       tags = {
         'beaker_version' => Beaker::Version::STRING,
-        'jenkins_build_url' => @options[:jenkins_build_url],
-        'department' => @options[:department],
-        'project' => @options[:project],
-        'created_by' => @options[:created_by]
+        'jenkins_build_url' => @options[:jenkins_build_url]
       }
 
       @hosts.each_with_index do |h, i|
@@ -158,7 +155,10 @@ module Beaker
           http = Net::HTTP.new(uri.host, uri.port)
           request = Net::HTTP::Put.new(uri.request_uri)
 
-          request.body = { 'tags' => tags }.to_json
+          # merge above tags with host-specific tags
+          host_tags = h[:host_tags].merge(tags)
+
+          request.body = { 'tags' => host_tags }.to_json
 
           response = http.request(request)
         rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
