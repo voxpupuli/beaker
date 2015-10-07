@@ -81,11 +81,18 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
 
-        rsync_to default, local_filename, remote_tmpdir
+        result = rsync_to default, local_filename, remote_tmpdir
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         remote_contents = on(default, "cat #{remote_filename}").stdout
-        assert_equal contents, remote_contents
+
+        fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
+          "default"         => default,
+          "remote_filename" => remote_filename,
+          "result"          => result.inspect,
+        ) do
+          assert_equal contents, remote_contents
+        end
       end
     end
 
