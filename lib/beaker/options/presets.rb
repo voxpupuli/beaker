@@ -121,11 +121,7 @@ module Beaker
           :project                => 'Beaker',
           :department             => 'unknown',
           :created_by             => ENV['USER'] || ENV['USERNAME'] || 'unknown',
-          :host_tags              => {
-                                      :project    => 'Beaker',
-                                      :department => 'unknown',
-                                      :created_by => ENV['USER'] || ENV['USERNAME'] || 'unknown'
-          },
+          :host_tags              => {},
           :openstack_api_key      => ENV['OS_PASSWORD'],
           :openstack_username     => ENV['OS_USERNAME'],
           :openstack_auth_url     => "#{ENV['OS_AUTH_URL']}/tokens",

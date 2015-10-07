@@ -145,7 +145,10 @@ module Beaker
 
       tags = {
         'beaker_version' => Beaker::Version::STRING,
-        'jenkins_build_url' => @options[:jenkins_build_url]
+        'jenkins_build_url' => @options[:jenkins_build_url],
+        'department' => @options[:department],
+        'project' => @options[:project],
+        'created_by' => @options[:created_by]
       }
 
       @hosts.each_with_index do |h, i|

@@ -499,6 +499,9 @@ module Beaker
         @logger.notify("aws-sdk: Add tags for #{host.name}")
         instance.add_tag("jenkins_build_url", :value => @options[:jenkins_build_url])
         instance.add_tag("Name", :value => host.name)
+        instance.add_tag("department", :value => @options[:department])
+        instance.add_tag("project", :value => @options[:project])
+        instance.add_tag("created_by", :value => @options[:created_by])
 
         host[:host_tags].each do |name, val|
           instance.add_tag(name.to_s, :value => val)
