@@ -1,3 +1,5 @@
+require "helpers/test_helper"
+
 test_name "confirm host object behave correctly"
 
 step "#port_open? : can determine if a port is open on hosts"
