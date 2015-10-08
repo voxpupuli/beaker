@@ -265,6 +265,25 @@ module Beaker
           end
         end
 
+        # Execute a powershell script from file, remote file created from provided string
+        # @note This method uses Tempfile in Ruby's STDLIB as well as {#create_remote_file}.
+        #
+        # @param [Host] hosts One or more hosts (or some object
+        #                                 that responds like
+        #                                 {Beaker::Host#do_scp_from}.
+        # @param [String] powershell_script A string describing a set of powershell actions
+        #
+        # @return [Result] Returns the result of the powershell command execution
+        def execute_powershell_script_on(hosts, powershell_script, opts = {})
+          block_on hosts do |host|
+            script_path = "beaker_powershell_script_#{Time.now.to_i}.ps1"
+            create_remote_file(host, script_path, powershell_script, opts)
+            native_path = script_path.gsub(/\//, "\\")
+            on host, powershell("", {"File" => native_path }), opts
+          end
+
+        end
+
         # Move a local script to a remote host and execute it
         # @note this relies on {#on} and {#scp_to}
         #
