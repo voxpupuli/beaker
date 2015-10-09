@@ -150,7 +150,7 @@ module Beaker
       it 'should wait for the container to stop ' do
         expect( container ).to receive(:wait).with("stopped", 60).and_return(:stopped)
         lxc.cleanup
-      end      
+      end
 
       it 'should delete the containers' do
         expect( container ).to receive(:destroy)
