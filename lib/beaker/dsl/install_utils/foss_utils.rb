@@ -1182,6 +1182,7 @@ module Beaker
                 component_version.gsub!(/(^-)|(-$)/, '')
                 # Here we strip leading 0 from version components but leave
                 # singular 0 on their own.
+                component_version = component_version.split('-').join('.')
                 component_version = component_version.split('.').map(&:to_i).join('.')
               end
               release_file = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}#{solaris_revision_conjunction}#{revision}.#{arch}.#{pkg_suffix}"
