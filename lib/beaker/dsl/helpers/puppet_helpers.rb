@@ -380,9 +380,13 @@ module Beaker
         #
         # @param [Block] block This method will yield to a block of code passed
         #                      by the caller; this can be used for additional
-        #                      validation, etc.
+        #                      validation, etc. This block is passed as an
+        #                      argument to {#on}, so if you'd like to learn more
+        #                      about it, check there.
         #
+        # @return [Array<Result>] the results of executing `puppet apply` on each host.
         def apply_manifest_on(host, manifest, opts = {}, &block)
+          results = []
           block_on host do | host |
             on_options = {}
             on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
@@ -454,8 +458,9 @@ module Beaker
               puppet_apply_opts = host[:default_apply_opts].merge( puppet_apply_opts )
             end
 
-            on host, puppet('apply', file_path, puppet_apply_opts), on_options, &block
+            results << on(host, puppet('apply', file_path, puppet_apply_opts), on_options, &block)
           end
+          results
         end
 
         # Runs 'puppet apply' on default host, piping manifest through stdin

@@ -31,7 +31,9 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [String, Command]   command The command to execute on *host*.
-        # @param [Proc]              block   Additional actions or assertions.
+        # @param [Proc]              block   Additional actions or assertions. The block can
+        #                                    take an argument, which is the {Result} of executing
+        #                                    the command.
         # @!macro common_opts
         #
         # @example Most basic usage
