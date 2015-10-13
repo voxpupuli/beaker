@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 1 Oct, 2015 (e21f5581)](#LATEST)
+* [LATEST - 13 Oct, 2015 (d581b613)](#LATEST)
+* [2.25.0 - 1 Oct, 2015 (51d4cb1a)](#2.25.0)
 * [2.24.0 - 15 Sep, 2015 (c12e9054)](#2.24.0)
 * [2.23.0 - 9 Sep, 2015 (2532324a)](#2.23.0)
 * [2.22.0 - 1 Sep, 2015 (96ec20a7)](#2.22.0)
@@ -97,7 +98,146 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 1 Oct, 2015 (e21f5581)
+### <a name = "LATEST">LATEST - 13 Oct, 2015 (d581b613)
+
+* (GEM) update beaker version to 2.26.0 (d581b613)
+
+* Merge pull request #971 from sschneid/sysprofile (e2c5f6fc)
+
+
+```
+Merge pull request #971 from sschneid/sysprofile
+
+(BKR-580) --collect-perf-data enhancements
+```
+* Merge pull request #980 from johnduarte/patch-sol-pkg-names (4ef4ba07)
+
+
+```
+Merge pull request #980 from johnduarte/patch-sol-pkg-names
+
+(maint) Fix Solaris 11 package name logic
+```
+* Merge pull request #975 from anodelman/win-fix (6a1e14a9)
+
+
+```
+Merge pull request #975 from anodelman/win-fix
+
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (5bffbaa0)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- add spec test coverage for EncodedCommand support in powershell
+  wrapper
+```
+* (maint) Fix Solaris 11 package name logic (fcbd6018)
+
+
+```
+(maint) Fix Solaris 11 package name logic
+
+This commit fixes a bug in the Solaris 11 package naming logic
+that dropped the SHA suffix entirely from the final package name.
+The SHA should be incorporated into the package name.
+
+An additional spec test has been added for the expected package
+name in this circumstance.
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (d364123b)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- add unicode support
+```
+* Merge pull request #968 from anodelman/new-platform (ad037a82)
+
+
+```
+Merge pull request #968 from anodelman/new-platform
+
+(BKR-488) Add support for Windows 10 (x86, x64)
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (c530b8c5)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- create new powershell dsl helper:
+  execute_powershell_script_on
+  * takes as input a string representing a powershell script
+  * create a file on the host containing the script
+  * executes the script using powershell -File
+- add the ability to execute an encoded powershell string
+  powershell("Set Content -path 'fu.txt', -value 'fu'", {'EncodedCommand => true})
+  * the command will be Base64 encoded for you
+  * bypasses quoting sadness
+```
+* Merge pull request #907 from hamidnazari/master (a28c8cf1)
+
+
+```
+Merge pull request #907 from hamidnazari/master
+
+(BKR-427) Support for Docker Container Names and Container Reuse
+```
+* (BKR-580) Different Debian vs EL crontab differences (a4c78dac)
+
+* (BKR-580) Fix spec tests broken in 9b16bef (3ec3fad0)
+
+* (BKR-580) --collect-perf-data enhancements (c57d4d44)
+
+
+```
+(BKR-580) --collect-perf-data enhancements
+
+* allow --collect-perf-data modes:
+
+'aggressive' (poll every minute)
+'normal' (poll every 10 minutes)
+'none' (do not collect perf data)
+
+If a mode is unspecified, --collect-perf-data will default to 'normal',
+which mimics past behavior.
+
+* allow metric exporting to Graphite:
+
+Set via the HOSTS file, eg:
+
+
+`json
+graphite_server: graphite.example.com
+graphite_perf_data: beaker.perf
+
+`
+```
+* (BKR-427) Added support for Docker container names and container reuse (e8a65c67)
+
+* (BKR-488) Add support for Windows 10 (x86, x64) (5b2918db)
+
+
+```
+(BKR-488) Add support for Windows 10 (x86, x64)
+
+- improve the 'wait_for_connection_failure' ssh connection method
+  * increase the timeouts
+  * send actual data down the pipe, seems to improve the function of
+    the test
+  * remove 'abort' calls from the code, we can recover and retry
+  * added yard docs
+- add /f to the windows reboot call
+  * forces closure of any open applications
+```
+### <a name = "2.25.0">2.25.0 - 1 Oct, 2015 (51d4cb1a)
+
+* (HISTORY) update beaker history for gem release 2.25.0 (51d4cb1a)
 
 * (GEM) update beaker version to 2.25.0 (e21f5581)
 
