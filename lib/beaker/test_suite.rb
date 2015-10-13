@@ -319,7 +319,7 @@ module Beaker
         when :pass
           @logger.success msg
         when :skip
-          @logger.debug msg
+          @logger.warn msg
         when :fail
           @logger.error msg
           break if @fail_mode.to_s !~ /slow/ #all failure modes except slow cause us to kick out early on failure
