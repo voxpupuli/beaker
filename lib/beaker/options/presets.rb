@@ -179,7 +179,7 @@ module Beaker
           :dot_fog                => File.join(ENV['HOME'], '.fog'),
           :ec2_yaml               => 'config/image_templates/ec2.yaml',
           :help                   => false,
-          :collect_perf_data      => false,
+          :collect_perf_data      => 'none',
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,

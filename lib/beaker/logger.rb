@@ -248,9 +248,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def perf_output *args
       return unless is_debug?
-      strings = strip_colors_from args
-      string = strings.join
-      optionally_color MAGENTA, string, false
+      optionally_color MAGENTA, *args
     end
 
     # Report a trace message.

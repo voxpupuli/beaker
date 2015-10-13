@@ -40,7 +40,7 @@ module Beaker
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
-        expect(@my_io.string).to match(/Setup perf on host: myHost*Setup perf on host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHost*\nSetup perf on host: myOtherHost/)
       end
 
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true, SLES' do
@@ -50,7 +50,7 @@ module Beaker
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
-        expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost/)
       end
     end
 
@@ -73,7 +73,7 @@ module Beaker
         perf = Perf.new( @hosts, @options )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHostSetup perf on host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHostGetting perf data for host: myHostGetting perf data for host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
       end
 
       it "Does the Right Thing on non-Linux hosts" do
@@ -82,7 +82,7 @@ module Beaker
         perf = Perf.new( @hosts, @options )
         expect( perf ).to be_a_kind_of Perf
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHostPerf \(sysstat\) not supported on host: myHostSetup perf on host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHostGetting perf data for host: myHostPerf \(sysstat\) not supported on host: myHostGetting perf data for host: myOtherHostPerf \(sysstat\) not supported on host: myOtherHost/)
+        expect(@my_io.string).to match(/Setup perf on host: myHost\nPerf \(sysstat\) not supported on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nPerf \(sysstat\) not supported on host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
       end
     end
 

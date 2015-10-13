@@ -85,7 +85,9 @@ module Beaker
         provision
 
         # Setup perf monitoring if needed
-        @perf = Beaker::Perf.new( @hosts, @options ) if @options[:collect_perf_data]
+        if @options[:collect_perf_data].to_s =~ /(aggressive)|(normal)/
+          @perf = Beaker::Perf.new( @hosts, @options )
+        end
 
         errored = false
 
@@ -101,11 +103,13 @@ module Beaker
           #run post-suite if we are in fail-slow mode
           if @options[:fail_mode].to_s =~ /slow/
             run_suite(:post_suite)
+            @perf.print_perf_info if defined? @perf
           end
           raise e
         else
           #post acceptance on success
           run_suite(:post_suite)
+          @perf.print_perf_info if defined? @perf
         end
       #cleanup phase
       rescue => e
@@ -119,7 +123,6 @@ module Beaker
           preserve_hosts_file
         end
 
-        @perf.print_perf_info if @options[:collect_perf_data]
         print_reproduction_info( :error )
 
         @logger.error "Failed running the test suite."
@@ -139,7 +142,6 @@ module Beaker
         if @logger.is_debug?
           print_reproduction_info( :debug )
         end
-        @perf.print_perf_info if @options[:collect_perf_data]
       end
     end
 
