@@ -19,7 +19,7 @@ module Beaker
       #                                                or Array<{Host}> to run the block against
       # @param [Block] block This method will yield to a block of code passed by the caller
       #
-      # @return [Array<Result>, Result] An array of results, or a result object.
+      # @return [Array<Result>, Result, nil] An array of results, a result object, or nil.
       #   Check {#run_block_on} for more details on this.
       def block_on hosts_or_filter, &block
         block_hosts = nil
