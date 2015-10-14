@@ -11,13 +11,16 @@ module Beaker
     #
     module Patterns
 
-      #Execute a block selecting the hosts that match with the provided criteria
-      #@param [Array<Host>, Host, String, Symbol] hosts_or_filter A host role as a String or Symbol that can be
+      # Execute a block selecting the hosts that match with the provided criteria
+      # @param [Array<Host>, Host, String, Symbol] hosts_or_filter A host role as a String or Symbol that can be
       #                                                used to search for a set of Hosts,  a host name
       #                                                as a String that can be used to search for
       #                                                a set of Hosts, or a {Host}
       #                                                or Array<{Host}> to run the block against
-      #@param [Block] block This method will yield to a block of code passed by the caller
+      # @param [Block] block This method will yield to a block of code passed by the caller
+      #
+      # @return [Array<Result>, Result] An array of results, or a result object.
+      #   Check {#run_block_on} for more details on this.
       def block_on hosts_or_filter, &block
         block_hosts = nil
         if defined? hosts

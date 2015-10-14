@@ -68,10 +68,17 @@ module Beaker
         host_with_role
       end
 
-      #Execute a block selecting the hosts that match with the provided criteria
-      #@param [Array<Host>, Host] hosts The host or hosts to run the provided block against
-      #@param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role
-      #@param [Block] block This method will yield to a block of code passed by the caller
+      # Execute a block selecting the hosts that match with the provided criteria
+      #
+      # @param [Array<Host>, Host] hosts The host or hosts to run the provided block against
+      # @param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role
+      # @param [Block] block This method will yield to a block of code passed by the caller
+      #
+      # @todo beaker3.0: simplify return types to Array<Result> only
+      #
+      # @return [Array<Result>, Result] If a non-empty array of hosts has been
+      #   passed (after filtering), then an array of results is returned. Else,
+      #   a result object is returned.
       def run_block_on hosts = [], filter = nil, &block
         result = nil
         block_hosts = hosts #the hosts to apply the block to after any filtering
