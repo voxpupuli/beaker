@@ -1180,4 +1180,61 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
   end
+
+  describe '#remove_puppet_on' do
+    let(:aixhost) { make_host('aix', :platform => 'aix-53-power') }
+    let(:sol10host) { make_host('sol10', :platform => 'solaris-10-x86_64') }
+    let(:sol11host) { make_host('sol11', :platform => 'solaris-11-x86_64') }
+    let(:el6host) { make_host('el6', :platform => 'el-6-x64') }
+
+    pkg_list = 'foo bar'
+
+    it 'uninstalls packages on aix, including tar' do
+      aix_depend_list = 'tar'
+      result = Beaker::Result.new(aixhost,'')
+      result.stdout = pkg_list
+      result2 = Beaker::Result.new(aixhost,'')
+      result2.stdout = aix_depend_list
+
+      expected_list = pkg_list + " " + aix_depend_list
+      cmd_args = ''
+
+      expect( subject ).to receive(:on).exactly(3).times.and_return(result, result2, result)
+      expect( aixhost ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+      subject.remove_puppet_on( aixhost )
+    end
+
+    it 'uninstalls packages on solaris 10' do
+      result = Beaker::Result.new(sol10host,'')
+      result.stdout = pkg_list
+
+      expected_list = pkg_list
+      cmd_args = '-a noask'
+
+      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
+      expect( sol10host ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+      subject.remove_puppet_on( sol10host  )
+    end
+
+    it 'uninstalls packages on solaris 11' do
+      result = Beaker::Result.new(sol11host,'')
+      result.stdout='foo bar'
+
+      expected_list = pkg_list
+      cmd_args = ''
+
+      expect( subject ).to receive(:on).exactly(3).times.and_return(result, result, result)
+      expect( sol11host ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+      subject.remove_puppet_on( sol11host  )
+    end
+
+    it 'raises error on other platforms' do
+      expect { subject.remove_puppet_on( el6host ) }.to raise_error(RuntimeError, /unsupported platform/)
+    end
+
+  end
+
 end

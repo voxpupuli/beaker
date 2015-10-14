@@ -1390,6 +1390,55 @@ NOASK
           create_remote_file(host, "C:\\Windows\\Temp\\#{cert_name}.pem", cert)
           on host, "certutil -v -addstore Root C:\\Windows\\Temp\\#{cert_name}.pem"
         end
+
+        # Ensures Puppet and dependencies are no longer installed on host(s).
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        #
+        # @return nil
+        # @api public
+        def remove_puppet_on( hosts )
+          block_on hosts do |host|
+            cmdline_args = ''
+            # query packages
+            case host[:platform]
+            when /aix/
+              pkgs = on(host, "rpm -qa  | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+              pkgs.concat on(host, "rpm -q tar", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            when /solaris-10/
+              cmdline_args = '-a noask'
+              pkgs = on(host, "pkginfo | egrep '(^pe-|puppet)' | cut -f2 -d ' '", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            when /solaris-11/
+              pkgs = on(host, "pkg list | egrep '(^pe-|puppet)' | awk '{print $1}'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            else
+              raise "remove_puppet_on() called for unsupported " +
+                    "platform '#{host['platform']}' on '#{host.name}'"
+            end
+
+            # uninstall packages
+            host.uninstall_package(pkgs.join(' '), cmdline_args) if pkgs.length > 0
+
+            # delete any residual files
+            on(host, 'find / -name "*puppet*" -print | xargs rm -rf')
+
+            if host[:platform] =~ /solaris-11/ then
+              # FIXME: This leaves things in a state where Puppet Enterprise (3.x) cannot be cleanly installed
+              #        but is required to put things in a state that puppet-agent can be installed
+              # extra magic for expunging left over publisher
+              if on(host, "pkg publisher puppetlabs.com", :acceptable_exit_codes => [0,1]).exit_code == 0 then
+                # First, try to remove the publisher altogether
+                if on(host, "pkg unset-publisher puppetlabs.com", :acceptable_exit_codes => [0,1]).exit_code == 1 then
+                  # If that doesn't work, we're in a non-global zone and the
+                  # publisher is from a global zone. As such, just remove any
+                  # references to the non-global zone uri.
+                  on(host, "pkg set-publisher -G '*' puppetlabs.com", :acceptable_exit_codes => [0,1])
+                end
+              end
+            end
+
+          end
+        end
       end
     end
   end

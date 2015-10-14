@@ -135,7 +135,9 @@ module Unix::Pkg
       when /solaris-11/
         execute("pkg #{cmdline_args} uninstall #{name}", opts)
       when /solaris-10/
-        execute("pkgutil -r -y #{cmdline_args} #{name}", opts)
+        execute("pkgrm -n #{cmdline_args} #{name}", opts)
+      when /aix/
+        execute("rpm #{cmdline_args} -e #{name}", opts)
       else
         raise "Package #{name} cannot be installed on #{self}"
     end
