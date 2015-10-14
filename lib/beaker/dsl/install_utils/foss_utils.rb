@@ -592,7 +592,7 @@ module Beaker
           block_on hosts do |host|
             link = "#{opts[:win_download_url]}/#{host['dist']}.msi"
             if not link_exists?( link )
-              raise "Puppet #{version} at #{link} does not exist!"
+              raise "Puppet MSI at #{link} does not exist!"
             end
 
 

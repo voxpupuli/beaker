@@ -754,9 +754,18 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe '#install_puppet_agent_from_msi_on' do
-    let( :opts )     { { :puppet_agent_version => 'VERSION' } }
+    let( :opts )     { { :puppet_agent_version => 'VERSION', :win_download_url => 'http://downloads.puppetlabs.com/windows' } }
     let( :platform ) { 'windows' }
     let( :host )     { { :platform => platform } }
+
+    it 'returns error when link incorrect' do
+      allow(subject).to receive(:link_exists?).with(anything()).and_return( false )
+      expect( host ).to receive( :is_x86_64? ).and_return( true )
+
+      expect{
+        subject.install_puppet_agent_from_msi_on( host, opts )
+      }.to raise_error(RuntimeError, /Puppet MSI at http:\/\/downloads.puppetlabs.com\/windows\/puppet-agent-VERSION-x64.msi does not exist!/)
+    end
 
     it 'uses x86 msi when host is_x86_64 and install_32 is set on the host' do
       host['install_32'] = true
