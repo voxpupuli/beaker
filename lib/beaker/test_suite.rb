@@ -306,7 +306,7 @@ module Beaker
       @test_suite_results.total_tests = @test_files.length
 
       @test_files.each do |test_file|
-        @logger.notify "Begin #{test_file}"
+        @logger.info "Begin #{test_file}"
         start = Time.now
         test_case = TestCase.new(@hosts, @logger, options, test_file).run_test
         duration = Time.now - start
@@ -319,7 +319,7 @@ module Beaker
         when :pass
           @logger.success msg
         when :skip
-          @logger.debug msg
+          @logger.warn msg
         when :fail
           @logger.error msg
           break if @fail_mode.to_s !~ /slow/ #all failure modes except slow cause us to kick out early on failure
