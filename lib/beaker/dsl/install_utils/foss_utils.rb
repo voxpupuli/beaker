@@ -289,7 +289,7 @@ module Beaker
               host[:version] = opts[:version]
 
               # Certain install paths may not create the config dirs/files needed
-              on host, "mkdir -p #{host['puppetpath']}" unless host[:type] =~ /aio/
+              host.mkdir_p host['puppetpath'] unless host[:type] =~ /aio/
               on host, "echo '' >> #{host.puppet['hiera_config']}"
             end
           end
