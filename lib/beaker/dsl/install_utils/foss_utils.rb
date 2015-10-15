@@ -1419,23 +1419,26 @@ NOASK
             # uninstall packages
             host.uninstall_package(pkgs.join(' '), cmdline_args) if pkgs.length > 0
 
-            # delete any residual files
-            on(host, 'find / -name "*puppet*" -print | xargs rm -rf')
-
             if host[:platform] =~ /solaris-11/ then
               # FIXME: This leaves things in a state where Puppet Enterprise (3.x) cannot be cleanly installed
               #        but is required to put things in a state that puppet-agent can be installed
               # extra magic for expunging left over publisher
-              if on(host, "pkg publisher puppetlabs.com", :acceptable_exit_codes => [0,1]).exit_code == 0 then
-                # First, try to remove the publisher altogether
-                if on(host, "pkg unset-publisher puppetlabs.com", :acceptable_exit_codes => [0,1]).exit_code == 1 then
-                  # If that doesn't work, we're in a non-global zone and the
-                  # publisher is from a global zone. As such, just remove any
-                  # references to the non-global zone uri.
-                  on(host, "pkg set-publisher -G '*' puppetlabs.com", :acceptable_exit_codes => [0,1])
+              publishers = ['puppetlabs.com', 'com.puppetlabs']
+              publishers.each do |publisher|
+                if on(host, "pkg publisher #{publisher}", :acceptable_exit_codes => [0,1]).exit_code == 0 then
+                  # First, try to remove the publisher altogether
+                  if on(host, "pkg unset-publisher #{publisher}", :acceptable_exit_codes => [0,1]).exit_code == 1 then
+                    # If that doesn't work, we're in a non-global zone and the
+                    # publisher is from a global zone. As such, just remove any
+                    # references to the non-global zone uri.
+                    on(host, "pkg set-publisher -G '*' #{publisher}", :acceptable_exit_codes => [0,1])
+                  end
                 end
               end
             end
+
+            # delete any residual files
+            on(host, 'find / -name "*puppet*" -print | xargs rm -rf')
 
           end
         end

@@ -1225,7 +1225,7 @@ describe ClassMixedWithDSLInstallUtils do
       expected_list = pkg_list
       cmd_args = ''
 
-      expect( subject ).to receive(:on).exactly(3).times.and_return(result, result, result)
+      expect( subject ).to receive(:on).exactly(4).times.and_return(result, result, result)
       expect( sol11host ).to receive(:uninstall_package).with(expected_list, cmd_args)
 
       subject.remove_puppet_on( sol11host  )
