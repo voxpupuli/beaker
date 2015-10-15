@@ -607,6 +607,15 @@ describe ClassMixedWithDSLHelpers do
             expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
           end
 
+          it 'can be set globally in options' do
+            host[:restart_when_done] = false
+
+            subject.with_puppet_running_on(host, {})
+
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=running/).once
+            expect(host).to execute_commands_matching(/puppet resource service #{host['puppetservice']}.*ensure=stopped/).exactly(2).times
+          end
+
           it 'yields to a block after bouncing service' do
             execution = 0
             allow( subject ).to receive(:curl_with_retries)
