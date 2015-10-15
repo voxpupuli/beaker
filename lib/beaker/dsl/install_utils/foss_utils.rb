@@ -290,7 +290,12 @@ module Beaker
 
               # Certain install paths may not create the config dirs/files needed
               host.mkdir_p host['puppetpath'] unless host[:type] =~ /aio/
-              on host, "echo '' >> #{host.puppet['hiera_config']}"
+
+              if ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+                # Do nothing
+              else
+                on host, "echo '' >> #{host.puppet['hiera_config']}"
+              end
             end
           end
 
