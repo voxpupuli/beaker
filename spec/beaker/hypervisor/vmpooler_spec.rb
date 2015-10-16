@@ -48,12 +48,13 @@ module Beaker
       it 'merges tags correctly' do
         host          = vmpooler.instance_variable_get(:@hosts)[0]
         merged_tags   = vmpooler.add_tags(host)
+        presets       = Beaker::Options::Presets.new.presets
         expected_hash = {
             test_tag:          'test_value',
             beaker_version:    Beaker::Version::STRING,
-            project:           'Beaker',
-            jenkins_build_url: nil,
-            created_by:        be_a(String)
+            project:           presets[:project],
+            jenkins_build_url: presets[:jenkins_build_url],
+            created_by:        presets[:created_by]
         }
         expect(merged_tags).to include(expected_hash)
       end
