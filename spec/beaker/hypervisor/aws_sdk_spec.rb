@@ -388,6 +388,15 @@ module Beaker
           @hosts.each {|host| host['instance'] = aws_instance}
         end
 
+        it 'handles host_tags hash on host object' do
+          # set :host_tags on first host
+          aws.instance_eval {
+            @hosts[0][:host_tags] =  {'test_tag' => 'test_value'}
+          }
+          expect(aws_instance).to receive(:add_tag).with('test_tag', hash_including(:value => 'test_value')).at_least(:once)
+          expect(add_tags).to be_nil
+        end
+
         it 'adds tag for jenkins_build_url' do
           aws.instance_eval('@options[:jenkins_build_url] = "my_build_url"')
           expect(aws_instance).to receive(:add_tag).with('jenkins_build_url', hash_including(:value => 'my_build_url')).at_least(:once)
