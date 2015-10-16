@@ -46,15 +46,15 @@ module Beaker
       let(:vmpooler) { Beaker::Vmpooler.new(make_hosts({:host_tags => {'test_tag' => 'test_value'}}), make_opts) }
 
       it 'merges tags correctly' do
+        vmpooler.instance_eval {
+          @options = @options.merge({:project => 'vmpooler-spec'})
+        }
         host          = vmpooler.instance_variable_get(:@hosts)[0]
         merged_tags   = vmpooler.add_tags(host)
-        presets       = Beaker::Options::Presets.new.presets
         expected_hash = {
-            test_tag:          'test_value',
-            beaker_version:    Beaker::Version::STRING,
-            project:           presets[:project],
-            jenkins_build_url: presets[:jenkins_build_url],
-            created_by:        presets[:created_by]
+            test_tag:       'test_value',
+            beaker_version: Beaker::Version::STRING,
+            project:        'vmpooler-spec'
         }
         expect(merged_tags).to include(expected_hash)
       end
