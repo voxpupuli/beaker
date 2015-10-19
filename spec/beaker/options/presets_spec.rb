@@ -27,6 +27,11 @@ module Beaker
         expect(presets.presets).to be_instance_of(Beaker::Options::OptionsHash)
       end
 
+      it 'has empty host_tags' do
+        expect(presets.presets.has_key?(:host_tags)).to be_truthy
+        expect(presets.presets[:host_tags]).to eq({})
+      end
+
     end
   end
 end
