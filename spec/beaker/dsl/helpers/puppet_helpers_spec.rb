@@ -894,5 +894,92 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#bounce_service' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port argument if none given' do
+      host = hosts[0]
+      expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything(), anything() )
+      subject.bounce_service( host, 'not_real_service')
+    end
+
+    it 'takes the port argument' do
+      host = hosts[0]
+      expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8000/, anything(), anything() )
+      subject.bounce_service( host, 'not_real_service', nil, 8000)
+    end
+  end
+
+  describe '#sleep_until_puppetdb_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default ports if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host )
+    end
+
+    it 'allows setting the nonssl_port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8084/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host, 8084 )
+
+    end
+
+    it 'allows setting the ssl_port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8085/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host, nil, 8085 )
+    end
+  end
+
+  describe '#sleep_until_puppetserver_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything() ).once.ordered
+      subject.sleep_until_puppetserver_started( host )
+    end
+
+    it 'allows setting the port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8147/, anything() ).once.ordered
+      subject.sleep_until_puppetserver_started( host, 8147 )
+    end
+  end
+
+  describe '#sleep_until_nc_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /4433/, anything() ).once.ordered
+      subject.sleep_until_nc_started( host )
+    end
+
+    it 'allows setting the port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /4435/, anything() ).once.ordered
+      subject.sleep_until_nc_started( host, 4435 )
+    end
+  end
 
 end
