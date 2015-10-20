@@ -861,11 +861,10 @@ module Beaker
             case variant
             when /^(fedora|el|centos)$/
               variant = (($1 == 'centos') ? 'el' : $1)
+              remote = "%s/puppetlabs-release%s-%s-%s.noarch.rpm" % [opts[:release_yum_repo_url],
+		                                                       repo_name, variant, version]
 
-              rpm = "puppetlabs-release%s-%s-%s.noarch.rpm" % [repo_name, variant, version]
-              remote = URI.join( opts[:release_yum_repo_url], rpm )
-
-              on host, "rpm --replacepkgs -ivh #{remote}"
+	      host.install_package_with_rpm(remote, '--replacepkgs', {:package_proxy => opts[:package_proxy]})
 
             when /^(debian|ubuntu|cumulus)$/
               deb = "puppetlabs-release%s-%s.deb" % [repo_name, codename]

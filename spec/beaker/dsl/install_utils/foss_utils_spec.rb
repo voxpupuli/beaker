@@ -396,7 +396,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on el-6' do
       let(:platform) { Beaker::Platform.new('el-6-i386') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-6\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-el-6\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -414,7 +414,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on el-5' do
       let(:platform) { Beaker::Platform.new('el-5-i386') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-5\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-el-5\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -422,7 +422,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on fedora' do
       let(:platform) { Beaker::Platform.new('fedora-18-x86_84') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-fedora-18\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-fedora-18\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -580,16 +580,6 @@ describe ClassMixedWithDSLInstallUtils do
         expect(subject).to receive(:on).with( host, /wget .*/ ).ordered
         expect(subject).to receive(:on).with( host, /dpkg .*/ ).ordered
         expect(subject).to receive(:on).with( host, "apt-get update" ).ordered
-        subject.install_puppetlabs_release_repo host
-      end
-
-    end
-
-    describe "When host is a redhat-like platform" do
-      let( :platform ) { Beaker::Platform.new('el-7-i386') }
-
-      it "installs an rpm" do
-        expect(subject).to receive(:on).with( host, /^(rpm --replacepkgs -ivh).*/ ).ordered
         subject.install_puppetlabs_release_repo host
       end
 
