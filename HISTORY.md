@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Oct, 2015 (d581b613)](#LATEST)
+* [LATEST - 21 Oct, 2015 (90fddaf4)](#LATEST)
+* [2.26.0 - 13 Oct, 2015 (427a512b)](#2.26.0)
 * [2.25.0 - 1 Oct, 2015 (51d4cb1a)](#2.25.0)
 * [2.24.0 - 15 Sep, 2015 (c12e9054)](#2.24.0)
 * [2.23.0 - 9 Sep, 2015 (2532324a)](#2.23.0)
@@ -98,7 +99,270 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Oct, 2015 (d581b613)
+### <a name = "LATEST">LATEST - 21 Oct, 2015 (90fddaf4)
+
+* (GEM) update beaker version to 2.27.0 (90fddaf4)
+
+* Merge pull request #961 from GeoffWilliams/dockerfile_externalise (f4a90933)
+
+
+```
+Merge pull request #961 from GeoffWilliams/dockerfile_externalise
+
+(BKR-539) simplified Dockerfile support
+```
+* Merge pull request #987 from johnduarte/remove_puppet_patch (2cdcb71e)
+
+
+```
+Merge pull request #987 from johnduarte/remove_puppet_patch
+
+(BKR-573) Add publisher for solaris package removal
+```
+* Merge pull request #977 from colinPL/qeng2604_add_tags (e79b4b17)
+
+
+```
+Merge pull request #977 from colinPL/qeng2604_add_tags
+
+(QENG-2604) Add Host Tags
+```
+* Merge pull request #962 from pondohva/decrease_spamlog_level (a7630b05)
+
+
+```
+Merge pull request #962 from pondohva/decrease_spamlog_level
+
+(BKR-542) remove hosts object from log about execution against empty …
+```
+* (QENG-2604) More vmpooler spec changes (dec9511c)
+
+
+```
+(QENG-2604) More vmpooler spec changes
+
+Remove some key:value checks from spec test. Override a used @option
+value and ensure it passes through add_tags.
+```
+* (QENG-2604) Fix vmpooler specs (8d71a905)
+
+
+```
+(QENG-2604) Fix vmpooler specs
+
+Fix vmpooler spec tests for tags that were hard-coded but checking
+against environment variables.
+```
+* (QENG-2604) Add More host_tag specs (f6fe7d5a)
+
+
+```
+(QENG-2604) Add More host_tag specs
+
+Add spec tests for aws_sdk and vmpooler hypervisors targetting
+host_tags behavior.
+```
+* (QENG-2604) Break add_tags in vmpooler (93d44425)
+
+
+```
+(QENG-2604) Break add_tags in vmpooler
+
+Move the merging of host tags with pre-defined tags to its own method
+to emulate how it behaves in aws_sdk.
+```
+* Merge pull request #988 from joshcooper/ticket/master/BKR-574-allow-no-restart (bfb6b356)
+
+
+```
+Merge pull request #988 from joshcooper/ticket/master/BKR-574-allow-no-restart
+
+(BKR-574) Allow global restart_when_done => false
+```
+* (BKR-574) Allow global restart_when_done => false (8d6742ef)
+
+
+```
+(BKR-574) Allow global restart_when_done => false
+
+Previously, setting `:restart_when_done` to false on the master host, or
+globally in options, did not work, because the `with_puppet_running_on`
+method was checking for a truthy value.
+
+This commit checks if the key is in the hash instead. It also preserves
+the behavior where the options passed in by the test case take
+precedence over the host's value.
+```
+* (BKR-573) Add publisher for solaris package removal (e90918c9)
+
+* Merge pull request #984 from ferventcoder/ticket/master/BKR-582 (45cca4e8)
+
+
+```
+Merge pull request #984 from ferventcoder/ticket/master/BKR-582
+
+(BKR-582) Colorization adjustments / CI Build / Allow overriding log colors
+```
+* Merge pull request #976 from johnduarte/remove_puppet_on (92a5309b)
+
+
+```
+Merge pull request #976 from johnduarte/remove_puppet_on
+
+(BKR-573) Add remove_puppet_on
+```
+* Merge pull request #982 from kevpl/bkr571_applymanifeston_docs (2a9b0a32)
+
+
+```
+Merge pull request #982 from kevpl/bkr571_applymanifeston_docs
+
+(BKR-571) updated documentation on return types
+```
+* Merge pull request #972 from azhurbilo/patch-1 (26c8c8bb)
+
+
+```
+Merge pull request #972 from azhurbilo/patch-1
+
+(BKR-380) Fix '3389' (host port) is declared multiple times
+```
+* (BKR-582) Colorization adjustments / CI Build (c2dc9fd7)
+
+
+```
+(BKR-582) Colorization adjustments / CI Build
+
+When beaker detects it is being run by Jenkins, it should adjust output
+colors so that they are better handled in console output. This is done
+by detecting BUILD_NUMBER environment variable, a variable that is
+known to be present on Jenkins build slaves.
+
+Adjust colorization to colors that come out better during runs. The
+colors that should come up to the front are shown better when running
+in the console. Additionally make it easier to see logs coming back
+from the SUT with an explicit color instead of NORMAL (which is the
+same setting as the current GREY).
+
+Allow overriding log colors by passing in log_colors in options.
+If a user has overridden the default colors, don't override the
+colors in CI.
+```
+* (BKR-582) Info on begin test file (239ab2d1)
+
+
+```
+(BKR-582) Info on begin test file
+
+When a test file is found, log it at the info level. This allows a bit
+more trackability in finding the location of tests.
+```
+* (BKR-582) Warn on skipped tests (8745c061)
+
+
+```
+(BKR-582) Warn on skipped tests
+
+If a test is skipped, it should show up as a warning. Adjust beaker to
+warn when tests are skipped.
+```
+* (BKR-571) updated documentation on return types (9d98dec1)
+
+* (QENG-2604) Empty host_tags in Presets (df0abb97)
+
+
+```
+(QENG-2604) Empty host_tags in Presets
+
+The host_tags value in presets is now an empty hash and
+department, project, and created_by are returned to the
+root of the @options hash. This resolves an issue with
+environment vars not being properly merged into the new
+host_tags hash.
+```
+* (BKR-542) change logger level to info for "empty array of hosts" (b056ef83)
+
+* (BKR-573) Add spec tests for remove_puppet_on (8e04650b)
+
+
+```
+(BKR-573) Add spec tests for remove_puppet_on
+
+This commit adds spec tests for the  `remove_puppet_on` method.
+```
+* (QENG-2604) Add Host Tags (03fd8ca7)
+
+
+```
+(QENG-2604) Add Host Tags
+
+This commit adds the ability to specify arbitrary tags and have them
+applied to AWS or vmpooler instances. The configuration parameter is
+called "host_tags" to avoid confusion with test tagging. Host tags can
+be specified at the host or CONFIG level.
+
+The presets have been modified to pre-populate "host_tags" with:
+project, department, and created_by.
+
+Example:
+HOSTS:
+  'agent1':
+    roles:
+      - agent
+    host_tags:
+      created_by: 'me'
+      some_key: 'yes it is'
+CONFIG:
+    host_tags:
+      project: 'beaker'
+```
+* (BKR-573) Add remove_puppet_on (3c1f5daf)
+
+
+```
+(BKR-573) Add remove_puppet_on
+
+This commit adds a `remove_puppet_on` method that can be used to
+ensure that puppet packages have been expunged from hosts.
+
+This method is intended to be used in a pre-suite. It is currently
+limited to the AIX and Solaris platforms.
+```
+* (BKR-380) beaker vagrant windows box support issues (c3379726)
+
+
+```
+(BKR-380) beaker vagrant windows box support issues
+Fix '3389' (host port) is declared multiple times
+
+Without "auto_correct" we got error if source Vagrantfile of box already contains this port forwarding.
+
+
+
+Error:
+vm:
+* Forwarded port '3389' (host port) is declared multiple times
+with the protocol 'tcp'.
+
+
+
+I think we need add this change as most part of Windows boxes in Vagrant Atlas already have this port forwarding:
+- https://github.com/joefitzgerald/packer-windows/blob/master/vagrantfile-windows_2012_r2.template
+- https://github.com/boxcutter/windows/blob/master/tpl/vagrantfile-eval-win2012r2-standard.tpl
+
+change spec for 3389 rdp port
+```
+* (BKR-539) simplified Dockerfile support (63268b8f)
+
+
+```
+(BKR-539) simplified Dockerfile support
+
+Allow user to override the automatically generated Dockerfile
+```
+### <a name = "2.26.0">2.26.0 - 13 Oct, 2015 (427a512b)
+
+* (HISTORY) update beaker history for gem release 2.26.0 (427a512b)
 
 * (GEM) update beaker version to 2.26.0 (d581b613)
 
