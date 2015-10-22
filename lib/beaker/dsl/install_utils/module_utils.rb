@@ -133,8 +133,12 @@ module Beaker
               #move to the host
               logger.debug "Using scp to transfer #{source_path} to #{target_path}"
               scp_to host, source_path, target_module_dir, {:ignore => ignore_list}
+
               #rename to the selected module name, if not correct
               cur_path = File.join(target_module_dir, source_name)
+              if host.is_powershell? #make sure our slashes are correct
+                cur_path = cur_path.gsub(/\//,'\\')
+              end
               host.mv cur_path, target_path unless cur_path == target_path
             when 'rsync'
               logger.debug "Using rsync to transfer #{source_path} to #{target_path}"
