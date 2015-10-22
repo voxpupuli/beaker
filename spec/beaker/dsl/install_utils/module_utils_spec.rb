@@ -187,7 +187,7 @@ describe ClassMixedWithDSLInstallUtils do
         expect( subject ).to receive(:on).with(host, "echo C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules" ).and_return( result )
 
         expect( subject ).to receive(:scp_to).with(host, "/opt/testmodule2", "C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules", {:ignore => ignore_list})
-        expect( host ).to receive(:mv).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules/testmodule2', 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules\\testmodule')
+        expect( host ).to receive(:mv).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules\\testmodule2', 'C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules\\testmodule')
 
         subject.copy_module_to(host, {:module_name => 'testmodule', :source => '/opt/testmodule2'})
       end
