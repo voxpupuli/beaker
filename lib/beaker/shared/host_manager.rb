@@ -74,11 +74,14 @@ module Beaker
       # @param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role
       # @param [Block] block This method will yield to a block of code passed by the caller
       #
-      # @todo beaker3.0: simplify return types to Array<Result> only
+      # @todo (beaker3.0:BKR-571): simplify return types to Array<Result> only
       #
-      # @return [Array<Result>, Result] If a non-empty array of hosts has been
-      #   passed (after filtering), then an array of results is returned. Else,
-      #   a result object is returned.
+      # @return [Array<Result>, Result, nil] If an array of hosts has been
+      #   passed (after filtering), then either an array of results is returned
+      #   (if the array is non-empty), or nil is returned (if the array is empty).
+      #   Else, a result object is returned. If filtering makes it such that only
+      #   one host is left, then it's passed as a host object (not in an array),
+      #   and thus a result object is returned.
       def run_block_on hosts = [], filter = nil, &block
         result = nil
         block_hosts = hosts #the hosts to apply the block to after any filtering
