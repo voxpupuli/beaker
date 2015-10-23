@@ -166,11 +166,10 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject.installer_cmd( the_host, {} ) ).to be === "cd /tmp && hdiutil attach .dmg && installer -pkg /Volumes/puppet-enterprise-3.0/puppet-enterprise-installer-3.0.pkg -target /"
     end
 
-    it 'generates an EOS PE install command for an EOS host' do
+    it 'calls the EOS PE install command for an EOS host' do
       the_host = eoshost.dup
-      commands = ['enable', "extension puppet-enterprise-#{the_host['pe_ver']}-#{the_host['platform']}.swix"]
-      command = commands.join("\n")
-      expect( subject.installer_cmd( the_host, {} ) ).to be === "Cli -c '#{command}'"
+      expect( the_host ).to receive( :install_from_file ).with( /swix$/ )
+      subject.installer_cmd( the_host, {} )
     end
 
     it 'generates a unix PE install command in verbose for a unix host when pe_debug is enabled' do
@@ -279,17 +278,11 @@ describe ClassMixedWithDSLInstallUtils do
       subject.fetch_pe( [unixhost], {:fetch_local_then_push_to_host => true} )
     end
 
-    it 'can download a PE .swix from a URL to an EOS host and unpack it' do
+    it 'calls the host method to get an EOS .swix file from a URL' do
       allow( File ).to receive( :directory? ).and_return( false ) #is not local
-      allow( subject ).to receive( :link_exists? ).and_return( true ) #is a tar.gz
-      allow( subject ).to receive( :on ).and_return( true )
+      allow( subject ).to receive( :link_exists? ).and_return( true ) #skip file check
 
-      path = eoshost['pe_dir']
-      filename = "#{ eoshost['dist'] }"
-      extension = '.swix'
-      commands = ['enable', "copy #{path}/#{filename}#{extension} extension:"]
-      command = commands.join("\n")
-      expect( subject ).to receive( :on ).with( eoshost, "Cli -c '#{command}'" ).once
+      expect( eoshost ).to receive( :get_remote_file ).with( /swix$/ ).once
       subject.fetch_pe( [eoshost], {} )
     end
 
@@ -373,7 +366,7 @@ describe ClassMixedWithDSLInstallUtils do
         expect( host ).to eq( hosts[1] )
       end.once
       expect( subject ).to receive( :on ).with( hosts[2], / hdiutil attach puppet-enterprise-3.0-osx-10.9-x86_64.dmg && installer -pkg \/Volumes\/puppet-enterprise-3.0\/puppet-enterprise-installer-3.0.pkg -target \// ).once
-      expect( subject ).to receive( :on ).with( hosts[3], /^Cli/ ).once
+      expect( hosts[3] ).to receive( :install_from_file ).with( /swix$/ ).once
       #does extra mac/EOS specific commands
       expect( subject ).to receive( :on ).with( hosts[2], /puppet config set server/ ).once
       expect( subject ).to receive( :on ).with( hosts[3], /puppet config set server/ ).once
