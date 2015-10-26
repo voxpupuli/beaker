@@ -46,6 +46,14 @@ module Beaker
         @logger.perf_output("Creating symlink from /etc/sysstat/sysstat.cron to /etc/cron.d")
         host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'),:acceptable_exit_codes => [0,1])
       end
+      if @options[:collect_perf_data] =~ /aggressive/
+        @logger.perf_output("Enabling aggressive sysstat polling")
+        if host['platform'] =~ /debian|ubuntu/
+          host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
+        elsif host['platform'] =~ /centos|el|fedora|oracle|redhats|scientific/
+          host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
+        end
+      end
       if host['platform'] =~ PERF_START_PLATFORMS # SLES doesn't need this step
         host.exec(Command.new('service sysstat start'))
       end
@@ -66,9 +74,53 @@ module Beaker
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
       if host['platform'] =~ PERF_SUPPORTED_PLATFORMS # All flavours of Linux
-        host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"),:acceptable_exit_codes => [0,1,2])
+        if not @options[:collect_perf_data] =~ /aggressive/
+          host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"),:acceptable_exit_codes => [0,1,2])
+        end
+        if (defined? @options[:graphite_server] and not @options[:graphite_server].nil?) and
+           (defined? @options[:graphite_perf_data] and not @options[:graphite_perf_data].nil?)
+          export_perf_data_to_graphite(host)
+        end
       else
         @logger.perf_output("Perf (sysstat) not supported on host: " + host)
+      end
+    end
+
+    # Send performance report numbers to an external Graphite instance
+    # @param [Host] host The host we are working with
+    # @return [void]  The report is sent to the logging output
+    def export_perf_data_to_graphite(host)
+      @logger.perf_output("Sending data to Graphite server: " + @options[:graphite_server])
+
+      data = JSON.parse(host.exec(Command.new("sadf -j -- -A"),:silent => true).stdout)
+      hostname = host['vmhostname'].split('.')[0]
+
+      data['sysstat']['hosts'].each do |host|
+        host['statistics'].each do |poll|
+          timestamp = DateTime.parse(poll['timestamp']['date'] + ' ' + poll['timestamp']['time']).to_time.to_i
+
+          poll.keys.each do |stat|
+            case stat
+              when 'cpu-load-all'
+                poll[stat].each do |s|
+                  s.keys.each do |k|
+                    next if k == 'cpu'
+
+                    socket = TCPSocket.new(@options[:graphite_server], 2003)
+                    socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.cpu.#{s['cpu']}.#{k} #{s[k]} #{timestamp}"
+                    socket.close
+                  end
+                end
+
+              when 'memory'
+                poll[stat].keys.each do |s|
+                  socket = TCPSocket.new(@options[:graphite_server], 2003)
+                  socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.memory.#{s} #{poll[stat][s]} #{timestamp}"
+                  socket.close
+                end
+            end
+          end
+        end
       end
     end
   end

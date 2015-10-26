@@ -1,6 +1,9 @@
 # default - History
 ## Tags
-* [LATEST - 15 Sep, 2015 (96d9104d)](#LATEST)
+* [LATEST - 21 Oct, 2015 (90fddaf4)](#LATEST)
+* [2.26.0 - 13 Oct, 2015 (427a512b)](#2.26.0)
+* [2.25.0 - 1 Oct, 2015 (51d4cb1a)](#2.25.0)
+* [2.24.0 - 15 Sep, 2015 (c12e9054)](#2.24.0)
 * [2.23.0 - 9 Sep, 2015 (2532324a)](#2.23.0)
 * [2.22.0 - 1 Sep, 2015 (96ec20a7)](#2.22.0)
 * [2.21.0 - 26 Aug, 2015 (40281eb2)](#2.21.0)
@@ -96,7 +99,644 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 15 Sep, 2015 (96d9104d)
+### <a name = "LATEST">LATEST - 21 Oct, 2015 (90fddaf4)
+
+* (GEM) update beaker version to 2.27.0 (90fddaf4)
+
+* Merge pull request #961 from GeoffWilliams/dockerfile_externalise (f4a90933)
+
+
+```
+Merge pull request #961 from GeoffWilliams/dockerfile_externalise
+
+(BKR-539) simplified Dockerfile support
+```
+* Merge pull request #987 from johnduarte/remove_puppet_patch (2cdcb71e)
+
+
+```
+Merge pull request #987 from johnduarte/remove_puppet_patch
+
+(BKR-573) Add publisher for solaris package removal
+```
+* Merge pull request #977 from colinPL/qeng2604_add_tags (e79b4b17)
+
+
+```
+Merge pull request #977 from colinPL/qeng2604_add_tags
+
+(QENG-2604) Add Host Tags
+```
+* Merge pull request #962 from pondohva/decrease_spamlog_level (a7630b05)
+
+
+```
+Merge pull request #962 from pondohva/decrease_spamlog_level
+
+(BKR-542) remove hosts object from log about execution against empty …
+```
+* (QENG-2604) More vmpooler spec changes (dec9511c)
+
+
+```
+(QENG-2604) More vmpooler spec changes
+
+Remove some key:value checks from spec test. Override a used @option
+value and ensure it passes through add_tags.
+```
+* (QENG-2604) Fix vmpooler specs (8d71a905)
+
+
+```
+(QENG-2604) Fix vmpooler specs
+
+Fix vmpooler spec tests for tags that were hard-coded but checking
+against environment variables.
+```
+* (QENG-2604) Add More host_tag specs (f6fe7d5a)
+
+
+```
+(QENG-2604) Add More host_tag specs
+
+Add spec tests for aws_sdk and vmpooler hypervisors targetting
+host_tags behavior.
+```
+* (QENG-2604) Break add_tags in vmpooler (93d44425)
+
+
+```
+(QENG-2604) Break add_tags in vmpooler
+
+Move the merging of host tags with pre-defined tags to its own method
+to emulate how it behaves in aws_sdk.
+```
+* Merge pull request #988 from joshcooper/ticket/master/BKR-574-allow-no-restart (bfb6b356)
+
+
+```
+Merge pull request #988 from joshcooper/ticket/master/BKR-574-allow-no-restart
+
+(BKR-574) Allow global restart_when_done => false
+```
+* (BKR-574) Allow global restart_when_done => false (8d6742ef)
+
+
+```
+(BKR-574) Allow global restart_when_done => false
+
+Previously, setting `:restart_when_done` to false on the master host, or
+globally in options, did not work, because the `with_puppet_running_on`
+method was checking for a truthy value.
+
+This commit checks if the key is in the hash instead. It also preserves
+the behavior where the options passed in by the test case take
+precedence over the host's value.
+```
+* (BKR-573) Add publisher for solaris package removal (e90918c9)
+
+* Merge pull request #984 from ferventcoder/ticket/master/BKR-582 (45cca4e8)
+
+
+```
+Merge pull request #984 from ferventcoder/ticket/master/BKR-582
+
+(BKR-582) Colorization adjustments / CI Build / Allow overriding log colors
+```
+* Merge pull request #976 from johnduarte/remove_puppet_on (92a5309b)
+
+
+```
+Merge pull request #976 from johnduarte/remove_puppet_on
+
+(BKR-573) Add remove_puppet_on
+```
+* Merge pull request #982 from kevpl/bkr571_applymanifeston_docs (2a9b0a32)
+
+
+```
+Merge pull request #982 from kevpl/bkr571_applymanifeston_docs
+
+(BKR-571) updated documentation on return types
+```
+* Merge pull request #972 from azhurbilo/patch-1 (26c8c8bb)
+
+
+```
+Merge pull request #972 from azhurbilo/patch-1
+
+(BKR-380) Fix '3389' (host port) is declared multiple times
+```
+* (BKR-582) Colorization adjustments / CI Build (c2dc9fd7)
+
+
+```
+(BKR-582) Colorization adjustments / CI Build
+
+When beaker detects it is being run by Jenkins, it should adjust output
+colors so that they are better handled in console output. This is done
+by detecting BUILD_NUMBER environment variable, a variable that is
+known to be present on Jenkins build slaves.
+
+Adjust colorization to colors that come out better during runs. The
+colors that should come up to the front are shown better when running
+in the console. Additionally make it easier to see logs coming back
+from the SUT with an explicit color instead of NORMAL (which is the
+same setting as the current GREY).
+
+Allow overriding log colors by passing in log_colors in options.
+If a user has overridden the default colors, don't override the
+colors in CI.
+```
+* (BKR-582) Info on begin test file (239ab2d1)
+
+
+```
+(BKR-582) Info on begin test file
+
+When a test file is found, log it at the info level. This allows a bit
+more trackability in finding the location of tests.
+```
+* (BKR-582) Warn on skipped tests (8745c061)
+
+
+```
+(BKR-582) Warn on skipped tests
+
+If a test is skipped, it should show up as a warning. Adjust beaker to
+warn when tests are skipped.
+```
+* (BKR-571) updated documentation on return types (9d98dec1)
+
+* (QENG-2604) Empty host_tags in Presets (df0abb97)
+
+
+```
+(QENG-2604) Empty host_tags in Presets
+
+The host_tags value in presets is now an empty hash and
+department, project, and created_by are returned to the
+root of the @options hash. This resolves an issue with
+environment vars not being properly merged into the new
+host_tags hash.
+```
+* (BKR-542) change logger level to info for "empty array of hosts" (b056ef83)
+
+* (BKR-573) Add spec tests for remove_puppet_on (8e04650b)
+
+
+```
+(BKR-573) Add spec tests for remove_puppet_on
+
+This commit adds spec tests for the  `remove_puppet_on` method.
+```
+* (QENG-2604) Add Host Tags (03fd8ca7)
+
+
+```
+(QENG-2604) Add Host Tags
+
+This commit adds the ability to specify arbitrary tags and have them
+applied to AWS or vmpooler instances. The configuration parameter is
+called "host_tags" to avoid confusion with test tagging. Host tags can
+be specified at the host or CONFIG level.
+
+The presets have been modified to pre-populate "host_tags" with:
+project, department, and created_by.
+
+Example:
+HOSTS:
+  'agent1':
+    roles:
+      - agent
+    host_tags:
+      created_by: 'me'
+      some_key: 'yes it is'
+CONFIG:
+    host_tags:
+      project: 'beaker'
+```
+* (BKR-573) Add remove_puppet_on (3c1f5daf)
+
+
+```
+(BKR-573) Add remove_puppet_on
+
+This commit adds a `remove_puppet_on` method that can be used to
+ensure that puppet packages have been expunged from hosts.
+
+This method is intended to be used in a pre-suite. It is currently
+limited to the AIX and Solaris platforms.
+```
+* (BKR-380) beaker vagrant windows box support issues (c3379726)
+
+
+```
+(BKR-380) beaker vagrant windows box support issues
+Fix '3389' (host port) is declared multiple times
+
+Without "auto_correct" we got error if source Vagrantfile of box already contains this port forwarding.
+
+
+
+Error:
+vm:
+* Forwarded port '3389' (host port) is declared multiple times
+with the protocol 'tcp'.
+
+
+
+I think we need add this change as most part of Windows boxes in Vagrant Atlas already have this port forwarding:
+- https://github.com/joefitzgerald/packer-windows/blob/master/vagrantfile-windows_2012_r2.template
+- https://github.com/boxcutter/windows/blob/master/tpl/vagrantfile-eval-win2012r2-standard.tpl
+
+change spec for 3389 rdp port
+```
+* (BKR-539) simplified Dockerfile support (63268b8f)
+
+
+```
+(BKR-539) simplified Dockerfile support
+
+Allow user to override the automatically generated Dockerfile
+```
+### <a name = "2.26.0">2.26.0 - 13 Oct, 2015 (427a512b)
+
+* (HISTORY) update beaker history for gem release 2.26.0 (427a512b)
+
+* (GEM) update beaker version to 2.26.0 (d581b613)
+
+* Merge pull request #971 from sschneid/sysprofile (e2c5f6fc)
+
+
+```
+Merge pull request #971 from sschneid/sysprofile
+
+(BKR-580) --collect-perf-data enhancements
+```
+* Merge pull request #980 from johnduarte/patch-sol-pkg-names (4ef4ba07)
+
+
+```
+Merge pull request #980 from johnduarte/patch-sol-pkg-names
+
+(maint) Fix Solaris 11 package name logic
+```
+* Merge pull request #975 from anodelman/win-fix (6a1e14a9)
+
+
+```
+Merge pull request #975 from anodelman/win-fix
+
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (5bffbaa0)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- add spec test coverage for EncodedCommand support in powershell
+  wrapper
+```
+* (maint) Fix Solaris 11 package name logic (fcbd6018)
+
+
+```
+(maint) Fix Solaris 11 package name logic
+
+This commit fixes a bug in the Solaris 11 package naming logic
+that dropped the SHA suffix entirely from the final package name.
+The SHA should be incorporated into the package name.
+
+An additional spec test has been added for the expected package
+name in this circumstance.
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (d364123b)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- add unicode support
+```
+* Merge pull request #968 from anodelman/new-platform (ad037a82)
+
+
+```
+Merge pull request #968 from anodelman/new-platform
+
+(BKR-488) Add support for Windows 10 (x86, x64)
+```
+* (BKR-275) PowerShell Wrapper Does not Handle Quoting (c530b8c5)
+
+
+```
+(BKR-275) PowerShell Wrapper Does not Handle Quoting
+
+- create new powershell dsl helper:
+  execute_powershell_script_on
+  * takes as input a string representing a powershell script
+  * create a file on the host containing the script
+  * executes the script using powershell -File
+- add the ability to execute an encoded powershell string
+  powershell("Set Content -path 'fu.txt', -value 'fu'", {'EncodedCommand => true})
+  * the command will be Base64 encoded for you
+  * bypasses quoting sadness
+```
+* Merge pull request #907 from hamidnazari/master (a28c8cf1)
+
+
+```
+Merge pull request #907 from hamidnazari/master
+
+(BKR-427) Support for Docker Container Names and Container Reuse
+```
+* (BKR-580) Different Debian vs EL crontab differences (a4c78dac)
+
+* (BKR-580) Fix spec tests broken in 9b16bef (3ec3fad0)
+
+* (BKR-580) --collect-perf-data enhancements (c57d4d44)
+
+
+```
+(BKR-580) --collect-perf-data enhancements
+
+* allow --collect-perf-data modes:
+
+'aggressive' (poll every minute)
+'normal' (poll every 10 minutes)
+'none' (do not collect perf data)
+
+If a mode is unspecified, --collect-perf-data will default to 'normal',
+which mimics past behavior.
+
+* allow metric exporting to Graphite:
+
+Set via the HOSTS file, eg:
+
+
+`json
+graphite_server: graphite.example.com
+graphite_perf_data: beaker.perf
+
+`
+```
+* (BKR-427) Added support for Docker container names and container reuse (e8a65c67)
+
+* (BKR-488) Add support for Windows 10 (x86, x64) (5b2918db)
+
+
+```
+(BKR-488) Add support for Windows 10 (x86, x64)
+
+- improve the 'wait_for_connection_failure' ssh connection method
+  * increase the timeouts
+  * send actual data down the pipe, seems to improve the function of
+    the test
+  * remove 'abort' calls from the code, we can recover and retry
+  * added yard docs
+- add /f to the windows reboot call
+  * forces closure of any open applications
+```
+### <a name = "2.25.0">2.25.0 - 1 Oct, 2015 (51d4cb1a)
+
+* (HISTORY) update beaker history for gem release 2.25.0 (51d4cb1a)
+
+* (GEM) update beaker version to 2.25.0 (e21f5581)
+
+* Merge pull request #974 from anodelman/maint (65664e45)
+
+
+```
+Merge pull request #974 from anodelman/maint
+
+(BKR-568) no longer accept PRs marked as "(MAINT)"
+```
+* Merge pull request #964 from kevpl/bkr522_ec2_nocachedkeys (3ec3e14d)
+
+
+```
+Merge pull request #964 from kevpl/bkr522_ec2_nocachedkeys
+
+(BKR-522) now creates new ec2 keys per run
+```
+* (BKR-568) no longer accept PRs marked as "(MAINT)" (47d9d1ba)
+
+
+```
+(BKR-568) no longer accept PRs marked as "(MAINT)"
+
+- update CONTRIBUTING.md to indicate change in policy
+```
+* Merge pull request #973 from anodelman/ruby-test (9b52fe4e)
+
+
+```
+Merge pull request #973 from anodelman/ruby-test
+
+(BKR-564) beaker no longer works on ruby 1.9.3
+```
+* (BKR-564) beaker no longer works on ruby 1.9.3 (4f94d048)
+
+
+```
+(BKR-564) beaker no longer works on ruby 1.9.3
+
+- pin fog-google to 0.0.9, 0.1 release removed ruby 1.9 support
+```
+* Merge pull request #970 from johnduarte/bkr-545-frozen-string (deb4377f)
+
+
+```
+Merge pull request #970 from johnduarte/bkr-545-frozen-string
+
+(BKR-545) Dup solaris puppet_agent_version
+```
+* (BKR-545) Dup solaris puppet_agent_version (f1d2068b)
+
+
+```
+(BKR-545) Dup solaris puppet_agent_version
+
+This commit dups the `opts[:puppet_agent_version]` in the foss_utils to
+prevent a `RuntimeError: can't modify frozen String` error
+```
+* Merge pull request #963 from johnduarte/p5p-for-sol11 (b9e6a23e)
+
+
+```
+Merge pull request #963 from johnduarte/p5p-for-sol11
+
+(BKR-545) Use p5p for Solaris 11 puppet-agent pkgs
+```
+* Merge pull request #969 from johnduarte/aix-repo-install (a7280515)
+
+
+```
+Merge pull request #969 from johnduarte/aix-repo-install
+
+(BKR-554) Install AIX packages via install repo
+```
+* (BKR-554) Install AIX packages via install repo (973ff502)
+
+
+```
+(BKR-554) Install AIX packages via install repo
+
+This commit adds support for installing AIX 'packages' via the
+install repo logic. AIX does not support repository management
+and can only install 'RPM' files directly. Since this logic
+is contained in the install repo logic in Beaker, we can use
+this to install a package that has been mirrored to the standard
+repo location.
+
+This assumes that the package is mirrored to the repo location.
+In other words, that the following files are the same.
+  * http://builds.delivery.puppetlabs.net/puppet-agent/1214e51d63b84a82df0c55cab99abc2a3f90a597/artifacts/aix/7.1/PC1/ppc/puppet-agent-1.2.5.49.g1214e51-1.aix7.1.ppc.rpm
+  * http://builds.delivery.puppetlabs.net/puppet-agent/1214e51d63b84a82df0c55cab99abc2a3f90a597/repos/aix/7.1/PC1/ppc/puppet-agent-1.2.5.49.g1214e51-1.aix7.1.ppc.rpm
+
+It also assumes that the desired package is not defined for AIX
+in the acceptance pre-suite for the project.
+```
+* Merge pull request #967 from bkero/master (7852e6b3)
+
+
+```
+Merge pull request #967 from bkero/master
+
+(BKR-327) Add support for EL7 to epel_info_for and add_el_extras method
+```
+* fix spec tests to match ArgumentError for epel_info_for (d78a8de4)
+
+* Raise ArgumentErrors instead of generic errors (839b75e4)
+
+* (BKR-327) add epel7 support to get_el_info and el_install (0e5a0257)
+
+
+```
+(BKR-327) add epel7 support to get_el_info and el_install
+
+Base work courtesy of Andrew Stangl <andrewstangl@gmail.com>
+```
+* (BKR-327) add epel_7_pkg preset (0e9485d3)
+
+* (BKR-327) add tests for retrieving epel el7 url (41730085)
+
+* Merge pull request #960 from kevpl/bkr351_indent_add (7e91e61e)
+
+
+```
+Merge pull request #960 from kevpl/bkr351_indent_add
+
+(BKR-351) added indentation based on test/step nesting level
+```
+* Merge pull request #959 from anodelman/subset-hosts (1810fae0)
+
+
+```
+Merge pull request #959 from anodelman/subset-hosts
+
+(BKR-535) Regression: confine_block does not skip tests...
+```
+* Merge pull request #957 from anodelman/confine (8de4ee64)
+
+
+```
+Merge pull request #957 from anodelman/confine
+
+(BKR-533) Beaker's `confine` overwrites the array of all hosts
+```
+* (BKR-522) now creates new ec2 keys per run (07bb7405)
+
+
+```
+(BKR-522) now creates new ec2 keys per run
+
+Before, ec2 keys would only be created if this was the first run for
+a particular user/coordinator. This is a problem for F5 testing, in
+which F5 hosts needed to be created with a particular key. We were
+using cached keys, which weren't the ones being used in ec2.
+
+The original solution was to delete the keys in ec2, so that they'd
+be recreated as if this was the first run by a user. @justinstoller
+brought up the good point that if this were to happen, certain
+Beaker runs would have their keys deleted from a new F5 run. The
+solution became that each Beaker run would generate its own key,
+deleting it on cleanup.
+```
+* (BKR-545) Use p5p for Solaris 11 puppet-agent pkgs (831b0bb5)
+
+
+```
+(BKR-545) Use p5p for Solaris 11 puppet-agent pkgs
+
+This commit updates install_utils/foss_utils to use `p5p` as
+the expected package suffix for puppet-agent when the platform
+is Solaris 11. Solaris 10 will continue to use `pkg.gz` as its
+expected suffix.
+
+The `p5p` package naming format is much more stringent. See
+http://www.oracle.com/technetwork/articles/servers-storage-admin/ips-package-versioning-2232906.html
+for details.
+```
+* Merge pull request #955 from kevpl/bkr532_beakerhiera_merge (b181c059)
+
+
+```
+Merge pull request #955 from kevpl/bkr532_beakerhiera_merge
+
+(BKR-532) added beaker-hiera library usage
+```
+* (BKR-535) Regression: confine_block does not skip tests... (72955d58)
+
+
+```
+(BKR-535) Regression: confine_block does not skip tests...
+
+...with beaker 2.24.0
+
+- allow users to include skip_test in block parameter for confine_block
+- added acceptance test to ensure correct behavior
+```
+* (BKR-533) Beaker's `confine` overwrites the array of all hosts (be1cc5dc)
+
+
+```
+(BKR-533) Beaker's `confine` overwrites the array of all hosts
+
+- make it possible to confine to a subset of hosts + all hosts not in
+  the subset.
+
+  To confine to only windows agents + any non-agent hosts
+
+    confine :to, { :platform => 'windows' }, agents
+
+  To confine to non-windows agents + any non-agent hosts
+
+    confine :except, { :platform => 'windows' }, agent
+
+- Useful for cases where you want to use your master, but only operate
+  on a subset of agents
+```
+* (BKR-351) added indentation based on test/step nesting level (cec66d21)
+
+
+```
+(BKR-351) added indentation based on test/step nesting level
+
+This will only affect tests where `test_name` or `step` has
+been passed a block to execute.
+
+The only exception to that statement is `host.exec`'s
+logic, as it's more presentable to nest command output one
+level under the command itself.
+```
+* (BKR-532) added beaker-hiera library usage (127aa3de)
+
+### <a name = "2.24.0">2.24.0 - 15 Sep, 2015 (c12e9054)
+
+* (HISTORY) update beaker history for gem release 2.24.0 (c12e9054)
 
 * (GEM) update beaker version to 2.24.0 (96d9104d)
 

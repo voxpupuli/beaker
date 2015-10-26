@@ -126,7 +126,7 @@ module Beaker
           cmdline_args = conf_opts[:__commandline_args__]
           service_args = conf_opts[:__service_args__] || {}
           restart_when_done = true
-          restart_when_done = host[:restart_when_done] if host[:restart_when_done]
+          restart_when_done = host[:restart_when_done] if host.has_key?(:restart_when_done)
           restart_when_done = conf_opts.fetch(:restart_when_done, restart_when_done)
           conf_opts = conf_opts.reject { |k,v| [:__commandline_args__, :__service_args__, :restart_when_done].include?(k) }
 
@@ -382,6 +382,8 @@ module Beaker
         #                      by the caller; this can be used for additional
         #                      validation, etc.
         #
+        # @return [Array<Result>, Result, nil] An array of results, a result object,
+        #   or nil. Check {#run_block_on} for more details on this.
         def apply_manifest_on(host, manifest, opts = {}, &block)
           block_on host do | host |
             on_options = {}

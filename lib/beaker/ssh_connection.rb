@@ -17,8 +17,11 @@ module Beaker
       Errno::ECONNREFUSED,
       Errno::ECONNRESET,
       Errno::ENETUNREACH,
+      Net::SSH::Exception,
       Net::SSH::Disconnect,
       Net::SSH::AuthenticationFailed,
+      Net::SSH::ChannelRequestFailed,
+      Net::SSH::ChannelOpenFailed,
       IOError,
     ]
 
@@ -46,7 +49,7 @@ module Beaker
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
          Net::SSH.start(host, user, ssh_opts)
        rescue *RETRYABLE_EXCEPTIONS => e
-         if try <= 8
+         if try <= 11
            @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
            @logger.warn "Trying again in #{wait} seconds"
            sleep wait
@@ -103,26 +106,52 @@ module Beaker
       end
     end
 
-    #We expect the connection to close so wait for that to happen
-    def wait_for_connection_failure
+    # Wait for the ssh connection to fail, returns true on connection failure and false otherwise
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Boolean] :pty Should we request a terminal when attempting 
+    #                                to send a command over this connection?
+    # @option options [String] :stdin Any input to be sent along with the command
+    # @param [IO] stdout_callback An IO stream to send connection stdout to, defaults to nil
+    # @param [IO] stderr_callback An IO stream to send connection stderr to, defaults to nil
+    # @return [Boolean] true if connection failed, false otherwise
+    def wait_for_connection_failure options = {}, stdout_callback = nil, stderr_callback = stdout_callback
       try = 1
-      last_wait = 0
-      wait = 1
+      last_wait = 2
+      wait = 3
+      command = 'echo echo' #can be run on all platforms (I'm looking at you, windows)
       while try < 11
+        result = Result.new(@hostname, command)
         begin
-          @logger.debug "Waiting for connection failure on #{@hostname} (attempt #{try}, try again in #{wait} second(s))"
+          @logger.notify "Waiting for connection failure on #{@hostname} (attempt #{try}, try again in #{wait} second(s))"
+          @logger.debug("\n#{@hostname} #{Time.new.strftime('%H:%M:%S')}$ #{command}")
           @ssh.open_channel do |channel|
-            channel.exec('') #Just send something down the pipe
-          end
-          loop_tries = 0
-          #loop is actually loop_forver, so let it try 3 times and then quit instead of endless blocking
-          @ssh.loop { loop_tries += 1 ; loop_tries < 4 }
+            request_terminal_for( channel, command ) if options[:pty]
+
+            channel.exec(command) do |terminal, success|
+              raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
+              register_stdout_for terminal, result, stdout_callback
+              register_stderr_for terminal, result, stderr_callback
+              register_exit_code_for terminal, result
+
+              process_stdin_for( terminal, options[:stdin] ) if options[:stdin]
+             end
+           end
+           loop_tries = 0
+           #loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
+           @ssh.loop { loop_tries += 1 ; loop_tries < 4 }
         rescue *RETRYABLE_EXCEPTIONS => e
           @logger.debug "Connection on #{@hostname} failed as expected (#{e.class.name} - #{e.message})"
           close #this connection is bad, shut it down
           return true
         end
-        sleep wait
+        slept = 0
+        stdout_callback.call("sleep #{wait} second(s): ")
+        while slept < wait
+          sleep slept
+          stdout_callback.call('.')
+          slept += 1
+        end
+        stdout_callback.call("\n")
         (last_wait, wait) = wait, last_wait + wait
         try += 1
       end
@@ -143,7 +172,7 @@ module Beaker
         request_terminal_for( channel, command ) if options[:pty]
 
         channel.exec(command) do |terminal, success|
-          abort "FAILED: to execute command on a new channel on #{@hostname}" unless success
+          raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
           register_stdout_for terminal, result, stdout_callback
           register_stderr_for terminal, result, stderr_callback
           register_exit_code_for terminal, result
@@ -198,8 +227,8 @@ module Beaker
         if success
           @logger.debug "Allocated a PTY on #{@hostname} for #{command.inspect}"
         else
-          abort "FAILED: could not allocate a pty when requested on " +
-            "#{@hostname} for #{command.inspect}"
+          raise Net::SSH::Exception.new("FAILED: could not allocate a pty when requested on " +
+            "#{@hostname} for #{command.inspect}")
         end
       end
     end

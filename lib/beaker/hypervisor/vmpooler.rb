@@ -73,6 +73,20 @@ module Beaker
       template_url
     end
 
+    # Override host tags with presets
+    # @param [Beaker::Host] host Beaker host
+    # @return [Hash] Tag hash
+    def add_tags(host)
+      host[:host_tags].merge(
+          {
+              'beaker_version'    => Beaker::Version::STRING,
+              'jenkins_build_url' => @options[:jenkins_build_url],
+              'department'        => @options[:department],
+              'project'           => @options[:project],
+              'created_by'        => @options[:created_by]
+          })
+    end
+
     def provision
       request_payload = {}
       start = Time.now
@@ -143,14 +157,6 @@ module Beaker
       start = Time.now
       @logger.notify 'Tagging vmpooler VMs'
 
-      tags = {
-        'beaker_version' => Beaker::Version::STRING,
-        'jenkins_build_url' => @options[:jenkins_build_url],
-        'department' => @options[:department],
-        'project' => @options[:project],
-        'created_by' => @options[:created_by]
-      }
-
       @hosts.each_with_index do |h, i|
         begin
           uri = URI.parse(@options[:pooling_api] + '/vm/' + h['vmhostname'].split('.')[0])
@@ -158,7 +164,8 @@ module Beaker
           http = Net::HTTP.new(uri.host, uri.port)
           request = Net::HTTP::Put.new(uri.request_uri)
 
-          request.body = { 'tags' => tags }.to_json
+          # merge pre-defined tags with host tags
+          request.body = { 'tags' => add_tags(h) }.to_json
 
           response = http.request(request)
         rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,

@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'fakefs/spec_helpers'
 
 # fake the docker-api
 module Docker
@@ -9,6 +10,14 @@ module Docker
 end
 
 module Beaker
+  platforms = [
+    "ubuntu-14.04-x86_64", 
+    "cumulus-2.2-x86_64", 
+    "fedora-22-x86_64", 
+    "centos-7-x86_64", 
+    "sles-12-x86_64"
+  ]
+
   describe Docker do
     let(:hosts) { make_hosts }
 
@@ -39,6 +48,9 @@ module Beaker
       container = double('Docker::Container')
       allow( container ).to receive(:id)
       allow( container ).to receive(:start)
+      allow( container ).to receive(:info).and_return(
+        *(0..2).map { |index| { 'Names' => ["/spec-container-#{index}"] } }
+      )
       allow( container ).to receive(:json).and_return({
         'NetworkSettings' => {
           'IPAddress' => '192.0.2.1',
@@ -162,6 +174,35 @@ module Beaker
         docker.provision
       end
 
+      it 'should create a named container based on the Image (identified by image.id)' do
+        hosts.each_with_index do |host, index|
+          container_name = "spec-container-#{index}"
+          host['docker_container_name'] = container_name
+
+          expect( ::Docker::Container ).to receive(:all).and_return([])
+
+          expect( ::Docker::Container ).to receive(:create).with({
+            'Image' => image.id,
+            'Hostname' => host.name,
+            'name' => container_name,
+          })
+        end
+
+        docker.provision
+      end
+
+      it 'should not create a container if a named one already exists' do
+        hosts.each_with_index do |host, index|
+          container_name = "spec-container-#{index}"
+          host['docker_container_name'] = container_name
+
+          expect( ::Docker::Container ).to receive(:all).and_return([container])
+          expect( ::Docker::Container ).not_to receive(:create)
+        end
+
+        docker.provision
+      end
+
       it 'should start the container' do
         expect( container ).to receive(:start).with({'PublishAllPorts' => true, 'Privileged' => true})
 
@@ -266,42 +307,77 @@ module Beaker
     end
 
     describe '#dockerfile_for' do
+      FakeFS.deactivate!
       before :each do
         allow( ::Docker ).to receive(:validate_version!)
       end
       it 'should raise on an unsupported platform' do
-        expect { docker.send(:dockerfile_for, {'platform' => 'a_sidewalk' }) }.to raise_error(/platform a_sidewalk not yet supported on docker/)
+        expect { docker.send(:dockerfile_for, {'platform' => 'a_sidewalk', 'image' => 'foobar' }) }.to raise_error(/platform a_sidewalk not yet supported/)
+      end
+
+      it 'should raise on missing image' do
+        expect { docker.send(:dockerfile_for, {'platform' => 'centos-7-x86_64'})}.to raise_error(/Docker image undefined/)
       end
 
       it 'should add docker_image_commands as RUN statements' do
-        dockerfile = docker.send(:dockerfile_for, {
-          'platform' => 'el-',
-          'docker_image_commands' => [
-            'special one',
-            'special two',
-            'special three',
-          ]
-        })
+        FakeFS.deactivate!
+        platforms.each do |platform|
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => platform,
+            'image' => 'foobar',
+            'docker_image_commands' => [
+              'special one',
+              'special two',
+              'special three',
+            ]
+          })
 
-        expect( dockerfile ).to be =~ /RUN special one\nRUN special two\nRUN special three/
+          expect( dockerfile ).to be =~ /RUN special one\nRUN special two\nRUN special three/
+        end
       end
 
       it 'should add docker_image_entrypoint' do
-        dockerfile = docker.send(:dockerfile_for, {
-          'platform' => 'el-',
-          'docker_image_entrypoint' => '/bin/bash'
-        })
+        FakeFS.deactivate!
+        platforms.each do |platform|
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => platform,
+            'image' => 'foobar',
+            'docker_image_entrypoint' => '/bin/bash'
+          })
 
-        expect( dockerfile ).to be =~ %r{ENTRYPOINT /bin/bash}
+          expect( dockerfile ).to be =~ %r{ENTRYPOINT /bin/bash}
+        end
       end
 
       it 'should use zypper on sles' do
+        FakeFS.deactivate!
         dockerfile = docker.send(:dockerfile_for, {
-          'platform' => 'sles',
+          'platform' => 'sles-12-x86_64',
+          'image' => 'foobar',
         })
 
         expect( dockerfile ).to be =~ /RUN zypper -n in openssh/
       end
+
+      it 'should use dnf on fedora-22' do
+        FakeFS.deactivate!
+        dockerfile = docker.send(:dockerfile_for, {
+          'platform' => 'fedora-22-x86_64',
+          'image' => 'foobar',
+        })
+
+        expect( dockerfile ).to be =~ /RUN dnf install -y sudo/
+      end
+
+      it 'should use user dockerfile if specified' do
+        FakeFS.deactivate!
+        dockerfile = docker.send(:dockerfile_for, {
+          'dockerfile' => 'README.md'
+        })
+
+        expect( dockerfile ).to be == File.read('README.md')
+      end
+
     end
   end
 end

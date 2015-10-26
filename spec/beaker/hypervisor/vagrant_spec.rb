@@ -100,7 +100,7 @@ EOF
 
       generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
 
-      match = generated_file.match(/v.vm.network :forwarded_port, guest: 3389, host: 3389/)
+      match = generated_file.match(/v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true/)
       expect( match ).to_not be_nil,'Should have proper port for RDP'
 
       match = generated_file.match(/v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true/)

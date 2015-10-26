@@ -72,5 +72,54 @@ describe ClassMixedWithDSLWrappers do
       expect( command.args ).to be === ["-ExecutionPolicy Unrestricted", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command Set-Content -path 'fu.txt' -value 'fu'"]
       expect( command.options ).to be === {}
     end
+
+    it 'should use EncodedCommand when EncodedCommand => true' do
+      cmd = "Set-Content -path 'fu.txt' -value 'fu'"
+      cmd = subject.encode_command(cmd)
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'EncodedCommand' => true})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand #{cmd}"]
+      expect( command.options ).to be === {}
+    end
+
+    it 'should use EncodedCommand when EncodedCommand => ""' do
+      cmd = "Set-Content -path 'fu.txt' -value 'fu'"
+      cmd = subject.encode_command(cmd)
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'EncodedCommand' => ""})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand #{cmd}"]
+      expect( command.options ).to be === {}
+    end
+
+    it 'should use EncodedCommand when EncodedCommand => nil' do
+      cmd = "Set-Content -path 'fu.txt' -value 'fu'"
+      cmd = subject.encode_command(cmd)
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'EncodedCommand' => nil})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand #{cmd}"]
+      expect( command.options ).to be === {}
+    end
+
+    it 'should not use EncodedCommand when EncodedCommand => false' do
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {'EncodedCommand' => false})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command Set-Content -path 'fu.txt' -value 'fu'"]
+      expect( command.options ).to be === {}
+    end
+
+    it 'should not use EncodedCommand when EncodedCommand not present' do
+      command = subject.powershell("Set-Content -path 'fu.txt' -value 'fu'", {})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command Set-Content -path 'fu.txt' -value 'fu'"]
+      expect( command.options ).to be === {}
+    end
+
+    it 'has no -Command/-EncodedCommand when command is empty' do
+      command = subject.powershell("", {"File" => 'myfile.ps1'})
+      expect(command.command ).to be === 'powershell.exe'
+      expect( command.args).to be ===  ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-File myfile.ps1"]
+      expect( command.options ).to be === {}
+
+    end
   end
 end

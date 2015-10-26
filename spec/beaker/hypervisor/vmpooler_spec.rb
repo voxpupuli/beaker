@@ -42,6 +42,24 @@ module Beaker
       end
     end
 
+    describe '#add_tags' do
+      let(:vmpooler) { Beaker::Vmpooler.new(make_hosts({:host_tags => {'test_tag' => 'test_value'}}), make_opts) }
+
+      it 'merges tags correctly' do
+        vmpooler.instance_eval {
+          @options = @options.merge({:project => 'vmpooler-spec'})
+        }
+        host          = vmpooler.instance_variable_get(:@hosts)[0]
+        merged_tags   = vmpooler.add_tags(host)
+        expected_hash = {
+            test_tag:       'test_value',
+            beaker_version: Beaker::Version::STRING,
+            project:        'vmpooler-spec'
+        }
+        expect(merged_tags).to include(expected_hash)
+      end
+    end
+
     describe "#provision" do
 
       it 'provisions hosts from the pool' do

@@ -121,14 +121,95 @@ module Beaker
         expect( stdout_logger.destinations.size ).to be === 1
       end
 
-
       context 'default for' do
         its(:destinations)  { should include(STDOUT)  }
         its(:color)         { should be_nil           }
         its(:log_level)     { should be :verbose      }
       end
-    end
 
+      context 'log_colors' do
+        original_build_number = ENV['BUILD_NUMBER']
+
+        before :each do
+          ENV['BUILD_NUMBER'] = nil
+        end
+
+        after :each do
+          ENV['BUILD_NUMER'] = original_build_number
+        end
+
+
+        it 'should have the default log_colors' do
+          expect(logger.log_colors).to be == {
+              :error=> Beaker::Logger::RED,
+              :warn=> Beaker::Logger::BRIGHT_RED,
+              :success=> Beaker::Logger::MAGENTA,
+              :notify=> Beaker::Logger::BLUE,
+              :info=> Beaker::Logger::GREEN,
+              :debug=> Beaker::Logger::WHITE,
+              :trace=> Beaker::Logger::BRIGHT_YELLOW,
+              :perf=> Beaker::Logger::BRIGHT_MAGENTA,
+              :host=> Beaker::Logger::YELLOW
+          }
+        end
+
+        context 'when passing in log_color options' do
+          let(:log_colors) {
+            {
+                :error => "\e[00;30m"
+            }
+          }
+
+          let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+
+          it 'should override the specified log colors' do
+            expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
+          end
+
+          it 'should leave other colors as the default' do
+            expect(logger.log_colors[:warn]).to be == Beaker::Logger::BRIGHT_RED
+          end
+        end
+
+        context 'with CI detected' do
+          before :each do
+            ENV['BUILD_NUMBER'] = 'bob'
+          end
+
+          context 'when using the default log colors' do
+            it 'should override notify with NORMAL' do
+              expect(logger.log_colors[:notify]).to be == Beaker::Logger::NORMAL
+            end
+
+            it 'should override info with NORMAL' do
+              expect(logger.log_colors[:info]).to be == Beaker::Logger::NORMAL
+            end
+          end
+
+          context 'when overriding default log colors' do
+            let(:log_colors) {
+              {
+                  :error => "\e[00;30m"
+              }
+            }
+
+            let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+
+            it 'should override the specified log colors' do
+              expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
+            end
+
+            it 'should not override notify with NORMAL' do
+              expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
+            end
+
+            it 'should not override info with NORMAL' do
+              expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
+            end
+          end
+        end
+      end
+    end
 
     context 'it can' do
       it 'open/create a file when a string is given to add_destination' do

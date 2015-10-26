@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Beaker
   describe AwsSdk do
-    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
+    let( :options ) { make_opts.merge({ 'logger' => double().as_null_object, 'timestamp' => Time.now }) }
     let(:aws) {
       # Mock out the call to load_fog_credentials
       allow_any_instance_of( Beaker::AwsSdk ).
@@ -211,6 +211,7 @@ module Beaker
       context 'with a list of hosts' do
         before :each do
           @hosts.each {|host| host['instance'] = ec2_instance}
+          expect(aws).to receive( :delete_key_pair_all_regions )
         end
 
         it { is_expected.to be_nil }
@@ -224,6 +225,7 @@ module Beaker
       context 'with an empty host list' do
         before :each do
           @hosts = []
+          expect(aws).to receive( :delete_key_pair_all_regions )
         end
 
         it { is_expected.to be_nil }
@@ -268,7 +270,16 @@ module Beaker
       it { is_expected.to be_instance_of(AWS::EC2::SecurityGroupCollection) }
     end
 
-    describe '#kill_zombies', :wip do
+    describe '#kill_zombies' do
+      it 'calls delete_key_pair_all_regions' do
+        ec2_mock = Object.new
+        allow(ec2_mock).to receive( :regions ).and_return( {} )
+        aws.instance_variable_set( :@ec2, ec2_mock )
+
+        expect( aws ).to receive( :delete_key_pair_all_regions ).once
+
+        aws.kill_zombies()
+      end
     end
 
     describe '#kill_zombie_volumes', :wip do
@@ -375,6 +386,15 @@ module Beaker
       context 'with multiple hosts' do
         before :each do
           @hosts.each {|host| host['instance'] = aws_instance}
+        end
+
+        it 'handles host_tags hash on host object' do
+          # set :host_tags on first host
+          aws.instance_eval {
+            @hosts[0][:host_tags] =  {'test_tag' => 'test_value'}
+          }
+          expect(aws_instance).to receive(:add_tag).with('test_tag', hash_including(:value => 'test_value')).at_least(:once)
+          expect(add_tags).to be_nil
         end
 
         it 'adds tag for jenkins_build_url' do
@@ -634,8 +654,11 @@ module Beaker
         expect( Socket ).to receive(:gethostname) { "foobar" }
         expect( aws ).to receive(:local_user) { "bob" }
 
+        options[:timestamp] = Time.now
+        date_part = options[:timestamp].strftime("%F_%H_%M_%S")
+
         # Should match the expected composite key name
-        expect(aws.key_name).to eq("Beaker-bob-foobar")
+        expect(aws.key_name).to eq("Beaker-bob-foobar-#{date_part}")
       end
     end
 
@@ -647,18 +670,36 @@ module Beaker
     end
 
     describe '#ensure_key_pair' do
-      let( :region ) { double('region') }
+      let( :region ) { double('region', :name => 'test_region_name') }
       subject(:ensure_key_pair) { aws.ensure_key_pair(region) }
 
       context 'when a beaker keypair already exists' do
         it 'returns the keypair if available' do
           stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          key_pair = double(:exists? => true, :secret => 'supersekritkey')
+          key_pair = double(:exists? => true, :secret => 'supersekritkey', :delete => true)
+          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
           key_pairs = { "Beaker-rspec-SUT" => key_pair }
 
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).once
-          expect( Socket ).to receive(:gethostname).and_return("SUT")
+          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
+          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
+          expect( key_pairs ).to receive( :import ).and_return(key_pair)
           expect(ensure_key_pair).to eq(key_pair)
+        end
+
+        it 'generates a new keypair if :generate_new_keypair set' do
+          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
+          key_pair = double(:exists? => true, :secret => 'keyOfSekritz', :delete => true)
+          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
+          key_pairs = { "Beaker-rspec-SUT" => key_pair }
+          options[:keypair_generate_new] = true
+
+          answer = 'You get a keypair!  You get a keypair!  And you get a keypair too!'
+          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
+          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
+          expect( key_pairs ).to receive( :import ).and_return(answer)
+          returned_keypair = ensure_key_pair
+          expect(returned_keypair).not_to eq(key_pair)
+          expect(returned_keypair).to eq(answer)
         end
       end
 
@@ -670,8 +711,8 @@ module Beaker
 
         before :each do
           stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).once
-          expect( Socket ).to receive(:gethostname).and_return("SUT")
+          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
+          allow( aws ).to receive( :key_name ).and_return(key_name)
         end
 
         it 'imports a new key based on user pubkey' do
@@ -685,6 +726,114 @@ module Beaker
           expect( key_pairs ).to receive(:import).and_return(key_pair).once
           expect(ensure_key_pair).to eq(key_pair)
         end
+      end
+    end
+
+    describe '#delete_key_pair_all_regions' do
+      it 'calls delete_key_pair over all regions' do
+        key_name = 'kname_test1538'
+        allow(aws).to receive( :key_name ).and_return(key_name)
+        regions = []
+        regions << double('region', :key_pairs => 'pair1', :name => 'name1')
+        regions << double('region', :key_pairs => 'pair2', :name => 'name2')
+        ec2_mock = Object.new
+        allow(ec2_mock).to receive( :regions ).and_return(regions)
+        aws.instance_variable_set( :@ec2, ec2_mock )
+        region_keypairs_hash_mock = {}
+        region_keypairs_hash_mock[double('region')] = ['key1', 'key2', 'key3']
+        region_keypairs_hash_mock[double('region')] = ['key4', 'key5', 'key6']
+        allow( aws ).to receive( :my_key_pairs ).and_return( region_keypairs_hash_mock )
+
+        region_keypairs_hash_mock.each_pair do |region, keyname_array|
+          keyname_array.each do |keyname|
+            expect( aws ).to receive( :delete_key_pair ).with( region, keyname )
+          end
+        end
+        aws.delete_key_pair_all_regions
+      end
+    end
+
+    describe '#my_key_pairs' do
+      let( :region ) { double('region', :name => 'test_region_name') }
+
+      it 'uses the default keyname if no filter is given' do
+        default_keyname_answer = 'test_pair_6193'
+        allow( aws ).to receive( :key_name ).and_return( default_keyname_answer )
+
+        kp_mock_1 = double('keypair')
+        kp_mock_2 = double('keypair')
+        regions = []
+        regions << double('region', :key_pairs => kp_mock_1, :name => 'name1')
+        regions << double('region', :key_pairs => kp_mock_2, :name => 'name2')
+        ec2_mock = Object.new
+        allow( ec2_mock ).to receive( :regions ).and_return( regions )
+        aws.instance_variable_set( :@ec2, ec2_mock )
+
+        kp_mock = double('keypair')
+        allow( region ).to receive( :key_pairs ).and_return( kp_mock )
+        expect( kp_mock_1 ).to receive( :filter ).with( 'key-name', default_keyname_answer ).and_return( [] )
+        expect( kp_mock_2 ).to receive( :filter ).with( 'key-name', default_keyname_answer ).and_return( [] )
+
+        aws.my_key_pairs()
+      end
+
+      it 'uses the filter passed if given' do
+        default_keyname_answer = 'test_pair_6194'
+        allow( aws ).to receive( :key_name ).and_return( default_keyname_answer )
+        name_filter = 'filter_pair_1597'
+        filter_star = "#{name_filter}-*"
+
+        kp_mock_1 = double('keypair')
+        kp_mock_2 = double('keypair')
+        regions = []
+        regions << double('region', :key_pairs => kp_mock_1, :name => 'name1')
+        regions << double('region', :key_pairs => kp_mock_2, :name => 'name2')
+        ec2_mock = Object.new
+        allow( ec2_mock ).to receive( :regions ).and_return( regions )
+        aws.instance_variable_set( :@ec2, ec2_mock )
+
+        kp_mock = double('keypair')
+        allow( region ).to receive( :key_pairs ).and_return( kp_mock )
+        expect( kp_mock_1 ).to receive( :filter ).with( 'key-name', filter_star ).and_return( [] )
+        expect( kp_mock_2 ).to receive( :filter ).with( 'key-name', filter_star ).and_return( [] )
+
+        aws.my_key_pairs(name_filter)
+      end
+    end
+
+    describe '#delete_key_pair' do
+      let( :region ) { double('region', :name => 'test_region_name') }
+
+      it 'calls delete on a keypair if it exists' do
+        pair_name = 'pair1'
+        kp_mock = double('keypair', :exists? => true)
+        expect( kp_mock ).to receive( :delete ).once
+        pairs = { pair_name => kp_mock }
+        allow( region ).to receive( :key_pairs ).and_return( pairs )
+        aws.delete_key_pair(region, pair_name)
+      end
+
+      it 'skips delete on a keypair if it does not exist' do
+        pair_name = 'pair1'
+        kp_mock = double('keypair', :exists? => false)
+        expect( kp_mock ).to receive( :delete ).never
+        pairs = { pair_name => kp_mock }
+        allow( region ).to receive( :key_pairs ).and_return( pairs )
+        aws.delete_key_pair(region, pair_name)
+      end
+    end
+
+    describe '#create_new_key_pair' do
+      let( :region ) { double('region', :name => 'test_region_name') }
+
+      it 'imports the key given from public_key' do
+        ssh_string = 'ssh_string_test_0867'
+        allow( aws ).to receive( :public_key ).and_return( ssh_string )
+        pairs = double('keypairs')
+        pair_name = 'pair_name_1555432'
+        expect( pairs ).to receive( :import ).with( pair_name, ssh_string )
+        expect( region ).to receive(:key_pairs).and_return(pairs).once
+        aws.create_new_key_pair( region, pair_name )
       end
     end
 

@@ -1111,6 +1111,10 @@ module Beaker
               variant = ((variant == 'centos') ? 'el' : variant)
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
+            when /^(aix)$/
+              if arch == 'power' then arch = 'ppc' end
+              release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
+              release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
             when /^(debian|ubuntu|cumulus)$/
               if arch == 'x86_64'
                 arch = 'amd64'
@@ -1153,14 +1157,37 @@ module Beaker
               if arch == 'x86_64'
                 arch = 'i386'
               end
+              release_path << "solaris/#{version}/#{opts[:puppet_collection]}"
+              solaris_revision_conjunction = '-'
+              revision = '1'
               if version == '10'
                 # Solaris 10 uses / as the root user directory. Solaris 11 uses /root.
                 onhost_copy_base = '/'
+                solaris_release_version = ''
+                pkg_suffix = 'pkg.gz'
+                solaris_name_conjunction = '-'
+                component_version = opts[:puppet_agent_version]
+              elsif version == '11'
+                # Ref:
+                # http://www.oracle.com/technetwork/articles/servers-storage-admin/ips-package-versioning-2232906.html
+                #
+                # Example to show package name components:
+                #   Full package name: puppet-agent@1.2.5.38.6813,5.11-1.sparc.p5p
+                #   Schema: <component-name><solaris_name_conjunction><component_version><solaris_release_version><solaris_revision_conjunction><revision>.<arch>.<pkg_suffix>
+                solaris_release_version = ',5.11' # injecting comma to prevent from adding another var
+                pkg_suffix = 'p5p'
+                solaris_name_conjunction = '@'
+                component_version = opts[:puppet_agent_version].dup
+                component_version.gsub!(/[a-zA-Z]/, '')
+                component_version.gsub!(/(^-)|(-$)/, '')
+                # Here we strip leading 0 from version components but leave
+                # singular 0 on their own.
+                component_version = component_version.split('-').join('.')
+                component_version = component_version.split('.').map(&:to_i).join('.')
               end
-              release_path << "solaris/#{version}/#{opts[:puppet_collection]}"
-              release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{arch}.pkg.gz"
+              release_file = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}#{solaris_revision_conjunction}#{revision}.#{arch}.#{pkg_suffix}"
               if not link_exists?("#{release_path}/#{release_file}")
-                release_file = "puppet-agent-#{opts[:puppet_agent_version]}.#{arch}.pkg.gz"
+                release_file = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}.#{arch}.#{pkg_suffix}"
               end
             else
               raise "No repository installation step for #{variant} yet..."
@@ -1173,6 +1200,25 @@ module Beaker
             case variant
             when /^(fedora|el|centos|sles)$/
               on host, "rpm -ivh #{onhost_copied_file}"
+            when /^(aix)$/
+              # NOTE: AIX does not support repo management. This block assumes
+              # that the desired rpm has been mirrored to the 'repos' location.
+              #
+              # NOTE: tar is a dependency for puppet packages on AIX. So,
+              # we install it prior to the 'repo' file.
+              tar_pkg_path = "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/tar"
+              if version == "5.3" then
+                tar_pkg_file = "tar-1.14-2.aix5.1.ppc.rpm"
+              else
+                tar_pkg_file = "tar-1.22-1.aix6.1.ppc.rpm"
+              end
+              fetch_http_file( tar_pkg_path, tar_pkg_file, copy_dir_local)
+              scp_to host, File.join(copy_dir_local, tar_pkg_file), onhost_copy_base
+              onhost_copied_tar_file = File.join(onhost_copy_base, tar_pkg_file)
+              on host, "rpm -ivh #{onhost_copied_tar_file}"
+
+              # install the repo file
+              on host, "rpm -ivh #{onhost_copied_file}"
             when /^(debian|ubuntu|cumulus)$/
               on host, "dpkg -i --force-all #{onhost_copied_file}"
               on host, "apt-get update"
@@ -1184,7 +1230,8 @@ module Beaker
             when /^osx$/
               host.install_package("#{mac_pkg_name}*")
             when /^solaris$/
-              noask = <<NOASK
+              if version == '10'
+                noask = <<NOASK
 # Write the noask file to a temporary directory
 # please see man -s 4 admin for details about this file:
 # http://www.opensolarisforum.org/man/man4/admin.html
@@ -1214,8 +1261,11 @@ action=nocheck
 # Install to the default base directory.
 basedir=default
 NOASK
-              create_remote_file host, File.join(onhost_copy_base, 'noask'), noask
-              on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
+                create_remote_file host, File.join(onhost_copy_base, 'noask'), noask
+                on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
+              elsif version == '11'
+                on host, "pkg install -g #{release_file} puppet-agent"
+              end
             end
             configure_type_defaults_on( host )
           end
@@ -1339,6 +1389,58 @@ NOASK
         def install_cert_on_windows(host, cert_name, cert)
           create_remote_file(host, "C:\\Windows\\Temp\\#{cert_name}.pem", cert)
           on host, "certutil -v -addstore Root C:\\Windows\\Temp\\#{cert_name}.pem"
+        end
+
+        # Ensures Puppet and dependencies are no longer installed on host(s).
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        #
+        # @return nil
+        # @api public
+        def remove_puppet_on( hosts )
+          block_on hosts do |host|
+            cmdline_args = ''
+            # query packages
+            case host[:platform]
+            when /aix/
+              pkgs = on(host, "rpm -qa  | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+              pkgs.concat on(host, "rpm -q tar", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            when /solaris-10/
+              cmdline_args = '-a noask'
+              pkgs = on(host, "pkginfo | egrep '(^pe-|puppet)' | cut -f2 -d ' '", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            when /solaris-11/
+              pkgs = on(host, "pkg list | egrep '(^pe-|puppet)' | awk '{print $1}'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
+            else
+              raise "remove_puppet_on() called for unsupported " +
+                    "platform '#{host['platform']}' on '#{host.name}'"
+            end
+
+            # uninstall packages
+            host.uninstall_package(pkgs.join(' '), cmdline_args) if pkgs.length > 0
+
+            if host[:platform] =~ /solaris-11/ then
+              # FIXME: This leaves things in a state where Puppet Enterprise (3.x) cannot be cleanly installed
+              #        but is required to put things in a state that puppet-agent can be installed
+              # extra magic for expunging left over publisher
+              publishers = ['puppetlabs.com', 'com.puppetlabs']
+              publishers.each do |publisher|
+                if on(host, "pkg publisher #{publisher}", :acceptable_exit_codes => [0,1]).exit_code == 0 then
+                  # First, try to remove the publisher altogether
+                  if on(host, "pkg unset-publisher #{publisher}", :acceptable_exit_codes => [0,1]).exit_code == 1 then
+                    # If that doesn't work, we're in a non-global zone and the
+                    # publisher is from a global zone. As such, just remove any
+                    # references to the non-global zone uri.
+                    on(host, "pkg set-publisher -G '*' #{publisher}", :acceptable_exit_codes => [0,1])
+                  end
+                end
+              end
+            end
+
+            # delete any residual files
+            on(host, 'find / -name "*puppet*" -print | xargs rm -rf')
+
+          end
         end
       end
     end

@@ -92,6 +92,7 @@ module Beaker
     def cleanup
       # Provisioning should have set the host 'instance' values.
       kill_instances(@hosts.map{|h| h['instance']}.select{|x| !x.nil?})
+      delete_key_pair_all_regions()
       nil
     end
 
@@ -193,6 +194,7 @@ module Beaker
           end
         end
       end
+      delete_key_pair_all_regions(key_name_prefix)
 
       @logger.notify "#{key}: Killed #{kill_count} instance(s)"
     end
@@ -500,6 +502,10 @@ module Beaker
         instance.add_tag("department", :value => @options[:department])
         instance.add_tag("project", :value => @options[:project])
         instance.add_tag("created_by", :value => @options[:created_by])
+
+        host[:host_tags].each do |name, val|
+          instance.add_tag(name.to_s, :value => val)
+        end
       end
 
       nil
@@ -665,13 +671,23 @@ module Beaker
       File.read(key_file)
     end
 
+    # Generate a key prefix for key pair names
+    #
+    # @note This is the part of the key that will stay static between Beaker
+    #   runs on the same host.
+    #
+    # @return [String] Beaker key pair name based on sanitized hostname
+    def key_name_prefix
+      safe_hostname = Socket.gethostname.gsub('.', '-')
+      "Beaker-#{local_user}-#{safe_hostname}"
+    end
+
     # Generate a reusable key name from the local hosts hostname
     #
     # @return [String] safe key name for current host
     # @api private
     def key_name
-      safe_hostname = Socket.gethostname.gsub('.', '-')
-      "Beaker-#{local_user}-#{safe_hostname}"
+      "#{key_name_prefix}-#{@options[:timestamp].strftime("%F_%H_%M_%S")}"
     end
 
     # Returns the local user running this tool
@@ -682,22 +698,86 @@ module Beaker
       ENV['USER']
     end
 
-    # Returns the KeyPair for this host, creating it if needed
+    # Creates the KeyPair for this test run
     #
     # @param region [AWS::EC2::Region] region to create the key pair in
     # @return [AWS::EC2::KeyPair] created key_pair
     # @api private
     def ensure_key_pair(region)
-      @logger.notify("aws-sdk: Ensure key pair exists, create if not")
-      key_pairs = region.key_pairs
       pair_name = key_name()
-      kp = key_pairs[pair_name]
-      unless kp.exists?
-        ssh_string = public_key()
-        kp = key_pairs.import(pair_name, ssh_string)
-      end
+      delete_key_pair(region, pair_name)
+      create_new_key_pair(region, pair_name)
+    end
 
-      kp
+    # Deletes key pairs from all regions
+    #
+    # @param [String] keypair_name_filter if given, will get all keypairs that match
+    #   a simple {::String#start_with?} filter. If no filter is given, the basic key
+    #   name returned by {#key_name} will be used.
+    #
+    # @return nil
+    # @api private
+    def delete_key_pair_all_regions(keypair_name_filter=nil)
+      region_keypairs_hash = my_key_pairs(keypair_name_filter)
+      region_keypairs_hash.each_pair do |region, keypair_name_array|
+        keypair_name_array.each do |keypair_name|
+          delete_key_pair(region, keypair_name)
+        end
+      end
+    end
+
+    # Gets the Beaker user's keypairs by region
+    #
+    # @param [String] name_filter if given, will get all keypairs that match
+    #   a simple {::String#start_with?} filter. If no filter is given, the basic key
+    #   name returned by {#key_name} will be used.
+    #
+    # @return [Hash{AWS::EC2::Region=>Array[String]}] a hash of region instance to
+    #   an array of the keypair names that match for the filter
+    # @api private
+    def my_key_pairs(name_filter=nil)
+      keypairs_by_region = {}
+      keyname_default = key_name()
+      keyname_filtered = "#{name_filter}-*"
+      @ec2.regions.each do |region|
+        if name_filter
+          aws_name_filter = keyname_filtered
+        else
+          aws_name_filter = keyname_default
+        end
+        keypair_collection = region.key_pairs.filter('key-name', aws_name_filter)
+        keypair_collection.each do |keypair|
+          keypairs_by_region[region] ||= []
+          keypairs_by_region[region] << keypair.name
+        end
+      end
+      keypairs_by_region
+    end
+
+    # Deletes a given key pair
+    #
+    # @param [AWS::EC2::Region] region the region the key belongs to
+    # @param [String] pair_name the name of the key to be deleted
+    #
+    # @api private
+    def delete_key_pair(region, pair_name)
+      kp = region.key_pairs[pair_name]
+      if kp.exists?
+        @logger.debug("aws-sdk: delete key pair in region: #{region.name}")
+        kp.delete()
+      end
+    end
+
+    # Create a new key pair for a given Beaker run
+    #
+    # @param [AWS::EC2::Region] region the region the key pair will be imported into
+    # @param [String] pair_name the name of the key to be created
+    #
+    # @return [AWS::EC2::KeyPair] key pair created
+    def create_new_key_pair(region, pair_name)
+      @logger.debug("aws-sdk: generating new key pair: #{pair_name}")
+      ssh_string = public_key()
+      region.key_pairs.import(pair_name, ssh_string)
     end
 
     # Return a reproducable security group identifier based on input ports

@@ -325,6 +325,14 @@ module Beaker
           if host[:platform] =~ /windows|el-4/
             test_host_roles(name, host)
           end
+
+          #check to see if a custom user account has been provided, if so use it
+          if host[:ssh] && host[:ssh][:user]
+            host[:user] = host[:ssh][:user]
+          end
+
+          # merge host tags for this host with the global/preset host tags
+          host[:host_tags] = @options[:host_tags].merge(host[:host_tags] || {})
         end
 
         normalize_and_validate_tags()
@@ -332,14 +340,6 @@ module Beaker
 
         #set the default role
         set_default_host!(@options[:HOSTS])
-
-        #check to see if a custom user account has been provided, if so use it
-        @options[:HOSTS].each_key do |name|
-          host = @options[:HOSTS][name]
-          if host[:ssh] && host[:ssh][:user]
-            host[:user] = host[:ssh][:user]
-          end
-        end
 
       end
 

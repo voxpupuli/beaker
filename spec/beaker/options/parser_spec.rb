@@ -292,6 +292,7 @@ module Beaker
             },
             'fail_mode' => 'slow',
             'preserve_hosts' => 'always',
+            'host_tags' => {}
           })
         end
 
