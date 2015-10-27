@@ -8,6 +8,12 @@ module Unix::Exec
       exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
     end
     sleep(10) #if we attempt a reconnect too quickly we end up blocking ¯\_(ツ)_/¯
+
+    # Our SSH connection can save the old IP address (even if the host IP changes
+    # on reboot), and we also may store the IP address in self['ip']. Ensure that
+    # an IP change across reboot will access the host directly.
+    self['ip'] = nil
+    close
   end
 
   def echo(msg, abs=true)
