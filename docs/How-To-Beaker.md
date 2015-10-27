@@ -3,5 +3,5 @@
 * [Creating A Test Environment](Creating-A-Test-Environment.md)
 * [The Command Line](The-Command-Line.md)
 * [The Beaker DSL](The-Beaker-DSL.md)
-* [Let's Write a Test!](Let%27s-Write-a-Test!.md)
+* [Let's Write a Test!](Lets-Write-a-Test.md)
 * [Access The Live Test Console with Pry](Access-the-Live-Test-Console-with-Pry.md)
