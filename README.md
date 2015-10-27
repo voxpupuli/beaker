@@ -8,7 +8,7 @@ See [Beaker Installation](https://github.com/puppetlabs/beaker/wiki/Beaker-Insta
 
 #Documentation
 
-Documentation for Beaker can be found in this repository in [the docs/ folder](docs/Home.md).
+Documentation for Beaker can be found in this repository in [the docs/ folder](docs/README.md).
 
 #Beaker API
 
