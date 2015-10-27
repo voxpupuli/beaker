@@ -87,9 +87,12 @@ end
 #      assert_equal expected, user
 #    end
 #
-# Re-raises any MiniTest::Assertion from a failing test assertion in the block.
+# Absorbs any MiniTest::Assertion from a failing test assertion in the block.
+# This implies that the intermittent failure is caught and the suite will not
+# go red for this failure. Intended to be used with the Jenkins Build Failure
+# Analyzer (or similar), to detect these failures without failing the build.
 #
-# Returns the value of the yielded block when no test assertion fails.
+# Returns the value of the yielded block.
 def fails_intermittently(issue_link, args = {}, &block)
   raise ArgumentError, "provide a Jira ticket link" unless issue_link
   raise ArgumentError, "a block is required" unless block_given?
