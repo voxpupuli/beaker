@@ -1180,17 +1180,14 @@ describe ClassMixedWithDSLInstallUtils do
 
     pkg_list = 'foo bar'
 
-    it 'uninstalls packages on aix, including tar' do
-      aix_depend_list = 'tar'
+    it 'uninstalls packages on aix' do
       result = Beaker::Result.new(aixhost,'')
       result.stdout = pkg_list
-      result2 = Beaker::Result.new(aixhost,'')
-      result2.stdout = aix_depend_list
 
-      expected_list = pkg_list + " " + aix_depend_list
+      expected_list = pkg_list
       cmd_args = ''
 
-      expect( subject ).to receive(:on).exactly(3).times.and_return(result, result2, result)
+      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
       expect( aixhost ).to receive(:uninstall_package).with(expected_list, cmd_args)
 
       subject.remove_puppet_on( aixhost )

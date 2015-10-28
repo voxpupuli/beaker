@@ -1212,19 +1212,6 @@ module Beaker
             when /^(aix)$/
               # NOTE: AIX does not support repo management. This block assumes
               # that the desired rpm has been mirrored to the 'repos' location.
-              #
-              # NOTE: tar is a dependency for puppet packages on AIX. So,
-              # we install it prior to the 'repo' file.
-              tar_pkg_path = "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/tar"
-              if version == "5.3" then
-                tar_pkg_file = "tar-1.14-2.aix5.1.ppc.rpm"
-              else
-                tar_pkg_file = "tar-1.22-1.aix6.1.ppc.rpm"
-              end
-              fetch_http_file( tar_pkg_path, tar_pkg_file, copy_dir_local)
-              scp_to host, File.join(copy_dir_local, tar_pkg_file), onhost_copy_base
-              onhost_copied_tar_file = File.join(onhost_copy_base, tar_pkg_file)
-              on host, "rpm -ivh #{onhost_copied_tar_file}"
 
               # install the repo file
               on host, "rpm -ivh #{onhost_copied_file}"
@@ -1416,7 +1403,6 @@ NOASK
               pkgs = on(host, "dpkg-query -l  | awk '{print $2}' | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
             when /aix/
               pkgs = on(host, "rpm -qa  | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
-              pkgs.concat on(host, "rpm -q tar", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
             when /solaris-10/
               cmdline_args = '-a noask'
               pkgs = on(host, "pkginfo | egrep '(^pe-|puppet)' | cut -f2 -d ' '", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
