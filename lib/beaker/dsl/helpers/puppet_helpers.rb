@@ -300,8 +300,18 @@ module Beaker
           new_conf
         end
 
+        # Restarts the named puppet service
+        #
+        # @param [Host] host Host the service runs on
+        # @param [String] service Name of the service to restart
+        # @param [Fixnum] curl_retries Number of times to retry the restart command
+        # @param [Fixnum] port Port to check status at
+        #
+        # @return [Result] Result of last status check
         # @!visibility private
-        def bounce_service host, service, curl_retries = 120
+        def bounce_service host, service, curl_retries = nil, port = nil
+          curl_retries = 120 if curl_retries.nil?
+          port = options[:puppetserver_port] if port.nil?
           if host.graceful_restarts?
             apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/apache2ctl" : 'apache2ctl'
             host.exec(Command.new("#{apachectl_path} graceful"))
@@ -309,7 +319,7 @@ module Beaker
             host.exec puppet_resource('service', service, 'ensure=stopped')
             host.exec puppet_resource('service', service, 'ensure=running')
           end
-          curl_with_retries(" #{service} ", host, "https://localhost:8140", [35, 60], curl_retries)
+          curl_with_retries(" #{service} ", host, "https://localhost:#{port}", [35, 60], curl_retries)
         end
 
         # Runs 'puppet apply' on a remote host, piping manifest through stdin
@@ -596,21 +606,45 @@ module Beaker
           stub_forge_on(default, forge_host)
         end
 
-        def sleep_until_puppetdb_started(host)
-          curl_with_retries("start puppetdb", host, "http://localhost:8080", 0, 120)
+        # Waits until a successful curl check has happened against puppetdb
+        #
+        # @param [Host] host Host puppetdb is on
+        # @param [Fixnum] nonssl_port Port to make the HTTP status check over
+        # @param [Fixnum] ssl_port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_puppetdb_started(host, nonssl_port = nil, ssl_port = nil)
+          nonssl_port = options[:puppetdb_port_nonssl] if nonssl_port.nil?
+          ssl_port = options[:puppetdb_port_ssl] if ssl_port.nil?
+          curl_with_retries("start puppetdb", host, "http://localhost:#{nonssl_port}", 0, 120)
           curl_with_retries("start puppetdb (ssl)",
-                            host, "https://#{host.node_name}:8081", [35, 60])
+                            host, "https://#{host.node_name}:#{ssl_port}", [35, 60])
         end
 
-        def sleep_until_puppetserver_started(host)
+        # Waits until a successful curl check has happened against puppetserver
+        #
+        # @param [Host] host Host puppetserver is on
+        # @param [Fixnum] port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_puppetserver_started(host, port = nil)
+          port = options[:puppetserver_port] if port.nil?
           curl_with_retries("start puppetserver (ssl)",
-                            host, "https://#{host.node_name}:8140", [35, 60])
+                            host, "https://#{host.node_name}:#{port}", [35, 60])
         end
 
-        def sleep_until_nc_started(host)
+        # Waits until a successful curl check has happaned against node classifier
+        #
+        # @param [Host] host Host node classifier is on
+        # @param [Fixnum] port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_nc_started(host, port = nil)
+          port = options[:nodeclassifier_port] if port.nil?
           curl_with_retries("start nodeclassifier (ssl)",
-                            host, "https://#{host.node_name}:4433", [35, 60])
+                            host, "https://#{host.node_name}:#{port}", [35, 60])
         end
+
         #stops the puppet agent running on the host
         # @param [Host, Array<Host>, String, Symbol] agent    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
