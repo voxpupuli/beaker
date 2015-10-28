@@ -1175,6 +1175,7 @@ describe ClassMixedWithDSLInstallUtils do
     let(:aixhost) { make_host('aix', :platform => 'aix-53-power') }
     let(:sol10host) { make_host('sol10', :platform => 'solaris-10-x86_64') }
     let(:sol11host) { make_host('sol11', :platform => 'solaris-11-x86_64') }
+    let(:cumulushost) { make_host('cumulus', :platform => 'cumulus-2.2-amd64') }
     let(:el6host) { make_host('el6', :platform => 'el-6-x64') }
 
     pkg_list = 'foo bar'
@@ -1219,6 +1220,19 @@ describe ClassMixedWithDSLInstallUtils do
       expect( sol11host ).to receive(:uninstall_package).with(expected_list, cmd_args)
 
       subject.remove_puppet_on( sol11host  )
+    end
+
+    it 'uninstalls packages on cumulus' do
+      result = Beaker::Result.new(cumulushost,'')
+      result.stdout = pkg_list
+
+      expected_list = pkg_list
+      cmd_args = ''
+
+      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
+      expect( cumulushost ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+      subject.remove_puppet_on( cumulushost  )
     end
 
     it 'raises error on other platforms' do
