@@ -687,7 +687,7 @@ module Beaker
     # @return [String] safe key name for current host
     # @api private
     def key_name
-      "#{key_name_prefix}-#{@options[:timestamp].strftime("%F_%H_%M_%S")}"
+      "#{key_name_prefix}-#{@options[:aws_keyname_modifier]}-#{@options[:timestamp].strftime("%F_%H_%M_%S_%N")}"
     end
 
     # Returns the local user running this tool
