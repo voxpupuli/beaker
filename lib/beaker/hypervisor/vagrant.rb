@@ -84,7 +84,7 @@ module Beaker
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
         ssh_config = Dir.chdir(@vagrant_path) do
-          stdin, stdout, stderr, wait_thr = Open3.popen3('vagrant', 'ssh-config', host.name)
+          stdin, stdout, stderr, wait_thr = Open3.popen3(@vagrant_env, 'vagrant', 'ssh-config', host.name)
           if not wait_thr.value.success?
             raise "Failed to 'vagrant ssh-config' for #{host.name}"
           end
@@ -128,7 +128,7 @@ module Beaker
       @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', '.vagrant', 'beaker_vagrant_files', File.basename(options[:hosts_file])))
       FileUtils.mkdir_p(@vagrant_path)
       @vagrant_file = File.expand_path(File.join(@vagrant_path, "Vagrantfile"))
-
+      @vagrant_env = { "RUBYLIB" => "" }
     end
 
     def provision(provider = nil)
@@ -182,7 +182,7 @@ module Beaker
     def vagrant_cmd(args)
       Dir.chdir(@vagrant_path) do
         exit_status = 1
-        Open3.popen3("vagrant #{args}") {|stdin, stdout, stderr, wait_thr|
+        Open3.popen3(@vagrant_env, "vagrant #{args}") {|stdin, stdout, stderr, wait_thr|
           while line = stdout.gets
             @logger.info(line)
           end

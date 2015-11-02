@@ -196,7 +196,7 @@ EOF
       allow( state ).to receive( :success? ).and_return( true )
       wait_thr.value = state
 
-      allow( Open3 ).to receive( :popen3 ).with( 'vagrant', 'ssh-config', name ).and_return( [ "", out, "", wait_thr ])
+      allow( Open3 ).to receive( :popen3 ).with( {"RUBYLIB"=>""}, 'vagrant', 'ssh-config', name ).and_return( [ "", out, "", wait_thr ])
 
       file = double( 'file' )
       allow( file ).to receive( :path ).and_return( '/path/sshconfig' )
