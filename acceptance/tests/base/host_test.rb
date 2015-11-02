@@ -1,3 +1,5 @@
+require "helpers/test_helper"
+
 test_name "confirm host object behave correctly"
 
 step "#port_open? : can determine if a port is open on hosts"
@@ -173,8 +175,13 @@ hosts.each do |host|
   end
 end
 
-step "#reboot: can reboot the host"
-hosts.each do |host|
-  host.reboot
-  on host, "echo #{host} rebooted!"
-end
+# TODO: re-enable via resolution of QENG-3063
+#
+# step "#reboot: can reboot the host"
+# hosts.each do |host|
+#   host.reboot
+#   fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3063",
+#     "host" => "#{host}") do
+#     on host, "echo #{host} rebooted!"
+#   end
+# end

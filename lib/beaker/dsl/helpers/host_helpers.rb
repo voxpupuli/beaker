@@ -396,7 +396,6 @@ module Beaker
           on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
-
         def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
           opts = {
             :desired_exit_codes => desired_exit_codes,
@@ -531,7 +530,6 @@ module Beaker
         # @param [String] val The string to 'echo' on the host(s)
         # @return [String, Array<String> The echo'ed value(s) returned by the host(s)
         def echo_on hosts, val
-          #val = val.gsub(/"/, "\"").gsub(/\(/, "\(")
           block_on hosts do |host|
             if host.is_powershell?
               host.exec(Command.new("echo #{val}")).stdout.chomp
@@ -540,8 +538,6 @@ module Beaker
             end
           end
         end
-
-
       end
     end
   end
