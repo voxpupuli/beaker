@@ -11,7 +11,7 @@ module Mac::Pkg
   end
 
   def uninstall_package(name, cmdline_args = '')
-    raise "Package #{name} cannot be installed on #{self}"
+    raise "Package #{name} cannot be uninstalled on #{self}"
   end
 
   # Upgrade an installed package to the latest available version
