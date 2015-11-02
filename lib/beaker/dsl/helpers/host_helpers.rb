@@ -422,6 +422,8 @@ module Beaker
         # @option opts [Float] :retry_interval (1) number of seconds
         #   that we'll wait between tries
         # @option opts [Boolean] :verbose (false)
+        #
+        # @return [Result] Result object of the last command execution
         def retry_on(host, command, opts = {}, &block)
           option_exit_codes     = opts[:desired_exit_codes]
           option_max_retries    = opts[:max_retries].to_i

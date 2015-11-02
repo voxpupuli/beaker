@@ -120,6 +120,24 @@ module Unix::Pkg
     end
   end
 
+  # Install a package using RPM
+  #
+  # @param [String] name          The name of the package to install.  It
+  #                               may be a filename or a URL.
+  # @param [String] cmdline_args  Additional command line arguments for
+  #                               the package manager.
+  # @option opts [String] :package_proxy  A proxy of form http://host:port
+  # 
+  # @return nil
+  # @api public
+  def install_package_with_rpm(name, cmdline_args = '', opts = {})
+    proxy = ''
+    if name =~ /^http/ and opts[:package_proxy]
+      proxy = extract_rpm_proxy_options(opts[:package_proxy])
+    end
+    execute("rpm #{cmdline_args} -ivh #{name} #{proxy}")
+  end
+
   def uninstall_package(name, cmdline_args = '', opts = {})
     case self['platform']
       when /sles-/
@@ -249,6 +267,24 @@ module Unix::Pkg
     else
       result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
       result.exit_code == 0
+    end
+  end
+
+  # Extract RPM command's proxy options from URL
+  #
+  # @param [String] url  A URL of form http://host:port
+  # @return [String]     httpproxy and httport options for rpm
+  #
+  # @raise [StandardError] When encountering a string that 
+  #                        cannot be parsed
+  # @api private
+  def extract_rpm_proxy_options(url)
+    begin
+      host, port = url.match(/https?:\/\/(.*):(\d*)/)[1,2]
+      raise if host.empty? or port.empty?
+      "--httpproxy #{host} --httpport #{port}"
+    rescue
+      raise "Cannot extract host and port from '#{url}'"
     end
   end
 

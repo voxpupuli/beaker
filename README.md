@@ -8,8 +8,7 @@ See [Beaker Installation](https://github.com/puppetlabs/beaker/wiki/Beaker-Insta
 
 #Documentation
 
-Documentation for Beaker can be found online at the
-[Beaker Wiki](https://github.com/puppetlabs/beaker/wiki).
+Documentation for Beaker can be found in this repository in [the docs/ folder](docs/README.md).
 
 #Beaker API
 
@@ -22,4 +21,3 @@ See [LICENSE](LICENSE) file.
 #Support
 
 Please log tickets and issues at our [Beaker Issue Tracker](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR).  In addition there is an active #puppet-dev channel on Freenode.
-

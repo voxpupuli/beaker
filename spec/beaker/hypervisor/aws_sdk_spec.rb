@@ -654,11 +654,18 @@ module Beaker
         expect( Socket ).to receive(:gethostname) { "foobar" }
         expect( aws ).to receive(:local_user) { "bob" }
 
-        options[:timestamp] = Time.now
-        date_part = options[:timestamp].strftime("%F_%H_%M_%S")
-
         # Should match the expected composite key name
-        expect(aws.key_name).to eq("Beaker-bob-foobar-#{date_part}")
+        expect(aws.key_name).to match(/^Beaker-bob-foobar-/)
+      end
+
+      it 'uses the generated random string from :aws_keyname_modifier' do
+        expect(aws.key_name).to match(/#{options[:aws_keyname_modifier]}/)
+      end
+
+      it 'uses nanosecond time value to make key name collision harder' do
+        options[:timestamp] = Time.now
+        nanosecond_value = options[:timestamp].strftime("%N")
+        expect(aws.key_name).to match(/#{nanosecond_value}/)
       end
     end
 
@@ -672,60 +679,14 @@ module Beaker
     describe '#ensure_key_pair' do
       let( :region ) { double('region', :name => 'test_region_name') }
       subject(:ensure_key_pair) { aws.ensure_key_pair(region) }
+      let( :key_name ) { "Beaker-rspec-SUT" }
 
-      context 'when a beaker keypair already exists' do
-        it 'returns the keypair if available' do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          key_pair = double(:exists? => true, :secret => 'supersekritkey', :delete => true)
-          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
-          key_pairs = { "Beaker-rspec-SUT" => key_pair }
+      it 'deletes the given keypair, then recreates it' do
+        allow( aws ).to receive( :key_name ).and_return(key_name)
 
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
-          expect( key_pairs ).to receive( :import ).and_return(key_pair)
-          expect(ensure_key_pair).to eq(key_pair)
-        end
-
-        it 'generates a new keypair if :generate_new_keypair set' do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          key_pair = double(:exists? => true, :secret => 'keyOfSekritz', :delete => true)
-          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
-          key_pairs = { "Beaker-rspec-SUT" => key_pair }
-          options[:keypair_generate_new] = true
-
-          answer = 'You get a keypair!  You get a keypair!  And you get a keypair too!'
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
-          expect( key_pairs ).to receive( :import ).and_return(answer)
-          returned_keypair = ensure_key_pair
-          expect(returned_keypair).not_to eq(key_pair)
-          expect(returned_keypair).to eq(answer)
-        end
-      end
-
-      context 'when a pre-existing keypair cannot be found' do
-        let( :key_name ) { "Beaker-rspec-SUT" }
-        let( :key_pair ) { double(:exists? => false) }
-        let( :key_pairs ) { { key_name => key_pair } }
-        let( :pubkey ) { "Beaker-rspec-SUT_secret-key" }
-
-        before :each do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          allow( aws ).to receive( :key_name ).and_return(key_name)
-        end
-
-        it 'imports a new key based on user pubkey' do
-          allow(aws).to receive(:public_key).and_return(pubkey)
-          expect( key_pairs ).to receive(:import).with(key_name, pubkey)
-          expect(ensure_key_pair)
-        end
-
-        it 'returns imported keypair' do
-          allow(aws).to receive(:public_key)
-          expect( key_pairs ).to receive(:import).and_return(key_pair).once
-          expect(ensure_key_pair).to eq(key_pair)
-        end
+        expect( aws ).to receive( :delete_key_pair ).with( region, key_name).once.ordered
+        expect( aws ).to receive( :create_new_key_pair ).with( region, key_name).once.ordered
+        ensure_key_pair
       end
     end
 

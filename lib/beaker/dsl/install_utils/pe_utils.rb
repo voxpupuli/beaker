@@ -102,9 +102,7 @@ module Beaker
             pe_debug = host[:pe_debug] || opts[:pe_debug] ? ' -verboseR' : ''
             "cd #{host['working_dir']} && hdiutil attach #{host['dist']}.dmg && installer#{pe_debug} -pkg /Volumes/puppet-enterprise-#{version}/puppet-enterprise-installer-#{version}.pkg -target /"
           elsif host['platform'] =~ /eos/
-            commands = ['enable', "extension puppet-enterprise-#{version}-#{host['platform']}.swix"]
-            command = commands.join("\n")
-            "Cli -c '#{command}'"
+            host.install_from_file("puppet-enterprise-#{version}-#{host['platform']}.swix")
           else
             pe_debug = host[:pe_debug] || opts[:pe_debug]  ? ' -D' : ''
             "cd #{host['working_dir']}/#{host['dist']} && ./#{host['pe_installer']}#{pe_debug} -a #{host['working_dir']}/answers"
@@ -218,9 +216,7 @@ module Beaker
             end
 
             if host['platform'] =~ /eos/
-              commands = ['enable', "copy #{path}/#{filename}#{extension} extension:"]
-              command = commands.join("\n")
-              on host, "Cli -c '#{command}'"
+              host.get_remote_file("#{path}/#{filename}#{extension}")
             else
               unpack = 'tar -xvf -'
               unpack = extension =~ /gz/ ? 'gunzip | ' + unpack  : unpack

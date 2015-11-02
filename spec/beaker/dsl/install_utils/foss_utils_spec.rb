@@ -419,7 +419,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on el-6' do
       let(:platform) { Beaker::Platform.new('el-6-i386') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-6\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-el-6\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -437,7 +437,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on el-5' do
       let(:platform) { Beaker::Platform.new('el-5-i386') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-el-5\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-el-5\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -445,7 +445,7 @@ describe ClassMixedWithDSLInstallUtils do
     context 'on fedora' do
       let(:platform) { Beaker::Platform.new('fedora-18-x86_84') }
       it 'installs' do
-        expect(subject).to receive(:on).with(hosts[0], /puppetlabs-release-fedora-18\.noarch\.rpm/)
+        expect(hosts[0]).to receive(:install_package_with_rpm).with(/puppetlabs-release-fedora-18\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
@@ -603,16 +603,6 @@ describe ClassMixedWithDSLInstallUtils do
         expect(subject).to receive(:on).with( host, /wget .*/ ).ordered
         expect(subject).to receive(:on).with( host, /dpkg .*/ ).ordered
         expect(subject).to receive(:on).with( host, "apt-get update" ).ordered
-        subject.install_puppetlabs_release_repo host
-      end
-
-    end
-
-    describe "When host is a redhat-like platform" do
-      let( :platform ) { Beaker::Platform.new('el-7-i386') }
-
-      it "installs an rpm" do
-        expect(subject).to receive(:on).with( host, /^(rpm --replacepkgs -ivh).*/ ).ordered
         subject.install_puppetlabs_release_repo host
       end
 
@@ -1208,21 +1198,19 @@ describe ClassMixedWithDSLInstallUtils do
     let(:aixhost) { make_host('aix', :platform => 'aix-53-power') }
     let(:sol10host) { make_host('sol10', :platform => 'solaris-10-x86_64') }
     let(:sol11host) { make_host('sol11', :platform => 'solaris-11-x86_64') }
+    let(:cumulushost) { make_host('cumulus', :platform => 'cumulus-2.2-amd64') }
     let(:el6host) { make_host('el6', :platform => 'el-6-x64') }
 
     pkg_list = 'foo bar'
 
-    it 'uninstalls packages on aix, including tar' do
-      aix_depend_list = 'tar'
+    it 'uninstalls packages on aix' do
       result = Beaker::Result.new(aixhost,'')
       result.stdout = pkg_list
-      result2 = Beaker::Result.new(aixhost,'')
-      result2.stdout = aix_depend_list
 
-      expected_list = pkg_list + " " + aix_depend_list
+      expected_list = pkg_list
       cmd_args = ''
 
-      expect( subject ).to receive(:on).exactly(3).times.and_return(result, result2, result)
+      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
       expect( aixhost ).to receive(:uninstall_package).with(expected_list, cmd_args)
 
       subject.remove_puppet_on( aixhost )
@@ -1252,6 +1240,19 @@ describe ClassMixedWithDSLInstallUtils do
       expect( sol11host ).to receive(:uninstall_package).with(expected_list, cmd_args)
 
       subject.remove_puppet_on( sol11host  )
+    end
+
+    it 'uninstalls packages on cumulus' do
+      result = Beaker::Result.new(cumulushost,'')
+      result.stdout = pkg_list
+
+      expected_list = pkg_list
+      cmd_args = ''
+
+      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
+      expect( cumulushost ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+      subject.remove_puppet_on( cumulushost  )
     end
 
     it 'raises error on other platforms' do

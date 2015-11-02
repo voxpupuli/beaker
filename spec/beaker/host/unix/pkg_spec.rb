@@ -145,6 +145,48 @@ module Beaker
 
     end
 
+    context "install_package_with_rpm" do
+
+      it "accepts a package as a single argument" do
+        @opts = {'platform' => 'el-is-me'}
+        pkg = 'redhat_package'
+        expect( Beaker::Command ).to receive(:new).with("rpm  -ivh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package_with_rpm(pkg) ).to be == "hello"
+      end
+
+      it "accepts a package and additional options" do
+        @opts = {'platform' => 'el-is-me'}
+        pkg = 'redhat_package'
+        cmdline_args = '--foo'
+        expect( Beaker::Command ).to receive(:new).with("rpm #{cmdline_args} -ivh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package_with_rpm(pkg, cmdline_args) ).to be == "hello"
+      end
+
+    end
+
+    context 'extract_rpm_proxy_options' do
+
+      [ 'http://myproxy.com:3128/',
+        'https://myproxy.com:3128/',
+        'https://myproxy.com:3128',
+        'http://myproxy.com:3128',
+      ].each do |url|
+        it "correctly extracts rpm proxy options for #{url}" do
+          expect( instance.extract_rpm_proxy_options(url) ).to be == '--httpproxy myproxy.com --httpport 3128'
+        end
+      end
+
+      url = 'http:/myproxy.com:3128'
+      it "fails to extract rpm proxy options for #{url}" do
+        expect{
+          instance.extract_rpm_proxy_options(url)
+        }.to raise_error(RuntimeError, /Cannot extract host and port/)
+      end
+
+    end
+
   end
 end
 

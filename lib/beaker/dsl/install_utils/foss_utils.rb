@@ -861,11 +861,10 @@ module Beaker
             case variant
             when /^(fedora|el|centos)$/
               variant = (($1 == 'centos') ? 'el' : $1)
+              remote = "%s/puppetlabs-release%s-%s-%s.noarch.rpm" % [opts[:release_yum_repo_url],
+		                                                       repo_name, variant, version]
 
-              rpm = "puppetlabs-release%s-%s-%s.noarch.rpm" % [repo_name, variant, version]
-              remote = URI.join( opts[:release_yum_repo_url], rpm )
-
-              on host, "rpm --replacepkgs -ivh #{remote}"
+	      host.install_package_with_rpm(remote, '--replacepkgs', {:package_proxy => opts[:package_proxy]})
 
             when /^(debian|ubuntu|cumulus)$/
               deb = "puppetlabs-release%s-%s.deb" % [repo_name, codename]
@@ -1107,6 +1106,10 @@ module Beaker
             onhost_copy_base = opts[:copy_dir_external]
 
             case variant
+            when /^eos/
+              release_path_end, release_file = host.get_puppet_agent_package_info(
+                opts[:puppet_collection], opts[:puppet_agent_version] )
+              release_path << release_path_end
             when /^(fedora|el|centos|sles)$/
               variant = ((variant == 'centos') ? 'el' : variant)
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
@@ -1193,29 +1196,22 @@ module Beaker
               raise "No repository installation step for #{variant} yet..."
             end
 
-            onhost_copied_file = File.join(onhost_copy_base, release_file)
-            fetch_http_file( release_path, release_file, copy_dir_local)
-            scp_to host, File.join(copy_dir_local, release_file), onhost_copy_base
+            if host['platform'] =~ /eos/
+              host.get_remote_file( "#{release_path}/#{release_file}" )
+            else
+              onhost_copied_file = File.join(onhost_copy_base, release_file)
+              fetch_http_file( release_path, release_file, copy_dir_local)
+              scp_to host, File.join(copy_dir_local, release_file), onhost_copy_base
+            end
 
             case variant
+            when /^eos/
+              host.install_from_file( release_file )
             when /^(fedora|el|centos|sles)$/
               on host, "rpm -ivh #{onhost_copied_file}"
             when /^(aix)$/
               # NOTE: AIX does not support repo management. This block assumes
               # that the desired rpm has been mirrored to the 'repos' location.
-              #
-              # NOTE: tar is a dependency for puppet packages on AIX. So,
-              # we install it prior to the 'repo' file.
-              tar_pkg_path = "ftp://ftp.software.ibm.com/aix/freeSoftware/aixtoolbox/RPMS/ppc/tar"
-              if version == "5.3" then
-                tar_pkg_file = "tar-1.14-2.aix5.1.ppc.rpm"
-              else
-                tar_pkg_file = "tar-1.22-1.aix6.1.ppc.rpm"
-              end
-              fetch_http_file( tar_pkg_path, tar_pkg_file, copy_dir_local)
-              scp_to host, File.join(copy_dir_local, tar_pkg_file), onhost_copy_base
-              onhost_copied_tar_file = File.join(onhost_copy_base, tar_pkg_file)
-              on host, "rpm -ivh #{onhost_copied_tar_file}"
 
               # install the repo file
               on host, "rpm -ivh #{onhost_copied_file}"
@@ -1403,9 +1399,10 @@ NOASK
             cmdline_args = ''
             # query packages
             case host[:platform]
+            when /cumulus/
+              pkgs = on(host, "dpkg-query -l  | awk '{print $2}' | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
             when /aix/
               pkgs = on(host, "rpm -qa  | grep -E '(^pe-|puppet)'", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
-              pkgs.concat on(host, "rpm -q tar", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
             when /solaris-10/
               cmdline_args = '-a noask'
               pkgs = on(host, "pkginfo | egrep '(^pe-|puppet)' | cut -f2 -d ' '", :acceptable_exit_codes => [0,1]).stdout.chomp.split(/\n+/)
