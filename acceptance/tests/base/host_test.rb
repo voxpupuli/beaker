@@ -175,13 +175,8 @@ hosts.each do |host|
   end
 end
 
-# TODO: re-enable via resolution of QENG-3063
-#
-# step "#reboot: can reboot the host"
-# hosts.each do |host|
-#   host.reboot
-#   fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3063",
-#     "host" => "#{host}") do
-#     on host, "echo #{host} rebooted!"
-#   end
-# end
+step "#reboot: can reboot the host"
+hosts.each do |host|
+  host.reboot
+  on host, "echo #{host} rebooted!"
+end
