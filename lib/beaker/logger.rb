@@ -357,6 +357,7 @@ module Beaker
         to.print color_code if @color
         to.send print_statement, msg
         to.print NORMAL if @color unless color_code == NONE
+        to.flush
       end
     end
 
