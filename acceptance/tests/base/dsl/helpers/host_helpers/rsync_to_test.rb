@@ -86,13 +86,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         remote_contents = on(default, "cat #{remote_filename}").stdout
 
-        fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
-          "default"         => default,
-          "remote_filename" => remote_filename,
-          "result"          => result.inspect,
-        ) do
-          assert_equal contents, remote_contents
-        end
+        assert_equal contents, remote_contents
       end
     end
 

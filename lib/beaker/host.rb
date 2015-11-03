@@ -115,7 +115,7 @@ module Beaker
       host_hash[k] = v
     end
 
-    # Does this host have this key?  Either as defined in the host itself, or globally? 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def [] k
       host_hash[k] || options[k]
     end
@@ -467,7 +467,7 @@ module Beaker
       end
 
       # We disable prompt when host isn't known
-      ssh_args << "-o 'StrictHostKeyChecking no'"
+      ssh_args << "-o 'StrictHostKeyChecking=no'"
 
       if not ssh_args.empty?
         rsync_args << "-e \"ssh #{ssh_args.join(' ')}\""
@@ -487,6 +487,7 @@ module Beaker
       end
 
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
+      @logger.debug "rsync argumemnts: #{rsync_args.inspect}"
       result = Rsync.run(from_path, to_path, rsync_args)
       @logger.debug("rsync returned #{result.inspect}")
       result
