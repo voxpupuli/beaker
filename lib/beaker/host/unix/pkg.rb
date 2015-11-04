@@ -11,7 +11,11 @@ module Unix::Pkg
     result = exec(Beaker::Command.new("which #{name}"), :accept_all_exit_codes => true)
     case self['platform']
     when /solaris-10/
-      result.stdout =~ %r|/.*/#{name}|
+      # solaris 10 appears to have considered `which` to have run successfully,
+      # even if the command didn't exist, so it'll return a 0 exit code in
+      # either case. Instead we match for the phrase output when a match isn't
+      # found: "no #{name} in $PATH", reversing it to match our API
+      !( result.stdout.match(/^no\ #{name}\ in\ /) )
     else
       result.exit_code == 0
     end

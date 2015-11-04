@@ -21,6 +21,7 @@ module Beaker
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['curl', 'ntpdate']
+    SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -107,6 +108,8 @@ module Beaker
           check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
         when host['platform'] =~ /openbsd/
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
+        when host['platform'] =~ /solaris-10/
+          check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
@@ -583,6 +586,8 @@ module Beaker
             arch = $3
             arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
             host.add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
+          elsif host['platform'] =~ /solaris-10/
+            host.add_env_var('PATH', '/opt/csw/bin')
           end
         end
         #add the env var set to this test host
