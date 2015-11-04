@@ -160,7 +160,7 @@ module Beaker
         #
         # @param exception [Exception] exception to fail with
         def log_and_fail_test(exception)
-          logger.error(exception.inspect)
+          logger.error("#{exception.class}: #{exception.message}")
           bt = exception.backtrace
           logger.pretty_backtrace(bt).each_line do |line|
             logger.error(line)
