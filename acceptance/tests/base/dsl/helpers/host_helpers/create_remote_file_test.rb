@@ -81,10 +81,18 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+      result = create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
 
-      remote_contents = on(default, "cat #{remote_filename}").stdout
-      assert_equal contents, remote_contents
+      fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
+        "default" => default,
+        "remote_tmpdir" => remote_tmpdir,
+        "remote_filename" => remote_filename,
+        "contents" => contents,
+        "result" => result
+        ) do
+          remote_contents = on(default, "cat #{remote_filename}").stdout
+          assert_equal contents, remote_contents
+      end
     end
   end
 
@@ -154,15 +162,26 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default
+
+      # NOTE: we do not do this step in the non-hosts-array version of the test, not sure why
       on hosts, "mkdir -p #{remote_tmpdir}"
+
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+      result = create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
 
       hosts.each do |host|
-        remote_contents = on(host, "cat #{remote_filename}").stdout
-        assert_equal contents, remote_contents
+        fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
+          "host" => host,
+          "remote_tmpdir" => remote_tmpdir,
+          "remote_filename" => remote_filename,
+          "contents" => contents,
+          "result" => result
+          ) do
+          remote_contents = on(host, "cat #{remote_filename}").stdout
+          assert_equal contents, remote_contents
+        end
       end
     end
   end

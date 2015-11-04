@@ -3,7 +3,7 @@ require 'spec_helper'
 
 module Beaker
   describe Logger do
-    let(:my_io)     { MockIO.new                         }
+    let(:my_io)     { StringIO.new                         }
     let(:logger)    { Logger.new(my_io, :quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
