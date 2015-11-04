@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 21 Oct, 2015 (90fddaf4)](#LATEST)
+* [LATEST - 4 Nov, 2015 (aadc0fcc)](#LATEST)
+* [2.27.0 - 21 Oct, 2015 (0378d13a)](#2.27.0)
 * [2.26.0 - 13 Oct, 2015 (427a512b)](#2.26.0)
 * [2.25.0 - 1 Oct, 2015 (51d4cb1a)](#2.25.0)
 * [2.24.0 - 15 Sep, 2015 (c12e9054)](#2.24.0)
@@ -99,7 +100,382 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 21 Oct, 2015 (90fddaf4)
+### <a name = "LATEST">LATEST - 4 Nov, 2015 (aadc0fcc)
+
+* (GEM) update beaker version to 2.28.0 (aadc0fcc)
+
+* Merge pull request #1006 from puppetlabs/qeng-3063/flush-output-to-prevent-reboot-timeout-problems (7a273b77)
+
+
+```
+Merge pull request #1006 from puppetlabs/qeng-3063/flush-output-to-prevent-reboot-timeout-problems
+
+[QENG-3063] Fix reboot test timeout issues on jenkins
+```
+* (QENG-3063/BKR-612) Wrap rsync tests in `fails_intermittently` (666e7944)
+
+
+```
+(QENG-3063/BKR-612) Wrap rsync tests in `fails_intermittently`
+
+These tests are failing intermittently under very similar conditions as the
+failure being addressed in QENG-3063: when a host obtains a new IP address after
+a `host.reboot`, calls to `host.create_remote_file` using the rsync protocol,
+and `host.rsync_to` fail, apparently due to SSH host keys having changed and
+causing an error that is also not properly reported, but also due to another
+root cause which is potentially related to stale IP addresses being used for
+rsync-ssh connections.
+
+Wrapping these testshere to get the QENG-3063 tests to land green. Separately
+work for BKR-612 will address the rsync issue.
+```
+* (QENG-3063) Use `StringIO` instead of `MockIO` in logger specs (74f97eb1)
+
+
+```
+(QENG-3063) Use `StringIO` instead of `MockIO` in logger specs
+
+Prior to this, attempting to use `.flush` on our logger instance (which is
+necessary) would cause the various logger-related spec tests to fail. These
+tests are overly mockist, but are also unnecessarily using a home-grown
+under-featured `MockIO` class that provides less functionality than just using
+the standard `StringIO` class, as normal IO testers are wont to do.
+```
+* (QENG-3063) Fix reboot test timeout issues on jenkins (98cd7785)
+
+
+```
+(QENG-3063) Fix reboot test timeout issues on jenkins
+
+Prior to this change, the `host_test.rb` check for rebooting systems could
+sometimes fail, only on our Beaker acceptance jenkins, but in such a way that
+it was clear that something was happening after the attempt to reboot started,
+but no further output was available.
+
+Exploratory work showed that when a rebooted host changes IP address, it is
+possible for not only the normal long sequence of Fibonacci-fallback connect
+retries to happen, but for also various low-level TCP connection failures (with
+their own long timeouts) to occur.
+
+Since output was being buffered, and not flushed, and neither of these phases
+was generating a lot of output (enough to trigger a buffer flush on its own),
+it was possible for more than our 10 minute jenkins output timeout to pass
+without effectively changing the output buffer.
+
+Flushing our log output overcomes the jenkins timeout problem. We do not here
+address questions of long IP-address change timeouts.
+```
+* Merge pull request #990 from petems/BKR-583-version_bug_fix (d5a7c089)
+
+
+```
+Merge pull request #990 from petems/BKR-583-version_bug_fix
+
+(BKR-583) Fixes incorrect error when MSI missing
+```
+* Merge pull request #989 from petems/BKR-584-fix_mkdir_on_windows (4ad80330)
+
+
+```
+Merge pull request #989 from petems/BKR-584-fix_mkdir_on_windows
+
+(BKR-584) Change to use mkdir_p helper command
+```
+* Merge pull request #1003 from GeoffWilliams/rublib_reset (1a854bc3)
+
+
+```
+Merge pull request #1003 from GeoffWilliams/rublib_reset
+
+(BKR-511) Beaker fails to launch Vagrant VMs when run within Bundler
+```
+* Merge pull request #1004 from puppetlabs/bkr-358/land-host-helpers-acceptance-tests (b3fa28fe)
+
+
+```
+Merge pull request #1004 from puppetlabs/bkr-358/land-host-helpers-acceptance-tests
+
+[BKR-358] Add acceptance tests for host helpers
+```
+* (BKR-358) Add acceptance tests for host helpers (7473e353)
+
+
+```
+(BKR-358) Add acceptance tests for host helpers
+
+This adds acceptance tests, along with a configuration file suitable for running
+these tests in our jenkins instance, for the Beaker host helpers.
+
+This also temporarily disables the "reboot" host acceptance test, which has been
+intermittently failing, and will be re-enabled via closure of QENG-3063.
+
+This work is detailed in the GitHub Pull Request at:
+
+  https://github.com/puppetlabs/beaker/pull/930
+```
+* (BKR-511) Beaker fails to launch Vagrant VMs when run within Bundler (e479c7cd)
+
+
+```
+(BKR-511) Beaker fails to launch Vagrant VMs when run within Bundler
+
+Unset the RUBYLIB variable before shelling out to run vagrant.  Fixes dependency on outdated version of bundler
+```
+* Merge pull request #998 from kevpl/bkr598_aws_keymod (18c39ce1)
+
+
+```
+Merge pull request #998 from kevpl/bkr598_aws_keymod
+
+(BKR-598) made AWS EC2 key name collision impractical
+```
+* Merge pull request #1001 from johnduarte/remove-aix-tar (97692dca)
+
+
+```
+Merge pull request #1001 from johnduarte/remove-aix-tar
+
+(BKR-607) Remove tar dependency for AIX
+```
+* (BKR-607) Remove tar dependency for AIX (ce1e169f)
+
+
+```
+(BKR-607) Remove tar dependency for AIX
+
+Prior to this commit, Beaker installed -- and removed -- tar as
+a dependency of the puppet-agent package on AIX. This dependency
+has been removed from puppet-agent.
+
+This commit removes the logic to install and remove the tar rpm
+from AIX. It also updates the rpec test for `remove_puppet_on`
+on AIX to remove the expectation that `tar` would a dependency.
+```
+* Merge pull request #995 from kevpl/bkr588_eos_update (4d692e26)
+
+
+```
+Merge pull request #995 from kevpl/bkr588_eos_update
+
+(BKR-588) updated eos install support
+```
+* Merge pull request #991 from kevpl/bkr590_ports_parameterize (1a9784e9)
+
+
+```
+Merge pull request #991 from kevpl/bkr590_ports_parameterize
+
+(BKR-590) parameterized ports in helpers
+```
+* Merge pull request #994 from johnduarte/cumulus-remove (8d9cd4e1)
+
+
+```
+Merge pull request #994 from johnduarte/cumulus-remove
+
+(BKR-597) Add cumulus logic to remove_puppet_on
+```
+* Merge pull request #992 from bkero/master (9e80a972)
+
+
+```
+Merge pull request #992 from bkero/master
+
+(BKR-592) Add < 1.35.0 dep constraint to fog
+```
+* Merge pull request #999 from puppetlabs/maint/fix-readme-docs-link (261a920e)
+
+
+```
+Merge pull request #999 from puppetlabs/maint/fix-readme-docs-link
+
+(MAINT) Update main README.md docs link
+```
+* (MAINT) Update main README.md docs link (8c979e91)
+
+
+```
+(MAINT) Update main README.md docs link
+
+This was missed in the final change-over from Home.md during BKR-602, updating so that
+this points to the new right place.
+```
+* Merge pull request #983 from alexharv074/BKR-579 (3558e0bf)
+
+
+```
+Merge pull request #983 from alexharv074/BKR-579
+
+(BKR-579) rpm calls to respect package_proxy opt
+```
+* (BKR-598) made AWS EC2 key name collision impractical (1ba4ae60)
+
+
+```
+(BKR-598) made AWS EC2 key name collision impractical
+
+Added the `:aws_keyname_modifier` property, randomly set to a string of
+10 digits by default, will be used to make the AWS EC2 key name unique
+to a Beaker run. The nanosecond time has been added to the key name as
+well to make the chance for collisions even harder.
+```
+* Merge pull request #997 from puppetlabs/maint/ongoing-wiki-import-docs-tweaks (f188e7f5)
+
+
+```
+Merge pull request #997 from puppetlabs/maint/ongoing-wiki-import-docs-tweaks
+
+(MAINT) Move docs to README.md, rename some files
+```
+* (BKR-588) added EOS docs (7b298942)
+
+* (MAINT) Move docs to README.md, rename some files (d4a0dbdb)
+
+
+```
+(MAINT) Move docs to README.md, rename some files
+
+Prior to this we were using Home.md as the root for documentation in docs/
+(as a direct import from the wiki). A few files also picked up strange names at
+some point in the automated cleanup process, so this fixes those, and normalizes
+some file names with punctuation, etc.
+```
+* Merge pull request #993 from cowofevil/maint/master/BKR-596/fix_windows_path_support (6975e329)
+
+
+```
+Merge pull request #993 from cowofevil/maint/master/BKR-596/fix_windows_path_support
+
+(BKR-596) Fix Windows Path Support
+```
+* Merge pull request #996 from puppetlabs/bkr-xxx/move-wiki-to-in-repo-docs (5709ac2b)
+
+
+```
+Merge pull request #996 from puppetlabs/bkr-xxx/move-wiki-to-in-repo-docs
+
+(BKR-600) Import wiki docs, relativize markdown links
+```
+* (BKR-600) Import wiki docs, relative markdown links (09f2d189)
+
+
+```
+(BKR-600) Import wiki docs, relative markdown links
+
+Import was via:
+
+git subtree add --prefix docs https://github.com/puppetlabs/beaker.wiki.git master --squash
+
+Cleanup was via:
+
+perl -p -i -e "s|https://github\.com/puppetlabs/beaker/wiki/([^.)#]+)([#)])|\1.md\2|g" docs/*
+
+Additionally did some manual whitespace cleanup, edited README.md.
+
+Notes:
+
+git-subtree-dir: doc
+git-subtree-split: 750f8dec7b5d453bcc567dec14b43b5d1f319447
+```
+* Merge pull request #986 from kevpl/bkr587_applymanifeston_docs2 (2fd10105)
+
+
+```
+Merge pull request #986 from kevpl/bkr587_applymanifeston_docs2
+
+(BKR-587) added nil as a result to apply_manifest_on docs
+```
+* (BKR-588) updated eos install support (4f9d11d9)
+
+* (BKR-596) Fix Broken Spec Test (c8f66627)
+
+
+```
+(BKR-596) Fix Broken Spec Test
+
+Should have fixed this in the first place!
+```
+* (BKR-596) Fix Windows Path Support (867141f9)
+
+
+```
+(BKR-596) Fix Windows Path Support
+
+The "copy_module_to" method does not detect if the target machine is Windows
+after SCP copy of the module. It attempts to move the directory because path
+joining does not account for "/" separators in the path.
+```
+* (BKR-597) Add cumulus logic to remove_puppet_on (a697937e)
+
+
+```
+(BKR-597) Add cumulus logic to remove_puppet_on
+
+This commit adds logic for gathering installed puppet packages
+on cumulus for removal in the `remove_puppet_on` method
+```
+* (BKR-592) Add < 1.35.0 dep constraint to fog (3625c573)
+
+
+```
+(BKR-592) Add < 1.35.0 dep constraint to fog
+
+This commit adds a < 1.35.0 dependency constraint to the fog entry in
+beaker's gemspec file. This fixes a problem introduced in fog 1.35.0
+where it starts depending on a newer version of fog-google than beaker
+currently allows.
+```
+* (BKR-579) rpm calls to respect package_proxy opt (6b9aeab0)
+
+
+```
+(BKR-579) rpm calls to respect package_proxy opt
+
+Without this patch applied, the call to rpm in Beaker::DSL::InstallUtils
+ignores the package_proxy option.
+
+We add two new methods, extract_rpm_proxy_options and
+install_package_with_rpm.
+
+The extract_rpm_proxy_options method is needed as the rpm command
+expects command line options --httpproxy and --httpport.
+
+The install_package_with_rpm method is needed in order to install rpms
+from a remote URL address.  The existing install_package method uses yum
+and yum can't install an rpm from a remote URL.
+
+Spec tests are provided for the new methods and one redundant spec test
+is deleted.
+```
+* (BKR-590) parameterized ports in helpers (b26470f8)
+
+* (BKR-584) Change to use mkdir_p helper command (6f1deef2)
+
+
+```
+(BKR-584) Change to use mkdir_p helper command
+
+Makes command cross-compatible for PSWindows
+```
+* (BKR-587) added nil as a result to apply_manifest_on docs (be3fb7dd)
+
+* (BKR-583) Fixes incorrect error when MSI missing (2f117f1a)
+
+
+```
+(BKR-583) Fixes incorrect error when MSI missing
+
+`version` variable missing, so get error:
+
+`<NameError: undefined local variable or method 'version'>`
+
+Rather than correct error:
+
+`<RuntimeError: Puppet MSI at /puppet-agent-VERSION-x86.msi does not exist!>`
+```
+### <a name = "2.27.0">2.27.0 - 21 Oct, 2015 (0378d13a)
+
+* (HISTORY) update beaker history for gem release 2.27.0 (0378d13a)
 
 * (GEM) update beaker version to 2.27.0 (90fddaf4)
 
