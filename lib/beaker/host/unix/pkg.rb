@@ -40,6 +40,9 @@ module Unix::Pkg
         result = execute("pkg info #{name}", opts) { |result| result }
       when /solaris-10/
         result = execute("pkginfo #{name}", opts) { |result| result }
+        if result.exit_code == 1
+          result = execute("pkginfo CSW#{name}", opts) { |result| result }
+        end
       when /freebsd-9/
         result = execute("pkg_info #{name}", opts) { |result| result }
       when /freebsd-10/
@@ -86,6 +89,11 @@ module Unix::Pkg
         update_apt_if_needed
         execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
+        if opts[:acceptable_exit_codes]
+          opts[:acceptable_exit_codes] << 4
+        else
+          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+        end
         execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
         execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
@@ -184,9 +192,14 @@ module Unix::Pkg
         update_apt_if_needed
         execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
       when /solaris-11/
+        if opts[:acceptable_exit_codes]
+          opts[:acceptable_exit_codes] << 4
+        else
+          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+        end
         execute("pkg #{cmdline_args} update #{name}", opts)
       when /solaris-10/
-        execute("pkgutil -u -y #{cmdline_args} ${name}", opts)
+        execute("pkgutil -u -y #{cmdline_args} #{name}", opts)
       else
         raise "Package #{name} cannot be upgraded on #{self}"
     end

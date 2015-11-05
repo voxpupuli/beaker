@@ -526,74 +526,13 @@ module Beaker
         next if host['platform'] =~ /f5/
         env = construct_env(host, opts)
         logger.debug("setting local environment on #{host.name}")
-        case host['platform']
-        when /windows/
-          if host.is_cygwin?
-            host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-            # we get periodic failures to restart the service, so looping these with re-attempts
-            repeat_fibonacci_style_for(5) do
-              0 == host.exec(Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
-            end
-            repeat_fibonacci_style_for(5) do
-              0 == host.exec(Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
-            end
-            env['CYGWIN'] = 'nodosfilewarning'
-          else
-            #nothing to do here
-          end
-        when /osx-10\.*11/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /private/etc/ssh/sshd_config"))
-          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
-          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
-        when /osx/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
-          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
-        when /debian|ubuntu|cumulus/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("service ssh restart"))
-        when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("systemctl restart sshd.service"))
-        when /el-|centos|fedora|redhat|oracle|scientific|eos/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("/sbin/service sshd restart"))
-        when /sles/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("rcsshd restart"))
-        when /solaris/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("svcadm restart svc:/network/ssh:default"))
-        when /aix/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("stopsrc -g ssh"))
-          host.exec(Command.new("startsrc -g ssh"))
-        when /(free|open)bsd/
-          host.exec(Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
-          host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
+        if host['platform'] =~ /windows/ and host.is_cygwin?
+          env['CYGWIN'] = 'nodosfilewarning'
         end
+        host.ssh_permit_user_environment()
 
-        if not host.is_powershell?
-          #ensure that ~/.ssh/environment exists
-          host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
-          host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
-          host.exec(Command.new("touch #{host[:ssh_env_file]}"))
-          #add the constructed env vars to this host
-          host.add_env_var('PATH', '$PATH')
-          # FIXME
-          if host['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
-            version = "#{$1}.#{$2}"
-            arch = $3
-            arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
-            host.add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
-          elsif host['platform'] =~ /solaris-10/
-            host.add_env_var('PATH', '/opt/csw/bin')
-          end
-        end
-        #add the env var set to this test host
-        env.each_pair do |var, value|
-          host.add_env_var(var, value)
-        end
+        host.ssh_set_user_environment(env)
+
         # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
         # this is the worst and i hate it
         Class.new.extend(Beaker::DSL).configure_type_defaults_on(host)

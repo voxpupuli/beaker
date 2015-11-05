@@ -33,18 +33,7 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
     end
   end
 
-  confine_block :to, :platform => /solaris/ do
-
-    step "#upgrade_package CURRENTLY fails on solaris platforms" do
-      # NOTE: pkgutil doesn't appear to be installed by default -- documentation
-      #       could be better here.
-      assert_raises Beaker::Host::CommandFailure do
-        upgrade_package default, "bash"
-      end
-    end
-  end
-
-  confine_block :except, :platform => /windows|solaris|osx/ do
+  confine_block :except, :platform => /windows|osx/ do
     confine_block :to, :platform => /centos|el-\d/ do
 
       step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
