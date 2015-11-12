@@ -14,7 +14,12 @@ module Beaker
     let( :vagrant ) { Beaker::Vagrant.new( @hosts, options ) }
 
     before :each do
-      @hosts = make_hosts()
+      @hosts = make_hosts({
+        :mount_folders => {
+          :test_temp => {:from => './', :to => '/temp'},
+          :test_tmp => {:from => '../', :to => '/tmp'}
+        }
+      })
     end
 
     it "stores the vagrant file in $WORKINGDIR/.vagrant/beaker_vagrant_files/sample.cfg" do
@@ -41,6 +46,8 @@ Vagrant.configure("2") do |c|
     v.vm.box_url = 'http://address.for.my.box.vm1'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm1", :netmask => "255.255.0.0", :mac => "0123456789"
+    v.vm.synced_folder './', '/temp', create: true
+    v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -51,6 +58,8 @@ Vagrant.configure("2") do |c|
     v.vm.box_url = 'http://address.for.my.box.vm2'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm2", :netmask => "255.255.0.0", :mac => "0123456789"
+    v.vm.synced_folder './', '/temp', create: true
+    v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -61,6 +70,8 @@ Vagrant.configure("2") do |c|
     v.vm.box_url = 'http://address.for.my.box.vm3'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm3", :netmask => "255.255.0.0", :mac => "0123456789"
+    v.vm.synced_folder './', '/temp', create: true
+    v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end

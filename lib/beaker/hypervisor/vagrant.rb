@@ -35,6 +35,12 @@ module Beaker
         v_file << "    v.vm.synced_folder '.', '/vagrant', disabled: true\n" if host['synced_folder'] == 'disabled'
         v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\", :mac => \"#{randmac}\"\n"
 
+        unless host['mount_folders'].nil? 
+          host['mount_folders'].each do |name, folder|
+            v_file << "    v.vm.synced_folder '#{folder[:from]}', '#{folder[:to]}', create: true\n"
+          end
+        end
+
         if /windows/i.match(host['platform'])
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true\n"
           v_file << "    v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true\n"
