@@ -49,6 +49,8 @@ describe ClassMixedWithDSLInstallUtils do
   context '#configure_pe_defaults_on' do
     it 'uses aio paths for hosts of role aio' do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host[:roles] = host[:roles] | ['aio']
       end
       expect(subject).to receive(:add_pe_defaults_on).exactly(hosts.length).times
@@ -71,6 +73,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'uses aio paths for hosts of type aio' do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host[:type] = 'aio'
       end
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
