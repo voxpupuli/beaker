@@ -302,7 +302,7 @@ module Beaker
 
           # This is an awful hack to maintain backward compatibility until tests
           # are ported to use logger.  Still in use in PuppetDB tests
-          Beaker.const_set(:Log, @logger) unless defined?( Log )
+          ::Beaker.const_set(:Log, @logger) unless defined?( ::Beaker::Log )
 
           @test_suite_results.start_time = start_time
           @test_suite_results.total_tests = @test_files.length
