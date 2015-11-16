@@ -154,6 +154,7 @@ module Beaker
         @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
         return
       end
+
       Beaker::TestSuite.new(
         suite_name, @hosts, @options, @timestamp, failure_strategy
       ).run_and_raise_on_failure
