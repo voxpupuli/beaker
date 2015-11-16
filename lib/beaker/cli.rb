@@ -155,7 +155,12 @@ module Beaker
         return
       end
 
-      Beaker::TestSuite.new(
+      unless runner_class = Beaker::TestSuite.runner(@options[:runner])
+        @logger.error "Test runner #{@options[:runner]} is unknown."
+        exit 1
+      end
+
+      runner_class.new(
         suite_name, @hosts, @options, @timestamp, failure_strategy
       ).run_and_raise_on_failure
     end
