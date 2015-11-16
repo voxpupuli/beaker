@@ -1,11 +1,11 @@
-require 'beaker/runner/beaker/test_suite'
+require 'beaker/runner/native/test_suite'
 
 module Beaker
-  class TestSuite < ::Beaker::Runner::Beaker::TestSuite
+  class TestSuite < ::Beaker::Runner::Native::TestSuite
     def self.runner(runner)
       case runner
       when "beaker"
-        Beaker::Runner::Beaker::TestSuite
+        Beaker::Runner::Native::TestSuite
       else
         nil
       end

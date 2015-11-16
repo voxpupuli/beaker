@@ -7,7 +7,7 @@ end
 
 module Beaker
   module Runner
-    module Beaker
+    module Native
       #A collection of {TestCase} objects are considered a {TestSuite}.
       #Handles executing the set of {TestCase} instances and reporting results as post summary text and JUnit XML.
       class TestSuite
