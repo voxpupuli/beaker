@@ -362,7 +362,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs the pe-puppet on a system without pe-puppet-agent' do
       vardir = '/var'
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64', :pe_ver => '3.7' )
-      allow( deb_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( deb_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( deb_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
       expect( deb_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(false)
@@ -377,7 +377,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs the pe-puppet-agent on a unix system with pe-puppet-agent' do
       vardir = '/var'
       el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '3.7' )
-      allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
       expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
@@ -391,7 +391,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs puppet on a unix system 4.0 or newer' do
       vardir = '/var'
       el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
-      allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
 

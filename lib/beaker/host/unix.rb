@@ -23,5 +23,23 @@ module Unix
       })
     end
 
+    # Determines which SSH Server is in use on this host
+    #
+    # @note This method is mostly a placeholder method, since only :openssh
+    #   can be returned at this time. Checkout {Windows::Host#determine_ssh_server}
+    #   for an example where work needs to be done to determine the answer
+    #
+    # @return [Symbol] Value for the SSH Server in use
+    def determine_ssh_server
+      :openssh
+    end
+
+    attr_reader :external_copy_base
+    def initialize name, host_hash, options
+      super
+
+      @external_copy_base = '/root'
+    end
+
   end
 end
