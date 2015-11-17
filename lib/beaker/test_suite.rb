@@ -2,7 +2,7 @@ require 'beaker/runner/native/test_suite'
 require 'beaker/runner/mini_test/test_suite'
 
 module Beaker
-  class TestSuite < ::Beaker::Runner::Native::TestSuite
+  class TestSuite
     def self.runner(runner)
       case runner
       when "beaker"
