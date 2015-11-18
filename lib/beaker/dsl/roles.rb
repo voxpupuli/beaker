@@ -100,7 +100,7 @@ module Beaker
       #     end
       #
       def not_controller(host)
-        controllers = ['dashboard', 'database', 'master', 'console']
+        controllers = ['dashboard', 'database', 'master', 'console', 'compile_master']
         matched_roles = host['roles'].select { |v| controllers.include?(v) }
         matched_roles.length == 0
       end
