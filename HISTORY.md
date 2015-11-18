@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 4 Nov, 2015 (aadc0fcc)](#LATEST)
+* [LATEST - 18 Nov, 2015 (5ae7782f)](#LATEST)
+* [2.28.0 - 4 Nov, 2015 (89829551)](#2.28.0)
 * [2.27.0 - 21 Oct, 2015 (0378d13a)](#2.27.0)
 * [2.26.0 - 13 Oct, 2015 (427a512b)](#2.26.0)
 * [2.25.0 - 1 Oct, 2015 (51d4cb1a)](#2.25.0)
@@ -100,7 +101,105 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 4 Nov, 2015 (aadc0fcc)
+### <a name = "LATEST">LATEST - 18 Nov, 2015 (5ae7782f)
+
+* (GEM) update beaker version to 2.29.0 (5ae7782f)
+
+* Merge pull request #1011 from developerinlondon/feature/BKR-625-add-mounting-folder-option (4bc5750e)
+
+
+```
+Merge pull request #1011 from developerinlondon/feature/BKR-625-add-mounting-folder-option
+
+(BKR-625) Added ability to mount a folder.
+```
+* Merge pull request #1010 from dylanratcliffe/bkr-624/fix-line_prefix_length (e48e8752)
+
+
+```
+Merge pull request #1010 from dylanratcliffe/bkr-624/fix-line_prefix_length
+
+(BKR-624) Added a setter for line_prefix
+```
+* (BKR-624) Modified `step_in` and `step_out` methods so that you can set (e72689b5)
+
+
+```
+(BKR-624) Modified `step_in` and `step_out` methods so that you can set
+`line_prefix` explicitly and they will still work.
+```
+* BKR-625: Added ability to mount a folder. (e047bd84)
+
+
+```
+BKR-625: Added ability to mount a folder.
+
+Without this patch there is no way to mount a local folder inside the beaker nodes.
+
+With this patch folders can be mounted similar to below:
+
+
+    HOSTS:
+      ubuntu-1404-x64-master:
+        roles:
+          - master
+          - agent
+          - dashboard
+          - database
+        platform: ubuntu-1404-x86_64
+        hypervisor: vagrant
+        box: puppetlabs/ubuntu-14.04-64-nocm
+        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+        mount_folders:
+          folder1:
+            from: ./
+            to: /vagrant/folder1
+          tmp:
+            from: /tmp
+            to: /vagrant/tmp
+        ip: 192.168.20.20
+      ubuntu-1404-x64-agent:
+        roles:
+          - agent
+        platform: ubuntu-1404-x86_64
+        hypervisor: vagrant
+        box: puppetlabs/ubuntu-14.04-64-nocm
+        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+        ip: 192.168.21.21
+    CONFIG:
+      nfs_server: none
+      consoleport: 443
+
+
+
+In the above beaker will mount the folders ./ to /vagrant/folder1 and the folder /tmp to /vagrant/tmp
+
+This relates to the new feature ticket opened on puppetlab here: https://tickets.puppetlabs.com/browse/BKR-625
+```
+* Merge pull request #1007 from adrienthebo/bkr-517-print-exception-class-message (5780f563)
+
+
+```
+Merge pull request #1007 from adrienthebo/bkr-517-print-exception-class-message
+
+(BRK-617) Print exception message for test cases
+```
+* (BRK-617) Print exception message for test cases (788b9cda)
+
+
+```
+(BRK-617) Print exception message for test cases
+
+Some exceptions implement the `#inspect` method to only print the class
+name or otherwise change the output to not include the error message in
+question, which makes such exceptions very challenging to deubg. This
+commit changes the test case exception printing method to explicitly
+print the exception class and message so that there's always relevant
+context available when an exception is raised.
+```
+### <a name = "2.28.0">2.28.0 - 4 Nov, 2015 (89829551)
+
+* (HISTORY) update beaker history for gem release 2.28.0 (89829551)
 
 * (GEM) update beaker version to 2.28.0 (aadc0fcc)
 
