@@ -492,71 +492,69 @@ describe Beaker do
   context "set_env" do
     subject { dummy_class.new }
 
-    it "can set the environment on a windows host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/sshd_config",
-        "cygrunsrv -E sshd",
-        "cygrunsrv -S sshd"
-      ]
-      set_env_helper('windows', commands)
+    it "permits user environments on an OS X host" do
+      test_host_ssh_permit_user_environment('osx')
     end
 
-    it "can set the environment on an OS X host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/sshd_config",
-        "launchctl unload /System/Library/LaunchDaemons/ssh.plist",
-        "launchctl load /System/Library/LaunchDaemons/ssh.plist"
-      ]
-      set_env_helper('osx', commands)
+    it "permits user environments on an ssh-based linux host" do
+      test_host_ssh_permit_user_environment('ubuntu')
     end
 
-    it "can set the environment on an ssh-based linux host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "service ssh restart"
-      ]
-      set_env_helper('ubuntu', commands)
+    it "permits user environments on an sshd-based linux host" do
+      test_host_ssh_permit_user_environment('eos')
     end
 
-    it "can set the environment on an sshd-based linux host" do
-      commands = [
-          "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-          "/sbin/service sshd restart"
-      ]
-      set_env_helper('eos', commands)
+    it "permits user environments on an sles host" do
+      test_host_ssh_permit_user_environment('sles')
     end
 
-    it "can set the environment on an sles host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "rcsshd restart"
-      ]
-      set_env_helper('sles', commands)
+    it "permits user environments on a solaris host" do
+      test_host_ssh_permit_user_environment('solaris')
     end
 
-    it "can set the environment on a solaris host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "svcadm restart svc:/network/ssh:default"
-      ]
-      set_env_helper('solaris', commands)
+    it "permits user environments on an aix host" do
+      test_host_ssh_permit_user_environment('aix')
     end
 
-    it "can set the environment on an aix host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "stopsrc -g ssh",
-        "startsrc -g ssh"
-      ]
-      set_env_helper('aix', commands)
+    it "permits user environments on a FreeBSD host" do
+      test_host_ssh_permit_user_environment('freebsd')
     end
 
-    it "can set the environment on a FreeBSD host" do
-      commands = [
-        "sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config",
-        "sudo /etc/rc.d/sshd restart",
-      ]
-      set_env_helper('freebsd', commands)
+    it "permits user environments on a windows host" do
+      test_host_ssh_permit_user_environment('windows')
+    end
+
+
+    it "sets user ssh environment on an OS X host" do
+      test_host_ssh_set_user_environment('osx')
+    end
+
+    it "sets user ssh environment on an ssh-based linux host" do
+      test_host_ssh_set_user_environment('ubuntu')
+    end
+
+    it "sets user ssh environment on an sshd-based linux host" do
+      test_host_ssh_set_user_environment('eos')
+    end
+
+    it "sets user ssh environment on an sles host" do
+      test_host_ssh_set_user_environment('sles')
+    end
+
+    it "sets user ssh environment on a solaris host" do
+      test_host_ssh_set_user_environment('solaris')
+    end
+
+    it "sets user ssh environment on an aix host" do
+      test_host_ssh_set_user_environment('aix')
+    end
+
+    it "sets user ssh environment on a FreeBSD host" do
+      test_host_ssh_set_user_environment('freebsd')
+    end
+
+    it "sets user ssh environment on a windows host" do
+      test_host_ssh_set_user_environment('windows')
     end
 
     it "skips an f5 host correctly" do
@@ -585,33 +583,27 @@ describe Beaker do
       subject.set_env(host, options.merge( opts ))
     end
 
-    def set_env_helper(platform_name, host_specific_commands_array)
+    def test_host_ssh_permit_user_environment(platform_name)
+      test_host_ssh_calls(platform_name, :ssh_permit_user_environment)
+    end
+
+    def test_host_ssh_set_user_environment(platform_name)
+      test_host_ssh_calls(platform_name, :ssh_set_user_environment)
+    end
+
+    def test_host_ssh_calls(platform_name, method_call_sym)
       host = make_host('name', {
           :platform     => platform_name,
           :ssh_env_file => 'ssh_env_file',
           :is_cygwin   => true,
-      } )
+        } )
       opts = {
-          :env1_key => :env1_value,
-          :env2_key => :env2_value
+        :env1_key => :env1_value,
+        :env2_key => :env2_value
       }
 
       expect( subject ).to receive( :construct_env ).and_return( opts )
-      host_specific_commands_array.each do |command|
-        expect( Beaker::Command ).to receive( :new ).with( command ).once
-      end
-
-      expect( Beaker::Command ).to receive( :new ).with( "mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
-      expect( Beaker::Command ).to receive( :new ).with( "chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
-      expect( Beaker::Command ).to receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
-      expect_any_instance_of( Class ).to receive( :extend ).and_return( double( 'class' ).as_null_object )
-      expect( Beaker::Command ).to receive( :new ).with( "cat #{host[:ssh_env_file]}" ).once
-      expect( host ).to receive( :add_env_var ).with( 'PATH', '$PATH' ).once
-      opts.each_pair do |key, value|
-        expect( host ).to receive( :add_env_var ).with( key, value ).once
-      end
-      expect( host ).to receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
-      expect( host ).to receive( :exec ).exactly( host_specific_commands_array.length + 4 ).times
+      expect( host ).to receive( method_call_sym )
 
       subject.set_env(host, options.merge( opts ))
     end

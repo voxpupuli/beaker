@@ -22,20 +22,11 @@ test_name "dsl::helpers::host_helpers #install_package" do
     end
   end
 
-  confine_block :to, :platform => /solaris/ do
-
-    step "#install_package CURRENTLY fails on solaris platforms" do
-      assert_raises Beaker::Host::CommandFailure do
-        install_package default, "rsync"
-      end
-    end
-  end
-
   confine_block :to, :platform => /osx/ do
     # TODO: install_package on OSX installs via a .dmg file -- how to test this?
   end
 
-  confine_block :except, :platform => /windows|solaris|osx/ do
+  confine_block :except, :platform => /windows|osx/ do
 
     step "#install_package fails if package is not known on the OS" do
       assert_raises Beaker::Host::CommandFailure do

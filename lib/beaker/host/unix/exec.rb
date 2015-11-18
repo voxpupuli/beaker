@@ -159,4 +159,82 @@ module Unix::Exec
     mirror_env_to_profile_d(env_file)
   end
 
+  # Restarts the SSH service.
+  #
+  # @return [Result] result of restarting the SSH service
+  def ssh_service_restart
+    case self['platform']
+    when /debian|ubuntu|cumulus/
+      exec(Beaker::Command.new("service ssh restart"))
+    when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
+      exec(Beaker::Command.new("systemctl restart sshd.service"))
+    when /el-|centos|fedora|redhat|oracle|scientific|eos/
+      exec(Beaker::Command.new("/sbin/service sshd restart"))
+    when /sles/
+      exec(Beaker::Command.new("rcsshd restart"))
+    when /solaris/
+      exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
+    when /(free|open)bsd/
+      exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
+    end
+  end
+
+  # Sets the PermitUserEnvironment setting & restarts the SSH service.
+  #
+  # @api private
+  # @return [Result] result of the command restarting the SSH service
+  #   (from {#ssh_service_restart}).
+  def ssh_permit_user_environment
+    case self['platform']
+    when /debian|ubuntu|cumulus/
+      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+    when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
+      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+    when /el-|centos|fedora|redhat|oracle|scientific|eos/
+      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+    when /sles/
+      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+    when /solaris/
+      # kept solaris here because refactoring it into its own Host module
+      # conflicts with the solaris hypervisor that already exists
+      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+    when /(free|open)bsd/
+      exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
+    end
+
+    ssh_service_restart()
+  end
+
+  # Fills the user SSH environment file.
+  #
+  # @param [Hash{String=>String}] env Environment variables to set on the system,
+  #                                   in the form of a hash of String variable
+  #                                   names to their corresponding String values.
+  #
+  # @api private
+  # @return nil
+  def ssh_set_user_environment(env)
+    #ensure that ~/.ssh/environment exists
+    ssh_env_file_dir = Pathname.new(self[:ssh_env_file]).dirname
+    mkdir_p(ssh_env_file_dir)
+    exec(Beaker::Command.new("chmod 0600 #{ssh_env_file_dir}"))
+    exec(Beaker::Command.new("touch #{self[:ssh_env_file]}"))
+    #add the constructed env vars to this host
+    add_env_var('PATH', '$PATH')
+    # FIXME
+    if self['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
+      version = "#{$1}.#{$2}"
+      arch = $3
+      arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
+      add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
+    elsif self['platform'] =~ /solaris-10/
+      add_env_var('PATH', '/opt/csw/bin')
+    end
+
+    #add the env var set to this test host
+    env.each_pair do |var, value|
+      add_env_var(var, value)
+    end
+  end
+
 end

@@ -50,4 +50,30 @@ module Windows::Exec
     result.exit_code == 0
   end
 
+  # Restarts the SSH service.
+  #
+  # @return [Result] result of starting SSH service
+  def ssh_service_restart
+    command_result = nil
+    # we get periodic failures to restart the service, so looping these with re-attempts
+    repeat_fibonacci_style_for(5) do
+      0 == exec(Beaker::Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
+    end
+    repeat_fibonacci_style_for(5) do
+      command_result = exec(Beaker::Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1] )
+      0 == command_result.exit_code
+    end
+    command_result
+  end
+
+  # Sets the PermitUserEnvironment setting & restarts the SSH service
+  #
+  # @api private
+  # @return [Result] result of the command starting the SSH service
+  #   (from {#ssh_service_restart}).
+  def ssh_permit_user_environment
+    exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
+    ssh_service_restart()
+  end
+
 end

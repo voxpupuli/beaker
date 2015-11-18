@@ -57,9 +57,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
-  confine_block :to, :platform => /windows|solaris.*10/ do
+  confine_block :to, :platform => /windows/ do
 
-    # NOTE: rsync methods are not working currently on windows and solaris 10 platforms
+    # NOTE: rsync methods are not working currently on windows platforms
 
     step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -74,7 +74,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :except, :platform => /windows|solaris.*10/ do
+  confine_block :except, :platform => /windows/ do
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
       remote_tmpdir = tmpdir_on default
@@ -137,9 +137,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
-  confine_block :to, :platform => /windows|solaris.*10/ do
+  confine_block :to, :platform => /windows/ do
 
-    # NOTE: rsync methods are not working currently on windows and solaris 10
+    # NOTE: rsync methods are not working currently on windows
     #       platforms. Would expect this to be documented better.
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
@@ -158,7 +158,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :except, :platform => /windows|solaris.*10|fedora/ do
+  confine_block :except, :platform => /windows|fedora/ do
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
       remote_tmpdir = tmpdir_on default

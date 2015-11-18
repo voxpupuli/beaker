@@ -11,7 +11,11 @@ module Unix::Pkg
     result = exec(Beaker::Command.new("which #{name}"), :accept_all_exit_codes => true)
     case self['platform']
     when /solaris-10/
-      result.stdout =~ %r|/.*/#{name}|
+      # solaris 10 appears to have considered `which` to have run successfully,
+      # even if the command didn't exist, so it'll return a 0 exit code in
+      # either case. Instead we match for the phrase output when a match isn't
+      # found: "no #{name} in $PATH", reversing it to match our API
+      !( result.stdout.match(/^no\ #{name}\ in\ /) )
     else
       result.exit_code == 0
     end
@@ -36,6 +40,9 @@ module Unix::Pkg
         result = execute("pkg info #{name}", opts) { |result| result }
       when /solaris-10/
         result = execute("pkginfo #{name}", opts) { |result| result }
+        if result.exit_code == 1
+          result = execute("pkginfo CSW#{name}", opts) { |result| result }
+        end
       when /freebsd-9/
         result = execute("pkg_info #{name}", opts) { |result| result }
       when /freebsd-10/
@@ -82,6 +89,11 @@ module Unix::Pkg
         update_apt_if_needed
         execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
+        if opts[:acceptable_exit_codes]
+          opts[:acceptable_exit_codes] << 4
+        else
+          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+        end
         execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
         execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
@@ -180,9 +192,14 @@ module Unix::Pkg
         update_apt_if_needed
         execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
       when /solaris-11/
+        if opts[:acceptable_exit_codes]
+          opts[:acceptable_exit_codes] << 4
+        else
+          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+        end
         execute("pkg #{cmdline_args} update #{name}", opts)
       when /solaris-10/
-        execute("pkgutil -u -y #{cmdline_args} ${name}", opts)
+        execute("pkgutil -u -y #{cmdline_args} #{name}", opts)
       else
         raise "Package #{name} cannot be upgraded on #{self}"
     end

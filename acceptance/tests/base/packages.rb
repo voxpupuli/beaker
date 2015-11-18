@@ -19,6 +19,8 @@ def get_host_pkg(host)
       Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
     when host['platform'] =~ /openbsd/
       Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
+    when host['platform'] =~ /solaris-10/
+      Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
     else
       Beaker::HostPrebuiltSteps::UNIX_PACKAGES
   end
@@ -48,8 +50,9 @@ hosts.each do |host|
   # this works on Windows as well, althought it pulls in
   # a lot of dependencies.
   package = 'zsh'
+  package = 'CSWzsh' if host['platform'] =~ /solaris-10/
 
-  if host['platform'] =~ /solaris/
+  if host['platform'] =~ /solaris-11/
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
     assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")

@@ -1,5 +1,5 @@
 [ 'host', 'command_factory' ].each do |lib|
-    require "beaker/#{lib}"
+  require "beaker/#{lib}"
 end
 
 module Aix
