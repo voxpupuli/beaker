@@ -110,5 +110,13 @@ module Beaker
       [@variant, @version, @arch].join('-')
     end
 
+    if RUBY_VERSION =~ /^1\.9/
+      def init_with(coder)
+        coder.map.each do |ivar, value|
+          instance_variable_set("@#{ivar}", value)
+        end
+        replace("#{@variant}-#{@version}-#{@arch}")
+      end
+    end
   end
 end
