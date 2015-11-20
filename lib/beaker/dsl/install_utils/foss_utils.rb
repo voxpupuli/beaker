@@ -1338,6 +1338,12 @@ NOASK
             when /^osx$/
               release_file = "/repos/apple/#{opts[:puppet_collection]}/puppet-agent-*"
               download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
+            when /^solaris$/
+              if arch == 'x86_64'
+                arch = 'i386'
+              end
+              release_file = "/repos/solaris/#{version}/#{opts[:puppet_collection]}/puppet-agent-*#{arch}.pkg.gz"
+              download_file = "puppet-agent-#{varant}-#{version}-#{arch}.tar.gz"
             else
               raise "No pe-promoted installation step for #{variant} yet..."
             end
