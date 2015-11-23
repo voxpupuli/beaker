@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 18 Nov, 2015 (5ae7782f)](#LATEST)
+* [LATEST - 23 Nov, 2015 (5781838d)](#LATEST)
+* [2.29.0 - 18 Nov, 2015 (33fd2399)](#2.29.0)
 * [2.28.0 - 4 Nov, 2015 (89829551)](#2.28.0)
 * [2.27.0 - 21 Oct, 2015 (0378d13a)](#2.27.0)
 * [2.26.0 - 13 Oct, 2015 (427a512b)](#2.26.0)
@@ -101,7 +102,48 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 18 Nov, 2015 (5ae7782f)
+### <a name = "LATEST">LATEST - 23 Nov, 2015 (5781838d)
+
+* (GEM) update beaker version to 2.29.1 (5781838d)
+
+* Merge pull request #1019 from ody/bkr633_lesser_ruby (41647b80)
+
+
+```
+Merge pull request #1019 from ody/bkr633_lesser_ruby
+
+(BKR-633) Explicitly depend on mime-types.
+```
+* (BKR-633) Explicitly depend on mime-types. (99fb8b11)
+
+
+```
+(BKR-633) Explicitly depend on mime-types.
+
+  This commit will add an explicit dependency on the mime-types gem to
+  beaker's gemspec that installs versions less than 3.0 on systems with
+  a Ruby version less than 2.0.
+
+  This has to be done in order for beaker to install freshly on systems
+  where it hasn't been installed before.  The mime-types gem dropped
+  ruby 1.9.2 support with 3.0 and one of beaker's dependency, fog
+  depends on any version of mime-types greater than 0.
+```
+* Merge pull request #1009 from kevpl/bkr499_solaris10_fixups (22fe3324)
+
+
+```
+Merge pull request #1009 from kevpl/bkr499_solaris10_fixups
+
+(BKR-499) solaris10 fixups
+```
+* (BKR-499) refactoring set_env into host logic (a661dfe0)
+
+* (BKR-499) Solaris 10 Fixes (ba1289ca)
+
+### <a name = "2.29.0">2.29.0 - 18 Nov, 2015 (33fd2399)
+
+* (HISTORY) update beaker history for gem release 2.29.0 (33fd2399)
 
 * (GEM) update beaker version to 2.29.0 (5ae7782f)
 
