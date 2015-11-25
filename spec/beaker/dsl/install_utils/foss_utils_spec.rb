@@ -87,6 +87,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'uses aio paths for hosts with aio type (backwards compatability)' do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host[:type] = 'aio'
       end
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times
