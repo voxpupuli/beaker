@@ -100,7 +100,7 @@ module Beaker
 
           opts.on '-r RUNNER', '--runner RUNNER',
                   'Specify which test runner to use',
-                  'supported runners: beaker, minitest' do |value|
+                  'supported runners: beaker' do |value|
             @cmd_options[:runner] = value
           end
 
