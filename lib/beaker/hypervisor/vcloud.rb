@@ -58,7 +58,12 @@ module Beaker
           'Creation time:  ' + Time.now.strftime("%Y-%m-%d %H:%M") + "\n\n" +
           'CI build link:  ' + ( ENV['BUILD_URL'] || 'Deployed independently of CI' ) +
           'department:     ' + @options[:department] +
-          'project:        ' + @options[:project]
+          'project:        ' + @options[:project],
+        :extraConfig => [
+          { :key   => 'guestinfo.hostname',
+            :value => host['vmhostname']
+          }
+        ]
       )
 
       # Are we using a customization spec?
