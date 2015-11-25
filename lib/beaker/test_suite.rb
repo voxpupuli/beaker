@@ -5,7 +5,7 @@ module Beaker
   class TestSuite
     def self.runner(runner)
       case runner
-      when "beaker"
+      when "native"
         ::Beaker::Runner::Native::TestSuite
       when "minitest"
         ::Beaker::Runner::MiniTest::TestSuite
