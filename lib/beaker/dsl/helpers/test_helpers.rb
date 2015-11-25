@@ -6,7 +6,7 @@ module Beaker
       module TestHelpers
 
         # Gets the currently executing test's name, which is set in a test
-        # using the {Beaker::DSL::Structure#test_name} method.
+        # using the {Beaker::Runner::Native::Structure#test_name} method.
         #
         # @return [String] Test name, or nil if it hasn't been set
         def current_test_name()
@@ -26,7 +26,7 @@ module Beaker
         end
 
         # Gets the currently executing test's currently executing step name.
-        # This is set using the {Beaker::DSL::Structure#step} method.
+        # This is set using the {Beaker::Runner::Native::Structure#step} method.
         #
         # @return [String] Step name, or nil if it hasn't been set
         def current_step_name()
@@ -65,7 +65,6 @@ module Beaker
           metadata[:step] ||= {}
           metadata[:step][:name] = name
         end
-
       end
     end
   end

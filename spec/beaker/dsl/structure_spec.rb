@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 class ClassMixedWithDSLStructure
-  include Beaker::DSL::Structure
-  include Beaker::DSL::Helpers::TestHelpers
+  include Beaker::DSL
 end
 
 describe ClassMixedWithDSLStructure do

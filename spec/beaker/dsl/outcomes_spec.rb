@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class ClassMixedWithDSLOutcomes
-  include Beaker::DSL::Outcomes
+  include Beaker::DSL
 end
 
 describe ClassMixedWithDSLOutcomes do
@@ -12,7 +12,7 @@ describe ClassMixedWithDSLOutcomes do
     it "logs the notification passed to it and raises PassTest" do
       expect( logger ).to receive( :notify ).with( /blah/ )
       expect { subject.pass_test('blah') }.
-        to raise_error Beaker::DSL::Outcomes::PassTest
+        to raise_error Beaker::DSL::PassTest
     end
   end
 
@@ -20,7 +20,7 @@ describe ClassMixedWithDSLOutcomes do
     it "logs the notification passed to it and raises SkipTest" do
       expect( logger ).to receive( :notify ).with( /blah/ )
       expect { subject.skip_test('blah') }.
-        to raise_error Beaker::DSL::Outcomes::SkipTest
+        to raise_error Beaker::DSL::SkipTest
     end
   end
 
@@ -28,7 +28,7 @@ describe ClassMixedWithDSLOutcomes do
     it "logs the notification passed to it and raises PendingTest" do
       expect( logger ).to receive( :warn ).with( /blah/ )
       expect { subject.pending_test('blah') }.
-        to raise_error Beaker::DSL::Outcomes::PendingTest
+        to raise_error Beaker::DSL::PendingTest
     end
   end
 
@@ -37,7 +37,7 @@ describe ClassMixedWithDSLOutcomes do
       expect( logger ).to receive( :warn )
       expect( logger ).to receive( :pretty_backtrace )
       expect { subject.fail_test('blah') }.
-        to raise_error Beaker::DSL::Outcomes::FailTest
+        to raise_error Beaker::DSL::FailTest
     end
   end
 end
