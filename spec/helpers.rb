@@ -39,7 +39,7 @@ module HostHelpers
   HOST_NAME     = "vm%d"
   HOST_SNAPSHOT = "snapshot%d"
   HOST_IP       = "ip.address.for.%s"
-  HOST_BOX      = "%s_of_my_box"
+  HOST_BOX      = "vm2%s_of_my_box"
   HOST_BOX_URL  = "http://address.for.my.box.%s"
   HOST_DNS_NAME = "%s.box.tld"
   HOST_TEMPLATE = "%s_has_a_template"

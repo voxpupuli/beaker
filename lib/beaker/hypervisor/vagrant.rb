@@ -112,7 +112,7 @@ module Beaker
       ip = ''
       if File.file?(@vagrant_file) #we should have a vagrant file available to us for reading
         f = File.read(@vagrant_file)
-        m = /#{hostname}.*?ip:\s*('|")\s*([^'"]+)('|")/m.match(f)
+        m = /'#{hostname}'.*?ip:\s*('|")\s*([^'"]+)('|")/m.match(f)
         if m
           ip = m[2]
           @logger.debug("Determined existing vagrant box #{hostname} ip to be: #{ip} ")

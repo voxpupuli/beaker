@@ -37,12 +37,13 @@ module Beaker
       vagrant.make_vfile( @hosts )
 
       vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+      puts "file is #{path}\n"
       expect( vagrantfile ).to be === <<-EOF
 Vagrant.configure("2") do |c|
   c.ssh.insert_key = false
   c.vm.define 'vm1' do |v|
     v.vm.hostname = 'vm1'
-    v.vm.box = 'vm1_of_my_box'
+    v.vm.box = 'vm2vm1_of_my_box'
     v.vm.box_url = 'http://address.for.my.box.vm1'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm1", :netmask => "255.255.0.0", :mac => "0123456789"
@@ -54,7 +55,7 @@ Vagrant.configure("2") do |c|
   end
   c.vm.define 'vm2' do |v|
     v.vm.hostname = 'vm2'
-    v.vm.box = 'vm2_of_my_box'
+    v.vm.box = 'vm2vm2_of_my_box'
     v.vm.box_url = 'http://address.for.my.box.vm2'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm2", :netmask => "255.255.0.0", :mac => "0123456789"
@@ -66,7 +67,7 @@ Vagrant.configure("2") do |c|
   end
   c.vm.define 'vm3' do |v|
     v.vm.hostname = 'vm3'
-    v.vm.box = 'vm3_of_my_box'
+    v.vm.box = 'vm2vm3_of_my_box'
     v.vm.box_url = 'http://address.for.my.box.vm3'
     v.vm.box_check_update = 'true'
     v.vm.network :private_network, ip: "ip.address.for.vm3", :netmask => "255.255.0.0", :mac => "0123456789"
@@ -246,7 +247,6 @@ EOF
           expect{ vagrant.get_ip_from_vagrant_file(host.name) }.to raise_error
         end
       end
-
     end
 
     describe "provisioning and cleanup" do
