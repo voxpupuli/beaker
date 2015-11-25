@@ -20,9 +20,9 @@ end
 describe "Beaker Options" do
   let (:parser) { Beaker::Options::Parser.new }
 
-  it "defaults :runner to 'beaker'" do
+  it "defaults :runner to 'native'" do
     with_ARGV([]) do
-      expect(parser.parse_args[:runner]).to be == "beaker"
+      expect(parser.parse_args[:runner]).to be == "native"
     end
   end
 

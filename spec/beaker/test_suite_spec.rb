@@ -4,8 +4,8 @@ require "beaker/test_suite"
 module Beaker
   describe TestSuite do
     context "runner" do
-      it "returns the native test suite class when the 'beaker' runner name is provided" do
-        expect(Beaker::TestSuite.runner("beaker")).to be == Beaker::Runner::Native::TestSuite
+      it "returns the native test suite class when the 'native' runner name is provided" do
+        expect(Beaker::TestSuite.runner("native")).to be == Beaker::Runner::Native::TestSuite
       end
 
       it "returns the minitest test suite class when the 'minitest' runner name is provided" do
