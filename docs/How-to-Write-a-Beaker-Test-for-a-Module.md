@@ -66,7 +66,8 @@ RSpec.configure do |c|
   # Configure all nodes in nodeset
   c.before :suite do
     # Install module
-    puppet_module_install(:source => module_root, :module_name => 'mysql')
+    puppet_module_install(:source => module_root, :module_name => 'mysql',
+                          :target_module_path => '/etc/puppet/modules')
     hosts.each do |host|
       on host, puppet('module','install','puppetlabs-stdlib'), { :acceptable_exit_codes => [0,1] }
     end
@@ -79,13 +80,19 @@ Update spec_helper_acceptance.rb to reflect the module under test.  You will nee
 ###Install beaker-rspec
 ####From Gem (preferred)
 
-    gem install beaker-rspec
+    gem install beaker-rspec pry
 
 ###Update the module's Gemfile
 
-In module's top level directory edit Gemfile.
+In module's top level directory edit the Gemfile. If there is a section that
+begins `group :development, :test do`, then add it there.
 
-Add `gem 'beaker-rspec', :require => false` under `group :development, :test do`.
+```ruby
+gem 'beaker-rspec', :require => false
+gem 'pry',          :require => false
+```
+
+Then run
 
     bundle install
 
