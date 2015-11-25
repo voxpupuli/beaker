@@ -79,13 +79,19 @@ Update spec_helper_acceptance.rb to reflect the module under test.  You will nee
 ###Install beaker-rspec
 ####From Gem (preferred)
 
-    gem install beaker-rspec
+    gem install beaker-rspec pry
 
 ###Update the module's Gemfile
 
-In module's top level directory edit Gemfile.
+In module's top level directory edit the Gemfile. If there is a section that
+begins `group :development, :test do`, then add it there.
 
-Add `gem 'beaker-rspec', :require => false` under `group :development, :test do`.
+```ruby
+gem 'beaker-rspec', :require => false
+gem 'pry',          :require => false
+```
+
+Then run
 
     bundle install
 
