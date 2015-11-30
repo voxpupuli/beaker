@@ -75,8 +75,9 @@ end
 #   Documentation Tasks
 #
 ###########################################################
-DOCS_DAEMON = "yard server --reload --daemon --server thin"
-FOREGROUND_SERVER = 'bundle exec yard server --reload --verbose --server thin lib/beaker'
+DOCS_DIR = 'yard_docs'
+DOCS_DAEMON = "yard server --reload --daemon --server thin --docroot #{DOCS_DIR}"
+FOREGROUND_SERVER = "bundle exec yard server --reload --verbose --server thin lib/beaker --docroot #{DOCS_DIR}"
 
 def running?( cmdline )
   ps = `ps -ef`
@@ -107,7 +108,7 @@ namespace :docs do
   task :clear do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    sh 'rm -rf docs'
+    sh "rm -rf #{DOCS_DIR}"
     Dir.chdir( original_dir )
   end
 
@@ -115,7 +116,7 @@ namespace :docs do
   task :gen => 'docs:clear' do
     original_dir = Dir.pwd
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    output = `bundle exec yard doc`
+    output = `bundle exec yard doc -o #{DOCS_DIR}`
     puts output
     if output =~ /\[warn\]|\[error\]/
       fail "Errors/Warnings during yard documentation generation"
