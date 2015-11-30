@@ -1,6 +1,8 @@
-[ 'host', 'dsl' ].each do |lib|
-  require "beaker/#{lib}"
-end
+require "beaker/host"
+require "beaker/host"
+require "beaker/runner/native/outcomes"
+require "beaker/runner/native/structure"
+require "beaker/dsl"
 
 require 'tempfile'
 require 'benchmark'
@@ -13,7 +15,7 @@ module Beaker
       # This class represents a single test case. A test case is necessarily
       # contained all in one file though may have multiple dependent examples.
       # They are executed in order (save for any teardown procs registered
-      # through {Beaker::DSL::Structure#teardown}) and once completed
+      # through {Beaker::Runner::Native::Structure#teardown}) and once completed
       # the status of the TestCase is saved. Instance readers/accessors provide
       # the test case access to various details of the environment and suite
       # the test case is running within.
@@ -21,7 +23,10 @@ module Beaker
       # See {Beaker::DSL} for more information about writing tests
       # using the DSL.
       class TestCase
-        include ::Beaker::DSL
+        Beaker::DSL.register(Beaker::Runner::Native::Structure)
+        Beaker::DSL.register(Beaker::Runner::Native::Outcomes)
+
+        include Beaker::DSL
 
         # The Exception raised by Ruby's STDLIB's test framework (Ruby 1.9)
         TEST_EXCEPTION_CLASS = ::MiniTest::Assertion

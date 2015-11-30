@@ -4,6 +4,10 @@ module Beaker
       class TestSuite
         attr_reader :name, :options, :fail_mode # TODO ?
 
+        # TODO: include Beaker::DSL methods here now
+        # TODO: implement compatible Structure and Outcomes methods
+        #       see also Beaker::DSL::Helpers::TestHelpers for usages
+
         #Create {TestSuite} instance
         #@param [String] name The name of the {TestSuite}
         #@param [Array<Host>] hosts An Array of Hosts to act upon.

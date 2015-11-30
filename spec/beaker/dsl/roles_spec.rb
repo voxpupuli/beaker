@@ -1,9 +1,7 @@
 require 'spec_helper'
 
-
 class ClassMixedWithDSLRoles
-  include Beaker::DSL::Roles
-  include Beaker::DSL::Outcomes
+  include Beaker::DSL
 end
 
 describe ClassMixedWithDSLRoles do

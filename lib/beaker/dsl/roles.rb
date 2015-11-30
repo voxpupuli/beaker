@@ -35,7 +35,7 @@ module Beaker
       # or it returns nil (masterless)
       #
       # @return [Host] Returns the host, or nil if not found & masterless
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are less
+      # @raise [Beaker::DSL::FailTest] if there are less
       #   or more than 1 master is found.
       #
       # @example Basic usage
@@ -48,7 +48,7 @@ module Beaker
       # The host for which ['roles'] include 'database'
       #
       # @return [Host] Returns the host, or nil if not found & masterless
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      # @raise [Beaker::DSL::FailTest] if there are an inappropriate
       #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
@@ -61,7 +61,7 @@ module Beaker
       # The host for which ['roles'] include 'dashboard'
       #
       # @return [Host] Returns the host, or nil if not found & masterless
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      # @raise [Beaker::DSL::FailTest] if there are an inappropriate
       #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
@@ -79,7 +79,7 @@ module Beaker
       #   - host with 'master' as a role
       #
       # @return [Host] Returns the host, or nil if not found & masterless
-      # @raise [Beaker::DSL::Outcomes::FailTest] if there are an inappropriate
+      # @raise [Beaker::DSL::FailTest] if there are an inappropriate
       #   number of hosts found (depends on masterless option)
       #
       # @example Basic usage
@@ -158,7 +158,7 @@ module Beaker
       end
 
       #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
-      #commands without having to refer to role by String or Symbol.  Will not add a new method 
+      #commands without having to refer to role by String or Symbol.  Will not add a new method
       #definition if the name is already in use.
       # @param [String, Symbol, Array[String,Symbol]] role The role that you wish to create a definition for, either a String
       # Symbol or an Array of Strings or Symbols.
@@ -237,7 +237,7 @@ module Beaker
       def find_only_one role
         only_host_with_role(hosts, role)
       rescue ArgumentError => e
-        raise DSL::Outcomes::FailTest, e.to_s
+        raise DSL::FailTest, e.to_s
       end
 
       # @param [Symbol, String] role The role to find a host for
@@ -247,7 +247,7 @@ module Beaker
       def find_at_most_one role
         find_at_most_one_host_with_role(hosts, role)
       rescue ArgumentError => e
-        raise DSL::Outcomes::FailTest, e.to_s
+        raise DSL::FailTest, e.to_s
       end
     end
   end

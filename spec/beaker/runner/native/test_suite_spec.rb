@@ -50,7 +50,7 @@ module Beaker
         context 'run' do
           let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.'}) }
           let(:broken_script) { "raise RuntimeError" }
-          let(:fail_script)   { "raise Beaker::DSL::Outcomes::FailTest" }
+          let(:fail_script)   { "raise Beaker::DSL::FailTest" }
           let(:okay_script)   { "true" }
           let(:rb_test)       { 'my_ruby_file.rb'     }
           let(:pl_test)       { '/my_perl_file.pl'    }
