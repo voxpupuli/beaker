@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 23 Nov, 2015 (5781838d)](#LATEST)
+* [LATEST - 2 Dec, 2015 (bc912e78)](#LATEST)
+* [2.29.1 - 23 Nov, 2015 (5d824690)](#2.29.1)
 * [2.29.0 - 18 Nov, 2015 (33fd2399)](#2.29.0)
 * [2.28.0 - 4 Nov, 2015 (89829551)](#2.28.0)
 * [2.27.0 - 21 Oct, 2015 (0378d13a)](#2.27.0)
@@ -102,7 +103,272 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 23 Nov, 2015 (5781838d)
+### <a name = "LATEST">LATEST - 2 Dec, 2015 (bc912e78)
+
+* (GEM) update beaker version to 2.30.0 (bc912e78)
+
+* Merge pull request #1013 from puppetlabs/bkr-623/test-runner-reorganization (6c613051)
+
+
+```
+Merge pull request #1013 from puppetlabs/bkr-623/test-runner-reorganization
+
+[BKR-623] Reorganize Beaker test runner classes for introduction of minitest runner
+```
+* Merge pull request #1021 from kevpl/yard_gen_fix (5fcdb777)
+
+
+```
+Merge pull request #1021 from kevpl/yard_gen_fix
+
+(MAINT) updated yard doc location
+```
+* Merge pull request #1016 from hunner/add_solaris (1245f155)
+
+
+```
+Merge pull request #1016 from hunner/add_solaris
+
+(BKR-472) (BKR-475) Fix solaris for install_pe_on with 2015.2
+```
+* Merge pull request #1017 from adrienthebo/ruby-193-p194-platform-yaml-deserialize (d4854de2)
+
+
+```
+Merge pull request #1017 from adrienthebo/ruby-193-p194-platform-yaml-deserialize
+
+(BKR-634) Fix YAML deserialization for Beaker::Platform
+```
+* Merge pull request #1008 from developerinlondon/master (6bdb61bc)
+
+
+```
+Merge pull request #1008 from developerinlondon/master
+
+(BKR-622) Fix Regular Expression to give correct Host IP Address
+```
+* Merge pull request #1022 from bleach/fix_module_howto (125fd861)
+
+
+```
+Merge pull request #1022 from bleach/fix_module_howto
+
+(BKR-636) Fix module howto
+```
+* (BKR-623) Make native runner name consistent (fdd904eb)
+
+
+```
+(BKR-623) Make native runner name consistent
+
+Prior to this we ended up in a state where the beaker native runner
+was in the Beaker::Runner::Native module namespace, but textual and
+--runner references to the runner used the name 'beaker'. This makes
+them consistently 'native'.
+```
+* (BKR-623) Stop advertising minitest runner in --help (1164b15c)
+
+
+```
+(BKR-623) Stop advertising minitest runner in --help
+
+We will wait until this is ready for prime time to mention it.
+```
+* Merge pull request #1012 from kevpl/bkr609_pever_empty (bff4d847)
+
+
+```
+Merge pull request #1012 from kevpl/bkr609_pever_empty
+
+(BKR-609) added checks to make aio_version? more robust
+```
+* (BKR-636) Specify module directory in spec helper (3635726c)
+
+
+```
+(BKR-636) Specify module directory in spec helper
+
+Unless this is specified, the module seems to be installed in
+/etc/puppetlabs/puppet/modules, where it is not found by puppet.
+```
+* (BKR-636) Tell the user to install pry (151d72fe)
+
+
+```
+(BKR-636) Tell the user to install pry
+
+The sample spec_helper requires pry, so we now tell the user to install it.
+```
+* Merge pull request #1014 from heathseals/extraConfig (1317b33b)
+
+
+```
+Merge pull request #1014 from heathseals/extraConfig
+
+(BKR-635) Add VM hostname to VMX data during cloning operations
+```
+* (MAINT) updated yard doc location (1c51fdee)
+
+
+```
+(MAINT) updated yard doc location
+
+Since moving the wiki docs into the repo itself, there's been
+an issue where if you ran the yard rake tasks, you'd blow away
+the in-repo docs, because the default yard doc location is the
+same as the in-repo docs location: . This change makes
+yard create the  folder, and use it for local doc
+generation
+```
+* (BKR-634) Fix YAML deserialization for Beaker::Platform (2ddd8881)
+
+
+```
+(BKR-634) Fix YAML deserialization for Beaker::Platform
+
+The version of Psych shipped with Ruby 1.9.3-p194 did not support
+subclasses of String that added additional ivars to the String class.
+The Beaker::Platform class does just that - subclassing String and
+additional ivars - which meant that round tripping a Beaker::Platform
+object would create an object with improperly initialized instance
+variables. Psych commit e2fcf9af9e95535401f816bc893839b9ad743a9e
+resolved that issue but we still use platforms that have the old version
+of psych.
+
+To resolve this issue, this commit implements a custom #init_with method
+that explicitly sets all instance variables on the Beaker object that
+were defined inside of the YAML map instance, and then reconstructs the
+string value based on those fields.
+```
+* (BKR-472) (BKR-475) Fix solaris for install_pe_on with 2015.2 (e27613e1)
+
+
+```
+(BKR-472) (BKR-475) Fix solaris for install_pe_on with 2015.2
+
+When trying to install puppet-agent collection packages through
+`install_pe_on`, eventually `install_puppet_agent_pe_promoted_repo_on`
+gets called but has no entry for where the solaris packages are kept.
+This commit adds the ability for solaris to install PC puppet-agent
+packages.
+```
+* (BKR-623) Remove inheritance from Beaker::TestSuite (c8610167)
+
+* (BKR-623) migrate TestCase tests into native runner (afc9546a)
+
+* (BKR-632) Include 'minitest' in --runner options list (e84a4059)
+
+* (BKR-623) Add barebones minitest test suite class (a33c5ec5)
+
+* (BKR-623) Migrate TestSuite tests to the native runner (43c7ac77)
+
+* (BKR-635) Add VM hostname to VMX data during cloning operations (55fb8447)
+
+
+```
+(BKR-635) Add VM hostname to VMX data during cloning operations
+
+This commit adds a custom guestinfo keyword and hostname variable
+that allows the VMware Tools to query the hostname.
+```
+* (BKR-623) Rename runner/beaker to runner/native, ... (7d13665e)
+
+
+```
+(BKR-623) Rename runner/beaker to runner/native, ...
+
+... and bring `Beaker::TestCase` into the fold.
+
+Prior to this, `Beaker::TestCase` was still global. In moving it to a nested
+`Beaker::Runner::Beaker::TestCase` I found that a few tests were starting to
+fail. Further investigation showed that references to `Beaker::*` classes
+inside tests were being resolved as `Beaker::Runner::Beaker::*`, and throwing
+constant missing exceptions. Moving `Beaker::Runner::Beaker` to
+`Beaker::Runner::Native` allows ruby's nested class resolution algorithm
+to find `::Beaker` instead of a nested `Beaker` module constant.
+```
+* (BKR-623) Use --runner to choose test suite (f1aace6b)
+
+* (BKR-623) Adjust const_set hack names (06469668)
+
+
+```
+(BKR-623) Adjust const_set hack names
+
+Prior to this, old tests which relied on Beaker::Log being set to
+@logger, would break under our refactorings. For example:
+https://github.com/puppetlabs/puppet/blob/3.8.3/acceptance/tests/security/cve-2013-1653_puppet_kick.rb#L66
+
+This should continue the duct-taping of constant names, kicking the can that much further
+down the road.
+```
+* (BKR-623) Add `--runner` option, defaulting to "beaker" (f392f2a3)
+
+
+```
+(BKR-623) Add `--runner` option, defaulting to "beaker"
+
+Note, we are generally not testing our command-line behavior, our presets, etc.
+This adds a spec that shows how to easily test these sorts of things.
+```
+* (BKR-623) Specialize Beaker::TestSuite (1bf1ed77)
+
+
+```
+(BKR-623) Specialize Beaker::TestSuite
+
+This creates a `lib/beaker/runnner` path, a `Beaker::Runner` module namespace,
+and moves the `Beaker::TestSuite` there, leaving a wrapper subclass behind.
+
+This allows us to treat the current Beaker test runner as a special case, making
+space to add support for other test runners. Everything should continue working
+as before, allowing us to move on to next steps.
+```
+* (BKR-609) added checks to make aio_version? more robust (54f79440)
+
+* {BKR-622} Fix Regular Expression to give correct Host IP Address (5c3331b4)
+
+
+```
+{BKR-622} Fix Regular Expression to give correct Host IP Address
+
+Without this patch applied the hostname can sometimes be incorrectly picked up and this
+creates problem with all the hostnames getting the same IP addresses on a multi-node setup.
+
+Example Nodeset that can cause this problem:
+HOSTS:
+  staging:
+    roles:
+      - sta
+      - master
+    platform: el-6-x86_64
+    box: puppetlabs/centos-6.6-64-puppet
+    box_url: https://vagrantcloud.com/puppetlabs/boxes/centos-6.6-64-puppet
+    hypervisor: vagrant
+    shared_folder: abc
+    NetworkSettings:
+      IPAddress: 10.255.50.100
+  etl:
+    roles:
+      - etl
+    platform: el-6-x86_64
+    box: puppetlabs/centos-6.6-64-puppet
+    box_url: https://vagrantcloud.com/puppetlabs/boxes/centos-6.6-64-puppet
+    hypervisor: vagrant
+    NetworkSettings:
+      IPAddress: 10.255.50.120
+CONFIG:
+  type: git
+  destroy: no
+
+In the above scenario, the hostname 'etl' is also available when you search 'puppetlabs'.
+
+The patch fixes this by changing the regular expression to look for the string 'etl' (including
+the quote marks).
+```
+### <a name = "2.29.1">2.29.1 - 23 Nov, 2015 (5d824690)
+
+* (HISTORY) update beaker history for gem release 2.29.1 (5d824690)
 
 * (GEM) update beaker version to 2.29.1 (5781838d)
 
