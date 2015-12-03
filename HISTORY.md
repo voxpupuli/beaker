@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 2 Dec, 2015 (bc912e78)](#LATEST)
+* [LATEST - 3 Dec, 2015 (a1ee5206)](#LATEST)
+* [2.30.0 - 2 Dec, 2015 (dbb72630)](#2.30.0)
 * [2.29.1 - 23 Nov, 2015 (5d824690)](#2.29.1)
 * [2.29.0 - 18 Nov, 2015 (33fd2399)](#2.29.0)
 * [2.28.0 - 4 Nov, 2015 (89829551)](#2.28.0)
@@ -103,7 +104,23 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 2 Dec, 2015 (bc912e78)
+### <a name = "LATEST">LATEST - 3 Dec, 2015 (a1ee5206)
+
+* (GEM) update beaker version to 2.30.1 (a1ee5206)
+
+* Merge pull request #1024 from puppetlabs/revert-1013-bkr-623/test-runner-reorganization (18307e09)
+
+
+```
+Merge pull request #1024 from puppetlabs/revert-1013-bkr-623/test-runner-reorganization
+
+Revert "[BKR-623] Reorganize Beaker test runner classes for introduction of minitest runner"
+```
+* Revert "[BKR-623] Reorganize Beaker test runner classes for introduction of minitest runner" (979a329e)
+
+### <a name = "2.30.0">2.30.0 - 2 Dec, 2015 (dbb72630)
+
+* (HISTORY) update beaker history for gem release 2.30.0 (dbb72630)
 
 * (GEM) update beaker version to 2.30.0 (bc912e78)
 
