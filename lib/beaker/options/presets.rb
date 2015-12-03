@@ -185,7 +185,6 @@ module Beaker
           :puppetdb_port_nonssl   => 8080,
           :puppetserver_port      => 8140,
           :nodeclassifier_port    => 4433,
-          :runner                 => "native",
           :aws_keyname_modifier   => rand(10 ** 10).to_s.rjust(10,'0'), # 10 digit random number string
           :ssh                    => {
                                      :config                => false,

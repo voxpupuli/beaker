@@ -98,12 +98,6 @@ module Beaker
             @cmd_options[:timeout] = value
           end
 
-          opts.on '-r RUNNER', '--runner RUNNER',
-                  'Specify which test runner to use',
-                  'supported runners: native' do |value|
-            @cmd_options[:runner] = value
-          end
-
           opts.on '-i URI', '--install URI',
                   'Install a project repo/app on the SUTs',
                   'Provide full git URI or use short form KEYWORD/name',
