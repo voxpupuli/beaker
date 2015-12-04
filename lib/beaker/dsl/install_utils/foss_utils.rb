@@ -1343,7 +1343,7 @@ NOASK
                 arch = 'i386'
               end
               release_file = "/repos/solaris/#{version}/#{opts[:puppet_collection]}/puppet-agent-*#{arch}.pkg.gz"
-              download_file = "puppet-agent-#{varant}-#{version}-#{arch}.tar.gz"
+              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
             else
               raise "No pe-promoted installation step for #{variant} yet..."
             end
