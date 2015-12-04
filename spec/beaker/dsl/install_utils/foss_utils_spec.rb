@@ -882,6 +882,21 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
+    it 'prepends f to the version in the URL and rpm' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['fedora', '22', 'x4']}
+      host = basic_hosts.first
+      host['platform'] = platform
+      opts = { :version => '0.1.0' }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      expect(subject).to receive(:fetch_http_file).once.with(/\/fedora\/f22\//, /-agent-0.1.0-1.fedoraf22/, /fedora/)
+      expect(subject).to receive(:scp_to).once.with(host, /puppet-agent-0.1.0-1.fedoraf22.x4.rpm/, "/root")
+      expect(subject).to receive(:on).ordered.with(host, /rpm -ivh/)
+
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+    end
+
     it 'runs the correct install for windows platforms' do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['windows', '5', 'x64']}

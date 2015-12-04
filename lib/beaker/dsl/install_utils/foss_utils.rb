@@ -1112,6 +1112,7 @@ module Beaker
               release_path << release_path_end
             when /^(fedora|el|centos|sles)$/
               variant = ((variant == 'centos') ? 'el' : variant)
+              version = ((variant == 'fedora') ? "f#{version}" : version)
               release_path << "#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}"
               release_file = "puppet-agent-#{opts[:puppet_agent_version]}-1.#{variant}#{version}.#{arch}.rpm"
             when /^(aix)$/
