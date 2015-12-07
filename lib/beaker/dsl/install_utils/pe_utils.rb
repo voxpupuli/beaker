@@ -327,6 +327,9 @@ module Beaker
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
         # to other settings whether the 32 or 64bit install is used
         #
+        # @note for puppet-agent install options, refer to
+        #   {Beaker::DSL::InstallUtils::FOSSUtils#install_puppet_agent_pe_promoted_repo_on}
+        #
         # @api private
         #
         def do_install hosts, opts = {}
@@ -547,6 +550,9 @@ module Beaker
         # @note Either pe_ver and pe_dir should be set in the ENV or each host should have pe_ver and pe_dir set individually.
         #       Install file names are assumed to be of the format puppet-enterprise-VERSION-PLATFORM.(tar)|(tar.gz)
         #       for Unix like systems and puppet-enterprise-VERSION.msi for Windows systems.
+        #
+        # @note For further installation parameters (such as puppet-agent install)
+        #   options, refer to {#do_install} documentation
         #
         def install_pe_on(install_hosts, opts)
           confine_block(:to, {}, install_hosts) do
