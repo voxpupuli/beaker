@@ -66,7 +66,7 @@ module Mac::Group
   # @param [Proc] block Additional actions or insertions
   def group_present(name, &block)
     group_exists = false
-    execute("dscacheutil -q user -a name #{name}") do |result|
+    execute("dscacheutil -q group -a name #{name}") do |result|
       group_exists = result.stdout =~  /^name: #{name}/
     end
 
