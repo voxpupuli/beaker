@@ -86,6 +86,7 @@ EOS
     it 'returns group existence without running create command if it already exists' do
       result.stdout = puppet1
       expect( subject ).to receive( :execute ).once.and_yield(result)
+      expect( subject ).not_to receive( :gid_next )
       subject.group_present( 'puppet1' )
     end
 
@@ -98,6 +99,15 @@ EOS
       expect( subject ).to receive( :execute ).once.ordered.and_yield(result)
       expect( subject ).to receive( :execute ).with("dscl . create /Groups/#{name} && dscl . create /Groups/#{name} PrimaryGroupID #{gid}").once.ordered
       subject.group_present( name )
+    end
+
+    it 'makes the correct call to dscacheutil' do
+      result.stdout = puppet1
+      expect( subject ).to receive( :execute ).with(
+        /^dscacheutil\ \-q\ group\ \-a\ name\ /
+      ).once.and_yield(result)
+      expect( subject ).not_to receive( :gid_next )
+      subject.group_present( 'puppet1' )
     end
 
   end
