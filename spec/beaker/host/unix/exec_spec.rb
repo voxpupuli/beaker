@@ -49,5 +49,23 @@ module Beaker
          expect( instance.mv(origin, destination, false) ).to be === 0
       end
     end
+
+    describe '#ssh_permit_user_environment' do
+      it 'raises an error on unsupported platforms' do
+        opts['platform'] = 'notarealthing01-parts-arch'
+        expect {
+          instance.ssh_permit_user_environment
+        }.to raise_error( ArgumentError, /#{opts['platform']}/ )
+      end
+    end
+
+    describe '#ssh_service_restart' do
+      it 'raises an error on unsupported platforms' do
+        opts['platform'] = 'notarealthing02-parts-arch'
+        expect {
+          instance.ssh_service_restart
+        }.to raise_error( ArgumentError, /#{opts['platform']}/ )
+      end
+    end
   end
 end

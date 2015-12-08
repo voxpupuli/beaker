@@ -176,6 +176,8 @@ module Unix::Exec
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
+    else
+      raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
     end
   end
 
@@ -210,6 +212,8 @@ module Unix::Exec
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
+    else
+      raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
     end
 
     ssh_service_restart()
