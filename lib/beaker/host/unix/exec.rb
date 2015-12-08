@@ -187,17 +187,27 @@ module Unix::Exec
   def ssh_permit_user_environment
     case self['platform']
     when /debian|ubuntu|cumulus/
-      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+      directory = create_tmpdir_on(self)
+      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
-      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+      directory = create_tmpdir_on(self)
+      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /el-|centos|fedora|redhat|oracle|scientific|eos/
-      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+      directory = create_tmpdir_on(self)
+      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /sles/
-      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+      directory = create_tmpdir_on(self)
+      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /solaris/
       # kept solaris here because refactoring it into its own Host module
       # conflicts with the solaris hypervisor that already exists
-      exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
+      directory = create_tmpdir_on(self)
+      exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
+      exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
     end

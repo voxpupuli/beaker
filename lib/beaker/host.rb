@@ -3,6 +3,9 @@ require 'timeout'
 require 'benchmark'
 require 'rsync'
 
+require 'beaker/dsl/helpers'
+require 'beaker/dsl/patterns'
+
 [ 'command', 'ssh_connection'].each do |lib|
   require "beaker/#{lib}"
 end
@@ -10,6 +13,9 @@ end
 module Beaker
   class Host
     SELECT_TIMEOUT = 30
+
+    include Beaker::DSL::Helpers
+    include Beaker::DSL::Patterns
 
     class CommandFailure < StandardError; end
 
