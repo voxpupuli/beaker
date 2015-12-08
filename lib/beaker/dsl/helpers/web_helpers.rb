@@ -47,7 +47,7 @@ module Beaker
           base_url.chomp!('/')
           src = "#{base_url}/#{file_name}"
           dst = File.join(dst_dir, file_name)
-          if File.exists?(dst)
+          if options[:cache_files_locally] && File.exists?(dst)
             logger.notify "Already fetched #{dst}"
           else
             logger.notify "Fetching: #{src}"
