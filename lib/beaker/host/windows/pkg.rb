@@ -26,7 +26,13 @@ module Windows::Pkg
     end
 
     if not check_for_command(cygwin)
-      execute("curl --retry 5 http://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}")
+      command = "curl --retry 5 https://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}"
+      begin
+        execute(command)
+      rescue Beaker::Host::CommandFailure
+        command.sub!('https', 'http')
+        execute(command)
+      end
     end
     execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}")
   end
