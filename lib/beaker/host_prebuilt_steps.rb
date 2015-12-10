@@ -377,6 +377,15 @@ module Beaker
       end
     end
 
+    # Update /etc/hosts to make updates.puppetlabs.com (aka the dujour server) resolve to 127.0.01,
+    # so that we don't pollute the server with test data.  See SERVER-1000, BKR-182, BKR-237, DJ-10
+    # for additional details.
+    def disable_updates_puppetlabs_com hosts
+     hosts.each do |host|
+      set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
+     end
+    end 
+
     # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
     #
     # Does nothing on other platfoms.
