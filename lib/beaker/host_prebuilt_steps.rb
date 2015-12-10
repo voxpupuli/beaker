@@ -323,7 +323,7 @@ module Beaker
       if host['platform'] =~ /freebsd/
         host.echo_to_file(etc_hosts, '/etc/hosts')
       else
-        host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
+        host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
       end
     end
 
