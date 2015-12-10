@@ -381,9 +381,11 @@ module Beaker
     # so that we don't pollute the server with test data.  See SERVER-1000, BKR-182, BKR-237, DJ-10
     # for additional details.
     def disable_updates_puppetlabs_com hosts
-     hosts.each do |host|
-      set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
-     end
+      logger = opts[:logger]
+      hosts.each do |host|
+        logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
+        set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
+      end
     end 
 
     # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
