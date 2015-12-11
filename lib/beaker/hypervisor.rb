@@ -118,6 +118,9 @@ module Beaker
       if @options[:set_env]
         set_env(@hosts, @options)
       end
+      if @options[:disable_updates]
+        disable_updates(@hosts, @options)
+      end
     end
 
     #Default validation steps to be run for a given hypervisor.  Ensures that SUTs meet requirements to be

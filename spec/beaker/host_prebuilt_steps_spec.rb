@@ -456,7 +456,7 @@ describe Beaker do
       host = make_host('name', {})
       etc_hosts = "127.0.0.1  localhost\n192.168.2.130 pe-ubuntu-lucid\n192.168.2.128 pe-centos6\n192.168.2.131 pe-debian6"
 
-      expect( Beaker::Command ).to receive( :new ).with( "echo '#{etc_hosts}' > /etc/hosts" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo '#{etc_hosts}' >> /etc/hosts" ).once
       expect( host ).to receive( :exec ).once
 
       subject.set_etc_hosts(host, etc_hosts)
