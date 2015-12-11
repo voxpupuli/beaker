@@ -89,18 +89,18 @@ module Beaker
         end
       end
 
-      context "if :enable_updates option set true" do
-        it "does not call disable_updates_puppetlabs_com" do
-          options[:enable_updates] = true
-          expect( hypervisor ).to receive( :enable_updates ).exactly( 1).times
+      context "if :disable_updates option set true" do
+        it "calls disable_updates" do
+          options[:disable_updates] = true
+          expect( hypervisor ).to receive( :disable_updates ).once
           hypervisor.configure
         end
       end
 
-      context "if :enable_updates option set false" do
-        it "calls disable_updates_puppetlabs_com" do
-          options[:enable_updates] = false
-          expect( hypervisor ).to receive( :enable_updates ).never
+      context "if :disable_updates option set false" do
+        it "does not call disable_updates_puppetlabs_com" do
+          options[:disable_updates] = false
+          expect( hypervisor ).to receive( :disable_updates ).never
           hypervisor.configure
         end
       end

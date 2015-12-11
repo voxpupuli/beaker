@@ -380,7 +380,7 @@ module Beaker
     # Update /etc/hosts to make updates.puppetlabs.com (aka the dujour server) resolve to 127.0.01,
     # so that we don't pollute the server with test data.  See SERVER-1000, BKR-182, BKR-237, DJ-10
     # for additional details.
-    def disable_updates_puppetlabs_com hosts
+    def disable_updates hosts, opts
       logger = opts[:logger]
       hosts.each do |host|
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"

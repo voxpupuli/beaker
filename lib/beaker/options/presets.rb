@@ -161,7 +161,7 @@ module Beaker
           :timesync               => false,
           :disable_iptables       => false,
           :set_env                => true,
-          :enable_updates         => false,
+          :disable_updates        => true,
           :repo_proxy             => false,
           :package_proxy          => false,
           :add_el_extras          => false,

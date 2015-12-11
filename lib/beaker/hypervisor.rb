@@ -118,8 +118,8 @@ module Beaker
       if @options[:set_env]
         set_env(@hosts, @options)
       end
-      if !@options[:enable_updates]
-        disable_updates_puppetlabs_com @hosts
+      if @options[:disable_updates]
+        disable_updates(@hosts, @options)
       end
     end
 
