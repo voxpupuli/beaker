@@ -110,7 +110,7 @@ module Beaker
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
         when host['platform'] =~ /solaris-10/
           check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-/
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end
@@ -383,6 +383,7 @@ module Beaker
     def disable_updates hosts, opts
       logger = opts[:logger]
       hosts.each do |host|
+        next if host['platform'] =~ /netscaler/
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
@@ -534,7 +535,7 @@ module Beaker
       logger = opts[:logger]
 
       block_on host do |host|
-        next if host['platform'] =~ /f5/
+        next if host['platform'] =~ /f5-|netscaler/
         env = construct_env(host, opts)
         logger.debug("setting local environment on #{host.name}")
         if host['platform'] =~ /windows/ and host.is_cygwin?

@@ -47,7 +47,7 @@ module Beaker
       # Perform the main launch work
       launch_all_nodes()
 
-      wait_for_status_f5()
+      wait_for_status_netdev()
 
       # Add metadata tags to each instance
       add_tags()
@@ -464,16 +464,16 @@ module Beaker
       end
     end
 
-    # Handles special checks needed for f5 platforms.
+    # Handles special checks needed for netdev platforms.
     #
-    # @note if any host is an f5 one, these checks will happen once across all
+    # @note if any host is an netdev one, these checks will happen once across all
     #   of the hosts, and then we'll exit
     #
     # @return [void]
     # @api private
-    def wait_for_status_f5()
+    def wait_for_status_netdev()
       @hosts.each do |host|
-        if host['platform'] =~ /f5/
+        if host['platform'] =~ /f5-|netscaler/
           wait_for_status(:running, @hosts)
 
           wait_for_status(nil, @hosts) do |instance|
@@ -549,9 +549,9 @@ module Beaker
     # @return [void]
     # @api private
     def configure_hosts
-      @hosts.each do |host|
-        next if host['platform'] =~ /f5/
-        host_entries = @hosts.map do |h|
+      non_netdev_hosts = @hosts.select{ |h| !(h['platform'] =~ /f5-|netscaler/) }
+      non_netdev_hosts.each do |host|
+        host_entries = non_netdev_hosts.map do |h|
           h == host ? etc_hosts_entry(h, :private_ip) : etc_hosts_entry(h)
         end
         host_entries.unshift "127.0.0.1\tlocalhost localhost.localdomain\n"
@@ -578,6 +578,8 @@ module Beaker
       if host['user'] != 'root'
         if host['platform'] =~ /f5-/
           enable_root_f5(host)
+        elsif host['platform'] =~ /netscaler/
+          enable_root_netscaler(host)
         else
           copy_ssh_to_root(host, @options)
           enable_root_login(host, @options)
@@ -618,6 +620,16 @@ module Beaker
       @logger.notify("f5: Configured admin password to be #{password}")
     end
 
+    # Enables root access for a host on an netscaler platform
+    # @note This method does not support other platforms
+    #
+    # @return nil
+    # @api private
+    def enable_root_netscaler(host)
+      host['ssh'] = {:password => host['instance'].id}
+      @logger.notify("netscaler: nsroot password is #{host['instance'].id}")
+    end
+
     # Set the hostname of all instances to be the hostname defined in the
     # beaker configuration.
     #
@@ -629,6 +641,7 @@ module Beaker
           # on el-7 hosts, the hostname command doesn't "stick" randomly
           host.exec(Command.new("hostnamectl set-hostname #{host.name}"))
         else
+          next if host['platform'] =~ /netscaler/
           host.exec(Command.new("hostname #{host.name}"))
         end
       end
