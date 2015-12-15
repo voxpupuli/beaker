@@ -202,7 +202,7 @@ module Beaker
           end
         when :to
           if criteria and ( not criteria.empty? )
-            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) 
           else
             # confining to only hosts in provided array of hosts
           end
@@ -213,7 +213,6 @@ module Beaker
           logger.warn "No suitable hosts with: #{criteria.inspect}"
           skip_test 'No suitable hosts found'
         end
-        self.hosts = hosts_to_modify
         hosts_to_modify
       end
 
@@ -236,9 +235,7 @@ module Beaker
           # a skip generated from the provided block, pass it up the chain
           raise e
         end
-      ensure
-        self.hosts = original_hosts
-      end
+     end
 
       # Sets tags on the current {Beaker::TestCase}, and skips testing
       # if necessary after checking this case's tags against the ones that are
