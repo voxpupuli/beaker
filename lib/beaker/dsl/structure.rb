@@ -222,7 +222,6 @@ module Beaker
       #
       # @see #confine
       def confine_block(type, criteria, host_array = nil, &block)
-        require 'pry'; require 'pry-debugger'; binding.pry
         host_array = Array( host_array || hosts )
         original_hosts = self.hosts.dup
         confine(type, criteria, host_array)
