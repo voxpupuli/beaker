@@ -190,6 +190,7 @@ module Beaker
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
       #   this test case after confinement.
       def confine(type, criteria, host_array = nil, &block)
+        original_hosts = self.hosts.dup
         hosts_to_modify = Array( host_array || hosts )
         hosts_not_modified = hosts - hosts_to_modify #we aren't examining these hosts
         case type
@@ -202,7 +203,7 @@ module Beaker
           end
         when :to
           if criteria and ( not criteria.empty? )
-            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) 
           else
             # confining to only hosts in provided array of hosts
           end
@@ -213,7 +214,7 @@ module Beaker
           logger.warn "No suitable hosts with: #{criteria.inspect}"
           skip_test 'No suitable hosts found'
         end
-        self.hosts = hosts_to_modify
+        self.hosts = original_hosts
         hosts_to_modify
       end
 
