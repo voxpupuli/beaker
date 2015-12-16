@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 3 Dec, 2015 (a1ee5206)](#LATEST)
+* [LATEST - 16 Dec, 2015 (da1729b0)](#LATEST)
+* [2.30.1 - 3 Dec, 2015 (9f1376ef)](#2.30.1)
 * [2.30.0 - 2 Dec, 2015 (dbb72630)](#2.30.0)
 * [2.29.1 - 23 Nov, 2015 (5d824690)](#2.29.1)
 * [2.29.0 - 18 Nov, 2015 (33fd2399)](#2.29.0)
@@ -104,7 +105,193 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 3 Dec, 2015 (a1ee5206)
+### <a name = "LATEST">LATEST - 16 Dec, 2015 (da1729b0)
+
+* (GEM) update beaker version to 2.31.0 (da1729b0)
+
+* Revert "Added netscaler platform" (112ef320)
+
+
+```
+Revert "Added netscaler platform"
+
+This reverts commit 6a2abd36fe5b36db163582b12dca11b5cd018c7f.
+```
+* Added netscaler platform (6a2abd36)
+
+* Merge pull request #1034 from erikPrime/(BKR-237)_disable_updates.puppetlabs.com (23bc8f94)
+
+
+```
+Merge pull request #1034 from erikPrime/(BKR-237)_disable_updates.puppetlabs.com
+
+(BKR-237) disable updates.puppetlabs.com
+```
+* (BKR-237) fixed option & updated tests (85a99ef8)
+
+* Merge pull request #1033 from kevpl/bkr647_windows_pkgcygwin (e0d06f7f)
+
+
+```
+Merge pull request #1033 from kevpl/bkr647_windows_pkgcygwin
+
+(BKR-647) windows.install_package now uses SSL cygwin URL with fallback
+```
+* (BKR-237) mods in response to review (af321acf)
+
+* (MAINT) fix spec test for set_etc_hosts (cf6dc589)
+
+* (MAINT) makes set_etc_hosts APPEND instead of REPLACE (09cbdf77)
+
+* (BKR-237) updates.puppetlabs.com resolves to 127.0.0.1 (a78ee042)
+
+* Merge pull request #1031 from kevpl/bkr642_aix_fix (ab4ebd1d)
+
+
+```
+Merge pull request #1031 from kevpl/bkr642_aix_fix
+
+(BKR-642) include aix exec, error checking to unix exec
+```
+* Merge pull request #1032 from kevpl/bkr628_mac_group (2c79ac19)
+
+
+```
+Merge pull request #1032 from kevpl/bkr628_mac_group
+
+(BKR-628) fixed mac group_present check
+```
+* (BKR-647) windows.install_package now uses SSL cygwin URL with fallback (95bf615b)
+
+* Merge pull request #1025 from ody/add_privatebindir_to_path (6e7333f5)
+
+
+```
+Merge pull request #1025 from ody/add_privatebindir_to_path
+
+Add privatebindir to PATH
+```
+* (BKR-628) fixed mac group_present check (35b12e53)
+
+* Merge pull request #1029 from kevpl/bkr569_fetch_nocache (3ffd8b42)
+
+
+```
+Merge pull request #1029 from kevpl/bkr569_fetch_nocache
+
+(BKR-569) added caching disable option
+```
+* (BKR-642) include aix exec, error checking to unix exec (7ba2bf64)
+
+* Merge pull request #1026 from ody/reorder_permiteuserenv (77581a29)
+
+
+```
+Merge pull request #1026 from ody/reorder_permiteuserenv
+
+Swap the placement of PermiteUserEnvironment
+```
+* Merge pull request #1030 from kevpl/bkr626_puppetagent_docs (7173bd15)
+
+
+```
+Merge pull request #1030 from kevpl/bkr626_puppetagent_docs
+
+(BKR-626) added puppet-agent doc links
+```
+* Merge pull request #1018 from sathlan/feature/add_memory_option_to_vagrant_libvirt (91621239)
+
+
+```
+Merge pull request #1018 from sathlan/feature/add_memory_option_to_vagrant_libvirt
+
+(BKR-631) Add memory option to vagrant libvirt.
+```
+* (BKR-626) added puppet-agent doc links (dee654e4)
+
+* (BKR-569) added caching disable option (1cf628e4)
+
+* Merge pull request #1028 from joshcooper/ticket/master/BKR-644-fedora-puppet-agent-dev-repo (a6e41cc1)
+
+
+```
+Merge pull request #1028 from joshcooper/ticket/master/BKR-644-fedora-puppet-agent-dev-repo
+
+(BKR-644) Prepend 'f' to the fedora version
+```
+* Merge pull request #1027 from bmjen/fix-solaris (3df53898)
+
+
+```
+Merge pull request #1027 from bmjen/fix-solaris
+
+(maint) Fix typo in solaris install_pe util function.
+```
+* (BKR-644) Prepend 'f' to the fedora version (1b15425d)
+
+
+```
+(BKR-644) Prepend 'f' to the fedora version
+
+Previously, install_puppet_agent_dev_repo_on did not work for fedora,
+because we were constructing a URL of the form:
+
+    http://<host>/puppet-agent/<sha>/repos/fedora/22/PC1/x86_64/puppet-agent-1.3.2-1.fedora22.x86_64.rpm
+
+However, we unfortunately prepend 'f' to the version string when
+publishing the package, see RE-4191.
+
+This commit prepends an 'f' to the version string for fedora-only, so
+the new URL is:
+
+    http://<host>/puppet-agent/<sha>/repos/fedora/f22/PC1/x86_64/puppet-agent-1.3.2-1.fedoraf22.x86_64.rpm
+
+Note f22 appears in two places, "fedora/f22" and
+"puppet-agent...-fedoraf22.x86_64.rpm"
+```
+* (maint) Fix typo in solaris install_pe util function. (3e68260a)
+
+* (MAINT) Swap placement of PermitUserEnvironment (2cb7f6d6)
+
+
+```
+(MAINT) Swap placement of PermitUserEnvironment
+
+  This commit will rework the way PermiteUserEnvironment is added to
+  sshd_config by putting it at the top of the file.
+
+  Without this commit you will create a bad sshd_config if your sut's
+  base image containes matching blocks the end of its sshd_config
+  because the PermitUserEnvironment option is not allowed there.  This
+  ordering is likely perferred since it is generally the norm to put
+  matching blocks at the end of the sshd_config.
+```
+* (MAINT) Add privatebindir to PATH (5e45c1f1)
+
+
+```
+(MAINT) Add privatebindir to PATH
+
+  This commit will add privatebindir to the list of paths added to the
+  PATH variable stored in ~/.ssh/environment.
+
+  This needs to happen so that the gem command and any excutables
+  installed using that gem command are available for use during a suite.
+  A requirement if your suite deploys dependencies with r10k on both aio
+  and foss agent types.
+```
+* (BKR-631) Add memory option to vagrant libvirt. (349501e0)
+
+
+```
+(BKR-631) Add memory option to vagrant libvirt.
+
+This add the possibility to specify the memory for each host separately
+or for every host.
+```
+### <a name = "2.30.1">2.30.1 - 3 Dec, 2015 (9f1376ef)
+
+* (HISTORY) update beaker history for gem release 2.30.1 (9f1376ef)
 
 * (GEM) update beaker version to 2.30.1 (a1ee5206)
 
