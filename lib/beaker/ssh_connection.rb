@@ -30,7 +30,7 @@ module Beaker
       @ip = name_hash[:ip]
       @hostname = name_hash[:hostname]
       @user = user
-      @ssh_opts = ssh_opts
+      @ssh_opts = ssh_opts.merge({keepalive: true, keepalive_interval: 2})
       @logger = options[:logger]
       @options = options
     end
