@@ -650,7 +650,7 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         def stop_agent_on(agent)
           block_on agent do | host |
-            vardir = agent.puppet['vardir']
+            vardir = agent.puppet_configprint['vardir']
             agent_running = true
             while agent_running
               agent_running = agent.file_exist?("#{vardir}/state/agent_catalog_run.lock")

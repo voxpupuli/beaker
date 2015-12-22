@@ -596,7 +596,7 @@ module Beaker
             end
 
 
-            msi_download_path = "#{get_temp_path(host)}\\#{host['dist']}.msi"
+            msi_download_path = "#{host.system_temp_path}\\#{host['dist']}.msi"
 
             if host.is_cygwin?
               # NOTE: it is critical that -o be before -O on Windows
@@ -1088,16 +1088,12 @@ module Beaker
             raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
           end
 
-          copy_base_external_defaults = Hash.new('/root').merge({
-            :windows => '`cygpath -smF 35`/',
-            :osx => '/var/root'
-          })
           block_on hosts do |host|
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:copy_dir_external]  ||= copy_base_external_defaults[variant.to_sym]
+            opts[:copy_dir_external]  ||= host.external_copy_base
             opts[:puppet_collection] ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
@@ -1296,17 +1292,13 @@ NOASK
         def install_puppet_agent_pe_promoted_repo_on( hosts, opts )
           opts[:puppet_agent_version] ||= 'latest'
 
-          copy_base_external_defaults = Hash.new('/root').merge({
-            :windows => '`cygpath -smF 35`/',
-            :osx => '/var/root'
-          })
           block_on hosts do |host|
             pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0.0-rc1'
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:copy_dir_external]  ||= copy_base_external_defaults[variant.to_sym]
+            opts[:copy_dir_external]  ||= host.external_copy_base
             opts[:puppet_collection] ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]

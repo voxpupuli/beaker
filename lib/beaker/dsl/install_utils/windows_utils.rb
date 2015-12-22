@@ -5,14 +5,15 @@ module Beaker
       # This module contains methods useful for Windows installs
       #
       module WindowsUtils
-
         # Given a host, returns it's system TEMP path
+        #
         # @param [Host] host An object implementing {Beaker::Hosts}'s interface.
-        def get_temp_path(host)
-          # under CYGWIN %TEMP% may not be set
-          tmp_path = on(host, Command.new('ECHO %SYSTEMROOT%', [], { :cmdexe => true }))
-          tmp_path.output.gsub(/\n/, '') + '\\TEMP'
+        #
+        # @return [String] system temp path
+        def get_system_temp_path(host)
+          host.system_temp_path
         end
+        alias_method :get_temp_path, :get_system_temp_path
 
         # Generates commands to be inserted into a Windows batch file to launch an MSI install
         # @param [String] msi_path The path of the MSI - can be a local Windows style file path like
@@ -40,19 +41,23 @@ exit /B %errorlevel%
         # Given a host, path to MSI and MSI options, will create a batch file
         #   on the host, returning the path to the randomized batch file and
         #   the randomized log file
+        #
         # @param [Host] host An object implementing {Beaker::Hosts}'s interface.
-        # @param [String] msi_path The path of the MSI - can be a local Windows style file path like
-        #                   c:\temp\puppet.msi OR a url like https://download.com/puppet.msi or file://c:\temp\puppet.msi
+        # @param [String] msi_path The path of the MSI - can be a local Windows
+        #   style file path like c:\temp\puppet.msi OR a url like
+        #   https://download.com/puppet.msi or file://c:\temp\puppet.msi
         # @param  [Hash{String=>String}] msi_opts MSI installer options
-        #                   See https://docs.puppetlabs.com/guides/install_puppet/install_windows.html#msi-properties
+        #   See https://docs.puppetlabs.com/guides/install_puppet/install_windows.html#msi-properties
+        #
         # @api private
+        # @return [String, String] path to the batch file, patch to the log file
         def create_install_msi_batch_on(host, msi_path, msi_opts)
           timestamp = Time.new.strftime('%Y-%m-%d_%H.%M.%S')
-          tmp_path = get_temp_path(host)
+          tmp_path = host.system_temp_path
+          tmp_path.gsub!('/', '\\')
 
           batch_name = "install-puppet-msi-#{timestamp}.bat"
-          batch_path = "#{tmp_path}\\#{batch_name}"
-
+          batch_path = "#{tmp_path}#{host.scp_separator}#{batch_name}"
           log_path = "#{tmp_path}\\install-puppet-#{timestamp}.log"
 
           Tempfile.open(batch_name) do |tmp_file|
