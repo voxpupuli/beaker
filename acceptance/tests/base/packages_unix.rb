@@ -6,8 +6,22 @@ pkg_fixtures = File.expand_path(File.join(current_dir, '../../fixtures/package')
 pkg_name     = 'puppetserver'
 
 def clean_file(host, file)
-  if host.file_exist?(file)
-    on(host, "rm -rf #{file}")
+  unless file.nil?
+    filename = pkg_file(host, file)
+
+    if !filename.nil? && host.file_exist?(filename)
+      on(host, "rm -rf #{filename}")
+    end
+  end
+end
+
+def pkg_file(host, pkg_name)
+  if host['platform'] =~ /debian|ubuntu/
+    "/etc/apt/sources.list.d/#{pkg_name}.list"
+  elsif host['platform'] =~ /el/
+    "/etc/yum.repos.d/#{pkg_name}.repo"
+  else
+    nil
   end
 end
 
@@ -20,12 +34,10 @@ step '#deploy_apt_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
 
   if host['platform'] =~ /debian|ubuntu/
-    pkg_file = "/etc/apt/sources.list.d/#{pkg_name}.list"
-
-    clean_file(host, pkg_file)
-    host.deploy_apt_repo(pkg_fixtures, 'puppetserver', 'latest')
-    assert(host.file_exist?(pkg_file), 'apt file should exist')
-    clean_file(host, pkg_file)
+    clean_file(host, pkg_name)
+    host.deploy_apt_repo(pkg_fixtures, pkg_name, 'latest')
+    assert(host.file_exist?(pkg_file(host, pkg_name)), 'apt file should exist')
+    clean_file(host, pkg_name)
   end
 
 end
@@ -34,17 +46,16 @@ step '#deploy_yum_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
 
   if host['platform'] =~ /el/
-    pkg_file = "/etc/yum.repos.d/#{pkg_name}.repo"
-
-    clean_file(host, pkg_file)
+    clean_file(host, pkg_name)
     host.deploy_yum_repo(pkg_fixtures, pkg_name, 'latest')
-    assert(host.file_exist?(pkg_file), 'yum file should exist')
-    clean_file(host, pkg_file)
+    assert(host.file_exist?(pkg_file(host, pkg_name)), 'yum file should exist')
+    clean_file(host, pkg_name)
   end
 
 end
 
 step '#deploy_package_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
-  host.deploy_package_repo(pkg_fixtures, 'puppetserver', 'latest')
+  host.deploy_package_repo(pkg_fixtures, pkg_name, 'latest')
+  clean_file(host, pkg_name)
 end
