@@ -5,10 +5,7 @@ module Beaker
 
     describe Parser do
       let(:parser)           { Parser.new }
-      let(:opts_path)        { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
       let(:hosts_path)       { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
-      let(:badyaml_path)     { File.join(File.expand_path(File.dirname(__FILE__)), "data", "badyaml.cfg") }
-      let(:home)             { ENV['HOME'] }
 
       it "supports usage function" do
         expect{parser.usage}.to_not raise_error
@@ -122,18 +119,6 @@ module Beaker
           arg = "#{test_dir}/,#{other_test_dir}/"
           output = parser.file_list( parser.split_arg( arg ))
           expect( output ).to be === @sorted_expanded_fileset1 + @sorted_expanded_fileset2
-        end
-      end
-
-      describe 'check_yaml_file' do
-        it "raises error on improperly formatted yaml file" do
-          FakeFS.deactivate!
-          expect{parser.check_yaml_file(badyaml_path)}.to raise_error(ArgumentError)
-        end
-
-        it "raises an error when a yaml file is missing" do
-          FakeFS.deactivate!
-          expect{parser.check_yaml_file("not a path")}.to raise_error(ArgumentError)
         end
       end
 
@@ -305,13 +290,12 @@ module Beaker
           filename
         end
 
-        shared_examples_for(:a_platform_supporting_only_agents) do |platform,type|
+        shared_examples_for(:a_platform_supporting_only_agents) do |platform, _type|
 
           it "restricts #{platform} hosts to agent" do
             args = []
-            hosts_file = fake_hosts_file_for_platform(hosts, platform)
-            args << "--hosts" << hosts_file
-            expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*may not have roles 'master', 'dashboard', or 'database'/)
+            args << '--hosts' << fake_hosts_file_for_platform(hosts, platform)
+            expect { parser.parse_args(args) }.to raise_error(ArgumentError, /#{platform}.*may not have roles: master, database, dashboard/)
           end
         end
 
@@ -345,7 +329,7 @@ module Beaker
 
       end
 
-      describe '#normalize_and_validate_tags' do
+      describe '#normalize_tags!' do
         let ( :tag_includes ) { @tag_includes || [] }
         let ( :tag_excludes ) { @tag_excludes || [] }
         let ( :options )      {
@@ -360,17 +344,7 @@ module Beaker
           @tag_excludes = 'joey,long_running,pants'
           parser.instance_variable_set(:@options, options)
 
-          expect( parser ).to_not receive( :parser_error )
-          parser.normalize_and_validate_tags()
-        end
-
-        it 'does error if tags overlap' do
-          @tag_includes = 'can,tommies,should_error,potatoes,plant'
-          @tag_excludes = 'joey,long_running,pants,should_error'
-          parser.instance_variable_set(:@options, options)
-
-          expect( parser ).to receive( :parser_error )
-          parser.normalize_and_validate_tags()
+          expect { parser.normalize_tags! }.not_to raise_error
         end
 
         it 'splits the basic case correctly' do
@@ -378,7 +352,7 @@ module Beaker
           @tag_excludes = 'joey,long_running,pants'
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_and_validate_tags()
+          parser.normalize_tags!
           expect( options[:tag_includes] ).to be === ['can', 'tommies', 'potatoes', 'plant']
           expect( options[:tag_excludes] ).to be === ['joey', 'long_running', 'pants']
         end
@@ -388,7 +362,7 @@ module Beaker
           @tag_excludes = ''
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_and_validate_tags()
+          parser.normalize_tags!
           expect( options[:tag_includes] ).to be === []
           expect( options[:tag_excludes] ).to be === []
         end
@@ -398,30 +372,12 @@ module Beaker
           @tag_excludes = 'lEet_spEAK,pOland'
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_and_validate_tags()
+          parser.normalize_tags!
           expect( options[:tag_includes] ).to be === ['jerry_and_tom', 'parka']
           expect( options[:tag_excludes] ).to be === ['leet_speak', 'poland']
         end
       end
 
-      describe '#resolve_symlinks' do
-        let ( :options )  { Beaker::Options::OptionsHash.new }
-
-        it 'calls File.realpath if hosts_file is set' do
-          options[:hosts_file] = opts_path
-          parser.instance_variable_set(:@options, options)
-
-          parser.resolve_symlinks()
-          expect( parser.instance_variable_get(:@options)[:hosts_file] ).to be === opts_path
-        end
-
-        it 'does not throw an error if hosts_file is not set' do
-          options[:hosts_file] = nil
-          parser.instance_variable_set(:@options, options)
-
-          expect{ parser.resolve_symlinks() }.to_not raise_error
-        end
-      end
     end
   end
 end
