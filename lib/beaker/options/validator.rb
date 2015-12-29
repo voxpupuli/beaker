@@ -48,7 +48,6 @@ module Beaker
       #
       # @param [Array<String>] default list of host names
       # @return [true, false]
-      # @thr
       def default_set?(default)
         if default.empty?
           return false
