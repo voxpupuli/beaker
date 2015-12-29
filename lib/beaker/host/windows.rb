@@ -43,6 +43,28 @@ module Windows
       @ssh_server
     end
 
+    # Gets the path & file name for the puppet agent dev package on Windows
+    #
+    # @param [String] puppet_collection Name of the puppet collection to use
+    # @param [String] puppet_agent_version Version of puppet agent to get
+    # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+    #
+    # @note Windows only uses the 'install_32' option of the opts hash at this
+    #   time. Note that it will not fail if not provided, however
+    #
+    # @return [String, String] Path to the directory and filename of the package, respectively
+    def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+      release_path_end = 'windows'
+      is_config_32 = self['ruby_arch'] == 'x86' || self['install_32'] || opts['install_32']
+      should_install_64bit = self.is_x86_64? && !is_config_32
+      # only install 64bit builds if
+      # - we do not have install_32 set on host
+      # - we do not have install_32 set globally
+      arch_suffix = should_install_64bit ? '64' : '86'
+      release_file = "puppet-agent-x#{arch_suffix}.msi"
+      return release_path_end, release_file
+    end
+
     attr_reader :scp_separator
     def initialize name, host_hash, options
       super

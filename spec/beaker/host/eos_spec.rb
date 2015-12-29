@@ -12,23 +12,23 @@ module Eos
     }
     let(:host)    { make_host( 'name', options.merge(platform) ) }
 
-    describe '#get_puppet_agent_package_info' do
+    describe '#puppet_agent_dev_package_info' do
       it 'raises an error if puppet_collection isn\'t passed' do
-        expect { host.get_puppet_agent_package_info(nil, 'maybe') }.to raise_error(ArgumentError)
+        expect { host.puppet_agent_dev_package_info(nil, 'maybe') }.to raise_error(ArgumentError)
       end
 
       it 'raises as error if puppet_agent_version isn\'t passed' do
-        expect { host.get_puppet_agent_package_info('maybe', nil) }.to raise_error(ArgumentError)
+        expect { host.puppet_agent_dev_package_info('maybe', nil) }.to raise_error(ArgumentError)
       end
 
       it 'returns two strings that include the passed parameters' do
-        return1, return2 = host.get_puppet_agent_package_info('pc1', 'pav1')
+        return1, return2 = host.puppet_agent_dev_package_info('pc1', 'pav1')
         expect( return1 ).to match(/pc1/)
         expect( return2 ).to match(/pav1/)
       end
 
       it 'gets the correct file type' do
-        _, return2 = host.get_puppet_agent_package_info('pc1', 'pav1')
+        _, return2 = host.puppet_agent_dev_package_info('pc1', 'pav1')
         expect( return2 ).to match(/swix/)
       end
     end
