@@ -5,6 +5,7 @@ module Beaker
 
     describe Parser do
       let(:parser)           { Parser.new }
+      let(:opts_path)        { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
       let(:hosts_path)       { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
 
       it "supports usage function" do
@@ -375,6 +376,53 @@ module Beaker
           parser.normalize_tags!
           expect( options[:tag_includes] ).to be === ['jerry_and_tom', 'parka']
           expect( options[:tag_excludes] ).to be === ['leet_speak', 'poland']
+        end
+      end
+
+      describe '#resolve_symlinks' do
+        let ( :options )  { Beaker::Options::OptionsHash.new }
+
+        it 'calls File.realpath if hosts_file is set' do
+          options[:hosts_file] = opts_path
+          parser.instance_variable_set(:@options, options)
+
+          parser.resolve_symlinks!
+          expect( parser.instance_variable_get(:@options)[:hosts_file] ).to be === opts_path
+        end
+
+        it 'does not throw an error if hosts_file is not set' do
+          options[:hosts_file] = nil
+          parser.instance_variable_set(:@options, options)
+
+          expect{ parser.resolve_symlinks! }.to_not raise_error
+        end
+      end
+
+      describe '#get_hypervisors' do
+        it 'returns a unique list' do
+          hosts_dupe   = {
+              'vm1' => {hypervisor: 'hi'},
+              'vm2' => {hypervisor: 'hi'},
+              'vm3' => {hypervisor: 'bye'}
+          }
+          hosts_single = {'vm1' => {hypervisor: 'hi'}}
+
+          expect(parser.get_hypervisors(hosts_dupe)).to eq(%w(hi bye))
+          expect(parser.get_hypervisors(hosts_single)).to eq(%w(hi))
+        end
+      end
+
+      describe '#get_roles' do
+        it 'returns a unique list' do
+          roles_dupe   = {
+              'vm1' => {roles: ['master']},
+              'vm2' => {roles: %w(database dashboard)},
+              'vm3' => {roles: ['bye']}
+          }
+          roles_single = {'vm1' => {roles: ['hi']}}
+
+          expect(parser.get_roles(roles_dupe)).to eq([['master'], %w(database dashboard), ['bye']])
+          expect(parser.get_roles(roles_single)).to eq([['hi']])
         end
       end
 

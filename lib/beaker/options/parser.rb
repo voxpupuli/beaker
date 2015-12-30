@@ -62,25 +62,35 @@ module Beaker
         files = []
         unless paths.empty?
           paths.each do |root|
+            @validator.validate_path(root)
+
+            path_files = []
             if File.file?(root)
-              files << root
+              path_files << root
             elsif File.directory?(root) #expand and explore
-              discover_files = Dir.glob(
-                  File.join(root, "**/*.rb")
-              ).select { |f| File.file?(f) }
-              if discover_files.empty?
-                @validator.parser_error "empty directory used as an option (#{root})!"
-              end
-              files += discover_files.sort_by { |file| [file.count("/"), file] }
-            else #not a file, not a directory, not nothin'
-              @validator.parser_error "#{root} used as a file option but is not a file or directory!"
+              path_files = Dir.glob(File.join(root, '**/*.rb'))
+                               .select { |f| File.file?(f) }
+                               .sort_by { |file| [file.count('/'), file] }
             end
+
+            @validator.validate_files(path_files, root)
+            files += path_files
           end
         end
-        if files.empty?
-          @validator.parser_error "no .rb files found in #{paths.to_s}"
-        end
+
+        @validator.validate_files(files, paths.to_s)
         files
+      end
+
+      # resolves all file symlinks that require it. This modifies @options.
+      #
+      # @note doing it here allows us to not need duplicate logic, which we
+      #   would need if we were doing it in the parser (--hosts & --config)
+      #
+      # @return nil
+      # @api public
+      def resolve_symlinks!
+        @options[:hosts_file] = File.realpath(@options[:hosts_file]) if @options[:hosts_file]
       end
 
       #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
@@ -223,7 +233,7 @@ module Beaker
       def normalize_args
 
         @options['HOSTS'].each_key do |name|
-          @validator.has_platform?(@options['HOSTS'][name], name)
+          @validator.validate_platform(@options['HOSTS'][name], name)
           @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
         end
 
@@ -248,8 +258,8 @@ module Beaker
           end
         end
 
-        @validator.valid_fail_mode?(@options[:fail_mode])
-        @validator.valid_preserve_hosts?(@options[:preserve_hosts])
+        @validator.validate_fail_mode(@options[:fail_mode])
+        @validator.validate_preserve_hosts(@options[:preserve_hosts])
 
         #check for config files necessary for different hypervisors
         hypervisors = get_hypervisors(@options[:HOSTS])
@@ -263,10 +273,10 @@ module Beaker
         roles  = get_roles(@options[:HOSTS])
         roles.each do |role_array|
           master += 1 if role_array.include?('master')
-          @validator.valid_frictionless_roles?(role_array)
+          @validator.validate_frictionless_roles(role_array)
         end
 
-        @validator.valid_master_count?(master)
+        @validator.validate_master_count(master)
 
         #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
@@ -286,17 +296,17 @@ module Beaker
 
         normalize_tags!
         @validator.validate_tags(@options[:tag_includes], @options[:tag_excludes])
-        @validator.resolve_symlinks(@options)
+        resolve_symlinks!
 
         #set the default role
         set_default_host!(@options[:HOSTS])
 
       end
 
-      # Get a list of roles by parsing each host in hosts.
+      # Get an array containing lists of roles by parsing each host in hosts.
       #
-      # @param [Array] hosts beaker hosts
-      # @return [Array] roles
+      # @param [Array<Array<String>>] hosts beaker hosts
+      # @return [Array] roles [['master', 'database'], ['agent'], ...]
       def get_roles(hosts)
         roles = []
         hosts.each_key do |name|
@@ -308,13 +318,17 @@ module Beaker
       # Get a unique list of hypervisors from list of host.
       #
       # @param [Array] hosts beaker hosts
-      # @return [Array] unique list of hosts
+      # @return [Array] unique list of hypervisors
       def get_hypervisors(hosts)
         hypervisors = []
         hosts.each_key { |name| hypervisors << hosts[name][:hypervisor].to_s }
         hypervisors.uniq
       end
 
+      # Validate the config file for visor exists.
+      #
+      # @param [String] visor Hypervisor name
+      # @return [nil] no return
       def check_hypervisor_config(visor)
         if ['blimpy'].include?(visor)
           @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
@@ -325,6 +339,8 @@ module Beaker
         end
       end
 
+      # Normalize include and exclude tags. This modifies @options.
+      #
       def normalize_tags!
         @options[:tag_includes] ||= ''
         @options[:tag_excludes] ||= ''
