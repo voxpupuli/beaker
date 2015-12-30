@@ -56,17 +56,17 @@ module Beaker
           end
 
           it "raises error when set to #{val.upcase}" do
-            expect { validator.validate_fail_mode(val.upcase) }.to raise_error
+            expect { validator.validate_fail_mode(val.upcase) }.to raise_error(ArgumentError)
           end
 
           it "raises error when set to #{val.capitalize}" do
-            expect { validator.validate_fail_mode(val.capitalize) }.to raise_error
+            expect { validator.validate_fail_mode(val.capitalize) }.to raise_error(ArgumentError)
           end
         end
 
         ['test', 1, true, Object.new].each do |val|
           it 'raises error with invalid mode' do
-            expect { validator.validate_fail_mode(val) }.to raise_error
+            expect { validator.validate_fail_mode(val) }.to raise_error(ArgumentError)
           end
         end
       end
@@ -78,17 +78,17 @@ module Beaker
           end
 
           it "raises error when set to #{val.upcase}" do
-            expect { validator.validate_preserve_hosts(val.upcase) }.to raise_error
+            expect { validator.validate_preserve_hosts(val.upcase) }.to raise_error(ArgumentError)
           end
 
           it "raises error when set to #{val.capitalize}" do
-            expect { validator.validate_preserve_hosts(val.capitalize) }.to raise_error
+            expect { validator.validate_preserve_hosts(val.capitalize) }.to raise_error(ArgumentError)
           end
         end
 
         ['test', 1, true, Object.new].each do |val|
           it 'raises error with invalid setting' do
-            expect { validator.validate_preserve_hosts(val) }.to raise_error
+            expect { validator.validate_preserve_hosts(val) }.to raise_error(ArgumentError)
           end
         end
       end
@@ -119,11 +119,11 @@ module Beaker
         end
 
         it 'throws errors when roles conflict' do
-          expect { validator.validate_frictionless_roles(%w(frictionless master)) }.to raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless database)) }.to raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless dashboard)) }.to raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless console)) }.to raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless master database dashboard console)) }.to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless master)) }.to raise_error(ArgumentError)
+          expect { validator.validate_frictionless_roles(%w(frictionless database)) }.to raise_error(ArgumentError)
+          expect { validator.validate_frictionless_roles(%w(frictionless dashboard)) }.to raise_error(ArgumentError)
+          expect { validator.validate_frictionless_roles(%w(frictionless console)) }.to raise_error(ArgumentError)
+          expect { validator.validate_frictionless_roles(%w(frictionless master database dashboard console)) }.to raise_error(ArgumentError)
         end
       end
 
@@ -146,7 +146,7 @@ module Beaker
         end
 
         it 'raises error when file list is empty' do
-          expect { validator.validate_files([], '.') }.to raise_error
+          expect { validator.validate_files([], '.') }.to raise_error(ArgumentError)
         end
       end
 
@@ -158,7 +158,7 @@ module Beaker
         end
 
         it 'throws an error whe path is invalid' do
-          expect { validator.validate_path('/tmp/doesnotexist_test') }.to raise_error
+          expect { validator.validate_path('/tmp/doesnotexist_test') }.to raise_error(ArgumentError)
         end
       end
     end
