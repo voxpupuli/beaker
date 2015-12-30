@@ -107,10 +107,60 @@ module Beaker
 
           expect { validator.validate_tags(tag_includes, tag_excludes) }.not_to raise_error
         end
-
       end
 
-    end
+      describe '#validate_frictionless_roles' do
+        it 'does nothing when roles are correct' do
+          expect { validator.validate_frictionless_roles(%w(frictionless)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless agent)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless test1)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless a role)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless frictionless some_role)) }.not_to raise_error
+        end
 
+        it 'throws errors when roles conflict' do
+          expect { validator.validate_frictionless_roles(%w(frictionless master)) }.to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless database)) }.to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless dashboard)) }.to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless console)) }.to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless master database dashboard console)) }.to raise_error
+        end
+      end
+
+      describe '#validate_master_count' do
+        it 'does nothing when count is exactly 1' do
+          expect { validator.validate_master_count(1) }.not_to raise_error
+        end
+
+        it 'throws errors when greater than 1' do
+          expect { validator.validate_master_count(2) }.to raise_error(ArgumentError, /one host\/node/)
+          expect { validator.validate_master_count(5) }.to raise_error(ArgumentError, /one host\/node/)
+          expect { validator.validate_master_count(100) }.to raise_error(ArgumentError, /one host\/node/)
+        end
+      end
+
+      describe '#validate_files' do
+        it 'does not throw an error with non-empty list' do
+          expect { validator.validate_files(['filea'], '.') }.not_to raise_error
+          expect { validator.validate_files(%w(filea fileb), '.') }.not_to raise_error
+        end
+
+        it 'raises error when file list is empty' do
+          expect { validator.validate_files([], '.') }.to raise_error
+        end
+      end
+
+      describe '#validate_path' do
+        it 'does not throw an error when path is valid' do
+          FakeFS do
+            expect { validator.validate_path('.') }.not_to raise_error
+          end
+        end
+
+        it 'throws an error whe path is invalid' do
+          expect { validator.validate_path('/tmp/doesnotexist_test') }.to raise_error
+        end
+      end
+    end
   end
 end
