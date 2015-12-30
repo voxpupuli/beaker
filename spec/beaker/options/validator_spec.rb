@@ -27,28 +27,6 @@ module Beaker
         end
       end
 
-      describe '#resolve_symlinks' do
-        let(:options_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'opts.txt') }
-        let(:options) { Beaker::Options::OptionsHash.new }
-
-        before :each do
-          FakeFS.deactivate!
-        end
-
-        it 'calls File.realpath if hosts_file is set' do
-          options[:hosts_file] = options_path
-          validator.resolve_symlinks(options)
-          expect(options[:hosts_file]).to eq(options_path)
-        end
-
-        it 'does not raise an error if nil' do
-          options[:hosts_file] = nil
-          validator.resolve_symlinks(options)
-          expect(options[:hosts_file]).to be_nil
-        end
-
-      end
-
       describe '#validator_error' do
         it 'raises error with message' do
           expect { validator.validator_error('test error') }.to raise_error(ArgumentError, 'test error')
@@ -74,21 +52,21 @@ module Beaker
       describe '#valid_fail_mode?' do
         %w(stop fast slow).each do |val|
           it "does not throw error when set to #{val}" do
-            expect { validator.valid_fail_mode?(val) }.not_to raise_error
+            expect { validator.validate_fail_mode(val) }.not_to raise_error
           end
 
           it "raises error when set to #{val.upcase}" do
-            expect { validator.valid_fail_mode?(val.upcase) }.to raise_error
+            expect { validator.validate_fail_mode(val.upcase) }.to raise_error
           end
 
           it "raises error when set to #{val.capitalize}" do
-            expect { validator.valid_fail_mode?(val.capitalize) }.to raise_error
+            expect { validator.validate_fail_mode(val.capitalize) }.to raise_error
           end
         end
 
         ['test', 1, true, Object.new].each do |val|
           it 'raises error with invalid mode' do
-            expect { validator.valid_fail_mode?(val) }.to raise_error
+            expect { validator.validate_fail_mode(val) }.to raise_error
           end
         end
       end
@@ -96,21 +74,21 @@ module Beaker
       describe '#valid_preserve_hosts?' do
         %w(always onfail onpass never).each do |val|
           it "does not raise error when set to #{val}" do
-            expect { validator.valid_preserve_hosts?(val) }.not_to raise_error
+            expect { validator.validate_preserve_hosts(val) }.not_to raise_error
           end
 
           it "raises error when set to #{val.upcase}" do
-            expect { validator.valid_preserve_hosts?(val.upcase) }.to raise_error
+            expect { validator.validate_preserve_hosts(val.upcase) }.to raise_error
           end
 
           it "raises error when set to #{val.capitalize}" do
-            expect { validator.valid_preserve_hosts?(val.capitalize) }.to raise_error
+            expect { validator.validate_preserve_hosts(val.capitalize) }.to raise_error
           end
         end
 
         ['test', 1, true, Object.new].each do |val|
           it 'raises error with invalid setting' do
-            expect { validator.valid_preserve_hosts?(val) }.to raise_error
+            expect { validator.validate_preserve_hosts(val) }.to raise_error
           end
         end
       end

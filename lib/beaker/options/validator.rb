@@ -21,18 +21,6 @@ module Beaker
         end
       end
 
-      # resolves all file symlinks that require it.
-      #
-      # @param [Beaker::OptionsHash] options Beaker Options hash
-      # @note doing it here allows us to not need duplicate logic, which we
-      #   would need if we were doing it in the parser (--hosts & --config)
-      #
-      # @return nil
-      # @api public
-      def resolve_symlinks(options)
-        options[:hosts_file] = File.realpath(options[:hosts_file]) if options[:hosts_file]
-      end
-
       # Raises an ArgumentError with associated message
       # @param [String] msg The error message to be reported
       # @raise [ArgumentError] Takes the supplied message and raises it as an ArgumentError
@@ -62,7 +50,7 @@ module Beaker
       #
       # @param [String] fail_mode Failure mode setting
       # @return [nil] Does not return anything
-      def valid_fail_mode?(fail_mode)
+      def validate_fail_mode(fail_mode)
         #check for valid fail mode
         if fail_mode !~ VALID_FAIL_MODES
           validator_error "--fail-mode must be one of fast or slow, not '#{fail_mode}'"
@@ -73,7 +61,7 @@ module Beaker
       #
       # @param [String] hosts_setting Preserve hosts setting
       # @return [nil] Does not return anything
-      def valid_preserve_hosts?(hosts_setting)
+      def validate_preserve_hosts(hosts_setting)
         #check for valid preserve_hosts option
         if hosts_setting !~ VALID_PRESERVE_HOSTS
           validator_error("--preserve_hosts must be one of always, onfail, onpass or never, not '#{hosts_setting}'")
@@ -85,7 +73,7 @@ module Beaker
       # @param [::Beaker::Host] host A beaker host
       # @param [String] name Host name
       # @return [nil] Does not return anything
-      def has_platform?(host, name)
+      def validate_platform(host, name)
         unless host['platform']
           validator_error "Host #{name} does not have a platform specified"
         end
@@ -108,7 +96,7 @@ module Beaker
 
       end
 
-      def valid_frictionless_roles?(role_array)
+      def validate_frictionless_roles(role_array)
         if role_array.include?(FRICTIONLESS_ROLE) and !(role_array & FRICTIONLESS_ADDITIONAL_ROLES).empty?
           validator_error "Only agent nodes may have the role 'frictionless'."
         end
@@ -118,11 +106,24 @@ module Beaker
       #
       # @param [Integer] count Count of roles with 'master'
       # @return [nil] Nothing is returned
-      def valid_master_count?(count)
+      # @raise [ArgumentError] Raises if master count is greater than 1
+      def validate_master_count(count)
         if count > 1
           validator_error("Only one host/node may have the role 'master'.")
         end
 
+      end
+
+      def validate_files(file_list, path)
+        if file_list.empty?
+          validator_error("No files found for path: '#{path}'")
+        end
+      end
+
+      def validate_path(path)
+        unless File.file?(path) || File.directory?(path)
+          validator_error("#{path} used as a file option but is not a file or directory!")
+        end
       end
 
     end
