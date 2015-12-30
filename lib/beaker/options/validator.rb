@@ -74,7 +74,7 @@ module Beaker
       # @param [String] name Host name
       # @return [nil] Does not return anything
       def validate_platform(host, name)
-        unless host['platform']
+        unless host['platform'] && !host['platform'].empty?
           validator_error "Host #{name} does not have a platform specified"
         end
       end

@@ -161,6 +161,20 @@ module Beaker
           expect { validator.validate_path('/tmp/doesnotexist_test') }.to raise_error(ArgumentError)
         end
       end
+
+      describe '#validate_platform' do
+        let(:valid_platform) { {'platform' => 'test1'} }
+        let(:blank_platform) { {'platform' => ''} }
+
+        it 'does not throw an error when host has a platform' do
+          expect { validator.validate_platform(valid_platform, 'vm1') }.to_not raise_error
+        end
+
+        it 'throws an error when platform is not included' do
+          expect { validator.validate_platform({}, 'vm1') }.to raise_error(ArgumentError, /Host vm1 does not/)
+          expect { validator.validate_platform(blank_platform, 'vm2') }.to raise_error(ArgumentError, /Host vm2 does not/)
+        end
+      end
     end
   end
 end
