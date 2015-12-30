@@ -74,7 +74,7 @@ module Beaker
       # @param [String] name Host name
       # @return [nil] Does not return anything
       def validate_platform(host, name)
-        unless host['platform'] && !host['platform'].empty?
+        if !host['platform'] || host['platform'].empty?
           validator_error "Host #{name} does not have a platform specified"
         end
       end
@@ -131,7 +131,7 @@ module Beaker
       # @param [String] path File path
       # @raise [ArgumentError] Raises if path is not a valid file or directory
       def validate_path(path)
-        unless File.file?(path) || File.directory?(path)
+        if !File.file?(path) && !File.directory?(path)
           validator_error("#{path} used as a file option but is not a file or directory!")
         end
       end

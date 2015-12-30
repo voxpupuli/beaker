@@ -60,7 +60,7 @@ module Beaker
       #                         no .rb files are found overall
       def file_list(paths)
         files = []
-        unless paths.empty?
+        if !paths.empty?
           paths.each do |root|
             @validator.validate_path(root)
 
@@ -144,7 +144,7 @@ module Beaker
 
         # default_set? will throw an error if length > 1
         # and return false if no default is set.
-        unless @validator.default_set?(default)
+        if !@validator.default_set?(default)
           #no default set, let's make one
           if not master.empty? and master.length == 1
             default_host_name = master[0]
