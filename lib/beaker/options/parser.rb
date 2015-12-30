@@ -329,6 +329,7 @@ module Beaker
       #
       # @param [String] visor Hypervisor name
       # @return [nil] no return
+      # @raise [ArgumentError] Raises error if config file does not exist or is not valid YAML
       def check_hypervisor_config(visor)
         if ['blimpy'].include?(visor)
           @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
