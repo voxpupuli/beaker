@@ -85,7 +85,6 @@ module Beaker
       # @param [Array] exclude excluded items
       # @return [nil] Does not return anything
       def validate_tags(include, exclude)
-
         include.each do |included_tag|
           # select items from exclude set that match included_tag
           # no match is an empty list/array/[]
@@ -93,9 +92,12 @@ module Beaker
             validator_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets"
           end
         end
-
       end
 
+      # Raises an error if role_array contains the frictionless role and conflicting roles.
+      #
+      # @param [Array<String>] role_array List of roles
+      # @raise [ArgumentError] Raises if role_array contains conflicting roles
       def validate_frictionless_roles(role_array)
         if role_array.include?(FRICTIONLESS_ROLE) and !(role_array & FRICTIONLESS_ADDITIONAL_ROLES).empty?
           validator_error "Only agent nodes may have the role 'frictionless'."
@@ -111,22 +113,28 @@ module Beaker
         if count > 1
           validator_error("Only one host/node may have the role 'master'.")
         end
-
       end
 
+      # Raise an error if file_list is empty
+      #
+      # @param [Array<String>] file_list list of files
+      # @param [String] path file path to report in error
+      # @raise [ArgumentError] Raises if file_list is empty
       def validate_files(file_list, path)
         if file_list.empty?
           validator_error("No files found for path: '#{path}'")
         end
       end
 
+      # Raise an error if path is not a valid file or directory
+      #
+      # @param [String] path File path
+      # @raise [ArgumentError] Raises if path is not a valid file or directory
       def validate_path(path)
         unless File.file?(path) || File.directory?(path)
           validator_error("#{path} used as a file option but is not a file or directory!")
         end
       end
-
     end
-
   end
 end
