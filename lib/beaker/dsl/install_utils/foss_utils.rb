@@ -394,7 +394,7 @@ module Beaker
         #       'environment' => 'dev'
         #     }
         #   }
-        #   configure_puppet(master, config)
+        #   configure_puppet_on(master, config)
         #
         # @return nil
         def configure_puppet_on(hosts, opts = {})
