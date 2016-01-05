@@ -30,7 +30,7 @@
   * [Let's Write a Test!](Lets-Write-a-Test.md)
   * [Access The Live Test Console with Pry](Access-the-Live-Test-Console-with-Pry.md)
   * [Test Tagging](Beaker-Test-Tagging.md)
-* [Beaker vs. Beaker-rspec](https://github.com/puppetlabs/beaker/wiki/beaker-vs.-beaker-rspec)
+* [Beaker vs. Beaker-rspec](beaker-vs.-beaker-rspec.md)
 * [How to Write a Beaker Test for a Module Using beaker-rspec](How-to-Write-a-Beaker-Test-for-a-Module.md)
 
 ## Other Resources
