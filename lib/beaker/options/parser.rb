@@ -16,13 +16,6 @@ module Beaker
       #The OptionsHash of all parsed options
       attr_accessor :options
 
-      # Raises an ArgumentError with associated message
-      # @param [String] msg The error message to be reported
-      # @raise [ArgumentError] Takes the supplied message and raises it as an ArgumentError
-      def parser_error msg = ""
-        raise ArgumentError, msg.to_s
-      end
-
       # Returns the git repository used for git installations
       # @return [String] The git repository
       def repo
@@ -32,7 +25,7 @@ module Beaker
       # Returns a description of Beaker's supported arguments
       # @return [String] The usage String
       def usage
-       @command_line_parser.usage
+        @command_line_parser.usage
       end
 
       # Normalizes argument into an Array.  Argument can either be converted into an array of a single value,
@@ -67,27 +60,37 @@ module Beaker
       #                         no .rb files are found overall
       def file_list(paths)
         files = []
-        if not paths.empty?
+        if !paths.empty?
           paths.each do |root|
+            @validator.validate_path(root)
+
+            path_files = []
             if File.file?(root)
-              files << root
+              path_files << root
             elsif File.directory?(root) #expand and explore
-              discover_files = Dir.glob(
-                File.join(root, "**/*.rb")
-              ).select { |f| File.file?(f) }
-              if discover_files.empty?
-                parser_error "empty directory used as an option (#{root})!"
-              end
-              files += discover_files.sort_by {|file| [file.count("/"), file]}
-            else #not a file, not a directory, not nothin'
-              parser_error "#{root} used as a file option but is not a file or directory!"
+              path_files = Dir.glob(File.join(root, '**/*.rb'))
+                               .select { |f| File.file?(f) }
+                               .sort_by { |file| [file.count('/'), file] }
             end
+
+            @validator.validate_files(path_files, root)
+            files += path_files
           end
         end
-        if files.empty?
-          parser_error "no .rb files found in #{paths.to_s}"
-        end
+
+        @validator.validate_files(files, paths.to_s)
         files
+      end
+
+      # resolves all file symlinks that require it. This modifies @options.
+      #
+      # @note doing it here allows us to not need duplicate logic, which we
+      #   would need if we were doing it in the parser (--hosts & --config)
+      #
+      # @return nil
+      # @api public
+      def resolve_symlinks!
+        @options[:hosts_file] = File.realpath(@options[:hosts_file]) if @options[:hosts_file]
       end
 
       #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
@@ -106,13 +109,13 @@ module Beaker
         git_opts.map! { |opt|
           case opt
             when /^PUPPET\//
-              opt = "#{GITREPO}/puppet.git##{opt.split('/', 2)[1]}"
+              opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
             when /^FACTER\//
-              opt = "#{GITREPO}/facter.git##{opt.split('/', 2)[1]}"
+              opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
             when /^HIERA\//
-              opt = "#{GITREPO}/hiera.git##{opt.split('/', 2)[1]}"
+              opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
             when /^HIERA-PUPPET\//
-              opt = "#{GITREPO}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+              opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
           end
           opt
         }
@@ -125,8 +128,8 @@ module Beaker
       #defined.
       #@param [Hash] hosts A hash of hosts, each identified by a String name.  Each named host will have an Array of roles
       def set_default_host!(hosts)
-        default = []
-        master = []
+        default           = []
+        master            = []
         default_host_name = nil
 
         #look through the hosts and find any hosts with role 'default' and any hosts with role 'master'
@@ -139,12 +142,9 @@ module Beaker
           end
         end
 
-        if not default.empty?
-          #we already have a default set, do nothing
-          if default.length > 1
-            parser_error "Only one host may have the role 'default', default roles assigned to #{default}"
-          end
-        else
+        # default_set? will throw an error if length > 1
+        # and return false if no default is set.
+        if !@validator.default_set?(default)
           #no default set, let's make one
           if not master.empty? and master.length == 1
             default_host_name = master[0]
@@ -160,8 +160,9 @@ module Beaker
       #Constructor for Parser
       #
       def initialize
-         @command_line_parser = Beaker::Options::CommandLineParser.new
-         @presets = Beaker::Options::Presets.new
+        @command_line_parser = Beaker::Options::CommandLineParser.new
+        @presets             = Beaker::Options::Presets.new
+        @validator           = Beaker::Options::Validator.new
       end
 
       # Parses ARGV or provided arguments array, file options, hosts options and combines with environment variables and
@@ -177,18 +178,18 @@ module Beaker
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
-        @options = @presets.presets
-        cmd_line_options = @command_line_parser.parse(args)
+        @options                        = @presets.presets
+        cmd_line_options                = @command_line_parser.parse(args)
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
-        file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
+        file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
 
         # merge together command line and file_options
         #   overwrite file options with command line options
-        cmd_line_and_file_options = file_options.merge(cmd_line_options)
+        cmd_line_and_file_options       = file_options.merge(cmd_line_options)
 
         # merge command line and file options with defaults
         #   overwrite defaults with command line and file options
-        @options = @options.merge(cmd_line_and_file_options)
+        @options                        = @options.merge(cmd_line_and_file_options)
 
         if not @options[:help] and not @options[:beaker_version_print]
           #read the hosts file that contains the node configuration and hypervisor info
@@ -196,15 +197,15 @@ module Beaker
 
           # merge in host file vars
           #   overwrite options (default, file options, command line) with host file options
-          @options = @options.merge(hosts_options)
+          @options      = @options.merge(hosts_options)
 
           # re-merge the command line options
           #   overwrite options (default, file options, hosts file ) with command line arguments
-          @options = @options.merge(cmd_line_options)
+          @options      = @options.merge(cmd_line_options)
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
-          env_vars = @presets.env_vars
+          env_vars      = @presets.env_vars
 
           @options = @options.merge(env_vars)
 
@@ -212,21 +213,6 @@ module Beaker
         end
 
         @options
-      end
-
-      # Determine is a given file exists and is a valid YAML file
-      # @param [String] f The YAML file path to examine
-      # @param [String] msg An options message to report in case of error
-      # @raise [ArgumentError] Raise if file does not exist or is not valid YAML
-      def check_yaml_file(f, msg = "")
-        if not File.file?(f)
-          parser_error "#{f} does not exist (#{msg})"
-        end
-        begin
-          YAML.load_file(f)
-        rescue PARSE_ERROR => e
-          parser_error "#{f} is not a valid YAML file (#{msg})\n\t#{e}"
-        end
       end
 
       #Validate all merged options values for correctness
@@ -247,11 +233,8 @@ module Beaker
       def normalize_args
 
         @options['HOSTS'].each_key do |name|
-          if not @options['HOSTS'][name]['platform']
-            parser_error "Host #{name} does not have a platform specified"
-          else
-            @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
-          end
+          @validator.validate_platform(@options['HOSTS'][name], name)
+          @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
         end
 
         #use the keyfile if present
@@ -275,49 +258,25 @@ module Beaker
           end
         end
 
-        #check for valid fail mode
-        if @options[:fail_mode] !~ /stop|fast|slow/
-          parser_error "--fail-mode must be one of fast or slow, not '#{@options[:fail_mode]}'"
-        end
-
-        #check for valid preserve_hosts option
-        if @options[:preserve_hosts] !~ /always|onfail|onpass|never/
-          parser_error "--preserve_hosts must be one of always, onfail, onpass or never, not '#{@options[:preserve_hosts]}'"
-        end
+        @validator.validate_fail_mode(@options[:fail_mode])
+        @validator.validate_preserve_hosts(@options[:preserve_hosts])
 
         #check for config files necessary for different hypervisors
-        hypervisors = []
-        @options[:HOSTS].each_key do |name|
-          hypervisors << @options[:HOSTS][name][:hypervisor].to_s
-        end
-        hypervisors.uniq!
+        hypervisors = get_hypervisors(@options[:HOSTS])
         hypervisors.each do |visor|
-          if ['blimpy'].include?(visor)
-            check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
-          end
-          if ['aix', 'solaris', 'vcloud'].include?(visor)
-            check_yaml_file(@options[:dot_fog], "required by #{visor}")
-          end
+          check_hypervisor_config(visor)
         end
 
         #check that roles of hosts make sense
         # - must be one and only one master
-        roles = []
-        @options[:HOSTS].each_key do |name|
-          roles << @options[:HOSTS][name][:roles]
-        end
         master = 0
+        roles  = get_roles(@options[:HOSTS])
         roles.each do |role_array|
-          if role_array.include?('master')
-            master += 1
-          end
-          if role_array.include?('frictionless') and !(role_array & ['master', 'database', 'dashboard', 'console']).empty?
-            parser_error "Only agent nodes may have the role 'frictionless', fix #{@options[:hosts_file]}"
-          end
+          master += 1 if role_array.include?('master')
+          @validator.validate_frictionless_roles(role_array)
         end
-        if master > 1
-          parser_error "Only one host/node may have the role 'master', fix #{@options[:hosts_file]}"
-        end
+
+        @validator.validate_master_count(master)
 
         #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
@@ -335,55 +294,71 @@ module Beaker
           host[:host_tags] = @options[:host_tags].merge(host[:host_tags] || {})
         end
 
-        normalize_and_validate_tags()
-        resolve_symlinks()
+        normalize_tags!
+        @validator.validate_tags(@options[:tag_includes], @options[:tag_excludes])
+        resolve_symlinks!
 
         #set the default role
         set_default_host!(@options[:HOSTS])
 
       end
 
-      # Takes tag arguments given at this point, which are strings, converts
-      # them into the proper format (an array of strings) for Beaker use,
-      # and lastly, validates them.
+      # Get an array containing lists of roles by parsing each host in hosts.
       #
-      # @return nil
-      # @api public
-      def normalize_and_validate_tags()
+      # @param [Array<Array<String>>] hosts beaker hosts
+      # @return [Array] roles [['master', 'database'], ['agent'], ...]
+      def get_roles(hosts)
+        roles = []
+        hosts.each_key do |name|
+          roles << hosts[name][:roles]
+        end
+        roles
+      end
+
+      # Get a unique list of hypervisors from list of host.
+      #
+      # @param [Array] hosts beaker hosts
+      # @return [Array] unique list of hypervisors
+      def get_hypervisors(hosts)
+        hypervisors = []
+        hosts.each_key { |name| hypervisors << hosts[name][:hypervisor].to_s }
+        hypervisors.uniq
+      end
+
+      # Validate the config file for visor exists.
+      #
+      # @param [String] visor Hypervisor name
+      # @return [nil] no return
+      # @raise [ArgumentError] Raises error if config file does not exist or is not valid YAML
+      def check_hypervisor_config(visor)
+        if ['blimpy'].include?(visor)
+          @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
+        end
+
+        if %w(aix solaris vcloud).include?(visor)
+          @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
+        end
+      end
+
+      # Normalize include and exclude tags. This modifies @options.
+      #
+      def normalize_tags!
         @options[:tag_includes] ||= ''
         @options[:tag_excludes] ||= ''
         @options[:tag_includes] = @options[:tag_includes].split(',') if @options[:tag_includes].respond_to?(:split)
         @options[:tag_excludes] = @options[:tag_excludes].split(',') if @options[:tag_excludes].respond_to?(:split)
         @options[:tag_includes].map!(&:downcase)
         @options[:tag_excludes].map!(&:downcase)
-
-        #check that a tag is not both included & excluded sets
-        @options[:tag_includes].each do |included_tag|
-          @options[:tag_excludes].each do |excluded_tag|
-            parser_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets" \
-              if included_tag == excluded_tag
-          end
-        end
-      end
-
-      # resolves all file symlinks that require it.
-      #
-      # @note doing it here allows us to not need duplicate logic, which we
-      #   would need if we were doing it in the parser (--hosts & --config)
-      #
-      # @return nil
-      # @api public
-      def resolve_symlinks()
-        @options[:hosts_file] = File.realpath(@options[:hosts_file]) if @options[:hosts_file]
       end
 
       private
 
       # @api private
       def test_host_roles(host_name, host_hash)
-        host_roles = host_hash[:roles]
-        if !(host_roles & ['master', 'database', 'dashboard']).empty?
-          parser_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles 'master', 'dashboard', or 'database'; it has roles #{host_roles.to_s}"
+        exclude_roles = %w(master database dashboard)
+        host_roles    = host_hash[:roles]
+        unless (host_roles & exclude_roles).empty?
+          @validator.parser_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
         end
       end
 
