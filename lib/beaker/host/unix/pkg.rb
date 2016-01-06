@@ -43,10 +43,6 @@ module Unix::Pkg
         if result.exit_code == 1
           result = execute("pkginfo CSW#{name}", opts) { |result| result }
         end
-      when /freebsd-9/
-        result = execute("pkg_info #{name}", opts) { |result| result }
-      when /freebsd-10/
-        result = execute("pkg info #{name}", opts) { |result| result }
       when /openbsd/
         result = execute("pkg_info #{name}", opts) { |result| result }
       else
@@ -97,10 +93,6 @@ module Unix::Pkg
         execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
         execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
-      when /freebsd-9/
-        execute("pkg_add -fr #{cmdline_args} #{name}", opts)
-      when /freebsd-10/
-        execute("pkg #{cmdline_args} install #{name}", opts)
       when /openbsd/
         begin
           execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
