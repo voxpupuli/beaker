@@ -361,8 +361,6 @@ module Beaker
 
         # Back up the given file in the current_dir to the new_dir
         #
-        # @!visibility private
-        #
         # @param host [Beaker::Host] The target host
         # @param current_dir [String] The directory containing the file to back up
         # @param new_dir [String] The directory to copy the file to
