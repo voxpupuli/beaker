@@ -535,8 +535,12 @@ module Beaker
       logger = opts[:logger]
 
       block_on host do |host|
-        next if host['platform'] =~ /cisco-/
-        next if host['platform'] =~ /f5-|netscaler/
+        skip_msg = host.skip_set_env?
+        unless skip_msg.nil?
+          logger.debug( skip_msg )
+          next
+        end
+
         env = construct_env(host, opts)
         logger.debug("setting local environment on #{host.name}")
         if host['platform'] =~ /windows/ and host.is_cygwin?

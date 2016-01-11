@@ -138,6 +138,23 @@ module Unix
       @external_copy_base
     end
 
+    # Tells you whether a host platform supports beaker's
+    #   {Beaker::HostPrebuiltSteps#set_env} method
+    #
+    # @return [String,nil] Reason message if set_env should be skipped,
+    #   nil if it should run.
+    def skip_set_env?
+      variant, version, arch, codename = self['platform'].to_array
+      case variant
+      when /^cisco$/
+        'Cisco does not allow SSH control through the BASH shell'
+      when /^(f5|netscaler)$/
+        "no puppet-agent package for network device platform '#{variant}'"
+      else
+        nil
+      end
+    end
+
     def initialize name, host_hash, options
       super
 

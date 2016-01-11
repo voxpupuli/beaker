@@ -573,12 +573,9 @@ describe Beaker do
         :env1_key => :env1_value,
         :env2_key => :env2_value
       }
+      allow( host ).to receive( :skip_set_env? ).and_return('f5 say NO' )
 
       expect( subject ).to receive( :construct_env ).exactly(0).times
-
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( host ).to receive( :add_env_var ).exactly(0).times
       opts.each_pair do |key, value|
@@ -599,12 +596,9 @@ describe Beaker do
         :env1_key => :env1_value,
         :env2_key => :env2_value
       }
+      allow( host ).to receive( :skip_set_env? ).and_return('cisco say NO' )
 
       expect( subject ).to receive( :construct_env ).exactly(0).times
-
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( host ).to receive( :add_env_var ).exactly(0).times
       opts.each_pair do |key, value|
@@ -634,6 +628,7 @@ describe Beaker do
         :env2_key => :env2_value
       }
 
+      allow( host ).to receive( :skip_set_env? ).and_return(nil )
       expect( subject ).to receive( :construct_env ).and_return( opts )
       expect( host ).to receive( method_call_sym )
 
