@@ -110,7 +110,7 @@ module Beaker
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
         when host['platform'] =~ /solaris-10/
           check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler/
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco-/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end
@@ -535,6 +535,7 @@ module Beaker
       logger = opts[:logger]
 
       block_on host do |host|
+        next if host['platform'] =~ /cisco-/
         next if host['platform'] =~ /f5-|netscaler/
         env = construct_env(host, opts)
         logger.debug("setting local environment on #{host.name}")
