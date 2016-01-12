@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 16 Dec, 2015 (da1729b0)](#LATEST)
+* [LATEST - 12 Jan, 2016 (15967483)](#LATEST)
+* [2.31.0 - 16 Dec, 2015 (54b1801d)](#2.31.0)
 * [2.30.1 - 3 Dec, 2015 (9f1376ef)](#2.30.1)
 * [2.30.0 - 2 Dec, 2015 (dbb72630)](#2.30.0)
 * [2.29.1 - 23 Nov, 2015 (5d824690)](#2.29.1)
@@ -105,7 +106,299 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 16 Dec, 2015 (da1729b0)
+### <a name = "LATEST">LATEST - 12 Jan, 2016 (15967483)
+
+* (GEM) update beaker version to 2.32.0 (15967483)
+
+* Merge pull request #1044 from kevpl/bkr648_puppetagent_singleinstall (d0d87438)
+
+
+```
+Merge pull request #1044 from kevpl/bkr648_puppetagent_singleinstall
+
+(BKR-648) Refactored to simplify puppet-agent installation
+```
+* Merge pull request #1043 from timhughes/patch-1 (4a42e63c)
+
+
+```
+Merge pull request #1043 from timhughes/patch-1
+
+(MAINT) Correcting method name in docs
+```
+* Merge pull request #1041 from petems/BKR-661-fix_freebsd9_packages (8898edf0)
+
+
+```
+Merge pull request #1041 from petems/BKR-661-fix_freebsd9_packages
+
+(BKR-661) Change to use pkgng for package installs
+```
+* Merge pull request #1042 from colinPL/bkr88_breakout (74bac25a)
+
+
+```
+Merge pull request #1042 from colinPL/bkr88_breakout
+
+(BKR-88) Split Validation Out Of Options Parser
+```
+* Merge pull request #1038 from DavidS/maint-docs-update-beaker-rspec (360307b7)
+
+
+```
+Merge pull request #1038 from DavidS/maint-docs-update-beaker-rspec
+
+(MAINT) improve beaker-rspec docs
+```
+* Merge pull request #1035 from LuvCurves/master (9cbed436)
+
+
+```
+Merge pull request #1035 from LuvCurves/master
+
+(BKR-510) Support for EC2 Netscaler provisioning
+```
+* (MAINT) Correcting method name in docs (b4fee7ba)
+
+* (BKR-88) Additional Docs (b5dddd76)
+
+
+```
+(BKR-88) Additional Docs
+
+Add @raise to yard docs.
+```
+* (BKR-88) Remove unless Blocks (aaa8d78a)
+
+
+```
+(BKR-88) Remove unless Blocks
+
+Following suggested code style, this commit removes the "unless" blocks
+I introduced in favor of "if" statements using "!" instead of "not".
+```
+* (BKR-88) Add Tests for check_hypervisor_config (80d14079)
+
+
+```
+(BKR-88) Add Tests for check_hypervisor_config
+
+Add tests for parser.check_hypervisor_config.
+```
+* (BKR-88) Add Tests for validate_platform (ee20aad3)
+
+
+```
+(BKR-88) Add Tests for validate_platform
+
+Added spec tests for validator.validate_platform. This includes a fix
+for an empty string being considered valid.
+```
+* (BKR-88) Specify Error Raised in Tests (65f3c49d)
+
+
+```
+(BKR-88) Specify Error Raised in Tests
+
+Using raise_error without specifying the specific error causes
+warning messages to be printed. This commit adds the expected error to
+all raise_error calls within validator.rb.
+```
+* (BKR-88) Change not_to to to_not (8f9e82cb)
+
+
+```
+(BKR-88) Change not_to to to_not
+
+Change "not_to" calls to "to_not" to match usage in other tests within
+the codebase.
+```
+* (BKR-88) Add Missing Tests for Validator (6ef8998c)
+
+
+```
+(BKR-88) Add Missing Tests for Validator
+
+Add tests for four more methods in Validator.
+```
+* (BKR-88) Yard Doc and Newline Clean-up (8f69176a)
+
+
+```
+(BKR-88) Yard Doc and Newline Clean-up
+
+Add yard docs to the methods missing them in validator.rb. This also
+removes empty lines between "end" portions at end of file.
+```
+* (BKR-88) Move resolve_symlinks and Use File Validations (3c6e7802)
+
+
+```
+(BKR-88) Move resolve_symlinks and Use File Validations
+
+This commit moves the resolve_symlinks from validator to parser. The
+method was also renamed to resolve_symlinks! because of its
+modification of @options.
+
+The file_list method was refactored to move all parser_error calls to
+the validator class.
+```
+* (BKR-88) Rename Validation Methods to validate_ Prefix (d62c616f)
+
+
+```
+(BKR-88) Rename Validation Methods to validate_ Prefix
+
+There are several methods in Options::Validator that ended in with a
+question mark but did not return a boolean value. These have been
+renamed to a "validate_" prefix and the question mark removed.
+
+This also adds validation for file lists and file paths.
+```
+* (BKR-88) Remove Invalid Doc Tag (13ab3162)
+
+
+```
+(BKR-88) Remove Invalid Doc Tag
+
+Remove an invalid yard doc tag.
+```
+* (BKR-88) Split Validation Out Of Options Parser (18ca60bb)
+
+
+```
+(BKR-88) Split Validation Out Of Options Parser
+
+This commit separates the options parser from the validation piece.
+This narrows the focus of Parser and makes the class smaller in code.
+```
+* (BKR-648) Refactored to simplify puppet-agent installation (e074def2)
+
+* (BKR-661) Change to use pkgng for FreeBSD (09f507cc)
+
+
+```
+(BKR-661) Change to use pkgng for FreeBSD
+
+* pkg_* is EOL as of Sept 2014 https://lists.freebsd.org/pipermail/freebsd-ports-announce/2014-February/000077.html
+* On most base boxes, the pkg_* pointers are now 404:
+
+
+
+The following SSH command responded with a non-zero exit status.
+Vagrant assumes that this means the command failed!
+
+pkg_add -r rsync
+
+Stdout from the command:
+
+Error: Unable to get ftp://ftp.freebsd.org/pub/FreeBSD/ports/amd64/packages-9-stable/Latest/rsync.tbz: File unavailable (e.g., file not found, no access)
+
+
+
+* Also fixes (BK-438), as we're changing package install result to be the result, as is the same with other pkg helpers.
+* Moves FreeBSD checking package code to FreeBSD specific class
+* Adds spec for changes
+```
+* Merge pull request #1040 from puppetlabs/revert-1025-add_privatebindir_to_path (d542dbbb)
+
+
+```
+Merge pull request #1040 from puppetlabs/revert-1025-add_privatebindir_to_path
+
+(BKR-660) Revert "Add privatebindir to PATH"
+```
+* (MAINT) improve docs (483a65c9)
+
+
+```
+(MAINT) improve docs
+
+beaker-vs.-beaker-rspec.md: Wording, criteria, better example.
+How-to-Write-a-Beaker-Test-for-a-Module.md: Moved to beaker-rspec repo
+Example-Vagrant-Hosts-Files.md: removed redundant URLs, vagrant can talk to atlas
+```
+* Revert "Add privatebindir to PATH" (8e4745f1)
+
+* Merge pull request #1039 from colinPL/bkr481_ubuntu1510 (25d1fea9)
+
+
+```
+Merge pull request #1039 from colinPL/bkr481_ubuntu1510
+
+(BRK-481) Add Ubuntu 15.10 Support
+```
+* (BKR-481) Move SSH Presets to Presets File (62b47e32)
+
+
+```
+(BKR-481) Move SSH Presets to Presets File
+
+Move the SSH presets / defaults to the file that has all of beaker's
+presets.
+```
+* Merge pull request #1020 from kevpl/bkr604_bitvise_installpe (f3d87f2b)
+
+
+```
+Merge pull request #1020 from kevpl/bkr604_bitvise_installpe
+
+(BKR-604) Windows BitVise install_pe fixes
+```
+* (BRK-481) Add Default SSH Options to Spec Test (cac80d79)
+
+
+```
+(BRK-481) Add Default SSH Options to Spec Test
+
+Add the default SSH options added to ssh_connection to the spec tests.
+```
+* (BKR-481) Detect SSH Connection Termination (a55e6f47)
+
+
+```
+(BKR-481) Detect SSH Connection Termination
+
+Ubuntu 15.10 does not seem to cleanly shutdown sshd, causing the ssh
+client to sit around until the next write attempt. For beaker's reboot
+test this write never happens.
+
+This change adds a keep alive and keep alive timeout to the ssh client
+connection to detect when the connection is severed without
+notification.
+
+This problem is not seen on Ubuntu 15.04.
+```
+* (maint) Clean After deploy_package_repo Test (64e9f920)
+
+
+```
+(maint) Clean After deploy_package_repo Test
+
+The acceptance test for deploy_package_repo was leaving behind the
+yum or source file, causing future package manager updates (apt-get
+update) to encounter errors (404).
+
+This change adds a clean-up step to the test and updates clean_file to
+be more intelligent and construct a filename based on the host's
+platform.
+```
+* (BKR-481) Add fixture for 15.10 (7ddd9ef9)
+
+
+```
+(BKR-481) Add fixture for 15.10
+
+Add acceptance test package fixture to support Ubuntu 15.10. This
+allows the package acceptance tests to pass on 15.10.
+```
+* (BKR-510) Support for EC2 Netscaler provisioning (9331a0fc)
+
+* (BKR-604) Windows BitVise install_pe fixes (4926cf95)
+
+### <a name = "2.31.0">2.31.0 - 16 Dec, 2015 (54b1801d)
+
+* (HISTORY) update beaker history for gem release 2.31.0 (54b1801d)
 
 * (GEM) update beaker version to 2.31.0 (da1729b0)
 
