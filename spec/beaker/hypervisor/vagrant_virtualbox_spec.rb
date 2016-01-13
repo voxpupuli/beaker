@@ -27,7 +27,7 @@ describe Beaker::VagrantVirtualbox do
     vagrant.make_vfile( @hosts )
 
     vagrantfile = File.read( File.expand_path( File.join( path, 'Vagrantfile' )))
-    expect( vagrantfile ).to include( %Q{    v.vm.provider :virtualbox do |vb|\n      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']\n    end})
+    expect( vagrantfile ).to include( %Q{    v.vm.provider :virtualbox do |vb|\n      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1', '--paravirtprovider', 'default']\n    end})
   end
 
   it "can disable the vb guest plugin" do
