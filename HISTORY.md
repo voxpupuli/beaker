@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 12 Jan, 2016 (15967483)](#LATEST)
+* [LATEST - 14 Jan, 2016 (1aa6de03)](#LATEST)
+* [2.32.0 - 12 Jan, 2016 (80e153cc)](#2.32.0)
 * [2.31.0 - 16 Dec, 2015 (54b1801d)](#2.31.0)
 * [2.30.1 - 3 Dec, 2015 (9f1376ef)](#2.30.1)
 * [2.30.0 - 2 Dec, 2015 (dbb72630)](#2.30.0)
@@ -106,7 +107,34 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 12 Jan, 2016 (15967483)
+### <a name = "LATEST">LATEST - 14 Jan, 2016 (1aa6de03)
+
+* (GEM) update beaker version to 2.32.1 (1aa6de03)
+
+* Merge pull request #1049 from colinPL/maint_remove_kainterval (c766539e)
+
+
+```
+Merge pull request #1049 from colinPL/maint_remove_kainterval
+
+(MAINT) Remove keepalive_interval
+```
+* (MAINT) Remove keepalive_interval (b7afedfc)
+
+
+```
+(MAINT) Remove keepalive_interval
+
+This commit removes the keepalive_interval setting in presets.rb. This
+was introduced to detect disconnections that were otherwise not noticed
+unless beaker tried to write to the SSH session.
+
+This change does still have keep alive enabled, but is now adhering to
+the default interval of 300 (5 minutes).
+```
+### <a name = "2.32.0">2.32.0 - 12 Jan, 2016 (80e153cc)
+
+* (HISTORY) update beaker history for gem release 2.32.0 (80e153cc)
 
 * (GEM) update beaker version to 2.32.0 (15967483)
 
