@@ -196,8 +196,7 @@ module Beaker
                                      :forward_agent         => true,
                                      :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
                                      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
-                                     :keepalive             => true,
-                                     :keepalive_interval    => 2
+                                     :keepalive             => true
           }
         })
       end
