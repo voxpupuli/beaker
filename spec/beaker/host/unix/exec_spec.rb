@@ -50,6 +50,25 @@ module Beaker
       end
     end
 
+    describe '#command_prefix' do
+      it 'returns an empty string for non-cisco platforms' do
+        allow( instance ).to receive( :[] ).with( :platform ).and_return( 'el-7-x86_64' )
+        expect( instance.command_prefix ).to be === ''
+      end
+
+      it 'returns the exec prefix for any cisco platform' do
+        allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-7-x86_64' )
+        allow( instance ).to receive( :[] ).with( :vrf ).and_return( 'vrf' )
+        expect( instance.command_prefix ).to be === 'ip netns exec vrf '
+      end
+
+      it 'uses sudo on cisco-5 platforms' do
+        allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-5-x86_64' )
+        allow( instance ).to receive( :[] ).with( :vrf ).and_return( 'vrf' )
+        expect( instance.command_prefix ).to be === 'sudo ip netns exec vrf '
+      end
+    end
+
     describe '#ssh_permit_user_environment' do
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing01-parts-arch'

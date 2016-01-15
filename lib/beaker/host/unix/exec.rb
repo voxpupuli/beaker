@@ -70,6 +70,16 @@ module Unix::Exec
     result.exit_code == 0
   end
 
+  # Gets the prefix that's needed for commands on a particular platform
+  #
+  # @return [String] Command prefix
+  def command_prefix
+    prefix = ''
+    prefix = "ip netns exec #{self[:vrf]} " if self[:platform] =~ /cisco-/
+    prefix = "sudo #{prefix}" if self[:platform] =~ /cisco-5/
+    prefix
+  end
+
   # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
   # This is for sles and debian based hosts.
   # @param [String] env_file The ssh environment file to read from

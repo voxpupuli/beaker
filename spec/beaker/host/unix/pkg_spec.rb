@@ -130,6 +130,7 @@ module Beaker
       it "uses yum on fedora-20" do
         @opts = {'platform' => 'fedora-20-is-me'}
         pkg = 'fedora_package'
+        allow( instance ).to receive( :command_prefix ).and_return( '' )
         expect( Beaker::Command ).to receive(:new).with("yum -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
         expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.install_package(pkg) ).to be == "hello"
@@ -139,6 +140,16 @@ module Beaker
         @opts = {'platform' => 'fedora-22-is-me'}
         pkg = 'fedora_package'
         expect( Beaker::Command ).to receive(:new).with("dnf -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.install_package(pkg) ).to be == "hello"
+      end
+
+      it 'uses the command prefix on el-based systems' do
+        @opts = {'platform' => 'fedora-20-is-me'}
+        pkg = 'fedora_package'
+        command_prefix_value = 'command_prefix_value_cisco'
+        allow( instance ).to receive( :command_prefix ).and_return( command_prefix_value )
+        expect( Beaker::Command ).to receive(:new).with("#{command_prefix_value}yum -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
         expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.install_package(pkg) ).to be == "hello"
       end

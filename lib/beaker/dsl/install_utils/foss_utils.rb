@@ -333,7 +333,7 @@ module Beaker
             add_role(host, 'aio') #we are installing agent, so we want aio role
             package_name = nil
             case host['platform']
-            when /el-|fedora|sles|centos/
+            when /el-|fedora|sles|centos|cisco-/
               package_name = 'puppet-agent'
               package_name << "-#{opts[:puppet_agent_version]}" if opts[:puppet_agent_version]
             when /debian|ubuntu|cumulus/
@@ -854,13 +854,19 @@ module Beaker
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
 
             case variant
-            when /^(fedora|el|centos|sles)$/
-              variant = (($1 == 'centos') ? 'el' : $1)
+            when /^(fedora|el|centos|sles|cisco)$/
+              variant_url_value = (($1 == 'centos') ? 'el' : $1)
+              variant_url_value = 'cisco-wrlinux' if variant == 'cisco'
               remote = "%s/puppetlabs-release%s-%s-%s.noarch.rpm" %
-                [opts[:release_yum_repo_url], repo_name, variant, version]
+                [opts[:release_yum_repo_url], repo_name, variant_url_value, version]
 
-              host.install_package_with_rpm(remote, '--replacepkgs',
-                {:package_proxy => opts[:package_proxy]})
+              if variant == 'cisco'
+                # cisco requires using yum to install the repo
+                host.install_package( remote )
+              else
+                host.install_package_with_rpm( remote, '--replacepkgs',
+                  { :package_proxy => opts[:package_proxy] } )
+              end
 
             when /^(debian|ubuntu|cumulus)$/
               deb = "puppetlabs-release%s-%s.deb" % [repo_name, codename]

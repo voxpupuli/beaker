@@ -77,7 +77,7 @@ module Unix::Pkg
         if version
           name = "#{name}-#{version}"
         end
-        execute("yum -y #{cmdline_args} install #{name}", opts)
+        execute("#{self.command_prefix}yum -y #{cmdline_args} install #{name}", opts)
       when /ubuntu|debian|cumulus/
         if version
           name = "#{name}=#{version}"
