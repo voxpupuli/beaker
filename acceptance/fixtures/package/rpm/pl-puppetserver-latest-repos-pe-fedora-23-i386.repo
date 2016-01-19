@@ -1,0 +1,6 @@
+[pl-puppetserver-latest]
+name=PL Repo for puppetserver at commit latest
+baseurl=http://nightlies.puppetlabs.com/puppetserver-latest/repos/fedora/f23/PC1/i386/
+enabled=1
+gpgcheck=1
+gpgkey=http://nightlies.puppetlabs.com/07BB6C57
