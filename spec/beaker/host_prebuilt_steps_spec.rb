@@ -411,6 +411,12 @@ describe Beaker do
       subject.validate_host(hosts, options)
 
     end
+
+    it 'skips validation on cisco hosts' do
+      @platform = 'cisco-5-x86_64'
+      expect( subject ).to receive( :check_and_install_packages_if_needed ).never
+      subject.validate_host(hosts, options)
+    end
   end
 
   context 'get_domain_name' do
@@ -567,12 +573,32 @@ describe Beaker do
         :env1_key => :env1_value,
         :env2_key => :env2_value
       }
+      allow( host ).to receive( :skip_set_env? ).and_return('f5 say NO' )
 
       expect( subject ).to receive( :construct_env ).exactly(0).times
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( host ).to receive( :add_env_var ).exactly(0).times
+      opts.each_pair do |key, value|
+        expect( host ).to receive( :add_env_var ).with( key, value ).exactly(0).times
+      end
+      expect( host ).to receive( :exec ).exactly(0).times
 
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      subject.set_env(host, options.merge( opts ))
+    end
+
+    it 'skips a cisco host correctly' do
+      host = make_host('name', {
+        :platform     => 'cisco-5-x86_64',
+        :ssh_env_file => 'ssh_env_file',
+        :is_cygwin   => true,
+      } )
+      opts = {
+        :env1_key => :env1_value,
+        :env2_key => :env2_value
+      }
+      allow( host ).to receive( :skip_set_env? ).and_return('cisco say NO' )
+
+      expect( subject ).to receive( :construct_env ).exactly(0).times
       expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( host ).to receive( :add_env_var ).exactly(0).times
       opts.each_pair do |key, value|
@@ -602,6 +628,7 @@ describe Beaker do
         :env2_key => :env2_value
       }
 
+      allow( host ).to receive( :skip_set_env? ).and_return(nil )
       expect( subject ).to receive( :construct_env ).and_return( opts )
       expect( host ).to receive( method_call_sym )
 

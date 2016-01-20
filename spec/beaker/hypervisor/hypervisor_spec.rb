@@ -76,6 +76,7 @@ module Beaker
       context "if :disable_iptables option set false" do
         it "does not call disable_iptables" do
           options[:disable_iptables] = false
+          allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :disable_iptables ).never
           hypervisor.configure
         end
@@ -84,6 +85,7 @@ module Beaker
       context "if :disable_iptables option set true" do
         it "calls disable_iptables once" do
           options[:disable_iptables] = true
+          allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :disable_iptables ).exactly( 1 ).times
           hypervisor.configure
         end
@@ -92,6 +94,7 @@ module Beaker
       context "if :disable_updates option set true" do
         it "calls disable_updates" do
           options[:disable_updates] = true
+          allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :disable_updates ).once
           hypervisor.configure
         end
@@ -100,6 +103,7 @@ module Beaker
       context "if :disable_updates option set false" do
         it "does not call disable_updates_puppetlabs_com" do
           options[:disable_updates] = false
+          allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :disable_updates ).never
           hypervisor.configure
         end
