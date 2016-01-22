@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 module Beaker
-  describe PSWindows::Exec do
-    class PSWindowsExecTest
-      include PSWindows::Exec
+  describe Windows::Exec do
+    class WindowsExecTest
+      include Windows::Exec
 
       def initialize(hash, logger)
         @hash = hash
@@ -22,32 +22,25 @@ module Beaker
 
     let (:opts)     { @opts || {} }
     let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { PSWindowsExecTest.new(opts, logger) }
+    let (:instance) { WindowsExecTest.new(opts, logger) }
 
-    context "rm" do
-
-      it "deletes" do
-        path = '/path/to/delete'
-        corrected_path = '\\path\\to\\delete'
-        expect( instance ).to receive(:execute).with("del /s /q #{corrected_path}").and_return(0)
-        expect( instance.rm_rf(path) ).to be === 0
-      end
-    end
-
-    context 'mv' do
-      let(:origin)      { '/origin/path/of/content' }
-      let(:destination) { '/destination/path/of/content' }
-
-      it 'rm first' do
-        expect( instance ).to receive(:execute).with("del /s /q #{destination.gsub(/\//, '\\')}").and_return(0)
-        expect( instance ).to receive(:execute).with("move /y #{origin.gsub(/\//, '\\')} #{destination.gsub(/\//, '\\')}").and_return(0)
-        expect( instance.mv(origin, destination) ).to be === 0
-
+    describe '#prepend_commands' do
+      it 'sets spacing correctly if both parts are defined' do
+        allow( instance ).to receive( :is_cygwin? ).and_return( true )
+        command_str = instance.prepend_commands( 'pants', { :cmd_exe => true } )
+        expect( command_str ).to be === 'cmd.exe /c pants'
       end
 
-      it 'does not rm' do
-         expect( instance ).to receive(:execute).with("move /y #{origin.gsub(/\//, '\\')} #{destination.gsub(/\//, '\\')}").and_return(0)
-         expect( instance.mv(origin, destination, false) ).to be === 0
+      it 'sets spacing empty if one is not supplied' do
+        allow( instance ).to receive( :is_cygwin? ).and_return( true )
+        command_str = instance.prepend_commands( 'pants' )
+        expect( command_str ).to be === 'pants'
+      end
+
+      it 'does not use cmd.exe by default' do
+        allow( instance ).to receive( :is_cygwin? ).and_return( true )
+        command_str = instance.prepend_commands( 'pants' )
+        expect( command_str ).not_to match( /cmd\.exe/ )
       end
     end
   end

@@ -76,4 +76,16 @@ module Windows::Exec
     ssh_service_restart()
   end
 
+  # Gets the specific prepend commands as needed for this host
+  #
+  # @param [String] pc List of commands to prepend
+  # @param [Hash] opts optional parameters
+  # @option opts [Boolean] :cmd_exe whether cmd.exe should be used
+  #
+  # @return [String] Command string as needed for this host
+  def prepend_commands(pc = nil, opts = {})
+    cygwin_prefix = (self.is_cygwin? and opts[:cmd_exe]) ? 'cmd.exe /c' : ''
+    spacing = (pc && !cygwin_prefix.empty?) ? ' ' : ''
+    "#{cygwin_prefix}#{spacing}#{pc}"
+  end
 end

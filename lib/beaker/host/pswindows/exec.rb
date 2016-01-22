@@ -148,6 +148,17 @@ module PSWindows::Exec
     self.close #refresh the state
   end
 
+  def environment_string env
+    return '' if env.empty?
+    env_array = self.environment_variable_string_pair_array( env )
+
+    environment_string = ''
+    env_array.each_with_index do |env|
+      environment_string += "set #{env} && "
+    end
+    environment_string
+  end
+
   # Overrides the {Windows::Exec#ssh_permit_user_environment} method,
   # since no steps are needed in this setup to allow user ssh environments
   # to work.

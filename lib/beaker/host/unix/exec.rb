@@ -70,16 +70,6 @@ module Unix::Exec
     result.exit_code == 0
   end
 
-  # Gets the prefix that's needed for commands on a particular platform
-  #
-  # @return [String] Command prefix
-  def command_prefix
-    prefix = ''
-    prefix = "ip netns exec #{self[:vrf]} " if self[:platform] =~ /cisco-/
-    prefix = "sudo #{prefix}" if self[:platform] =~ /cisco-5/
-    prefix
-  end
-
   # Converts the provided environment file to a new shell script in /etc/profile.d, then sources that file.
   # This is for sles and debian based hosts.
   # @param [String] env_file The ssh environment file to read from
@@ -227,6 +217,54 @@ module Unix::Exec
     end
 
     ssh_service_restart()
+  end
+
+  # Construct the environment string for this command
+  #
+  # @param [Hash{String=>String}] env   An optional Hash containing
+  #                                     key-value pairs to be treated
+  #                                     as environment variables that
+  #                                     should be set for the duration
+  #                                     of the puppet command.
+  #
+  # @return [String] Returns a string containing command line arguments that
+  #                  will ensure the environment is correctly set for the
+  #                  given host.
+  def environment_string env
+    return '' if env.empty?
+    env_array = self.environment_variable_string_pair_array( env )
+
+    environment_string = env_array.join(' ')
+    "env #{environment_string}"
+  end
+
+  def environment_variable_string_pair_array env
+    env_array = []
+    env.each_key do |key|
+      val = env[key]
+      if val.is_a?(Array)
+        val = val.join(':')
+      else
+        val = val.to_s
+      end
+      env_array << "#{key.to_s.upcase}=\"#{val}\""
+    end
+    env_array
+  end
+
+  # Gets the specific prepend commands as needed for this host
+  #
+  # @param [String] pc List of commands to prepend
+  # @param [Hash] opts optional parameters
+  #
+  # @return [String] Command string as needed for this host
+  def prepend_commands(pc = '', opts = {})
+    if self[:platform] =~ /cisco-5/
+      prepend_cmds = 'source /etc/profile; sudo ip netns exec '
+      prepend_cmds << ( self[:vrf] ? self[:vrf] : '' )
+      return prepend_cmds
+    end
+    pc
   end
 
   # Fills the user SSH environment file.
