@@ -901,7 +901,10 @@ module Beaker
           repo = fetch_http_file( repo_config_folder_url,
                                   repo_filename,
                                   copy_dir )
+
+          on( host, "chmod 777 #{host.package_config_dir}" ) if host[:platform] =~ /cisco-5/
           scp_to( host, repo, host.package_config_dir )
+          on( host, "chmod 755 #{host.package_config_dir}" ) if host[:platform] =~ /cisco-5/
 
           on( host, 'apt-get update' ) if host['platform'] =~ /ubuntu-|debian-|cumulus-/
           nil
@@ -938,7 +941,7 @@ module Beaker
                                   repo_configs_dir = nil,
                                   opts = options )
           variant, version, arch, codename = host['platform'].to_array
-          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus)$/
+          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus|cisco)$/
             raise "No repository installation step for #{variant} yet..."
           end
           repo_configs_dir ||= 'tmp/repo_configs'
@@ -1035,7 +1038,7 @@ module Beaker
             onhost_copy_base = opts[:copy_dir_external]
 
             case variant
-            when /^(fedora|el|centos|debian|ubuntu|cumulus)$/
+            when /^(fedora|el|centos|debian|ubuntu|cumulus|cisco)$/
               sha = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
               opts[:dev_builds_repos] ||= [ opts[:puppet_collection] ]
               install_puppetlabs_dev_repo( host, 'puppet-agent', sha, nil, opts )

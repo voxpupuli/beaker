@@ -47,6 +47,11 @@ module Beaker
         expect( instance.repo_type ).to be === 'deb'
       end
 
+      it 'returns correctly for cisco platforms' do
+        @platform = 'cisco-5-x86_64'
+        expect( instance.repo_type ).to be === 'rpm'
+      end
+
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
         expect {
@@ -65,6 +70,11 @@ module Beaker
       it 'returns correctly for debian-based platforms' do
         @platform = 'debian-6-x86_64'
         expect( instance.package_config_dir ).to be === '/etc/apt/sources.list.d'
+      end
+
+      it 'returns correctly for cisco platforms' do
+        @platform = 'cisco-5-x86_64'
+        expect( instance.package_config_dir ).to be === '/etc/yum/repos.d/'
       end
 
       it 'errors for all other platform types' do
@@ -102,16 +112,23 @@ module Beaker
 
       it 'builds the filename correctly for debian-based platforms' do
         @platform = 'debian-8-x86_64'
-        filename = instance.repo_filename( 'pkg_name', 'pkg_version9' )
-        correct = 'pl-pkg_name-pkg_version9-jessie.list'
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version10' )
+        correct = 'pl-pkg_name-pkg_version10-jessie.list'
         expect( filename ).to be === correct
       end
 
       it 'uses the variant for the codename on the cumulus platform' do
         @platform = 'cumulus-2.5-x86_64'
-        filename = instance.repo_filename( 'pkg_name', 'pkg_version10' )
-        correct = 'pl-pkg_name-pkg_version10-cumulus.list'
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version11' )
+        correct = 'pl-pkg_name-pkg_version11-cumulus.list'
         expect( filename ).to be === correct
+      end
+
+      it 'adds wrlinux to variant on cisco platforms' do
+        @platform = 'cisco-5-x86_64'
+        allow( instance ).to receive( :is_pe? ) { false }
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version12' )
+        expect( filename ).to match( /sion12\-cisco\-wrlinux\-/ )
       end
 
       it 'errors for non-el or debian-based platforms' do
