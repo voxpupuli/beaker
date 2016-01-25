@@ -71,7 +71,7 @@ module Beaker
     # @return [String] This returns the fully formed command line invocation.
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
       env_string = host.environment_string( env )
-      prepend_commands = host.prepend_commands( pc, :cmd_exe => @cmdexe )
+      prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
       cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]

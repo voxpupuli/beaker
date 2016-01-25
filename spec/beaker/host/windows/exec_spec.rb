@@ -27,13 +27,13 @@ module Beaker
     describe '#prepend_commands' do
       it 'sets spacing correctly if both parts are defined' do
         allow( instance ).to receive( :is_cygwin? ).and_return( true )
-        command_str = instance.prepend_commands( 'pants', { :cmd_exe => true } )
+        command_str = instance.prepend_commands( 'command', 'pants', { :cmd_exe => true } )
         expect( command_str ).to be === 'cmd.exe /c pants'
       end
 
       it 'sets spacing empty if one is not supplied' do
         allow( instance ).to receive( :is_cygwin? ).and_return( true )
-        command_str = instance.prepend_commands( 'pants' )
+        command_str = instance.prepend_commands( 'command', 'pants' )
         expect( command_str ).to be === 'pants'
       end
 

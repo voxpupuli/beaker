@@ -254,17 +254,20 @@ module Unix::Exec
 
   # Gets the specific prepend commands as needed for this host
   #
-  # @param [String] pc List of commands to prepend
+  # @param [String] command Command to be executed
+  # @param [String] user_pc List of user-specified commands to prepend
   # @param [Hash] opts optional parameters
   #
   # @return [String] Command string as needed for this host
-  def prepend_commands(pc = '', opts = {})
+  def prepend_commands(command = '', user_pc = '', opts = {})
     if self[:platform] =~ /cisco-5/
+      return user_pc unless command.index('vsh').nil?
+
       prepend_cmds = 'source /etc/profile; sudo ip netns exec '
       prepend_cmds << ( self[:vrf] ? self[:vrf] : '' )
       return prepend_cmds
     end
-    pc
+    user_pc
   end
 
   # Fills the user SSH environment file.

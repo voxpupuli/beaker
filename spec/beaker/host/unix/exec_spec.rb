@@ -92,7 +92,7 @@ module Beaker
       it 'returns the pc parameter unchanged for non-cisco platforms' do
         allow( instance ).to receive( :[] ).with( :platform ).and_return( 'notcisco' )
         answer_prepend_commands = 'pc_param_unchanged_13579'
-        answer_test = instance.prepend_commands( answer_prepend_commands )
+        answer_test = instance.prepend_commands( 'fake_cmd', answer_prepend_commands )
         expect( answer_test ).to be === answer_prepend_commands
       end
 
@@ -121,6 +121,13 @@ module Beaker
           command_start_index = answer_test.index( '; ' ) + 2
           command_actual = answer_test[command_start_index, answer_test.length - command_start_index]
           expect( command_actual ).to match( /^sudo / )
+        end
+
+        it 'guards against "vsh" usage (only scenario we dont want prefixing)' do
+          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
+          answer_prepend_commands = 'pc_param_unchanged_13584'
+          answer_test = instance.prepend_commands( 'fake/vsh/command', answer_prepend_commands )
+          expect( answer_test ).to be === answer_prepend_commands
         end
       end
     end
