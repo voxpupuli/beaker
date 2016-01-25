@@ -28,12 +28,14 @@ module HostHelpers
   HOST_DEFAULTS = { :platform => 'unix',
                     :snapshot => 'pe',
                     :roles => ['agent'],
-                    :snapshot => 'snap',
                     :ip => 'default.ip.address',
                     :private_ip => 'private.ip.address',
                     :dns_name => 'default.box.tld',
                     :box => 'default_box_name',
                     :box_url => 'http://default.box.url',
+                    :image => 'default_image',
+                    :flavor => 'm1.large',
+                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"'
   }
 
   HOST_NAME     = "vm%d"
@@ -61,7 +63,13 @@ module HostHelpers
                                                :gce_project => 'beaker-compute',
                                                :gce_keyfile => '/path/to/keyfile.p12',
                                                :gce_password => 'notasecret',
-                                               :gce_email => '12345678910@developer.gserviceaccount.com' } )
+                                               :gce_email => '12345678910@developer.gserviceaccount.com',
+                                               :openstack_api_key => "P1as$w0rd",
+                                               :openstack_username => "user",
+                                               :openstack_auth_url => "http://openstack_hypervisor.labs.net:5000/v2.0/tokens",
+                                               :openstack_tenant => "testing",
+                                               :openstack_network => "testing",
+                                               :openstack_keyname => "nopass" } )
   end
 
   def generate_result (name, opts )
