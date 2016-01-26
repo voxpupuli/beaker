@@ -130,6 +130,29 @@ module Beaker
           expect( answer_test ).to be === answer_prepend_commands
         end
       end
+
+      context 'for cisco-7' do
+
+        before :each do
+          allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-7' )
+        end
+
+        it 'begins with sourcing the /etc/profile script' do
+          answer_test = instance.prepend_commands( 'fake_command' )
+          expect( answer_test ).to match( /^#{Regexp.escape('source /etc/profile;')}/ )
+        end
+
+        it 'does not use sudo, as root is allowed' do
+          answer_test = instance.prepend_commands( 'fake_command' )
+          expect( answer_test ).not_to match( /sudo/ )
+        end
+
+        it 'does not prepend with the :vrf host parameter' do
+          expect( instance ).to receive( :[] ).with( :vrf ).never
+          answer_test = instance.prepend_commands( 'fake_command' )
+        end
+
+      end
     end
   end
 end

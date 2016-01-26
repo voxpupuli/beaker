@@ -155,6 +155,29 @@ module Unix
       end
     end
 
+    # Validates that the host was setup correctly
+    #
+    # @return nil
+    # @raise [ArgumentError] If the host is setup incorrectly,
+    #   this will be raised with the appropriate message
+    def validate_setup
+      if self[:platform] =~ /cisco-/
+        msg = nil
+        msg = 'Cisco hosts must be provided with a :vrf value.' unless self[:vrf]
+
+        if !msg && self[:platform] =~ /cisco-5/ && self[:user] == 'root'
+          msg = 'Cisco-5 hosts must be provided with a :user value, as they can not SSH in as root.'
+        end
+
+        if msg
+          msg << <<-EOF
+            Check https://github.com/puppetlabs/beaker/blob/master/docs/hosts/cisco.md for more info.'
+          EOF
+          raise ArgumentError, msg
+        end
+      end
+    end
+
     def initialize name, host_hash, options
       super
 
