@@ -207,17 +207,17 @@ module Beaker
         hosts.each_with_index do |host, index|
           host['mount_folders'] = {
             'mount1' => {
-              'from' => '/source_folder',
-              'to'   => '/mount_point',
+              'host_path' => '/source_folder',
+              'container_path' => '/mount_point',
             },
             'mount2' => {
-              'from' => '/another_folder',
-              'to'   => '/another_mount',
+              'host_path' => '/another_folder',
+              'container_path' => '/another_mount',
               'opts' => 'ro',
             },
             'mount3' => {
-              'from' => '/different_folder',
-              'to'   => '/different_mount',
+              'host_path' => '/different_folder',
+              'container_path' => '/different_mount',
               'opts' => 'rw',
             },
           }

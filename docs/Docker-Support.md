@@ -89,11 +89,11 @@ You can mount folders into a docker container:
         hypervisor: docker
         mount_folders:
           name1:
-            from: host_path1
-            to: container_path1
+            host_path: host_path1
+            container_path: container_path1
           name2:
-            from: host_path2
-            to: container_path2
+            host_path: host_path2
+            container_path: container_path2
             opts: rw
     CONFIG:
       type: foss
