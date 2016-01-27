@@ -341,6 +341,7 @@ module Beaker
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
     def do_scp_to source, target, options
+      self.scp_prep_operations( target )
       target = self.scp_path(target)
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
@@ -409,6 +410,7 @@ module Beaker
         end
       end
 
+      self.scp_post_operations( target )
       return result
     end
 

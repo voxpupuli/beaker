@@ -902,9 +902,7 @@ module Beaker
                                   repo_filename,
                                   copy_dir )
 
-          on( host, "chmod 777 #{host.package_config_dir}" ) if host[:platform] =~ /cisco-5/
           scp_to( host, repo, host.package_config_dir )
-          on( host, "chmod 755 #{host.package_config_dir}" ) if host[:platform] =~ /cisco-5/
 
           on( host, 'apt-get update' ) if host['platform'] =~ /ubuntu-|debian-|cumulus-/
           nil

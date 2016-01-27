@@ -147,4 +147,34 @@ NOASK
     end
     noask
   end
+
+  protected
+
+  # Handles host operations needed before an SCP takes place
+  #
+  # @param [String] scp_file_target File path to SCP to on the host
+  #
+  # @return nil
+  def scp_prep_operations scp_file_target
+    if self[:platform] =~ /cisco-5/
+      msg = "cisco-5 requires an SCP prep chmod, because it's using the #{self[:user]} user rather than root."
+      logger.trace( msg )
+      execute( "chmod 777 #{scp_file_target}" )
+    end
+    nil
+  end
+
+  # Handles host operations needed after an SCP takes place
+  #
+  # @param [String] scp_file_target File path to SCP to on the host
+  #
+  # @return nil
+  def scp_post_operations scp_file_target
+    if self[:platform] =~ /cisco-5/
+      msg = 'cleaning up cisco-5 SCP chmod'
+      logger.trace( msg )
+      execute( "chmod 755 #{scp_file_target}" )
+    end
+    nil
+  end
 end
