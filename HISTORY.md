@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 14 Jan, 2016 (1aa6de03)](#LATEST)
+* [LATEST - 27 Jan, 2016 (abf7e410)](#LATEST)
+* [2.32.1 - 14 Jan, 2016 (8c394fdb)](#2.32.1)
 * [2.32.0 - 12 Jan, 2016 (80e153cc)](#2.32.0)
 * [2.31.0 - 16 Dec, 2015 (54b1801d)](#2.31.0)
 * [2.30.1 - 3 Dec, 2015 (9f1376ef)](#2.30.1)
@@ -107,7 +108,51 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 14 Jan, 2016 (1aa6de03)
+### <a name = "LATEST">LATEST - 27 Jan, 2016 (abf7e410)
+
+* (GEM) update beaker version to 2.33.0 (abf7e410)
+
+* Merge pull request #1045 from kevpl/maint_backupfile_public (3a86990f)
+
+
+```
+Merge pull request #1045 from kevpl/maint_backupfile_public
+
+(MAINT) made backup_the_file public
+```
+* Merge pull request #1046 from kevpl/bkr666_wrlinux5_provision (1fbea3a4)
+
+
+```
+Merge pull request #1046 from kevpl/bkr666_wrlinux5_provision
+
+(BKR-666) added wrlinux5 provisioning steps
+```
+* Merge pull request #1048 from kevpl/bkr480_fedora23_supportadd (d248d822)
+
+
+```
+Merge pull request #1048 from kevpl/bkr480_fedora23_supportadd
+
+(BKR-480) added support for fedora23
+```
+* (BKR-480) added support for fedora23 (71d2dc30)
+
+* (BKR-666) refactored supports_set_env check into host object (0ee32f72)
+
+* (BKR-666) added wrlinux-5 provisioning changes (b744229f)
+
+* (MAINT) made backup_the_file public (315271b6)
+
+
+```
+(MAINT) made backup_the_file public
+
+[skip ci]
+```
+### <a name = "2.32.1">2.32.1 - 14 Jan, 2016 (8c394fdb)
+
+* (HISTORY) update beaker history for gem release 2.32.1 (8c394fdb)
 
 * (GEM) update beaker version to 2.32.1 (1aa6de03)
 
