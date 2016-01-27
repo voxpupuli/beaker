@@ -80,7 +80,7 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive( :hosts ).and_return( hosts )
       master = hosts.first
 
-
+      allow( subject ).to receive( :on ).once
       expect( subject ).to receive( :puppet ).with('module install test ', {}).once
 
       subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )
@@ -92,6 +92,7 @@ describe ClassMixedWithDSLInstallUtils do
       trace_opts = { :trace => nil }
       master['default_module_install_opts'] = trace_opts
 
+      allow( subject ).to receive( :on ).once
       expect( subject ).to receive( :puppet ).with('module install test ', trace_opts).once
 
       subject.install_puppet_module_via_pmt_on( master, {:module_name => 'test'} )

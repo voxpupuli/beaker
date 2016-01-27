@@ -61,16 +61,21 @@ module Beaker
         # @raise  [FailTest] Raises an exception if *command* obviously fails.
         def on(host, command, opts = {}, &block)
           block_on host do | host |
-            cur_command = command
-            if command.is_a? Command
-              cur_command = command.cmd_line(host)
+            if command.is_a? String
+              cmd_opts = {}
+              #add any additional environment variables to the command
+              if opts[:environment]
+                cmd_opts['ENV'] = opts[:environment]
+              end
+              command_object = Command.new(command.to_s, [], cmd_opts)
+            elsif command.is_a? Command
+              command_object = command
+            else
+              msg = "DSL method `on` can only be called with a String or Beaker::Command"
+              msg << " object as the command parameter, not #{command.class}."
+              raise ArgumentError, msg
             end
-            cmd_opts = {}
-            #add any additional environment variables to the command
-            if opts[:environment]
-              cmd_opts['ENV'] = opts[:environment]
-            end
-            @result = host.exec(Command.new(cur_command.to_s, [], cmd_opts), opts)
+            @result = host.exec(command_object, opts)
 
             # Also, let additional checking be performed by the caller.
             if block_given?
