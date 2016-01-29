@@ -10,6 +10,11 @@ See [Beaker Installation](https://github.com/puppetlabs/beaker/wiki/Beaker-Insta
 
 Documentation for Beaker can be found in this repository in [the docs/ folder](docs/README.md).
 
+#Beaker Libraries
+
+Beaker functionality has been extended through the use of libraries available as gems. See the
+[complete list](docs/Beaker-Libraries.md) for more details.
+
 #Beaker API
 
 [RubyDoc Beaker Documentation Server](http://rubydoc.info/github/puppetlabs/beaker/frames)
