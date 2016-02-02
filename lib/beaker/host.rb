@@ -331,7 +331,7 @@ module Beaker
     # to that source dir.
     #
     # @param source [String] The path to the file/dir to upload
-    # @param target [String] The destination path on the host
+    # @param target_path [String] The destination path on the host
     # @param options [Hash{Symbol=>String}] Options to alter execution
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
     # @example
@@ -340,9 +340,8 @@ module Beaker
     #
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
-    def do_scp_to source, target, options
-      self.scp_prep_operations( target )
-      target = self.scp_path(target)
+    def do_scp_to source, target_path, options
+      target = self.scp_path( target_path )
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
       result = Result.new(@name, [source, target])
@@ -410,7 +409,7 @@ module Beaker
         end
       end
 
-      self.scp_post_operations( target )
+      self.scp_post_operations( target, target_path )
       return result
     end
 

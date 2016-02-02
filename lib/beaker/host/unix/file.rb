@@ -17,7 +17,13 @@ module Unix::File
   #
   # @note This is really only needed in Windows at this point. Refer to
   #   {Windows::File#scp_path} for more info
-  def scp_path path
+  def scp_path(path)
+    if self[:platform] =~ /cisco-5/
+      @home_dir ||= execute( 'pwd' )
+      answer = "#{@home_dir}/#{File.basename( path )}"
+      answer << '/' if path =~ /\/$/
+      return answer
+    end
     path
   end
 
@@ -150,30 +156,15 @@ NOASK
 
   protected
 
-  # Handles host operations needed before an SCP takes place
-  #
-  # @param [String] scp_file_target File path to SCP to on the host
-  #
-  # @return nil
-  def scp_prep_operations scp_file_target
-    if self[:platform] =~ /cisco-5/
-      msg = "cisco-5 requires an SCP prep chmod, because it's using the #{self[:user]} user rather than root."
-      logger.trace( msg )
-      execute( "chmod 777 #{scp_file_target}" )
-    end
-    nil
-  end
-
   # Handles host operations needed after an SCP takes place
   #
-  # @param [String] scp_file_target File path to SCP to on the host
+  # @param [String] scp_file_actual File path to actual SCP'd file on host
+  # @param [String] scp_file_target File path to target SCP location on host
   #
   # @return nil
-  def scp_post_operations scp_file_target
+  def scp_post_operations(scp_file_actual, scp_file_target)
     if self[:platform] =~ /cisco-5/
-      msg = 'cleaning up cisco-5 SCP chmod'
-      logger.trace( msg )
-      execute( "chmod 755 #{scp_file_target}" )
+      execute( "mv #{scp_file_actual} #{scp_file_target}" )
     end
     nil
   end

@@ -902,7 +902,12 @@ module Beaker
                                   repo_filename,
                                   copy_dir )
 
-          scp_to( host, repo, host.package_config_dir )
+          if host[:platform] =~ /cisco-5/
+            to_path = "#{host.package_config_dir}/#{File.basename(repo)}"
+          else
+            to_path = host.package_config_dir
+          end
+          scp_to( host, repo, to_path )
 
           on( host, 'apt-get update' ) if host['platform'] =~ /ubuntu-|debian-|cumulus-/
           nil

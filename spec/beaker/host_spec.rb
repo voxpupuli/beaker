@@ -423,27 +423,6 @@ module Beaker
         host.do_scp_to *args
       end
 
-      it 'calls for host scp prep operations before SCPing happens' do
-        create_files(['source'])
-        logger = host[:logger]
-        conn = double(:connection)
-        @options = { :logger => logger }
-        host.instance_variable_set :@connection, conn
-        args = [ '/source', 'target', {} ]
-        conn_args = args + [ nil ]
-
-        expect( host ).to receive( :scp_prep_operations ).ordered
-        allow( logger ).to receive(:trace)
-        expect( conn ).to receive(:scp_to).ordered.with(
-          *conn_args
-        ).and_return(Beaker::Result.new(host, 'output!'))
-        allow( conn ).to receive(:ip).and_return(host['ip'])
-        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-        allow( conn ).to receive(:hostname).and_return(host.name)
-
-        host.do_scp_to *args
-      end
-
       it 'calls for host scp post operations after SCPing happens' do
         create_files(['source'])
         logger = host[:logger]
