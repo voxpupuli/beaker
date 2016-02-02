@@ -15,8 +15,10 @@ module Unix::File
 
   # Handles any changes needed in a path for SCP
   #
-  # @note This is really only needed in Windows at this point. Refer to
-  #   {Windows::File#scp_path} for more info
+  # @param [String] path File path to SCP to
+  #
+  # @return [String] path, changed if needed due to host
+  #   constraints
   def scp_path(path)
     if self[:platform] =~ /cisco-5/
       @home_dir ||= execute( 'pwd' )

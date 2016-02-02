@@ -235,7 +235,13 @@ module Unix::Exec
     env_array = self.environment_variable_string_pair_array( env )
 
     environment_string = env_array.join(' ')
-    "env #{environment_string}"
+    command = 'env'
+    punctuation = ''
+    if self[:platform] =~ /cisco-5/
+      command = 'export'
+      punctuation = ';'
+    end
+    "#{command} #{environment_string}#{punctuation}"
   end
 
   def environment_variable_string_pair_array env
