@@ -203,6 +203,41 @@ module Beaker
         docker.provision
       end
 
+      it 'should create a container with volumes bound' do
+        hosts.each_with_index do |host, index|
+          host['mount_folders'] = {
+            'mount1' => {
+              'host_path' => '/source_folder',
+              'container_path' => '/mount_point',
+            },
+            'mount2' => {
+              'host_path' => '/another_folder',
+              'container_path' => '/another_mount',
+              'opts' => 'ro',
+            },
+            'mount3' => {
+              'host_path' => '/different_folder',
+              'container_path' => '/different_mount',
+              'opts' => 'rw',
+            },
+          }
+
+          expect( ::Docker::Container ).to receive(:create).with({
+            'Image' => image.id,
+            'Hostname' => host.name,
+            'HostConfig' => {
+              'Binds' => [
+                '/source_folder:/mount_point',
+                '/another_folder:/another_mount:ro',
+                '/different_folder:/different_mount:rw',
+              ]
+            }
+          })
+        end
+
+        docker.provision
+      end
+
       it 'should start the container' do
         expect( container ).to receive(:start).with({'PublishAllPorts' => true, 'Privileged' => true})
 

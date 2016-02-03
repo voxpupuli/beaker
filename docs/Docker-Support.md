@@ -79,6 +79,25 @@ ssh:
   auth_methods: ["password"]
 ```
 
+### Mounting volumes into your docker container ###
+You can mount folders into a docker container:
+
+    HOSTS:
+      ubuntu-12-10:
+        platform: ubuntu-12.10-x64
+        image: ubuntu:12.10
+        hypervisor: docker
+        mount_folders:
+          name1:
+            host_path: host_path1
+            container_path: container_path1
+          name2:
+            host_path: host_path2
+            container_path: container_path2
+            opts: rw
+    CONFIG:
+      type: foss
+
 ### Example Output
 
 For this example made a new docker nodeset file in the [puppetlabs-inifile](https://github.com/puppetlabs/puppetlabs-inifile) repo and ran the ini_setting_spec.rb spec:

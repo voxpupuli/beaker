@@ -81,6 +81,15 @@ module Beaker
           end
         end
 
+        unless host['mount_folders'].nil?
+          container_opts['HostConfig'] ||= {}
+          container_opts['HostConfig']['Binds'] = host['mount_folders'].values.map do |mount|
+            a = [ mount['host_path'], mount['container_path'] ]
+            a << mount['opts'] if mount.has_key?('opts')
+            a.join(':')
+          end
+        end
+
         # If the specified container exists, then use it rather creating a new one
         if container.nil?
           @logger.debug("Creating container from image #{image_name}")
