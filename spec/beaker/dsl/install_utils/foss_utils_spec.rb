@@ -530,27 +530,31 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe 'configure_puppet_on' do
-    before do
-      allow(subject).to receive(:on).and_return(Beaker::Result.new({},''))
-    end
     context 'on debian' do
       let(:platform) { 'debian-7-amd64' }
       let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+
       it 'it sets the puppet.conf file to the provided config' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on).with(host, "echo \"[main]\nserver=testbox.test.local\n\n\" > #{host.puppet['config']}")
+        expected_config_string = "[main]\nserver=testbox.test.local\n\n"
+
+        expect( subject ).to receive( :create_remote_file ).with(
+          host, anything, expected_config_string
+        )
         subject.configure_puppet_on(host, config)
       end
     end
     context 'on windows' do
       let(:platform) { 'windows-2008R2-amd64' }
       let(:host) { make_host('testbox.test.local', :platform => 'windows-2008R2-amd64') }
+
       it 'it sets the puppet.conf file to the provided config' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on) do |host, command|
-          expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '#{host.puppet['config']}' -value $text"])
-        end
+        expected_config_string = "[main]\nserver=testbox.test.local\n\n"
+
+        expect( subject ).to receive( :create_remote_file ).with(
+          host, anything, expected_config_string
+        )
         subject.configure_puppet_on(host, config)
       end
     end
@@ -565,22 +569,27 @@ describe ClassMixedWithDSLInstallUtils do
       allow( subject ).to receive(:hosts).and_return(hosts)
       allow( subject ).to receive(:on).and_return(Beaker::Result.new({},''))
     end
+
     context 'on debian' do
       let(:platform) { 'debian-7-amd64' }
-      it 'it sets the puppet.conf file to the provided config' do
+
+      it 'calls configure_puppet_on correctly' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on).with(hosts[0], "echo \"[main]\nserver=testbox.test.local\n\n\" > #{hosts[0].puppet['config']}")
+        expect( subject ).to receive( :configure_puppet_on ).with(
+          anything, config
+        ).exactly( hosts.length ).times
         subject.configure_puppet(config)
       end
     end
+
     context 'on windows' do
       let(:platform) { 'windows-2008R2-amd64' }
-      it 'it sets the puppet.conf file to the provided config' do
+
+      it 'calls configure_puppet_on correctly' do
         config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect(subject).to receive(:on) do |host, command|
-          expect(command.command).to eq('powershell.exe')
-          expect(command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $text = \\\"[main]`nserver=testbox.test.local`n`n\\\"; Set-Content -path '#{host.puppet['config']}' -value $text"])
-        end
+        expect( subject ).to receive( :configure_puppet_on ).with(
+          anything, config
+        ).exactly( hosts.length ).times
         subject.configure_puppet(config)
       end
     end

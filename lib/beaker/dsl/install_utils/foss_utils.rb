@@ -393,30 +393,18 @@ module Beaker
         #
         # @return nil
         def configure_puppet_on(hosts, opts = {})
-          block_on hosts do |host|
-            if host['platform'] =~ /windows/
-              puppet_conf = host.puppet['config']
-              conf_data = ''
-              opts.each do |section,options|
-                conf_data << "[#{section}]`n"
-                options.each do |option,value|
-                  conf_data << "#{option}=#{value}`n"
-                end
-                conf_data << "`n"
-              end
-              on host, powershell("\$text = \\\"#{conf_data}\\\"; Set-Content -path '#{puppet_conf}' -value \$text")
-            else
-              puppet_conf = host.puppet['config']
-              conf_data = ''
-              opts.each do |section,options|
-                conf_data << "[#{section}]\n"
-                options.each do |option,value|
-                  conf_data << "#{option}=#{value}\n"
-                end
-                conf_data << "\n"
-              end
-              on host, "echo \"#{conf_data}\" > #{puppet_conf}"
+          puppet_conf_text = ''
+          opts.each do |section,options|
+            puppet_conf_text << "[#{section}]\n"
+            options.each do |option,value|
+              puppet_conf_text << "#{option}=#{value}\n"
             end
+            puppet_conf_text << "\n"
+          end
+          logger.debug( "setting config '#{puppet_conf_text}' on hosts #{hosts}" )
+          block_on hosts do |host|
+            puppet_conf_path = host.puppet['config']
+            create_remote_file(host, puppet_conf_path, puppet_conf_text)
           end
         end
 
