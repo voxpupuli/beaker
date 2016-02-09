@@ -70,12 +70,12 @@ module Beaker
     #
     # @return [String] This returns the fully formed command line invocation.
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
-      env_string = env.nil? ? '' : environment_string_for( host, env )
-
-      cygwin = ((host['platform'] =~ /windows/) and host.is_cygwin? and @cmdexe) ? 'cmd.exe /c' : nil
+      env_string = host.environment_string( env )
+      prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      [env_string, cygwin, pc, cmd, options_string, args_string].compact.reject(&:empty?).join(' ')
+      cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
+      cmd_line_array.compact.reject( &:empty? ).join( ' ' )
     end
 
     # @param [Hash] opts These are the options that the command takes
@@ -120,48 +120,7 @@ module Beaker
       args.flatten.compact.join(' ')
     end
 
-    # Construct the environment string for this command
-    #
-    # @param [Host]                 host  A Host object
-    # @param [Hash{String=>String}] env   An optional Hash containing
-    #                                     key-value pairs to be treated
-    #                                     as environment variables that
-    #                                     should be set for the duration
-    #                                     of the puppet command.
-    #
-    # @return [String] Returns a string containing command line arguments that
-    #                  will ensure the environment is correctly set for the
-    #                  given host.
-    #
-    # @note I dislike the principle of this method. There is host specific
-    #       knowledge contained here. Really the relationship should be
-    #       reversed where a host is asked for an appropriate Command when
-    #       given a generic Command.
-    def environment_string_for host, env
-      return '' if env.empty?
-      env_array = []
-      env.each_key do |key|
-        val = env[key]
-        if val.is_a?(Array)
-          val = val.join(':')
-        else
-          val = val.to_s
-        end
-        env_array << "#{key.to_s.upcase}=\"#{val}\""
-      end
 
-      if not host.is_powershell?
-        environment_string = env_array.join(' ')
-        "env #{environment_string}"
-      else
-        environment_string = ''
-        env_array.each_with_index do |env|
-          environment_string += "set #{env} && "
-        end
-        environment_string
-      end
-
-    end
 
   end
 

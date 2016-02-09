@@ -15,9 +15,17 @@ module Unix::File
 
   # Handles any changes needed in a path for SCP
   #
-  # @note This is really only needed in Windows at this point. Refer to
-  #   {Windows::File#scp_path} for more info
-  def scp_path path
+  # @param [String] path File path to SCP to
+  #
+  # @return [String] path, changed if needed due to host
+  #   constraints
+  def scp_path(path)
+    if self[:platform] =~ /cisco-5/
+      @home_dir ||= execute( 'pwd' )
+      answer = "#{@home_dir}/#{File.basename( path )}"
+      answer << '/' if path =~ /\/$/
+      return answer
+    end
     path
   end
 
@@ -37,6 +45,8 @@ module Unix::File
   # @return [String] Path to package config dir
   def package_config_dir
     case self['platform']
+    when /cisco-/
+      '/etc/yum/repos.d/'
     when /fedora|el-|centos/
       '/etc/yum.repos.d/'
     when /debian|ubuntu|cumulus/
@@ -60,8 +70,9 @@ module Unix::File
     repo_filename = "pl-%s-%s-" % [ package_name, build_version ]
 
     case variant
-    when /fedora|el|centos/
+    when /fedora|el|centos|cisco/
       variant = 'el' if variant == 'centos'
+      variant = 'cisco-wrlinux' if variant == 'cisco'
       fedora_prefix = ((variant == 'fedora') ? 'f' : '')
       pattern = "%s-%s%s-%s.repo"
       pattern = "repos-pe-#{pattern}" if self.is_pe?
@@ -90,7 +101,7 @@ module Unix::File
   # @return [String] Type of repo (rpm|deb)
   def repo_type
     case self['platform']
-    when /fedora|el-|centos/
+    when /fedora|el-|centos|cisco-/
       'rpm'
     when /debian|ubuntu|cumulus/
       'deb'
@@ -143,5 +154,20 @@ NOASK
       raise ArgumentError, msg
     end
     noask
+  end
+
+  protected
+
+  # Handles host operations needed after an SCP takes place
+  #
+  # @param [String] scp_file_actual File path to actual SCP'd file on host
+  # @param [String] scp_file_target File path to target SCP location on host
+  #
+  # @return nil
+  def scp_post_operations(scp_file_actual, scp_file_target)
+    if self[:platform] =~ /cisco-5/
+      execute( "mv #{scp_file_actual} #{scp_file_target}" )
+    end
+    nil
   end
 end

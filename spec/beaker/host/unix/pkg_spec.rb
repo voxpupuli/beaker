@@ -142,7 +142,6 @@ module Beaker
         expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.install_package(pkg) ).to be == "hello"
       end
-
     end
 
     context "install_package_with_rpm" do

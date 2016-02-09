@@ -50,7 +50,7 @@ describe ClassMixedWithDSLHelpers do
       subject.on( 'master', 'echo hello')
     end
 
-    it 'if the host is a Symbol Object, finds the matching hsots with that Symbol as role' do
+    it 'if the host is a Symbol Object, finds the matching hosts with that Symbol as role' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
 
       expect( master ).to receive( :exec ).once
@@ -156,6 +156,18 @@ describe ClassMixedWithDSLHelpers do
           expect( subject.exit_code ).to be == 0
         end
       end
+    end
+
+    it 'errors if command is not a String or Beaker::Command' do
+      expect {
+        subject.on( host, Object.new )
+      }.to raise_error( ArgumentError, /called\ with\ a\ String\ or\ Beaker/ )
+    end
+
+    it 'executes the passed Beaker::Command if given as command argument' do
+      command_test = Beaker::Command.new( 'echo face_testing' )
+      expect( master ).to receive( :exec ).with( command_test, anything )
+      subject.on( master, command_test )
     end
   end
 

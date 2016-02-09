@@ -423,6 +423,27 @@ module Beaker
         host.do_scp_to *args
       end
 
+      it 'calls for host scp post operations after SCPing happens' do
+        create_files(['source'])
+        logger = host[:logger]
+        conn = double(:connection)
+        @options = { :logger => logger }
+        host.instance_variable_set :@connection, conn
+        args = [ '/source', 'target', {} ]
+        conn_args = args + [ nil ]
+
+        allow( logger ).to receive(:trace)
+        expect( conn ).to receive(:scp_to).ordered.with(
+          *conn_args
+        ).and_return(Beaker::Result.new(host, 'output!'))
+        allow( conn ).to receive(:ip).and_return(host['ip'])
+        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow( conn ).to receive(:hostname).and_return(host.name)
+        expect( host ).to receive( :scp_post_operations ).ordered
+
+        host.do_scp_to *args
+      end
+
       it 'throws an IOError when the file given doesn\'t exist' do
         expect { host.do_scp_to "/does/not/exist", "does/not/exist/over/there", {} }.to raise_error(IOError)
       end

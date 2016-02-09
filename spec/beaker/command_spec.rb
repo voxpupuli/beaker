@@ -6,7 +6,11 @@ module Beaker
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
     subject(:cmd) { Command.new( command, args, options ) }
-    let(:host)    { Hash.new }
+    let(:host)    {
+      h = Hash.new
+      allow( h ).to receive( :environment_string ).and_return( '' )
+      h
+    }
 
     it 'creates a new Command object' do
       @command = '/usr/bin/blah'
@@ -19,7 +23,6 @@ module Beaker
 
       expect( cmd.args_string    ).to be == 'to the baz'
       expect( cmd.options_string ).to be == '--foo=bar'
-      expect( cmd.environment_string_for(host, cmd.environment) ).to be == ''
 
     end
 
@@ -27,17 +30,19 @@ module Beaker
       it 'can prepend commands' do
         @command = '/usr/bin/blah'
         @args    = [ 'to', 'the', 'baz' ]
-        @options = { :foo => 'bar', :prepend_cmds => 'aloha!' }
+        @options = { :foo => 'bar' }
+        allow( host ).to receive( :prepend_commands ).and_return( 'aloha!' )
 
-        expect( cmd.cmd_line({}) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz"
+        expect( cmd.cmd_line( host ) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz"
       end
 
       it 'can handle no prepend_cmds' do
         @command = '/usr/bin/blah'
         @args    = [ 'to', 'the', 'baz' ]
-        @options = { :foo => 'bar', :prepend_cmds => nil }
+        @options = { :foo => 'bar' }
+        allow( host ).to receive( :prepend_commands ).and_return( '' )
 
-        expect( cmd.cmd_line({}) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
+        expect( cmd.cmd_line( host ) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
       end
     end
 
@@ -59,26 +64,6 @@ module Beaker
       end
     end
 
-    describe '#environment_string_for' do
-      let(:host) { {'pathseparator' => ':'} }
-
-      it 'returns a blank string if theres no env' do
-        expect( host ).to receive( :is_powershell? ).never
-        expect( subject.environment_string_for(host, {}) ).to be == ''
-      end
-
-      it 'takes an env hash with var_name/value pairs' do
-        expect( host ).to receive( :is_powershell? ).and_return(false)
-        expect( subject.environment_string_for(host, {:HOME => '/'}) ).
-          to be == "env HOME=\"/\""
-      end
-
-      it 'takes an env hash with var_name/value[Array] pairs' do
-        expect( host ).to receive( :is_powershell? ).and_return(false)
-        expect( subject.environment_string_for(host, {:LD_PATH => ['/', '/tmp']}) ).
-          to be == "env LD_PATH=\"/:/tmp\""
-      end
-    end
 
   end
   describe HostCommand do
@@ -102,7 +87,12 @@ module Beaker
     end
   end
   describe SedCommand do
-    let(:host)        { Hash.new }
+    let(:host)        {
+      h = Hash.new
+      allow( h ).to receive( :environment_string ).and_return( '' )
+      allow( h ).to receive( :prepend_commands ).and_return( '' )
+      h
+    }
     let(:platform)    { @platform   || 'unix' }
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }

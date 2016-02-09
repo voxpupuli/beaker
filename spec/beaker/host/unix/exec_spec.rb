@@ -50,6 +50,25 @@ module Beaker
       end
     end
 
+    describe '#environment_string' do
+      let(:host) { {'pathseparator' => ':'} }
+
+      it 'returns a blank string if theres no env' do
+        expect( instance ).to receive( :is_powershell? ).never
+        expect( instance.environment_string( {} ) ).to be == ''
+      end
+
+      it 'takes an env hash with var_name/value pairs' do
+        expect( instance.environment_string( {:HOME => '/'} ) ).
+          to be == "env HOME=\"/\""
+      end
+
+      it 'takes an env hash with var_name/value[Array] pairs' do
+        expect( instance.environment_string( {:LD_PATH => ['/', '/tmp']}) ).
+          to be == "env LD_PATH=\"/:/tmp\""
+      end
+    end
+
     describe '#ssh_permit_user_environment' do
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing01-parts-arch'
@@ -65,6 +84,51 @@ module Beaker
         expect {
           instance.ssh_service_restart
         }.to raise_error( ArgumentError, /#{opts['platform']}/ )
+      end
+    end
+
+    describe '#prepend_commands' do
+
+      it 'returns the pc parameter unchanged for non-cisco platforms' do
+        allow( instance ).to receive( :[] ).with( :platform ).and_return( 'notcisco' )
+        answer_prepend_commands = 'pc_param_unchanged_13579'
+        answer_test = instance.prepend_commands( 'fake_cmd', answer_prepend_commands )
+        expect( answer_test ).to be === answer_prepend_commands
+      end
+
+      context 'for cisco-5' do
+
+        before :each do
+          allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-5' )
+        end
+
+        it 'ends with the :vrf host parameter' do
+          vrf_answer = 'vrf_answer_135246'
+          allow( instance ).to receive( :[] ).with( :vrf ).and_return( vrf_answer )
+          answer_test = instance.prepend_commands( 'fake_command' )
+          expect( answer_test ).to match( /#{vrf_answer}$/ )
+        end
+
+        it 'begins with sourcing the /etc/profile script' do
+          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
+          answer_test = instance.prepend_commands( 'fake_command' )
+          expect( answer_test ).to match( /^#{Regexp.escape('source /etc/profile; ')}/ )
+        end
+
+        it 'uses sudo at the beginning of the actual command to execute' do
+          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
+          answer_test = instance.prepend_commands( 'fake_command' )
+          command_start_index = answer_test.index( '; ' ) + 2
+          command_actual = answer_test[command_start_index, answer_test.length - command_start_index]
+          expect( command_actual ).to match( /^sudo / )
+        end
+
+        it 'guards against "vsh" usage (only scenario we dont want prefixing)' do
+          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
+          answer_prepend_commands = 'pc_param_unchanged_13584'
+          answer_test = instance.prepend_commands( 'fake/vsh/command', answer_prepend_commands )
+          expect( answer_test ).to be === answer_prepend_commands
+        end
       end
     end
   end
