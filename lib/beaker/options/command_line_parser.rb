@@ -154,7 +154,6 @@ module Beaker
                    'Report what would happen on targets',
                    '(default: false)' do |bool|
             @cmd_options[:dry_run] = bool
-            $dry_run = bool
           end
 
           opts.on '--fail-mode [MODE]',

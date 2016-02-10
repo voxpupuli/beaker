@@ -265,8 +265,17 @@ module Beaker
     end
 
     def exec command, options={}
+      result = nil
       # I've always found this confusing
       cmdline = command.cmd_line(self)
+
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        @logger.debug "\n Running in :dry_run mode. Command #{cmdline} not executed."
+      end
 
       if options[:silent]
         output_callback = nil
@@ -279,11 +288,10 @@ module Beaker
         end
       end
 
-      unless $dry_run
+      unless options[:dry_run]
         # is this returning a result object?
         # the options should come at the end of the method signature (rubyism)
         # and they shouldn't be ssh specific
-        result = nil
 
         @logger.step_in()
         seconds = Benchmark.realtime {
@@ -320,9 +328,8 @@ module Beaker
             raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
           end
         end
-        # Danger, so we have to return this result?
-        result
       end
+      result
     end
 
     # scp files from the localhost to this test host, if a directory is provided it is recursively copied.
@@ -343,7 +350,18 @@ module Beaker
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
     def do_scp_to source, target_path, options
+      result = nil
       target = self.scp_path( target_path )
+
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        @logger.debug "\n Running in :dry_run mode. localhost $ scp #{source} #{@name}:#{target} not executed."
+        return result
+      end
+
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
       result = Result.new(@name, [source, target])
@@ -371,7 +389,7 @@ module Beaker
           result.exit_code = 1
         end
         if source_file
-          result = connection.scp_to(source_file, target, options, $dry_run)
+          result = connection.scp_to(source_file, target, options)
           @logger.trace result.stdout
         end
       else # a directory with ignores
@@ -406,7 +424,7 @@ module Beaker
           else
             file_path = File.join(target, File.dirname(s))
           end
-          result = connection.scp_to(s, file_path, options, $dry_run)
+          result = connection.scp_to(s, file_path, options)
           @logger.trace result.stdout
         end
       end
@@ -416,9 +434,18 @@ module Beaker
     end
 
     def do_scp_from source, target, options
+      result = nil
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        @logger.debug "\n Running in :dry_run mode. localhost $ scp #{@name}:#{source} #{target} not executed."
+        return result
+      end
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
-      result = connection.scp_from(source, target, options, $dry_run)
+      result = connection.scp_from(source, target, options)
       @logger.debug result.stdout
       return result
     end
