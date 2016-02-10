@@ -96,63 +96,6 @@ module Beaker
         expect( answer_test ).to be === answer_prepend_commands
       end
 
-      context 'for cisco-5' do
-
-        before :each do
-          allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-5' )
-        end
-
-        it 'ends with the :vrf host parameter' do
-          vrf_answer = 'vrf_answer_135246'
-          allow( instance ).to receive( :[] ).with( :vrf ).and_return( vrf_answer )
-          answer_test = instance.prepend_commands( 'fake_command' )
-          expect( answer_test ).to match( /#{vrf_answer}$/ )
-        end
-
-        it 'begins with sourcing the /etc/profile script' do
-          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
-          answer_test = instance.prepend_commands( 'fake_command' )
-          expect( answer_test ).to match( /^#{Regexp.escape('source /etc/profile; ')}/ )
-        end
-
-        it 'uses sudo at the beginning of the actual command to execute' do
-          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
-          answer_test = instance.prepend_commands( 'fake_command' )
-          command_start_index = answer_test.index( '; ' ) + 2
-          command_actual = answer_test[command_start_index, answer_test.length - command_start_index]
-          expect( command_actual ).to match( /^sudo / )
-        end
-
-        it 'guards against "vsh" usage (only scenario we dont want prefixing)' do
-          allow( instance ).to receive( :[] ).with( :vrf ).and_return( nil )
-          answer_prepend_commands = 'pc_param_unchanged_13584'
-          answer_test = instance.prepend_commands( 'fake/vsh/command', answer_prepend_commands )
-          expect( answer_test ).to be === answer_prepend_commands
-        end
-      end
-
-      context 'for cisco-7' do
-
-        before :each do
-          allow( instance ).to receive( :[] ).with( :platform ).and_return( 'cisco-7' )
-        end
-
-        it 'begins with sourcing the /etc/profile script' do
-          answer_test = instance.prepend_commands( 'fake_command' )
-          expect( answer_test ).to match( /^#{Regexp.escape('source /etc/profile;')}/ )
-        end
-
-        it 'does not use sudo, as root is allowed' do
-          answer_test = instance.prepend_commands( 'fake_command' )
-          expect( answer_test ).not_to match( /sudo/ )
-        end
-
-        it 'does not prepend with the :vrf host parameter' do
-          expect( instance ).to receive( :[] ).with( :vrf ).never
-          answer_test = instance.prepend_commands( 'fake_command' )
-        end
-
-      end
     end
   end
 end

@@ -57,6 +57,8 @@ module Beaker
         FreeBSD::Host.new name, host_hash, options
       when /eos/
         Eos::Host.new name, host_hash, options
+      when /cisco/
+        Cisco::Host.new name, host_hash, options
       else
         Unix::Host.new name, host_hash, options
       end
@@ -511,6 +513,7 @@ module Beaker
     'windows',
     'pswindows',
     'eos',
+    'cisco',
   ].each do |lib|
     require "beaker/host/#{lib}"
   end

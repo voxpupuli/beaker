@@ -20,12 +20,6 @@ module Unix::File
   # @return [String] path, changed if needed due to host
   #   constraints
   def scp_path(path)
-    if self[:platform] =~ /cisco-5/
-      @home_dir ||= execute( 'pwd' )
-      answer = "#{@home_dir}/#{File.basename( path )}"
-      answer << '/' if path =~ /\/$/
-      return answer
-    end
     path
   end
 
@@ -45,8 +39,6 @@ module Unix::File
   # @return [String] Path to package config dir
   def package_config_dir
     case self['platform']
-    when /cisco-/
-      '/etc/yum/repos.d/'
     when /fedora|el-|centos/
       '/etc/yum.repos.d/'
     when /debian|ubuntu|cumulus/
@@ -101,7 +93,7 @@ module Unix::File
   # @return [String] Type of repo (rpm|deb)
   def repo_type
     case self['platform']
-    when /fedora|el-|centos|cisco-/
+    when /fedora|el-|centos/
       'rpm'
     when /debian|ubuntu|cumulus/
       'deb'
@@ -165,9 +157,6 @@ NOASK
   #
   # @return nil
   def scp_post_operations(scp_file_actual, scp_file_target)
-    if self[:platform] =~ /cisco-5/
-      execute( "mv #{scp_file_actual} #{scp_file_target}" )
-    end
     nil
   end
 end

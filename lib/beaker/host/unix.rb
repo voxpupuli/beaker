@@ -146,8 +146,6 @@ module Unix
     def skip_set_env?
       variant, version, arch, codename = self['platform'].to_array
       case variant
-      when /^cisco$/
-        'Cisco does not allow SSH control through the BASH shell'
       when /^(f5|netscaler)$/
         "no puppet-agent package for network device platform '#{variant}'"
       else
@@ -161,21 +159,7 @@ module Unix
     # @raise [ArgumentError] If the host is setup incorrectly,
     #   this will be raised with the appropriate message
     def validate_setup
-      if self[:platform] =~ /cisco-/
-        msg = nil
-        msg = 'Cisco hosts must be provided with a :vrf value.' unless self[:vrf]
-
-        if !msg && self[:platform] =~ /cisco-5/ && self[:user] == 'root'
-          msg = 'Cisco-5 hosts must be provided with a :user value, as they can not SSH in as root.'
-        end
-
-        if msg
-          msg << <<-EOF
-            Check https://github.com/puppetlabs/beaker/blob/master/docs/hosts/cisco.md for more info.'
-          EOF
-          raise ArgumentError, msg
-        end
-      end
+      nil
     end
 
     def initialize name, host_hash, options

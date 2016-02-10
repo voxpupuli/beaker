@@ -233,15 +233,8 @@ module Unix::Exec
   def environment_string env
     return '' if env.empty?
     env_array = self.environment_variable_string_pair_array( env )
-
     environment_string = env_array.join(' ')
-    command = 'env'
-    punctuation = ''
-    if self[:platform] =~ /cisco-/
-      punctuation = ';'
-      command = 'export' if self[:platform] =~ /cisco-5/
-    end
-    "#{command} #{environment_string}#{punctuation}"
+    "env #{environment_string}"
   end
 
   def environment_variable_string_pair_array env
@@ -266,16 +259,6 @@ module Unix::Exec
   #
   # @return [String] Command string as needed for this host
   def prepend_commands(command = '', user_pc = '', opts = {})
-    if self[:platform] =~ /cisco-/
-      return user_pc unless command.index('vsh').nil?
-
-      prepend_cmds = 'source /etc/profile;'
-      if self[:platform] =~ /cisco-5/
-        prepend_cmds << ' sudo ip netns exec '
-        prepend_cmds << ( self[:vrf] ? self[:vrf] : '' )
-      end
-      return prepend_cmds
-    end
     user_pc
   end
 

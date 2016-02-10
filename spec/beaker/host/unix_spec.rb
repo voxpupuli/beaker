@@ -212,35 +212,6 @@ module Unix
         validate_test = host.validate_setup
         expect( validate_test ).to be_nil
       end
-
-      context 'on the cisco-5 platform' do
-        before :each do
-          # overriding `host[key]` later breaks just setting @platform here
-          allow( host ).to receive( :[] ).with( :platform ).and_return( 'cisco-5-x86_64' )
-        end
-
-        it 'errors when no :vrf value is provided' do
-          allow( host ).to receive( :[] ).with( :vrf ).and_return( nil )
-          expect {
-            host.validate_setup
-          }.to raise_error( ArgumentError, /provided\ with\ a\ \:vrf\ value/ )
-        end
-
-        it 'errors when no user is provided for cisco 5' do
-          allow( host ).to receive( :[] ).with( :vrf ).and_return( 'fake_vrf' )
-          allow( host ).to receive( :[] ).with( :user ).and_return( 'root' )
-          expect {
-            host.validate_setup
-          }.to raise_error( ArgumentError, /provided\ with\ a\ \:user\ value/ )
-        end
-
-        it 'does nothing if the host is setup correctly' do
-          allow( host ).to receive( :[] ).with( :vrf ).and_return( 'fake_vrf' )
-          allow( host ).to receive( :[] ).with( :user ).and_return( 'notroot' )
-          validate_test = host.validate_setup
-          expect( validate_test ).to be_nil
-        end
-      end
     end
   end
 end
