@@ -146,13 +146,20 @@ module Unix
     def skip_set_env?
       variant, version, arch, codename = self['platform'].to_array
       case variant
-      when /^cisco$/
-        'Cisco does not allow SSH control through the BASH shell'
       when /^(f5|netscaler)$/
         "no puppet-agent package for network device platform '#{variant}'"
       else
         nil
       end
+    end
+
+    # Validates that the host was setup correctly
+    #
+    # @return nil
+    # @raise [ArgumentError] If the host is setup incorrectly,
+    #   this will be raised with the appropriate message
+    def validate_setup
+      nil
     end
 
     def initialize name, host_hash, options

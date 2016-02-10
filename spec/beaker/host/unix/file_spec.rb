@@ -47,11 +47,6 @@ module Beaker
         expect( instance.repo_type ).to be === 'deb'
       end
 
-      it 'returns correctly for cisco platforms' do
-        @platform = 'cisco-5-x86_64'
-        expect( instance.repo_type ).to be === 'rpm'
-      end
-
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
         expect {
@@ -70,11 +65,6 @@ module Beaker
       it 'returns correctly for debian-based platforms' do
         @platform = 'debian-6-x86_64'
         expect( instance.package_config_dir ).to be === '/etc/apt/sources.list.d'
-      end
-
-      it 'returns correctly for cisco platforms' do
-        @platform = 'cisco-5-x86_64'
-        expect( instance.package_config_dir ).to be === '/etc/yum/repos.d/'
       end
 
       it 'errors for all other platform types' do
