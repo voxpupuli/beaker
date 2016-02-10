@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 27 Jan, 2016 (abf7e410)](#LATEST)
+* [LATEST - 10 Feb, 2016 (78b7dd79)](#LATEST)
+* [2.33.0 - 27 Jan, 2016 (0dd8505a)](#2.33.0)
 * [2.32.1 - 14 Jan, 2016 (8c394fdb)](#2.32.1)
 * [2.32.0 - 12 Jan, 2016 (80e153cc)](#2.32.0)
 * [2.31.0 - 16 Dec, 2015 (54b1801d)](#2.31.0)
@@ -108,7 +109,177 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 27 Jan, 2016 (abf7e410)
+### <a name = "LATEST">LATEST - 10 Feb, 2016 (78b7dd79)
+
+* (GEM) update beaker version to 2.34.0 (78b7dd79)
+
+* Merge pull request #1064 from kevpl/maint_cisco_docadd (ecdbafbc)
+
+
+```
+Merge pull request #1064 from kevpl/maint_cisco_docadd
+
+(MAINT) added cisco platform doc
+```
+* Merge pull request #1062 from kevpl/bkr667_cisco7_provision (1b662ddf)
+
+
+```
+Merge pull request #1062 from kevpl/bkr667_cisco7_provision
+
+(BKR-667) added wrlinux7 provisioning support
+```
+* (MAINT) added cisco platform doc (8ffb6f07)
+
+* Merge pull request #1056 from objectverbobject/BKR-513 (3bc8c548)
+
+
+```
+Merge pull request #1056 from objectverbobject/BKR-513
+
+Revert "(BKR-358) get ubuntu 15.04 builds green"
+```
+* Merge pull request #1055 from cowofevil/doc/master/update_readme (3c7d6fdc)
+
+
+```
+Merge pull request #1055 from cowofevil/doc/master/update_readme
+
+(MAINT) Add README Information for Beaker Libraries
+```
+* (BKR-667) refactor cisco specific code into its own host object (eadc206c)
+
+* Merge pull request #1061 from kevpl/bkr695_puppetconf_windows (eae84239)
+
+
+```
+Merge pull request #1061 from kevpl/bkr695_puppetconf_windows
+
+(BKR-695) fix configure_puppet_on for windows
+```
+* Merge pull request #1051 from kevpl/bkr668_wrlinux5_puppetagentinstall (52ad675d)
+
+
+```
+Merge pull request #1051 from kevpl/bkr668_wrlinux5_puppetagentinstall
+
+(BKR-668) wrlinux5 puppet-agent install support added
+```
+* Merge pull request #1058 from Iristyle/maint/fix-windows-user_list (6260d231)
+
+
+```
+Merge pull request #1058 from Iristyle/maint/fix-windows-user_list
+
+(maint) Fix Windows user_list functionality
+```
+* (BKR-695) fix configure_puppet_on for windows (27661d96)
+
+* (maint) Fix Windows user_list functionality (fe15bcfe)
+
+
+```
+(maint) Fix Windows user_list functionality
+
+ - Existing functionality used an overly restrictive regex that didn't
+   account for characters like - or . in Windows user names, which are
+   completely valid.
+
+   Use a less restrictive regex to capture the value correctly.  The
+   results of wmic always include the username immediately after the
+   = in the Name= string
+```
+* Revert "(BKR-358) get ubuntu 15.04 builds green" (53cfea20)
+
+
+```
+Revert "(BKR-358) get ubuntu 15.04 builds green"
+
+This reverts commit 9d400ef4e08aa89f6174af7fdef3c6b160fbe620.
+```
+* Merge pull request #1053 from nhemingway/neilh/BKR-637-docker-volumes (d4da4aaa)
+
+
+```
+Merge pull request #1053 from nhemingway/neilh/BKR-637-docker-volumes
+
+(BKR-637) Support mounting volumes with docker
+```
+* Merge pull request #1054 from er0ck/task/master/move_recipes_from_confluence (ad8122f3)
+
+
+```
+Merge pull request #1054 from er0ck/task/master/move_recipes_from_confluence
+
+(maint) move recipes from confluence
+```
+* Merge pull request #1052 from samwoods1/teardown_info_log (a640b3f6)
+
+
+```
+Merge pull request #1052 from samwoods1/teardown_info_log
+
+Add info log when teardown begins
+```
+* (BKR-668) used specific command to set env var for cisco-5 (7308c4ff)
+
+* (BKR-668) fixed non-root SCP issue for cisco-5 (c5913ac0)
+
+* (MAINT) Add README Information for Beaker Libraries (bd9619c3)
+
+
+```
+(MAINT) Add README Information for Beaker Libraries
+
+Update the Beaker docs README to point to the public Beaker libraries.
+```
+* (maint) move recipes from confluence (26af5654)
+
+
+```
+(maint) move recipes from confluence
+
+This change adds a document containing some recipes for solving common
+problems with Beaker.  It is currently housed on confluence.
+```
+* (BKR-668) fixed SCP to root owned files for cisco-5 (b2dd3185)
+
+* (BKR-637) Rename options to be clearer (8b8f2ce4)
+
+* (BKR-637) Support mounting volumes with docker (aa2847ed)
+
+* (BKR-668) dealt with on / puppet issue (details below): (f78c2db4)
+
+
+```
+(BKR-668) dealt with on / puppet issue (details below):
+
+if you executed this code
+
+    on( host, puppet( 'status' ) )
+
+on a cisco host, you would get double prefixing.  Thats because if
+you pass the  method a Beaker::Command object, it would reverse
+it to the command string & re-build the Command object again. This
+change makes it so that if a Command object is passed, it gets used,
+since the reason for creating a Command object is to pass in other
+arguments youd like to be a part of execution.
+```
+* (BKR-667) added wrlinux7 provisioning support (bb06c9a4)
+
+* (MAINT) Add info log when teardown begins (d24f5b47)
+
+* (BKR-668) guarding against 'vsh' usage on cisco platforms (3e1d7690)
+
+* (BKR-668) install_puppet_agent_dev_repo_on support added for cisco-5 (a6f3c67d)
+
+* (BKR-668) refactored host-based commands into host objects (f548df7b)
+
+* (BKR-668) install_puppet_agent_on cisco-5 support added (0ab82acb)
+
+### <a name = "2.33.0">2.33.0 - 27 Jan, 2016 (0dd8505a)
+
+* (HISTORY) update beaker history for gem release 2.33.0 (0dd8505a)
 
 * (GEM) update beaker version to 2.33.0 (abf7e410)
 
