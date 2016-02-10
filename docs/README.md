@@ -33,6 +33,7 @@
   * [Recipes](Beaker-Recipes.md)
 * [Beaker vs. Beaker-rspec](beaker-vs.-beaker-rspec.md)
 * [How to Write a Beaker Test for a Module Using beaker-rspec](How-to-Write-a-Beaker-Test-for-a-Module.md)
+* [Beaker Libraries](Beaker-Libraries.md)
 
 ## Other Resources
 
