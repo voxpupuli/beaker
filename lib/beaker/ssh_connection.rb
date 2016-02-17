@@ -162,11 +162,6 @@ module Beaker
                 stderr_callback = stdout_callback
 
       result = Result.new(@hostname, command)
-      # why are we getting to this point on a dry run anyways?
-      # also... the host creates connections through the class method,
-      # which automatically connects, so you can't do a dry run unless you also
-      # can connect to your hosts?
-      return result if options[:dry_run]
 
       @ssh.open_channel do |channel|
         request_terminal_for( channel, command ) if options[:pty]
@@ -267,8 +262,7 @@ module Beaker
       channel.eof!
     end
 
-    def scp_to source, target, options = {}, dry_run = false
-      return if dry_run
+    def scp_to source, target, options = {}
 
       local_opts = options.dup
       if local_opts[:recursive].nil?
@@ -278,10 +272,10 @@ module Beaker
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
+
       @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
         result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
       end
-
       # Setting these values allows reporting via result.log(test_name)
       result.stdout << "  SCP'ed file #{source} to #{@hostname}:#{target}"
 
@@ -292,8 +286,7 @@ module Beaker
       return result
     end
 
-    def scp_from source, target, options = {}, dry_run = false
-      return if dry_run
+    def scp_from source, target, options = {}
 
       local_opts = options.dup
       if local_opts[:recursive].nil?
@@ -303,10 +296,10 @@ module Beaker
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
+
       @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
         result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
       end
-
       # Setting these values allows reporting via result.log(test_name)
       result.stdout << "  SCP'ed file #{@hostname}:#{source} to #{target}"
 

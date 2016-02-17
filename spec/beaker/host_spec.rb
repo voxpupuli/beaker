@@ -412,7 +412,7 @@ module Beaker
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
         args = [ '/source', 'target', {} ]
-        conn_args = args + [ nil ]
+        conn_args = args
 
         expect( logger ).to receive(:trace)
         expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
@@ -430,7 +430,7 @@ module Beaker
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
         args = [ '/source', 'target', {} ]
-        conn_args = args + [ nil ]
+        conn_args = args
 
         allow( logger ).to receive(:trace)
         expect( conn ).to receive(:scp_to).ordered.with(
@@ -488,7 +488,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ source_path, target_path, {:ignore => [exclude_file]} ]
+          args = [ source_path, target_path, {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -498,12 +498,12 @@ module Beaker
 
           (@fileset1 + @fileset2).each do |file|
             if file !~ /#{exclude_file}/
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
@@ -553,7 +553,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -562,19 +562,18 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
             if file !~ /#{exclude_file}/
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
           allow( conn ).to receive(:ip).and_return(host['ip'])
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
-
           host.do_scp_to *args
         end
 
@@ -584,7 +583,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -592,13 +591,13 @@ module Beaker
           expect( host ).to_not receive( :mkdir_p ).with('target/tmp/tests')
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-            conn_args = file_args + [ nil ]
+            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            conn_args = file_args
             expect( conn ).to_not receive(:scp_to).with( *conn_args )
           end
           (@fileset2).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-            conn_args = file_args + [ nil ]
+            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            conn_args = file_args
             expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
           end
 
@@ -617,7 +616,7 @@ module Beaker
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
         args = [ 'source', 'target', {} ]
-        conn_args = args + [ nil ]
+        conn_args = args
 
         expect( logger ).to receive(:debug)
         expect( conn ).to receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
