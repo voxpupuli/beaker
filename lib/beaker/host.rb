@@ -275,6 +275,8 @@ module Beaker
 
       if options[:dry_run]
         @logger.debug "\n Running in :dry_run mode. Command #{cmdline} not executed."
+        result = Beaker::NullResult.new(self, command)
+        return result
       end
 
       if options[:silent]
@@ -350,7 +352,6 @@ module Beaker
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
     def do_scp_to source, target_path, options
-      result = nil
       target = self.scp_path( target_path )
 
       # use the value of :dry_run passed to the method unless
@@ -358,8 +359,9 @@ module Beaker
       options[:dry_run] ||= @options[:dry_run]
 
       if options[:dry_run]
-        @logger.debug "\n Running in :dry_run mode. localhost $ scp #{source} #{@name}:#{target} not executed."
-        return result
+        scp_cmd = "scp #{source} #{@name}:#{target}"
+        @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
+        return NullResult.new(self, scp_cmd)
       end
 
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
@@ -434,14 +436,14 @@ module Beaker
     end
 
     def do_scp_from source, target, options
-      result = nil
       # use the value of :dry_run passed to the method unless
       # undefined, then use parsed @options hash.
       options[:dry_run] ||= @options[:dry_run]
 
       if options[:dry_run]
-        @logger.debug "\n Running in :dry_run mode. localhost $ scp #{@name}:#{source} #{target} not executed."
-        return result
+        scp_cmd = "scp #{@name}:#{source} #{target}"
+        @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
+        return  NullResult.new(self, scp_cmd)
       end
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"

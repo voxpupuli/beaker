@@ -48,4 +48,11 @@ module Beaker
       range.include?(@exit_code)
     end
   end
+
+  class NullResult < Result
+    def initialize(host, cmd)
+      super(host, cmd)
+      @exit_code = 0
+    end
+  end
 end
