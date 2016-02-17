@@ -1151,7 +1151,7 @@ module Beaker
               if arch == 'x86_64'
                 arch = 'i386'
               end
-              release_file = "/repos/solaris/#{version}/#{opts[:puppet_collection]}/puppet-agent-*#{arch}.pkg.gz"
+              release_file = "/repos/solaris/#{version}/#{opts[:puppet_collection]}/"
               download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
             else
               raise "No pe-promoted installation step for #{variant} yet..."
@@ -1186,6 +1186,30 @@ module Beaker
               # move to better location
               on host, "mv #{onhost_copied_file}.dmg ."
               host.install_package("puppet-agent-*")
+            when /^solaris$/
+              # uncompress PE puppet-agent tarball
+              if version == '10'
+                on host, "gunzip #{onhost_copied_download}"
+                tar_file_name = File.basename(download_file, '.gz')
+                on host, "tar -xvf #{tar_file_name}"
+              elsif version == '11'
+                on host, "tar -zxvf #{onhost_copied_download}"
+              else
+                msg = "Solaris #{version} is not supported by the method "
+                msg << 'install_puppet_agent_pe_promoted_repo_on'
+                raise ArgumentError, msg
+              end
+              # get uncompressed package filename on the system
+              pkg_filename = on(host, "ls #{onhost_copied_file}").stdout.chomp
+              # actually install the package
+              if version == '10'
+                noask_text = host.noask_file_text
+                create_remote_file host, File.join(onhost_copy_base, 'noask'), noask_text
+
+                on host, "gunzip -c #{onhost_copied_file}#{pkg_filename} | pkgadd -d /dev/stdin -a noask -n all"
+              elsif version == '11'
+                on host, "pkg install -g #{onhost_copied_file}#{pkg_filename} puppet-agent"
+              end
             end
             configure_type_defaults_on( host )
           end
