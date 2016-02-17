@@ -220,6 +220,14 @@ module Beaker
               'container_path' => '/different_mount',
               'opts' => 'rw',
             },
+            'mount4' => {
+              'host_path' => './',
+              'container_path' => '/relative_mount',
+            },
+            'mount5' => {
+              'host_path' => 'local_folder',
+              'container_path' => '/another_relative_mount',
+            }
           }
 
           expect( ::Docker::Container ).to receive(:create).with({
@@ -230,6 +238,8 @@ module Beaker
                 '/source_folder:/mount_point',
                 '/another_folder:/another_mount:ro',
                 '/different_folder:/different_mount:rw',
+                "#{File.expand_path('./')}:/relative_mount",
+                "#{File.expand_path('local_folder')}:/another_relative_mount",
               ]
             }
           })
