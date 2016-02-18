@@ -19,4 +19,8 @@ if ENV['GEM_SOURCE'] =~ /rubygems\.delivery\.puppetlabs\.net/
   end
 end
 
+group :'hypervisor-lxc', :optional => true do
+  gem 'ruby-lxc'
+end
+
 gemspec
