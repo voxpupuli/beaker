@@ -413,7 +413,7 @@ describe Beaker do
     end
 
     it 'skips validation on cisco hosts' do
-      @platform = 'cisco-5-x86_64'
+      @platform = 'cisco_nexus-7-x86_64'
       expect( subject ).to receive( :check_and_install_packages_if_needed ).never
       subject.validate_host(hosts, options)
     end
@@ -588,7 +588,7 @@ describe Beaker do
 
     it 'skips a cisco host correctly' do
       host = make_host('name', {
-        :platform     => 'cisco-5-x86_64',
+        :platform     => 'cisco_nexus-7-x86_64',
         :ssh_env_file => 'ssh_env_file',
         :is_cygwin   => true,
       } )

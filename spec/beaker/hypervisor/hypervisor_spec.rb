@@ -73,6 +73,25 @@ module Beaker
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
       let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
 
+      context 'if :timesync option set true on host' do
+        it 'does call timesync for host' do
+          hosts[0][:timesync] = true
+          allow( hypervisor ).to receive( :set_env )
+          expect( hypervisor ).to receive( :timesync ).once
+          hypervisor.configure
+        end
+      end
+
+      context 'if :timesync option set true but false on host' do
+        it 'does not call timesync for host' do
+          options[:timesync] = true
+          hosts[0][:timesync] = false
+          allow( hypervisor ).to receive( :set_env )
+          expect( hypervisor ).to_not receive( :timesync )
+          hypervisor.configure
+        end
+      end
+
       context "if :disable_iptables option set false" do
         it "does not call disable_iptables" do
           options[:disable_iptables] = false

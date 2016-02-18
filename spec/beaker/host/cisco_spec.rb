@@ -14,10 +14,10 @@ module Cisco
 
     describe '#prepend_commands' do
 
-      context 'for cisco-5' do
+      context 'for cisco_nexus-7' do
 
         before :each do
-          @platform = 'cisco-5-x86'
+          @platform = 'cisco_nexus-7-x86_64'
         end
 
         it 'ends with the :vrf host parameter' do
@@ -46,10 +46,10 @@ module Cisco
         end
       end
 
-      context 'for cisco-7' do
+      context 'for cisco_ios_xr-6' do
 
         before :each do
-          @platform = 'cisco-7-x86'
+          @platform = 'cisco_ios_xr-6-x86_64'
         end
 
         it 'begins with sourcing the /etc/profile script' do
@@ -72,15 +72,15 @@ module Cisco
 
     describe '#environment_string' do
 
-      it 'starts with `env` for cisco-7' do
-        @platform = 'cisco-7-x86'
+      it 'starts with `env` for cisco_ios_xr-6' do
+        @platform = 'cisco_ios_xr-6-x86'
         env_map = { 'PATH' => '/opt/pants/1' }
         answer_test = host.environment_string( env_map )
         expect( answer_test ).to match( /^env\ / )
       end
 
-      it 'starts with `export` for cisco-5' do
-        @platform = 'cisco-5-x86'
+      it 'starts with `export` for cisco_nexus-7' do
+        @platform = 'cisco_nexus-7-x86_64'
         env_map = { 'PATH' => '/opt/pants/2' }
         answer_test = host.environment_string( env_map )
         expect( answer_test ).to match( /^export\ / )
@@ -93,7 +93,7 @@ module Cisco
       end
 
       it 'turns env maps into paired strings correctly' do
-        @platform = 'cisco-7-x86'
+        @platform = 'cisco_ios_xr-6-x86_64'
         env_map = { 'var1' => 'ans1', 'var2' => 'ans2' }
         answer_correct = 'env VAR1="ans1" VAR2="ans2";'
         answer_test = host.environment_string( env_map )
@@ -104,7 +104,7 @@ module Cisco
     describe '#package_config_dir' do
 
       it 'returns correctly for cisco platforms' do
-        @platform = 'cisco-5-x86_64'
+        @platform = 'cisco_nexus-7-x86_64'
         expect( host.package_config_dir ).to be === '/etc/yum/repos.d/'
       end
     end
@@ -112,16 +112,16 @@ module Cisco
     describe '#repo_type' do
 
       it 'returns correctly for cisco platforms' do
-        @platform = 'cisco-5-x86_64'
+        @platform = 'cisco_nexus-7-x86_64'
         expect( host.repo_type ).to be === 'rpm'
       end
     end
 
     describe '#validate_setup' do
 
-      context 'on the cisco-5 platform' do
+      context 'on the cisco_nexus-7 platform' do
         before :each do
-          @platform = 'cisco-5-x86'
+          @platform = 'cisco_nexus-7-x86_64'
         end
 
         it 'errors when no :vrf value is provided' do
@@ -150,29 +150,33 @@ module Cisco
         end
       end
 
-      context 'on the cisco-7 platform' do
+      context 'on the cisco_ios_xr-6 platform' do
         before :each do
-          @platform = 'cisco-7-x86'
+          @platform = 'cisco_ios_xr-6-x86_64'
         end
 
-        it 'errors when no :vrf value is provided' do
-          expect {
-            host.validate_setup
-          }.to raise_error( ArgumentError, /provided\ with\ a\ \:vrf\ value/ )
+        it 'does nothing if no :vrf value is provided' do
+          @options = {
+              :user => 'notroot',
+          }
+          validate_test = host.validate_setup
+          expect( validate_test ).to be_nil
         end
 
-        it 'does not error when no user is provided' do
+        it 'errors when no user is provided' do
           @options = {
             :vrf  => 'fake_vrf',
-            :user => 'root',
           }
           expect {
             host.validate_setup
-          }.not_to raise_error()
+          }.to raise_error( ArgumentError, /provided\ with\ a\ \:user\ value/ )
         end
 
         it 'does nothing if the host is setup correctly' do
-          @options = { :vrf  => 'fake_vrf' }
+          @options = {
+            :vrf  => 'fake_vrf',
+            :user => 'notroot',
+          }
           validate_test = host.validate_setup
           expect( validate_test ).to be_nil
         end

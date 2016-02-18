@@ -103,8 +103,10 @@ module Beaker
     #to the provided SUT for test execution to be successful.
     def configure
       return unless @options[:configure]
-      if @options[:timesync]
-        timesync(@hosts, @options)
+      block_on @hosts do |host|
+        if host[:timesync]
+          timesync(host, @options)
+        end
       end
       if @options[:root_keys]
         sync_root_keys(@hosts, @options)

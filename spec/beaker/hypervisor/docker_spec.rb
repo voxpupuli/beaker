@@ -93,6 +93,8 @@ module Beaker
       end
       it 'should fail when docker not present' do
         expect { docker }.to raise_error(RuntimeError, /Docker instance not connectable./)
+        expect { docker }.to raise_error(RuntimeError, /Check your DOCKER_HOST variable has been set/)
+        expect { docker }.to raise_error(RuntimeError, /If you are on OSX or Windows, you might not have Docker Machine setup correctly/)
         expect { docker }.to raise_error(RuntimeError, /Error was: oops/)
       end
     end
@@ -220,6 +222,14 @@ module Beaker
               'container_path' => '/different_mount',
               'opts' => 'rw',
             },
+            'mount4' => {
+              'host_path' => './',
+              'container_path' => '/relative_mount',
+            },
+            'mount5' => {
+              'host_path' => 'local_folder',
+              'container_path' => '/another_relative_mount',
+            }
           }
 
           expect( ::Docker::Container ).to receive(:create).with({
@@ -230,6 +240,8 @@ module Beaker
                 '/source_folder:/mount_point',
                 '/another_folder:/another_mount:ro',
                 '/different_folder:/different_mount:rw',
+                "#{File.expand_path('./')}:/relative_mount",
+                "#{File.expand_path('local_folder')}:/another_relative_mount",
               ]
             }
           })

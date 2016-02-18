@@ -28,8 +28,61 @@ module Beaker
     let (:logger)   { double( 'logger' ).as_null_object }
     let (:instance) { UnixPkgTest.new(opts, logger) }
 
-    context "check_for_package" do
+    context 'Package deployment tests' do
+      path = '/some/file/path'
+      name = 'package_name'
+      version = '1.0.0'
 
+      describe '#deploy_package_repo' do
+
+        it 'returns a warning if there is no file at the path specified' do
+          expect(logger).to receive(:warn)
+          allow(File).to receive(:exists?).with(path).and_return(false)
+          instance.deploy_package_repo(path,name,version)
+        end
+
+        it 'calls #deploy_apt_repo for debian systems' do
+          @opts = {'platform' => 'ubuntu-is-me'}
+          expect(instance).to receive(:deploy_apt_repo)
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+
+        it 'calls #deploy_yum_repo for el systems' do
+          @opts = {'platform' => 'el-is-me'}
+          expect(instance).to receive(:deploy_yum_repo)
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+
+        it 'calls #deploy_zyp_repo for sles systems' do
+          @opts = {'platform' => 'sles-is-me'}
+          expect(instance).to receive(:deploy_zyp_repo)
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+
+        it 'raises an error for unsupported systems' do
+          @opts = {'platform' => 'windows-is-me'}
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          expect{instance.deploy_package_repo(path,name,version)}.to raise_error(RuntimeError)
+        end
+      end
+
+      describe '#deploy_apt_repo' do
+
+        it 'warns and exits when no codename exists for the debian platform' do
+          @opts = {'platform' => 'ubuntu-is-me'}
+          expect(logger).to receive(:warn)
+          allow(@opts['platform']).to receive(:codename).and_return(nil)
+          expect(instance).to receive(:deploy_apt_repo).and_return(instance.deploy_apt_repo(path,name,version))
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+      end
+    end
+
+    context "check_for_package" do
       it "checks correctly on sles" do
         @opts = {'platform' => 'sles-is-me'}
         pkg = 'sles_package'
@@ -186,6 +239,93 @@ module Beaker
 
     end
 
+    context '#pe_puppet_agent_promoted_package_install' do
+      context 'on solaris platforms' do
+        before :each do
+          allow( subject ).to receive( :fetch_http_file )
+          allow( subject ).to receive( :scp_to )
+          allow( subject ).to receive( :configure_type_defaults_on )
+        end
+
+        context 'version support' do
+          (7..17).each do |version|
+            supported_version = version == 10 || version == 11
+            supported_str = ( supported_version ? '' : 'not ')
+            test_title = "does #{supported_str}support version #{version}"
+
+            it "#{test_title}" do
+              solaris_platform = Beaker::Platform.new("solaris-#{version}-x86_64")
+              @opts = {'platform' => solaris_platform}
+              allow( instance ).to receive( :execute )
+              allow( instance ).to receive( :exec )
+              if supported_version
+                if version == 10
+                  allow( instance ).to receive( :noask_file_text )
+                  allow( instance ).to receive( :create_remote_file )
+                end
+                # only expect diff in the last line: .not_to vs .to raise_error
+                expect{
+                  instance.pe_puppet_agent_promoted_package_install(
+                    'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+                  )
+                }.not_to raise_error
+              else
+                expect{
+                  instance.pe_puppet_agent_promoted_package_install(
+                    'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+                  )
+                }.to raise_error(ArgumentError, /^Solaris #{version} is not supported/ )
+              end
+            end
+          end
+
+        end
+
+        context 'on solaris 10' do
+          before :each do
+            solaris_platform = Beaker::Platform.new('solaris-10-x86_64')
+            @opts = {'platform' => solaris_platform}
+          end
+
+          it 'sets a noask file' do
+            allow( instance ).to receive( :execute )
+            allow( instance ).to receive( :exec )
+            expect( instance ).to receive( :noask_file_text )
+            expect( instance ).to receive( :create_remote_file )
+            instance.pe_puppet_agent_promoted_package_install('', '', '', '', {})
+          end
+
+          it 'calls the correct install command' do
+            allow( instance ).to receive( :noask_file_text )
+            allow( instance ).to receive( :create_remote_file )
+            # a number of `execute` calls before the one we're looking for
+            allow( instance ).to receive( :execute )
+            allow( instance ).to receive( :exec )
+            # actual gunzip call to
+            expect( Beaker::Command ).to receive( :new ).with( /^gunzip\ \-c\ / )
+            instance.pe_puppet_agent_promoted_package_install(
+              'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+            )
+          end
+        end
+
+        context 'on solaris 11' do
+          before :each do
+            solaris_platform = Beaker::Platform.new('solaris-11-x86_64')
+            @opts = {'platform' => solaris_platform}
+          end
+
+          it 'calls the correct install command' do
+            allow( instance ).to receive( :execute )
+            allow( instance ).to receive( :exec )
+            expect( Beaker::Command ).to receive( :new ).with( /^pkg\ install\ \-g / )
+            instance.pe_puppet_agent_promoted_package_install(
+              'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+            )
+          end
+        end
+      end
+    end
   end
 end
 
