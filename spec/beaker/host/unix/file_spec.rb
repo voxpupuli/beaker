@@ -115,7 +115,7 @@ module Beaker
       end
 
       it 'adds wrlinux to variant on cisco platforms' do
-        @platform = 'cisco-5-x86_64'
+        @platform = 'cisco_nexus-7-x86_64'
         allow( instance ).to receive( :is_pe? ) { false }
         filename = instance.repo_filename( 'pkg_name', 'pkg_version12' )
         expect( filename ).to match( /sion12\-cisco\-wrlinux\-/ )
