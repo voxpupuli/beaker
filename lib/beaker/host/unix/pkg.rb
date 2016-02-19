@@ -472,18 +472,41 @@ module Unix::Pkg
         raise ArgumentError, msg
       end
       # get uncompressed package filename on the system
-      pkg_filename = execute("ls #{onhost_copied_file}")
-      # actually install the package
-      if version == '10'
-        noask_text = self.noask_file_text
-        create_remote_file self, File.join(onhost_copy_base, 'noask'), noask_text
-
-        execute("gunzip -c #{onhost_copied_file}#{pkg_filename} | pkgadd -d /dev/stdin -a noask -n all")
-      elsif version == '11'
-        execute("pkg install -g #{onhost_copied_file}#{pkg_filename} puppet-agent")
-      end
+      pkg_filename = execute( "ls #{onhost_copied_file}" )
+      pkg_path = "#{onhost_copied_file}#{pkg_filename}"
+      self.solaris_install_local_package( pkg_path, onhost_copy_base )
     end
     nil
   end
 
+  # Installs a local package file on a solaris host
+  #
+  # @param [String] package_path Path to the package file on the host
+  # @param [String] noask_directory Path to the directory for the noask file
+  #   (only needed for solaris 10).
+  #
+  # @return [Beaker::Result] Result of installation command execution
+  def solaris_install_local_package(package_path, noask_directory = nil)
+    variant, version, arch, codename = self['platform'].to_array
+    error_message = nil
+    unless variant == 'solaris'
+      error_message = "Can not call solaris_install_local_package for the "
+      error_message << "non-solaris platform '#{variant}'"
+    end
+    if version != '10' && version != '11'
+      error_message = "Solaris #{version} is not supported by the method "
+      error_message << 'solaris_install_local_package'
+    end
+    raise ArgumentError, error_message if error_message
+
+    if version == '10'
+      noask_text = self.noask_file_text
+      create_remote_file self, File.join(noask_directory, 'noask'), noask_text
+
+      install_cmd = "gunzip -c #{package_path} | pkgadd -d /dev/stdin -a noask -n all"
+    elsif version == '11'
+      install_cmd = "pkg install -g #{package_path} puppet-agent"
+    end
+    self.exec(Beaker::Command.new(install_cmd))
+  end
 end

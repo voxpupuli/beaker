@@ -204,6 +204,7 @@ module Beaker
               solaris_platform = Beaker::Platform.new("solaris-#{version}-x86_64")
               @opts = {'platform' => solaris_platform}
               allow( instance ).to receive( :execute )
+              allow( instance ).to receive( :exec )
               if supported_version
                 if version == 10
                   allow( instance ).to receive( :noask_file_text )
@@ -235,6 +236,7 @@ module Beaker
 
           it 'sets a noask file' do
             allow( instance ).to receive( :execute )
+            allow( instance ).to receive( :exec )
             expect( instance ).to receive( :noask_file_text )
             expect( instance ).to receive( :create_remote_file )
             instance.pe_puppet_agent_promoted_package_install('', '', '', '', {})
@@ -245,8 +247,9 @@ module Beaker
             allow( instance ).to receive( :create_remote_file )
             # a number of `execute` calls before the one we're looking for
             allow( instance ).to receive( :execute )
-            # actual gunzip call to test
-            expect( instance ).to receive( :execute ).with( /^gunzip\ \-c\ / )
+            allow( instance ).to receive( :exec )
+            # actual gunzip call to
+            expect( Beaker::Command ).to receive( :new ).with( /^gunzip\ \-c\ / )
             instance.pe_puppet_agent_promoted_package_install(
               'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
             )
@@ -260,10 +263,9 @@ module Beaker
           end
 
           it 'calls the correct install command' do
-            # a number of `execute` calls before the one we're looking for
             allow( instance ).to receive( :execute )
-            # actual pkg install call to test
-            expect( instance ).to receive( :execute ).with( /^pkg\ install\ \-g / ).ordered
+            allow( instance ).to receive( :exec )
+            expect( Beaker::Command ).to receive( :new ).with( /^pkg\ install\ \-g / )
             instance.pe_puppet_agent_promoted_package_install(
               'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
             )

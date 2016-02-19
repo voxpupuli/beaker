@@ -1068,13 +1068,7 @@ module Beaker
             when /^osx$/
               host.install_package("puppet-agent-#{opts[:puppet_agent_version]}*")
             when /^solaris$/
-              if version == '10'
-                noask_text = host.noask_file_text
-                create_remote_file host, File.join(onhost_copy_base, 'noask'), noask_text
-                on host, "gunzip -c #{release_file} | pkgadd -d /dev/stdin -a noask -n all"
-              elsif version == '11'
-                on host, "pkg install -g #{release_file} puppet-agent"
-              end
+              host.solaris_install_local_package( release_file, onhost_copy_base )
             end
             configure_type_defaults_on( host )
           end

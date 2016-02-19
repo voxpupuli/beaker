@@ -975,12 +975,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :scp_to ).once.with(
         host, /#{release_file}$/, anything )
 
-      noask_text = 'blablabla noask solaris 10 text'
-      allow( host ).to receive( :noask_file_text ).and_return( noask_text )
-      expect( subject ).to receive( :create_remote_file ).with(
-        host, /noask$/, noask_text )
-      expect( subject ).to receive( :on ).with(
-        host, /^gunzip.*#{release_file}.*pkgadd.*noask.*all$/ )
+      expect( host ).to receive( :solaris_install_local_package )
 
       allow( subject ).to receive( :configure_type_defaults_on )
       subject.install_puppet_agent_dev_repo_on( host, opts )
