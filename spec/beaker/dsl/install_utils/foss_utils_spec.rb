@@ -805,35 +805,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_puppet_agent_pe_promoted_repo_on' do
 
-    it 'splits the platform string version correctly to get ubuntu puppet-agent packages (format 9999)' do
-      platform = Object.new()
-      allow(platform).to receive(:to_array) { ['ubuntu', '9999', 'x42']}
-      host = basic_hosts.first
-      host['platform'] = platform
 
-      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\//, "puppet-agent-ubuntu-99.99-x42.tar.gz", /ubuntu/)
-      expect(subject).to receive(:scp_to).once.with(host, /-ubuntu-99.99-x42\./, "/root")
-      expect(subject).to receive(:on).ordered.with(host, /^tar.*-ubuntu-99.99-x42/)
-      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
-      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
-
-      subject.install_puppet_agent_pe_promoted_repo_on( host, {} )
-    end
-
-    it 'doesn\'t split the platform string version correctly to get ubuntu puppet-agent packages when unnecessary (format 99.99)' do
-      platform = Object.new()
-      allow(platform).to receive(:to_array) { ['ubuntu', '99.99', 'x42']}
-      host = basic_hosts.first
-      host['platform'] = platform
-
-      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\//, "puppet-agent-ubuntu-99.99-x42.tar.gz", /ubuntu/)
-      expect(subject).to receive(:scp_to).once.with(host, /-ubuntu-99.99-x42\./, "/root")
-      expect(subject).to receive(:on).ordered.with(host, /^tar.*-ubuntu-99.99-x42/)
-      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
-      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
-
-      subject.install_puppet_agent_pe_promoted_repo_on( host, {} )
-    end
 
   end
 
@@ -1098,85 +1070,11 @@ describe ClassMixedWithDSLInstallUtils do
       it 'calls fetch_http_file with no ending slash' do
         test_fetch_http_file_no_ending_slash( 'windows-7-x86_64' )
       end
-
     end
 
     it 'calls fetch_http_file with no ending slash' do
       test_fetch_http_file_no_ending_slash( 'debian-5-x86_64' )
     end
-
-    context 'on solaris platforms' do
-
-      before :each do
-        allow( subject ).to receive( :fetch_http_file )
-        allow( subject ).to receive( :scp_to )
-        allow( subject ).to receive( :configure_type_defaults_on )
-      end
-
-      context 'version support' do
-        (7..17).each do |version|
-          supported_version = version == 10 || version == 11
-          supported_str = ( supported_version ? '' : 'not ')
-          test_title = "does #{supported_str}support version #{version}"
-
-          it "#{test_title}" do
-            @platform = "solaris-#{version}-x86_64"
-            if supported_version
-              allow( subject ).to receive( :create_remote_file ) if version == 10
-              # only expect diff in the last line: .not_to vs .to raise_error
-              expect{
-                subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
-              }.not_to raise_error
-            else
-              expect{
-                subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
-              }.to raise_error(ArgumentError, /^Solaris #{version} is not supported/ )
-            end
-          end
-        end
-
-      end
-
-      context 'on solaris 10' do
-        before :each do
-          @platform = 'solaris-10-x86_64'
-        end
-
-        it 'sets a noask file' do
-          expect( host ).to receive( :noask_file_text )
-          expect( subject ).to receive( :create_remote_file )
-          subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
-        end
-
-        it 'calls the correct install command' do
-          allow( subject ).to receive( :create_remote_file )
-          # a number of `on` calls before the one we're looking for
-          allow( subject ).to receive( :on ).and_return(
-            Beaker::NullResult.new( host, 'bla' )
-          )
-          # actual gunzip call to test
-          expect( subject ).to receive( :on ).with( host, /^gunzip\ \-c\ / ).ordered
-          subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
-        end
-      end
-
-      context 'on solaris 11' do
-        before :each do
-          @platform = 'solaris-11-x86_64'
-        end
-
-        it 'calls the correct install command' do
-          # a number of `on` calls before the one we're looking for
-          allow( subject ).to receive( :on ).and_return(
-            Beaker::NullResult.new( host, 'ls' )
-          )
-          # actual pkg install call to test
-          expect( subject ).to receive( :on ).with( host, /^pkg\ install\ \-g / ).ordered
-          subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
-        end
-      end
-    end
-
   end
 
   describe '#remove_puppet_on' do

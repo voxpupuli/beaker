@@ -186,6 +186,91 @@ module Beaker
 
     end
 
+    context '#pe_puppet_agent_promoted_package_install' do
+      context 'on solaris platforms' do
+        before :each do
+          allow( subject ).to receive( :fetch_http_file )
+          allow( subject ).to receive( :scp_to )
+          allow( subject ).to receive( :configure_type_defaults_on )
+        end
+
+        context 'version support' do
+          (7..17).each do |version|
+            supported_version = version == 10 || version == 11
+            supported_str = ( supported_version ? '' : 'not ')
+            test_title = "does #{supported_str}support version #{version}"
+
+            it "#{test_title}" do
+              solaris_platform = Beaker::Platform.new("solaris-#{version}-x86_64")
+              @opts = {'platform' => solaris_platform}
+              allow( instance ).to receive( :execute )
+              if supported_version
+                if version == 10
+                  allow( instance ).to receive( :noask_file_text )
+                  allow( instance ).to receive( :create_remote_file )
+                end
+                # only expect diff in the last line: .not_to vs .to raise_error
+                expect{
+                  instance.pe_puppet_agent_promoted_package_install(
+                    'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+                  )
+                }.not_to raise_error
+              else
+                expect{
+                  instance.pe_puppet_agent_promoted_package_install(
+                    'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+                  )
+                }.to raise_error(ArgumentError, /^Solaris #{version} is not supported/ )
+              end
+            end
+          end
+
+        end
+
+        context 'on solaris 10' do
+          before :each do
+            solaris_platform = Beaker::Platform.new('solaris-10-x86_64')
+            @opts = {'platform' => solaris_platform}
+          end
+
+          it 'sets a noask file' do
+            allow( instance ).to receive( :execute )
+            expect( instance ).to receive( :noask_file_text )
+            expect( instance ).to receive( :create_remote_file )
+            instance.pe_puppet_agent_promoted_package_install('', '', '', '', {})
+          end
+
+          it 'calls the correct install command' do
+            allow( instance ).to receive( :noask_file_text )
+            allow( instance ).to receive( :create_remote_file )
+            # a number of `execute` calls before the one we're looking for
+            allow( instance ).to receive( :execute )
+            # actual gunzip call to test
+            expect( instance ).to receive( :execute ).with( /^gunzip\ \-c\ / )
+            instance.pe_puppet_agent_promoted_package_install(
+              'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+            )
+          end
+        end
+
+        context 'on solaris 11' do
+          before :each do
+            solaris_platform = Beaker::Platform.new('solaris-11-x86_64')
+            @opts = {'platform' => solaris_platform}
+          end
+
+          it 'calls the correct install command' do
+            # a number of `execute` calls before the one we're looking for
+            allow( instance ).to receive( :execute )
+            # actual pkg install call to test
+            expect( instance ).to receive( :execute ).with( /^pkg\ install\ \-g / ).ordered
+            instance.pe_puppet_agent_promoted_package_install(
+              'oh_cp_base', 'oh_cp_dl', 'oh_cp_fl', 'dl_fl', {}
+            )
+          end
+        end
+      end
+    end
   end
 end
 

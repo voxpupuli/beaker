@@ -297,4 +297,193 @@ module Unix::Pkg
     end
   end
 
+  # Gets the path & file name for the puppet agent dev package on Unix
+  #
+  # @param [String] puppet_collection Name of the puppet collection to use
+  # @param [String] puppet_agent_version Version of puppet agent to get
+  # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+  #
+  # @note Solaris does require :download_url to be set on the opts argument
+  #   in order to check for builds on the builds server
+  #
+  # @raise [ArgumentError] If one of the two required parameters (puppet_collection,
+  #   puppet_agent_version) is either not passed or set to nil
+  #
+  # @return [String, String] Path to the directory and filename of the package, respectively
+  def solaris_puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+    error_message = "Must provide %s argument to get puppet agent package information"
+    raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
+    raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
+    raise ArgumentError, error_message % "opts[:download_url]" unless opts[:download_url]
+
+    variant, version, arch, codename = self['platform'].to_array
+    platform_error = "Incorrect platform '#{variant}' for #solaris_puppet_agent_dev_package_info"
+    raise ArgumentError, platform_error if variant != 'solaris'
+
+    if arch == 'x86_64'
+      arch = 'i386'
+    end
+    release_path_end = "solaris/#{version}/#{puppet_collection}"
+    solaris_revision_conjunction = '-'
+    revision = '1'
+    if version == '10'
+      solaris_release_version = ''
+      pkg_suffix = 'pkg.gz'
+      solaris_name_conjunction = '-'
+      component_version = puppet_agent_version
+    elsif version == '11'
+      # Ref:
+      # http://www.oracle.com/technetwork/articles/servers-storage-admin/ips-package-versioning-2232906.html
+      #
+      # Example to show package name components:
+      #   Full package name: puppet-agent@1.2.5.38.6813,5.11-1.sparc.p5p
+      #   Schema: <component-name><solaris_name_conjunction><component_version><solaris_release_version><solaris_revision_conjunction><revision>.<arch>.<pkg_suffix>
+      solaris_release_version = ',5.11' # injecting comma to prevent from adding another var
+      pkg_suffix = 'p5p'
+      solaris_name_conjunction = '@'
+      component_version = puppet_agent_version.dup
+      component_version.gsub!(/[a-zA-Z]/, '')
+      component_version.gsub!(/(^-)|(-$)/, '')
+      # Here we strip leading 0 from version components but leave
+      # singular 0 on their own.
+      component_version = component_version.split('-').join('.')
+      component_version = component_version.split('.').map(&:to_i).join('.')
+    end
+    release_file_base = "puppet-agent#{solaris_name_conjunction}#{component_version}#{solaris_release_version}"
+    release_file_end = "#{arch}.#{pkg_suffix}"
+    release_file = "#{release_file_base}#{solaris_revision_conjunction}#{revision}.#{release_file_end}"
+    if not link_exists?("#{opts[:download_url]}/#{release_path_end}/#{release_file}")
+      release_file = "#{release_file_base}.#{release_file_end}"
+    end
+    return release_path_end, release_file
+  end
+
+  # Gets the path & file name for the puppet agent dev package on Unix
+  #
+  # @param [String] puppet_collection Name of the puppet collection to use
+  # @param [String] puppet_agent_version Version of puppet agent to get
+  # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+  #
+  # @note Solaris does require some options to be set. See
+  #   {#solaris_puppet_agent_dev_package_info} for more details
+  #
+  # @raise [ArgumentError] If one of the two required parameters (puppet_collection,
+  #   puppet_agent_version) is either not passed or set to nil
+  #
+  # @return [String, String] Path to the directory and filename of the package, respectively
+  def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+    error_message = "Must provide %s argument to get puppet agent dev package information"
+    raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
+    raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
+
+    variant, version, arch, codename = self['platform'].to_array
+    case variant
+    when /^(solaris)$/
+      release_path_end, release_file = solaris_puppet_agent_dev_package_info(
+        puppet_collection, puppet_agent_version, opts )
+    when /^(sles|aix)$/
+      arch = 'ppc' if variant == 'aix' && arch == 'power'
+      release_path_end = "#{variant}/#{version}/#{puppet_collection}/#{arch}"
+      release_file = "puppet-agent-#{puppet_agent_version}-1.#{variant}#{version}.#{arch}.rpm"
+    else
+      msg = "puppet_agent dev package info unknown for platform '#{self['platform']}'"
+      raise ArgumentError, msg
+    end
+    return release_path_end, release_file
+  end
+
+  # Gets host-specific information for PE promoted puppet-agent packages
+  #
+  # @param [String] puppet_collection Name of the puppet collection to use
+  # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+  #
+  # @return [String, String, String] Host-specific information for packages
+  #   1. release_path_end Suffix for the release_path. Used on Windows. Check
+  #   {Windows::Pkg#pe_puppet_agent_promoted_package_info} to see usage.
+  #   2. release_file Path to the file on release build servers
+  #   3. download_file Filename for the package itself
+  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, opts = {} )
+    error_message = "Must provide %s argument to get puppet agent dev package information"
+    raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
+
+    variant, version, arch, codename = self['platform'].to_array
+    case variant
+    when /^(fedora|el|centos|sles)$/
+      variant = ((variant == 'centos') ? 'el' : variant)
+      release_file = "/repos/#{variant}/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*.rpm"
+      download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
+    when /^(debian|ubuntu|cumulus)$/
+      if arch == 'x86_64'
+        arch = 'amd64'
+      end
+      version = version[0,2] + '.' + version[2,2] if (variant =~ /ubuntu/ && !version.include?("."))
+      release_file = "/repos/apt/#{codename}/pool/#{puppet_collection}/p/puppet-agent/puppet-agent*#{arch}.deb"
+      download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
+    when /^solaris$/
+      if arch == 'x86_64'
+        arch = 'i386'
+      end
+      release_file = "/repos/solaris/#{version}/#{puppet_collection}/"
+      download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
+    else
+      raise "No pe-promoted installation step for #{variant} yet..."
+    end
+    return '', release_file, download_file
+  end
+
+  # Installs a given PE promoted package on a host
+  #
+  # @param [String] onhost_copy_base Base copy directory on the host
+  # @param [String] onhost_copied_download Downloaded file path on the host
+  # @param [String] onhost_copied_file Copied file path once un-compressed
+  # @param [String] download_file File name of the downloaded file
+  # @param [Hash{Symbol=>String}] opts additional options
+  #
+  # @return nil
+  def pe_puppet_agent_promoted_package_install(
+    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
+  )
+    variant, version, arch, codename = self['platform'].to_array
+    case variant
+    when /^(fedora-22)$/
+      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
+      execute("dnf --nogpgcheck localinstall -y #{onhost_copied_file}")
+    when /^(fedora|el|centos)$/
+      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
+      execute("yum --nogpgcheck localinstall -y #{onhost_copied_file}")
+    when /^(sles)$/
+      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
+      execute("rpm -ihv #{onhost_copied_file}")
+    when /^(debian|ubuntu|cumulus)$/
+      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
+      execute("dpkg -i --force-all #{onhost_copied_file}")
+      execute("apt-get update")
+    when /^solaris$/
+      # uncompress PE puppet-agent tarball
+      if version == '10'
+        execute("gunzip #{onhost_copied_download}")
+        tar_file_name = File.basename(download_file, '.gz')
+        execute("tar -xvf #{tar_file_name}")
+      elsif version == '11'
+        execute("tar -zxvf #{onhost_copied_download}")
+      else
+        msg = "Solaris #{version} is not supported by the method "
+        msg << 'install_puppet_agent_pe_promoted_repo_on'
+        raise ArgumentError, msg
+      end
+      # get uncompressed package filename on the system
+      pkg_filename = execute("ls #{onhost_copied_file}")
+      # actually install the package
+      if version == '10'
+        noask_text = self.noask_file_text
+        create_remote_file self, File.join(onhost_copy_base, 'noask'), noask_text
+
+        execute("gunzip -c #{onhost_copied_file}#{pkg_filename} | pkgadd -d /dev/stdin -a noask -n all")
+      elsif version == '11'
+        execute("pkg install -g #{onhost_copied_file}#{pkg_filename} puppet-agent")
+      end
+    end
+    nil
+  end
+
 end

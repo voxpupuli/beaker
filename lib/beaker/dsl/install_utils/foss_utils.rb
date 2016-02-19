@@ -1110,7 +1110,6 @@ module Beaker
 
           block_on hosts do |host|
             pe_ver = host[:pe_ver] || opts[:pe_ver] || '4.0.0-rc1'
-            variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:pe_promoted_builds_url]}/puppet-agent/#{ pe_ver }/#{ opts[:puppet_agent_version] }/repos"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
@@ -1122,94 +1121,30 @@ module Beaker
             copy_dir_local = File.join(opts[:copy_base_local], variant)
             onhost_copy_base = opts[:copy_dir_external]
 
-            case variant
-            when /^(fedora|el|centos|sles)$/
-              variant = ((variant == 'centos') ? 'el' : variant)
-              release_file = "/repos/#{variant}/#{version}/#{opts[:puppet_collection]}/#{arch}/puppet-agent-*.rpm"
-              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
-            when /^(debian|ubuntu|cumulus)$/
-              if arch == 'x86_64'
-                arch = 'amd64'
-              end
-              version = version[0,2] + '.' + version[2,2] if (variant =~ /ubuntu/ && !version.include?("."))
-              release_file = "/repos/apt/#{codename}/pool/#{opts[:puppet_collection]}/p/puppet-agent/puppet-agent*#{arch}.deb"
-              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
-            when /^windows$/
-              is_config_32 = host['ruby_arch'] == 'x86' || host['install_32'] || opts['install_32']
-              should_install_64bit = host.is_x86_64? && !is_config_32
-              # only install 64bit builds if
-              # - we do not have install_32 set on host
-              # - we do not have install_32 set globally
-              arch_suffix = should_install_64bit ? '64' : '86'
-              release_path += "/windows"
-              release_file = "/puppet-agent-x#{arch_suffix}.msi"
-              download_file = "puppet-agent-x#{arch_suffix}.msi"
-            when /^osx$/
-              release_file = "/repos/apple/#{opts[:puppet_collection]}/puppet-agent-*"
-              download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
-            when /^solaris$/
-              if arch == 'x86_64'
-                arch = 'i386'
-              end
-              release_file = "/repos/solaris/#{version}/#{opts[:puppet_collection]}/"
-              download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
-            else
-              raise "No pe-promoted installation step for #{variant} yet..."
-            end
+            release_path_end, release_file, download_file =
+              host.pe_puppet_agent_promoted_package_info(
+                opts[:puppet_collection], opts
+              )
+            release_path << release_path_end
 
             onhost_copied_download = File.join(onhost_copy_base, download_file)
             onhost_copied_file = File.join(onhost_copy_base, release_file)
             fetch_http_file( release_path, download_file, copy_dir_local)
             scp_to host, File.join(copy_dir_local, download_file), onhost_copy_base
 
-            case variant
-            when /^(fedora-22)$/
-              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              on host, "dnf --nogpgcheck localinstall -y #{onhost_copied_file}"
-            when /^(fedora|el|centos)$/
-              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              on host, "yum --nogpgcheck localinstall -y #{onhost_copied_file}"
-            when /^(sles)$/
-              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              on host, "rpm -ihv #{onhost_copied_file}"
-            when /^(debian|ubuntu|cumulus)$/
-              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              on host, "dpkg -i --force-all #{onhost_copied_file}"
-              on host, "apt-get update"
-            when /^windows$/
+            if variant == 'windows'
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
               opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+              # couldn't pull this out, because it's relying on
+              # {Beaker::DSL::InstallUtils::WindowsUtils} methods,
+              # which I didn't want to attack right now. TODO
               install_msi_on(host, onhost_copied_file, {}, opts)
-            when /^osx$/
-              on host, "tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}"
-              # move to better location
-              on host, "mv #{onhost_copied_file}.dmg ."
-              host.install_package("puppet-agent-*")
-            when /^solaris$/
-              # uncompress PE puppet-agent tarball
-              if version == '10'
-                on host, "gunzip #{onhost_copied_download}"
-                tar_file_name = File.basename(download_file, '.gz')
-                on host, "tar -xvf #{tar_file_name}"
-              elsif version == '11'
-                on host, "tar -zxvf #{onhost_copied_download}"
-              else
-                msg = "Solaris #{version} is not supported by the method "
-                msg << 'install_puppet_agent_pe_promoted_repo_on'
-                raise ArgumentError, msg
-              end
-              # get uncompressed package filename on the system
-              pkg_filename = on(host, "ls #{onhost_copied_file}").stdout.chomp
-              # actually install the package
-              if version == '10'
-                noask_text = host.noask_file_text
-                create_remote_file host, File.join(onhost_copy_base, 'noask'), noask_text
-
-                on host, "gunzip -c #{onhost_copied_file}#{pkg_filename} | pkgadd -d /dev/stdin -a noask -n all"
-              elsif version == '11'
-                on host, "pkg install -g #{onhost_copied_file}#{pkg_filename} puppet-agent"
-              end
+            else
+              host.pe_puppet_agent_promoted_package_install(
+                onhost_copy_base, onhost_copied_download,
+                onhost_copied_file, download_file, opts
+              )
             end
             configure_type_defaults_on( host )
           end
