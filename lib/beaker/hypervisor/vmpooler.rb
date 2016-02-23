@@ -127,6 +127,10 @@ module Beaker
           domain = parsed_response['domain']
 
           @hosts.each_with_index do |h, i|
+            # If one of the requested hosts is not available on vmpooler
+            if parsed_response[h['template']].nil?
+              raise "Vmpooler.provision - requested host #{h['template']} not available"
+            end
             if parsed_response[h['template']]['hostname'].is_a?(Array)
               hostname = parsed_response[h['template']]['hostname'].shift
             else
