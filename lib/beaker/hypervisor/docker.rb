@@ -84,7 +84,7 @@ module Beaker
         unless host['mount_folders'].nil?
           container_opts['HostConfig'] ||= {}
           container_opts['HostConfig']['Binds'] = host['mount_folders'].values.map do |mount|
-            a = [ mount['host_path'], mount['container_path'] ]
+            a = [ File.expand_path(mount['host_path']), mount['container_path'] ]
             a << mount['opts'] if mount.has_key?('opts')
             a.join(':')
           end
