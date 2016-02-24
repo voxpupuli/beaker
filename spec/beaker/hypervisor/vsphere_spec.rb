@@ -58,6 +58,20 @@ module Beaker
 
       end
 
+      it 'does not provisions hosts if provision is set to false' do
+        MockVsphereHelper.powerOff
+        hosts = make_hosts()
+        hosts[0]["provision"] = false
+        vsphere = Beaker::Vsphere.new( hosts, make_opts )
+
+        vsphere.provision
+
+        hosts.each do |host|
+          expect( MockVsphereHelper.find_vm( host.name ).powerState ) == "poweredOff"
+        end
+
+      end
+
     end
 
     describe "#cleanup" do
