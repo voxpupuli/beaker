@@ -805,35 +805,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe '#install_puppet_agent_pe_promoted_repo_on' do
 
-    it 'splits the platform string version correctly to get ubuntu puppet-agent packages (format 9999)' do
-      platform = Object.new()
-      allow(platform).to receive(:to_array) { ['ubuntu', '9999', 'x42']}
-      host = basic_hosts.first
-      host['platform'] = platform
 
-      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\//, "puppet-agent-ubuntu-99.99-x42.tar.gz", /ubuntu/)
-      expect(subject).to receive(:scp_to).once.with(host, /-ubuntu-99.99-x42\./, "/root")
-      expect(subject).to receive(:on).ordered.with(host, /^tar.*-ubuntu-99.99-x42/)
-      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
-      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
-
-      subject.install_puppet_agent_pe_promoted_repo_on( host, {} )
-    end
-
-    it 'doesn\'t split the platform string version correctly to get ubuntu puppet-agent packages when unnecessary (format 99.99)' do
-      platform = Object.new()
-      allow(platform).to receive(:to_array) { ['ubuntu', '99.99', 'x42']}
-      host = basic_hosts.first
-      host['platform'] = platform
-
-      expect(subject).to receive(:fetch_http_file).once.with(/\/puppet-agent\//, "puppet-agent-ubuntu-99.99-x42.tar.gz", /ubuntu/)
-      expect(subject).to receive(:scp_to).once.with(host, /-ubuntu-99.99-x42\./, "/root")
-      expect(subject).to receive(:on).ordered.with(host, /^tar.*-ubuntu-99.99-x42/)
-      expect(subject).to receive(:on).ordered.with(host, /dpkg\ -i\ --force-all/)
-      expect(subject).to receive(:on).ordered.with(host, /apt-get\ update/)
-
-      subject.install_puppet_agent_pe_promoted_repo_on( host, {} )
-    end
 
   end
 
@@ -1003,12 +975,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :scp_to ).once.with(
         host, /#{release_file}$/, anything )
 
-      noask_text = 'blablabla noask solaris 10 text'
-      allow( host ).to receive( :noask_file_text ).and_return( noask_text )
-      expect( subject ).to receive( :create_remote_file ).with(
-        host, /noask$/, noask_text )
-      expect( subject ).to receive( :on ).with(
-        host, /^gunzip.*#{release_file}.*pkgadd.*noask.*all$/ )
+      expect( host ).to receive( :solaris_install_local_package )
 
       allow( subject ).to receive( :configure_type_defaults_on )
       subject.install_puppet_agent_dev_repo_on( host, opts )
@@ -1098,13 +1065,11 @@ describe ClassMixedWithDSLInstallUtils do
       it 'calls fetch_http_file with no ending slash' do
         test_fetch_http_file_no_ending_slash( 'windows-7-x86_64' )
       end
-
     end
 
     it 'calls fetch_http_file with no ending slash' do
       test_fetch_http_file_no_ending_slash( 'debian-5-x86_64' )
     end
-
   end
 
   describe '#remove_puppet_on' do

@@ -41,4 +41,84 @@ module Mac::Pkg
     result.exit_code == 0
   end
 
+  # Gets the path & file name for the puppet agent dev package on OSX
+  #
+  # @param [String] puppet_collection Name of the puppet collection to use
+  # @param [String] puppet_agent_version Version of puppet agent to get
+  # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+  #
+  # @note OSX doesn't use any additional options at this time, but does require
+  #   both puppet_collection & puppet_agent_version, & will fail without them
+  #
+  # @raise [ArgumentError] If one of the two required parameters (puppet_collection,
+  #   puppet_agent_version) is either not passed or set to nil
+  #
+  # @return [String, String] Path to the directory and filename of the package, respectively
+  def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+    error_message = "Must provide %s argument to get puppet agent dev package information"
+    raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
+    raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
+
+    variant, version, arch, codename = self['platform'].to_array
+
+    mac_pkg_name = "puppet-agent-#{puppet_agent_version}"
+    version = version[0,2] + '.' + version[2,2] unless version.include?(".")
+    # newest hotness
+    path_chunk = "apple/#{version}/#{puppet_collection}/#{arch}"
+    release_path_end = path_chunk
+    # moved to doing this when 'el capitan' came out & the objection was
+    # raised that the code name wasn't a fact, & as such can be hard to script
+    # example: puppet-agent-0.1.0-1.osx10.9.dmg
+    release_file = "#{mac_pkg_name}-1.osx#{version}.dmg"
+    if not link_exists?("#{opts[:download_url]}/#{release_path_end}/#{release_file}") # new hotness
+      # little older change involved the code name as only difference from above
+      # example: puppet-agent-0.1.0-1.mavericks.dmg
+      release_file = "#{mac_pkg_name}-1.#{codename}.dmg"
+    end
+    if not link_exists?("#{opts[:download_url]}/#{release_path_end}/#{release_file}") # oops, try the old stuff
+      release_path_end = "apple/#{puppet_collection}"
+      # example: puppet-agent-0.1.0-osx-10.9-x86_64.dmg
+      release_file = "#{mac_pkg_name}-#{variant}-#{version}-x86_64.dmg"
+    end
+    return release_path_end, release_file
+  end
+
+  # Gets host-specific information for PE promoted puppet-agent packages
+  #
+  # @param [String] puppet_collection Name of the puppet collection to use
+  # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
+  #
+  # @return [String, String, String] Host-specific information for packages
+  #   1. release_path_end Suffix for the release_path. Used on Windows. Check
+  #   {Windows::Pkg#pe_puppet_agent_promoted_package_info} to see usage.
+  #   2. release_file Path to the file on release build servers
+  #   3. download_file Filename for the package itself
+  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, opts = {} )
+    error_message = "Must provide %s argument to get puppet agent dev package information"
+    raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
+
+    variant, version, arch, codename = self['platform'].to_array
+    release_file = "/repos/apple/#{puppet_collection}/puppet-agent-*"
+    download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
+    return '', release_file, download_file
+  end
+
+  # Installs a given PE promoted package on a host
+  #
+  # @param [String] onhost_copy_base Base copy directory on the host
+  # @param [String] onhost_copied_download Downloaded file path on the host
+  # @param [String] onhost_copied_file Copied file path once un-compressed
+  # @param [String] download_file File name of the downloaded file
+  # @param [Hash{Symbol=>String}] opts additional options
+  #
+  # @return nil
+  def pe_puppet_agent_promoted_package_install(
+    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
+  )
+    execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
+    # move to better location
+    execute("mv #{onhost_copied_file}.dmg .")
+    self.install_package("puppet-agent-*")
+  end
+
 end

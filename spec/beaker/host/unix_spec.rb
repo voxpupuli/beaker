@@ -179,6 +179,26 @@ module Unix
       end
     end
 
+    describe '#pe_puppet_agent_promoted_package_info' do
+      context 'on ubuntu platforms' do
+        it 'splits the platform string version to get puppet-agent packages (format 9999)' do
+          @platform = 'ubuntu-9999-x42'
+          _, _, download_file = host.pe_puppet_agent_promoted_package_info(
+            'pa_collection'
+          )
+          expect( download_file ).to match( /-ubuntu-99\.99-x42/ )
+        end
+
+        it 'skips splitting the platform string version to get puppet-agent packages when unnecessary (format 99.99)' do
+          @platform = 'ubuntu-88.88-x63'
+          _, _, download_file = host.pe_puppet_agent_promoted_package_info(
+            'pa_collection'
+          )
+          expect( download_file ).to match( /-ubuntu-88\.88-x63/ )
+        end
+      end
+    end
+
     describe '#external_copy_base' do
 
       it 'returns /root in general' do
