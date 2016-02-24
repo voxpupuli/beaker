@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 10 Feb, 2016 (78b7dd79)](#LATEST)
+* [LATEST - 24 Feb, 2016 (e714b1eb)](#LATEST)
+* [2.34.0 - 10 Feb, 2016 (b897a98a)](#2.34.0)
 * [2.33.0 - 27 Jan, 2016 (0dd8505a)](#2.33.0)
 * [2.32.1 - 14 Jan, 2016 (8c394fdb)](#2.32.1)
 * [2.32.0 - 12 Jan, 2016 (80e153cc)](#2.32.0)
@@ -109,7 +110,99 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 10 Feb, 2016 (78b7dd79)
+### <a name = "LATEST">LATEST - 24 Feb, 2016 (e714b1eb)
+
+* (GEM) update beaker version to 2.35.0 (e714b1eb)
+
+* Merge pull request #1067 from kevpl/bkr693_solaris_install (539de014)
+
+
+```
+Merge pull request #1067 from kevpl/bkr693_solaris_install
+
+(BKR-693) solaris install puppet-agent from PE promoted repo fix
+```
+* Merge pull request #1069 from pinkypie/BKR-99 (875f984f)
+
+
+```
+Merge pull request #1069 from pinkypie/BKR-99
+
+(BKR-99) - Populate host[:timesync] with host configured value.
+```
+* Merge pull request #1065 from op-ct/BKR-704_relative_docker_mount_folders (70805173)
+
+
+```
+Merge pull request #1065 from op-ct/BKR-704_relative_docker_mount_folders
+
+(BKR-704) Allow relative `mount_folders` in docker
+```
+* Merge pull request #1059 from jordane/master (28047b44)
+
+
+```
+Merge pull request #1059 from jordane/master
+
+point install link to docs/
+```
+* (BKR-99) - Populate host[:timesync] with host configured value if it has been set. (d1454372)
+
+
+```
+(BKR-99) - Populate host[:timesync] with host configured value if it has been set.
+Add spec tests.
+```
+* (BKR-693) refactored duplicate install logic into separate method (0a1075dc)
+
+* (BKR-693) refactored pe promoted puppet-agent install (0370c4b5)
+
+* Merge pull request #1063 from pinkypie/BKR-48 (b2b9ad6e)
+
+
+```
+Merge pull request #1063 from pinkypie/BKR-48
+
+(BKR-48) Change how --dry_run is defined - should not be global variable.
+```
+* (BKR-693) fixed solaris 10/11 install_puppet_agent_pe_promoted_repo_on (8f1f3a58)
+
+* (BKR-48) implementing Null object pattern for Beaker::NullResult (7499df05)
+
+
+```
+(BKR-48) implementing Null object pattern for Beaker::NullResult
+ This is so that calling methods can handle a dry-run more gracefully.
+```
+* (BKR-704) Allow relative `mount_folders` in docker (2a30987c)
+
+
+```
+(BKR-704) Allow relative `mount_folders` in docker
+
+Without this patch, a nodeset using relative `from:` paths under
+`mount_folders:` with the `docker` hypervisor will encounter a
+test-halting `Docker::Error::ClientError`.  This is a problem because
+it forces docker-based nodesets to specify host-side mounts with
+absolute paths, which isn't portable.
+
+This patch fixes the issue by using Ruby's `File.expand_path()` method to
+translate any relative `mount_folders:`/`from:` entries into absolute
+paths before passing them on to docker.
+```
+* (BKR-48) Change how --dry_run is defined (f27e4803)
+
+
+```
+(BKR-48) Change how --dry_run is defined
+ We should not be using a global variable, and we should make it possible to overide the value from calling methods (as per other options).
+ Also returning result before we attempt a host connection.
+```
+* (MAINT) point install link to docs/ (0348b29a)
+
+### <a name = "2.34.0">2.34.0 - 10 Feb, 2016 (b897a98a)
+
+* (HISTORY) update beaker history for gem release 2.34.0 (b897a98a)
 
 * (GEM) update beaker version to 2.34.0 (78b7dd79)
 
