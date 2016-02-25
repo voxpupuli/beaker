@@ -73,6 +73,17 @@ module Beaker
           expect( host['vmhostname'] ).to be === 'pool'
         end
       end
+
+      it 'raises an error when a host template is not found in returned json' do
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        host          = vmpooler.instance_variable_get(:@hosts)[0][:template]
+
+        allow( vmpooler ).to receive( :require ).and_return( true )
+        allow( vmpooler ).to receive( :sleep ).and_return( true )
+        allow( vmpooler ).to receive(:get_host_info).and_return(nil)
+
+        expect {vmpooler.provision}.to raise_error RuntimeError,"Vmpooler.provision - requested host #{host} not available"
+      end
     end
 
     describe "#cleanup" do

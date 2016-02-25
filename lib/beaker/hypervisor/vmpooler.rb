@@ -87,6 +87,14 @@ module Beaker
           })
     end
 
+    # Get host info hash from parsed json response
+    # @param [Hash] parsed_response hash
+    # @param [String] template string
+    # @return [Hash] Host info hash
+    def get_host_info(parsed_response, template)
+      parsed_response[template]
+    end
+
     def provision
       request_payload = {}
       start = Time.now
@@ -127,6 +135,10 @@ module Beaker
           domain = parsed_response['domain']
 
           @hosts.each_with_index do |h, i|
+            # If the requested host template is not available on vmpooler
+            if get_host_info(parsed_response, h['template']).nil?
+              raise "Vmpooler.provision - requested host #{h['template']} not available"
+            end
             if parsed_response[h['template']]['hostname'].is_a?(Array)
               hostname = parsed_response[h['template']]['hostname'].shift
             else
