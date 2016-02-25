@@ -849,8 +849,14 @@ module Beaker
                 [opts[:release_yum_repo_url], repo_name, variant_url_value, version]
 
               if variant == 'cisco'
-                # cisco requires using yum to install the repo
-                host.install_package( remote )
+                if version == '5'
+                  # cisco requires using yum to install the repo
+                  host.install_package( remote )
+                end
+                if version == '7'
+                  # cisco 7 requires using yum to localinstall the repo
+                  on host, "yum -y localinstall #{remote}"
+                end
               else
                 host.install_package_with_rpm( remote, '--replacepkgs',
                   { :package_proxy => opts[:package_proxy] } )
