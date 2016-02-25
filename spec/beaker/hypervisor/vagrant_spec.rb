@@ -50,7 +50,7 @@ Vagrant.configure("2") do |c|
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
-      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
+      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1', '--paravirtprovider', 'default']
     end
   end
   c.vm.define 'vm2' do |v|
@@ -62,7 +62,7 @@ Vagrant.configure("2") do |c|
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
-      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
+      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1', '--paravirtprovider', 'default']
     end
   end
   c.vm.define 'vm3' do |v|
@@ -74,7 +74,7 @@ Vagrant.configure("2") do |c|
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
     v.vm.provider :virtualbox do |vb|
-      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
+      vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1', '--paravirtprovider', 'default']
     end
   end
 end
@@ -132,7 +132,7 @@ EOF
 
       generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
 
-      match = generated_file.match(/vb.customize \['modifyvm', :id, '--memory', 'hello!', '--cpus', '1'\]/)
+      match = generated_file.match(/vb.customize \['modifyvm', :id, '--memory', 'hello!', '--cpus', '1', '--paravirtprovider', 'default'\]/)
 
       expect( match ).to_not be nil
 
@@ -146,10 +146,24 @@ EOF
   
       generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
   
-      match = generated_file.match(/vb.customize \['modifyvm', :id, '--memory', '1024', '--cpus', 'goodbye!'\]/)
+      match = generated_file.match(/vb.customize \['modifyvm', :id, '--memory', '1024', '--cpus', 'goodbye!', '--paravirtprovider', 'default'\]/)
   
       expect( match ).to_not be nil
   
+    end
+
+    it "uses the paravirtualization interface defined per vagrant host" do
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+      vagrant.make_vfile( @hosts, {'vagrant_paravirtprovider' => 'farewell!'} )
+
+      generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+
+      match = generated_file.match(/vb.customize \['modifyvm', :id, '--memory', '1024', '--cpus', '1!', '--paravirtprovider', 'farewell!'\]/)
+
+      expect( match ).to_not be nil
+
     end
 
     it "can generate a new /etc/hosts file referencing each host" do
