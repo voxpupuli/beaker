@@ -630,6 +630,37 @@ describe ClassMixedWithDSLInstallUtils do
 
   end
 
+  describe '#install_puppetlabs_release_repo_on' do
+    let( :host ) do
+      FakeHost.create( 'fakevm', platform.to_s )
+    end
+
+    before :each do
+      allow( subject ).to receive( :options ) { opts }
+    end
+
+    context 'on cisco platforms' do
+      context 'version 5' do
+        let( :platform ) { Beaker::Platform.new( 'cisco-5-x86_64' ) }
+
+        it 'calls host.install_package' do
+          expect( host ).to receive( :install_package ).with( /\.rpm$/ )
+          subject.install_puppetlabs_release_repo_on( host )
+        end
+      end
+
+      context 'version 7' do
+        let( :platform ) { Beaker::Platform.new( 'cisco-7-x86_64' ) }
+
+        it 'uses yum localinstall to install the package' do
+          expect( subject ).to receive( :on ).with( host, /^yum.*localinstall.*\.rpm$/ )
+          subject.install_puppetlabs_release_repo_on( host )
+        end
+      end
+    end
+
+  end
+
   describe "#install_puppetlabs_dev_repo" do
     let( :package_name ) { "puppet" }
     let( :package_version ) { "7.5.6" }
