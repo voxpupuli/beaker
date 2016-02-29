@@ -81,5 +81,9 @@ module Beaker
     include Beaker::DSL::InstallUtils
     include Beaker::DSL::Patterns
     include Beaker::DSL::PE
+
+    def self.register(helper_module)
+      include helper_module
+    end
   end
 end
