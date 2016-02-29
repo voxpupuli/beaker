@@ -3,6 +3,7 @@
   require "beaker/dsl/#{lib}"
 end
 
+require 'beaker-pe'
 module Beaker
   # This is a catch all module for including Puppetlabs home grown testing
   # DSL. This module is mixed into {Beaker::TestCase} and can be
@@ -79,5 +80,6 @@ module Beaker
     include Beaker::DSL::Helpers
     include Beaker::DSL::InstallUtils
     include Beaker::DSL::Patterns
+    include Beaker::DSL::PE
   end
 end
