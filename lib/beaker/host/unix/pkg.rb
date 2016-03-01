@@ -209,7 +209,7 @@ module Unix::Pkg
     codename = self['platform'].codename
 
     if codename.nil?
-      @logger.warning "Could not determine codename for debian platform #{self['platform']}. Skipping deployment of repo #{name}"
+      @logger.warn "Could not determine codename for debian platform #{self['platform']}. Skipping deployment of repo #{name}"
       return
     end
 
@@ -248,7 +248,7 @@ module Unix::Pkg
   #       params
   def deploy_package_repo(path, name, version)
     if not File.exists? path
-      @logger.warning "Was asked to deploy package repository from #{path}, but it doesn't exist!"
+      @logger.warn "Was asked to deploy package repository from #{path}, but it doesn't exist!"
       return
     end
 
