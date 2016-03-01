@@ -93,6 +93,8 @@ module Beaker
       end
       it 'should fail when docker not present' do
         expect { docker }.to raise_error(RuntimeError, /Docker instance not connectable./)
+        expect { docker }.to raise_error(RuntimeError, /Check your DOCKER_HOST variable has been set/)
+        expect { docker }.to raise_error(RuntimeError, /If you are on OSX or Windows, you might not have Docker Machine setup correctly/)
         expect { docker }.to raise_error(RuntimeError, /Error was: oops/)
       end
     end
