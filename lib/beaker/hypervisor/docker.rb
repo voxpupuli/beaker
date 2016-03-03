@@ -68,33 +68,31 @@ module Beaker
           'Image' => image_name,
           'Hostname' => host.name,
         }
-
-        unless host['docker_container_name'].nil?
-          @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
-          existing_container = ::Docker::Container.all.select do |container| container.info['Names'].include? "/#{host['docker_container_name']}" end
-
-          # Prepare to use the existing container or else create it
-          if existing_container.any?
-            container = existing_container[0]
-          else
-            container_opts['name'] = host['docker_container_name']
-          end
-        end
-
-        unless host['mount_folders'].nil?
-          container_opts['HostConfig'] ||= {}
-          container_opts['HostConfig']['Binds'] = host['mount_folders'].values.map do |mount|
-            a = [ File.expand_path(mount['host_path']), mount['container_path'] ]
-            a << mount['opts'] if mount.has_key?('opts')
-            a.join(':')
-          end
-        end
+        container = find_container(host)
 
         # If the specified container exists, then use it rather creating a new one
         if container.nil?
-          @logger.debug("Creating container from image #{image_name}")
-          container = ::Docker::Container.create(container_opts)
+          unless host['mount_folders'].nil?
+            container_opts['HostConfig'] ||= {}
+            container_opts['HostConfig']['Binds'] = host['mount_folders'].values.map do |mount|
+              a = [ File.expand_path(mount['host_path']), mount['container_path'] ]
+              a << mount['opts'] if mount.has_key?('opts')
+              a.join(':')
+            end
+          end
+
+          if @options[:provision]
+            if host['docker_container_name']
+              container_opts['name'] = host['docker_container_name']
+            end
+
+            @logger.debug("Creating container from image #{image_name}")
+            container = ::Docker::Container.create(container_opts)
+          end
         end
+
+        raise RuntimeError, "Unable to create container because provision=false" if container.nil?
+        fix_ssh(container) if @options[:provision] == false
 
         @logger.debug("Starting container #{container.id}")
         container.start({"PublishAllPorts" => true, "Privileged" => true})
@@ -268,9 +266,34 @@ module Beaker
         EOF
 
       end
-      
+
       @logger.debug("Dockerfile is #{dockerfile}")
       return dockerfile
+    end
+
+    # a puppet run may have changed the ssh config which would
+    # keep us out of the container.  This is a best effort to fix it.
+    def fix_ssh(container)
+      @logger.debug("Fixing ssh on container #{container.id}")
+      container.exec(['sed','-ri',
+                      's/^#?PermitRootLogin .*/PermitRootLogin yes/',
+                      '/etc/ssh/sshd_config'])
+      container.exec(['sed','-ri',
+                      's/^#?PasswordAuthentication .*/PasswordAuthentication yes/',
+                      '/etc/ssh/sshd_config'])
+      container.exec(%w(service ssh restart))
+    end
+
+
+    # return the existing container if we're not provisioning
+    # and docker_container_name is set
+    def find_container(host)
+      return nil if host['docker_container_name'].nil? || @options[:provision]
+      @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
+
+      ::Docker::Container.all.select do |c|
+        c.info['Names'].include? "/#{host['docker_container_name']}"
+      end.first
     end
 
   end

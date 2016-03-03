@@ -34,6 +34,7 @@ module Beaker
     let(:options) {{
       :logger => logger,
       :forward_ssh_agent => true,
+      :provision => true
     }}
 
     let(:image) do
@@ -66,6 +67,7 @@ module Beaker
       })
       allow( container ).to receive(:stop)
       allow( container ).to receive(:delete)
+      allow( container ).to receive(:exec)
       container
     end
 
@@ -181,8 +183,6 @@ module Beaker
           container_name = "spec-container-#{index}"
           host['docker_container_name'] = container_name
 
-          expect( ::Docker::Container ).to receive(:all).and_return([])
-
           expect( ::Docker::Container ).to receive(:create).with({
             'Image' => image.id,
             'Hostname' => host.name,
@@ -193,17 +193,6 @@ module Beaker
         docker.provision
       end
 
-      it 'should not create a container if a named one already exists' do
-        hosts.each_with_index do |host, index|
-          container_name = "spec-container-#{index}"
-          host['docker_container_name'] = container_name
-
-          expect( ::Docker::Container ).to receive(:all).and_return([container])
-          expect( ::Docker::Container ).not_to receive(:create)
-        end
-
-        docker.provision
-      end
 
       it 'should create a container with volumes bound' do
         hosts.each_with_index do |host, index|
@@ -304,6 +293,41 @@ module Beaker
 
         expect( hosts[0]['docker_image'] ).to be === image
         expect( hosts[0]['docker_container'] ).to be === container
+      end
+
+      context 'provision=false' do
+        before do
+        end
+
+        let(:options) {{
+          :logger => logger,
+          :forward_ssh_agent => true,
+          :provision => false
+        }}
+
+
+        it 'should fix ssh' do
+          hosts.each_with_index do |host, index|
+            container_name = "spec-container-#{index}"
+            host['docker_container_name'] = container_name
+
+            expect( ::Docker::Container ).to receive(:all).and_return([container])
+            expect(container).to receive(:exec).exactly(3).times
+          end
+          docker.provision
+        end
+
+        it 'should not create a container if a named one already exists' do
+          hosts.each_with_index do |host, index|
+            container_name = "spec-container-#{index}"
+            host['docker_container_name'] = container_name
+
+            expect( ::Docker::Container ).to receive(:all).and_return([container])
+            expect( ::Docker::Container ).not_to receive(:create)
+          end
+
+          docker.provision
+        end
       end
     end
 
