@@ -227,7 +227,7 @@ module Unix
 
     describe '#validate_setup' do
 
-      it 'does nothing for non cisco-5 platforms' do
+      it 'does nothing for non cisco_nexus-7 platforms' do
         @platform = 'el-7-x86_64'
         validate_test = host.validate_setup
         expect( validate_test ).to be_nil

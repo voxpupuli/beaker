@@ -641,7 +641,7 @@ describe ClassMixedWithDSLInstallUtils do
 
     context 'on cisco platforms' do
       context 'version 5' do
-        let( :platform ) { Beaker::Platform.new( 'cisco-5-x86_64' ) }
+        let( :platform ) { Beaker::Platform.new( 'cisco_nexus-7-x86_64' ) }
 
         it 'calls host.install_package' do
           expect( host ).to receive( :install_package ).with( /\.rpm$/ )
@@ -650,7 +650,7 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       context 'version 7' do
-        let( :platform ) { Beaker::Platform.new( 'cisco-7-x86_64' ) }
+        let( :platform ) { Beaker::Platform.new( 'cisco_ios_xr-6-x86_64' ) }
 
         it 'uses yum localinstall to install the package' do
           expect( subject ).to receive( :on ).with( host, /^yum.*localinstall.*\.rpm$/ )

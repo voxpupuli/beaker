@@ -110,7 +110,7 @@ module Beaker
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
         when host['platform'] =~ /solaris-10/
           check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco-/
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end
