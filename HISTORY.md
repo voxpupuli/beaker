@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 24 Feb, 2016 (e714b1eb)](#LATEST)
+* [LATEST - 9 Mar, 2016 (571ab630)](#LATEST)
+* [2.35.0 - 24 Feb, 2016 (b20fa892)](#2.35.0)
 * [2.34.0 - 10 Feb, 2016 (b897a98a)](#2.34.0)
 * [2.33.0 - 27 Jan, 2016 (0dd8505a)](#2.33.0)
 * [2.32.1 - 14 Jan, 2016 (8c394fdb)](#2.32.1)
@@ -110,7 +111,93 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 24 Feb, 2016 (e714b1eb)
+### <a name = "LATEST">LATEST - 9 Mar, 2016 (571ab630)
+
+* (GEM) update beaker version to 2.36.0 (571ab630)
+
+* Merge pull request #1073 from kevpl/bkr308_beaker_pe_create (8b6be6f9)
+
+
+```
+Merge pull request #1073 from kevpl/bkr308_beaker_pe_create
+
+(BKR-308) moved PE-specific functionality to beaker-pe
+```
+* Merge pull request #1074 from objectverbobject/BKR-451 (c9102673)
+
+
+```
+Merge pull request #1074 from objectverbobject/BKR-451
+
+(BKR-451) Fix broken logger warnings
+```
+* Merge pull request #1072 from kevpl/bkr669_cisco7_install (0dc2537d)
+
+
+```
+Merge pull request #1072 from kevpl/bkr669_cisco7_install
+
+(BKR-669) added cisco-7 install release repo support
+```
+* Merge pull request #1075 from petems/maint-fix_error_in_beaker_docker (033e6f80)
+
+
+```
+Merge pull request #1075 from petems/maint-fix_error_in_beaker_docker
+
+(maint) Improves error message for Docker failure
+```
+* (maint) Improves error message for Docker failure (1a50d4ec)
+
+
+```
+(maint) Improves error message for Docker failure
+
+* Frontload the DOCKER_HOST variable, as it's the easiest thing to check
+* boot2docker-cli is deprecated (https://github.com/boot2docker/boot2docker-cli#deprecated)
+* Error could also occur on Windows
+```
+* (BKR-451) Fix broken logger warnings (f998bbae)
+
+
+```
+(BKR-451) Fix broken logger warnings
+
+The `warning` methods in `deploy_package_repo` should have been simply
+`warn`. This PR changes them to warn and adds appropriate spec testing
+for the methods to ensure they `warn` correctly.
+```
+* (BKR-308) added beaker-library DSL registry method (a6c72e80)
+
+* (BKR-308) added beaker-pe dependency (68f62624)
+
+* (BKR-308) removed scooter dependency (62579f89)
+
+* (BKR-308) removed PE-specific functionality (449a08e3)
+
+
+```
+(BKR-308) removed PE-specific functionality
+
+moved into beaker-pe library
+```
+* (BKR-669) added cisco-7 install release repo support (8aeebb0d)
+
+* Merge pull request #1070 from pinkypie/BKR-671 (fd26aa9d)
+
+
+```
+Merge pull request #1070 from pinkypie/BKR-671
+
+(BKR-671) - Add error handing for Beaker failing to acquire a VM from vmpooler
+```
+* (BKR-671) - Add spec test for change to provision method. (9688cd21)
+
+* (BKR-671) - Add error handing for Beaker failing to acquire a VM from vmpooler. (40d2db32)
+
+### <a name = "2.35.0">2.35.0 - 24 Feb, 2016 (b20fa892)
+
+* (HISTORY) update beaker history for gem release 2.35.0 (b20fa892)
 
 * (GEM) update beaker version to 2.35.0 (e714b1eb)
 
