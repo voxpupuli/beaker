@@ -952,12 +952,12 @@ describe ClassMixedWithDSLInstallUtils do
       host['platform'] = platform
       opts = { :version => '0.1.0' }
       allow( subject ).to receive( :options ).and_return( {} )
-      copied_path = "#{win_temp}\\puppet-agent-x86.msi"
+      copied_path = "#{win_temp}\\puppet-agent-0.1.0-x86.msi"
       mock_echo = Object.new()
       allow( mock_echo ).to receive( :raw_output ).and_return( copied_path )
 
-      expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-x86.msi', /\/windows$/)
-      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-x86.msi$/, /#{external_copy_base}/)
+      expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-0.1.0-x86.msi', /\/windows$/)
+      expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-x86.msi$/, /#{external_copy_base}/)
       expect(subject).to receive(:install_msi_on).with(host, copied_path, {}, {:debug => nil}).once
       expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
 
@@ -1063,7 +1063,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :install_msi_on ).with( any_args )
       copy_base = 'copy_base_cygwin'
       allow( host ).to receive( :external_copy_base ).and_return( copy_base )
-      expect( subject ).to receive( :scp_to ).with( host, /puppet-agent-x86\.msi/, /#{copy_base}/ )
+      expect( subject ).to receive( :scp_to ).with( host, /puppet-agent-1\.0\.0-x86\.msi/, /#{copy_base}/ )
       expect( subject ).to receive( :configure_type_defaults_on ).with(host)
       expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
       subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )

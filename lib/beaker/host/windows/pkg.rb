@@ -65,7 +65,13 @@ module Windows::Pkg
     # - we do not have install_32 set on host
     # - we do not have install_32 set globally
     arch_suffix = should_install_64bit ? '64' : '86'
-    release_file = "puppet-agent-x#{arch_suffix}.msi"
+    # If a version was specified, use it; otherwise fall back to a default name.
+    # Avoid when puppet_agent_version is set to a SHA, which isn't used in package names.
+    if puppet_agent_version =~ /^\d+\.\d+\.\d+/
+      release_file = "puppet-agent-#{puppet_agent_version}-x#{arch_suffix}.msi"
+    else
+      release_file = "puppet-agent-x#{arch_suffix}.msi"
+    end
     return release_path_end, release_file
   end
 
