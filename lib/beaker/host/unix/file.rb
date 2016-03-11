@@ -62,10 +62,18 @@ module Unix::File
     repo_filename = "pl-%s-%s-" % [ package_name, build_version ]
 
     case variant
-    when /fedora|el|centos|cisco/
+    when /fedora|el|centos|cisco_nexus|cisco_ios_xr/
       variant = 'el' if variant == 'centos'
-      variant = 'cisco-wrlinux' if variant == 'cisco'
+      if variant == 'cisco_nexus'
+        variant = 'cisco-wrlinux'
+        version = '5'
+      end
+      if variant == 'cisco_ios_xr'
+        variant = 'cisco-wrlinux'
+        version = '7'
+      end
       fedora_prefix = ((variant == 'fedora') ? 'f' : '')
+
       pattern = "%s-%s%s-%s.repo"
       pattern = "repos-pe-#{pattern}" if self.is_pe?
 

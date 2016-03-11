@@ -333,7 +333,7 @@ module Beaker
             add_role(host, 'aio') #we are installing agent, so we want aio role
             package_name = nil
             case host['platform']
-            when /el-|fedora|sles|centos|cisco-/
+            when /el-|fedora|sles|centos|cisco_/
               package_name = 'puppet-agent'
               package_name << "-#{opts[:puppet_agent_version]}" if opts[:puppet_agent_version]
             when /debian|ubuntu|cumulus/
@@ -842,21 +842,25 @@ module Beaker
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
 
             case variant
-            when /^(fedora|el|centos|sles|cisco)$/
+            when /^(fedora|el|centos|sles|cisco_nexus|cisco_ios_xr)$/
               variant_url_value = (($1 == 'centos') ? 'el' : $1)
-              variant_url_value = 'cisco-wrlinux' if variant == 'cisco'
+              if variant == 'cisco_nexus'
+                variant_url_value = 'cisco-wrlinux'
+                version = '5'
+              end
+              if variant == 'cisco_ios_xr'
+                variant_url_value = 'cisco-wrlinux'
+                version = '7'
+              end
               remote = "%s/puppetlabs-release%s-%s-%s.noarch.rpm" %
                 [opts[:release_yum_repo_url], repo_name, variant_url_value, version]
 
-              if variant == 'cisco'
-                if version == '5'
-                  # cisco requires using yum to install the repo
-                  host.install_package( remote )
-                end
-                if version == '7'
-                  # cisco 7 requires using yum to localinstall the repo
-                  on host, "yum -y localinstall #{remote}"
-                end
+              if variant == 'cisco_nexus'
+                # cisco nexus requires using yum to install the repo
+                host.install_package( remote )
+              elsif variant == 'cisco_ios_xr'
+                # cisco ios xr requires using yum to localinstall the repo
+                on host, "yum -y localinstall #{remote}"
               else
                 host.install_package_with_rpm( remote, '--replacepkgs',
                   { :package_proxy => opts[:package_proxy] } )
@@ -896,7 +900,7 @@ module Beaker
                                   repo_filename,
                                   copy_dir )
 
-          if host[:platform] =~ /cisco-5/
+          if host[:platform] =~ /cisco_nexus/
             to_path = "#{host.package_config_dir}/#{File.basename(repo)}"
           else
             to_path = host.package_config_dir
@@ -938,7 +942,7 @@ module Beaker
                                   repo_configs_dir = nil,
                                   opts = options )
           variant, version, arch, codename = host['platform'].to_array
-          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus|cisco)$/
+          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus|cisco_nexus|cisco_ios_xr)$/
             raise "No repository installation step for #{variant} yet..."
           end
           repo_configs_dir ||= 'tmp/repo_configs'
@@ -1035,7 +1039,7 @@ module Beaker
             onhost_copy_base = opts[:copy_dir_external]
 
             case variant
-            when /^(fedora|el|centos|debian|ubuntu|cumulus|cisco)$/
+            when /^(fedora|el|centos|debian|ubuntu|cumulus|cisco_nexus|cisco_ios_xr)$/
               sha = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
               opts[:dev_builds_repos] ||= [ opts[:puppet_collection] ]
               install_puppetlabs_dev_repo( host, 'puppet-agent', sha, nil, opts )

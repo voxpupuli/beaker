@@ -21,7 +21,7 @@ module Cisco
     #
     # @return nil
     def scp_post_operations(scp_file_actual, scp_file_target)
-      if self[:platform] =~ /cisco-5/
+      if self[:platform] =~ /cisco_nexus/
         execute( "mv #{scp_file_actual} #{scp_file_target}" )
       end
       nil
@@ -34,7 +34,7 @@ module Cisco
     # @return [String] path, changed if needed due to host
     #   constraints
     def scp_path(path)
-      if self[:platform] =~ /cisco-5/
+      if self[:platform] =~ /cisco_nexus/
         @home_dir ||= execute( 'pwd' )
         answer = "#{@home_dir}/#{File.basename( path )}"
         answer << '/' if path =~ /\/$/
@@ -72,9 +72,8 @@ module Cisco
       return user_pc unless command.index('vsh').nil?
 
       prepend_cmds = 'source /etc/profile;'
-      if self[:platform] =~ /cisco-5/
-        prepend_cmds << ' sudo ip netns exec '
-        prepend_cmds << ( self[:vrf] ? self[:vrf] : '' )
+      if self[:vrf]
+        prepend_cmds << "sudo ip netns exec #{self[:vrf]}"
       end
       return prepend_cmds
     end
@@ -95,7 +94,7 @@ module Cisco
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
 
-      command = self[:platform] =~ /cisco-5/ ? 'export' : 'env'
+      command = self[:platform] =~ /cisco_nexus/ ? 'export' : 'env'
       "#{command} #{environment_string};"
     end
 
@@ -106,10 +105,18 @@ module Cisco
     #   this will be raised with the appropriate message
     def validate_setup
       msg = nil
-      msg = 'Cisco hosts must be provided with a :vrf value.' unless self[:vrf]
-
-      if !msg && self[:platform] =~ /cisco-5/ && self[:user] == 'root'
-        msg = 'Cisco-5 hosts must be provided with a :user value, as they can not SSH in as root.'
+      if self[:platform] =~ /cisco_nexus/ 
+        if !self[:vrf]
+          msg = 'Cisco Nexus hosts must be provided with a :vrf value.' 
+        end
+        if !self[:user]
+          msg = 'Cisco hosts must be provided with a :user value'
+        end
+      end
+      if self[:platform] =~ /cisco_ios_xr/ 
+        if !self[:user]
+          msg = 'Cisco hosts must be provided with a :user value'
+        end
       end
 
       if msg
