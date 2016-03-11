@@ -296,9 +296,6 @@ module Beaker
       end
 
       context 'provision=false' do
-        before do
-        end
-
         let(:options) {{
           :logger => logger,
           :forward_ssh_agent => true,
