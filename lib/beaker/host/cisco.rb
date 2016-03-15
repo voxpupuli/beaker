@@ -71,11 +71,14 @@ module Cisco
     def prepend_commands(command = '', user_pc = '', opts = {})
       return user_pc unless command.index('vsh').nil?
 
-      prepend_cmds = 'source /etc/profile;'
+      prepend_cmds = ''
       if self[:vrf]
-        prepend_cmds << "sudo ip netns exec #{self[:vrf]}"
+        prepend_cmds << "ip netns exec #{self[:vrf]} "
       end
-      return prepend_cmds
+      if user_pc && !user_pc.empty?
+        prepend_cmds << "#{user_pc} "
+      end
+      prepend_cmds.strip
     end
 
     # Construct the environment string for this command
@@ -90,12 +93,22 @@ module Cisco
     #                  will ensure the environment is correctly set for the
     #                  given host.
     def environment_string env
-      return '' if env.empty?
+      prestring = 'source /etc/profile;'
+      prestring << " sudo" if self[:user] != 'root'
+      return prestring if env.empty?
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
 
-      command = self[:platform] =~ /cisco_nexus/ ? 'export' : 'env'
-      "#{command} #{environment_string};"
+      if self[:user] == 'root'
+        if self[:platform] =~ /cisco_nexus/
+          prestring << " export"
+        else
+          prestring << " env"
+        end
+      end
+      environment_string = "#{prestring} #{environment_string}"
+      environment_string << ';' if prestring =~ /export/
+      environment_string
     end
 
     # Validates that the host was setup correctly
