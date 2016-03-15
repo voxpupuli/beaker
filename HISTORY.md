@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 9 Mar, 2016 (571ab630)](#LATEST)
+* [LATEST - 15 Mar, 2016 (b7ed692c)](#LATEST)
+* [2.36.0 - 9 Mar, 2016 (5fd86b67)](#2.36.0)
 * [2.35.0 - 24 Feb, 2016 (b20fa892)](#2.35.0)
 * [2.34.0 - 10 Feb, 2016 (b897a98a)](#2.34.0)
 * [2.33.0 - 27 Jan, 2016 (0dd8505a)](#2.33.0)
@@ -111,7 +112,71 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 9 Mar, 2016 (571ab630)
+### <a name = "LATEST">LATEST - 15 Mar, 2016 (b7ed692c)
+
+* (GEM) update beaker version to 2.37.0 (b7ed692c)
+
+* Merge pull request #1079 from kevpl/bkr702_platform_confine_tags (e2b3701d)
+
+
+```
+Merge pull request #1079 from kevpl/bkr702_platform_confine_tags
+
+(BKR-702) added platform-specific tag confines
+```
+* Merge pull request #1080 from MikaelSmith/fix-install_puppet_agent_on (478983f2)
+
+
+```
+Merge pull request #1080 from MikaelSmith/fix-install_puppet_agent_on
+
+(maint) Correct install_puppet_agent_on args
+```
+* (maint) Correct install_puppet_agent_on args (26c82bdd)
+
+
+```
+(maint) Correct install_puppet_agent_on args
+
+The docs for `install_puppet_agent_on` specify that the `opts` arg is
+optional, but it doesn't have a default value so in practice it's
+required. Update the call signature to specify a default empty hash, so
+the function matches its description.
+```
+* Merge pull request #1078 from LuvCurves/BKR-705 (23612a36)
+
+
+```
+Merge pull request #1078 from LuvCurves/BKR-705
+
+(BKR-705) Rename cisco platforms
+```
+* Merge pull request #1076 from MikaelSmith/BKR-715 (521fbf7b)
+
+
+```
+Merge pull request #1076 from MikaelSmith/BKR-715
+
+(BKR-715) Use puppet_agent_version for MSI from dev repos
+```
+* (BKR-702) added platform-specific tag confines (7cc40abb)
+
+* (BKR-705) Rename cisco platforms (f5a46897)
+
+* (BKR-715) Use puppet_agent_version for MSI from dev repos (046fbffd)
+
+
+```
+(BKR-715) Use puppet_agent_version for MSI from dev repos
+
+If a `puppet_agent_version` is specified, use it in
+`install_puppet_agent_dev_repo_on` to fetch the MSI, so we get an MSI
+unique to that SHA. This provides a work-around for BKR-712, and
+normalizes behavior with `install_puppet_agent_on`.
+```
+### <a name = "2.36.0">2.36.0 - 9 Mar, 2016 (5fd86b67)
+
+* (HISTORY) update beaker history for gem release 2.36.0 (5fd86b67)
 
 * (GEM) update beaker version to 2.36.0 (571ab630)
 
