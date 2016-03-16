@@ -21,11 +21,15 @@ module Beaker
           require "net/http"
           require "net/https"
           require "open-uri"
+          puts "link_exists? link: #{link}"
           url = URI.parse(link)
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
+          puts "link_exists? request_uri: #{url.request_uri}"
           http.start do |http|
-            return http.head(url.request_uri).code == "200"
+            head_code = http.head(url.request_uri).code
+            puts "link_exists? head code: #{head_code}"
+            return head_code == "200"
           end
         end
 
