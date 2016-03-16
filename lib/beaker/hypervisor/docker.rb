@@ -91,7 +91,11 @@ module Beaker
           end
         end
 
-        raise RuntimeError, "Unable to create container because provision=false" if container.nil?
+        if container.nil?
+          raise RuntimeError, 'Cannot continue because no existing container ' +
+                              'could be found and provisioning is disabled.'
+        end
+
         fix_ssh(container) if @options[:provision] == false
 
         @logger.debug("Starting container #{container.id}")
