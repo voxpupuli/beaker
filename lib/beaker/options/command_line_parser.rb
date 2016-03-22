@@ -53,6 +53,11 @@ module Beaker
             @cmd_options[:post_suite] = value
           end
 
+          opts.on '--pre-cleanup /PRE-CLEANUP/DIR/PATH,/OPTIONAL/ADDITONAL/DIR/PATHS,/PATH/TO/FILE.rb',
+                  'Path to project specific steps to be run before cleaning up VMs (will always run)' do |value|
+            @cmd_options[:pre_cleanup] = value
+          end
+
           opts.on '--[no-]provision',
                   'Do not provision vm images before testing',
                   '(default: true)' do |bool|

@@ -113,6 +113,15 @@ module Beaker
         end
       #cleanup phase
       rescue => e
+        begin
+          if @options[:fail_mode].to_s =~ /slow/
+            run_suite(:pre_cleanup)
+          end
+        rescue => e
+          # pre-cleanup failed
+          @logger.error "Failed running the pre-cleanup suite."
+        end
+
         #cleanup on error
         if @options[:preserve_hosts].to_s =~ /(never)|(onpass)/
           @logger.notify "Cleanup: cleaning up after failed run"
@@ -129,6 +138,13 @@ module Beaker
         puts ''
         exit 1
       else
+        begin
+          run_suite(:pre_cleanup)
+        rescue => e
+          # pre-cleanup failed
+          @logger.error "Failed running the pre-cleanup suite."
+        end
+
         #cleanup on success
         if @options[:preserve_hosts].to_s =~ /(never)|(onfail)/
           @logger.notify "Cleanup: cleaning up after successful run"
@@ -179,6 +195,7 @@ module Beaker
       @options[:pre_suite] = []
       @options[:post_suite] = []
       @options[:tests] = []
+      @options[:pre_cleanup] = []
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
       FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
       hosts_yaml = YAML.load_file(preserved_hosts_filename)
