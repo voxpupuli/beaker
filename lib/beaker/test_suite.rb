@@ -182,7 +182,7 @@ module Beaker
             suite['tests']    = test_count
             suite['errors']   = errored_tests
             suite['failures'] = failed_tests
-            suite['skip']     = skipped_tests
+            suite['skipped']     = skipped_tests
             suite['pending']  = pending_tests
             suite['total']    = @total_tests
             suite['time']     = "%f" % (stop_time - start_time)
@@ -218,7 +218,7 @@ module Beaker
               end
 
               if test.test_status == :skip
-                status = Nokogiri::XML::Node.new('skip', doc)
+                status = Nokogiri::XML::Node.new('skipped', doc)
                 status['type'] =  test.test_status.to_s
                 item.add_child(status)
               end
