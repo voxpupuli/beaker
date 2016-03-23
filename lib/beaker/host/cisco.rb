@@ -94,17 +94,15 @@ module Cisco
     #                  given host.
     def environment_string env
       prestring = 'source /etc/profile;'
-      prestring << " sudo" if self[:user] != 'root'
+      prestring << " sudo sh -c \"" if self[:user] != 'root'
       return prestring if env.empty?
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
 
-      if self[:user] == 'root'
-        if self[:platform] =~ /cisco_nexus/
-          prestring << " export"
-        else
-          prestring << " env"
-        end
+      if self[:platform] =~ /cisco_nexus/
+        prestring << " export"
+      else
+        prestring << " env"
       end
       environment_string = "#{prestring} #{environment_string}"
       environment_string << ';' if prestring =~ /export/

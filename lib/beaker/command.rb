@@ -72,9 +72,13 @@ module Beaker
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
       env_string = host.environment_string( env )
       prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
+      if host[:platform] =~ /cisco_nexus/ && host[:user] != 'root'
+          append_command = '"'
+        cmd = cmd.gsub('"') { '\\"' }
+      end
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
+      cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string, append_command]
       cmd_line_array.compact.reject( &:empty? ).join( ' ' )
     end
 
