@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 15 Mar, 2016 (b7ed692c)](#LATEST)
+* [LATEST - 30 Mar, 2016 (fa9fbc7d)](#LATEST)
+* [2.37.0 - 15 Mar, 2016 (a6c2297b)](#2.37.0)
 * [2.36.0 - 9 Mar, 2016 (5fd86b67)](#2.36.0)
 * [2.35.0 - 24 Feb, 2016 (b20fa892)](#2.35.0)
 * [2.34.0 - 10 Feb, 2016 (b897a98a)](#2.34.0)
@@ -112,7 +113,62 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 15 Mar, 2016 (b7ed692c)
+### <a name = "LATEST">LATEST - 30 Mar, 2016 (fa9fbc7d)
+
+* (GEM) update beaker version to 2.38.0 (fa9fbc7d)
+
+* Merge pull request #1085 from LuvCurves/BKR-749 (123bca82)
+
+
+```
+Merge pull request #1085 from LuvCurves/BKR-749
+
+(BKR-749) Wrap Nexus Pre-commands
+```
+* Merge pull request #1077 from aaronbbrown/BKR-658 (75ca10fa)
+
+
+```
+Merge pull request #1077 from aaronbbrown/BKR-658
+
+(BKR-658) Fix BEAKER_provision=no when using Docker
+```
+* (BKR-749) Wrap Nexus Pre-commands (c4eb29f2)
+
+* Merge pull request #1081 from glennmatthews/cisco-user_pc (e6988252)
+
+
+```
+Merge pull request #1081 from glennmatthews/cisco-user_pc
+
+(BKR-722) Don't clobber user_pc in prepend_commands for cisco host
+```
+* (BKR-658) refactor error message (eed36669)
+
+* (BKR-722) cisco host#prepend_commands needs fixes for 'sudo' and user_pc (52b8a039)
+
+* (BKR-658) remove empty before block (39713760)
+
+* (BKR-658) fix BEAKER_provision=no for docker provisioner (5d1c4681)
+
+
+```
+(BKR-658) fix BEAKER_provision=no for docker provisioner
+
+The Docker provisioner does not behave correctly when
+BEAKER_provision=no is used from beaker-rspec. This corrects that
+behavior so the container is reused. It defers to
+::Docker::Container.create throwing raising an exception if
+BEAKER_provision=yes and the container currently exists, rather than
+blindly reusing the container (the previous behavior).
+
+Also added is a best effort at sshd_config repair for root logins.
+Puppet users will often disable root logins, which breaks Beaker, so
+this attempts to revert such changes via Docker::Container#exec.
+```
+### <a name = "2.37.0">2.37.0 - 15 Mar, 2016 (a6c2297b)
+
+* (HISTORY) update beaker history for gem release 2.37.0 (a6c2297b)
 
 * (GEM) update beaker version to 2.37.0 (b7ed692c)
 
