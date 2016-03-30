@@ -1,4 +1,8 @@
 require 'open3'
+require 'securerandom'
+require 'beaker-hostgenerator'
+
+HOSTS_PRESERVED  = 'log/latest/hosts_preserved.yml'
 
 task :default => [ 'test:spec' ]
 
@@ -9,6 +13,10 @@ end
 task :spec do
   Rake::Task['test:spec'].invoke
 end
+
+
+task :acceptance => ['test:base', 'test:puppetgit', 'test:hypervisor']
+
 
 task :yard do
   Rake::Task['docs:gen'].invoke
@@ -23,7 +31,118 @@ task :travis do
   Rake::Task['spec'].invoke
 end
 
+module HarnessOptions
+  defaults = {
+      :tests  => ['tests'],
+      :log_level => 'debug',
+      :preserve_hosts => 'onfail',
+  }
+
+  DEFAULTS = defaults
+
+  def self.get_options(file_path)
+    puts "Attempting to merge config file: #{file_path}"
+    if File.exists? file_path
+      options = eval(File.read(file_path), binding)
+    else
+      puts "No options file found at #{File.expand_path(file_path)}... skipping"
+    end
+    options || {}
+  end
+
+  def self.get_mode_options(mode)
+    get_options("./acceptance/config/#{mode}/acceptance-options.rb")
+  end
+
+  def self.get_local_options
+    get_options('./acceptance/local_options.rb')
+  end
+
+  def self.final_options(mode, intermediary_options = {})
+    mode_options = get_mode_options(mode)
+    local_overrides = get_local_options
+    final_options = DEFAULTS.merge(mode_options)
+    final_options.merge!(intermediary_options)
+    final_options.merge!(local_overrides)
+  end
+
+end
+
+def hosts_file_env
+  ENV['BEAKER_HOSTS']
+end
+
+def hosts_opt(use_preserved_hosts=false)
+  if use_preserved_hosts
+    "--hosts=#{HOSTS_PRESERVED}"
+  else
+    if hosts_file_env
+      "--hosts=#{hosts_file_env}"
+    else
+      "--hosts=tmp/#{HOSTS_FILE}"
+    end
+  end
+end
+
+def agent_target
+  ENV['TEST_TARGET'] || 'redhat7-64af'
+end
+
+def master_target
+  ENV['MASTER_TEST_TARGET'] || 'redhat7-64default.mdcal'
+end
+
+def test_targets
+  ENV['LAYOUT'] || "#{master_target}-#{agent_target}"
+end
+
+HOSTS_FILE = "#{test_targets}-#{SecureRandom.uuid}.yaml"
+
+def beaker_test(mode = :base, options = {})
+
+  preserved_hosts_mode = options[:hosts] == HOSTS_PRESERVED
+  final_options = HarnessOptions.final_options(mode, options)
+
+  options_opt  = ""
+  # preserved hosts can not be used with an options file (BKR-670)
+  #   one can still use OPTIONS
+
+  if !preserved_hosts_mode
+    options_file = 'merged_options.rb'
+    options_opt  = "--options-file=#{options_file}"
+    File.open(options_file, 'w') do |merged|
+      merged.puts <<-EOS
+# Copy this file to local_options.rb and adjust as needed if you wish to run
+# with some local overrides.
+      EOS
+      merged.puts(final_options)
+    end
+  end
+
+  tests = ENV['TESTS'] || ENV['TEST']
+  tests_opt = ""
+  tests_opt = "--tests=#{tests}" if tests
+
+  overriding_options = ENV['OPTIONS'].to_s
+
+  args = [options_opt, hosts_opt(preserved_hosts_mode), tests_opt,
+          *overriding_options.split(' ')].compact
+
+  sh("beaker", *args)
+end
+
+
 namespace :test do
+  USAGE = <<-EOS
+You may set BEAKER_HOSTS=config/nodes/foo.yaml or include it in an acceptance-options.rb for Beaker,
+or specify TEST_TARGET in a form beaker-hostgenerator accepts, e.g. ubuntu1504-64a.
+You may override the default master test target by specifying MASTER_TEST_TARGET.
+You may set TESTS=path/to/test,and/more/tests.
+You may set additional Beaker OPTIONS='--more --options'
+If there is a Beaker options hash in a ./acceptance/local_options.rb, it will be included.
+Commandline options set through the above environment variables will override settings in this file.
+  EOS
+
   desc 'Run specs and check for deprecation warnings'
   task :spec do
     original_dir = Dir.pwd
@@ -48,7 +167,68 @@ namespace :test do
     end
     Dir.chdir( original_dir )
   end
+
+  desc <<-EOS
+Run the base beaker acceptance tests
+#{USAGE}
+  EOS
+  task :base  => 'gen_hosts' do
+    beaker_test(:base)
+  end
+
+  desc <<-EOS
+Run the hypervisor beaker acceptance tests
+#{USAGE}
+  EOS
+  task :hypervisor  => 'gen_hosts' do
+    beaker_test(:hypervisor)
+  end
+
+  desc <<-EOS
+Run the puppet beaker acceptance tests on a pe install.
+#{USAGE}
+  EOS
+  task :puppetpe  => 'gen_hosts' do
+    beaker_test(:puppetpe)
+  end
+
+  desc <<-EOS
+Run the puppet beaker acceptance tests on a puppet gem install.
+#{USAGE}
+  EOS
+  task :puppetgem  => 'gen_hosts' do
+    beaker_test(:puppetgem)
+  end
+
+  desc <<-EOS
+Run the puppet beaker acceptance tests on a puppet git install.
+#{USAGE}
+  EOS
+  task :puppetgit  => 'gen_hosts' do
+    beaker_test(:puppetgit)
+  end
+
+  desc <<-EOS
+Run the puppet beaker acceptance tests on a puppet package install.
+#{USAGE}
+  EOS
+  task :puppetpkg => 'gen_hosts' do
+    beaker_test(:puppetpkg)
+  end
+
+  desc 'Generate Beaker Host Config File'
+  task :gen_hosts do
+    if hosts_file_env
+      next
+    end
+    cli = BeakerHostGenerator::CLI.new([test_targets])
+    FileUtils.mkdir_p('tmp') # -p ignores when dir already exists
+    File.open("tmp/#{HOSTS_FILE}", 'w') do |fh|
+      fh.print(cli.execute)
+    end
+  end
 end
+
 
 ###########################################################
 #
