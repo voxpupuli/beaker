@@ -72,7 +72,7 @@ module Beaker
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
       env_string = host.environment_string( env )
       prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
-      if host[:platform] =~ /cisco_nexus/ && host[:user] != 'root'
+      if host[:platform] =~ /cisco/ && host[:user] != 'root'
           append_command = '"'
         cmd = cmd.gsub('"') { '\\"' }
       end
