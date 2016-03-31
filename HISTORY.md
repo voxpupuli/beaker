@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 30 Mar, 2016 (fa9fbc7d)](#LATEST)
+* [LATEST - 31 Mar, 2016 (e131537d)](#LATEST)
+* [2.38.0 - 30 Mar, 2016 (0878bff7)](#2.38.0)
 * [2.37.0 - 15 Mar, 2016 (a6c2297b)](#2.37.0)
 * [2.36.0 - 9 Mar, 2016 (5fd86b67)](#2.36.0)
 * [2.35.0 - 24 Feb, 2016 (b20fa892)](#2.35.0)
@@ -113,7 +114,23 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 30 Mar, 2016 (fa9fbc7d)
+### <a name = "LATEST">LATEST - 31 Mar, 2016 (e131537d)
+
+* (GEM) update beaker version to 2.38.1 (e131537d)
+
+* Merge pull request #1087 from glennmatthews/unbreak_xr (094f5db4)
+
+
+```
+Merge pull request #1087 from glennmatthews/unbreak_xr
+
+(BKR-753) Cisco IOS XR broken by BKR-749
+```
+* (BKR-753) Cisco IOS XR broken by BKR-749 (06d9e727)
+
+### <a name = "2.38.0">2.38.0 - 30 Mar, 2016 (0878bff7)
+
+* (HISTORY) update beaker history for gem release 2.38.0 (0878bff7)
 
 * (GEM) update beaker version to 2.38.0 (fa9fbc7d)
 
