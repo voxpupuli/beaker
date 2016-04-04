@@ -34,7 +34,7 @@ module Unix::Pkg
         return false
       when /cisco|fedora|centos|eos|el-/
         result = execute("rpm -q #{name}", opts) { |result| result }
-      when /ubuntu|debian|cumulus/
+      when /ubuntu|debian|cumulus|huaweios/
         result = execute("dpkg -s #{name}", opts) { |result| result }
       when /solaris-11/
         result = execute("pkg info #{name}", opts) { |result| result }
@@ -54,7 +54,7 @@ module Unix::Pkg
   # If apt has not been updated since the last repo deployment it is
   # updated. Otherwise this is a noop
   def update_apt_if_needed
-    if self['platform'] =~ /debian|ubuntu|cumulus/
+    if self['platform'] =~ /debian|ubuntu|cumulus|huaweios/
       if @apt_needs_update
         execute("apt-get update")
         @apt_needs_update = false
@@ -78,7 +78,7 @@ module Unix::Pkg
           name = "#{name}-#{version}"
         end
         execute("yum -y #{cmdline_args} install #{name}", opts)
-      when /ubuntu|debian|cumulus/
+      when /ubuntu|debian|cumulus|huaweios/
         if version
           name = "#{name}=#{version}"
         end
@@ -152,7 +152,7 @@ module Unix::Pkg
         execute("dnf -y #{cmdline_args} remove #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
-      when /ubuntu|debian|cumulus/
+      when /ubuntu|debian|cumulus|huaweios/
         execute("apt-get purge #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
         execute("pkg #{cmdline_args} uninstall #{name}", opts)
@@ -180,7 +180,7 @@ module Unix::Pkg
         execute("dnf -y #{cmdline_args} update #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}", opts)
-      when /ubuntu|debian|cumulus/
+      when /ubuntu|debian|cumulus|huaweios/
         update_apt_if_needed
         execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
       when /solaris-11/
@@ -257,7 +257,7 @@ module Unix::Pkg
         @logger.debug("Package repo deploy is not supported on rhel4")
       when /fedora|centos|eos|el-/
         deploy_yum_repo(path, name, version)
-      when /ubuntu|debian|cumulus/
+      when /ubuntu|debian|cumulus|huaweios/
         deploy_apt_repo(path, name, version)
       when /sles/
         deploy_zyp_repo(path, name, version)
