@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 31 Mar, 2016 (e131537d)](#LATEST)
+* [LATEST - 6 Apr, 2016 (1a0fe8ac)](#LATEST)
+* [2.38.1 - 31 Mar, 2016 (124b91b8)](#2.38.1)
 * [2.38.0 - 30 Mar, 2016 (0878bff7)](#2.38.0)
 * [2.37.0 - 15 Mar, 2016 (a6c2297b)](#2.37.0)
 * [2.36.0 - 9 Mar, 2016 (5fd86b67)](#2.36.0)
@@ -114,7 +115,72 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 31 Mar, 2016 (e131537d)
+### <a name = "LATEST">LATEST - 6 Apr, 2016 (1a0fe8ac)
+
+* (GEM) update beaker version to 2.39.0 (1a0fe8ac)
+
+* Merge pull request #1083 from samwoods1/fix_junit_skipped (244d9706)
+
+
+```
+Merge pull request #1083 from samwoods1/fix_junit_skipped
+
+(maint) change junit skip to skipped to match schema
+```
+* Merge pull request #1088 from puppetlabs/added-beaker-libraries (47fe09db)
+
+
+```
+Merge pull request #1088 from puppetlabs/added-beaker-libraries
+
+(maint) Add more libraries to Beaker-Libraries.md
+```
+* Merge pull request #1086 from pinkypie/BKR-430 (4510c968)
+
+
+```
+Merge pull request #1086 from pinkypie/BKR-430
+
+(BKR-430) Adding rake tasks for running beaker acceptance tests.
+```
+* Merge pull request #1089 from tvpartytonight/BKR-708 (307c231d)
+
+
+```
+Merge pull request #1089 from tvpartytonight/BKR-708
+
+(BKR-708) Add ubuntu xenial as a supported platform
+```
+* (BKR-708) Add ubuntu xenial as a supported platform (8ef1e057)
+
+
+```
+(BKR-708) Add ubuntu xenial as a supported platform
+
+This change adds xenial support to beaker.
+```
+* (maint) Add more libraries to Beaker-Libraries.md (26aab9b0)
+
+* (BKR-430) Adding rake tasks for running Beaker acceptance tests. (e463effd)
+
+
+```
+(BKR-430) Adding rake tasks for running Beaker acceptance tests.
+'rake acceptance' for the main acceptance run.
+Also the following individual tasks for individual sets of tests.
+rake test:base
+rake test:hypervisor
+rake test:puppetpe
+rake test:puppetgem
+rake test:puppetgit
+rake test:puppetpkg
+rake test:puppet
+```
+* (maint) change junit skip to skipped to match schema (25b7abcc)
+
+### <a name = "2.38.1">2.38.1 - 31 Mar, 2016 (124b91b8)
+
+* (HISTORY) update beaker history for gem release 2.38.1 (124b91b8)
 
 * (GEM) update beaker version to 2.38.1 (e131537d)
 
