@@ -41,6 +41,13 @@ module Beaker
           instance.deploy_package_repo(path,name,version)
         end
 
+        it 'calls #deploy_apt_repo for huaweios systems' do
+          @opts = {'platform' => 'huaweios-is-me'}
+          expect(instance).to receive(:deploy_apt_repo)
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+
         it 'calls #deploy_apt_repo for debian systems' do
           @opts = {'platform' => 'ubuntu-is-me'}
           expect(instance).to receive(:deploy_apt_repo)
@@ -123,6 +130,13 @@ module Beaker
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
+      it "checks correctly on huaweios" do
+        @opts = {'platform' => 'huaweios-is-me'}
+        pkg = 'debian_package'
+        expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance.check_for_package(pkg) ).to be === true
+      end
       it "checks correctly on debian" do
         @opts = {'platform' => 'debian-is-me'}
         pkg = 'debian_package'
@@ -178,7 +192,27 @@ module Beaker
 
     end
 
+    describe '#update_apt_if_needed' do
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "calls update for #{platform}" do
+          @opts = {'platform' => platform}
+          instance.instance_variable_set("@apt_needs_update", true)
+          expect(instance).to receive('execute').with("apt-get update")
+          expect{instance.update_apt_if_needed}.to_not raise_error
+        end
+      end
+    end
     context "install_package" do
+
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "uses apt-get for #{platform}" do
+          @opts = {'platform' => platform}
+          pkg = 'pkg'
+          expect( Beaker::Command ).to receive(:new).with("apt-get install --force-yes  -y #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+          expect( instance.install_package(pkg) ).to be == "hello"
+        end
+      end
 
       it "uses yum on fedora-20" do
         @opts = {'platform' => 'fedora-20-is-me'}
@@ -197,6 +231,27 @@ module Beaker
       end
     end
 
+    describe '#uninstall_package' do
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "calls pkg uninstall for #{platform}" do
+          @opts = {'platform' => platform}
+          expect( Beaker::Command ).to receive(:new).with("apt-get purge  -y pkg", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+          expect(instance.uninstall_package('pkg')).to be == "hello"
+        end
+      end
+    end
+
+    describe '#upgrade_package' do
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "calls the correct apt-get incantation for #{platform}" do
+          @opts = {'platform' => platform}
+          expect( Beaker::Command ).to receive(:new).with("apt-get install -o Dpkg::Options::='--force-confold'  -y --force-yes pkg", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+          expect(instance.upgrade_package('pkg')).to be == "hello"
+        end
+      end
+    end
     context "install_package_with_rpm" do
 
       it "accepts a package as a single argument" do

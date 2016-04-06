@@ -111,3 +111,26 @@ module HostHelpers
   end
 
 end
+
+module PlatformHelpers
+
+  DEBIANPLATFORMS = ['debian',
+                     'ubuntu',
+                     'cumulus',
+                     'huaweios']
+
+  SYSTEMDPLATFORMS = ['el-7',
+                      'centos-7',
+                      'redhat-7',
+                      'oracle-7',
+                      'scientific-7',
+                      'eos-7']
+
+  SYSTEMVPLATFORMS = ['el-',
+                      'centos',
+                      'fedora',
+                      'redhat',
+                      'oracle',
+                      'scientific',
+                      'eos']
+end
