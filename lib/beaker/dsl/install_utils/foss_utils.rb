@@ -696,19 +696,45 @@ module Beaker
             add_role(host, 'aio') #we are installing agent, so we want aio role
 
             variant, version, arch, codename = host['platform'].to_array
-            agent_version = opts[:puppet_agent_version] || 'latest'
-            pkg_name = "puppet-agent-#{agent_version}*"
-            if agent_version == 'latest'
-              dmg_name = "puppet-agent-#{agent_version}.dmg"
-              on host, "curl -O #{opts[:mac_download_url]}/#{dmg_name}"
-            else
-              dmg_name = "puppet-agent-#{agent_version}-osx-#{version}-x86_64.dmg"
-              on host, "curl -O #{opts[:mac_download_url]}/#{opts[:puppet_collection]}/#{dmg_name}"
+
+            download_url = "#{opts[:mac_download_url]}/#{version}/#{opts[:puppet_collection]}/#{arch}"
+
+            latest = get_latest_puppet_agent_build_from_url(download_url)
+
+            agent_version = opts[:puppet_agent_version] || latest
+            unless agent_version.length > 0
+              raise "no puppet-agent version specified or found on at #{download_url}"
             end
+
+            pkg_name = "puppet-agent-#{agent_version}*"
+            dmg_name = "puppet-agent-#{agent_version}-1.osx#{version}.dmg"
+            on host, "curl -O #{download_url}/#{dmg_name}"
 
             host.install_package(pkg_name)
 
             configure_type_defaults_on( host )
+          end
+        end
+
+        # Returns the latest puppet-agent version number from a given url.
+        #
+        # @param [String] url         URL containing list of puppet-agent packages.
+        #                             Example: https://downloads.puppetlabs.com/mac/10.11/PC1/x86_64
+        #
+        # @return [String] version    puppet-agent version number (e.g. 1.4.1)
+        #                             Empty string if none found.
+        # @api private
+        def get_latest_puppet_agent_build_from_url(url)
+          require 'nokogiri'
+          require 'open-uri'
+          page = Nokogiri::HTML(open("#{url}/?C=M;O=A"))
+          agents = page.css('a').children.select{ |link| link.to_s.include? 'puppet-agent' }
+          re =  /puppet-agent-(.*)-1/
+          latest_match = agents[-1].to_s.match re
+          if latest_match
+            latest = latest_match[1]
+          else
+            latest = ''
           end
         end
 
