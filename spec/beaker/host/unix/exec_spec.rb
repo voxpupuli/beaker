@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 module Beaker
+
   describe Unix::Exec do
     class UnixExecTest
       include Unix::Exec
@@ -70,6 +71,26 @@ module Beaker
     end
 
     describe '#ssh_permit_user_environment' do
+      context 'When called without error' do
+        let (:directory) {'/directory'}
+        let (:ssh_command) {"echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"}
+        let (:ssh_move) {"mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"}
+
+        platforms = PlatformHelpers::SYSTEMDPLATFORMS + PlatformHelpers::DEBIANPLATFORMS + PlatformHelpers::SYSTEMVPLATFORMS
+
+        platforms.each do |platform|
+          it "calls the correct commands for #{platform}" do
+            opts['platform'] = platform
+            expect(instance).to receive(:exec).twice
+            expect(instance).to receive(:create_tmpdir_on).and_return(directory)
+            expect(Beaker::Command).to receive(:new).with(ssh_move)
+            expect(Beaker::Command).to receive(:new).with(ssh_command)
+            expect(instance).to receive(:ssh_service_restart)
+            expect{instance.ssh_permit_user_environment}.to_not raise_error
+          end
+        end
+      end
+
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing01-parts-arch'
         expect {
@@ -79,6 +100,33 @@ module Beaker
     end
 
     describe '#ssh_service_restart' do
+      PlatformHelpers::SYSTEMDPLATFORMS.each do |platform|
+        it "calls the correct command for #{platform}" do
+          opts['platform'] = platform 
+          expect(instance).to receive(:exec)
+          expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
+          expect{instance.ssh_service_restart}.to_not raise_error
+        end
+      end
+
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "calls the correct command for #{platform}" do
+          opts['platform'] = platform
+          expect(instance).to receive(:exec)
+          expect(Beaker::Command).to receive(:new).with("service ssh restart")
+          expect{instance.ssh_service_restart}.to_not raise_error
+        end
+      end
+
+      PlatformHelpers::SYSTEMVPLATFORMS.each do |platform|
+        it "calls the correct command for #{platform}" do
+          opts['platform'] = "#{platform}-arch"
+          expect(instance).to receive(:exec)
+          expect(Beaker::Command).to receive(:new).with("/sbin/service sshd restart")
+          expect{instance.ssh_service_restart}.to_not raise_error
+        end
+      end
+
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing02-parts-arch'
         expect {
