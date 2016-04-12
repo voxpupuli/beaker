@@ -133,7 +133,7 @@ module Beaker
           curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
           logger.debug "Setting curl retries to #{curl_retries}"
 
-          if options[:is_puppetserver]
+          if options[:is_puppetserver] || host[:is_puppetserver]
             confdir = host.puppet('master')['confdir']
             vardir = host.puppet('master')['vardir']
 
