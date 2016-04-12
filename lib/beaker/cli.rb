@@ -114,9 +114,7 @@ module Beaker
       #cleanup phase
       rescue => e
         begin
-          if @options[:fail_mode].to_s =~ /slow/
-            run_suite(:pre_cleanup)
-          end
+          run_suite(:pre_cleanup)
         rescue => e
           # pre-cleanup failed
           @logger.error "Failed running the pre-cleanup suite."

@@ -55,8 +55,9 @@ module Beaker
           cli.instance_variable_set(:@options, options)
           allow( cli ).to receive(:run_suite).with(:pre_suite, :fast).and_return(true)
           allow( cli ).to receive(:run_suite).with(:tests, options[:fail_mode]).and_throw("bad test")
+          allow( cli ).to receive(:run_suite).with(:pre_cleanup).and_return(true)
 
-          expect( cli ).to receive(:run_suite).exactly( 2 ).times
+          expect( cli ).to receive(:run_suite).exactly( 3 ).times
           expect{ cli.execute! }.to raise_error
 
         end
@@ -70,6 +71,7 @@ module Beaker
           cli.instance_variable_set(:@options, options)
           allow( cli ).to receive(:run_suite).with(:pre_suite, :fast).and_return(true)
           allow( cli ).to receive(:run_suite).with(:tests, options[:fail_mode]).and_throw("bad test")
+          allow( cli ).to receive(:run_suite).with(:pre_cleanup).and_return(true)
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
