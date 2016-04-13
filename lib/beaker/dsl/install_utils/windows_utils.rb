@@ -140,6 +140,15 @@ exit /B %errorlevel%
             # if puppet service does not exist, pe-puppet is queried and that exit code is used
             # therefore, this command will always exit 0 if either service is installed
             on host, Command.new("sc query puppet || sc query pe-puppet", [], { :cmdexe => true })
+
+            # emit the misc/versions.txt file which contains component versions for
+            # puppet, facter, hiera, pxp-agent, packaging and vendored Ruby
+            [
+              "\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
+              "\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\""
+            ].each do |path|
+              on host, Command.new("if exist #{path} type #{path}", [], { :cmdexe => true })
+            end
           end
         end
 
