@@ -551,6 +551,15 @@ describe ClassMixedWithDSLHelpers do
         })
       end
 
+      describe 'when the global option for :is_puppetserver is false' do
+        it 'checks the option for the host object' do
+          allow( subject ).to receive( :options) .and_return( {:is_puppetserver => false})
+          host[:is_puppetserver] = true
+          expect( subject ).to receive( :modify_tk_config)
+          subject.with_puppet_running_on(host, conf_opts)
+        end
+      end
+
       describe 'and command line args passed' do
         it 'modifies SUT trapperkeeper configuration w/ command line args' do
           host['puppetserver-confdir'] = '/etc/puppetserver/conf.d'
