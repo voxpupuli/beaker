@@ -1,10 +1,10 @@
-## What's Current?
+#Beaker Installation
 
-* [Latest Gem Release Notes](https://github.com/puppetlabs/beaker/blob/master/HISTORY.md#LATEST)
+In most cases, beaker is running on a system separate from the SUT; we will commonly refer to this system as the beaker coordinator. This page outlines how to install requirements for the beaker coordinator and options for the installation of beaker itself.
 
-##Requirements
+## Beaker Requirements
 
-* Ruby 1.9+, 2.1.5 or 2.1.6
+* Ruby 1.9+, 2.0.0p481, or 2.1.1
 * libxml2, libxslt (needed for the [Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html) gem)
 * g++ (needed for the [unf_ext](http://rubydoc.info/gems/unf_ext/) gem)
 * curl (needed for some DSL functions to be able to execute successfully)
