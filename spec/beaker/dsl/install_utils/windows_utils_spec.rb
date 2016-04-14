@@ -40,6 +40,17 @@ describe ClassMixedWithDSLInstallUtils do
       .exactly( times ).times
   end
 
+  def expect_version_log_called(times = hosts.length)
+    [
+      "\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
+      "\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
+    ].each do |path|
+      expect( Beaker::Command ).to receive( :new )
+        .with( "if exist #{path} type #{path}", [], {:cmdexe => true} )
+        .exactly( times ).times
+    end
+  end
+
   def expect_script_matches(hosts, contents)
     hosts.each do |host|
       expect( host )
@@ -60,6 +71,7 @@ describe ClassMixedWithDSLInstallUtils do
     it "will specify a PUPPET_AGENT_STARTUP_MODE of Manual (disabling the service) by default" do
       expect_install_called
       expect_status_called
+      expect_version_log_called
       expect( subject ).to receive( :create_install_msi_batch_on ).with(
           anything, anything,
           'PUPPET_AGENT_STARTUP_MODE' => 'Manual')
@@ -69,6 +81,7 @@ describe ClassMixedWithDSLInstallUtils do
     it "allows configuration of PUPPET_AGENT_STARTUP_MODE" do
       expect_install_called
       expect_status_called
+      expect_version_log_called
       value = 'Automatic'
       expect( subject ).to receive( :create_install_msi_batch_on ).with(
           anything, anything,
@@ -97,6 +110,7 @@ describe ClassMixedWithDSLInstallUtils do
     it "will generate a command to emit a log file with the :debug option set" do
       expect_install_called
       expect_status_called
+      expect_version_log_called
 
       expect( Beaker::Command ).to receive( :new ).with( /^type \".*\.log\"$/, [], {:cmdexe => true} ).exactly( hosts.length ).times
       subject.install_msi_on(hosts, msi_path, {}, { :debug => true })
@@ -105,6 +119,7 @@ describe ClassMixedWithDSLInstallUtils do
     it 'will pass msi_path to #create_install_msi_batch_on as-is' do
       expect_install_called
       expect_status_called
+      expect_version_log_called
       test_path = 'test/path'
       expect( subject ).to receive( :create_install_msi_batch_on ).with(
           anything, test_path, anything)
