@@ -317,6 +317,9 @@ module Unix::Pkg
     raise ArgumentError, error_message % "opts[:download_url]" unless opts[:download_url]
 
     variant, version, arch, codename = self['platform'].to_array
+
+    version = version.split('.')[0] # packages are only published for major versions
+
     platform_error = "Incorrect platform '#{variant}' for #solaris_puppet_agent_dev_package_info"
     raise ArgumentError, platform_error if variant != 'solaris'
 
@@ -488,6 +491,9 @@ module Unix::Pkg
   # @return [Beaker::Result] Result of installation command execution
   def solaris_install_local_package(package_path, noask_directory = nil)
     variant, version, arch, codename = self['platform'].to_array
+
+    version = version.split('.')[0] # packages are only published for major versions
+
     error_message = nil
     unless variant == 'solaris'
       error_message = "Can not call solaris_install_local_package for the "
