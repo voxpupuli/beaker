@@ -7,9 +7,9 @@ module Beaker
       GITREPO      = 'git://github.com/puppetlabs'
       #These options can have the form of arg1,arg2 or [arg] or just arg,
       #should default to []
-      LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :modules]
+      LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :pre_cleanup, :modules]
       #These options expand out into an array of .rb files
-      RB_FILE_OPTS = [:tests, :pre_suite, :post_suite]
+      RB_FILE_OPTS = [:tests, :pre_suite, :post_suite, :pre_cleanup]
 
       PARSE_ERROR = Psych::SyntaxError
 
