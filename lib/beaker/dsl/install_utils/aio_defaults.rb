@@ -17,13 +17,13 @@ module Beaker
           },
           'windows' => { #windows
             'puppetbindir'      => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/bin',
-            'privatebindir'     => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/sys/ruby/bin',
+            'privatebindir'     => '/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/sys/ruby/bin:/cygdrive/c/Program Files/Puppet Labs/Puppet/puppet/bin',
             'distmoduledir'     => '`cygpath -smF 35`/PuppetLabs/code/modules',
             # sitemoduledir not included (check PUP-4049 for more info)
           },
           'pwindows' => { #pure windows
             'puppetbindir'      => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\bin"',
-            'privatebindir'     => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\sys\\ruby\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\sys\\ruby\\bin"',
+            'privatebindir'     => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\sys\\ruby\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\puppet\\bin"',
             'distmoduledir'     => 'C:\\ProgramData\\PuppetLabs\\code\\environments\\production\\modules',
           }
         }
