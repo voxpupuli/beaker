@@ -41,7 +41,7 @@ module Unix::File
     case self['platform']
     when /fedora|el-|centos/
       '/etc/yum.repos.d/'
-    when /debian|ubuntu|cumulus/
+    when /debian|ubuntu|cumulus|huaweios/
       '/etc/apt/sources.list.d'
     else
       msg = "package config dir unknown for platform '#{self['platform']}'"
@@ -83,8 +83,8 @@ module Unix::File
         version,
         arch
       ]
-    when /debian|ubuntu|cumulus/
-      codename = variant if variant == 'cumulus'
+    when /debian|ubuntu|cumulus|huaweios/
+      codename = variant if variant == 'cumulus' || variant == 'huaweios'
       repo_filename << "%s.list" % [ codename ]
     else
       msg = "#repo_filename: repo filename pattern not known for platform '#{self['platform']}'"
@@ -103,7 +103,7 @@ module Unix::File
     case self['platform']
     when /fedora|el-|centos/
       'rpm'
-    when /debian|ubuntu|cumulus/
+    when /debian|ubuntu|cumulus|huaweios/
       'deb'
     else
       msg = "#repo_type: repo type not known for platform '#{self['platform']}'"

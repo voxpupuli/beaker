@@ -455,13 +455,15 @@ describe ClassMixedWithDSLInstallUtils do
       end
     end
     context 'on debian' do
-      let(:platform) { Beaker::Platform.new('debian-7-amd64') }
-      it 'installs latest if given no version info' do
-        hosts.each do |host|
-          expect(subject).to receive(:install_puppetlabs_release_repo).with(host)
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        let(:platform) { Beaker::Platform.new("#{platform}-ver-arch") }
+        it "installs latest on #{platform} if given no version info" do
+          hosts.each do |host|
+            expect(subject).to receive(:install_puppetlabs_release_repo).with(host)
+          end
+          expect(hosts[0]).to receive(:install_package).with('puppet')
+          subject.install_puppet
         end
-        expect(hosts[0]).to receive(:install_package).with('puppet')
-        subject.install_puppet
       end
       it 'installs specific version of puppet when passed :version' do
         expect(hosts[0]).to receive(:install_package).with('puppet=3-1puppetlabs1')
@@ -531,17 +533,18 @@ describe ClassMixedWithDSLInstallUtils do
 
   describe 'configure_puppet_on' do
     context 'on debian' do
-      let(:platform) { 'debian-7-amd64' }
-      let(:host) { make_host('testbox.test.local', :platform => 'debian-7-amd64') }
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        let(:platform) { Beaker::Platform.new("#{platform}-ver-arch") }
+        let(:host) { make_host('testbox.test.local', :platform => "#{platform}") }
+        it "it sets the puppet.conf file to the provided config on #{platform}" do
+          config = { 'main' => {'server' => 'testbox.test.local'} }
+          expected_config_string = "[main]\nserver=testbox.test.local\n\n"
 
-      it 'it sets the puppet.conf file to the provided config' do
-        config = { 'main' => {'server' => 'testbox.test.local'} }
-        expected_config_string = "[main]\nserver=testbox.test.local\n\n"
-
-        expect( subject ).to receive( :create_remote_file ).with(
-          host, anything, expected_config_string
-        )
-        subject.configure_puppet_on(host, config)
+          expect( subject ).to receive( :create_remote_file ).with(
+              host, anything, expected_config_string
+          )
+          subject.configure_puppet_on(host, config)
+        end
       end
     end
     context 'on windows' do
@@ -571,14 +574,15 @@ describe ClassMixedWithDSLInstallUtils do
     end
 
     context 'on debian' do
-      let(:platform) { 'debian-7-amd64' }
-
-      it 'calls configure_puppet_on correctly' do
-        config = { 'main' => {'server' => 'testbox.test.local'} }
-        expect( subject ).to receive( :configure_puppet_on ).with(
-          anything, config
-        ).exactly( hosts.length ).times
-        subject.configure_puppet(config)
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        let(:platform) { Beaker::Platform.new("#{platform}-ver-arch") }
+        it "calls configure_puppet_on correctly on #{platform}" do
+          config = { 'main' => {'server' => 'testbox.test.local'} }
+          expect( subject ).to receive( :configure_puppet_on ).with(
+              anything, config
+          ).exactly( hosts.length ).times
+          subject.configure_puppet(config)
+        end
       end
     end
 
@@ -722,11 +726,13 @@ describe ClassMixedWithDSLInstallUtils do
       end
 
       describe "that are debian-like" do
-        let( :platform ) { Beaker::Platform.new('debian-7-i386') }
-        before { allow(subject).to receive(:link_exists?).and_return(true) }
+        PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+          let(:platform) { Beaker::Platform.new("#{platform}-ver-arch") }
+          before { allow(subject).to receive(:link_exists?).and_return(true) }
 
-        include_examples "install-dev-repo"
+          include_examples "install-dev-repo"
 
+        end
       end
 
       describe "that are redhat-like" do
