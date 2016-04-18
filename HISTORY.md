@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 6 Apr, 2016 (1a0fe8ac)](#LATEST)
+* [LATEST - 18 Apr, 2016 (29b0694d)](#LATEST)
+* [2.39.0 - 6 Apr, 2016 (5976e103)](#2.39.0)
 * [2.38.1 - 31 Mar, 2016 (124b91b8)](#2.38.1)
 * [2.38.0 - 30 Mar, 2016 (0878bff7)](#2.38.0)
 * [2.37.0 - 15 Mar, 2016 (a6c2297b)](#2.37.0)
@@ -115,7 +116,265 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 6 Apr, 2016 (1a0fe8ac)
+### <a name = "LATEST">LATEST - 18 Apr, 2016 (29b0694d)
+
+* (GEM) update beaker version to 2.40.0 (29b0694d)
+
+* Merge pull request #1098 from LuvCurves/BKR-766 (16ff6892)
+
+
+```
+Merge pull request #1098 from LuvCurves/BKR-766
+
+(BKR-766) Install puppet agent on huaweios
+```
+* Merge pull request #1103 from james-stocks/QENG-3787 (b6b2f862)
+
+
+```
+Merge pull request #1103 from james-stocks/QENG-3787
+
+(BKR-770) Update EPEL package name for EL7
+```
+* Merge pull request #1102 from EmilienM/bump/googleapi (34dc08fc)
+
+
+```
+Merge pull request #1102 from EmilienM/bump/googleapi
+
+(MAINT) bump google-api-client to ~> 0.8, < 0.9.5
+```
+* Merge pull request #1100 from johnduarte/bkr-767 (c61571c7)
+
+
+```
+Merge pull request #1100 from johnduarte/bkr-767
+
+(BKR-767) Only use Solaris major version for pkg
+```
+* Merge pull request #1101 from pinkypie/BKR-521 (406ad56e)
+
+
+```
+Merge pull request #1101 from pinkypie/BKR-521
+
+(BKR-521) handle priority of :acceptable_exit_codes
+```
+* Merge pull request #1099 from er0ck/docs/master/maint-add_beaker-template_link (a6be842b)
+
+
+```
+Merge pull request #1099 from er0ck/docs/master/maint-add_beaker-template_link
+
+(maint) add beaker-template link to README
+```
+* Merge pull request #1094 from MikaelSmith/ruby22 (f2f109a9)
+
+
+```
+Merge pull request #1094 from MikaelSmith/ruby22
+
+(maint) Avoid scoping change in Ruby 2.2
+```
+* (BKR-770) Update EPEL package name for EL7 (63a394ab)
+
+
+```
+(BKR-770) Update EPEL package name for EL7
+
+Change the default EPEL package name for EL7 from "epel-release-7-5.noarch.rpm" to "epel-release-7-6.noarch.rpm"
+```
+* (MAINT) bump google-api-client to ~> 0.8, < 0.9.5 (86f3b8c3)
+
+
+```
+(MAINT) bump google-api-client to ~> 0.8, < 0.9.5
+
+google-api-client dropped ruby 1.9 support in 0.9.5.
+Ubuntu Trusty (current LTS) still have Ruby 1.9 by default, so it's
+impossible to run beaker on this platform with official packaging.
+
+See https://github.com/google/google-api-ruby-client/issues/397
+```
+* (BKR-521) handle priority of the command execution option :acceptable_exit_codes (a489b58e)
+
+
+```
+(BKR-521) handle priority of the command execution option :acceptable_exit_codes
+make acceptable_exit_codes override accept_all_exit_codes => true
+```
+* Merge pull request #1096 from kevpl/docs_ticket_process (ee41a102)
+
+
+```
+Merge pull request #1096 from kevpl/docs_ticket_process
+
+(MAINT) added ticket process doc & meta docs folder
+```
+* Merge pull request #1091 from johnduarte/update-dmg-path (cb93ea87)
+
+
+```
+Merge pull request #1091 from johnduarte/update-dmg-path
+
+(BKR-759) Update dmg url for puppet-agent install
+```
+* Merge pull request #1095 from Iristyle/maint/master/log-windows-versions.txt (5de54377)
+
+
+```
+Merge pull request #1095 from Iristyle/maint/master/log-windows-versions.txt
+
+(maint) Log Windows versions.txt post MSI install
+```
+* (BKR-767) Only use Solaris major version for pkg (6ef6595d)
+
+
+```
+(BKR-767) Only use Solaris major version for pkg
+
+Puppet only publishes packages under the major version of a Solaris
+release. Currently, if Beaker is passed a Solaris host with a minor
+version (eg. solaris 11.2), it fails to find and install package.
+
+This commit truncates the Solaris version to its minor component
+in the solaris_puppet_agent_dev_package_info and
+solaris_install_local_package  methods.
+```
+* (maint) add beaker-template link to README (a21bf068)
+
+* Merge pull request #1084 from highb/add_pre_cleanup_suite (6c4b6f2a)
+
+
+```
+Merge pull request #1084 from highb/add_pre_cleanup_suite
+
+(BKR-750) Add pre-cleanup option
+```
+* Merge pull request #1097 from tvpartytonight/doc_maint (7cfa9c52)
+
+
+```
+Merge pull request #1097 from tvpartytonight/doc_maint
+
+(maint) Clarify beaker installation guide
+```
+* (MAINT) added ticket process doc & meta docs folder (31187fc9)
+
+* (maint) Clarify beaker installation guide (b0e83208)
+
+
+```
+(maint) Clarify beaker installation guide
+
+This change clarifies the notion of beaker as a test coordinator that
+runs tests on a host separate from the SUT.
+```
+* (BKR-766) Install puppet agent on huaweios (0c08652d)
+
+* Merge pull request #1093 from tvpartytonight/BKR-219 (0f4a430c)
+
+
+```
+Merge pull request #1093 from tvpartytonight/BKR-219
+
+(BKR-219) Add support for :is_puppetserver per host
+```
+* (maint) Log Windows versions.txt post MSI install (522f58dd)
+
+
+```
+(maint) Log Windows versions.txt post MSI install
+
+ - The puppet-agent package contains information about the various
+   component versions present, so log it after the MSI installation
+   has completed.
+
+   Without having this information logged by Beaker, it can be painful
+   to cross reference the agent commit vs the included component
+   versions.
+```
+* (maint) Avoid scoping change in Ruby 2.2 (60ae4086)
+
+
+```
+(maint) Avoid scoping change in Ruby 2.2
+
+Using Ruby 2.2, the `opts` assignment in the Windows case of
+`install_puppet_agent_dev_repo_on` overwrites the `opts` method
+argument. This causes installs after Windows to fail in Puppet
+acceptance runs. Fix by avoiding using the same variable name.
+```
+* (BKR-219) Add support for :is_puppetserver per host (f0c07bd7)
+
+
+```
+(BKR-219) Add support for :is_puppetserver per host
+
+This commit adds a check for each host's :is_puppetserver key when using
+the `with_puppet_running_on` command. Previously, it would only check
+the global option for this key.
+```
+* (BKR-750) Always run pre_cleanup suite (e5071ac0)
+
+
+```
+(BKR-750) Always run pre_cleanup suite
+
+Prior to this commit the pre-cleanup suite would not run if
+the `fail_mode` wasn't set to slow, but that wouldn't match
+the description or purpose of the pre_cleanup *always* happening.
+
+So, this commit ensures the pre-cleanup suite will *always* run by
+ignoring the `fail_mode` setting.
+```
+* Merge pull request #1090 from tvpartytonight/BKR-680 (f00e942f)
+
+
+```
+Merge pull request #1090 from tvpartytonight/BKR-680
+
+(BKR-680) Add Huaweios support
+```
+* (BKR-759) Update dmg url for puppet-agent install (af7e7287)
+
+
+```
+(BKR-759) Update dmg url for puppet-agent install
+
+The url path structure for osx dmg packages has changed. Also,
+the `puppet-agent-latest.dmg` alias is no longer generated when
+publishing packages to https://downloads.puppetlabs.com.
+
+This commit updates the url structure to reflect the current
+pattern. It also adds a method to introspect the 'latest' published
+version. If a `puppet_agent_version` has not been specified and
+a 'latest' version cannot be found, an exception is raised.
+```
+* (BKR-680) Update spec tests for Huaweios changes (b2dda06f)
+
+* (BKR-680) Update UNIX exec & pkg handler for huaweios (d6965e34)
+
+* (BKR-680) Add huaweios platform (56674595)
+
+
+```
+(BKR-680) Add huaweios platform
+
+This PR adds support for connecting to huaweios network devices.
+```
+* (BKR-750) Add pre-cleanup option (8023c1a1)
+
+
+```
+(BKR-750) Add pre-cleanup option
+
+Adds a `--pre-cleanup` suite, that will *always* run before the
+VM cleanup step. Useful for saving logs before the VMs disappear.
+```
+### <a name = "2.39.0">2.39.0 - 6 Apr, 2016 (5976e103)
+
+* (HISTORY) update beaker history for gem release 2.39.0 (5976e103)
 
 * (GEM) update beaker version to 2.39.0 (1a0fe8ac)
 
