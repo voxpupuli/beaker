@@ -1099,8 +1099,8 @@ module Beaker
             when /^windows$/
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
-              opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
-              install_msi_on(host, onhost_copied_file, {}, opts)
+              msi_opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
+              install_msi_on(host, onhost_copied_file, {}, msi_opts)
             when /^osx$/
               host.install_package("puppet-agent-#{opts[:puppet_agent_version]}*")
             when /^solaris$/
