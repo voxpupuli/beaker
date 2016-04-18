@@ -13,7 +13,7 @@ Documentation for Beaker can be found in this repository in [the docs/ folder](d
 #Beaker Libraries
 
 Beaker functionality has been extended through the use of libraries available as gems. See the
-[complete list](docs/Beaker-Libraries.md) for more details.
+[complete list](docs/Beaker-Libraries.md) for available gems. See the [beaker-template documentation](https://github.com/puppetlabs/beaker-template/blob/master/README.md) for documentation on creating beaker-libraries.
 
 #Beaker API
 
