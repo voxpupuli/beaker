@@ -257,7 +257,7 @@ module Beaker
       it "accepts a package as a single argument" do
         @opts = {'platform' => 'el-is-me'}
         pkg = 'redhat_package'
-        expect( Beaker::Command ).to receive(:new).with("rpm  -ivh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( Beaker::Command ).to receive(:new).with("rpm  -Uvh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
         expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.install_package_with_rpm(pkg) ).to be == "hello"
       end
@@ -266,7 +266,7 @@ module Beaker
         @opts = {'platform' => 'el-is-me'}
         pkg = 'redhat_package'
         cmdline_args = '--foo'
-        expect( Beaker::Command ).to receive(:new).with("rpm #{cmdline_args} -ivh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+        expect( Beaker::Command ).to receive(:new).with("rpm #{cmdline_args} -Uvh #{pkg} ", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
         expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.install_package_with_rpm(pkg, cmdline_args) ).to be == "hello"
       end

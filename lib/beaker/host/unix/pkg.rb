@@ -139,7 +139,7 @@ module Unix::Pkg
     if name =~ /^http/ and opts[:package_proxy]
       proxy = extract_rpm_proxy_options(opts[:package_proxy])
     end
-    execute("rpm #{cmdline_args} -ivh #{name} #{proxy}")
+    execute("rpm #{cmdline_args} -Uvh #{name} #{proxy}")
   end
 
   def uninstall_package(name, cmdline_args = '', opts = {})
