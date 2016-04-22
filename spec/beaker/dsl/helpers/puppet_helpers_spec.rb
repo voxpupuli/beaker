@@ -5,6 +5,7 @@ class ClassMixedWithDSLHelpers
   include Beaker::DSL::Wrappers
   include Beaker::DSL::Roles
   include Beaker::DSL::Patterns
+  include Beaker::DSL::Outcomes
 
   def logger
     RSpec::Mocks::Double.new('logger').as_null_object
@@ -500,6 +501,33 @@ describe ClassMixedWithDSLHelpers do
       allow( subject ).to receive( :backup_the_file ).and_raise( Minitest::Assertion.new('assertion failed!') )
       expect( subject ).to receive( :fail_test )
       subject.with_puppet_running_on(host, {})
+    end
+
+    context 'with test flow exceptions' do
+      it 'can pass_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::PassTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:pass_test)
+        }.to raise_error(Beaker::DSL::Outcomes::PassTest)
+      end
+      it 'can fail_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::FailTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:fail_test)
+        }.to raise_error(Beaker::DSL::Outcomes::FailTest)
+      end
+      it 'can skip_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::SkipTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:skip_test)
+        }.to raise_error(Beaker::DSL::Outcomes::SkipTest)
+      end
+      it 'can pending_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::PendingTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:pending_test)
+        }.to raise_error(Beaker::DSL::Outcomes::PendingTest)
+      end
     end
 
     describe 'with puppet-server' do
