@@ -842,17 +842,16 @@ describe ClassMixedWithDSLHelpers do
         end
       end
 
+      let(:logger) { double.as_null_object }
       describe 'handling failures' do
 
-        let(:logger) { double.as_null_object }
         before do
           allow( subject ).to receive( :logger ).and_return( logger )
           expect( subject ).to receive(:stop_puppet_from_source_on).and_raise(RuntimeError.new('Also failed in teardown.'))
+          expect( host ).to receive(:port_open?).with(8140).and_return(true)
         end
 
         it 'does not swallow an exception raised from within test block if ensure block also fails' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:error).with(/Raised during attempt to teardown.*Also failed in teardown/)
 
           expect do
@@ -861,8 +860,6 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'dumps the puppet logs if there is an error in the teardown' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:notify).with(/Dumping master log/)
 
           expect do
@@ -871,8 +868,6 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'does not mask the teardown error with an error from dumping the logs' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:notify).with(/Dumping master log/).and_raise("Error from dumping logs")
 
           expect do
@@ -881,13 +876,14 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'does not swallow a teardown exception if no earlier exception was raised' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
           expect( subject.logger).to_not receive(:error)
           expect do
             subject.with_puppet_running_on(host, {})
           end.to raise_error(RuntimeError, 'Also failed in teardown.')
         end
+
       end
+
     end
   end
 
