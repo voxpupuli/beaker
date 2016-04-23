@@ -77,7 +77,7 @@ Once your PR is merged, then you can Resolve your ticket.
 
 **NOTE** that when you do this, you should set the FixedVersion to
 
-    BKR next
+    BKR.next
     
 The reason that we do this now and not before is that we use this field to 
 autogenerate our release notes.  We want to make sure that we capture only
