@@ -203,6 +203,13 @@ module Beaker
               item['name']      = File.basename(test.path)
               item['time']      = "%f" % test.runtime
 
+              #ugh. nokogiri!!!  item can't take a hash, let alone an array.
+              test.exports.each do |export|
+                export.keys.each do |key|
+                  item[key] = export[key]
+                end
+              end
+
               # Did we fail?  If so, report that.
               # We need to remove the escape character from colorized text, the
               # substitution of other entities is handled well by Rexml

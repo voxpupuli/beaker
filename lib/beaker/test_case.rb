@@ -37,6 +37,10 @@ module Beaker
     # a hash.
     attr_accessor :metadata
 
+    # Necessary for {Beaker::DSL::Outcomes}.
+    # Assumed to be an Array.
+    attr_accessor :exports
+
     #The full log for this test
     attr_accessor :sublog
 
@@ -102,6 +106,7 @@ module Beaker
       @runtime = nil
       @teardown_procs = []
       @metadata = {}
+      @exports  = []
       set_current_test_filename(@path ? File.basename(@path, '.rb') : nil)
 
 

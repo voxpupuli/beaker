@@ -265,6 +265,48 @@ module Beaker
           expect( after_testcase_order ).to be === original_testcase_order
         end
 
+        it 'writes @export nested hashes properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          inner_value = {'second' => '2nd'}
+          @test_cases.each do |tc|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{'oh' => 'hai', 'first' => inner_value}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          expect( @nokogiri_mock['oh'] ).to    eq('hai')
+          expect( @nokogiri_mock['first'] ).to eq(inner_value)
+        end
+
+        it 'writes @export array of hashes properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          @test_cases.each do |tc|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{:yes => 'hello'}, {:uh => 'sher'}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          expect( @nokogiri_mock[:yes] ).to eq('hello')
+          expect( @nokogiri_mock[:uh] ).to  eq('sher')
+        end
+
+        # this isn't the best test as the @nokogiri_mock is a single hash.
+        #   it really should be an array of hashes or nested, to ensure each case
+        #   gets the correct key/value.  But i could not get it to work properly with
+        #   the various calls to ::Node and #add_child
+        it 'writes @export hashes per test case properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          @test_cases.each_with_index do |tc,index|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{"yes_#{index}" => "hello#{index}"}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          @test_cases.each_with_index do |tc,index|
+            expect( @nokogiri_mock["yes_#{index}"] ).to eq("hello#{index}")
+          end
+        end
+
       end
 
 

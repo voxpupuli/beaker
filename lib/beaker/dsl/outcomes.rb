@@ -77,6 +77,13 @@ module Beaker
         raise( SkipTest, message )
       end
 
+      # populate a TestCase's @exports[] with structured_data
+      #
+      # @param [Hash,Array<Hash>] data The data to export
+      def export(data)
+        @exports << data
+      end
+
       # Formats an optional message or self appended by a state, either
       # bracketted in newlines
       #
