@@ -76,13 +76,35 @@ module Beaker
 
       it 'raises an error when a host template is not found in returned json' do
         vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
-        host          = vmpooler.instance_variable_get(:@hosts)[0][:template]
 
         allow( vmpooler ).to receive( :require ).and_return( true )
         allow( vmpooler ).to receive( :sleep ).and_return( true )
-        allow( vmpooler ).to receive(:get_host_info).and_return(nil)
+        allow( vmpooler ).to receive( :get_host_info ).and_return( nil )
 
-        expect {vmpooler.provision}.to raise_error RuntimeError,"Vmpooler.provision - requested host #{host} not available"
+        expect {
+          vmpooler.provision
+        }.to raise_error( RuntimeError,
+          /Vmpooler\.provision - requested VM templates \[.*\,.*\,.*\] not available/
+        )
+      end
+
+      it 'repeats asking only for failed hosts' do
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+
+        allow( vmpooler ).to receive( :require ).and_return( true )
+        allow( vmpooler ).to receive( :sleep ).and_return( true )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm1_has_a_template" ).and_return( nil )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm2_has_a_template" ).and_return( 'y' )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm3_has_a_template" ).and_return( 'y' )
+
+        expect {
+          vmpooler.provision
+        }.to raise_error( RuntimeError,
+          /Vmpooler\.provision - requested VM templates \[[^\,]*\] not available/
+        ) # should be only one item in the list, no commas
       end
     end
 
