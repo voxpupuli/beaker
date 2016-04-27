@@ -126,28 +126,38 @@ module Beaker
           @logger.notify "Requesting VM set from vmpooler"
         end
 
-        request.body = request_payload.to_json
+        request_payload_json = request_payload.to_json
+        @logger.trace( "Request payload json: #{request_payload_json}" )
+        request.body = request_payload_json
 
         response = http.request(request)
         parsed_response = JSON.parse(response.body)
+        @logger.trace( "Response parsed json: #{parsed_response}" )
 
         if parsed_response['ok']
           domain = parsed_response['domain']
+          request_payload = {}
 
           @hosts.each_with_index do |h, i|
             # If the requested host template is not available on vmpooler
-            if get_host_info(parsed_response, h['template']).nil?
-              raise "Vmpooler.provision - requested host #{h['template']} not available"
+            host_template = h['template']
+            if get_host_info(parsed_response, host_template).nil?
+              request_payload[host_template] ||= 0
+              request_payload[host_template] += 1
+              next
             end
             if parsed_response[h['template']]['hostname'].is_a?(Array)
-              hostname = parsed_response[h['template']]['hostname'].shift
+              hostname = parsed_response[host_template]['hostname'].shift
             else
-              hostname = parsed_response[h['template']]['hostname']
+              hostname = parsed_response[host_template]['hostname']
             end
 
             h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
 
             @logger.notify "Using available host '#{h['vmhostname']}' (#{h.name})"
+          end
+          unless request_payload.empty?
+            raise "Vmpooler.provision - requested VM templates #{request_payload.keys} not available"
           end
         else
           raise "Vmpooler.provision - requested host set not available"
