@@ -160,7 +160,7 @@ module Beaker
             raise "Vmpooler.provision - requested VM templates #{request_payload.keys} not available"
           end
         else
-          raise "Vmpooler.provision - response from pooler not ok. Requested host set #{request_payload.keys} not available in pooler"
+          raise "Vmpooler.provision - response from pooler not ok. Requested host set #{request_payload.keys} not available in pooler.\n#{parsed_response}"
         end
       rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
         @logger.debug "Failed vmpooler provision: #{e.class} : #{e.message}"
