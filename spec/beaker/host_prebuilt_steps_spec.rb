@@ -56,6 +56,18 @@ describe Beaker do
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
   ]
 
+  # Solaris
+  it_should_behave_like 'enables_root_login', 'solaris-10', [
+    "sudo -E svcadm restart network/ssh",
+    "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+  ], true
+
+  it_should_behave_like 'enables_root_login', 'solaris-11', [
+    "sudo -E svcadm restart network/ssh",
+    "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
+    "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"
+  ], true
+
   ['debian','ubuntu','cumulus'].each do | deb_like |
     it_should_behave_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
