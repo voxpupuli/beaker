@@ -214,20 +214,24 @@ module Beaker
         end
       end
 
-      it "uses yum on fedora-20" do
-        @opts = {'platform' => 'fedora-20-is-me'}
-        pkg = 'fedora_package'
-        expect( Beaker::Command ).to receive(:new).with("yum -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
-        expect( instance.install_package(pkg) ).to be == "hello"
+      (1..21).to_a.each do | fedora_release |
+        it "uses yum on fedora-#{fedora_release}" do
+          @opts = {'platform' => "fedora-#{fedora_release}-is-me"}
+          pkg = 'fedora_package'
+          expect( Beaker::Command ).to receive(:new).with("yum -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+          expect( instance.install_package(pkg) ).to be == "hello"
+        end
       end
 
-      it "uses dnf on fedora-22" do
-        @opts = {'platform' => 'fedora-22-is-me'}
-        pkg = 'fedora_package'
-        expect( Beaker::Command ).to receive(:new).with("dnf -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
-        expect( instance.install_package(pkg) ).to be == "hello"
+      (22..29).to_a.each do | fedora_release |
+        it "uses dnf on fedora-#{fedora_release}" do
+          @opts = {'platform' => "fedora-#{fedora_release}-is-me"}
+          pkg = 'fedora_package'
+          expect( Beaker::Command ).to receive(:new).with("dnf -y  install #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
+          expect( instance.install_package(pkg) ).to be == "hello"
+        end
       end
     end
 

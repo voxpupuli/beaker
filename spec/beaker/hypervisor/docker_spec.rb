@@ -11,10 +11,10 @@ end
 
 module Beaker
   platforms = [
-    "ubuntu-14.04-x86_64", 
-    "cumulus-2.2-x86_64", 
-    "fedora-22-x86_64", 
-    "centos-7-x86_64", 
+    "ubuntu-14.04-x86_64",
+    "cumulus-2.2-x86_64",
+    "fedora-22-x86_64",
+    "centos-7-x86_64",
     "sles-12-x86_64"
   ]
 
@@ -427,14 +427,16 @@ module Beaker
         expect( dockerfile ).to be =~ /RUN zypper -n in openssh/
       end
 
-      it 'should use dnf on fedora-22' do
-        FakeFS.deactivate!
-        dockerfile = docker.send(:dockerfile_for, {
-          'platform' => 'fedora-22-x86_64',
-          'image' => 'foobar',
-        })
+      (22..29).to_a.each do | fedora_release |
+        it "should use dnf on fedora #{fedora_release}" do
+          FakeFS.deactivate!
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => "fedora-#{fedora_release}-x86_64",
+            'image' => 'foobar',
+          })
 
-        expect( dockerfile ).to be =~ /RUN dnf install -y sudo/
+          expect( dockerfile ).to be =~ /RUN dnf install -y sudo/
+        end
       end
 
       it 'should use user dockerfile if specified' do
