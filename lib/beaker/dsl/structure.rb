@@ -200,18 +200,22 @@ module Beaker
             # confining to all hosts *except* provided array of hosts
             hosts_to_modify = hosts_not_modified
           end
+          if hosts_to_modify.empty?
+            logger.warn "No suitable hosts without: #{criteria.inspect}"
+            skip_test "No suitable hosts found without #{criteria.inspect}"
+          end
         when :to
           if criteria and ( not criteria.empty? )
             hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to only hosts in provided array of hosts
           end
+          if hosts_to_modify.empty?
+            logger.warn "No suitable hosts with: #{criteria.inspect}"
+            skip_test "No suitable hosts found with #{criteria.inspect}"
+          end
         else
           raise "Unknown option #{type}"
-        end
-        if hosts_to_modify.empty?
-          logger.warn "No suitable hosts with: #{criteria.inspect}"
-          skip_test 'No suitable hosts found'
         end
         self.hosts = hosts_to_modify
         hosts_to_modify

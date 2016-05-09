@@ -26,7 +26,7 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     begin
       tag( 'tag1' )
     rescue Beaker::DSL::Outcomes::SkipTest => e
-      if e.message =~ /^No\ suitable\ hosts\ found$/
+      if e.message =~ /^No\ suitable\ hosts\ found/
         # SkipTest is raised in the case when there are no hosts leftover for a test
         # after confining. It's a very common acceptance test case where all of the
         # hosts involved are of the same platform, and are thus all confined

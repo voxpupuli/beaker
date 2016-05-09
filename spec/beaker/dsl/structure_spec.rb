@@ -122,14 +122,20 @@ describe ClassMixedWithDSLStructure do
       allow( subject ).to receive( :logger ).and_return( logger )
     end
 
-    it 'skips the test if there are no applicable hosts' do
+    it ':to - skips the test if there are no applicable hosts' do
       allow( subject ).to receive( :hosts ).and_return( [] )
       allow( subject ).to receive( :hosts= )
       expect( logger ).to receive( :warn )
-      expect( subject ).to receive( :skip_test ).
-        with( 'No suitable hosts found' )
-
+      expect( subject ).to receive( :skip_test ).with( 'No suitable hosts found with {}' )
       subject.confine( :to, {} )
+    end
+
+    it ':except - skips the test if there are no applicable hosts' do
+      allow( subject ).to receive( :hosts ).and_return( [] )
+      allow( subject ).to receive( :hosts= )
+      expect( logger ).to receive( :warn )
+      expect( subject ).to receive( :skip_test ).with( 'No suitable hosts found without {}' )
+      subject.confine( :except, {} )
     end
 
     it ':to - uses a provided host subset when no criteria is provided' do
