@@ -16,7 +16,7 @@ module Beaker
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
-        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
         #     exit codes as passing.
         #   @option opts [Boolean] :dry_run (false) Do not actually execute any
         #     commands on the SUT
@@ -170,6 +170,16 @@ module Beaker
 
             yield self if block_given?
 
+          # FIXME: these test-flow-control exceptions should be using throw
+            # they can be caught in test_case.  current layout dows not allow it
+          rescue Beaker::DSL::Outcomes::PassTest => early_assertion
+            pass_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::FailTest => early_assertion
+            fail_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::PendingTest => early_assertion
+            pending_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::SkipTest => early_assertion
+            skip_test(early_assertion)
           rescue Beaker::DSL::Assertions, Minitest::Assertion => early_assertion
             fail_test(early_assertion)
           rescue Exception => early_exception
