@@ -387,7 +387,7 @@ module Beaker
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
-    end 
+    end
 
     # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
     #
@@ -420,7 +420,7 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /centos-7|el-7|redhat-7/
+        elsif host['platform'] =~ /centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})

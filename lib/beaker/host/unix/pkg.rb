@@ -68,7 +68,7 @@ module Unix::Pkg
         execute("zypper --non-interactive in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora-22/
+      when /fedora-(2[2-9])/
         if version
           name = "#{name}-#{version}"
         end
@@ -176,7 +176,7 @@ module Unix::Pkg
         execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
-      when /fedora-22/
+      when /fedora-(2[2-9])/
         execute("dnf -y #{cmdline_args} update #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}", opts)
@@ -448,7 +448,7 @@ module Unix::Pkg
   )
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora-22)$/
+    when /^(fedora-(2[2-9]))$/
       execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
       execute("dnf --nogpgcheck localinstall -y #{onhost_copied_file}")
     when /^(fedora|el|centos)$/

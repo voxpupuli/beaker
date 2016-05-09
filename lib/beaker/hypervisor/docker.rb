@@ -212,7 +212,7 @@ module Beaker
             RUN apt-get update
             RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
           EOF
-        when /fedora-22/
+        when /fedora-(2[2-9])/
           dockerfile += <<-EOF
             RUN dnf clean all
             RUN dnf install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
