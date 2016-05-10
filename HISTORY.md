@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 18 Apr, 2016 (29b0694d)](#LATEST)
+* [LATEST - 10 May, 2016 (859e8702)](#LATEST)
+* [2.40.0 - 18 Apr, 2016 (0a7b948a)](#2.40.0)
 * [2.39.0 - 6 Apr, 2016 (5976e103)](#2.39.0)
 * [2.38.1 - 31 Mar, 2016 (124b91b8)](#2.38.1)
 * [2.38.0 - 30 Mar, 2016 (0878bff7)](#2.38.0)
@@ -116,7 +117,229 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 18 Apr, 2016 (29b0694d)
+### <a name = "LATEST">LATEST - 10 May, 2016 (859e8702)
+
+* (GEM) update beaker version to 2.41.0 (859e8702)
+
+* Merge pull request #1118 from tvpartytonight/BKR-684 (44e11078)
+
+
+```
+Merge pull request #1118 from tvpartytonight/BKR-684
+
+(BKR-684) Update Beaker-Libraries doc
+```
+* (BKR-684) Update Beaker-Libraries doc (69689f76)
+
+
+```
+(BKR-684) Update Beaker-Libraries doc
+
+This PR syncs the internal confluence docs with public Github
+documentation.
+```
+* Merge pull request #1105 from er0ck/fix/master/BKR-779-skip_test_broken_in_with_puppet_running_on (54dd8192)
+
+
+```
+Merge pull request #1105 from er0ck/fix/master/BKR-779-skip_test_broken_in_with_puppet_running_on
+
+(BKR-779) skip_test broken in with_puppet_running_on
+```
+* Merge pull request #1116 from petems/BKR-799-update_fedora_support (1c5a46b7)
+
+
+```
+Merge pull request #1116 from petems/BKR-799-update_fedora_support
+
+(BKR-799) Update Fedora support
+```
+* (BKR-799) Updates specs with more Fedora versions (0553e807)
+
+* (BKR-799) Use systemd for commands from Fedora 14+ (859e8ee1)
+
+* (BKR-799) Use dnf on Fedora from 22 onwards (020522a0)
+
+* Merge pull request #1112 from apollo-io/solaris11-provision (5e04dbd8)
+
+
+```
+Merge pull request #1112 from apollo-io/solaris11-provision
+
+(BKR-789) enable --no-provision for Solaris 11 guests
+```
+* Merge pull request #1114 from briancain/maint/improve-vmpooler-error-msg (0562c213)
+
+
+```
+Merge pull request #1114 from briancain/maint/improve-vmpooler-error-msg
+
+(maint) Improve the error message returned when failing to request vms
+```
+* (maint) Include parsed response in error msg (e0f69a5c)
+
+* Merge pull request #1109 from kevpl/docs_maintainers_create3 (384384f5)
+
+
+```
+Merge pull request #1109 from kevpl/docs_maintainers_create3
+
+(MAINT) added maintainers section to README
+```
+* (maint) Improve the error message returned when failing to request vms (c7dc65be)
+
+
+```
+(maint) Improve the error message returned when failing to request vms
+
+This commit gives a better error message to the user when beaker fails
+to request a host set that doesn't exist in vmpooler.
+```
+* Merge pull request #1110 from er0ck/improve/master/BKR-776-TestCase_methods_for_exporting_structured_data_to_junit_xml (72bff6a5)
+
+
+```
+Merge pull request #1110 from er0ck/improve/master/BKR-776-TestCase_methods_for_exporting_structured_data_to_junit_xml
+
+(BKR-776) test case methods for exporting structured data to junit xml
+```
+* (BKR-789) enable --no-provision for Solaris 11 guests (0c40f30d)
+
+
+```
+(BKR-789) enable --no-provision for Solaris 11 guests
+
+Without this change, it is not possible to run beaker against solaris
+hosts with --no-provision, which means for every test run the VMs must
+be re-provisioned, which has a big impact on the length of time to be
+able to run tests during development lifecycle.
+
+For Solaris the 'rolemod' command is used, but this can only be run
+successfully once, the second time it runs it fails because the root
+user has already been changes from a role to a user.  This change adds a
+check to ensure rolemod is only run if it is needed.
+```
+* Merge pull request #1111 from kevpl/bkr787_vmpooler_dont_reask (4f65721d)
+
+
+```
+Merge pull request #1111 from kevpl/bkr787_vmpooler_dont_reask
+
+(BKR-787) vmpooler only asks for failed hosts on provision request repeat
+```
+* (BKR-787) vmpooler only asks for failed hosts on provision request repeat (a1d8e0d5)
+
+* Merge pull request #1106 from kevpl/docs_test_suites2 (76349e4d)
+
+
+```
+Merge pull request #1106 from kevpl/docs_test_suites2
+
+(MAINT) created test_suites.md
+```
+* Merge pull request #1107 from kevpl/docs_ticket_lifecycle_update (cf27df65)
+
+
+```
+Merge pull request #1107 from kevpl/docs_ticket_lifecycle_update
+
+(MAINT) fixed BKR.next label in JIRA ticket docs
+```
+* (BKR-776) functionality for exporting structured data (to junit xml) (8f3b5327)
+
+
+```
+(BKR-776) functionality for exporting structured data (to junit xml)
+
+This change adds a dsl method `export` which takes a single argument of
+hash data for export to junit.xml.
+This can be used for later storage without storing all of the logfile.
+Think performance benchmarks, flakiness data, etc.
+```
+* (maint) fix up nearby spec tests (c13c2e14)
+
+* (MAINT) added maintainers section to README (620854f1)
+
+
+```
+(MAINT) added maintainers section to README
+
+[skip ci]
+```
+* (MAINT) created test_suites.md (961dbf47)
+
+
+```
+(MAINT) created test_suites.md
+
+[skip ci]
+```
+* (maint) update defaults for common user id_rsa-acceptance keys (20fd411b)
+
+* (BKR-779) add acceptance tests for skip_test and pending_test (9cfd8d3c)
+
+
+```
+(BKR-779) add acceptance tests for skip_test and pending_test
+
+These tests required changes to the pre-suite for puppetpkg.
+We might also require changes to puppetgit and puppetgem and maybe pe.
+we need to tell with_puppet_running_on where to find the correct puppet
+service, otherwise beaker defaults to pe-puppetserver.
+```
+* (BKR-779) skip_test, pending_test, fail_test don't work in with_puppet_running_on (2fc36eb3)
+
+
+```
+(BKR-779) skip_test, pending_test, fail_test don't work in with_puppet_running_on
+
+Prior to this change, these test exits did not work in
+with_puppet_running_on() as the exceptions were not bubbling up to
+TestCase.
+This change rescues the exceptions for these flow-controls before they
+get mangled by the other rescues and sent to TestCase.  We should
+probably be using throw here. But there are too many entanglements to
+get them working in this PR.
+```
+* (maint) cleanup some nearby spec tests (7d16c6d0)
+
+* Merge pull request #1104 from cmurphy/rpm_upgrade (57ec5a6b)
+
+
+```
+Merge pull request #1104 from cmurphy/rpm_upgrade
+
+(MAINT) Use the upgrade install option for rpm packages
+```
+* (MAINT) Use the upgrade install option for rpms (2db3708e)
+
+
+```
+(MAINT) Use the upgrade install option for rpms
+
+Images used in beaker tests might have all kinds of preinstalled
+packages on them, some of which may be out of date. In our case, we
+were preinstalling the puppetlabs el 7.10 release package on images,
+but then running beaker's install_puppet function as a provisional step
+in our tests. Since a new release package was added, this started
+failing[1]. We were able to fix this easily by fixing our images, but
+users depending on externally hosted images, such as vagrant boxes, may
+not be so lucky.
+
+This patch changes the -i flag of the rpm install command to -U so that
+the package will be either installed or, if already present but out of
+date, upgraded. This will not change functionality for users with clean
+images who do not need to upgrade anything. The --replacepkgs flag that
+was already present in the rpm command is not sufficient to remove
+conflicting files from older versions of packages.
+
+[1] http://logs.openstack.org/77/308277/2/check/gate-openstackci-beaker-centos-7/0736982/console.html#_2016-04-20_14_14_12_690
+```
+* (MAINT) fixed BKR.next label in JIRA ticket docs (c49ae8a4)
+
+### <a name = "2.40.0">2.40.0 - 18 Apr, 2016 (0a7b948a)
+
+* (HISTORY) update beaker history for gem release 2.40.0 (0a7b948a)
 
 * (GEM) update beaker version to 2.40.0 (29b0694d)
 
