@@ -76,4 +76,27 @@ test_name "dsl::structure" do
       assert_equal hosts.dup, hosts, "#confine_block did not preserve the hosts array"
     end
   end
+
+  step "#confine reports correct message and skips test when criteria doesn't match on 'to'" do
+    begin
+      confine :to, { :platform => 'test' }
+
+      fail "#confine did not skip test but should have."
+
+    rescue Beaker::DSL::Outcomes::SkipTest => e
+      assert_match /No suitable hosts found with {:platform=>"test"}/, e.message, "#confine raised an unexpected skip_test"
+    end
+  end
+
+  step "#confine reports correct message  and skips test when criteria doesn't match on 'except'" do
+    begin
+      confine :except, { :platform => default['platform'] }
+
+      fail "#confine did not skip test but should have."
+
+    rescue Beaker::DSL::Outcomes::SkipTest => e
+      assert_match /No suitable hosts found without {:platform=>"#{default['platform']}"}/, e.message, "#confine raised an unexpected
+      # skip_test"
+    end
+  end
 end
