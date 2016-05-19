@@ -94,7 +94,9 @@ describe ClassMixedWithDSLStructure do
     it 'passes when a MiniTest assertion is raised' do
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
-      block = lambda { assert_equal('1', '2', '1 should not equal 2') }
+      # We changed this lambda to use the simplest assert possible; using assert_equal
+      # caused an error in minitest 5.9.0 trying to write to the file system.
+      block = lambda { assert(false, 'this assertion should be caught') }
       expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
     end
 
