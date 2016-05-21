@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'thin'
 
   # Run time dependencies
-  s.add_runtime_dependency 'minitest', '~> 5.4'
+  s.add_runtime_dependency 'minitest', '~> 5.8.4'
   s.add_runtime_dependency 'json', '~> 1.8'
   s.add_runtime_dependency 'hocon', '~> 0.1'
   s.add_runtime_dependency 'net-ssh', '~> 2.9'
