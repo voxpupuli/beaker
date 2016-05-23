@@ -59,7 +59,9 @@ module Beaker
 
       # @private
       def define(args, &task_block)
-        desc "Run Beaker Acceptance" unless ::Rake.application.last_comment
+        # Depending on the version of rake, either last_description or last_comment will be available.
+        desc "Run Beaker Acceptance" unless (::Rake.application.respond_to?(:last_description) ? ::Rake.application.last_description : ::Rake
+                                                                                                                                .application.last_comment)
         task name, *args do |_, task_args|
           RakeFileUtils.__send__(:verbose, verbose) do
             task_block.call(*[self, task_args].slice(0, task_block.arity)) if task_block
