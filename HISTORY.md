@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 10 May, 2016 (859e8702)](#LATEST)
+* [LATEST - 23 May, 2016 (67b70d4a)](#LATEST)
+* [2.41.0 - 10 May, 2016 (17c745bd)](#2.41.0)
 * [2.40.0 - 18 Apr, 2016 (0a7b948a)](#2.40.0)
 * [2.39.0 - 6 Apr, 2016 (5976e103)](#2.39.0)
 * [2.38.1 - 31 Mar, 2016 (124b91b8)](#2.38.1)
@@ -117,7 +118,46 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 10 May, 2016 (859e8702)
+### <a name = "LATEST">LATEST - 23 May, 2016 (67b70d4a)
+
+* (GEM) update beaker version to 2.42.0 (67b70d4a)
+
+* Merge pull request #1120 from tvpartytonight/fix_assertion_method (f6bf5a19)
+
+
+```
+Merge pull request #1120 from tvpartytonight/fix_assertion_method
+
+(maint) Change spec test to use simplest assertion
+```
+* (maint) Change spec test to use simplest assertion (abd47084)
+
+
+```
+(maint) Change spec test to use simplest assertion
+
+Changes to minitest 5.9 broke a single test that used assert_equal to
+generate a minitest assertion; this change uses the simplest assertion
+possible, so changes to minitest are less likely to break a spec test.
+```
+* Merge pull request #1117 from pinkypie/BKR-688 (5eb17550)
+
+
+```
+Merge pull request #1117 from pinkypie/BKR-688
+
+(BKR-688) Moving confine message(s) up a level
+```
+* (BKR-688) Moving message stating that criteria match has been unsuccessful in finding a matching host, to the specific case logic. (fb597511)
+
+
+```
+(BKR-688) Moving message stating that criteria match has been unsuccessful in finding a matching host, to the specific case logic.
+This means that we can be more detailed in what exactly has failed to be found.
+```
+### <a name = "2.41.0">2.41.0 - 10 May, 2016 (17c745bd)
+
+* (HISTORY) update beaker history for gem release 2.41.0 (17c745bd)
 
 * (GEM) update beaker version to 2.41.0 (859e8702)
 
