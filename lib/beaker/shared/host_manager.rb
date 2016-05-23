@@ -72,6 +72,8 @@ module Beaker
       #
       # @param [Array<Host>, Host] hosts The host or hosts to run the provided block against
       # @param [String, Symbol] filter Optional filter to apply to provided hosts - limits by name or role
+      # @param [Hash{Symbol=>String}] opts
+      # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
       # @param [Block] block This method will yield to a block of code passed by the caller
       #
       # @todo (beaker3.0:BKR-571): simplify return types to Array<Result> only
@@ -82,7 +84,7 @@ module Beaker
       #   Else, a result object is returned. If filtering makes it such that only
       #   one host is left, then it's passed as a host object (not in an array),
       #   and thus a result object is returned.
-      def run_block_on hosts = [], filter = nil, &block
+      def run_block_on hosts = [], filter = nil, opts = {}, &block
         result = nil
         block_hosts = hosts #the hosts to apply the block to after any filtering
         if filter
@@ -100,8 +102,18 @@ module Beaker
         end
         if block_hosts.is_a? Array
           if block_hosts.length > 0
-            result = block_hosts.map do |h|
-              run_block_on h, nil, &block
+            if opts[:run_in_parallel]
+              # Pass caller[1] - the line that called block_on - for logging purposes.
+              result = block_hosts.map.each_in_parallel(caller[1]) do |h|
+                run_block_on h, &block
+              end
+              hosts.each{|host| host.close}# For some reason, I have to close the SSH connection
+              # after spawning a process and running commands on a host,
+              # or else it gets into a broken state for the next call.
+            else
+              result = block_hosts.map do |h|
+                run_block_on h, &block
+              end
             end
           else
             # there are no matching hosts to execute against

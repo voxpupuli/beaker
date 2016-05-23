@@ -24,7 +24,7 @@ module Beaker
         #   @option opts [Hash{String=>String}] :environment ({}) These will be
         #     treated as extra environment variables that should be set before
         #     running the command.
-        #
+        #   @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
 
         # The primary method for executing commands *on* some set of hosts.
         #
@@ -60,7 +60,7 @@ module Beaker
         # @return [Result]   An object representing the outcome of *command*.
         # @raise  [FailTest] Raises an exception if *command* obviously fails.
         def on(host, command, opts = {}, &block)
-          block_on host do | host |
+          block_on host, opts do | host |
             if command.is_a? String
               cmd_opts = {}
               #add any additional environment variables to the command
@@ -280,10 +280,12 @@ module Beaker
         #                                 that responds like
         #                                 {Beaker::Host#do_scp_from}.
         # @param [String] powershell_script A string describing a set of powershell actions
+        # @param [Hash{Symbol=>String}] opts Options to alter execution.
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
         #
         # @return [Result] Returns the result of the powershell command execution
         def execute_powershell_script_on(hosts, powershell_script, opts = {})
-          block_on hosts do |host|
+          block_on hosts, opts do |host|
             script_path = "beaker_powershell_script_#{Time.now.to_i}.ps1"
             create_remote_file(host, script_path, powershell_script, opts)
             native_path = script_path.gsub(/\//, "\\")

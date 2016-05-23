@@ -41,3 +41,9 @@ Do not output any logging for this command.  Defaults to `false`.
 Specifies standard input to be provided to the command post execution.  Defaults to `nil`.
 
     on host, "this command takes input", {:stdin => "hiya"}
+
+## [:run_in_parallel](runner/run_in_parallel.md)
+
+Execute the command against all hosts in parallel
+
+    on hosts, puppet( 'agent -t' ), :run_in_parallel => true

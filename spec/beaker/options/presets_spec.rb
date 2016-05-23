@@ -18,6 +18,12 @@ module Beaker
          ENV.delete('q_puppet_cloud_install')
       end
 
+      it "correctly parses the run_in_parallel array" do
+        ENV['BEAKER_RUN_IN_PARALLEL'] = "install,configure"
+        env = presets.env_vars
+        expect(env[:run_in_parallel]).to eq(['install', 'configure'])
+      end
+
       it "removes all empty/nil entries in env_vars" do
         expect(presets.env_vars.has_value?(nil)).to be === false
         expect(presets.env_vars.has_value?({})).to be === false

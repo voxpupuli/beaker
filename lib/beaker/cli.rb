@@ -14,6 +14,7 @@ module Beaker
       @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
+      InParallel::InParallelExecutor.logger = @logger
       @options[:logger] = @logger
       @options[:timestamp] = @timestamp
       @options[:beaker_version] = Beaker::Version::STRING

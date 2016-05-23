@@ -397,6 +397,7 @@ module Beaker
         # @option opts [String]   :debug (false) If this option exists,
         #                         the "--debug" command line parameter
         #                         will be passed to the 'puppet apply' command.
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
         #
         # @param [Block] block This method will yield to a block of code passed
         #                      by the caller; this can be used for additional
@@ -405,7 +406,7 @@ module Beaker
         # @return [Array<Result>, Result, nil] An array of results, a result object,
         #   or nil. Check {#run_block_on} for more details on this.
         def apply_manifest_on(host, manifest, opts = {}, &block)
-          block_on host do | host |
+          block_on host, opts do | host |
             on_options = {}
             on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
 
@@ -658,12 +659,14 @@ module Beaker
         #stops the puppet agent running on the host
         # @param [Host, Array<Host>, String, Symbol] agent    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
-        def stop_agent_on(agent)
-          block_on agent do | host |
-            vardir = agent.puppet_configprint['vardir']
+        # @param [Hash{Symbol=>String}] opts Options to alter execution.
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
+        def stop_agent_on(agent, opts = {})
+          block_on agent, opts do | host |
+            vardir = host.puppet_configprint['vardir']
             agent_running = true
             while agent_running
-              agent_running = agent.file_exist?("#{vardir}/state/agent_catalog_run.lock")
+              agent_running = host.file_exist?("#{vardir}/state/agent_catalog_run.lock")
               if agent_running
                 sleep 2
               end
@@ -671,26 +674,26 @@ module Beaker
 
             # In 4.0 this was changed to just be `puppet`
             agent_service = 'puppet'
-            if !aio_version?(agent)
+            if !aio_version?(host)
               # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
               # In all the case that it is different, this init script will exist. So we can assume
               # that if the script doesn't exist, we should just use `pe-puppet`
               agent_service = 'pe-puppet-agent'
-              agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
+              agent_service = 'pe-puppet' unless host.file_exist?('/etc/init.d/pe-puppet-agent')
             end
 
             # Under a number of stupid circumstances, we can't stop the
             # agent using puppet.  This is usually because of issues with
             # the init script or system on that particular configuration.
             avoid_puppet_at_all_costs = false
-            avoid_puppet_at_all_costs ||= agent['platform'] =~ /el-4/
-            avoid_puppet_at_all_costs ||= agent['pe_ver'] && version_is_less(agent['pe_ver'], '3.2') && agent['platform'] =~ /sles/
+            avoid_puppet_at_all_costs ||= host['platform'] =~ /el-4/
+            avoid_puppet_at_all_costs ||= host['pe_ver'] && version_is_less(host['pe_ver'], '3.2') && host['platform'] =~ /sles/
 
             if avoid_puppet_at_all_costs
               # When upgrading, puppet is already stopped. On EL4, this causes an exit code of '1'
-              on agent, "/etc/init.d/#{agent_service} stop", :acceptable_exit_codes => [0, 1]
+              on host, "/etc/init.d/#{agent_service} stop", :acceptable_exit_codes => [0, 1]
             else
-              on agent, puppet_resource('service', agent_service, 'ensure=stopped')
+              on host, puppet_resource('service', agent_service, 'ensure=stopped')
             end
           end
         end
@@ -714,35 +717,52 @@ module Beaker
 
         # Ensure the host has requested a cert, then sign it
         #
-        # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Host, Array<Host>, String, Symbol] host   One or more hosts, or a role (String or Symbol)
+        #                            that identifies one or more hosts to validate certificate signing.
+        #                            No argument, or an empty array means no validation of success
+        #                            for specific hosts will be performed. This will always execute
+        #                            'cert --sign --all --allow-dns-alt-names' even for a single host.
         #
         # @return nil
         # @raise [FailTest] if process times out
-        def sign_certificate_for(host)
-          block_on host do | host |
-            if [master, dashboard, database].include? host
+        def sign_certificate_for(host = [])
+          hostnames = []
+          hosts = host.is_a?(Array) ? host : [host]
+          hosts.each{ |current_host|
+            if [master, dashboard, database].include? current_host
 
-              on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
-              on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
+              on current_host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
+              on master, puppet( "cert --allow-dns-alt-names sign #{current_host}" ), :acceptable_exit_codes => [0,24]
 
             else
-
-              hostname = Regexp.escape host.node_name
-
-              last_sleep = 0
-              next_sleep = 1
-              (0..10).each do |i|
-                fail_test("Failed to sign cert for #{hostname}") if i == 10
-
-                on master, puppet("cert --sign --all --allow-dns-alt-names"), :acceptable_exit_codes => [0,24]
-                break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
-                sleep next_sleep
-                (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+              hostnames << Regexp.escape( current_host.node_name )
+            end
+          }
+          if hostnames.size < 1
+            on master, puppet("cert --sign --all --allow-dns-alt-names"),
+               :acceptable_exit_codes => [0,24]
+            return
+          end
+          while hostnames.size > 0
+            last_sleep = 0
+            next_sleep = 1
+            (0..10).each do |i|
+              if i == 10
+                fail_test("Failed to sign cert for #{hostnames}")
+                hostnames.clear
+              end
+              on master, puppet("cert --sign --all --allow-dns-alt-names"), :acceptable_exit_codes => [0,24]
+              out = on(master, puppet("cert --list --all")).stdout
+              if hostnames.all? { |hostname| out =~ /\+ "?#{hostname}"?/ }
+                hostnames.clear
+                break
               end
 
+              sleep next_sleep
+              (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
             end
           end
+          host
         end
 
         #prompt the master to sign certs then check to confirm the cert for the default host is signed

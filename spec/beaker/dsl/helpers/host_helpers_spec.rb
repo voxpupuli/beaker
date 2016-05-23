@@ -77,6 +77,22 @@ describe ClassMixedWithDSLHelpers do
       subject.on( :master, 'echo hello')
     end
 
+    it 'executes in parallel if run_in_parallel=true' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expected = []
+      hosts.each_with_index do |host, i|
+        expected << i
+        allow( host ).to receive( :exec ).and_return( i )
+      end
+
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(5).times
+      results = subject.on( hosts, command, {:run_in_parallel => true})
+      expect( results ).to be == expected
+    end
+
     it 'delegates to itself for each host passed' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
       expected = []

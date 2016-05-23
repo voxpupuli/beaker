@@ -101,9 +101,10 @@ module Beaker
 
     #Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
     #to the provided SUT for test execution to be successful.
-    def configure
+    def configure(opts = {})
       return unless @options[:configure]
-      block_on @hosts do |host|
+      block_on @hosts, { :run_in_parallel => (@options && @options[:run_in_parallel].is_a?(Array)) ?
+          @options[:run_in_parallel].include?('configure') : false} do |host|
         if host[:timesync]
           timesync(host, @options)
         end

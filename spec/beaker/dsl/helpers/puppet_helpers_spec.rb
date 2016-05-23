@@ -109,6 +109,28 @@ describe ClassMixedWithDSLHelpers do
       expect(result).to be_an(Array)
     end
 
+    it 'operates on an array of hosts in parallel' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(2).times
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      the_hosts = [master, agent]
+
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      the_hosts.each do |host|
+        allow( subject ).to receive( :puppet ).
+            and_return( 'puppet_command' )
+
+        allow( subject ).to receive( :on ).
+            with( host, 'puppet_command', :acceptable_exit_codes => [0] )
+      end
+
+      result = nil
+      result = subject.apply_manifest_on( the_hosts, 'include foobar', { :run_in_parallel => true } )
+      expect(result).to be_an(Array)
+    end
+
     it 'adds acceptable exit codes with :catch_failures' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject ).to receive( :create_remote_file ).and_return( true )
@@ -402,6 +424,46 @@ describe ClassMixedWithDSLHelpers do
       subject.stop_agent_on( el_agent )
     end
 
+    it 'can run on an array of hosts' do
+      vardir = '/var'
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+      el_agent2 = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      allow( el_agent2 ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      expect( el_agent2 ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      expect( subject ).to receive( :puppet_resource ).with( "service", "puppet", "ensure=stopped").twice
+      expect( subject ).to receive( :on ).twice
+
+      subject.stop_agent_on( [el_agent, el_agent2] )
+    end
+
+    it 'runs in parallel with run_in_parallel=true' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      vardir = '/var'
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+      el_agent2 = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      allow( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      allow( el_agent2 ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      allow( el_agent2 ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(2).times
+
+      subject.stop_agent_on( [el_agent, el_agent2], { :run_in_parallel => true} )
+    end
+
   end
 
   describe "#stop_agent" do
@@ -449,6 +511,22 @@ describe ClassMixedWithDSLHelpers do
       subject.sign_certificate_for( agent )
     end
 
+    it 'accepts an array of hosts to validate' do
+      allow( subject ).to receive( :sleep ).and_return( true )
+
+      result.stdout = "+ \"#{agent}\" + \"#{custom}\""
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      allow( subject ).to receive( :puppet ) do |arg|
+        arg
+      end
+      expect( subject ).to receive( :on ).with( master, "agent -t", :acceptable_exit_codes => [0, 1, 2]).once
+      expect( subject ).to receive( :on ).with( master, "cert --allow-dns-alt-names sign master", :acceptable_exit_codes => [0, 24]).once
+      expect( subject ).to receive( :on ).with( master, "cert --sign --all --allow-dns-alt-names", :acceptable_exit_codes => [0,24]).once
+      expect( subject ).to receive( :on ).with( master, "cert --list --all").once.and_return( result )
+
+      subject.sign_certificate_for( [master, agent, custom] )
+    end
   end
 
   describe "#sign_certificate" do

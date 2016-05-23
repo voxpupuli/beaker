@@ -75,7 +75,7 @@ module Beaker
 
       context 'if :timesync option set true on host' do
         it 'does call timesync for host' do
-          hosts[0][:timesync] = true
+          hosts[0].options[:timesync] = true
           allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :timesync ).once
           hypervisor.configure
@@ -85,9 +85,25 @@ module Beaker
       context 'if :timesync option set true but false on host' do
         it 'does not call timesync for host' do
           options[:timesync] = true
-          hosts[0][:timesync] = false
+          hosts[0].options[:timesync] = false
           allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to_not receive( :timesync )
+          hypervisor.configure
+        end
+      end
+
+      context 'if :run_in_parallel option includes configure' do
+        it 'timesync is run in parallel' do
+          InParallel::InParallelExecutor.logger = logger
+          # Need to deactivate FakeFS since the child processes write STDOUT to file.
+          FakeFS.deactivate!
+          hosts[0].options[:timesync] = true
+          hosts[1].options[:timesync] = true
+          hosts[2].options[:timesync] = true
+          options[:run_in_parallel] = ['configure']
+          allow( hypervisor ).to receive( :set_env )
+          # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+          expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(3).times
           hypervisor.configure
         end
       end

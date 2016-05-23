@@ -40,6 +40,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'inifile', '~> 2.0'
   s.add_runtime_dependency 'rsync', '~> 1.0.9'
   s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
+  s.add_runtime_dependency 'in-parallel', '~> 0.1'
 
   # Run time dependencies that are Beaker libraries
   s.add_runtime_dependency 'beaker-answers', '~> 0.0'

@@ -36,6 +36,7 @@ module Beaker
         :vbguest_plugin       => ['BEAKER_VB_GUEST_PLUGIN', 'BEAKER_vb_guest_plugin'],
         :tag_includes         => ['BEAKER_TAG'],
         :tag_excludes         => ['BEAKER_EXCLUDE_TAG'],
+        :run_in_parallel      => ['BEAKER_RUN_IN_PARALLEL'],
       }
 
       # Select all environment variables whose name matches provided regex
@@ -85,6 +86,9 @@ module Beaker
                  end
 
           found_env_vars[:type] = type
+        end
+        if found_env_vars[:run_in_parallel]
+          found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',')
         end
 
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
@@ -188,6 +192,7 @@ module Beaker
           :nodeclassifier_port    => 4433,
           :cache_files_locally    => true, # TODO change to false in next major version
           :aws_keyname_modifier   => rand(10 ** 10).to_s.rjust(10,'0'), # 10 digit random number string
+          :run_in_parallel        => [],
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,

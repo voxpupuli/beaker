@@ -29,7 +29,10 @@ module Beaker
   #
   # Common setup and testing steps
   #require 'beaker/steps'
-  #
+
+  # InParallel, for executing in parallel
+  require 'in_parallel'
+
   # Shared methods and helpers
   require 'beaker/shared'
 
