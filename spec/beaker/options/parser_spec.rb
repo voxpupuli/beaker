@@ -221,6 +221,72 @@ module Beaker
 
       end
 
+      describe '#parse_hosts_options' do
+
+        context 'Hosts file exists' do
+          it 'returns nil as the second value' do
+            parser.instance_variable_set( :@options, {} )
+            allow( Beaker::Options::HostsFileParser ).to receive( :parse_hosts_file )
+            _, val2 = parser.parse_hosts_options
+            expect( val2 ).to be_nil
+          end
+
+          it 'returns the parser\'s output as the first value' do
+            parser.instance_variable_set( :@options, {} )
+            test_value = 'blaqwetjijl,emikfuj1235'
+            allow( Beaker::Options::HostsFileParser ).to receive(
+              :parse_hosts_file
+            ).and_return( test_value )
+            val1, _ = parser.parse_hosts_options
+            expect( val1 ).to be === test_value
+          end
+        end
+
+        context 'Hosts file does not exist' do
+          require 'tempfile'
+          require 'beaker-hostgenerator'
+
+          it 'calls beaker-hostgenerator to get hosts information' do
+            parser.instance_variable_set( :@options, {} )
+            allow( Beaker::Options::HostsFileParser ).to receive(
+              :parse_hosts_file
+            ).and_raise( Errno::ENOENT )
+
+            mock_beaker_hostgenerator_cli = Object.new
+            cli_execute_return = 'job150865'
+            expect( mock_beaker_hostgenerator_cli ).to receive(
+              :execute
+            ).and_return( cli_execute_return )
+            expect( BeakerHostGenerator::CLI ).to receive(
+              :new
+            ).and_return( mock_beaker_hostgenerator_cli )
+            allow( Beaker::Options::HostsFileParser ).to receive(
+              :parse_hosts_string
+            ).with( cli_execute_return )
+            parser.parse_hosts_options
+          end
+
+          it 'sets the :hosts_file_generated flag to signal others when needed' do
+            options_test = {}
+            parser.instance_variable_set( :@options, options_test )
+            allow( Beaker::Options::HostsFileParser ).to receive(
+              :parse_hosts_file
+            ).and_raise( Errno::ENOENT )
+
+            mock_beaker_hostgenerator_cli = Object.new
+            allow( mock_beaker_hostgenerator_cli ).to receive( :execute )
+            allow( BeakerHostGenerator::CLI ).to receive(
+              :new
+            ).and_return( mock_beaker_hostgenerator_cli )
+            allow( Beaker::Options::HostsFileParser ).to receive( :parse_hosts_string )
+            parser.parse_hosts_options
+
+            expect( options_test[:hosts_file_generated] ).to be true
+          end
+        end
+
+      end
+
       context "set_default_host!" do
 
         let(:roles) { @roles || [["master", "agent", "database"], ["agent"]] }

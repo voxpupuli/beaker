@@ -189,14 +189,14 @@ module Beaker
       @options[:tests] = []
       @options[:pre_cleanup] = []
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
-      FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
-      hosts_yaml = YAML.load_file(preserved_hosts_filename)
+
+      hosts_yaml = @options
       newly_keyed_hosts_entries = {}
       hosts_yaml['HOSTS'].each do |host_name, file_host_hash|
         h = Beaker::Options::OptionsHash.new
         file_host_hash = h.merge(file_host_hash)
         @hosts.each do |host|
-          if host_name == host.name
+          if host_name.to_s == host.name.to_s
             newly_keyed_hosts_entries[host.reachable_name] = file_host_hash.merge(host.host_hash)
             break
           end

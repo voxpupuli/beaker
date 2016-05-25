@@ -90,7 +90,9 @@ module Beaker
       # @return nil
       # @api public
       def resolve_symlinks!
-        @options[:hosts_file] = File.realpath(@options[:hosts_file]) if @options[:hosts_file]
+        if @options[:hosts_file] && !@options[:hosts_file_generated]
+          @options[:hosts_file] = File.realpath(@options[:hosts_file])
+        end
       end
 
       #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
@@ -192,8 +194,7 @@ module Beaker
         @options                        = @options.merge(cmd_line_and_file_options)
 
         if not @options[:help] and not @options[:beaker_version_print]
-          #read the hosts file that contains the node configuration and hypervisor info
-          hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+          hosts_options = parse_hosts_options
 
           # merge in host file vars
           #   overwrite options (default, file options, command line) with host file options
@@ -213,6 +214,27 @@ module Beaker
         end
 
         @options
+      end
+
+      # Parse hosts options from host files into a host options hash. Falls back
+      # to trying as a beaker-hostgenerator string if reading the hosts file
+      # doesn't work
+      #
+      # @return [Hash] Host options, containing all host-specific details
+      # @raise [ArgumentError] if a hosts file is generated, but it can't
+      #   be read by the HostsFileParser
+      def parse_hosts_options
+        #read the hosts file that contains the node configuration and hypervisor info
+        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+        return hosts_options
+      rescue Errno::ENOENT
+        require 'tempfile'
+        require 'beaker-hostgenerator'
+        bhg_cli = BeakerHostGenerator::CLI.new( [ @options[:hosts_file] ] )
+        hosts_file_content = bhg_cli.execute
+        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_string( hosts_file_content )
+        @options[:hosts_file_generated] = true
+        return hosts_options
       end
 
       #Validate all merged options values for correctness
