@@ -2,7 +2,7 @@
 
 ## Beaker Info
 
-* [Beaker Owners & Reviewers](Beaker-Owners-and-Reviewers.md)
+* [MAINTAINERS](/MAINTAINERS.md)
 * [How to install](Beaker-Installation.md)
 * [How to Beaker](How-To-Beaker.md)
   * [Overview](Overview.md)
