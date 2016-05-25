@@ -10,6 +10,8 @@ See [Beaker Installation](docs/Beaker-Installation.md).
 
 Documentation for Beaker can be found in this repository in [the docs/ folder](docs/README.md).
 
+The [Getting Started](docs/How-To-Beaker.md) is a great place to start for new Beaker users.
+
 #Beaker Libraries
 
 Beaker functionality has been extended through the use of libraries available as gems. See the
