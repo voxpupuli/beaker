@@ -1,6 +1,8 @@
 # Beaker
 
-Puppet Labs cloud enabled acceptance testing tool.
+Beaker is an acceptance testing harness for Puppet PE and other Puppet Projects.  It can also be used as a virtual machine provisioner - setting up machines, running any configuration on those machines and then exiting.
+
+Beaker runs tests written in Ruby with an additional DSL API.  This gives you access to all standard Ruby along with acceptance testing specific commands.
 
 # Installation
 
