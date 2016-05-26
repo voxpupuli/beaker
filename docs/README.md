@@ -3,10 +3,9 @@
 ## Beaker Info
 
 * [MAINTAINERS](/MAINTAINERS.md)
-* [How to install](Beaker-Installation.md)
+* [Installing Beaker](Beaker-Installation.md)
 * [How to Beaker](How-To-Beaker.md)
   * [Overview](Overview.md)
-  * [Beaker Installation](Beaker-Installation.md)
   * [Creating A Test Environment](Creating-A-Test-Environment.md)
     * [Roles, What Are They?](Roles-What-Are-They.md)
     * Supported Virtualization Techniques
