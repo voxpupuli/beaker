@@ -18,6 +18,11 @@ module Beaker
         :mount_folders => {
           :test_temp => {:from => './', :to => '/temp'},
           :test_tmp => {:from => '../', :to => '/tmp'}
+        },
+        :forwarded_ports => {
+          :http => {:from => 10080, :to => 80},
+          :ssl  => {:from => 4443,  :to => 443},
+          :tomcat => {:from => 8080, :to => 8080}
         }
       })
     end
@@ -49,6 +54,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm1", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
+    v.vm.network :forwarded_port, guest:80, host:10080
+    v.vm.network :forwarded_port, guest:443, host:4443
+    v.vm.network :forwarded_port, guest:8080, host:8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -61,6 +69,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm2", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
+    v.vm.network :forwarded_port, guest:80, host:10080
+    v.vm.network :forwarded_port, guest:443, host:4443
+    v.vm.network :forwarded_port, guest:8080, host:8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -73,6 +84,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm3", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
+    v.vm.network :forwarded_port, guest:80, host:10080
+    v.vm.network :forwarded_port, guest:443, host:4443
+    v.vm.network :forwarded_port, guest:8080, host:8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end

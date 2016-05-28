@@ -41,6 +41,12 @@ module Beaker
           end
         end
 
+        unless host['forwarded_ports'].nil?
+          host['forwarded_ports'].each do |_name, port|
+            v_file << "    v.vm.network :forwarded_port, guest:#{port[:to]}, host:#{port[:from]}\n"
+          end
+        end
+
         if /windows/i.match(host['platform'])
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true\n"
           v_file << "    v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true\n"
