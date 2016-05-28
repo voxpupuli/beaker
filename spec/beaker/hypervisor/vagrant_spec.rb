@@ -54,9 +54,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm1", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
-    v.vm.network :forwarded_port, guest:80, host:10080
-    v.vm.network :forwarded_port, guest:443, host:4443
-    v.vm.network :forwarded_port, guest:8080, host:8080
+    v.vm.network :forwarded_port, guest: 80, host: 10080
+    v.vm.network :forwarded_port, guest: 443, host: 4443
+    v.vm.network :forwarded_port, guest: 8080, host: 8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -69,9 +69,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm2", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
-    v.vm.network :forwarded_port, guest:80, host:10080
-    v.vm.network :forwarded_port, guest:443, host:4443
-    v.vm.network :forwarded_port, guest:8080, host:8080
+    v.vm.network :forwarded_port, guest: 80, host: 10080
+    v.vm.network :forwarded_port, guest: 443, host: 4443
+    v.vm.network :forwarded_port, guest: 8080, host: 8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -84,9 +84,9 @@ Vagrant.configure("2") do |c|
     v.vm.network :private_network, ip: "ip.address.for.vm3", :netmask => "255.255.0.0", :mac => "0123456789"
     v.vm.synced_folder './', '/temp', create: true
     v.vm.synced_folder '../', '/tmp', create: true
-    v.vm.network :forwarded_port, guest:80, host:10080
-    v.vm.network :forwarded_port, guest:443, host:4443
-    v.vm.network :forwarded_port, guest:8080, host:8080
+    v.vm.network :forwarded_port, guest: 80, host: 10080
+    v.vm.network :forwarded_port, guest: 443, host: 4443
+    v.vm.network :forwarded_port, guest: 8080, host: 8080
     v.vm.provider :virtualbox do |vb|
       vb.customize ['modifyvm', :id, '--memory', '1024', '--cpus', '1']
     end
@@ -164,6 +164,91 @@ EOF
   
       expect( match ).to_not be nil
   
+    end
+
+    context "port forwarding rules" do
+      it "supports all Vagrant parameters" do
+        path = vagrant.instance_variable_get( :@vagrant_path )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+        hosts = make_hosts(
+          {
+            :forwarded_ports => {
+              :http => {
+                :from => 10080,
+                :from_ip => '127.0.0.1',
+                :to => 80,
+                :to_ip => '0.0.0.0',
+                :protocol => 'udp'
+              }
+            }
+          },1)
+        vagrant.make_vfile( hosts, options )
+
+        vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+        expect( vagrantfile ).to match(/v.vm.network :forwarded_port, protocol: 'udp', guest_ip: '0.0.0.0', guest: 80, host_ip: '127.0.0.1', host: 10080/)
+      end
+
+      it "supports supports from_ip" do
+        path = vagrant.instance_variable_get( :@vagrant_path )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+        hosts = make_hosts(
+            {
+                :forwarded_ports => {
+                    :http => {
+                        :from => 10080,
+                        :from_ip => '127.0.0.1',
+                        :to => 80,
+                    }
+                }
+            },1)
+        vagrant.make_vfile( hosts, options )
+
+        vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+        expect( vagrantfile ).to match(/v.vm.network :forwarded_port, guest: 80, host_ip: '127.0.0.1', host: 10080/)
+      end
+
+      it "supports all to_ip" do
+        path = vagrant.instance_variable_get( :@vagrant_path )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+        hosts = make_hosts(
+            {
+                :forwarded_ports => {
+                    :http => {
+                        :from => 10080,
+                        :to => 80,
+                        :to_ip => '0.0.0.0',
+                    }
+                }
+            },1)
+        vagrant.make_vfile( hosts, options )
+
+        vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+        expect( vagrantfile ).to match(/v.vm.network :forwarded_port, guest_ip: '0.0.0.0', guest: 80, host: 10080/)
+      end
+
+      it "supports all protocol" do
+        path = vagrant.instance_variable_get( :@vagrant_path )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+
+        hosts = make_hosts(
+            {
+                :forwarded_ports => {
+                    :http => {
+                        :from => 10080,
+                        :to => 80,
+                        :protocol => 'udp'
+                    }
+                }
+            },1)
+        vagrant.make_vfile( hosts, options )
+
+        vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+        expect( vagrantfile ).to match(/v.vm.network :forwarded_port, protocol: 'udp', guest: 80, host: 10080/)
+
+      end
     end
 
     it "can generate a new /etc/hosts file referencing each host" do
