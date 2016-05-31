@@ -293,7 +293,11 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
+      if ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+        resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+      else
+        resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
+      end
       resolv_conf.each_line { |line|
         if line =~ /^\s*domain\s+(\S+)/
           domain = $1
@@ -322,6 +326,8 @@ module Beaker
     def set_etc_hosts(host, etc_hosts)
       if host['platform'] =~ /freebsd/
         host.echo_to_file(etc_hosts, '/etc/hosts')
+      elsif ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+        host.exec(Command.new("echo '#{etc_hosts}' >> C:\\Windows\\System32\\drivers\\etc\\hosts"))
       else
         host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
       end
