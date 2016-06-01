@@ -110,10 +110,8 @@ module Beaker
         #     end
         #
         # @example Using TestCase helpers from within a test.
-        #     agents.each do |agent|
-        #       shell('cat /etc/puppet/puppet.conf') do |result|
-        #         assert_match result.stdout, /server = #{master}/, 'WTF Mate'
-        #       end
+        #     shell('cat /etc/puppet/puppet.conf') do |result|
+        #       assert_match result.stdout, /server = #{master}/, 'WTF Mate'
         #     end
         #
         # @return [Result]   An object representing the outcome of *command*.
