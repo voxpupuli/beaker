@@ -56,6 +56,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'mime-types', '~> 2.99' if RUBY_VERSION < '2.0' # dropped ruby 1.9 rupport in 3.0
   s.add_runtime_dependency 'fog-google', '~> 0.0.9' # dropped ruby 1.9 support in 0.1
   s.add_runtime_dependency 'fog', ['~> 1.25', '< 1.35.0']
+  s.add_runtime_dependency 'ruby-lxc'
 
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'

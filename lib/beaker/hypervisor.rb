@@ -59,6 +59,8 @@ module Beaker
           Beaker::OpenStack
         when /^noop$/
           Beaker::Noop
+        when /^lxc$/
+          Beaker::Lxc
         when /^(default)|(none)$/
           Beaker::Hypervisor
         else
@@ -146,6 +148,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack', 'noop' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack', 'noop', 'lxc' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end
