@@ -7,13 +7,17 @@ module Beaker
     let(:options) { make_opts.merge({'logger' => double().as_null_object}) }
 
     let(:openstack) {
-      stub_const("Fog::Compute", MockComputeClient)
-      stub_const("Fog::Network", MockNetworkClient)
-      Beaker::OpenStack.new(@hosts, options)
+      OpenStack.new(@hosts, options)
     }
 
     before :each do
       @hosts = make_hosts()
+
+      @compute_client = double().as_null_object
+      @network_client = double().as_null_object
+
+      allow( Fog::Compute ).to receive( :new ).and_return( @compute_client )
+      allow( Fog::Network ).to receive( :new ).and_return( @network_client )
     end
 
     it 'check openstack options during initialization' do
@@ -36,12 +40,26 @@ module Beaker
     end
 
     it 'check host options during server creation' do
-      openstack.provision
-      compute_options = openstack.instance_eval('@compute_client').create_options
 
-      expect(compute_options[:flavor_ref]).to eq('testid')
-      expect(compute_options[:image_ref]).to eq('testid')
-      expect(compute_options[:user_data]).to eq('#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"')
+      mock_flavor = Object.new
+      allow( mock_flavor ).to receive( :id ).and_return( 12345 )
+      allow( openstack ).to receive( :flavor ).and_return( mock_flavor )
+      expect( openstack ).to receive( :flavor ).with( 'm1.large' )
+
+      mock_image = Object.new
+      allow( mock_image ).to receive( :id ).and_return( 54321 )
+      allow( openstack ).to receive( :image ).and_return( mock_image )
+      expect( openstack ).to receive( :image ).with( 'default_image' )
+
+      mock_servers = double().as_null_object
+      allow( @compute_client ).to receive( :servers ).and_return( mock_servers )
+      expect(mock_servers).to receive(:create).with(hash_including(
+        :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"',
+        :flavor_ref => 12345,
+        :image_ref => 54321)
+      )
+
+      openstack.provision
     end
 
   end
