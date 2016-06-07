@@ -27,8 +27,6 @@ module Windows::File
     when :bitvise
       # swap out separators
       network_path = path.gsub('\\', scp_separator)
-      # pull off drive prefix since base BitVise dir is '/'
-      network_path.gsub('C:', '')
     when :openssh
       path
     else

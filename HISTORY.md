@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 23 May, 2016 (67b70d4a)](#LATEST)
+* [LATEST - 1 Jun, 2016 (83bf4f46)](#LATEST)
+* [2.42.0 - 23 May, 2016 (c245fef7)](#2.42.0)
 * [2.41.0 - 10 May, 2016 (17c745bd)](#2.41.0)
 * [2.40.0 - 18 Apr, 2016 (0a7b948a)](#2.40.0)
 * [2.39.0 - 6 Apr, 2016 (5976e103)](#2.39.0)
@@ -118,7 +119,160 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 23 May, 2016 (67b70d4a)
+### <a name = "LATEST">LATEST - 1 Jun, 2016 (83bf4f46)
+
+* (GEM) update beaker version to 2.43.0 (83bf4f46)
+
+* Merge pull request #1128 from puppetlabs/maint/master/update-shell-docs (81f6ab97)
+
+
+```
+Merge pull request #1128 from puppetlabs/maint/master/update-shell-docs
+
+(maint) Fix documentation example for shell
+```
+* Merge pull request #1132 from kevpl/docs_vagrant_reconcile (1ec62530)
+
+
+```
+Merge pull request #1132 from kevpl/docs_vagrant_reconcile
+
+(MAINT) cleaned up vagrant hypervisor docs
+```
+* Merge pull request #1113 from james-powis/BKR-758_fix-bitvise-ssh (3df2a046)
+
+
+```
+Merge pull request #1113 from james-powis/BKR-758_fix-bitvise-ssh
+
+(BKR-758) Fix Bitvise SSH issues and Various vagrant versions not forwarding ssh properly
+```
+* (MAINT) cleaned up vagrant hypervisor docs (ad442334)
+
+
+```
+(MAINT) cleaned up vagrant hypervisor docs
+
+[skip ci]
+```
+* (maint) Fix documentation example for shell (323a5296)
+
+
+```
+(maint) Fix documentation example for shell
+
+Shell cannot accept a host, so update inline docs accordingly.
+```
+* Merge pull request #1125 from kevpl/maint_docs_installation_clarify (75d6244f)
+
+
+```
+Merge pull request #1125 from kevpl/maint_docs_installation_clarify
+
+(MAINT) clarifying between install docs
+```
+* Merge pull request #1123 from kevpl/maint_docs_filebug_rm (c6a02b25)
+
+
+```
+Merge pull request #1123 from kevpl/maint_docs_filebug_rm
+
+(MAINT) rm File-a-Beaker-Bug doc, redundant
+```
+* Merge pull request #1127 from kevpl/maint_docs_maintainers_consolidate (746f571f)
+
+
+```
+Merge pull request #1127 from kevpl/maint_docs_maintainers_consolidate
+
+(MAINT) clarify beaker maintainers
+```
+* Merge pull request #1124 from kevpl/maint_docs_readme_01 (dbd4c1cf)
+
+
+```
+Merge pull request #1124 from kevpl/maint_docs_readme_01
+
+(MAINT) added overview to main README
+```
+* (MAINT) clarify beaker maintainers (a9a9fb9a)
+
+
+```
+(MAINT) clarify beaker maintainers
+
+[skipci]
+```
+* Merge pull request #1126 from tvpartytonight/maint_add_front_page_links (8540111a)
+
+
+```
+Merge pull request #1126 from tvpartytonight/maint_add_front_page_links
+
+(maint) Add front page link for Getting Started guide
+```
+* (maint) Add front page link for Getting Started guide (74fe4247)
+
+* (MAINT) clarifying between install docs (bbe3e500)
+
+
+```
+(MAINT) clarifying between install docs
+
+[skip ci]
+```
+* (MAINT) added overview to main README (c0987a67)
+
+* (MAINT) rm File-a-Beaker-Bug doc, redundant (c9af7dd7)
+
+* Merge pull request #1122 from pinkypie/BKR-811 (6b586915)
+
+
+```
+Merge pull request #1122 from pinkypie/BKR-811
+
+(BKR-811) Adding documentation for the confine method.
+```
+* Merge pull request #1121 from pinkypie/BKR-718 (8659c9d8)
+
+
+```
+Merge pull request #1121 from pinkypie/BKR-718
+
+(BKR-718) Check the available rake method
+```
+* (BKR-811) Adding documentation for the confine method. (bf7921a7)
+
+* (BKR-718) - Check the available rake method for the version of, rake to avoid deprecation errors/warnings. (2d98d384)
+
+* (BKR-758) Fix Bitvise SSH issues and (1f9c6efd)
+
+
+```
+(BKR-758) Fix Bitvise SSH issues and
+
+correct various vagrant versions not forwarding ssh properly
+
+petems - Add logic for PSWindows
+petems - Replace host make command with mkdir_p helper
+petems - Remove resolv.conf code
+    Could fix this with Windows specific stuff later, but leaving it out for now
+joshsouza - Correct SSH config's HostName when connecting to Windows hosts (not using local port mapping)
+joshsouza - Correct hieraconf to be hiera_config in puppet lookup
+
+explicitly forwarding ssh
+james-powis - forwarding ssh explicitly for windows
+
+    due to regression bugs in vagrant versions 1.6.2, 1.6.3, 1.6.4, 1.7.3+
+    this causes ssh vagrant@#{SUT} to fail to map to ssh -p 2222
+    vagrant@localhost. Explicitly setting absolutely ensures ssh forwarding
+    functions.
+
+james-powis - fixing bitvise on windows
+```
+### <a name = "2.42.0">2.42.0 - 23 May, 2016 (c245fef7)
+
+* (HISTORY) update beaker history for gem release 2.42.0 (c245fef7)
 
 * (GEM) update beaker version to 2.42.0 (67b70d4a)
 
