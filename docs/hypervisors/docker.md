@@ -41,10 +41,10 @@ By default the docker container just runs an sshd which is adequate for 'puppet 
 
     HOSTS:
       ubuntu-12-10:
-      platform: ubuntu-12.10-x64
-      image: ubuntu:12.10
-      hypervisor: docker
-      docker_cmd: '["/sbin/init"]'
+        platform: ubuntu-12.10-x64
+        image: ubuntu:12.10
+        hypervisor: docker
+        docker_cmd: '["/sbin/init"]'
     CONFIG:
       type: foss
 
@@ -53,10 +53,10 @@ Unless the image configuration changes you might want to keep the Docker image f
 
     HOSTS:
       ubuntu-12-10:
-      platform: ubuntu-12.10-x64
-      image: ubuntu:12.10
-      hypervisor: docker
-      docker_preserve_image: true
+        platform: ubuntu-12.10-x64
+        image: ubuntu:12.10
+        hypervisor: docker
+        docker_preserve_image: true
     CONFIG:
       type: foss
 
