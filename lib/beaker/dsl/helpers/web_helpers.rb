@@ -24,6 +24,7 @@ module Beaker
           url = URI.parse(link)
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
           http.start do |http|
             return http.head(url.request_uri).code == "200"
           end
@@ -52,9 +53,17 @@ module Beaker
           else
             logger.notify "Fetching: #{src}"
             logger.notify "  and saving to #{dst}"
-            open(src, :allow_redirections => :all) do |remote|
-              File.open(dst, "w") do |file|
-                FileUtils.copy_stream(remote, file)
+            begin
+              open(src, :allow_redirections => :all) do |remote|
+                File.open(dst, "w") do |file|
+                  FileUtils.copy_stream(remote, file)
+                end
+              end
+            rescue OpenURI::HTTPError => e
+              if e.message =~ /404.*/
+                raise "Failed to fetch_remote_file '#{src}' (exit code #{$?}"
+              else
+                raise e
               end
             end
           end
