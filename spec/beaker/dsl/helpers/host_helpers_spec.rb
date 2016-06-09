@@ -42,6 +42,25 @@ describe ClassMixedWithDSLHelpers do
       subject.on( host, 'ls ~/.bin', :environment => {:HOME => '/tmp/test_home' } )
     end
 
+    describe 'with a beaker command object passed in as the command argument' do
+      let( :command ) { Beaker::Command.new('commander command', [], :environment => {:HOME => 'default'}) }
+
+      it 'overwrites the command environment with the environment specified in #on' do
+        expect( host ).to receive( :exec ) do |command|
+          expect(command.environment).to eq({:HOME => 'override'})
+        end
+        subject.on( host, command, :environment => {:HOME => 'override'})
+      end
+
+      it 'uses the command environment if there is no overriding argument in #on' do
+        expect( host ).to receive( :exec ) do |command|
+          expect(command.environment).to eq({:HOME => 'default'})
+        end
+        subject.on( host, command )
+      end
+
+    end
+
     it 'if the host is a String Object, finds the matching hosts with that String as role' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
 
