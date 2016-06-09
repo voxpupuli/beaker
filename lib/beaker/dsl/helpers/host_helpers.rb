@@ -69,7 +69,12 @@ module Beaker
               end
               command_object = Command.new(command.to_s, [], cmd_opts)
             elsif command.is_a? Command
-              command_object = command
+              if opts[:environment]
+                command_object = command.clone
+                command_object.environment = opts[:environment]
+              else
+                command_object = command
+              end
             else
               msg = "DSL method `on` can only be called with a String or Beaker::Command"
               msg << " object as the command parameter, not #{command.class}."
