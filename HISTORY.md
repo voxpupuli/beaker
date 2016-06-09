@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 1 Jun, 2016 (83bf4f46)](#LATEST)
+* [LATEST - 9 Jun, 2016 (0d267d3d)](#LATEST)
+* [2.43.0 - 1 Jun, 2016 (777469ca)](#2.43.0)
 * [2.42.0 - 23 May, 2016 (c245fef7)](#2.42.0)
 * [2.41.0 - 10 May, 2016 (17c745bd)](#2.41.0)
 * [2.40.0 - 18 Apr, 2016 (0a7b948a)](#2.40.0)
@@ -119,7 +120,85 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 1 Jun, 2016 (83bf4f46)
+### <a name = "LATEST">LATEST - 9 Jun, 2016 (0d267d3d)
+
+* (GEM) update beaker version to 2.44.0 (0d267d3d)
+
+* Merge pull request #1138 from s12v/patch-1 (b612c0d3)
+
+
+```
+Merge pull request #1138 from s12v/patch-1
+
+Update docker.md
+```
+* Merge pull request #1136 from kevpl/docs_hypervisor_lxc_link (605cdc33)
+
+
+```
+Merge pull request #1136 from kevpl/docs_hypervisor_lxc_link
+
+(MAINT) added LXC hypervisor fork link
+```
+* Merge pull request #1139 from tvpartytonight/BKR-822 (30f39c60)
+
+
+```
+Merge pull request #1139 from tvpartytonight/BKR-822
+
+(BKR-822) Ensure env options applied to bkr commands with #on
+```
+* (BKR-822) Ensure env options applied to bkr commands with #on (1b16c967)
+
+
+```
+(BKR-822) Ensure env options applied to bkr commands with #on
+
+In commit f78c2db, we neglected to ensure that an environment passed in
+through the options specified by #on overrides the environment specified
+in the Beaker::Command object. This change ensures that #on checks for
+the environment in its own options to override the command options.
+```
+* Merge pull request #1134 from tvpartytonight/BKR-813 (c8830026)
+
+
+```
+Merge pull request #1134 from tvpartytonight/BKR-813
+
+(BKR-813) Add support for beaker lib PR testing
+```
+* (MAINT) Fix examples in docker.md (262758ec)
+
+* (MAINT) added LXC hypervisor fork link (695ab33e)
+
+
+```
+(MAINT) added LXC hypervisor fork link
+
+[skip ci]
+```
+* Merge pull request #1131 from kevpl/docs_hypervisor_rearrange (f6459cb1)
+
+
+```
+Merge pull request #1131 from kevpl/docs_hypervisor_rearrange
+
+(MAINT) moved non-conflicting hypervisor docs into hypervisor folder
+```
+* (BKR-813) Add support for beaker lib PR testing (2870d467)
+
+
+```
+(BKR-813) Add support for beaker lib PR testing
+
+This change allows for Beaker's CI to detect PR testing from beaker-pe
+and pull in that branch for additional testing.
+```
+* (MAINT) moved non-conflicting hypervisor docs into hypervisor folder (03346d9a)
+
+### <a name = "2.43.0">2.43.0 - 1 Jun, 2016 (777469ca)
+
+* (HISTORY) update beaker history for gem release 2.43.0 (777469ca)
 
 * (GEM) update beaker version to 2.43.0 (83bf4f46)
 
