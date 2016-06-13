@@ -61,7 +61,7 @@ module Beaker
               end
             rescue OpenURI::HTTPError => e
               if e.message =~ /404.*/
-                raise "Failed to fetch_remote_file '#{src}' (exit code #{$?}"
+                raise "Failed to fetch_remote_file '#{src}' (#{e.message})"
               else
                 raise e
               end
@@ -104,7 +104,7 @@ module Beaker
             logger.debug(line)
           end
           if $?.to_i != 0
-            raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?}"
+            raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
           end
           dst
         end
