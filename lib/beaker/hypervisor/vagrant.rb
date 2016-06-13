@@ -41,6 +41,20 @@ module Beaker
           end
         end
 
+        unless host['forwarded_ports'].nil?
+          host['forwarded_ports'].each do |_name, port|
+            fwd = "    v.vm.network :forwarded_port,"
+            fwd << " protocol: '#{port[:protocol]}'," unless port[:protocol].nil?
+            fwd << " guest_ip: '#{port[:to_ip]}'," unless port[:to_ip].nil?
+            fwd << " guest: #{port[:to]},"
+            fwd << " host_ip: '#{port[:from_ip]}'," unless port[:from_ip].nil?
+            fwd << " host: #{port[:from]}"
+            fwd << "\n"
+
+            v_file << fwd
+          end
+        end
+
         if /windows/i.match(host['platform'])
           #due to a regression bug in versions of vagrant 1.6.2, 1.6.3, 1.6.4, >= 1.7.3 ssh fails to forward 
           #automatically (note <=1.6.1, 1.6.5, 1.7.0 - 1.7.2 are uneffected)

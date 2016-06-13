@@ -119,3 +119,41 @@ as synced_folders inside the vagrant box. This is done by using the
 
 In the above beaker will mount the folders `./` to `/vagrant/folder1` and the
 folder `/tmp` to `/vagrant/tmp`.
+
+### Forwarding Ports to Guest
+
+When using the Vagrant Hypervisor, beaker can create the Vagrantfile to forward specified ports to a specific box. This is done by using the `forwarded_ports` option in the nodeset file.
+
+**Example hosts file**
+
+    HOSTS:
+      ubuntu-1404-x64-master:
+        roles:
+          - master
+          - agent
+          - dashboard
+          - database
+        platform: ubuntu-1404-x86_64
+        hypervisor: vagrant
+        box: puppetlabs/ubuntu-14.04-64-nocm
+        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+        ip: 192.168.20.20
+      ubuntu-1404-x64-agent:
+        roles:
+          - agent
+        platform: ubuntu-1404-x86_64
+        hypervisor: vagrant
+        box: puppetlabs/ubuntu-14.04-64-nocm
+        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+        ip: 192.168.21.21
+        forwarded_ports:
+          apache:
+            from: 10080
+            to: 80
+          tomcat:
+            from: 8080
+            to: 8080
+            from_ip: '127.0.0.1'
+            to_ip: '0.0.0.0'
+
+In the above, beaker will forward port 10080 and 8080 on the Host to port 80 and 8080 (respectively) on the Agent guest.
