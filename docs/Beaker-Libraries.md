@@ -2,6 +2,8 @@
 Engineering at Puppet Labs has written several libraries that extends the functionality provided
 by Beaker.
 
+To learn how to create beaker libraries, see the [Beaker-Template](https://github.com/puppetlabs/beaker-template/blob/master/README.md) documentation.
+
 | Name               | Description                                                         | Docs                                                            |
 |:-------------------|:--------------------------------------------------------------------|:----------------------------------------------------------------|
 | Master Manipulator | Easy DSL extension for changing configuration on a Puppet Master    | [Github Repo](https://github.com/puppetlabs/master_manipulator) |
