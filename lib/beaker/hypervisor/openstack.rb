@@ -170,7 +170,7 @@ module Beaker
           :image_ref  => image(host[:image]).id,
           :nics       => [ {'net_id' => network(@options[:openstack_network]).id } ],
           :name       => host[:vmhostname],
-          :user_data  => "#cloud-config\nmanage_etc_hosts: true\n",
+          :user_data  => host[:user_data] || "#cloud-config\nmanage_etc_hosts: true\n",
         }
         options[:key_name] = key_name(host)
         vm = @compute_client.servers.create(options)
