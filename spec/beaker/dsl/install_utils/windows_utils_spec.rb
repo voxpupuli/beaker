@@ -42,11 +42,11 @@ describe ClassMixedWithDSLInstallUtils do
 
   def expect_version_log_called(times = hosts.length)
     [
-      "\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
-      "\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
+      "\\\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\\\"",
+      "\\\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\\\"",
     ].each do |path|
       expect( Beaker::Command ).to receive( :new )
-        .with( "if exist #{path} type #{path}", [], {:cmdexe => true} )
+        .with( "\"if exist #{path} type #{path}\"", [], {:cmdexe => true} )
         .exactly( times ).times
     end
   end

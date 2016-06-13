@@ -144,10 +144,10 @@ exit /B %errorlevel%
             # emit the misc/versions.txt file which contains component versions for
             # puppet, facter, hiera, pxp-agent, packaging and vendored Ruby
             [
-              "\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\"",
-              "\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\""
+              "\\\"%ProgramFiles%\\Puppet Labs\\puppet\\misc\\versions.txt\\\"",
+              "\\\"%ProgramFiles(x86)%\\Puppet Labs\\puppet\\misc\\versions.txt\\\""
             ].each do |path|
-              on host, Command.new("if exist #{path} type #{path}", [], { :cmdexe => true })
+              on host, Command.new("\"if exist #{path} type #{path}\"", [], { :cmdexe => true })
             end
           end
         end
