@@ -1051,7 +1051,9 @@ module Beaker
         #
         # @return nil
         def install_puppet_agent_dev_repo_on( hosts, opts )
-
+        
+	require "pry"
+	binding.pry
           opts[:puppet_agent_version] ||= opts[:version] #backward compatability
           if not opts[:puppet_agent_version]
             raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
@@ -1090,6 +1092,7 @@ module Beaker
               host.get_remote_file( "#{release_path}/#{release_file}" )
             else
               onhost_copied_file = File.join(onhost_copy_base, release_file)
+	      print "release path is #{release_path}"
               fetch_http_file( release_path, release_file, copy_dir_local)
               scp_to host, File.join(copy_dir_local, release_file), onhost_copy_base
             end
