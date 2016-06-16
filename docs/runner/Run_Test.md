@@ -13,15 +13,7 @@ Beaker goes through several phases when running tests
   * skip with `--no-configure`
   * Do any post-provisioning configuration to the test nodes
 * Testing
-  * Pre-Suite
-   * use `--pre-suite`
-   * Run any test files defined as part of the `--pre-suite` command line option
-  * Tests
-   * use `--tests`
-   * Run any test files defined as part of the `--tests` command line option
-  * Post-Suite
-   * use `--post-suite`
-   * Run any test files defined as part of the `--post-suite` command line option
+   For test running options, please refer to [Beaker Test Run Options] (test_suites.md)
 * Reverting
   * Skip with `--preserve-hosts`
   * Destroy and cleanup all SUTs
