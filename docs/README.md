@@ -5,7 +5,6 @@
 * [MAINTAINERS](/MAINTAINERS.md)
 * [Installing Beaker](Beaker-Installation.md)
 * [How to Beaker](How-To-Beaker.md)
-  * [Overview](Overview.md)
   * [Creating A Test Environment](Creating-A-Test-Environment.md)
     * [Roles, What Are They?](Roles-What-Are-They.md)
     * [Supported Virtualization Techniques - Hypervisor Docs](hypervisors)
