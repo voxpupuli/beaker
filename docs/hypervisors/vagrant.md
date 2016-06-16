@@ -15,7 +15,7 @@ see [downloads.vagrantup.com](http://downloads.vagrantup.com/) for downloads.
 Currently, we provide a suite of pre-built, publicly available vagrant boxes for
 use in constructing tests: [Puppet Labs Vagrant Boxes](https://vagrantcloud.com/puppetlabs/).
 You can use these boxes easily by pulling one of our
-[Example Vagrant Hosts Files](Example-Vagrant-Hosts-Files.md).
+[Example Vagrant Hosts Files](vagrant_hosts_file_examples.md).
 
 ### Setup a Vagrant Hosts File
 
