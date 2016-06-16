@@ -4,8 +4,8 @@
 
 * [MAINTAINERS](/MAINTAINERS.md)
 * [Installing Beaker](Beaker-Installation.md)
+* [Running Beaker Tests ](runner/test_run.md)
 * [How to Beaker](How-To-Beaker.md)
-  * [Overview](Overview.md)
   * [Creating A Test Environment](Creating-A-Test-Environment.md)
     * [Roles, What Are They?](Roles-What-Are-They.md)
     * [Supported Virtualization Techniques - Hypervisor Docs](hypervisors)
@@ -19,7 +19,7 @@
     * [How the confine method works](dsl/confine.md)
     * [Platform Specific Tag Confines](dsl/platform_specific_tag_confines.md)
     * [Shared Options for Executing Beaker Commands](Shared-Options-for-Executing-Beaker-Commands.md)
-  * [Let's Write a Test!](Lets-Write-a-Test.md)
+  * [Let's Write a Test!](Lets-Write-a-Test.md) 
   * [Access The Live Test Console with Pry](Access-the-Live-Test-Console-with-Pry.md)
   * [Test Tagging](Beaker-Test-Tagging.md)
   * [Recipes](Beaker-Recipes.md)
