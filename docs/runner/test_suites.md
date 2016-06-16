@@ -1,13 +1,13 @@
-# Test Suites & Failure Modes
+# Beaker Phases, Test Suites & Failure Modes
 
 Beaker test suites correspond to test suites in most testing frameworks,
 being containers for tests or pre- or post-testing files to execute.
 
 There are two main ways that you specify which test suites a particular
 file belongs in. The first way is to use the Beaker command line interface
-(CLI) arguments. These are specified in runtime order below:
+(CLI) arguments. The various test suites specified in runtime order below:
 
-    --pre-suite
+    —-pre-suite
     —-tests
     —-post-suite
     —-pre-cleanup
@@ -81,3 +81,6 @@ tests, regardless of Beaker’s fail-mode. You can think of this behaving as a
 The pre-cleanup suite falls back to the global fail-mode setting, which
 defaults to slow, meaning it will run all tests regardless of any early
 failures.
+
+
+
