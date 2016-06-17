@@ -709,7 +709,15 @@ module Beaker
         host.host_hash[:hypervisor] = 'vmpooler'
         expect(host.get_public_ip).to be(nil)
       end
+
+      it 'calls execute with curl if the instance is not defined' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = nil
+        expect(host).to receive(:execute).with("curl http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
     end
+
     describe '#ip' do
       it 'calls #get_ip when get_public_ip returns nil' do
         allow( host ).to receive(:get_public_ip).and_return(nil)

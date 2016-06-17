@@ -228,7 +228,15 @@ module Beaker
     def get_public_ip
       case host_hash[:hypervisor]
       when 'ec2'
-        host_hash[:instance].ip_address
+        if host_hash[:instance]
+          host_hash[:instance].ip_address
+        else
+          # In the case of using ec2 instances with the --no-provision flag, the ec2
+          # instance object does not exist and we should just use the curl endpoint
+          # specified here:
+          # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
+        end
       end
     end
 
