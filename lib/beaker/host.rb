@@ -224,10 +224,18 @@ module Beaker
       @logger.warn("Uh oh, this should be handled by sub-classes but hasn't been")
     end
 
+    # Determine the ip address using logic specific to the hypervisor
+    def get_public_ip
+      case host_hash[:hypervisor]
+      when 'ec2'
+        host_hash[:instance].ip_address
+      end
+    end
+
     #Return the ip address of this host
     #Always pull fresh, because this can sometimes change
     def ip
-      self['ip'] = get_ip
+      self['ip'] = get_public_ip || get_ip
     end
 
     #@return [Boolean] true if x86_64, false otherwise
