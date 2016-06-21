@@ -235,7 +235,11 @@ module Beaker
           # instance object does not exist and we should just use the curl endpoint
           # specified here:
           # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+          if self.instance_of?(Windows::Host)
+          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          else
           execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          end
         end
       end
     end
