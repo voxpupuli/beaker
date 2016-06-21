@@ -1,6 +1,6 @@
 
-Beaker uses a set of colors to output different types of messages on to the terminal. 
-       
+Beaker uses a set of colors to output different types of messages on to the terminal.
+
 ## The Default Color Codes
    If you do not provide any values, the defaults are: [Default colors](https://github.com/puppetlabs/beaker/blob/master/lib/beaker/logger.rb#L85-L95)
 
@@ -22,7 +22,7 @@ To get the color-code corresponding to a color, refer to: [Colors Supported by B
         log_colors:
           success: "\e[01;35m"
           warn: "\e[00;33m"
- 
+
 **Eg 2: Turning off colors.**
 The following option in the hosts file will print the whole output in one single color.
 
