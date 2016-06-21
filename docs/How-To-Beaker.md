@@ -1,4 +1,3 @@
-* [Overview](Overview.md)
 * [Beaker Installation](Beaker-Installation.md)
 * [Creating A Test Environment](Creating-A-Test-Environment.md)
 * [The Command Line](The-Command-Line.md)
