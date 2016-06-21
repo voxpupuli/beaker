@@ -696,5 +696,49 @@ module Beaker
       end
     end
 
+    describe '#get_public_ip' do
+      let (:aws) { double('AWSmock')}
+      it 'calls upon the ec2 instance to get the ip address' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = aws
+        expect(aws).to receive(:ip_address)
+        host.get_public_ip
+      end
+
+      it 'returns nil when no matching hypervisor is found' do
+        host.host_hash[:hypervisor] = 'vmpooler'
+        expect(host.get_public_ip).to be(nil)
+      end
+
+      it 'calls execute with curl if the host_hash[:instance] is not defined and the host is not an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(false)
+        expect(host).to receive(:execute).with("curl http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+
+      it 'calls execute with wget if the host_hash[:instance] is not defined and the host is an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(true)
+        expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+    end
+
+    describe '#ip' do
+      it 'calls #get_ip when get_public_ip returns nil' do
+        allow( host ).to receive(:get_public_ip).and_return(nil)
+        expect(host).to receive(:get_ip).and_return('127.0.0.2')
+        expect(host.ip).to eq('127.0.0.2')
+      end
+
+      it 'does not call get_ip when #get_public_ip returns an address' do
+        allow( host ).to receive(:get_public_ip).and_return('127.0.0.1')
+        expect(host).to_not receive(:get_ip)
+        expect(host.ip).to eq('127.0.0.1')
+      end
+    end
   end
 end

@@ -224,10 +224,30 @@ module Beaker
       @logger.warn("Uh oh, this should be handled by sub-classes but hasn't been")
     end
 
+    # Determine the ip address using logic specific to the hypervisor
+    def get_public_ip
+      case host_hash[:hypervisor]
+      when 'ec2'
+        if host_hash[:instance]
+          host_hash[:instance].ip_address
+        else
+          # In the case of using ec2 instances with the --no-provision flag, the ec2
+          # instance object does not exist and we should just use the curl endpoint
+          # specified here:
+          # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+          if self.instance_of?(Windows::Host)
+          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          else
+          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          end
+        end
+      end
+    end
+
     #Return the ip address of this host
     #Always pull fresh, because this can sometimes change
     def ip
-      self['ip'] = get_ip
+      self['ip'] = get_public_ip || get_ip
     end
 
     #@return [Boolean] true if x86_64, false otherwise
