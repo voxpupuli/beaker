@@ -2,16 +2,16 @@ require 'helpers/test_helper'
 require 'webrick'
 require 'webrick/https'
 
-confine :except, :platform => %w(windows solaris-11 osx)
-
 test_name 'dsl::helpers::web_helpers #link_exists?' do
   cert_name = [
       %w[CN localhost],
   ]
   http_cmd = "ruby -rwebrick -e'WEBrick::HTTPServer.new(:Port => 80, :DocumentRoot => \"/tmp\").start' > /tmp/mylogfile 2>&1 &"
-  https_cmd = "ruby -rwebrick/https -e'WEBrick::HTTPServer.new(:SSLEnable => true, :SSLCertName => #{cert_name}, :Port => 4430,:DocumentRoot => \"/tmp\").start' > /tmp/mylogfile 2>&1 &"
+  https_cmd = "ruby -rwebrick/https -e'WEBrick::HTTPServer.new(:SSLEnable => true, :SSLCertName => #{cert_name}, :Port => 555,:DocumentRoot => \"/tmp\").start' > /tmp/mylogfile 2>&1 &"
   on(default, http_cmd)
   on(default, https_cmd)
+  #allow web servers to start up
+  sleep(3)
   dir = default.tmpdir('test_dir')
   file = default.tmpfile('test_file')
   dir.slice! "/tmp"
@@ -31,7 +31,7 @@ test_name 'dsl::helpers::web_helpers #link_exists?' do
   end
 
   step '#link_exists? can use an ssl link' do
-    assert link_exists?("https://#{default}:4430")
+    assert link_exists?("https://#{default}:555")
   end
 
   step '#fetch_http_dir can fetch a dir' do
