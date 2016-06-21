@@ -19,7 +19,7 @@
     * [How the confine method works](dsl/confine.md)
     * [Platform Specific Tag Confines](dsl/platform_specific_tag_confines.md)
     * [Shared Options for Executing Beaker Commands](Shared-Options-for-Executing-Beaker-Commands.md)
-  * [Let's Write a Test!](Lets-Write-a-Test.md) 
+  * [Let's Write a Test!](Lets-Write-a-Test.md)
   * [Access The Live Test Console with Pry](Access-the-Live-Test-Console-with-Pry.md)
   * [Test Tagging](Beaker-Test-Tagging.md)
   * [Recipes](Beaker-Recipes.md)
