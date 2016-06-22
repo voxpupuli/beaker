@@ -165,7 +165,7 @@ module Beaker
           :repo_proxy             => false,
           :package_proxy          => false,
           :add_el_extras          => false,
-          :epel_url               => "http://mirrors.kernel.org/fedora-epel",
+          :epel_url               => "http://dl.fedoraproject.org/pub/epel",
           :epel_arch              => "i386",
           :epel_7_pkg             => "epel-release-7-7.noarch.rpm",
           :epel_6_pkg             => "epel-release-6-8.noarch.rpm",
