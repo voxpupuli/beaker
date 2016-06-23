@@ -194,7 +194,7 @@ module Beaker
     end
 
     def cleanup
-      @logger.debug "removing temporory ssh-config files per-vagrant box"
+      @logger.debug "removing temporary ssh-config files per-vagrant box"
       @temp_files.each do |f|
         f.close()
       end
