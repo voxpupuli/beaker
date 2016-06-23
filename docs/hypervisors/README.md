@@ -22,4 +22,4 @@ trying to support a new hypervisor yourself.
 
 | Hypervisor | Fork                                               |
 |:----------:|:--------------------------------------------------:|
-| LXC        | [ashish1099](https://github.com/ashish1099/beaker) |
+| LXC        | [Obmondo](https://github.com/Obmondo/beaker) |
