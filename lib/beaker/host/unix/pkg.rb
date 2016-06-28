@@ -148,7 +148,7 @@ module Unix::Pkg
         execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
-      when /fedora-22/
+      when /edora-(2[2-9])/
         execute("dnf -y #{cmdline_args} remove #{name}", opts)
       when /cisco|fedora|centos|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
