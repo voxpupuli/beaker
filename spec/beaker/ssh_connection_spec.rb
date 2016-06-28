@@ -1,6 +1,22 @@
 require 'spec_helper'
 require 'net/ssh'
 
+module Net
+  module SSH
+    describe Buffer do
+      it 'has a monkey patch tested on 2.9.4' do
+        # simple verification that the patch is understood for this particular version
+        # and might be removable in future versions
+        expect(Gem.loaded_specs['net-ssh'].version).to eq(Gem::Version.new('2.9.4'))
+      end
+
+      it 'can build up a buffer properly with a UTF8 string of 128 bytes or longer' do
+        expect { described_class.from(:string, ("\u16A0" * 128)) }.to_not raise_error
+      end
+    end
+  end
+end
+
 module Beaker
   describe SshConnection do
     let( :user )      { 'root'    }
