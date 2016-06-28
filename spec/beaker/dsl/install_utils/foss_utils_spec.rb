@@ -1110,68 +1110,45 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   describe '#remove_puppet_on' do
-    let(:aixhost) { make_host('aix', :platform => 'aix-53-power') }
-    let(:sol10host) { make_host('sol10', :platform => 'solaris-10-x86_64') }
-    let(:sol11host) { make_host('sol11', :platform => 'solaris-11-x86_64') }
-    let(:cumulushost) { make_host('cumulus', :platform => 'cumulus-2.2-amd64') }
-    let(:el6host) { make_host('el6', :platform => 'el-6-x64') }
+    supported_platforms   = [ 'aix-53-power',
+                              'aix-61-power',
+                              'aix-71-power',
+                              'solaris-10-x86_64',
+                              'solaris-10-x86_64',
+                              'solaris-11-x86_64',
+                              'cumulus-2.2-amd64',
+                              'el-6-x86_64',
+                              'redhat-7-x86_64',
+                              'centos-7-x86_64',
+                              'oracle-7-x86_64',
+                              'scientific-7-x86_64',
+                              'sles-10-x86_64',
+                              'sles-11-x86_64',
+                              'sles-12-s390x'
+                            ]
 
-    pkg_list = 'foo bar'
+    supported_platforms.each do |platform|
+      let(:host) { make_host(platform, :platform => platform) }
 
-    it 'uninstalls packages on aix' do
-      result = Beaker::Result.new(aixhost,'')
-      result.stdout = pkg_list
+      pkg_list = 'foo bar'
 
-      expected_list = pkg_list
-      cmd_args = ''
+      it "uninstalls packages on #{platform}" do
+        result = Beaker::Result.new(host,'')
+        result.stdout = pkg_list
 
-      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
-      expect( aixhost ).to receive(:uninstall_package).with(expected_list, cmd_args)
+        expected_list = pkg_list
+        cmd_args = ''
 
-      subject.remove_puppet_on( aixhost )
+        expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
+        expect( host ).to receive(:uninstall_package).with(expected_list, cmd_args)
+
+        subject.remove_puppet_on( host )
+      end
     end
 
-    it 'uninstalls packages on solaris 10' do
-      result = Beaker::Result.new(sol10host,'')
-      result.stdout = pkg_list
-
-      expected_list = pkg_list
-      cmd_args = '-a noask'
-
-      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
-      expect( sol10host ).to receive(:uninstall_package).with(expected_list, cmd_args)
-
-      subject.remove_puppet_on( sol10host  )
-    end
-
-    it 'uninstalls packages on solaris 11' do
-      result = Beaker::Result.new(sol11host,'')
-      result.stdout='foo bar'
-
-      expected_list = pkg_list
-      cmd_args = ''
-
-      expect( subject ).to receive(:on).exactly(4).times.and_return(result, result, result)
-      expect( sol11host ).to receive(:uninstall_package).with(expected_list, cmd_args)
-
-      subject.remove_puppet_on( sol11host  )
-    end
-
-    it 'uninstalls packages on cumulus' do
-      result = Beaker::Result.new(cumulushost,'')
-      result.stdout = pkg_list
-
-      expected_list = pkg_list
-      cmd_args = ''
-
-      expect( subject ).to receive(:on).exactly(2).times.and_return(result, result)
-      expect( cumulushost ).to receive(:uninstall_package).with(expected_list, cmd_args)
-
-      subject.remove_puppet_on( cumulushost  )
-    end
-
-    it 'raises error on other platforms' do
-      expect { subject.remove_puppet_on( el6host ) }.to raise_error(RuntimeError, /unsupported platform/)
+    let(:ubuntu12) { make_host('ubuntu-1204-amd64', :platform => 'ubuntu-1204-amd64') }
+    it 'raises error on unsupported platforms' do
+      expect { subject.remove_puppet_on( ubuntu12 ) }.to raise_error(RuntimeError, /unsupported platform/)
     end
 
   end
