@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 9 Jun, 2016 (0d267d3d)](#LATEST)
+* [LATEST - 29 Jun, 2016 (428f959a)](#LATEST)
+* [2.44.0 - 9 Jun, 2016 (38dfb77f)](#2.44.0)
 * [2.43.0 - 1 Jun, 2016 (777469ca)](#2.43.0)
 * [2.42.0 - 23 May, 2016 (c245fef7)](#2.42.0)
 * [2.41.0 - 10 May, 2016 (17c745bd)](#2.41.0)
@@ -120,7 +121,204 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 9 Jun, 2016 (0d267d3d)
+### <a name = "LATEST">LATEST - 29 Jun, 2016 (428f959a)
+
+* (GEM) update beaker version to 2.45.0 (428f959a)
+
+* Merge pull request #1143 from kevpl/bkr814_error_output (61343618)
+
+
+```
+Merge pull request #1143 from kevpl/bkr814_error_output
+
+(MAINT) improved error output from beaker-hostgenerator workflow
+```
+* Merge pull request #1161 from johnduarte/bkr-856-add-el-sles-to-remove-puppet (2a9070cd)
+
+
+```
+Merge pull request #1161 from johnduarte/bkr-856-add-el-sles-to-remove-puppet
+
+(BKR-856) Add el/sles support to remove_puppet_on
+```
+* (BKR-799) Use DNF for Uninstall Fedora 22+ (#1156) (e1e6c5e5)
+
+
+```
+(BKR-799) Use DNF for Uninstall Fedora 22+ (#1156)
+
+* Missed out in original PR
+```
+* Merge pull request #1162 from puppetlabs/revert-974-maint (e71875c9)
+
+
+```
+Merge pull request #1162 from puppetlabs/revert-974-maint
+
+Revert "(BKR-568) no longer accept PRs marked as "(MAINT)""
+```
+* Revert "(BKR-568) no longer accept PRs marked as "(MAINT)"" (1397371a)
+
+* (BKR-856) Add el/sles support to remove_puppet_on (50bca276)
+
+
+```
+(BKR-856) Add el/sles support to remove_puppet_on
+
+This commit expands platform support for the `remove_puppet_on` install
+helper method to include `sles` and all `el` derivatives.
+
+This allows hosts declared with a `hypervisor` of `none` on these
+platforms to have puppet uninstalled as part of a pre-suite.
+```
+* (BKR-355) - Adding acceptance tests for web_helper methods. (#1140) (43f41603)
+
+
+```
+(BKR-355) - Adding acceptance tests for web_helper methods. (#1140)
+
+* (BKR-355) - Adding acceptance tests for web_helper methods.
+
+* (BKR-355) - changes based on comments
+
+* (BKR-355) Moving test to puppet level so that ruby is installed for these tests.
+```
+* (MAINT) Changed link for lxc hypervisor (#1158) (07ae263f)
+
+* (BKR-24) Added "change_terminal_output_coloring.md" to describe how to change terminal colors in Beaker. (#1153) (128dae6d)
+
+
+```
+(BKR-24) Added "change_terminal_output_coloring.md" to describe how to change terminal colors in Beaker. (#1153)
+
+[skip ci]
+```
+* (MAINT) Fix typo (#1157) (695b6ef1)
+
+* (BKR-853) Update epel_url and epel_7_pkg presets (#1155) (c27113e1)
+
+
+```
+(BKR-853) Update epel_url and epel_7_pkg presets (#1155)
+
+* (BKR-853) Update epel_7_pkg preset
+
+* (BKR-853) Use master mirror for epel_url preset
+
+This changes the default to point to the master mirror outlined in the
+documentation here: https://fedoraproject.org/wiki/EPEL/FAQ
+
+* (BKR-853) Update spec tests for epel preset changes
+```
+* Merge pull request #1141 from Iristyle/maint/master/log-windows-versions-fix (ad6bf66e)
+
+
+```
+Merge pull request #1141 from Iristyle/maint/master/log-windows-versions-fix
+
+(maint) Extra quoting for Windows versions.txt
+```
+* (BKR-840) Added a new file test_run.md and deleted Overview.md (#1147) (fdd2c7e3)
+
+
+```
+(BKR-840) Added a new file test_run.md and deleted Overview.md (#1147)
+
+Removed extra space from README.md
+Added logger.rb
+[skip ci]
+```
+* (BKR-843) Use hypervisor specific logic for ip (#1149) (9b4f088d)
+
+
+```
+(BKR-843) Use hypervisor specific logic for ip (#1149)
+
+* (BKR-843) Use hypervisor specific logic for ip
+
+When determining the ip address of a machine, beaker normally ssh'd into
+the box and would run a command that would return the ip configured on
+that box. However, this doesn't work for several cloud hypervisors, as
+the public ip of the box may not match the internally configured ip
+address. This change allows for hypervisor specific logic to be executed
+instead of sshing into the box. Specifically, this commit changes all
+ec2 instances to use the public ip address instead of the private one.
+
+* (BKR-843) Curl ec2 for ip in case of --no-provision
+
+When there is no ec2 instance object created, the #get_public_ip method
+needs to use curl on the box instead of using the instance object to
+determine its ip. This will be the case when users add the no-provision
+flag.
+
+* (BKR-843) Add case for Windows ec2 instances for #get_public_ip
+```
+* (maint) link to beaker template from beaker library docs (#1142) (e2da65b8)
+
+
+```
+(maint) link to beaker template from beaker library docs (#1142)
+
+beaker-library howto is tough to find from beaker docs. This change
+links to it from the beaker-library list in docs
+
+[skip ci]
+```
+* (MAINT) Fix broken link to Vagrant Hosts examples (#1145) (f5b28947)
+
+* (MAINT) improved error output from beaker-hostgenerator workflow (8d22da0a)
+
+* Merge pull request #1130 from kevpl/bkr814_hostgenerator_syntax (806e6fa8)
+
+
+```
+Merge pull request #1130 from kevpl/bkr814_hostgenerator_syntax
+
+(BKR-814) added beaker-hostgenerator syntax to hosts arg
+```
+* (maint) Extra quoting for Windows versions.txt (36d7cbe9)
+
+
+```
+(maint) Extra quoting for Windows versions.txt
+
+ - Adds quotes around the "if exist path type path" command passed to
+   cmd.exe, which also requires that quotes around filenames have
+   their quoting escaped
+```
+* (BKR-685) Support openstack user_data (#1135) (5446a768)
+
+
+```
+(BKR-685) Support openstack user_data (#1135)
+
+* (BKR-685) Support openstack user_data
+
+* (BKR-685) add tests for Openstack hypervisor
+
+* (BKR-685) refactor openstack spec
+
+* (BKR-685) remove duplicate snapshot key
+
+* (BKR-685) add user_data field to openstack dock file
+```
+* (BKR-827) Vagrant port forwarding (#1133) (7090641f)
+
+
+```
+(BKR-827) Vagrant port forwarding (#1133)
+
+* (BKR-827) Adding port forwarding support.
+
+* (BKR-827) Adding support for all vagrant parameters.
+
+* (BKR-827) Adding documentation.
+```
+* (BKR-814) added beaker-hostgenerator syntax to hosts arg (6e15ae58)
+
+### <a name = "2.44.0">2.44.0 - 9 Jun, 2016 (38dfb77f)
+
+* (HISTORY) update beaker history for gem release 2.44.0 (38dfb77f)
 
 * (GEM) update beaker version to 2.44.0 (0d267d3d)
 
