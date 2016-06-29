@@ -2,7 +2,10 @@ require 'spec_helper'
 
 module Beaker
   describe CLI do
-    let(:cli)      { Beaker::CLI.new }
+    let(:cli)      {
+      allow(File).to receive(:exists?).and_return(true)
+      Beaker::CLI.new
+    }
 
     context 'execute!' do
       before :each do

@@ -224,17 +224,29 @@ module Beaker
       # @raise [ArgumentError] if a hosts file is generated, but it can't
       #   be read by the HostsFileParser
       def parse_hosts_options
-        #read the hosts file that contains the node configuration and hypervisor info
-        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
-        return hosts_options
-      rescue Errno::ENOENT
-        require 'tempfile'
+        if File.exists?(@options[:hosts_file])
+          #read the hosts file that contains the node configuration and hypervisor info
+          return Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
+        end
+
+        dne_message = "\nHosts file '#{@options[:hosts_file]}' does not exist."
+        dne_message << "\nTrying as beaker-hostgenerator input.\n\n"
+        $stdout.puts dne_message
         require 'beaker-hostgenerator'
-        bhg_cli = BeakerHostGenerator::CLI.new( [ @options[:hosts_file] ] )
-        hosts_file_content = bhg_cli.execute
-        hosts_options = Beaker::Options::HostsFileParser.parse_hosts_string( hosts_file_content )
+
+        hosts_file_content = begin
+          bhg_cli = BeakerHostGenerator::CLI.new( [ @options[:hosts_file] ] )
+          bhg_cli.execute
+        rescue BeakerHostGenerator::Exceptions::Error,
+          BeakerHostGenerator::Exceptions::InvalidNodeSpecError => error
+          error_message = "\nbeaker-hostgenerator was not able to use this value as input."
+          error_message << "\nExiting with an Error.\n\n"
+          $stderr.puts error_message
+          raise error
+        end
+
         @options[:hosts_file_generated] = true
-        return hosts_options
+        Beaker::Options::HostsFileParser.parse_hosts_string( hosts_file_content )
       end
 
       #Validate all merged options values for correctness

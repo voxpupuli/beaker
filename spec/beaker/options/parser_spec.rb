@@ -153,7 +153,7 @@ module Beaker
             parser.instance_variable_set(:@command_line_parser, command_line_parser_obj)
 
             allow(OptionsFileParser).to receive(:parse_options_file).and_return(opt_file)
-            allow(HostsFileParser).to receive(:parse_hosts_file).and_return(host_file)
+            allow(parser).to receive(:parse_hosts_options).and_return(host_file)
           end
 
           it 'presets have the lowest priority' do
@@ -224,14 +224,11 @@ module Beaker
       describe '#parse_hosts_options' do
 
         context 'Hosts file exists' do
-          it 'returns nil as the second value' do
-            parser.instance_variable_set( :@options, {} )
-            allow( Beaker::Options::HostsFileParser ).to receive( :parse_hosts_file )
-            _, val2 = parser.parse_hosts_options
-            expect( val2 ).to be_nil
+          before :each do
+            allow(File).to receive(:exists?).and_return(true)
           end
 
-          it 'returns the parser\'s output as the first value' do
+          it 'returns the parser\'s output' do
             parser.instance_variable_set( :@options, {} )
             test_value = 'blaqwetjijl,emikfuj1235'
             allow( Beaker::Options::HostsFileParser ).to receive(
@@ -243,8 +240,10 @@ module Beaker
         end
 
         context 'Hosts file does not exist' do
-          require 'tempfile'
           require 'beaker-hostgenerator'
+          before :each do
+            allow(File).to receive(:exists?).and_return(false)
+          end
 
           it 'calls beaker-hostgenerator to get hosts information' do
             parser.instance_variable_set( :@options, {} )
@@ -282,6 +281,33 @@ module Beaker
             parser.parse_hosts_options
 
             expect( options_test[:hosts_file_generated] ).to be true
+          end
+
+          it 'beaker-hostgenerator failures trigger nice prints & a rethrow' do
+            options_test = {}
+            parser.instance_variable_set( :@options, options_test )
+            allow( Beaker::Options::HostsFileParser ).to receive(
+              :parse_hosts_file
+            ).and_raise( Errno::ENOENT )
+
+            mock_beaker_hostgenerator_cli = Object.new
+            expect( BeakerHostGenerator::CLI ).to receive(
+              :new
+            ).and_return( mock_beaker_hostgenerator_cli )
+            expect( mock_beaker_hostgenerator_cli ).to receive(
+              :execute
+            ).and_raise( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
+            expect( Beaker::Options::HostsFileParser ).not_to receive( :parse_hosts_string )
+            expect( $stdout ).to receive( :puts ).with(
+              /does not exist/
+            ).ordered
+            expect( $stderr ).to receive( :puts ).with(
+              /Exiting with an Error/
+            ).ordered
+
+            expect {
+              parser.parse_hosts_options
+            }.to raise_error( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
           end
         end
 
