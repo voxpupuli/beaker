@@ -26,6 +26,7 @@ module Beaker
 
     def load_credentials(dot_fog = '.fog')
       creds = {}
+
       if fog = read_fog_file(dot_fog)
         if fog[:default] && fog[:default][:vmpooler_token]
           creds[:vmpooler_token] = fog[:default][:vmpooler_token]
@@ -35,7 +36,9 @@ module Beaker
       else
         @logger.warn "Credentials file (#{dot_fog}) is empty; proceeding without authentication"
       end
+
       creds
+
     rescue Errno::ENOENT
       @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
       creds
