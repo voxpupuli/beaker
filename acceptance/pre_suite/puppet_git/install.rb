@@ -8,7 +8,7 @@ test_name 'Puppet git pre-suite'
 install = [
   'facter#2.1.0',
   'hiera#1.3.4',
-  'puppet#3.7.5'
+  'puppet#3.8.7'
 ]
 
 SourcePath  = Beaker::DSL::InstallUtils::SourcePath
