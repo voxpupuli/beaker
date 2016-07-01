@@ -98,7 +98,7 @@ module Mac::Pkg
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
 
     variant, version, arch, codename = self['platform'].to_array
-    release_file = "/repos/apple/#{puppet_collection}/puppet-agent-*"
+    release_file = "/repos/apple/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*"
     download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
     return '', release_file, download_file
   end
