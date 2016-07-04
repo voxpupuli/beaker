@@ -81,11 +81,12 @@ The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one o
 `VERSION`'s format is not enforced, but should reflect the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, scientific-6-i386-agent, etc).  `ARCH`'s format is also not enforced, but should be appropriate to the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, sles-11-x86_64-master, debian-7-amd64-master, etc).
 
 ## Supported Virtualization Providers ##
-* [VMWare Fusion](VMWare-Fusion-Support.md)
-* [EC2](EC2-Support.md)
-* [vSphere](vSphere-Support.md)
-* [Vagrant](Vagrant-Support.md)
-* [Google Compute Engine](Google-Compute-Engine-Support.md)
-* [Docker Support](Docker-Support.md)
-* [Openstack](Openstack-Support.md)
-* [Solaris](Solaris-Support.md)
+* [AWS](hypervisors/aws.md)
+* [VMWare Fusion](hypervisors/vmware_fusion.md)
+* [EC2](hypervisors/ec2.md)
+* [vSphere](hypervisors/vsphere.md)
+* [Vagrant](hypervisors/vagrant.md)
+* [Google Compute Engine](hypervisors/google_compute_engine.md)
+* [Docker Support](hypervisors/docker.md)
+* [Openstack](hypervisors/openstack.md)
+* [Solaris](hypervisors/solaris.md)
