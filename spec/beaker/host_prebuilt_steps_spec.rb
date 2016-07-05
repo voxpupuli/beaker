@@ -89,7 +89,7 @@ describe Beaker do
     it "can sync time on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 3 ).times
 
       subject.timesync( hosts, options )
     end
@@ -98,7 +98,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'unix', :exit_code => [1, 0] } )
       allow( subject ).to receive( :sleep ).and_return(true)
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 6 ).times
 
       subject.timesync( hosts, options )
     end
@@ -107,7 +107,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'unix', :exit_code => 1 } )
       allow( subject ).to receive( :sleep ).and_return(true)
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 5 ).times
 
       expect{ subject.timesync( hosts, options ) }.to raise_error(/NTP date was not successful after/)
     end
@@ -136,7 +136,7 @@ describe Beaker do
     it "can set time server on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver_set}").exactly( 3 ).times
 
       subject.timesync( hosts, options_ntp )
     end

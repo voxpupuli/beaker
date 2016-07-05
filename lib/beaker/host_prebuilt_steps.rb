@@ -52,7 +52,7 @@ module Beaker
             when host['platform'] =~ /sles-/
               ntp_command = "sntp #{ntp_server}"
             else
-              ntp_command = "ntpdate -t 20 #{ntp_server}"
+              ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
           success=false
           try = 0
