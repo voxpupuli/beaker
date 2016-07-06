@@ -2,13 +2,11 @@
 
 ## Getting Started
 
-* If it is accessible to you, create a [Jira account](http://tickets.puppetlabs.com)
+* Create a [Jira account](http://tickets.puppetlabs.com)
 * Make sure you have a [GitHub account](https://github.com/signup/free)
 * Submit a ticket for your issue, assuming one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
-  * File in the appropriate location:
-    * Using your [Jira account](http://tickets.puppetlabs.com)
-      * Beaker bugs are submitted in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
+  * File a ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker)
 
 ## Making Changes
@@ -33,14 +31,21 @@
     from our issue tracker.  The body describes the behavior without the patch,
     why this is a problem, and how the patch fixes the problem when applied.
 ````
- 
-* Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
-  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
-* Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without apporpriate documentation will be rejected.
-* Run the tests to assure nothing else was accidentally broken, using `rake test`
-  * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 2.0, etc). Beaker supports Ruby 1.9+, and breakage of support for older/newer rubies will cause a patch to be rejected.
+
 * During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) before you submit your PR with `git rebase master`.  A successful rebase ensures that your patch will cleanly merge into Beaker.
 * Submitted patches will be smoke tested through a series of acceptance level tests that ensures basic Beaker functionality - the results of these tests will be evaluated by a Beaker team member.  Failures associated with the submitted patch will result in the patch being rejected.
+
+### Testing
+
+* Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
+  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
+  * Run the tests to assure nothing else was accidentally broken, using `rake test`
+    * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 2.0, etc). Beaker supports Ruby 1.9+, and breakage of support for older/newer rubies will cause a patch to be rejected.
+
+### Documentation
+
+* Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without appropriate documentation will be rejected.
+* More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
 ## Making Trivial Changes
 
