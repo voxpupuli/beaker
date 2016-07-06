@@ -24,7 +24,7 @@ module Beaker
           'pwindows' => { #pure windows
             'puppetbindir'      => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\bin"',
             'privatebindir'     => '"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\sys\\ruby\\bin";"C:\\Program Files\\Puppet Labs\\Puppet\\sys\\ruby\\bin"',
-            'distmoduledir'     => 'C:\\ProgramData\\PuppetLabs\\code\\environments\\production\\modules',
+            'distmoduledir'     => 'C:\\ProgramData\\PuppetLabs\\code\\modules',
           }
         }
 
