@@ -77,4 +77,4 @@ You can now run this with
 
     beaker --host redhat7-64ma.yaml --pre-suite install.rb --test mytest.rb
 
-Next up you may want to look at the [Beaker test for a module](How-to-Write-a-Beaker-Test-for-a-Module.md) page.
+Next up you may want to look at the [Beaker test for a module](../how_to/write_a_beaker_test_for_a_module.md) page.
