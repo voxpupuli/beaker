@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 29 Jun, 2016 (428f959a)](#LATEST)
+* [LATEST - 8 Jul, 2016 (0fb3408c)](#LATEST)
+* [2.45.0 - 29 Jun, 2016 (c0b56972)](#2.45.0)
 * [2.44.0 - 9 Jun, 2016 (38dfb77f)](#2.44.0)
 * [2.43.0 - 1 Jun, 2016 (777469ca)](#2.43.0)
 * [2.42.0 - 23 May, 2016 (c245fef7)](#2.42.0)
@@ -121,7 +122,92 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 29 Jun, 2016 (428f959a)
+### <a name = "LATEST">LATEST - 8 Jul, 2016 (0fb3408c)
+
+* (GEM) update beaker version to 2.46.0 (0fb3408c)
+
+* Merge pull request #1173 from tvpartytonight/maint_skip_windows_pkg_test (c74a21e0)
+
+
+```
+Merge pull request #1173 from tvpartytonight/maint_skip_windows_pkg_test
+
+(BKR-871) Don't test packages on Windows
+```
+* (BKR-871) Don't test packages on Windows (480cbad5)
+
+
+```
+(BKR-871) Don't test packages on Windows
+
+An update to the Windows2008r2 image template broke the packages test
+because it tries to run installation from a folder that has restricted
+permissions. This commit makes it so CI will skip testing packages on OSX;
+it should be reverted when the install_package method is fixed.
+```
+* Merge pull request #1165 from tvpartytonight/BKR-852 (84f4f98f)
+
+
+```
+Merge pull request #1165 from tvpartytonight/BKR-852
+
+(BKR-852) Update Puppet install versions for acceptance
+```
+* (MAINT) Fix links to hypervisors (#1166) (5a588883)
+
+
+```
+(MAINT) Fix links to hypervisors (#1166)
+
+Fix links to hypervisors
+```
+* Merge pull request #1150 from james-powis/BKR-849 (597a5177)
+
+
+```
+Merge pull request #1150 from james-powis/BKR-849
+
+(BKR-849) Change AIO distmoduledir to global module directory
+```
+* Merge pull request #1170 from demophoon/task/master/pe-16065-bump-hocon-gem-version (17a0b04f)
+
+
+```
+Merge pull request #1170 from demophoon/task/master/pe-16065-bump-hocon-gem-version
+
+(PE-16065) Bump hocon gem to get latest beaker-answers
+```
+* (PE-16065) Bump hocon gem to get latest beaker-answers (f85e7da0)
+
+
+```
+(PE-16065) Bump hocon gem to get latest beaker-answers
+
+Currently beaker is pinning the hocon gem at a version less than 1.0
+but beaker-pe requires hocon 1.0 or greater so we are essentially stuck
+at an older version of beaker-answers.
+
+This commit bumps the hocon gem in beaker to be at least 1.0 to allow us
+to test with the latest beaker-answers.
+```
+* Fix links to hypervisors (b7d37b83)
+
+
+```
+Fix links to hypervisors
+
+All the particular hypervisor docs are now in
+a sub directory.
+```
+* (BKR-852) Add version and arch to osx release_file path (035ca153)
+
+* (BKR-852) Update Puppet install versions for acceptance (9acd63e7)
+
+* (BKR-849) Change AIO distmoduledir to global module directory (69ddd9ed)
+
+### <a name = "2.45.0">2.45.0 - 29 Jun, 2016 (c0b56972)
+
+* (HISTORY) update beaker history for gem release 2.45.0 (c0b56972)
 
 * (GEM) update beaker version to 2.45.0 (428f959a)
 
