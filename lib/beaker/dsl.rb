@@ -56,8 +56,8 @@ module Beaker
   #     require 'spec_helper'
   #
   #     describe 'A Test With RSpec' do
-  #       let(:hosts)  { Host.new('blah', 'blah', 'not helpful' }
-  #       let(:logger) { Where.is('the', 'rspec', 'logger')     }
+  #       let(:hosts)  { Host.new('blah', 'blah', 'not helpful') }
+  #       let(:logger) { Where.is('the', 'rspec', 'logger')      }
   #
   #       after do
   #         on master, puppet('resource mything ensure=absent')
