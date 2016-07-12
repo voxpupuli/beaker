@@ -427,6 +427,18 @@ describe ClassMixedWithDSLInstallUtils do
         expect(hosts[0]).to receive(:install_package).with('puppet')
         subject.install_puppet
       end
+      it 'installs in parallel' do
+        InParallel::InParallelExecutor.logger = logger
+        FakeFS.deactivate!
+        hosts.each{ |host|
+          allow(host).to receive(:install_package_with_rpm).with(/puppetlabs-release-el-6\.noarch\.rpm/, '--replacepkgs', {:package_proxy=>false})
+          allow(host).to receive(:install_package).with('puppet')
+        }
+        opts[:run_in_parallel] = true
+        # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+        expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(3).times
+        subject.install_puppet(opts)
+      end
       it 'installs specific version of puppet when passed :version' do
         expect(hosts[0]).to receive(:install_package).with('puppet-3')
         subject.install_puppet( :version => '3' )

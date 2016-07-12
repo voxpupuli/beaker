@@ -71,6 +71,7 @@ module Beaker
           end
         end
       end
+      nil
     rescue => e
       report_and_raise(logger, e, "timesync (--ntp)")
     end

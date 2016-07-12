@@ -245,6 +245,7 @@ module Beaker
         # @option opts [String] :puppet_agent_version Version of puppet agent to download
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-%version%.msi
         # @option opts [String] :win_download_url Url to download dmg pattern of %url%/(puppet|hiera|facter)-%version%.msi
+        # @option opts [Boolean] :run_in_parallel   Whether to install on all hosts in parallel. Defaults to false.
         #
         # @return nil
         # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
@@ -257,9 +258,13 @@ module Beaker
             # backwards compatability
             opts[:puppet_agent_version] ||= opts[:version]
             install_puppet_agent_on(hosts, opts)
-
           else
-            block_on hosts do |host|
+            # Use option specified in the method call, otherwise check whether the global
+            # run_in_parallel option includes install
+            run_in_parallel = opts[:run_in_parallel]
+            run_in_parallel = ((@options && @options[:run_in_parallel].is_a?(Array)) ?
+                @options[:run_in_parallel].include?('install') : false) if run_in_parallel.nil?
+            block_on hosts, { :run_in_parallel => run_in_parallel} do |host|
               if host['platform'] =~ /el-(5|6|7)/
                 relver = $1
                 install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'el'))
@@ -325,6 +330,7 @@ module Beaker
         # @option opts [String] :mac_download_url Url to download msi pattern of %url%/puppet-agent-%version%.msi
         # @option opts [String] :win_download_url Url to download dmg pattern of %url%/puppet-agent-%version%.msi
         # @option opts [String] :puppet_collection Defaults to 'pc1'
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
         #
         # @return nil
         # @raise [StandardError] When encountering an unsupported platform by default, or if gem cannot be found when default_action => 'gem_install'
@@ -334,7 +340,10 @@ module Beaker
           opts[:puppet_collection] ||= 'pc1' #hi!  i'm case sensitive!  be careful!
           opts[:puppet_agent_version] ||= opts[:version] #backwards compatability with old parameter name
 
-          block_on hosts do |host|
+          run_in_parallel = opts[:run_in_parallel]
+          run_in_parallel = ((@options && @options[:run_in_parallel].is_a?(Array)) ?
+              @options[:run_in_parallel].include?('install') : false) if run_in_parallel.nil?
+          block_on hosts, { :run_in_parallel => run_in_parallel } do |host|
             add_role(host, 'aio') #we are installing agent, so we want aio role
             package_name = nil
             case host['platform']
@@ -379,6 +388,7 @@ module Beaker
         # @param [Hash{Symbol=>String}] opts
         # @option opts [Hash{String=>String}] :main configure the main section of puppet.conf
         # @option opts [Hash{String=>String}] :agent configure the agent section of puppet.conf
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
         #
         # @example will configure /etc/puppet.conf on the puppet master.
         #   config = {
@@ -407,7 +417,7 @@ module Beaker
             puppet_conf_text << "\n"
           end
           logger.debug( "setting config '#{puppet_conf_text}' on hosts #{hosts}" )
-          block_on hosts do |host|
+          block_on hosts, opts do |host|
             puppet_conf_path = host.puppet['config']
             create_remote_file(host, puppet_conf_path, puppet_conf_text)
           end
