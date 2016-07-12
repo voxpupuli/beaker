@@ -56,6 +56,7 @@ end
 
 step '#deploy_package_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
+  next if host['platform'] =~ /fedora/
   host.deploy_package_repo(pkg_fixtures, pkg_name, 'latest')
   clean_file(host, pkg_name)
 end
