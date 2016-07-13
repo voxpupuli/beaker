@@ -15,7 +15,7 @@ namespace :beaker_quickstart do
   task :gen_pre_suite do
     FileUtils.mkdir_p('acceptance/setup') # -p ignores when dir already exists
     File.open("acceptance/setup/default_pre_suite.rb", 'w') do |fh|
-      fh.print('install_pe')
+      fh.print('install_puppet')
     end
   end
 
@@ -43,7 +43,7 @@ def beaker_command
   cmd_parts = []
   cmd_parts << "beaker"
   cmd_parts << "--hosts acceptance/config/default_hosts.yaml"
-  cmd_parts << "--hosts acceptance/setup/default_pre_suite.rb"
+  cmd_parts << "--pre-suite acceptance/setup/default_pre_suite.rb"
   cmd_parts << "--tests acceptance/tests/default_smoke_test.rb"
   cmd_parts.flatten.join(" ")
 end
