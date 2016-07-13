@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 10.1'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'pry', '~> 0.10'
-  s.add_development_dependency 'beaker-hostgenerator'
 
   # Documentation dependencies
   s.add_development_dependency 'yard'
@@ -47,6 +46,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
   s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
   s.add_runtime_dependency 'beaker-pe', '~> 0.0'
+  s.add_runtime_dependency 'beaker-hostgenerator'
 
   # Optional provisioner specific support
   s.add_runtime_dependency 'rbvmomi', '~> 1.8'
