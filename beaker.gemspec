@@ -30,6 +30,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'markdown'
   s.add_development_dependency 'thin'
 
+  # Temporary pin for gems no longer compatible with ruby 1.9.3
+  s.add_development_dependency 'activesupport', '~> 4.2'
+  s.add_development_dependency 'rack', '~> 1.6'
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'json', '~> 1.8'
