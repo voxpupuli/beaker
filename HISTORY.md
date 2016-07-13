@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 8 Jul, 2016 (0fb3408c)](#LATEST)
+* [LATEST - 13 Jul, 2016 (8bd72c92)](#LATEST)
+* [2.46.0 - 8 Jul, 2016 (3a650c95)](#2.46.0)
 * [2.45.0 - 29 Jun, 2016 (c0b56972)](#2.45.0)
 * [2.44.0 - 9 Jun, 2016 (38dfb77f)](#2.44.0)
 * [2.43.0 - 1 Jun, 2016 (777469ca)](#2.43.0)
@@ -122,7 +123,149 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 8 Jul, 2016 (0fb3408c)
+### <a name = "LATEST">LATEST - 13 Jul, 2016 (8bd72c92)
+
+* (GEM) update beaker version to 2.47.0 (8bd72c92)
+
+* Merge pull request #1181 from tvpartytonight/maint_pin_gems (e89c0b8f)
+
+
+```
+Merge pull request #1181 from tvpartytonight/maint_pin_gems
+
+(maint) Pin gems that removed ruby 1.9.3 support
+```
+* (maint) Pin gems that removed ruby 1.9.3 support (94bd58e8)
+
+
+```
+(maint) Pin gems that removed ruby 1.9.3 support
+
+This PR pins gems that are transitive dependencies that dropped ruby
+1.9.3 support. This should be removed eventually, as these gems are not
+actually needed by beaker itself, but by gems beaker relies on.
+```
+* (BKR-859) Add rake quick start tasks (#1176) (31a99a1a)
+
+
+```
+(BKR-859) Add rake quick start tasks (#1176)
+
+* (BKR-859) Add rake quick start tasks
+For generating hosts file, test suite and running test (on vmpooler)
+
+* Some fixes.
+```
+* Merge pull request #1129 from samwoods1/install_in_parallel (c8d60edf)
+
+
+```
+Merge pull request #1129 from samwoods1/install_in_parallel
+
+(QA-2501) add ability to install hosts in parallel
+```
+* Merge pull request #1178 from tvpartytonight/BKR-869 (7b71a640)
+
+
+```
+Merge pull request #1178 from tvpartytonight/BKR-869
+
+(BKR-869) Skip deploy_package_repo tests when Fedora
+```
+* Merge pull request #1177 from tvpartytonight/BKR-871_revert (4b875e9b)
+
+
+```
+Merge pull request #1177 from tvpartytonight/BKR-871_revert
+
+Revert "(BKR-871) Don't test packages on Windows"
+```
+* (BKR-869) Skip deploy_package_repo tests when Fedora (0491cffa)
+
+
+```
+(BKR-869) Skip deploy_package_repo tests when Fedora
+
+Because we are missing packages for Fedora for puppetserver, we should
+skip them until they become available.
+```
+* Merge pull request #1169 from james-stocks/BKR-797 (b7eab4ea)
+
+
+```
+Merge pull request #1169 from james-stocks/BKR-797
+
+(BKR-797) timesync helper should handle ntpd already running
+```
+* (BKR-874) PUPPET_MODULE_INSTALL_IGNORE (#1175) (8b0c4a4e)
+
+
+```
+(BKR-874) PUPPET_MODULE_INSTALL_IGNORE (#1175)
+
+Updated the filtering on PUPPET_MODULE_INSTALL_IGNORE to exclude .svn,
+junit, pkg and example folders
+```
+* Revert "(BKR-871) Don't test packages on Windows" (3f8afefc)
+
+
+```
+Revert "(BKR-871) Don't test packages on Windows"
+
+This reverts commit 480cbad5f8b75c9cb96d104e2537bc8771ed4f8c.
+```
+* Merge pull request #1174 from erosa/maint/master/fix-dsl-example (f2274451)
+
+
+```
+Merge pull request #1174 from erosa/maint/master/fix-dsl-example
+
+(maint) Add missing parenthesis in dsl.rb docs
+```
+* Merge pull request #1172 from kevpl/docs_add_doc_requirement (4b2ea02b)
+
+
+```
+Merge pull request #1172 from kevpl/docs_add_doc_requirement
+
+(MAINT) updated contributor guidelines
+```
+* (maint) Add missing parenthesis in dsl.rb docs (51eeaf19)
+
+
+```
+(maint) Add missing parenthesis in dsl.rb docs
+
+Prior to this commit, there was a missing closing paren in the code
+examples in the DSL documentation.
+
+This commit rectifies that issue.
+```
+* (MAINT) updated contributor guidelines (395d0696)
+
+
+```
+(MAINT) updated contributor guidelines
+
+added in user friendly docs & acceptance testing requirements
+[skip ci]
+```
+* (BKR-797) timesync helper should handle ntpd already running (d77c3bb5)
+
+
+```
+(BKR-797) timesync helper should handle ntpd already running
+
+This commit fixes a bug where timesync causes beaker to error if the host has ntpd already running.
+The fix is simply to use the -u option for ntpdate to use an alternate network port.
+
+Tested on Redhat and Ubuntu.
+```
+* (QA-2501) add ability to install hosts in parallel (de50ffe1)
+
+### <a name = "2.46.0">2.46.0 - 8 Jul, 2016 (3a650c95)
+
+* (HISTORY) update beaker history for gem release 2.46.0 (3a650c95)
 
 * (GEM) update beaker version to 2.46.0 (0fb3408c)
 
