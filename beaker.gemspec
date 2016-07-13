@@ -52,7 +52,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'rbvmomi', '~> 1.8'
   s.add_runtime_dependency 'fission', '~> 0.4'
   s.add_runtime_dependency 'google-api-client', ['~> 0.8', '< 0.9.5'] # dropped ruby 1.9 rupport in 0.9.5
-  s.add_runtime_dependency 'aws-sdk', '~> 1.57'
+  s.add_runtime_dependency 'aws-sdk-v1', '~> 1.57'
   s.add_runtime_dependency 'docker-api'
   s.add_runtime_dependency 'mime-types', '~> 2.99' if RUBY_VERSION < '2.0' # dropped ruby 1.9 rupport in 3.0
   s.add_runtime_dependency 'fog-google', '~> 0.0.9' # dropped ruby 1.9 support in 0.1
