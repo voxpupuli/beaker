@@ -163,14 +163,6 @@ module Beaker
           }
         end
 
-        it "will ignore run_in_parallel global option" do
-          myhosts = host_handler.run_block_on( hosts, nil, { :run_in_parallel => [] } ) do |host|
-            host
-          end
-          expect( InParallel::InParallelExecutor ).not_to receive(:_execute_in_parallel).with(any_args)
-          expect(myhosts).to eq(hosts)
-        end
-
         it "does not run in parallel if there is only 1 host in the array" do
           myhosts = host_handler.run_block_on( [hosts[0]], nil, { :run_in_parallel => true } ) do |host|
             puts host
