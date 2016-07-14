@@ -1,7 +1,7 @@
 require 'open3'
 require 'securerandom'
 require 'beaker-hostgenerator'
-
+require 'beaker'
 HOSTS_PRESERVED  = 'log/latest/hosts_preserved.yml'
 
 task :default => [ 'test:spec' ]
@@ -27,7 +27,7 @@ task :history do
 end
 
 task :travis do
-  Rake::Task['yard'].invoke
+  Rake::Task['yard'].invoke if !Beaker::Shared::Semvar.version_is_less(RUBY_VERSION, '2.0.0')
   Rake::Task['spec'].invoke
 end
 
@@ -256,8 +256,8 @@ end
 #
 ###########################################################
 DOCS_DIR = 'yard_docs'
-DOCS_DAEMON = "yard server --reload --daemon --server thin --docroot #{DOCS_DIR}"
-FOREGROUND_SERVER = "bundle exec yard server --reload --verbose --server thin lib/beaker --docroot #{DOCS_DIR}"
+DOCS_DAEMON = "yard server --reload --daemon --docroot #{DOCS_DIR}"
+FOREGROUND_SERVER = "bundle exec yard server --reload --verbose lib/beaker --docroot #{DOCS_DIR}"
 
 def running?( cmdline )
   ps = `ps -ef`
