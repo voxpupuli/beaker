@@ -102,7 +102,7 @@ module Beaker
         end
         if block_hosts.is_a? Array
           if block_hosts.length > 0
-            if opts[:run_in_parallel]
+            if opts[:run_in_parallel] == true
               # Pass caller[1] - the line that called block_on - for logging purposes.
               result = block_hosts.map.each_in_parallel(caller[1]) do |h|
                 run_block_on h, &block
