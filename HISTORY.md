@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 13 Jul, 2016 (8bd72c92)](#LATEST)
+* [LATEST - 15 Jul, 2016 (7c89a4d0)](#LATEST)
+* [2.47.0 - 13 Jul, 2016 (bf4cbcf0)](#2.47.0)
 * [2.46.0 - 8 Jul, 2016 (3a650c95)](#2.46.0)
 * [2.45.0 - 29 Jun, 2016 (c0b56972)](#2.45.0)
 * [2.44.0 - 9 Jun, 2016 (38dfb77f)](#2.44.0)
@@ -123,7 +124,24 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 13 Jul, 2016 (8bd72c92)
+### <a name = "LATEST">LATEST - 15 Jul, 2016 (7c89a4d0)
+
+* (GEM) update beaker version to 2.47.1 (7c89a4d0)
+
+* (BKR-884) Fix issue in run_block_on (#1183) (abced8b0)
+
+
+```
+(BKR-884) Fix issue in run_block_on (#1183)
+
+* (BKR-884) Need to check if opts[:run_in_parallel] == true
+as if it evaluates to [], it will go into the if statement as it stands.
+
+* Added unit test.
+```
+### <a name = "2.47.0">2.47.0 - 13 Jul, 2016 (bf4cbcf0)
+
+* (HISTORY) update beaker history for gem release 2.47.0 (bf4cbcf0)
 
 * (GEM) update beaker version to 2.47.0 (8bd72c92)
 
