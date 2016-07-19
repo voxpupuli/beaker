@@ -152,6 +152,45 @@ exit /B %errorlevel%
           end
         end
 
+        # Installs a specified msi path on given hosts
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] msi_path The path of the MSI - can be a local Windows style file path like
+        #                   c:\temp\foo.msi OR a url like https://download.com/foo.msi or file://c:\temp\foo.msi
+        # @param  [Hash{String=>String}] msi_opts MSI installer options
+        # @option opts [Boolean] :debug output the MSI installation log when set to true
+        #                 otherwise do not output log (false; default behavior)
+        #
+        # @example
+        #  generic_install_msi_on(hosts, 'https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.msi', {}, {:debug => true})
+        #
+        # @api private
+        def generic_install_msi_on(hosts, msi_path, msi_opts = {}, opts = {})
+          block_on hosts do | host |
+            batch_path, log_file = create_install_msi_batch_on(host, msi_path, msi_opts)
+
+            # begin / rescue here so that we can reuse existing error msg propagation
+            begin
+              # 1641 = ERROR_SUCCESS_REBOOT_INITIATED
+              # 3010 = ERROR_SUCCESS_REBOOT_REQUIRED
+              on host, Command.new("\"#{batch_path}\"", [], { :cmdexe => true }), :acceptable_exit_codes => [0, 1641, 3010]
+            rescue
+              on host, Command.new("type \"#{log_file}\"", [], { :cmdexe => true })
+              raise
+            end
+
+            if opts[:debug]
+              on host, Command.new("type \"#{log_file}\"", [], { :cmdexe => true })
+            end
+
+            if !host.is_cygwin?
+              # HACK: for some reason, post install we need to refresh the connection to make puppet available for execution
+              host.close
+            end
+
+          end
+        end
+
       end
     end
   end
