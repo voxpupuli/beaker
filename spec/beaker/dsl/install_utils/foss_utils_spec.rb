@@ -945,6 +945,30 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_puppet_agent_dev_repo_on( host, opts )
     end
 
+    it 'runs the correct install for el-based platforms on s390x architectures' do
+      platform = Object.new()
+      allow(platform).to receive(:to_array) { ['el', '5', 's390x'] }
+      host = basic_hosts.first
+      host['platform'] = platform
+      sha_value = 'ereiuwoiur'
+      opts = { :version => '0.1.0', :puppet_agent_sha => sha_value }
+      allow( subject ).to receive( :options ).and_return( {} )
+
+      release_path_end = 'fake_release_path_end'
+      release_file = 'fake_29835_release_file'
+      expect( host ).to receive( :puppet_agent_dev_package_info ).and_return(
+        [ release_path_end, release_file ] )
+
+      expect(subject).not_to receive(:install_puppetlabs_dev_repo)
+      expect(host).not_to receive(:install_package)
+
+      expect(subject).to receive(:fetch_http_file).once.with(/#{release_path_end}$/, release_file, /\/el$/)
+      expect(subject).to receive(:scp_to).once.with(host, /#{release_file}$/, anything)
+      expect(subject).to receive(:on).ordered.with(host, /rpm -ivh.*#{release_file}$/)
+
+      subject.install_puppet_agent_dev_repo_on( host, opts )
+    end
+
     it 'runs the correct install for debian-based platforms' do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['debian', '5', 'x4']}
