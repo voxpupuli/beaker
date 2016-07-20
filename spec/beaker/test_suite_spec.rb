@@ -226,6 +226,29 @@ module Beaker
         expect( test_suite_result.elapsed_time ).to be == 111
       end
 
+      describe '#print_test_result' do
+        it 'prints the test result without the line number if no file path' do
+          tc = Beaker::TestCase.new( hosts, options[:logger], options)
+          ex = StandardError.new('failed')
+          allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
+          tc.instance_variable_set(:@exception, ex)
+          test_suite_result.add_test_case( tc )
+          expect(options[:logger]).to_not receive(:notify).with(/Test line:/)
+          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+        end
+
+        it 'prints the test result and line number from test case file on failure' do
+          tc = Beaker::TestCase.new( hosts, options[:logger], options, 'path_to_test_file.rb')
+          ex = StandardError.new('failed')
+          allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
+          tc.instance_variable_set(:@exception, ex)
+          test_suite_result.add_test_case( tc )
+
+          expect(options[:logger]).to receive(:notify).with(/Test line:/)
+          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+        end
+      end
+
       describe '#write_junit_xml' do
         let(:options) { make_opts.merge({:logger => double().as_null_object,
                                          'name' => create_files(@files),
