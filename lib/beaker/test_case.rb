@@ -145,7 +145,7 @@ module Beaker
                 begin
                   teardown.call
                 rescue StandardError, SignalException, TEST_EXCEPTION_CLASS => e
-                  log_and_fail_test(e)
+                  log_and_fail_test(e, :teardown_error)
                 end
               end
               @logger.info('End teardown')
@@ -172,8 +172,12 @@ module Beaker
           logger.pretty_backtrace(bt).each_line do |line|
             logger.error(line)
           end
-          @test_status = status
-          @exception   = exception
+          # If the status is already a test failure or error, don't overwrite with the teardown failure.
+          unless status == :teardown_error && (@test_status == :error || @test_status == :fail)
+            status = :error if status == :teardown_error
+            @test_status = status
+            @exception   = exception
+          end
         end
       end
     end
