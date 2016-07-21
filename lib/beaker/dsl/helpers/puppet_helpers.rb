@@ -505,13 +505,22 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
         #   mappings
-        # @example Stub puppetlabs.com on the master to 127.0.0.1
-        #   stub_hosts_on(master, 'puppetlabs.com' => '127.0.0.1')
-        def stub_hosts_on(machine, ip_spec)
+        # @param alias_spec [Hash{String=>Array[String]] an hash containing the host to alias(es) mappings to apply
+        # @example Stub puppetlabs.com on the master to 127.0.0.1 with an alias example.com
+        #   stub_hosts_on(master, {'puppetlabs.com' => '127.0.0.1'}, {'puppetlabs.com' => ['example.com']})
+        def stub_hosts_on(machine, ip_spec, alias_spec={})
           block_on machine do | host |
             ip_spec.each do |address, ip|
+              aliases = alias_spec[address] || []
+              manifest =<<-EOS.gsub /^\s+/, ""
+                host { '#{address}':
+                  \tensure       => present,
+                  \tip           => '#{ip}',
+                  \thost_aliases => #{aliases},
+                }
+              EOS
               logger.notify("Stubbing address #{address} to IP #{ip} on machine #{host}")
-              on( host, puppet('resource', 'host', address, 'ensure=present', "ip=#{ip}") )
+              apply_manifest_on( host, manifest )
             end
 
             teardown do
@@ -530,17 +539,15 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
         #   mappings
-        # @example Stub puppetlabs.com on the master to 127.0.0.1
-        #   with_host_stubbed_on(master, 'forgeapi.puppetlabs.com' => '127.0.0.1') do
+        # @param alias_spec [Hash{String=>Array[String]] an hash containing the host to alias(es) mappings to apply
+        # @example Stub forgeapi.puppetlabs.com on the master to 127.0.0.1 with an alias forgeapi.example.com
+        #   with_host_stubbed_on(master, {'forgeapi.puppetlabs.com' => '127.0.0.1'}, {'forgeapi.puppetlabs.com' => ['forgeapi.example.com']}) do
         #     puppet( "module install puppetlabs-stdlib" )
         #   end
-        def with_host_stubbed_on(host, ip_spec, &block)
+        def with_host_stubbed_on(host, ip_spec, alias_spec={}, &block)
           begin
             block_on host do |host|
-              ip_spec.each_pair do |address, ip|
-                logger.notify("Stubbing address #{address} to IP #{ip} on machine #{host}")
-                on( host, puppet('resource', 'host', address, 'ensure=present', "ip=#{ip}") )
-              end
+              stub_hosts_on(host, ip_spec, alias_spec)
             end
 
             block.call
@@ -574,11 +581,11 @@ module Beaker
         #                             global options hash
         def stub_forge_on(machine, forge_host = nil)
           #use global options hash
+          primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
           @forge_ip ||= Resolv.getaddress(forge_host)
           block_on machine do | host |
-            stub_hosts_on(host, 'forge.puppetlabs.com' => @forge_ip)
-            stub_hosts_on(host, 'forgeapi.puppetlabs.com' => @forge_ip)
+            stub_hosts_on(host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']})
           end
         end
 
@@ -593,12 +600,10 @@ module Beaker
         #                             global options hash
         def with_forge_stubbed_on( host, forge_host = nil, &block )
           #use global options hash
+          primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
           @forge_ip ||= Resolv.getaddress(forge_host)
-          with_host_stubbed_on( host,
-                                {'forge.puppetlabs.com'  => @forge_ip,
-                               'forgeapi.puppetlabs.com' => @forge_ip},
-                                &block                                    )
+          with_host_stubbed_on( host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']}, &block )
         end
 
         # This wraps `with_forge_stubbed_on` and provides it the default host

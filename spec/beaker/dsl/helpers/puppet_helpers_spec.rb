@@ -318,22 +318,48 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_hosts_on' do
     it 'executes puppet on the host passed and ensures it is reverted' do
+      test_host = make_host('my_host', {})
       allow( subject ).to receive( :hosts ).and_return( hosts )
       logger = double.as_null_object
 
+      expect( subject ).to receive( :on ).once
       allow( subject ).to receive( :logger ).and_return( logger )
-      expect( subject ).to receive( :on ).twice
       expect( subject ).to receive( :teardown ).and_yield
-      expect( subject ).to receive( :puppet ).once.
-        with( 'resource', 'host',
-              'puppetlabs.com',
-              'ensure=present', 'ip=127.0.0.1' )
+      manifest =<<-EOS.gsub /^\s+/, ""
+        host { 'puppetlabs.com':
+          \tensure       => present,
+          \tip           => '127.0.0.1',
+          \thost_aliases => [],
+        }
+      EOS
+      expect( subject ).to receive( :apply_manifest_on ).once.
+        with( test_host, manifest )
       expect( subject ).to receive( :puppet ).once.
         with( 'resource', 'host',
               'puppetlabs.com',
               'ensure=absent' )
 
-      subject.stub_hosts_on( make_host('my_host', {}), 'puppetlabs.com' => '127.0.0.1' )
+      subject.stub_hosts_on( test_host, {'puppetlabs.com' => '127.0.0.1'} )
+    end
+    it 'adds aliases to defined hostname' do
+      test_host = make_host('my_host', {})
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      logger = double.as_null_object
+
+      expect( subject ).to receive( :on ).once
+      allow( subject ).to receive( :logger ).and_return( logger )
+      expect( subject ).to receive( :teardown ).and_yield
+      manifest =<<-EOS.gsub /^\s+/, ""
+        host { 'puppetlabs.com':
+          \tensure       => present,
+          \tip           => '127.0.0.1',
+          \thost_aliases => [\"foo\", \"bar\"],
+        }
+      EOS
+      expect( subject ).to receive( :apply_manifest_on ).once.
+        with( test_host, manifest )
+
+      subject.stub_hosts_on( test_host, {'puppetlabs.com' => '127.0.0.1'}, {'puppetlabs.com' => ['foo','bar']} )
     end
   end
 
@@ -355,9 +381,7 @@ describe ClassMixedWithDSLHelpers do
       expect( Resolv ).to receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       expect( subject ).to receive( :stub_hosts_on ).
-        with( host, 'forge.puppetlabs.com' => '127.0.0.1' )
-      expect( subject ).to receive( :stub_hosts_on ).
-        with( host, 'forgeapi.puppetlabs.com' => '127.0.0.1' )
+        with( host, {'forge.puppetlabs.com' => '127.0.0.1'}, {'forge.puppetlabs.com' => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']} )
 
       subject.stub_forge_on( host, 'my_forge.example.com' )
     end
