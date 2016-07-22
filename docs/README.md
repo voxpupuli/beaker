@@ -1,36 +1,26 @@
 ![Beaker Muppet Image](http://images4.wikia.nocookie.net/__cb20101015151248/muppet/images/0/05/Beaker.jpg)
 
-## Beaker Info
+Documentation for Beaker can be found in this repository in [the docs/ folder](README.md).
 
-* [MAINTAINERS](/MAINTAINERS.md)
-* [Installing Beaker](Beaker-Installation.md)
-* [Running Beaker Tests ](runner/test_run.md)
-* [How to Beaker](How-To-Beaker.md)
-  * [Creating A Test Environment](Creating-A-Test-Environment.md)
-    * [Roles, What Are They?](Roles-What-Are-They.md)
-    * [Supported Virtualization Techniques - Hypervisor Docs](hypervisors)
-  * [The Command Line](The-Command-Line.md)
-  * [Argument Processing and Precedence](Argument-Processing-and-Precedence.md)
-    * [How To Use User/Password Authentication with Beaker](How-To-Use-User-Password-Authentication-with-Beaker.md)
-  * [Running Masterless Beaker](Beaker-with-Masterless-Puppet.md)
-  * [Types, Puppet 4, & The All-In-One Agent](Types,-Puppet-4,-and-the-All-In-One-Agent.md)
-  * [The Beaker DSL](The-Beaker-DSL.md)
-    * [Beaker DSL on rdoc.info](http://rdoc.info/github/puppetlabs/beaker/master/Beaker/DSL)
-    * [How the confine method works](dsl/confine.md)
-    * [Platform Specific Tag Confines](dsl/platform_specific_tag_confines.md)
-    * [Shared Options for Executing Beaker Commands](Shared-Options-for-Executing-Beaker-Commands.md)
-  * [Let's Write a Test!](Lets-Write-a-Test.md)
-  * [Access The Live Test Console with Pry](Access-the-Live-Test-Console-with-Pry.md)
-  * [Test Tagging](Beaker-Test-Tagging.md)
-  * [Recipes](Beaker-Recipes.md)
-* [Beaker vs. Beaker-rspec](beaker-vs.-beaker-rspec.md)
-* [How to Write a Beaker Test for a Module Using beaker-rspec](How-to-Write-a-Beaker-Test-for-a-Module.md)
-* [Beaker Libraries](Beaker-Libraries.md)
+## Table of Contents
+
+- [Tutorials](tutorials) take you by the hand through the steps to setup a
+beaker run. Start here if you’re new to Beaker or test development.
+- [Concepts](concepts) discuss key topics and concepts at a fairly high
+level and provide useful background information and explanation.
+- [Rubydocs](http://rubydoc.info/github/puppetlabs/beaker/frames) contains the
+technical reference for APIs and other aspects of Beaker. They describe how it
+works and how to use it but assume that you have a basic understanding of key concepts.
+- [How-to guides](how_to) are recipes. They guide you through the steps
+involved in addressing key problems and use-cases. They are more advanced than
+tutorials and assume some knowledge of how Beaker works.
 
 ## Other Resources
 
+In addition to the overview above, which matches Beaker's main README docs section,
+this doc's README has some links to other outside resources:
+
 * [Latest Gem Release Notes](https://github.com/puppetlabs/beaker/blob/master/HISTORY.md#LATEST)
-* [File a Beaker Bug](File-a-Beaker-Bug.md)
 * [Video: Beaker 101 talk at PDXPUG, May 2014](https://www.youtube.com/watch?v=cSyJXTYFXFg)
 * [Podcast: Beaker, May 2014](http://puppetlabs.com/podcasts/podcast-beaker-cloud-enabled-acceptance-testing-tool)
 * [Podcast: Automated Testing with Beaker for Windows, December 2014](http://puppetlabs.com/podcasts/podcast-automated-testing-beaker-windows)
