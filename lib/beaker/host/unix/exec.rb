@@ -122,7 +122,7 @@ module Unix::Exec
   #@example
   #  host.delete_env_var('PATH', '/usr/bin:PATH')
   def delete_env_var key, val
-    key = key.to_s.upcase
+    key = key.to_s
     env_file = self[:ssh_env_file]
     val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
     #if the key only has that single value remove the entire line
@@ -141,7 +141,7 @@ module Unix::Exec
   #@example
   #  host.get_env_var('path')
   def get_env_var key
-    key = key.to_s.upcase
+    key = key.to_s
     exec(Beaker::Command.new("env | grep #{key}"), :accept_all_exit_codes => true).stdout.chomp
   end
 
@@ -150,7 +150,7 @@ module Unix::Exec
   #@example
   #  host.clear_env_var('PATH')
   def clear_env_var key
-    key = key.to_s.upcase
+    key = key.to_s
     env_file = self[:ssh_env_file]
     #remove entire line
     exec(Beaker::SedCommand.new(self['platform'], "/#{key}=.*$/d", env_file))
