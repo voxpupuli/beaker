@@ -186,7 +186,7 @@ module Beaker
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).once.and_return(result)
 
         host.add_env_var('key', '/my/first/value')
@@ -195,24 +195,24 @@ module Beaker
       it "adds new line to environment file if no env var of that name already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with(/grep \^KEY ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with("echo \"KEY=/my/first/value\" >> ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("echo \"key=/my/first/value\" >> ~/.ssh/environment")
         host.add_env_var('key', '/my/first/value')
       end
 
       it "updates existing line in environment file when adding additional value to existing variable" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with(/grep \^KEY ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^KEY=/KEY=\\/my\\/first\\/value:/', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
 
@@ -220,9 +220,9 @@ module Beaker
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/KEY=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\(.*\\)[;:]\\/my\\/first\\/value/KEY=\\1/", "~/.ssh/environment")
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\/my\\/first\\/value[;:]/KEY=/", "~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
 
