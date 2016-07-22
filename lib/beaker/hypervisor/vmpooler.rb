@@ -42,6 +42,9 @@ module Beaker
     rescue Errno::ENOENT
       @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
       creds
+    rescue TypeError
+      @logger.warn "Errors in credentials file (#{dot_fog}); missing a :default section; proceeding without authentication"
+      creds
     end
 
     def read_fog_file(dot_fog = '.fog')

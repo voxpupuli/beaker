@@ -181,6 +181,20 @@ module Beaker
         expect( vmpooler.credentials ).to be == { }
       end
 
+      it 'continues without credentials when there are formatting errors in the fog file' do
+        data = { :some => { :other => :data } }
+
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+        receive(:read_fog_file).and_raise(TypeError)
+
+        @my_logger = RSpec::Mocks::Double.new('logger').as_null_object
+        expect(@my_logger).to receive(:warn).with( "Errors in credentials file " )
+        my_options = {:logger => @my_logger}
+
+        vmpooler =  Beaker::Vmpooler.new( make_hosts, my_options )
+      end
+
+
       it 'stores vmpooler token when found in fog file' do
         data = { :default => { :vmpooler_token => "TOKEN" } }
 
