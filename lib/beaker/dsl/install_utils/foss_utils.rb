@@ -1081,20 +1081,28 @@ module Beaker
 
             case variant
             when /^(fedora|el|centos|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr)$/
-              sha = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
-              opts[:dev_builds_repos] ||= [ opts[:puppet_collection] ]
-              install_puppetlabs_dev_repo( host, 'puppet-agent', sha, nil, opts )
-              host.install_package('puppet-agent')
-              logger.trace("#install_puppet_agent_dev_repo_on: install_puppetlabs_dev_repo finished")
-              next
+              if arch == 's390x'
+                logger.trace("#install_puppet_agent_dev_repo_on: s390x arch detected for host #{host}. using dev package")
+              else
+                sha = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
+                opts[:dev_builds_repos] ||= [ opts[:puppet_collection] ]
+                install_puppetlabs_dev_repo( host, 'puppet-agent', sha, nil, opts )
+                host.install_package('puppet-agent')
+                logger.trace("#install_puppet_agent_dev_repo_on: install_puppetlabs_dev_repo finished")
+                next
+              end
             when /^(eos|osx|windows|solaris|sles|aix)$/
-              release_path_end, release_file = host.puppet_agent_dev_package_info(
-                opts[:puppet_collection], opts[:puppet_agent_version], opts )
-              release_path << release_path_end
-              logger.trace("#install_puppet_agent_dev_repo_on: dev_package_info, continuing...")
+              # Download installer package file & run install manually.
+              # Done below, so that el hosts with s390x arch can use this
+              # workflow as well
             else
               raise "No repository installation step for #{variant} yet..."
             end
+
+            release_path_end, release_file = host.puppet_agent_dev_package_info(
+              opts[:puppet_collection], opts[:puppet_agent_version], opts )
+            release_path << release_path_end
+            logger.trace("#install_puppet_agent_dev_repo_on: dev_package_info, continuing...")
 
             if host['platform'] =~ /eos/
               host.get_remote_file( "#{release_path}/#{release_file}" )
@@ -1107,7 +1115,7 @@ module Beaker
             case variant
             when /^eos/
               host.install_from_file( release_file )
-            when /^(sles|aix)$/
+            when /^(sles|aix|el)$/
               # NOTE: AIX does not support repo management. This block assumes
               # that the desired rpm has been mirrored to the 'repos' location.
               on host, "rpm -ivh #{onhost_copied_file}"

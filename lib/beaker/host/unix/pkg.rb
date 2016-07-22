@@ -384,7 +384,7 @@ module Unix::Pkg
     when /^(solaris)$/
       release_path_end, release_file = solaris_puppet_agent_dev_package_info(
         puppet_collection, puppet_agent_version, opts )
-    when /^(sles|aix)$/
+    when /^(sles|aix|el)$/
       arch = 'ppc' if variant == 'aix' && arch == 'power'
       release_path_end = "#{variant}/#{version}/#{puppet_collection}/#{arch}"
       release_file = "puppet-agent-#{puppet_agent_version}-1.#{variant}#{version}.#{arch}.rpm"
