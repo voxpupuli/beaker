@@ -1,8 +1,8 @@
-###The Task
+##The Task
 
 Consider if mcollectived incorrectly spawned a new process with every puppet agent run on Ubuntu 10.04.  We need an acceptance test to check that a new process is not spawned and to ensure that this issue does not regress in new builds.
 
-###Figure Out Test Steps
+##Figure Out Test Steps
 
 What needs to happen in this test:
 
@@ -10,7 +10,10 @@ What needs to happen in this test:
 * Restart mcollective twice
 * Check to see if more than one mcollective process is running
 
-###Install PE
+##Create a host configuration file
+    $ beaker-hostgenerator redhat7-64ma > redhat7-64ma.yaml
+
+##Install PE
 
 We prefer to install PE once and then run a set of tests, so PE installation should not be part of the actual acceptance test.
 
@@ -18,11 +21,12 @@ We prefer to install PE once and then run a set of tests, so PE installation sho
     $ cd setup
     $ cat > install.rb << RUBY
     test_name "Installing Puppet Enterprise" do
-    install_pe      
+    install_pe
     RUBY
     $ cd ..
 
-XXX - Will beaker just pick this up? Is the setup dir magic?
+This places our install steps in a ruby script (install.rb) which will run on localhost, but the #install_pe method knows where to install puppet enterprise based on the host configuration in use.
+The install.rb script is used in our commandline to beaker, below.
 
 ## Create a test file
 
@@ -38,13 +42,14 @@ Here's our magic command that restarts mcollective:
 ####Check to see if more than one mcollective process is running
 
 Here's our magic command that throws an error if more than one mcollective process is running:
-```
-process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
-```
+
+    process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
+
 ###Put it all together
 
 Here's the finished acceptance test.
-```
+
+```ruby
 test_name "/etc/init.d/pe-mcollective restart check"
 
 # Don't run these tests on the following platforms
@@ -66,8 +71,10 @@ hosts.each do |host|
   on(host, process_count_check) { assert_equal(0, exit_code) }
 end
 ```
+
+## Run it!
 You can now run this with
 
-  `beaker --host myhost.cfg --test mytest.rb`
+    beaker --host redhat7-64ma.yaml --pre-suite install.rb --test mytest.rb
 
 Next up you may want to look at the [Beaker test for a module](How-to-Write-a-Beaker-Test-for-a-Module.md) page.
