@@ -99,7 +99,7 @@ module Unix::Exec
   #@example
   #  host.add_env_var('PATH', '/usr/bin:PATH')
   def add_env_var key, val
-    key = key.to_s.upcase
+    key = key.to_s
     env_file = self[:ssh_env_file]
     escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
     #see if the key/value pair already exists
