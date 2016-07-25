@@ -1,5 +1,7 @@
 test_name 'test generic installers'
 
+confine :except, :platform => /^windows|osx/
+
 step 'install arbitrary msi via url' do
   hosts.each do |host|
     if host['platform'] =~ /win/
