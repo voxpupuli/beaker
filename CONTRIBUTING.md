@@ -32,19 +32,19 @@
     why this is a problem, and how the patch fixes the problem when applied.
 ````
 
-* During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) before you submit your PR with `git rebase master`.  A successful rebase ensures that your patch will cleanly merge into Beaker.
-* Submitted patches will be smoke tested through a series of acceptance level tests that ensures basic Beaker functionality - the results of these tests will be evaluated by a Beaker team member.  Failures associated with the submitted patch will result in the patch being rejected.
+* During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will cleanly merge into Beaker.
 
 ### Testing
 
+* Submitted PR's will be tested in a series of spec and acceptance level tests - the results of these tests will be evaluated by a Beaker team member, as test results are currently not accessible by the public. Testing failures that require code changes will be communicated in the PR discussion.
 * Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
-  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
+  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`. See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
   * Run the tests to assure nothing else was accidentally broken, using `rake test`
-    * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 2.0, etc). Beaker supports Ruby 1.9+, and breakage of support for older/newer rubies will cause a patch to be rejected.
+    * **Bonus**: if possible ensure that `rake test` runs without failures for additional Rubies (versions 1.9.3 and above).
 
 ### Documentation
 
-* Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without appropriate documentation will be rejected.
+* Make sure that you have added documentation using [Yard](http://yardoc.org/) as necessary for any new code introduced.
 * More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
 ## Making Trivial Changes
