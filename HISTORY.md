@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 15 Jul, 2016 (7c89a4d0)](#LATEST)
+* [LATEST - 27 Jul, 2016 (f4d394e2)](#LATEST)
+* [2.47.1 - 15 Jul, 2016 (da89c35b)](#2.47.1)
 * [2.47.0 - 13 Jul, 2016 (bf4cbcf0)](#2.47.0)
 * [2.46.0 - 8 Jul, 2016 (3a650c95)](#2.46.0)
 * [2.45.0 - 29 Jun, 2016 (c0b56972)](#2.45.0)
@@ -124,7 +125,292 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 15 Jul, 2016 (7c89a4d0)
+### <a name = "LATEST">LATEST - 27 Jul, 2016 (f4d394e2)
+
+* (GEM) update beaker version to 2.48.0 (f4d394e2)
+
+* Merge pull request #1198 from kevpl/docs_in_parallel_link (dbc5be2d)
+
+
+```
+Merge pull request #1198 from kevpl/docs_in_parallel_link
+
+(MAINT) fixed broken link to run_in_parallel.md
+```
+* (MAINT) fixed broken link to run_in_parallel.md (ad883530)
+
+
+```
+(MAINT) fixed broken link to run_in_parallel.md
+
+[skip ci]
+```
+* Merge pull request #1195 from kevpl/docs_parallel_mv (cdb3aa5b)
+
+
+```
+Merge pull request #1195 from kevpl/docs_parallel_mv
+
+(MAINT) moved run_in_parallel doc for re-org - BKR-846
+```
+* Merge pull request #1196 from johnduarte/maint-skip-file-install-test (5452e132)
+
+
+```
+Merge pull request #1196 from johnduarte/maint-skip-file-install-test
+
+(MAINT) confined file install acceptance to win/osx
+```
+* (MAINT) confined file install acceptance to win/osx (dfd22f1f)
+
+
+```
+(MAINT) confined file install acceptance to win/osx
+
+This commit confines the `acceptance/tests/install/from_file.rb`
+test to Windows and OSX which are currently the only platforms supported
+by the test.
+```
+* (MAINT) moved run_in_parallel doc for re-org - BKR-846 (3c83094a)
+
+
+```
+(MAINT) moved run_in_parallel doc for re-org - BKR-846
+
+[skip ci]
+```
+* Merge pull request #1192 from johnduarte/generic-pkg-installers (8e923264)
+
+
+```
+Merge pull request #1192 from johnduarte/generic-pkg-installers
+
+(MAINT) add generic dmg and msi installers
+```
+* Merge pull request #1189 from tvpartytonight/maint_add_ci_test_description (746e87eb)
+
+
+```
+Merge pull request #1189 from tvpartytonight/maint_add_ci_test_description
+
+(MAINT) Improve CONTRIBUTING.md testing section
+```
+* Merge pull request #1171 from kevpl/docs_big_reorg (b4937b06)
+
+
+```
+Merge pull request #1171 from kevpl/docs_big_reorg
+
+(BKR-846) re-organized docs
+```
+* Merge pull request #1186 from kevpl/bkr745_rhel6_install (755ecbe4)
+
+
+```
+Merge pull request #1186 from kevpl/bkr745_rhel6_install
+
+(BKR-745) added el support for s390x dev installs
+```
+* Merge pull request #1190 from samwoods1/print_line (72df3b1a)
+
+
+```
+Merge pull request #1190 from samwoods1/print_line
+
+(BKR-556) Print line number from test file in stack in summary on fail
+```
+* Merge pull request #1188 from er0ck/docs/master/maint-remove_TODO_from_lets_write_a_test_doc (dc906de4)
+
+
+```
+Merge pull request #1188 from er0ck/docs/master/maint-remove_TODO_from_lets_write_a_test_doc
+
+(maint) remove TODO from lets_write_a_test doc
+```
+* Merge pull request #1194 from dylanratcliffe/BKR-891 (75587154)
+
+
+```
+Merge pull request #1194 from dylanratcliffe/BKR-891
+
+(BKR-891) Remove uppercasing
+```
+* Merge pull request #1185 from kevpl/docs_preserved_hosts (afc21313)
+
+
+```
+Merge pull request #1185 from kevpl/docs_preserved_hosts
+
+(MAINT) added preserved hosts doc
+```
+* Merge pull request #1193 from puppetlabs/qeng3198/simple-archiving-mechanism (ea263617)
+
+
+```
+Merge pull request #1193 from puppetlabs/qeng3198/simple-archiving-mechanism
+
+(QENG-3198) Mechanism for archiving SUT files
+```
+* (BKR-891) Removed uppercasing assumptions (b5aff42c)
+
+* (BKR-891) Removed more uppercasing (c62c915b)
+
+* (BRK-891) Fixed Tests (986934ac)
+
+* (BKR-891) Remove uppercasing (64c6e1fe)
+
+* Merge pull request #1148 from johnduarte/bkr-847-forgeapi-puppet-com (5f145359)
+
+
+```
+Merge pull request #1148 from johnduarte/bkr-847-forgeapi-puppet-com
+
+(BKR-847) Support puppet.com in forge stubs
+```
+* (QENG-3198) Mechanism for archiving SUT files (f51f66a4)
+
+
+```
+(QENG-3198) Mechanism for archiving SUT files
+
+This commit adds a new host helpers method called `archive_file_from`
+that is intended to be used in post-suites for grabbing arbitrary files
+from the SUTs and puts them in a known location where the Jenkins
+Archive Artifact plugin can find them and present them with the build
+results.
+
+The implementation is basically thin wrapper around `scp_from` that sets
+up a particular directory structure with a hardcoded root directory.
+This hardcoded root directory will need to be added to the Jenkins
+acceptance job configurations so they can be published along with the
+rest of the build results.
+```
+* (MAINT) Improve CONTRIBUTING.md testing section (7828489c)
+
+* (BKR-556) Print line number from test file in stack in summary on fail (f45c57ec)
+
+* (maint) remove TODO from lets write a test doc (d2b739f5)
+
+
+```
+(maint) remove TODO from lets write a test doc
+
+[skip ci]
+```
+* (BKR-745) added el support for s390x dev installs (6fa03aa0)
+
+* Merge pull request #1182 from tvpartytonight/QENG-4068 (7df594b2)
+
+
+```
+Merge pull request #1182 from tvpartytonight/QENG-4068
+
+(QENG-4068) Remove unnecessary gem documentation dependencies
+```
+* Merge pull request #1179 from randomvariable/BKR-882 (afa4d84c)
+
+
+```
+Merge pull request #1179 from randomvariable/BKR-882
+
+(BKR-882) Explicitly refer to AWS SDK v1 gem
+```
+* (MAINT) add generic dmg and msi installers (d89dceb0)
+
+
+```
+(MAINT) add generic dmg and msi installers
+
+This commit adds a generic dmg installer to the OS X package facility.
+This allows either a either a local file location or a URL to be specified
+to install a dmg on an OS X host. It is based on the existing `install_dmg`
+method, but requires the Volume location and package name to be specified by
+the caller. These values cannot be introspected without making assumptions
+about the packaging.
+
+It also adds a generic msi installer as a helper. It is based on the
+`install_msi_on` helper. The additional helper requirements make it a larger
+effort to port to the Windows package facility which is not pursued in this
+commit. The interface of the `generic_install_msi_on` method is the same as
+the `install_msi_on`, it simply removes the validations that are puppet
+specific.
+```
+* (MAINT) added preserved hosts doc (e279c34a)
+
+
+```
+(MAINT) added preserved hosts doc
+
+[skip ci]
+```
+* (BKR-883) Add docs for Beaker rake tasks (#1180) (8eed7d02)
+
+
+```
+(BKR-883) Add docs for Beaker rake tasks (#1180)
+
+* (BKR-883) Add docs for Beaker rake tasks
+
+* (BKR-883) - moving doc to the right location
+
+* Added unit test.
+
+* Revert "Added unit test."
+
+This reverts commit dc5fba2ee1015a7d0b808ef786676d90bbae52e6.
+```
+* (QENG-4068) Remove yardoc testing in 1.9.3 (1e1a29ae)
+
+
+```
+(QENG-4068) Remove yardoc testing in 1.9.3
+
+This commit removes yardoc testing with ruby 1.9.3, allowing us
+to remove gems necessary for yardoc in 1.9.3 only.
+```
+* (QENG-4068) Remove unnecessary gem documentation dependencies (6e70277d)
+
+
+```
+(QENG-4068) Remove unnecessary gem documentation dependencies
+
+These gems are not necessary for beaker itself, and they do not need to
+be specified in the the gemspec.
+```
+* (BKR-882) Explicitly refer to AWS SDK v1 gem (e801cac8)
+
+
+```
+(BKR-882) Explicitly refer to AWS SDK v1 gem
+
+The AWS SDK gem has had a backwards compatible major release.
+However, in projects that want to use both v1 and v2 of the SDK gem, the .gemspec must refer to 'aws-sdk-v1' to satisfy Bundler dependency management.
+```
+* (BKR-846) re-organized docs (f3e01b0c)
+
+
+```
+(BKR-846) re-organized docs
+
+[skip ci]
+```
+* (BKR-847) Support puppet.com in forge stubs (41a95e89)
+
+
+```
+(BKR-847) Support puppet.com in forge stubs
+
+This commit adds an `alias_spec` parameter to the `stub_hosts_on`
+and the `with_host_stubbed_on` to facilitate adding multiple host aliases when
+stubbing hosts.
+
+This commit also updates the `stub_forge_on` and `with_forge_stubbed_on`
+methods to add the `puppet.com` and `puppetlabs.com` variants of `forge`
+and `forgeapi` in order to support both domain names.
+```
+### <a name = "2.47.1">2.47.1 - 15 Jul, 2016 (da89c35b)
+
+* (HISTORY) update beaker history for gem release 2.47.1 (da89c35b)
 
 * (GEM) update beaker version to 2.47.1 (7c89a4d0)
 
