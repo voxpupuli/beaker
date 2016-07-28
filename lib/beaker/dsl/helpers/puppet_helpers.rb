@@ -547,7 +547,23 @@ module Beaker
         def with_host_stubbed_on(host, ip_spec, alias_spec={}, &block)
           begin
             block_on host do |host|
-              stub_hosts_on(host, ip_spec, alias_spec)
+              # this code is duplicated from the `stub_hosts_on` method. The
+              # `stub_hosts_on` method itself is not used here because this
+              # method is used by modules tests using `beaker-rspec`. Since
+              # the `stub_hosts_on` method contains a `teardown` step, it is
+              # incompatible with `beaker_rspec`.
+              ip_spec.each do |address, ip|
+                aliases = alias_spec[address] || []
+                manifest =<<-EOS.gsub /^\s+/, ""
+                  host { '#{address}':
+                    \tensure       => present,
+                    \tip           => '#{ip}',
+                    \thost_aliases => #{aliases},
+                  }
+                EOS
+                logger.notify("Stubbing address #{address} to IP #{ip} on machine #{host}")
+                apply_manifest_on( host, manifest )
+              end
             end
 
             block.call
