@@ -16,6 +16,7 @@ class Beaker::VagrantLibvirt < Beaker::Vagrant
     "    v.vm.provider :libvirt do |node|\n" +
       "      node.cpus = #{cpu(host, options)}\n" +
       "      node.memory = #{memory(host, options)}\n" +
+      build_options_str(options) +
       "    end\n"
   end
 
@@ -41,5 +42,17 @@ class Beaker::VagrantLibvirt < Beaker::Vagrant
     else
       '512'
     end
+  end
+
+  def self.build_options_str(options)
+    other_options_str = ''
+    if options['libvirt']
+      other_options = []
+      options['libvirt'].each do |k, v|
+        other_options << "      node.#{k} = '#{v}'"
+      end
+      other_options_str = other_options.join("\n")
+    end
+    "#{other_options_str}\n"
   end
 end
