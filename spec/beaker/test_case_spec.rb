@@ -49,7 +49,7 @@ module Beaker
           f.write "raise FailTest"
         end
         @path = path
-        expect( testcase ).to_not receive( :log_and_fail_test )
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :fail

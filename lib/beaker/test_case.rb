@@ -132,8 +132,7 @@ module Beaker
               test = File.read(path)
               eval test,nil,path,1
             rescue FailTest, TEST_EXCEPTION_CLASS => e
-              @test_status = :fail
-              @exception   = e
+              log_and_fail_test(e, :fail)
             rescue PendingTest
               @test_status = :pending
             rescue SkipTest
@@ -166,13 +165,14 @@ module Beaker
         # individually as well.
         #
         # @param exception [Exception] exception to fail with
-        def log_and_fail_test(exception)
+        # @param exception [Symbol] the test status
+        def log_and_fail_test(exception, status=:error)
           logger.error("#{exception.class}: #{exception.message}")
           bt = exception.backtrace
           logger.pretty_backtrace(bt).each_line do |line|
             logger.error(line)
           end
-          @test_status = :error
+          @test_status = status
           @exception   = exception
         end
       end
