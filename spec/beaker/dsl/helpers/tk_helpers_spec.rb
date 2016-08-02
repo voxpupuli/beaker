@@ -72,7 +72,7 @@ describe ClassMixedWithDSLHelpers do
 
       describe 'given a true value to its `replace` parameter' do
         before do
-          expect( JSON ).to receive(:dump)
+          expect( JSON ).to receive(:pretty_generate)
           expect( subject ).to receive(:create_remote_file).with(host, config_file_path, anything())
         end
         include_examples('modify-tk-config-without-error')
