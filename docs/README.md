@@ -1,6 +1,6 @@
 ![Beaker Muppet Image](http://images4.wikia.nocookie.net/__cb20101015151248/muppet/images/0/05/Beaker.jpg)
 
-Documentation for Beaker can be found in this repository in [the docs/ folder](README.md).
+Documentation for Beaker can be found in this repository in [the docs/ folder]().
 
 ## Table of Contents
 

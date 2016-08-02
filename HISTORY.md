@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 27 Jul, 2016 (f4d394e2)](#LATEST)
+* [LATEST - 29 Jul, 2016 (90d15165)](#LATEST)
+* [2.48.0 - 27 Jul, 2016 (47d3aa18)](#2.48.0)
 * [2.47.1 - 15 Jul, 2016 (da89c35b)](#2.47.1)
 * [2.47.0 - 13 Jul, 2016 (bf4cbcf0)](#2.47.0)
 * [2.46.0 - 8 Jul, 2016 (3a650c95)](#2.46.0)
@@ -125,7 +126,38 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 27 Jul, 2016 (f4d394e2)
+### <a name = "LATEST">LATEST - 29 Jul, 2016 (90d15165)
+
+* (GEM) update beaker version to 2.48.1 (90d15165)
+
+* Merge pull request #1201 from johnduarte/bkr847-hotfix (7fb5c7fa)
+
+
+```
+Merge pull request #1201 from johnduarte/bkr847-hotfix
+
+(BKR-847) Fix with_host_stubbed_on
+```
+* (BKR-847) Fix with_host_stubbed_on (fa454e8e)
+
+
+```
+(BKR-847) Fix with_host_stubbed_on
+
+Prior to this commit, the `@teardown_procs` value was not being created
+to handle the teardown referenced by calling `stub_hosts_on` within
+`with_host_stubbed_on`. This commit removes the reference to the method
+and adds in the desired code directly.
+
+The `stub_hosts_on` method includes a `teardown` step to allow for the
+removal of the hosts stub after the test is concluded. The `teardown`
+method is incompatible with `beaker_rspec`. Therefore, modules tests using
+`beaker_rspec` use the `with_host_stubbed_on` method that does not utilize
+this feature.
+```
+### <a name = "2.48.0">2.48.0 - 27 Jul, 2016 (47d3aa18)
+
+* (HISTORY) update beaker history for gem release 2.48.0 (47d3aa18)
 
 * (GEM) update beaker version to 2.48.0 (f4d394e2)
 

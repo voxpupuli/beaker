@@ -332,6 +332,14 @@ module Beaker
       else
         host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
       end
+      # AIX must be configured to prefer local DNS over external
+      if host['platform'] =~ /aix/
+        aix_netsvc = '/etc/netsvc.conf'
+        aix_local_resolv = 'hosts = local, bind'
+        unless host.exec(Command.new("grep '#{aix_local_resolv}' #{aix_netsvc}"), :accept_all_exit_codes => true).exit_code == 0
+          host.exec(Command.new("echo '#{aix_local_resolv}' >> #{aix_netsvc}"))
+        end
+      end
     end
 
     #Make it possible to log in as root by copying the current users ssh keys to the root account

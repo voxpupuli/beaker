@@ -7,6 +7,24 @@ able to quickly iterate on those tests in an already setup System Under Test
 (SUT) configuration. Beaker provides the ability to do that using its preserved
 hosts functionality.
 
+## But Is This The Right Solution?
+
+Many people are of the opinion that if you have to login to a SUT, then you've
+already failed, and that the purpose of good automation is so that you don't
+ever have to do this. Beaker supports a diverse group of developers and testers,
+and we try to remain flexible and support multiple approaches to these problems.
+
+Another approach you might take to debugging failed tests, during development or
+test runs in your Continuous Integration (CI) systems, is to archive any
+artifacts or log files from the SUTs, so that you can read them all from the
+beaker coordinator. Beaker provides a Domain-Specific Language (DSL) method to
+accomodate this workflow, called `archive_file_from`. Check out the
+[how-to article](archive_sut_files.md) on this method for details on it.
+
+That being said, the preserved hosts functionality is still useful, particularly
+for new development. In this case, you might not be able to necessarily tell
+what files you might need from your SUTs, and exploration might be necessary.
+
 ## How Do I Use It?
 
 Note that where you decide to use this option will affect its precedence. You
