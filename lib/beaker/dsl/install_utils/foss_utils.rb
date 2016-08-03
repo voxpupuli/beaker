@@ -261,10 +261,8 @@ module Beaker
           else
             # Use option specified in the method call, otherwise check whether the global
             # run_in_parallel option includes install
-            run_in_parallel = opts[:run_in_parallel]
-            run_in_parallel = ((@options && @options[:run_in_parallel].is_a?(Array)) ?
-                @options[:run_in_parallel].include?('install') : false) if run_in_parallel.nil?
-            block_on hosts, { :run_in_parallel => run_in_parallel} do |host|
+            run_in_parallel = run_in_parallel? opts, @options, 'install'
+            block_on hosts, { :run_in_parallel => run_in_parallel } do |host|
               if host['platform'] =~ /el-(5|6|7)/
                 relver = $1
                 install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'el'))
@@ -340,9 +338,7 @@ module Beaker
           opts[:puppet_collection] ||= 'pc1' #hi!  i'm case sensitive!  be careful!
           opts[:puppet_agent_version] ||= opts[:version] #backwards compatability with old parameter name
 
-          run_in_parallel = opts[:run_in_parallel]
-          run_in_parallel = ((@options && @options[:run_in_parallel].is_a?(Array)) ?
-              @options[:run_in_parallel].include?('install') : false) if run_in_parallel.nil?
+          run_in_parallel = run_in_parallel? opts, @options, 'install'
           block_on hosts, { :run_in_parallel => run_in_parallel } do |host|
             add_role(host, 'aio') #we are installing agent, so we want aio role
             package_name = nil
