@@ -11,9 +11,8 @@
 
 ## Making Changes
 
-* Create a topic branch from where you want to base your work.
-  * This is the `master` branch in the case of Beaker
-  * To quickly create a topic branch based on master use `git checkout -b my_contribution master`. Please avoid working directly on the `master` branch.
+* Create a topic branch from your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker). 
+  * Please title the branch after the beaker ticket you intend to address, ie `BKR-1234`.
 * Make commits of logical units.
 * Check for unnecessary whitespace with `git diff --check` before committing.
 * Make sure your commit messages are in the proper format.
