@@ -10,8 +10,8 @@ CONFIG:
   forward_ssh_agent: true
 ~~~
 
-Beaker will then be able to use the user's agent on the host machine.  There is
-a gotcha though: the agent socket file in the virtual machine is only available
+Beaker will then make the ssh agent running on the beaker coordinator available to the Systems Under Test (SUT).  There is
+a gotcha though: the agent socket file in the SUT is only available
 to the user who signed in.  If you want to access remote machine resources as
 another user, you *must* change the socket permission.
 
