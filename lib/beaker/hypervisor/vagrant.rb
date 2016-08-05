@@ -121,8 +121,16 @@ module Beaker
         ssh_config = ssh_config.gsub(/User vagrant/, "User #{user}")
         f.write(ssh_config)
         f.rewind
-        host['ssh'] = {:config => f.path()}
-        host['user'] = user
+
+        override_ssh = !host['vagrant_override_ssh']  ? host['vagrant_override_ssh'] : true
+        if(override_ssh)
+          @logger.info("Set SSH Config (override existing config)")
+          host['ssh'] = {:config => f.path()}
+          host['user'] = user
+        else
+          @logger.info("don't override ssh config")
+        end
+
         @temp_files << f
     end
 
@@ -177,13 +185,9 @@ module Beaker
       @hosts.each do |host|
         default_user = host['user']
 
-        override_ssh = host['vagrant_override_ssh'] ? host['vagrant_override_ssh'] : true
 
-        if(override_ssh)
-          set_ssh_config host, 'vagrant'
-        else
-          @logger.info("don't override ssh config")
-        end
+        set_ssh_config host, 'vagrant'
+
 
         #copy vagrant's keys to roots home dir, to allow for login as root
         copy_ssh_to_root host, @options
