@@ -239,6 +239,9 @@ module Beaker
                             :project           => @options[:project].to_s })
         @vms << vm
 
+        # Wait for the host to accept ssh logins
+        host.wait_for_port(22)
+
         #enable root if user is not root
         enable_root(host)
 
