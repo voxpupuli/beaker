@@ -177,7 +177,13 @@ module Beaker
       @hosts.each do |host|
         default_user = host['user']
 
-        set_ssh_config host, 'vagrant'
+        override_ssh = host['vagrant_override_ssh'] ? host['vagrant_override_ssh'] : true
+
+        if(override_ssh)
+          set_ssh_config host, 'vagrant'
+        else
+          @logger.info("don't override ssh config")
+        end
 
         #copy vagrant's keys to roots home dir, to allow for login as root
         copy_ssh_to_root host, @options
