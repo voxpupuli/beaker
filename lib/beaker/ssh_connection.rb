@@ -102,7 +102,7 @@ module Beaker
         raise e
       ensure
         @ssh = nil
-        @logger.warn("ssh connection to #{@hostname} has been terminated")
+        @logger.debug("ssh connection to #{@hostname} has been terminated")
       end
     end
 
