@@ -50,7 +50,7 @@ module Beaker
             new_hash.merge!(options_hash)
           end
 
-          file_string = JSON.dump(new_hash)
+          file_string = JSON.pretty_generate(new_hash)
           create_remote_file host, config_file_path, file_string
         end
 
