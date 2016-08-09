@@ -103,8 +103,8 @@ module Beaker
     #to the provided SUT for test execution to be successful.
     def configure(opts = {})
       return unless @options[:configure]
-      block_on @hosts, { :run_in_parallel => (@options && @options[:run_in_parallel].is_a?(Array)) ?
-          @options[:run_in_parallel].include?('configure') : false} do |host|
+      run_in_parallel = run_in_parallel? opts, @options, 'configure'
+      block_on @hosts, { :run_in_parallel => run_in_parallel} do |host|
         if host[:timesync]
           timesync(host, @options)
         end
