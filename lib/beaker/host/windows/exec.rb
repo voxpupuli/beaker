@@ -89,4 +89,13 @@ module Windows::Exec
     spacing = (user_pc && !cygwin_prefix.empty?) ? ' ' : ''
     "#{cygwin_prefix}#{spacing}#{user_pc}"
   end
+
+  # Checks if selinux is enabled
+  # selinux is not available on Windows
+  #
+  # @return [Boolean] false
+  def selinux_enabled?()
+    false
+  end
+
 end

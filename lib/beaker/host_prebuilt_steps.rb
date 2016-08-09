@@ -368,6 +368,10 @@ module Beaker
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
+
+        if host.selinux_enabled?
+          host.exec(Command.new('sudo fixfiles restore /root'))
+        end
       end
     end
 
