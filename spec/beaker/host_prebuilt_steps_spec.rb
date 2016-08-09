@@ -169,7 +169,7 @@ describe Beaker do
     it "can return the correct url for an el-7 host" do
       host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-7-platform') } )
 
-      expect( subject.epel_info_for( host, options )).to be === ["http://dl.fedoraproject.org/pub/epel/7", "x86_64", "epel-release-7-7.noarch.rpm"]
+      expect( subject.epel_info_for( host, options )).to be === ["http://dl.fedoraproject.org/pub/epel/7", "x86_64", "epel-release-7-8.noarch.rpm"]
     end
 
     it "can return the correct url for an el-6 host" do
