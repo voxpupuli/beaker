@@ -368,6 +368,10 @@ module Beaker
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
+
+        if host.exec(Command.new('sudo selinuxenabled'), :accept_all_exit_codes => true).exit_code == 0
+          host.exec(Command.new('sudo fixfiles restore /root'))
+        end
       end
     end
 
