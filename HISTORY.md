@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 29 Jul, 2016 (90d15165)](#LATEST)
+* [LATEST - 11 Aug, 2016 (966f74b9)](#LATEST)
+* [2.48.1 - 29 Jul, 2016 (e5a52ad4)](#2.48.1)
 * [2.48.0 - 27 Jul, 2016 (47d3aa18)](#2.48.0)
 * [2.47.1 - 15 Jul, 2016 (da89c35b)](#2.47.1)
 * [2.47.0 - 13 Jul, 2016 (bf4cbcf0)](#2.47.0)
@@ -126,7 +127,182 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 29 Jul, 2016 (90d15165)
+### <a name = "LATEST">LATEST - 11 Aug, 2016 (966f74b9)
+
+* (GEM) update beaker version to 2.49.0 (966f74b9)
+
+* (BKR-783) Confusing error messages when key missing from .fog file (#1216) (581ece1f)
+
+* Merge pull request #1217 from kevpl/bkr910_epel7_url_fix (4bf3269e)
+
+
+```
+Merge pull request #1217 from kevpl/bkr910_epel7_url_fix
+
+(BKR-910) fixed EPEL URL, added tests to detect changes
+```
+* Merge pull request #1210 from ferglor/BKR-892 (751e3827)
+
+
+```
+Merge pull request #1210 from ferglor/BKR-892
+
+BKR-892 Generalize how beaker determines run_in_parallel option
+```
+* (BKR-910) fixed EPEL URL, added tests to detect changes (417614c8)
+
+* Merge pull request #1197 from kevpl/docs_style_guide (95225217)
+
+
+```
+Merge pull request #1197 from kevpl/docs_style_guide
+
+(BKR-80) created style guide for beaker tests
+```
+* Output informational message at debug level. (#1209) (5e8b4ced)
+
+
+```
+Output informational message at debug level. (#1209)
+
+(MAINT) Output informational message at debug level
+
+The previous behavior output this as a warning message, causing it to
+appear in red with the default configuration which is probably not
+desired since this is expected in normal conditions.
+```
+* Merge pull request #1203 from kurtwall/use-pretty-generate (24adf82b)
+
+
+```
+Merge pull request #1203 from kurtwall/use-pretty-generate
+
+(MAINT) Use JSON.pretty_generate to create JSON output
+```
+* (MAINT) Document how to do ssh agent forwarding. (#1208) (bb17ae34)
+
+
+```
+(MAINT) Document how to do ssh agent forwarding. (#1208)
+
+* Document how to do ssh agent forwarding.
+
+I literally spent hours understanding that the `@option` / `option` hash
+was coming from the `CONFIG` section…  Such a howto would have saved my
+day :-)
+
+* Clarify what a 'host machine' is.
+
+Suggested by:	@kevpl
+```
+* Merge pull request #1191 from samwoods1/teardown_errors (9f540f37)
+
+
+```
+Merge pull request #1191 from samwoods1/teardown_errors
+
+(BKR-570) Errors in teardown do not obscure errors in test
+```
+* Merge pull request #1211 from tvpartytonight/maint_add_PR_request_procedure (5f43a8f3)
+
+
+```
+Merge pull request #1211 from tvpartytonight/maint_add_PR_request_procedure
+
+(MAINT) Modify PR instructions
+```
+* (MAINT) Modify PR instructions (5a433ecd)
+
+* BKR-892 Generalize how beaker determines run_in_parallel option (80f3e1bb)
+
+* Update last spec test (066094bb)
+
+* Merge branch 'master' of https://github.com/puppetlabs/beaker into use-pretty-generate (0a33b21e)
+
+* Merge pull request #1200 from johnduarte/bkr-894-aix-dns (ec2657eb)
+
+
+```
+Merge pull request #1200 from johnduarte/bkr-894-aix-dns
+
+(BKR-894) AIX - prefer local DNS if hosts file changed
+```
+* Merge pull request #1187 from samwoods1/log_at_failure (63920f57)
+
+
+```
+Merge pull request #1187 from samwoods1/log_at_failure
+
+(BKR-890) Surface and provide more visibility into where failures occured
+```
+* Merge pull request #1204 from kevpl/docs_file_archiving (e1f3bd51)
+
+
+```
+Merge pull request #1204 from kevpl/docs_file_archiving
+
+(MAINT) added archiving SUT files doc
+```
+* Merge pull request #1205 from tvpartytonight/maint_fix_folder_link (e8835781)
+
+
+```
+Merge pull request #1205 from tvpartytonight/maint_fix_folder_link
+
+(MAINT) Fix link to folder from /doc README
+```
+* (MAINT) Fix link to folder from /doc README (2c651e99)
+
+* (MAINT) added archiving SUT files doc (1bcce26d)
+
+
+```
+(MAINT) added archiving SUT files doc
+
+[skip ci]
+```
+* (MAINT) Use JSON.pretty_generate instead of JSON.dump to create JSON (4a98bf79)
+
+
+```
+(MAINT) Use JSON.pretty_generate instead of JSON.dump to create JSON
+for TK config files.
+
+JSON.dump ruins the formatting of JSON files, which can make TK config
+files difficult to read. This commit replaces .dump with .pretty_generate
+to preserve config file formatting and readability.
+```
+* (BKR-894) AIX - prefer local DNS if hosts file changed (d5a3363e)
+
+
+```
+(BKR-894) AIX - prefer local DNS if hosts file changed
+
+This commit adds logic to the `set_etc_hosts` method to change the
+preferred DNS resolution order on AIX platforms.
+
+By default, AIX will first use external DNS to resolve a name even
+if the name has an entry in the `/etc/hosts` file. This means that
+an externally resolvable hostname cannot be overridden by a local
+entry in `/etc/hosts` unless the resolution order is changed. The
+logic added with this commit adds the configuration to give precedence
+to local DNS resolution.
+```
+* (BKR-80) created style guide for beaker tests (db298c85)
+
+
+```
+(BKR-80) created style guide for beaker tests
+
+[skip ci]
+```
+* (BKR-570) Errors in teardown do not obscure errors in test (19208967)
+
+* (BKR-890) Log failure info and stack inline in log. (671c5ea7)
+
+### <a name = "2.48.1">2.48.1 - 29 Jul, 2016 (e5a52ad4)
+
+* (HISTORY) update beaker history for gem release 2.48.1 (e5a52ad4)
 
 * (GEM) update beaker version to 2.48.1 (90d15165)
 
