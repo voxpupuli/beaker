@@ -39,6 +39,9 @@ module Beaker
 
       creds
 
+    rescue TypeError, Psych::SyntaxError => e
+      @logger.warn "#{e.class}: Credentials file (#{dot_fog}) has invalid syntax; proceeding without authentication"
+      creds
     rescue Errno::ENOENT
       @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
       creds
