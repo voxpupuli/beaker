@@ -979,7 +979,7 @@ module Beaker
                                   repo_configs_dir = nil,
                                   opts = options )
           variant, version, arch, codename = host['platform'].to_array
-          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr)$/
+          if variant !~ /^(fedora|el|centos|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr|sles)$/
             raise "No repository installation step for #{variant} yet..."
           end
           repo_configs_dir ||= 'tmp/repo_configs'
