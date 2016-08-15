@@ -294,4 +294,11 @@ module Unix::Exec
     end
   end
 
+  # Checks if selinux is enabled
+  #
+  # @return [Boolean] true if selinux is enabled, false otherwise 
+  def selinux_enabled?()
+    exec(Beaker::Command.new("sudo selinuxenabled"), :accept_all_exit_codes => true).exit_code == 0
+  end
+
 end

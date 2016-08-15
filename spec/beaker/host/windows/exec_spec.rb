@@ -43,5 +43,13 @@ module Beaker
         expect( command_str ).not_to match( /cmd\.exe/ )
       end
     end
+
+    describe '#selinux_enabled?' do
+      it 'does not call selinuxenabled' do
+        expect(Beaker::Command).not_to receive(:new).with("sudo selinuxenabled")
+        expect(instance).not_to receive(:exec).with(0, :accept_all_exit_codes => true)
+        expect(instance.selinux_enabled?).to be === false
+      end
+    end
   end
 end

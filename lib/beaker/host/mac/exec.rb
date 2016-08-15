@@ -27,4 +27,12 @@ module Mac::Exec
     ssh_service_restart()
   end
 
+  # Checks if selinux is enabled
+  # selinux is not availble on OS X
+  #
+  # @return [Boolean] false 
+  def selinux_enabled?()
+    false
+  end
+
 end

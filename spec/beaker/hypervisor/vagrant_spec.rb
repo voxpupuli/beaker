@@ -269,6 +269,8 @@ EOF
         host[:platform] = 'unix'
 
         expect( Command ).to receive( :new ).with("sudo su -c \"cp -r .ssh /root/.\"").once
+        expect( Command ).to receive( :new ).with("sudo fixfiles restore /root").once
+        expect( Command ).to receive( :new ).with("sudo selinuxenabled").once
 
         vagrant.copy_ssh_to_root( host, options )
 
@@ -279,8 +281,16 @@ EOF
         host[:platform] = 'windows'
         expect( host ).to receive( :is_cygwin? ).and_return(true)
 
+        expect( Command ).to_not receive( :new ).with("sudo fixfiles restore /root")
         expect( Command ).to receive( :new ).with("cp -r .ssh /cygdrive/c/Users/Administrator/.").once
         expect( Command ).to receive( :new ).with("chown -R Administrator /cygdrive/c/Users/Administrator/.ssh").once
+
+        # This is checked on all platforms since Linux isn't called out specifically in the code
+        # If this fails, nothing further is activated
+        result = Beaker::Result.new(host, '')
+        result.exit_code = 1
+        expect( Command ).to receive( :new ).with("sudo selinuxenabled")
+        allow( host ).to receive(:exec).and_return(result)
 
         vagrant.copy_ssh_to_root( host, options )
 

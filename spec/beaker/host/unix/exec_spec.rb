@@ -136,14 +136,26 @@ module Beaker
     end
 
     describe '#prepend_commands' do
-
       it 'returns the pc parameter unchanged for non-cisco platforms' do
         allow( instance ).to receive( :[] ).with( :platform ).and_return( 'notcisco' )
         answer_prepend_commands = 'pc_param_unchanged_13579'
         answer_test = instance.prepend_commands( 'fake_cmd', answer_prepend_commands )
         expect( answer_test ).to be === answer_prepend_commands
       end
+    end
 
+    describe '#selinux_enabled?' do
+      it 'calls selinuxenabled and selinux is enabled' do
+        expect(Beaker::Command).to receive(:new).with("sudo selinuxenabled").and_return(0)
+        expect(instance).to receive(:exec).with(0, :accept_all_exit_codes => true).and_return(generate_result("test", {:exit_code => 0}))
+        expect(instance.selinux_enabled?).to be === true
+      end
+
+      it 'calls selinuxenabled and selinux is not enabled' do
+        expect(Beaker::Command).to receive(:new).with("sudo selinuxenabled").and_return(1)
+        expect(instance).to receive(:exec).with(1, :accept_all_exit_codes => true).and_return(generate_result("test", {:exit_code => 1}))
+        expect(instance.selinux_enabled?).to be === false
+      end
     end
   end
 end
