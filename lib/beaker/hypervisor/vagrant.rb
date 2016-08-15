@@ -18,6 +18,18 @@ module Beaker
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
+    def private_network_generator(host)
+      private_network_string = "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\""
+      case host['network_mac']
+      when 'false'
+        private_network_string << "\n"
+      when nil
+        private_network_string << ", :mac => \"#{randmac}\"\n"
+      else
+        private_network_string << ", :mac => \"#{host['network_mac']}\"\n"
+      end
+    end
+
     def make_vfile hosts, options = {}
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
@@ -33,9 +45,9 @@ module Beaker
         v_file << "    v.vm.box_version = '#{host['box_version']}'\n" unless host['box_version'].nil?
         v_file << "    v.vm.box_check_update = '#{host['box_check_update'] ||= 'true'}'\n"
         v_file << "    v.vm.synced_folder '.', '/vagrant', disabled: true\n" if host['synced_folder'] == 'disabled'
-        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\", :mac => \"#{randmac}\"\n"
+        v_file << private_network_generator(host)
 
-        unless host['mount_folders'].nil? 
+        unless host['mount_folders'].nil?
           host['mount_folders'].each do |name, folder|
             v_file << "    v.vm.synced_folder '#{folder[:from]}', '#{folder[:to]}', create: true\n"
           end
@@ -56,7 +68,7 @@ module Beaker
         end
 
         if /windows/i.match(host['platform'])
-          #due to a regression bug in versions of vagrant 1.6.2, 1.6.3, 1.6.4, >= 1.7.3 ssh fails to forward 
+          #due to a regression bug in versions of vagrant 1.6.2, 1.6.3, 1.6.4, >= 1.7.3 ssh fails to forward
           #automatically (note <=1.6.1, 1.6.5, 1.7.0 - 1.7.2 are uneffected)
           #Explicitly setting SSH port forwarding due to this bug
           v_file << "    v.vm.network :forwarded_port, guest: 22, host: 2222, id: 'ssh', auto_correct: true\n"
