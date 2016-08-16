@@ -100,7 +100,7 @@ module Unix::Pkg
           execute('/opt/csw/bin/pkgutil -U', opts)
           execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
         end
-        execute("/opt/csw/bin/pkgutil -i -y #{cmdline_args} #{name}", opts)
+        execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
       when /openbsd/
         begin
           execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
