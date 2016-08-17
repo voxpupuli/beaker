@@ -67,6 +67,11 @@ module Beaker
         expect( instance.package_config_dir ).to be === '/etc/apt/sources.list.d'
       end
 
+      it 'returns correctly for sles-based platforms' do
+        @platform = 'sles-12-x86_64'
+        expect( instance.package_config_dir ).to be === '/etc/zypp/repos.d/'
+      end
+
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
         expect {
@@ -82,6 +87,13 @@ module Beaker
         allow( instance ).to receive( :is_pe? ) { false }
         filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
         expect( filename ).to match( /sion7\-el\-/ )
+      end
+
+      it 'sets the sles portion correctly for sles platforms' do
+        @platform = 'sles-11-x86_64'
+        allow( instance ).to receive( :is_pe? ) { false }
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
+        expect( filename ).to match( /sion7\-sles\-/ )
       end
 
       it 'builds the filename correctly for el-based platforms' do
