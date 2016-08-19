@@ -602,7 +602,7 @@ module Beaker
 
       context 'for each host' do
         it 'calls exec' do
-          @hosts.each do |host| 
+          @hosts.each do |host|
             expect(host).to receive(:exec).once unless host['platform'] =~ /netscaler/
           end
           expect(set_hostnames).to eq(@hosts)
@@ -614,6 +614,15 @@ module Beaker
           end
           expect(set_hostnames).to eq(@hosts)
         end
+
+        it 'sets the the vmhostname to the dns_name for each host' do
+          expect(set_hostnames).to eq(@hosts)
+          @hosts.each do |host|
+            expect(host[:vmhostname]).to eq(host[:dns_name])
+            expect(host[:vmhostname]).to eq(host.hostname)
+          end
+        end
+
       end
     end
 

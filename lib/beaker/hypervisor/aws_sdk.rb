@@ -630,19 +630,21 @@ module Beaker
       @logger.notify("netscaler: nsroot password is #{host['instance'].id}")
     end
 
-    # Set the hostname of all instances to be the hostname defined in the
-    # beaker configuration.
+    # Set the :vmhostname for each host object to be the dns_name, which is accessible
+    # publicly. Then configure each ec2 machine to that dns_name, so that when facter
+    # is installed the facts for hostname and domain match the dns_name.
     #
-    # @return [void]
+    # @return [@hosts]
     # @api private
     def set_hostnames
       @hosts.each do |host|
+        host[:vmhostname] = host[:dns_name]
         if host['platform'] =~ /el-7/
           # on el-7 hosts, the hostname command doesn't "stick" randomly
-          host.exec(Command.new("hostnamectl set-hostname #{host.name}"))
+          host.exec(Command.new("hostnamectl set-hostname #{host.hostname}"))
         else
           next if host['platform'] =~ /netscaler/
-          host.exec(Command.new("hostname #{host.name}"))
+          host.exec(Command.new("hostname #{host.hostname}"))
         end
       end
     end
