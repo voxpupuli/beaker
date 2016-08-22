@@ -22,6 +22,7 @@ module Beaker
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['curl', 'ntpdate']
     SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp']
+    SOLARIS11_PACKAGES = ['curl', 'ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -111,6 +112,8 @@ module Beaker
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
         when host['platform'] =~ /solaris-10/
           check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
+        when host['platform'] =~ /solaris-1[1-9]/
+          check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end

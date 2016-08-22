@@ -92,6 +92,14 @@ module Unix::Pkg
         end
         execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
+        if ! check_for_command('pkgutil')
+          # https://www.opencsw.org/package/pkgutil/
+          noask_text = self.noask_file_text
+          create_remote_file self, File.join(noask_directory, 'noask'), noask_text
+          execute('pkgadd -d http://get.opencsw.org/now -a noask -n all', opts)
+          execute('/opt/csw/bin/pkgutil -U', opts)
+          execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
+        end
         execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
       when /openbsd/
         begin
@@ -131,7 +139,7 @@ module Unix::Pkg
   # @param [String] cmdline_args  Additional command line arguments for
   #                               the package manager.
   # @option opts [String] :package_proxy  A proxy of form http://host:port
-  # 
+  #
   # @return nil
   # @api public
   def install_package_with_rpm(name, cmdline_args = '', opts = {})
@@ -284,7 +292,7 @@ module Unix::Pkg
   # @param [String] url  A URL of form http://host:port
   # @return [String]     httpproxy and httport options for rpm
   #
-  # @raise [StandardError] When encountering a string that 
+  # @raise [StandardError] When encountering a string that
   #                        cannot be parsed
   # @api private
   def extract_rpm_proxy_options(url)
