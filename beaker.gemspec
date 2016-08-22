@@ -47,7 +47,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-hostgenerator'
 
   # Optional provisioner specific support
-  s.add_runtime_dependency 'rbvmomi', '~> 1.8'
+  s.add_runtime_dependency 'rbvmomi', ['~> 1.8', '< 1.9.0']
   s.add_runtime_dependency 'fission', '~> 0.4'
   s.add_runtime_dependency 'google-api-client', ['~> 0.8', '< 0.9.5'] # dropped ruby 1.9 rupport in 0.9.5
   s.add_runtime_dependency 'aws-sdk-v1', '~> 1.57'
