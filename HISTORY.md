@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 11 Aug, 2016 (966f74b9)](#LATEST)
+* [LATEST - 22 Aug, 2016 (9358f2eb)](#LATEST)
+* [2.49.0 - 11 Aug, 2016 (53ba3f14)](#2.49.0)
 * [2.48.1 - 29 Jul, 2016 (e5a52ad4)](#2.48.1)
 * [2.48.0 - 27 Jul, 2016 (47d3aa18)](#2.48.0)
 * [2.47.1 - 15 Jul, 2016 (da89c35b)](#2.47.1)
@@ -127,7 +128,120 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 11 Aug, 2016 (966f74b9)
+### <a name = "LATEST">LATEST - 22 Aug, 2016 (9358f2eb)
+
+* (GEM) update beaker version to 2.50.0 (9358f2eb)
+
+* Merge pull request #1226 from kevpl/maint_rbvmomi_pin (5ad18987)
+
+
+```
+Merge pull request #1226 from kevpl/maint_rbvmomi_pin
+
+(BKR-918) pin rbvmomi to 1.8.0
+```
+* (BKR-918) pin rbvmomi to 1.8.0 (50270cf9)
+
+* Merge pull request #1223 from highb/fix/master/pe-17093_solaris_fixes (b90bc186)
+
+
+```
+Merge pull request #1223 from highb/fix/master/pe-17093_solaris_fixes
+
+(PE-17093) Solaris 10/11 pkg/pkgutil fixes
+```
+* Merge pull request #1221 from melissa/maint/master/test-foss-sles (fb02c924)
+
+
+```
+Merge pull request #1221 from melissa/maint/master/test-foss-sles
+
+(RE-7420) Add the ability to run FOSS tests on sles
+```
+* (PE-17093) pkgutil should be in path post install (725f5baf)
+
+
+```
+(PE-17093) pkgutil should be in path post install
+
+Prior to this commit I thought that I would need to specify
+the full path to pkgutil after installing it in order to use
+it.
+This commit removes the full path, because pkgutil should be
+in the system path after installation.
+```
+* (PE-17093) Solaris 10/11 pkg/pkgutil fixes (5fac81c9)
+
+
+```
+(PE-17093) Solaris 10/11 pkg/pkgutil fixes
+
+Prior to this commit Solaris 10 would blow up if pkgutil wasn't
+installed. Solaris 11 was not verifying that curl/ntp were installed.
+
+This commit adds logic to install pkgutil if it isn't found on
+Solaris 11, as well as adding package checks for Solaris 11 so that
+it actually verifies that ntp/curl are installed.
+```
+* Merge pull request #1218 from kevpl/acceptance_gather_hosts_tests (f878d2f8)
+
+
+```
+Merge pull request #1218 from kevpl/acceptance_gather_hosts_tests
+
+(MAINT) host acceptance tests refactor
+```
+* Merge pull request #1214 from petems/BKR-906-allow_mac_setting (3d21e843)
+
+
+```
+Merge pull request #1214 from petems/BKR-906-allow_mac_setting
+
+(BKR-906) Allow setting MAC address
+```
+* Merge pull request #1219 from ferglor/BKR-896-2 (9c1a25ee)
+
+
+```
+Merge pull request #1219 from ferglor/BKR-896-2
+
+(BKR-896) Fix SELinux context on root's SSH keys
+```
+* (BKR-860) Adding support for vagrant to quick start tasks. (#1199) (ff99eae3)
+
+
+```
+(BKR-860) Adding support for vagrant to quick start tasks. (#1199)
+
+* (BKR-860) - Adding support for vagrant to quick start tasks.
+
+* Adding tutorial doc.
+```
+* (RE-7420) Add the ability to run FOSS tests on sles (60893e2e)
+
+* (MAINT) host acceptance tests refactor (73176763)
+
+
+```
+(MAINT) host acceptance tests refactor
+
+- moved hosts-specific testing to a hosts folder rather than cluttering top-level dir
+- pulled reboot test into its own file, to make failures there more clear in reporting
+```
+* (BKR-896) Fix SELinux context on root's SSH keys (108d21d9)
+
+* (BKR-906) Allow setting MAC address (ae755e75)
+
+
+```
+(BKR-906) Allow setting MAC address
+
+* Everything else is configurable, makes sense to make mac configurable too!
+* Prevents issues with using vagrant-libvirt (https://github.com/vagrant-libvirt/vagrant-libvirt/issues/638)
+```
+### <a name = "2.49.0">2.49.0 - 11 Aug, 2016 (53ba3f14)
+
+* (HISTORY) update beaker history for gem release 2.49.0 (53ba3f14)
 
 * (GEM) update beaker version to 2.49.0 (966f74b9)
 
