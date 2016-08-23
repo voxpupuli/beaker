@@ -95,8 +95,9 @@ module Unix::Pkg
         if ! check_for_command('pkgutil')
           # https://www.opencsw.org/package/pkgutil/
           noask_text = self.noask_file_text
-          create_remote_file self, File.join(noask_directory, 'noask'), noask_text
-          execute('pkgadd -d http://get.opencsw.org/now -a noask -n all', opts)
+          noask_file = File.join(external_copy_base, 'noask')
+          create_remote_file(self, noask_file, noask_text)
+          execute("pkgadd -d http://get.opencsw.org/now -a #{noask_file} -n all", opts)
           execute('/opt/csw/bin/pkgutil -U', opts)
           execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
         end
