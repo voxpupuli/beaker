@@ -16,6 +16,7 @@ module Beaker
     #@option options [String] :openstack_region The region that each OpenStack instance should be provisioned on (optional)
     #@option options [String] :openstack_network The network that each OpenStack instance should be contacted through (required)
     #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each
+    #@option options [Hash] :security_group An array of security groups to associate with the instance
     #                                            OpenStack instance (optional)
     #@option options [String] :jenkins_build_url Added as metadata to each OpenStack instance
     #@option options [String] :department Added as metadata to each OpenStack instance
@@ -86,6 +87,18 @@ module Beaker
     def network n
       @logger.debug "OpenStack: Looking up network '#{n}'"
       @network_client.networks.find { |x| x.name == n } || raise("Couldn't find network: #{n}")
+    end
+
+    #Provided an array of security groups return that array if all
+    #security groups are present
+    #@param [Array] sgs The array of security group names
+    #@return [Array] The array of security group names
+    def security_groups sgs
+      for sg in sgs
+        @logger.debug "Openstack: Looking up security group '#{sg}'"
+        @compute_client.security_groups.find { |x| x.name == sg } || raise("Couldn't find security group: #{sg}")
+      sgs
+      end
     end
 
     # Create a volume client on request
@@ -173,6 +186,7 @@ module Beaker
           :user_data  => host[:user_data] || "#cloud-config\nmanage_etc_hosts: true\n",
         }
         options[:key_name] = key_name(host)
+        options[:security_groups] = security_groups(@options[:security_group]) unless @options[:security_group].nil?
         vm = @compute_client.servers.create(options)
 
         #wait for the new instance to start up
