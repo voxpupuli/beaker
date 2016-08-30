@@ -16,7 +16,6 @@ Get openstack Access & Security credentials:
 - "openstack_tenant"
 - "openstack_network"
 - "openstack_keyname"
-- "security_group" (optional)
 
 If you are using [OpenStack Dashboard "Horizon"] (https://wiki.openstack.org/wiki/Horizon) 
 you can find these keys in next places:
@@ -28,8 +27,6 @@ you can find these keys in next places:
 2. "openstack_network": in "project" -> "Networks"
 3. "openstack_keyname": in "project" -> "Compute" -> "Access & Security" -> tab "Key Pairs"
 4. "openstack_api_key": Your user Password
-5. "security_group": in "project" -> "Compute" -> "Access & Security"
--> tab "Security Groups"
 
 ### Setup a Openstack Hosts File
 
@@ -60,7 +57,6 @@ in order for the Openstack hypervisor to provision hosts properly.
       openstack_tenant: testing
       openstack_network : testing
       openstack_keyname : nopass
-      security_group    : ['sg0', 'default']
 
 The `image` - image name.
 
@@ -108,5 +104,13 @@ Also if you plan use `user-data` make sure that 'cloud-init' package installed i
       openstack_tenant: testing
       openstack_network : testing
       openstack_keyname : nopass
-      security_group    : ['sg0', 'default']
 
+### Security groups
+
+A security group is a set of rules for incoming and outgoing traffic to 
+an instance.  You can associate a host with one or many security groups
+in the `CONFIG` section of your hosts file:
+
+    security_group: ['my_sg', 'default']
+
+This is an optional config parameter.
