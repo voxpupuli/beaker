@@ -28,6 +28,7 @@ module Beaker
       expect(options['openstack_tenant']).to eq('testing')
       expect(options['openstack_network']).to eq('testing')
       expect(options['openstack_keyname']).to eq('nopass')
+      expect(options['security_group']).to eq(['my_sg', 'default'])
     end
 
     it 'check hosts options during initialization' do
@@ -53,6 +54,7 @@ module Beaker
 
       mock_servers = double().as_null_object
       allow( @compute_client ).to receive( :servers ).and_return( mock_servers )
+
       expect(mock_servers).to receive(:create).with(hash_including(
         :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"',
         :flavor_ref => 12345,
