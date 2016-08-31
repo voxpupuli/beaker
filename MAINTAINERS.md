@@ -1,4 +1,4 @@
-# Reviewers/Maintainers For Beaker
+# Maintainers For Beaker
 
 Beaker is maintained by Puppet's Quality Engineering (QE) Team. These people
 will be reviewing & merging PRs to the project.
@@ -10,9 +10,9 @@ In particular, our current Beaker maintainers are:
 | Tony Vu        | [tvpartytonight](https://github.com/tvpartytonight) | <tony.vu@puppet.com> |
 | Sarah Thompson | [pinkypie](https://github.com/pinkypie)             | <sarah@puppet.com>   |
 
-# Reviewers/Maintainers For Specific Areas of Beaker
+# Reviewers For Specific Areas of Beaker
 
-For code to land in these specific areas of Beaker the following owners must provide review and :+1:
+For code to land in these specific areas of Beaker the following people must provide review and :+1:
 
  Code | Owners
 :-------:|:----------:
