@@ -17,5 +17,5 @@ end
 
 step "puppet install smoketest: can get a configprint of the puppet server setting on all hosts"
 hosts.each do |host|
-  assert(!host.puppet['server'].empty?, "can get a configprint of the puppet server setting")
+  assert(!host.puppet_configprint['server'].empty?, "can get a configprint of the puppet server setting")
 end

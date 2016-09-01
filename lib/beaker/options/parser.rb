@@ -392,7 +392,7 @@ module Beaker
         exclude_roles = %w(master database dashboard)
         host_roles    = host_hash[:roles]
         unless (host_roles & exclude_roles).empty?
-          @validator.parser_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
+          @validator.validator_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
         end
       end
 

@@ -28,9 +28,6 @@ module Beaker
         raise ArgumentError, msg.to_s
       end
 
-      # alias to keep old methods and functionality from throwing errors.
-      alias_method :parser_error, :validator_error
-
       # Raises an ArgumentError if more than one default exists,
       # otherwise returns true or false if default is set.
       #

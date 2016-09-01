@@ -61,7 +61,6 @@ module Beaker
           repo = (git_server == 'github.com') ? "#{git_fork}/#{project_name}.git" : "#{git_fork}-#{project_name}.git"
           return git_protocol == 'git@' ? "#{git_protocol}#{git_server}:#{repo}" : "#{git_protocol}#{git_server}/#{repo}"
         end
-        alias_method :build_giturl, :build_git_url
 
         # @param [String] uri A uri in the format of <git uri>#<revision>
         #                     the `git://`, `http://`, `https://`, and ssh
@@ -199,7 +198,6 @@ module Beaker
                     "ruby ./install.rb #{install_opts}; " +
                     "else true; fi", opts
         end
-        alias_method :install_from_git, :install_from_git_on
 
         # @deprecated Use {#install_puppet_on} instead.
         def install_puppet(opts = {})
@@ -297,7 +295,7 @@ module Beaker
               if ((host['platform'] =~ /windows/) and not host.is_cygwin?)
                 # Do nothing
               else
-                on host, "echo '' >> #{host.puppet['hiera_config']}"
+                on host, "echo '' >> #{host.puppet_configprint['hiera_config']}"
               end
             end
           end
@@ -414,7 +412,7 @@ module Beaker
           end
           logger.debug( "setting config '#{puppet_conf_text}' on hosts #{hosts}" )
           block_on hosts, opts do |host|
-            puppet_conf_path = host.puppet['config']
+            puppet_conf_path = host.puppet_configprint['config']
             create_remote_file(host, puppet_conf_path, puppet_conf_text)
           end
         end
@@ -434,7 +432,7 @@ module Beaker
         # @api private
         def install_puppet_from_rpm_on( hosts, opts )
           block_on hosts do |host|
-            install_puppetlabs_release_repo(host)
+            install_puppetlabs_release_repo_on(host)
 
             if opts[:facter_version]
               host.install_package("facter-#{opts[:facter_version]}")
@@ -449,7 +447,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppet_from_rpm, :install_puppet_from_rpm_on
 
         # Installs Puppet and dependencies from deb on provided host(s).
         #
@@ -464,7 +461,7 @@ module Beaker
         # @api private
         def install_puppet_from_deb_on( hosts, opts )
           block_on hosts do |host|
-            install_puppetlabs_release_repo(host)
+            install_puppetlabs_release_repo_on(host)
 
             if opts[:facter_version]
               host.install_package("facter=#{opts[:facter_version]}-1puppetlabs1")
@@ -483,7 +480,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppet_from_deb, :install_puppet_from_deb_on
 
         # Installs Puppet and dependencies from msi on provided host(s).
         #
@@ -519,7 +515,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppet_from_msi, :install_puppet_from_msi_on
 
         # @api private
         def compute_puppet_msi_name(host, opts)
@@ -638,7 +633,6 @@ module Beaker
           end
 
         end
-        alias_method :install_puppet_from_freebsd_ports, :install_puppet_from_freebsd_ports_on
 
         # Installs Puppet and dependencies from dmg on provided host(s).
         #
@@ -686,7 +680,6 @@ module Beaker
             end
           end
         end
-        alias_method :install_puppet_from_dmg, :install_puppet_from_dmg_on
 
         # Installs puppet-agent and dependencies from dmg on provided host(s).
         #
@@ -856,14 +849,12 @@ module Beaker
 
             # A gem install might not necessarily create these
             ['confdir', 'logdir', 'codedir'].each do |key|
-              host.mkdir_p host.puppet[key] if host.puppet.has_key?(key)
+              host.mkdir_p host.puppet_configprint[key] if host.puppet_configprint.has_key?(key)
             end
 
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppet_from_gem,          :install_puppet_from_gem_on
-        alias_method :install_puppet_agent_from_gem_on, :install_puppet_from_gem_on
 
         # Install official puppetlabs release repository configuration on host(s).
         #
@@ -917,7 +908,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppetlabs_release_repo, :install_puppetlabs_release_repo_on
 
         # Installs the repo configs on a given host
         #
@@ -1127,7 +1117,6 @@ module Beaker
             configure_type_defaults_on( host )
           end
         end
-        alias_method :install_puppetagent_dev_repo, :install_puppet_agent_dev_repo_on
 
         # Install shared repo of the puppet-agent on the given host(s).  Downloaded from
         # location of the form PE_PROMOTED_BUILDS_URL/PE_VER/puppet-agent/AGENT_VERSION/repo

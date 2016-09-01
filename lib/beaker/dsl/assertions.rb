@@ -105,8 +105,6 @@ module Beaker
         assert(regexp !~ string, msg)
       end
 
-      alias_method :assert_not_match, :assert_no_match
-
     end
   end
 end
