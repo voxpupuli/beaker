@@ -69,7 +69,8 @@ module HostHelpers
                                                :openstack_auth_url => "http://openstack_hypervisor.labs.net:5000/v2.0/tokens",
                                                :openstack_tenant => "testing",
                                                :openstack_network => "testing",
-                                               :openstack_keyname => "nopass" } )
+                                               :openstack_keyname => "nopass", 
+                                               :security_group => ['my_sg', 'default'] } )
   end
 
   def generate_result (name, opts )

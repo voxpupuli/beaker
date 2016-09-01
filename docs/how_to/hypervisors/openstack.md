@@ -105,4 +105,12 @@ Also if you plan use `user-data` make sure that 'cloud-init' package installed i
       openstack_network : testing
       openstack_keyname : nopass
 
+### Security groups
 
+A security group is a set of rules for incoming and outgoing traffic to 
+an instance.  You can associate a host with one or many security groups
+in the `CONFIG` section of your hosts file:
+
+    security_group: ['my_sg', 'default']
+
+This is an optional config parameter.
