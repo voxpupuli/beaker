@@ -36,41 +36,19 @@ describe ClassMixedWithDSLHelpers do
       it "returns its second and third arguments concatenated." do
         concat_path = "#{destdir}/#{name}"
         create_files([concat_path])
-        allow(logger).to receive(:notify)
-        allow(subject).to receive(:open)
+        expect( logger ).to receive( :notify ).with( /^Already\ fetched\ / )
         result = subject.fetch_http_file url, name, destdir
         expect(result).to eq(concat_path)
       end
 
-      it 'doesn\'t cache by default' do
+      it 'doesn\'t cache if :cache_files_locally set false' do
+        options[:cache_files_locally] = false
+
         expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
         expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
         expect( subject ).to receive( :open )
 
         subject.fetch_http_file( url, name, destdir )
-      end
-
-      context ':cache_files_locally option is set' do
-        it 'caches if the file exists locally' do
-          options[:cache_files_locally] = true
-          allow(File).to receive(:exists?).and_return(true)
-
-          expect( logger ).to receive( :notify ).with( /^Already\ fetched\ / )
-          expect( subject ).not_to receive( :open )
-
-          subject.fetch_http_file( url, name, destdir )
-        end
-
-        it 'doesn\'t cache if the file doesn\'t exist locally' do
-          options[:cache_files_locally] = true
-          allow(File).to receive(:exists?).and_return(false)
-
-          expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
-          expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
-          expect( subject ).to receive( :open )
-
-          subject.fetch_http_file( url, name, destdir )
-        end
       end
 
     end
