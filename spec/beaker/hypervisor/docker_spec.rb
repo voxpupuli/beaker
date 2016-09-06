@@ -387,6 +387,17 @@ module Beaker
         expect { docker.send(:dockerfile_for, {'platform' => 'centos-7-x86_64'})}.to raise_error(/Docker image undefined/)
       end
 
+      it 'should set "ENV container docker"' do
+        FakeFS.deactivate!
+        platforms.each do |platform|
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => platform,
+            'image' => 'foobar',
+          })
+          expect( dockerfile ).to be =~ /ENV container docker/
+        end
+      end
+
       it 'should add docker_image_commands as RUN statements' do
         FakeFS.deactivate!
         platforms.each do |platform|
