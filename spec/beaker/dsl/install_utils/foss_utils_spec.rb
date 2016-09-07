@@ -1059,7 +1059,7 @@ describe ClassMixedWithDSLInstallUtils do
       # install_puppetlabs_dev_repo route
       platform = Object.new()
       allow( platform ).to receive( :to_array ) { ['eos', '5', 'x4'] }
-      host = basic_hosts.first
+      host = eoshost
       host['platform'] = platform
       sha_value = 'dahdahdahdah'
       copy_base_local_override = 'face'
@@ -1072,10 +1072,7 @@ describe ClassMixedWithDSLInstallUtils do
 
       allow( host ).to receive( :puppet_agent_dev_package_info ).and_return( ['', ''] )
 
-      expect( subject ).to receive( :fetch_http_file ).once.with(
-        anything, anything, /^#{copy_base_local_override}/ )
-      expect( subject ).to receive( :scp_to ).once.with(
-        host, /#{copy_base_local_override}/, anything )
+      allow( host ).to receive( :get_remote_file).once.with(anything)
       allow( host ).to receive( :install_from_file )
 
       subject.install_puppet_agent_dev_repo_on( host, opts )
@@ -1109,6 +1106,92 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :configure_type_defaults_on ).with(host)
       expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
       subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )
+    end
+
+    it 'installs on different hosts without erroring' do
+      mhosts = hosts
+      mhosts[3] = eoshost
+
+      mhosts.each_with_index do |host, index|
+        platform = Object.new()
+        if index == 0
+          allow(platform).to receive(:to_array) { ['solaris', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host0'}
+        elsif index == 1
+          allow(platform).to receive(:to_array) { ['windows', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host1'}
+        elsif index == 2
+          allow(platform).to receive(:to_array) { ['osx', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host2'}
+        elsif index == 3
+          allow(platform).to receive(:to_array) { ['eos', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host3'}
+        end
+        host['platform'] = platform
+        allow(host).to receive(:puppet_agent_dev_package_info).with(any_args).and_return(["test", "blah"])
+      end
+
+      expect( subject ).to receive(:add_role).with( any_args ).exactly(mhosts.length).times
+
+      expect( subject ).to receive(:fetch_http_file).with( any_args ).exactly(3).times
+      expect( subject ).to receive(:scp_to).with( any_args ).exactly(3).times
+
+      expect( subject ).to receive(:install_msi_on).with( mhosts[1], 'xyz', {}, anything).exactly(1).times
+      expect( mhosts[0] ).to receive(:solaris_install_local_package).with( "blah", "/host0" ).exactly(1).times
+      expect( mhosts[2] ).to receive(:install_package).with( any_args ).exactly(1).times
+      expect( mhosts[3] ).to receive(:install_from_file).with( "blah" ).exactly(1).times
+
+      result = object_double(Beaker::Result.new({}, "foo"), :raw_output=> "xyz")
+      allow(subject).to receive(:on).with(mhosts[1], anything).and_return(result)
+
+      expect( subject ).to receive(:configure_type_defaults_on).with( any_args ).exactly(mhosts.length).times
+
+      subject.install_puppet_agent_dev_repo_on( mhosts, opts.merge({:puppet_agent_version => '1.0.0' }) )
+    end
+
+    it 'installs on different hosts with options specifying :copy_dir_external' do
+      mhosts = hosts
+      mhosts[3] = eoshost
+
+      mhosts.each_with_index do |host, index|
+        platform = Object.new()
+        if index == 0
+          allow(platform).to receive(:to_array) { ['solaris', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host0'}
+        elsif index == 1
+          allow(platform).to receive(:to_array) { ['windows', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host1'}
+        elsif index == 2
+          allow(platform).to receive(:to_array) { ['osx', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host2'}
+        elsif index == 3
+          allow(platform).to receive(:to_array) { ['eos', '5', 'x4']}
+          allow(host).to receive(:external_copy_base) {'/host3'}
+        end
+        allow(host).to receive(:puppet_agent_dev_package_info).with(any_args).and_return(["test", "/blah"])
+        host['platform'] = platform
+      end
+
+      expect( subject ).to receive(:add_role).with( any_args ).exactly(mhosts.length).times
+
+      expect( subject ).to receive(:fetch_http_file).with( any_args ).exactly(3).times
+      expect( subject ).to receive(:scp_to).with( any_args ).exactly(3).times
+
+      expect( subject ).to receive(:install_msi_on).with(mhosts[1], 'xyz', {}, anything ).exactly(1).times
+      expect( mhosts[0] ).to receive(:solaris_install_local_package).with( '/blah', '/tmp').exactly(1).times
+      expect( mhosts[2] ).to receive(:install_package).with( any_args ).exactly(1).times
+      expect( mhosts[3] ).to receive(:install_from_file).with( '/blah').exactly(1).times
+      expect( mhosts[0] ).to receive(:external_copy_base).with( no_args ).exactly(0).times
+      expect( mhosts[1] ).to receive(:external_copy_base).with( no_args ).exactly(0).times
+      expect( mhosts[2] ).to receive(:external_copy_base).with( no_args ).exactly(0).times
+      expect( mhosts[3] ).to receive(:external_copy_base).with( no_args ).exactly(0).times
+
+      result = object_double(Beaker::Result.new({}, "foo"), :raw_output=> "xyz")
+      allow(subject).to receive(:on).with(mhosts[1], anything).and_return(result)
+
+      expect( subject ).to receive(:configure_type_defaults_on).with( any_args ).exactly(mhosts.length).times
+
+      subject.install_puppet_agent_dev_repo_on( mhosts, opts.merge({:puppet_agent_version => '1.0.0', :copy_dir_external => '/tmp' }) )
     end
   end
 

@@ -1068,12 +1068,11 @@ module Beaker
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
             opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:copy_dir_external]  ||= host.external_copy_base
             opts[:puppet_collection] ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
             copy_dir_local = File.join(opts[:copy_base_local], variant)
-            onhost_copy_base = opts[:copy_dir_external]
+            onhost_copy_base = opts[:copy_dir_external] || host.external_copy_base
 
             case variant
             when /^(fedora|el|centos|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr)$/
@@ -1100,7 +1099,7 @@ module Beaker
             release_path << release_path_end
             logger.trace("#install_puppet_agent_dev_repo_on: dev_package_info, continuing...")
 
-            if host['platform'] =~ /eos/
+            if variant =~ /eos/
               host.get_remote_file( "#{release_path}/#{release_file}" )
             else
               onhost_copied_file = File.join(onhost_copy_base, release_file)
