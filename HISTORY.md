@@ -1,6 +1,7 @@
 # default - History
 ## Tags
-* [LATEST - 22 Aug, 2016 (9358f2eb)](#LATEST)
+* [LATEST - 7 Sep, 2016 (fb109bdc)](#LATEST)
+* [2.50.0 - 22 Aug, 2016 (1f003a4d)](#2.50.0)
 * [2.49.0 - 11 Aug, 2016 (53ba3f14)](#2.49.0)
 * [2.48.1 - 29 Jul, 2016 (e5a52ad4)](#2.48.1)
 * [2.48.0 - 27 Jul, 2016 (47d3aa18)](#2.48.0)
@@ -128,7 +129,158 @@
 * [pe1.2 - 6 Sep, 2011 (ba3dadd2)](#pe1.2)
 
 ## Details
-### <a name = "LATEST">LATEST - 22 Aug, 2016 (9358f2eb)
+### <a name = "LATEST">LATEST - 7 Sep, 2016 (fb109bdc)
+
+* (GEM) update beaker version to 2.51.0 (fb109bdc)
+
+* Merge pull request #1237 from tvpartytonight/maint_maintainers (45a9c88d)
+
+
+```
+Merge pull request #1237 from tvpartytonight/maint_maintainers
+
+(maint) Add MAINTAINERS
+```
+* (maint) Add MAINTAINERS (f7d491fb)
+
+* Merge pull request #1232 from ferglor/BKR-888 (0e13b888)
+
+
+```
+Merge pull request #1232 from ferglor/BKR-888
+
+(BKR-888) install_puppet_agent_dev_repo_on prohibits passing different platforms
+```
+* Merge pull request #1235 from puppetlabs/revert-1233-bkr712_fix_preset (c0c69370)
+
+
+```
+Merge pull request #1235 from puppetlabs/revert-1233-bkr712_fix_preset
+
+Revert "(BKR-712) changed default to not cache files locally"
+```
+* Revert "(BKR-712) changed default to not cache files locally" (94e500b7)
+
+* Merge pull request #1220 from mmckinst/ENV_containter_docker (6d627526)
+
+
+```
+Merge pull request #1220 from mmckinst/ENV_containter_docker
+
+(BKR-528) Set ENV container docker
+```
+* (maint) Add security group option to openstack hypervisor initialization (#1229) (fff68bbb)
+
+
+```
+(maint) Add security group option to openstack hypervisor initialization (#1229)
+
+* Add security group option to openstack hypervisor
+
+* Setting hostname working
+
+* Update docs for sec group
+
+* Add spec tests for security group option
+
+* Adjust docs
+```
+* Merge pull request #1233 from kevpl/bkr712_fix_preset (391730f0)
+
+
+```
+Merge pull request #1233 from kevpl/bkr712_fix_preset
+
+(BKR-712) changed default to not cache files locally
+```
+* Merge pull request #1230 from kevpl/maint_maintainer_clarify (ff45ff66)
+
+
+```
+Merge pull request #1230 from kevpl/maint_maintainer_clarify
+
+(MAINT) clarify reviewer vs maintainer roles
+```
+* (BKR-712) changed default to not cache files locally (9c276bba)
+
+* (MAINT) clarify reviewer vs maintainer roles (4f8d322e)
+
+
+```
+(MAINT) clarify reviewer vs maintainer roles
+
+[skip ci]
+```
+* Merge pull request #1215 from petems/BKR-907-custom_vagrantfile_provisioner (5c66ae6f)
+
+
+```
+Merge pull request #1215 from petems/BKR-907-custom_vagrantfile_provisioner
+
+(BKR-907) Add vagrant_custom hypervisor
+```
+* (BKR-888) install_puppet_agent_dev_repo_on design prohibits passing hosts of different platforms (253e20c1)
+
+* Merge pull request #1225 from tvpartytonight/BKR-916 (0601467d)
+
+
+```
+Merge pull request #1225 from tvpartytonight/BKR-916
+
+(BKR-916) Use dns_name for ec2 hostnames
+```
+* (BKR-916) Use dns_name for ec2 hostnames (a5bbdab2)
+
+
+```
+(BKR-916) Use dns_name for ec2 hostnames
+
+Prior to this change, provisioning in ec2 would set each host's hostname
+to the `name` attribute of the host. This change removes that behavior
+and sets each host's hostname to be the public facing `dns_name`
+provided by ec2 to allow traffic from outside ec2 to route correctly to
+that host.
+```
+* (BKR-528) Set ENV container docker (9dcc8079)
+
+
+```
+(BKR-528) Set ENV container docker
+
+See below relevant links:
+
+* https://github.com/test-kitchen/kitchen-docker/pull/192
+* https://github.com/test-kitchen/kitchen-docker/pull/216
+* https://developerblog.redhat.com/2014/05/05/running-systemd-within-docker-container/
+```
+* (BKR-907) Add vagrant_custom hypervisor (bb596fa1)
+
+
+```
+(BKR-907) Add vagrant_custom hypervisor
+
+* Gives the ability to specify users own Vagrantfile
+* Useful if there's a bug in beaker, you have a custom Vagrant provider missing from Beaker...
+* or you just want to be super explicit about your Vagrantfile
+* Example:
+
+
+
+HOSTS:
+  trusty:
+    roles:
+      - apache
+    platform: ubuntu-1404-x86_64
+    hypervisor: vagrant_custom
+    box: trusty64
+CONFIG:
+  vagrantfile_path: /opt/testing/CustomVagrantfile
+
+
+```
+### <a name = "2.50.0">2.50.0 - 22 Aug, 2016 (1f003a4d)
+
+* (HISTORY) update beaker history for gem release 2.50.0 (1f003a4d)
 
 * (GEM) update beaker version to 2.50.0 (9358f2eb)
 
