@@ -7,8 +7,9 @@ In particular, our current Beaker maintainers are:
 | Name           | Github                                              | Email                |
 |:--------------:|:---------------------------------------------------:|:--------------------:|
 | Kevin Imber    | [kevpl](https://github.com/kevpl)                   | <ki@puppet.com>      |
-| Tony Vu        | [tvpartytonight](https://github.com/tvpartytonight) | <tony.vu@puppet.com> |
+| Tony Vu        | [tvpartytonight](https://github.com/tvpartytonight) | <tv@puppet.com>      |
 | Sarah Thompson | [pinkypie](https://github.com/pinkypie)             | <sarah@puppet.com>   |
+| Fergal Gribben | [ferglor](https://github.com/ferglor)               | <ferglor@puppet.com> |
 
 # Reviewers For Specific Areas of Beaker
 
