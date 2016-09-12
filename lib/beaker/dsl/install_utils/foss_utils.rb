@@ -434,7 +434,11 @@ module Beaker
         # @api private
         def install_puppet_from_rpm_on( hosts, opts )
           block_on hosts do |host|
-            install_puppetlabs_release_repo(host)
+            if host[:type] == 'aio'
+              install_puppetlabs_release_repo(host,'pc1',opts)
+            else
+              install_puppetlabs_release_repo(host,nil,opts)
+            end
 
             if opts[:facter_version]
               host.install_package("facter-#{opts[:facter_version]}")
