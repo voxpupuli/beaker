@@ -114,3 +114,12 @@ in the `CONFIG` section of your hosts file:
     security_group: ['my_sg', 'default']
 
 This is an optional config parameter.
+
+### Floating IP Pool
+
+The name of the floating IP pool that a VM can grab IPs from. This is useful
+if your organization doesn't have a public pool of floating IPs, or give each
+user their own pool.  It's used in allocating new IPs.  It's an options
+parameter in the CONFIG section of the host file:
+
+    floating_ip_pool: 'my_pool_name'

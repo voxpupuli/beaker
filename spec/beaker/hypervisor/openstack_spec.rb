@@ -29,6 +29,7 @@ module Beaker
       expect(options['openstack_network']).to eq('testing')
       expect(options['openstack_keyname']).to eq('nopass')
       expect(options['security_group']).to eq(['my_sg', 'default'])
+      expect(options['floating_ip_pool']).to eq('my_pool')
     end
 
     it 'check hosts options during initialization' do

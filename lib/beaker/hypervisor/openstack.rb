@@ -171,15 +171,25 @@ module Beaker
       end
     end
 
+    # Get a floating IP address to associate with the instance, and
+    # allocate a new one if none are available
     def get_ip
+      @logger.debug "Finding IP"
       ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
       if ip.nil?
-        @logger.debug "Creating IP"
-        ip = @compute_client.addresses.create
+        begin
+          @logger.debug "Creating IP"
+          ip = @compute_client.addresses.create
+        rescue Fog::Compute::OpenStack::NotFound
+          # If there are no more floating IP addresses, allocate a
+          # new one and try again. 
+          @compute_client.allocate_address(@options[:floating_ip_pool])
+          ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
+        end
       end
+      raise 'Could not find or allocate an address' if not ip
       ip
     end
-
 
     #Create new instances in OpenStack
     def provision
@@ -187,7 +197,7 @@ module Beaker
 
       @hosts.each do |host|
         ip = get_ip
-        hostname = ip.ip.gsub! '.','-'
+        hostname = ip.ip.gsub '.','-'
         host[:vmhostname] = hostname+'.rfc1918.puppetlabs.net'
         @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
         options = {
@@ -223,36 +233,8 @@ module Beaker
         end
 
         # Associate a public IP to the server
-        # Create if there are no floating ips available
-        #
-        # Do we already have an address?
-        @logger.debug vm.addresses
-        address=nil
-        begin
-          # Here we try and assign an address from a floating IP pool
-          # This seems to fail on some implementations (FloatingIpPoolNotFound)
-          ip.ip.gsub! '-','.'
-          ip.server = vm
-          address = ip.ip
-
-        rescue Fog::Compute::OpenStack::NotFound
-          # Here, we fail to just trying to use an address that's already assigned if there is one
-          # There may be better logic, but this worked in the original implementation
-          # There might be an argument for checking whether an address is reachable a la
-          # port_open? logic in host.rb but maybe race conditions
-
-          begin
-            if vm.addresses[@options[:openstack_network]]
-              address = vm.addresses[@options[:openstack_network]].map{ |network| network['addr'] }.first
-            end
-          rescue NoMethodError
-            @logger.debug "No current address retrievable from OpenStack data"
-          end
-
-        end
-
-        raise 'Could not find or assign an address to the instance' unless address
-        host[:ip] = address
+        ip.server = vm
+        host[:ip] = ip.ip
 
         @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"
 
