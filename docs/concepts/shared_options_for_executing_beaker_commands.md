@@ -42,7 +42,7 @@ Specifies standard input to be provided to the command post execution.  Defaults
 
     on host, "this command takes input", {:stdin => "hiya"}
 
-## [:run_in_parallel](how_to/run_in_parallel.md)
+## [:run_in_parallel](../how_to/run_in_parallel.md)
 
 Execute the command against all hosts in parallel
 
