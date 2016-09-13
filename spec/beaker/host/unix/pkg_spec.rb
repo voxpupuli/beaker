@@ -341,6 +341,7 @@ module Beaker
                 if version == 10
                   allow( instance ).to receive( :noask_file_text )
                   allow( instance ).to receive( :create_remote_file )
+                  allow( instance ).to receive( :execute ).with('/opt/csw/bin/pkgutil -y -i pkgutil')
                 end
                 # only expect diff in the last line: .not_to vs .to raise_error
                 expect{
