@@ -740,5 +740,17 @@ module Beaker
         expect(host.ip).to eq('127.0.0.1')
       end
     end
+
+    describe "#wait_for_port" do
+      it 'returns true when port is open' do
+        allow(host).to receive(:repeat_fibonacci_style_for).and_return(true)
+        expect(host.wait_for_port(22, 0)).to be true
+      end
+
+      it 'returns false when port is not open' do
+        allow(host).to receive(:repeat_fibonacci_style_for).and_return(false)
+        expect(host.wait_for_port(22, 0)).to be false
+      end
+    end
   end
 end

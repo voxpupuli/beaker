@@ -92,9 +92,24 @@ module Beaker
           TCPSocket.new(reachable_name, port).close
           return true
         end
-      rescue Errno::ECONNREFUSED, Timeout::Error, Errno::ETIMEDOUT
+      rescue Errno::ECONNREFUSED, Timeout::Error, Errno::ETIMEDOUT, Errno::EHOSTUNREACH
         return false
       end
+    end
+
+    # Wait for a port on the host.  Useful for those occasions when you've called
+    # host.reboot and want to avoid spam from subsequent SSH connections retrying
+    # to connect from say retry_on()
+    def wait_for_port(port, attempts=15)
+      @logger.debug("  Waiting for port #{port} ... ", false)
+      start = Time.now
+      done = repeat_fibonacci_style_for(attempts) { port_open?(port) }
+      if done
+        @logger.debug('connected in %0.2f seconds' % (Time.now - start))
+      else
+        @logger.debug('timeout')
+      end
+      done
     end
 
     def up?

@@ -62,6 +62,10 @@ module Beaker
         :image_ref => 54321)
       )
 
+      @hosts.each do |host|
+        allow(host).to receive(:wait_for_port).and_return(true)
+      end
+
       openstack.provision
     end
 
