@@ -777,7 +777,21 @@ describe ClassMixedWithDSLHelpers do
         it 'bounces puppet twice' do
           allow( subject ).to receive(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
+        end
+
+        it 'gracefully restarts using apache2ctl' do
+          allow(host).to receive( :check_for_command ).and_return( true )
+          allow( subject ).to receive(:curl_with_retries)
+          subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
+        end
+
+        it 'gracefully restarts using apachectl' do
+          allow(host).to receive( :check_for_command ).and_return( false )
+          allow( subject ).to receive(:curl_with_retries)
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
         end
 
         it 'yields to a block after bouncing service' do
@@ -785,18 +799,18 @@ describe ClassMixedWithDSLHelpers do
           allow( subject ).to receive(:curl_with_retries)
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+              expect(host).to execute_commands_matching(/apachectl graceful/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
         end
 
         context ':restart_when_done flag set false' do
           it 'bounces puppet once' do
             allow( subject ).to receive(:curl_with_retries)
             subject.with_puppet_running_on(host, { :restart_when_done => false })
-            expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+            expect(host).to execute_commands_matching(/apachectl graceful/).once
           end
 
           it 'yields to a block after bouncing service' do
@@ -804,7 +818,7 @@ describe ClassMixedWithDSLHelpers do
             allow( subject ).to receive(:curl_with_retries)
             expect do
               subject.with_puppet_running_on(host, { :restart_when_done => false }) do
-                expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+                expect(host).to execute_commands_matching(/apachectl graceful/).once
                 execution += 1
               end
             end.to change { execution }.by(1)

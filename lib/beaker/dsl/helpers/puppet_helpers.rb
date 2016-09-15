@@ -323,7 +323,8 @@ module Beaker
           curl_retries = 120 if curl_retries.nil?
           port = options[:puppetserver_port] if port.nil?
           if host.graceful_restarts?
-            apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/apache2ctl" : 'apache2ctl'
+            service = host.check_for_command('apache2ctl') ? 'apache2ctl' : 'apachectl'
+            apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/#{service}" : service
             host.exec(Command.new("#{apachectl_path} graceful"))
           else
             host.exec puppet_resource('service', service, 'ensure=stopped')
