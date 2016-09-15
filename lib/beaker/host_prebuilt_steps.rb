@@ -161,41 +161,6 @@ module Beaker
       report_and_raise(logger, e, "sync_root_keys")
     end
 
-    #Determine the Extra Packages for Enterprise Linux URL for the provided Enterprise Linux host.
-    # @param [Host, Array<Host>] host One host to act on.  Will use host epel_url, epel_arch and epel_pkg
-    #                                 before using defaults provided in opts.
-    # @return [String, String, String] The URL, arch  and package name for EPL for the provided host
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [String] :epel_url Link to download
-    # @option opts [String] :epel_arch Architecture to download (i386, x86_64, etc), defaults to i386 for 5 and 6, x86_64 for 7
-    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
-    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
-    # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
-    def epel_info_for host, opts
-      if !el_based?(host)
-        raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
-      end
-
-      version = host['platform'].version
-      url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
-      if version == '7'
-        if opts[:epel_7_arch] == 'i386'
-          raise ArgumentError.new("epel-7 does not provide packages for i386")
-        end
-        pkg = host[:epel_pkg] || opts[:epel_7_pkg]
-        arch = opts[:epel_7_arch] || 'x86_64'
-      elsif version == '6'
-        pkg = host[:epel_pkg] || opts[:epel_6_pkg]
-        arch = host[:epel_arch] || opts[:epel_6_arch] || 'i386'
-      elsif version == '5'
-        pkg = host[:epel_pkg] || opts[:epel_5_pkg]
-        arch = host[:epel_arch] || opts[:epel_5_arch] || 'i386'
-      else
-        raise ArgumentError.new("epel_info_for does not support el version #{version}, on #{host.name}")
-      end
-      return url, arch, pkg
-    end
-
     # Run 'apt-get update' on the provided host or hosts.
     # If the platform of the provided host is not ubuntu, debian or cumulus: do nothing.
     #
@@ -258,10 +223,6 @@ module Beaker
     # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     # @option opts [String] :epel_url Link to download from
-    # @option opts [String] :epel_arch Architecture of epel to download (i386, x86_64, etc)
-    # @option opts [String] :epel_7_pkg Package to download from provided link for el-7
-    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
-    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     def add_el_extras( host, opts )
       #add_el_extras
       #only supports el-* platforms
@@ -272,14 +233,9 @@ module Beaker
         when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
-            url, arch, pkg = epel_info_for host, opts
-            if host['platform'].version == '7'
-              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/e/#{pkg}"))
-            else
-              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/#{pkg}"))
-            end
+            host.exec(Command.new("rpm -i#{debug_opt} #{opts[:epel_url]}/epel-release-latest-#{host['platform'].version}.noarch.rpm"))
             #update /etc/yum.repos.d/epel.repo for new baseurl
-            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape(url)}/\$basearch;' /etc/yum.repos.d/epel.repo"))
+            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{opts[:epel_url]}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
             #remove mirrorlist
             host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
             host.exec(Command.new('yum clean all && yum makecache'))

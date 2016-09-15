@@ -163,37 +163,6 @@ describe Beaker do
     end
   end
 
-  context "epel_info_for!" do
-    subject { dummy_class.new }
-
-    it "can return the correct url for an el-7 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-7-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://dl.fedoraproject.org/pub/epel/7", "x86_64", "epel-release-7-8.noarch.rpm"]
-    end
-
-    it "can return the correct url for an el-6 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-6-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://dl.fedoraproject.org/pub/epel/6", "i386", "epel-release-6-8.noarch.rpm"]
-    end
-
-    it "can return the correct url for an el-5 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-5-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://dl.fedoraproject.org/pub/epel/5", "i386", "epel-release-5-4.noarch.rpm"]
-
-    end
-
-    it "raises an error on non el-5/6 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-4-platform') } )
-
-      expect{ subject.epel_info_for( host, options )}.to raise_error(ArgumentError, /epel_info_for does not support el version/)
-
-    end
-
-  end
-
   context "apt_get_update" do
     subject { dummy_class.new }
 
@@ -335,8 +304,8 @@ describe Beaker do
       hosts[4][:platform] = Beaker::Platform.new('oracle-5-arch')
 
       expect( Beaker::Command ).to receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm").exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm").exactly( 2 ).times
       expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
       expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
       expect( Beaker::Command ).to receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
