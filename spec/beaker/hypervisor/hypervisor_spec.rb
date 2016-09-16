@@ -4,21 +4,6 @@ module Beaker
   describe Hypervisor do
     let( :hypervisor ) { Beaker::Hypervisor }
 
-    it "creates an aix hypervisor for aix hosts" do
-      aix = double( 'aix' )
-      allow( aix ).to receive( :provision ).and_return( true )
-
-      expect( Aixer ).to receive( :new ).once.and_return( aix )
-      expect( hypervisor.create( 'aix', [], make_opts() ) ).to be === aix
-    end
-
-    it "creates a solaris hypervisor for solaris hosts" do
-      solaris = double( 'solaris' )
-      allow( solaris ).to receive( :provision ).and_return( true )
-      expect( Solaris ).to receive( :new ).once.and_return( solaris )
-      expect( hypervisor.create( 'solaris', [], make_opts() ) ).to be === solaris
-    end
-
     it "creates a vsphere hypervisor for vsphere hosts" do
       vsphere = double( 'vsphere' )
       allow( vsphere ).to receive( :provision ).and_return( true )
