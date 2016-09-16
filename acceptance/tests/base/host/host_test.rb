@@ -27,6 +27,112 @@ hosts.each do |host|
   end
 end
 
+step "#get_env_var : can get a specific environment variable"
+hosts.each do |host|
+  env_prefix = 'BEAKER' + SecureRandom.hex(4).upcase
+  env_param1 = "#{env_prefix}_p1"
+  env_value1 = "#{env_prefix}_v1"
+
+  host.clear_env_var(env_param1)
+  host.add_env_var(env_param1,env_value1)
+
+  val = host.get_env_var(env_param1)
+
+  assert_match(/^#{env_param1}=#{env_value1}$/, val, "get_env_var can get a specific environment variable")
+end
+
+step "#get_env_var : should not match a partial env key name"
+hosts.each do |host|
+  env_id = 'BEAKER' + SecureRandom.hex(4).upcase
+  # Used as a prefix
+  env_param1 = "#{env_id}_pre"
+  env_value1 = "#{env_id}_pre"
+  # Used as a suffix
+  env_param2 = "suf_#{env_id}"
+  env_value2 = "suf_#{env_id}"
+  # Used as a infix
+  env_param3 = "in_#{env_id}_in"
+  env_value3 = "in_#{env_id}_in"
+
+  host.clear_env_var(env_param1)
+  host.clear_env_var(env_param2)
+  host.clear_env_var(env_param3)
+  host.add_env_var(env_param1,env_value1)
+  host.add_env_var(env_param1,env_value2)
+  host.add_env_var(env_param1,env_value3)
+
+  val = host.get_env_var(env_id)
+  assert('' == val,'get_env_var should not match a partial env key name')
+end
+
+step "#get_env_var : should not return a match from a key\'s value"
+hosts.each do |host|
+  env_prefix = 'BEAKER' + SecureRandom.hex(4).upcase
+  env_param1 = "#{env_prefix}_p1"
+  env_value1 = "#{env_prefix}_v1"
+
+  host.clear_env_var(env_param1)
+  host.add_env_var(env_param1,env_value1)
+
+  val = host.get_env_var(env_value1)
+  assert('' == val,'get_env_var should not return a match from a key\'s value')
+end
+
+step "#clear_env_var : should only remove the specified key"
+hosts.each do |host|
+  # Note - Must depend on `SecureRandom.hex(4)` creating a unique key as unable to depend on the function under test `clear_env_var`
+  env_id = 'BEAKER' + SecureRandom.hex(4).upcase
+  # Use env_id as a suffix
+  env_param1 = "p1_#{env_id}"
+  env_value1 = "v1_#{env_id}"
+  # Use env_id as a prefix
+  env_param2 = "#{env_id}_p2"
+  env_value2 = "#{env_id}_v2"
+  # Use env_id a key to delete
+  env_param3 = "#{env_id}"
+  env_value3 = "#{env_id}"
+  
+  host.add_env_var(env_param1,env_value1)
+  host.add_env_var(env_param2,env_value2)
+  host.add_env_var(env_param3,env_value3)
+
+  host.clear_env_var(env_param3)
+
+  val = host.get_env_var(env_param1)
+  assert_match(/^#{env_param1}=#{env_value1}$/, val, "#{env_param1} should exist after calling clear_env_var")
+  val = host.get_env_var(env_param2)
+  assert_match(/^#{env_param2}=#{env_value2}$/, val, "#{env_param2} should exist after calling clear_env_var")
+  val = host.get_env_var(env_param3)
+  assert('' == val,"#{env_param3} should not exist after calling clear_env_var")
+end
+
+step "#add_env_var : can add a unique environment variable"
+hosts.each do |host|
+  env_id = 'BEAKER' + SecureRandom.hex(4).upcase
+  env_param1 = "#{env_id}"
+  env_value1 = "#{env_id}"
+  # Use env_id as a prefix
+  env_param2 = "#{env_id}_pre"
+  env_value2 = "#{env_id}_pre"
+  # Use env_id as a suffix
+  env_param3 = "suf_#{env_id}"
+  env_value3 = "suf_#{env_id}"
+
+  host.clear_env_var(env_param1)
+  host.clear_env_var(env_param2)
+  host.clear_env_var(env_param3)
+  host.add_env_var(env_param1,env_value1)
+  host.add_env_var(env_param2,env_value2)
+  host.add_env_var(env_param3,env_value3)
+
+  val = host.get_env_var(env_param1)
+  assert_match(/^#{env_param1}=#{env_value1}$/, val, "#{env_param1} should exist")
+  val = host.get_env_var(env_param2)
+  assert_match(/^#{env_param2}=#{env_value2}$/, val, "#{env_param2} should exist")
+  val = host.get_env_var(env_param3)
+  assert_match(/^#{env_param3}=#{env_value3}$/, val, "#{env_param3} should exist")
+end
+
 step "#add_env_var : can add an environment variable"
 hosts.each do |host|
   host.clear_env_var("test")

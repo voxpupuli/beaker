@@ -106,7 +106,7 @@ module Unix::Exec
     if exec(Beaker::Command.new("grep ^#{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
       return #nothing to do here, key value pair already exists
     #see if the key already exists
-    elsif exec(Beaker::Command.new("grep ^#{key} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
+    elsif exec(Beaker::Command.new("grep ^#{key}= #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
       exec(Beaker::SedCommand.new(self['platform'], "s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
@@ -142,7 +142,7 @@ module Unix::Exec
   #  host.get_env_var('path')
   def get_env_var key
     key = key.to_s
-    exec(Beaker::Command.new("env | grep #{key}"), :accept_all_exit_codes => true).stdout.chomp
+    exec(Beaker::Command.new("env | grep ^#{key}="), :accept_all_exit_codes => true).stdout.chomp
   end
 
   #Delete the environment variable from the current ssh environment
@@ -153,7 +153,7 @@ module Unix::Exec
     key = key.to_s
     env_file = self[:ssh_env_file]
     #remove entire line
-    exec(Beaker::SedCommand.new(self['platform'], "/#{key}=.*$/d", env_file))
+    exec(Beaker::SedCommand.new(self['platform'], "/^#{key}=.*$/d", env_file))
     #update the profile.d to current state
     #match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
@@ -296,7 +296,7 @@ module Unix::Exec
 
   # Checks if selinux is enabled
   #
-  # @return [Boolean] true if selinux is enabled, false otherwise 
+  # @return [Boolean] true if selinux is enabled, false otherwise
   def selinux_enabled?()
     exec(Beaker::Command.new("sudo selinuxenabled"), :accept_all_exit_codes => true).exit_code == 0
   end

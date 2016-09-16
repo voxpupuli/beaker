@@ -197,7 +197,7 @@ module Beaker
         result.exit_code = 1
         expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with(/grep \^key ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
         expect( Beaker::Command ).to receive(:new).with("echo \"key=/my/first/value\" >> ~/.ssh/environment")
         host.add_env_var('key', '/my/first/value')
@@ -210,7 +210,7 @@ module Beaker
         expect( host ).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with(/grep \^key ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
         expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
