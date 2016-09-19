@@ -28,3 +28,18 @@ If you'd like to keep this setting the way it was in 2.y, then just set the
 global option `:cache_files_locally` to `false`. Checkout the
 [Argument Processing and Precedence](../concepts/argument_processing_and_precedence.md)
 doc for info on how to do this.
+
+## EPEL package update
+
+In beaker < 3.0.0, the epel package names had hardcoded defaults listed in the 
+presets default; in beaker >= 3.0.0, beaker utilizes the `release-latest` file
+provided on epel mirrors for el versions 5, 6, and 7. Since only the latest epel
+packages are available on epel mirrors, beaker only supports installation of 
+that latest version.
+
+## Solaris and AIX Hypervisors removed
+
+Special cased hypervisor support for Solaris and AIX have been removed in favor
+of a `hypervisor=none` workflow where the provisioning of SUTs is handled separately
+outside of beaker itself. Solaris and AIX are still of course supported as `platform`
+strings; only these special-cased hypervisors have been removed.
