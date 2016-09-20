@@ -36,7 +36,7 @@ describe ClassMixedWithDSLInstallUtils do
 
   def expect_status_called(times = hosts.length)
     expect( Beaker::Command ).to receive( :new )
-      .with( "sc query puppet || sc query pe-puppet", [], {:cmdexe => true} )
+      .with( "sc qc puppet || sc qc pe-puppet", [], {:cmdexe => true} )
       .exactly( times ).times
   end
 
@@ -62,13 +62,13 @@ describe ClassMixedWithDSLInstallUtils do
   end
 
   def expect_reg_query_called(times = hosts.length)
+    hosts.each do |host|
+      expect(host).to receive(:is_x86_64?).and_return(:true)
+    end
+
     expect( Beaker::Command ).to receive( :new )
       .with(%r{reg query "HKLM\\SOFTWARE\\Wow6432Node\\Puppet Labs\\PuppetInstaller}, [], {:cmdexe => true})
       .exactly(times).times
-  end
-
-  def expect_startup_query_called(times = hosts.length)
-    expect( Beaker::Command ).to receive( :new ).with(/WMIC SERVICE.*StartMode=/, [], {:cmdexe => true}).exactly(times).times
   end
 
   describe "#install_msi_on" do
@@ -82,7 +82,6 @@ describe ClassMixedWithDSLInstallUtils do
       expect_install_called
       expect_status_called
       expect_reg_query_called
-      expect_startup_query_called
       expect_version_log_called
       expect( subject ).to receive( :create_install_msi_batch_on ).with(
           anything, anything,
@@ -94,7 +93,6 @@ describe ClassMixedWithDSLInstallUtils do
       expect_install_called
       expect_status_called
       expect_reg_query_called
-      expect_startup_query_called
       expect_version_log_called
       value = 'Automatic'
       expect( subject ).to receive( :create_install_msi_batch_on ).with(
@@ -124,7 +122,6 @@ describe ClassMixedWithDSLInstallUtils do
     it "will generate a command to emit a log file with the :debug option set" do
       expect_install_called
       expect_reg_query_called
-      expect_startup_query_called
       expect_status_called
       expect_version_log_called
 
@@ -135,7 +132,6 @@ describe ClassMixedWithDSLInstallUtils do
     it 'will pass msi_path to #create_install_msi_batch_on as-is' do
       expect_install_called
       expect_reg_query_called
-      expect_startup_query_called
       expect_status_called
       expect_version_log_called
       test_path = 'test/path'
@@ -144,29 +140,37 @@ describe ClassMixedWithDSLInstallUtils do
       subject.install_msi_on(hosts, test_path)
     end
 
-    it 'will confirm service startup type is honored via WMIC Service' do
+    it 'will search in Wow6432Node for the remembered startup setting on 64-bit hosts' do
       expect_install_called
-      expect_reg_query_called
       expect_status_called
       expect_version_log_called
 
-      expect( Beaker::Command ).to receive( :new )
-        .with(/WMIC SERVICE.*StartMode="Foo"/, [], {:cmdexe => true})
-        .exactly(hosts.length).times
-      subject.install_msi_on(hosts, msi_path, {'PUPPET_AGENT_STARTUP_MODE' => "Foo"})
-    end
-
-    it 'will check the registry for remembered startup setting via reg query' do
-      expect_install_called
-      expect_status_called
-      expect_startup_query_called
-      expect_version_log_called
+      hosts.each do |host|
+        expect(host).to receive(:is_x86_64?).and_return(true)
+      end
 
       expect( Beaker::Command ).to receive( :new )
         .with('reg query "HKLM\\SOFTWARE\\Wow6432Node\\Puppet Labs\\PuppetInstaller" /v "RememberedPuppetAgentStartupMode" | findstr Foo', [], {:cmdexe => true})
         .exactly(hosts.length).times
-        subject.install_msi_on(hosts, msi_path, {'PUPPET_AGENT_STARTUP_MODE' => "Foo"})
+
+      subject.install_msi_on(hosts, msi_path, {'PUPPET_AGENT_STARTUP_MODE' => "Foo"})
+    end
+
+    it 'will omit Wow6432Node in the registry search for remembered startup setting on 32-bit hosts' do
+      expect_install_called
+      expect_status_called
+      expect_version_log_called
+
+      hosts.each do |host|
+        expect(host).to receive(:is_x86_64?).and_return(false)
       end
+
+      expect( Beaker::Command ).to receive( :new )
+        .with('reg query "HKLM\\SOFTWARE\\Puppet Labs\\PuppetInstaller" /v "RememberedPuppetAgentStartupMode" | findstr Foo', [], {:cmdexe => true})
+        .exactly(hosts.length).times
+
+      subject.install_msi_on(hosts, msi_path, {'PUPPET_AGENT_STARTUP_MODE' => "Foo"})
+    end
   end
 
   describe '#create_install_msi_batch_on' do

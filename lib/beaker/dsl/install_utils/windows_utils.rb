@@ -139,17 +139,33 @@ exit /B %errorlevel%
             # if puppet service exists, then pe-puppet is not queried
             # if puppet service does not exist, pe-puppet is queried and that exit code is used
             # therefore, this command will always exit 0 if either service is installed
-            on host, Command.new("sc query puppet || sc query pe-puppet", [], { :cmdexe => true })
+            #
+            # We also take advantage of this output to verify the startup
+            # settings are honored as supplied to the MSI
+            on host, Command.new("sc qc puppet || sc qc pe-puppet", [], { :cmdexe => true }) do |result|
+              output = result.stdout
+              startup_mode = msi_opts['PUPPET_AGENT_STARTUP_MODE'].upcase
+
+              search = case startup_mode
+                when 'AUTOMATIC'
+                  { :code => 2, :name => 'AUTO_START' }
+                when 'MANUAL'
+                  { :code => 3, :name => 'DEMAND_START' }
+                when 'DISABLED'
+                  { :code => 4, :name => 'DISABLED' }
+                end
+
+              if output !~ /^\s+START_TYPE\s+:\s+#{search[:code]}\s+#{search[:name]}/
+                raise "puppet service startup mode did not match supplied MSI option '#{startup_mode}'"
+              end
+            end
 
             # (PA-514) value for PUPPET_AGENT_STARTUP_MODE should be present in
             # registry and honored after install/upgrade.
-            reg_query_command = %Q(reg query "HKLM\\SOFTWARE\\Wow6432Node\\Puppet Labs\\PuppetInstaller" /v "RememberedPuppetAgentStartupMode" | findstr #{msi_opts['PUPPET_AGENT_STARTUP_MODE']})
+            reg_key = host.is_x86_64? ? "HKLM\\SOFTWARE\\Wow6432Node\\Puppet Labs\\PuppetInstaller" :
+                                        "HKLM\\SOFTWARE\\Puppet Labs\\PuppetInstaller"
+            reg_query_command = %Q(reg query "#{reg_key}" /v "RememberedPuppetAgentStartupMode" | findstr #{msi_opts['PUPPET_AGENT_STARTUP_MODE']})
             on host, Command.new(reg_query_command, [], { :cmdexe => true })
-
-            start_mode = msi_opts['PUPPET_AGENT_STARTUP_MODE'] == "Automatic" ? "Auto" : msi_opts['PUPPET_AGENT_STARTUP_MODE']
-            service_query_command = %Q('WMIC SERVICE where (Name like "%Puppet" AND StartMode="#{start_mode}") | findstr Puppet')
-
-            on host, Command.new(service_query_command, [], { :cmdexe => true })
 
             # emit the misc/versions.txt file which contains component versions for
             # puppet, facter, hiera, pxp-agent, packaging and vendored Ruby
