@@ -81,13 +81,14 @@ module Beaker
     # @return [Hash] Tag hash
     def add_tags(host)
       host[:host_tags].merge(
-          {
-              'beaker_version'    => Beaker::Version::STRING,
-              'jenkins_build_url' => @options[:jenkins_build_url],
-              'department'        => @options[:department],
-              'project'           => @options[:project],
-              'created_by'        => @options[:created_by]
-          })
+        'beaker_version'    => Beaker::Version::STRING,
+        'jenkins_build_url' => @options[:jenkins_build_url],
+        'department'        => @options[:department],
+        'project'           => @options[:project],
+        'created_by'        => @options[:created_by],
+        'name'              => host.name,
+        'roles'             => host.host_hash[:roles].join(', ')
+      )
     end
 
     # Get host info hash from parsed json response
