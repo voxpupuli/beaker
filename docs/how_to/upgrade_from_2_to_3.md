@@ -1,7 +1,9 @@
 # How To Upgrade from 2.y to 3.0
 
 This is a guide detailing all the issues to be aware of, and to help people make
-any changes that you might need to move from beaker 2.y to 3.0.
+any changes that you might need to move from beaker 2.y to 3.0. To test out 
+beaker 3.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md) 
+to ensure this new major release does not break your existing testing.
 
 ## Locally Cached Files
 
