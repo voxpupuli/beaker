@@ -43,3 +43,18 @@ Special cased hypervisor support for Solaris and AIX have been removed in favor
 of a `hypervisor=none` workflow where the provisioning of SUTs is handled separately
 outside of beaker itself. Solaris and AIX are still of course supported as `platform`
 strings; only these special-cased hypervisors have been removed.
+
+## Environment Variable DSL Methods
+
+In [BKR-914](https://tickets.puppetlabs.com/browse/BKR-914) we fixed our host
+methods that deal with environment variables (
+[#add_env_var](http://www.rubydoc.info/github/puppetlabs/beaker/Unix/Exec#add_env_var-instance_method),
+[#get_env_var](http://www.rubydoc.info/github/puppetlabs/beaker/Unix/Exec#get_env_var-instance_method),
+and
+[#clear_env_var](http://www.rubydoc.info/github/puppetlabs/beaker/Unix/Exec#clear_env_var-instance_method)).
+
+Before, these methods used regular expressions that were too loose. This means
+that in an example of a call like `get_env_var('abc')`, the environment variables
+`abc=123`, `xx_abc_xx=123`, and `123=abc` would all be matched, where the intent
+is to get `abc=123` alone. From Beaker 3.0 forward, this will be the case.
+
