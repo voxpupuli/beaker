@@ -1,7 +1,11 @@
 require 'spec_helper'
 
 describe Beaker::VagrantLibvirt do
-  let( :options ) { make_opts.merge({ :hosts_file => 'sample.cfg', 'logger' => double().as_null_object }) }
+  let( :options ) { make_opts.merge({ :hosts_file => 'sample.cfg',
+                                      'logger' => double().as_null_object,
+                                      'libvirt' => { 'uri' => 'qemu+ssh://root@host/system'},
+                                      'vagrant_cpus' => 2,
+                                    }) }
   let( :vagrant ) { Beaker::VagrantLibvirt.new( @hosts, options ) }
 
   before :each do
@@ -27,7 +31,7 @@ describe Beaker::VagrantLibvirt do
       path = vagrant.instance_variable_get( :@vagrant_path )
       allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
 
-      vagrant.make_vfile( @hosts )
+      vagrant.make_vfile( @hosts, options )
       @vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
     end
 
@@ -38,6 +42,16 @@ describe Beaker::VagrantLibvirt do
     it "can specify the memory as an integer" do
       expect( @vagrantfile.split("\n").map(&:strip) )
         .to include('node.memory = 512')
+    end
+
+    it "can specify the number of cpus" do
+      expect( @vagrantfile.split("\n").map(&:strip) )
+        .to include("node.cpus = 2")
+    end
+
+    it "can specify any libvirt option" do
+      expect( @vagrantfile.split("\n").map(&:strip) )
+        .to include("node.uri = 'qemu+ssh://root@host/system'")
     end
   end
 end
