@@ -60,3 +60,17 @@ that in an example of a call like `get_env_var('abc')`, the environment variable
 `abc=123`, `xx_abc_xx=123`, and `123=abc` would all be matched, where the intent
 is to get `abc=123` alone. From Beaker 3.0 forward, this will be the case.
 
+## beaker-pe Import Changes
+
+Starting in beaker 3.0, there is no explicit beaker-pe requirement in beaker. This
+separates the two, meaning that you'll have to explicitly require beaker-pe if you
+do need it in your testing. And if you don't need it, you won't get it, limiting
+your dependencies & exposure to unnecessary code.
+
+Luckily, if you do need it, this shouldn't be hard to update. These are the steps
+needed to use beaker-pe with beaker 3.0:
+
+1. put a dependency on beaker-pe in your Gemfile as a sibling to your beaker
+  requirement (make sure beaker-pe is >= 1.0)
+2. put a `require 'beaker-pe'` statement where you'd like to use beaker-pe-specific
+  functionality

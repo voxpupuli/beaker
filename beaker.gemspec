@@ -48,10 +48,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
 
   # Run time dependencies that are Beaker libraries
-  s.add_runtime_dependency 'beaker-answers', '~> 0.0'
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
   s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
-  s.add_runtime_dependency 'beaker-pe', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
 
   # Optional provisioner specific support
