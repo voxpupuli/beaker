@@ -5,6 +5,12 @@ any changes that you might need to move from beaker 2.y to 3.0. To test out
 beaker 3.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md) 
 to ensure this new major release does not break your existing testing.
 
+## Ruby version 1.9.3 no longer supported
+
+Official support for 1.9.3 has been eol'd since Feb 2015; the beaker 3.0.0 release
+drops support for ruby 1.9.3 and will not install with ruby 1.9.3. We suggest using
+ruby >= 2.2.5, as that is the version we currently test and support at Puppet.
+
 ## Locally Cached Files
 
 This is a change of the `:cache_files_locally` preset from `true` to `false`.
