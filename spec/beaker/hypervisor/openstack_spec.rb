@@ -69,5 +69,24 @@ module Beaker
       openstack.provision
     end
 
+    it 'generates valid keynames during server creation' do
+      # Simulate getting a dynamic IP from OpenStack to test key generation code
+      # after provisioning. See _validate_new_key_pair in openstack/nova for reference
+      mock_ip = double().as_null_object
+      allow( openstack ).to receive( :get_ip ).and_return( mock_ip )
+      allow( mock_ip ).to receive( :ip ).and_return( '172.16.0.1' )
+      openstack.instance_eval('@options')['openstack_keyname'] = nil
+
+      @hosts.each do |host|
+        allow(host).to receive(:wait_for_port).and_return(true)
+      end
+
+      openstack.provision
+
+      @hosts.each do |host|
+        expect(host[:keyname]).to match(/[_\-0-9a-zA-Z]+/)
+      end
+    end
+
   end
 end
