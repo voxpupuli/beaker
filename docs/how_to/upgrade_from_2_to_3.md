@@ -78,5 +78,7 @@ needed to use beaker-pe with beaker 3.0:
 
 1. put a dependency on beaker-pe in your Gemfile as a sibling to your beaker
   requirement (make sure beaker-pe is >= 1.0)
-2. put a `require 'beaker-pe'` statement where you'd like to use beaker-pe-specific
-  functionality
+2. That's it! Beaker itself will still `require 'beaker-pe'`, so making sure that it is specified
+  in your project's Gemfile is the only code change you will need to make. Please note that this
+  is only supported with the `beaker-pe` gem; other beaker libraries will need an explicit `require`
+  in your test setup.
