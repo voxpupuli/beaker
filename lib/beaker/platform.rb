@@ -21,7 +21,8 @@ module Beaker
                      "precise" => "1204",
                      "lucid"   => "1004",
                    },
-        :osx =>    { "elcapitan" => "1011",
+        :osx =>    { "sierra"    => "1012",
+                     "elcapitan" => "1011",
                      "yosemite"  => "1010",
                      "mavericks" => "109",
                    }
