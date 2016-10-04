@@ -1,3 +1,5 @@
+require 'semantic'
+
 module Beaker
   module Shared
     module Semvar
@@ -36,6 +38,41 @@ module Beaker
         return false
       end
 
+      # Wrapper around semantic semver gem that supports our
+      # semver-breaking version scheme in PE.
+      #
+      #@param [String] a A version of the from '\d.\d.\d.*'
+      #@param [String/Symbol] cmp A comparison operator such as <, >, or ==
+      #@param [String] b A version of the form '\d.\d.\d.*'
+      #@return [Boolean] true if a <cmp> b
+      #
+      #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
+      #@note -rc being less than final builds is not yet implemented.
+      def puppet_version_comparison a, cmp, b
+        ah = Hash.new(0)
+        bh = Hash.new(0)
+
+        ah[:ver], ah[:rc], ah[:build] = a.split('-', 3)
+        bh[:ver], bh[:rc], bh[:build] = b.split('-', 3)
+
+        ah[:x], ah[:y], ah[:z] = ah[:ver].split('.')
+        bh[:x], bh[:y], bh[:z] = bh[:ver].split('.')
+
+        ah.each { |k, v| ah[k] = 0 if ah[k].nil? }
+        bh.each { |k, v| bh[k] = 0 if bh[k].nil? }
+
+        ah[:semver] = Semantic::Version.new [ah[:x], ah[:y], ah[:z]].join('.')
+        bh[:semver] = Semantic::Version.new [bh[:x], bh[:y], bh[:z]].join('.')
+
+        if ah[:semver] != bh[:semver]
+          return ah[:semver].send(cmp.to_sym, bh[:semver])
+        elsif ah[:rc] != bh[:rc]
+          return ah[:rc].to_s.send(cmp.to_sym, bh[:rc].to_s)
+        else
+          return ah[:build].to_s.send(cmp.to_sym, bh[:build].to_s)
+        end
+      end
+
       # Gets the max semver version from a list of them
       # @param [Array<String>]  versions  List of versions to get max from
       # @param [String]         default   Default version if list is nil or empty
@@ -59,4 +96,3 @@ module Beaker
     end
   end
 end
-
