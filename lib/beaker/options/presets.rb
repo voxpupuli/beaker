@@ -133,6 +133,7 @@ module Beaker
           :openstack_keyname      => ENV['OS_KEYNAME'],
           :openstack_network      => ENV['OS_NETWORK'],
           :openstack_region       => ENV['OS_REGION'],
+          :openstack_volume_support => ENV['OS_VOL_SUPPORT'] || true,
           :jenkins_build_url      => nil,
           :validate               => true,
           :configure              => true,
