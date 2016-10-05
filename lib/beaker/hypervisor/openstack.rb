@@ -63,6 +63,17 @@ module Beaker
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
       end
 
+      # Validate openstack_volume_support setting value, reset to boolean if passed via ENV value string
+      if not @options[:openstack_volume_support].is_a?(TrueClass) || @options[:openstack_volume_support].is_a?(FalseClass)
+        if @options[:openstack_volume_support].match(/\btrue\b/i)
+          @options[:openstack_volume_support] = true
+        elsif @options[:openstack_volume_support].match(/\bfalse\b/i)
+          @options[:openstack_volume_support] = false
+        else
+          raise "Invalid value provided for CONFIG setting openstack_volume_support, current value #{@options[:openstack_volume_support]}"
+        end
+      end
+
     end
 
     #Provided a flavor name return the OpenStack id for that flavor
@@ -229,7 +240,6 @@ module Beaker
         vm = @compute_client.servers.create(options)
 
         #wait for the new instance to start up
-        start = Time.now
         try = 1
         attempts = @options[:timeout].to_i / SLEEPWAIT
 
@@ -266,7 +276,8 @@ module Beaker
         #enable root if user is not root
         enable_root(host)
 
-        provision_storage(host, vm)
+        provision_storage(host, vm) if @options[:openstack_volume_support]
+        @logger.notify "OpenStack Volume Support Disabled, can't provision volumes" if not @options[:openstack_volume_support]
       end
 
       hack_etc_hosts @hosts, @options
@@ -277,7 +288,7 @@ module Beaker
     def cleanup
       @logger.notify "Cleaning up OpenStack"
       @vms.each do |vm|
-        cleanup_storage(vm)
+        cleanup_storage(vm) if @options[:openstack_volume_support]
         @logger.debug "Release floating IPs for OpenStack host #{vm.name}"
         floating_ips = vm.all_addresses # fetch and release its floating IPs
         floating_ips.each do |address|
