@@ -31,9 +31,15 @@ module Beaker
         @execute = false
         return
       end
-      @logger.info("Beaker!")
-      @logger.info(beaker_version_string)
-      @logger.info(@options.dump)
+
+      if Beaker::Shared::SubcommandsUtil::write_config?
+        @options.dump_to_file(Beaker::Shared::SubcommandsUtil::CONFIG_PATH)
+      else
+        @logger.info("Beaker!")
+        @logger.info(beaker_version_string)
+        @logger.info(@options.dump)
+      end
+
       if @options[:parse_only]
         @execute = false
         return
