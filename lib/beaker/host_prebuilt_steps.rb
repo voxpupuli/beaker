@@ -13,7 +13,7 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     UNIX_PACKAGES = ['curl', 'ntpdate']
-    FREEBSD_PACKAGES = ['curl', 'perl5']
+    FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
@@ -127,11 +127,27 @@ module Beaker
     # @param [Host] host Host to act on
     # @param [Array<String>] package_list List of package names to install
     def check_and_install_packages_if_needed host, package_list
-      package_list.each do |pkg|
-        if not host.check_for_package pkg
-          host.install_package pkg
+      package_list.each do |string|
+        alternatives = string.split('|')
+        next if alternatives.any? { |pkg| host.check_for_package pkg }
+        install_one_of_packages host, alternatives
+      end
+    end
+
+    # Installs one of alternative packages (first available)
+    #
+    # @param [Host] host Host to act on
+    # @param [Array<String>] packages List of package names (alternatives).
+    def install_one_of_packages host, packages
+      error = nil
+      packages.each do |pkg|
+        begin
+          return host.install_package pkg
+        rescue Beaker::Host::CommandFailure => e
+          error = e
         end
       end
+      raise error
     end
 
     #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
