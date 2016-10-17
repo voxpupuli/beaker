@@ -51,6 +51,8 @@ module Beaker
 
       # Add metadata tags to each instance
       add_tags()
+      
+      sleep 100
 
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
@@ -642,6 +644,9 @@ module Beaker
         if host['platform'] =~ /el-7/
           # on el-7 hosts, the hostname command doesn't "stick" randomly
           host.exec(Command.new("hostnamectl set-hostname #{host.hostname}"))
+        elsif host['platform'] =~ /windows/
+          # on el-7 hosts, the hostname command doesn't "stick" randomly
+          # skip hostname           
         else
           next if host['platform'] =~ /netscaler/
           host.exec(Command.new("hostname #{host.hostname}"))
