@@ -43,6 +43,70 @@ module Beaker
         end
       end
 
+      describe 'puppet_version_split' do
+        it 'accepts valid PE non-final builds' do
+          ver = '2015.3.0-rc0-8-gf80879a'
+          expect( subject.puppet_version_split(ver).x ).to be == 2015
+          expect( subject.puppet_version_split(ver).y ).to be == 3
+          expect( subject.puppet_version_split(ver).z ).to be == 0
+          expect( subject.puppet_version_split(ver).rc ).to be == 0
+          expect( subject.puppet_version_split(ver).build ).to be == 8
+          expect( subject.puppet_version_split(ver).sha ).to be == 'f80879a'
+        end
+
+        it 'accepts valid PE final builds' do
+          ver = '2015.3.0'
+          expect( subject.puppet_version_split(ver).x ).to be == 2015
+          expect( subject.puppet_version_split(ver).y ).to be == 3
+          expect( subject.puppet_version_split(ver).z ).to be == 0
+          expect( subject.puppet_version_split(ver).rc ).to be == 999
+          expect( subject.puppet_version_split(ver).build ).to be == 0
+          expect( subject.puppet_version_split(ver).sha ).to be == 'none'
+        end
+
+        it 'accepts valid PE post-final builds' do
+          ver = '2015.3.0-8-gf80879a'
+          expect( subject.puppet_version_split(ver).x ).to be == 2015
+          expect( subject.puppet_version_split(ver).y ).to be == 3
+          expect( subject.puppet_version_split(ver).z ).to be == 0
+          expect( subject.puppet_version_split(ver).rc ).to be == 999
+          expect( subject.puppet_version_split(ver).build ).to be == 8
+          expect( subject.puppet_version_split(ver).sha ).to be == 'f80879a'
+        end
+
+        it 'accepts valid PE year/release' do
+          ver = '2015.3'
+          expect( subject.puppet_version_split(ver).x ).to be == 2015
+          expect( subject.puppet_version_split(ver).y ).to be == 3
+          expect( subject.puppet_version_split(ver).z ).to be == 0
+          expect( subject.puppet_version_split(ver).rc ).to be == 999
+          expect( subject.puppet_version_split(ver).build ).to be == 0
+          expect( subject.puppet_version_split(ver).sha ).to be == 'none'
+        end
+
+        it 'accepts valid PE year' do
+          ver = '2015'
+          expect( subject.puppet_version_split(ver).x ).to be == 2015
+          expect( subject.puppet_version_split(ver).y ).to be == 0
+          expect( subject.puppet_version_split(ver).z ).to be == 0
+          expect( subject.puppet_version_split(ver).rc ).to be == 999
+          expect( subject.puppet_version_split(ver).build ).to be == 0
+          expect( subject.puppet_version_split(ver).sha ).to be == 'none'
+        end
+
+        it 'rejects an invalid semver' do
+          expect { subject.puppet_version_split('2015.0-3') }.to raise_error(/Unknown version format/)
+        end
+
+        it 'rejects an invalid PE version' do
+          expect { subject.puppet_version_split('2015.1.0-rc5-300-null') }.to raise_error(/Unknown version format/)
+        end
+
+        it 'rejects a non version string' do
+          expect { subject.puppet_version_split('banana') }.to raise_error(/Unknown version format/)
+        end
+      end
+
       describe 'puppet_version_comparison' do
         it 'reports 2015.3.0-rc0-8-gf80879a is less than 2016' do
           expect( subject.puppet_version_comparison( '2015.3.0-rc0-8-gf80879a', '<', '2016' ) ).to be === true
@@ -57,19 +121,43 @@ module Beaker
         end
 
         it 'reports 2016 is greater than 2015.3.0-rc0-8-gf80879a' do
-          expect( subject.puppet_version_comparison( '2015.3.0-rc1-4-gabcdefg', '>', '2015.3.0-rc0-8-gf80879a' ) ).to be === true
+          expect( subject.puppet_version_comparison( '2015.3.0-rc1-4-gabcdef1', '>', '2015.3.0-rc0-8-gf80879a' ) ).to be === true
         end
 
         it 'reports 2016 is greater than 2015.3.0-rc0-8-gf80879a' do
-          expect( subject.puppet_version_comparison( '2015.2.0-rc1-9-gabcdefg', '>', '2015.3.0-rc0-8-gf80879a' ) ).to be === false
+          expect( subject.puppet_version_comparison( '2015.2.0-rc1-9-gabcdef1', '>', '2015.3.0-rc0-8-gf80879a' ) ).to be === false
         end
 
-        it 'reports 2015.3.0-rc0-8-gf80879a is not less than 2015.3.0' do
-          expect( subject.puppet_version_comparison( '2015.3.0-rc0-8-gf80879a', '<', '2015.3.0' ) ).to be === false
+        it 'reports 2015.3.0-rc0-8-gf80879a is less than 2015.3.0' do
+          expect( subject.puppet_version_comparison( '2015.3.0-rc0-8-gf80879a', '<', '2015.3.0' ) ).to be === true
         end
 
         it 'reports 2015.3.0-rc0-8-gf80879a is not less than 3.0.0' do
           expect( subject.puppet_version_comparison( '2015.3.0-rc0-8-gf80879a', '<', '3.0.0' ) ).to be === false
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :>, '2016.2.1')).to be === true
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :>=, '2016.2.1')).to be === true
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :<, '2016.2.1')).to be === false
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :<=, '2016.2.1')).to be === false
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :!=, '2016.2.1')).to be === true
+        end
+
+        it 'can compare 2017.1.0-rc9-100-gabcdef and 2016.2.1' do
+          expect( subject.puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :==, '2016.2.1')).to be === false
         end
 
         it 'reports 3.0.0-160-gac44cfb is not less than 3.0.0' do
@@ -78,6 +166,14 @@ module Beaker
 
         it 'reports 3.0.0-160-gac44cfb is not less than 2.8.2' do
           expect( subject.puppet_version_comparison( '3.0.0-160-gac44cfb', '<', '2.8.2' ) ).to be === false
+        end
+
+        it 'reports 3.0.0-rc0-160-gac44cfb is less than 3.0.0' do
+          expect( subject.puppet_version_comparison( '3.0.0-rc0-160-gac44cfb', '<', '3.0.0' ) ).to be === true
+        end
+
+        it 'reports 3.0.0-rc0-160-gac44cfb is greater than 2.8.0' do
+          expect( subject.puppet_version_comparison( '3.0.0-rc0-160-gac44cfb', '>', '2.8.0' ) ).to be === true
         end
 
         it 'reports 3.0.0 is less than 3.0.0-160-gac44cfb' do
@@ -111,13 +207,13 @@ module Beaker
         it 'blows up if you give it an invalid version' do
           expect {
             subject.puppet_version_comparison( 'a.banana.5', '<', '2.9' )
-          }.to raise_error(/is not a valid SemVer/)
+          }.to raise_error(/Unknown version format/)
         end
 
         it 'blows up if you give it an invalid version' do
           expect {
             subject.puppet_version_comparison( '1.2.beta', '<', '2.9' )
-          }.to raise_error(/is not a valid SemVer/)
+          }.to raise_error(/Unknown version format/)
         end
       end
 
