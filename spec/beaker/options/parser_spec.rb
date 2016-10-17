@@ -246,7 +246,9 @@ module Beaker
           end
 
           it 'calls beaker-hostgenerator to get hosts information' do
-            parser.instance_variable_set( :@options, {} )
+            parser.instance_variable_set( :@options, {
+              :hosts_file => 'notafile.yml'
+            } )
             allow( Beaker::Options::HostsFileParser ).to receive(
               :parse_hosts_file
             ).and_raise( Errno::ENOENT )
@@ -266,7 +268,9 @@ module Beaker
           end
 
           it 'sets the :hosts_file_generated flag to signal others when needed' do
-            options_test = {}
+            options_test = {
+              :hosts_file => 'not_a_file.yml'
+            }
             parser.instance_variable_set( :@options, options_test )
             allow( Beaker::Options::HostsFileParser ).to receive(
               :parse_hosts_file
@@ -284,7 +288,9 @@ module Beaker
           end
 
           it 'beaker-hostgenerator failures trigger nice prints & a rethrow' do
-            options_test = {}
+            options_test = {
+              :hosts_file => 'not_a_file.yml'
+            }
             parser.instance_variable_set( :@options, options_test )
             allow( Beaker::Options::HostsFileParser ).to receive(
               :parse_hosts_file
@@ -308,6 +314,14 @@ module Beaker
             expect {
               parser.parse_hosts_options
             }.to raise_error( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
+          end
+
+          it 'can be passed a nil hosts file and get the default hash back' do
+            parser.instance_variable_set( :@options, {} )
+
+            host_options = parser.parse_hosts_options
+            expect(host_options[:HOSTS]).to be === {}
+
           end
         end
 
