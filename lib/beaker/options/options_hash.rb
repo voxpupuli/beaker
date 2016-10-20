@@ -38,6 +38,14 @@ module Beaker
         end
       end
 
+      def dump_to_file(output_file)
+        dirname = File.dirname(output_file)
+        unless File.directory?(dirname)
+          FileUtils.mkdir_p(dirname)
+        end
+        File.open(output_file, 'w+') { |f| f.write(dump)  }
+      end
+
     end
   end
 end

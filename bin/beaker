@@ -4,6 +4,6 @@ require 'rubygems' unless defined?(Gem)
 require 'beaker'
 
 Beaker::CLI.new.execute!
-
 puts "Beaker completed successfully, thanks."
+
 exit 0
