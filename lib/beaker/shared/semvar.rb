@@ -65,7 +65,7 @@ module Beaker
       #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
       #@note 3.0.0-rc-0-160-gac44cfb is less than 3.0.0, and greater 2.8.2
       class PuppetVersion < Semantic::Version
-        attr_reader :x, :y, :z, :rc, :build, :sha
+        attr_reader :major, :minor, :patch, :rc, :build, :sha
 
         def initialize(version)
           @ver_string = version
@@ -84,9 +84,9 @@ module Beaker
           end
 
           semver_split = semver.split('.').collect { |str| str.to_i }
-          @x = semver_split[0] || 0
-          @y = semver_split[1] || 0
-          @z = semver_split[2] || 0
+          x = semver_split[0] || 0
+          y = semver_split[1] || 0
+          z = semver_split[2] || 0
 
           if @build
             @build = @build.to_i
@@ -98,15 +98,23 @@ module Beaker
             @sha = nil
           end
 
-          @semver = super([@x, @y, @z].join('.'))
+          super([x, y, z].join('.'))
         end
 
+        # Overrides Semantic::Version::to_a
         def to_a
-          [@x, @y, @z, @rc, @build, @sha]
+          [@major, @minor, @patch, @rc, @build, @sha]
         end
 
+        # Overrides Semantic::Version::to_h
+        def to_h
+          keys = [:major, :minor, :patch, :rc, :build, :sha]
+          Hash[keys.zip(self.to_a)]
+        end
+
+        # Overrides Semantic::Version::to_s
         def to_s
-          str = [@x, @y, @z].join '.'
+          str = super.to_s
           str << ('-' << @rc unless @rc.nil? || @rc == 999)
           str << ('-' << @build unless @build.nil?)
           str << ('-g' << @sha unless @sha.nil?)
@@ -118,6 +126,7 @@ module Beaker
           @sha = sha
         end
 
+        # Overrides Semantic::Version::<=>
         def <=>(other_version)
           other_version = Beaker::Shared::Semvar::PuppetVersion.new(other_version) if other_version.is_a? String
 

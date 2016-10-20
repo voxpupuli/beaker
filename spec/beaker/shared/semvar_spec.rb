@@ -46,9 +46,9 @@ module Beaker
       describe 'PuppetVersion' do
         it 'accepts valid PE non-final builds' do
           ver = '2015.3.0-rc0-8-gf80879a'
-          expect( subject::PuppetVersion.new(ver).x ).to be == 2015
-          expect( subject::PuppetVersion.new(ver).y ).to be == 3
-          expect( subject::PuppetVersion.new(ver).z ).to be == 0
+          expect( subject::PuppetVersion.new(ver).major ).to be == 2015
+          expect( subject::PuppetVersion.new(ver).minor ).to be == 3
+          expect( subject::PuppetVersion.new(ver).patch ).to be == 0
           expect( subject::PuppetVersion.new(ver).rc ).to be == 0
           expect( subject::PuppetVersion.new(ver).build ).to be == 8
           expect( subject::PuppetVersion.new(ver).sha ).to be == 'f80879a'
@@ -56,9 +56,9 @@ module Beaker
 
         it 'accepts valid PE final builds' do
           ver = '2015.3.0'
-          expect( subject::PuppetVersion.new(ver).x ).to be == 2015
-          expect( subject::PuppetVersion.new(ver).y ).to be == 3
-          expect( subject::PuppetVersion.new(ver).z ).to be == 0
+          expect( subject::PuppetVersion.new(ver).major ).to be == 2015
+          expect( subject::PuppetVersion.new(ver).minor ).to be == 3
+          expect( subject::PuppetVersion.new(ver).patch ).to be == 0
           expect( subject::PuppetVersion.new(ver).rc ).to be == 999
           expect( subject::PuppetVersion.new(ver).build ).to be == 0
           expect( subject::PuppetVersion.new(ver).sha ).to be == nil
@@ -66,9 +66,9 @@ module Beaker
 
         it 'accepts valid PE post-final builds' do
           ver = '2015.3.0-8-gf80879a'
-          expect( subject::PuppetVersion.new(ver).x ).to be == 2015
-          expect( subject::PuppetVersion.new(ver).y ).to be == 3
-          expect( subject::PuppetVersion.new(ver).z ).to be == 0
+          expect( subject::PuppetVersion.new(ver).major ).to be == 2015
+          expect( subject::PuppetVersion.new(ver).minor ).to be == 3
+          expect( subject::PuppetVersion.new(ver).patch ).to be == 0
           expect( subject::PuppetVersion.new(ver).rc ).to be == 999
           expect( subject::PuppetVersion.new(ver).build ).to be == 8
           expect( subject::PuppetVersion.new(ver).sha ).to be == 'f80879a'
@@ -76,9 +76,9 @@ module Beaker
 
         it 'accepts valid PE year/release' do
           ver = '2015.3'
-          expect( subject::PuppetVersion.new(ver).x ).to be == 2015
-          expect( subject::PuppetVersion.new(ver).y ).to be == 3
-          expect( subject::PuppetVersion.new(ver).z ).to be == 0
+          expect( subject::PuppetVersion.new(ver).major ).to be == 2015
+          expect( subject::PuppetVersion.new(ver).minor ).to be == 3
+          expect( subject::PuppetVersion.new(ver).patch ).to be == 0
           expect( subject::PuppetVersion.new(ver).rc ).to be == 999
           expect( subject::PuppetVersion.new(ver).build ).to be == 0
           expect( subject::PuppetVersion.new(ver).sha ).to be == nil
@@ -86,9 +86,9 @@ module Beaker
 
         it 'accepts valid PE year' do
           ver = '2015'
-          expect( subject::PuppetVersion.new(ver).x ).to be == 2015
-          expect( subject::PuppetVersion.new(ver).y ).to be == 0
-          expect( subject::PuppetVersion.new(ver).z ).to be == 0
+          expect( subject::PuppetVersion.new(ver).major ).to be == 2015
+          expect( subject::PuppetVersion.new(ver).minor ).to be == 0
+          expect( subject::PuppetVersion.new(ver).patch ).to be == 0
           expect( subject::PuppetVersion.new(ver).rc ).to be == 999
           expect( subject::PuppetVersion.new(ver).build ).to be == 0
           expect( subject::PuppetVersion.new(ver).sha ).to be == nil
