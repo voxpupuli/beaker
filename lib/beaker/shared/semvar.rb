@@ -38,54 +38,7 @@ module Beaker
         return false
       end
 
-      # Validates that the given version is a valid/expected PE version.
-      # Splits up a PE version string into a struct of all the elements of the version
-      #
-      # @param version [String] A PE version string
-      # @return [Struct] containing the elements of the version
-      def puppet_version_split(version)
-        version_struct = Struct.new("Version", :ver, :rc, :build, :sha, :x, :y, :z, :semver, :string) do
-          def to_s
-            "#{semver}-#{rc}-#{build}-g#{sha}"
-          end
-        end
-        v = version_struct.new
-
-        v[:string] = version
-
-        if version =~ /^\d+(\.\d+)?(\.\d)?+$/
-          v[:ver] = version
-          v[:rc] = 999
-        elsif version =~ /^\d+\.\d+\.\d+(-\d+-g[a-f0-9]+)?$/
-          v[:ver], v[:build], v[:sha] = version.split('-', 3)
-          v[:rc] = 999
-        elsif version =~ /^\d+\.\d+\.\d+(-rc\d+-\d+-g[a-f0-9]+)?$/
-          v[:ver], v[:rc], v[:build], v[:sha] = version.split('-', 4)
-          v[:rc] = v[:rc].tr('rc', '').to_i
-        else
-          raise "Unknown version format: #{version}"
-        end
-
-        v[:x], v[:y], v[:z] = v.ver.split('.').collect { |str| str.to_i }
-
-        if v[:build]
-          v[:build] = v[:build].to_i
-        end
-
-        if v[:sha]
-          v[:sha] = v[:sha][1..-1]
-        else
-          v[:sha] = 'none'
-        end
-
-        v.each_pair { |name, value| v[name] = 0 if value.nil? }
-
-        v[:semver] = Semantic::Version.new [v.x, v.y, v.z].join('.')
-
-        return v
-      end
-
-      # Wrapper around semantic semver gem that supports our
+      # Wrapper class around Semantic::Version that supports our
       # semver-breaking version scheme in PE.
       #
       # Overview of how PE is versioned for the public:
@@ -101,29 +54,83 @@ module Beaker
       # SHA.
       #
       #@param [String] a A version of the from '\d.\d.\d-rc\d-\d.-g<sha>'
-      #@param [String/Symbol] cmp A comparison operator such as <, >, or ==
-      #@param [String] b A version of the form '\d.\d.\d-rc\d-\d.-g<sha>'
-      #@return [Boolean] true if a <cmp> b
       #
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :>, '2016.2.1') returns true
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :>=, '2016.2.1') returns true
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :<, '2016.2.1') returns false
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :<=, '2016.2.1') returns false
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :==, '2016.2.1') returns false
-      #@example puppet_version_comparison('2017.1.0-rc9-100-gabcdef', :!=, '2016.2.1') returns true
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') > '2016.2.1' returns true
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') >= '2016.2.1' returns true
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') < '2016.2.1' returns false
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') <= '2016.2.1' returns false
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') == '2016.2.1' returns false
+      #@example PuppetVersion.new('2017.1.0-rc9-100-gabcdef') != '2016.2.1' returns true
       #@example See the semver_spec.rb for more examples
       #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
       #@note 3.0.0-rc-0-160-gac44cfb is less than 3.0.0, and greater 2.8.2
-      def puppet_version_comparison a, cmp, b
-        as = puppet_version_split(a)
-        bs = puppet_version_split(b)
+      class PuppetVersion < Semantic::Version
+        attr_reader :x, :y, :z, :rc, :build, :sha
 
-        if as.semver != bs.semver
-          return as.semver.send(cmp.to_sym, bs.semver)
-        elsif as.rc != bs.rc
-          return as.rc.send(cmp.to_sym, bs.rc)
-        else
-          return as.build.send(cmp.to_sym, bs.build)
+        def initialize(version)
+          @ver_string = version
+          @rc = 999
+          @build = 0
+
+          if version =~ /^\d+(\.\d+)?(\.\d)?+$/
+            semver = version
+          elsif version =~ /^\d+\.\d+\.\d+(-\d+-g[a-f0-9]+)?$/
+            semver, @build, @sha = version.split('-', 3)
+          elsif version =~ /^\d+\.\d+\.\d+(-rc\d+-\d+-g[a-f0-9]+)?$/
+            semver, @rc, @build, @sha = version.split('-', 4)
+            @rc = @rc.tr('rc', '').to_i
+          else
+            raise "PuppetVersion: Unknown format #{version}"
+          end
+
+          semver_split = semver.split('.').collect { |str| str.to_i }
+          @x = semver_split[0] || 0
+          @y = semver_split[1] || 0
+          @z = semver_split[2] || 0
+
+          if @build
+            @build = @build.to_i
+          end
+
+          if @sha
+            @sha = @sha[1..-1]
+          else
+            @sha = nil
+          end
+
+          @semver = super([@x, @y, @z].join('.'))
+        end
+
+        def to_a
+          [@x, @y, @z, @rc, @build, @sha]
+        end
+
+        def to_s
+          str = [@x, @y, @z].join '.'
+          str << ('-' << @rc unless @rc.nil? || @rc == 999)
+          str << ('-' << @build unless @build.nil?)
+          str << ('-g' << @sha unless @sha.nil?)
+
+          str
+        end
+
+        def sha=(sha)
+          @sha = sha
+        end
+
+        def <=>(other_version)
+          other_version = Beaker::Shared::Semvar::PuppetVersion.new(other_version) if other_version.is_a? String
+
+          v1 = self.dup
+          v2 = other_version.dup
+
+          # The sha must be excluded from the comparison, so that e.g.
+          # 1.2.3-rc0-100-gfoo and 1.2.3-rc0-100-gbar are semantically equal.
+          # This differs from http://www.semver.org
+          v1.sha = nil
+          v2.sha = nil
+
+          compare_recursively(v1.to_a, v2.to_a)
         end
       end
 
