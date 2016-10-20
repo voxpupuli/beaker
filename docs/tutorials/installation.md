@@ -4,7 +4,7 @@ In most cases, beaker is running on a system separate from the SUT; we will comm
 
 ## Beaker Requirements
 
-* Ruby 1.9+, 2.0.0p481, or 2.1.1
+* Ruby >= 2.2.5
 * libxml2, libxslt (needed for the [Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html) gem)
 * g++ (needed for the [unf_ext](http://rubydoc.info/gems/unf_ext/) gem)
 * curl (needed for some DSL functions to be able to execute successfully)
