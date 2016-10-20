@@ -115,7 +115,7 @@ module Beaker
         # Overrides Semantic::Version::to_s
         def to_s
           str = super.to_s
-          str << ('-' << @rc unless @rc.nil? || @rc == 999)
+          str << ('-rc' << @rc unless @rc.nil? || @rc == 999)
           str << ('-' << @build unless @build.nil?)
           str << ('-g' << @sha unless @sha.nil?)
 
