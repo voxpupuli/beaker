@@ -585,7 +585,12 @@ module Beaker
         else
           copy_ssh_to_root(host, @options)
           enable_root_login(host, @options)
-          host['user'] = 'root'
+     
+          if host['platform'] =~ /windows/
+            host['user'] = 'Administrator'
+          else
+            host['user'] = 'root'
+          end  
         end
         host.close
       end
