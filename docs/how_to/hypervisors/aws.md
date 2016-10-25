@@ -80,6 +80,9 @@ The `ami-size` variable refers to
 Some examples of these values are "m3.large", "c4.xlarge", and "r3.8xlarge". The
 default value if this key is not provided used by Beaker is "m1.small".
       
+### ec2 VM Hostnames
+
+By default, beaker will set the hostnames of the VMs to the 'Public DNS' hostname supplied by ec2 (and which is normally based on the Public IP address). If your test requires the hosts be named identically to the `<hostname>:` from your beaker hosts file, set `:use_beaker_hostnames: true` in the beaker hosts file.
 
 # AWS Keys
 
