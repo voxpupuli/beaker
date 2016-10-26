@@ -623,6 +623,19 @@ module Beaker
           end
         end
 
+        it 'sets the the vmhostname to the beaker config name for each host' do
+          options[:use_beaker_hostnames] = true
+	  @hosts.each do |host|
+            host[:name] = "prettyponyprincess"
+	  end
+          expect(set_hostnames).to eq(@hosts)
+          @hosts.each do |host|
+            puts host[:name]
+            expect(host[:vmhostname]).to eq(host[:name])
+            expect(host[:vmhostname]).to eq(host.hostname)
+          end
+        end
+
       end
     end
 

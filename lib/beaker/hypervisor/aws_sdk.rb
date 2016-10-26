@@ -634,17 +634,33 @@ module Beaker
     # publicly. Then configure each ec2 machine to that dns_name, so that when facter
     # is installed the facts for hostname and domain match the dns_name.
     #
+    # if :use_beaker_hostnames: is true, set the :vmhostname and hostname of each ec2
+    # machine to the host[:name] from the beaker hosts file.
+    #
     # @return [@hosts]
     # @api private
     def set_hostnames
-      @hosts.each do |host|
-        host[:vmhostname] = host[:dns_name]
-        if host['platform'] =~ /el-7/
-          # on el-7 hosts, the hostname command doesn't "stick" randomly
-          host.exec(Command.new("hostnamectl set-hostname #{host.hostname}"))
-        else
-          next if host['platform'] =~ /netscaler/
-          host.exec(Command.new("hostname #{host.hostname}"))
+      if @options[:use_beaker_hostnames]
+        @hosts.each do |host|
+          host[:vmhostname] = host[:name]
+          if host['platform'] =~ /el-7/
+            # on el-7 hosts, the hostname command doesn't "stick" randomly
+            host.exec(Command.new("hostnamectl set-hostname #{host.name}"))
+          else
+            next if host['platform'] =~ /netscaler/
+            host.exec(Command.new("hostname #{host.name}"))
+          end
+        end
+      else
+        @hosts.each do |host|
+          host[:vmhostname] = host[:dns_name]
+          if host['platform'] =~ /el-7/
+            # on el-7 hosts, the hostname command doesn't "stick" randomly
+            host.exec(Command.new("hostnamectl set-hostname #{host.hostname}"))
+          else
+            next if host['platform'] =~ /netscaler/
+            host.exec(Command.new("hostname #{host.hostname}"))
+          end
         end
       end
     end
