@@ -1147,7 +1147,7 @@ module Beaker
         # @option opts [String] :pe_promoted_builds_url Base URL to pull artifacts from
         #
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
-        # to other settings whether the 32 or 64bit install is used
+        #   to other settings whether the 32 or 64bit install is used
         #
         # @example
         #   install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => '1.1.0.227', :pe_ver => '4.0.0-rc1'})
