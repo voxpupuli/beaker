@@ -16,7 +16,10 @@ module Beaker
 
           opts.on '-h', '--hosts FILE',
                   'Use host configuration FILE',
-                  '(default sample.cfg)'  do |file|
+                  'Possible FILE values:',
+                  'a file path (beaker will parse file directly)',
+                  'a beaker-hostgenerator string (BHG generates hosts file)',
+                  'omitted (coordinator-only run; no SUTs provisioned)' do |file|
             @cmd_options[:hosts_file] = file
           end
 
