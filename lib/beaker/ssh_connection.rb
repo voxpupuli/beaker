@@ -273,9 +273,17 @@ module Beaker
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
 
-      @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
-        result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+      begin
+        @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
+          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+        end
+      rescue => e
+        logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
+          "raise an error."
+        close
       end
+
+
       # Setting these values allows reporting via result.log(test_name)
       result.stdout << "  SCP'ed file #{source} to #{@hostname}:#{target}"
 
@@ -297,9 +305,16 @@ module Beaker
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
 
-      @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
-        result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+      begin
+        @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
+          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+        end
+      rescue => e
+        logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
+          "raise an error."
+        close
       end
+
       # Setting these values allows reporting via result.log(test_name)
       result.stdout << "  SCP'ed file #{@hostname}:#{source} to #{target}"
 
