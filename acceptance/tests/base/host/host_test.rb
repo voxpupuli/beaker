@@ -280,3 +280,39 @@ hosts.each do |host|
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
 end
+
+step "Ensure scp errors close the ssh connection" do
+
+  step 'Attempt to generate a remote file that does not exist' do
+
+    # This assert relies on the behavior of the net-scp library to
+    # raise an error when #channel.on_close is called, which is called by
+    # indirectly called by beaker's own SshConnection #close mehod. View
+    # the source for further info:
+    # https://github.com/net-ssh/net-sacp/blob/master/lib/net/scp.rb
+    assert_raises Net::SCP::Error do
+      create_remote_file(default, '/tmp/this/path/cannot/possibly/exist.txt', "contents")
+    end
+  end
+
+  step 'Ensure that a subsequent ssh connection works' do
+    # If the ssh connection was left in a dangling state, then this #on call will hang
+    on default, 'true'
+  end
+
+  step 'Attempt to scp from a resource on the SUT that does not exist' do
+
+    # This assert relies on the behavior of the net-scp library to
+    # use the Dir.mkdir method in the #download_start_state method.
+    # See the source for further info:
+    # https://github.com/net-ssh/net-sacp/blob/master/lib/net/scp/download.rb
+    assert_raises Errno::ENOENT do
+      scp_from default, '/tmp/path/dne/wtf/bbq', '/tmp/path/dne/wtf/bbq'
+    end
+  end
+
+  step 'Ensure that a subsequent ssh connection works' do
+    # If the ssh connection was left in a dangling state, then this #on call will hang
+    on default, 'true'
+  end
+end

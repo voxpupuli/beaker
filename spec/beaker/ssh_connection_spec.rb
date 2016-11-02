@@ -245,6 +245,12 @@ module Beaker
         connection.scp_to '', ''
       end
 
+      it 'ensures the connection closes when scp.upload! errors' do
+        expect( @mock_scp ).to receive( :upload! ).once.and_raise(RuntimeError)
+        expect(connection).to receive(:close).once
+        connection.scp_to '', ''
+      end
+
       it 'returns a result object' do
         expect( connection.scp_to '', '' ).to be_a_kind_of Beaker::Result
       end
@@ -263,6 +269,12 @@ module Beaker
 
       it 'calls scp.download!' do
         expect( @mock_scp ).to receive( :download! ).once
+        connection.scp_from '', ''
+      end
+
+      it 'ensures the connection closes when scp.download! errors' do
+        expect( @mock_scp ).to receive( :download! ).once.and_raise(RuntimeError)
+        expect(connection).to receive(:close).once
         connection.scp_from '', ''
       end
 
