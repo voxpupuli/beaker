@@ -157,3 +157,9 @@ When using the Vagrant Hypervisor, beaker can create the Vagrantfile to forward 
             to_ip: '0.0.0.0'
 
 In the above, beaker will forward port 10080 and 8080 on the Host to port 80 and 8080 (respectively) on the Agent guest.
+
+# vagrant plugins #
+
+You can check more information for some suported vagrant plugins:
+
+ - [vagrant-libvirt](vagrant_libvirt.md)
