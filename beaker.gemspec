@@ -30,8 +30,8 @@ Gem::Specification.new do |s|
 
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
-  s.add_runtime_dependency 'json', '~> 1.8'
   s.add_runtime_dependency 'minitar', '~> 0.5.4'
+  s.add_runtime_dependency 'json', '~> 1.8'
   ## json: will stay <2.0 while aws-sdk-v1 is in use
   ## aws-sdk-2 doesn't require json, so we can give this up when we move
 
