@@ -197,18 +197,19 @@ module Beaker
 
       @hosts.each do |host|
         ip = get_ip
-        hostname = ip.ip.gsub '.','-'
-        host[:vmhostname] = hostname+'.rfc1918.puppetlabs.net'
-        @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
+        host[:vmhostname] = ip.ip.gsub '.','-'
+        host[:vmfqdn] = host[:vmhostname] + '.rfc1918.puppetlabs.net'
+        host[:keyname] = key_name(host)
+        @logger.debug "Provisioning #{host.name} (#{host[:vmfqdn]})"
         options = {
           :flavor_ref => flavor(host[:flavor]).id,
           :image_ref  => image(host[:image]).id,
           :nics       => [ {'net_id' => network(@options[:openstack_network]).id } ],
-          :name       => host[:vmhostname],
-          :hostname   => host[:vmhostname],
+          :name       => host[:vmfqdn],
+          :hostname   => host[:vmfqdn],
           :user_data  => host[:user_data] || "#cloud-config\nmanage_etc_hosts: true\n",
+          :key_name   => host[:keyname],
         }
-        options[:key_name] = key_name(host)
         options[:security_groups] = security_groups(@options[:security_group]) unless @options[:security_group].nil?
         vm = @compute_client.servers.create(options)
 
@@ -223,10 +224,10 @@ module Beaker
             break
           rescue Fog::Errors::TimeoutError => e
             if try >= attempts
-              @logger.debug "Failed to connect to new OpenStack instance #{host.name} (#{host[:vmhostname]})"
+              @logger.debug "Failed to connect to new OpenStack instance #{host.name} (#{host[:vmfqdn]})"
               raise e
             end
-            @logger.debug "Timeout connecting to instance #{host.name} (#{host[:vmhostname]}), trying again..."
+            @logger.debug "Timeout connecting to instance #{host.name} (#{host[:vmfqdn]}), trying again..."
           end
           sleep SLEEPWAIT
           try += 1
@@ -236,7 +237,7 @@ module Beaker
         ip.server = vm
         host[:ip] = ip.ip
 
-        @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"
+        @logger.debug "OpenStack host #{host.name} (#{host[:vmfqdn]}) assigned ip: #{host[:ip]}"
 
         #set metadata
         vm.metadata.update({:jenkins_build_url => @options[:jenkins_build_url].to_s,
@@ -272,7 +273,7 @@ module Beaker
         vm.destroy
         if @options[:openstack_keyname].nil?
           @logger.debug "Deleting random keypair"
-          @compute_client.delete_key_pair vm.name
+          @compute_client.delete_key_pair vm.key_name
         end
       end
     end
@@ -308,7 +309,7 @@ module Beaker
     #@api private
     def key_name(host)
       if @options[:openstack_keyname]
-        @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmhostname]})"
+        @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmfqdn]})"
         @options[:openstack_keyname]
       else
         @logger.debug "Generate a new rsa key"
