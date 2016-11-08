@@ -65,7 +65,7 @@ module Unix::Pkg
   def install_package(name, cmdline_args = '', version = nil, opts = {})
     case self['platform']
       when /sles-/
-        execute("zypper --non-interactive in #{name}", opts)
+        execute("zypper --no-gpg-checks --non-interactive in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
       when /fedora-(2[2-9])/
