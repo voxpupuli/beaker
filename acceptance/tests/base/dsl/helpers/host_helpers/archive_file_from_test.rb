@@ -21,7 +21,7 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
 
   step "fails archive_file_from when from_path is non-existant" do
     filepath = "foo-filepath-should-not-exist"
-    assert_raises Net::SCP::Error do
+    assert_raises IOError do
       archive_file_from(default, filepath)
     end
   end

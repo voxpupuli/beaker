@@ -263,8 +263,14 @@ module Beaker
           require 'archive/tar/minitar'
           filedir = File.dirname(from_path)
           targetdir = File.join(archive_root, host.hostname, filedir)
+          # full path to check for existance later
+          filename = "#{targetdir}/" + File.basename(from_path)
           FileUtils.mkdir_p(targetdir)
           scp_from(host, from_path, targetdir, opts)
+          # scp_from does succeed on a non-existant file, checking if the file/folder actually exists
+          if not File.exists?(filename)
+            raise IOError, "No such file or directory - #{filename}"
+          end
           create_tarball(archive_root, archive_name)
         end
 
