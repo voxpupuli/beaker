@@ -1045,13 +1045,37 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#bounce_service' do
     let( :options ) { Beaker::Options::Presets.new.presets }
+    let( :result ) { double.as_null_object }
     before :each do
       allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'requests a reload but not a restart if the reload is successful' do
+      host = FakeHost.create
+      allow( result ).to receive( :exit_code ).and_return( 0 )
+      allow( host ).to receive( :any_exec_result ).and_return( result )
+      subject.bounce_service( host, 'not_real_service')
+      expect( host ).to execute_commands_matching(/service not_real_service reload/).exactly( 1 ).times
+      expect( host ).to execute_commands_matching(/puppet resource service not_real_service ensure=stopped/).exactly( 0 ).times
+      expect( host ).to execute_commands_matching(/puppet resource service not_real_service ensure=started/).exactly( 0 ).times
+    end
+
+    it 'requests a restart if the reload fails' do
+      host = FakeHost.create
+      allow( result ).to receive( :exit_code ).and_return( 1 )
+      allow( host ).to receive( :any_exec_result ).and_return( result )
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything(), anything() )
+      subject.bounce_service( host, 'not_real_service')
+      expect( host ).to execute_commands_matching(/service not_real_service reload/).exactly( 1 ).times
+      expect( host ).to execute_commands_matching(/puppet resource service not_real_service ensure=stopped/).exactly( 1 ).times
+      expect( host ).to execute_commands_matching(/puppet resource service not_real_service ensure=running/).exactly( 1 ).times
     end
 
     it 'uses the default port argument if none given' do
       host = hosts[0]
       expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      allow( result ).to receive( :exit_code ).and_return( 1 )
+      expect( host ).to receive( :exec ).and_return( result )
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything(), anything() )
       subject.bounce_service( host, 'not_real_service')
     end
@@ -1059,6 +1083,8 @@ describe ClassMixedWithDSLHelpers do
     it 'takes the port argument' do
       host = hosts[0]
       expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      allow( result ).to receive( :exit_code ).and_return( 1 )
+      expect( host ).to receive( :exec ).and_return( result )
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8000/, anything(), anything() )
       subject.bounce_service( host, 'not_real_service', nil, 8000)
     end
