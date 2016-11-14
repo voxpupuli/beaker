@@ -123,3 +123,32 @@ user their own pool.  It's used in allocating new IPs.  It's an options
 parameter in the CONFIG section of the host file:
 
     floating_ip_pool: 'my_pool_name'
+
+### Volumes
+
+Attaching volumes to a VM is supported via the Cinder service.  All versions are transparently
+supported to cater for differences in the APIs.  To create and attach volumes simply add hash
+called 'volumes' to a host in the HOSTS section.  Each key is the name given to the volume upon
+resource creation.  The value is a hash with a single integer parameter 'size' which defines the
+volume size in MB.
+
+**Example OpenStack hosts file with volumes**
+
+    HOSTS:
+      ceph:
+        roles:
+          - master
+        platform: ubuntu-16.04-amd64
+        hypervisor: openstack
+        flavor: m1.large
+        image: xenial-server-cloudimg-amd64-scsi
+        user: ubuntu
+        volumes:
+          osd0:
+            size: 10000
+          osd1:
+            size: 10000
+          osd2:
+            size: 10000
+          journal:
+            size: 1000

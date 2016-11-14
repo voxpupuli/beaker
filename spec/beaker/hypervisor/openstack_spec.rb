@@ -104,5 +104,57 @@ module Beaker
       (1..3).each { openstack.get_ip }
     end
 
+    it 'creates volumes with cinder v1' do
+      # Mock a volume
+      allow(openstack).to receive(:get_volumes).and_return({'volume1' => {'size' => 1000000 }})
+
+      # Stub out the call to create the client and hard code the return value
+      allow(openstack).to receive(:volume_client_create).and_return(nil)
+      client = double().as_null_object
+      openstack.instance_variable_set(:@volume_client, client)
+      allow(openstack).to receive(:get_volume_api_version).and_return(1)
+
+      # Check the parameters are valid, correct 'name' parameter and correct size conversion
+      mock_volume = double().as_null_object
+      expect(client).to receive(:create).with(:display_name => 'volume1', :description => 'Beaker volume: host=alan volume=volume1', :size => 1000).and_return(mock_volume)
+      allow(mock_volume).to receive(:wait_for).and_return(nil)
+
+      # Perform the test!
+      mock_vm = double().as_null_object
+      allow(mock_volume).to receive(:id).and_return('Fake ID')
+      expect(mock_vm).to receive(:attach_volume).with('Fake ID', '/dev/vdb')
+
+      mock_host = double().as_null_object
+      allow(mock_host).to receive(:name).and_return('alan')
+
+      openstack.provision_storage mock_host, mock_vm
+    end
+
+    it 'creates volumes with cinder v2' do
+      # Mock a volume
+      allow(openstack).to receive(:get_volumes).and_return({'volume1' => {'size' => 1000000 }})
+
+      # Stub out the call to create the client and hard code the return value
+      allow(openstack).to receive(:volume_client_create).and_return(nil)
+      client = double().as_null_object
+      openstack.instance_variable_set(:@volume_client, client)
+      allow(openstack).to receive(:get_volume_api_version).and_return(-1)
+
+      # Check the parameters are valid, correct 'name' parameter and correct size conversion
+      mock_volume = double().as_null_object
+      expect(client).to receive(:create).with(:name => 'volume1', :description => 'Beaker volume: host=alan volume=volume1', :size => 1000).and_return(mock_volume)
+      allow(mock_volume).to receive(:wait_for).and_return(nil)
+
+      # Perform the test!
+      mock_vm = double().as_null_object
+      allow(mock_volume).to receive(:id).and_return('Fake ID')
+      expect(mock_vm).to receive(:attach_volume).with('Fake ID', '/dev/vdb')
+
+      mock_host = double().as_null_object
+      allow(mock_host).to receive(:name).and_return('alan')
+
+      openstack.provision_storage mock_host, mock_vm
+    end
+
   end
 end

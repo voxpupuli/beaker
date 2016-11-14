@@ -122,6 +122,22 @@ module Beaker
       end
     end
 
+    # Get a hash of volumes from the host
+    def get_volumes host
+      return host['volumes'] if host['volumes']
+      {}
+    end
+
+    # Get the API version
+    def get_volume_api_version
+      case @volume_client
+      when Fog::Volume::OpenStack::V1
+        1
+      else
+        -1
+      end
+    end
+
     # Create and attach dynamic volumes
     #
     # Creates an array of volumes and attaches them to the current host.
@@ -133,23 +149,34 @@ module Beaker
     # @param host [Hash] thet current host defined in the nodeset
     # @param vm [Fog::Compute::OpenStack::Server] the server to attach to
     def provision_storage host, vm
-      if host['volumes']
+      volumes = get_volumes(host)
+      if !volumes.empty?
         # Lazily create the volume client if needed
         volume_client_create
-        host['volumes'].keys.each_with_index do |volume, index|
+        volumes.keys.each_with_index do |volume, index|
           @logger.debug "Creating volume #{volume} for OpenStack host #{host.name}"
 
           # The node defintion file defines volume sizes in MB (due to precedent
           # with the vagrant virtualbox implementation) however OpenStack requires
           # this translating into GB
-          openstack_size = host['volumes'][volume]['size'].to_i / 1000
+          openstack_size = volumes[volume]['size'].to_i / 1000
+
+          # Set up the volume creation arguments
+          args = {
+            :size        => openstack_size,
+            :description => "Beaker volume: host=#{host.name} volume=#{volume}",
+          }
+
+          # Between version 1 and subsequent versions the API was updated to
+          # rename 'display_name' to just 'name' for better consistency
+          if get_volume_api_version == 1
+            args[:display_name] = volume
+          else
+            args[:name] = volume
+          end
 
           # Create the volume and wait for it to become available
-          vol = @volume_client.volumes.create(
-            :size         => openstack_size,
-            :display_name => volume,
-            :description  => "Beaker volume: host=#{host.name} volume=#{volume}",
-          )
+          vol = @volume_client.volumes.create(**args)
           vol.wait_for { ready? }
 
           # Fog needs a device name to attach as, so invent one.  The guest
