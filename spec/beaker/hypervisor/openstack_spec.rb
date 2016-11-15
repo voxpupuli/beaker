@@ -88,5 +88,21 @@ module Beaker
       end
     end
 
+    it 'get_ip always allocates a new floatingip' do
+      # Assume beaker is being executed in parallel N times by travis (or similar).
+      # IPs are allocated (but not associated) before an instance is created; it is
+      # hightly possible the first instance will allocate a new IP and create an ssh
+      # key.  While the instance is being created the other N-1 instances come along,
+      # find the unused IP and try to use it as well which causes keyname clashes
+      # and other IP related shenannigans.  Ensure we allocate a new IP each and every
+      # time
+      mock_addresses = double().as_null_object
+      mock_ip = double().as_null_object
+      allow(@compute_client).to receive(:addresses).and_return(mock_addresses)
+      allow(mock_addresses).to receive(:create).and_return(mock_ip)
+      expect(mock_addresses).to receive(:create).exactly(3).times
+      (1..3).each { openstack.get_ip }
+    end
+
   end
 end
