@@ -15,6 +15,7 @@ module Beaker
 
       #The OptionsHash of all parsed options
       attr_accessor :options
+      attr_reader :attribution
 
       # Returns the git repository used for git installations
       # @return [String] The git repository
@@ -165,6 +166,34 @@ module Beaker
         @command_line_parser = Beaker::Options::CommandLineParser.new
         @presets             = Beaker::Options::Presets.new
         @validator           = Beaker::Options::Validator.new
+        @attribution         = Beaker::Options::OptionsHash.new
+      end
+
+      # Update the @attribution hash with the source of each key in the options_hash
+      #
+      # @param [Hash] options_hash Options hash 
+      # @param [String] source Where the options were specified
+      # @return [Hash] hash Hash of sources for each key
+      def tag_sources(options_hash, source)
+        hash = Beaker::Options::OptionsHash.new
+        options_hash.each do |key, value|
+          if value.is_a?(Hash)
+            hash[key] = tag_sources(value, source)
+          else
+            hash[key] = source
+          end
+        end
+        hash
+      end
+
+      # Update the @option hash with a value and the @attribution hash with a source
+      #
+      # @param [String] key The key to update in both hashes
+      # @param [Object] value The value to set in the @options hash
+      # @param [String] source The source to set in the @attribution hash
+      def update_option(key, value, source)
+        @options[key] = value
+        @attribution[key] = source
       end
 
       # Parses ARGV or provided arguments array, file options, hosts options and combines with environment variables and
@@ -181,9 +210,12 @@ module Beaker
       # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
         @options                        = @presets.presets
+        @attribution = @attribution.merge(tag_sources(@presets.presets, "preset"))
         cmd_line_options                = @command_line_parser.parse(args)
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
+        @attribution = @attribution.merge(tag_sources(cmd_line_options, "flag"))
         file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
+        @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
 
         # merge together command line and file_options
         #   overwrite file options with command line options
@@ -199,16 +231,19 @@ module Beaker
           # merge in host file vars
           #   overwrite options (default, file options, command line) with host file options
           @options      = @options.merge(hosts_options)
+          @attribution = @attribution.merge(tag_sources(hosts_options, "host_file"))
 
           # re-merge the command line options
           #   overwrite options (default, file options, hosts file ) with command line arguments
           @options      = @options.merge(cmd_line_options)
+          @attribution = @attribution.merge(tag_sources(cmd_line_options, "cmd"))
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
           env_vars      = @presets.env_vars
 
           @options = @options.merge(env_vars)
+          @attribution = @attribution.merge(tag_sources(env_vars, "env"))
 
           normalize_args
         end
@@ -280,15 +315,15 @@ module Beaker
         #will end up being normalized into an array
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
-            @options[opt] = split_arg(@options[opt])
+            update_option(opt, split_arg(@options[opt]), 'runtime')
             if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
-              @options[opt] = file_list(@options[opt])
+              update_option(opt, file_list(@options[opt]), 'runtime')
             end
             if opt == :install
-              @options[:install] = parse_git_repos(@options[:install])
+              update_option(:install, parse_git_repos(@options[:install]), 'runtime')
             end
           else
-            @options[opt] = []
+            update_option(opt, [], 'runtime')
           end
         end
 

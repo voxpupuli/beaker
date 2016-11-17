@@ -127,16 +127,35 @@ module Beaker
         before { FakeFS.deactivate! }
 
         it 'pulls the args into key called :command_line' do
-          my_args = ['--log-level', 'debug', '-h', hosts_path]
+          my_args = ['--log-level', 'debug', '-h', hosts_path]  
+
           expect(parser.parse_args(my_args)[:command_line]).to include(my_args.join(' '))
+          expect(parser.attribution[:command_line]).to be == 'cmd'
+          expect(parser.attribution[:hosts_file]).to be == 'cmd'
+          expect(parser.attribution[:log_level]).to be == 'cmd'
+          expect(parser.attribution[:pe_dir]).to be == 'preset'
         end
 
         describe 'does prioritization correctly' do
           let(:env) { @env || {:level => 'highest'} }
           let(:argv) { @argv || {:level => 'second'} }
           let(:host_file) { @host_file || {:level => 'third'} }
-          let(:opt_file) { @opt_file || {:level => 'fourth'} }
-          let(:presets) { {:level => 'lowest'} }
+          let(:opt_file) { @opt_file || {:level => 'fourth', 
+                            :ssh => {
+                              :auth_methods => 'auth123',
+                              :user_known_hosts_file => 'hosts123'
+                            }                                
+          } }
+          let(:presets) { {:level => 'lowest',
+                            :ssh => {
+                              :config => 'config123',
+                              :paranoid => 'paranoid123',
+                              :port => 'port123',
+                              :forward_agent => 'forwardagent123',
+                              :keys => 'keys123',
+                              :keepalive => 'keepalive123'
+                            } 
+          } }
 
           before :each do
             expect(parser).to receive(:normalize_args).and_return(true)
@@ -161,7 +180,9 @@ module Beaker
             mock_out_parsing
 
             opts = parser.parse_args([])
+            attribution = parser.attribution
             expect(opts[:level]).to be == 'lowest'
+            expect(attribution[:level]).to be == 'preset'
           end
 
           it 'options file has fourth priority' do
@@ -169,7 +190,18 @@ module Beaker
             mock_out_parsing
 
             opts = parser.parse_args([])
+            attribution = parser.attribution
+            expect(attribution[:ssh]).to be_a(Hash)
+            expect(attribution[:ssh][:auth_methods]).to be == 'options_file'
+            expect(attribution[:ssh][:user_known_hosts_file]).to be == 'options_file'
+            expect(attribution[:ssh][:config]).to be == 'preset'
+            expect(attribution[:ssh][:paranoid]).to be == 'preset'
+            expect(attribution[:ssh][:port]).to be == 'preset'
+            expect(attribution[:ssh][:forward_agent]).to be == 'preset'
+            expect(attribution[:ssh][:keys]).to be == 'preset'
+            expect(attribution[:ssh][:keepalive]).to be == 'preset'
             expect(opts[:level]).to be == 'fourth'
+            expect(attribution[:level]).to be == 'options_file'
           end
 
           it 'host file CONFIG section has third priority' do
@@ -177,7 +209,9 @@ module Beaker
             mock_out_parsing
 
             opts = parser.parse_args([])
+            attribution = parser.attribution
             expect(opts[:level]).to be == 'third'
+            expect(attribution[:level]).to be == 'host_file'
           end
 
           it 'command line arguments have second priority' do
@@ -185,14 +219,18 @@ module Beaker
             mock_out_parsing
 
             opts = parser.parse_args([])
+            attribution = parser.attribution
             expect(opts[:level]).to be == 'second'
+            expect(attribution[:level]).to be == 'cmd'
           end
 
           it 'env vars have highest priority' do
             mock_out_parsing
 
             opts = parser.parse_args([])
+            attribution = parser.attribution
             expect(opts[:level]).to be == 'highest'
+            expect(attribution[:level]).to be == 'env'
           end
 
         end
@@ -207,9 +245,13 @@ module Beaker
 
           args   = ["-h", hosts_path, "--log-level", log_level, "--type", type, "--install", "PUPPET/1.0,HIERA/hello"]
           output = parser.parse_args(args)
-          expect(output[:hosts_file]).to be == hosts_path
+          attribution = parser.attribution
+          expect(output[:hosts_file]).to be == hosts_path  
+          expect(attribution[:hosts_file]).to be == 'cmd'
           expect(output[:jenkins_build_url]).to be == build_url
+          expect(attribution[:jenkins_build_url]).to be == 'env'
           expect(output[:install]).to include('git://github.com/puppetlabs/hiera.git#hello')
+          expect(attribution[:install]).to be == 'runtime'
 
           ENV["BUILD_URL"] = old_build_url
         end
