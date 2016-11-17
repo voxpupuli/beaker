@@ -314,7 +314,7 @@ module Beaker
         #
         # @param [Host] host Host the service runs on
         # @param [String] service Name of the service to restart
-        # @param [Fixnum] curl_retries Number of times to retry the restart command
+        # @param [Fixnum] curl_retries Number of seconds to wait for the restart to complete before failing
         # @param [Fixnum] port Port to check status at
         #
         # @return [Result] Result of last status check
@@ -327,8 +327,14 @@ module Beaker
             apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/#{service}" : service
             host.exec(Command.new("#{apachectl_path} graceful"))
           else
-            host.exec puppet_resource('service', service, 'ensure=stopped')
-            host.exec puppet_resource('service', service, 'ensure=running')
+            result = host.exec(Command.new("service #{service} reload"),
+                               :acceptable_exit_codes => [0,1,3])
+            if result.exit_code == 0
+              return result
+            else
+              host.exec puppet_resource('service', service, 'ensure=stopped')
+              host.exec puppet_resource('service', service, 'ensure=running')
+            end
           end
           curl_with_retries(" #{service} ", host, "https://localhost:#{port}", [35, 60], curl_retries)
         end
