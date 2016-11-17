@@ -56,6 +56,10 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'fog-google', '~> 0.0.9' # dropped ruby 1.9 support in 0.1
   s.add_runtime_dependency 'fog', ['~> 1.25', '< 1.35.0']
 
+  # webmock requires addressable as as of 2.5.0 addressable started
+  # requiring the public_suffix gem which requires Ruby 2
+  s.add_runtime_dependency 'addressable', '< 2.5.0'
+
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
 end
