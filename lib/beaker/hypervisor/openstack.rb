@@ -171,21 +171,17 @@ module Beaker
       end
     end
 
-    # Get a floating IP address to associate with the instance, and
-    # allocate a new one if none are available
+    # Get a floating IP address to associate with the instance, try
+    # to allocate a new one from the specified pool if none are available
     def get_ip
-      @logger.debug "Finding IP"
-      ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
-      if ip.nil?
-        begin
-          @logger.debug "Creating IP"
-          ip = @compute_client.addresses.create
-        rescue Fog::Compute::OpenStack::NotFound
-          # If there are no more floating IP addresses, allocate a
-          # new one and try again. 
-          @compute_client.allocate_address(@options[:floating_ip_pool])
-          ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
-        end
+      begin
+        @logger.debug "Creating IP"
+        ip = @compute_client.addresses.create
+      rescue Fog::Compute::OpenStack::NotFound
+        # If there are no more floating IP addresses, allocate a
+        # new one and try again. 
+        @compute_client.allocate_address(@options[:floating_ip_pool])
+        ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
       end
       raise 'Could not find or allocate an address' if not ip
       ip
