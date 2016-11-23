@@ -1031,7 +1031,11 @@ module Beaker
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param [Hash{Symbol=>String}] opts An options hash
-        # @option opts [String] :puppet_agent_version The version of puppet-agent to install
+        # @option opts [String] :puppet_agent_version The version of puppet-agent to install. This
+        #                       parameter is used by puppet with the +SUITE_VERSION+ environment
+        #                       variable to provide a `git describe` value to beaker to create a
+        #                       build server URL. Note that +puppet_agent_sha+ will still be used
+        #                       instead of this if a value is provided for that option
         # @option opts [String] :puppet_agent_sha The sha of puppet-agent to install, defaults to provided
         #                       puppet_agent_version
         # @option opts [String] :copy_base_local Directory where puppet-agent artifact
@@ -1062,13 +1066,16 @@ module Beaker
           if not opts[:puppet_agent_version]
             raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
           end
+          # TODO consolidate these values as they serve no purpose from beaker's side
+          # you could provide any values you could to one to the other
+          puppet_agent_version = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
 
           block_on hosts do |host|
             variant, version, arch, codename = host['platform'].to_array
             opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ opts[:puppet_agent_sha] || opts[:puppet_agent_version] }/repos/"
+            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ puppet_agent_version }/repos/"
             opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:puppet_collection] ||= 'PC1'
+            opts[:puppet_collection]  ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
             release_path = opts[:download_url]
             copy_dir_local = File.join(opts[:copy_base_local], variant)
@@ -1079,9 +1086,8 @@ module Beaker
               if arch == 's390x'
                 logger.trace("#install_puppet_agent_dev_repo_on: s390x arch detected for host #{host}. using dev package")
               else
-                sha = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
                 opts[:dev_builds_repos] ||= [ opts[:puppet_collection] ]
-                install_puppetlabs_dev_repo( host, 'puppet-agent', sha, nil, opts )
+                install_puppetlabs_dev_repo( host, 'puppet-agent', puppet_agent_version, nil, opts )
                 host.install_package('puppet-agent')
                 logger.trace("#install_puppet_agent_dev_repo_on: install_puppetlabs_dev_repo finished")
                 next
