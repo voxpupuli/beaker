@@ -1070,14 +1070,15 @@ module Beaker
           # you could provide any values you could to one to the other
           puppet_agent_version = opts[:puppet_agent_sha] || opts[:puppet_agent_version]
 
+          opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
+          opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ puppet_agent_version }/repos/"
+          opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
+          opts[:puppet_collection]  ||= 'PC1'
+          release_path = opts[:download_url]
+
           block_on hosts do |host|
             variant, version, arch, codename = host['platform'].to_array
-            opts = FOSS_DEFAULT_DOWNLOAD_URLS.merge(opts)
-            opts[:download_url] = "#{opts[:dev_builds_url]}/puppet-agent/#{ puppet_agent_version }/repos/"
-            opts[:copy_base_local]    ||= File.join('tmp', 'repo_configs')
-            opts[:puppet_collection]  ||= 'PC1'
             add_role(host, 'aio') #we are installing agent, so we want aio role
-            release_path = opts[:download_url]
             copy_dir_local = File.join(opts[:copy_base_local], variant)
             onhost_copy_base = opts[:copy_dir_external] || host.external_copy_base
 
