@@ -14,30 +14,34 @@ module Mac
 
     describe '#puppet_agent_dev_package_info' do
       it 'raises an error if puppet_collection isn\'t passed' do
-        expect { host.puppet_agent_dev_package_info(nil, 'maybe') }.to raise_error(ArgumentError)
+        expect { host.puppet_agent_dev_package_info(nil, 'maybe', :download_url => '') }.to raise_error(ArgumentError)
       end
 
-      it 'raises as error if puppet_agent_version isn\'t passed' do
-        expect { host.puppet_agent_dev_package_info('maybe', nil) }.to raise_error(ArgumentError)
+      it 'raises an error if puppet_agent_version isn\'t passed' do
+        expect { host.puppet_agent_dev_package_info('maybe', nil, :download_url => '') }.to raise_error(ArgumentError)
+      end
+
+      it 'raises an error if opts[:download_url] isn\'t passed' do
+        expect { host.puppet_agent_dev_package_info('', '') }.to raise_error(ArgumentError)
       end
 
       it 'returns two strings that include the passed parameters' do
         allow( host ).to receive( :link_exists? ) { true }
-        return1, return2 = host.puppet_agent_dev_package_info( 'pc1', 'pav1' )
+        return1, return2 = host.puppet_agent_dev_package_info( 'pc1', 'pav1', :download_url => '' )
         expect( return1 ).to match( /pc1/ )
         expect( return2 ).to match( /pav1/ )
       end
 
       it 'gets the correct file type' do
         allow( host ).to receive( :link_exists? ) { true }
-        _, return2 = host.puppet_agent_dev_package_info( 'pc1', 'pav1' )
+        _, return2 = host.puppet_agent_dev_package_info( 'pc2', 'pav2', :download_url => '' )
         expect( return2 ).to match( /\.dmg$/ )
       end
 
       it 'adds the version dot correctly if not supplied' do
         @platform = 'osx-109-x86_64'
         allow( host ).to receive( :link_exists? ) { true }
-        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC3', 'pav3' )
+        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC3', 'pav3', :download_url => '' )
         expect( release_path_end ).to match( /10\.9/ )
         expect( release_file ).to match( /10\.9/ )
       end
@@ -45,7 +49,7 @@ module Mac
       it 'runs the correct install for osx platforms (newest link format)' do
         allow( host ).to receive( :link_exists? ) { true }
 
-        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC4', 'pav4' )
+        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC4', 'pav4', :download_url => '' )
         # verify the mac package name starts the name correctly
         expect( release_file ).to match( /^puppet-agent-pav4-/ )
         # verify the "newest hotness" is set correctly for the end of the mac package name
@@ -57,7 +61,7 @@ module Mac
       it 'runs the correct install for osx platforms (new link format)' do
         allow( host ).to receive( :link_exists? ).and_return( false, true )
 
-        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC7', 'pav7' )
+        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC7', 'pav7', :download_url => '' )
         # verify the mac package name starts the name correctly
         expect( release_file ).to match( /^puppet-agent-pav7-/ )
         # verify the "new hotness" is set correctly for the end of the mac package name
@@ -69,7 +73,7 @@ module Mac
       it 'runs the correct install for osx platforms (old link format)' do
         allow( host ).to receive( :link_exists? ) { false }
 
-        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC8', 'pav8' )
+        release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC8', 'pav8', :download_url => '' )
         # verify the mac package name starts the name correctly
         expect( release_file ).to match( /^puppet-agent-pav8-/ )
         # verify the old way is set correctly for the end of the mac package name

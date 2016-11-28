@@ -65,8 +65,8 @@ module Mac::Pkg
   # @param [String] puppet_agent_version Version of puppet agent to get
   # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
   #
-  # @note OSX doesn't use any additional options at this time, but does require
-  #   both puppet_collection & puppet_agent_version, & will fail without them
+  # @note OSX does require :download_url to be set on the opts argument
+  #   in order to check for builds on the builds server
   #
   # @raise [ArgumentError] If one of the two required parameters (puppet_collection,
   #   puppet_agent_version) is either not passed or set to nil
@@ -76,6 +76,7 @@ module Mac::Pkg
     error_message = "Must provide %s argument to get puppet agent dev package information"
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
+    raise ArgumentError, error_message % "opts[:download_url]" unless opts[:download_url]
 
     variant, version, arch, codename = self['platform'].to_array
 

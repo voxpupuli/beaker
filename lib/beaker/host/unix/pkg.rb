@@ -376,8 +376,9 @@ module Unix::Pkg
   # @param [String] puppet_agent_version Version of puppet agent to get
   # @param [Hash{Symbol=>String}] opts Options hash to provide extra values
   #
-  # @note Solaris does require some options to be set. See
-  #   {#solaris_puppet_agent_dev_package_info} for more details
+  # @note Solaris & OSX do require some options to be set. See
+  #   {#solaris_puppet_agent_dev_package_info} &
+  #   {Mac::Pkg#puppet_agent_dev_package_info} for more details
   #
   # @raise [ArgumentError] If one of the two required parameters (puppet_collection,
   #   puppet_agent_version) is either not passed or set to nil
