@@ -58,4 +58,7 @@ Gem::Specification.new do |s|
 
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
+  # public_suffix is required by addressable, so make sure it pulls a version
+  # that still supports ruby 1.9.3
+  s.add_runtime_dependency 'public_suffix', ' < 1.5.0'
 end
