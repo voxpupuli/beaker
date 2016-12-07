@@ -315,6 +315,11 @@ module Beaker
         expect { host.exec(command, opts) }.to_not raise_error
       end
 
+      it 'explicitly closes the connection when :reset_connection is set' do
+        expect( host ).to receive( :close )
+        expect { host.exec(command, :reset_connection => true) }.to_not raise_error
+      end
+
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0
