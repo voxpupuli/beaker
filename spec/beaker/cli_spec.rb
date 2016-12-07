@@ -35,6 +35,9 @@ module Beaker
 
           expect( cli ).to receive(:run_suite).exactly( 2 ).times
           expect{ cli.execute! }.to raise_error
+          expect(cli.instance_variable_get(:@attribution)[:logger]).to be == 'runtime'
+          expect(cli.instance_variable_get(:@attribution)[:timestamp]).to be == 'runtime'
+          expect(cli.instance_variable_get(:@attribution)[:beaker_version]).to be == 'runtime'
 
         end
 

@@ -13,11 +13,12 @@ module Beaker
       @timestamp = Time.now
       @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
+      @attribution = @options_parser.attribution
       @logger = Beaker::Logger.new(@options)
       InParallel::InParallelExecutor.logger = @logger
-      @options[:logger] = @logger
-      @options[:timestamp] = @timestamp
-      @options[:beaker_version] = Beaker::Version::STRING
+      @options_parser.update_option(:logger, @logger, 'runtime')
+      @options_parser.update_option(:timestamp, @timestamp, 'runtime')
+      @options_parser.update_option(:beaker_version, Beaker::Version::STRING, 'runtime')
       beaker_version_string = VERSION_STRING % @options[:beaker_version]
       @execute = true
 
