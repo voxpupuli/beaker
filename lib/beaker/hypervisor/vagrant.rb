@@ -147,7 +147,8 @@ module Beaker
           ip = m[2]
           @logger.debug("Determined existing vagrant box #{hostname} ip to be: #{ip} ")
         else
-          raise("Unable to determine ip for vagrant box #{hostname}")
+          ip = nil
+          @logger.debug("Unable to determine ip for vagrant box #{hostname}")
         end
       else
         raise("No vagrant file found (should be located at #{@vagrant_file})")
