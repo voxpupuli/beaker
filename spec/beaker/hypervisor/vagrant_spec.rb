@@ -375,9 +375,8 @@ EOF
 
       end
 
-      it "raises an error if it is unable to find an ip" do
-        expect{ vagrant.get_ip_from_vagrant_file("unknown") }.to raise_error
-
+      it "returns nil if it is unable to find an ip" do
+        expect( vagrant.get_ip_from_vagrant_file("unknown") ).to be_nil
       end
 
       it "raises an error if no Vagrantfile is present" do
