@@ -34,7 +34,7 @@ module Windows::Pkg
         execute(command)
       end
     end
-    execute("#{cygwin} -q -n -N -d -R #{cmdline_args} #{rootdir} -s http://cygwin.osuosl.org -P #{name}")
+    execute("#{cygwin} -q -n -N -d -R #{rootdir} -s http://cygwin.osuosl.org -P #{name} #{cmdline_args}")
   end
 
   def uninstall_package(name, cmdline_args = '')

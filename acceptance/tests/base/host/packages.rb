@@ -60,7 +60,11 @@ hosts.each do |host|
 
   assert_equal(false, host.check_for_package(package), "'#{package}' not should be installed")
   logger.debug("#{package} should be installed on #{host}")
-  host.install_package(package)
+  cmdline_args = ''
+  # Newer vmpooler hosts created by Packer templates, and running Cygwin 2.4,
+  # must have these switches passed
+  cmdline_args = '--local-install --download' if (host['platform'] =~ /windows/ and host.is_cygwin?)
+  host.install_package(package, cmdline_args)
   assert(host.check_for_package(package), "'#{package}' should be installed")
 
   # windows does not support uninstall_package
