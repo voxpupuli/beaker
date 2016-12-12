@@ -340,6 +340,13 @@ module Beaker
           @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
         end
 
+        if options[:reset_connection]
+          # Expect the connection to fail hard and possibly take a long time timeout.
+          # Pre-emptively reset it so we don't wait forever.
+          close
+          return result
+        end
+
         unless options[:silent]
           # What?
           result.log(@logger)

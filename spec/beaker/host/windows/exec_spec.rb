@@ -51,5 +51,14 @@ module Beaker
         expect(instance.selinux_enabled?).to be === false
       end
     end
+
+    describe '#reboot' do
+      it 'invokes the correct command on the host' do
+        expect( Beaker::Command ).to receive( :new ).with( /^shutdown \/f \/r \/t 0 \/d p:4:1 \/c "Beaker::Host reboot command issued"/ ).and_return( :foo )
+        expect( instance ).to receive( :exec ).with( :foo, :reset_connection => true )
+        expect( instance ).to receive( :sleep )
+        instance.reboot
+      end
+    end
   end
 end
