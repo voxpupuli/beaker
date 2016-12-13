@@ -16,7 +16,7 @@ module Windows::Group
 
   def group_get(name, &block)
     execute("net localgroup \"#{name}\"") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^Alias name\s+#{name}/
+      fail_test "failed to get group #{name}" if result.exit_code != 0
 
       yield result if block_given?
     end
