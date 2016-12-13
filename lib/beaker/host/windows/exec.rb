@@ -24,13 +24,23 @@ module Windows::Exec
   end
 
   def get_ip
-    ip = execute("ipconfig | grep -i 'IP Address' | cut -d: -f2 | head -1").strip
-    if ip == ''
-      ip = execute("ipconfig | grep -i 'IPv4 Address' | cut -d: -f2 | head -1").strip
+    # when querying for an IP this way the return value can be formatted like:
+    # IPAddress=
+    # IPAddress={"129.168.0.1"}
+    # IPAddress={"192.168.0.1","2001:db8:aaaa:bbbb:cccc:dddd:eeee:0001"}
+
+    ips = execute("wmic nicconfig where ipenabled=true GET IPAddress /format:list")
+
+    ip = ''
+    ips.each_line do |line|
+      matches = line.split('=')
+      next if matches.length <= 1
+      matches = matches[1].match(/^{"(.*?)"/)
+      next if matches.nil? || matches.captures.nil? || matches.captures.empty?
+      ip = matches.captures[0] if matches && matches.captures
+      break if ip != ''
     end
-    if ip == ''
-      ip = execute("ipconfig | grep -i 'IPv6 Address' | cut -d: -f2 | head -1").strip
-    end
+
     ip
   end
 
