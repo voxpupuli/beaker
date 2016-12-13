@@ -16,7 +16,7 @@ module PSWindows::User
 
   def user_get(name, &block)
     execute("net user \"#{name}\"") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~ /^User name\s+#{name}/
+      fail_test "failed to get user #{name}" if result.exit_code != 0
 
       yield result if block_given?
     end
