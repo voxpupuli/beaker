@@ -266,6 +266,29 @@ module Beaker
       end
     end
 
+    describe '#puppet_agent_dev_package_info' do
+      puppet_collection = 'PC1'
+      puppet_agent_version = '1.2.3'
+      platforms = { 'solaris-10-x86_64' => ["solaris/10/#{puppet_collection}", "puppet-agent-#{puppet_agent_version}-1.i386.pkg.gz"],
+                    'solaris-11-x86_64' => ["solaris/11/#{puppet_collection}", "puppet-agent@#{puppet_agent_version},5.11-1.i386.p5p"],
+                    'sles-11-x86_64' => ["sles/11/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.sles11.x86_64.rpm"],
+                    'aix-5.3-power' => ["aix/5.3/#{puppet_collection}/ppc", "puppet-agent-#{puppet_agent_version}-1.aix5.3.ppc.rpm"],
+                    'el-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    'centos-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    'oracle-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    'redhat-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    'scientific-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"]
+                  }
+      platforms.each do |p, v|
+        it "accomodates platform #{p} without erroring" do
+          platform = Beaker::Platform.new(p)
+          @opts = {'platform' => platform}
+          allow( instance ).to receive(:link_exists?).and_return(true)
+          expect( instance.puppet_agent_dev_package_info( puppet_collection, puppet_agent_version, { :download_url => 'http://trust.me' } )).to eq(v)
+        end
+      end
+    end
+
     describe '#upgrade_package' do
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
         it "calls the correct apt-get incantation for #{platform}" do
