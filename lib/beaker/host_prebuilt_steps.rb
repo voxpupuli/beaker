@@ -357,7 +357,7 @@ module Beaker
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
           host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
         elsif host['platform'] =~ /windows/ and not host.is_cygwin?
-          host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e)"))
+          host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif host['platform'] =~ /osx/
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         elsif host['platform'] =~ /freebsd/
