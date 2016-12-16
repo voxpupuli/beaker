@@ -376,10 +376,8 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_forge_on' do
     it 'stubs forge.puppetlabs.com with the value of `forge`' do
-      allow( subject ).to receive( :hosts ).and_return( hosts )
+      allow( subject ).to receive( :resolve_hostname_on ).and_return ( '127.0.0.1' )
       host = make_host('my_host', {})
-      expect( Resolv ).to receive( :getaddress ).
-        with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       expect( subject ).to receive( :stub_hosts_on ).
         with( host, {'forge.puppetlabs.com' => '127.0.0.1'}, {'forge.puppetlabs.com' => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']} )
 
