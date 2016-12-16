@@ -18,6 +18,18 @@ module Beaker
       "10.255.#{rand_chunk}.#{rand_chunk}"
     end
 
+    def private_network_generator(host)
+      private_network_string = "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\""
+      case host['network_mac']
+      when 'false'
+        private_network_string << "\n"
+      when nil
+        private_network_string << ", :mac => \"#{randmac}\"\n"
+      else
+        private_network_string << ", :mac => \"#{host['network_mac']}\"\n"
+      end
+    end
+
     def make_vfile hosts, options = {}
       #HACK HACK HACK - add checks here to ensure that we have box + box_url
       #generate the VagrantFile
@@ -33,9 +45,33 @@ module Beaker
         v_file << "    v.vm.box_version = '#{host['box_version']}'\n" unless host['box_version'].nil?
         v_file << "    v.vm.box_check_update = '#{host['box_check_update'] ||= 'true'}'\n"
         v_file << "    v.vm.synced_folder '.', '/vagrant', disabled: true\n" if host['synced_folder'] == 'disabled'
-        v_file << "    v.vm.network :private_network, ip: \"#{host['ip'].to_s}\", :netmask => \"#{host['netmask'] ||= "255.255.0.0"}\", :mac => \"#{randmac}\"\n"
+        v_file << private_network_generator(host)
+
+        unless host['mount_folders'].nil?
+          host['mount_folders'].each do |name, folder|
+            v_file << "    v.vm.synced_folder '#{folder[:from]}', '#{folder[:to]}', create: true\n"
+          end
+        end
+
+        unless host['forwarded_ports'].nil?
+          host['forwarded_ports'].each do |_name, port|
+            fwd = "    v.vm.network :forwarded_port,"
+            fwd << " protocol: '#{port[:protocol]}'," unless port[:protocol].nil?
+            fwd << " guest_ip: '#{port[:to_ip]}'," unless port[:to_ip].nil?
+            fwd << " guest: #{port[:to]},"
+            fwd << " host_ip: '#{port[:from_ip]}'," unless port[:from_ip].nil?
+            fwd << " host: #{port[:from]}"
+            fwd << "\n"
+
+            v_file << fwd
+          end
+        end
 
         if /windows/i.match(host['platform'])
+          #due to a regression bug in versions of vagrant 1.6.2, 1.6.3, 1.6.4, >= 1.7.3 ssh fails to forward
+          #automatically (note <=1.6.1, 1.6.5, 1.7.0 - 1.7.2 are uneffected)
+          #Explicitly setting SSH port forwarding due to this bug
+          v_file << "    v.vm.network :forwarded_port, guest: 22, host: 2222, id: 'ssh', auto_correct: true\n"
           v_file << "    v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true\n"
           v_file << "    v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true\n"
           v_file << "    v.vm.guest = :windows\n"
@@ -84,7 +120,7 @@ module Beaker
     def set_ssh_config host, user
         f = Tempfile.new("#{host.name}")
         ssh_config = Dir.chdir(@vagrant_path) do
-          stdin, stdout, stderr, wait_thr = Open3.popen3('vagrant', 'ssh-config', host.name)
+          stdin, stdout, stderr, wait_thr = Open3.popen3(@vagrant_env, 'vagrant', 'ssh-config', host.name)
           if not wait_thr.value.success?
             raise "Failed to 'vagrant ssh-config' for #{host.name}"
           end
@@ -106,7 +142,7 @@ module Beaker
       ip = ''
       if File.file?(@vagrant_file) #we should have a vagrant file available to us for reading
         f = File.read(@vagrant_file)
-        m = /#{hostname}.*?ip:\s*('|")\s*([^'"]+)('|")/m.match(f)
+        m = /'#{hostname}'.*?ip:\s*('|")\s*([^'"]+)('|")/m.match(f)
         if m
           ip = m[2]
           @logger.debug("Determined existing vagrant box #{hostname} ip to be: #{ip} ")
@@ -128,7 +164,7 @@ module Beaker
       @vagrant_path = File.expand_path(File.join(File.basename(__FILE__), '..', '.vagrant', 'beaker_vagrant_files', File.basename(options[:hosts_file])))
       FileUtils.mkdir_p(@vagrant_path)
       @vagrant_file = File.expand_path(File.join(@vagrant_path, "Vagrantfile"))
-
+      @vagrant_env = { "RUBYLIB" => "" }
     end
 
     def provision(provider = nil)
@@ -170,7 +206,7 @@ module Beaker
     end
 
     def cleanup
-      @logger.debug "removing temporory ssh-config files per-vagrant box"
+      @logger.debug "removing temporary ssh-config files per-vagrant box"
       @temp_files.each do |f|
         f.close()
       end
@@ -182,7 +218,7 @@ module Beaker
     def vagrant_cmd(args)
       Dir.chdir(@vagrant_path) do
         exit_status = 1
-        Open3.popen3("vagrant #{args}") {|stdin, stdout, stderr, wait_thr|
+        Open3.popen3(@vagrant_env, "vagrant #{args}") {|stdin, stdout, stderr, wait_thr|
           while line = stdout.gets
             @logger.info(line)
           end

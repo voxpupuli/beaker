@@ -6,16 +6,13 @@
 * Make sure you have a [GitHub account](https://github.com/signup/free)
 * Submit a ticket for your issue, assuming one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
-  * File in the appropriate location:
-    * Using your [Jira account](http://tickets.puppetlabs.com)
-      * Beaker bugs are submitted in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
+  * File a ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker)
 
 ## Making Changes
 
-* Create a topic branch from where you want to base your work.
-  * This is the `master` branch in the case of Beaker
-  * To quickly create a topic branch based on master use `git checkout -b my_contribution master`. Please avoid working directly on the `master` branch.
+* Create a topic branch from your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker). 
+  * Please title the branch after the beaker ticket you intend to address, ie `BKR-1234`.
 * Make commits of logical units.
 * Check for unnecessary whitespace with `git diff --check` before committing.
 * Make sure your commit messages are in the proper format.
@@ -33,21 +30,33 @@
     from our issue tracker.  The body describes the behavior without the patch,
     why this is a problem, and how the patch fixes the problem when applied.
 ````
- 
+
+* During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will cleanly merge into Beaker.
+
+### Testing
+
+* Submitted PR's will be tested in a series of spec and acceptance level tests - the results of these tests will be evaluated by a Beaker team member, as test results are currently not accessible by the public. Testing failures that require code changes will be communicated in the PR discussion.
 * Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
-  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`.  Use of deprecated RSpec methods will result in your patch being rejected.  See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
-* Make sure that you have added documentation using [Yard](http://yardoc.org/), new methods/classes without apporpriate documentation will be rejected.
-* Run the tests to assure nothing else was accidentally broken, using `rake test`
-  * **Bonus**: if possible ensure that `rake test` runs without failures for additional Ruby versions (1.9, 2.0, etc). Beaker supports Ruby 1.9+, and breakage of support for older/newer rubies will cause a patch to be rejected.
-* During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) before you submit your PR with `git rebase master`.  A successful rebase ensures that your patch will cleanly merge into Beaker.
-* Submitted patches will be smoke tested through a series of acceptance level tests that ensures basic Beaker functionality - the results of these tests will be evaluated by a Beaker team member.  Failures associated with the submitted patch will result in the patch being rejected.
+  * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`. See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
+  * Run the tests to assure nothing else was accidentally broken, using `rake test`
+    * **Bonus**: if possible ensure that `rake test` runs without failures for additional Rubies (versions 1.9.3 and above).
+
+### Documentation
+
+* Make sure that you have added documentation using [Yard](http://yardoc.org/) as necessary for any new code introduced.
+* More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
 ## Making Trivial Changes
 
 ### Maintenance
 
-**We are no longer accepting PRs marked as `(MAINT)` - all PRs must be associated with a Beaker Jira ticket number for book keeping purposes.**
+For changes of a trivial nature, it is not always necessary to create a new ticket in Jira. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number. 
 
+````
+    (MAINT) Fix whitespace 
+
+    - remove additional spaces that appear at EOL
+````
 ### Version Bump For Gem Release
 
 To prepare for a new gem release of Beaker the `version.rb` file is updated with the upcoming gem version number.  This is submitted with `(GEM)` instead of a ticket/issue number.

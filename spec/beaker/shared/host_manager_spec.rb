@@ -2,7 +2,14 @@ require 'spec_helper'
 
 module Beaker
   module Shared
+
+    config = RSpec::Mocks.configuration
+
+    config.patch_marshal_to_support_partial_doubles = true
+
     describe HostManager do
+      # The logger double as nil object doesn't work with marshal.load and marshal.unload needed for run_in_parallel.
+      let( :logger )         { double('logger') }
       let( :host_handler )   { Beaker::Shared::HostManager }
       let( :spec_block )     { Proc.new { |arr| arr } }
       let( :platform )       { @platform || 'unix' }
@@ -133,6 +140,44 @@ module Beaker
             hosts
           end
           expect( myhosts ).to be  === hosts
+        end
+
+        it "can execute a block against an array of hosts in parallel" do
+          InParallel::InParallelExecutor.logger = Logger.new(STDOUT)
+          FakeFS.deactivate!
+
+          expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(3).times
+
+          myhosts = host_handler.run_block_on( hosts, nil, { :run_in_parallel => true } ) do |host|
+            # kind of hacky workaround to remove logger which contains a singleton method injected by rspec
+
+            host.instance_eval("remove_instance_variable(:@logger)")
+            host
+          end
+
+          # After marshal load and marshal unload, the logger option (an rspec double) is no longer 'equal' to the original.
+          # Array of results can be in different order.
+          new_host = myhosts.select{ |host| host.name == hosts[0].name}.first
+          hosts[0].options.each { |option|
+            expect(option[1]).to eq(new_host.options[option[0]]) unless option[0] == :logger
+          }
+        end
+
+        it "will ignore run_in_parallel global option" do
+          myhosts = host_handler.run_block_on( hosts, nil, { :run_in_parallel => [] } ) do |host|
+            host
+          end
+          expect( InParallel::InParallelExecutor ).not_to receive(:_execute_in_parallel).with(any_args)
+          expect(myhosts).to eq(hosts)
+        end
+
+        it "does not run in parallel if there is only 1 host in the array" do
+          myhosts = host_handler.run_block_on( [hosts[0]], nil, { :run_in_parallel => true } ) do |host|
+            puts host
+            host
+          end
+
+          expect( myhosts ).to be  === [hosts[0]]
         end
 
         it "receives an ArgumentError on empty host" do

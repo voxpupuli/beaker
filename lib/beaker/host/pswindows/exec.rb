@@ -148,4 +148,39 @@ module PSWindows::Exec
     self.close #refresh the state
   end
 
+  def environment_string env
+    return '' if env.empty?
+    env_array = self.environment_variable_string_pair_array( env )
+
+    environment_string = ''
+    env_array.each_with_index do |env|
+      environment_string += "set #{env} && "
+    end
+    environment_string
+  end
+
+  # Overrides the {Windows::Exec#ssh_permit_user_environment} method,
+  # since no steps are needed in this setup to allow user ssh environments
+  # to work.
+  def ssh_permit_user_environment
+  end
+
+  # Sets the user SSH environment.
+  #
+  # @param [Hash{String=>String}] env Environment variables to set on the system,
+  #                                   in the form of a hash of String variable
+  #                                   names to their corresponding String values.
+  #
+  # @note this class doesn't manipulate an SSH environment file, it just sets
+  # the environment variables on the system.
+  #
+  # @api private
+  # @return nil
+  def ssh_set_user_environment(env)
+    #add the env var set to this test host
+    env.each_pair do |var, value|
+      add_env_var(var, value)
+    end
+  end
+
 end

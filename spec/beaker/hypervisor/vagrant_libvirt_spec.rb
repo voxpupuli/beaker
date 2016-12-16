@@ -21,14 +21,23 @@ describe Beaker::VagrantLibvirt do
     vagrant.provision
   end
 
-  it "can make a Vagranfile for a set of hosts" do
-    FakeFS.activate!
-    path = vagrant.instance_variable_get( :@vagrant_path )
-    allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+  context 'Correct vagrant configuration' do
+    before(:each) do
+      FakeFS.activate!
+      path = vagrant.instance_variable_get( :@vagrant_path )
+      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
 
-    vagrant.make_vfile( @hosts )
+      vagrant.make_vfile( @hosts )
+      @vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
+    end
 
-    vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
-    expect( vagrantfile ).to include( %Q{    v.vm.provider :libvirt})
+    it "can make a Vagranfile for a set of hosts" do
+      expect( @vagrantfile ).to include( %Q{    v.vm.provider :libvirt do |node|})
+    end
+
+    it "can specify the memory as an integer" do
+      expect( @vagrantfile.split("\n").map(&:strip) )
+        .to include('node.memory = 512')
+    end
   end
 end

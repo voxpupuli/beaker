@@ -1,0 +1,14 @@
+
+# This script which will fail the first `RETRY_LIMIT` times when run and then
+# will exit successfully on later runs. It will store counter state in a file
+# in the provided `BASEDIR` directory.
+set -x
+
+BASEDIR=${1}
+RETRY_LIMIT=${2}
+
+current=`cat ${BASEDIR}/value.txt || echo '0'`
+current=$((current+1))
+echo "${current}" > ${BASEDIR}/value.txt
+if [ "$current" -gt "${RETRY_LIMIT}" ]; then exit 0; fi
+exit 1

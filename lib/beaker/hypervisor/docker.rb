@@ -23,7 +23,7 @@ module Beaker
       begin
         ::Docker.validate_version!
       rescue Excon::Errors::SocketError => e
-        raise "Docker instance not connectable.\nError was: #{e}\nIf you are on OSX, you might not have Boot2Docker setup correctly\nCheck your DOCKER_HOST variable has been set"
+        raise "Docker instance not connectable.\nError was: #{e}\nCheck your DOCKER_HOST variable has been set\nIf you are on OSX or Windows, you might not have Docker Machine setup correctly: https://docs.docker.com/machine/\n"
       end
 
       # Pass on all the logging from docker-api to the beaker logger instance
@@ -68,24 +68,35 @@ module Beaker
           'Image' => image_name,
           'Hostname' => host.name,
         }
-
-        unless host['docker_container_name'].nil?
-          @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
-          existing_container = ::Docker::Container.all.select do |container| container.info['Names'].include? "/#{host['docker_container_name']}" end
-
-          # Prepare to use the existing container or else create it
-          if existing_container.any?
-            container = existing_container[0]
-          else
-            container_opts['name'] = host['docker_container_name']
-          end
-        end
+        container = find_container(host)
 
         # If the specified container exists, then use it rather creating a new one
         if container.nil?
-          @logger.debug("Creating container from image #{image_name}")
-          container = ::Docker::Container.create(container_opts)
+          unless host['mount_folders'].nil?
+            container_opts['HostConfig'] ||= {}
+            container_opts['HostConfig']['Binds'] = host['mount_folders'].values.map do |mount|
+              a = [ File.expand_path(mount['host_path']), mount['container_path'] ]
+              a << mount['opts'] if mount.has_key?('opts')
+              a.join(':')
+            end
+          end
+
+          if @options[:provision]
+            if host['docker_container_name']
+              container_opts['name'] = host['docker_container_name']
+            end
+
+            @logger.debug("Creating container from image #{image_name}")
+            container = ::Docker::Container.create(container_opts)
+          end
         end
+
+        if container.nil?
+          raise RuntimeError, 'Cannot continue because no existing container ' +
+                              'could be found and provisioning is disabled.'
+        end
+
+        fix_ssh(container) if @options[:provision] == false
 
         @logger.debug("Starting container #{container.id}")
         container.start({"PublishAllPorts" => true, "Privileged" => true})
@@ -181,6 +192,7 @@ module Beaker
         # specify base image
         dockerfile = <<-EOF
           FROM #{host['image']}
+          ENV container docker
         EOF
 
         # additional options to specify to the sshd
@@ -201,7 +213,7 @@ module Beaker
             RUN apt-get update
             RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES.join(' ')}
           EOF
-        when /fedora-22/
+        when /fedora-(2[2-9])/
           dockerfile += <<-EOF
             RUN dnf clean all
             RUN dnf install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
@@ -259,9 +271,34 @@ module Beaker
         EOF
 
       end
-      
+
       @logger.debug("Dockerfile is #{dockerfile}")
       return dockerfile
+    end
+
+    # a puppet run may have changed the ssh config which would
+    # keep us out of the container.  This is a best effort to fix it.
+    def fix_ssh(container)
+      @logger.debug("Fixing ssh on container #{container.id}")
+      container.exec(['sed','-ri',
+                      's/^#?PermitRootLogin .*/PermitRootLogin yes/',
+                      '/etc/ssh/sshd_config'])
+      container.exec(['sed','-ri',
+                      's/^#?PasswordAuthentication .*/PasswordAuthentication yes/',
+                      '/etc/ssh/sshd_config'])
+      container.exec(%w(service ssh restart))
+    end
+
+
+    # return the existing container if we're not provisioning
+    # and docker_container_name is set
+    def find_container(host)
+      return nil if host['docker_container_name'].nil? || @options[:provision]
+      @logger.debug("Looking for an existing container called #{host['docker_container_name']}")
+
+      ::Docker::Container.all.select do |c|
+        c.info['Names'].include? "/#{host['docker_container_name']}"
+      end.first
     end
 
   end

@@ -23,5 +23,55 @@ module Unix
       })
     end
 
+    # Determines which SSH Server is in use on this host
+    #
+    # @note This method is mostly a placeholder method, since only :openssh
+    #   can be returned at this time. Checkout {Windows::Host#determine_ssh_server}
+    #   for an example where work needs to be done to determine the answer
+    #
+    # @return [Symbol] Value for the SSH Server in use
+    def determine_ssh_server
+      :openssh
+    end
+
+    def external_copy_base
+      return @external_copy_base if @external_copy_base
+      @external_copy_base = '/root'
+      variant, version, arch, codename = self['platform'].to_array
+      # Solaris 10 uses / as the root user directory. Solaris 11 uses /root (like most).
+      @external_copy_base = '/' if variant == 'solaris' && version == '10'
+      @external_copy_base
+    end
+
+    # Tells you whether a host platform supports beaker's
+    #   {Beaker::HostPrebuiltSteps#set_env} method
+    #
+    # @return [String,nil] Reason message if set_env should be skipped,
+    #   nil if it should run.
+    def skip_set_env?
+      variant, version, arch, codename = self['platform'].to_array
+      case variant
+      when /^(f5|netscaler)$/
+        "no puppet-agent package for network device platform '#{variant}'"
+      else
+        nil
+      end
+    end
+
+    # Validates that the host was setup correctly
+    #
+    # @return nil
+    # @raise [ArgumentError] If the host is setup incorrectly,
+    #   this will be raised with the appropriate message
+    def validate_setup
+      nil
+    end
+
+    def initialize name, host_hash, options
+      super
+
+      @external_copy_base = nil
+    end
+
   end
 end

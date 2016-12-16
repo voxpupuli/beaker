@@ -226,39 +226,108 @@ module Beaker
         expect( test_suite_result.elapsed_time ).to be == 111
       end
 
+      describe '#print_test_result' do
+        it 'prints the test result without the line number if no file path' do
+          tc = Beaker::TestCase.new( hosts, options[:logger], options)
+          ex = StandardError.new('failed')
+          allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
+          tc.instance_variable_set(:@exception, ex)
+          test_suite_result.add_test_case( tc )
+          expect(options[:logger]).to_not receive(:notify).with(/Test line:/)
+          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+        end
+
+        it 'prints the test result and line number from test case file on failure' do
+          tc = Beaker::TestCase.new( hosts, options[:logger], options, 'path_to_test_file.rb')
+          ex = StandardError.new('failed')
+          allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
+          tc.instance_variable_set(:@exception, ex)
+          test_suite_result.add_test_case( tc )
+
+          expect(options[:logger]).to receive(:notify).with(/Test line:/)
+          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+        end
+      end
+
       describe '#write_junit_xml' do
-        let( :options )     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.'}) }
-        let(:rb_test)       { 'my_ruby_file.rb'     }
-
-        it 'doesn\'t re-order test cases themselves on time_sort' do
-          nokogiri_mock = Hash.new
-          allow( nokogiri_mock ).to receive( :add_child )
-          allow( Nokogiri::XML::Node ).to receive( :new ) { nokogiri_mock }
-          allow( LoggerJunit ).to receive( :write_xml ).and_yield( Object.new, nokogiri_mock )
-
+        let(:options) { make_opts.merge({:logger => double().as_null_object,
+                                         'name' => create_files(@files),
+                                         :log_dated_dir => '.',
+                                         :xml_dated_dir => '.'}) }
+        let(:rb_test) { 'my_ruby_file.rb' }
+        before(:each) do
+          @nokogiri_mock = Hash.new
+          allow( @nokogiri_mock ).to receive( :add_child )
+          allow( Nokogiri::XML::Node ).to receive( :new ) { @nokogiri_mock }
+          allow( LoggerJunit ).to receive( :write_xml ).and_yield( Object.new, @nokogiri_mock )
           @files = [ rb_test, rb_test, rb_test]
-          ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :fast )
-          tsr = ts.instance_variable_get( :@test_suite_results )
-
-          allow( tsr ).to receive( :start_time ).and_return(0)
-          allow( tsr ).to receive( :stop_time ).and_return(10)
-          expect( tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
-
-          test_cases = []
-          3.times do
+          @ts    = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :fast )
+          @tsr   = @ts.instance_variable_get( :@test_suite_results )
+          allow( @tsr ).to receive( :start_time ).and_return(0)
+          allow( @tsr ).to receive( :stop_time ).and_return(10)
+          @test_cases = []
+          @files.each_with_index do |file, index|
             tc = Beaker::TestCase.new( hosts, options[:logger], options, rb_test)
             allow( tc ).to receive( :sublog ).and_return( false )
-            test_cases << tc
+            @test_cases << tc
           end
-          test_cases[0].instance_variable_set(:@runtime, 3)
-          test_cases[1].instance_variable_set(:@runtime, 301)
-          test_cases[2].instance_variable_set(:@runtime, 101)
-          test_cases.map { |tc| tsr.add_test_case( tc ) }
+        end
+
+        it 'doesn\'t re-order test cases themselves on time_sort' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+
+          @test_cases.each_with_index do |tc,index|
+            tc.instance_variable_set(:@runtime, 3**index)
+            @tsr.add_test_case( tc )
+          end
 
           original_testcase_order = test_suite_result.instance_variable_get( :@test_cases ).dup
-          tsr.write_junit_xml( 'fakeFilePath07', 'fakeFileToLink09', true )
+          time_sort = true
+          @tsr.write_junit_xml( 'fakeFilePath07', 'fakeFileToLink09', time_sort )
           after_testcase_order = test_suite_result.instance_variable_get( :@test_cases ).dup
           expect( after_testcase_order ).to be === original_testcase_order
+        end
+
+        it 'writes @export nested hashes properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          inner_value = {'second' => '2nd'}
+          @test_cases.each do |tc|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{'oh' => 'hai', 'first' => inner_value}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          expect( @nokogiri_mock['oh'] ).to    eq('hai')
+          expect( @nokogiri_mock['first'] ).to eq(inner_value)
+        end
+
+        it 'writes @export array of hashes properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          @test_cases.each do |tc|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{:yes => 'hello'}, {:uh => 'sher'}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          expect( @nokogiri_mock[:yes] ).to eq('hello')
+          expect( @nokogiri_mock[:uh] ).to  eq('sher')
+        end
+
+        # this isn't the best test as the @nokogiri_mock is a single hash.
+        #   it really should be an array of hashes or nested, to ensure each case
+        #   gets the correct key/value.  But i could not get it to work properly with
+        #   the various calls to ::Node and #add_child
+        it 'writes @export hashes per test case properly' do
+          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          @test_cases.each_with_index do |tc,index|
+            tc.instance_variable_set(:@runtime, 0)
+            tc.instance_variable_set(:@exports, [{"yes_#{index}" => "hello#{index}"}])
+            @tsr.add_test_case( tc )
+          end
+          @tsr.write_junit_xml( 'fakeFilePath08' )
+          @test_cases.each_with_index do |tc,index|
+            expect( @nokogiri_mock["yes_#{index}"] ).to eq("hello#{index}")
+          end
         end
 
       end

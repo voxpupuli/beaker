@@ -17,11 +17,13 @@ module Beaker
       #                                                as a String that can be used to search for
       #                                                a set of Hosts, or a {Host}
       #                                                or Array<{Host}> to run the block against
+      # @param [Hash{Symbol=>String}] opts Options to alter execution.
+      # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
       # @param [Block] block This method will yield to a block of code passed by the caller
       #
       # @return [Array<Result>, Result, nil] An array of results, a result object, or nil.
       #   Check {#run_block_on} for more details on this.
-      def block_on hosts_or_filter, &block
+      def block_on hosts_or_filter, opts={}, &block
         block_hosts = nil
         if defined? hosts
           block_hosts = hosts
@@ -32,7 +34,7 @@ module Beaker
         else
           block_hosts = hosts_or_filter
         end
-        run_block_on block_hosts, filter, &block
+        run_block_on block_hosts, filter, opts, &block
       end
 
     end

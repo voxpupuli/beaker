@@ -55,8 +55,8 @@ module Beaker
   #     require 'spec_helper'
   #
   #     describe 'A Test With RSpec' do
-  #       let(:hosts)  { Host.new('blah', 'blah', 'not helpful' }
-  #       let(:logger) { Where.is('the', 'rspec', 'logger')     }
+  #       let(:hosts)  { Host.new('blah', 'blah', 'not helpful') }
+  #       let(:logger) { Where.is('the', 'rspec', 'logger')      }
   #
   #       after do
   #         on master, puppet('resource mything ensure=absent')
@@ -79,5 +79,9 @@ module Beaker
     include Beaker::DSL::Helpers
     include Beaker::DSL::InstallUtils
     include Beaker::DSL::Patterns
+
+    def self.register(helper_module)
+      include helper_module
+    end
   end
 end

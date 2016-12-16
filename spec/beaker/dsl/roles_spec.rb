@@ -163,6 +163,124 @@ describe ClassMixedWithDSLRoles do
       agent1[:type] = 'aio-foss'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+    it 'can take an empty string for pe_ver' do
+      agent1[:pe_ver] = ''
+      expect{ subject.aio_version?(agent1) }.not_to raise_error
+    end
+    it 'can take an empty string for FOSS version' do
+      agent1[:version] = ''
+      expect{ subject.aio_version?(agent1) }.not_to raise_error
+    end
+
+    context 'truth table-type testing' do
+
+      before :each do
+        @old_pe_ver  = agent1[:pe_ver]
+        @old_version = agent1[:version]
+        @old_roles   = agent1[:roles]
+        @old_type    = agent1[:type]
+      end
+
+      after :each do
+        agent1[:pe_ver]   = @old_pe_ver
+        agent1[:version]  = @old_version
+        agent1[:roles]    = @old_roles
+        agent1[:type]     = @old_type
+      end
+
+      context 'version values table' do
+        # pe_ver, version, answer
+        versions_table = [
+          [nil,      nil, false],
+          [nil,       '', false],
+          [nil,    '3.9', false],
+          [nil,    '4.0', true ],
+          [nil, '2015.1', true ],
+          \
+          ['',      nil, false],
+          ['',       '', false],
+          ['',    '3.9', false],
+          ['',    '4.0', true ],
+          ['', '2015.1', true ],
+          \
+          ['3.9',      nil, false],
+          ['3.9',       '', false],
+          ['3.9',    '3.9', false],
+          ['3.9',    '4.0', false],
+          ['3.9', '2015.1', false],
+          \
+          ['4.0',      nil, true],
+          ['4.0',       '', true],
+          ['4.0',    '3.9', true],
+          ['4.0',    '4.0', true],
+          ['4.0', '2015.1', true],
+          \
+          ['2015.1',      nil, true],
+          ['2015.1',       '', true],
+          ['2015.1',    '3.9', true],
+          ['2015.1',    '4.0', true],
+          ['2015.1', '2015.1', true],
+        ]
+
+        versions_table.each do |answers_row|
+          it "acts with values #{answers_row} correctly" do
+            agent1[:pe_ver]   = answers_row[0]
+            agent1[:version]  = answers_row[1]
+            agent1[:roles]    = nil
+            agent1[:type]     = nil
+            expect( subject.aio_version?(agent1) ).to be === answers_row[2]
+          end
+        end
+      end
+
+      context 'roles values table' do
+        roles_table = [
+          [nil,           false],
+          [[],            false],
+          [['aio'],       true ],
+          [['gun'],       false],
+          [['a', 'b'],    false],
+          [['c', 'aio'],  true ],
+        ]
+
+        roles_table.each do |answers_row|
+          it "acts with values #{answers_row} correctly" do
+            agent1[:pe_ver]   = nil
+            agent1[:version]  = nil
+            agent1[:roles]    = answers_row[0]
+            agent1[:type]     = nil
+            expect( subject.aio_version?(agent1) ).to be === answers_row[1]
+          end
+        end
+      end
+
+      context 'type values table' do
+        type_table = [
+          [nil,         false],
+          ['',          false],
+          ['cheese',    false],
+          ['paionts',   false],
+          ['aioch',     false],
+          ['chaio',     false],
+          ['aio',       true ],
+          ['aio-',      true ],
+          ['ew-aio-ji', true ],
+          ['id-aiot',   false],
+        ]
+
+        type_table.each do |answers_row|
+          it "acts with values #{answers_row} correctly" do
+            agent1[:pe_ver]   = nil
+            agent1[:version]  = nil
+            agent1[:roles]    = nil
+            agent1[:type]     = answers_row[0]
+            expect( subject.aio_version?(agent1) ).to be === answers_row[1]
+          end
+        end
+      end
+
+    end
+
   end
   describe '#aio_agent?' do
     it 'returns false if agent_only check doesn\'t pass' do

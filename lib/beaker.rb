@@ -29,7 +29,10 @@ module Beaker
   #
   # Common setup and testing steps
   #require 'beaker/steps'
-  #
+
+  # InParallel, for executing in parallel
+  require 'in_parallel'
+
   # Shared methods and helpers
   require 'beaker/shared'
 
@@ -39,6 +42,15 @@ module Beaker
   # Add pry support when available
   begin
     require 'pry'
+  rescue LoadError
+    # do nothing
+  end
+
+  # If beaker-pe is available, pull it in. The gem beaker-pe will need to be
+  # specified in the project Gemfile independent of beaker itself. If not available,
+  # catch LoadError and continue.
+  begin
+    require 'beaker-pe'
   rescue LoadError
     # do nothing
   end

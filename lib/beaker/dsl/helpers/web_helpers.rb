@@ -24,6 +24,7 @@ module Beaker
           url = URI.parse(link)
           http = Net::HTTP.new(url.host, url.port)
           http.use_ssl = (url.scheme == 'https')
+          http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
           http.start do |http|
             return http.head(url.request_uri).code == "200"
           end
@@ -47,14 +48,22 @@ module Beaker
           base_url.chomp!('/')
           src = "#{base_url}/#{file_name}"
           dst = File.join(dst_dir, file_name)
-          if File.exists?(dst)
+          if options[:cache_files_locally] && File.exists?(dst)
             logger.notify "Already fetched #{dst}"
           else
             logger.notify "Fetching: #{src}"
             logger.notify "  and saving to #{dst}"
-            open(src, :allow_redirections => :all) do |remote|
-              File.open(dst, "w") do |file|
-                FileUtils.copy_stream(remote, file)
+            begin
+              open(src, :allow_redirections => :all) do |remote|
+                File.open(dst, "w") do |file|
+                  FileUtils.copy_stream(remote, file)
+                end
+              end
+            rescue OpenURI::HTTPError => e
+              if e.message =~ /404.*/
+                raise "Failed to fetch_remote_file '#{src}' (#{e.message})"
+              else
+                raise e
               end
             end
           end
@@ -95,7 +104,7 @@ module Beaker
             logger.debug(line)
           end
           if $?.to_i != 0
-            raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?}"
+            raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
           end
           dst
         end

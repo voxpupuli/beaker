@@ -83,6 +83,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "adds aio defaults to foss hosts when they have an aio foss puppet version" do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host['type'] = 'foss'
         host['version'] = '4.0'
       end
@@ -93,6 +95,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "adds aio defaults to foss hosts when they have type foss-aio" do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host['type'] = 'foss-aio'
       end
       expect(subject).to receive(:add_foss_defaults_on).exactly(hosts.length).times
@@ -102,6 +106,8 @@ describe ClassMixedWithDSLInstallUtils do
 
     it "can set aio defaults for aio type (backwards compatability)" do
       hosts.each do |host|
+        host[:pe_ver] = nil
+        host[:version] = nil
         host['type'] = 'aio'
       end
       expect(subject).to receive(:add_aio_defaults_on).exactly(hosts.length).times

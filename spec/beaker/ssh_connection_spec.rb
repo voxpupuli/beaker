@@ -4,7 +4,7 @@ require 'net/ssh'
 module Beaker
   describe SshConnection do
     let( :user )      { 'root'    }
-    let( :ssh_opts )  { {} }
+    let( :ssh_opts )  { { keepalive: true, keepalive_interval: 2 } }
     let( :options )   { { :logger => double('logger').as_null_object }  }
     let( :ip )        { "default.ip.address" }
     let( :vmhostname ){ "vmhostname" }

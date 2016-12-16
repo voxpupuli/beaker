@@ -186,7 +186,7 @@ module Beaker
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).once.and_return(result)
 
         host.add_env_var('key', '/my/first/value')
@@ -195,24 +195,24 @@ module Beaker
       it "adds new line to environment file if no env var of that name already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with(/grep \^KEY ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with("echo \"KEY=/my/first/value\" >> ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("echo \"key=/my/first/value\" >> ~/.ssh/environment")
         host.add_env_var('key', '/my/first/value')
       end
 
       it "updates existing line in environment file when adding additional value to existing variable" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^KEY=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
         expect( host ).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with(/grep \^KEY ~\/\.ssh\/environment/)
+        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
         expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^KEY=/KEY=\\/my\\/first\\/value:/', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
 
@@ -220,9 +220,9 @@ module Beaker
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/KEY=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\(.*\\)[;:]\\/my\\/first\\/value/KEY=\\1/", "~/.ssh/environment")
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/KEY=\\/my\\/first\\/value[;:]/KEY=/", "~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
+        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
 
@@ -293,7 +293,7 @@ module Beaker
         expect { host.exec(command, opts) }.to raise_error(Beaker::Host::CommandFailure)
       end
 
-      it 'does not throw an error when an unacceptable exit code is returned and the accept_all_exit_codes flag is set' do
+      it 'does throw an error when an unacceptable exit code is returned and the accept_all_exit_codes flag is set' do
         result.exit_code = 7
         opts = {
           :acceptable_exit_codes  => [0, 1],
@@ -301,11 +301,11 @@ module Beaker
         }
         allow( host.logger ).to receive( :warn )
 
-        expect { host.exec(command, opts) }.to_not raise_error
+        expect { host.exec(command, opts) }.to raise_error
       end
 
       it 'sends a warning when both :acceptable_exit_codes & :accept_all_exit_codes are set' do
-        result.exit_code = 7
+        result.exit_code = 1
         opts = {
           :acceptable_exit_codes  => [0, 1],
           :accept_all_exit_codes  => true
@@ -412,13 +412,34 @@ module Beaker
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
         args = [ '/source', 'target', {} ]
-        conn_args = args + [ nil ]
+        conn_args = args
 
         expect( logger ).to receive(:trace)
         expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
         allow( conn ).to receive(:ip).and_return(host['ip'])
         allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
         allow( conn ).to receive(:hostname).and_return(host.name)
+
+        host.do_scp_to *args
+      end
+
+      it 'calls for host scp post operations after SCPing happens' do
+        create_files(['source'])
+        logger = host[:logger]
+        conn = double(:connection)
+        @options = { :logger => logger }
+        host.instance_variable_set :@connection, conn
+        args = [ '/source', 'target', {} ]
+        conn_args = args
+
+        allow( logger ).to receive(:trace)
+        expect( conn ).to receive(:scp_to).ordered.with(
+          *conn_args
+        ).and_return(Beaker::Result.new(host, 'output!'))
+        allow( conn ).to receive(:ip).and_return(host['ip'])
+        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow( conn ).to receive(:hostname).and_return(host.name)
+        expect( host ).to receive( :scp_post_operations ).ordered
 
         host.do_scp_to *args
       end
@@ -467,7 +488,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ source_path, target_path, {:ignore => [exclude_file]} ]
+          args = [ source_path, target_path, {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -477,12 +498,12 @@ module Beaker
 
           (@fileset1 + @fileset2).each do |file|
             if file !~ /#{exclude_file}/
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
@@ -532,7 +553,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -541,19 +562,18 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
             if file !~ /#{exclude_file}/
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-              conn_args = file_args + [ nil ]
+              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
               expect( conn ).to_not receive(:scp_to).with( *conn_args )
             end
           end
           allow( conn ).to receive(:ip).and_return(host['ip'])
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
-
           host.do_scp_to *args
         end
 
@@ -563,7 +583,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file]} ]
+          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
 
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
@@ -571,13 +591,13 @@ module Beaker
           expect( host ).to_not receive( :mkdir_p ).with('target/tmp/tests')
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-            conn_args = file_args + [ nil ]
+            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            conn_args = file_args
             expect( conn ).to_not receive(:scp_to).with( *conn_args )
           end
           (@fileset2).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file]} ]
-            conn_args = file_args + [ nil ]
+            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            conn_args = file_args
             expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
           end
 
@@ -596,7 +616,7 @@ module Beaker
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
         args = [ 'source', 'target', {} ]
-        conn_args = args + [ nil ]
+        conn_args = args
 
         expect( logger ).to receive(:debug)
         expect( conn ).to receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
@@ -676,5 +696,61 @@ module Beaker
       end
     end
 
+    describe '#get_public_ip' do
+      let (:aws) { double('AWSmock')}
+      it 'calls upon the ec2 instance to get the ip address' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = aws
+        expect(aws).to receive(:ip_address)
+        host.get_public_ip
+      end
+
+      it 'returns nil when no matching hypervisor is found' do
+        host.host_hash[:hypervisor] = 'vmpooler'
+        expect(host.get_public_ip).to be(nil)
+      end
+
+      it 'calls execute with curl if the host_hash[:instance] is not defined and the host is not an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(false)
+        expect(host).to receive(:execute).with("curl http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+
+      it 'calls execute with wget if the host_hash[:instance] is not defined and the host is an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'ec2'
+        host.host_hash[:instance] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(true)
+        expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+    end
+
+    describe '#ip' do
+      it 'calls #get_ip when get_public_ip returns nil' do
+        allow( host ).to receive(:get_public_ip).and_return(nil)
+        expect(host).to receive(:get_ip).and_return('127.0.0.2')
+        expect(host.ip).to eq('127.0.0.2')
+      end
+
+      it 'does not call get_ip when #get_public_ip returns an address' do
+        allow( host ).to receive(:get_public_ip).and_return('127.0.0.1')
+        expect(host).to_not receive(:get_ip)
+        expect(host.ip).to eq('127.0.0.1')
+      end
+    end
+
+    describe "#wait_for_port" do
+      it 'returns true when port is open' do
+        allow(host).to receive(:repeat_fibonacci_style_for).and_return(true)
+        expect(host.wait_for_port(22, 0)).to be true
+      end
+
+      it 'returns false when port is not open' do
+        allow(host).to receive(:repeat_fibonacci_style_for).and_return(false)
+        expect(host.wait_for_port(22, 0)).to be false
+      end
+    end
   end
 end

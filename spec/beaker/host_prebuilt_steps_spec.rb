@@ -56,6 +56,18 @@ describe Beaker do
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
   ]
 
+  # Solaris
+  it_should_behave_like 'enables_root_login', 'solaris-10', [
+    "sudo -E svcadm restart network/ssh",
+    "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+  ], true
+
+  it_should_behave_like 'enables_root_login', 'solaris-11', [
+    "sudo -E svcadm restart network/ssh",
+    "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
+    "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"
+  ], true
+
   ['debian','ubuntu','cumulus'].each do | deb_like |
     it_should_behave_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
@@ -77,7 +89,7 @@ describe Beaker do
     it "can sync time on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 3 ).times
 
       subject.timesync( hosts, options )
     end
@@ -86,7 +98,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'unix', :exit_code => [1, 0] } )
       allow( subject ).to receive( :sleep ).and_return(true)
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 6 ).times
 
       subject.timesync( hosts, options )
     end
@@ -95,7 +107,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'unix', :exit_code => 1 } )
       allow( subject ).to receive( :sleep ).and_return(true)
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver}").exactly( 5 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver}").exactly( 5 ).times
 
       expect{ subject.timesync( hosts, options ) }.to raise_error(/NTP date was not successful after/)
     end
@@ -124,7 +136,7 @@ describe Beaker do
     it "can set time server on unix hosts" do
       hosts = make_hosts( { :platform => 'unix' } )
 
-      expect( Beaker::Command ).to receive( :new ).with("ntpdate -t 20 #{ntpserver_set}").exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with("ntpdate -u -t 20 #{ntpserver_set}").exactly( 3 ).times
 
       subject.timesync( hosts, options_ntp )
     end
@@ -149,37 +161,6 @@ describe Beaker do
       subject.timesync( hosts, options_ntp )
 
     end
-  end
-
-  context "epel_info_for!" do
-    subject { dummy_class.new }
-
-    it "can return the correct url for an el-7 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-7-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://mirrors.kernel.org/fedora-epel/7", "x86_64", "epel-release-7-5.noarch.rpm"]
-    end
-
-    it "can return the correct url for an el-6 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-6-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://mirrors.kernel.org/fedora-epel/6", "i386", "epel-release-6-8.noarch.rpm"]
-    end
-
-    it "can return the correct url for an el-5 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-5-platform') } )
-
-      expect( subject.epel_info_for( host, options )).to be === ["http://mirrors.kernel.org/fedora-epel/5", "i386", "epel-release-5-4.noarch.rpm"]
-
-    end
-
-    it "raises an error on non el-5/6 host" do
-      host = make_host( 'testhost', { :platform => Beaker::Platform.new('el-4-platform') } )
-
-      expect{ subject.epel_info_for( host, options )}.to raise_error(ArgumentError, /epel_info_for does not support el version/)
-
-    end
-
   end
 
   context "apt_get_update" do
@@ -323,10 +304,10 @@ describe Beaker do
       hosts[4][:platform] = Beaker::Platform.new('oracle-5-arch')
 
       expect( Beaker::Command ).to receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/6/i386/epel-release-6-8.noarch.rpm").exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://mirrors.kernel.org/fedora-epel/5/i386/epel-release-5-4.noarch.rpm").exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://mirrors\\.kernel\\.org/fedora\\-epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm").exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm").exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
       expect( Beaker::Command ).to receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
       expect( Beaker::Command ).to receive( :new ).with("yum clean all && yum makecache").exactly( 6 ).times
 
@@ -411,6 +392,12 @@ describe Beaker do
       subject.validate_host(hosts, options)
 
     end
+
+    it 'skips validation on cisco hosts' do
+      @platform = 'cisco_nexus-7-x86_64'
+      expect( subject ).to receive( :check_and_install_packages_if_needed ).never
+      subject.validate_host(hosts, options)
+    end
   end
 
   context 'get_domain_name' do
@@ -456,7 +443,7 @@ describe Beaker do
       host = make_host('name', {})
       etc_hosts = "127.0.0.1  localhost\n192.168.2.130 pe-ubuntu-lucid\n192.168.2.128 pe-centos6\n192.168.2.131 pe-debian6"
 
-      expect( Beaker::Command ).to receive( :new ).with( "echo '#{etc_hosts}' > /etc/hosts" ).once
+      expect( Beaker::Command ).to receive( :new ).with( "echo '#{etc_hosts}' >> /etc/hosts" ).once
       expect( host ).to receive( :exec ).once
 
       subject.set_etc_hosts(host, etc_hosts)
@@ -492,71 +479,69 @@ describe Beaker do
   context "set_env" do
     subject { dummy_class.new }
 
-    it "can set the environment on a windows host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/sshd_config",
-        "cygrunsrv -E sshd",
-        "cygrunsrv -S sshd"
-      ]
-      set_env_helper('windows', commands)
+    it "permits user environments on an OS X host" do
+      test_host_ssh_permit_user_environment('osx')
     end
 
-    it "can set the environment on an OS X host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/sshd_config",
-        "launchctl unload /System/Library/LaunchDaemons/ssh.plist",
-        "launchctl load /System/Library/LaunchDaemons/ssh.plist"
-      ]
-      set_env_helper('osx', commands)
+    it "permits user environments on an ssh-based linux host" do
+      test_host_ssh_permit_user_environment('ubuntu')
     end
 
-    it "can set the environment on an ssh-based linux host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "service ssh restart"
-      ]
-      set_env_helper('ubuntu', commands)
+    it "permits user environments on an sshd-based linux host" do
+      test_host_ssh_permit_user_environment('eos')
     end
 
-    it "can set the environment on an sshd-based linux host" do
-      commands = [
-          "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-          "/sbin/service sshd restart"
-      ]
-      set_env_helper('eos', commands)
+    it "permits user environments on an sles host" do
+      test_host_ssh_permit_user_environment('sles')
     end
 
-    it "can set the environment on an sles host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "rcsshd restart"
-      ]
-      set_env_helper('sles', commands)
+    it "permits user environments on a solaris host" do
+      test_host_ssh_permit_user_environment('solaris')
     end
 
-    it "can set the environment on a solaris host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "svcadm restart svc:/network/ssh:default"
-      ]
-      set_env_helper('solaris', commands)
+    it "permits user environments on an aix host" do
+      test_host_ssh_permit_user_environment('aix')
     end
 
-    it "can set the environment on an aix host" do
-      commands = [
-        "echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config",
-        "stopsrc -g ssh",
-        "startsrc -g ssh"
-      ]
-      set_env_helper('aix', commands)
+    it "permits user environments on a FreeBSD host" do
+      test_host_ssh_permit_user_environment('freebsd')
     end
 
-    it "can set the environment on a FreeBSD host" do
-      commands = [
-        "sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config",
-        "sudo /etc/rc.d/sshd restart",
-      ]
-      set_env_helper('freebsd', commands)
+    it "permits user environments on a windows host" do
+      test_host_ssh_permit_user_environment('windows')
+    end
+
+
+    it "sets user ssh environment on an OS X host" do
+      test_host_ssh_set_user_environment('osx')
+    end
+
+    it "sets user ssh environment on an ssh-based linux host" do
+      test_host_ssh_set_user_environment('ubuntu')
+    end
+
+    it "sets user ssh environment on an sshd-based linux host" do
+      test_host_ssh_set_user_environment('eos')
+    end
+
+    it "sets user ssh environment on an sles host" do
+      test_host_ssh_set_user_environment('sles')
+    end
+
+    it "sets user ssh environment on a solaris host" do
+      test_host_ssh_set_user_environment('solaris')
+    end
+
+    it "sets user ssh environment on an aix host" do
+      test_host_ssh_set_user_environment('aix')
+    end
+
+    it "sets user ssh environment on a FreeBSD host" do
+      test_host_ssh_set_user_environment('freebsd')
+    end
+
+    it "sets user ssh environment on a windows host" do
+      test_host_ssh_set_user_environment('windows')
     end
 
     it "skips an f5 host correctly" do
@@ -569,12 +554,9 @@ describe Beaker do
         :env1_key => :env1_value,
         :env2_key => :env2_value
       }
+      allow( host ).to receive( :skip_set_env? ).and_return('f5 say NO' )
 
       expect( subject ).to receive( :construct_env ).exactly(0).times
-
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
-      expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( Beaker::Command ).to receive( :new ).exactly(0).times
       expect( host ).to receive( :add_env_var ).exactly(0).times
       opts.each_pair do |key, value|
@@ -585,33 +567,51 @@ describe Beaker do
       subject.set_env(host, options.merge( opts ))
     end
 
-    def set_env_helper(platform_name, host_specific_commands_array)
+    it 'skips a cisco host correctly' do
+      host = make_host('name', {
+        :platform     => 'cisco_nexus-7-x86_64',
+        :ssh_env_file => 'ssh_env_file',
+        :is_cygwin   => true,
+      } )
+      opts = {
+        :env1_key => :env1_value,
+        :env2_key => :env2_value
+      }
+      allow( host ).to receive( :skip_set_env? ).and_return('cisco say NO' )
+
+      expect( subject ).to receive( :construct_env ).exactly(0).times
+      expect( Beaker::Command ).to receive( :new ).exactly(0).times
+      expect( host ).to receive( :add_env_var ).exactly(0).times
+      opts.each_pair do |key, value|
+        expect( host ).to receive( :add_env_var ).with( key, value ).exactly(0).times
+      end
+      expect( host ).to receive( :exec ).exactly(0).times
+
+      subject.set_env(host, options.merge( opts ))
+    end
+
+    def test_host_ssh_permit_user_environment(platform_name)
+      test_host_ssh_calls(platform_name, :ssh_permit_user_environment)
+    end
+
+    def test_host_ssh_set_user_environment(platform_name)
+      test_host_ssh_calls(platform_name, :ssh_set_user_environment)
+    end
+
+    def test_host_ssh_calls(platform_name, method_call_sym)
       host = make_host('name', {
           :platform     => platform_name,
           :ssh_env_file => 'ssh_env_file',
           :is_cygwin   => true,
-      } )
+        } )
       opts = {
-          :env1_key => :env1_value,
-          :env2_key => :env2_value
+        :env1_key => :env1_value,
+        :env2_key => :env2_value
       }
 
+      allow( host ).to receive( :skip_set_env? ).and_return(nil )
       expect( subject ).to receive( :construct_env ).and_return( opts )
-      host_specific_commands_array.each do |command|
-        expect( Beaker::Command ).to receive( :new ).with( command ).once
-      end
-
-      expect( Beaker::Command ).to receive( :new ).with( "mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
-      expect( Beaker::Command ).to receive( :new ).with( "chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}" ).once
-      expect( Beaker::Command ).to receive( :new ).with( "touch #{host[:ssh_env_file]}" ).once
-      expect_any_instance_of( Class ).to receive( :extend ).and_return( double( 'class' ).as_null_object )
-      expect( Beaker::Command ).to receive( :new ).with( "cat #{host[:ssh_env_file]}" ).once
-      expect( host ).to receive( :add_env_var ).with( 'PATH', '$PATH' ).once
-      opts.each_pair do |key, value|
-        expect( host ).to receive( :add_env_var ).with( key, value ).once
-      end
-      expect( host ).to receive( :add_env_var ).with( 'CYGWIN', 'nodosfilewarning' ).once if platform_name =~ /windows/
-      expect( host ).to receive( :exec ).exactly( host_specific_commands_array.length + 4 ).times
+      expect( host ).to receive( method_call_sym )
 
       subject.set_env(host, options.merge( opts ))
     end

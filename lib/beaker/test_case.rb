@@ -37,6 +37,10 @@ module Beaker
     # a hash.
     attr_accessor :metadata
 
+    # Necessary for {Beaker::DSL::Outcomes}.
+    # Assumed to be an Array.
+    attr_accessor :exports
+
     #The full log for this test
     attr_accessor :sublog
 
@@ -102,6 +106,7 @@ module Beaker
       @runtime = nil
       @teardown_procs = []
       @metadata = {}
+      @exports  = []
       set_current_test_filename(@path ? File.basename(@path, '.rb') : nil)
 
 
@@ -127,8 +132,7 @@ module Beaker
               test = File.read(path)
               eval test,nil,path,1
             rescue FailTest, TEST_EXCEPTION_CLASS => e
-              @test_status = :fail
-              @exception   = e
+              log_and_fail_test(e, :fail)
             rescue PendingTest
               @test_status = :pending
             rescue SkipTest
@@ -136,13 +140,15 @@ module Beaker
             rescue StandardError, ScriptError, SignalException => e
               log_and_fail_test(e)
             ensure
+              @logger.info('Begin teardown')
               @teardown_procs.each do |teardown|
                 begin
                   teardown.call
                 rescue StandardError, SignalException, TEST_EXCEPTION_CLASS => e
-                  log_and_fail_test(e)
+                  log_and_fail_test(e, :teardown_error)
                 end
               end
+              @logger.info('End teardown')
             end
           end
           @sublog = @logger.get_sublog
@@ -159,14 +165,19 @@ module Beaker
         # individually as well.
         #
         # @param exception [Exception] exception to fail with
-        def log_and_fail_test(exception)
-          logger.error(exception.inspect)
+        # @param exception [Symbol] the test status
+        def log_and_fail_test(exception, status=:error)
+          logger.error("#{exception.class}: #{exception.message}")
           bt = exception.backtrace
           logger.pretty_backtrace(bt).each_line do |line|
             logger.error(line)
           end
-          @test_status = :error
-          @exception   = exception
+          # If the status is already a test failure or error, don't overwrite with the teardown failure.
+          unless status == :teardown_error && (@test_status == :error || @test_status == :fail)
+            status = :error if status == :teardown_error
+            @test_status = status
+            @exception   = exception
+          end
         end
       end
     end

@@ -16,7 +16,7 @@ module Beaker
         #     (or range) of integer exit codes that should be considered
         #     acceptable.  An error will be thrown if the exit code does not
         #     match one of the values in this list.
-        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all 
+        #   @option opts [Boolean] :accept_all_exit_codes (false) Consider all
         #     exit codes as passing.
         #   @option opts [Boolean] :dry_run (false) Do not actually execute any
         #     commands on the SUT
@@ -133,7 +133,7 @@ module Beaker
           curl_retries = host['master-start-curl-retries'] || options['master-start-curl-retries']
           logger.debug "Setting curl retries to #{curl_retries}"
 
-          if options[:is_puppetserver]
+          if options[:is_puppetserver] || host[:is_puppetserver]
             confdir = host.puppet('master')['confdir']
             vardir = host.puppet('master')['vardir']
 
@@ -170,6 +170,16 @@ module Beaker
 
             yield self if block_given?
 
+          # FIXME: these test-flow-control exceptions should be using throw
+            # they can be caught in test_case.  current layout dows not allow it
+          rescue Beaker::DSL::Outcomes::PassTest => early_assertion
+            pass_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::FailTest => early_assertion
+            fail_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::PendingTest => early_assertion
+            pending_test(early_assertion)
+          rescue Beaker::DSL::Outcomes::SkipTest => early_assertion
+            skip_test(early_assertion)
           rescue Beaker::DSL::Assertions, Minitest::Assertion => early_assertion
             fail_test(early_assertion)
           rescue Exception => early_exception
@@ -300,16 +310,27 @@ module Beaker
           new_conf
         end
 
+        # Restarts the named puppet service
+        #
+        # @param [Host] host Host the service runs on
+        # @param [String] service Name of the service to restart
+        # @param [Fixnum] curl_retries Number of times to retry the restart command
+        # @param [Fixnum] port Port to check status at
+        #
+        # @return [Result] Result of last status check
         # @!visibility private
-        def bounce_service host, service, curl_retries = 120
+        def bounce_service host, service, curl_retries = nil, port = nil
+          curl_retries = 120 if curl_retries.nil?
+          port = options[:puppetserver_port] if port.nil?
           if host.graceful_restarts?
-            apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/apache2ctl" : 'apache2ctl'
+            service = host.check_for_command('apache2ctl') ? 'apache2ctl' : 'apachectl'
+            apachectl_path = host.is_pe? ? "#{host['puppetsbindir']}/#{service}" : service
             host.exec(Command.new("#{apachectl_path} graceful"))
           else
             host.exec puppet_resource('service', service, 'ensure=stopped')
             host.exec puppet_resource('service', service, 'ensure=running')
           end
-          curl_with_retries(" #{service} ", host, "https://localhost:8140", [35, 60], curl_retries)
+          curl_with_retries(" #{service} ", host, "https://localhost:#{port}", [35, 60], curl_retries)
         end
 
         # Runs 'puppet apply' on a remote host, piping manifest through stdin
@@ -377,6 +398,7 @@ module Beaker
         # @option opts [String]   :debug (false) If this option exists,
         #                         the "--debug" command line parameter
         #                         will be passed to the 'puppet apply' command.
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
         #
         # @param [Block] block This method will yield to a block of code passed
         #                      by the caller; this can be used for additional
@@ -385,7 +407,7 @@ module Beaker
         # @return [Array<Result>, Result, nil] An array of results, a result object,
         #   or nil. Check {#run_block_on} for more details on this.
         def apply_manifest_on(host, manifest, opts = {}, &block)
-          block_on host do | host |
+          block_on host, opts do | host |
             on_options = {}
             on_options[:acceptable_exit_codes] = Array(opts[:acceptable_exit_codes])
 
@@ -484,13 +506,22 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
         #   mappings
-        # @example Stub puppetlabs.com on the master to 127.0.0.1
-        #   stub_hosts_on(master, 'puppetlabs.com' => '127.0.0.1')
-        def stub_hosts_on(machine, ip_spec)
+        # @param alias_spec [Hash{String=>Array[String]] an hash containing the host to alias(es) mappings to apply
+        # @example Stub puppetlabs.com on the master to 127.0.0.1 with an alias example.com
+        #   stub_hosts_on(master, {'puppetlabs.com' => '127.0.0.1'}, {'puppetlabs.com' => ['example.com']})
+        def stub_hosts_on(machine, ip_spec, alias_spec={})
           block_on machine do | host |
             ip_spec.each do |address, ip|
+              aliases = alias_spec[address] || []
+              manifest =<<-EOS.gsub /^\s+/, ""
+                host { '#{address}':
+                  \tensure       => present,
+                  \tip           => '#{ip}',
+                  \thost_aliases => #{aliases},
+                }
+              EOS
               logger.notify("Stubbing address #{address} to IP #{ip} on machine #{host}")
-              on( host, puppet('resource', 'host', address, 'ensure=present', "ip=#{ip}") )
+              apply_manifest_on( host, manifest )
             end
 
             teardown do
@@ -509,16 +540,30 @@ module Beaker
         #                            or a role (String or Symbol) that identifies one or more hosts.
         # @param ip_spec [Hash{String=>String}] a hash containing the host to ip
         #   mappings
-        # @example Stub puppetlabs.com on the master to 127.0.0.1
-        #   with_host_stubbed_on(master, 'forgeapi.puppetlabs.com' => '127.0.0.1') do
+        # @param alias_spec [Hash{String=>Array[String]] an hash containing the host to alias(es) mappings to apply
+        # @example Stub forgeapi.puppetlabs.com on the master to 127.0.0.1 with an alias forgeapi.example.com
+        #   with_host_stubbed_on(master, {'forgeapi.puppetlabs.com' => '127.0.0.1'}, {'forgeapi.puppetlabs.com' => ['forgeapi.example.com']}) do
         #     puppet( "module install puppetlabs-stdlib" )
         #   end
-        def with_host_stubbed_on(host, ip_spec, &block)
+        def with_host_stubbed_on(host, ip_spec, alias_spec={}, &block)
           begin
             block_on host do |host|
-              ip_spec.each_pair do |address, ip|
+              # this code is duplicated from the `stub_hosts_on` method. The
+              # `stub_hosts_on` method itself is not used here because this
+              # method is used by modules tests using `beaker-rspec`. Since
+              # the `stub_hosts_on` method contains a `teardown` step, it is
+              # incompatible with `beaker_rspec`.
+              ip_spec.each do |address, ip|
+                aliases = alias_spec[address] || []
+                manifest =<<-EOS.gsub /^\s+/, ""
+                  host { '#{address}':
+                    \tensure       => present,
+                    \tip           => '#{ip}',
+                    \thost_aliases => #{aliases},
+                  }
+                EOS
                 logger.notify("Stubbing address #{address} to IP #{ip} on machine #{host}")
-                on( host, puppet('resource', 'host', address, 'ensure=present', "ip=#{ip}") )
+                apply_manifest_on( host, manifest )
               end
             end
 
@@ -553,11 +598,11 @@ module Beaker
         #                             global options hash
         def stub_forge_on(machine, forge_host = nil)
           #use global options hash
+          primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
           @forge_ip ||= Resolv.getaddress(forge_host)
           block_on machine do | host |
-            stub_hosts_on(host, 'forge.puppetlabs.com' => @forge_ip)
-            stub_hosts_on(host, 'forgeapi.puppetlabs.com' => @forge_ip)
+            stub_hosts_on(host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']})
           end
         end
 
@@ -572,12 +617,10 @@ module Beaker
         #                             global options hash
         def with_forge_stubbed_on( host, forge_host = nil, &block )
           #use global options hash
+          primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
           @forge_ip ||= Resolv.getaddress(forge_host)
-          with_host_stubbed_on( host,
-                                {'forge.puppetlabs.com'  => @forge_ip,
-                               'forgeapi.puppetlabs.com' => @forge_ip},
-                                &block                                    )
+          with_host_stubbed_on( host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']}, &block )
         end
 
         # This wraps `with_forge_stubbed_on` and provides it the default host
@@ -596,30 +639,56 @@ module Beaker
           stub_forge_on(default, forge_host)
         end
 
-        def sleep_until_puppetdb_started(host)
-          curl_with_retries("start puppetdb", host, "http://localhost:8080", 0, 120)
+        # Waits until a successful curl check has happened against puppetdb
+        #
+        # @param [Host] host Host puppetdb is on
+        # @param [Fixnum] nonssl_port Port to make the HTTP status check over
+        # @param [Fixnum] ssl_port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_puppetdb_started(host, nonssl_port = nil, ssl_port = nil)
+          nonssl_port = options[:puppetdb_port_nonssl] if nonssl_port.nil?
+          ssl_port = options[:puppetdb_port_ssl] if ssl_port.nil?
+          curl_with_retries("start puppetdb", host, "http://localhost:#{nonssl_port}", 0, 120)
           curl_with_retries("start puppetdb (ssl)",
-                            host, "https://#{host.node_name}:8081", [35, 60])
+                            host, "https://#{host.node_name}:#{ssl_port}", [35, 60])
         end
 
-        def sleep_until_puppetserver_started(host)
+        # Waits until a successful curl check has happened against puppetserver
+        #
+        # @param [Host] host Host puppetserver is on
+        # @param [Fixnum] port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_puppetserver_started(host, port = nil)
+          port = options[:puppetserver_port] if port.nil?
           curl_with_retries("start puppetserver (ssl)",
-                            host, "https://#{host.node_name}:8140", [35, 60])
+                            host, "https://#{host.node_name}:#{port}", [35, 60])
         end
 
-        def sleep_until_nc_started(host)
+        # Waits until a successful curl check has happaned against node classifier
+        #
+        # @param [Host] host Host node classifier is on
+        # @param [Fixnum] port Port to make the HTTPS status check over
+        #
+        # @return [Result] Result of the last HTTPS status check
+        def sleep_until_nc_started(host, port = nil)
+          port = options[:nodeclassifier_port] if port.nil?
           curl_with_retries("start nodeclassifier (ssl)",
-                            host, "https://#{host.node_name}:4433", [35, 60])
+                            host, "https://#{host.node_name}:#{port}", [35, 60])
         end
+
         #stops the puppet agent running on the host
         # @param [Host, Array<Host>, String, Symbol] agent    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
-        def stop_agent_on(agent)
-          block_on agent do | host |
-            vardir = agent.puppet['vardir']
+        # @param [Hash{Symbol=>String}] opts Options to alter execution.
+        # @option opts [Boolean] :run_in_parallel Whether to run on each host in parallel.
+        def stop_agent_on(agent, opts = {})
+          block_on agent, opts do | host |
+            vardir = host.puppet_configprint['vardir']
             agent_running = true
             while agent_running
-              agent_running = agent.file_exist?("#{vardir}/state/agent_catalog_run.lock")
+              agent_running = host.file_exist?("#{vardir}/state/agent_catalog_run.lock")
               if agent_running
                 sleep 2
               end
@@ -627,26 +696,26 @@ module Beaker
 
             # In 4.0 this was changed to just be `puppet`
             agent_service = 'puppet'
-            if !aio_version?(agent)
+            if !aio_version?(host)
               # The agent service is `pe-puppet` everywhere EXCEPT certain linux distros on PE 2.8
               # In all the case that it is different, this init script will exist. So we can assume
               # that if the script doesn't exist, we should just use `pe-puppet`
               agent_service = 'pe-puppet-agent'
-              agent_service = 'pe-puppet' unless agent.file_exist?('/etc/init.d/pe-puppet-agent')
+              agent_service = 'pe-puppet' unless host.file_exist?('/etc/init.d/pe-puppet-agent')
             end
 
             # Under a number of stupid circumstances, we can't stop the
             # agent using puppet.  This is usually because of issues with
             # the init script or system on that particular configuration.
             avoid_puppet_at_all_costs = false
-            avoid_puppet_at_all_costs ||= agent['platform'] =~ /el-4/
-            avoid_puppet_at_all_costs ||= agent['pe_ver'] && version_is_less(agent['pe_ver'], '3.2') && agent['platform'] =~ /sles/
+            avoid_puppet_at_all_costs ||= host['platform'] =~ /el-4/
+            avoid_puppet_at_all_costs ||= host['pe_ver'] && version_is_less(host['pe_ver'], '3.2') && host['platform'] =~ /sles/
 
             if avoid_puppet_at_all_costs
               # When upgrading, puppet is already stopped. On EL4, this causes an exit code of '1'
-              on agent, "/etc/init.d/#{agent_service} stop", :acceptable_exit_codes => [0, 1]
+              on host, "/etc/init.d/#{agent_service} stop", :acceptable_exit_codes => [0, 1]
             else
-              on agent, puppet_resource('service', agent_service, 'ensure=stopped')
+              on host, puppet_resource('service', agent_service, 'ensure=stopped')
             end
           end
         end
@@ -670,35 +739,52 @@ module Beaker
 
         # Ensure the host has requested a cert, then sign it
         #
-        # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [Host, Array<Host>, String, Symbol] host   One or more hosts, or a role (String or Symbol)
+        #                            that identifies one or more hosts to validate certificate signing.
+        #                            No argument, or an empty array means no validation of success
+        #                            for specific hosts will be performed. This will always execute
+        #                            'cert --sign --all --allow-dns-alt-names' even for a single host.
         #
         # @return nil
         # @raise [FailTest] if process times out
-        def sign_certificate_for(host)
-          block_on host do | host |
-            if [master, dashboard, database].include? host
+        def sign_certificate_for(host = [])
+          hostnames = []
+          hosts = host.is_a?(Array) ? host : [host]
+          hosts.each{ |current_host|
+            if [master, dashboard, database].include? current_host
 
-              on host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
-              on master, puppet( "cert --allow-dns-alt-names sign #{host}" ), :acceptable_exit_codes => [0,24]
+              on current_host, puppet( 'agent -t' ), :acceptable_exit_codes => [0,1,2]
+              on master, puppet( "cert --allow-dns-alt-names sign #{current_host}" ), :acceptable_exit_codes => [0,24]
 
             else
-
-              hostname = Regexp.escape host.node_name
-
-              last_sleep = 0
-              next_sleep = 1
-              (0..10).each do |i|
-                fail_test("Failed to sign cert for #{hostname}") if i == 10
-
-                on master, puppet("cert --sign --all --allow-dns-alt-names"), :acceptable_exit_codes => [0,24]
-                break if on(master, puppet("cert --list --all")).stdout =~ /\+ "?#{hostname}"?/
-                sleep next_sleep
-                (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
+              hostnames << Regexp.escape( current_host.node_name )
+            end
+          }
+          if hostnames.size < 1
+            on master, puppet("cert --sign --all --allow-dns-alt-names"),
+               :acceptable_exit_codes => [0,24]
+            return
+          end
+          while hostnames.size > 0
+            last_sleep = 0
+            next_sleep = 1
+            (0..10).each do |i|
+              if i == 10
+                fail_test("Failed to sign cert for #{hostnames}")
+                hostnames.clear
+              end
+              on master, puppet("cert --sign --all --allow-dns-alt-names"), :acceptable_exit_codes => [0,24]
+              out = on(master, puppet("cert --list --all")).stdout
+              if hostnames.all? { |hostname| out =~ /\+ "?#{hostname}"?/ }
+                hostnames.clear
+                break
               end
 
+              sleep next_sleep
+              (last_sleep, next_sleep) = next_sleep, last_sleep+next_sleep
             end
           end
+          host
         end
 
         #prompt the master to sign certs then check to confirm the cert for the default host is signed

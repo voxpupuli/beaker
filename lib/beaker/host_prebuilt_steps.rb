@@ -13,7 +13,7 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     UNIX_PACKAGES = ['curl', 'ntpdate']
-    FREEBSD_PACKAGES = ['curl', 'perl5']
+    FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
@@ -21,6 +21,8 @@ module Beaker
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['curl', 'ntpdate']
+    SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp']
+    SOLARIS11_PACKAGES = ['curl', 'ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -51,7 +53,7 @@ module Beaker
             when host['platform'] =~ /sles-/
               ntp_command = "sntp #{ntp_server}"
             else
-              ntp_command = "ntpdate -t 20 #{ntp_server}"
+              ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
           success=false
           try = 0
@@ -70,6 +72,7 @@ module Beaker
           end
         end
       end
+      nil
     rescue => e
       report_and_raise(logger, e, "timesync (--ntp)")
     end
@@ -107,7 +110,11 @@ module Beaker
           check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
         when host['platform'] =~ /openbsd/
           check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-/
+        when host['platform'] =~ /solaris-10/
+          check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
+        when host['platform'] =~ /solaris-1[1-9]/
+          check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
+        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end
@@ -120,11 +127,27 @@ module Beaker
     # @param [Host] host Host to act on
     # @param [Array<String>] package_list List of package names to install
     def check_and_install_packages_if_needed host, package_list
-      package_list.each do |pkg|
-        if not host.check_for_package pkg
-          host.install_package pkg
+      package_list.each do |string|
+        alternatives = string.split('|')
+        next if alternatives.any? { |pkg| host.check_for_package pkg }
+        install_one_of_packages host, alternatives
+      end
+    end
+
+    # Installs one of alternative packages (first available)
+    #
+    # @param [Host] host Host to act on
+    # @param [Array<String>] packages List of package names (alternatives).
+    def install_one_of_packages host, packages
+      error = nil
+      packages.each do |pkg|
+        begin
+          return host.install_package pkg
+        rescue Beaker::Host::CommandFailure => e
+          error = e
         end
       end
+      raise error
     end
 
     #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
@@ -152,41 +175,6 @@ module Beaker
       end
     rescue => e
       report_and_raise(logger, e, "sync_root_keys")
-    end
-
-    #Determine the Extra Packages for Enterprise Linux URL for the provided Enterprise Linux host.
-    # @param [Host, Array<Host>] host One host to act on.  Will use host epel_url, epel_arch and epel_pkg
-    #                                 before using defaults provided in opts.
-    # @return [String, String, String] The URL, arch  and package name for EPL for the provided host
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [String] :epel_url Link to download
-    # @option opts [String] :epel_arch Architecture to download (i386, x86_64, etc), defaults to i386 for 5 and 6, x86_64 for 7
-    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
-    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
-    # @raise [Exception] Raises an error if the host provided's platform != /el-(5|6)/
-    def epel_info_for host, opts
-      if !el_based?(host)
-        raise "epel_info_for! not available for #{host.name} on platform #{host['platform']}"
-      end
-
-      version = host['platform'].version
-      url = "#{host[:epel_url] || opts[:epel_url]}/#{version}"
-      if version == '7'
-        if opts[:epel_7_arch] == 'i386'
-          raise ArgumentError.new("epel-7 does not provide packages for i386")
-        end
-        pkg = host[:epel_pkg] || opts[:epel_7_pkg]
-        arch = opts[:epel_7_arch] || 'x86_64'
-      elsif version == '6'
-        pkg = host[:epel_pkg] || opts[:epel_6_pkg]
-        arch = host[:epel_arch] || opts[:epel_6_arch] || 'i386'
-      elsif version == '5'
-        pkg = host[:epel_pkg] || opts[:epel_5_pkg]
-        arch = host[:epel_arch] || opts[:epel_5_arch] || 'i386'
-      else
-        raise ArgumentError.new("epel_info_for does not support el version #{version}, on #{host.name}")
-      end
-      return url, arch, pkg
     end
 
     # Run 'apt-get update' on the provided host or hosts.
@@ -251,10 +239,6 @@ module Beaker
     # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
     # @option opts [String] :epel_url Link to download from
-    # @option opts [String] :epel_arch Architecture of epel to download (i386, x86_64, etc)
-    # @option opts [String] :epel_7_pkg Package to download from provided link for el-7
-    # @option opts [String] :epel_6_pkg Package to download from provided link for el-6
-    # @option opts [String] :epel_5_pkg Package to download from provided link for el-5
     def add_el_extras( host, opts )
       #add_el_extras
       #only supports el-* platforms
@@ -265,14 +249,9 @@ module Beaker
         when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
-            url, arch, pkg = epel_info_for host, opts
-            if host['platform'].version == '7'
-              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/e/#{pkg}"))
-            else
-              host.exec(Command.new("rpm -i#{debug_opt} #{url}/#{arch}/#{pkg}"))
-            end
+            host.exec(Command.new("rpm -i#{debug_opt} #{opts[:epel_url]}/epel-release-latest-#{host['platform'].version}.noarch.rpm"))
             #update /etc/yum.repos.d/epel.repo for new baseurl
-            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape(url)}/\$basearch;' /etc/yum.repos.d/epel.repo"))
+            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{opts[:epel_url]}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
             #remove mirrorlist
             host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
             host.exec(Command.new('yum clean all && yum makecache'))
@@ -290,7 +269,11 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
+      if ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+        resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+      else
+        resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
+      end
       resolv_conf.each_line { |line|
         if line =~ /^\s*domain\s+(\S+)/
           domain = $1
@@ -319,8 +302,18 @@ module Beaker
     def set_etc_hosts(host, etc_hosts)
       if host['platform'] =~ /freebsd/
         host.echo_to_file(etc_hosts, '/etc/hosts')
+      elsif ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+        host.exec(Command.new("echo '#{etc_hosts}' >> C:\\Windows\\System32\\drivers\\etc\\hosts"))
       else
-        host.exec(Command.new("echo '#{etc_hosts}' > /etc/hosts"))
+        host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
+      end
+      # AIX must be configured to prefer local DNS over external
+      if host['platform'] =~ /aix/
+        aix_netsvc = '/etc/netsvc.conf'
+        aix_local_resolv = 'hosts = local, bind'
+        unless host.exec(Command.new("grep '#{aix_local_resolv}' #{aix_netsvc}"), :accept_all_exit_codes => true).exit_code == 0
+          host.exec(Command.new("echo '#{aix_local_resolv}' >> #{aix_netsvc}"))
+        end
       end
     end
 
@@ -350,6 +343,10 @@ module Beaker
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
+
+        if host.selinux_enabled?
+          host.exec(Command.new('sudo fixfiles restore /root'))
+        end
       end
     end
 
@@ -374,6 +371,18 @@ module Beaker
       end
     end
 
+    # Update /etc/hosts to make updates.puppetlabs.com (aka the dujour server) resolve to 127.0.01,
+    # so that we don't pollute the server with test data.  See SERVER-1000, BKR-182, BKR-237, DJ-10
+    # for additional details.
+    def disable_updates hosts, opts
+      logger = opts[:logger]
+      hosts.each do |host|
+        next if host['platform'] =~ /netscaler/
+        logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
+        set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
+      end
+    end
+
     # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
     #
     # Does nothing on other platfoms.
@@ -395,7 +404,7 @@ module Beaker
         elsif host['platform'] =~ /solaris-10/
           host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif host['platform'] =~ /solaris-11/
-          host.exec(Command.new("sudo rolemod -K type=normal root"), {:pty => true} )
+          host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif not host.is_powershell?
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
@@ -405,7 +414,7 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /centos-7|el-7|redhat-7/
+        elsif host['platform'] =~ /centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
@@ -520,75 +529,21 @@ module Beaker
       logger = opts[:logger]
 
       block_on host do |host|
-        next if host['platform'] =~ /f5/
-        env = construct_env(host, opts)
-        logger.debug("setting local environment on #{host.name}")
-        case host['platform']
-        when /windows/
-          if host.is_cygwin?
-            host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-            # we get periodic failures to restart the service, so looping these with re-attempts
-            repeat_fibonacci_style_for(5) do
-              0 == host.exec(Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
-            end
-            repeat_fibonacci_style_for(5) do
-              0 == host.exec(Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
-            end
-            env['CYGWIN'] = 'nodosfilewarning'
-          else
-            #nothing to do here
-          end
-        when /osx-10\.*11/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /private/etc/ssh/sshd_config"))
-          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
-          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
-        when /osx/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-          host.exec(Command.new("launchctl unload /System/Library/LaunchDaemons/ssh.plist"))
-          host.exec(Command.new("launchctl load /System/Library/LaunchDaemons/ssh.plist"))
-        when /debian|ubuntu|cumulus/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("service ssh restart"))
-        when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("systemctl restart sshd.service"))
-        when /el-|centos|fedora|redhat|oracle|scientific|eos/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("/sbin/service sshd restart"))
-        when /sles/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("rcsshd restart"))
-        when /solaris/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("svcadm restart svc:/network/ssh:default"))
-        when /aix/
-          host.exec(Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-          host.exec(Command.new("stopsrc -g ssh"))
-          host.exec(Command.new("startsrc -g ssh"))
-        when /(free|open)bsd/
-          host.exec(Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
-          host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
+        skip_msg = host.skip_set_env?
+        unless skip_msg.nil?
+          logger.debug( skip_msg )
+          next
         end
 
-        if not host.is_powershell?
-          #ensure that ~/.ssh/environment exists
-          host.exec(Command.new("mkdir -p #{Pathname.new(host[:ssh_env_file]).dirname}"))
-          host.exec(Command.new("chmod 0600 #{Pathname.new(host[:ssh_env_file]).dirname}"))
-          host.exec(Command.new("touch #{host[:ssh_env_file]}"))
-          #add the constructed env vars to this host
-          host.add_env_var('PATH', '$PATH')
-          # FIXME
-          if host['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
-            version = "#{$1}.#{$2}"
-            arch = $3
-            arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
-            host.add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
-          end
+        env = construct_env(host, opts)
+        logger.debug("setting local environment on #{host.name}")
+        if host['platform'] =~ /windows/ and host.is_cygwin?
+          env['CYGWIN'] = 'nodosfilewarning'
         end
-        #add the env var set to this test host
-        env.each_pair do |var, value|
-          host.add_env_var(var, value)
-        end
+        host.ssh_permit_user_environment()
+
+        host.ssh_set_user_environment(env)
+
         # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
         # this is the worst and i hate it
         Class.new.extend(Beaker::DSL).configure_type_defaults_on(host)

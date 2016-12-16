@@ -3,6 +3,9 @@ require 'timeout'
 require 'benchmark'
 require 'rsync'
 
+require 'beaker/dsl/helpers'
+require 'beaker/dsl/patterns'
+
 [ 'command', 'ssh_connection'].each do |lib|
   require "beaker/#{lib}"
 end
@@ -10,6 +13,9 @@ end
 module Beaker
   class Host
     SELECT_TIMEOUT = 30
+
+    include Beaker::DSL::Helpers
+    include Beaker::DSL::Patterns
 
     class CommandFailure < StandardError; end
 
@@ -49,6 +55,10 @@ module Beaker
         Mac::Host.new name, host_hash, options
       when /freebsd/
         FreeBSD::Host.new name, host_hash, options
+      when /eos/
+        Eos::Host.new name, host_hash, options
+      when /cisco/
+        Cisco::Host.new name, host_hash, options
       else
         Unix::Host.new name, host_hash, options
       end
@@ -73,7 +83,7 @@ module Beaker
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = puppet['node_name_value'].strip
+      result = puppet_configprint['node_name_value'].strip
     end
 
     def port_open? port
@@ -82,9 +92,24 @@ module Beaker
           TCPSocket.new(reachable_name, port).close
           return true
         end
-      rescue Errno::ECONNREFUSED, Timeout::Error, Errno::ETIMEDOUT
+      rescue Errno::ECONNREFUSED, Timeout::Error, Errno::ETIMEDOUT, Errno::EHOSTUNREACH
         return false
       end
+    end
+
+    # Wait for a port on the host.  Useful for those occasions when you've called
+    # host.reboot and want to avoid spam from subsequent SSH connections retrying
+    # to connect from say retry_on()
+    def wait_for_port(port, attempts=15)
+      @logger.debug("  Waiting for port #{port} ... ", false)
+      start = Time.now
+      done = repeat_fibonacci_style_for(attempts) { port_open?(port) }
+      if done
+        @logger.debug('connected in %0.2f seconds' % (Time.now - start))
+      else
+        @logger.debug('timeout')
+      end
+      done
     end
 
     def up?
@@ -105,9 +130,10 @@ module Beaker
     # class to do things like `host.puppet['vardir']` to query the
     # 'main' section or, if they want the configuration for a
     # particular run type, `host.puppet('agent')['vardir']`
-    def puppet(command='agent')
+    def puppet_configprint(command='agent')
       PuppetConfigReader.new(self, command)
     end
+    alias_method :puppet, :puppet_configprint
 
     def []= k, v
       host_hash[k] = v
@@ -213,10 +239,30 @@ module Beaker
       @logger.warn("Uh oh, this should be handled by sub-classes but hasn't been")
     end
 
+    # Determine the ip address using logic specific to the hypervisor
+    def get_public_ip
+      case host_hash[:hypervisor]
+      when 'ec2'
+        if host_hash[:instance]
+          host_hash[:instance].ip_address
+        else
+          # In the case of using ec2 instances with the --no-provision flag, the ec2
+          # instance object does not exist and we should just use the curl endpoint
+          # specified here:
+          # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+          if self.instance_of?(Windows::Host)
+          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          else
+          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
+          end
+        end
+      end
+    end
+
     #Return the ip address of this host
     #Always pull fresh, because this can sometimes change
     def ip
-      self['ip'] = get_ip
+      self['ip'] = get_public_ip || get_ip
     end
 
     #@return [Boolean] true if x86_64, false otherwise
@@ -254,8 +300,19 @@ module Beaker
     end
 
     def exec command, options={}
+      result = nil
       # I've always found this confusing
       cmdline = command.cmd_line(self)
+
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        @logger.debug "\n Running in :dry_run mode. Command #{cmdline} not executed."
+        result = Beaker::NullResult.new(self, command)
+        return result
+      end
 
       if options[:silent]
         output_callback = nil
@@ -268,11 +325,10 @@ module Beaker
         end
       end
 
-      unless $dry_run
+      unless options[:dry_run]
         # is this returning a result object?
         # the options should come at the end of the method signature (rubyism)
         # and they shouldn't be ssh specific
-        result = nil
 
         @logger.step_in()
         seconds = Benchmark.realtime {
@@ -303,15 +359,15 @@ module Beaker
           # exit codes at the host level and then raising...
           # is it necessary to break execution??
           if options[:accept_all_exit_codes] && options[:acceptable_exit_codes]
-            @logger.warn ":accept_all_exit_codes & :acceptable_exit_codes set. :accept_all_exit_codes overrides, but they shouldn't both be set at once"
+            @logger.warn ":accept_all_exit_codes & :acceptable_exit_codes set. :acceptable_exit_codes overrides, but they shouldn't both be set at once"
+            options[:accept_all_exit_codes] = false
           end
           if !options[:accept_all_exit_codes] && !result.exit_code_in?(Array(options[:acceptable_exit_codes] || [0, nil]))
             raise CommandFailure, "Host '#{self}' exited with #{result.exit_code} running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
           end
         end
-        # Danger, so we have to return this result?
-        result
       end
+      result
     end
 
     # scp files from the localhost to this test host, if a directory is provided it is recursively copied.
@@ -322,7 +378,7 @@ module Beaker
     # to that source dir.
     #
     # @param source [String] The path to the file/dir to upload
-    # @param target [String] The destination path on the host
+    # @param target_path [String] The destination path on the host
     # @param options [Hash{Symbol=>String}] Options to alter execution
     # @option options [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
     # @example
@@ -331,7 +387,19 @@ module Beaker
     #
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
-    def do_scp_to source, target, options
+    def do_scp_to source, target_path, options
+      target = self.scp_path( target_path )
+
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        scp_cmd = "scp #{source} #{@name}:#{target}"
+        @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
+        return NullResult.new(self, scp_cmd)
+      end
+
       @logger.notify "localhost $ scp #{source} #{@name}:#{target} {:ignore => #{options[:ignore]}}"
 
       result = Result.new(@name, [source, target])
@@ -359,7 +427,7 @@ module Beaker
           result.exit_code = 1
         end
         if source_file
-          result = connection.scp_to(source_file, target, options, $dry_run)
+          result = connection.scp_to(source_file, target, options)
           @logger.trace result.stdout
         end
       else # a directory with ignores
@@ -394,18 +462,28 @@ module Beaker
           else
             file_path = File.join(target, File.dirname(s))
           end
-          result = connection.scp_to(s, file_path, options, $dry_run)
+          result = connection.scp_to(s, file_path, options)
           @logger.trace result.stdout
         end
       end
 
+      self.scp_post_operations( target, target_path )
       return result
     end
 
     def do_scp_from source, target, options
+      # use the value of :dry_run passed to the method unless
+      # undefined, then use parsed @options hash.
+      options[:dry_run] ||= @options[:dry_run]
+
+      if options[:dry_run]
+        scp_cmd = "scp #{@name}:#{source} #{target}"
+        @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
+        return  NullResult.new(self, scp_cmd)
+      end
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
-      result = connection.scp_from(source, target, options, $dry_run)
+      result = connection.scp_from(source, target, options)
       @logger.debug result.stdout
       return result
     end
@@ -499,6 +577,8 @@ module Beaker
     'freebsd',
     'windows',
     'pswindows',
+    'eos',
+    'cisco',
   ].each do |lib|
     require "beaker/host/#{lib}"
   end

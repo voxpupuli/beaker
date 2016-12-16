@@ -11,10 +11,10 @@ end
 
 module Beaker
   platforms = [
-    "ubuntu-14.04-x86_64", 
-    "cumulus-2.2-x86_64", 
-    "fedora-22-x86_64", 
-    "centos-7-x86_64", 
+    "ubuntu-14.04-x86_64",
+    "cumulus-2.2-x86_64",
+    "fedora-22-x86_64",
+    "centos-7-x86_64",
     "sles-12-x86_64"
   ]
 
@@ -34,6 +34,7 @@ module Beaker
     let(:options) {{
       :logger => logger,
       :forward_ssh_agent => true,
+      :provision => true
     }}
 
     let(:image) do
@@ -66,6 +67,7 @@ module Beaker
       })
       allow( container ).to receive(:stop)
       allow( container ).to receive(:delete)
+      allow( container ).to receive(:exec)
       container
     end
 
@@ -93,6 +95,8 @@ module Beaker
       end
       it 'should fail when docker not present' do
         expect { docker }.to raise_error(RuntimeError, /Docker instance not connectable./)
+        expect { docker }.to raise_error(RuntimeError, /Check your DOCKER_HOST variable has been set/)
+        expect { docker }.to raise_error(RuntimeError, /If you are on OSX or Windows, you might not have Docker Machine setup correctly/)
         expect { docker }.to raise_error(RuntimeError, /Error was: oops/)
       end
     end
@@ -179,8 +183,6 @@ module Beaker
           container_name = "spec-container-#{index}"
           host['docker_container_name'] = container_name
 
-          expect( ::Docker::Container ).to receive(:all).and_return([])
-
           expect( ::Docker::Container ).to receive(:create).with({
             'Image' => image.id,
             'Hostname' => host.name,
@@ -191,13 +193,47 @@ module Beaker
         docker.provision
       end
 
-      it 'should not create a container if a named one already exists' do
-        hosts.each_with_index do |host, index|
-          container_name = "spec-container-#{index}"
-          host['docker_container_name'] = container_name
 
-          expect( ::Docker::Container ).to receive(:all).and_return([container])
-          expect( ::Docker::Container ).not_to receive(:create)
+      it 'should create a container with volumes bound' do
+        hosts.each_with_index do |host, index|
+          host['mount_folders'] = {
+            'mount1' => {
+              'host_path' => '/source_folder',
+              'container_path' => '/mount_point',
+            },
+            'mount2' => {
+              'host_path' => '/another_folder',
+              'container_path' => '/another_mount',
+              'opts' => 'ro',
+            },
+            'mount3' => {
+              'host_path' => '/different_folder',
+              'container_path' => '/different_mount',
+              'opts' => 'rw',
+            },
+            'mount4' => {
+              'host_path' => './',
+              'container_path' => '/relative_mount',
+            },
+            'mount5' => {
+              'host_path' => 'local_folder',
+              'container_path' => '/another_relative_mount',
+            }
+          }
+
+          expect( ::Docker::Container ).to receive(:create).with({
+            'Image' => image.id,
+            'Hostname' => host.name,
+            'HostConfig' => {
+              'Binds' => [
+                '/source_folder:/mount_point',
+                '/another_folder:/another_mount:ro',
+                '/different_folder:/different_mount:rw',
+                "#{File.expand_path('./')}:/relative_mount",
+                "#{File.expand_path('local_folder')}:/another_relative_mount",
+              ]
+            }
+          })
         end
 
         docker.provision
@@ -257,6 +293,38 @@ module Beaker
 
         expect( hosts[0]['docker_image'] ).to be === image
         expect( hosts[0]['docker_container'] ).to be === container
+      end
+
+      context 'provision=false' do
+        let(:options) {{
+          :logger => logger,
+          :forward_ssh_agent => true,
+          :provision => false
+        }}
+
+
+        it 'should fix ssh' do
+          hosts.each_with_index do |host, index|
+            container_name = "spec-container-#{index}"
+            host['docker_container_name'] = container_name
+
+            expect( ::Docker::Container ).to receive(:all).and_return([container])
+            expect(container).to receive(:exec).exactly(3).times
+          end
+          docker.provision
+        end
+
+        it 'should not create a container if a named one already exists' do
+          hosts.each_with_index do |host, index|
+            container_name = "spec-container-#{index}"
+            host['docker_container_name'] = container_name
+
+            expect( ::Docker::Container ).to receive(:all).and_return([container])
+            expect( ::Docker::Container ).not_to receive(:create)
+          end
+
+          docker.provision
+        end
       end
     end
 
@@ -319,6 +387,17 @@ module Beaker
         expect { docker.send(:dockerfile_for, {'platform' => 'centos-7-x86_64'})}.to raise_error(/Docker image undefined/)
       end
 
+      it 'should set "ENV container docker"' do
+        FakeFS.deactivate!
+        platforms.each do |platform|
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => platform,
+            'image' => 'foobar',
+          })
+          expect( dockerfile ).to be =~ /ENV container docker/
+        end
+      end
+
       it 'should add docker_image_commands as RUN statements' do
         FakeFS.deactivate!
         platforms.each do |platform|
@@ -359,14 +438,16 @@ module Beaker
         expect( dockerfile ).to be =~ /RUN zypper -n in openssh/
       end
 
-      it 'should use dnf on fedora-22' do
-        FakeFS.deactivate!
-        dockerfile = docker.send(:dockerfile_for, {
-          'platform' => 'fedora-22-x86_64',
-          'image' => 'foobar',
-        })
+      (22..29).to_a.each do | fedora_release |
+        it "should use dnf on fedora #{fedora_release}" do
+          FakeFS.deactivate!
+          dockerfile = docker.send(:dockerfile_for, {
+            'platform' => "fedora-#{fedora_release}-x86_64",
+            'image' => 'foobar',
+          })
 
-        expect( dockerfile ).to be =~ /RUN dnf install -y sudo/
+          expect( dockerfile ).to be =~ /RUN dnf install -y sudo/
+        end
       end
 
       it 'should use user dockerfile if specified' do

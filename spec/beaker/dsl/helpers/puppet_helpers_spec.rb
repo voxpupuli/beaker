@@ -5,6 +5,7 @@ class ClassMixedWithDSLHelpers
   include Beaker::DSL::Wrappers
   include Beaker::DSL::Roles
   include Beaker::DSL::Patterns
+  include Beaker::DSL::Outcomes
 
   def logger
     RSpec::Mocks::Double.new('logger').as_null_object
@@ -105,6 +106,28 @@ describe ClassMixedWithDSLHelpers do
       end
 
       result = subject.apply_manifest_on( the_hosts, 'include foobar' )
+      expect(result).to be_an(Array)
+    end
+
+    it 'operates on an array of hosts in parallel' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(2).times
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      the_hosts = [master, agent]
+
+      allow( subject ).to receive( :create_remote_file ).and_return( true )
+      the_hosts.each do |host|
+        allow( subject ).to receive( :puppet ).
+            and_return( 'puppet_command' )
+
+        allow( subject ).to receive( :on ).
+            with( host, 'puppet_command', :acceptable_exit_codes => [0] )
+      end
+
+      result = nil
+      result = subject.apply_manifest_on( the_hosts, 'include foobar', { :run_in_parallel => true } )
       expect(result).to be_an(Array)
     end
 
@@ -295,22 +318,48 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#stub_hosts_on' do
     it 'executes puppet on the host passed and ensures it is reverted' do
+      test_host = make_host('my_host', {})
       allow( subject ).to receive( :hosts ).and_return( hosts )
       logger = double.as_null_object
 
+      expect( subject ).to receive( :on ).once
       allow( subject ).to receive( :logger ).and_return( logger )
-      expect( subject ).to receive( :on ).twice
       expect( subject ).to receive( :teardown ).and_yield
-      expect( subject ).to receive( :puppet ).once.
-        with( 'resource', 'host',
-              'puppetlabs.com',
-              'ensure=present', 'ip=127.0.0.1' )
+      manifest =<<-EOS.gsub /^\s+/, ""
+        host { 'puppetlabs.com':
+          \tensure       => present,
+          \tip           => '127.0.0.1',
+          \thost_aliases => [],
+        }
+      EOS
+      expect( subject ).to receive( :apply_manifest_on ).once.
+        with( test_host, manifest )
       expect( subject ).to receive( :puppet ).once.
         with( 'resource', 'host',
               'puppetlabs.com',
               'ensure=absent' )
 
-      subject.stub_hosts_on( make_host('my_host', {}), 'puppetlabs.com' => '127.0.0.1' )
+      subject.stub_hosts_on( test_host, {'puppetlabs.com' => '127.0.0.1'} )
+    end
+    it 'adds aliases to defined hostname' do
+      test_host = make_host('my_host', {})
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      logger = double.as_null_object
+
+      expect( subject ).to receive( :on ).once
+      allow( subject ).to receive( :logger ).and_return( logger )
+      expect( subject ).to receive( :teardown ).and_yield
+      manifest =<<-EOS.gsub /^\s+/, ""
+        host { 'puppetlabs.com':
+          \tensure       => present,
+          \tip           => '127.0.0.1',
+          \thost_aliases => [\"foo\", \"bar\"],
+        }
+      EOS
+      expect( subject ).to receive( :apply_manifest_on ).once.
+        with( test_host, manifest )
+
+      subject.stub_hosts_on( test_host, {'puppetlabs.com' => '127.0.0.1'}, {'puppetlabs.com' => ['foo','bar']} )
     end
   end
 
@@ -332,9 +381,7 @@ describe ClassMixedWithDSLHelpers do
       expect( Resolv ).to receive( :getaddress ).
         with( 'my_forge.example.com' ).and_return( '127.0.0.1' )
       expect( subject ).to receive( :stub_hosts_on ).
-        with( host, 'forge.puppetlabs.com' => '127.0.0.1' )
-      expect( subject ).to receive( :stub_hosts_on ).
-        with( host, 'forgeapi.puppetlabs.com' => '127.0.0.1' )
+        with( host, {'forge.puppetlabs.com' => '127.0.0.1'}, {'forge.puppetlabs.com' => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']} )
 
       subject.stub_forge_on( host, 'my_forge.example.com' )
     end
@@ -362,7 +409,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs the pe-puppet on a system without pe-puppet-agent' do
       vardir = '/var'
       deb_agent = make_host( 'deb', :platform => 'debian-7-amd64', :pe_ver => '3.7' )
-      allow( deb_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( deb_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( deb_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
       expect( deb_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(false)
@@ -377,7 +424,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs the pe-puppet-agent on a unix system with pe-puppet-agent' do
       vardir = '/var'
       el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '3.7' )
-      allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
       expect( el_agent ).to receive( :file_exist? ).with("/etc/init.d/pe-puppet-agent").and_return(true)
@@ -391,7 +438,7 @@ describe ClassMixedWithDSLHelpers do
     it 'runs puppet on a unix system 4.0 or newer' do
       vardir = '/var'
       el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
-      allow( el_agent ).to receive( :puppet ).and_return( { 'vardir' => vardir } )
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
 
       expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
 
@@ -399,6 +446,46 @@ describe ClassMixedWithDSLHelpers do
       expect( subject ).to receive( :on ).once
 
       subject.stop_agent_on( el_agent )
+    end
+
+    it 'can run on an array of hosts' do
+      vardir = '/var'
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+      el_agent2 = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      expect( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      allow( el_agent2 ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      expect( el_agent2 ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      expect( subject ).to receive( :puppet_resource ).with( "service", "puppet", "ensure=stopped").twice
+      expect( subject ).to receive( :on ).twice
+
+      subject.stop_agent_on( [el_agent, el_agent2] )
+    end
+
+    it 'runs in parallel with run_in_parallel=true' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      vardir = '/var'
+      el_agent = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+      el_agent2 = make_host( 'el', :platform => 'el-5-x86_64', :pe_ver => '4.0' )
+
+      allow( el_agent ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      allow( el_agent ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      allow( el_agent2 ).to receive( :puppet_configprint ).and_return( { 'vardir' => vardir } )
+
+      allow( el_agent2 ).to receive( :file_exist? ).with("/var/state/agent_catalog_run.lock").and_return(false)
+
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(2).times
+
+      subject.stop_agent_on( [el_agent, el_agent2], { :run_in_parallel => true} )
     end
 
   end
@@ -448,6 +535,22 @@ describe ClassMixedWithDSLHelpers do
       subject.sign_certificate_for( agent )
     end
 
+    it 'accepts an array of hosts to validate' do
+      allow( subject ).to receive( :sleep ).and_return( true )
+
+      result.stdout = "+ \"#{agent}\" + \"#{custom}\""
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+
+      allow( subject ).to receive( :puppet ) do |arg|
+        arg
+      end
+      expect( subject ).to receive( :on ).with( master, "agent -t", :acceptable_exit_codes => [0, 1, 2]).once
+      expect( subject ).to receive( :on ).with( master, "cert --allow-dns-alt-names sign master", :acceptable_exit_codes => [0, 24]).once
+      expect( subject ).to receive( :on ).with( master, "cert --sign --all --allow-dns-alt-names", :acceptable_exit_codes => [0,24]).once
+      expect( subject ).to receive( :on ).with( master, "cert --list --all").once.and_return( result )
+
+      subject.sign_certificate_for( [master, agent, custom] )
+    end
   end
 
   describe "#sign_certificate" do
@@ -502,6 +605,33 @@ describe ClassMixedWithDSLHelpers do
       subject.with_puppet_running_on(host, {})
     end
 
+    context 'with test flow exceptions' do
+      it 'can pass_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::PassTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:pass_test)
+        }.to raise_error(Beaker::DSL::Outcomes::PassTest)
+      end
+      it 'can fail_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::FailTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:fail_test)
+        }.to raise_error(Beaker::DSL::Outcomes::FailTest)
+      end
+      it 'can skip_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::SkipTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:skip_test)
+        }.to raise_error(Beaker::DSL::Outcomes::SkipTest)
+      end
+      it 'can pending_test' do
+        expect( subject ).to receive(:backup_the_file).and_raise(Beaker::DSL::Outcomes::PendingTest)
+        expect {
+          subject.with_puppet_running_on(host, {}).to receive(:pending_test)
+        }.to raise_error(Beaker::DSL::Outcomes::PendingTest)
+      end
+    end
+
     describe 'with puppet-server' do
       let(:default_confdir) { "/etc/puppet" }
       let(:default_vardir) { "/var/lib/puppet" }
@@ -549,6 +679,15 @@ describe ClassMixedWithDSLHelpers do
           'vardir' => default_vardir,
           'config' => "#{default_confdir}/puppet.conf"
         })
+      end
+
+      describe 'when the global option for :is_puppetserver is false' do
+        it 'checks the option for the host object' do
+          allow( subject ).to receive( :options) .and_return( {:is_puppetserver => false})
+          host[:is_puppetserver] = true
+          expect( subject ).to receive( :modify_tk_config)
+          subject.with_puppet_running_on(host, conf_opts)
+        end
       end
 
       describe 'and command line args passed' do
@@ -638,7 +777,21 @@ describe ClassMixedWithDSLHelpers do
         it 'bounces puppet twice' do
           allow( subject ).to receive(:curl_with_retries)
           subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
+        end
+
+        it 'gracefully restarts using apache2ctl' do
+          allow(host).to receive( :check_for_command ).and_return( true )
+          allow( subject ).to receive(:curl_with_retries)
+          subject.with_puppet_running_on(host, {})
           expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
+        end
+
+        it 'gracefully restarts using apachectl' do
+          allow(host).to receive( :check_for_command ).and_return( false )
+          allow( subject ).to receive(:curl_with_retries)
+          subject.with_puppet_running_on(host, {})
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
         end
 
         it 'yields to a block after bouncing service' do
@@ -646,18 +799,18 @@ describe ClassMixedWithDSLHelpers do
           allow( subject ).to receive(:curl_with_retries)
           expect do
             subject.with_puppet_running_on(host, {}) do
-              expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+              expect(host).to execute_commands_matching(/apachectl graceful/).once
               execution += 1
             end
           end.to change { execution }.by(1)
-          expect(host).to execute_commands_matching(/apache2ctl graceful/).exactly(2).times
+          expect(host).to execute_commands_matching(/apachectl graceful/).exactly(2).times
         end
 
         context ':restart_when_done flag set false' do
           it 'bounces puppet once' do
             allow( subject ).to receive(:curl_with_retries)
             subject.with_puppet_running_on(host, { :restart_when_done => false })
-            expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+            expect(host).to execute_commands_matching(/apachectl graceful/).once
           end
 
           it 'yields to a block after bouncing service' do
@@ -665,7 +818,7 @@ describe ClassMixedWithDSLHelpers do
             allow( subject ).to receive(:curl_with_retries)
             expect do
               subject.with_puppet_running_on(host, { :restart_when_done => false }) do
-                expect(host).to execute_commands_matching(/apache2ctl graceful/).once
+                expect(host).to execute_commands_matching(/apachectl graceful/).once
                 execution += 1
               end
             end.to change { execution }.by(1)
@@ -833,17 +986,16 @@ describe ClassMixedWithDSLHelpers do
         end
       end
 
+      let(:logger) { double.as_null_object }
       describe 'handling failures' do
 
-        let(:logger) { double.as_null_object }
         before do
           allow( subject ).to receive( :logger ).and_return( logger )
           expect( subject ).to receive(:stop_puppet_from_source_on).and_raise(RuntimeError.new('Also failed in teardown.'))
+          expect( host ).to receive(:port_open?).with(8140).and_return(true)
         end
 
         it 'does not swallow an exception raised from within test block if ensure block also fails' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:error).with(/Raised during attempt to teardown.*Also failed in teardown/)
 
           expect do
@@ -852,8 +1004,6 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'dumps the puppet logs if there is an error in the teardown' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:notify).with(/Dumping master log/)
 
           expect do
@@ -862,8 +1012,6 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'does not mask the teardown error with an error from dumping the logs' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
-
           expect( subject.logger ).to receive(:notify).with(/Dumping master log/).and_raise("Error from dumping logs")
 
           expect do
@@ -872,13 +1020,14 @@ describe ClassMixedWithDSLHelpers do
         end
 
         it 'does not swallow a teardown exception if no earlier exception was raised' do
-          expect( host ).to receive(:port_open?).with(8140).and_return(true)
           expect( subject.logger).to_not receive(:error)
           expect do
             subject.with_puppet_running_on(host, {})
           end.to raise_error(RuntimeError, 'Also failed in teardown.')
         end
+
       end
+
     end
   end
 
@@ -894,5 +1043,92 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
+  describe '#bounce_service' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port argument if none given' do
+      host = hosts[0]
+      expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything(), anything() )
+      subject.bounce_service( host, 'not_real_service')
+    end
+
+    it 'takes the port argument' do
+      host = hosts[0]
+      expect( host ).to receive( :graceful_restarts? ).and_return( false )
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8000/, anything(), anything() )
+      subject.bounce_service( host, 'not_real_service', nil, 8000)
+    end
+  end
+
+  describe '#sleep_until_puppetdb_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default ports if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host )
+    end
+
+    it 'allows setting the nonssl_port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8084/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host, 8084 )
+
+    end
+
+    it 'allows setting the ssl_port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8085/, anything() ).once.ordered
+      subject.sleep_until_puppetdb_started( host, nil, 8085 )
+    end
+  end
+
+  describe '#sleep_until_puppetserver_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8140/, anything() ).once.ordered
+      subject.sleep_until_puppetserver_started( host )
+    end
+
+    it 'allows setting the port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8147/, anything() ).once.ordered
+      subject.sleep_until_puppetserver_started( host, 8147 )
+    end
+  end
+
+  describe '#sleep_until_nc_started' do
+    let( :options ) { Beaker::Options::Presets.new.presets }
+    before :each do
+      allow( subject ).to receive( :options ) { options }
+    end
+
+    it 'uses the default port if none given' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /4433/, anything() ).once.ordered
+      subject.sleep_until_nc_started( host )
+    end
+
+    it 'allows setting the port' do
+      host = hosts[0]
+      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /4435/, anything() ).once.ordered
+      subject.sleep_until_nc_started( host, 4435 )
+    end
+  end
 
 end

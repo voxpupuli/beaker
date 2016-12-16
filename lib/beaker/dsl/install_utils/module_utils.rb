@@ -16,7 +16,7 @@ module Beaker
         # The directories in the module directory that will not be scp-ed to the test system when using
         # `copy_module_to`
         PUPPET_MODULE_INSTALL_IGNORE = ['.bundle', '.git', '.idea', '.vagrant', '.vendor', 'vendor', 'acceptance',
-                                        'bundle', 'spec', 'tests', 'log']
+                                        'bundle', 'spec', 'tests', 'log', '.svn', 'junit', 'pkg', 'example']
 
         # Install the desired module on all hosts using either the PMT or a
         #   staging forge

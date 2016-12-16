@@ -26,7 +26,6 @@ end
 
 module HostHelpers
   HOST_DEFAULTS = { :platform => 'unix',
-                    :snapshot => 'pe',
                     :roles => ['agent'],
                     :snapshot => 'snap',
                     :ip => 'default.ip.address',
@@ -34,12 +33,15 @@ module HostHelpers
                     :dns_name => 'default.box.tld',
                     :box => 'default_box_name',
                     :box_url => 'http://default.box.url',
+                    :image => 'default_image',
+                    :flavor => 'm1.large',
+                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"'
   }
 
   HOST_NAME     = "vm%d"
   HOST_SNAPSHOT = "snapshot%d"
   HOST_IP       = "ip.address.for.%s"
-  HOST_BOX      = "%s_of_my_box"
+  HOST_BOX      = "vm2%s_of_my_box"
   HOST_BOX_URL  = "http://address.for.my.box.%s"
   HOST_DNS_NAME = "%s.box.tld"
   HOST_TEMPLATE = "%s_has_a_template"
@@ -61,7 +63,15 @@ module HostHelpers
                                                :gce_project => 'beaker-compute',
                                                :gce_keyfile => '/path/to/keyfile.p12',
                                                :gce_password => 'notasecret',
-                                               :gce_email => '12345678910@developer.gserviceaccount.com' } )
+                                               :gce_email => '12345678910@developer.gserviceaccount.com',
+                                               :openstack_api_key => "P1as$w0rd",
+                                               :openstack_username => "user",
+                                               :openstack_auth_url => "http://openstack_hypervisor.labs.net:5000/v2.0/tokens",
+                                               :openstack_tenant => "testing",
+                                               :openstack_network => "testing",
+                                               :openstack_keyname => "nopass", 
+                                               :floating_ip_pool => "my_pool",
+                                               :security_group => ['my_sg', 'default'] } )
   end
 
   def generate_result (name, opts )
@@ -110,4 +120,32 @@ module HostHelpers
     OpenStruct.new instance_data
   end
 
+end
+
+module PlatformHelpers
+
+  DEBIANPLATFORMS = ['debian',
+                     'ubuntu',
+                     'cumulus',
+                     'huaweios']
+
+
+  FEDORASYSTEMD    = (14..29).to_a.collect! { |i| "fedora-#{i}" }
+
+  SYSTEMDPLATFORMS = ['el-7',
+                      'centos-7',
+                      'redhat-7',
+                      'oracle-7',
+                      'scientific-7',
+                      'eos-7'].concat(FEDORASYSTEMD)
+
+  FEDORASYSTEMV    = (1..13).to_a.collect! { |i| "fedora-#{i}" }
+
+  SYSTEMVPLATFORMS = ['el-',
+                      'centos',
+                      'fedora',
+                      'redhat',
+                      'oracle',
+                      'scientific',
+                      'eos'].concat(FEDORASYSTEMV)
 end

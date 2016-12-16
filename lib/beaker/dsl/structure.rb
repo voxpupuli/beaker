@@ -200,18 +200,22 @@ module Beaker
             # confining to all hosts *except* provided array of hosts
             hosts_to_modify = hosts_not_modified
           end
+          if hosts_to_modify.empty?
+            logger.warn "No suitable hosts without: #{criteria.inspect}"
+            skip_test "No suitable hosts found without #{criteria.inspect}"
+          end
         when :to
           if criteria and ( not criteria.empty? )
             hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to only hosts in provided array of hosts
           end
+          if hosts_to_modify.empty?
+            logger.warn "No suitable hosts with: #{criteria.inspect}"
+            skip_test "No suitable hosts found with #{criteria.inspect}"
+          end
         else
           raise "Unknown option #{type}"
-        end
-        if hosts_to_modify.empty?
-          logger.warn "No suitable hosts with: #{criteria.inspect}"
-          skip_test 'No suitable hosts found'
         end
         self.hosts = hosts_to_modify
         hosts_to_modify
@@ -273,6 +277,28 @@ module Beaker
         end
         skip_test "#{self.path} includes excluded tag(s): #{tags_to_remove_to_include_this_test}" \
           if tags_to_remove_to_include_this_test.length > 0
+
+        platform_specific_tag_confines
+      end
+
+      # Handles platform-specific tag confines logic
+      #
+      # @return nil
+      # @!visibility private
+      def platform_specific_tag_confines
+        @options[:platform_tag_confines_object] ||= PlatformTagConfiner.new(
+          @options[:platform_tag_confines]
+        )
+        confines = @options[:platform_tag_confines_object].confine_details(
+          metadata[:case][:tags]
+        )
+        confines.each do |confine_details|
+          logger.notify( confine_details[:log_message] )
+          confine(
+            confine_details[:type],
+            :platform => confine_details[:platform_regex]
+          )
+        end
       end
 
       #Return a set of hosts that meet the given criteria
@@ -320,6 +346,79 @@ module Beaker
             true_false = host[property.to_s] =~ value
           end
           true_false
+        end
+      end
+
+      class PlatformTagConfiner
+
+        # Constructs the PlatformTagConfiner, transforming the user format
+        #   into the internal structure for use by Beaker itself.
+        #
+        # @param [Array<Hash{Symbol=>Object}>] platform_tag_confines_array
+        #   The array of PlatformTagConfines objects that specify how these
+        #   confines should behave. See the note below for more info
+        #
+        # @note PlatformTagConfines objects come in the form
+        #     [
+        #       {
+        #         :platform => <platform-regex>,
+        #         :tag_reason_hash => {
+        #           <tag> => <reason to confine>,
+        #           <tag> => <reason to confine>,
+        #           ...etc...
+        #         }
+        #       }
+        #     ]
+        #
+        #   Internally, we want to turn tag matches into platform
+        #     confine statements. So a better internal structure would
+        #     be something of the form:
+        #     {
+        #       <tag> => [{
+        #         :platform => <platform-regex>,
+        #         :reason => <reason to confine>,
+        #         :type => :except,
+        #       }, ... ]
+        #     }
+        def initialize(platform_tag_confines_array)
+          platform_tag_confines_array ||= []
+          @tag_confine_details_hash = {}
+          platform_tag_confines_array.each do |entry|
+            entry[:tag_reason_hash].keys.each do |tag|
+              @tag_confine_details_hash[tag] ||= []
+              log_msg = "Tag '#{tag}' found, confining: except platforms "
+              log_msg << "matching regex '#{entry[:platform]}'. Reason: "
+              log_msg << "'#{entry[:tag_reason_hash][tag]}'"
+              @tag_confine_details_hash[tag] << {
+                :platform_regex => entry[:platform],
+                :log_message => log_msg,
+                :type => :except
+              }
+            end
+          end
+        end
+
+        # Gets the confine details needed for a set of tags
+        #
+        # @param [Array<String>] tags Tags of the given test
+        #
+        # @return [Array<Hash{Symbol=>Object}>] an array of
+        #   Confine details hashes, which are hashes of symbols
+        #   to their properties, which are objects of various
+        #   kinds, depending on the key
+        def confine_details(tags)
+          tags ||= []
+          details = []
+          tags.each do |tag|
+            tag_confine_array = @tag_confine_details_hash[tag]
+            next if tag_confine_array.nil?
+
+            details.push( *tag_confine_array )
+            # tag_confine_array.each do |confine_details|
+            #   details << confine_details
+            # end
+          end
+          details
         end
       end
     end

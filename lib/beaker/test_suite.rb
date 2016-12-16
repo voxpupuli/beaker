@@ -140,11 +140,18 @@ module Beaker
       #A convenience method for printing the results of a {TestCase}
       #@param [TestCase] test_case The {TestCase} to examine and print results for
       def print_test_result(test_case)
-        test_reported = if test_case.exception
-                          "reported: #{test_case.exception.inspect}"
-                        else
-                          test_case.test_status
-                        end
+        if test_case.exception
+          test_file_trace = ""
+          test_case.exception.backtrace.each do |line|
+            if line.include?(test_case.path)
+              test_file_trace = "\r\n    Test line: #{line}"
+              break
+            end
+          end if test_case.exception.backtrace && test_case.path
+          test_reported = "reported: #{test_case.exception.inspect}#{test_file_trace}"
+        else
+          test_case.test_status
+        end
         @logger.notify "  Test Case #{test_case.path} #{test_reported}"
       end
 
@@ -182,7 +189,7 @@ module Beaker
             suite['tests']    = test_count
             suite['errors']   = errored_tests
             suite['failures'] = failed_tests
-            suite['skip']     = skipped_tests
+            suite['skipped']     = skipped_tests
             suite['pending']  = pending_tests
             suite['total']    = @total_tests
             suite['time']     = "%f" % (stop_time - start_time)
@@ -203,6 +210,13 @@ module Beaker
               item['name']      = File.basename(test.path)
               item['time']      = "%f" % test.runtime
 
+              #ugh. nokogiri!!!  item can't take a hash, let alone an array.
+              test.exports.each do |export|
+                export.keys.each do |key|
+                  item[key] = export[key]
+                end
+              end
+
               # Did we fail?  If so, report that.
               # We need to remove the escape character from colorized text, the
               # substitution of other entities is handled well by Rexml
@@ -218,7 +232,7 @@ module Beaker
               end
 
               if test.test_status == :skip
-                status = Nokogiri::XML::Node.new('skip', doc)
+                status = Nokogiri::XML::Node.new('skipped', doc)
                 status['type'] =  test.test_status.to_s
                 item.add_child(status)
               end

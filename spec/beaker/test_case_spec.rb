@@ -49,7 +49,7 @@ module Beaker
           f.write "raise FailTest"
         end
         @path = path
-        expect( testcase ).to_not receive( :log_and_fail_test )
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :fail
@@ -105,8 +105,26 @@ module Beaker
           EOF
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion))
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
+        expect @test_status == :error
+      end
+
+      it 'does not overwrite a test failure if an assertion also happens in a teardown block' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write <<-EOF
+            teardown do
+              assert_equal(1, 2, 'Oh noes!')
+            end
+            assert_equal(true, false, 'failed test')
+          EOF
+        end
+        @path = path
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :fail).and_call_original
+        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
+        testcase.run_test
+        expect @test_status == :fail
       end
     end
 

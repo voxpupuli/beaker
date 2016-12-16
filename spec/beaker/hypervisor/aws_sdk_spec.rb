@@ -40,7 +40,7 @@ module Beaker
     }}
 
     before :each do
-      @hosts = make_hosts({:snapshot => :pe}, 5)
+      @hosts = make_hosts({:snapshot => :pe}, 6)
       @hosts[0][:platform] = "centos-5-x86-64-west"
       @hosts[1][:platform] = "centos-6-x86-64-west"
       @hosts[2][:platform] = "centos-7-x86-64-west"
@@ -48,6 +48,7 @@ module Beaker
       @hosts[3][:user] = "ubuntu"
       @hosts[4][:platform] = 'f5-host'
       @hosts[4][:user] = 'notroot'
+      @hosts[5][:platform] = 'netscaler-host'
 
       ENV['AWS_ACCESS_KEY'] = nil
       ENV['AWS_SECRET_ACCESS_KEY'] = nil
@@ -83,12 +84,12 @@ module Beaker
       end
 
       it 'should step through provisioning' do
-        allow( aws ).to receive( :wait_for_status_f5 )
+        allow( aws ).to receive( :wait_for_status_netdev )
         aws.provision
       end
 
       it 'should return nil' do
-        allow( aws ).to receive( :wait_for_status_f5 )
+        allow( aws ).to receive( :wait_for_status_netdev )
         expect(aws.provision).to be_nil
       end
     end
@@ -521,8 +522,8 @@ module Beaker
 
       context 'calls #set_etc_hosts' do
         it 'for each host (except the f5 ones)' do
-          non_f5_hosts = @hosts.select{ |h| !(h['platform'] =~ /f5/) }
-          expect(aws).to receive(:set_etc_hosts).exactly(non_f5_hosts.size).times
+          non_netdev_hosts = @hosts.select{ |h| !(h['platform'] =~ /f5|netscaler/) }
+          expect(aws).to receive(:set_etc_hosts).exactly(non_netdev_hosts.size).times
           expect(configure_hosts).to be_nil
         end
 
@@ -542,6 +543,7 @@ module Beaker
     describe '#enable_root_on_hosts' do
       context 'enabling root shall be called once for the ubuntu machine' do
         it "should enable root once" do
+          allow(aws).to receive(:enable_root_netscaler)
           expect( aws ).to receive(:copy_ssh_to_root).with( @hosts[3], options ).once()
           expect( aws ).to receive(:enable_root_login).with( @hosts[3], options).once()
           aws.enable_root_on_hosts();
@@ -549,6 +551,7 @@ module Beaker
       end
 
       it 'enables root once on the f5 host through its code path' do
+        allow(aws).to receive(:enable_root_netscaler)
         expect( aws ).to receive(:enable_root_f5).with( @hosts[4] ).once()
         aws.enable_root_on_hosts()
       end
@@ -578,6 +581,19 @@ module Beaker
       end
     end
 
+    describe '#enable_root_netscaler' do
+      let( :ns_host ) { @hosts[5] }
+      subject(:enable_root_netscaler) { aws.enable_root_netscaler(ns_host) }
+
+      it 'set password to instance id of the host' do
+        instance_mock = Object.new
+        allow( instance_mock ).to receive(:id).and_return("i-842018")
+        ns_host["instance"]=instance_mock
+        enable_root_netscaler
+        expect(ns_host['ssh'][:password]).to eql("i-842018")
+      end
+    end
+
     describe '#set_hostnames' do
       subject(:set_hostnames) { aws.set_hostnames }
       it 'returns @hosts' do
@@ -586,16 +602,27 @@ module Beaker
 
       context 'for each host' do
         it 'calls exec' do
-          @hosts.each {|host| expect(host).to receive(:exec).once}
+          @hosts.each do |host|
+            expect(host).to receive(:exec).once unless host['platform'] =~ /netscaler/
+          end
           expect(set_hostnames).to eq(@hosts)
         end
 
         it 'passes a Command instance to exec' do
           @hosts.each do |host|
-            expect(host).to receive(:exec).with( instance_of(Beaker::Command) ).once
+            expect(host).to receive(:exec).with( instance_of(Beaker::Command) ).once unless host['platform'] =~ /netscaler/
           end
           expect(set_hostnames).to eq(@hosts)
         end
+
+        it 'sets the the vmhostname to the dns_name for each host' do
+          expect(set_hostnames).to eq(@hosts)
+          @hosts.each do |host|
+            expect(host[:vmhostname]).to eq(host[:dns_name])
+            expect(host[:vmhostname]).to eq(host.hostname)
+          end
+        end
+
       end
     end
 
@@ -654,11 +681,18 @@ module Beaker
         expect( Socket ).to receive(:gethostname) { "foobar" }
         expect( aws ).to receive(:local_user) { "bob" }
 
-        options[:timestamp] = Time.now
-        date_part = options[:timestamp].strftime("%F_%H_%M_%S")
-
         # Should match the expected composite key name
-        expect(aws.key_name).to eq("Beaker-bob-foobar-#{date_part}")
+        expect(aws.key_name).to match(/^Beaker-bob-foobar-/)
+      end
+
+      it 'uses the generated random string from :aws_keyname_modifier' do
+        expect(aws.key_name).to match(/#{options[:aws_keyname_modifier]}/)
+      end
+
+      it 'uses nanosecond time value to make key name collision harder' do
+        options[:timestamp] = Time.now
+        nanosecond_value = options[:timestamp].strftime("%N")
+        expect(aws.key_name).to match(/#{nanosecond_value}/)
       end
     end
 
@@ -672,60 +706,14 @@ module Beaker
     describe '#ensure_key_pair' do
       let( :region ) { double('region', :name => 'test_region_name') }
       subject(:ensure_key_pair) { aws.ensure_key_pair(region) }
+      let( :key_name ) { "Beaker-rspec-SUT" }
 
-      context 'when a beaker keypair already exists' do
-        it 'returns the keypair if available' do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          key_pair = double(:exists? => true, :secret => 'supersekritkey', :delete => true)
-          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
-          key_pairs = { "Beaker-rspec-SUT" => key_pair }
+      it 'deletes the given keypair, then recreates it' do
+        allow( aws ).to receive( :key_name ).and_return(key_name)
 
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
-          expect( key_pairs ).to receive( :import ).and_return(key_pair)
-          expect(ensure_key_pair).to eq(key_pair)
-        end
-
-        it 'generates a new keypair if :generate_new_keypair set' do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          key_pair = double(:exists? => true, :secret => 'keyOfSekritz', :delete => true)
-          allow( aws ).to receive( :key_name ).and_return( "Beaker-rspec-SUT" )
-          key_pairs = { "Beaker-rspec-SUT" => key_pair }
-          options[:keypair_generate_new] = true
-
-          answer = 'You get a keypair!  You get a keypair!  And you get a keypair too!'
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          expect( aws ).to receive( :public_key ).and_return('test_ssh_string')
-          expect( key_pairs ).to receive( :import ).and_return(answer)
-          returned_keypair = ensure_key_pair
-          expect(returned_keypair).not_to eq(key_pair)
-          expect(returned_keypair).to eq(answer)
-        end
-      end
-
-      context 'when a pre-existing keypair cannot be found' do
-        let( :key_name ) { "Beaker-rspec-SUT" }
-        let( :key_pair ) { double(:exists? => false) }
-        let( :key_pairs ) { { key_name => key_pair } }
-        let( :pubkey ) { "Beaker-rspec-SUT_secret-key" }
-
-        before :each do
-          stub_const('ENV', ENV.to_hash.merge('USER' => 'rspec'))
-          expect( region ).to receive(:key_pairs).and_return(key_pairs).twice
-          allow( aws ).to receive( :key_name ).and_return(key_name)
-        end
-
-        it 'imports a new key based on user pubkey' do
-          allow(aws).to receive(:public_key).and_return(pubkey)
-          expect( key_pairs ).to receive(:import).with(key_name, pubkey)
-          expect(ensure_key_pair)
-        end
-
-        it 'returns imported keypair' do
-          allow(aws).to receive(:public_key)
-          expect( key_pairs ).to receive(:import).and_return(key_pair).once
-          expect(ensure_key_pair).to eq(key_pair)
-        end
+        expect( aws ).to receive( :delete_key_pair ).with( region, key_name).once.ordered
+        expect( aws ).to receive( :create_new_key_pair ).with( region, key_name).once.ordered
+        ensure_key_pair
       end
     end
 

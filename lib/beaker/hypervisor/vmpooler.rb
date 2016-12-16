@@ -39,6 +39,9 @@ module Beaker
 
       creds
 
+    rescue TypeError, Psych::SyntaxError => e
+      @logger.warn "#{e.class}: Credentials file (#{dot_fog}) has invalid syntax; proceeding without authentication"
+      creds
     rescue Errno::ENOENT
       @logger.warn "Credentials file (#{dot_fog}) not found; proceeding without authentication"
       creds
@@ -87,6 +90,14 @@ module Beaker
           })
     end
 
+    # Get host info hash from parsed json response
+    # @param [Hash] parsed_response hash
+    # @param [String] template string
+    # @return [Hash] Host info hash
+    def get_host_info(parsed_response, template)
+      parsed_response[template]
+    end
+
     def provision
       request_payload = {}
       start = Time.now
@@ -118,27 +129,45 @@ module Beaker
           @logger.notify "Requesting VM set from vmpooler"
         end
 
-        request.body = request_payload.to_json
+        request_payload_json = request_payload.to_json
+        @logger.trace( "Request payload json: #{request_payload_json}" )
+        request.body = request_payload_json
 
         response = http.request(request)
         parsed_response = JSON.parse(response.body)
+        @logger.trace( "Response parsed json: #{parsed_response}" )
 
         if parsed_response['ok']
           domain = parsed_response['domain']
+          request_payload = {}
 
           @hosts.each_with_index do |h, i|
+            # If the requested host template is not available on vmpooler
+            host_template = h['template']
+            if get_host_info(parsed_response, host_template).nil?
+              request_payload[host_template] ||= 0
+              request_payload[host_template] += 1
+              next
+            end
             if parsed_response[h['template']]['hostname'].is_a?(Array)
-              hostname = parsed_response[h['template']]['hostname'].shift
+              hostname = parsed_response[host_template]['hostname'].shift
             else
-              hostname = parsed_response[h['template']]['hostname']
+              hostname = parsed_response[host_template]['hostname']
             end
 
             h['vmhostname'] = domain ? "#{hostname}.#{domain}" : hostname
 
             @logger.notify "Using available host '#{h['vmhostname']}' (#{h.name})"
           end
+          unless request_payload.empty?
+            raise "Vmpooler.provision - requested VM templates #{request_payload.keys} not available"
+          end
         else
-          raise "Vmpooler.provision - requested host set not available"
+          if response.code == '401'
+            raise "Vmpooler.provision - response from pooler not ok. Vmpooler token not authorized to make request.\n#{parsed_response}"
+          else
+            raise "Vmpooler.provision - response from pooler not ok. Requested host set #{request_payload.keys} not available in pooler.\n#{parsed_response}"
+          end
         end
       rescue JSON::ParserError, RuntimeError, *SSH_EXCEPTIONS => e
         @logger.debug "Failed vmpooler provision: #{e.class} : #{e.message}"

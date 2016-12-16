@@ -14,6 +14,7 @@ module Beaker
       @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
       @logger = Beaker::Logger.new(@options)
+      InParallel::InParallelExecutor.logger = @logger
       @options[:logger] = @logger
       @options[:timestamp] = @timestamp
       @options[:beaker_version] = Beaker::Version::STRING
@@ -113,6 +114,13 @@ module Beaker
         end
       #cleanup phase
       rescue => e
+        begin
+          run_suite(:pre_cleanup)
+        rescue => e
+          # pre-cleanup failed
+          @logger.error "Failed running the pre-cleanup suite."
+        end
+
         #cleanup on error
         if @options[:preserve_hosts].to_s =~ /(never)|(onpass)/
           @logger.notify "Cleanup: cleaning up after failed run"
@@ -129,6 +137,13 @@ module Beaker
         puts ''
         exit 1
       else
+        begin
+          run_suite(:pre_cleanup)
+        rescue => e
+          # pre-cleanup failed
+          @logger.error "Failed running the pre-cleanup suite."
+        end
+
         #cleanup on success
         if @options[:preserve_hosts].to_s =~ /(never)|(onfail)/
           @logger.notify "Cleanup: cleaning up after successful run"
@@ -173,15 +188,16 @@ module Beaker
       @options[:pre_suite] = []
       @options[:post_suite] = []
       @options[:tests] = []
+      @options[:pre_cleanup] = []
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
-      FileUtils.cp(@options[:hosts_file], preserved_hosts_filename)
-      hosts_yaml = YAML.load_file(preserved_hosts_filename)
+
+      hosts_yaml = @options
       newly_keyed_hosts_entries = {}
       hosts_yaml['HOSTS'].each do |host_name, file_host_hash|
         h = Beaker::Options::OptionsHash.new
         file_host_hash = h.merge(file_host_hash)
         @hosts.each do |host|
-          if host_name == host.name
+          if host_name.to_s == host.name.to_s
             newly_keyed_hosts_entries[host.reachable_name] = file_host_hash.merge(host.host_hash)
             break
           end

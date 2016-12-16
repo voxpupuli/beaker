@@ -36,6 +36,7 @@ module Beaker
         :vbguest_plugin       => ['BEAKER_VB_GUEST_PLUGIN', 'BEAKER_vb_guest_plugin'],
         :tag_includes         => ['BEAKER_TAG'],
         :tag_excludes         => ['BEAKER_EXCLUDE_TAG'],
+        :run_in_parallel      => ['BEAKER_RUN_IN_PARALLEL'],
       }
 
       # Select all environment variables whose name matches provided regex
@@ -85,6 +86,9 @@ module Beaker
                  end
 
           found_env_vars[:type] = type
+        end
+        if found_env_vars[:run_in_parallel]
+          found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',')
         end
 
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
@@ -161,14 +165,11 @@ module Beaker
           :timesync               => false,
           :disable_iptables       => false,
           :set_env                => true,
+          :disable_updates        => true,
           :repo_proxy             => false,
           :package_proxy          => false,
           :add_el_extras          => false,
-          :epel_url               => "http://mirrors.kernel.org/fedora-epel",
-          :epel_arch              => "i386",
-          :epel_7_pkg             => "epel-release-7-5.noarch.rpm",
-          :epel_6_pkg             => "epel-release-6-8.noarch.rpm",
-          :epel_5_pkg             => "epel-release-5-4.noarch.rpm",
+          :epel_url               => "http://dl.fedoraproject.org/pub/epel",
           :consoleport            => 443,
           :pe_dir                 => '/opt/enterprise/dists',
           :pe_version_file        => 'LATEST',
@@ -181,6 +182,13 @@ module Beaker
           :ec2_yaml               => 'config/image_templates/ec2.yaml',
           :help                   => false,
           :collect_perf_data      => 'none',
+          :puppetdb_port_ssl      => 8081,
+          :puppetdb_port_nonssl   => 8080,
+          :puppetserver_port      => 8140,
+          :nodeclassifier_port    => 4433,
+          :cache_files_locally    => false,
+          :aws_keyname_modifier   => rand(10 ** 10).to_s.rjust(10,'0'), # 10 digit random number string
+          :run_in_parallel        => [],
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,
@@ -189,6 +197,7 @@ module Beaker
                                      :forward_agent         => true,
                                      :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
                                      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+                                     :keepalive             => true
           }
         })
       end

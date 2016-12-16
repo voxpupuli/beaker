@@ -41,6 +41,8 @@ module Beaker
           end
         when /^vagrant$/
           Beaker::Vagrant
+        when /^vagrant_custom$/
+          Beaker::VagrantCustom
         when /^vagrant_libvirt$/
           Beaker::VagrantLibvirt
         when /^vagrant_virtualbox$/
@@ -101,10 +103,13 @@ module Beaker
 
     #Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
     #to the provided SUT for test execution to be successful.
-    def configure
+    def configure(opts = {})
       return unless @options[:configure]
-      if @options[:timesync]
-        timesync(@hosts, @options)
+      run_in_parallel = run_in_parallel? opts, @options, 'configure'
+      block_on @hosts, { :run_in_parallel => run_in_parallel} do |host|
+        if host[:timesync]
+          timesync(host, @options)
+        end
       end
       if @options[:root_keys]
         sync_root_keys(@hosts, @options)
@@ -117,6 +122,9 @@ module Beaker
       end
       if @options[:set_env]
         set_env(@hosts, @options)
+      end
+      if @options[:disable_updates]
+        disable_updates(@hosts, @options)
       end
     end
 
@@ -141,6 +149,6 @@ module Beaker
   end
 end
 
-[ 'vsphere_helper', 'vagrant', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'aixer', 'solaris', 'docker', 'google_compute', 'openstack', 'noop' ].each do |lib|
+[ 'vsphere_helper', 'vagrant', 'vagrant_custom', 'vagrant_virtualbox', 'vagrant_parallels', 'vagrant_libvirt', 'vagrant_fusion', 'vagrant_workstation', 'fusion', 'aws_sdk', 'vsphere', 'vmpooler', 'vcloud', 'docker', 'google_compute', 'openstack', 'noop' ].each do |lib|
     require "beaker/hypervisor/#{lib}"
 end

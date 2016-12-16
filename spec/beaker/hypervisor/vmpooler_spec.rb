@@ -73,6 +73,39 @@ module Beaker
           expect( host['vmhostname'] ).to be === 'pool'
         end
       end
+
+      it 'raises an error when a host template is not found in returned json' do
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+
+        allow( vmpooler ).to receive( :require ).and_return( true )
+        allow( vmpooler ).to receive( :sleep ).and_return( true )
+        allow( vmpooler ).to receive( :get_host_info ).and_return( nil )
+
+        expect {
+          vmpooler.provision
+        }.to raise_error( RuntimeError,
+          /Vmpooler\.provision - requested VM templates \[.*\,.*\,.*\] not available/
+        )
+      end
+
+      it 'repeats asking only for failed hosts' do
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+
+        allow( vmpooler ).to receive( :require ).and_return( true )
+        allow( vmpooler ).to receive( :sleep ).and_return( true )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm1_has_a_template" ).and_return( nil )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm2_has_a_template" ).and_return( 'y' )
+        allow( vmpooler ).to receive( :get_host_info ).with(
+          anything, "vm3_has_a_template" ).and_return( 'y' )
+
+        expect {
+          vmpooler.provision
+        }.to raise_error( RuntimeError,
+          /Vmpooler\.provision - requested VM templates \[[^\,]*\] not available/
+        ) # should be only one item in the list, no commas
+      end
     end
 
     describe "#cleanup" do
@@ -145,6 +178,51 @@ module Beaker
           receive(:read_fog_file).and_return(data)
 
         vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == { }
+      end
+
+      it 'continues without credentials when there are formatting errors in the fog file' do
+        data = { "'default'" => { :vmpooler_token => "b2wl8prqe6ddoii70md" } }
+
+        allow_any_instance_of( Beaker::Vmpooler ).to \
+          receive(:read_fog_file).and_return(data)
+
+        logger = double('logger')
+      
+        expect(logger).to receive(:warn).with(/is missing a :default section with a :vmpooler_token value/)
+        make_opts = {:logger => logger}
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        expect( vmpooler.credentials ).to be == { }
+      end
+
+      it 'throws a TypeError and continues without credentials when there are syntax errors in the fog file' do
+        data = "'default'\n  :vmpooler_token: z2wl8prqe0ddoii70ad"
+
+        allow( File ).to receive( :open ).and_yield( StringIO.new(data)  )
+        logger = double('logger')
+      
+        expect(logger).to receive(:warn).with(/TypeError: .* has invalid syntax/)
+        make_opts = {:logger => logger}
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        
+        expect( vmpooler.credentials ).to be == { }
+      end
+
+      it 'throws a Psych::SyntaxError and continues without credentials when there are syntax errors in the fog file' do
+
+        data = ";default;\n  :vmpooler_token: z2wl8prqe0ddoii707d"
+
+        allow( File ).to receive( :open ).and_yield( StringIO.new(data)  )
+
+        logger = double('logger')
+      
+        expect(logger).to receive(:warn).with(/Psych::SyntaxError: .* invalid syntax/)
+        make_opts = {:logger => logger}
+
+        vmpooler = Beaker::Vmpooler.new( make_hosts, make_opts )
+        
         expect( vmpooler.credentials ).to be == { }
       end
 

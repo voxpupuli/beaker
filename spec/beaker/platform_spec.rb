@@ -77,6 +77,11 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'debian-squeeze-xxx'
       end
 
+      it "can convert unbuntu-1604-xxx to ubuntu-xenial-xxx" do
+        @name = 'ubuntu-1604-xxx'
+        expect( platform.with_version_codename ).to be === 'ubuntu-xenial-xxx'
+
+      end
       it "can convert ubuntu-1310-xxx to ubuntu-saucy-xxx" do
         @name = 'ubuntu-1310-xxx'
         expect( platform.with_version_codename ).to be === 'ubuntu-saucy-xxx'
@@ -128,6 +133,22 @@ module Beaker
 
     end
 
-  end
+    context 'round tripping from yaml', if: RUBY_VERSION =~ /^1\.9/ do
+      before do
+        @name = 'ubuntu-14.04-x86_64'
+      end
 
+      let(:round_tripped) { YAML.load(YAML.dump(platform)) }
+
+      [:variant, :arch, :version, :codename].each do |field|
+        it "deserializes the '#{field}' field" do
+          expect(round_tripped.send(field)).to eq platform.send(field)
+        end
+      end
+
+      it 'properly sets the string contents' do
+        expect(round_tripped.to_s).to eq @name
+      end
+    end
+  end
 end

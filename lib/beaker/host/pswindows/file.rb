@@ -2,15 +2,13 @@ module PSWindows::File
   include Beaker::CommandFactory
 
   def tmpfile(name)
-    execute("echo C:\\Windows\\Temp\\#{name}.%RANDOM%")
+    result = exec(powershell('[System.IO.Path]::GetTempFileName()'))
+    result.stdout.chomp()
   end
 
   def tmpdir(name)
-    # generate name
-    tmpdirname = execute("echo C:\\Windows\\Temp\\#{name}.%RANDOM%")
-    # created named dir
-    execute("md #{tmpdirname}")
-    tmpdirname
+    result = exec(powershell('[System.IO.Path]::GetTempPath()'))
+    result.stdout.chomp()
   end
 
   def path_split(paths)

@@ -119,25 +119,28 @@ module Beaker
           host['roles'].length == 1 && host['roles'].include?('agent')
       end
 
-      # Determine whether a host has an AIO version or not. If a host :pe_ver or :version
-      # is not specified, then it is open-ended, and as such, can be an AIO
-      # version depending on the context.
+      # Determine whether a host has an AIO version or not. If a host :pe_ver or
+      # :version is not specified, then either the 'aio' role or type will be
+      # needed for a host to be the AIO version.
       #
-      # True when any of the following cases are true
-      #   * has PE version (:pe_ver) >= 4.0
-      #   * has FOSS version (:version) >= 4.0
-      #   * host has role 'aio'
-      #   * host as the type 'aio'
+      # True if host has
+      #   * PE version (:pe_ver) >= 4.0
+      #   * FOSS version (:version) >= 4.0
+      #   * the role 'aio'
+      #   * the type 'aio'
       #
       # @note aio version is just a base-line condition.  If you want to check
       #   that a host is an aio agent, refer to {#aio_agent?}.
       #
       # @return [Boolean] whether or not a host is AIO-capable
       def aio_version?(host)
-        return (( host[:pe_ver] && !version_is_less(host[:pe_ver], '4.0') ) ||
-               ( host[:version] && !version_is_less(host[:version], '4.0') ) ||
-               ( host[:roles] && host[:roles].include?('aio')) ||
-               ( host[:type] && !!(host[:type] =~ /(\A|-)aio(\Z|-)/ ))) == true
+        [:pe_ver, :version].each do |key|
+          version = host[key]
+          return !version_is_less(version, '4.0') if version && !version.empty?
+        end
+        return true if host[:roles] && host[:roles].include?('aio')
+        return true if host[:type] && !!(host[:type] =~ /(\A|-)aio(\Z|-)/ )
+        false
       end
 
       # Determine if the host is an AIO agent

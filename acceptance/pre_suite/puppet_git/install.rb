@@ -8,7 +8,7 @@ test_name 'Puppet git pre-suite'
 install = [
   'facter#2.1.0',
   'hiera#1.3.4',
-  'puppet#3.7.5'
+  'puppet#3.8.7'
 ]
 
 SourcePath  = Beaker::DSL::InstallUtils::SourcePath
@@ -89,5 +89,10 @@ repos = order_packages(tmp_repos)
 hosts.each do |host|
   repos.each do |repo|
     install_from_git(host, SourcePath, repo)
+  end
+  unless host['platform'] =~ /windows/
+    on(host, "touch #{File.join(host.puppet['confdir'],'puppet.conf')}")
+    on(host, puppet('resource user puppet ensure=present'))
+    on(host, puppet('resource group puppet ensure=present'))
   end
 end

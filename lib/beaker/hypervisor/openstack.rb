@@ -16,6 +16,7 @@ module Beaker
     #@option options [String] :openstack_region The region that each OpenStack instance should be provisioned on (optional)
     #@option options [String] :openstack_network The network that each OpenStack instance should be contacted through (required)
     #@option options [String] :openstack_keyname The name of an existing key pair that should be auto-loaded onto each
+    #@option options [Hash] :security_group An array of security groups to associate with the instance
     #                                            OpenStack instance (optional)
     #@option options [String] :jenkins_build_url Added as metadata to each OpenStack instance
     #@option options [String] :department Added as metadata to each OpenStack instance
@@ -88,6 +89,18 @@ module Beaker
       @network_client.networks.find { |x| x.name == n } || raise("Couldn't find network: #{n}")
     end
 
+    #Provided an array of security groups return that array if all
+    #security groups are present
+    #@param [Array] sgs The array of security group names
+    #@return [Array] The array of security group names
+    def security_groups sgs
+      for sg in sgs
+        @logger.debug "Openstack: Looking up security group '#{sg}'"
+        @compute_client.security_groups.find { |x| x.name == sg } || raise("Couldn't find security group: #{sg}")
+        sgs
+      end
+    end
+
     # Create a volume client on request
     # @return [Fog::OpenStack::Volume] OpenStack volume client
     def volume_client_create
@@ -102,10 +115,10 @@ module Beaker
       @volume_client ||= Fog::Volume.new(options)
       unless @volume_client
         raise "Unable to create OpenStack Volume instance"\
-              " (api_key: #{@options[:openstack_api_key]},"\
-              " username: #{@options[:openstack_username]},"\
-              " auth_url: #{@options[:openstack_auth_url]},"\
-              " tenant: #{@options[:openstack_tenant]})"
+          " (api_key: #{@options[:openstack_api_key]},"\
+        " username: #{@options[:openstack_username]},"\
+        " auth_url: #{@options[:openstack_auth_url]},"\
+        " tenant: #{@options[:openstack_tenant]})"
       end
     end
 
@@ -158,21 +171,45 @@ module Beaker
       end
     end
 
+    # Get a floating IP address to associate with the instance, and
+    # allocate a new one if none are available
+    def get_ip
+      @logger.debug "Finding IP"
+      ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
+      if ip.nil?
+        begin
+          @logger.debug "Creating IP"
+          ip = @compute_client.addresses.create
+        rescue Fog::Compute::OpenStack::NotFound
+          # If there are no more floating IP addresses, allocate a
+          # new one and try again. 
+          @compute_client.allocate_address(@options[:floating_ip_pool])
+          ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
+        end
+      end
+      raise 'Could not find or allocate an address' if not ip
+      ip
+    end
+
     #Create new instances in OpenStack
     def provision
       @logger.notify "Provisioning OpenStack"
 
       @hosts.each do |host|
-        host[:vmhostname] = generate_host_name
+        ip = get_ip
+        hostname = ip.ip.gsub '.','-'
+        host[:vmhostname] = hostname+'.rfc1918.puppetlabs.net'
         @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
         options = {
           :flavor_ref => flavor(host[:flavor]).id,
           :image_ref  => image(host[:image]).id,
           :nics       => [ {'net_id' => network(@options[:openstack_network]).id } ],
           :name       => host[:vmhostname],
-          :user_data  => "#cloud-config\nmanage_etc_hosts: true\n",
+          :hostname   => host[:vmhostname],
+          :user_data  => host[:user_data] || "#cloud-config\nmanage_etc_hosts: true\n",
         }
         options[:key_name] = key_name(host)
+        options[:security_groups] = security_groups(@options[:security_group]) unless @options[:security_group].nil?
         vm = @compute_client.servers.create(options)
 
         #wait for the new instance to start up
@@ -196,40 +233,8 @@ module Beaker
         end
 
         # Associate a public IP to the server
-        # Create if there are no floating ips available
-        #
-        # Do we already have an address?
-        @logger.debug vm.addresses
-        address=nil
-        begin
-          # Here we try and assign an address from a floating IP pool
-          # This seems to fail on some implementations (FloatingIpPoolNotFound)
-          ip = @compute_client.addresses.find { |ip| ip.instance_id.nil? }
-          if ip.nil?
-            @logger.debug "Creating IP for #{host.name} (#{host[:vmhostname]})"
-            ip = @compute_client.addresses.create
-          end
-          ip.server = vm
-          address = ip.ip
-
-        rescue Fog::Compute::OpenStack::NotFound
-          # Here, we fail to just trying to use an address that's already assigned if there is one
-          # There may be better logic, but this worked in the original implementation
-          # There might be an argument for checking whether an address is reachable a la
-          # port_open? logic in host.rb but maybe race conditions
-
-          begin
-            if vm.addresses[@options[:openstack_network]]
-              address = vm.addresses[@options[:openstack_network]].map{ |network| network['addr'] }.first
-            end
-          rescue NoMethodError
-            @logger.debug "No current address retrievable from OpenStack data"
-          end
-
-        end
-
-        raise 'Could not find or assign an address to the instance' unless address
-        host[:ip] = address
+        ip.server = vm
+        host[:ip] = ip.ip
 
         @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"
 
@@ -238,6 +243,9 @@ module Beaker
                             :department        => @options[:department].to_s,
                             :project           => @options[:project].to_s })
         @vms << vm
+
+        # Wait for the host to accept ssh logins
+        host.wait_for_port(22)
 
         #enable root if user is not root
         enable_root(host)

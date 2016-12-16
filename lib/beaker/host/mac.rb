@@ -23,5 +23,12 @@ module Mac
       })
     end
 
+    attr_reader :external_copy_base
+    def initialize name, host_hash, options
+      super
+
+      @external_copy_base = '/var/root'
+    end
+
   end
 end

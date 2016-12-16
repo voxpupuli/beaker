@@ -42,6 +42,25 @@ describe ClassMixedWithDSLHelpers do
       subject.on( host, 'ls ~/.bin', :environment => {:HOME => '/tmp/test_home' } )
     end
 
+    describe 'with a beaker command object passed in as the command argument' do
+      let( :command ) { Beaker::Command.new('commander command', [], :environment => {:HOME => 'default'}) }
+
+      it 'overwrites the command environment with the environment specified in #on' do
+        expect( host ).to receive( :exec ) do |command|
+          expect(command.environment).to eq({:HOME => 'override'})
+        end
+        subject.on( host, command, :environment => {:HOME => 'override'})
+      end
+
+      it 'uses the command environment if there is no overriding argument in #on' do
+        expect( host ).to receive( :exec ) do |command|
+          expect(command.environment).to eq({:HOME => 'default'})
+        end
+        subject.on( host, command )
+      end
+
+    end
+
     it 'if the host is a String Object, finds the matching hosts with that String as role' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
 
@@ -50,12 +69,28 @@ describe ClassMixedWithDSLHelpers do
       subject.on( 'master', 'echo hello')
     end
 
-    it 'if the host is a Symbol Object, finds the matching hsots with that Symbol as role' do
+    it 'if the host is a Symbol Object, finds the matching hosts with that Symbol as role' do
       allow( subject ).to receive( :hosts ).and_return( hosts )
 
       expect( master ).to receive( :exec ).once
 
       subject.on( :master, 'echo hello')
+    end
+
+    it 'executes in parallel if run_in_parallel=true' do
+      InParallel::InParallelExecutor.logger = logger
+      FakeFS.deactivate!
+      allow( subject ).to receive( :hosts ).and_return( hosts )
+      expected = []
+      hosts.each_with_index do |host, i|
+        expected << i
+        allow( host ).to receive( :exec ).and_return( i )
+      end
+
+      # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
+      expect( InParallel::InParallelExecutor ).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(5).times
+      results = subject.on( hosts, command, {:run_in_parallel => true})
+      expect( results ).to be == expected
     end
 
     it 'delegates to itself for each host passed' do
@@ -156,6 +191,18 @@ describe ClassMixedWithDSLHelpers do
           expect( subject.exit_code ).to be == 0
         end
       end
+    end
+
+    it 'errors if command is not a String or Beaker::Command' do
+      expect {
+        subject.on( host, Object.new )
+      }.to raise_error( ArgumentError, /called\ with\ a\ String\ or\ Beaker/ )
+    end
+
+    it 'executes the passed Beaker::Command if given as command argument' do
+      command_test = Beaker::Command.new( 'echo face_testing' )
+      expect( master ).to receive( :exec ).with( command_test, anything )
+      subject.on( master, command_test )
     end
   end
 

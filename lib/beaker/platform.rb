@@ -3,15 +3,15 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(cisco|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus|f5)\-.+\-.+$/
-
+    PLATFORMS = /^(huaweios|cisco_nexus|cisco_ios_xr|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|el|eos|cumulus|f5|netscaler)\-.+\-.+$/
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
       { :debian => { "jessie"  => "8",
                      "wheezy"  => "7",
                      "squeeze" => "6",
                    },
-        :ubuntu => { "wily"    => "1510",
+        :ubuntu => { "xenial"    => "1604",
+                     "wily"    => "1510",
                      "vivid"   => "1504",
                      "utopic"  => "1410",
                      "trusty"  => "1404",
@@ -21,7 +21,8 @@ module Beaker
                      "precise" => "1204",
                      "lucid"   => "1004",
                    },
-        :osx =>    { "elcapitan" => "1011",
+        :osx =>    { "sierra"    => "1012",
+                     "elcapitan" => "1011",
                      "yosemite"  => "1010",
                      "mavericks" => "109",
                    }
@@ -43,6 +44,9 @@ module Beaker
     # Creates the Platform object.  Checks to ensure that the platform String
     # provided meets the platform formatting rules.  Platforms name must be of
     # the format /^OSFAMILY-VERSION-ARCH.*$/ where OSFAMILY is one of:
+    # * huaweios
+    # * cisco_nexus
+    # * cisco_ios_xr
     # * freebsd
     # * openbsd
     # * osx
@@ -59,6 +63,8 @@ module Beaker
     # * aix
     # * el
     # * cumulus
+    # * f5
+    # * netscaler
     def initialize(name)
       if name !~ PLATFORMS
         raise ArgumentError, "Unsupported platform name #{name}"
@@ -110,5 +116,13 @@ module Beaker
       [@variant, @version, @arch].join('-')
     end
 
+    if RUBY_VERSION =~ /^1\.9/
+      def init_with(coder)
+        coder.map.each do |ivar, value|
+          instance_variable_set("@#{ivar}", value)
+        end
+        replace("#{@variant}-#{@version}-#{@arch}")
+      end
+    end
   end
 end

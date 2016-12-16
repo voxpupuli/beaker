@@ -15,6 +15,18 @@ module Beaker
       @assertions || 0
     end
 
+    # Helper to create & run commands
+    #
+    # @note {Beaker::Host#exec} gets passed a duplicate of the options hash argument.
+    # @note {Beaker::Command#initialize} gets passed selected options from the
+    #   options hash argument. Specifically, :prepend_cmds & :cmdexe.
+    #
+    # @param [String] command Command to run
+    # @param [Hash{Symbol=>Boolean, Array<Fixnum>}] options Options to pass
+    #   through for command execution
+    #
+    # @api private
+    # @return [String] Stdout from command execution
     def execute(command, options={}, &block)
       cmd_create_options = {}
       exec_opts = options.dup
