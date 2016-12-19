@@ -188,6 +188,12 @@ module Beaker
 
       @logger.debug "configure vagrant boxes (set ssh-config, switch to root user, hack etc/hosts)"
       @hosts.each do |host|
+        if host[:platform] =~ /windows/
+          @logger.debug "skip ssh hacks on windows box #{host[:name]}"
+          set_ssh_config host, host['user']
+          next
+        end
+
         default_user = host['user']
 
         set_ssh_config host, 'vagrant'
