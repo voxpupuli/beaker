@@ -15,6 +15,7 @@ module Beaker
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
+    ARCHLINUX_PACKAGES = ['curl', 'ntp']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
     SLES10_PACKAGES = ['curl']
@@ -114,6 +115,8 @@ module Beaker
           check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
         when host['platform'] =~ /solaris-1[1-9]/
           check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
+        when host['platform'] =~ /archlinux/
+          check_and_install_packages_if_needed(host, ARCHLINUX_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
@@ -414,7 +417,7 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
+        elsif host['platform'] =~ /arch|centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})

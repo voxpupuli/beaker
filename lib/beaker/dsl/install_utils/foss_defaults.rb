@@ -83,6 +83,23 @@ module Beaker
             'distmoduledir'     => '/etc/puppet/modules',
             'sitemoduledir'     => '/usr/share/puppet/modules',
           },
+          'archlinux' => {
+            'puppetserver-confdir' => '/etc/puppetserver/conf.d',
+            'puppetservice'     => 'puppetmaster',
+            'puppetpath'        => '/etc/puppetlabs/puppet',
+            'puppetconfdir'     => '/etc/puppetlabs/puppet',
+            'puppetvardir'      => '/opt/puppetlabs/puppet/cache',
+            'puppetbin'         => '/usr/bin/puppet',
+            'puppetbindir'      => '/usr/bin',
+            'privatebindir'     => '/usr/bin',
+            'hieralibdir'       => '/var/lib/hiera',
+            'hierapuppetlibdir' => '/opt/puppet-git-repos/hiera-puppet/lib',
+            'hierabindir'       => '/usr/bin',
+            'hieradatadir'      => '/etc/puppetlabs/code/hiera',
+            'hieraconf'         => '/etc/hiera.yaml',
+            'distmoduledir'     => '/etc/puppetlabs/code/modules',
+            'sitemoduledir'     => '/usr/share/puppet/modules',
+          },
           'windows' => { #cygwin windows
             'puppetpath'        => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
             'puppetconfdir'     => '`cygpath -smF 35`/PuppetLabs/puppet/etc',
@@ -144,6 +161,8 @@ module Beaker
               platform = 'mac'
             when /pswindows/
               platform = 'pswindows'
+            when /archlinux/
+              platform = 'archlinux'
             else
               platform = 'windows'
             end
