@@ -451,6 +451,18 @@ describe Beaker do
 
   end
 
+  context "copy_ssh_to_root" do
+    subject { dummy_class.new }
+
+    it "can copy ssh to root in windows hosts with no cygwin" do
+      host = make_host( 'testhost', { :platform => 'windows', :is_cygwin => false })
+      expect( Beaker::Command ).to receive( :new ).with( "if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)" ).once
+
+      subject.copy_ssh_to_root(host, options)
+    end
+
+  end
+
   context "package_proxy" do
 
     subject { dummy_class.new }
