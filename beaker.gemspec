@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
   # Run time dependencies that are Beaker libraries
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
   s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
+  s.add_runtime_dependency 'beaker-facter', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
 
   # Optional provisioner specific support
