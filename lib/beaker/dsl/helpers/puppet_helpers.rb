@@ -9,6 +9,23 @@ module Beaker
       # for these methods to execute correctly
       module PuppetHelpers
 
+        # Return the regular expression pattern for an IPv4 address
+        def ipv4_regex
+          return /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/
+        end
+
+        # Return the IP address that given hostname returns when resolved on
+        # the given host.
+        #
+        # @ param [Host] host One object that acts like a Beaker::Host
+        # @ param [String] hostname The hostname to perform a DNS resolution on
+        #
+        # @return [String, nil] An IP address, or nil.
+        def resolve_hostname_on(host, hostname)
+          match = curl_on(host, "--verbose #{hostname}", :accept_all_exit_codes => true).stderr.match(ipv4_regex)
+          return match ? match[0] : nil
+        end
+
         # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
         #   @option opts [Boolean] :silent (false) Do not produce log output
@@ -606,7 +623,9 @@ module Beaker
           #use global options hash
           primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
-          @forge_ip ||= Resolv.getaddress(forge_host)
+          forge_ip = resolve_hostname_on(machine, forge_host)
+          raise "Failed to resolve forge host '#{forge_host}'" unless forge_ip
+          @forge_ip ||= forge_ip
           block_on machine do | host |
             stub_hosts_on(host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']})
           end
@@ -625,7 +644,9 @@ module Beaker
           #use global options hash
           primary_forge_name = 'forge.puppetlabs.com'
           forge_host ||= options[:forge_host]
-          @forge_ip ||= Resolv.getaddress(forge_host)
+          forge_ip = resolve_hostname_on(host, forge_host)
+          raise "Failed to resolve forge host '#{forge_host}'" unless forge_ip
+          @forge_ip ||= forge_ip
           with_host_stubbed_on( host, {primary_forge_name => @forge_ip}, {primary_forge_name => ['forge.puppet.com','forgeapi.puppetlabs.com','forgeapi.puppet.com']}, &block )
         end
 
