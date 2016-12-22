@@ -258,7 +258,11 @@ module Beaker
       when options['vagrant_memsize']
         options['vagrant_memsize']
       else
-        '1024'
+        if host['platform'] =~ /windows/
+          '2048'
+        else
+          '1024'
+        end
       end
     end
   end

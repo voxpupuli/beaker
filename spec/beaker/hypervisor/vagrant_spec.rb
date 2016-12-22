@@ -147,25 +147,32 @@ EOF
       expect( vagrantfile ).to match(/v.vm.network :private_network, ip: "ip.address.for.vm1", :netmask => "255.255.0.0"/)
     end
 
-    it "generates a valid windows config" do
-      path = vagrant.instance_variable_get( :@vagrant_path )
-      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
-      @hosts[0][:platform] = 'windows'
+    context "when generating a windows config" do
+      before do
+        path = vagrant.instance_variable_get( :@vagrant_path )
+        allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
+        @hosts[0][:platform] = 'windows'
 
-      vagrant.make_vfile( @hosts )
+        vagrant.make_vfile( @hosts )
 
-      generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+        @generated_file = File.read( File.expand_path( File.join( path, "Vagrantfile") ) )
+      end
 
-      match = generated_file.match(/v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true/)
-      expect( match ).to_not be_nil,'Should have proper port for RDP'
+      it 'has the proper port forwarding for RDP' do
+        expect( @generated_file ).to match /v.vm.network :forwarded_port, guest: 3389, host: 3389, id: 'rdp', auto_correct: true/
+      end
 
-      match = generated_file.match(/v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true/)
-      expect( match ).to_not be_nil, "Should have proper port for WinRM"
+      it 'has the proper port forwarding for WinRM' do
+        expect( @generated_file ).to match /v.vm.network :forwarded_port, guest: 5985, host: 5985, id: 'winrm', auto_correct: true/
+      end
 
-      match = generated_file.match(/v.vm.guest = :windows/)
-      expect( match ).to_not be_nil, 'Should correctly identify guest OS so Vagrant can act accordingly'
+      it 'configures the guest type to windows' do
+        expect( @generated_file ).to match /v.vm.guest = :windows/
+      end
 
-
+      it 'sets a non-default memsize' do
+        expect( @generated_file ).to match /'--memory', '2048',/
+      end
     end
 
     it "uses the memsize defined per vagrant host" do
