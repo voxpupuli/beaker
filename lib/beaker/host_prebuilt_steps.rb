@@ -272,8 +272,12 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      if ((host['platform'] =~ /windows/) and not host.is_cygwin?)
-        resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+      if host['platform'] =~ /windows/
+        if host.is_cygwin?
+          resolv_conf = host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
+        else
+          resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+        end
       else
         resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
       end
@@ -409,10 +413,12 @@ module Beaker
         elsif host['platform'] =~ /solaris-11/
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif not host.is_powershell?
-          host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
-        else
+        elsif host.is_cygwin?
+          host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), {:pty => true})
+        elsif host.is_powershell?
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
+        else
+          host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         end
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/

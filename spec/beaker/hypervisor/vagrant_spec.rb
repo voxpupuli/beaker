@@ -382,7 +382,7 @@ EOF
       it "raises an error if no Vagrantfile is present" do
         File.delete( vagrant.instance_variable_get( :@vagrant_file ) )
         @hosts.each do |host|
-          expect{ vagrant.get_ip_from_vagrant_file(host.name) }.to raise_error
+          expect{ vagrant.get_ip_from_vagrant_file(host.name) }.to raise_error RuntimeError, /No vagrant file found/
         end
       end
     end
@@ -396,6 +396,42 @@ EOF
           expect( vagrant ).to receive( :set_ssh_config ).with( host, 'vagrant' ).once
           expect( vagrant ).to receive( :copy_ssh_to_root ).with( host, options ).once
           expect( vagrant ).to receive( :set_ssh_config ).with( host, host_prev_name ).once
+        end
+        expect( vagrant ).to receive( :hack_etc_hosts ).with( @hosts, options ).once
+      end
+
+      it "can provision a set of hosts" do
+        options = vagrant.instance_variable_get( :@options )
+        expect( vagrant ).to receive( :make_vfile ).with( @hosts, options ).once
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).never
+        vagrant.provision
+      end
+
+      it "destroys an existing set of hosts before provisioning" do
+        vagrant.make_vfile( @hosts )
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).once
+        vagrant.provision
+      end
+
+      it "can cleanup" do
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).once
+        expect( FileUtils ).to receive( :rm_rf ).once
+
+        vagrant.provision
+        vagrant.cleanup
+
+      end
+
+    end
+
+    describe "provisioning and cleanup on windows" do
+      before :each do
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "up" ).once
+        @hosts.each do |host|
+          host_prev_name = host['user']
+          expect( vagrant ).to receive( :set_ssh_config ).with( host, 'vagrant' ).once
+          expect( vagrant ).not_to receive( :copy_ssh_to_root ).with( host, options ).once
+          expect( vagrant ).not_to receive( :set_ssh_config ).with( host, host_prev_name ).once
         end
         expect( vagrant ).to receive( :hack_etc_hosts ).with( @hosts, options ).once
       end

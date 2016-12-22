@@ -43,7 +43,7 @@ describe Beaker do
 
   # Non-cygwin Windows
   it_should_behave_like 'enables_root_login', 'windows', [
-    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
+    "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"
   ], true
 
   # FreeBSD
@@ -403,22 +403,69 @@ describe Beaker do
   context 'get_domain_name' do
     subject { dummy_class.new }
 
-    it "can find the domain for a host" do
-      host = make_host('name', { :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
-
-      expect( subject.get_domain_name( host ) ).to be === "labs.lan"
-
+    shared_examples 'find domain name' do
+      it "finds the domain name" do
+        expect( subject.get_domain_name( host ) ).to be === "labs.lan"
+      end
     end
 
-    it "can find the search for a host" do
-      host = make_host('name', { :stdout => "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" } )
+    context "on windows" do
+      let(:host) { make_host( 'name', {
+        :platform => 'windows',
+        :is_cygwin => cygwin,
+        :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
+      } ) }
 
-      expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
+      context "with cygwin" do
+        let(:cygwin) { true }
+        before(:each) do
+          expect( Beaker::Command ).to receive( :new ).with( "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" ).once
+        end
+        include_examples 'find domain name'
+      end
 
-      expect( subject.get_domain_name( host ) ).to be === "labs.lan"
+      context "without cygwin" do
+        let(:cygwin) { false }
+        before(:each) do
+          expect( Beaker::Command ).to receive( :new ).with( 'type C:\Windows\System32\drivers\etc\hosts' ).once
+        end
+        include_examples 'find domain name'
+      end
+    end
 
+    context "on other platforms" do
+      let(:host) { make_host( 'name', {
+        :platform => 'centos',
+        :stdout => stdout,
+      } ) }
+
+      before(:each) do
+        expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
+      end
+
+      context "with a domain entry" do
+        let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
+        include_examples 'find domain name'
+      end
+
+      context "with a search entry" do
+        let(:stdout) { "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
+        include_examples 'find domain name'
+      end
+
+      context "with a both a domain and a search entry" do
+        let(:stdout) { "domain labs.lan\nsearch d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
+        include_examples 'find domain name'
+      end
+
+      context "with a both a domain and a search entry, the search entry first" do
+        let(:stdout) { "search foo.example.net\ndomain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
+        include_examples 'find domain name'
+      end
     end
   end
 
