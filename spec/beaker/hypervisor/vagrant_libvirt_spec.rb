@@ -41,7 +41,7 @@ describe Beaker::VagrantLibvirt do
 
     it "can specify the memory as an integer" do
       expect( @vagrantfile.split("\n").map(&:strip) )
-        .to include('node.memory = 512')
+        .to include('node.memory = 1024')
     end
 
     it "can specify the number of cpus" do
