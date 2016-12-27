@@ -240,5 +240,30 @@ module Beaker
       end
     end
 
+    def self.cpus(host, options)
+      case
+      when host['vagrant_cpus']
+        host['vagrant_cpus']
+      when options['vagrant_cpus']
+        options['vagrant_cpus']
+      else
+        '1'
+      end
+    end
+
+    def self.memsize(host, options)
+      case
+      when host['vagrant_memsize']
+        host['vagrant_memsize']
+      when options['vagrant_memsize']
+        options['vagrant_memsize']
+      else
+        if host['platform'] =~ /windows/
+          '2048'
+        else
+          '1024'
+        end
+      end
+    end
   end
 end

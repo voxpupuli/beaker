@@ -7,7 +7,7 @@ class Beaker::VagrantWorkstation < Beaker::Vagrant
 
   def self.provider_vfile_section(host, options)
     "    v.vm.provider :vmware_workstation do |v|\n" +
-    "      v.vmx['memsize'] = '#{options['vagrant_memsize'] ||= '1024'}'\n" +
+    "      v.vmx['memsize'] = '#{memsize(host,options)}'\n" +
     "    end\n"
   end
 end
