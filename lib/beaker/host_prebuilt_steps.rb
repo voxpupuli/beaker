@@ -336,7 +336,16 @@ module Beaker
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
           host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
         elsif host['platform'] =~ /windows/ and not host.is_cygwin?
-          host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e)"))
+          # from https://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/xcopy.mspx?mfr=true:
+          #    /i : If Source is a directory or contains wildcards and Destination
+          #      does not exist, xcopy assumes destination specifies a directory
+          #      name and creates a new directory. Then, xcopy copies all specified
+          #      files into the new directory. By default, xcopy prompts you to
+          #      specify whether Destination is a file or a directory.
+          #
+          #    /y : Suppresses prompting to confirm that you want to overwrite an
+          #      existing destination file.
+          host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif host['platform'] =~ /osx/
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         elsif host['platform'] =~ /freebsd/
