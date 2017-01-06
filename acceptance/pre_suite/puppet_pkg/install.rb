@@ -1,7 +1,9 @@
 # the version is required on windows
 # all versions are required for osx
 install_puppet({
-  :version        => '3.8.7',
-  :facter_version => '2.1.0',
-  :hiera_version  => '1.3.4',
+  :version        => ENV['BEAKER_PUPPET_VERSION'] || '4.8.0',
+  :puppet_agent_version => ENV['BEAKER_PUPPET_AGENT_VERSION'] || '1.8.0'
 })
+
+on(master, puppet('resource user puppet ensure=present'))
+on(master, puppet('resource group puppet ensure=present'))
