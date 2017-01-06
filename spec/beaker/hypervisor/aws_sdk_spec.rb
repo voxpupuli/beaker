@@ -825,16 +825,29 @@ module Beaker
     end
 
     describe '#create_new_key_pair' do
-      let( :region ) { double('region', :name => 'test_region_name') }
+      let(:region) { double('region', :name => 'test_region_name') }
+      let(:ssh_string) { 'ssh_string_test_0867' }
+      let(:pairs) { double('keypairs') }
+      let(:pair) { double('keypair') }
+      let(:pair_name) { 'pair_name_1555432' }
+
+      before :each do
+        allow(aws).to receive(:public_key).and_return(ssh_string)
+        expect(pairs).to receive(:import).with(pair_name, ssh_string)
+        expect(pairs).to receive(:[]).with(pair_name).and_return(pair)
+        expect(region).to receive(:key_pairs).and_return(pairs).twice
+      end
 
       it 'imports the key given from public_key' do
-        ssh_string = 'ssh_string_test_0867'
-        allow( aws ).to receive( :public_key ).and_return( ssh_string )
-        pairs = double('keypairs')
-        pair_name = 'pair_name_1555432'
-        expect( pairs ).to receive( :import ).with( pair_name, ssh_string )
-        expect( region ).to receive(:key_pairs).and_return(pairs).once
-        aws.create_new_key_pair( region, pair_name )
+        expect(pair).to receive(:exists?).and_return (true)
+        aws.create_new_key_pair(region, pair_name)
+      end
+
+      it 'raises an exception if subsequent keypair check is false' do
+        expect(pair).to receive(:exists?).and_return (false)
+        expect { aws.create_new_key_pair(region, pair_name) }.
+          to raise_error(RuntimeError,
+            "AWS key pair #{pair_name} can not be queried, even after import")
       end
     end
 
