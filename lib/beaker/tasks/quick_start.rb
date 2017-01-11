@@ -1,5 +1,7 @@
 require 'beaker-hostgenerator'
 
+CONFIG_DIR = '.beaker/acceptance/config'
+
 VAGRANT  = ['ubuntu1404-64default.mdcal-ubuntu1404-64af', '--hypervisor=vagrant',
             '--global-config={box_url=https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm,box=puppetlabs/ubuntu-14.04-64-nocm}']
 
@@ -9,17 +11,17 @@ namespace :beaker_quickstart do
 
   desc 'Generate Default Beaker Host Config File, valid options are: vmpooler or vagrant.'
   task :gen_hosts, [:hypervisor] do |t, args|
-    hosts_file = "acceptance/config/default_#{args[:hypervisor]}_hosts.yaml"
+    hosts_file = "#{CONFIG_DIR}/default_#{args[:hypervisor]}_hosts.yaml"
     if args[:hypervisor] == 'vagrant'
       cli = VAGRANT
     elsif args[:hypervisor] == 'vmpooler'
       cli = VMPOOLER
     else
       puts "No hypervisor provided, defaulting to vagrant."
-      hosts_file = "acceptance/config/default_vagrant_hosts.yaml"
+      hosts_file = "#{CONFIG_DIR}/default_vagrant_hosts.yaml"
       cli = VAGRANT
     end
-    FileUtils.mkdir_p('acceptance/config') # -p ignores when dir already exists
+    FileUtils.mkdir_p("#{CONFIG_DIR}") # -p creates intermediate directories as required
     puts "About to run - beaker-hostgenerator #{cli.to_s.delete!('[]"')}"
     if !File.exist?(hosts_file) then
       puts "Writing default host config to file - #{hosts_file}"
