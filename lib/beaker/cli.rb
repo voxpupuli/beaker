@@ -27,19 +27,16 @@ module Beaker
         @execute = false
         return
       end
+
       if @options[:beaker_version_print]
         @logger.notify(beaker_version_string)
         @execute = false
         return
       end
 
-      if Beaker::Shared::SubcommandsUtil::write_config?
-        @options.dump_to_file(Beaker::Shared::SubcommandsUtil::CONFIG_PATH)
-      else
-        @logger.info("Beaker!")
-        @logger.info(beaker_version_string)
-        @logger.info(@options.dump)
-      end
+      @logger.info("Beaker!")
+      @logger.info(beaker_version_string)
+      @logger.info(@options.dump)
 
       if @options[:parse_only]
         @execute = false

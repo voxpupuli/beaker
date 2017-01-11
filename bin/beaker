@@ -3,7 +3,11 @@
 require 'rubygems' unless defined?(Gem)
 require 'beaker'
 
-Beaker::CLI.new.execute!
-puts "Beaker completed successfully, thanks."
+if Beaker::Subcommands::SubcommandUtil.execute_subcommand?(ARGV[0])
+  Beaker::Subcommand.start(ARGV)
+else
+  Beaker::CLI.new.execute!
+  puts "Beaker completed successfully, thanks."
+end
 
 exit 0
