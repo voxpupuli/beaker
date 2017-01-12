@@ -29,7 +29,6 @@ describe Beaker::VagrantLibvirt do
     before(:each) do
       FakeFS.activate!
       path = vagrant.instance_variable_get( :@vagrant_path )
-      allow( vagrant ).to receive( :randmac ).and_return( "0123456789" )
 
       vagrant.make_vfile( @hosts, options )
       @vagrantfile = File.read( File.expand_path( File.join( path, "Vagrantfile")))
@@ -52,6 +51,11 @@ describe Beaker::VagrantLibvirt do
     it "can specify any libvirt option" do
       expect( @vagrantfile.split("\n").map(&:strip) )
         .to include("node.uri = 'qemu+ssh://root@host/system'")
+    end
+
+    it "has a mac address in the proper format" do
+      expect( @vagrantfile.split("\n").map(&:strip) )
+        .to include(/:mac => "08:00:27:\h{2}:\h{2}:\h{2}"/)
     end
   end
 end

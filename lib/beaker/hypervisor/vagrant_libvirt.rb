@@ -8,6 +8,13 @@ class Beaker::VagrantLibvirt < Beaker::Vagrant
     attr_reader :memory
   end
 
+  # Return a random mac address with colons
+  #
+  # @return [String] a random mac address
+  def randmac
+    "08:00:27:" + (1..3).map{"%0.2X"%rand(256)}.join(':')
+  end
+
   def provision(provider = 'libvirt')
     super
   end
