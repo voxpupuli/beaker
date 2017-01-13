@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.0'
   s.add_development_dependency 'rspec-its'
   s.add_development_dependency 'fakefs', '~> 0.6'
-  s.add_development_dependency 'rake', '~> 11.2'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'pry', '~> 0.10'
 
@@ -43,6 +42,7 @@ Gem::Specification.new do |s|
   ## indicating test from puppet acceptance:
   ##   tests/security/cve-2013-1652_improper_query_params.rb
 
+  s.add_runtime_dependency 'rake', '~> 10.0'
   s.add_runtime_dependency 'rsync', '~> 1.0.9'
   s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
