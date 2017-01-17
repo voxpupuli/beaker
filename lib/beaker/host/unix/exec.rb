@@ -246,7 +246,7 @@ module Unix::Exec
       else
         val = val.to_s
       end
-      env_array << "#{key.to_s.upcase}=\"#{val}\""
+      env_array << "#{key.to_s}=\"#{val}\""
     end
     env_array
   end
