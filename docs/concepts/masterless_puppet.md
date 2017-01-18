@@ -23,7 +23,7 @@ In order to have Beaker support a masterless Puppet setup, you have to do a few 
 
 ## What is Beaker Doing by Default?
 
-Be default (without the masterless flag), when someone calls for a host of a particular role, using the `Beaker::DSL::Roles` module's methods (ie. `master`, `dashboard`, etc), Beaker checks to verify that a host was given with that role.
+By default (without the masterless flag), when someone calls for a host of a particular role, using the `Beaker::DSL::Roles` module's methods (ie. `master`, `dashboard`, etc), Beaker checks to verify that a host was given with that role.
 
 If no host was given with this role, then Beaker throws a `DSL::Outcomes::FailTest` Error, which causes that test case to fail.
 
