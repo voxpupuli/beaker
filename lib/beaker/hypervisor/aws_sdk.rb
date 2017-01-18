@@ -407,7 +407,7 @@ module Beaker
         end
         wait_for_status(:running, instances)
       rescue Exception => ex
-        @logger.notify("aws-sdk: exception - #{ex}")
+        @logger.notify("aws-sdk: exception #{ex.class}: #{ex}")
         kill_instances(instances.map{|x| x[:instance]})
         raise ex
       end
@@ -805,10 +805,18 @@ module Beaker
     # @param [String] pair_name the name of the key to be created
     #
     # @return [AWS::EC2::KeyPair] key pair created
+    # @raise [RuntimeError] raised if AWS keypair not created
     def create_new_key_pair(region, pair_name)
-      @logger.debug("aws-sdk: generating new key pair: #{pair_name}")
+      @logger.debug("aws-sdk: importing new key pair: #{pair_name}")
       ssh_string = public_key()
       region.key_pairs.import(pair_name, ssh_string)
+      kp = region.key_pairs[pair_name]
+      if kp.exists?
+        @logger.debug("aws-sdk: key pair #{pair_name} imported")
+        kp
+      else
+        raise RuntimeError, "AWS key pair #{pair_name} can not be queried, even after import"
+      end
     end
 
     # Return a reproducable security group identifier based on input ports
