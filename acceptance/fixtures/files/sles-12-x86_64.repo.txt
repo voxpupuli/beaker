@@ -1,0 +1,5 @@
+[PE-2016.4-sles-12-x86_64]
+name=PE-2016.4-sles-12-x86_64
+baseurl=http://enterprise.delivery.puppetlabs.net/2016.4/repos/sles-12-x86_64
+enabled=1
+gpgcheck=0

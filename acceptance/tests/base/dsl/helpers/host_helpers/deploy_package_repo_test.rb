@@ -106,15 +106,15 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
-        local_filename, contents = create_local_file_from_fixture("sles-11-x86_64.repo", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        local_filename, contents = create_local_file_from_fixture("#{default["platform"]}.repo", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         deploy_package_repo default, local_dir, name, version
 
         result = on default, "zypper repos -d"
-        assert_match "PE-3.8-sles-11-x86_64", result.stdout
+        assert_match "PE-2016.4-#{default['platform']}", result.stdout
 
         # teardown
-        on default, "zypper rr PE-3.8-sles-11-x86_64"
+        on default, "zypper rr #{default['platform']}"
       end
     end
   end

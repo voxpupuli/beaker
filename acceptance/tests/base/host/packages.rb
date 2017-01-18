@@ -51,6 +51,7 @@ hosts.each do |host|
   # a lot of dependencies.
   package = 'zsh'
   package = 'CSWzsh' if host['platform'] =~ /solaris-10/
+  package = 'git' if host['platform'] =~ /sles/
 
   if host['platform'] =~ /solaris-11/
     logger.debug("#{package} should be uninstalled on #{host}")
