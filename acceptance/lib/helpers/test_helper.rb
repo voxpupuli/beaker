@@ -44,8 +44,8 @@ end
 
 # Returns the contents of a named fixture file, to be found in `fixture_path`.
 def fixture_contents(fixture)
-  fixture_file = File.join(fixture_path, "#{fixture}.txt")
-  File.read(fixture_file)
+  fixture_file = Dir.entries(fixture_path).find { |e| /^#{fixture}$|#{fixture}\.[a-z]/ =~ e }
+  File.read("#{fixture_path}/#{fixture_file}")
 end
 
 # Create a file on `host` in the `remote_path` with file name `filename`,
