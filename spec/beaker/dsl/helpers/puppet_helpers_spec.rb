@@ -1096,14 +1096,14 @@ describe ClassMixedWithDSLHelpers do
 
     it 'uses the default ports if none given' do
       host = hosts[0]
-      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :retry_on ).with( anything(), /8080/, anything() ).once.ordered
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
       subject.sleep_until_puppetdb_started( host )
     end
 
     it 'allows setting the nonssl_port' do
       host = hosts[0]
-      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8084/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :retry_on ).with( anything(), /8084/, anything() ).once.ordered
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
       subject.sleep_until_puppetdb_started( host, 8084 )
 
@@ -1111,7 +1111,7 @@ describe ClassMixedWithDSLHelpers do
 
     it 'allows setting the ssl_port' do
       host = hosts[0]
-      expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8080/, anything(), anything() ).once.ordered
+      expect( subject ).to receive( :retry_on ).with( anything(), /8080/, anything() ).once.ordered
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8085/, anything() ).once.ordered
       subject.sleep_until_puppetdb_started( host, nil, 8085 )
     end

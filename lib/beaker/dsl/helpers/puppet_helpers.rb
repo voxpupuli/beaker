@@ -676,7 +676,10 @@ module Beaker
         def sleep_until_puppetdb_started(host, nonssl_port = nil, ssl_port = nil)
           nonssl_port = options[:puppetdb_port_nonssl] if nonssl_port.nil?
           ssl_port = options[:puppetdb_port_ssl] if ssl_port.nil?
-          curl_with_retries("start puppetdb", host, "http://localhost:#{nonssl_port}", 0, 120)
+          endpoint = 'status/v1/services/puppetdb-status'
+          retry_on(host,
+                   "curl -m 1 http://localhost:#{nonssl_port}/#{endpoint} | grep '\"state\":\"running\"'",
+                   {:max_retries => 120})
           curl_with_retries("start puppetdb (ssl)",
                             host, "https://#{host.node_name}:#{ssl_port}", [35, 60])
         end
