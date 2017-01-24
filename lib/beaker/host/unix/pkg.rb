@@ -403,6 +403,7 @@ module Unix::Pkg
     when /^(sles|aix|el|centos|oracle|redhat|scientific)$/
       variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
       arch = 'ppc' if variant == 'aix' && arch == 'power'
+      version = '7.1' if variant == 'aix' && version == '7.2'
       release_path_end = "#{variant}/#{version}/#{puppet_collection}/#{arch}"
       release_file = "puppet-agent-#{puppet_agent_version}-1.#{variant}#{version}.#{arch}.rpm"
     else
