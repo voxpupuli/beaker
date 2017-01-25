@@ -1143,7 +1143,12 @@ module Beaker
             when /^(sles|aix|el)$/
               # NOTE: AIX does not support repo management. This block assumes
               # that the desired rpm has been mirrored to the 'repos' location.
-              on host, "rpm -ivh #{onhost_copied_file}"
+              # NOTE: the AIX 7.1 package will only install on 7.2 with
+              # --ignoreos. This is a bug in package building on AIX 7.1's RPM
+              if variant == "aix" and version == "7.2"
+                aix_72_ignoreos_hack = "--ignoreos"
+              end
+              on host, "rpm -ivh #{aix_72_ignoreos_hack} #{onhost_copied_file}"
             when /^windows$/
               result = on host, "echo #{onhost_copied_file}"
               onhost_copied_file = result.raw_output.chomp
