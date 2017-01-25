@@ -51,6 +51,7 @@ module Beaker
       # quick start tasks
       def self.require_tasks()
         rake_file = determine_rake_file()
+        FileUtils.touch(rake_file)
         unless File.readlines(rake_file).grep(/#{BEAKER_REQUIRE}/).any?
           File.open(rake_file, "a+") { |f| f.puts(BEAKER_REQUIRE) }
         end

@@ -181,6 +181,7 @@ module Beaker
           allow(File).to receive(:readlines).with("Rakefile").and_return([""])
           allow(File).to receive(:open).with("Rakefile", "a+").and_yield(file)
           allow(File).to receive(:puts).with("require 'beaker/tasks/quick_start'").and_return(true)
+          expect(FileUtils).to receive(:touch).with("Rakefile").exactly(1).times
           expect(File).to receive(:open).with("Rakefile", "a+").and_yield(file).exactly(1).times
           expect(file).to receive(:puts).with("require 'beaker/tasks/quick_start'").exactly(1).times
           subject.require_tasks
@@ -191,6 +192,7 @@ module Beaker
           allow(File).to receive(:readlines).with("Rakefile").and_return(["require 'beaker/tasks/quick_start'"])
           allow(File).to receive(:open).with("Rakefile", "a+").and_yield(file)
           allow(File).to receive(:puts).with("require 'beaker/tasks/quick_start'").and_return(true)
+          expect(FileUtils).to receive(:touch).with("Rakefile").exactly(1).times
           expect(File).to receive(:open).with("Rakefile", "a+").and_yield(file).exactly(0).times
           expect(file).to receive(:puts).with("require 'beaker/tasks/quick_start'").exactly(0).times
           subject.require_tasks
