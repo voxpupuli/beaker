@@ -177,6 +177,14 @@ Run the base beaker acceptance tests
   end
 
   desc <<-EOS
+Run the subcommand beaker acceptance tests
+#{USAGE}
+  EOS
+  task :subcommands => 'gen_hosts' do
+    beaker_test(:subcommands)
+  end
+
+  desc <<-EOS
 Run the hypervisor beaker acceptance tests
 #{USAGE}
   EOS
