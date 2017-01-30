@@ -1,4 +1,5 @@
 require 'rake'
+require 'stringio'
 
 module Beaker
   module Subcommands
@@ -12,8 +13,8 @@ module Beaker
     # - execute the vagrant quickstart task
     # - execute the vmpooler quickstart task
     # - exit with a specific message
-    # - verify that the init subcommand has the correct arguments
     # - execute the quick start task for the specified hypervisor
+    # - capture stdout and stderr
     module SubcommandUtil
       BEAKER_REQUIRE = "require 'beaker/tasks/quick_start'"
       HYPERVISORS = ["vagrant", "vmpooler"]
@@ -72,7 +73,7 @@ module Beaker
       # @param [String] task the rake task to execute
       def self.execute_rake_task(task)
         rake_app.load_rakefile()
-        rake_app.invoke_task(task)
+        with_captured_output { rake_app.invoke_task(task) }
       end
 
       # Execute the quick start task for vagrant
@@ -92,14 +93,6 @@ module Beaker
         exit(0)
       end
 
-      # Verify that a valid hypervisor has been specified
-      # @param [Array<Object>] options the options we want to query
-      def self.verify_init_args(options)
-        unless HYPERVISORS.include?(options[:hypervisor])
-          exit_with("Invalid hypervisor. Currently supported hypervisors are: #{HYPERVISORS.join(', ')}")
-        end
-      end
-
       # Call the quick start task for the specified hypervisor
       # @param [Array<Object>] options the options we want to query
       def self.init_hypervisor(options)
@@ -108,6 +101,20 @@ module Beaker
           init_vagrant
         when "vmpooler"
           init_vmpooler
+        end
+      end
+
+      # Execute a task but capture stdout and stderr to a buffer
+      def self.with_captured_output
+        begin
+          old_stdout = $stdout.clone
+          old_stderr = $stderr.clone
+          $stdout = StringIO.new
+          $stderr = StringIO.new
+          yield
+        ensure
+          $stdout = old_stdout
+          $stderr = old_stderr
         end
       end
     end

@@ -20,7 +20,7 @@ test_name 'use the init subcommand' do
 
     ['vmpooler', 'vagrant'].each do |hypervisor|
       result = on(default, "beaker init --hypervisor=#{hypervisor}")
-      assert_match(/Writing default host config/, result.stdout)
+      assert_match(/Writing host config.+/, result.stdout)
       assert_equal(0, result.exit_code, "`beaker init --hypervisor=#{hypervisor}` should return a zero exit code")
       step 'ensure that the Rakefile is present' do
         on(default, '[ -e "Rakefile" ]')
@@ -44,4 +44,3 @@ test_name 'use the init subcommand' do
     assert(result.stdout.include?("require 'tempfile'"), 'Rakefile should not contain prepended require')
   end
 end
-
