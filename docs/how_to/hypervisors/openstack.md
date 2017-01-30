@@ -123,3 +123,17 @@ user their own pool.  It's used in allocating new IPs.  It's an options
 parameter in the CONFIG section of the host file:
 
     floating_ip_pool: 'my_pool_name'
+
+### Volume Support
+
+In the event your using an OpenStack instance that does not deploy the volume service you can disable that functionality to prevent beaker runs from failing.  Either using an ENV variable or setting the following value in the `CONFIG` section of your hosts file(valid values are `true` or `false`):
+
+```
+openstack_volume_support: false
+```
+
+You can also configure this setting via an environment variable:
+
+```
+export OS_VOL_SUPPORT=false
+```
