@@ -811,7 +811,18 @@ module Beaker
       ssh_string = public_key()
       region.key_pairs.import(pair_name, ssh_string)
       kp = region.key_pairs[pair_name]
-      if kp.exists?
+
+      exists = false
+      for tries in 1..10
+        if kp.exists?
+          exists = true
+          break
+        end
+        @logger.debug("AWS key pair doesn't appear to exist yet, sleeping before retry ")
+        backoff_sleep(tries)
+      end
+
+      if exists
         @logger.debug("aws-sdk: key pair #{pair_name} imported")
         kp
       else
