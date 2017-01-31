@@ -1,6 +1,7 @@
 require 'timeout'
 require 'inifile'
 require 'resolv'
+require 'beaker-http'
 
 module Beaker
   module DSL
@@ -757,12 +758,15 @@ module Beaker
         # @deprecated this method should be removed in the next release since we don't believe the check is necessary.
         def wait_for_host_in_dashboard(host)
           hostname = host.node_name
-          if host['platform'] =~ /aix/ then
-            curl_opts = '--tlsv1 -I'
-          else
-            curl_opts = '--tlsv1 -k -I'
-          end
-          retry_on(dashboard, "curl #{curl_opts} https://#{dashboard}:4433/classifier-api/v1/nodes | grep '\"name\":\"#{hostname}\"'")
+          cacert_file = get_host_cacert(host)
+          private_key_file = get_host_private_key(host)
+          cert_file = get_host_cert(host)
+          curl_opts = '--tlsv1 -H'
+          retry_on(dashboard, "curl #{curl_opts} 'Content-Type: application/json' \
+                              --cert #{cert_file}\
+                              --key #{private_key_file}\
+                              --cacert #{cacert_file}\
+                              https://#{dashboard}:4433/classifier-api/v1/nodes | grep '\"name\":\"#{hostname}\"'")
         end
 
         # Ensure the host has requested a cert, then sign it
