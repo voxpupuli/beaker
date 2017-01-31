@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
   s.add_runtime_dependency 'beaker-facter', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
-  s.add_development_dependency 'beaker-http'
+  s.add_runtime_dependency 'beaker-http', '~> 0.0'
 
   # Optional provisioner specific support
   s.add_runtime_dependency 'rbvmomi', '~> 1.9'
