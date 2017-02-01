@@ -813,7 +813,7 @@ module Beaker
       kp = region.key_pairs[pair_name]
 
       exists = false
-      for tries in 1..10
+      for tries in 1..5
         if kp.exists?
           exists = true
           break
