@@ -316,3 +316,17 @@ step "Ensure scp errors close the ssh connection" do
     on default, 'true'
   end
 end
+
+step 'Ensure that a long 128+ character string with UTF-8 characters does not break net-ssh' do
+  long_string = 'a' * 128 + "\u06FF"
+  on(default, "mkdir /tmp/#{long_string}")
+  result = on(default, 'ls /tmp')
+  assert(result.stdout.include?(long_string), 'Error in folder creation with long string + UTF-8 characters')
+
+  # remove the folder
+  on(default, "rm -rf /tmp/#{long_string}")
+  result = on(default, 'ls /tmp')
+  assert(!result.stdout.include?(long_string), 'Error in folder deletion with long string + UTF-8 characters')
+
+end
+
