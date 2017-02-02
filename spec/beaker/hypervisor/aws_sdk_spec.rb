@@ -839,12 +839,13 @@ module Beaker
       end
 
       it 'imports the key given from public_key' do
-        expect(pair).to receive(:exists?).and_return (true)
+        expect(pair).to receive(:exists?).and_return(true)
         aws.create_new_key_pair(region, pair_name)
       end
 
       it 'raises an exception if subsequent keypair check is false' do
-        expect(pair).to receive(:exists?).and_return (false)
+        expect(pair).to receive(:exists?).and_return(false).exactly(5).times
+        expect(aws).to receive(:backoff_sleep).exactly(5).times
         expect { aws.create_new_key_pair(region, pair_name) }.
           to raise_error(RuntimeError,
             "AWS key pair #{pair_name} can not be queried, even after import")
