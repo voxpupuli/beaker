@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'minitar', '~> 0.5.4'
 
   s.add_runtime_dependency 'hocon', '~> 1.0'
-  s.add_runtime_dependency 'net-ssh', '3.3.0.beta1'
+  s.add_runtime_dependency 'net-ssh', '~> 4.0'
   s.add_runtime_dependency 'net-scp', '~> 1.2'
   s.add_runtime_dependency 'inifile', '~> 2.0'
   ## inifile: keep <3.0, breaks puppet_helpers.rb:puppet_conf_for when updated
