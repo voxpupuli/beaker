@@ -29,7 +29,7 @@ what files you might need from your SUTs, and exploration might be necessary.
 
 Note that where you decide to use this option will affect its precedence. You
 can learn more about this in our
-[argument processing & precedence doc](../topics/argument_processing_and_precedence.md).
+[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
 
 ### Command-Line Option
 
@@ -54,11 +54,11 @@ You can also provide a value for this option wherever you can provide a value
 that gets merged into beaker's global options hash. The two ways to do this are
 to provide it in a local options file, or in the global `CONFIG` section of your
 hosts file. To learn more about how to set these options, check out the
-[Options File Values](../topics/argument_processing_and_precedence.md#options-file-values)
+[Options File Values](../concepts/argument_processing_and_precedence.md#options-file-values)
 and the
-[`CONFIG` Section of a Hosts File](../topics/argument_processing_and_precedence.md#config-section-of-hosts-file)
+[`CONFIG` Section of a Hosts File](../concepts/argument_processing_and_precedence.md#config-section-of-hosts-file)
 sections of the
-[argument processing & precedence doc](../topics/argument_processing_and_precedence.md).
+[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
 
 Either way, the underlying property name that you will have to set if you use
 these options is `:preserve_hosts`.
@@ -94,5 +94,5 @@ symlink, as mentioned at the beginning of this section.
 For subsequent runs, if you want to set something, you'll have to pay attention
 to the precedence of your arguments, to be sure that you are overriding what is
 set in the preserved hosts file. Checkout the
-[argument processing & precedence doc](../topics/argument_processing_and_precedence.md)
+[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md)
 for more details on the precedence order of options parsing.
