@@ -51,9 +51,19 @@ describe Beaker do
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
   ], true
 
-  it_should_behave_like 'enables_root_login', 'osx', [
+  it_should_behave_like 'enables_root_login', 'osx-10.10', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
+  ]
+
+  it_should_behave_like 'enables_root_login', 'osx-10.11', [
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
+  ]
+
+  it_should_behave_like 'enables_root_login', 'osx-10.12', [
+      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
   ]
 
   # Solaris
@@ -538,8 +548,16 @@ describe Beaker do
   context "set_env" do
     subject { dummy_class.new }
 
-    it "permits user environments on an OS X host" do
-      test_host_ssh_permit_user_environment('osx')
+    it "permits user environments on an OS X 10.10 host" do
+      test_host_ssh_permit_user_environment('osx-10.10')
+    end
+
+    it "permits user environments on an OS X 10.11 host" do
+      test_host_ssh_permit_user_environment('osx-10.11')
+    end
+
+    it "permits user environments on an OS X 10.12 host" do
+      test_host_ssh_permit_user_environment('osx-10.12')
     end
 
     it "permits user environments on an ssh-based linux host" do
@@ -571,8 +589,16 @@ describe Beaker do
     end
 
 
-    it "sets user ssh environment on an OS X host" do
-      test_host_ssh_set_user_environment('osx')
+    it "sets user ssh environment on an OS X 10.10 host" do
+      test_host_ssh_set_user_environment('osx-10.10')
+    end
+
+    it "sets user ssh environment on an OS X 10.11 host" do
+      test_host_ssh_set_user_environment('osx-10.11')
+    end
+
+    it "sets user ssh environment on an OS X 10.12 host" do
+      test_host_ssh_set_user_environment('osx-10.12')
     end
 
     it "sets user ssh environment on an ssh-based linux host" do

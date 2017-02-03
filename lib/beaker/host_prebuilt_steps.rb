@@ -409,10 +409,14 @@ module Beaker
     def enable_root_login host, opts
       logger = opts[:logger]
       block_on host do |host|
-        logger.debug "Update /etc/ssh/sshd_config to allow root login"
+        logger.debug "Update sshd_config to allow root login"
         if host['platform'] =~ /osx/
-          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"))
-          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config"))
+          # If osx > 10.10 use '/private/etc/ssh/sshd_config', else use '/etc/sshd_config'
+          ssh_config_file = '/private/etc/ssh/sshd_config'
+          ssh_config_file = '/etc/sshd_config' if host['platform'] =~ /^osx-10\.(9|10)/i
+
+          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' #{ssh_config_file}"))
+          host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' #{ssh_config_file}"))
         elsif host['platform'] =~ /freebsd/
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif host['platform'] =~ /openbsd/
