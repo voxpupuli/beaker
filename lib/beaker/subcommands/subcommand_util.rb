@@ -1,5 +1,7 @@
 require 'rake'
 require 'stringio'
+require 'yaml/store'
+require 'fileutils'
 
 module Beaker
   module Subcommands
@@ -18,6 +20,8 @@ module Beaker
     module SubcommandUtil
       BEAKER_REQUIRE = "require 'beaker/tasks/quick_start'"
       HYPERVISORS = ["vagrant", "vmpooler"]
+      CONFIG_DIR = ".beaker"
+      CONFIG_KEYS = [:hypervisor, :provisioned]
 
       # Check if the first argument to the beaker execution is a subcommand
       # @return [Boolean] true if argv[0] is "help" or a method defined in the Subcommands class, false otherwise
@@ -107,6 +111,14 @@ module Beaker
         end
       end
 
+      # Verify that a valid hypervisor has been specified
+      # @param [String] hypervisor the hypervisor we want to validate
+      def self.verify_init_args(hypervisor)
+        unless HYPERVISORS.include?(hypervisor)
+          exit_with("Invalid hypervisor. Currently supported hypervisors are: #{HYPERVISORS.join(', ')}")
+        end
+      end
+
       # Execute a task but capture stdout and stderr to a buffer
       def self.with_captured_output
         begin
@@ -119,6 +131,42 @@ module Beaker
           $stdout = old_stdout
           $stderr = old_stderr
         end
+      end
+
+      # Initialise the beaker config
+      def self.init_config()
+        FileUtils.mkdir_p CONFIG_DIR
+        @@store = YAML::Store.new("#{CONFIG_DIR}/config")
+      end
+
+      # Store values from a hash into the beaker config
+      # @param [Hash{Symbol=>String}] config values we want to store
+      def self.store_config(config)
+        @@store.transaction do
+          CONFIG_KEYS.each do |key|
+            @@store[key] = config[key] unless config[key].nil?
+          end
+        end
+      end
+
+      # Delete keys from the beaker configi
+      # @param [Array<Object>] keys the keys we want to delete from the config
+      def self.delete_config(keys)
+        @@store.transaction {
+          keys.each do |key|
+            @@store.delete(key)
+          end
+        }
+      end
+
+      # Reset args and provision nodes
+      # @param [String] hypervisor the hypervisor to use
+      # @param [Array<Object>] options the options to use when provisioning
+      def self.provision(hypervisor, options)
+        reset_argv(["--hosts", "#{CONFIG_DIR}/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", options[:validate], "--configure", options[:configure]])
+        beaker = Beaker::CLI.new
+        beaker.provision
+        beaker.preserve_hosts_file
       end
     end
   end
