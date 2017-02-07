@@ -336,7 +336,24 @@ module Beaker
         @options[:openstack_keyname]
       else
         @logger.debug "Generate a new rsa key"
-        key = OpenSSL::PKey::RSA.new 2048
+
+        # There is apparently an error that can occur when generating RSA keys, probably
+        # due to some timing issue, probably similar to the issue described here:
+        # https://github.com/negativecode/vines/issues/34
+        # In order to mitigate this error, we will simply try again up to three times, and
+        # then fail if we continue to error out.
+        begin
+          retries ||= 0
+          key = OpenSSL::PKey::RSA.new 2048
+        rescue OpenSSL::PKey::RSAError => e
+          retries += 1
+          if retries > 2
+            @logger.notify "error generating RSA key #{retries} times, exiting"
+            raise e
+          end
+          retry
+        end
+
         type = key.ssh_type
         data = [ key.to_blob ].pack('m0')
         @logger.debug "Creating Openstack keypair for public key '#{type} #{data}'"
