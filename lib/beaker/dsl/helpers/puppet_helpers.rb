@@ -757,14 +757,15 @@ module Beaker
         end
 
         #wait for a given host to appear in the dashboard
+        # @deprecated this method should be removed in the next release since we don't believe the check is necessary.
         def wait_for_host_in_dashboard(host)
+
           hostname = host.node_name
-          if host['platform'] =~ /aix/ then
-            curl_opts = '--tlsv1 -I'
-          else
-            curl_opts = '--tlsv1 -k -I'
-          end
-          retry_on(dashboard, "! curl #{curl_opts} https://#{dashboard}/nodes/#{hostname} | grep '404 Not Found'")
+          hostcert = dashboard.puppet['hostcert']
+          key = dashboard.puppet['hostprivkey']
+          cacert = dashboard.puppet['localcacert']
+          retry_on(dashboard, "curl --cert #{hostcert} --key #{key} --cacert #{cacert}\
+                              https://#{dashboard}:4433/classifier-api/v1/nodes | grep '\"name\":\"#{hostname}\"'")
         end
 
         # Ensure the host has requested a cert, then sign it
