@@ -1,5 +1,5 @@
 [ 'install_utils', 'roles', 'outcomes', 'assertions', 'patterns',
-  'structure', 'helpers', 'wrappers' ].each do |lib|
+  'structure', 'helpers', 'wrappers', 'test_tagging' ].each do |lib|
   require "beaker/dsl/#{lib}"
 end
 
@@ -79,6 +79,7 @@ module Beaker
     include Beaker::DSL::Helpers
     include Beaker::DSL::InstallUtils
     include Beaker::DSL::Patterns
+    include Beaker::DSL::TestTagging
 
     def self.register(helper_module)
       include helper_module
