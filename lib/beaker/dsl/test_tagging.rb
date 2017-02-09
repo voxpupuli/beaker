@@ -1,5 +1,16 @@
 module Beaker
   module DSL
+    # Test Tagging is about applying meta-data to tests (using the #tag method),
+    # so that you can control which tests are executed in a particular beaker
+    # run at a more fine-grained level.
+    #
+    # @note There are a few places where TestTagging-related code is located:
+    #   - {Beaker::Options::Parser#normalize_tags!} makes sure the test tags
+    #     are formatted correctly for use in this module
+    #   - {Beaker::Options::CommandLineParser#initialize} parses test tagging
+    #     options
+    #   - {Beaker::Options::Validator#validate_tags} ensures test tag CLI params
+    #     are valid for use by this module
     module TestTagging
 
       # Sets tags on the current {Beaker::TestCase}, and skips testing
@@ -17,11 +28,11 @@ module Beaker
           metadata[:case][:tags] << tag.downcase
         end
 
-        @options[:tag_includes] ||= []
-        @options[:tag_excludes] ||= []
+        @options[:test_tag_and]     ||= []
+        @options[:test_tag_exclude] ||= []
 
         tags_needed_to_include_this_test = []
-        @options[:tag_includes].each do |tag_to_include|
+        @options[:test_tag_and].each do |tag_to_include|
           tags_needed_to_include_this_test << tag_to_include \
             unless metadata[:case][:tags].include?(tag_to_include)
         end
@@ -29,7 +40,7 @@ module Beaker
           if tags_needed_to_include_this_test.length > 0
 
         tags_to_remove_to_include_this_test = []
-        @options[:tag_excludes].each do |tag_to_exclude|
+        @options[:test_tag_exclude].each do |tag_to_exclude|
           tags_to_remove_to_include_this_test << tag_to_exclude \
             if metadata[:case][:tags].include?(tag_to_exclude)
         end

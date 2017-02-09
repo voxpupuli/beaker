@@ -16,12 +16,12 @@ describe ClassMixedWithDSLStructure do
   end
 
   describe '#tag' do
-    let ( :tag_includes ) { @tag_includes || [] }
-    let ( :tag_excludes ) { @tag_excludes || [] }
-    let ( :options )      {
-      opts = Beaker::Options::OptionsHash.new
-      opts[:tag_includes] = tag_includes
-      opts[:tag_excludes] = tag_excludes
+    let ( :test_tag_and     ) { @tag_includes || [] }
+    let ( :test_tag_exclude ) { @tag_excludes || [] }
+    let ( :options          ) {
+      opts                    = Beaker::Options::OptionsHash.new
+      opts[:test_tag_and]     = test_tag_and
+      opts[:test_tag_exclude] = test_tag_exclude
       opts
     }
 

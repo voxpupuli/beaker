@@ -34,8 +34,8 @@ module Beaker
         :release_yum_repo_url => ['BEAKER_RELEASE_YUM_REPO', 'RELEASE_YUM_REPO'],
         :dev_builds_url       => ['BEAKER_DEV_BUILDS_URL', 'DEV_BUILDS_URL'],
         :vbguest_plugin       => ['BEAKER_VB_GUEST_PLUGIN', 'BEAKER_vb_guest_plugin'],
-        :tag_includes         => ['BEAKER_TAG'],
-        :tag_excludes         => ['BEAKER_EXCLUDE_TAG'],
+        :test_tag_and         => ['BEAKER_TAG', 'BEAKER_TEST_TAG_AND'],
+        :test_tag_exclude     => ['BEAKER_EXCLUDE_TAG', 'BEAKER_TEST_TAG_EXCLUDE'],
         :run_in_parallel      => ['BEAKER_RUN_IN_PARALLEL'],
       }
 
@@ -157,8 +157,8 @@ module Beaker
           :log_sut_event          => 'sut.log',
           :color                  => true,
           :dry_run                => false,
-          :tag_includes           => '',
-          :tag_excludes           => '',
+          :test_tag_and           => '',
+          :test_tag_exclude       => '',
           :timeout                => 900, # 15 minutes
           :fail_mode              => 'slow',
           :accept_all_exit_codes  => false,

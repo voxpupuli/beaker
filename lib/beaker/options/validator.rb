@@ -81,6 +81,8 @@ module Beaker
 
       # Raise an error if an item exists in both the include and exclude lists.
       #
+      # @note see test tagging logic at {Beaker::DSL::TestTagging} module
+      #
       # @param [Array] include included items
       # @param [Array] exclude excluded items
       # @return [nil] Does not return anything

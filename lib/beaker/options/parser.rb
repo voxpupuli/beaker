@@ -364,7 +364,7 @@ module Beaker
         end
 
         normalize_tags!
-        @validator.validate_tags(@options[:tag_includes], @options[:tag_excludes])
+        @validator.validate_tags(@options[:test_tag_and], @options[:test_tag_exclude])
         resolve_symlinks!
 
         #set the default role
@@ -411,13 +411,15 @@ module Beaker
 
       # Normalize include and exclude tags. This modifies @options.
       #
+      # @note refer to {Beaker::DSL::TestTagging} for test tagging implementation
+      #
       def normalize_tags!
-        @options[:tag_includes] ||= ''
-        @options[:tag_excludes] ||= ''
-        @options[:tag_includes] = @options[:tag_includes].split(',') if @options[:tag_includes].respond_to?(:split)
-        @options[:tag_excludes] = @options[:tag_excludes].split(',') if @options[:tag_excludes].respond_to?(:split)
-        @options[:tag_includes].map!(&:downcase)
-        @options[:tag_excludes].map!(&:downcase)
+        @options[:test_tag_and]     ||= ''
+        @options[:test_tag_exclude] ||= ''
+        @options[:test_tag_and]     = @options[:test_tag_and].split(',') if @options[:test_tag_and].respond_to?(:split)
+        @options[:test_tag_exclude] = @options[:test_tag_exclude].split(',') if @options[:test_tag_exclude].respond_to?(:split)
+        @options[:test_tag_and].map!(&:downcase)
+        @options[:test_tag_exclude].map!(&:downcase)
       end
 
       private

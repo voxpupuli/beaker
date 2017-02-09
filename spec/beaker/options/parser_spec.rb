@@ -479,12 +479,12 @@ module Beaker
       end
 
       describe '#normalize_tags!' do
-        let (:tag_includes) { @tag_includes || [] }
-        let (:tag_excludes) { @tag_excludes || [] }
-        let (:options) {
-          opts                = Beaker::Options::OptionsHash.new
-          opts[:tag_includes] = tag_includes
-          opts[:tag_excludes] = tag_excludes
+        let (:test_tag_and      ) { @tag_includes || [] }
+        let (:test_tag_exclude  ) { @tag_excludes || [] }
+        let (:options           ) {
+          opts                    = Beaker::Options::OptionsHash.new
+          opts[:test_tag_and]     = test_tag_and
+          opts[:test_tag_exclude] = test_tag_exclude
           opts
         }
 
@@ -502,8 +502,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_tags!
-          expect(options[:tag_includes]).to be === ['can', 'tommies', 'potatoes', 'plant']
-          expect(options[:tag_excludes]).to be === ['joey', 'long_running', 'pants']
+          expect(options[:test_tag_and]).to be === ['can', 'tommies', 'potatoes', 'plant']
+          expect(options[:test_tag_exclude]).to be === ['joey', 'long_running', 'pants']
         end
 
         it 'returns empty arrays for empty strings' do
@@ -512,8 +512,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_tags!
-          expect(options[:tag_includes]).to be === []
-          expect(options[:tag_excludes]).to be === []
+          expect(options[:test_tag_and]).to be === []
+          expect(options[:test_tag_exclude]).to be === []
         end
 
         it 'lowercases all tags correctly for later use' do
@@ -522,8 +522,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_tags!
-          expect(options[:tag_includes]).to be === ['jerry_and_tom', 'parka']
-          expect(options[:tag_excludes]).to be === ['leet_speak', 'poland']
+          expect(options[:test_tag_and]).to be === ['jerry_and_tom', 'parka']
+          expect(options[:test_tag_exclude]).to be === ['leet_speak', 'poland']
         end
       end
 
