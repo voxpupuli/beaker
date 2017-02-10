@@ -176,7 +176,7 @@ module Beaker
             modify_tk_config(host, puppetserver_conf, puppetserver_opts)
           end
           begin
-            backup_file = backup_the_file(host, host.puppet('master')['confdir'], testdir, 'puppet.conf')
+            backup_file = backup_the_file(host, host.puppet_configprint('master')['confdir'], testdir, 'puppet.conf')
             lay_down_new_puppet_conf host, conf_opts, testdir
 
             if host.use_service_scripts? && !service_args[:bypass_service_script]
@@ -250,7 +250,7 @@ module Beaker
 
         # @!visibility private
         def restore_puppet_conf_from_backup( host, backup_file )
-          puppet_conf = host.puppet('master')['config']
+          puppet_conf = host.puppet_configprint('master')['config']
 
           if backup_file
             host.exec( Command.new( "if [ -f '#{backup_file}' ]; then " +
@@ -305,7 +305,7 @@ module Beaker
 
         # @!visibility private
         def lay_down_new_puppet_conf( host, configuration_options, testdir )
-          puppetconf_main = host.puppet('master')['config']
+          puppetconf_main = host.puppet_configprint('master')['config']
           puppetconf_filename = File.basename(puppetconf_main)
           puppetconf_test = File.join(testdir, puppetconf_filename)
 
@@ -321,7 +321,7 @@ module Beaker
 
         # @!visibility private
         def puppet_conf_for host, conf_opts
-          puppetconf = host.exec( Command.new( "cat #{host.puppet('master')['config']}" ) ).stdout
+          puppetconf = host.exec( Command.new( "cat #{host.puppet_configprint('master')['config']}" ) ).stdout
           new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
 
           new_conf

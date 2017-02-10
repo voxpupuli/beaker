@@ -167,21 +167,21 @@ describe ClassMixedWithDSLInstallUtils do
       allow(ENV).to receive(:[]).with('FORK').and_return(nil)
       allow(ENV).to receive(:[]).with('PUPPET_FORK').and_return(nil)
       allow(ENV).to receive(:[]).with('PUPPET_SERVER').and_return(nil)
-      url = subject.build_giturl('puppet')
+      url = subject.build_git_url('puppet')
       expect(url).to be == 'https://github.com/puppetlabs/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck')
+      url = subject.build_git_url('puppet', 'er0ck')
       expect(url).to be == 'https://github.com/er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'bitbucket.com')
+      url = subject.build_git_url('puppet', 'er0ck', 'bitbucket.com')
       expect(url).to be == 'https://bitbucket.com/er0ck-puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https://')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'https://')
       expect(url).to be == 'https://github.com/er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'https')
       expect(url).to be == 'https://github.com/er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git@')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'git@')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'git')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'ssh')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'ssh')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
     end
 
@@ -190,21 +190,21 @@ describe ClassMixedWithDSLInstallUtils do
       allow(ENV).to receive(:[]).with('FORK').and_return(nil)
       allow(ENV).to receive(:[]).with('PUPPET_FORK').and_return('er0ck/repo')
       allow(ENV).to receive(:[]).with('PUPPET_SERVER').and_return('gitlab.com')
-      url = subject.build_giturl('puppet')
+      url = subject.build_git_url('puppet')
       expect(url).to be == 'https://gitlab.com/er0ck/repo-puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck')
+      url = subject.build_git_url('puppet', 'er0ck')
       expect(url).to be == 'https://gitlab.com/er0ck-puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'bitbucket.com')
+      url = subject.build_git_url('puppet', 'er0ck', 'bitbucket.com')
       expect(url).to be == 'https://bitbucket.com/er0ck-puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https://')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'https://')
       expect(url).to be == 'https://github.com/er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'https')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'https')
       expect(url).to be == 'https://github.com/er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git@')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'git@')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'git')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'git')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
-      url = subject.build_giturl('puppet', 'er0ck', 'github.com', 'ssh')
+      url = subject.build_git_url('puppet', 'er0ck', 'github.com', 'ssh')
       expect(url).to be == 'git@github.com:er0ck/puppet.git'
     end
   end
@@ -284,7 +284,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect(subject).to receive(:on).with(winhost, " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
       expect(subject).to receive(:install_msi_on).with(winhost, "#{win_temp}\\puppet-3.7.1.msi", {}, {:debug => nil})
 
-      subject.install_puppet_from_msi( winhost, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}  )
+      subject.install_puppet_from_msi_on( winhost, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}  )
     end
 
     it 'installs puppet on non-cygwin windows' do
@@ -299,7 +299,7 @@ describe ClassMixedWithDSLInstallUtils do
 
       expect(subject).to receive(:install_msi_on).with(winhost_non_cygwin, "#{win_temp}\\puppet-3.7.1.msi", {}, {:debug => nil})
 
-      subject.install_puppet_from_msi( winhost_non_cygwin, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}   )
+      subject.install_puppet_from_msi_on( winhost_non_cygwin, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}   )
     end
   end
 
@@ -368,7 +368,7 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
-  context 'install_from_git' do
+  context 'install_from_git_on' do
     it 'does a ton of stuff it probably shouldnt' do
       repo = { :name => 'puppet',
                :path => 'git://my.server.net/puppet.git',
@@ -384,7 +384,7 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :on ).exactly( 4 ).times
 
       subject.instance_variable_set( :@metadata, {} )
-      subject.install_from_git( host, path, repo )
+      subject.install_from_git_on( host, path, repo )
     end
 
     it 'should attempt to install ruby code' do
@@ -478,7 +478,7 @@ describe ClassMixedWithDSLInstallUtils do
         let(:platform) { Beaker::Platform.new("#{platform}-ver-arch") }
         it "installs latest on #{platform} if given no version info" do
           hosts.each do |host|
-            expect(subject).to receive(:install_puppetlabs_release_repo).with(host)
+            expect(subject).to receive(:install_puppetlabs_release_repo_on).with(host)
           end
           expect(hosts[0]).to receive(:install_package).with('puppet')
           subject.install_puppet
@@ -634,7 +634,7 @@ describe ClassMixedWithDSLInstallUtils do
 
       it "raises an exception." do
         expect{
-          subject.install_puppetlabs_release_repo host
+          subject.install_puppetlabs_release_repo_on host
         }.to raise_error(RuntimeError, /No repository installation step for/)
       end
     end
@@ -646,7 +646,7 @@ describe ClassMixedWithDSLInstallUtils do
         expect(subject).to receive(:on).with( host, /wget .*/ ).ordered
         expect(subject).to receive(:on).with( host, /dpkg .*/ ).ordered
         expect(subject).to receive(:on).with( host, "apt-get update" ).ordered
-        subject.install_puppetlabs_release_repo host
+        subject.install_puppetlabs_release_repo_on host
       end
 
     end

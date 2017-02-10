@@ -929,16 +929,16 @@ describe ClassMixedWithDSLHelpers do
           mock_puppetconf_reader = Object.new
           allow( mock_puppetconf_reader ).to receive( :[] ).with( 'config' ).and_return( '/root/mock/puppet.conf' )
           allow( mock_puppetconf_reader ).to receive( :[] ).with( 'confdir' ).and_return( '/root/mock' )
-          allow( host ).to receive( :puppet ).with( any_args ).and_return( mock_puppetconf_reader )
+          allow( host ).to receive( :puppet_configprint ).with( any_args ).and_return( mock_puppetconf_reader )
         end
 
-        let(:original_location) { host.puppet['config'] }
+        let(:original_location) { host.puppet_configprint['config'] }
         let(:backup_location) {
-          filename = File.basename(host.puppet['config'])
+          filename = File.basename(host.puppet_configprint['config'])
           File.join(tmpdir_path, "#{filename}.bak")
         }
         let(:new_location) {
-          filename = File.basename(host.puppet['config'])
+          filename = File.basename(host.puppet_configprint['config'])
           File.join(tmpdir_path, filename)
         }
 

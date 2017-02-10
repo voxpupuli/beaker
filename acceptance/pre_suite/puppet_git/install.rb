@@ -63,9 +63,9 @@ hosts.each do |host|
 
     step "#{host} Install ruby from git using revision #{revision}"
     # TODO remove this step once we are installing puppet from msi packages
-    install_from_git(host, "/opt/puppet-git-repos",
+    install_from_git_on(host, "/opt/puppet-git-repos",
                      :name => 'puppet-win32-ruby',
-                     :path => build_giturl('puppet-win32-ruby'),
+                     :path => build_git_url('puppet-win32-ruby'),
                      :rev  => revision)
     on host, 'cd /opt/puppet-git-repos/puppet-win32-ruby; cp -r ruby/* /'
     on host, 'cd /lib; icacls ruby /grant "Everyone:(OI)(CI)(RX)"'
@@ -88,10 +88,10 @@ repos = order_packages(tmp_repos)
 
 hosts.each do |host|
   repos.each do |repo|
-    install_from_git(host, SourcePath, repo)
+    install_from_git_on(host, SourcePath, repo)
   end
   unless host['platform'] =~ /windows/
-    on(host, "touch #{File.join(host.puppet['confdir'],'puppet.conf')}")
+    on(host, "touch #{File.join(host.puppet_configprint['confdir'],'puppet.conf')}")
     on(host, puppet('resource user puppet ensure=present'))
     on(host, puppet('resource group puppet ensure=present'))
   end

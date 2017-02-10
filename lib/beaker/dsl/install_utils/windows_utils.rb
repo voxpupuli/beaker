@@ -13,7 +13,6 @@ module Beaker
         def get_system_temp_path(host)
           host.system_temp_path
         end
-        alias_method :get_temp_path, :get_system_temp_path
 
         # Generates commands to be inserted into a Windows batch file to launch an MSI install
         # @param [String] msi_path The path of the MSI - can be a local Windows style file path like

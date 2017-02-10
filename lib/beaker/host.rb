@@ -133,7 +133,6 @@ module Beaker
     def puppet_configprint(command='agent')
       PuppetConfigReader.new(self, command)
     end
-    alias_method :puppet, :puppet_configprint
 
     def []= k, v
       host_hash[k] = v
