@@ -255,7 +255,7 @@ module Beaker
           end
 
           opts.on '--test-tag-or TAGS',
-                  'Run the set of tests matching ANY of the provided single or command separated list of tags' do |value|
+                  'Run the set of tests matching ANY of the provided single or comma separated list of tags' do |value|
             @cmd_options[:test_tag_or] = value
           end
 
@@ -264,7 +264,7 @@ module Beaker
             @cmd_options[:test_tag_exclude] = value
           end
           opts.on '--test-tag-exclude TAGS',
-                  'Run the set of tests that do not contain ANY of the provided single or command separated list of tags' do |value|
+                  'Run the set of tests that do not contain ANY of the provided single or comma separated list of tags' do |value|
             @cmd_options[:test_tag_exclude] = value
           end
 

@@ -19,6 +19,7 @@ confine.  Things to stay aware of:
 - Tags are free form strings and will not be subjected to any correctness testing
 - Tags are NOT case sensitive
 - Tagging was added after Beaker 2.14.1.  If you're using that version or older, this isn't available
+- `--test-tag-or` was added after Beaker 3.12.0. If you're using an older version, this isnt available
 
 ## Test Examples
 
@@ -44,13 +45,16 @@ Preferred style no-block example:
 
 ## Command Line Interaction
 
-`--test-tag-and`: Run the set of tests matching ALL of the provided single or comma separated list of tags.
+`--test-tag-and`: Run the set of tests matching ALL of the provided single or comma-separated list of tags.
 
-`--test-tag-exclude`: Run the set of tests that do not contain ANY of the provided single or command separated list of tags
+`--test-tag-or`: Run the set of tests matching ANY of the provided single or comma-separated list of tags.
 
-To do set intersection combine `--test-tag-and` and `--test-tag-exclude`.
+`--test-tag-exclude`: Run the set of tests that do not contain ANY of the provided single or comma-separated list of tags.
 
 Beaker will raise an error if `--test-tag-and` & `--test-tag-exclude` contain the same tag, however.
+
+Beaker will also raise an error if you use both `--test-tag-or` & `--test-tag-and`, because
+it won't be able to determine which order they should be used in.
 
 ## CLI Examples
 
@@ -72,10 +76,14 @@ Execute all tests marked both 'long_running' and 'feature_test'
 
 ## Environment Variable Support
 
-Equivalent to `--test_tag_and`:
+Equivalent to `--test-tag-and`:
 
     BEAKER_TEST_TAG_AND=long_running,feature_test
 
-Equivalent to `--test-tag_exclude`:
+Equivalent to `--test-tag-or`:
+
+    BEAKER_TEST_TAG_OR=long_running,feature_test
+
+Equivalent to `--test-tag-exclude`:
 
     BEAKER_TEST_TAG_EXCLUDE=long_running,feature_test

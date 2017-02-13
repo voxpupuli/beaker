@@ -16,11 +16,13 @@ describe ClassMixedWithDSLStructure do
   end
 
   describe '#tag' do
-    let ( :test_tag_and     ) { @tag_includes || [] }
-    let ( :test_tag_exclude ) { @tag_excludes || [] }
+    let ( :test_tag_and     ) { @test_tag_and     || [] }
+    let ( :test_tag_or      ) { @test_tag_or      || [] }
+    let ( :test_tag_exclude ) { @test_tag_exclude || [] }
     let ( :options          ) {
       opts                    = Beaker::Options::OptionsHash.new
       opts[:test_tag_and]     = test_tag_and
+      opts[:test_tag_or]      = test_tag_or
       opts[:test_tag_exclude] = test_tag_exclude
       opts
     }
@@ -45,8 +47,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if any of the requested tags isn\'t included in this test' do
-      test_tags = ['pants', 'jayjay', 'moguely']
-      @tag_includes = test_tags.compact.push('needed_tag_not_in_test')
+      test_tags     = ['pants', 'jayjay', 'moguely']
+      @test_tag_and = test_tags.compact.push('needed_tag_not_in_test')
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
@@ -55,8 +57,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'runs the test if all requested tags are included in this test' do
-      @tag_includes = ['pants_on_head', 'jayjay_jayjay', 'mo']
-      test_tags = @tag_includes.compact.push('extra_asdf')
+      @test_tag_and = ['pants_on_head', 'jayjay_jayjay', 'mo']
+      test_tags     = @test_tag_and.compact.push('extra_asdf')
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
@@ -65,8 +67,19 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if any of the excluded tags are included in this test' do
-      test_tags = ['ports', 'jay_john_mary', 'mog_the_dog']
-      @tag_excludes = [test_tags[0]]
+      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      @test_tag_exclude = [test_tags[0]]
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test )
+      subject.tag(*test_tags)
+    end
+
+    it 'skips the test if an and-included & excluded tag are in this test' do
+      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      @test_tag_and     = [test_tags[1]]
+      @test_tag_exclude = [test_tags[0]]
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
@@ -75,12 +88,43 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'runs the test if none of the excluded tags are included in this test' do
-      @tag_excludes = ['pants_on_head', 'jayjay_jayjay', 'mo']
-      test_tags     = ['pants_at_head', 'jayj00_jayjay', 'motly_crew']
+      @test_tag_exclude = ['pants_on_head', 'jayjay_jayjay', 'mo']
+      test_tags         = ['pants_at_head', 'jayj00_jayjay', 'motly_crew']
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
       expect( subject ).to receive( :skip_test ).never
+      subject.tag(*test_tags)
+    end
+
+    it 'skips the test if none of the OR tags are included in this test' do
+      test_tags = ['portmanteau', 'foolios']
+      @test_tag_or = ['fish', 'crayons', 'parkas']
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test )
+      subject.tag(*test_tags)
+    end
+
+    it 'runs the test if only one of the OR tags are included in this test' do
+      test_tags = ['portmanteau', 'foolios']
+      @test_tag_or = ['foolios', 'crayons', 'parkas']
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test ).never
+      subject.tag(*test_tags)
+    end
+
+    it 'skips the test if an or-included & excluded tag are included in this test' do
+      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      @test_tag_or      = [test_tags[1]]
+      @test_tag_exclude = [test_tags[0]]
+      subject.instance_variable_set(:@options, options)
+
+      allow( subject ).to receive( :path )
+      expect( subject ).to receive( :skip_test )
       subject.tag(*test_tags)
     end
   end

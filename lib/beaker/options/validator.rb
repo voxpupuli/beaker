@@ -83,14 +83,18 @@ module Beaker
       #
       # @note see test tagging logic at {Beaker::DSL::TestTagging} module
       #
-      # @param [Array] include included items
-      # @param [Array] exclude excluded items
+      # @param [Array] tags_and included items
+      # @param [Array] tags_exclude excluded items
       # @return [nil] Does not return anything
-      def validate_tags(include, exclude)
-        include.each do |included_tag|
+      def validate_test_tags(tags_and, tags_or, tags_exclude)
+        if tags_and.length > 0 && tags_or.length > 0
+          validator_error "cannot have values for both test tagging operands (AND and OR)"
+        end
+
+        tags_and.each do |included_tag|
           # select items from exclude set that match included_tag
           # no match is an empty list/array/[]
-          if exclude.select { |ex| ex == included_tag } != []
+          if tags_exclude.select { |ex| ex == included_tag } != []
             validator_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets"
           end
         end

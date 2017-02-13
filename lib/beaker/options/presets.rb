@@ -35,6 +35,7 @@ module Beaker
         :dev_builds_url       => ['BEAKER_DEV_BUILDS_URL', 'DEV_BUILDS_URL'],
         :vbguest_plugin       => ['BEAKER_VB_GUEST_PLUGIN', 'BEAKER_vb_guest_plugin'],
         :test_tag_and         => ['BEAKER_TAG', 'BEAKER_TEST_TAG_AND'],
+        :test_tag_or          => ['BEAKER_TEST_TAG_OR'],
         :test_tag_exclude     => ['BEAKER_EXCLUDE_TAG', 'BEAKER_TEST_TAG_EXCLUDE'],
         :run_in_parallel      => ['BEAKER_RUN_IN_PARALLEL'],
       }
@@ -158,6 +159,7 @@ module Beaker
           :color                  => true,
           :dry_run                => false,
           :test_tag_and           => '',
+          :test_tag_or            => '',
           :test_tag_exclude       => '',
           :timeout                => 900, # 15 minutes
           :fail_mode              => 'slow',

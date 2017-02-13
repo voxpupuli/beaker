@@ -29,6 +29,7 @@ module Beaker
         end
 
         @options[:test_tag_and]     ||= []
+        @options[:test_tag_or]      ||= []
         @options[:test_tag_exclude] ||= []
 
         tags_needed_to_include_this_test = []
@@ -38,6 +39,14 @@ module Beaker
         end
         skip_test "#{self.path} does not include necessary tag(s): #{tags_needed_to_include_this_test}" \
           if tags_needed_to_include_this_test.length > 0
+
+        found_test_tag = false
+        @options[:test_tag_or].each do |tag_to_include|
+          found_test_tag = metadata[:case][:tags].include?(tag_to_include)
+          break if found_test_tag
+        end
+        skip_test "#{self.path} does not include any of these tag(s): #{@options[:test_tag_or]}" \
+          if @options[:test_tag_or].length > 0 && !found_test_tag
 
         tags_to_remove_to_include_this_test = []
         @options[:test_tag_exclude].each do |tag_to_exclude|

@@ -363,8 +363,12 @@ module Beaker
           host[:host_tags] = @options[:host_tags].merge(host[:host_tags] || {})
         end
 
-        normalize_tags!
-        @validator.validate_tags(@options[:test_tag_and], @options[:test_tag_exclude])
+        normalize_test_tags!
+        @validator.validate_test_tags(
+          @options[:test_tag_and],
+          @options[:test_tag_or],
+          @options[:test_tag_exclude]
+        )
         resolve_symlinks!
 
         #set the default role
@@ -413,12 +417,15 @@ module Beaker
       #
       # @note refer to {Beaker::DSL::TestTagging} for test tagging implementation
       #
-      def normalize_tags!
+      def normalize_test_tags!
         @options[:test_tag_and]     ||= ''
+        @options[:test_tag_or]      ||= ''
         @options[:test_tag_exclude] ||= ''
-        @options[:test_tag_and]     = @options[:test_tag_and].split(',') if @options[:test_tag_and].respond_to?(:split)
+        @options[:test_tag_and]     = @options[:test_tag_and].split(',')     if @options[:test_tag_and].respond_to?(:split)
+        @options[:test_tag_or]      = @options[:test_tag_or].split(',')      if @options[:test_tag_or].respond_to?(:split)
         @options[:test_tag_exclude] = @options[:test_tag_exclude].split(',') if @options[:test_tag_exclude].respond_to?(:split)
         @options[:test_tag_and].map!(&:downcase)
+        @options[:test_tag_or].map!(&:downcase)
         @options[:test_tag_exclude].map!(&:downcase)
       end
 
