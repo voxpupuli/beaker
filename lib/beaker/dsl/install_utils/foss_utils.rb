@@ -266,6 +266,12 @@ module Beaker
               if host['platform'] =~ /el-(5|6|7)/
                 relver = $1
                 install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'el'))
+              elsif host['platform'] =~ /sles-(11|12)/
+                relver = $1
+                # Need to get rid of whatever Puppet might have shipped on the
+                # upstream images
+                host.uninstall_package('puppet')
+                install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'sles'))
               elsif host['platform'] =~ /fedora-(\d+)/
                 relver = $1
                 install_puppet_from_rpm_on(host, opts.merge(:release => relver, :family => 'fedora'))
@@ -436,7 +442,12 @@ module Beaker
         # @api private
         def install_puppet_from_rpm_on( hosts, opts )
           block_on hosts do |host|
-            install_puppetlabs_release_repo(host)
+            if host[:type] == 'aio'
+              install_puppetlabs_release_repo(host,'pc1',opts)
+              opts[:version] = 'agent' unless opts[:version]
+            else
+              install_puppetlabs_release_repo(host,nil,opts)
+            end
 
             if opts[:facter_version]
               host.install_package("facter-#{opts[:facter_version]}")
@@ -1106,7 +1117,7 @@ module Beaker
             onhost_copy_base = opts[:copy_dir_external] || host.external_copy_base
 
             case variant
-            when /^(fedora|el|centos|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr)$/
+            when /^(fedora|el|centos|sles|debian|ubuntu|cumulus|huaweios|cisco_nexus|cisco_ios_xr)$/
               if arch == 's390x'
                 logger.trace("#install_puppet_agent_dev_repo_on: s390x arch detected for host #{host}. using dev package")
               else
@@ -1116,7 +1127,7 @@ module Beaker
                 logger.trace("#install_puppet_agent_dev_repo_on: install_puppetlabs_dev_repo finished")
                 next
               end
-            when /^(eos|osx|windows|solaris|sles|aix)$/
+            when /^(eos|osx|windows|solaris|aix)$/
               # Download installer package file & run install manually.
               # Done below, so that el hosts with s390x arch can use this
               # workflow as well
@@ -1182,7 +1193,7 @@ module Beaker
         # @option opts [String] :pe_promoted_builds_url Base URL to pull artifacts from
         #
         # @note on windows, the +:ruby_arch+ host parameter can determine in addition
-        #   to other settings whether the 32 or 64bit install is used
+        # to other settings whether the 32 or 64bit install is used
         #
         # @example
         #   install_puppet_agent_pe_promoted_repo_on(host, { :puppet_agent_version => '1.1.0.227', :pe_ver => '4.0.0-rc1'})
