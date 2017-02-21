@@ -60,7 +60,13 @@ module Beaker
       when /cisco/
         Cisco::Host.new name, host_hash, options
       else
-        Unix::Host.new name, host_hash, options
+        # Custom Host
+        begin
+          require "beaker/host/#{type}"
+        rescue LoadError
+          raise "Invalid Host type: #{type}"
+        end
+        Beaker.const_get(type.capitalize)
       end
     end
 
@@ -139,7 +145,7 @@ module Beaker
       host_hash[k] = v
     end
 
-    # Does this host have this key?  Either as defined in the host itself, or globally? 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def [] k
       host_hash[k] || options[k]
     end
