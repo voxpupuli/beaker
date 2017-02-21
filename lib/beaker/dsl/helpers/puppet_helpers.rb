@@ -676,9 +676,18 @@ module Beaker
         def sleep_until_puppetdb_started(host, nonssl_port = nil, ssl_port = nil)
           nonssl_port = options[:puppetdb_port_nonssl] if nonssl_port.nil?
           ssl_port = options[:puppetdb_port_ssl] if ssl_port.nil?
-          endpoint = 'status/v1/services/puppetdb-status'
+          pe_ver = host['pe_ver'] || '0'
+          if version_is_less(pe_ver, '2016.1.0') then
+            # the status endpoint was introduced in puppetdb 4.0. The earliest
+            # PE release with the 4.x pdb version was 2016.1.0
+            endpoint = 'pdb/meta/v1/version'
+            expected_regex = '\"version\" \{0,\}: \{0,\}\"[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\"'
+          else
+            endpoint = 'status/v1/services/puppetdb-status'
+            expected_regex = '\"state\" \{0,\}: \{0,\}\"running\"'
+          end
           retry_on(host,
-                   "curl -m 1 http://localhost:#{nonssl_port}/#{endpoint} | grep '\"state\":\"running\"'",
+                   "curl -m 1 http://localhost:#{nonssl_port}/#{endpoint} | grep '#{expected_regex}'",
                    {:max_retries => 120})
           curl_with_retries("start puppetdb (ssl)",
                             host, "https://#{host.node_name}:#{ssl_port}", [35, 60])

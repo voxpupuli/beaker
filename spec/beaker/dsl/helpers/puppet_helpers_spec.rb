@@ -1115,6 +1115,27 @@ describe ClassMixedWithDSLHelpers do
       expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8085/, anything() ).once.ordered
       subject.sleep_until_puppetdb_started( host, nil, 8085 )
     end
+
+    context 'when pe_ver is less than 2016.1.0' do
+      it 'uses the version endpoint' do
+        host = hosts[0]
+        host['pe_ver'] = '2015.3.3'
+        expect( subject ).to receive( :retry_on ).with( anything(), /pdb\/meta\/v1\/version/, anything() ).once.ordered
+        expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+        subject.sleep_until_puppetdb_started( host )
+      end
+    end
+
+    context 'when pe_ver is greater than 2015.9.9' do
+      it 'uses the status endpoint' do
+        host = hosts[0]
+        host['pe_ver'] = '2016.1.0'
+        expect( subject ).to receive( :retry_on ).with( anything(), /status\/v1\/services\/puppetdb-status/, anything() ).once.ordered
+        expect( subject ).to receive( :curl_with_retries ).with( anything(), anything(), /8081/, anything() ).once.ordered
+        subject.sleep_until_puppetdb_started( host )
+      end
+    end
+
   end
 
   describe '#sleep_until_puppetserver_started' do
