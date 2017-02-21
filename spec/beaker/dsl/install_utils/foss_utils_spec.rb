@@ -57,6 +57,17 @@ describe ClassMixedWithDSLInstallUtils do
                                                 :working_dir => '/tmp',
                                                 :type => 'foss',
                                                 :dist => 'puppet-enterprise-3.7.1-rc0-78-gffc958f-eos-4-i386' } ) }
+  let(:el6hostaio)    { make_host( 'el6hostaio', { :platform => Beaker::Platform.new('el-6-i386'),
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp',
+                                                :type => 'aio',
+                                                 :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-centos-6-i386' } ) }
+  let(:el6hostfoss)   { make_host( 'el6hostfoss', { :platform => Beaker::Platform.new('el-6-i386'),
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp',
+                                                :type => 'foss',
+                                                 :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-centos-6-i386' } ) }
+
   let(:win_temp)      { 'C:\\Windows\\Temp' }
 
 
@@ -254,6 +265,20 @@ describe ClassMixedWithDSLInstallUtils do
       version = subject.find_git_repo_versions( host, path, repository )
 
       expect( version ).to be == { 'name' => '2' }
+    end
+  end
+
+  context 'install_puppet_from_rpm_on' do
+    it 'installs PC1 release repo when AIO' do
+      expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostaio,'pc1',{})
+
+      subject.install_puppet_from_rpm_on( el6hostaio, {}  )
+    end
+
+    it 'installs non-PC1 package when not-AIO' do
+      expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostfoss,nil,{})
+
+      subject.install_puppet_from_rpm_on( el6hostfoss, {}  )
     end
   end
 

@@ -436,7 +436,11 @@ module Beaker
         # @api private
         def install_puppet_from_rpm_on( hosts, opts )
           block_on hosts do |host|
-            install_puppetlabs_release_repo(host)
+            if host[:type] == 'aio'
+              install_puppetlabs_release_repo(host,'pc1',opts)
+            else
+              install_puppetlabs_release_repo(host,nil,opts)
+            end
 
             if opts[:facter_version]
               host.install_package("facter-#{opts[:facter_version]}")
@@ -922,6 +926,7 @@ module Beaker
                 # cisco ios xr requires using yum to localinstall the repo
                 on host, "yum -y localinstall #{remote}"
               else
+                opts[:package_proxy] ||= false
                 host.install_package_with_rpm( remote, '--replacepkgs',
                   { :package_proxy => opts[:package_proxy] } )
               end
