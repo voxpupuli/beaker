@@ -733,6 +733,24 @@ module Beaker
           end
         end
 
+        # Returns the latest released puppetserver version number.
+        #
+        # @return [String] version    puppetserver version number (e.g. 2.5.0)
+        #                             Empty string if none found.
+        def get_latest_puppetserver_released_version
+          require 'nokogiri'
+          require 'open-uri'
+          page = Nokogiri::HTML(open('http://downloads.puppetlabs.com/puppet/?C=M;O=A'))
+          servers = page.css('a').children.select{ |link| link.to_s.include? 'puppetserver' }
+          re =  /puppetserver-(.*)\.tar\.gz\.asc/
+          latest_match = servers[-1].to_s.match re
+          if latest_match
+            latest = latest_match[1]
+          else
+            latest = ''
+          end
+        end
+
         # Returns the latest puppet-agent version number from a given url.
         #
         # @param [String] url         URL containing list of puppet-agent packages.
