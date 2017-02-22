@@ -108,40 +108,6 @@ module Beaker
         end
       end
 
-      describe 'verify_init_args' do
-        it "verfy the init args are valid for a vagrant run" do
-          options = {:hypervisor => "vagrant"}
-          expect(subject).to receive(:exit_with).exactly(0).times
-          subject.verify_init_args(options)
-        end
-
-        it "verfy the init args are valid for a vmpooler run" do
-          options = {:hypervisor => "vmpooler"}
-          expect(subject).to receive(:exit_with).exactly(0).times
-          subject.verify_init_args(options)
-        end
-
-        it "verify the init args are invalid for an init run" do
-          options = {}
-          expect(STDOUT).to receive(:puts).with("Invalid hypervisor. Currently supported hypervisors are: #{Beaker::Subcommands::SubcommandUtil::HYPERVISORS.join(', ')}").exactly(1).times
-          begin
-            subject.verify_init_args(options)
-          rescue SystemExit=>e
-            expect(e.status).to eq(0)
-          end
-        end
-
-        it "verify the init args are invalid for a vmpooler run" do
-          options = {:hypervisor => "thisshouldfail"}
-          expect(STDOUT).to receive(:puts).with("Invalid hypervisor. Currently supported hypervisors are: #{Beaker::Subcommands::SubcommandUtil::HYPERVISORS.join(', ')}").exactly(1).times
-          begin
-            subject.verify_init_args(options)
-          rescue SystemExit=>e
-            expect(e.status).to eq(0)
-          end
-        end
-      end
-
       describe "determine_rake_file" do
 
         it "uses Rakefile if no rakefile exists" do
