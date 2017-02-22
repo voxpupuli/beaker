@@ -54,7 +54,7 @@ module Beaker
           begin
             subject.exit_with("exiting")
           rescue SystemExit=>e
-            expect(e.status).to eq(0)
+            expect(e.status).to eq(1)
           end
         end
       end

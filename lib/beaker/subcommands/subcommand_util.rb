@@ -86,11 +86,11 @@ module Beaker
         execute_rake_task("beaker_quickstart:gen_hosts[vmpooler]")
       end
 
-      # Print a message to the console and exit with 0
+      # Print a message to the console and exit with 1
       # @param [String] msg the message to print
-      def self.exit_with(msg)
+      def self.exit_with(msg, exit_code=1)
         puts msg
-        exit(0)
+        exit(exit_code)
       end
 
       # Call the quick start task for the specified hypervisor
