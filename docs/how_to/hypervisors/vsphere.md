@@ -7,9 +7,6 @@ To do this create a `~/.fog` file with your vSphere credentials:
       :vsphere_server: 'vsphere.example.com'
       :vsphere_username: 'joe'
       :vsphere_password: 'MyP@$$w0rd'
-      :vmpooler_token: 'randomtokentext'
-
-The vmpooler_token can be used with https://github.com/puppetlabs/vmpooler. Users with Puppet Labs credentials can follow directions for getting and using tokens at https://confluence.puppetlabs.com/display/QE/Generating+and+using+vmpooler+tokens.
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
