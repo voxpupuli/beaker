@@ -36,11 +36,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'net-ssh', '~> 4.0'
   s.add_runtime_dependency 'net-scp', '~> 1.2'
-  s.add_runtime_dependency 'inifile', '~> 2.0'
-  ## inifile: keep <3.0, breaks puppet_helpers.rb:puppet_conf_for when updated
-  ## will need to fix that to upgrade this gem
-  ## indicating test from puppet acceptance:
-  ##   tests/security/cve-2013-1652_improper_query_params.rb
+  s.add_runtime_dependency 'inifile', '~> 3.0'
 
   s.add_runtime_dependency 'rake', '~> 10.0'
   s.add_runtime_dependency 'rsync', '~> 1.0.9'

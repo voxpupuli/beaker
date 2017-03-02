@@ -75,7 +75,7 @@ module Beaker
             end
 
             begin
-              return IniFile.new(string)
+              return IniFile.new(content: string)
             rescue IniFile::Error
               nil
             end

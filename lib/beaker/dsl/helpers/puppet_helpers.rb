@@ -322,7 +322,7 @@ module Beaker
         # @!visibility private
         def puppet_conf_for host, conf_opts
           puppetconf = host.exec( Command.new( "cat #{host.puppet('master')['config']}" ) ).stdout
-          new_conf   = IniFile.new( puppetconf ).merge( conf_opts )
+          new_conf   = IniFile.new(content: puppetconf).merge( conf_opts )
 
           new_conf
         end
