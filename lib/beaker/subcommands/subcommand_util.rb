@@ -86,10 +86,13 @@ module Beaker
         execute_rake_task("beaker_quickstart:gen_hosts[vmpooler]")
       end
 
-      # Print a message to the console and exit with 1
-      # @param [String] msg the message to print
-      def self.exit_with(msg, exit_code=1)
+      # Print a message to the console and exit with specified exit code, defaults to 1
+      # @param [String] msg the message to output
+      # @param [Hash<Object>] options to specify exit code or output stack trace
+      def self.error_with(msg, options={})
         puts msg
+        puts options[:stack_trace] if options[:stack_trace]
+        exit_code = options[:exit_code] ? options[:exit_code] : 1
         exit(exit_code)
       end
 
