@@ -349,7 +349,7 @@ describe Beaker do
 
     it "can sync keys on a non-solaris host" do
 
-      expect( Beaker::Command ).to receive( :new ).with( sync_cmd % "env PATH=/usr/gnu/bin:$PATH bash" ).exactly( 3 ).times
+      expect( Beaker::Command ).to receive( :new ).with( sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash" ).exactly( 3 ).times
 
       subject.sync_root_keys( hosts, options )
 
