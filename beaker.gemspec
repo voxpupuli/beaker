@@ -5,11 +5,11 @@ require 'beaker/version'
 Gem::Specification.new do |s|
   s.name        = "beaker"
   s.version     = Beaker::Version::STRING
-  s.authors     = ["Puppetlabs"]
-  s.email       = ["delivery@puppetlabs.com"]
+  s.authors     = ["Puppet"]
+  s.email       = ["delivery@puppet.com"]
   s.homepage    = "https://github.com/puppetlabs/beaker"
   s.summary     = %q{Let's test Puppet!}
-  s.description = %q{Puppetlabs accceptance testing harness}
+  s.description = %q{Puppet's accceptance testing harness}
   s.license     = 'Apache2'
 
   s.files         = `git ls-files`.split("\n")
