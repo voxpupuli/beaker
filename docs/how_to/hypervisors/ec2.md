@@ -20,6 +20,7 @@ hypervisor: ec2
         hypervisor: ec2
         amisize: c1.medium
         snapshot: pe
+        user: ec2-user
       centos-5-64-1:
         roles:
           - agent
@@ -28,6 +29,7 @@ hypervisor: ec2
         hypervisor: ec2
         amisize: c1.medium
         snapshot: pe
+        user: ec2-user
     CONFIG:
       nfs_server: none
       consoleport: 443
@@ -75,3 +77,5 @@ AMI:
 Size of the [EBS Volume](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSVolumes.html) that will be attached to the EC2 instance.
 ####`vpc_id`####
 ID of the [VPC](https://aws.amazon.com/vpc/) to create the instances in.  If not provided will either use the default VPC for the provided region (marked as `isDefault`), otherwise falls back to `nil`.  If subnet information is provided (`subnet_id`/`subnet_ids`) this must be defined.
+####`user`####
+By default root login is not allowed with Amazon Linux. Setting it to ec2-user will trigger `sshd_config` and `authorized_keys` changes by beaker.
