@@ -75,24 +75,21 @@ module Beaker
 
       describe 'init_hypervisor' do
         it "calls init_vagrant" do
-          options = {:hypervisor => "vagrant"}
           expect(subject).to receive(:init_vagrant).with(no_args).exactly(1).times
           expect(subject).to receive(:init_vmpooler).with(no_args).exactly(0).times
-          subject.init_hypervisor(options)
+          subject.init_hypervisor('vagrant')
         end
 
         it "calls init_vmpooler" do
-          options = {:hypervisor => "vmpooler"}
           expect(subject).to receive(:init_vagrant).with(no_args).exactly(0).times
           expect(subject).to receive(:init_vmpooler).with(no_args).exactly(1).times
-          subject.init_hypervisor(options)
+          subject.init_hypervisor('vmpooler')
         end
 
         it "fails to call init for a hypervisor" do
-          options = {:hypervisor => "invalid"}
           expect(subject).to receive(:init_vagrant).with(no_args).exactly(0).times
           expect(subject).to receive(:init_vmpooler).with(no_args).exactly(0).times
-          subject.init_hypervisor(options)
+          subject.init_hypervisor('invalid')
         end
       end
 

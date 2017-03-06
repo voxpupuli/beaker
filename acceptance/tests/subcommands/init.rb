@@ -19,9 +19,9 @@ test_name 'use the init subcommand' do
   step 'ensure that `beaker init` accepts both vmpooler and vagrant hypervisor arguments' do
 
     ['vmpooler', 'vagrant'].each do |hypervisor|
-      result = on(default, "beaker init --hypervisor=#{hypervisor}")
+      result = on(default, "beaker init #{hypervisor}")
       assert_match(/Writing host config.+/, result.stdout)
-      assert_equal(0, result.exit_code, "`beaker init --hypervisor=#{hypervisor}` should return a zero exit code")
+      assert_equal(0, result.exit_code, "`beaker init #{hypervisor}` should return a zero exit code")
       step 'ensure that the Rakefile is present' do
         on(default, '[ -e "Rakefile" ]')
       end
@@ -32,11 +32,11 @@ test_name 'use the init subcommand' do
 
   step 'ensure that a Rakefile is not overwritten if it does exist prior' do
     delete_root_folder_contents
-    on(default, "beaker init --hypervisor=vmpooler")
+    on(default, "beaker init vmpooler")
     prepended_rakefile = on(default, 'cat Rakefile').stdout
     delete_root_folder_contents
     on(default, 'echo "require \'tempfile\'" >> Rakefile')
-    on(default, 'beaker init --hypervisor=vmpooler', :accept_all_exit_codes => true)
+    on(default, 'beaker init vmpooler', :accept_all_exit_codes => true)
     rakefile = on(default, 'cat Rakefile')
 
     # Assert that the Rakefile contents includes the original and inserted requirements

@@ -94,9 +94,9 @@ module Beaker
       end
 
       # Call the quick start task for the specified hypervisor
-      # @param [Array<Object>] options the options we want to query
-      def self.init_hypervisor(options)
-        case options[:hypervisor]
+      # @param [String] hypervisor the hypervisor we want to query
+      def self.init_hypervisor(hypervisor)
+        case hypervisor
         when "vagrant"
           init_vagrant
         when "vmpooler"
