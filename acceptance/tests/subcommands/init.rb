@@ -4,24 +4,20 @@ test_name 'use the init subcommand' do
     on default, 'rm -rf /root/*'
   end
 
-  step 'ensure that `beaker init` fails correctly when not provided a hypervisor' do
-    expect_failure('it should return a non-zero code when it fails') do
-      result = on(default, 'beaker init', :accept_all_exit_codes => true)
-      refute_equal(0, result.exit_code, '`beaker init` without a hypervisor argument should return a non-zero exit code')
-    end
+  step 'ensure that `beaker init` exit value should be 1 when not provided with a supported hypervisor' do
+    result = on(default, 'beaker init ec2', :accept_all_exit_codes => true)
+    refute_equal(0, result.exit_code, '`beaker init` without a hypervisor argument should return a non-zero exit code')
   end
 
   step 'ensure that `beaker help init` works' do
     result = on(default, 'beaker help init')
-    assert_equal(0, result.exit_code, '`beaker help init` should return a zero exit code')
+    assert_match(/Usage+/, result.stdout)
   end
 
-  step 'ensure that `beaker init` accepts both vmpooler and vagrant hypervisor arguments' do
-
-    ['vmpooler', 'vagrant'].each do |hypervisor|
+  step 'ensure that `beaker init` accepts no argument as well as accepts either vmpooler or vagrant hypervisor arguments' do
+    ['vmpooler', 'vagrant', ''].each do |hypervisor|
       result = on(default, "beaker init #{hypervisor}")
       assert_match(/Writing host config.+/, result.stdout)
-      assert_equal(0, result.exit_code, "`beaker init #{hypervisor}` should return a zero exit code")
       step 'ensure that the Rakefile is present' do
         on(default, '[ -e "Rakefile" ]')
       end
