@@ -16,6 +16,14 @@ module Beaker
         double("file")
       }
 
+      let(:store) {
+        double("store")
+      }
+
+      let(:host) {
+        double("host")
+      }
+
       describe 'reset_argv' do
         it "resets argv" do
           args = ["test1", "test2"]
@@ -30,8 +38,14 @@ module Beaker
         it "determines if we should execute the init subcommand" do
           expect(subject.execute_subcommand?("init")).to be == true
         end
+        it "does not attempt to execute intialize as a subcommand" do
+          expect(subject.execute_subcommand?("initialize")).to be == false
+        end
         it "determines if we should execute the help subcommand" do
           expect(subject.execute_subcommand?("help")).to be == true
+        end
+        it "determines if we should execute the provision subcommand" do
+          expect(subject.execute_subcommand?("provision")).to be == true
         end
         it "determines that a subcommand should not be executed" do
           expect(subject.execute_subcommand?("notasubcommand")).to be == false
@@ -178,9 +192,88 @@ module Beaker
           expect(file).to receive(:puts).with("require 'beaker/tasks/quick_start'").exactly(0).times
           subject.require_tasks
         end
-
       end
 
+      describe "init_config" do
+        it "creates a .beaker folder and loads the config" do
+          expect(FileUtils).to receive(:mkdir_p).with(".beaker").exactly(1).times
+          expect(YAML::Store).to receive(:new).with(".beaker/config").exactly(1).times
+          subject.init_config
+        end
+      end
+
+      describe "store_config" do
+        before(:each) { SubcommandUtil.class_variable_set :@@store, store} 
+
+        it "stores some values in the YAML store" do
+          options = { :hypervisor => "vmpooler", :test => "abc", :provisioned => true}
+          allow(store).to receive(:transaction).and_yield
+          expect(store).to receive(:[]=).with(:hypervisor, "vmpooler").exactly(1).times
+          expect(store).to receive(:[]=).with(:test, "abc").exactly(0).times
+          expect(store).to receive(:[]=).with(:provisioned, true).exactly(1).times
+          subject.store_config(options)
+        end
+
+        it "stores all values in the YAML store" do
+          options = { :hypervisor => "vmpooler", :provisioned => true}
+          allow(store).to receive(:transaction).and_yield
+          expect(store).to receive(:[]=).with(:hypervisor, "vmpooler").exactly(1).times
+          expect(store).to receive(:[]=).with(:provisioned, true).exactly(1).times
+          subject.store_config(options)
+        end
+
+        it "stores no values in the YAML store" do
+          options = {:test => "abc"}
+          allow(store).to receive(:transaction).and_yield
+          expect(store).to receive(:[]=).with(:hypervisor, anything).exactly(0).times
+          expect(store).to receive(:[]=).with(:provisioned, anything).exactly(0).times
+          subject.store_config(options)
+        end
+      end
+
+      describe "delete_config" do
+        before(:each) { SubcommandUtil.class_variable_set :@@store, store} 
+        it "deletes keys from the YAML store" do
+          keys = [ :hypervisor, :test, :provisioned ]
+          allow(store).to receive(:transaction).and_yield
+          expect(store).to receive(:delete).with(:hypervisor).exactly(1).times
+          expect(store).to receive(:delete).with(:test).exactly(1).times
+          expect(store).to receive(:delete).with(:provisioned).exactly(1).times
+          subject.delete_config(keys)
+        end
+      end
+
+      describe "provision" do
+        it "provisions, validates, and configures with vmpooler" do
+          options = {:validate => true, :configure => true}
+          expect(cli).to receive(:provision).and_return(true)
+          expect(cli).to receive(:preserve_hosts_file).exactly(1).times
+          allow(Beaker::CLI).to receive(:new).and_return(cli)
+          hypervisor = "vmpooler"
+          expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", true, "--configure", true]).exactly(1).times
+          subject.provision(hypervisor, options)
+        end
+
+        it "provisions and validates with vmpooler" do
+          options = {:validate => true, :configure => false }
+          expect(cli).to receive(:provision).and_return(true)
+          expect(cli).to receive(:preserve_hosts_file).exactly(1).times
+          allow(Beaker::CLI).to receive(:new).and_return(cli)
+          hypervisor = "vmpooler"
+          expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", true, "--configure", false]).exactly(1).times
+          subject.provision(hypervisor, options)
+        end
+
+        it "only provisions with vmpooler" do
+          options = {:validate => false, :configure => false }
+          expect(cli).to receive(:provision).and_return(true)
+          expect(cli).to receive(:preserve_hosts_file).exactly(1).times
+          allow(Beaker::CLI).to receive(:new).and_return(cli)
+          hypervisor = "vmpooler"
+          expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", false, "--configure", false]).exactly(1).times
+          subject.provision(hypervisor, options)
+        end
+      end
     end
   end
 end

@@ -1,17 +1,23 @@
 test_name 'use the init subcommand' do
 
   def delete_root_folder_contents
-    on default, 'rm -rf /root/*'
+    on default, 'rm -rf /root/* /root/.beaker'
   end
 
   step 'ensure that `beaker init` exit value should be 1 when not provided with a supported hypervisor' do
     result = on(default, 'beaker init ec2', :accept_all_exit_codes => true)
-    refute_equal(0, result.exit_code, '`beaker init` without a hypervisor argument should return a non-zero exit code')
-  end
+    refute_equal(0, result.exit_code, '`beaker init` with an unsupported hypervisor argument should return a non-zero exit code')
+	end
 
   step 'ensure that `beaker help init` works' do
     result = on(default, 'beaker help init')
     assert_match(/Usage+/, result.stdout)
+  end
+
+  step 'ensure that `beaker init --help` works' do
+    result = on(default, 'beaker init --help')
+    assert_match(/Usage.+/, result.stdout)
+    assert_equal(0, result.exit_code, '`beaker init --help` should return a zero exit code')
   end
 
   step 'ensure that `beaker init` accepts no argument as well as accepts either vmpooler or vagrant hypervisor arguments' do
@@ -24,7 +30,6 @@ test_name 'use the init subcommand' do
     delete_root_folder_contents
     end
   end
-
 
   step 'ensure that a Rakefile is not overwritten if it does exist prior' do
     delete_root_folder_contents
