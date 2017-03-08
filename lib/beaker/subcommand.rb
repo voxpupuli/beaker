@@ -21,7 +21,7 @@ module Beaker
         SubcommandUtil.init_hypervisor(hypervisor)
         say "Writing host config to .beaker/acceptance/config/default_#{hypervisor}_hosts.yaml"
       else
-        SubcommandUtil.exit_with("You did not enter a supported hypervisor.  Please enter 'vagrant' or 'vmpooler'.")
+        SubcommandUtil.error_with("You did not enter a supported hypervisor.  Please enter 'vagrant' or 'vmpooler'.")
       end
 
     end

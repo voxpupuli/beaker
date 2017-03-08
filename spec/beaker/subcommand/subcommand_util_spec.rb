@@ -48,13 +48,31 @@ module Beaker
         end
       end
 
-      describe 'exit_with' do
-        it "the exit value should be false" do
+      describe 'error_with' do
+        it "the exit value should default to 1" do
           expect(STDOUT).to receive(:puts).with("exiting").exactly(1).times
           begin
-            subject.exit_with("exiting")
+            subject.error_with("exiting")
           rescue SystemExit=>e
-            expect(e.status).to eq(0)
+            expect(e.status).to eq(1)
+          end
+        end
+        it "the exit value should return specified value" do
+          expect(STDOUT).to receive(:puts).with("exiting").exactly(1).times
+          begin
+            subject.error_with("exiting", {exit_code: 3})
+          rescue SystemExit=>e
+            expect(e.status).to eq(3)
+          end
+        end
+
+        it "the exit value should default to 1 with a stack trace" do
+          expect(STDOUT).to receive(:puts).with("exiting").exactly(1).times
+          expect(STDOUT).to receive(:puts).with("testing").exactly(1).times
+          begin
+            subject.error_with("exiting", {stack_trace: "testing"})
+          rescue SystemExit=>e
+            expect(e.status).to eq(1)
           end
         end
       end
