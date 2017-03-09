@@ -220,16 +220,15 @@ module Beaker
 
       @hosts.each do |host|
         ip = get_ip
-        host[:vmhostname] = ip.ip.gsub '.','-'
-        host[:vmfqdn] = host[:vmhostname] + '.rfc1918.puppetlabs.net'
+        host[:vmhostname] = ip.ip.gsub('.','-') + '.rfc1918.puppetlabs.net'
         host[:keyname] = key_name(host)
-        @logger.debug "Provisioning #{host.name} (#{host[:vmfqdn]})"
+        @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
         options = {
           :flavor_ref => flavor(host[:flavor]).id,
           :image_ref  => image(host[:image]).id,
           :nics       => [ {'net_id' => network(@options[:openstack_network]).id } ],
-          :name       => host[:vmfqdn],
-          :hostname   => host[:vmfqdn],
+          :name       => host[:vmhostname],
+          :hostname   => host[:vmhostname],
           :user_data  => host[:user_data] || "#cloud-config\nmanage_etc_hosts: true\n",
           :key_name   => host[:keyname],
         }
@@ -247,10 +246,10 @@ module Beaker
             break
           rescue Fog::Errors::TimeoutError => e
             if try >= attempts
-              @logger.debug "Failed to connect to new OpenStack instance #{host.name} (#{host[:vmfqdn]})"
+              @logger.debug "Failed to connect to new OpenStack instance #{host.name} (#{host[:vmhostname]})"
               raise e
             end
-            @logger.debug "Timeout connecting to instance #{host.name} (#{host[:vmfqdn]}), trying again..."
+            @logger.debug "Timeout connecting to instance #{host.name} (#{host[:vmhostname]}), trying again..."
           end
           sleep SLEEPWAIT
           try += 1
@@ -260,7 +259,7 @@ module Beaker
         ip.server = vm
         host[:ip] = ip.ip
 
-        @logger.debug "OpenStack host #{host.name} (#{host[:vmfqdn]}) assigned ip: #{host[:ip]}"
+        @logger.debug "OpenStack host #{host.name} (#{host[:vmhostname]}) assigned ip: #{host[:ip]}"
 
         #set metadata
         vm.metadata.update({:jenkins_build_url => @options[:jenkins_build_url].to_s,
@@ -332,7 +331,7 @@ module Beaker
     #@api private
     def key_name(host)
       if @options[:openstack_keyname]
-        @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmfqdn]})"
+        @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmhostname]})"
         @options[:openstack_keyname]
       else
         @logger.debug "Generate a new rsa key"
