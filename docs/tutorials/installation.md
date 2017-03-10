@@ -4,7 +4,23 @@ In most cases, beaker is running on a system separate from the SUT; we will comm
 
 ## Beaker Requirements
 
-* Ruby >= 2.2.5
+### Ruby Version
+
+In moving to beaker 3.0, we added in a hard requirement that a
+beaker test writer be using Ruby 2.2.5 or higher. Since Puppet
+has versions that support earlier versions of Ruby, this made
+writing tests more difficult than it needed to be.
+
+In order to make this easier, in beaker 3.13.0 we've relaxed
+this requirement to Ruby 2.1.8. Note that the beaker team does
+not internally test Ruby versions below 2.2.5, and that if bugs
+are submitted that are found to be specific to versions below
+2.2.5, they will not be worked on by the beaker team. This
+doesn't mean we won't merge fixes to bugs that are specific to
+those versions that are submitted by the community, however.
+
+### Other Requirements
+
 * libxml2, libxslt (needed for the [Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html) gem)
 * g++ (needed for the [unf_ext](http://rubydoc.info/gems/unf_ext/) gem)
 * curl (needed for some DSL functions to be able to execute successfully)
