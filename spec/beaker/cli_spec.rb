@@ -533,6 +533,7 @@ module Beaker
           expect( answer.start_with?(command_correct) ).to be_truthy
         end
       end
+
     end
   end
 end

@@ -9,9 +9,7 @@ module Beaker
     |   V   |
     |   |   | "
 
-    attr_reader :options, :logger
-
-
+    attr_reader :logger, :options, :network_manager
     def initialize
       @timestamp = Time.now
       # Initialize a logger object prior to parsing; this should be overwritten whence
@@ -75,8 +73,7 @@ module Beaker
     def provision
       begin
         @hosts =  []
-        @network_manager = Beaker::NetworkManager.new(@options, @logger)
-        @hosts = @network_manager.provision
+        initialize_network_manager
         @network_manager.proxy_package_manager
         @network_manager.validate
         @network_manager.configure

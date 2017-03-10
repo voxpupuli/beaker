@@ -31,7 +31,3 @@ test_name 'use the exec subcommand' do
     assert_match(/hello world/, result.stdout)
   end
 end
-
-
-
-

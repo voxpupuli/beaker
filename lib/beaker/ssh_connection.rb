@@ -108,7 +108,7 @@ module Beaker
 
     # Wait for the ssh connection to fail, returns true on connection failure and false otherwise
     # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
-    # @option options [Boolean] :pty Should we request a terminal when attempting 
+    # @option options [Boolean] :pty Should we request a terminal when attempting
     #                                to send a command over this connection?
     # @option options [String] :stdin Any input to be sent along with the command
     # @param [IO] stdout_callback An IO stream to send connection stdout to, defaults to nil

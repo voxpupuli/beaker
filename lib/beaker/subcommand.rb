@@ -53,11 +53,7 @@ module Beaker
     class_option :'exclude-tags', :type => :string, :group => 'Beaker run'
     class_option :'xml-time-order', :type => :boolean, :group => 'Beaker run'
 
-    #global class options that should be available for all beaker subcommands
-    class_option :help, :type => :boolean
-
     desc "init BEAKER_RUN_OPTIONS", "Initializes the required configuration for Beaker subcommand execution"
-    option :help, :type => :boolean, :hide => true, :banner => 'whoooo'
     long_desc <<-LONGDESC
       Initializes the required .beaker configuration folder. This folder contains
       a subcommand_options.yaml file that is user-facing; altering this file will
@@ -65,6 +61,7 @@ module Beaker
       such as `provision`, will result in beaker making modifications to this file
       as necessary.
     LONGDESC
+    option :help, :type => :boolean, :hide => true
     def init()
       if options[:help]
         invoke :help, [], ["init"]
@@ -100,6 +97,7 @@ module Beaker
     flag here to override any hosts provided there. Really, you can pass most any beaker
     flag here to override.
     LONGDESC
+    option :help, :type => :boolean, :hide => true
     def provision()
       if options[:help]
         invoke :help, [], ["provision"]
@@ -110,6 +108,7 @@ module Beaker
       if state.transaction { state['provisioned']}
         SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.')
       end
+
       @cli.parse_options
       @cli.provision
 
@@ -122,14 +121,16 @@ module Beaker
         host_hash['provision'] = false
       end
 
-
       # should we only update the options here with the new host? Or update the settings
       # with whatever new flags may have been provided with provision?
       options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
       options_storage.transaction do
         @cli.logger.notify 'updating HOSTS key in subcommand_options'
         options_storage['HOSTS'] = cleaned_hosts
+        options_storage['hosts_preserved_yaml_file'] = @cli.options[:hosts_preserved_yaml_file]
       end
+
+      @cli.preserve_hosts_file
 
       state.transaction do
         state['provisioned'] = true
@@ -143,6 +144,7 @@ module Beaker
     suite, then just that suite will run. If no resource is supplied, then this command
     executes the suites as they are defined in the configuration.
     LONG_DESC
+    option :help, :type => :boolean, :hide => true
     def exec(resource=nil)
       if options[:help]
         invoke :help, [], ["exec"]
@@ -184,5 +186,30 @@ module Beaker
       @cli.execute!
     end
 
+    desc "destroy", "Destroys the provisioned VMs"
+    long_desc <<-LONG_DESC
+    Destroys the currently provisioned VMs
+    LONG_DESC
+    option :help, :type => :boolean, :hide => true
+    def destroy()
+      if options[:help]
+        invoke :help, [], ["destroy"]
+        return
+      end
+
+      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
+      unless state.transaction { state['provisioned']}
+        SubcommandUtil.error_with('Please provision an environment')
+      end
+
+      @cli.parse_options
+      @cli.options[:provision] = false
+      @cli.initialize_network_manager
+      @cli.network_manager.cleanup
+
+      state.transaction {
+        state.delete('provisioned')
+      }
+    end
   end
 end
