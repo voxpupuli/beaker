@@ -61,7 +61,7 @@ module Beaker
 
       it 'takes an env hash with var_name/value pairs' do
         expect( instance.environment_string( {:HOME => '/', :http_proxy => 'http://foo'} ) ).
-          to be == 'env HOME="/" http_proxy="http://foo"'
+          to be == 'env HOME="/" http_proxy="http://foo" HTTP_PROXY="http://foo"'
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do

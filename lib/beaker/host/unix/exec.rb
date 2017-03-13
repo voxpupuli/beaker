@@ -246,7 +246,15 @@ module Unix::Exec
       else
         val = val.to_s
       end
-      env_array << "#{key.to_s}=\"#{val}\""
+      # doing this for the key itself & the upcase'd version allows us to remain
+      # backwards compatible
+      # TODO: (Next Major Version) get rid of upcase'd version
+      key_str = key.to_s
+      keys = [key_str]
+      keys << key_str.upcase if key_str.upcase != key_str
+      keys.each do |env_key|
+        env_array << "#{env_key}=\"#{val}\""
+      end
     end
     env_array
   end

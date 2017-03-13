@@ -108,7 +108,7 @@ module Cisco
         it 'turns env maps into paired strings correctly' do
           @options = { :user => 'root' }
           env_map = { 'var1' => 'ans1', 'VAR2' => 'ans2' }
-          answer_correct = 'source /etc/profile; export var1="ans1" VAR2="ans2";'
+          answer_correct = 'source /etc/profile; export var1="ans1" VAR1="ans1" VAR2="ans2";'
           answer_test = host.environment_string( env_map )
           expect( answer_test ).to be === answer_correct
         end
@@ -142,7 +142,7 @@ module Cisco
         it 'turns env maps into paired strings correctly' do
           @options = { :user => 'root' }
           env_map = { 'VAR1' => 'ans1', 'var2' => 'ans2' }
-          answer_correct = 'source /etc/profile; env VAR1="ans1" var2="ans2"'
+          answer_correct = 'source /etc/profile; env VAR1="ans1" var2="ans2" VAR2="ans2"'
           answer_test = host.environment_string( env_map )
           expect( answer_test ).to be === answer_correct
         end
