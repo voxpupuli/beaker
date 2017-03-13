@@ -4,6 +4,60 @@ In most cases, beaker is running on a system separate from the SUT; we will comm
 
 ## Beaker Requirements
 
+* Ruby >= 2.1.8 (but we [only test on >= 2.2.5](installation.md#ruby-version))
+* libxml2, libxslt (needed for the [Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html) gem)
+* g++ (needed for the [unf_ext](http://rubydoc.info/gems/unf_ext/) gem)
+* curl (needed for some DSL functions to be able to execute successfully)
+
+On a Debian or Ubuntu system you can install these using the command
+
+    sudo apt-get install ruby-dev libxml2-dev libxslt1-dev g++ zlib1g-dev
+
+On an EL or Fedora system use:
+
+    sudo yum install make gcc gcc-c++ libxml2-devel libxslt-devel ruby-devel
+
+## Installing Beaker
+### From Gem (Preferred)
+
+    $ gem install beaker
+    $ beaker --help
+
+### From Latest Git
+
+If you need the latest and greatest (and mostly likely broken/untested/no warranty) beaker code.
+
+* Uses <a href = "http://bundler.io/">bundler</a>
+
+<!-- end of list -->
+    $ git clone https://github.com/puppetlabs/beaker
+    $ cd beaker
+    $ bundle install
+    $ bundle exec beaker --help
+
+### From Latest Git, As Installed Gem
+
+If you need the latest and greatest, but prefer to work from gem instead of through bundler.
+
+    $ gem uninstall beaker
+    $ git clone https://github.com/puppetlabs/beaker
+    $ cd beaker
+    $ gem build beaker.gemspec
+    $ gem install ./beaker-*.gem
+
+### Special Case Installation
+
+The beaker gem can be built and installed in the context of the current test suite by adding the github repos as the source in the Gemspec file (see <a href = "http://bundler.io/git.html">bundler git documentation</a>).
+
+    source 'https://rubygems.org'
+    group :testing do
+      gem 'cucumber', '~> 1.3.6'
+      gem 'site_prism'
+      gem 'selenium-webdriver'
+      gem 'chromedriver2-helper'
+      gem 'beaker', :github => 'puppetlabs/beaker', :branch => 'master', :ref => 'fffe7'
+    end
+
 ### Ruby Version
 
 In moving to beaker 3.0, we added in a hard requirement that a
@@ -18,58 +72,3 @@ are submitted that are found to be specific to versions below
 2.2.5, they will not be worked on by the beaker team. This
 doesn't mean we won't merge fixes to bugs that are specific to
 those versions that are submitted by the community, however.
-
-### Other Requirements
-
-* libxml2, libxslt (needed for the [Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html) gem)
-* g++ (needed for the [unf_ext](http://rubydoc.info/gems/unf_ext/) gem)
-* curl (needed for some DSL functions to be able to execute successfully)
-
-On a Debian or Ubuntu system you can install these using the command
-
-    sudo apt-get install ruby-dev libxml2-dev libxslt1-dev g++ zlib1g-dev
-
-On an EL or Fedora system use:
-
-    sudo yum install make gcc gcc-c++ libxml2-devel libxslt-devel ruby-devel
-
-##Installing Beaker
-###From Gem (Preferred)
-
-    $ gem install beaker
-    $ beaker --help
-
-###From Latest Git
-
-If you need the latest and greatest (and mostly likely broken/untested/no warranty) beaker code.
-
-* Uses <a href = "http://bundler.io/">bundler</a>
-
-<!-- end of list -->
-    $ git clone https://github.com/puppetlabs/beaker
-    $ cd beaker
-    $ bundle install
-    $ bundle exec beaker --help
-
-###From Latest Git, As Installed Gem
-
-If you need the latest and greatest, but prefer to work from gem instead of through bundler.
-
-    $ gem uninstall beaker
-    $ git clone https://github.com/puppetlabs/beaker
-    $ cd beaker
-    $ gem build beaker.gemspec
-    $ gem install ./beaker-*.gem
-
-###Special Case Installation
-
-The beaker gem can be built and installed in the context of the current test suite by adding the github repos as the source in the Gemspec file (see <a href = "http://bundler.io/git.html">bundler git documentation</a>).
-
-    source 'https://rubygems.org'
-    group :testing do
-      gem 'cucumber', '~> 1.3.6'
-      gem 'site_prism'
-      gem 'selenium-webdriver'
-      gem 'chromedriver2-helper'
-      gem 'beaker', :github => 'puppetlabs/beaker', :branch => 'master', :ref => 'fffe7'
-    end
