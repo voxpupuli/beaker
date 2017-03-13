@@ -58,7 +58,7 @@ The beaker gem can be built and installed in the context of the current test sui
       gem 'beaker', :github => 'puppetlabs/beaker', :branch => 'master', :ref => 'fffe7'
     end
 
-### Ruby Version
+## Ruby Version
 
 In moving to beaker 3.0, we added in a hard requirement that a
 beaker test writer be using Ruby 2.2.5 or higher. Since Puppet
