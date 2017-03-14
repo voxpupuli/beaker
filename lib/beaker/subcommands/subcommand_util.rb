@@ -115,7 +115,7 @@ module Beaker
       # @param [String] hypervisor the hypervisor we want to validate
       def self.verify_init_args(hypervisor)
         unless HYPERVISORS.include?(hypervisor)
-          exit_with("Invalid hypervisor. Currently supported hypervisors are: #{HYPERVISORS.join(', ')}")
+          error_with("Invalid hypervisor. Currently supported hypervisors are: #{HYPERVISORS.join(', ')}")
         end
       end
 
