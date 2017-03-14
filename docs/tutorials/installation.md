@@ -1,4 +1,4 @@
-#Beaker Installation
+# Beaker Installation
 
 In most cases, beaker is running on a system separate from the SUT; we will commonly refer to this system as the beaker coordinator. This page outlines how to install requirements for the beaker coordinator and options for the installation of beaker itself.
 
