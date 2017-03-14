@@ -11,10 +11,14 @@ module Beaker
       @@config = SubcommandUtil.init_config()
     end
 
-    desc "init", "Initialises the beaker test environment configuration"
+    desc "init HYPERVISOR", "Initialises the beaker test environment configuration"
     option :help, :type => :boolean, :hide => true
     long_desc <<-LONGDESC
-    Initialises a beaker environment configuration
+
+      Initialises a test environment configuration for a specific hypervisor
+
+      Supported hypervisors are: vagrant (default), vmpooler
+
     LONGDESC
     def init(hypervisor='vagrant')
       if options[:help]

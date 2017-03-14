@@ -6,6 +6,7 @@ test_name 'use the init subcommand' do
 
   step 'ensure that `beaker init` exit value should be 1 when not provided with a supported hypervisor' do
     result = on(default, 'beaker init ec2', :accept_all_exit_codes => true)
+    assert_match(/Invalid hypervisor. Currently supported hypervisors are.+/, result.stdout)
     refute_equal(0, result.exit_code, '`beaker init` with an unsupported hypervisor argument should return a non-zero exit code')
 	end
 
