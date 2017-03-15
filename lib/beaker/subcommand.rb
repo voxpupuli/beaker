@@ -53,8 +53,11 @@ module Beaker
     class_option :'exclude-tags', :type => :string, :group => 'Beaker run'
     class_option :'xml-time-order', :type => :boolean, :group => 'Beaker run'
 
+    #global class options that should be available for all beaker subcommands
+    class_option :help, :type => :boolean
+
     desc "init BEAKER_RUN_OPTIONS", "Initializes the required configuration for Beaker subcommand execution"
-    option :help, :type => :boolean, :hide => true
+    option :help, :type => :boolean, :hide => true, :banner => 'whoooo'
     long_desc <<-LONGDESC
       Initializes the required .beaker configuration folder. This folder contains
       a subcommand_options.yaml file that is user-facing; altering this file will
@@ -92,7 +95,6 @@ module Beaker
     end
 
     desc "provision", "Provisions the beaker systems under test(SUTs)"
-    option :help, :type => :boolean, :hide => true
     long_desc <<-LONGDESC
     Provisions hosts defined in your subcommand_options file. You can pass the --hosts
     flag here to override any hosts provided there. Really, you can pass most any beaker
@@ -114,6 +116,13 @@ module Beaker
       # Sanitize the hosts
       cleaned_hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
 
+      # Update each host provisioned with a flag indicating that it no longer needs
+      # provisioning
+      cleaned_hosts.each do |host, host_hash|
+        host_hash['provision'] = false
+      end
+
+
       # should we only update the options here with the new host? Or update the settings
       # with whatever new flags may have been provided with provision?
       options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
@@ -126,5 +135,54 @@ module Beaker
         state['provisioned'] = true
       end
     end
+
+    desc 'exec FILE/BEAKER_SUITE', 'execute a directory, file, or beaker suite'
+    long_desc <<-LONG_DESC
+    Run a single file, directory, or beaker suite. If supplied a file or directory,
+    that resource will be run in the context of the `tests` suite; If supplied a beaker
+    suite, then just that suite will run. If no resource is supplied, then this command
+    executes the suites as they are defined in the configuration.
+    LONG_DESC
+    def exec(resource=nil)
+      if options[:help]
+        invoke :help, [], ["exec"]
+        return
+      end
+
+      @cli.parse_options
+      @cli.initialize_network_manager
+
+      if !resource
+        @cli.execute!
+        return
+      end
+
+      beaker_suites = [:pre_suite, :tests, :post_suite, :pre_cleanup]
+
+      if Pathname(resource).exist?
+        # If we determine the resource is a valid file resource, then we empty
+        # all the suites and run that file resource in the tests suite. In the
+        # future, when we have the ability to have custom suites, we should change
+        # this to run in a custom suite. You know, in the future.
+        beaker_suites.each do |suite|
+          @cli.options[suite] = []
+        end
+        if Pathname(resource).directory?
+          @cli.options[:tests] = Dir.glob("#{Pathname(resource).expand_path}/*.rb")
+        else
+          @cli.options[:tests] = [Pathname(resource).expand_path.to_s]
+        end
+      elsif resource.match(/pre-suite|tests|post-suite|pre-cleanup/)
+        # The regex match here is loose so that users can supply multiple suites,
+        # such as `beaker exec pre-suite,tests`.
+        beaker_suites.each do |suite|
+          @cli.options[suite] = [] unless resource.gsub(/-/, '_').match(suite.to_s)
+        end
+      else
+        raise ArgumentError, "Unable to parse #{resource} with beaker exec"
+      end
+      @cli.execute!
+    end
+
   end
 end

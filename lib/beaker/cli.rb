@@ -10,6 +10,8 @@ module Beaker
     |   |   | "
 
     attr_reader :options, :logger
+
+
     def initialize
       @timestamp = Time.now
       # Initialize a logger object prior to parsing; this should be overwritten whence
@@ -81,6 +83,17 @@ module Beaker
       rescue => e
         report_and_raise(@logger, e, "CLI.provision")
       end
+      self
+    end
+
+    #Initialize the network manager so it can initialize hosts for testing for subcommands
+    def initialize_network_manager
+      begin
+        @network_manager = Beaker::NetworkManager.new(@options, @logger)
+        @hosts = @network_manager.provision
+      rescue => e
+        report_and_raise(@logger, e, "CLI.initialize_network_manager")
+      end
     end
 
     #Run Beaker tests.
@@ -102,8 +115,6 @@ module Beaker
           @logger.warn "Interrupt received; exiting..."
           exit(1)
         end
-
-        provision
 
         # Setup perf monitoring if needed
         if @options[:collect_perf_data].to_s =~ /(aggressive)|(normal)/
