@@ -249,6 +249,7 @@ module Beaker
           expect(cli).to receive(:provision).and_return(true)
           expect(cli).to receive(:preserve_hosts_file).exactly(1).times
           allow(Beaker::CLI).to receive(:new).and_return(cli)
+          allow(cli).to receive(:parse_options).and_return(cli)
           hypervisor = "vmpooler"
           expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", true, "--configure", true]).exactly(1).times
           subject.provision(hypervisor, options)
@@ -259,6 +260,7 @@ module Beaker
           expect(cli).to receive(:provision).and_return(true)
           expect(cli).to receive(:preserve_hosts_file).exactly(1).times
           allow(Beaker::CLI).to receive(:new).and_return(cli)
+          allow(cli).to receive(:parse_options).and_return(cli)
           hypervisor = "vmpooler"
           expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", true, "--configure", false]).exactly(1).times
           subject.provision(hypervisor, options)
@@ -269,6 +271,7 @@ module Beaker
           expect(cli).to receive(:provision).and_return(true)
           expect(cli).to receive(:preserve_hosts_file).exactly(1).times
           allow(Beaker::CLI).to receive(:new).and_return(cli)
+          allow(cli).to receive(:parse_options).and_return(cli)
           hypervisor = "vmpooler"
           expect(subject).to receive(:reset_argv).with(["--hosts",".beaker/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", false, "--configure", false]).exactly(1).times
           subject.provision(hypervisor, options)

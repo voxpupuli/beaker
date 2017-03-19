@@ -6,7 +6,7 @@ require 'beaker'
 if Beaker::Subcommands::SubcommandUtil.execute_subcommand?(ARGV[0])
   Beaker::Subcommand.start(ARGV)
 else
-  Beaker::CLI.new.execute!
+  Beaker::CLI.new.parse_options.execute!
   puts "Beaker completed successfully, thanks."
 end
 

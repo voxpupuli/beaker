@@ -9,8 +9,16 @@ module Beaker
     |   V   |
     |   |   | "
 
+    attr_reader :logger
     def initialize
       @timestamp = Time.now
+      # Initialize a logger object prior to parsing; this should be overwritten whence
+      # the options are parsed and replaced with a new logger based on what is passed
+      # in to configure the logger.
+      @logger = Beaker::Logger.new
+    end
+
+    def parse_options
       @options_parser = Beaker::Options::Parser.new
       @options = @options_parser.parse_args
       @attribution = @options_parser.attribution
@@ -20,28 +28,19 @@ module Beaker
       @options_parser.update_option(:timestamp, @timestamp, 'runtime')
       @options_parser.update_option(:beaker_version, Beaker::Version::STRING, 'runtime')
       beaker_version_string = VERSION_STRING % @options[:beaker_version]
-      @execute = true
 
       if @options[:help]
         @logger.notify(@options_parser.usage)
         @execute = false
-        return
+        return self
       end
 
       if @options[:beaker_version_print]
         @logger.notify(beaker_version_string)
         @execute = false
-        return
+        return self
       end
 
-      @logger.info("Beaker!")
-      @logger.info(beaker_version_string)
-      @logger.info(@options.dump)
-
-      if @options[:parse_only]
-        @execute = false
-        return
-      end
 
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
@@ -53,6 +52,21 @@ module Beaker
         require File.expand_path(helper)
       end
 
+      if @options[:parse_only]
+        print_version_and_options
+        @execute = false
+        return self
+      end
+
+      @execute = true
+      self
+    end
+
+    # only call this method after parse_options has been executed.
+    def print_version_and_options
+      @logger.info("Beaker!")
+      @logger.info(VERSION_STRING % @options[:beaker_version])
+      @logger.info(@options.dump)
     end
 
     #Provision, validate and configure all hosts as defined in the hosts file
@@ -77,10 +91,12 @@ module Beaker
     # - run post-suite
     # - cleanup hosts
     def execute!
-
       if !@execute
         return
       end
+
+      print_version_and_options
+
       begin
         trap(:INT) do
           @logger.warn "Interrupt received; exiting..."
