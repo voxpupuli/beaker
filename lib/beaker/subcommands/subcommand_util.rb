@@ -22,12 +22,25 @@ module Beaker
       HYPERVISORS = ["vagrant", "vmpooler"]
       CONFIG_DIR = ".beaker"
       CONFIG_KEYS = [:hypervisor, :provisioned]
+      SUBCOMMAND_OPTIONS = Pathname("#{CONFIG_DIR}/subcommand_options.yaml")
+      SUBCOMMAND_STATE = Pathname("#{CONFIG_DIR}/.subcommand_state.yaml")
 
       # Check if the first argument to the beaker execution is a subcommand
       # @return [Boolean] true if argv[0] is "help" or a method defined in the Subcommands class, false otherwise
       def self.execute_subcommand?(arg0)
         return false if arg0.nil?
         (Beaker::Subcommand.instance_methods(false) << :help).include? arg0.to_sym
+      end
+
+      # Checks to ensure the the subcommand options are there and load them. Otherwise,
+      # return an empty OptionsHash.
+      # @return [Hash, OptionsHash]
+      def self.load_subcommand_options
+        if SUBCOMMAND_OPTIONS.exist?
+          YAML.load_file(SUBCOMMAND_OPTIONS)
+        else
+          Beaker::Options::OptionsHash.new
+        end
       end
 
       # Reset ARGV to contain the arguments determined by a specific subcommand
@@ -37,6 +50,14 @@ module Beaker
         args.each do |arg|
           ARGV << arg
         end
+      end
+
+      def self.sanitize_options_for_save(options)
+        # God help us, the YAML library won't stop adding tags to objects, so this
+        # hack is a way to force the options into the basic object types so that
+        # an eventual YAML.dump or .to_yaml call doesn't add tags.
+        # Relevant stackoverflow: http://stackoverflow.com/questions/18178098/how-do-i-have-ruby-yaml-dump-a-hash-subclass-as-a-simple-hash
+        JSON.parse(options.to_json)
       end
 
       # Update ARGV and call Beaker
