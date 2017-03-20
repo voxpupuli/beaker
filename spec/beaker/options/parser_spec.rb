@@ -479,51 +479,60 @@ module Beaker
       end
 
       describe '#normalize_tags!' do
-        let (:tag_includes) { @tag_includes || [] }
-        let (:tag_excludes) { @tag_excludes || [] }
-        let (:options) {
-          opts                = Beaker::Options::OptionsHash.new
-          opts[:tag_includes] = tag_includes
-          opts[:tag_excludes] = tag_excludes
+        let (:test_tag_and      ) { @test_tag_and     || [] }
+        let (:test_tag_or       ) { @test_tag_or      || [] }
+        let (:test_tag_exclude  ) { @test_tag_exclude || [] }
+        let (:options           ) {
+          opts                    = Beaker::Options::OptionsHash.new
+          opts[:test_tag_and]     = test_tag_and
+          opts[:test_tag_or]      = test_tag_or
+          opts[:test_tag_exclude] = test_tag_exclude
           opts
         }
 
         it 'does not error if no tags overlap' do
-          @tag_includes = 'can,tommies,potatoes,plant'
-          @tag_excludes = 'joey,long_running,pants'
+          @test_tag_and     = 'can,tommies,potatoes,plant'
+          @test_tag_or      = 'juicy,zoomba,plantation'
+          @test_tag_exclude = 'joey,long_running,pants'
           parser.instance_variable_set(:@options, options)
 
-          expect { parser.normalize_tags! }.not_to raise_error
+          expect { parser.normalize_test_tags! }.not_to raise_error
         end
 
         it 'splits the basic case correctly' do
-          @tag_includes = 'can,tommies,potatoes,plant'
-          @tag_excludes = 'joey,long_running,pants'
+          @test_tag_and     = 'can,tommies,potatoes,plant'
+          @test_tag_or      = 'johnny,wordsmith,zebra'
+          @test_tag_exclude = 'joey,long_running,pants'
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_tags!
-          expect(options[:tag_includes]).to be === ['can', 'tommies', 'potatoes', 'plant']
-          expect(options[:tag_excludes]).to be === ['joey', 'long_running', 'pants']
+          parser.normalize_test_tags!
+          expect(options[:test_tag_and]    ).to be === ['can', 'tommies', 'potatoes', 'plant']
+          expect(options[:test_tag_or]     ).to be === ['johnny', 'wordsmith', 'zebra']
+          expect(options[:test_tag_exclude]).to be === ['joey', 'long_running', 'pants']
         end
 
         it 'returns empty arrays for empty strings' do
-          @tag_includes = ''
-          @tag_excludes = ''
+          @test_tag_and     = ''
+          @test_tag_or      = ''
+          @test_tag_exclude = ''
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_tags!
-          expect(options[:tag_includes]).to be === []
-          expect(options[:tag_excludes]).to be === []
+          parser.normalize_test_tags!
+          expect(options[:test_tag_and]    ).to be === []
+          expect(options[:test_tag_or]     ).to be === []
+          expect(options[:test_tag_exclude]).to be === []
         end
 
         it 'lowercases all tags correctly for later use' do
-          @tag_includes = 'jeRRy_And_tOM,PARka'
-          @tag_excludes = 'lEet_spEAK,pOland'
+          @test_tag_and     = 'jeRRy_And_tOM,PARka'
+          @test_tag_or      = 'clearLy_They,Neva'
+          @test_tag_exclude = 'lEet_spEAK,pOland'
           parser.instance_variable_set(:@options, options)
 
-          parser.normalize_tags!
-          expect(options[:tag_includes]).to be === ['jerry_and_tom', 'parka']
-          expect(options[:tag_excludes]).to be === ['leet_speak', 'poland']
+          parser.normalize_test_tags!
+          expect(options[:test_tag_and]    ).to be === ['jerry_and_tom', 'parka']
+          expect(options[:test_tag_or]     ).to be === ['clearly_they', 'neva']
+          expect(options[:test_tag_exclude]).to be === ['leet_speak', 'poland']
         end
       end
 

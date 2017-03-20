@@ -245,12 +245,27 @@ module Beaker
             @cmd_options[:type] = type
           end
 
-          opts.on '--tag TAGS', 'Run the set of tests matching ALL of the provided single or comma separated list of tags' do |value|
-            @cmd_options[:tag_includes] = value
+          opts.on '--tag TAGS',
+                  'DEPRECATED - use --test-tag-and instead' do |value|
+            @cmd_options[:test_tag_and] = value
+          end
+          opts.on '--test-tag-and TAGS',
+                  'Run the set of tests matching ALL of the provided single or comma separated list of tags' do |value|
+            @cmd_options[:test_tag_and] = value
           end
 
-          opts.on '--exclude-tag TAGS', 'Run the set of tests that do not contain ANY of the provided single or command separated list of tags' do |value|
-            @cmd_options[:tag_excludes] = value
+          opts.on '--test-tag-or TAGS',
+                  'Run the set of tests matching ANY of the provided single or comma separated list of tags' do |value|
+            @cmd_options[:test_tag_or] = value
+          end
+
+          opts.on '--exclude-tag TAGS',
+                  'DEPRECATED - use --test-tag-exclude instead' do |value|
+            @cmd_options[:test_tag_exclude] = value
+          end
+          opts.on '--test-tag-exclude TAGS',
+                  'Run the set of tests that do not contain ANY of the provided single or comma separated list of tags' do |value|
+            @cmd_options[:test_tag_exclude] = value
           end
 
           opts.on '--xml-time-order',

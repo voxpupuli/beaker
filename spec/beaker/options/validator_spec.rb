@@ -93,19 +93,34 @@ module Beaker
         end
       end
 
-      describe '#validate_tags' do
+      describe '#validate_test_tags' do
         it 'does error if tags overlap' do
           tag_includes = %w(can tommies should_error potatoes plant)
           tag_excludes = %w(joey long_running pants should_error)
 
-          expect { validator.validate_tags(tag_includes, tag_excludes) }.to raise_error(ArgumentError)
+          expect {
+            validator.validate_test_tags(tag_includes, [], tag_excludes)
+          }.to raise_error(ArgumentError)
         end
 
         it 'does not raise an error if tags do not overlap' do
           tag_includes = %w(horse dog cat)
           tag_excludes = %w(car truck train)
 
-          expect { validator.validate_tags(tag_includes, tag_excludes) }.to_not raise_error
+          expect {
+            validator.validate_test_tags(tag_includes, [], tag_excludes)
+          }.to_not raise_error
+        end
+
+        it 'raises an error if AND and OR are both used' do
+          # this is because we don't have a way to specify how they
+          # should interact
+          tag_and = %w(square)
+          tag_or  = %w(circle)
+
+          expect {
+            validator.validate_test_tags(tag_and, tag_or, [])
+          }.to raise_error(ArgumentError)
         end
       end
 
