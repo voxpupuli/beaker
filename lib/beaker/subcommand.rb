@@ -6,9 +6,13 @@ module Beaker
   class Subcommand < Thor
     SubcommandUtil = Beaker::Subcommands::SubcommandUtil
 
+
     def initialize(*args)
       super
-      @@config = SubcommandUtil.init_config()
+      FileUtils.mkdir_p(SubcommandUtil::CONFIG_DIR)
+      FileUtils.touch(SubcommandUtil::SUBCOMMAND_OPTIONS) unless SubcommandUtil::SUBCOMMAND_OPTIONS.exist?
+      FileUtils.touch(SubcommandUtil::SUBCOMMAND_STATE) unless SubcommandUtil::SUBCOMMAND_STATE.exist?
+      @cli = Beaker::CLI.new
     end
 
     # Options listed in this group 'Beaker run' are options that can be set on subcommands
@@ -49,34 +53,51 @@ module Beaker
     class_option :'exclude-tags', :type => :string, :group => 'Beaker run'
     class_option :'xml-time-order', :type => :boolean, :group => 'Beaker run'
 
-    desc "init HYPERVISOR", "Initialises the beaker test environment configuration"
+    desc "init BEAKER_RUN_OPTIONS", "Initializes the required configuration for Beaker subcommand execution"
     option :help, :type => :boolean, :hide => true
     long_desc <<-LONGDESC
+      Initializes the required .beaker configuration folder. This folder contains
+      a subcommand_options.yaml file that is user-facing; altering this file will
+      alter the options subcommand execution.
 
-      Initialises a test environment configuration for a specific hypervisor
-
-      Supported hypervisors are: vagrant (default), vmpooler
-
+      Also modified in this operation is the .subcommand_state file that is used
+      by beaker to determine subcommand state. You as a user should never have to
+      edit this file.
     LONGDESC
-    def init(hypervisor='vagrant')
+    def init()
       if options[:help]
         invoke :help, [], ["init"]
         return
       end
-      SubcommandUtil.verify_init_args(hypervisor)
-      SubcommandUtil.require_tasks()
-      SubcommandUtil.init_hypervisor(hypervisor)
-      say "Writing host config to .beaker/acceptance/config/default_#{hypervisor}_hosts.yaml"
-      SubcommandUtil.store_config({:hypervisor => hypervisor})
-      SubcommandUtil.delete_config([:provisioned])
+
+      @cli.parse_options
+
+      # delete unnecessary keys for saving the options
+      options_to_write = @cli.configured_options
+      # Remove keys we don't want to save
+      [:timestamp, :logger, :command_line, :beaker_version, :hosts_file].each do |key|
+        options_to_write.delete(key)
+      end
+
+      options_to_write = SubcommandUtil.sanitize_options_for_save(options_to_write)
+
+      @cli.logger.notify 'writing configured options to disk'
+      File.open(SubcommandUtil::SUBCOMMAND_OPTIONS, 'w') do |f|
+        f.write(options_to_write.to_yaml)
+      end
+
+      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
+      state.transaction do
+        state['provisioned'] = false
+      end
     end
 
-    desc "provision", "Provisions the beaker test configuration"
-    option :validate, :type => :boolean, :default => true
-    option :configure, :type => :boolean, :default => true
+    desc "provision", "Provisions the beaker systems under test(SUTs)"
     option :help, :type => :boolean, :hide => true
     long_desc <<-LONGDESC
-    Provisions a beaker configuration
+    Provisions hosts defined in your subcommand_options file. You can pass the --hosts
+    flag here to override any hosts provided there. Really, you can pass most any beaker
+    flag here to override.
     LONGDESC
     def provision()
       if options[:help]
@@ -84,19 +105,26 @@ module Beaker
         return
       end
 
-      hypervisor = @@config.transaction { @@config[:hypervisor] }
+      state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
+      if state.transaction { state['provisioned']}
+        SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.')
+      end
+      @cli.parse_options
+      @cli.provision
 
-      unless hypervisor
-        SubcommandUtil.error_with("Please initialise a configuration")
+      # Sanitize the hosts
+      cleaned_hosts = SubcommandUtil.sanitize_options_for_save(@cli.hosts_with_reachable_name)
+
+      # should we only update the options here with the new host? Or update the settings
+      # with whatever new flags may have been provided with provision?
+      options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
+      options_storage.transaction do
+        @cli.logger.notify 'updating HOSTS key in subcommand_options'
+        options_storage['HOSTS'] = cleaned_hosts
       end
 
-      provisioned = @@config.transaction { @@config[:provisioned] }
-
-      if !provisioned or options[:force]
-        SubcommandUtil.provision(hypervisor, options)
-        SubcommandUtil.store_config({:provisioned => true})
-      else
-        say "Hosts have already been provisioned"
+      state.transaction do
+        state['provisioned'] = true
       end
     end
   end

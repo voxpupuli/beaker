@@ -9,7 +9,7 @@ module Beaker
     |   V   |
     |   |   | "
 
-    attr_reader :logger
+    attr_reader :options, :logger
     def initialize
       @timestamp = Time.now
       # Initialize a logger object prior to parsing; this should be overwritten whence
@@ -194,6 +194,20 @@ module Beaker
       ).run_and_raise_on_failure
     end
 
+    # Get the list of options that are not equal to presets. Skip certain keys that
+    # that shouldn't be shared between cli objects, such as :timestamp, :logger, and
+    # :command_line.
+    # @return Beaker::Options::OptionsHash
+    def configured_options
+      result = Beaker::Options::OptionsHash.new
+      @attribution.each do |attribute, setter|
+        if setter != 'preset'
+          result[attribute] = @options[attribute]
+        end
+      end
+      result
+    end
+
     # Sets aside the current hosts file for re-use with the --no-provision flag.
     # This is originally intended for use on a successful tests where the hosts
     # are preserved (the --preserve-hosts option is set accordingly).
@@ -212,6 +226,21 @@ module Beaker
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
 
       hosts_yaml = @options
+      hosts_yaml['HOSTS'] = hosts_with_reachable_name
+      hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
+      # save the rest of the options, excepting the HOSTS that we have already processed
+      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
+      # remove copy of HOSTS information
+      hosts_yaml['CONFIG']['provision'] = false
+      File.open(preserved_hosts_filename, 'w') do |file|
+        YAML.dump(hosts_yaml, file)
+      end
+      @options[:hosts_preserved_yaml_file] = preserved_hosts_filename
+    end
+
+    # Return a host_hash that is updated to have reachable names
+    def hosts_with_reachable_name
+      hosts_yaml = @options
       newly_keyed_hosts_entries = {}
       hosts_yaml['HOSTS'].each do |host_name, file_host_hash|
         h = Beaker::Options::OptionsHash.new
@@ -223,16 +252,7 @@ module Beaker
           end
         end
       end
-      hosts_yaml['HOSTS'] = newly_keyed_hosts_entries
-      hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
-      # save the rest of the options, excepting the HOSTS that we have already processed
-      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
-      # remove copy of HOSTS information
-      hosts_yaml['CONFIG']['provision'] = false
-      File.open(preserved_hosts_filename, 'w') do |file|
-        YAML.dump(hosts_yaml, file)
-      end
-      @options[:hosts_preserved_yaml_file] = preserved_hosts_filename
+     newly_keyed_hosts_entries
     end
 
     # Prints all information required to reproduce the current run & results to the log

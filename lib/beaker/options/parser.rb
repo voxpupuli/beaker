@@ -217,6 +217,14 @@ module Beaker
         file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
         @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
 
+        if Beaker::Subcommands::SubcommandUtil.execute_subcommand?(ARGV[0])
+          unless ARGV[0] == 'init'
+            subcommand_options = Beaker::Subcommands::SubcommandUtil.load_subcommand_options
+            @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
+            @options.merge!(subcommand_options)
+          end
+        end
+
         # merge together command line and file_options
         #   overwrite file options with command line options
         cmd_line_and_file_options       = file_options.merge(cmd_line_options)
