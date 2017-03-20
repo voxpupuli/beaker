@@ -4,6 +4,8 @@ test_name 'use the provision subcommand' do
 
   def delete_root_folder_contents
     on default, 'rm -rf /root/* /root/.beaker'
+    on default, 'mkdir -p /root/.ssh/'
+    scp_to default, "#{ENV['HOME']}/.ssh/id_rsa-acceptance", "/root/.ssh/id_rsa"
   end
 
   step 'run beaker init and provision' do
