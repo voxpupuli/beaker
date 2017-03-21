@@ -2,9 +2,52 @@ require 'spec_helper'
 
 module Beaker
   describe CLI do
+
+    context 'initializing and parsing' do
+      let( :cli ) {
+        Beaker::CLI.new
+      }
+
+      describe 'instance variable initialization' do
+        it 'creates a logger for use before parse is called' do
+          expect(Beaker::Logger).to receive(:new).once.and_call_original
+          expect(cli.logger).to be_instance_of(Beaker::Logger)
+        end
+
+        it 'generates the timestamp' do
+          expect(Time).to receive(:now).once
+          cli
+        end
+      end
+
+      describe '#parse_options' do
+        it 'returns self' do
+          expect(cli.parse_options).to be_instance_of(Beaker::CLI)
+        end
+
+        it 'replaces the logger object with a new one' do
+          expect(Beaker::Logger).to receive(:new).with(no_args).once.and_call_original
+          expect(Beaker::Logger).to receive(:new).once.and_call_original
+          cli.parse_options
+        end
+      end
+
+      describe '#print_version_and_options' do
+        before do
+          options  = Beaker::Options::OptionsHash.new
+          options[:beaker_version] = 'version_number'
+          cli.instance_variable_set('@options', options)
+        end
+        it 'prints the version and dumps the options' do
+          expect(cli.logger).to receive(:info).exactly(3).times
+          cli.print_version_and_options
+        end
+      end
+    end
+
     let(:cli)      {
       allow(File).to receive(:exists?).and_return(true)
-      Beaker::CLI.new
+      Beaker::CLI.new.parse_options
     }
 
     context 'execute!' do

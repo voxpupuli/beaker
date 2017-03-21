@@ -32,8 +32,6 @@ test_name 'use the provision subcommand' do
      end
      step 'ensure provision provisions, validates, and configures new hosts' do
        result = on(default, "beaker provision")
-       assert_match(/"validate": true,/, result.stdout)
-       assert_match(/"configure": true,/, result.stdout)
        assert_equal(0, result.exit_code, "`beaker provision` should return a zero exit code")
      end
      step 'ensure provision will not provision new hosts if hosts have already been provisioned' do

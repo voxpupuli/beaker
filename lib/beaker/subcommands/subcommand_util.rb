@@ -164,7 +164,7 @@ module Beaker
       # @param [Array<Object>] options the options to use when provisioning
       def self.provision(hypervisor, options)
         reset_argv(["--hosts", "#{CONFIG_DIR}/acceptance/config/default_#{hypervisor}_hosts.yaml", "--validate", options[:validate], "--configure", options[:configure]])
-        beaker = Beaker::CLI.new
+        beaker = Beaker::CLI.new.parse_options
         beaker.provision
         beaker.preserve_hosts_file
       end
