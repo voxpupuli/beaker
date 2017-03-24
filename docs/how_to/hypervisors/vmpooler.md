@@ -18,6 +18,23 @@ An example of a `.fog` file with just the vmpooler details is below:
 :default:
   :vmpooler_token: 'randomtokentext'
 ```
+# Additional Disks
+Using the vmpooler API, Beaker enables you to attach additional storage disks in the host configuration file. The disks are added at the time the VM is created. Logic for using the disk must go into your tests.
+
+Simply add the `disks` key and a list containing the sizes(in GB) of the disks you want to create and attach to that host.
+For example, to create 2 disks sized 8GB and 16GB to example-box:
+
+```yaml
+ example-box:
+    disks:
+      - 8
+      - 16
+    roles:
+      - satellite
+    platform: el-7-x86_64
+    hypervisor: vmpooler
+    template: redhat-7-x86_64
+```
 
 Users with Puppet credentials can follow our instructions for getting & using
 vmpooler tokens in our
