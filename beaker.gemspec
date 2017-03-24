@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'net-scp', '~> 1.2'
   s.add_runtime_dependency 'inifile', '~> 3.0'
 
-  s.add_runtime_dependency 'rake', '~> 10.0'
+  s.add_runtime_dependency 'rake', '~> 11.0'
   s.add_runtime_dependency 'rsync', '~> 1.0.9'
   s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
