@@ -194,9 +194,7 @@ module Beaker
       ).run_and_raise_on_failure
     end
 
-    # Get the list of options that are not equal to presets. Skip certain keys that
-    # that shouldn't be shared between cli objects, such as :timestamp, :logger, and
-    # :command_line.
+    # Get the list of options that are not equal to presets.
     # @return Beaker::Options::OptionsHash
     def configured_options
       result = Beaker::Options::OptionsHash.new
@@ -226,7 +224,7 @@ module Beaker
       preserved_hosts_filename = File.join(@options[:log_dated_dir], 'hosts_preserved.yml')
 
       hosts_yaml = @options
-      hosts_yaml['HOSTS'] = hosts_with_reachable_name
+      hosts_yaml['HOSTS'] = combined_instance_and_options_hosts
       hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
       # save the rest of the options, excepting the HOSTS that we have already processed
       hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
@@ -238,8 +236,9 @@ module Beaker
       @options[:hosts_preserved_yaml_file] = preserved_hosts_filename
     end
 
-    # Return a host_hash that is updated to have reachable names
-    def hosts_with_reachable_name
+    # Return a host_hash that is a merging of options host hashes with instance host objects
+    # @return Hash
+    def combined_instance_and_options_hosts
       hosts_yaml = @options
       newly_keyed_hosts_entries = {}
       hosts_yaml['HOSTS'].each do |host_name, file_host_hash|

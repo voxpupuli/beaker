@@ -58,7 +58,7 @@ module Beaker
         allow(yaml_store_mock).to receive(:[]).and_return(false)
         expect(cli).to receive(:parse_options)
         expect(cli).to receive(:provision)
-        expect(cli).to receive(:hosts_with_reachable_name).and_return(host_hash)
+        expect(cli).to receive(:combined_instance_and_options_hosts).and_return(host_hash)
         expect(SubcommandUtil).to receive(:sanitize_options_for_save).and_return('cleaned hosts')
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS).and_return(yaml_store_mock)
 
