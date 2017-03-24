@@ -60,6 +60,42 @@ module Beaker
       end
     end
 
+    describe '#disk_added?' do
+      let(:vmpooler) { Beaker::Vmpooler.new(make_hosts, make_opts) }
+      let(:response_hash_no_disk) {
+        {
+          "ok" => "true",
+          "hostname" => {
+            "template"=>"redhat-7-x86_64",
+            "domain"=>"delivery.puppetlabs.net"
+          }
+        }
+      }
+      let(:response_hash_disk) {
+        {
+          "ok" => "true",
+          "hostname" => {
+            "disk" => [
+              '+16gb',
+              '+8gb'
+            ],
+            "template"=>"redhat-7-x86_64",
+            "domain"=>"delivery.puppetlabs.net"
+          }
+        }
+      }
+      it 'returns false when there is no disk' do
+        host = response_hash_no_disk['hostname']
+        expect(vmpooler.disk_added?(host, "8", 0)).to be(false)
+      end
+
+      it 'returns true when there is a disk' do
+        host = response_hash_disk["hostname"]
+        expect(vmpooler.disk_added?(host, "16", 0)).to be(true)
+        expect(vmpooler.disk_added?(host, "8", 1)).to be(true)
+      end
+    end
+
     describe "#provision" do
 
       it 'provisions hosts from the pool' do

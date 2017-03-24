@@ -215,6 +215,33 @@ module Beaker
       end
 
       @logger.notify 'Spent %.2f seconds tagging VMs' % (Time.now - start)
+
+      # add additional disks to vm
+      @logger.debug 'Looking for disks to add...'
+
+      @hosts.each do |h|
+        hostname = h['vmhostname'].split(".")[0]
+
+        if h['disks']
+          @logger.debug "Found disks for #{hostname}!"
+          disks = h['disks']
+
+          disks.each_with_index do |disk_size, index|
+            start = Time.now
+
+            add_disk(hostname, disk_size)
+
+            done = wait_for_disk(hostname, disk_size, index)
+            if done
+              @logger.notify "Spent %.2f seconds adding disk #{index}. " % (Time.now - start)
+            else
+              raise "Could not verify disk was added after %.2f seconds" % (Time.now - start)
+            end
+          end
+        else
+          @logger.debug "No disks to add for #{hostname}"
+        end
+      end
     end
 
     def cleanup
@@ -246,5 +273,82 @@ module Beaker
       @logger.notify "Spent %.2f seconds cleaning up" % (Time.now - start)
     end
 
+    def add_disk(hostname, disk_size)
+      @logger.notify "Requesting an additional disk of size #{disk_size}GB for #{hostname}"
+
+      if !disk_size.to_s.match /[0123456789]/ || size <= '0'
+        raise NameError.new "Disk size must be an integer greater than zero!"
+      end
+
+      begin
+        uri = URI.parse(@options[:pooling_api] + '/api/v1/vm/' + hostname + '/disk/' + disk_size.to_s)
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Post.new(uri.request_uri)
+        request['X-AUTH-TOKEN'] = @credentials[:vmpooler_token]
+
+        response = http.request(request)
+
+        parsed = parse_response(response)
+
+        raise "Response from #{hostname} indicates disk was not added" if !parsed['ok']
+
+      rescue NameError, RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+             Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
+        report_and_raise(@logger, e, 'Vmpooler.add_disk')
+      end
+    end
+
+    def parse_response(response)
+      parsed_response = JSON.parse(response.body)
+    end
+
+    def disk_added?(host, disk_size, index)
+      if host['disk'].nil?
+        false
+      else
+        host['disk'][index] == "+#{disk_size}gb"
+      end
+    end
+
+    def get_vm(hostname)
+      begin
+        uri = URI.parse(@options[:pooling_api] + '/vm/' + hostname)
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Get.new(uri.request_uri)
+
+        response = http.request(request)
+      rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+             Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
+        @logger.notify "Failed to connect to vmpooler while getting VM information!"
+      end
+    end
+
+    def wait_for_disk(hostname, disk_size, index)
+      response = get_vm(hostname)
+      parsed = parse_response(response)
+
+      @logger.notify "Waiting for disk"
+
+      attempts = 0
+
+      while (!disk_added?(parsed[hostname], disk_size, index) && attempts < 20)
+        sleep 10
+        begin
+          response = get_vm(hostname)
+          parsed = parse_response(response)
+        rescue RuntimeError, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+               Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, *SSH_EXCEPTIONS => e
+          report_and_raise(@logger, e, "Vmpooler.wait_for_disk")
+        end
+        print "."
+        attempts += 1
+      end
+
+      puts " "
+
+      disk_added?(parsed[hostname], disk_size, index)
+    end
   end
 end
