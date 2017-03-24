@@ -50,6 +50,36 @@ module Beaker
       Beaker::CLI.new.parse_options
     }
 
+    context '#configured_options' do
+      it 'returns a list of options that were not presets' do
+        attribution = cli.instance_variable_get(:@attribution)
+        attribution.each do |attribute, setter|
+          if setter == 'preset'
+            expect(cli.configured_options[attribute]).to be_nil
+          end
+        end
+      end
+    end
+
+    context '#combined_instance_and_options_hosts' do
+      let (:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
+      let (:instance_host ) {
+        [Beaker::Host.create('ubuntu', {:platform => 'host'}, {} )]
+      }
+      before do
+        cli.instance_variable_set(:@options, options_host)
+        cli.instance_variable_set(:@hosts, instance_host)
+      end
+      it 'combines the options and instance host objects' do
+        merged_host = cli.combined_instance_and_options_hosts
+        expect(merged_host).to have_key('ubuntu')
+        expect(merged_host['ubuntu']).to have_key(:options_attribute)
+        expect(merged_host['ubuntu']).to have_key(:platform)
+        expect(merged_host['ubuntu'][:options_attribute]).to eq('options')
+        expect(merged_host['ubuntu'][:platform]).to eq('host')
+      end
+    end
+
     context 'execute!' do
       before :each do
        stub_const("Beaker::Logger", double().as_null_object )

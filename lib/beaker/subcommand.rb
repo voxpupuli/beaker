@@ -113,7 +113,7 @@ module Beaker
       @cli.provision
 
       # Sanitize the hosts
-      cleaned_hosts = SubcommandUtil.sanitize_options_for_save(@cli.hosts_with_reachable_name)
+      cleaned_hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
 
       # should we only update the options here with the new host? Or update the settings
       # with whatever new flags may have been provided with provision?

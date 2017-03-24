@@ -224,7 +224,6 @@ module Beaker
         file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
         @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
 
-
         # merge together command line and file_options
         #   overwrite file options with command line options
         cmd_line_and_file_options       = file_options.merge(cmd_line_options)
