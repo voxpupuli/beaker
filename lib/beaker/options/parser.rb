@@ -204,7 +204,8 @@ module Beaker
       #   2.  ARGV or provided arguments array
       #   3.  the 'CONFIG' section of the hosts file
       #   4.  options file values
-      #   5.  default or preset values are given the lowest priority
+      #   5.  subcommand options, if executing beaker subcommands
+      #   6.  default or preset values are given the lowest priority
       #
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
@@ -214,16 +215,15 @@ module Beaker
         cmd_line_options                = @command_line_parser.parse(args)
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
         @attribution = @attribution.merge(tag_sources(cmd_line_options, "flag"))
+
+        # Subcommands are the first to get merged into presets
+        subcommand_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args)
+        @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
+        @options.merge!(subcommand_options)
+
         file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
         @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
 
-        if Beaker::Subcommands::SubcommandUtil.execute_subcommand?(ARGV[0])
-          unless ARGV[0] == 'init'
-            subcommand_options = Beaker::Subcommands::SubcommandUtil.load_subcommand_options
-            @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
-            @options.merge!(subcommand_options)
-          end
-        end
 
         # merge together command line and file_options
         #   overwrite file options with command line options

@@ -146,6 +146,7 @@ module Beaker
                               :user_known_hosts_file => 'hosts123'
                             }                                
           } }
+          let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
           let(:presets) { {:level => 'lowest',
                             :ssh => {
                               :config => 'config123',
@@ -173,16 +174,28 @@ module Beaker
 
             allow(OptionsFileParser).to receive(:parse_options_file).and_return(opt_file)
             allow(parser).to receive(:parse_hosts_options).and_return(host_file)
+
+            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).and_return(subcommand_file)
           end
 
           it 'presets have the lowest priority' do
-            @env = @argv = @host_file = @opt_file = {}
+            @env = @argv = @host_file = @opt_file = @subcommand_file = {}
             mock_out_parsing
 
             opts = parser.parse_args([])
             attribution = parser.attribution
             expect(opts[:level]).to be == 'lowest'
             expect(attribution[:level]).to be == 'preset'
+          end
+
+          it 'subcommand_options should have fifth priority' do
+            @env = @argv = @host_file = @opt_file = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            attribution = parser.attribution
+            expect(opts[:level]).to be == 'fifth'
+            expect(attribution[:level]).to be == 'subcommand'
           end
 
           it 'options file has fourth priority' do

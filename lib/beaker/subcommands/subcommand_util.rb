@@ -32,17 +32,6 @@ module Beaker
         (Beaker::Subcommand.instance_methods(false) << :help).include? arg0.to_sym
       end
 
-      # Checks to ensure the the subcommand options are there and load them. Otherwise,
-      # return an empty OptionsHash.
-      # @return [Hash, OptionsHash]
-      def self.load_subcommand_options
-        if SUBCOMMAND_OPTIONS.exist?
-          YAML.load_file(SUBCOMMAND_OPTIONS)
-        else
-          Beaker::Options::OptionsHash.new
-        end
-      end
-
       # Reset ARGV to contain the arguments determined by a specific subcommand
       # @param [Array<String>] args the arguments determined by a specific subcommand
       def self.reset_argv(args)
