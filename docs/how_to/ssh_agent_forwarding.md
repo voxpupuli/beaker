@@ -29,3 +29,7 @@ vcsrepo { '/var/www/app':
   user     => 'deploy'
 }
 ~~~
+
+## Cross SUT access
+
+If you need to be able to SSH between SUTs while running Beaker acceptance tests, please refer to the [enabling cross SUT access](enabling_cross_sut_access.md) document
