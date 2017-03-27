@@ -58,11 +58,9 @@ module Beaker
     long_desc <<-LONGDESC
       Initializes the required .beaker configuration folder. This folder contains
       a subcommand_options.yaml file that is user-facing; altering this file will
-      alter the options subcommand execution.
-
-      Also modified in this operation is the .subcommand_state file that is used
-      by beaker to determine subcommand state. You as a user should never have to
-      edit this file.
+      alter the options subcommand execution. Subsequent subcommand execution,
+      such as `provision`, will result in beaker making modifications to this file
+      as necessary.
     LONGDESC
     def init()
       if options[:help]
@@ -81,10 +79,11 @@ module Beaker
 
       options_to_write = SubcommandUtil.sanitize_options_for_save(options_to_write)
 
-      @cli.logger.notify 'writing configured options to disk'
+      @cli.logger.notify 'Writing configured options to disk'
       File.open(SubcommandUtil::SUBCOMMAND_OPTIONS, 'w') do |f|
         f.write(options_to_write.to_yaml)
       end
+      @cli.logger.notify "Options written to #{SubcommandUtil::SUBCOMMAND_OPTIONS}"
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
       state.transaction do
