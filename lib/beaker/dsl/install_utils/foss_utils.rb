@@ -367,6 +367,7 @@ module Beaker
             end
 
             if package_name
+              # DLU: install_puppet_agent_dev_repo_on(hosts, opts)
               install_puppetlabs_release_repo( host, opts[:puppet_collection] )
               host.install_package( package_name )
             end
@@ -584,6 +585,7 @@ module Beaker
             end
 
             install_a_puppet_msi_on(host, opts)
+            # DLU: install_puppet_agent_dev_repo_on(hosts, opts)
           end
         end
 
@@ -595,24 +597,30 @@ module Beaker
               raise "Puppet MSI at #{link} does not exist!"
             end
 
-
-            msi_download_path = "#{host.system_temp_path}\\#{host['dist']}.msi"
+            # DLU: msi_download_path = "#{host.system_temp_path}\\#{host['dist']}.msi"
 
             if host.is_cygwin?
-              # NOTE: it is critical that -o be before -O on Windows
-              on host, "curl -o \"#{msi_download_path}\" -O #{link}"
+              # DLU: NOTE: it is critical that -o be before -O on Windows
+              # DLU: on host, "curl -o \"#{msi_download_path}\" -O #{link}"
+
+
 
               #Because the msi installer doesn't add Puppet to the environment path
               #Add both potential paths for simplicity
               #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
               puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
               on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
-            else
-              on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{msi_download_path}')")
+
+
+              # DLU: else
+              # DLU: on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{msi_download_path}')")
             end
 
             opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
-            install_msi_on(host, msi_download_path, {}, opts)
+
+            # DLU: require 'pry' ; binding.pry
+            # DLU: install_msi_on(host, msi_download_path, {}, opts)
+            install_msi_on(host, link, {}, opts)
 
             configure_type_defaults_on( host )
             if not host.is_cygwin?
@@ -1089,7 +1097,7 @@ module Beaker
         #
         # @return nil
         def install_puppet_agent_dev_repo_on( hosts, opts )
-
+          # DLU: require 'pry'; binding.pry
           opts[:puppet_agent_version] ||= opts[:version] #backward compatability
           if not opts[:puppet_agent_version]
             raise "must provide :puppet_agent_version (puppet-agent version) for install_puppet_agent_dev_repo_on"
@@ -1136,6 +1144,10 @@ module Beaker
 
             if variant =~ /eos/
               host.get_remote_file( "#{release_path}/#{release_file}" )
+            elsif variant =~ /windows/
+              # DLU: require 'pry'; binding.pry
+              release_path.chomp!('/')
+              link = "#{release_path}/#{release_file}"
             else
               onhost_copied_file = File.join(onhost_copy_base, release_file)
               fetch_http_file( release_path, release_file, copy_dir_local)
@@ -1155,10 +1167,13 @@ module Beaker
               end
               on host, "rpm -ivh #{aix_72_ignoreos_hack} #{onhost_copied_file}"
             when /^windows$/
-              result = on host, "echo #{onhost_copied_file}"
-              onhost_copied_file = result.raw_output.chomp
+              # DLU: hook for 'installs on different hosts with options specifying :copy_dir_external' spec test...
+              result = on host, "echo #{link}"
+              link = result.raw_output.chomp
               msi_opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
-              install_msi_on(host, onhost_copied_file, {}, msi_opts)
+
+              # DLU: install_msi_on(host, onhost_copied_file, {}, msi_opts)
+              install_msi_on(host, link, {}, msi_opts)
             when /^osx$/
               host.install_package("puppet-agent-#{opts[:puppet_agent_version]}*")
             when /^solaris$/
@@ -1215,20 +1230,39 @@ module Beaker
               )
             release_path << release_path_end
 
-            onhost_copied_download = File.join(onhost_copy_base, download_file)
-            onhost_copied_file = File.join(onhost_copy_base, release_file)
-            fetch_http_file( release_path, download_file, copy_dir_local)
-            scp_to host, File.join(copy_dir_local, download_file), onhost_copy_base
+            # DLU:
+            # require 'pry' ; binding.pry
 
             if variant == 'windows'
-              result = on host, "echo #{onhost_copied_file}"
-              onhost_copied_file = result.raw_output.chomp
+              # DLU : result = on host, "echo #{onhost_copied_file}"
+              # DLU : onhost_copied_file = result.raw_output.chomp
+
+
+              # DLU: otherwise, transform release_file -> download_file 
+              # DLU: if want to keep naming consistent.  
+              release_path.chomp!('/')
+              link = "#{release_path}/#{download_file}"
+
               opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
               # couldn't pull this out, because it's relying on
               # {Beaker::DSL::InstallUtils::WindowsUtils} methods,
               # which I didn't want to attack right now. TODO
-              install_msi_on(host, onhost_copied_file, {}, opts)
+
+              # DLU : install_msi_on(host, onhost_copied_file, {}, opts)
+
+              # DLU:
+              # puts "DLU GOT HERE TO PE PROMOTED REPO INSTALL" + link
+              install_msi_on(host, link, {}, opts)
+
             else
+
+              # DLU: sunk fetch_http_file -> scp_to routine
+              onhost_copied_download = File.join(onhost_copy_base, download_file)
+              onhost_copied_file = File.join(onhost_copy_base, release_file)
+
+              fetch_http_file( release_path, download_file, copy_dir_local)
+              scp_to host, File.join(copy_dir_local, download_file), onhost_copy_base
+
               host.pe_puppet_agent_promoted_package_install(
                 onhost_copy_base, onhost_copied_download,
                 onhost_copied_file, download_file, opts
