@@ -84,7 +84,7 @@ module Beaker
       openstack.provision
 
       @hosts.each do |host|
-        expect(host[:keyname]).to match(/[_\-0-9a-zA-Z]+/)
+        expect(host[:keyname]).to match(/^[_\-0-9a-zA-Z]+$/)
       end
     end
 
