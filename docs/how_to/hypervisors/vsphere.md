@@ -10,6 +10,8 @@ To do this create a `~/.fog` file with your vSphere credentials:
 
 These follow the conventions used by Cloud Provisioner and Fog.
 
+>Note: Your fog credential file location may be specified in the 'CONFIG' section using the 'dot_fog' setting
+
 There are two possible `hypervisor` hypervisor-types to use for vSphere testing, `vsphere` and `vcloud`.
 
 ### `hypervisor: vsphere`
@@ -18,7 +20,7 @@ This option locates an existing static VM, optionally reverts it to a pre-existi
 ### `hypervisor: vcloud`
 This option clones a new VM from a pre-existing template, runs tests on the newly-provisioned clone, then deletes the clone once testing completes.
 
-The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'resourcepool', and 'folder').
+The `vcloud` option requires a slightly-modified test configuration file, specifying both the target template as well as three additional parameters in the 'CONFIG' section ('datastore', 'datacenter', and 'folder').  Optionally, a resourcepool may be specified via the 'resourcepool' setting in the 'CONFIG' section.  Template can be expressed in the 'HOSTS' section, or you can set the template to be used via the `BEAKER_vcloud_template` environment variable.
 
 #### example vcloud hosts file ###
     HOSTS:
@@ -38,6 +40,7 @@ The `vcloud` option requires a slightly-modified test configuration file, specif
         hypervisor: vcloud
     CONFIG:
       consoleport: 443
+      datacenter: testdc
       datastore: instance0
       resourcepool: Delivery/Quality Assurance/FOSS/Dynamic
       folder: delivery/Quality Assurance/FOSS/Dynamic

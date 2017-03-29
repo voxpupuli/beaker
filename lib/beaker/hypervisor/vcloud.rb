@@ -10,6 +10,7 @@ module Beaker
 
       raise 'You must specify a datastore for vCloud instances!' unless @options['datastore']
       raise 'You must specify a folder for vCloud instances!' unless @options['folder']
+      raise 'You must specify a datacenter for vCloud instances!' unless @options['datacenter']
       @vsphere_credentials = VsphereHelper.load_config(@options[:dot_fog])
     end
 
@@ -50,6 +51,16 @@ module Beaker
       end
     end
 
+    # Directly borrowed from openstack hypervisor
+    def enable_root(host)
+      if host['user'] != 'root'
+        copy_ssh_to_root(host, @options)
+        enable_root_login(host, @options)
+        host['user'] = 'root'
+        host.close
+      end
+    end
+
     def create_clone_spec host
       # Add VM annotation
       configSpec = RbVmomi::VIM.VirtualMachineConfigSpec(
@@ -76,8 +87,8 @@ module Beaker
 
       # Put the VM in the specified folder and resource pool
       relocateSpec = RbVmomi::VIM.VirtualMachineRelocateSpec(
-        :datastore    => @vsphere_helper.find_datastore(@options['datastore']),
-        :pool         => @options['resourcepool'] ? @vsphere_helper.find_pool(@options['resourcepool']) : nil,
+        :datastore    => @vsphere_helper.find_datastore(@options['datacenter'],@options['datastore']),
+        :pool         => @options['resourcepool'] ? @vsphere_helper.find_pool(@options['datacenter'],@options['resourcepool']) : nil,
         :diskMoveType => :moveChildMostDiskBacking
       )
 
@@ -95,7 +106,6 @@ module Beaker
     def provision
       connect_to_vsphere
       begin
-        vsphere_vms = {}
 
         try = 1
         attempts = @options[:timeout].to_i / 5
@@ -109,6 +119,12 @@ module Beaker
             h['vmhostname'] = generate_host_name
           end
 
+          if h['template'].nil? and defined?(ENV['BEAKER_vcloud_template'])
+            h['template'] = ENV['BEAKER_vcloud_template']
+          end
+
+          raise "Missing template configuration for #{h}.  Set template in nodeset or set ENV[BEAKER_vcloud_template]" unless h['template']
+
           if h['template'] =~ /\//
             templatefolders = h['template'].split('/')
             h['template'] = templatefolders.pop
@@ -119,7 +135,7 @@ module Beaker
           vm = {}
 
           if templatefolders
-            vm[h['template']] = @vsphere_helper.find_folder(templatefolders.join('/')).find(h['template'])
+            vm[h['template']] = @vsphere_helper.find_folder(@options['datacenter'],templatefolders.join('/')).find(h['template'])
           else
             vm = @vsphere_helper.find_vms(h['template'])
           end
@@ -131,8 +147,9 @@ module Beaker
           spec = create_clone_spec(h)
 
           # Deploy from specified template
-          tasks << vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['folder']), :name => h['vmhostname'], :spec => spec )
+          tasks << vm[h['template']].CloneVM_Task( :folder => @vsphere_helper.find_folder(@options['datacenter'],@options['folder']), :name => h['vmhostname'], :spec => spec )
         end
+
         try = (Time.now - start) / 5
         @vsphere_helper.wait_for_tasks(tasks, try, attempts)
         @logger.notify 'Spent %.2f seconds deploying VMs' % (Time.now - start)
@@ -147,15 +164,22 @@ module Beaker
 
         try = (Time.now - start) / 5
         duration = run_and_report_duration do
-          @hosts.each_with_index do |h, i|
-            wait_for_dns_resolution(h, try, attempts)
+          @hosts.each do |host|
+            repeat_fibonacci_style_for 8 do
+              @vsphere_helper.find_vms(host['vmhostname'])[host['vmhostname']].summary.guest.ipAddress != nil
+            end
+            host[:ip] = @vsphere_helper.find_vms(host['vmhostname'])[host['vmhostname']].summary.guest.ipAddress
+            enable_root(host)
           end
         end
+
         @logger.notify "Spent %.2f seconds waiting for DNS resolution" % duration
+
       rescue => e
         @vsphere_helper.close
         report_and_raise(@logger, e, "Vcloud.provision")
       end
+
     end
 
     def cleanup

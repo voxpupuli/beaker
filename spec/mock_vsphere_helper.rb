@@ -160,15 +160,15 @@ class MockVsphereHelper
     nil
   end
 
-  def find_datastore datastore
+  def find_datastore dc,datastore
     datastore
   end
 
-  def find_pool pool
+  def find_pool dc,pool
     pool
   end
 
-  def find_folder folder
+  def find_folder dc,folder
     folder
   end
 

@@ -183,7 +183,7 @@ class MockRbVmomiConnection
       @datacenter = Datacenter.new
     end
 
-    def find_datacenter
+    def find_datacenter dc
       @datacenter
     end
 
@@ -258,6 +258,7 @@ class MockRbVmomi
         self
       end
 
+
       def childEntity
         self
       end
@@ -266,6 +267,9 @@ class MockRbVmomi
         self
       end
 
+      def traverse path, type=Object, create=false
+        self
+      end
     end
 
     class ResourcePool

@@ -9,7 +9,7 @@ module Beaker
      stub_const( "VsphereHelper", MockVsphereHelper )
      stub_const( "Net", MockNet )
       json = double( 'json' )
-      allow( json ).to receive( :parse ) do |arg| 
+      allow( json ).to receive( :parse ) do |arg|
         arg
       end
      stub_const( "JSON", json )
@@ -23,6 +23,7 @@ module Beaker
 
         opts = make_opts
         opts[:pooling_api] = nil
+        opts[:datacenter] = 'testdc'
 
         vcloud = Beaker::Vcloud.new( make_hosts, opts )
         allow( vcloud ).to receive( :require ).and_return( true )
@@ -47,6 +48,7 @@ module Beaker
 
         opts = make_opts
         opts[:pooling_api] = nil
+        opts[:datacenter] = 'testdc'
 
         vcloud = Beaker::Vcloud.new( make_hosts, opts )
         allow( vcloud ).to receive( :require ).and_return( true )
