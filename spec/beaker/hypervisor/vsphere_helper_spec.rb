@@ -5,23 +5,21 @@ module Beaker
     let( :logger )         { double('logger').as_null_object }
     let( :vInfo )          { { :server => "vsphere.labs.net", :user => "vsphere@labs.com", :pass => "supersekritpassword" } }
     let( :vsphere_helper ) { VsphereHelper.new ( vInfo.merge( { :logger => logger } ) ) }
-    let( :snaplist )       { { 'snap1' => { 'snap1sub1' => nil , 
-                                            'snap1sub2' => nil }, 
+    let( :snaplist )       { { 'snap1' => { 'snap1sub1' => nil ,
+                                            'snap1sub2' => nil },
                                'snap2' => nil,
-                               'snap3' => { 'snap3sub1' => nil , 
+                               'snap3' => { 'snap3sub1' => nil ,
                                             'snap3sub2' => nil ,
                                             'snap3sub3' => nil } } }
-    let( :vms )            {  [ MockRbVmomiVM.new( 'mockvm1', snaplist ), 
-                                MockRbVmomiVM.new( 'mockvm2', snaplist ), 
+    let( :vms )            {  [ MockRbVmomiVM.new( 'mockvm1', snaplist ),
+                                MockRbVmomiVM.new( 'mockvm2', snaplist ),
                                 MockRbVmomiVM.new( 'mockvm3', snaplist ) ] }
-
-                                                
 
     before :each do
      stub_const( "RbVmomi", MockRbVmomi )
     end
 
-    describe "#load_config" do 
+    describe "#load_config" do
 
       it 'can load a .fog file' do
         allow( File ).to receive( :exists? ).and_return( true )
@@ -78,7 +76,9 @@ module Beaker
 
    describe "#find_datastore" do
      it 'finds the datastore from the connection object' do
-       expect(vsphere_helper.find_datastore( 'datastorename' ) ).to be === true
+       connection = vsphere_helper.instance_variable_get( :@connection )
+       dc = connection.serviceInstance.find_datacenter('testdc')
+       expect(vsphere_helper.find_datastore( dc,'datastorename' ) ).to be === true
      end
 
    end
@@ -86,8 +86,7 @@ module Beaker
    describe "#find_folder" do
      it 'can find a folder in the datacenter' do
        connection = vsphere_helper.instance_variable_get( :@connection )
-
-       expect(vsphere_helper.find_folder( 'root' ) ).to be === connection.serviceInstance.find_datacenter.vmFolder
+       expect(vsphere_helper.find_folder( 'testdc','root' ) ).to be === connection.serviceInstance.find_datacenter('testdc').vmFolder
      end
 
    end
@@ -95,26 +94,28 @@ module Beaker
    describe "#find_pool" do
      it 'can find a pool in a folder in the datacenter' do
        connection = vsphere_helper.instance_variable_get( :@connection )
-       connection.serviceInstance.find_datacenter.hostFolder = MockRbVmomi::VIM::Folder.new
-       connection.serviceInstance.find_datacenter.hostFolder.name = "/root"
+       dc = connection.serviceInstance.find_datacenter('testdc')
+       dc.hostFolder = MockRbVmomi::VIM::Folder.new
+       dc.hostFolder.name = "/root"
 
-       expect(vsphere_helper.find_pool( 'root' ) ).to be === connection.serviceInstance.find_datacenter.hostFolder
+       expect(vsphere_helper.find_pool( 'testdc','root' ) ).to be === connection.serviceInstance.find_datacenter('testdc').hostFolder
 
      end
      it 'can find a pool in a clustercomputeresource in the datacenter' do
        connection = vsphere_helper.instance_variable_get( :@connection )
-       connection.serviceInstance.find_datacenter.hostFolder = MockRbVmomi::VIM::ClusterComputeResource.new
-       connection.serviceInstance.find_datacenter.hostFolder.name = "/root"
+       dc = connection.serviceInstance.find_datacenter('testdc')
+       dc.hostFolder = MockRbVmomi::VIM::ClusterComputeResource.new
+       dc.hostFolder.name = "/root"
 
-       expect(vsphere_helper.find_pool( 'root' ) ).to be === connection.serviceInstance.find_datacenter.hostFolder
-
+       expect(vsphere_helper.find_pool( 'testdc','root' ) ).to be === connection.serviceInstance.find_datacenter('testdc').hostFolder
      end
      it 'can find a pool in a resourcepool in the datacenter' do
        connection = vsphere_helper.instance_variable_get( :@connection )
-       connection.serviceInstance.find_datacenter.hostFolder = MockRbVmomi::VIM::ResourcePool.new
-       connection.serviceInstance.find_datacenter.hostFolder.name = "/root"
+       dc = connection.serviceInstance.find_datacenter('testdc')
+       dc.hostFolder = MockRbVmomi::VIM::ResourcePool.new
+       dc.hostFolder.name = "/root"
 
-       expect(vsphere_helper.find_pool( 'root' ) ).to be === connection.serviceInstance.find_datacenter.hostFolder
+       expect(vsphere_helper.find_pool( 'testdc','root' ) ).to be === connection.serviceInstance.find_datacenter('testdc').hostFolder
      end
 
    end
