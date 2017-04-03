@@ -35,29 +35,29 @@ module Beaker
       raise 'You must specify an Openstack tenant (:openstack_tenant) for OpenStack instances!' unless @options[:openstack_tenant]
       raise 'You must specify an Openstack network (:openstack_network) for OpenStack instances!' unless @options[:openstack_network]
 
-      optionhash = {}
-      optionhash[:provider]           = :openstack
-      optionhash[:openstack_api_key]  = @options[:openstack_api_key]
-      optionhash[:openstack_username] = @options[:openstack_username]
-      optionhash[:openstack_auth_url] = @options[:openstack_auth_url]
-      optionhash[:openstack_tenant]   = @options[:openstack_tenant]
-      optionhash[:openstack_region]   = @options[:openstack_region] if @options[:openstack_region]
+      # Common keystone authentication credentials
+      @credentials = {
+        :provider           => :openstack,
+        :openstack_auth_url => @options[:openstack_auth_url],
+        :openstack_api_key  => @options[:openstack_api_key],
+        :openstack_username => @options[:openstack_username],
+        :openstack_tenant   => @options[:openstack_tenant],
+        :openstack_region   => @options[:openstack_region],
+      }
 
-      @compute_client ||= Fog::Compute.new(optionhash)
+      # Keystone version 3 requires users and projects to be scoped
+      if @credentials[:openstack_auth_url].include?('/v3/')
+        @credentials[:openstack_user_domain]    = @options[:openstack_user_domain] || 'Default'
+        @credentials[:openstack_project_domain] = @options[:openstack_project_domain] || 'Default'
+      end
+
+      @compute_client ||= Fog::Compute.new(@credentials)
 
       if not @compute_client
         raise "Unable to create OpenStack Compute instance (api key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
       end
 
-      networkoptionhash = {}
-      networkoptionhash[:provider]           = :openstack
-      networkoptionhash[:openstack_api_key]  = @options[:openstack_api_key]
-      networkoptionhash[:openstack_username] = @options[:openstack_username]
-      networkoptionhash[:openstack_auth_url] = @options[:openstack_auth_url]
-      networkoptionhash[:openstack_tenant]   = @options[:openstack_tenant]
-      networkoptionhash[:openstack_region]   = @options[:openstack_region] if @options[:openstack_region]
-
-      @network_client ||= Fog::Network.new(networkoptionhash)
+      @network_client ||= Fog::Network.new(@credentials)
 
       if not @network_client
         raise "Unable to create OpenStack Network instance (api_key: #{@options[:openstack_api_key]}, username: #{@options[:openstack_username]}, auth_url: #{@options[:openstack_auth_url]}, tenant: #{@options[:openstack_tenant]})"
@@ -104,15 +104,7 @@ module Beaker
     # Create a volume client on request
     # @return [Fog::OpenStack::Volume] OpenStack volume client
     def volume_client_create
-      options = {
-        :provider           => :openstack,
-        :openstack_api_key  => @options[:openstack_api_key],
-        :openstack_username => @options[:openstack_username],
-        :openstack_auth_url => @options[:openstack_auth_url],
-        :openstack_tenant   => @options[:openstack_tenant],
-        :openstack_region   => @options[:openstack_region],
-      }
-      @volume_client ||= Fog::Volume.new(options)
+      @volume_client ||= Fog::Volume.new(@credentials)
       unless @volume_client
         raise "Unable to create OpenStack Volume instance"\
           " (api_key: #{@options[:openstack_api_key]},"\
