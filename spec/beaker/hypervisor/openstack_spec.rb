@@ -156,5 +156,31 @@ module Beaker
       openstack.provision_storage mock_host, mock_vm
     end
 
+    it 'supports keystone v2' do
+      credentials = openstack.instance_eval('@credentials')
+      expect(credentials[:openstack_user_domain]).to be_nil
+      expect(credentials[:openstack_project_domain]).to be_nil
+    end
+
+    it 'supports keystone v3 with implicit arguments' do
+      v3_options = options
+      v3_options[:openstack_auth_url] = 'https://example.com/identity/v3/auth'
+
+      credentials = OpenStack.new(@hosts, v3_options).instance_eval('@credentials')
+      expect(credentials[:openstack_user_domain]).to eq('Default')
+      expect(credentials[:openstack_project_domain]).to eq('Default')
+    end
+
+    it 'supports keystone v3 with explicit arguments' do
+      v3_options = options
+      v3_options[:openstack_auth_url] = 'https://example.com/identity/v3/auth'
+      v3_options[:openstack_user_domain] = 'acme.com'
+      v3_options[:openstack_project_domain] = 'R&D'
+
+      credentials = OpenStack.new(@hosts, v3_options).instance_eval('@credentials')
+      expect(credentials[:openstack_user_domain]).to eq('acme.com')
+      expect(credentials[:openstack_project_domain]).to eq('R&D')
+    end
+
   end
 end
