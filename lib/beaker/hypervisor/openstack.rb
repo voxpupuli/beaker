@@ -220,8 +220,9 @@ module Beaker
 
       @hosts.each do |host|
         ip = get_ip
-        host[:vmhostname] = ip.ip.gsub('.','-') + '.rfc1918.puppetlabs.net'
-        host[:keyname] = key_name(host)
+        hostname = ip.ip.gsub('.','-')
+        host[:vmhostname] = hostname + '.rfc1918.puppetlabs.net'
+        create_or_associate_keypair(host, hostname)
         @logger.debug "Provisioning #{host.name} (#{host[:vmhostname]})"
         options = {
           :flavor_ref => flavor(host[:flavor]).id,
@@ -327,12 +328,11 @@ module Beaker
     #OpenStack keypairs
     #
     #@param [Host] host The OpenStack host to provision
-    #@return [String] key_name
     #@api private
-    def key_name(host)
+    def create_or_associate_keypair(host, keyname)
       if @options[:openstack_keyname]
         @logger.debug "Adding optional key_name #{@options[:openstack_keyname]} to #{host.name} (#{host[:vmhostname]})"
-        @options[:openstack_keyname]
+        keyname = @options[:openstack_keyname]
       else
         @logger.debug "Generate a new rsa key"
 
@@ -355,11 +355,12 @@ module Beaker
 
         type = key.ssh_type
         data = [ key.to_blob ].pack('m0')
-        @logger.debug "Creating Openstack keypair for public key '#{type} #{data}'"
-        @compute_client.create_key_pair host[:vmhostname], "#{type} #{data}"
+        @logger.debug "Creating Openstack keypair '#{keyname}' for public key '#{type} #{data}'"
+        @compute_client.create_key_pair keyname, "#{type} #{data}"
         host['ssh'][:key_data] = [ key.to_pem ]
-        host[:vmhostname]
       end
+
+      host[:keyname] = keyname
     end
   end
 end
