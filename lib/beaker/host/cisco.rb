@@ -70,8 +70,12 @@ module Cisco
     # @return [String] Command string as needed for this host
     def prepend_commands(command = '', user_pc = '', opts = {})
       return user_pc unless command.index('vsh').nil?
+      if self[:platform] =~ /cisco_nexus/
+        return user_pc unless command.index('ntpdate').nil?
+      end
 
-      prepend_cmds = ''
+      prepend_cmds = 'source /etc/profile;'
+      prepend_cmds << " sudo sh -c \"" if self[:user] != 'root'
       if self[:vrf]
         prepend_cmds << "ip netns exec #{self[:vrf]} "
       end
@@ -93,8 +97,7 @@ module Cisco
     #                  will ensure the environment is correctly set for the
     #                  given host.
     def environment_string env
-      prestring = 'source /etc/profile;'
-      prestring << " sudo sh -c \"" if self[:user] != 'root'
+      prestring = ''
       return prestring if env.empty?
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
