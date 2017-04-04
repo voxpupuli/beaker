@@ -20,6 +20,19 @@ module Cisco
           @platform = 'cisco_nexus-7-x86_64'
         end
 
+        it 'starts with sourcing the /etc/profile script' do
+          answer_correct = 'source /etc/profile;'
+          answer_test = host.prepend_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'uses `sudo` if not root' do
+          @options = { :user => 'notroot' }
+          answer_correct = "source /etc/profile; sudo sh -c \""
+          answer_test = host.prepend_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
         it 'ends with the :vrf host parameter' do
           vrf_answer = 'vrf_answer_135246'
           @options = {
@@ -29,19 +42,27 @@ module Cisco
           expect( answer_test ).to match( /ip netns exec #{vrf_answer}$/ )
         end
 
-        it 'guards against "vsh" usage (only scenario we dont want prefixing)' do
-          answer_prepend_commands = 'pc_param_unchanged_13584'
-          answer_test = host.prepend_commands( 'fake/vsh/command', answer_prepend_commands )
-          expect( answer_test ).to be === answer_prepend_commands
+        it 'guards against "vsh" usage (scenario we never want prefixing)' do
+          answer_user_pc = 'pc_param_unchanged_13584'
+          answer_test = host.prepend_commands( 'fake/vsh/command', answer_user_pc )
+          expect( answer_test ).to be === answer_user_pc
         end
+
+        it 'guards against "ntpdate" usage (we dont want prefixing on nexus)' do
+          answer_user_pc = 'user_pc_param_54321'
+          answer_test = host.prepend_commands( 'fake/ntpdate/command', answer_user_pc )
+          expect( answer_test ).to be === answer_user_pc
+        end
+
 
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
             :vrf  => 'fakevrf',
           }
           answer_prepend_commands = 'prepend'
+          answer_correct = 'source /etc/profile;ip netns exec fakevrf prepend'
           answer_test = host.prepend_commands( 'fake_command', answer_prepend_commands )
-          expect( answer_test ).to match( /^ip netns exec fakevrf #{answer_prepend_commands}/ )
+          expect( answer_test ).to be === answer_correct
         end
       end
 
@@ -51,33 +72,36 @@ module Cisco
           @platform = 'cisco_ios_xr-6-x86_64'
         end
 
+        it 'starts with sourcing the /etc/profile script' do
+          answer_correct = 'source /etc/profile;'
+          answer_test = host.prepend_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
         it 'does use the :vrf host parameter if provided' do
           @options = { :vrf => 'tpnns' }
           answer_test = host.prepend_commands( 'fake_command' )
           expect( answer_test ).to match( /ip netns exec tpnns/ )
         end
 
+        it 'does not guard "ntpdate" usage' do
+          answer_user_pc = 'user_pc_param_54321'
+          answer_correct = 'source /etc/profile;user_pc_param_54321'
+          answer_test = host.prepend_commands( 'fake/ntpdate/command', answer_user_pc )
+          expect( answer_test ).to be === answer_correct
+        end
+
         it 'retains user-specified prepend commands when adding vrf' do
           @options = { :vrf  => 'fakevrf', }
           answer_prepend_commands = 'prepend'
+          answer_correct = 'source /etc/profile;ip netns exec fakevrf prepend'
           answer_test = host.prepend_commands( 'fake_command', answer_prepend_commands )
-          expect( answer_test ).to match( /^ip netns exec fakevrf #{answer_prepend_commands}/ )
+          expect( answer_test ).to be === answer_correct
         end
       end
     end
 
     describe '#environment_string' do
-
-      it 'starts with sourcing the /etc/profile script' do
-        answer_test = host.environment_string( {} )
-        expect( answer_test ).to match( %r{^source /etc/profile;} )
-      end
-
-      it 'uses `sudo` if not root' do
-        @options = { :user => 'notroot' }
-        answer_test = host.environment_string( {} )
-        expect( answer_test ).to match( /sudo/ )
-      end
 
       context 'for cisco_nexus-7' do
 
@@ -85,18 +109,12 @@ module Cisco
           @platform = 'cisco_nexus-7-x86_64'
         end
 
-        it 'uses `sudo` if not root' do
-          @options = { :user => 'notroot' }
-          env_map = { 'PATH' => '/opt/pants/2' }
-          answer_test = host.environment_string( env_map )
-          expect( answer_test ).to match( %r{^source /etc/profile; sudo } )
-        end
-
         it 'uses `export` if root' do
           @options = { :user => 'root' }
           env_map = { 'PATH' => '/opt/pants/2' }
+          answer_correct = ' export PATH="/opt/pants/2";'
           answer_test = host.environment_string( env_map )
-          expect( answer_test ).to match( %r{^source /etc/profile; export } )
+          expect( answer_test ).to be === answer_correct
         end
 
         it 'ends with a semi-colon' do
@@ -108,7 +126,7 @@ module Cisco
         it 'turns env maps into paired strings correctly' do
           @options = { :user => 'root' }
           env_map = { 'var1' => 'ans1', 'VAR2' => 'ans2' }
-          answer_correct = 'source /etc/profile; export var1="ans1" VAR1="ans1" VAR2="ans2";'
+          answer_correct = ' export var1="ans1" VAR1="ans1" VAR2="ans2";'
           answer_test = host.environment_string( env_map )
           expect( answer_test ).to be === answer_correct
         end
@@ -122,15 +140,17 @@ module Cisco
         it 'uses `sudo` if not root' do
           @options = { :user => 'notroot' }
           env_map = { 'PATH' => '/opt/pants/2' }
+          answer_correct = ' env PATH="/opt/pants/2"'
           answer_test = host.environment_string( env_map )
-          expect( answer_test ).to match( %r{^source /etc/profile; sudo } )
+          expect( answer_test ).to be === answer_correct
         end
 
         it 'uses `env` if root' do
           @options = { :user => 'root' }
           env_map = { 'PATH' => '/opt/pants/1' }
+          answer_correct = ' env PATH="/opt/pants/1"'
           answer_test = host.environment_string( env_map )
-          expect( answer_test ).to match( %r{^source /etc/profile; env } )
+          expect( answer_test ).to be === answer_correct
         end
 
         it 'does not end with a semi-colon' do
@@ -142,7 +162,7 @@ module Cisco
         it 'turns env maps into paired strings correctly' do
           @options = { :user => 'root' }
           env_map = { 'VAR1' => 'ans1', 'var2' => 'ans2' }
-          answer_correct = 'source /etc/profile; env VAR1="ans1" var2="ans2" VAR2="ans2"'
+          answer_correct = ' env VAR1="ans1" var2="ans2" VAR2="ans2"'
           answer_test = host.environment_string( env_map )
           expect( answer_test ).to be === answer_correct
         end

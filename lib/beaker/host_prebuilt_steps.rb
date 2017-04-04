@@ -53,6 +53,9 @@ module Beaker
           case
             when host['platform'] =~ /sles-/
               ntp_command = "sntp #{ntp_server}"
+            when host['platform'] =~ /cisco_nexus/
+              ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
+              ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
             else
               ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
