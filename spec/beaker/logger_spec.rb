@@ -5,6 +5,7 @@ module Beaker
   describe Logger do
     let(:my_io)     { StringIO.new                         }
     let(:logger)    { Logger.new(my_io, :quiet => true)  }
+    let(:basic_logger)    { Logger.new(:quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
@@ -424,5 +425,6 @@ module Beaker
       end
 
     end
+
   end
 end

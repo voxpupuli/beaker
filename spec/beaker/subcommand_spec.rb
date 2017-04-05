@@ -56,10 +56,20 @@ module Beaker
       let ( :cleaned_hosts ) {double()}
       let ( :yielded_host_hash ) {double()}
       let ( :yielded_host_name) {double()}
+      let ( :network_manager) {double('network_manager')}
+      let ( :hosts) {double('hosts')}
+      let ( :hypervisors) {double('hypervisors')}
+      let (:options) {double ('options')}
       it 'provisions the host and saves the host info' do
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
         allow(yaml_store_mock).to receive(:[]).and_return(false)
-        expect(cli).to receive(:parse_options)
+        allow(cli).to receive(:preserve_hosts_file).and_return("/path/to/ho")
+        allow(cli).to receive(:network_manager).and_return(network_manager)
+        allow(cli).to receive(:options).and_return(options)
+        allow(options).to receive(:[]).with(:hosts_preserved_yaml_file).and_return("/path/to/hosts")
+        allow(network_manager).to receive(:hosts).and_return(hosts)
+        allow(network_manager).to receive(:hypervisors).and_return(hypervisors)
+        expect(cli).to receive(:parse_options).and_return(cli)
         expect(cli).to receive(:provision)
         expect(cli).to receive(:combined_instance_and_options_hosts).and_return(host_hash)
         expect(SubcommandUtil).to receive(:sanitize_options_for_save).and_return(cleaned_hosts)
@@ -69,6 +79,7 @@ module Beaker
 
         expect(yaml_store_mock).to receive(:transaction).and_yield.exactly(3).times
         expect(yaml_store_mock).to receive(:[]=).with('HOSTS', cleaned_hosts)
+        expect(yaml_store_mock).to receive(:[]=).with('hosts_preserved_yaml_file', "/path/to/hosts")
 
         expect(yaml_store_mock).to receive(:[]=).with('provisioned', true)
         subcommand.provision
@@ -114,6 +125,21 @@ module Beaker
       it 'errors when a resource is neither a valid file resource or suite name' do
         allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
         expect{subcommand.exec('blahblahblah')}.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'destroy' do
+      let( :cli ) { subcommand.instance_variable_get(:@cli) }
+      let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
+      let( :yaml_store_mock ) { double('yaml_store_mock') }
+      it 'calls destroy and updates the yaml store' do
+        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
+        allow(SubcommandUtil).to receive(:cleanup).with(cli).and_return(true)
+        allow(yaml_store_mock).to receive(:transaction).and_yield
+        allow(yaml_store_mock).to receive(:[]).with('provisioned').and_return(true)
+        allow(yaml_store_mock).to receive(:delete).with('provisioned').and_return(true)
+        expect(SubcommandUtil).to receive(:error_with).with("Please provision an environment").exactly(0).times
+        subcommand.destroy
       end
     end
   end

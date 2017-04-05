@@ -139,7 +139,7 @@ module Beaker
       host_hash[k] = v
     end
 
-    # Does this host have this key?  Either as defined in the host itself, or globally? 
+    # Does this host have this key?  Either as defined in the host itself, or globally?
     def [] k
       host_hash[k] || options[k]
     end

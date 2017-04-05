@@ -7,6 +7,7 @@ test_name 'use the provision subcommand' do
   end
 
   step 'run beaker init and provision' do
+    delete_root_folder_contents
     on(default, 'beaker init')
     result = on(default, 'beaker provision --hosts centos6-64')
     assert_match(/Using available host/, result.stdout)

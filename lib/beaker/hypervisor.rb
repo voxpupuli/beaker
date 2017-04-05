@@ -20,6 +20,7 @@ module Beaker
     def self.create(type, hosts_to_provision, options)
       @logger = options[:logger]
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
+
       hyper_class = case type
         when /^aix$/
           Beaker::Aixer
@@ -74,7 +75,7 @@ module Beaker
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
-      hypervisor.provision
+      hypervisor.provision if options[:provision]
 
       hypervisor
     end

@@ -21,6 +21,8 @@ module Beaker
       (command_line_says && host_says) or (host['hypervisor'] =~/(vagrant|docker)/)
     end
 
+    attr_accessor :hosts, :hypervisors
+
     def initialize(options, logger)
       @logger = logger
       @options = options
@@ -56,7 +58,9 @@ module Beaker
       @options['HOSTS'].each_key do |name|
         host_hash = @options['HOSTS'][name]
         hypervisor = host_hash['hypervisor']
-        hypervisor = provision?(@options, host_hash) ? host_hash['hypervisor'] : 'none'
+        if @options[:provision]
+          hypervisor = provision?(@options, host_hash) ? host_hash['hypervisor'] : 'none'
+        end
         @logger.debug "Hypervisor for #{name} is #{hypervisor}"
         @machines[hypervisor] = [] unless @machines[hypervisor]
         hostless_options[:timesync] = host_hash[:timesync] if host_hash[:timesync]!=nil
