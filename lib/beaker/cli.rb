@@ -71,6 +71,9 @@ module Beaker
 
     #Provision, validate and configure all hosts as defined in the hosts file
     def provision
+      # return self if only invoking the OptionsParser help
+      return self if @options[:help]
+
       begin
         @hosts =  []
         initialize_network_manager
