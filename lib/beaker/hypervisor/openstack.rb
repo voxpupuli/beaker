@@ -345,12 +345,13 @@ module Beaker
           retry
         end
 
+        keyname = host[:vmhostname].gsub('.','-')
         type = key.ssh_type
         data = [ key.to_blob ].pack('m0')
-        @logger.debug "Creating Openstack keypair for public key '#{type} #{data}'"
-        @compute_client.create_key_pair host[:vmhostname], "#{type} #{data}"
+        @logger.debug "Creating Openstack keypair '#{keyname}' for public key '#{type} #{data}'"
+        @compute_client.create_key_pair keyname, "#{type} #{data}"
         host['ssh'][:key_data] = [ key.to_pem ]
-        host[:vmhostname]
+        keyname
       end
     end
   end
