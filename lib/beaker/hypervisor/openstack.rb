@@ -64,15 +64,9 @@ module Beaker
       end
 
       # Validate openstack_volume_support setting value, reset to boolean if passed via ENV value string
-      if not @options[:openstack_volume_support].is_a?(TrueClass) || @options[:openstack_volume_support].is_a?(FalseClass)
-        if @options[:openstack_volume_support].match(/\btrue\b/i)
-          @options[:openstack_volume_support] = true
-        elsif @options[:openstack_volume_support].match(/\bfalse\b/i)
-          @options[:openstack_volume_support] = false
-        else
-          raise "Invalid value provided for CONFIG setting openstack_volume_support, current value #{@options[:openstack_volume_support]}"
-        end
-      end
+      @options[:openstack_volume_support] = true  if @options[:openstack_volume_support].to_s.match(/\btrue\b/i)
+      @options[:openstack_volume_support] = false if @options[:openstack_volume_support].to_s.match(/\bfalse\b/i)
+      [true,false].include? @options[:openstack_volume_support] or raise "Invalid openstack_volume_support setting, current: @options[:openstack_volume_support]"
 
     end
 
