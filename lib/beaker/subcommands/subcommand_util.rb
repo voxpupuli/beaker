@@ -1,5 +1,4 @@
 require 'json'
-require 'rake'
 require 'stringio'
 require 'yaml/store'
 require 'fileutils'
