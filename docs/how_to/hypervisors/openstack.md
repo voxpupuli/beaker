@@ -154,7 +154,7 @@ volume size in MB.
             size: 1000
 
 
-In the event your using an OpenStack instance that does not deploy the volume service you can disable that functionality to prevent beaker runs from failing.  Either using an ENV variable or setting the following value in the `CONFIG` section of your hosts file(valid values are `true` or `false`):
+In the event you're using an OpenStack instance that does not deploy the volume service you can disable that functionality to prevent beaker runs from failing.  Either using an ENV variable or setting the following value in the `CONFIG` section of your hosts file(valid values are `true` or `false`):
 
 ```
 openstack_volume_support: false
@@ -163,4 +163,4 @@ openstack_volume_support: false
 You can also configure this setting via an environment variable:
 
 ```
-export OS_VOL_SUPPORT=false
+export OS_VOLUME_SUPPORT=false
