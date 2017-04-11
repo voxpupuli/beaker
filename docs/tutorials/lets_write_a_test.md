@@ -1,80 +1,118 @@
-##The Task
+# The Task
 
-Consider if mcollectived incorrectly spawned a new process with every puppet agent run on Ubuntu 10.04.  We need an acceptance test to check that a new process is not spawned and to ensure that this issue does not regress in new builds.
+Verify that `cowsay` works when installed on a host
 
-##Figure Out Test Steps
+# Figure Out Test Steps
 
 What needs to happen in this test:
 
-* Install PE
-* Restart mcollective twice
-* Check to see if more than one mcollective process is running
+* Prep by installing & verifying `cowsay` is on the system
+* Run `cowsay` & assert that it did not fail
 
-##Create a host configuration file
-    $ beaker-hostgenerator redhat7-64ma > redhat7-64ma.yaml
+# Create a host  file
 
-##Install PE
+```bash
+$ beaker-hostgenerator --global-config {add_el_extras=true} centos6-64 > centos6-64.yaml
+```
 
-We prefer to install PE once and then run a set of tests, so PE installation should not be part of the actual acceptance test.
+The `--global-config {add_el_extras=true}` part adds the `add_el_extras: true`
+line to the global config section of the hosts file. With this setting enabled,
+beaker will ensure that the
+[Extra Packages for Enterprise Linux (EPEL)](https://fedoraproject.org/wiki/EPEL)
+are setup on the hosts as a part of beaker's host setup after the VMs are
+provisioned.
 
-    $ mkdir setup
-    $ cd setup
-    $ cat > install.rb << RUBY
-    test_name "Installing Puppet Enterprise" do
-    install_pe
-    RUBY
-    $ cd ..
-
-This places our install steps in a ruby script (install.rb) which will run on localhost, but the #install_pe method knows where to install puppet enterprise based on the host configuration in use.
-The install.rb script is used in our commandline to beaker, below.
-
-## Create a test file
+# Create a test file
 
 We need to create a test file to run.
 
-### Define some test commands to run
-####Restart mcollective twice
+## Install & verify that `cowsay` is on the host
 
-Here's our magic command that restarts mcollective:
+beaker's [Host object](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/Host)
+provides a number of convenience methods that abstract away Operating System (OS)
+-specific details. We'll use a few of these to do what we'd like:
 
-    restart_command = "bash -c '[[ -x /etc/init.d/pe-mcollective ]] && /etc/init.d/pe-mcollective restart'"
+- [`check_for_package`](http://www.rubydoc.info/github/puppetlabs/beaker/Unix/Pkg:check_for_package)
+- [`install_package`](http://www.rubydoc.info/github/puppetlabs/beaker/Unix/Pkg:install_package)
 
-####Check to see if more than one mcollective process is running
+A step that checks for our `cowsay` package & installs it could look like this:
+```ruby
+unless default.check_for_package('cowsay')
+  default.install_package('cowsay')
+end
+   
+assert(default.check_for_package('cowsay'))
+```
 
-Here's our magic command that throws an error if more than one mcollective process is running:
+beaker's assertions are based in [minitest](https://github.com/seattlerb/minitest)'s
+and a few helpers of our own have been added on top of that. Checkout the
+[Assertions rubydocs](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Assertions)
+for more information on that.
 
-    process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
+## Run `cowsay` & Verify it Exited Without an Error
+ 
+For this, we'll introduce you to the heart of beaker execution, the
+[`on` method](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers:on).
+This method runs commands similarly to saying the phrase:
 
-###Put it all together
+    on hostX, run commandZ
+
+So to run & verify our `cowsay` command, we can have a step like this one:
+```ruby
+result = on(default, 'cowsay pants pants pants')
+
+assert(result.exit_code == 0)
+```
+
+In beaker, when you run `on`, you get a
+[Result object](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/Result)
+back. We can assert against its `exit_code` accessor to make sure it exited
+successfully, as you see above.
+
+## Put it all together
 
 Here's the finished acceptance test.
 
 ```ruby
-test_name "/etc/init.d/pe-mcollective restart check"
-
-# Don't run these tests on the following platforms
-confine :except, :platform => 'solaris'
-confine :except, :platform => 'windows'
-confine :except, :platform => 'aix'
-
-step "Make sure the service restarts properly"
-hosts.each do |host|
-  # Commands to execute on the target system.
-  restart_command = "bash -c '[[ -x /etc/init.d/pe-mcollective ]] && /etc/init.d/pe-mcollective restart'"
-  process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
-
-  # Restart once
-  on(host, restart_command) { assert_equal(0, exit_code) }
-  # Restart again
-  on(host, restart_command) { assert_equal(0, exit_code) }
-  # Check to make sure only one process is running
-  on(host, process_count_check) { assert_equal(0, exit_code) }
+test_name 'Cowsay works for the Let\'s Write a Test doc' do
+  confine :to, :platform => 'el'
+  
+  package = 'cowsay'
+  step "make sure #{package} is on the host" do
+    unless default.check_for_package(package)
+      default.install_package(package)
+    end
+   
+    assert(default.check_for_package(package))
+  end
+  
+  step "verify #{package} executes without error codes" do
+    result = on(default, "#{package} pants pants pants")
+    
+    assert(result.exit_code == 0)
+  end
 end
 ```
 
-## Run it!
-You can now run this with
+You'll notice there's some structure around the code that we talked about before.
+`test_name` & `step` are structural beaker domain-specific language (DSL)
+methods that help you organize your tests & the output from beaker itself. To
+learn more about best practices in beaker test writing, checkout our
+[Style Guide](../concepts/style_guide.md).
 
-    beaker --host redhat7-64ma.yaml --pre-suite install.rb --test mytest.rb
+You'll also notice that we're using the `confine` method. Confining allows you
+to skip tests in certain situations. Skipped tests are reported separately from
+tests that return results. For this scenario, we're confining this test to
+`el`-platforms. To learn more about how confining works, checkout our
+[How-To Confine doc](../how_to/confine.md).
 
-Next up you may want to look at the [Beaker test for a module](../how_to/write_a_beaker_test_for_a_module.md) page.
+# Run it!
+If we saved the test above into a `cowsay.rb` file, then you can run the tests
+with this command:
+```bash
+$ beaker --host centos6-64.yaml --test cowsay.rb
+```
+
+Congrats! You've run beaker with your new test!
+
+Return to the [Tutorials Section](../) README to continue learning about beaker!
