@@ -440,7 +440,11 @@ module Beaker
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /arch|centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
-          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
+          if host['hypervisor'] = "docker"
+            host.exec(Command.new("/bin/kill -HUP `cat /var/run/sshd.pid`"), {:pty => true})
+          else
+            host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
+          end
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         elsif host['platform'] =~ /(free|open)bsd/

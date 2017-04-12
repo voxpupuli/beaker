@@ -167,7 +167,11 @@ module Unix::Exec
     when /debian|ubuntu|cumulus|huaweios/
       exec(Beaker::Command.new("service ssh restart"))
     when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7|fedora-(1[4-9]|2[0-9])|archlinux-/
-      exec(Beaker::Command.new("systemctl restart sshd.service"))
+      if self['hypervisor'] == 'docker'
+        exec(Beaker::Command.new("/bin/kill -HUP `cat /var/run/sshd.pid`"))
+      else
+        exec(Beaker::Command.new("systemctl restart sshd.service"))
+      end
     when /el-|centos|fedora|redhat|oracle|scientific|eos/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /sles/
