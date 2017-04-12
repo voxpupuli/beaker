@@ -164,7 +164,7 @@ module PSWindows::Exec
 
     environment_string = ''
     env_array.each_with_index do |env|
-      environment_string += "set #{env} && "
+      environment_string += "set #{env}&& "
     end
     environment_string
   end
