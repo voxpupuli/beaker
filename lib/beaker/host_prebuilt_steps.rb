@@ -255,9 +255,11 @@ module Beaker
         when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
-            host.exec(Command.new("rpm -i#{debug_opt} #{opts[:epel_url]}/epel-release-latest-#{host['platform'].version}.noarch.rpm"))
+            url_base = opts[:epel_url]
+            url_base = opts[:epel_url_archive] if host['platform'].version == '5'
+            host.exec(Command.new("rpm -i#{debug_opt} #{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm"))
             #update /etc/yum.repos.d/epel.repo for new baseurl
-            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{opts[:epel_url]}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
+            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{url_base}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
             #remove mirrorlist
             host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
             host.exec(Command.new('yum clean all && yum makecache'))
