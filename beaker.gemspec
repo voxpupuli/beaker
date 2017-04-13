@@ -59,4 +59,6 @@ Gem::Specification.new do |s|
 
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
+
+  s.add_runtime_dependency 'semantic', '~> 1.4'
 end
