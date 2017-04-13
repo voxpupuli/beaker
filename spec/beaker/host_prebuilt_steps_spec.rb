@@ -304,22 +304,53 @@ describe Beaker do
   context "add_el_extras" do
     subject { dummy_class.new }
 
-    it "add extras for el-5/6 hosts" do
+    it 'adds archived extras for el-5 hosts' do
 
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 }, 6 )
-      hosts[0][:platform] = Beaker::Platform.new('el-6-arch')
+      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 }, 2 )
+      hosts[1][:platform] = Beaker::Platform.new('oracle-5-arch')
+
+      expect( Beaker::Command ).to receive( :new ).with(
+        "rpm -qa | grep epel-release"
+      ).exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "rpm -i http://archive.fedoraproject.org/pub/archive/epel/epel-release-latest-5.noarch.rpm"
+      ).exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "sed -i -e 's;#baseurl.*$;baseurl=http://archive\\.fedoraproject\\.org/pub/archive/epel/5/$basearch;' /etc/yum.repos.d/epel.repo"
+      ).exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
+      ).exactly( 2 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "yum clean all && yum makecache"
+      ).exactly( 2 ).times
+
+      subject.add_el_extras( hosts, options )
+
+    end
+
+    it 'adds extras for el-6 hosts' do
+
+      hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 4 )
       hosts[1][:platform] = Beaker::Platform.new('centos-6-arch')
       hosts[2][:platform] = Beaker::Platform.new('scientific-6-arch')
       hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
-      hosts[4][:platform] = Beaker::Platform.new('oracle-5-arch')
 
-      expect( Beaker::Command ).to receive( :new ).with("rpm -qa | grep epel-release").exactly( 6 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm").exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with("rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm").exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with("sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/5/$basearch;' /etc/yum.repos.d/epel.repo").exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo").exactly( 6 ).times
-      expect( Beaker::Command ).to receive( :new ).with("yum clean all && yum makecache").exactly( 6 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "rpm -qa | grep epel-release"
+      ).exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
+      ).exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo"
+      ).exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
+      ).exactly( 4 ).times
+      expect( Beaker::Command ).to receive( :new ).with(
+        "yum clean all && yum makecache"
+      ).exactly( 4 ).times
 
       subject.add_el_extras( hosts, options )
 
