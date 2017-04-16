@@ -757,5 +757,11 @@ module Beaker
         expect(host.wait_for_port(22, 0)).to be false
       end
     end
+
+    it "creates a temporary directory on the host" do
+      host.should_receive(:tmpdir)
+      host.should_receive(:execute).with(/chown/)
+      host.puppet_tmpdir("foo")
+    end
   end
 end
