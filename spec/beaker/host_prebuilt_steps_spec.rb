@@ -81,14 +81,14 @@ describe Beaker do
   ['debian','ubuntu','cumulus'].each do | deb_like |
     it_should_behave_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-      "sudo su -c \"service ssh restart\""
+      "/bin/kill -HUP `cat /var/run/sshd.pid`"
     ]
   end
 
   ['centos','el-','redhat','fedora','eos'].each do | rhel_like |
     it_should_behave_like 'enables_root_login', rhel_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-      "sudo -E /sbin/service sshd reload"
+      "/bin/kill -HUP `cat /var/run/sshd.pid`"
     ]
   end
 

@@ -104,7 +104,7 @@ module Beaker
         it "calls the correct command for #{platform}" do
           opts['platform'] = platform 
           expect(instance).to receive(:exec)
-          expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
+          expect(Beaker::Command).to receive(:new).with("/bin/kill -HUP `cat /var/run/sshd.pid`")
           expect{instance.ssh_service_restart}.to_not raise_error
         end
       end
@@ -113,7 +113,7 @@ module Beaker
         it "calls the correct command for #{platform}" do
           opts['platform'] = platform
           expect(instance).to receive(:exec)
-          expect(Beaker::Command).to receive(:new).with("service ssh restart")
+          expect(Beaker::Command).to receive(:new).with("/bin/kill -HUP `cat /var/run/sshd.pid`")
           expect{instance.ssh_service_restart}.to_not raise_error
         end
       end
@@ -122,7 +122,7 @@ module Beaker
         it "calls the correct command for #{platform}" do
           opts['platform'] = "#{platform}-arch"
           expect(instance).to receive(:exec)
-          expect(Beaker::Command).to receive(:new).with("/sbin/service sshd restart")
+          expect(Beaker::Command).to receive(:new).with("/bin/kill -HUP `cat /var/run/sshd.pid`")
           expect{instance.ssh_service_restart}.to_not raise_error
         end
       end
