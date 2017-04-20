@@ -195,15 +195,9 @@ module Beaker
           ENV container docker
         EOF
 
-        # additional options to specify to the sshd
-        # may vary by platform
-        sshd_options = ''
-
         # add platform-specific actions
-        service_name = "sshd"
         case host['platform']
         when /ubuntu/, /debian/
-          service_name = "ssh"
           dockerfile += <<-EOF
             RUN apt-get update
             RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
