@@ -1,4 +1,4 @@
-#Beaker Quick Start Tasks
+# Beaker Quick Start Tasks
 
 We have developed some rake tasks to help new Beaker users get up and running quickly with writing and running tests.
 

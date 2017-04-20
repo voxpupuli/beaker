@@ -1,8 +1,8 @@
-##The Task
+## The Task
 
 Consider if mcollectived incorrectly spawned a new process with every puppet agent run on Ubuntu 10.04.  We need an acceptance test to check that a new process is not spawned and to ensure that this issue does not regress in new builds.
 
-##Figure Out Test Steps
+## Figure Out Test Steps
 
 What needs to happen in this test:
 
@@ -10,10 +10,10 @@ What needs to happen in this test:
 * Restart mcollective twice
 * Check to see if more than one mcollective process is running
 
-##Create a host configuration file
+## Create a host configuration file
     $ beaker-hostgenerator redhat7-64ma > redhat7-64ma.yaml
 
-##Install PE
+## Install PE
 
 We prefer to install PE once and then run a set of tests, so PE installation should not be part of the actual acceptance test.
 
@@ -33,19 +33,19 @@ The install.rb script is used in our commandline to beaker, below.
 We need to create a test file to run.
 
 ### Define some test commands to run
-####Restart mcollective twice
+#### Restart mcollective twice
 
 Here's our magic command that restarts mcollective:
 
     restart_command = "bash -c '[[ -x /etc/init.d/pe-mcollective ]] && /etc/init.d/pe-mcollective restart'"
 
-####Check to see if more than one mcollective process is running
+#### Check to see if more than one mcollective process is running
 
 Here's our magic command that throws an error if more than one mcollective process is running:
 
     process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
 
-###Put it all together
+### Put it all together
 
 Here's the finished acceptance test.
 
