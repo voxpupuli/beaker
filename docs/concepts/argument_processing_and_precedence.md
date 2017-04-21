@@ -12,7 +12,7 @@ Beaker uses arguments and settings from a variety of sources to determine how yo
 
 
 ## Environment Variables
-###Supported Environment Variables:
+### Supported Environment Variables:
 ```
         BEAKER VARIABLE NAME  => ENVIRONMENT VARIABLE NAME
         :home                 => 'HOME',
@@ -81,7 +81,7 @@ $ beaker --debug --tests acceptance/tests/base/host.rb --hosts configs/fusion/wi
 ```
 `--debug`, `--tests acceptance/tests/base/host.rb` and `--hosts configs/fusion/winfusion.cfg` are the provided command line values for this test run.
 
-###Supported Command Line Arguments:
+### Supported Command Line Arguments:
 ```
 $ beaker --help
 Usage: beaker [options...]
