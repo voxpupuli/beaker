@@ -167,6 +167,13 @@ exit /B %errorlevel%
             reg_query_command = %Q(reg query "#{reg_key}" /v "RememberedPuppetAgentStartupMode" | findstr #{msi_opts['PUPPET_AGENT_STARTUP_MODE']})
             on host, Command.new(reg_query_command, [], { :cmdexe => true })
 
+            # (PA-620) environment.bat should be run before any cmd.exe shell command
+            # in order to properly set up environment variables
+            auto_run_key = "HKLM\\SOFTWARE\\Microsoft\\Command Processor\AutoRun"
+            # TODO What's the best way to get the actual path to the script, respecting arch differences?
+            environment_script = "C:\\Program Files\\Puppet Labs\\Puppet\bin\\environment.bat"
+            reg_add_command = %Q(reg add "#{auto_run_key}" /v "PuppetEnvironment" /d "#{environment_script}")
+
             # emit the misc/versions.txt file which contains component versions for
             # puppet, facter, hiera, pxp-agent, packaging and vendored Ruby
             [
