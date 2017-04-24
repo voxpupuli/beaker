@@ -195,6 +195,11 @@ module Beaker
           ENV container docker
         EOF
 
+        # Any extra commands specified for the host
+        dockerfile += (host['docker_image_commands'] || []).map { |command|
+          "RUN #{command}\n"
+        }.join('')
+
         # additional options to specify to the sshd
         # may vary by platform
         sshd_options = ''
@@ -250,12 +255,6 @@ module Beaker
           RUN sed -ri 's/^#?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
           RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
         EOF
-
-
-        # Any extra commands specified for the host
-        dockerfile += (host['docker_image_commands'] || []).map { |command|
-          "RUN #{command}\n"
-        }.join('')
 
         # Override image entrypoint
         if host['docker_image_entrypoint']
