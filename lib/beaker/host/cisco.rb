@@ -75,7 +75,7 @@ module Cisco
       end
 
       prepend_cmds = 'source /etc/profile;'
-      prepend_cmds << " sudo sh -c \"" if self[:user] != 'root'
+      prepend_cmds << " sudo -E sh -c \"" if self[:user] != 'root'
       if self[:vrf]
         prepend_cmds << "ip netns exec #{self[:vrf]} "
       end

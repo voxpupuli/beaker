@@ -28,7 +28,7 @@ module Cisco
 
         it 'uses `sudo` if not root' do
           @options = { :user => 'notroot' }
-          answer_correct = "source /etc/profile; sudo sh -c \""
+          answer_correct = "source /etc/profile; sudo -E sh -c \""
           answer_test = host.prepend_commands( 'fake_command' )
           expect( answer_test ).to be === answer_correct
         end
