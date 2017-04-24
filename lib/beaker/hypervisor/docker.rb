@@ -223,6 +223,7 @@ module Beaker
         when /^el-/, /centos/, /fedora/, /redhat/, /eos/
           dockerfile += <<-EOF
             RUN yum clean all
+            RUN touch /var/lib/rpm/*
             RUN yum install -y sudo openssh-server openssh-clients #{Beaker::HostPrebuiltSteps::UNIX_PACKAGES.join(' ')}
             RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
             RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
