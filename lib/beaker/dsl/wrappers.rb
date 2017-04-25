@@ -18,15 +18,6 @@ module Beaker
         HostCommand.new(command_string)
       end
 
-        # @param [String] command_string A string of to be interpolated
-        #                                within the context of a host in
-        #                                question
-        # @example Usage
-        # @!visibility private
-        def host_command(command_string)
-          HostCommand.new(command_string)
-        end
-
       # Returns a {Beaker::Command} object for executing powershell commands on a host
       #
       # @param [String]   command   The powershell command to execute
