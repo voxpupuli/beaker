@@ -28,7 +28,14 @@ module Unix::Pkg
         result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
         result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
       when /sles-/
-        result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
+        if !self[:sles_rpmkeys_nightly_pl_imported]
+          # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
+          # time. It's just to make sure that we only do the key import once, &
+          # isn't for setting or use outside of beaker.
+          execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
+          self[:sles_rpmkeys_nightly_pl_imported] = true
+        end
+        result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
