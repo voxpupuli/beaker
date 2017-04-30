@@ -597,29 +597,17 @@ module Beaker
               raise "Puppet MSI at #{link} does not exist!"
             end
 
-            # DLU: msi_download_path = "#{host.system_temp_path}\\#{host['dist']}.msi"
-
             if host.is_cygwin?
-              # DLU: NOTE: it is critical that -o be before -O on Windows
-              # DLU: on host, "curl -o \"#{msi_download_path}\" -O #{link}"
-
-
-
               #Because the msi installer doesn't add Puppet to the environment path
               #Add both potential paths for simplicity
               #NOTE - this is unnecessary if the host has been correctly identified as 'foss' during set up
               puppetbin_path = "\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\""
               on host, %Q{ echo 'export PATH=$PATH:#{puppetbin_path}' > /etc/bash.bashrc }
-
-
-              # DLU: else
-              # DLU: on host, powershell("$webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('#{link}','#{msi_download_path}')")
             end
 
             opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
 
             # DLU: require 'pry' ; binding.pry
-            # DLU: install_msi_on(host, msi_download_path, {}, opts)
             install_msi_on(host, link, {}, opts)
 
             configure_type_defaults_on( host )
@@ -1167,12 +1155,10 @@ module Beaker
               end
               on host, "rpm -ivh #{aix_72_ignoreos_hack} #{onhost_copied_file}"
             when /^windows$/
-              # DLU: hook for 'installs on different hosts with options specifying :copy_dir_external' spec test...
               result = on host, "echo #{link}"
               link = result.raw_output.chomp
               msi_opts = { :debug => host[:pe_debug] || opts[:pe_debug] }
 
-              # DLU: install_msi_on(host, onhost_copied_file, {}, msi_opts)
               install_msi_on(host, link, {}, msi_opts)
             when /^osx$/
               host.install_package("puppet-agent-#{opts[:puppet_agent_version]}*")
@@ -1230,16 +1216,9 @@ module Beaker
               )
             release_path << release_path_end
 
-            # DLU:
             # require 'pry' ; binding.pry
 
             if variant == 'windows'
-              # DLU : result = on host, "echo #{onhost_copied_file}"
-              # DLU : onhost_copied_file = result.raw_output.chomp
-
-
-              # DLU: otherwise, transform release_file -> download_file 
-              # DLU: if want to keep naming consistent.  
               release_path.chomp!('/')
               link = "#{release_path}/#{download_file}"
 
@@ -1248,15 +1227,10 @@ module Beaker
               # {Beaker::DSL::InstallUtils::WindowsUtils} methods,
               # which I didn't want to attack right now. TODO
 
-              # DLU : install_msi_on(host, onhost_copied_file, {}, opts)
-
-              # DLU:
-              # puts "DLU GOT HERE TO PE PROMOTED REPO INSTALL" + link
               install_msi_on(host, link, {}, opts)
 
             else
 
-              # DLU: sunk fetch_http_file -> scp_to routine
               onhost_copied_download = File.join(onhost_copy_base, download_file)
               onhost_copied_file = File.join(onhost_copy_base, release_file)
 

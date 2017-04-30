@@ -305,8 +305,6 @@ describe ClassMixedWithDSLInstallUtils do
 
     it 'installs puppet on cygwin windows' do
       allow(subject).to receive(:link_exists?).and_return( true )
-      # DLU: expect(subject).to receive(:on).with(winhost, "curl -o \"#{win_temp}\\puppet-3.7.1.msi\" -O http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi")
-      # DLU: expect(subject).to receive(:on).with(winhost, " echo 'export PATH=$PATH:\"/cygdrive/c/Program Files (x86)/Puppet Labs/Puppet/bin\":\"/cygdrive/c/Program Files/Puppet Labs/Puppet/bin\"' > /etc/bash.bashrc ")
       expect(subject).to receive(:install_msi_on).with(winhost, "http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi", {}, {:debug => nil})
 
       subject.install_puppet_from_msi( winhost, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}  )
@@ -316,12 +314,6 @@ describe ClassMixedWithDSLInstallUtils do
       allow(subject).to receive(:link_exists?).and_return( true )
 
       expect(winhost_non_cygwin).to receive(:mkdir_p).with('C:\\ProgramData\\PuppetLabs\\puppet\\etc\\modules')
-
-      # DLU: expect(subject).to receive(:on).with(winhost_non_cygwin, instance_of( Beaker::Command )) do |host, beaker_command|
-      # DLU:  expect(beaker_command.command).to eq('powershell.exe')
-      # DLU:  expect(beaker_command.args).to eq(["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command $webclient = New-Object System.Net.WebClient;  $webclient.DownloadFile('http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi','#{win_temp}\\puppet-3.7.1.msi')"])
-      # DLU: end.once
-
       expect(subject).to receive(:install_msi_on).with(winhost_non_cygwin, "http://downloads.puppetlabs.com/windows/puppet-3.7.1.msi", {}, {:debug => nil})
 
       subject.install_puppet_from_msi( winhost_non_cygwin, {:version => '3.7.1', :win_download_url => 'http://downloads.puppetlabs.com/windows'}   )
@@ -1021,8 +1013,6 @@ describe ClassMixedWithDSLInstallUtils do
       platform = Object.new()
       allow(platform).to receive(:to_array) { ['windows', '5', 'x64']}
       host = winhost
-      # DLU: external_copy_base = 'tmp_install_windows_copy_base_1325'
-      # DLU: allow( host ).to receive( :external_copy_base ).and_return( external_copy_base )
       host['platform'] = platform
       opts = { :version => '0.1.0' }
       allow( subject ).to receive( :options ).and_return( {} )
@@ -1035,13 +1025,9 @@ describe ClassMixedWithDSLInstallUtils do
 
       release_path.chomp!('/')
       link = "#{release_path}/#{release_file}"
-      # DLU: copied_path = "#{win_temp}\\puppet-agent-0.1.0-x86.msi"
       mock_echo = Object.new()
       allow( mock_echo ).to receive( :raw_output ).and_return( link )
 
-      # DLU: expect(subject).to receive(:fetch_http_file).once.with(/\/windows$/, 'puppet-agent-0.1.0-x86.msi', /\/windows$/)
-      # DLU: expect(subject).to receive(:scp_to).once.with(host, /\/puppet-agent-0.1.0-x86.msi$/, /#{external_copy_base}/)
-      # DLU: expect(subject).to receive(:install_msi_on).with(host, copied_path, {}, {:debug => nil}).once
       expect(subject).to receive(:install_msi_on).with(host, link, {}, {:debug => nil}).once
       expect(subject).to receive(:on).ordered.with(host, /echo/).and_return(mock_echo)
 
@@ -1138,19 +1124,6 @@ describe ClassMixedWithDSLInstallUtils do
 
       subject.install_puppet_agent_dev_repo_on( host, opts )
     end
-
-    # DLU: This seems to replicate most of 'runs the correct install for windows platforms'
-    #
-    # DLU:it 'copies package to the cygwin root directory and installs it' do
-    # DLU: @platform = 'windows-7-x86_64'
-    # DLU: expect( subject ).to receive( :install_msi_on ).with( any_args )
-    # DLU: copy_base = 'copy_base_cygwin'
-    # DLU: allow( host ).to receive( :external_copy_base ).and_return( copy_base )
-    # DLU: expect( subject ).to receive( :scp_to ).with( host, /puppet-agent-1\.0\.0-x86\.msi/, /#{copy_base}/ )
-    # DLU: expect( subject ).to receive( :configure_type_defaults_on ).with(host)
-    # DLU: expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
-    # DLU: subject.install_puppet_agent_dev_repo_on( host, opts.merge({ :puppet_agent_version => '1.0.0' }) )
-    # DLU: end
 
     it 'installs on different hosts without erroring' do
       mhosts = hosts
@@ -1260,13 +1233,6 @@ describe ClassMixedWithDSLInstallUtils do
       expect( subject ).to receive( :fetch_http_file ).with( /[^\/]\z/, anything, anything )
       subject.install_puppet_agent_pe_promoted_repo_on( host, opts )
     end
-
-    # DLU: context 'on windows' do
-
-    # DLU:  it 'calls fetch_http_file with no ending slash' do
-    # DLU:    test_fetch_http_file_no_ending_slash( 'windows-7-x86_64' )
-    # DLU:  end
-    # DLU: end
 
     it 'calls fetch_http_file with no ending slash' do
       test_fetch_http_file_no_ending_slash( 'debian-5-x86_64' )
