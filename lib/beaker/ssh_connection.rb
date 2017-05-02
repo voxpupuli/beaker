@@ -111,15 +111,18 @@ module Beaker
     # @option options [Boolean] :pty Should we request a terminal when attempting
     #                                to send a command over this connection?
     # @option options [String] :stdin Any input to be sent along with the command
+    # @param options [Integer] :poll_interval A set interval of time to poll for connectivity, defaults to nil
+    # @param options [Integer] :max_tries The maximum number of times to retry connection, defaults to 11
     # @param [IO] stdout_callback An IO stream to send connection stdout to, defaults to nil
     # @param [IO] stderr_callback An IO stream to send connection stderr to, defaults to nil
     # @return [Boolean] true if connection failed, false otherwise
     def wait_for_connection_failure options = {}, stdout_callback = nil, stderr_callback = stdout_callback
       try = 1
       last_wait = 2
-      wait = 3
+      wait = options[:poll_interval] ? options[:poll_interval] : 3
+      max_tries = options[:max_tries] ? options[:max_tries] : 10
       command = 'echo echo' #can be run on all platforms (I'm looking at you, windows)
-      while try < 11
+      while try <= max_tries
         result = Result.new(@hostname, command)
         begin
           @logger.notify "Waiting for connection failure on #{@hostname} (attempt #{try}, try again in #{wait} second(s))"
@@ -147,12 +150,16 @@ module Beaker
         slept = 0
         stdout_callback.call("sleep #{wait} second(s): ")
         while slept < wait
-          sleep slept
+          sleep 1
           stdout_callback.call('.')
           slept += 1
         end
         stdout_callback.call("\n")
-        (last_wait, wait) = wait, last_wait + wait
+        if options[:poll_interval]
+          wait = options[:poll_interval]
+        else
+          (last_wait, wait) = wait, last_wait + wait
+        end
         try += 1
       end
       false
