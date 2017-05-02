@@ -5,6 +5,7 @@ module Beaker
     # Env variables supported:
     # DOCKER_REGISTRY: Docker registry URL
     # DOCKER_HOST: Remote docker host
+	# DOCKER_BUILDARGS: Docker buildargs map
     # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
     #                            or a role (String or Symbol) that identifies one or more hosts.
     # @param [Hash{Symbol=>String}] options Options to pass on to the hypervisor
@@ -50,7 +51,9 @@ module Beaker
         @logger.notify "provisioning #{host.name}"
 
         @logger.debug("Creating image")
-        image = ::Docker::Image.build(dockerfile_for(host), { :rm => true })
+        image = ::Docker::Image.build(dockerfile_for(host), {
+           :rm => true, :buildargs => buildargs_for(host)
+        })
 
         if @docker_type == 'swarm'
           image_name = "#{@registry}/beaker/#{image.id}"
@@ -176,6 +179,28 @@ module Beaker
 
     def root_password
       'root'
+    end
+
+    def buildargs_for(host)
+      docker_buildargs = {}
+      docker_buildargs_env = ENV['DOCKER_BUILDARGS']
+      if docker_buildargs_env != nil
+        docker_buildargs_env.split(/ +|\t+/).each do |arg|
+          key,value=arg.split(/=/)
+          if key
+            docker_buildargs[key]=value
+          else
+            @logger.warn("DOCKER_BUILDARGS environment variable appears invalid, no key found for value #{value}" )
+          end
+        end
+      end
+      if docker_buildargs.empty?
+        buildargs = host['docker_buildargs'] || {}
+      else
+        buildargs = docker_buildargs
+      end
+      @logger.debug("Docker build buildargs: #{buildargs}")
+      JSON.generate(buildargs)
     end
 
     def dockerfile_for(host)

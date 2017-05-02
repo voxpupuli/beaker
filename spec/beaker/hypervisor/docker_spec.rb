@@ -162,7 +162,15 @@ module Beaker
 
       it 'should pass the Dockerfile on to Docker::Image.create' do
         allow( docker ).to receive(:dockerfile_for).and_return('special testing value')
-        expect( ::Docker::Image ).to receive(:build).with('special testing value', { :rm => true })
+        expect( ::Docker::Image ).to receive(:build).with('special testing value', { :rm => true, :buildargs => '{}' })
+
+        docker.provision
+      end
+
+      it 'should pass the buildargs from ENV DOCKER_BUILDARGS on to Docker::Image.create' do
+        allow( docker ).to receive(:dockerfile_for).and_return('special testing value')
+        ENV['DOCKER_BUILDARGS'] = 'HTTP_PROXY=http://1.1.1.1:3128'
+        expect( ::Docker::Image ).to receive(:build).with('special testing value', { :rm => true, :buildargs => "{\"HTTP_PROXY\":\"http://1.1.1.1:3128\"}" })
 
         docker.provision
       end
