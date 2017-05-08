@@ -1,3 +1,11 @@
+This doc describes beaker's vSphere hypervisor. This is the interaction layer
+that beaker will use to get Systems Under Test (SUTs) from any vSphere
+infrastructure that you might have.
+
+**Note** that if you're a puppet-internal user, or an external user that is
+using the vmpooler hypervisor, please refer to our [vmpooler doc](vmpooler.md)
+for info, as it can be different than the information here. 
+
 The harness can use vms and snapshots that live within vSphere as well.
 To do this create a `~/.fog` file with your vSphere credentials:
 
