@@ -5,6 +5,10 @@ systems.
 beaker's vmpooler hypervisor interacts with vmpooler to get Systems Under Test
 (SUTs) for testing purposes.
 
+**Note** that if you're a puppet-internal user, you'll have to setup your SSH
+keys to communicate with vmpooler SUTs. To do that, refer to our
+[internal doc](https://confluence.puppetlabs.com/display/SRE/SSH+access+to+vmpooler+VMs).
+
 # Tokens
 
 Using tokens will allow you to extend your VMs lifetime, as well as interact
