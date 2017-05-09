@@ -34,6 +34,19 @@ test_name "dsl::helpers::host_helpers #scp_to" do
     end
   end
 
+  step "#scp_to creates a dotfile on the remote system" do
+    Dir.mktmpdir do |local_dir|
+      local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, ".testfile.txt")
+      remote_tmpdir = tmpdir_on default
+
+      scp_to default, local_filename, remote_tmpdir
+
+      remote_filename = File.join(remote_tmpdir, ".testfile.txt")
+      remote_contents = on(default, "cat #{remote_filename}").stdout
+      assert_equal contents, remote_contents
+    end
+  end
+
   step "#scp_to creates the file on all remote systems when a host array is provided" do
     Dir.mktmpdir do |local_dir|
       local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
