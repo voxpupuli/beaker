@@ -195,15 +195,9 @@ module Beaker
           ENV container docker
         EOF
 
-        # additional options to specify to the sshd
-        # may vary by platform
-        sshd_options = ''
-
         # add platform-specific actions
-        service_name = "sshd"
         case host['platform']
         when /ubuntu/, /debian/
-          service_name = "ssh"
           dockerfile += <<-EOF
             RUN apt-get update
             RUN apt-get install -y openssh-server openssh-client #{Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES.join(' ')}
@@ -264,7 +258,7 @@ module Beaker
 
         # How to start a sshd on port 22.  May be an init for more supervision
         # Ensure that the ssh server can be restarted (done from set_env) and container keeps running
-        cmd = host['docker_cmd'] || ["sh","-c","service #{service_name} start ; tail -f /dev/null"]
+        cmd = host['docker_cmd'] || ["sh","-c","/usr/sbin/sshd; tail -f /dev/null"]
         dockerfile += <<-EOF
           EXPOSE 22
           CMD #{cmd}
@@ -286,7 +280,7 @@ module Beaker
       container.exec(['sed','-ri',
                       's/^#?PasswordAuthentication .*/PasswordAuthentication yes/',
                       '/etc/ssh/sshd_config'])
-      container.exec(%w(service ssh restart))
+      container.exec(%w(/bin/kill -HUP `cat /var/run/sshd.pid`))
     end
 
 

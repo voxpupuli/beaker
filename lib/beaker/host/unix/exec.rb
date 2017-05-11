@@ -164,12 +164,8 @@ module Unix::Exec
   # @return [Result] result of restarting the SSH service
   def ssh_service_restart
     case self['platform']
-    when /debian|ubuntu|cumulus|huaweios/
-      exec(Beaker::Command.new("service ssh restart"))
-    when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7|fedora-(1[4-9]|2[0-9])|archlinux-/
-      exec(Beaker::Command.new("systemctl restart sshd.service"))
-    when /el-|centos|fedora|redhat|oracle|scientific|eos/
-      exec(Beaker::Command.new("/sbin/service sshd restart"))
+    when /debian|ubuntu|cumulus|huaweios|el-|centos-|redhat-|oracle-|scientific-|eos|fedora-|archlinux-/
+        exec(Beaker::Command.new("/bin/kill -HUP `cat /var/run/sshd.pid`"))
     when /sles/
       exec(Beaker::Command.new("rcsshd restart"))
     when /solaris/

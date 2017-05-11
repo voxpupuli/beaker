@@ -438,13 +438,10 @@ module Beaker
         else
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         end
+
         #restart sshd
-        if host['platform'] =~ /debian|ubuntu|cumulus/
-          host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /arch|centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
-          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
-        elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
-          host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
+        if host['platform'] =~ /debian|ubuntu|cumulus|arch|centos|el-|redhat|fedora|eos/
+          host.exec(Command.new("/bin/kill -HUP `cat /var/run/sshd.pid`"), {:pty => true})
         elsif host['platform'] =~ /(free|open)bsd/
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         elsif host['platform'] =~ /solaris/
