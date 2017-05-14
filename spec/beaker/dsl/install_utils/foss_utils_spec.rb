@@ -60,13 +60,23 @@ describe ClassMixedWithDSLInstallUtils do
   let(:el6hostaio)    { make_host( 'el6hostaio', { :platform => Beaker::Platform.new('el-6-i386'),
                                                  :pe_ver => '3.0',
                                                  :working_dir => '/tmp',
-                                                :type => 'aio',
+                                                 :type => 'aio',
                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-centos-6-i386' } ) }
   let(:el6hostfoss)   { make_host( 'el6hostfoss', { :platform => Beaker::Platform.new('el-6-i386'),
                                                  :pe_ver => '3.0',
                                                  :working_dir => '/tmp',
-                                                :type => 'foss',
+                                                 :type => 'foss',
                                                  :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-centos-6-i386' } ) }
+  let(:sles12hostaio)    { make_host( 'sles12hostaio', { :platform => Beaker::Platform.new('sles-12-x86_64'),
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp',
+                                                 :type => 'aio',
+                                                 :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-sles-12-x86_64' } ) }
+  let(:sles12hostfoss)    { make_host( 'sles12hostfoss', { :platform => Beaker::Platform.new('sles-12-x86_64'),
+                                                 :pe_ver => '3.0',
+                                                 :working_dir => '/tmp',
+                                                 :type => 'foss',
+                                                 :dist => 'puppet-enterprise-3.1.0-rc0-230-g36c9e5c-sles-12-x86_64' } ) }
 
   let(:win_temp)      { 'C:\\Windows\\Temp' }
 
@@ -268,17 +278,43 @@ describe ClassMixedWithDSLInstallUtils do
     end
   end
 
-  context 'install_puppet_from_rpm_on' do
-    it 'installs PC1 release repo when AIO' do
-      expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostaio,'pc1',{})
-
-      subject.install_puppet_from_rpm_on( el6hostaio, {}  )
+  context 'install_puppet_agent_on' do
+    before :each do
+      allow( subject ).to receive( :options ) { opts }
     end
 
-    it 'installs non-PC1 package when not-AIO' do
-      expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostfoss,nil,{})
+    context 'when AIO' do
+      it 'installs PC1 release repo' do
+        expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostaio, 'pc1')
 
-      subject.install_puppet_from_rpm_on( el6hostfoss, {}  )
+        subject.install_puppet_agent_on( el6hostaio, {}  )
+      end
+
+      context 'when running SLES' do
+        it 'removes existing rubygem-puppet packages' do
+          expect(sles12hostaio).to receive(:uninstall_package).with('rubygem-puppet')
+
+          subject.install_puppet_agent_on( sles12hostaio, {}  )
+        end
+      end
+    end
+  end
+
+  context 'install_puppet_from_rpm_on' do
+    context 'when AIO' do
+      it 'installs PC1 release repo' do
+        expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostaio,'pc1',{})
+
+        subject.install_puppet_from_rpm_on( el6hostaio, {}  )
+      end
+    end
+
+    context 'when FOSS' do
+      it 'installs non-PC1 package when not-AIO' do
+        expect(subject).to receive(:install_puppetlabs_release_repo).with(el6hostfoss,nil,{})
+
+        subject.install_puppet_from_rpm_on( el6hostfoss, {}  )
+      end
     end
   end
 
@@ -1275,6 +1311,7 @@ describe ClassMixedWithDSLInstallUtils do
                               'scientific-7-x86_64',
                               'sles-10-x86_64',
                               'sles-11-x86_64',
+                              'sles-12-x86_64',
                               'sles-12-s390x'
                             ]
 

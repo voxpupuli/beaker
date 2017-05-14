@@ -367,6 +367,12 @@ module Beaker
             end
 
             if package_name
+              # Some SLES images already have rubygem-puppet installed and this
+              # conflicts with the regular puppet-agent installer
+              if host['platform'] =~ /sles/
+                host.uninstall_package('rubygem-puppet')
+              end
+
               install_puppetlabs_release_repo( host, opts[:puppet_collection] )
               host.install_package( package_name )
             end

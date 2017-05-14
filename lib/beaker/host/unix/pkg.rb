@@ -32,7 +32,7 @@ module Unix::Pkg
           # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
           # time. It's just to make sure that we only do the key import once, &
           # isn't for setting or use outside of beaker.
-          execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
+          execute('rpmkeys --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppet', opts)
           self[:sles_rpmkeys_nightly_pl_imported] = true
         end
         result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
