@@ -1,23 +1,24 @@
 # Using Subcommands
 
-The document gives an overview of the subcommands that beaker supports and
-describes a basic of how to use them.
+The document gives an overview of the subcommands that Beaker supports and
+describes how to use them.
 
 ## Why Subcommands?
 
 Subcommands are designed to make test development and iteration simpler by
-separating out all of the phases of a beaker test run*. Instead of requiring the
-entirety of your beaker execution in one command, subcommands allow you to
-execute each phase independently. This allows for faster feedback for potential
-failures and better control for iterating over actual test development.
+separating out all of the phases of a Beaker [test run](test_run.md)*. Instead
+of requiring the entirety of your Beaker execution in one command, subcommands
+allow you to execute each phase independently. This allows for faster feedback
+for potential failures and better control for iterating over actual test
+development.
 
-Most subcommands pass through flags to the beaker options. For instance, you can
+Most subcommands pass through flags to the Beaker options. For instance, you can
 pass through `--hosts` to the `init` subcommand and it will parse the `--hosts`
-argument as if you were executing a beaker run*. Please review the
+argument as if you were executing a Beaker run*. Please review the
 subcommand specific help for further information. You can see the help for a
 specific subcommand by running `beaker help SUBCOMMAND`.
 
-*Please note that in this document, a beaker `run` is standard beaker invocation
+*Please note that in this document, a Beaker `run` is standard beaker invocation
 without any subcommands.
 ## Available Subcommands
 
@@ -31,9 +32,9 @@ Provisions hosts defined in your `subcommand_options file`. You can pass the
 `--hosts` flag here to override any hosts provided there.
 
 ### beaker exec
-Run a single file, directory, or beaker suite. If supplied a file or directory,
+Run a single file, directory, or Beaker suite. If supplied a file or directory,
 that resource will be run in the context of the `tests` suite; if supplied a
-beaker suite, then just that suite will run. If no resource is supplied, then
+Beaker suite, then just that suite will run. If no resource is supplied, then
 this command executes the suites as they are defined in the configuration in the
 `subcommand_options.yaml`.
 
@@ -49,6 +50,6 @@ beaker provision
 # or directory. Do not pass GO. Do not collect $200.
 beaker exec ./tests/my_test.rb
 # Repeating the above command as needed
-# When you're done testing using the VM that beaker provisioned
+# When you're done testing using the VM that Beaker provisioned
 beaker destroy
 ```
