@@ -246,9 +246,12 @@ module Beaker
         EOF
 
         # Configure sshd service to allowroot login using password
+        # Also, disable reverse DNS lookups to prevent every. single. ssh
+        # operation taking 30 seconds while the lookup times out.
         dockerfile += <<-EOF
           RUN sed -ri 's/^#?PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
           RUN sed -ri 's/^#?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+          RUN sed -ri 's/^#?UseDNS .*/UseDNS no/' /etc/ssh/sshd_config
         EOF
 
 
@@ -285,6 +288,9 @@ module Beaker
                       '/etc/ssh/sshd_config'])
       container.exec(['sed','-ri',
                       's/^#?PasswordAuthentication .*/PasswordAuthentication yes/',
+                      '/etc/ssh/sshd_config'])
+      container.exec(['sed','-ri',
+                      's/^#?UseDNS .*/UseDNS no/',
                       '/etc/ssh/sshd_config'])
       container.exec(%w(service ssh restart))
     end

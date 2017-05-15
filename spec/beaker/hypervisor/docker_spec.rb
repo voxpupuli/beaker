@@ -309,7 +309,7 @@ module Beaker
             host['docker_container_name'] = container_name
 
             expect( ::Docker::Container ).to receive(:all).and_return([container])
-            expect(container).to receive(:exec).exactly(3).times
+            expect(container).to receive(:exec).exactly(4).times
           end
           docker.provision
         end
