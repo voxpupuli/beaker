@@ -2,6 +2,8 @@ test_name 'use the destroy subcommand' do
 
   def delete_root_folder_contents
     on default, 'rm -rf /root/* /root/.beaker'
+    on default, 'mkdir -p /root/.ssh/'
+    scp_to default, "#{ENV['HOME']}/.ssh/id_rsa-acceptance", "/root/.ssh/id_rsa"
   end
 
   step 'ensure that `beaker destroy` fails correctly when a configuration has not been initialized' do
@@ -34,11 +36,13 @@ test_name 'use the destroy subcommand' do
        assert_equal(1, result.exit_code, "`beaker destroy` should return a non zero exit code")
      end
      step 'ensure provision provisions, validates, and configures new hosts' do
+       scp_to default, "#{ENV['HOME']}/.ssh/id_rsa-acceptance", "/root/.ssh/id_rsa"
        result = on(default, "beaker provision")
        assert_match(/Using available host/, result.stdout)
        assert_equal(0, result.exit_code, "`beaker provision` should return a zero exit code")
      end
      step 'ensure destroy will destroy a provisioned environment' do
+       scp_to default, "#{ENV['HOME']}/.ssh/id_rsa-acceptance", "/root/.ssh/id_rsa"
        result = on(default, 'beaker destroy')
        assert_match(/Handing/, result.stdout)
        assert_equal(0, result.exit_code, "`beaker destroy` should return a zero exit code")

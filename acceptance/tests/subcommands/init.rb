@@ -1,8 +1,11 @@
 test_name 'use the init subcommand' do
 
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
+
   def delete_root_folder_contents
     on default, 'rm -rf /root/* /root/.beaker'
+    on default, 'mkdir -p /root/.ssh/'
+    scp_to default, "#{ENV['HOME']}/.ssh/id_rsa-acceptance", "/root/.ssh/id_rsa"
   end
 
   step 'ensure beaker init writes YAML configuration files to disk' do
