@@ -1,6 +1,6 @@
 require 'beaker-hostgenerator'
 
-CONFIG_DIR = '.beaker/acceptance/config'
+CONFIG_DIR = 'acceptance/config'
 
 VAGRANT  = ['ubuntu1404-64default.mdcal-ubuntu1404-64af', '--hypervisor=vagrant',
             '--global-config={box_url=https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm,box=puppetlabs/ubuntu-14.04-64-nocm}']
