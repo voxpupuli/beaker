@@ -1,74 +1,82 @@
 ## The Task
 
-Consider if mcollectived incorrectly spawned a new process with every puppet agent run on Ubuntu 10.04.  We need an acceptance test to check that a new process is not spawned and to ensure that this issue does not regress in new builds.
+We will write a test to check if a package (specifically HTTPD) is installed and running. To do this we will write two files:
+1. `install.rb` - This file will install the package and start the service
+2. `mytest.rb` - This file will have our core tests that checks if the package is installed and running
 
-## Figure Out Test Steps
+Note: We will exclude Windows OS from our testing due to variation of package name.
+
+## Figure out steps
 
 What needs to happen in this test:
 
-* Install PE
-* Restart mcollective twice
-* Check to see if more than one mcollective process is running
+* Install and run HTTPD
+  * Install HTTPD if its not available on our SUT
+  * Start HTTPD service
+* Testing
+  * Test HTTPD is installed
+  * Test HTTPD service is running
 
 ## Create a host configuration file
-    $ beaker-hostgenerator redhat7-64ma > redhat7-64ma.yaml
+    $ beaker-hostgenerator redhat7-64 > redhat7-64.yaml
 
-## Install PE
+This command will generate a host file for our system under test (SUT). It will use vmpooler as hypervisor for the host. Please check out [this](https://github.com/puppetlabs/beaker/tree/master/docs/how_to/hypervisors) doc to learn more about hypervisors for beaker.
 
-We prefer to install PE once and then run a set of tests, so PE installation should not be part of the actual acceptance test.
+## Install and run HTTPD
 
-    $ mkdir setup
-    $ cd setup
-    $ cat > install.rb << RUBY
-    test_name "Installing Puppet Enterprise" do
-    install_pe
-    RUBY
-    $ cd ..
+Make a file named `install.rb` and put the following code into it:
 
-This places our install steps in a ruby script (install.rb) which will run on localhost, but the #install_pe method knows where to install puppet enterprise based on the host configuration in use.
-The install.rb script is used in our commandline to beaker, below.
+```ruby
+test_name "Installing and runnning HTTPD" do
+
+  # Don't run the install script on the following platform
+  confine :except, :platform => 'windows'
+
+  step "Install HTTPD" do
+    hosts.each do |host|
+      # Install HTTPD if it is not available on our SUT
+      install_package(host, 'httpd') unless check_for_package(host, 'httpd')
+    end
+  end
+
+  step "Start HTTPD" do
+    hosts.each do |host|
+      # Start HTTPD service
+      on(host, "service httpd start")
+    end
+  end
+
+end
+```
+
+This places our install steps in a ruby script (`install.rb`) which will run on your SUT. The install.rb script is used in our commandline to beaker, below.
 
 ## Create a test file
 
-We need to create a test file to run.
-
-### Define some test commands to run
-#### Restart mcollective twice
-
-Here's our magic command that restarts mcollective:
-
-    restart_command = "bash -c '[[ -x /etc/init.d/pe-mcollective ]] && /etc/init.d/pe-mcollective restart'"
-
-#### Check to see if more than one mcollective process is running
-
-Here's our magic command that throws an error if more than one mcollective process is running:
-
-    process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
-
-### Put it all together
-
-Here's the finished acceptance test.
+Lets create test file that tests if HTTPD is installed and running on our hosts. Make a file called `mytest.rb` and add the following code to it:
 
 ```ruby
-test_name "/etc/init.d/pe-mcollective restart check"
+test_name "Check if HTTPD is installed and running" do
 
-# Don't run these tests on the following platforms
-confine :except, :platform => 'solaris'
-confine :except, :platform => 'windows'
-confine :except, :platform => 'aix'
+  # Don't run these tests on the following platform
+  confine :except, :platform => 'windows'
 
-step "Make sure the service restarts properly"
-hosts.each do |host|
-  # Commands to execute on the target system.
-  restart_command = "bash -c '[[ -x /etc/init.d/pe-mcollective ]] && /etc/init.d/pe-mcollective restart'"
-  process_count_check = "bash -c '[[ $(ps auxww | grep [m]collectived | wc -l) -eq 1 ]]'"
+  step "Make sure HTTPD is installed" do
+    hosts.each do |host|
+      # Check if HTTPD is installed
+      assert check_for_package(host, 'httpd')
+    end
+  end
 
-  # Restart once
-  on(host, restart_command) { assert_equal(0, exit_code) }
-  # Restart again
-  on(host, restart_command) { assert_equal(0, exit_code) }
-  # Check to make sure only one process is running
-  on(host, process_count_check) { assert_equal(0, exit_code) }
+  step "Make sure HTTPD is running" do
+    hosts.each do |host|
+      on(host, "systemctl is-active httpd") do |result|
+        # Check if HTTPD is running
+        assert_equal(0, result.exit_code)
+      end
+    end
+  end
+
 end
 ```
 
