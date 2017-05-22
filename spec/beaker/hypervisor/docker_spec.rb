@@ -186,6 +186,25 @@ module Beaker
         docker.provision
       end
 
+      it 'should pass the multiple buildargs from ENV DOCKER_BUILDARGS on to Docker::Image.create' do
+        allow( docker ).to receive(:dockerfile_for).and_return('special testing value')
+        ENV['DOCKER_BUILDARGS'] = 'HTTP_PROXY=http://1.1.1.1:3128	HTTPS_PROXY=https://1.1.1.1:3129'
+        expect( ::Docker::Image ).to receive(:build).with('special testing value', { :rm => true, :buildargs => "{\"HTTP_PROXY\":\"http://1.1.1.1:3128\",\"HTTPS_PROXY\":\"https://1.1.1.1:3129\"}" })
+
+        docker.provision
+      end
+
+      it 'should create a container based on the Image (identified by image.id)' do
+        hosts.each do |host|
+          expect( ::Docker::Container ).to receive(:create).with({
+            'Image' => image.id,
+            'Hostname' => host.name,
+          })
+        end
+
+        docker.provision
+      end
+
       it 'should create a named container based on the Image (identified by image.id)' do
         hosts.each_with_index do |host, index|
           container_name = "spec-container-#{index}"
