@@ -5,7 +5,7 @@ module Beaker
     # Env variables supported:
     # DOCKER_REGISTRY: Docker registry URL
     # DOCKER_HOST: Remote docker host
-	# DOCKER_BUILDARGS: Docker buildargs map
+    # DOCKER_BUILDARGS: Docker buildargs map
     # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
     #                            or a role (String or Symbol) that identifies one or more hosts.
     # @param [Hash{Symbol=>String}] options Options to pass on to the hypervisor
