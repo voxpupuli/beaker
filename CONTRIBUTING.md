@@ -83,7 +83,7 @@ To prepare for a new gem release of Beaker (after the version has been bumped) t
 
 # Additional Resources
 
-* [More information on contributing](http://links.puppetlabs.com/contribute-to-puppet)
+* [Puppet community guidelines](https://docs.puppet.com/community/community_guidelines.html)
 * [Bug tracker (Jira)](http://tickets.puppetlabs.com)
 * [BKR Jira Project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * [Contributor License Agreement](http://links.puppetlabs.com/cla)
