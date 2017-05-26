@@ -233,7 +233,7 @@ module Beaker
           allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
-          expect(options[:logger]).to_not receive(:notify).with(/Test line:/)
+          expect(test_suite_result.print_test_result(tc)).not_to match(/Test line:/)
           expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
         end
 
@@ -243,8 +243,7 @@ module Beaker
           allow(ex).to receive(:backtrace).and_return(['path_to_test_file.rb line 1 - blah'])
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
-
-          expect(options[:logger]).to receive(:notify).with(/Test line:/)
+          expect(test_suite_result.print_test_result(tc)).to match(/Test line:/)
           expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
         end
       end
