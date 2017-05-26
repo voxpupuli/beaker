@@ -116,22 +116,22 @@ module Beaker
 
         summary_logger.notify "Failed Tests Cases:"
         (grouped_summary[:fail] || []).each do |test_case|
-          print_test_result(test_case)
+          summary_logger.notify print_test_result(test_case)
         end
 
         summary_logger.notify "Errored Tests Cases:"
         (grouped_summary[:error] || []).each do |test_case|
-          print_test_result(test_case)
+          summary_logger.notify print_test_result(test_case)
         end
 
         summary_logger.notify "Skipped Tests Cases:"
         (grouped_summary[:skip] || []).each do |test_case|
-          print_test_result(test_case)
+          summary_logger.notify print_test_result(test_case)
         end
 
         summary_logger.notify "Pending Tests Cases:"
         (grouped_summary[:pending] || []).each do |test_case|
-          print_test_result(test_case)
+          summary_logger.notify print_test_result(test_case)
         end
 
         summary_logger.notify("\n\n")
@@ -152,7 +152,7 @@ module Beaker
         else
           test_case.test_status
         end
-        @logger.notify "  Test Case #{test_case.path} #{test_reported}"
+        "  Test Case #{test_case.path} #{test_reported}"
       end
 
       # Writes Junit XML of this {TestSuiteResult}
