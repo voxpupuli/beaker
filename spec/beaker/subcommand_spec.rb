@@ -84,6 +84,10 @@ module Beaker
         expect(yaml_store_mock).to receive(:[]=).with('provisioned', true)
         subcommand.provision
       end
+      it 'does not allow hosts to be passed' do
+        subcommand.options = {:hosts => "myhost"}
+        expect{subcommand.provision()}.to raise_error(NotImplementedError)
+      end
     end
 
 

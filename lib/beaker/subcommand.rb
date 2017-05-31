@@ -20,7 +20,6 @@ module Beaker
     # a Beaker::CLI object executes, it can pick up these options. Notably excluded from this
     # group are `help` and `version`. Please note that whenever the command_line_parser.rb is
     # updated, this list should also be updated as well.
-    class_option :hosts, :aliases => '-h', :type => :string, :group => 'Beaker run'
     class_option :'options-file', :aliases => '-o', :type => :string, :group => 'Beaker run'
     class_option :helper, :type => :string, :group => 'Beaker run'
     class_option :'load-path', :type => :string, :group => 'Beaker run'
@@ -62,6 +61,7 @@ module Beaker
       as necessary.
     LONGDESC
     option :help, :type => :boolean, :hide => true
+    method_option :hosts, :aliases => '-h', :type => :string
     def init()
       if options[:help]
         invoke :help, [], ["init"]

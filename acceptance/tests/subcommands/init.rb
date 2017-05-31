@@ -7,7 +7,8 @@ test_name 'use the init subcommand' do
 
   step 'ensure beaker init writes YAML configuration files to disk' do
     delete_root_folder_contents
-    on(default, 'beaker init')
+    result = on(default, 'beaker init --hosts centos6-64')
+    assert_match(/Trying as beaker-hostgenerator input/, result.stdout)
     subcommand_options = on(default, "cat #{SubcommandUtil::SUBCOMMAND_OPTIONS}").stdout
     subcommand_state = on(default, "cat #{SubcommandUtil::SUBCOMMAND_STATE}").stdout
     assert(YAML.parse(subcommand_options).to_ruby.class == Hash)
