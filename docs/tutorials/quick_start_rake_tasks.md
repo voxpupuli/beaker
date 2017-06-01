@@ -13,7 +13,7 @@ and running. See the docs on how to setup [Vmpooler](../how_to/hypervisors/vsphe
 
 ## How to use them
 
-To use the tasks, you need to put the following line at the top of your project's rake file:
+To use the tasks, you need to put the following line at the top of your project's rake file. If you don't have a project and are just going through the beaker tutorial, make a file named `Rakefile` inside a new directory and add the following line:
 
     require 'beaker/tasks/quick_start'
 
