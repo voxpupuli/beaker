@@ -18,7 +18,7 @@ module Beaker
       vsphere_helper = VsphereHelper.new( vsphere_credentials )
 
       vsphere_vms = {}
-      @hosts.each do |h|
+      @hosts.reject do |host| host[:provision] == false end.each do |h|
         name = h["vmname"] || h.name
         vsphere_vms[name] = h["snapshot"]
       end
