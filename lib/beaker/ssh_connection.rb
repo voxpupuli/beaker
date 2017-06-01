@@ -1,6 +1,53 @@
 require 'socket'
 require 'timeout'
 require 'net/scp'
+require 'net/ssh'
+
+module Net
+  module SSH
+    class Buffer
+      # @private
+      # monkey patch net-ssh gem to allow UTF-8 strings >= 128 bytes
+      # \@content is often built as a UTF-8 string, until the point at
+      # which it appends data that cannot be encoded as a UTF-8 sequence.
+      #
+      # One case occurs when the call to write_string is made to append a
+      # string that exceeds 127 bytes in length.  The SSH2 format says
+      # that strings must be length prefixed, and when the value [128]
+      # has pack("N*") called against it, the resultant 4 byte network
+      # order representation does not have a valid UTF-8 equivalent,
+      # resulting in an ASCII-8BIT / BINARY string.
+      #
+      # [127].pack('N*').encode('utf-8')
+      # => "\u0000\u0000\u0000\u007F"
+      #
+      # [128].pack('N*').encode('utf-8')
+      # Encoding::UndefinedConversionError: "\x80" from ASCII-8BIT to UTF-8
+      #
+      # Ruby has a subtle behavior where appending a BINARY string to
+      # an existing UTF-8 string is allowed and the resultant string
+      # changes encoding to BINARY.  However, once this has happened,
+      # the string can no longer have UTF-8 encoded strings appended as
+      # Ruby will raise an Encoding:CompatibilityError
+      #
+      # The simple solution is to call force_encoding on UTF-8 strings
+      # prior to appending them to @content, given it's always OK to
+      # append ASCII-8BIT / BINARY strings to existing strings, but
+      # appending UTF-8 to BINARY raises errors.
+      #
+      # force_encoding in this case, will simply translate a valid UTF-8
+      # string to its BINARY equivalent
+      #
+      # "\u16A0".force_encoding('BINARY')
+      # => "\xE1\x9A\xA0"
+      # Correct conversion per http://www.fileformat.info/info/unicode/char/16a0/index.htm
+      def write(*data)
+        data.each { |datum| @content << datum.frozen? ? datum.encode('BINARY') : datum.force_encoding('BINARY') }
+        self
+      end
+    end
+  end
+end
 
 module Beaker
   class SshConnection
