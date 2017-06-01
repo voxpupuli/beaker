@@ -6,7 +6,7 @@ require 'rsync'
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
 
-[ 'command', 'ssh_connection'].each do |lib|
+[ 'command', 'ssh_connection', 'winrm_connection'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -285,7 +285,17 @@ module Beaker
       if @name && (@connection.hostname != @name)
         @connection.hostname = @name
       end
-      @connection
+    end
+
+    def connection
+      if self[:platform] =~ /windows-/ and self[:communicator] == 'winrm'
+        @connection ||= WinrmConnection.connect( reachable_name,
+                                             self['winrm'], { :logger => @logger } )
+      else
+        @connection ||= SshConnection.connect( reachable_name,
+                                             self['user'],
+                                             self['ssh'], { :logger => @logger } )
+      end
     end
 
     def close

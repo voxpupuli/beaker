@@ -202,6 +202,11 @@ module Beaker
                                      :keys                  => ["#{ENV['HOME']}/.ssh/id_rsa"],
                                      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
                                      :keepalive             => true
+          },
+          :winrm                  => {
+                                     :auth    => 'kerberos',
+                                     :timeout => 300,
+                                     :port    => 5985
           }
         })
       end
