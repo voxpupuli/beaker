@@ -65,7 +65,7 @@ module Beaker
           },
         },
       })
-      allow( container ).to receive(:stop)
+      allow( container ).to receive(:kill)
       allow( container ).to receive(:delete)
       allow( container ).to receive(:exec)
       container
@@ -338,7 +338,7 @@ module Beaker
 
       it 'should stop the containers' do
         allow( docker ).to receive( :sleep ).and_return(true)
-        expect( container ).to receive(:stop)
+        expect( container ).to receive(:kill)
         docker.cleanup
       end
 

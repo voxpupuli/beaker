@@ -145,7 +145,7 @@ module Beaker
         if container = host['docker_container']
           @logger.debug("stop container #{container.id}")
           begin
-            container.stop
+            container.kill
             sleep 2 # avoid a race condition where the root FS can't unmount
           rescue Excon::Errors::ClientError => e
             @logger.warn("stop of container #{container.id} failed: #{e.response.body}")
