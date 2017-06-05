@@ -42,7 +42,7 @@ def some_method_call
     return "some_method_call"
 end
 
-def some_method_call
+def some_other_method_call
     return "some_other_method_call"
 end
 
