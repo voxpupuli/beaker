@@ -205,7 +205,8 @@ module Beaker
       #   3.  the 'CONFIG' section of the hosts file
       #   4.  options file values
       #   5.  subcommand options, if executing beaker subcommands
-      #   6.  default or preset values are given the lowest priority
+      #   6.  subcommand options from $HOME/.beaker/subcommand_options.yaml
+      #   7.  default or preset values are given the lowest priority
       #
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
@@ -216,7 +217,12 @@ module Beaker
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
         @attribution = @attribution.merge(tag_sources(cmd_line_options, "flag"))
 
-        # Subcommands are the first to get merged into presets
+        # Global subcommand options from $HOME/.beaker/subcommand_options.yaml are first to get merged into presets
+        homedir_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, home_dir=true)
+        @attribution = @attribution.merge(tag_sources(homedir_options, "homedir"))
+        @options.merge!(homedir_options)
+
+        # Subcommands are the second to get merged into presets
         subcommand_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args)
         @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
         @options.merge!(subcommand_options)
