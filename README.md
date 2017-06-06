@@ -32,7 +32,7 @@ works and how to use it but assume that you have a basic understanding of key co
 involved in addressing key problems and use-cases. They are more advanced than
 tutorials and assume some knowledge of how Beaker works.
 
-#Beaker Libraries
+# Beaker Libraries
 
 Beaker functionality has been extended through the use of libraries available as
 gems. See the [complete list](docs/concepts/beaker_libraries.md) for available
