@@ -32,6 +32,9 @@ module Unix::Pkg
           # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
           # time. It's just to make sure that we only do the key import once, &
           # isn't for setting or use outside of beaker.
+          execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
+
+          # We also need the real key in case users are pulling from the stable packages
           execute('rpmkeys --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppet', opts)
           self[:sles_rpmkeys_nightly_pl_imported] = true
         end
