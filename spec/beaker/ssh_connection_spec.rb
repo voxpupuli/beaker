@@ -284,5 +284,57 @@ module Beaker
 
     end
 
+    describe '#wait_for_connection_failure' do
+      before :each do
+
+      end
+
+      it 'waits at increasing intervals for connection failure' do
+        @mock_ssh = double('ssh').as_null_object
+        @mock_stdout_callback = Object.new
+        expect( @mock_ssh ).to receive( :open_channel ).exactly(10).times
+        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        connection.connect
+
+        expect( @mock_ssh ).to receive( :loop ).exactly(10).times
+        allow( @mock_stdout_callback ).to receive(:call)
+
+        expect( connection ).to receive(:sleep).with(1).exactly(605).times
+        # 605 = Sum of 10 times at increasing intervals: 3,5,8,13,21,34,55,89,144,233
+        connection.wait_for_connection_failure({}, @mock_stdout_callback)
+      end
+
+      it 'waits at a set interval if poll_interval is provided' do
+        @mock_ssh = double('ssh').as_null_object
+        @mock_stdout_callback = Object.new
+        expect( @mock_ssh ).to receive( :open_channel ).exactly(10).times
+        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        connection.connect
+
+        expect( @mock_ssh ).to receive( :loop ).exactly(10).times
+        allow( @mock_stdout_callback ).to receive(:call)
+
+        expect( connection ).to receive(:sleep).with(1).exactly(50).times
+        # 50 = 10 times poll_interval of 5
+        connection.wait_for_connection_failure({:poll_interval => 5}, @mock_stdout_callback, @mock_stdout_callback)
+      end
+
+      it 'polls a set number of times if max_tries is provided' do
+        @mock_ssh = double('ssh').as_null_object
+        @mock_stdout_callback = Object.new
+        expect( @mock_ssh ).to receive( :open_channel ).exactly(2).times
+        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        connection.connect
+
+        expect( @mock_ssh ).to receive( :loop ).exactly(2).times
+        allow( @mock_stdout_callback ).to receive(:call)
+
+        expect( connection ).to receive(:sleep).with(1).exactly(8).times
+        # 8 = Sum of 2 times at increasing intervals: 3,5
+        connection.wait_for_connection_failure({:max_tries => 2}, @mock_stdout_callback, @mock_stdout_callback)
+      end
+
+    end
+
   end
 end
