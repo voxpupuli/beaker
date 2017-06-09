@@ -61,7 +61,7 @@ module Beaker
       as necessary.
     LONGDESC
     option :help, :type => :boolean, :hide => true
-    method_option :hosts, :aliases => '-h', :type => :string
+    method_option :hosts, :aliases => '-h', :type => :string, :required => true
     def init()
       if options[:help]
         invoke :help, [], ["init"]

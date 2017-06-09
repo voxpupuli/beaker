@@ -5,6 +5,11 @@ test_name 'use the init subcommand' do
     on default, 'rm -rf /root/* /root/.beaker'
   end
 
+  step 'ensure beaker init requires hosts flag' do
+    result = on(default, 'beaker init')
+    assert_match(/No value(.+)--hosts/, result.raw_output)
+  end
+
   step 'ensure beaker init writes YAML configuration files to disk' do
     delete_root_folder_contents
     on(default, 'beaker init --hosts centos6-64')
@@ -18,7 +23,7 @@ test_name 'use the init subcommand' do
 
   step 'ensure beaker init saves beaker-run arguments to the subcommand_options.yaml' do
     delete_root_folder_contents
-    on(default, 'beaker init --log-level verbose')
+    on(default, 'beaker init --log-level verbose --hosts centos6-64')
     subcommand_options = on(default, "cat #{SubcommandUtil::SUBCOMMAND_OPTIONS}").stdout
     hash = YAML.parse(subcommand_options).to_ruby
     assert_equal('verbose', hash['log_level'])
