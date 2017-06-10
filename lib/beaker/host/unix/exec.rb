@@ -294,6 +294,8 @@ module Unix::Exec
       add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
     elsif self['platform'] =~ /solaris-10/
       add_env_var('PATH', '/opt/csw/bin')
+    elsif self['platform'] =~ /osx/
+      add_env_var('PATH', '/usr/local/bin')
     end
 
     #add the env var set to this test host
