@@ -296,6 +296,11 @@ module Unix::Exec
       add_env_var('PATH', '/opt/csw/bin')
     end
 
+    # some hosts may omit the LANG variable, which sets Ruby to US-ASCII
+    # UTF-8 is the accepted standard encoding for Puppet tools
+    add_env_var('LANG', 'en_US.UTF-8')
+    add_env_var('LC_ALL', 'en_US.UTF-8')
+
     #add the env var set to this test host
     env.each_pair do |var, value|
       add_env_var(var, value)
