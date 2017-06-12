@@ -218,12 +218,12 @@ module Beaker
         @attribution = @attribution.merge(tag_sources(cmd_line_options, "flag"))
 
         # Global subcommand options from $HOME/.beaker/subcommand_options.yaml are first to get merged into presets
-        homedir_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, home_dir=true)
+        homedir_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, ENV['HOME']+'/.beaker/subcommand_options.yaml')
         @attribution = @attribution.merge(tag_sources(homedir_options, "homedir"))
         @options.merge!(homedir_options)
 
         # Subcommands are the second to get merged into presets
-        subcommand_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args)
+        subcommand_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
         @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
         @options.merge!(subcommand_options)
 
