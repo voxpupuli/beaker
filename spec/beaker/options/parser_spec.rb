@@ -140,28 +140,31 @@ module Beaker
           let(:env) { @env || {:level => 'highest'} }
           let(:argv) { @argv || {:level => 'second'} }
           let(:host_file) { @host_file || {:level => 'third'} }
-          let(:opt_file) { @opt_file || {:level => 'fourth', 
-                            :ssh => {
-                              :auth_methods => 'auth123',
-                              :user_known_hosts_file => 'hosts123'
-                            }                                
-          } }
-          let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
-          let(:homedir_file) {@homedir_file || {:level => 'sixth',
-                                :ssh => {
-                                    :auth_methods => 'auth_home_123'
-                                }
+          let(:opt_file) { @opt_file || {
+              :level => 'fourth',
+              :ssh => {
+                  :auth_methods => 'auth123',
+                  :user_known_hosts_file => 'hosts123'
+              }
           }}
-          let(:presets) { {:level => 'lowest',
-                            :ssh => {
-                              :config => 'config123',
-                              :paranoid => 'paranoid123',
-                              :port => 'port123',
-                              :forward_agent => 'forwardagent123',
-                              :keys => 'keys123',
-                              :keepalive => 'keepalive123'
-                            } 
-          } }
+          let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
+          let(:homedir_file) {@homedir_file || {
+              :level => 'sixth',
+              :ssh => {
+                  :auth_methods => 'auth_home_123'
+              }
+          }}
+          let(:presets) { {
+              :level => 'lowest',
+              :ssh => {
+                  :config => 'config123',
+                  :paranoid => 'paranoid123',
+                  :port => 'port123',
+                  :forward_agent => 'forwardagent123',
+                  :keys => 'keys123',
+                  :keepalive => 'keepalive123'
+              }
+          }}
 
           before :each do
             expect(parser).to receive(:normalize_args).and_return(true)
