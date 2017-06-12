@@ -148,9 +148,9 @@ module Beaker
           } }
           let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
           let(:homedir_file) {@homedir_file || {:level => 'sixth',
-                                                :ssh => {
-                                                    :auth_methods => 'auth_home_123'
-                                                }
+                                :ssh => {
+                                    :auth_methods => 'auth_home_123'
+                                }
           }}
           let(:presets) { {:level => 'lowest',
                             :ssh => {
