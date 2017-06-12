@@ -217,15 +217,16 @@ module Beaker
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
         @attribution = @attribution.merge(tag_sources(cmd_line_options, "flag"))
 
-        # Global subcommand options from $HOME/.beaker/subcommand_options.yaml are first to get merged into presets
-        homedir_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, ENV['HOME']+'/.beaker/subcommand_options.yaml')
-        @attribution = @attribution.merge(tag_sources(homedir_options, "homedir"))
-        @options.merge!(homedir_options)
+        subcommand_options_file = Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS
+        options_files = {"homedir" => "#{ENV['HOME']}/#{subcommand_options_file}", "subcommand" => subcommand_options_file}
 
+        # Global subcommand options from $HOME/.beaker/subcommand_options.yaml are first to get merged into presets
         # Subcommands are the second to get merged into presets
-        subcommand_options = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
-        @attribution = @attribution.merge(tag_sources(subcommand_options, 'subcommand'))
-        @options.merge!(subcommand_options)
+        options_files.each do |src, path|
+          opts = Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(args, path)
+          @attribution = @attribution.merge(tag_sources(opts, src))
+          @options.merge!(opts)
+        end
 
         file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file])
         @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
