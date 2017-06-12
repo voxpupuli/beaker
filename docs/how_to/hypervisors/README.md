@@ -32,17 +32,22 @@ that are needed for it. An example `.fog` file is below:
 
 # External Hypervisors
 
-There are a number of community-supported hypervisors that have not been added to
-Beaker itself. The reason for this is that we're looking to decrease Beaker's
+Puppetlabs and its community have made several gems that support different hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's
 dependency footprint, and hypervisors are one of the places where we can often
 increase the load across all Beaker uses to benefit a small group that uses a
-particular hypervisor.
+particular hypervisor. 
 
-In order to offset this, we've made a listing of forks below that support other
-hypervisors not included in Beaker. Please check them out if you'd
-like to use their hypervisor, hopefully it'll save you from spending time
-trying to support a new hypervisor yourself.
+In order to offset this, we've made a listing of gems and community-supported forks that support other external hypervisors. Please check them out if you'd like to use those hypervisors, hopefully it'll save you from spending time trying to support a new hypervisor yourself.
 
-| Hypervisor | Fork                                               |
-|:----------:|:--------------------------------------------------:|
-| LXC        | [Obmondo](https://github.com/Obmondo/beaker) |
+Hypervisor gems made by puppet (pre-included in beaker < 4.0.0):
+
+| Hypervisor             | Fork                                                      |
+|:----------------------:|:---------------------------------------------------------:|
+| Vmpooler        | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler) |
+
+Hypervisor gems and beaker forks made by community:
+
+| Hypervisor   | Fork                                                                 |
+|:------------:|:--------------------------------------------------------------------:|
+| LXC          | [Obmondo](https://github.com/Obmondo/beaker)                         |
+| DigitalOcean | [beaker-digitalocean](https://github.com/tiengo/beaker-digitalocean) |
