@@ -450,6 +450,136 @@ module Beaker
         end
       end
     end
+
+    describe '#install_local_package' do
+      let( :platform      ) { @platform || 'fedora' }
+      let( :version       ) { @version  || 6        }
+      let( :platform_mock ) {
+        mock = Object.new
+        allow( mock ).to receive( :to_array ) { [platform, version, '', ''] }
+        mock
+      }
+
+      before :each do
+        allow( instance ).to receive( :[] ).with( 'platform' ) { platform_mock }
+      end
+
+      it 'Fedora 22-29: uses dnf' do
+        (22...29).each do |version|
+          @version = version
+          package_file = 'test_123.yay'
+          expect( instance ).to receive( :execute ).with( /^dnf.*#{package_file}$/ )
+          instance.install_local_package( package_file )
+        end
+      end
+
+      it 'Fedora 21 & 30: uses yum' do
+        package_file = 'testing_456.yay'
+        platform_mock = Object.new
+        [21, 30].each do |version|
+          @version = version
+          expect( instance ).to receive( :execute ).with( /^yum.*#{package_file}$/ )
+          instance.install_local_package( package_file )
+        end
+      end
+
+      it 'Centos & EL: uses yum' do
+        package_file = 'testing_789.yay'
+        ['centos', 'el'].each do |platform|
+          @platform = platform
+          expect( instance ).to receive( :execute ).with( /^yum.*#{package_file}$/ )
+          instance.install_local_package( package_file )
+        end
+      end
+
+      it 'Debian, Ubuntu, Cumulus: uses dpkg' do
+        package_file = 'testing_012.yay'
+        ['debian', 'ubuntu', 'cumulus'].each do |platform|
+          @platform = platform
+          expect( instance ).to receive( :execute ).with( /^dpkg.*#{package_file}$/ )
+          expect( instance ).to receive( :execute ).with( 'apt-get update' )
+          instance.install_local_package( package_file )
+        end
+      end
+
+      it 'Solaris: calls solaris-specific install method' do
+        package_file = 'testing_345.yay'
+        @platform = 'solaris'
+        expect( instance ).to receive( :solaris_install_local_package ).with( package_file, anything )
+        instance.install_local_package( package_file )
+      end
+
+      it 'OSX: calls host.install_package' do
+        package_file = 'testing_678.yay'
+        @platform = 'osx'
+        expect( instance ).to receive( :install_package ).with( package_file )
+        instance.install_local_package( package_file )
+      end
+    end
+
+    describe '#uncompress_local_tarball' do
+      let( :platform      ) { @platform || 'fedora' }
+      let( :version       ) { @version  || 6        }
+      let( :tar_file      ) { 'test.tar.gz'         }
+      let( :base_dir      ) { '/base/dir/fake'      }
+      let( :download_file ) { 'download_file.txt'   }
+      let( :platform_mock ) {
+        mock = Object.new
+        allow( mock ).to receive( :to_array ) { [platform, version, '', ''] }
+        mock
+      }
+
+      before :each do
+        allow( instance ).to receive( :[] ).with( 'platform' ) { platform_mock }
+      end
+
+      it 'rejects unsupported platforms' do
+        @platform = 'huawei'
+        expect {
+          instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+        }.to raise_error(
+          /^Platform #{platform} .* not supported .* uncompress_local_tarball$/
+        )
+      end
+
+      it 'untars the file given' do
+        @platform = 'sles'
+        expect( instance ).to receive( :execute ).with(
+          /^tar .* #{tar_file} .* #{base_dir}$/
+        )
+        instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+      end
+
+      context 'on solaris' do
+
+        before :each do
+          @platform = 'solaris'
+        end
+
+        it 'rejects unsupported versions' do
+          @version = '12'
+          expect {
+            instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+          }.to raise_error(
+            /^Solaris #{version} .* not supported .* uncompress_local_tarball$/
+          )
+        end
+
+        it 'v10: gunzips before untaring' do
+          @version = '10'
+          expect( instance ).to receive( :execute ).with( /^gunzip #{tar_file}$/ )
+          expect( instance ).to receive( :execute ).with( /^tar .* #{download_file}$/ )
+          instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+        end
+
+        it 'v11: untars only' do
+          @version = '11'
+          expect( instance ).to receive( :execute ).with( /^tar .* #{tar_file}$/ )
+          instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+        end
+
+      end
+    end
   end
 end
 
