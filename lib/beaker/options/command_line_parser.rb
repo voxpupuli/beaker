@@ -88,6 +88,12 @@ module Beaker
             @cmd_options[:preserve_hosts] = mode || 'always'
           end
 
+          opts.on '--skip-last-teardown',
+                  'Do not execute teardown code for last test in suite',
+                  '(default: false)' do |bool|
+            @cmd_options[:skip_last_teardown] = bool
+          end
+
           opts.on '--root-keys',
                   'Install puppetlabs pubkeys for superuser',
                   '(default: false)' do |bool|

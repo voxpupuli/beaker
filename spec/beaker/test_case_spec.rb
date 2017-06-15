@@ -128,6 +128,59 @@ module Beaker
       end
     end
 
+    context 'controlling teardown' do
+      let(:last_testcase_do_teardown) { TestCase.new({}, logger, {}, path, true ) }
+      let(:last_testcase_skip_teardown) { TestCase.new({}, logger, { skip_last_teardown: true }, path, true ) }
+      let(:not_last_testcase_skip_teardown) { TestCase.new({}, logger, { skip_last_teardown: true }, path, false ) }
+
+      it 'executes teardown if the last test in the suite and --skip-last-teardown is not set' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write <<-EOF
+            teardown do
+              raise('Teardown throws error')
+            end
+            assert_equal(true, true, 'Test passes')
+          EOF
+        end
+        @path = path
+        expect( last_testcase_do_teardown ).to receive( :log_and_fail_test ).once.with(kind_of(::RuntimeError), :teardown_error).and_call_original
+        last_testcase_do_teardown.run_test
+        expect @test_status == :error
+      end
+
+      it 'executes teardown if --skip-last-teardown is set but this is not the last test in the suite' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write <<-EOF
+            teardown do
+              raise('Teardown throws error')
+            end
+            assert_equal(true, true, 'Test passes')
+          EOF
+        end
+        @path = path
+        expect(not_last_testcase_skip_teardown).to receive( :log_and_fail_test ).once.with(kind_of(::RuntimeError), :teardown_error).and_call_original
+        not_last_testcase_skip_teardown.run_test
+        expect @test_status == :error
+      end
+
+      it 'skips teardown if --skip-last-teardown is set and this is the last test in the suite' do
+        path = 'test.rb'
+        File.open(path, 'w') do |f|
+          f.write <<-EOF
+            teardown do
+              raise('Teardown throws error')
+            end
+            assert_equal(true, true, 'Test passes')
+          EOF
+        end
+        @path = path
+        last_testcase_skip_teardown.run_test
+        expect @test_status == :pass
+      end
+    end
+
     context 'metadata' do
       it 'sets the filename correctly from the path' do
         answer = 'jacket'
