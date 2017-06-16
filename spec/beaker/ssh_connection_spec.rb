@@ -18,25 +18,25 @@ module Beaker
 
     it 'self.connect creates connects and returns a proxy for that connection' do
       # grrr
-      expect( Net::SSH ).to receive(:start).with( ip, user, ssh_opts ).and_return(true)
+      expect( Net::SSH ).to receive(:start).with( vmhostname, user, ssh_opts ).and_return(true)
       connection_constructor = SshConnection.connect name_hash, user, ssh_opts, options
       expect( connection_constructor ).to be_a_kind_of SshConnection
     end
 
     it 'connect creates a new connection' do
-      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(true)
+      expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(true)
       connection.connect
     end
 
     it 'connect caches its connection' do
-      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts ).once.and_return true
+      expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts ).once.and_return true
       connection.connect
       connection.connect
     end
 
-    it 'attempts to connect by vmhostname if ip address connection fails' do
-      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(false)
-      expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(true).once
+    it 'attempts to connect by ip address if vmhostname connection fails' do
+      expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(false)
+      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(true).once
       expect( Net::SSH ).to receive( :start ).with( hostname, user, ssh_opts).never
       connection.connect
     end
@@ -53,7 +53,7 @@ module Beaker
 
       it 'runs ssh close' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         allow( mock_ssh).to receive( :closed? ).once.and_return(false)
@@ -63,7 +63,7 @@ module Beaker
 
       it 'sets the @ssh variable to nil' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         allow( mock_ssh).to receive( :closed? ).once.and_return(false)
@@ -76,7 +76,7 @@ module Beaker
       it 'calls ssh shutdown & re-raises if ssh close fails with an unexpected Error' do
         mock_ssh = Object.new
         allow( mock_ssh ).to receive( :close ) { raise StandardError }
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         allow( mock_ssh).to receive( :closed? ).once.and_return(false)
@@ -90,7 +90,7 @@ module Beaker
     describe '#execute' do
       it 'retries if failed with a retryable exception' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         allow( subject ).to receive( :close )
@@ -102,7 +102,7 @@ module Beaker
 
       it 'raises an error if it fails both times' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         allow( subject ).to receive( :close )
@@ -115,7 +115,7 @@ module Beaker
     describe '#request_terminal_for' do
       it 'fails correctly by raising Net::SSH::Exception' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         mock_channel = Object.new
@@ -128,7 +128,7 @@ module Beaker
     describe '#register_stdout_for' do
       before :each do
         @mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { @mock_ssh }
         connection.connect
 
         @data = '7 of clubs'
@@ -164,7 +164,7 @@ module Beaker
 
       before :each do
         @mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { @mock_ssh }
         connection.connect
 
         @data = '3 of spades'
@@ -203,7 +203,7 @@ module Beaker
 
       it 'assigns the output\'s exit code correctly from the data' do
         mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { mock_ssh }
         connection.connect
 
         data = '10 of jeromes'
@@ -236,7 +236,7 @@ module Beaker
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :upload! )
         allow( @mock_ssh ).to receive( :scp ).and_return( @mock_scp )
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { @mock_ssh }
         connection.connect
       end
 
@@ -263,7 +263,7 @@ module Beaker
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :download! )
         allow( @mock_ssh ).to receive( :scp ).and_return( @mock_scp )
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
+        expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts) { @mock_ssh }
         connection.connect
       end
 

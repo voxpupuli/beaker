@@ -65,15 +65,15 @@ module Beaker
 
     # connect to the host
     def connect
-      #try three ways to connect to host (ip, vmhostname, hostname)
+      #try three ways to connect to host (vmhostname, ip, hostname)
       methods = []
-      if @ip
-        @ssh ||= connect_block(@ip, @user, @ssh_opts)
-        methods << "ip (#{@ip})"
-      end
-      if @vmhostname && !@ssh
+      if @vmhostname
         @ssh ||= connect_block(@vmhostname, @user, @ssh_opts)
         methods << "vmhostname (#{@vmhostname})"
+      end
+      if @ip && !@ssh
+        @ssh ||= connect_block(@ip, @user, @ssh_opts)
+        methods << "ip (#{@ip})"
       end
       if @hostname && !@ssh
         @ssh ||= connect_block(@hostname, @user, @ssh_opts)
