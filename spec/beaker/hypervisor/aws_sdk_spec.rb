@@ -76,7 +76,6 @@ module Beaker
     describe '#provision' do
       before :each do
         expect(aws).to receive(:launch_all_nodes)
-        expect(aws).to receive(:add_tags)
         expect(aws).to receive(:populate_dns)
         expect(aws).to receive(:enable_root_on_hosts)
         expect(aws).to receive(:set_hostnames)
@@ -84,11 +83,13 @@ module Beaker
       end
 
       it 'should step through provisioning' do
+        allow( aws ).to receive( :wait_for_status )
         allow( aws ).to receive( :wait_for_status_netdev )
         aws.provision
       end
 
       it 'should return nil' do
+        allow( aws ).to receive( :wait_for_status )
         allow( aws ).to receive( :wait_for_status_netdev )
         expect(aws.provision).to be_nil
       end
@@ -296,8 +297,9 @@ module Beaker
     end
 
     describe '#wait_for_status' do
-      let( :aws_instance ) { double('aws_instance', :id => "ec2", :terminate => nil) }
-      let( :instance_set ) { [{:instance => aws_instance}] }
+      let( :aws_instance ) { double('aws_instance', :add_tag => nil, :id => "ec2", :terminate => nil) }
+      let( :host ) { double('host', :name => "testhost") }
+      let( :instance_set ) { [{:host => host, :instance => aws_instance}] }
       subject(:wait_for_status) { aws.wait_for_status(:running, instance_set) }
 
       context 'single instance' do
@@ -320,7 +322,8 @@ module Beaker
       end
 
       context 'with multiple instances' do
-        let( :instance_set ) { [{:instance => aws_instance}, {:instance => aws_instance}] }
+        let( :instance_set ) { [{:host => host, :instance => aws_instance},
+                                {:host => host, :instance => aws_instance}] }
 
         it 'returns the instance set passed to it' do
           allow(aws_instance).to receive(:status).and_return(:waiting, :waiting, :running, :waiting, :waiting, :running)
@@ -370,30 +373,26 @@ module Beaker
     end
 
     describe '#add_tags' do
-      let( :aws_instance ) { double('aws_instance', :add_tag => nil) }
-      subject(:add_tags) { aws.add_tags }
+      let( :aws_instance ) { double('aws_instance', :add_tag => nil, :id => "ec2", :terminate => nil) }
+      let( :host ) { double('host', :[] => {}, :name => "testvm1") }
+      let( :instance_set ) { [{:host => host, :instance => aws_instance}] }
+      subject(:add_tags) { aws.add_tags(instance_set) }
 
       it 'returns nil' do
-        @hosts.each {|host| host['instance'] = aws_instance}
         expect(add_tags).to be_nil
       end
 
       it 'handles a single host' do
-        @hosts[0]['instance'] = aws_instance
-        @hosts = [@hosts[0]]
         expect(add_tags).to be_nil
       end
 
       context 'with multiple hosts' do
-        before :each do
-          @hosts.each {|host| host['instance'] = aws_instance}
-        end
+        let( :otherhost ) { double('otherhost', :[] => {'test_tag' => 'test_value'}, :name => "testvm2") }
+        let( :instance_set ) { [{:host => host, :instance => aws_instance},
+                                {:host => otherhost, :instance => aws_instance}] }
 
         it 'handles host_tags hash on host object' do
           # set :host_tags on first host
-          aws.instance_eval {
-            @hosts[0][:host_tags] =  {'test_tag' => 'test_value'}
-          }
           expect(aws_instance).to receive(:add_tag).with('test_tag', hash_including(:value => 'test_value')).at_least(:once)
           expect(add_tags).to be_nil
         end
@@ -405,7 +404,7 @@ module Beaker
         end
 
         it 'adds tag for Name' do
-          expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(@hosts.size).times
+          expect(aws_instance).to receive(:add_tag).with('Name', hash_including(:value => /vm/)).at_least(instance_set.size).times
           expect(add_tags).to be_nil
         end
 
@@ -630,7 +629,6 @@ module Beaker
 	  end
           expect(set_hostnames).to eq(@hosts)
           @hosts.each do |host|
-            puts host[:name]
             expect(host[:vmhostname]).to eq(host[:name])
             expect(host[:vmhostname]).to eq(host.hostname)
           end
