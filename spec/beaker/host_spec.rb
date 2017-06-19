@@ -465,7 +465,9 @@ module Beaker
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
               '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+              '.08_HiddenFile.rb'
+          ]
 
           @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
@@ -529,7 +531,9 @@ module Beaker
             '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
             '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
             '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-            '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+            '.08_HiddenFile.rb'
+          ]
 
           @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
