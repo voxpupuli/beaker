@@ -4,6 +4,10 @@ module Beaker
   describe Hypervisor do
     let( :hypervisor ) { Beaker::Hypervisor }
 
+    it "includes custom hypervisor" do
+      expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(RuntimeError, "Invalid hypervisor: custom_hypervisor")
+    end
+
     it "creates a vsphere hypervisor for vsphere hosts" do
       vsphere = double( 'vsphere' )
       allow( vsphere ).to receive( :provision ).and_return( true )
@@ -16,13 +20,6 @@ module Beaker
       allow( fusion ).to receive( :provision ).and_return( true )
       expect( Fusion ).to receive( :new ).once.and_return( fusion )
       expect( hypervisor.create( 'fusion', [], make_opts() ) ).to be === fusion
-    end
-
-    it "creates a vcloud hypervisor for vcloud hosts that are not pooled" do
-      vcloud = double( 'vcloud' )
-      allow( vcloud ).to receive( :provision ).and_return( true )
-      expect( Vcloud ).to receive( :new ).once.and_return( vcloud )
-      expect( hypervisor.create( 'vcloud', [], make_opts().merge( { 'pooling_api' => false } ) ) ).to be === vcloud
     end
 
     it "creates a vagrant hypervisor for vagrant hosts" do

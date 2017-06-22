@@ -32,12 +32,6 @@ module Beaker
           Beaker::Fusion
         when /^ec2$/
           Beaker::AwsSdk
-        when /^vcloud$/
-          if options['pooling_api']
-            Beaker::Vmpooler
-          else
-            Beaker::Vcloud
-          end
         when /^vagrant$/
           Beaker::Vagrant
         when /^vagrant_custom$/
@@ -160,7 +154,6 @@ end
   'fusion',
   'aws_sdk',
   'vsphere',
-  'vcloud',
   'docker',
   'google_compute',
   'openstack',
