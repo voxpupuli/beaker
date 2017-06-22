@@ -52,6 +52,12 @@ module Beaker
     class_option :'exclude-tags', :type => :string, :group => 'Beaker run'
     class_option :'xml-time-order', :type => :boolean, :group => 'Beaker run'
 
+    # The following are listed as deprecated in beaker --help, but needed now for
+    # feature parity for beaker 3.x.
+    class_option :xml, :type => :boolean, :group => "Beaker run"
+    class_option :type, :type => :string, :group => "Beaker run"
+    class_option :debug, :type => :boolean, :group => "Beaker run"
+
     desc "init BEAKER_RUN_OPTIONS", "Initializes the required configuration for Beaker subcommand execution"
     long_desc <<-LONGDESC
       Initializes the required .beaker configuration folder. This folder contains
