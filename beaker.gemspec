@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-its'
   s.add_development_dependency 'fakefs', '~> 0.6'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'pry', '~> 0.10'
   s.add_development_dependency 'rake', '~> 10.0'
 
   # Documentation dependencies
@@ -43,6 +42,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
   s.add_runtime_dependency 'thor', '~> 0.19'
+  s.add_runtime_dependency 'pry-byebug'
 
   # Run time dependencies that are Beaker libraries
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
