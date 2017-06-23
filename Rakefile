@@ -200,29 +200,6 @@ Run the puppet beaker acceptance tests on a pe install.
     beaker_test(:puppetpe)
   end
 
-  desc <<-EOS
-Run the puppet beaker acceptance tests on a puppet gem install.
-#{USAGE}
-  EOS
-  task :puppetgem  => 'gen_hosts' do
-    beaker_test(:puppetgem)
-  end
-
-  desc <<-EOS
-Run the puppet beaker acceptance tests on a puppet git install.
-#{USAGE}
-  EOS
-  task :puppetgit  => 'gen_hosts' do
-    beaker_test(:puppetgit)
-  end
-
-  desc <<-EOS
-Run the puppet beaker acceptance tests on a puppet package install.
-#{USAGE}
-  EOS
-  task :puppetpkg => 'gen_hosts' do
-    beaker_test(:puppetpkg)
-  end
 
   desc 'Generate Beaker Host Config File'
   task :gen_hosts do
