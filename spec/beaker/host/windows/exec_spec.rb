@@ -60,5 +60,23 @@ module Beaker
         instance.reboot
       end
     end
+
+    describe '#cygwin_installed?' do
+      let (:response) { double( 'response' ) }
+
+      it 'uses cygcheck to see if cygwin is installed' do
+        expect( Beaker::Command ).to receive(:new).with("cygcheck --check-setup cygwin").and_return(:foo)
+        expect( instance ).to receive( :exec ).with(:foo, :accept_all_exit_codes => true).and_return(response)
+        expect( response ).to receive(:stdout).and_return('cygwin OK')
+        expect(instance.cygwin_installed?).to eq(true)
+      end
+
+      it 'returns false when unable to find matching text' do
+        expect( Beaker::Command ).to receive(:new).with("cygcheck --check-setup cygwin").and_return(:foo)
+        expect( instance ).to receive( :exec ).with(:foo, :accept_all_exit_codes => true).and_return(response)
+        expect( response ).to receive(:stdout).and_return('No matching text')
+        expect(instance.cygwin_installed?).to eq(false)
+      end
+    end
   end
 end

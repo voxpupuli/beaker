@@ -108,4 +108,14 @@ module Windows::Exec
     false
   end
 
+  # Determine if cygwin is actually installed on the SUT. Differs from
+  # is_cygwin?, which is just a type check for a Windows::Host.
+  #
+  # @return [Boolean]
+  def cygwin_installed?
+    output = exec(Beaker::Command.new('cygcheck --check-setup cygwin'), :accept_all_exit_codes => true).stdout 
+    return true if output.match(/cygwin/) && output.match(/OK/)
+    false
+  end
+
 end

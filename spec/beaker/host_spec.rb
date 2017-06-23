@@ -122,62 +122,31 @@ module Beaker
         let(:cygwin64) { 'setup-x86_64.exe' }
         let(:package) { 'foo' }
 
-        before(:each) do
-          @platform = 'windows'
-          allow( host ).to receive(:check_for_package).and_return(true)
-        end
-
         context "testing osarchitecture" do
 
-          before(:each) do
-            expect( host ).to receive(:execute).with(/wmic os get osarchitecture/, anything).and_yield(success_osarch_check)
-          end
-
-          context "32 bit" do
-            let(:success_osarch_check) { double(:success, :exit_code => 0, :stdout => '32-bit') }
-
-            it "uses 32 bit cygwin" do
-              expect( host ).to receive(:execute).with(/#{cygwin}.*#{package}/)
-              host.install_package(package)
-            end
-          end
-
           context "64 bit" do
-            let(:success_osarch_check) { double(:success, :exit_code => 0, :stdout => '64-bit') }
+            before do
+              @platform = Beaker::Platform.new('windows-2008r2-64')
+            end
 
             it "uses 64 bit cygwin" do
               expect( host ).to receive(:execute).with(/#{cygwin64}.*#{package}/)
               host.install_package(package)
             end
           end
-        end
-
-        context "testing os name" do
-          let(:failed_osarch_check) { double(:failed, :exit_code => 1) }
-
-          before(:each) do
-            expect( host ).to receive(:execute).with(/wmic os get osarchitecture/, anything).and_yield(failed_osarch_check)
-            expect( host ).to receive(:execute).with(/wmic os get name/, anything).and_yield(name_check)
-          end
 
           context "32 bit" do
-            let(:name_check) { double(:failure, :exit_code => 1) }
+            before do
+              @platform = Beaker::Platform.new('windows-10ent-32')
+            end
 
             it "uses 32 bit cygwin" do
               expect( host ).to receive(:execute).with(/#{cygwin}.*#{package}/)
               host.install_package(package)
             end
           end
-
-          context "64 bit" do
-            let(:name_check) { double(:success, :exit_code => 0) }
-
-            it "uses 64 bit cygwin" do
-              expect( host ).to receive(:execute).with(/#{cygwin64}.*#{package}/)
-              host.install_package(package)
-            end
-          end
         end
+
       end
     end
 

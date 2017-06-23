@@ -15,7 +15,7 @@ describe ClassMixedWithDSLInstallUtils do
   let( :batch_path )        { '/fake/batch/path' }
   let(:msi_path)            { 'c:\\foo\\puppet.msi' }
   let(:winhost)             { make_host( 'winhost',
-                              { :platform => 'windows',
+                            { :platform => Beaker::Platform.new('windows-2008r2-64'),
                                 :pe_ver => '3.0',
                                 :working_dir => '/tmp',
                                 :is_cygwin => true} ) }
