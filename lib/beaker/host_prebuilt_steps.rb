@@ -107,6 +107,7 @@ module Beaker
         when host['platform'] =~ /cumulus/
           check_and_install_packages_if_needed(host, CUMULUS_PACKAGES)
         when (host['platform'] =~ /windows/ and host.is_cygwin?)
+          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
           check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
         when (host['platform'] =~ /windows/ and not host.is_cygwin?)
           check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)

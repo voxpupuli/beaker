@@ -409,6 +409,7 @@ describe Beaker do
 
       hosts.each do |host|
         windows_pkgs.each do |pkg|
+          allow( host ).to receive( :cygwin_installed? ).and_return( true )
           allow( host ).to receive( :is_cygwin? ).and_return( true )
           expect( host ).to receive( :check_for_package ).with( pkg ).once.and_return( false )
           expect( host ).to receive( :install_package ).with( pkg ).once

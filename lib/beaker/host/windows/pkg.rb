@@ -12,9 +12,6 @@ module Windows::Pkg
   end
 
   def install_package(name, cmdline_args = '')
-    cygwin = ""
-    rootdir = ""
-
     arch = identify_windows_architecture
 
     if arch == '64'
@@ -25,15 +22,6 @@ module Windows::Pkg
       cygwin = "setup-x86.exe"
     end
 
-    if not check_for_command(cygwin)
-      command = "curl --retry 5 https://cygwin.com/#{cygwin} -o /cygdrive/c/Windows/System32/#{cygwin}"
-      begin
-        execute(command)
-      rescue Beaker::Host::CommandFailure
-        command.sub!('https', 'http')
-        execute(command)
-      end
-    end
     execute("#{cygwin} -q -n -N -d -R #{rootdir} -s http://cygwin.osuosl.org -P #{name} #{cmdline_args}")
   end
 
@@ -101,23 +89,7 @@ module Windows::Pkg
 
   # @api private
   def identify_windows_architecture
-    arch = nil
-    execute("echo '' | wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
-      arch = if result.exit_code == 0
-        result.stdout =~ /64/ ? '64' : '32'
-      else
-        identify_windows_architecture_from_os_name_for_win2003
-      end
-    end
-    arch
+    platform.arch =~ /64/ ? '64' : '32'
   end
 
-  # @api private
-  def identify_windows_architecture_from_os_name_for_win2003
-    arch = nil
-    execute("echo '' | wmic os get name | grep x64", :accept_all_exit_codes => true) do |result|
-      arch = result.exit_code == 0 ? '64' : '32'
-    end
-    arch
-  end
 end

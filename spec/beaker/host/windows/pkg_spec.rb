@@ -39,17 +39,10 @@ module Beaker
         end
 
         it 'curls the SSL URL for cygwin\'s installer' do
-          expect( instance ).to receive( :execute ).with( /^curl.*https\:/  ).ordered
           allow(  instance ).to receive( :execute ).with( /^setup\-x86/     ).ordered
           instance.install_package( 'curl' )
         end
 
-        it 'falls back to the non-SSL URL if that one fails' do
-          allow(  instance ).to receive( :execute ).with( /^curl.*https\:/  ).and_raise( Beaker::Host::CommandFailure ).ordered
-          expect( instance ).to receive( :execute ).with( /^curl.*http\:/   ).ordered
-          allow(  instance ).to receive( :execute ).with( /^setup\-x86/     ).ordered
-          instance.install_package( 'curl' )
-        end
       end
     end
 
