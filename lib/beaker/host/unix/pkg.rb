@@ -471,40 +471,79 @@ module Unix::Pkg
   def pe_puppet_agent_promoted_package_install(
     onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
   )
+    uncompress_local_tarball( onhost_copied_download, onhost_copy_base, download_file )
+    if self['platform'] =~ /^solaris/
+      # above uncompresses the install from .tar.gz -> .p5p into the
+      # onhost_copied_file directory w/a weird name. We have to read that file
+      # name from the filesystem, so that we can provide it to install_local...
+      pkg_filename = execute( "ls #{onhost_copied_file}" )
+      onhost_copied_file = "#{onhost_copied_file}#{pkg_filename}"
+    end
+
+    install_local_package( onhost_copied_file, onhost_copy_base )
+    nil
+  end
+
+  # Installs a package already located on a SUT
+  #
+  # @param [String] onhost_package_file Path to the package file to install
+  # @param [String] onhost_copy_dir Path to the directory where the package
+  #                                 file is located. Used on solaris only
+  #
+  # @return nil
+  def install_local_package(onhost_package_file, onhost_copy_dir = nil)
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora-(2[2-9]))$/
-      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
-      execute("dnf --nogpgcheck localinstall -y #{onhost_copied_file}")
     when /^(fedora|el|centos)$/
-      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
-      execute("yum --nogpgcheck localinstall -y #{onhost_copied_file}")
+      command_name = 'yum'
+      command_name = 'dnf 'if variant == 'fedora' && version > 21 && version <= 29
+      execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(sles)$/
-      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
-      execute("rpm -ihv #{onhost_copied_file}")
+      execute("rpm -ihv #{onhost_package_file}")
     when /^(debian|ubuntu|cumulus)$/
-      execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
-      execute("dpkg -i --force-all #{onhost_copied_file}")
+      execute("dpkg -i --force-all #{onhost_package_file}")
       execute("apt-get update")
+    when /^solaris$/
+      self.solaris_install_local_package( onhost_package_file, onhost_copy_dir )
+    when /^osx$/
+      install_package( onhost_package_file )
+    else
+      msg = "Platform #{variant} is not supported by the method "
+      msg << 'install_local_package'
+      raise ArgumentError, msg
+    end
+  end
+
+  # Uncompresses a tarball on the SUT
+  #
+  # @param [String] onhost_tar_file Path to the tarball to uncompress
+  # @param [String] onhost_base_dir Path to the directory to uncompress to
+  # @param [String] download_file Name of the file after uncompressing
+  #
+  # @return nil
+  def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
+    variant, version, arch, codename = self['platform'].to_array
+    case variant
+    when /^(fedora|el|centos|sles|debian|ubuntu|cumulus)$/
+      execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball
       if version == '10'
-        execute("gunzip #{onhost_copied_download}")
+        execute("gunzip #{onhost_tar_file}")
         tar_file_name = File.basename(download_file, '.gz')
         execute("tar -xvf #{tar_file_name}")
       elsif version == '11'
-        execute("tar -zxvf #{onhost_copied_download}")
+        execute("tar -zxvf #{onhost_tar_file}")
       else
         msg = "Solaris #{version} is not supported by the method "
-        msg << 'install_puppet_agent_pe_promoted_repo_on'
+        msg << 'uncompress_local_tarball'
         raise ArgumentError, msg
       end
-      # get uncompressed package filename on the system
-      pkg_filename = execute( "ls #{onhost_copied_file}" )
-      pkg_path = "#{onhost_copied_file}#{pkg_filename}"
-      self.solaris_install_local_package( pkg_path, onhost_copy_base )
+    else
+      msg = "Platform #{variant} is not supported by the method "
+      msg << 'uncompress_local_tarball'
+      raise ArgumentError, msg
     end
-    nil
   end
 
   # Installs a local package file on a solaris host
