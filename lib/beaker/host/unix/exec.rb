@@ -26,7 +26,7 @@ module Unix::Exec
     if self['platform'].include?('solaris') || self['platform'].include?('osx')
       execute("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1").strip
     else
-      execute("ip a|awk '/global/{print$2}' | cut -d/ -f1 | head -1").strip
+      execute("ip a | awk '/global/{print$2}' | cut -d/ -f1 | #{self['hypervisor'] == 'vagrant' ? 'tail' : 'head'} -1").strip
     end
   end
 
