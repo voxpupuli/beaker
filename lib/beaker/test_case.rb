@@ -94,12 +94,13 @@ module Beaker
     #                        {Beaker::Logger}'s interface.
     # @param [Hash{Symbol=>String}] options Parsed command line options.
     # @param [String] path The local path to a test file to be executed.
-    def initialize(these_hosts, logger, options={}, path=nil)
+    def initialize(these_hosts, logger, options={}, path=nil, last_test=false)
       @hosts   = these_hosts
       @logger = logger
       @sublog = ""
       @options = options
       @path    = path
+      @last_test = last_test
       @usr_home = options[:home]
       @test_status = :pass
       @exception = nil
@@ -140,15 +141,19 @@ module Beaker
             rescue StandardError, ScriptError, SignalException => e
               log_and_fail_test(e)
             ensure
-              @logger.info('Begin teardown')
-              @teardown_procs.each do |teardown|
-                begin
-                  teardown.call
-                rescue StandardError, SignalException, TEST_EXCEPTION_CLASS => e
-                  log_and_fail_test(e, :teardown_error)
+              if (@last_test && @options.has_key?(:skip_last_teardown) && @options[:skip_last_teardown] == true)
+                @logger.info('Skipping teardown on last test due to skip_last_teardown')
+              else
+                @logger.info('Begin teardown')
+                @teardown_procs.each do |teardown|
+                  begin
+                    teardown.call
+                  rescue StandardError, SignalException, TEST_EXCEPTION_CLASS => e
+                    log_and_fail_test(e, :teardown_error)
+                  end
                 end
+                @logger.info('End teardown')
               end
-              @logger.info('End teardown')
             end
           end
           @sublog = @logger.get_sublog

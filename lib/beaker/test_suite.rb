@@ -322,7 +322,8 @@ module Beaker
       @test_files.each do |test_file|
         @logger.info "Begin #{test_file}"
         start = Time.now
-        test_case = TestCase.new(@hosts, @logger, options, test_file).run_test
+        last_test = test_file == @test_files.last
+        test_case = TestCase.new(@hosts, @logger, options, test_file, last_test).run_test
         duration = Time.now - start
         @test_suite_results.add_test_case(test_case)
         @test_cases << test_case
