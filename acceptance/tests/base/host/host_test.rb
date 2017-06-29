@@ -228,7 +228,7 @@ hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some files/dirs")
   #make sure that we are clean on the test host
   host.rm_rf("module")
-  host.do_scp_to(module_fixture, ".", {:ignore => ['vendor', 'Gemfile']})
+  host.do_scp_to(module_fixture, ".", {:ignore => ['tests', 'Gemfile']})
   Dir.mktmpdir do |tmp_dir|
     #grab copy from host
     host.do_scp_from("module", tmp_dir, {})
@@ -239,7 +239,7 @@ hosts.each do |host|
     local_paths.each do |path|
       search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
       matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
-      re =  /((\/|\A)vendor(\/|\z))|((\/|\A)Gemfile(\/|\z))/
+      re =  /((\/|\A)tests(\/|\z))|((\/|\A)Gemfile(\/|\z))/
       if path !~ re
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       else
