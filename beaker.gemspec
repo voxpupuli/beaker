@@ -51,7 +51,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-puppet', '~> 0.0'
 
   # Optional provisioner specific support
-  s.add_runtime_dependency 'rbvmomi', '~> 1.9'
   s.add_runtime_dependency 'fission', '~> 0.4'
   s.add_runtime_dependency 'google-api-client', '~> 0.9'
   s.add_runtime_dependency 'aws-sdk-v1', '~> 1.57'
