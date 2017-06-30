@@ -19,6 +19,7 @@ module Beaker
 
       if roles.include? 'master'
         ports << 8140
+        ports << 8142
       end
 
       if roles.include? 'dashboard'
