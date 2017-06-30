@@ -39,7 +39,7 @@ particular hypervisor.
 
 In order to offset this, we've made a listing of gems and community-supported forks that support other external hypervisors. Please check them out if you'd like to use those hypervisors, hopefully it'll save you from spending time trying to support a new hypervisor yourself.
 
-Hypervisor gems made by puppet (pre-included in beaker < 4.0.0):
+Hypervisor gems made by puppet (pre-included in beaker 3.x):
 
 | Hypervisor             | Fork                                                      |
 |:----------------------:|:---------------------------------------------------------:|
