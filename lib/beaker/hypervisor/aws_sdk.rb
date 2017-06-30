@@ -649,6 +649,14 @@ module Beaker
           else
             next if host['platform'] =~ /netscaler/
             host.exec(Command.new("hostname #{host.name}"))
+            if host['vmname'] =~ /^amazon/
+              # Amazon Linux requires this to preserve host name changes across reboots.
+              # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-hostname.html
+              # Also note that without an elastic ip set, while this will
+              # preserve the hostname across a full shutdown/startup of the vm
+              # (as opposed to a reboot) -- the ip address will have changed. 
+              host.exec(Command.new("sed -ie '/^HOSTNAME/ s/=.*/=#{host.name}/' /etc/sysconfig/network"))
+            end
           end
         end
       else
@@ -660,6 +668,10 @@ module Beaker
           else
             next if host['platform'] =~ /netscaler/
             host.exec(Command.new("hostname #{host.hostname}"))
+            if host['vmname'] =~ /^amazon/
+              # See note above
+              host.exec(Command.new("sed -ie '/^HOSTNAME/ s/=.*/=#{host.hostname}/' /etc/sysconfig/network"))
+            end
           end
         end
       end
