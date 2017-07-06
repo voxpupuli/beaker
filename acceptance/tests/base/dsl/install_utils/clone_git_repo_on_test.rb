@@ -7,6 +7,8 @@ begin
   extend Beaker::Acceptance::InstallUtils
 end
 
+confine :except, :platform => /^solaris-10/
+
 test_name 'Clone from git' do
 
   PACKAGES = {
