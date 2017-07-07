@@ -78,7 +78,11 @@ module Beaker
       end
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
+      if host[:platform] =~ /cisco/ 
+        cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string]
+      else
+        cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
+      end
       cmd_line_array << append_command unless (cmd =~ /ntpdate/ && host[:platform] =~ /cisco_nexus/)
       cmd_line_array.compact.reject( &:empty? ).join( ' ' )
     end
