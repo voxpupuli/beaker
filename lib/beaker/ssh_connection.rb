@@ -65,24 +65,32 @@ module Beaker
 
     # connect to the host
     def connect
-      #try three ways to connect to host (vmhostname, ip, hostname)
-      methods = []
-      if @vmhostname
-        @ssh ||= connect_block(@vmhostname, @user, @ssh_opts)
-        methods << "vmhostname (#{@vmhostname})"
+      # Methods of connection to try
+      # IP should be the prefered method here as not all virtualization technologies
+      # support DNS based resolution
+      methods = ['ip', 'vmhostname', 'hostname']
+
+      # If we have a valid preference put that on the head
+      if @options[:connection_method]
+        preference = @options[:connection_method]
+        if methods.include?(preference)
+          methods.delete(preference)
+          methods.unshift(preference)
+        end
       end
-      if @ip && !@ssh
-        @ssh ||= connect_block(@ip, @user, @ssh_opts)
-        methods << "ip (#{@ip})"
+
+      # Try each method in turn until we succeed
+      methods.each do |method|
+        @ssh ||= connect_block(instance_variable_get("@#{method}"), @user, @ssh_opts)
+        break if @ssh
       end
-      if @hostname && !@ssh
-        @ssh ||= connect_block(@hostname, @user, @ssh_opts)
-        methods << "hostname (#{@hostname})"
-      end
+
       if not @ssh
-        @logger.error "Failed to connect to #{@hostname}, attempted #{methods.join(', ')}"
+        values = methods.map{|x| instance_variable_get("@#{x}")}
+        @logger.error "Failed to connect to #{@hostname}, attempted #{values.join(', ')}"
         raise RuntimeError, "Cannot connect to #{@hostname}"
       end
+
       @ssh
     end
 
