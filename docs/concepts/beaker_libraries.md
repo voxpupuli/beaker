@@ -16,4 +16,5 @@ To learn how to create beaker libraries, see the [Beaker-Template](https://githu
 | beaker-http | Adds ability to dispatch http traffic from the coordinator | [Github Repo](https://github.com/puppetlabs/beaker-http/) |
 | Beaker Rubymine Plugin | An IntelliJ IDEA plugin making Beaker test runs a native IDE experience | [Github Repo](https://github.com/samwoods1/BeakerRubyMinePlugin) |
 | beaker-rspec | A bridge between beaker itself and [rspec](https://github.com/rspec/rspec); also integrates [serverspec](http://serverspec.org/) | [Github Repo](https://github.com/puppetlabs/beaker-rspec/) |
+| beaker-puppet | Adds helper & install methods for Puppet-specific tasks | [Github Repo](https://github.com/puppetlabs/beaker-puppet/)
 
