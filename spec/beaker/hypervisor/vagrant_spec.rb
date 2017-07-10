@@ -420,6 +420,13 @@ EOF
         vagrant.provision
       end
 
+      it "notifies user of failed provision" do
+        vagrant.provision
+        expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).and_raise( RuntimeError )
+        expect( options['logger'] ).to receive( :debug ).with( /Vagrantfile/ )
+        expect{ vagrant.provision }.to raise_error( RuntimeError )
+      end
+
       it "can cleanup" do
         expect( vagrant ).to receive( :vagrant_cmd ).with( "destroy --force" ).once
         expect( FileUtils ).to receive( :rm_rf ).once

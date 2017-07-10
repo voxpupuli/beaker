@@ -175,7 +175,24 @@ module Beaker
       if @options[:provision]
         #setting up new vagrant hosts
         #make sure that any old boxes are dead dead dead
-        vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
+        begin
+          vagrant_cmd("destroy --force") if File.file?(@vagrant_file)
+        rescue RuntimeError => e
+          # LATER: use <<~MESSAGE once we're on Ruby 2.3
+          @logger.debug(%Q{
+            Beaker failed to destroy the existing VM's. If you think this is
+            an error or you upgraded from an older version of beaker try
+            verifying the VM exists and deleting the existing Vagrantfile if
+            you believe it is safe to do so. WARNING: If a VM still exists
+            please run 'vagrant destroy'.
+
+            cd #{@vagrant_path}
+            vagrant status
+            vagrant destroy # only need to run this is a VM is not created
+            rm #{@vagrant_file} # only do this if all VM's are actually destroyed
+          }.each_line.map(&:strip).join("\n"))
+          raise e
+        end
 
         make_vfile @hosts, @options
 
