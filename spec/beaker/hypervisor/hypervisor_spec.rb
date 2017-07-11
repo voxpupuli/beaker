@@ -22,27 +22,6 @@ module Beaker
       expect( hypervisor.create( 'fusion', [], make_opts() ) ).to be === fusion
     end
 
-    it "creates a vagrant hypervisor for vagrant hosts" do
-      vagrant = double( 'vagrant' )
-      allow( vagrant ).to receive( :provision ).and_return( true )
-      expect( Vagrant ).to receive( :new ).once.and_return( vagrant )
-      expect( hypervisor.create( 'vagrant', [], make_opts() ) ).to be === vagrant
-    end
-
-    it "creates a vagrant_fusion hypervisor for vagrant vmware fusion hosts" do
-      vagrant = double( 'vagrant_fusion' )
-      allow( vagrant ).to receive( :provision ).and_return( true )
-      expect( VagrantFusion ).to receive( :new ).once.and_return( vagrant )
-      expect( hypervisor.create( 'vagrant_fusion', [], make_opts() ) ).to be === vagrant
-    end
-
-    it "creates a vagrant_virtualbox hypervisor for vagrant virtualbox hosts" do
-      vagrant = double( 'vagrant_virtualbox' )
-      allow( vagrant ).to receive( :provision ).and_return( true )
-      expect( VagrantVirtualbox ).to receive( :new ).once.and_return( vagrant )
-      expect( hypervisor.create( 'vagrant_virtualbox', [], make_opts() ) ).to be === vagrant
-    end
-
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
