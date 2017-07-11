@@ -185,7 +185,7 @@ module PSWindows::Exec
       keys = [key_str]
       keys << key_str.upcase if key_str.upcase != key_str
       keys.each do |env_key|
-        env_array << "#{env_key}=\"#{val}\""
+        env_array << "#{env_key}=#{val}"
       end
     end
     env_array
