@@ -46,8 +46,6 @@ module Beaker
           Beaker::VagrantWorkstation
         when /^vagrant_parallels$/
           Beaker::VagrantParallels
-        when /^google$/
-          Beaker::GoogleCompute
         when /^docker$/
           Beaker::Docker
         when /^openstack$/
@@ -155,7 +153,6 @@ end
   'aws_sdk',
   'vsphere',
   'docker',
-  'google_compute',
   'openstack',
   'noop'
 ].each do |lib|
