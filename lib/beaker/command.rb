@@ -78,7 +78,7 @@ module Beaker
       end
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      if host[:platform] =~ /cisco/ 
+      if host[:platform] =~ /cisco_ios_xr/ 
         cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string]
       else
         cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
