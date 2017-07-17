@@ -15,13 +15,6 @@ module Beaker
       expect( hypervisor.create( 'vsphere', [], make_opts() ) ).to be === vsphere
     end
 
-    it "creates a fusion hypervisor for fusion hosts" do
-      fusion = double( 'fusion' )
-      allow( fusion ).to receive( :provision ).and_return( true )
-      expect( Fusion ).to receive( :new ).once.and_return( fusion )
-      expect( hypervisor.create( 'fusion', [], make_opts() ) ).to be === fusion
-    end
-
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }

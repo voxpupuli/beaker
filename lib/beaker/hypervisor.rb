@@ -28,8 +28,6 @@ module Beaker
           Beaker::Solaris
         when /^vsphere$/
           Beaker::Vsphere
-        when /^fusion$/
-          Beaker::Fusion
         when /^ec2$/
           Beaker::AwsSdk
         when /^google$/
@@ -130,7 +128,6 @@ end
 
 [
   'vsphere_helper',
-  'fusion',
   'aws_sdk',
   'vsphere',
   'docker',
