@@ -274,7 +274,7 @@ module Beaker
       # create new connection object if necessary
       @connection ||= SshConnection.connect( { :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
                                              self['user'],
-                                             self['ssh'], { :logger => @logger } )
+                                             self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference] } )
       # update connection information
       if self['ip'] && (@connection.ip != self['ip'])
         @connection.ip = self['ip']
