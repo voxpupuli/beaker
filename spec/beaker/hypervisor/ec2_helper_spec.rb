@@ -30,7 +30,7 @@ describe Beaker::EC2Helper do
     end
 
     it "can set ports for master host" do
-      expect(ec2.amiports(master_host)).to be === [22, 61613, 8139, 8140, 9999]
+      expect(ec2.amiports(master_host)).to be === [22, 61613, 8139, 8140, 8142, 9999]
     end
 
     it "can set ports for dashboard host" do
@@ -38,7 +38,7 @@ describe Beaker::EC2Helper do
     end
 
     it "can set ports for combined master/database/dashboard host" do
-      expect(ec2.amiports(all_in_one_host)).to be === [22, 61613, 8139, 5432, 8080, 8081, 8140, 443, 4433, 4435]
+      expect(ec2.amiports(all_in_one_host)).to be === [22, 61613, 8139, 5432, 8080, 8081, 8140, 8142, 443, 4433, 4435]
     end
   end
 end

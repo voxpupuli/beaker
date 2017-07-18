@@ -976,5 +976,40 @@ module Beaker
         end
       end
     end
+
+    describe 'test_split_install' do
+      it 'does not add port 8143 if master, dashboard and database are on the same host' do
+        @hosts = [@hosts[0]]
+        @hosts[0][:roles] = ["master", "dashboard", "database"]
+        allow(aws).to receive(:test_split_install)
+        expect(@hosts[0]).not_to have_key(:additional_ports)
+        aws
+      end
+
+      it 'does not add port 8143 if host does not have master, dashboard or database at all' do
+        @hosts = [@hosts[0]]
+        @hosts[0][:roles] = ["agent", "frictionless"]
+        allow(aws).to receive(:test_split_install)
+        expect(@hosts[0]).not_to have_key(:additional_ports)
+        aws
+      end
+
+      it 'adds port 8143 to all the hosts for split install that has either master, dashboard or database' do
+        @hosts = [@hosts[0], @hosts[1], @hosts[2], @hosts[3]]
+        @hosts[0][:roles] = ["master"]
+        @hosts[1][:roles] = ["dashboard"]
+        @hosts[2][:roles] = ["database"]
+        @hosts[3][:roles] = ["agent"]
+        allow(aws).to receive(:test_split_install)
+        expect(@hosts[0]).to have_key(:additional_ports)
+        expect(@hosts[0][:additional_ports]).to include(8143)
+        expect(@hosts[1]).to have_key(:additional_ports)
+        expect(@hosts[1][:additional_ports]).to include(8143)
+        expect(@hosts[2]).to have_key(:additional_ports)
+        expect(@hosts[2][:additional_ports]).to include(8143)
+        expect(@hosts[3]).not_to have_key(:additional_ports)
+        aws
+      end
+    end
   end
 end
