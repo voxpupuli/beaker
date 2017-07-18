@@ -36,6 +36,7 @@ module Beaker
       AWS.config(config)
 
       @ec2 = AWS::EC2.new()
+      test_split_install()
     end
 
     # Provision all hosts on EC2 using the AWS::EC2 API
@@ -984,6 +985,18 @@ module Beaker
         :access_key => default[:aws_access_key_id],
         :secret_key => default[:aws_secret_access_key],
       }
+    end
+
+    # Adds port 8143 to host[:additional_ports]
+    # if master, database and dashboard are not on same instance
+    def test_split_install
+      @hosts.each do |host|
+        mono_roles = ['master', 'database', 'dashboard']
+        roles_intersection = host[:roles] & mono_roles
+        if roles_intersection.size != 3 && roles_intersection.any?
+          host[:additional_ports] ? host[:additional_ports].push(8143) : host[:additional_ports] = [8143]
+        end
+      end
     end
   end
 end
