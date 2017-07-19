@@ -688,10 +688,9 @@ module Beaker
       keys = Array(@options[:ssh][:keys])
       keys << '~/.ssh/id_rsa'
       keys << '~/.ssh/id_dsa'
-      key_file = nil
-      keys.each do |key|
-        key_filename = File.expand_path(key + '.pub')
-        key_file = key_filename if File.exists?(key_filename)
+      key_file = keys.find do |key|
+        key_pub = key + '.pub'
+        File.exist?(File.expand_path(key_pub)) && File.exist?(File.expand_path(key))
       end
 
       if key_file
@@ -699,7 +698,7 @@ module Beaker
       else
         raise RuntimeError, "Expected to find a public key, but couldn't in #{keys}"
       end
-      File.read(key_file)
+      File.read(File.expand_path(key_file + '.pub'))
     end
 
     # Generate a key prefix for key pair names
