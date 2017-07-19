@@ -30,8 +30,6 @@ module Beaker
           Beaker::Vsphere
         when /^ec2$/
           Beaker::AwsSdk
-        when /^google$/
-          Beaker::GoogleCompute
         when /^docker$/
           Beaker::Docker
         when /^openstack$/
@@ -131,7 +129,6 @@ end
   'aws_sdk',
   'vsphere',
   'docker',
-  'google_compute',
   'openstack',
   'noop'
 ].each do |lib|
