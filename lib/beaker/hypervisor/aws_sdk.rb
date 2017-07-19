@@ -48,11 +48,6 @@ module Beaker
       # Perform the main launch work
       launch_all_nodes()
 
-      wait_for_status_netdev()
-
-      # Add metadata tags to each instance
-      add_tags()
-
       # Grab the ip addresses and dns from EC2 for each instance to use for ssh
       populate_dns()
 
@@ -406,7 +401,12 @@ module Beaker
           instance = create_instance(host, ami_spec, nil)
           instances.push({:instance => instance, :host => host})
         end
+        # Add metadata tags to each instance
+        add_tags(instances)
+        # Verify that all hosts are running
         wait_for_status(:running, instances)
+        # Verify extra network device checks, if any
+        wait_for_status_netdev(instances)
       rescue Exception => ex
         @logger.notify("aws-sdk: exception #{ex.class}: #{ex}")
         kill_instances(instances.map{|x| x[:instance]})
@@ -437,9 +437,9 @@ module Beaker
       # Wait for each node to reach status :running
       @logger.notify("aws-sdk: Waiting for all hosts to be #{status}")
       instances.each do |x|
-        name = x[:name]
+        host = x[:host]
         instance = x[:instance]
-        @logger.notify("aws-sdk: Wait for node #{name} to be #{status}")
+        @logger.notify("aws-sdk: Wait for node #{host.name} to be #{status}")
         # Here we keep waiting for the machine state to reach ':running' with an
         # exponential backoff for each poll.
         # TODO: should probably be a in a shared method somewhere
@@ -458,7 +458,7 @@ module Beaker
               raise "Instance never reached state #{status}"
             end
           rescue AWS::EC2::Errors::InvalidInstanceID::NotFound => e
-            @logger.debug("Instance #{name} not yet available (#{e})")
+            @logger.debug("Instance #{host.name} not yet available (#{e})")
           end
           backoff_sleep(tries)
         end
@@ -467,17 +467,18 @@ module Beaker
 
     # Handles special checks needed for netdev platforms.
     #
-    # @note if any host is an netdev one, these checks will happen once across all
-    #   of the hosts, and then we'll exit
+    # @note After having a "running" status we must also wait for the network
+    # devices to be "ok"
+    # @note This is hardcoded to look only for f5 and netscaler devices
     #
     # @return [void]
     # @api private
-    def wait_for_status_netdev()
-      @hosts.each do |host|
+    def wait_for_status_netdev(instances)
+      instances.each do |x|
+        host = x[:host]
+        instance = x[:instance]
         if host['platform'] =~ /f5-|netscaler/
-          wait_for_status(:running, @hosts)
-
-          wait_for_status(nil, @hosts) do |instance|
+          wait_for_status("ok", [{:host => host, :instance => instance}]) do |instance|
             instance_status_collection = instance.client.describe_instance_status({:instance_ids => [instance.id]})
             first_instance = instance_status_collection[:instance_status_set].first
             first_instance[:system_status][:status] == "ok"
@@ -492,9 +493,10 @@ module Beaker
     #
     # @return [void]
     # @api private
-    def add_tags
-      @hosts.each do |host|
-        instance = host['instance']
+    def add_tags(instances)
+      instances.each do |x|
+        host = x[:host]
+        instance = x[:instance]
 
         # Define tags for the instance
         @logger.notify("aws-sdk: Add tags for #{host.name}")
