@@ -8,13 +8,6 @@ module Beaker
       expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(RuntimeError, "Invalid hypervisor: custom_hypervisor")
     end
 
-    it "creates a vsphere hypervisor for vsphere hosts" do
-      vsphere = double( 'vsphere' )
-      allow( vsphere ).to receive( :provision ).and_return( true )
-      expect( Vsphere ).to receive( :new ).once.and_return( vsphere )
-      expect( hypervisor.create( 'vsphere', [], make_opts() ) ).to be === vsphere
-    end
-
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }

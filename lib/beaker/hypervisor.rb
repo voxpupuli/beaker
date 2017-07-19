@@ -26,8 +26,6 @@ module Beaker
           Beaker::Aixer
         when /^solaris$/
           Beaker::Solaris
-        when /^vsphere$/
-          Beaker::Vsphere
         when /^ec2$/
           Beaker::AwsSdk
         when /^docker$/
@@ -125,9 +123,7 @@ module Beaker
 end
 
 [
-  'vsphere_helper',
   'aws_sdk',
-  'vsphere',
   'docker',
   'openstack',
   'noop'
