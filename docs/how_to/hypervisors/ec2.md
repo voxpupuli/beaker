@@ -50,9 +50,10 @@ Ports to be opened on the instance, in addition to those opened by Beaker to sup
 
 Ports opened by default:
 * all hosts have [22, 61613, 8139] opened
-* `master` will also have 8140 opened
+* `master` will also have [8140, 8142] opened
 * `dashboard` will also have [443, 4433, 4435] opened
 * `database` will also have [5432, 8080, 8081] opened
+* If you have a split install, all the hosts with `master`, `dashboard` and `database` role will have port 8143 opened
 
 ####`amisize` ####
 The [instance type](https://aws.amazon.com/ec2/instance-types/) - defaults to `m1.small`.  

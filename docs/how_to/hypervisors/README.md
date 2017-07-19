@@ -41,9 +41,11 @@ In order to offset this, we've made a listing of gems and community-supported fo
 
 Hypervisor gems made by puppet (pre-included in beaker 3.x):
 
-| Hypervisor             | Fork                                                      |
-|:----------------------:|:---------------------------------------------------------:|
-| Vmpooler        | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler) |
+| Hypervisor               | Fork                                                             |
+| :----------------------: | :---------------------------------------------------------:      |
+| Vmpooler                 | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler) |
+| Vagrant                  | [beaker-vagrant](https://github.com/puppetlabs/beaker-vagrant) |
+| VMware                   | [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)   |
 
 Hypervisor gems and beaker forks made by community:
 

@@ -51,12 +51,13 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-puppet', '~> 0.0'
 
   # Optional provisioner specific support
-  s.add_runtime_dependency 'fission', '~> 0.4'
   s.add_runtime_dependency 'aws-sdk-v1', '~> 1.57'
   s.add_runtime_dependency 'docker-api'
   s.add_runtime_dependency 'fog', '~> 1.38'
   s.add_runtime_dependency 'beaker-vmpooler', '~> 0.1'
   s.add_runtime_dependency 'beaker-google', '~> 0.1'
+  s.add_runtime_dependency 'beaker-vagrant', '~> 0.1'
+  s.add_runtime_dependency 'beaker-vmware', '~> 0.1'
 
   # So fog doesn't always complain of unmet AWS dependencies
   s.add_runtime_dependency 'unf', '~> 0.1'
