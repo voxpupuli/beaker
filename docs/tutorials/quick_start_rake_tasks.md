@@ -8,7 +8,7 @@ We have developed some rake tasks to help new Beaker users get up and running qu
 * You will need to have already completed the Beaker installation tutorial - [Beaker Installation](installation.md)
 
 * Hypervisors are services that provision SUTs for Beaker. We have made two available in this quick start guide to allow you to get up 
-and running. See the docs on how to setup [Vmpooler](../how_to/hypervisors/vsphere.md) and [Vagrant](../how_to/hypervisors/vagrant.md).
+and running. See the docs on how to setup [Vmpooler](https://github.com/puppetlabs/beaker-vmpooler/blob/master/vmpooler.md) and [Vagrant](https://github.com/puppetlabs/beaker-vagrant/blob/master/docs/vagrant.md).
 
 
 ## How to use them
