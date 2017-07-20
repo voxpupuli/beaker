@@ -88,6 +88,12 @@ module Beaker
             @cmd_options[:preserve_hosts] = mode || 'always'
           end
 
+          opts.on '--debug-errors',
+                  'Enter a pry console if or when a test fails',
+                  '(default: false)' do |bool|
+            @cmd_options[:debug_errors] = bool
+          end
+
           opts.on '--root-keys',
                   'Install puppetlabs pubkeys for superuser',
                   '(default: false)' do |bool|

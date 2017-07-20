@@ -31,7 +31,7 @@ module Beaker
     #     end
     #
     module Structure
-
+      require 'pry'
       # Provides a method to help structure tests into coherent steps.
       # @param [String] step_name The name of the step to be logged.
       # @param [Proc] block The actions to be performed in this step.
@@ -40,7 +40,16 @@ module Beaker
         set_current_step_name(step_name)
         if block_given?
           logger.step_in()
-          yield
+          begin
+            yield
+          rescue Exception => e
+            if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
+              logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
+              logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
+              binding.pry
+            end
+            raise e
+          end
           logger.step_out()
         end
       end
