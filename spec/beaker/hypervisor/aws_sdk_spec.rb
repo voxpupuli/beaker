@@ -630,7 +630,6 @@ module Beaker
 	  end
           expect(set_hostnames).to eq(@hosts)
           @hosts.each do |host|
-            puts host[:name]
             expect(host[:vmhostname]).to eq(host[:name])
             expect(host[:vmhostname]).to eq(host.hostname)
           end
@@ -652,8 +651,10 @@ module Beaker
       it "retrieves contents from local ~/.ssh/id_rsa.pub file" do
         # Stub calls to file read/exists
         key_value = 'foobar_Rsa'
-        allow(File).to receive(:exists?).with(/id_dsa.pub/) { false }
-        allow(File).to receive(:exists?).with(/id_rsa.pub/) { true }
+        allow(File).to receive(:exist?).with(/id_dsa.pub/) { false }
+        allow(File).to receive(:exist?).with(/id_dsa/) { false }
+        allow(File).to receive(:exist?).with(/id_rsa.pub/) { true }
+        allow(File).to receive(:exist?).with(/id_rsa/) { true }
         allow(File).to receive(:read).with(/id_rsa.pub/) { key_value }
 
         # Should return contents of allow( previously ).to receivebed id_rsa.pub
@@ -663,8 +664,10 @@ module Beaker
       it "retrieves contents from local ~/.ssh/id_dsa.pub file" do
         # Stub calls to file read/exists
         key_value = 'foobar_Dsa'
-        allow(File).to receive(:exists?).with(/id_rsa.pub/) { false }
-        allow(File).to receive(:exists?).with(/id_dsa.pub/) { true }
+        allow(File).to receive(:exist?).with(/id_rsa.pub/) { false }
+        allow(File).to receive(:exist?).with(/id_rsa/) { false }
+        allow(File).to receive(:exist?).with(/id_dsa.pub/) { true }
+        allow(File).to receive(:exist?).with(/id_dsa/) { true }
         allow(File).to receive(:read).with(/id_dsa.pub/) { key_value }
 
         expect(public_key).to be === key_value
@@ -680,8 +683,8 @@ module Beaker
         aws.instance_variable_set( :@options, opts )
 
         key_value = 'foobar_Custom2'
-        allow(File).to receive(:exists?).with(anything) { false }
-        allow(File).to receive(:exists?).with(/fake_key2/) { true }
+        allow(File).to receive(:exist?).with(anything) { false }
+        allow(File).to receive(:exist?).with(/fake_key2/) { true }
         allow(File).to receive(:read).with(/fake_key2/) { key_value }
 
         expect(public_key).to be === key_value
