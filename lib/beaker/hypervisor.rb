@@ -26,8 +26,6 @@ module Beaker
           Beaker::Aixer
         when /^solaris$/
           Beaker::Solaris
-        when /^ec2$/
-          Beaker::AwsSdk
         when /^docker$/
           Beaker::Docker
         when /^openstack$/
@@ -123,7 +121,6 @@ module Beaker
 end
 
 [
-  'aws_sdk',
   'docker',
   'openstack',
   'noop'
