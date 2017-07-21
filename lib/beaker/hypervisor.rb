@@ -26,8 +26,6 @@ module Beaker
           Beaker::Aixer
         when /^solaris$/
           Beaker::Solaris
-        when /^ec2$/
-          Beaker::AwsSdk
         when /^docker$/
           Beaker::Docker
         when /^openstack$/
@@ -146,7 +144,6 @@ Please check hypervisor.rb file's "self.connection_preference" method for an exa
 end
 
 [
-  'aws_sdk',
   'docker',
   'openstack',
   'noop'
