@@ -710,12 +710,17 @@ module Beaker
         host.get_public_ip
       end
 
+      it 'call upon openstack host to get the ip address' do
+        host.host_hash[:hypervisor] = 'openstack'
+        expect(host.get_public_ip).to be(host.host_hash[:ip])
+      end
+
       it 'returns nil when no matching hypervisor is found' do
         host.host_hash[:hypervisor] = 'vmpooler'
         expect(host.get_public_ip).to be(nil)
       end
 
-      it 'calls execute with curl if the host_hash[:instance] is not defined and the host is not an instance of Windows::Host' do
+      it 'calls execute with curl if the host_hash[:instance] is not defined for ec2 and the host is not an instance of Windows::Host' do
         host.host_hash[:hypervisor] = 'ec2'
         host.host_hash[:instance] = nil
         expect(host).to receive(:instance_of?).with(Windows::Host).and_return(false)
@@ -723,13 +728,30 @@ module Beaker
         host.get_public_ip
       end
 
-      it 'calls execute with wget if the host_hash[:instance] is not defined and the host is an instance of Windows::Host' do
+      it 'calls execute with wget if the host_hash[:instance] is not defined for ec2 and the host is an instance of Windows::Host' do
         host.host_hash[:hypervisor] = 'ec2'
         host.host_hash[:instance] = nil
         expect(host).to receive(:instance_of?).with(Windows::Host).and_return(true)
         expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
         host.get_public_ip
       end
+
+      it 'calls execute with curl if the host_hash[:ip] is not defined for openstack and the host is not an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'openstack'
+        host.host_hash[:ip] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(false)
+        expect(host).to receive(:execute).with("curl http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+
+      it 'calls execute with wget if the host_hash[:ip] is not defined for openstack and the host is an instance of Windows::Host' do
+        host.host_hash[:hypervisor] = 'openstack'
+        host.host_hash[:ip] = nil
+        expect(host).to receive(:instance_of?).with(Windows::Host).and_return(true)
+        expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
+        host.get_public_ip
+      end
+
     end
 
     describe '#ip' do

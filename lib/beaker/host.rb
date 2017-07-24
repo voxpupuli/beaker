@@ -242,9 +242,11 @@ module Beaker
     # Determine the ip address using logic specific to the hypervisor
     def get_public_ip
       case host_hash[:hypervisor]
-      when 'ec2'
-        if host_hash[:instance]
-          host_hash[:instance].ip_address
+      when /^(ec2|openstack)$/
+        if self[:hypervisor] == 'ec2' && self[:instance]
+          return self[:instance].ip_address
+        elsif self[:hypervisor] == 'openstack' && self[:ip]
+          return self[:ip]
         else
           # In the case of using ec2 instances with the --no-provision flag, the ec2
           # instance object does not exist and we should just use the curl endpoint
