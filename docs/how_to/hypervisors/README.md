@@ -41,13 +41,14 @@ In order to offset this, we've made a listing of gems and community-supported fo
 
 Hypervisor gems made by puppet (pre-included in beaker 3.x):
 
-| Hypervisor               | Fork                                                             |
-| :----------------------: | :---------------------------------------------------------:      |
-| Vmpooler                 | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler) |
-| AWS                      | [beaker-aws](https://github.com/puppetlabs/beaker-aws)           |
-| Google Compute           | [beaker-google](https://github.com/puppetlabs/beaker-google)     |
-| Vagrant                  | [beaker-vagrant](https://github.com/puppetlabs/beaker-vagrant)   |
-| VMware/Vsphere           | [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)     |
+| Hypervisor               | Fork                                                               |
+| :----------------------: | :---------------------------------------------------------:        |
+| Vmpooler                 | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler)   |
+| AWS                      | [beaker-aws](https://github.com/puppetlabs/beaker-aws)             |
+| VMware/Vsphere           | [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)       |
+| Vagrant                  | [beaker-vagrant](https://github.com/puppetlabs/beaker-vagrant)     |
+| Openstack                | [beaker-openstack](https://github.com/puppetlabs/beaker-openstack) |
+| Google Compute           | [beaker-google](https://github.com/puppetlabs/beaker-google)       |
 
 Hypervisor gems and beaker forks made by community:
 

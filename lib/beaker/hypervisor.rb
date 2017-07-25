@@ -28,8 +28,6 @@ module Beaker
           Beaker::Solaris
         when /^docker$/
           Beaker::Docker
-        when /^openstack$/
-          Beaker::OpenStack
         when /^noop$/
           Beaker::Noop
         when /^(default)|(none)$/
@@ -145,7 +143,6 @@ end
 
 [
   'docker',
-  'openstack',
   'noop'
 ].each do |lib|
   require "beaker/hypervisor/#{lib}"
