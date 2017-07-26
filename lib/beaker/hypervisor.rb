@@ -45,8 +45,8 @@ module Beaker
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
-      self.set_ssh_connection_preference(hosts_to_provision, hypervisor)
       hypervisor.provision if options[:provision]
+
       hypervisor
     end
 
@@ -63,29 +63,6 @@ module Beaker
     #Cleanup steps to be run for a given hypervisor.  Default is nil.
     def cleanup
       nil
-    end
-
-    DEFAULT_CONNECTION_PREFERENCE = ['ip', 'vmhostname', 'hostname']
-    #SSH connection method preference. Can be overwritten by hypervisor to change the order
-    def connection_preference
-      DEFAULT_CONNECTION_PREFERENCE
-    end
-
-    #Check if overriding method returns correct array with ip, vmhostname hostname as elements
-    def self.set_ssh_connection_preference(hosts_to_provision, hypervisor)
-      if hypervisor.connection_preference.sort == DEFAULT_CONNECTION_PREFERENCE.sort
-        hosts_to_provision.each{ |h| h[:ssh_connection_preference] = hypervisor.connection_preference}
-      else
-        raise ArgumentError, <<-HEREDOC
-Hypervisor's overriding connection_pereference method is not matching the API.
-
-Make sure your hypervisor's connection_preference returns an array
-containing the following elements in any order you prefer:
-"ip", "hostname", "vmhostname"
-
-Please check hypervisor.rb file's "self.connection_preference" method for an example
-        HEREDOC
-      end
     end
 
     #Proxy package managers on tests hosts created by this hypervisor, runs before validation and configuration.

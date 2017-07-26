@@ -6,7 +6,7 @@ module Beaker
   class SshConnection
 
     attr_accessor :logger
-    attr_accessor :ip, :vmhostname, :hostname, :ssh_connection_preference
+    attr_accessor :ip, :vmhostname, :hostname
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,
@@ -33,7 +33,6 @@ module Beaker
       @ssh_opts = ssh_opts
       @logger = options[:logger]
       @options = options
-      @ssh_connection_preference = @options[:ssh_connection_preference]
     end
 
     def self.connect name_hash, user = 'root', ssh_opts = {}, options = {}
@@ -67,13 +66,21 @@ module Beaker
     # connect to the host
     def connect
       #try three ways to connect to host (vmhostname, ip, hostname)
-      # Try each method in turn until we succeed
-      methods = @ssh_connection_preference.dup
-      while (not @ssh) && (not methods.empty?) do
-        @ssh = connect_block(instance_variable_get("@#{methods.shift}"), @user, @ssh_opts)
+      methods = []
+      if @vmhostname
+        @ssh ||= connect_block(@vmhostname, @user, @ssh_opts)
+        methods << "vmhostname (#{@vmhostname})"
       end
-      unless @ssh
-        @logger.error "Failed to connect to #{@hostname}, attempted #{@ssh_connection_preference.join(', ')}"
+      if @ip && !@ssh
+        @ssh ||= connect_block(@ip, @user, @ssh_opts)
+        methods << "ip (#{@ip})"
+      end
+      if @hostname && !@ssh
+        @ssh ||= connect_block(@hostname, @user, @ssh_opts)
+        methods << "hostname (#{@hostname})"
+      end
+      if not @ssh
+        @logger.error "Failed to connect to #{@hostname}, attempted #{methods.join(', ')}"
         raise RuntimeError, "Cannot connect to #{@hostname}"
       end
       @ssh
