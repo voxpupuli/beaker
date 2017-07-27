@@ -22,12 +22,6 @@ module Beaker
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
 
       hyper_class = case type
-        when /^aix$/
-          Beaker::Aixer
-        when /^solaris$/
-          Beaker::Solaris
-        when /^docker$/
-          Beaker::Docker
         when /^noop$/
           Beaker::Noop
         when /^(default)|(none)$/
@@ -118,9 +112,4 @@ module Beaker
   end
 end
 
-[
-  'docker',
-  'noop'
-].each do |lib|
-  require "beaker/hypervisor/#{lib}"
-end
+require "beaker/hypervisor/noop"

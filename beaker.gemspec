@@ -57,7 +57,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'nokogiri', '~> 1.8.0'
 
   # Optional provisioner specific support
-  s.add_runtime_dependency 'docker-api'
+  s.add_runtime_dependency 'beaker-docker', '~> 0.1'
   s.add_runtime_dependency 'beaker-aws', '~> 0.1'
   s.add_runtime_dependency 'beaker-vmpooler', '~> 0.1'
   s.add_runtime_dependency 'beaker-google', '~> 0.1'
