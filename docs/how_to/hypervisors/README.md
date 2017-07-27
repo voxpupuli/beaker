@@ -45,8 +45,9 @@ Hypervisor gems made by puppet (pre-included in beaker 3.x):
 | :----------------------: | :---------------------------------------------------------:        |
 | Vmpooler                 | [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler)   |
 | AWS                      | [beaker-aws](https://github.com/puppetlabs/beaker-aws)             |
-| VMware/Vsphere           | [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)       |
 | Vagrant                  | [beaker-vagrant](https://github.com/puppetlabs/beaker-vagrant)     |
+| VMware/Vsphere           | [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)       |
+| Docker                   | [beaker-docker](https://github.com/puppetlabs/beaker-docker)       |
 | Openstack                | [beaker-openstack](https://github.com/puppetlabs/beaker-openstack) |
 | Google Compute           | [beaker-google](https://github.com/puppetlabs/beaker-google)       |
 
