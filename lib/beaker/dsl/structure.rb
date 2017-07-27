@@ -54,6 +54,63 @@ module Beaker
         end
       end
 
+      # Provides a method to help manual tests. So we can use beaker to set up
+      # the environment, then prompt a user to manually check the setup.
+      # @param [String] step_name The name of the step to be logged.
+      def manual_step step_name
+        require 'readline'
+        logger.notify "\n* #{step_name}\n"
+        if(!@options.has_key?(:exec_manual_tests))
+          # if the option -exec-manual-tests is not set then this has executed outside of a manual tests
+          # so we raise an error to avoid issues
+          raise('--exec-manual-tests option not set, this means a manual_step was used outside a manual_test')
+        end
+
+        set_current_step_name(step_name)
+        # Here we prompt the user to tell us if the step passed or failed
+        loop do 
+          input = Readline.readline('Did this step pass, Y/n? ', true).squeeze(" ").strip.downcase
+          if %w(y yes).include?(input)
+            break
+          elsif %w(n no).include?(input)
+            # if the step failed, the user can enter a fail message.
+            # we loops to ensure they give use a fail message
+            fail_message = ''
+            loop do
+              fail_message = Readline.readline('What was the reason for failure? ', true).squeeze(" ").strip
+              if fail_message == ''
+                # if nothing is entered we tell the user to enter something
+                puts "No reason for failure given, please enter reason for failure."
+              else
+                break
+              end
+            end
+            raise Beaker::DSL::FailTest, fail_message
+          else
+            # if something other than Y or n is returned we ask them again
+            puts "Please enter Y or n."
+          end
+        end
+      end
+
+      # Provides a method to mark manual tests.
+      # If the --exec-manual-tests param is not set then we skip the test
+      # this is so manual tests do not execute by mistake
+      # @param [String] manual_test_name The name of the test to be logged.
+      # @param [Proc] block The actions to be performed during this test.
+      #
+      def manual_test manual_test_name, &block
+        if(@options.has_key?(:exec_manual_tests) && @options[:exec_manual_tests] == true)
+          # here the option is set so we run the test as normal
+          test_name manual_test_name, &block 
+        else
+          # here no option was set so we log the test name and skip it
+          test_name manual_test_name
+          raise( Beaker::DSL::SkipTest,
+                 '--exec-manual-tests option not set, so skipping manual test' )
+        end
+      end
+
       # Provides a method to name tests.
       #
       # @param [String] my_name The name of the test to be logged.

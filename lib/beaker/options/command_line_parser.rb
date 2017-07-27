@@ -94,6 +94,12 @@ module Beaker
             @cmd_options[:debug_errors] = bool
           end
 
+          opts.on '--exec-manual-tests',
+                  'Execute manual tests',
+                  '(default: false)' do |bool|
+            @cmd_options[:exec_manual_tests] = bool
+          end
+
           opts.on '--root-keys',
                   'Install puppetlabs pubkeys for superuser',
                   '(default: false)' do |bool|

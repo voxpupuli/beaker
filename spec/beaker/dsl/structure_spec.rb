@@ -48,6 +48,109 @@ describe ClassMixedWithDSLStructure do
     end
   end
 
+  describe '#manual_step' do
+    context 'without exec manual test option' do
+      let( :options ) { {} }
+      it 'throws an error' do
+        expect( Readline ).not_to receive( :readline )
+        expect { subject.manual_step 'blah' do; end }.to raise_error StandardError
+      end
+    end
+
+    context 'with exec manual test option' do
+      let( :options ) { {exec_manual_tests: nil} }
+      it 'requires a name' do
+        expect { subject.manual_step do; end }.to raise_error ArgumentError
+      end
+
+      it 'notifies the logger' do
+        subject.instance_variable_set(:@options, options)
+        allow( subject ).to receive( :set_current_step_name )
+        expect( subject ).to receive( :logger ).and_return( logger )
+        expect( logger ).to receive( :notify )
+        allow( Readline ).to receive( :readline ).and_return( 'Y')
+        subject.manual_step 'blah'
+      end
+    end
+
+    context 'with exec manual test option set to true' do
+      let( :options ) { {exec_manual_tests: true} }
+      it 'requires a name' do
+        expect { subject.manual_step do; end }.to raise_error ArgumentError
+      end
+
+      it 'pass when user enters Y' do
+        subject.instance_variable_set(:@options, options)
+        allow( subject ).to receive( :set_current_step_name )
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow( logger ).to receive( :notify )
+        expect( Readline ).to receive( :readline ).and_return( 'Y')
+        subject.manual_step 'blahblah'
+      end
+
+      it 'fails when user enters n and uses default error when no message is entered' do
+        subject.instance_variable_set(:@options, options)
+        allow( subject ).to receive( :set_current_step_name )
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow( logger ).to receive( :notify )
+        expect( Readline ).to receive( :readline ).and_return('n', 'step failed')
+        expect { subject.manual_step 'blah two' do; end }.to raise_error(Beaker::DSL::FailTest, 'step failed')
+      end
+    end
+  end
+
+  describe '#manual_test' do
+    context 'without exec manual test option' do
+      let( :options ) { {} }
+      it 'requires a name' do
+        expect { subject.manual_test do; end }.to raise_error ArgumentError
+      end
+
+      it 'raises a skip test' do
+        subject.instance_variable_set(:@options, options)
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow( logger ).to receive( :notify )
+        test_name = 'random test name'
+        expect { subject.manual_test test_name do; end }.to raise_error Beaker::DSL::SkipTest
+      end
+    end
+
+    context 'with exec manual test option' do
+      let( :options ) { {exec_manual_tests: true} }
+      it 'requires a name' do
+        expect { subject.manual_test do; end }.to raise_error ArgumentError
+      end
+
+      it 'notifies the logger' do
+        subject.instance_variable_set(:@options, options)
+        expect( subject ).to receive( :logger ).and_return( logger )
+        expect( logger ).to receive( :notify )
+        subject.manual_test 'blah blah'
+      end
+
+      it 'yields if a block is given' do
+        subject.instance_variable_set(:@options, options)
+        expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
+        expect( logger ).to receive( :notify )
+        expect( logger ).to receive( :step_in )
+        expect( logger ).to receive( :step_out )
+        expect( subject ).to receive( :foo )
+        subject.manual_test 'blah' do
+          subject.foo
+        end
+      end
+
+      it 'sets the metadata' do
+        subject.instance_variable_set(:@options, options)
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow( logger ).to receive( :notify )
+        test_name = 'test is setting metadata yay!'
+        subject.manual_test test_name
+        expect( metadata[:case][:name] ).to be === test_name
+      end
+    end
+  end
+
   describe '#test_name' do
 
     it 'requires a name' do
