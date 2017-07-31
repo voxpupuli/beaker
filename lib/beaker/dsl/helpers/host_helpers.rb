@@ -260,7 +260,7 @@ module Beaker
         #
         # @return [Result] Returns the result of the #scp_from operation.
         def archive_file_from(host, from_path, opts = {}, archive_root = 'archive/sut-files', archive_name = 'sut-files.tgz')
-          require 'archive/tar/minitar'
+          require 'minitar'
           filedir = File.dirname(from_path)
           targetdir = File.join(archive_root, host.hostname, filedir)
           # full path to check for existance later
@@ -277,7 +277,7 @@ module Beaker
         # @visibility private
         def create_tarball(path, archive_name)
           tgz = Zlib::GzipWriter.new(File.open(archive_name, 'wb'))
-          Archive::Tar::Minitar.pack(path, tgz)
+          Minitar.pack(path, tgz)
         end
         private :create_tarball
 

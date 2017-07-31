@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
 
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
-  s.add_runtime_dependency 'minitar', '~> 0.5.4'
+  s.add_runtime_dependency 'minitar', '~> 0.6'
 
   s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'net-ssh', '~> 4.0'
