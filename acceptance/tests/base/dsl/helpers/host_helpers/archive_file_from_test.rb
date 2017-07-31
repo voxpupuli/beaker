@@ -40,7 +40,7 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
       expected_path = File.join(tmpdir, default)
 
       tgz = Zlib::GzipReader.new(File.open(tar_path, 'rb'))
-      Archive::Tar::Minitar.unpack(tgz, expected_path)
+      Minitar.unpack(tgz, expected_path)
       assert_equal('number of the beast', File.read(expected_path + '/' + filepath).strip)
     end
   end
