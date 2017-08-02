@@ -1,19 +1,23 @@
-## What's Pry?
+# Debug beaker tests
+
+beaker includes [pry-byebug](https://github.com/deivid-rodriguez/pry-byebug), a gem that combines two powerful related tools: pry and byebug
+
+## Pry
+
+### What's Pry?
 
 [Pry](http://pryrepl.org/) is a powerful Ruby editing and debugging tool.  Beaker uses Pry runtime invocation to create a developer console.
 
-## Set it up!
+### Set it up!
 
-Pry is included in the Beaker 1.13+ development gems and is available by default.  
+Add Pry to individual tests by adding `require 'pry'` as the first line in the Ruby test file.
 
-Pre-1.13.0 add Pry with `gem install pry`, then add Pry to individual tests by adding `require 'pry'` as the first line in the Ruby test file.
-
-## Invoke the Developer Console
+### Invoke the Developer Console
 
 In a Beaker test file call `binding.pry` to invoke the console.  Place it where you want access to the full, current Beaker environment.
 
-## Example
-### Example test trypry.rb
+### Example
+#### Example test trypry.rb
 Here's a test file that exercises different ways of running commands on Beaker hosts.  At the end of the main `hosts.each` loop I've included `binding.pry` to invoke the console.
 
 ```
@@ -40,7 +44,7 @@ hosts.each do |h|
 end
 ```
 
-### Sample output to the first `binding.pry` call:
+#### Sample output to the first `binding.pry` call:
 ```
 $ bundle exec beaker --debug --tests tests/trypry.rb --hosts configs/fusion/winfusion.cfg --no-provi
 sion
@@ -210,7 +214,7 @@ From: /Users/anode/beaker/tests/trypry.rb @ line 19 self.run_test:
 
 [1] pry(#<Beaker::TestCase>)>
 ```
-### Using the console
+#### Using the console
 At this point I have access to the console.  I have full access to Beaker hosts, the Beaker DSL and Ruby.
 
 Here's some sample console calls:
@@ -298,8 +302,109 @@ w2k8r2 executed in 0.08 seconds
 [5] pry(#<Beaker::TestCase>)> result.stdout.chomp
 => "Application Data\nDesktop\nDocuments\nFavorites\nMicrosoft\nPackage Cache\nStart Menu\nTemplates\nVMware\nbeaker.gemspec\nntuser.pol"
 ```
-### Continue regular test execution
+#### Continue regular test execution
 Simply `exit` the console.
 ```
 [6] pry(#<Beaker::TestCase>)> exit
 ```
+
+## Byebug
+
+### What is byebug?
+[Byebug](https://github.com/deivid-rodriguez/byebug) is a powerful debugger for ruby. It allows for flexible control of breakpoints, stepping through lines or the call stack. It lacks some features of pry such as source code editing and replaying code execution from within the debugging session, but can be used in combination with pry.
+
+### Using byebug to debug a test without modifying source
+It is sometimes desirable to debug a test without changing the test's code at all (i.e. not adding a breakpoint call into the test). For example, if you want to compare a test at two or more different git commits, your test source needs to remain unmodified from its committed form.
+
+byebug allows you to externally define breakpoints to keep them separate from your source code. Consider the following test file test.rb:
+
+```ruby
+test_name 'An important aspect of my product'
+
+important_expected_value = 3
+
+step 'Assert expected matches actual' do
+  actual_value = 2
+  assert_equal(important_expected_value, actual_value, 'This product is faulty')
+end
+```
+
+If you wanted to debug at line 6 to investigate the state of your System Under Test before the failing assertion executes, then create a file in your working directory named .byebugrc with contents:
+
+```
+break test.rb:7
+```
+
+You can then run beaker within byebug like this:
+
+```
+[centos@test-development project]$ bundle exec byebug beaker -t test.rb
+
+[4, 13] in /home/puppet/code/beaker/vendor/bundle/ruby/2.3.0/bin/beaker
+    4: #
+    5: # The application 'beaker' is installed as part of a gem, and
+    6: # this file is here to facilitate running it.
+    7: #
+    8:
+=>  9: require 'rubygems'
+   10:
+   11: version = ">= 0.a"
+   12:
+   13: if ARGV.first
+(byebug)
+```
+
+Note that byebug has immediately stopped at the first line of beaker and awaits your command. Type 'continue' to command byebug to continue execution until it next hits a breakpoint.
+
+```
+    8:
+=>  9: require 'rubygems'
+   10:
+   11: version = ">= 0.a"
+   12:
+   13: if ARGV.first
+(byebug) continue
+Beaker!
+      wWWWw
+      |o o|
+      | O |  3.18.0!
+      |(")|
+     / \X/ \
+    |   V   |
+    |   |   |
+{
+    "project": "Beaker",
+    "department": "unknown",
+    "created_by": "centos",
+    "host_tags": {},
+    "openstack_api_key": null,
+    "openstack_username": null,
+...
+    "timestamp": "2017-06-23 13:21:11 +0000",
+    "beaker_version": "3.18.0",
+    "log_prefix": "beaker_logs",
+    "xml_dated_dir": "junit/beaker_logs/2017-06-23_13_21_11",
+    "log_dated_dir": "log/beaker_logs/2017-06-23_13_21_11",
+    "logger_sut": "#<Beaker::Logger:0x000000034a2998>"
+}
+No tests to run for suite 'pre_suite'
+Begin test.rb
+
+An important aspect of my product
+
+* Assert expected matches actual
+Stopped by breakpoint 1 at test.rb:7
+
+[1, 8] in test.rb
+   1: test_name 'An important aspect of my product'
+   2:
+   3: important_expected_value = 3
+   4:
+   5: step 'Assert expected matches actual' do
+   6:   actual_value = 2
+=> 7:   assert_equal(important_expected_value, actual_value, 'This product is faulty')
+   8: end
+(byebug)
+```
+
+You can now debug at this point in the file using [byebug commands](https://github.com/deivid-rodriguez/byebug#byebugs-commands)

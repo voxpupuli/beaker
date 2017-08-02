@@ -24,3 +24,6 @@ doc
 # Vagrant folder
 .vagrant/
 .vagrant_files/
+# Byebug
+.byebugrc
+.byebug_history
