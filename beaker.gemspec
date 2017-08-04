@@ -61,10 +61,11 @@ Gem::Specification.new do |s|
   # Optional provisioner specific support
   s.add_runtime_dependency 'beaker-docker', '~> 0.1'
   s.add_runtime_dependency 'beaker-aws', '~> 0.1'
-  s.add_runtime_dependency 'beaker-vmpooler', '~> 0.1'
+  s.add_runtime_dependency 'beaker-vmpooler', '~> 1.0'
   s.add_runtime_dependency 'beaker-google', '~> 0.1'
   s.add_runtime_dependency 'beaker-vagrant', '~> 0.1'
   s.add_runtime_dependency 'beaker-vmware', '~> 0.1'
   s.add_runtime_dependency 'beaker-openstack', '~> 0.1'
+  s.add_runtime_dependency 'beaker-vcloud', '~> 0.1'
 
 end
