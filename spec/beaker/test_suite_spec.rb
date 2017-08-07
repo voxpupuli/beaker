@@ -121,14 +121,14 @@ module Beaker
 
     end
 
-    describe TestSuite::TestSuiteResult do
+    describe TestSuiteResult do
 
       let( :options )           { make_opts.merge({ :logger => double().as_null_object }) }
       let( :hosts )             { make_hosts() }
       let( :testcase1 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
       let( :testcase2 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
       let( :testcase3 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
-      let( :test_suite_result ) { TestSuite::TestSuiteResult.new( options, "my_suite") }
+      let( :test_suite_result ) { TestSuiteResult.new( options, "my_suite") }
 
       it 'supports adding test cases' do
         expect( test_suite_result.test_count ).to be === 0

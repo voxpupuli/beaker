@@ -4,7 +4,7 @@ module Beaker
   #
   # There is a specific pattern for using this class.
   # Here's a list of example usages:
-  # - {Beaker::TestSuite::TestSuiteResult#write_junit_xml}
+  # - {Beaker::TestSuiteResult#write_junit_xml}
   module LoggerJunit
 
     # writes the xml created in the block to the xml file given
