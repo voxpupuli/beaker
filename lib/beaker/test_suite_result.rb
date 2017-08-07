@@ -169,98 +169,88 @@ module Beaker
       begin
         LoggerJunit.write_xml(xml_file, stylesheet) do |doc, suites|
 
-          meta_info = Nokogiri::XML::Node.new('meta_test_info', doc)
+          meta_info = suites.add_element(REXML::Element.new('meta_test_info'))
           unless file_to_link.nil?
-            meta_info['page_active'] = time_sort ? 'performance' : 'execution'
-            meta_info['link_url'] = file_to_link
+            time_sort ? meta_info.add_attribute('page_active', 'performance') : meta_info.add_attribute('page_active', 'execution')
+            meta_info.add_attribute('link_url', file_to_link)
           else
-            meta_info['page_active'] = 'no-links'
-            meta_info['link_url'] = ''
+            meta_info.add_attribute('page_active', 'no-links')
+            meta_info.add_attribute('link_url', '')
           end
-          suites.add_child(meta_info)
 
-          suite = Nokogiri::XML::Node.new('testsuite', doc)
-          suite['name']     = @name
-          suite['tests']    = test_count
-          suite['errors']   = errored_tests
-          suite['failures'] = failed_tests
-          suite['skipped']     = skipped_tests
-          suite['pending']  = pending_tests
-          suite['total']    = @total_tests
-          suite['time']     = "%f" % (stop_time - start_time)
-          properties = Nokogiri::XML::Node.new('properties', doc)
-          @options.each_pair do | name, value |
-            property = Nokogiri::XML::Node.new('property', doc)
-            property['name']  = name
-            property['value'] = value
-            properties.add_child(property)
+          suite = suites.add_element(REXML::Element.new('testsuite'))
+          suite.add_attributes(
+            [
+              ['name' , @name],
+              ['tests', test_count],
+              ['errors', errored_tests],
+              ['failures', failed_tests],
+              ['skipped', skipped_tests],
+              ['pending', pending_tests],
+              ['total', @total_tests],
+              ['time', "%f" % (stop_time - start_time)]
+          ])
+          properties = suite.add_element(REXML::Element.new('properties'))
+          @options.each_pair do |name,value|
+            property = properties.add_element(REXML::Element.new('property'))
+            property.add_attributes([['name', name], ['value', value.to_s || '']])
           end
-          suite.add_child(properties)
 
           test_cases_to_report = @test_cases
           test_cases_to_report = @test_cases.sort { |x,y| y.runtime <=> x.runtime } if time_sort
           test_cases_to_report.each do |test|
-            item = Nokogiri::XML::Node.new('testcase', doc)
-            item['classname'] = File.dirname(test.path)
-            item['name']      = File.basename(test.path)
-            item['time']      = "%f" % test.runtime
+            item = suite.add_element(REXML::Element.new('testcase'))
+            item.add_attributes(
+              [
+                ['classname', File.dirname(test.path)],
+                ['name', File.basename(test.path)],
+                ['time', "%f" % test.runtime]
+              ])
 
-            #ugh. nokogiri!!!  item can't take a hash, let alone an array.
             test.exports.each do |export|
               export.keys.each do |key|
-                item[key] = export[key]
+                item.add_attribute(key.to_s.tr(" ", "_"), export[key])
               end
             end
 
-            # Did we fail?  If so, report that.
-            # We need to remove the escape character from colorized text, the
-            # substitution of other entities is handled well by Rexml
-            if test.test_status == :fail || test.test_status == :error then
-              status = Nokogiri::XML::Node.new('failure', doc)
-              status['type'] =  test.test_status.to_s
-              if test.exception then
-                status['message'] = test.exception.to_s.gsub(/\e/, '')
+            #Report failures
+            if test.test_status == :fail || test.test_status == :error
+              status = item.add_element(REXML::Element.new('failure'))
+              status.add_attribute('type', test.test_status.to_s)
+              if test.exception
+                status.add_attribute('message', test.exception.to_s.gsub(/\e/,''))
                 data = LoggerJunit.format_cdata(test.exception.backtrace.join('\n'))
-                status.add_child(status.document.create_cdata(data))
+                REXML::CData.new(data, true, status)
               end
-              item.add_child(status)
             end
 
             if test.test_status == :skip
-              status = Nokogiri::XML::Node.new('skipped', doc)
-              status['type'] =  test.test_status.to_s
-              item.add_child(status)
+              status = item.add_element(REXML::Element.new('skipped'))
+              status.add_attribute('type', test.test_status.to_s)
             end
 
             if test.test_status == :pending
-              status = Nokogiri::XML::Node.new('pending', doc)
-              status['type'] =  test.test_status.to_s
-              item.add_child(status)
+              status = item.add_element(REXML::Element.new('pending'))
+              status.add_attribute('type', test.test_status.to_s)
             end
 
-            if test.sublog then
-              stdout = Nokogiri::XML::Node.new('system-out', doc)
+            if test.sublog
+              stdout = item.add_element(REXML::Element.new('system-out'))
               data = LoggerJunit.format_cdata(test.sublog)
-              stdout.add_child(stdout.document.create_cdata(data))
-              item.add_child(stdout)
+              REXML::CData.new(data, true, stdout)
             end
 
-            if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty? then
-              stderr = Nokogiri::XML::Node.new('system-err', doc)
+            if test.last_result and test.last_result.stderr and not test.last_result.stderr.empty?
+              stderr = item.add_element('system-err')
               data = LoggerJunit.format_cdata(test.last_result.stderr)
-              stderr.add_child(stderr.document.create_cdata(data))
-              item.add_child(stderr)
+              REXML::CData.new(data, true, stderr)
             end
-
-            suite.add_child(item)
           end
-          suites.add_child(suite)
         end
       rescue Exception => e
-        @logger.error "failure in XML output:\n#{e.to_s}\n" + e.backtrace.join("\n")
+        @logger.error "failure in XML output: \n#{e.to_s}" + e.backtrace.join("\n")
       end
-
     end
-  end
 
+  end
 end

@@ -1,3 +1,4 @@
+require 'rexml/document'
 module Beaker
   # The Beaker JUnit Logger class
   # This module handles message reporting from Beaker to the JUnit format
@@ -34,14 +35,14 @@ module Beaker
 
     # writes out xml content for a doc
     #
-    # @param [Nokogiri::XML] doc Nokogiri doc containing content to write
+    # @param [REXML::Document] doc doc containing content to write
     # @param [String] xml_file Path to the xml file to write
     #
     # @return nil
     def self.finish(doc, xml_file)
       # junit/name.xml will be created in a directory relative to the CWD
-      # --  JLS 2/12
-      File.open(xml_file, 'w') { |fh| fh.write(doc.to_xml) }
+
+      File.open(xml_file, 'w') { |f| doc.write(f, 2) }
     end
 
     # gets the xml doc & suites in order to build your xml output on top of
@@ -50,8 +51,8 @@ module Beaker
     # @param [String] name Name of the testsuite you're writing
     # @param [String] stylesheet Path to the stylesheet file
     #
-    # @return [Nokogiri::XML] doc to use for your xml content
-    # @return [Nokogiri::XML::Node] suites to add your content to
+    # @return [REXML::Document] doc to use for your xml content
+    # @return [REXML::Element] suites to add your content to
     def self.get_xml_contents(xml_file, name, stylesheet)
       self.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
       xml_file_already_exists = File.file?(xml_file)
@@ -74,24 +75,23 @@ module Beaker
 
     # sets up doc & gives us the suites for the testsuite named
     #
-    # @param [Nokogiri::XML] doc Doc that you're getting suites from
+    # @param [REXML::Document] doc Doc that you're getting suites from
     # @param [String] name Testsuite node name
     # @param [Boolean] already_existed Whether or not the doc already existed
     #
-    # @return [Nokogiri::XML::Node] testsuites
+    # @return [Rexml::Element] testsuites
     def self.get_testsuites_from_doc(doc, name, already_existed)
       #check to see if an output file already exists, if it does add or replace test suite data
       if already_existed
-        suites = doc.at_xpath('testsuites')
+        suites = REXML::XPath.first(doc, "testsuites")
         #remove old data
-        doc.search("//testsuite").each do |node|
-          if node['name'] =~ /#{name}/
-            node.unlink
+        suites.elements.each("testsuite") do |e|
+          if e.name =~ /#{name}/
+            suites.delete_element e
           end
         end
       else
-        suites        = Nokogiri::XML::Node.new('testsuites', doc)
-        suites.parent = doc
+        suites = doc.add_element(REXML::Element.new('testsuites'))
       end
       return suites
     end
@@ -102,16 +102,16 @@ module Beaker
     # @param [String] stylesheet Path to the stylesheet for this doc
     # @param [Boolean] already_exists Whether or not the file already exists
     #
-    # @return [Nokogiri::XML] Doc that you want to write in
+    # @return [REXML::Document] Doc that you want to write in
     def self.get_doc_for_filename(filename, stylesheet, already_exists)
       if already_exists
-        doc           = Nokogiri::XML(File.open(filename, 'r'))
+        doc           = REXML::Document.new File.open(filename)
       else
         #no existing file, create a new one
-        doc           = Nokogiri::XML::Document.new()
-        doc.encoding  = 'UTF-8'
-        pi            = Nokogiri::XML::ProcessingInstruction.new(doc, "xml-stylesheet", "type=\"text/xsl\" href=\"#{File.basename(stylesheet)}\"")
-        pi.parent     = doc
+        doc           = REXML::Document.new
+        doc << REXML::XMLDecl.new(version="1.0", encoding="UTF-8")
+        instruction_content = "type='text/xsl' href='#{File.basename(stylesheet)}'"
+        doc << REXML::Instruction.new(target="xml-stylesheet", content=instruction_content)
       end
       return doc
     end

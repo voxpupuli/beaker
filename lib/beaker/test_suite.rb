@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-require 'nokogiri'
 require 'fileutils'
 [ 'test_case', 'logger', 'test_suite_result'].each do |lib|
   require "beaker/#{lib}"

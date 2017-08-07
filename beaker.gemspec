@@ -52,12 +52,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'beaker-hostgenerator'
   s.add_runtime_dependency 'beaker-puppet', '~> 0.0'
 
-  # A minor setback for a major comeback (BKR-841)
-  #
-  # Beaker uses nokogiri but it was not declared as direct dependency
-  # before as one of the hypervisor gems included it
-  s.add_runtime_dependency 'nokogiri', '~> 1.8.0'
-
   # Optional provisioner specific support
   s.add_runtime_dependency 'beaker-docker', '~> 0.1'
   s.add_runtime_dependency 'beaker-aws', '~> 0.1'
