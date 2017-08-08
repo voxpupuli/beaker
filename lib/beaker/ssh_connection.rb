@@ -6,7 +6,9 @@ module Beaker
   class SshConnection
 
     attr_accessor :logger
-    attr_accessor :ip, :vmhostname, :hostname
+    attr_accessor :ip, :vmhostname, :hostname, :ssh_connection_preference
+
+    SUPPORTED_CONNECTION_METHODS = [:ip, :vmhostname, :hostname]
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,
@@ -33,6 +35,7 @@ module Beaker
       @ssh_opts = ssh_opts
       @logger = options[:logger]
       @options = options
+      @ssh_connection_preference = @options[:ssh_connection_preference]
     end
 
     def self.connect name_hash, user = 'root', ssh_opts = {}, options = {}
@@ -65,22 +68,24 @@ module Beaker
 
     # connect to the host
     def connect
-      #try three ways to connect to host (vmhostname, ip, hostname)
-      methods = []
-      if @vmhostname
-        @ssh ||= connect_block(@vmhostname, @user, @ssh_opts)
-        methods << "vmhostname (#{@vmhostname})"
+      # Try three ways to connect to host (vmhostname, ip, hostname)
+      # Try each method in turn until we succeed
+      methods = @ssh_connection_preference.dup
+      while (not @ssh) && (not methods.empty?) do
+        unless instance_variable_get("@#{methods[0]}").nil?
+          if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
+            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts)
+          else
+            @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
+            @ssh_connection_preference.delete(methods[0])
+          end
+        else
+          @logger.warn "Skipping #{methods[0]} method to ssh to host as its value is not set. Refer to https://github.com/puppetlabs/beaker/tree/master/docs/how_to/ssh_connection_preference.md to remove this warning"
+        end
+        methods.shift
       end
-      if @ip && !@ssh
-        @ssh ||= connect_block(@ip, @user, @ssh_opts)
-        methods << "ip (#{@ip})"
-      end
-      if @hostname && !@ssh
-        @ssh ||= connect_block(@hostname, @user, @ssh_opts)
-        methods << "hostname (#{@hostname})"
-      end
-      if not @ssh
-        @logger.error "Failed to connect to #{@hostname}, attempted #{methods.join(', ')}"
+      unless @ssh
+        @logger.error "Failed to connect to #{@hostname}, attempted #{@ssh_connection_preference.join(', ')}"
         raise RuntimeError, "Cannot connect to #{@hostname}"
       end
       @ssh

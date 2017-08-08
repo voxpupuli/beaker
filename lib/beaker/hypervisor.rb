@@ -37,6 +37,7 @@ module Beaker
         end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
+      self.set_ssh_connection_preference(hosts_to_provision, hypervisor)
       hypervisor.provision if options[:provision]
 
       hypervisor
@@ -55,6 +56,24 @@ module Beaker
     #Cleanup steps to be run for a given hypervisor.  Default is nil.
     def cleanup
       nil
+    end
+
+    DEFAULT_CONNECTION_PREFERENCE = [:ip, :vmhostname, :hostname]
+    # SSH connection method preference. Can be overwritten by hypervisor to change the order
+    def connection_preference(host)
+      DEFAULT_CONNECTION_PREFERENCE
+    end
+
+    def self.set_ssh_connection_preference(hosts_to_provision, hypervisor)
+      hosts_to_provision.each do |host|
+        ssh_methods = hypervisor.connection_preference(host) + DEFAULT_CONNECTION_PREFERENCE
+        if host[:ssh_preference]
+          # If user has provided ssh_connection_preference in hosts file then concat the preference provided by hypervisor
+          # Followed by concatenating the default preference and keeping the unique once
+          ssh_methods = host[:ssh_preference] + ssh_methods
+        end
+        host[:ssh_connection_preference] = ssh_methods.uniq
+      end
     end
 
     #Proxy package managers on tests hosts created by this hypervisor, runs before validation and configuration.
