@@ -83,13 +83,4 @@ The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one o
 
 `VERSION`'s format is not enforced, but should reflect the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, scientific-6-i386-agent, etc).  `ARCH`'s format is also not enforced, but should be appropriate to the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, sles-11-x86_64-master, debian-7-amd64-master, etc).
 
-## Supported Virtualization Providers ##
-* [AWS](../how_to/hypervisors/aws.md)
-* [VMWare Fusion](../how_to/hypervisors/vmware_fusion.md)
-* [EC2](../how_to/hypervisors/ec2.md)
-* [vSphere](../how_to/hypervisors/vsphere.md)
-* [Vagrant](../how_to/hypervisors/vagrant.md)
-* [Google Compute Engine](../how_to/hypervisors/google_compute_engine.md)
-* [Docker Support](../how_to/hypervisors/docker.md)
-* [Openstack](../how_to/hypervisors/openstack.md)
-* [Solaris](../how_to/hypervisors/solaris.md)
+## [Supported Virtualization Providers](../how_to/hypervisors/README.md#external-hypervisors) ##
