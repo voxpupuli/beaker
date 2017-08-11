@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-its'
   s.add_development_dependency 'fakefs', '~> 0.6'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'pry', '~> 0.10'
   s.add_development_dependency 'rake', '~> 10.0'
 
   # Documentation dependencies
@@ -33,6 +32,9 @@ Gem::Specification.new do |s|
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'minitar', '~> 0.6'
+  s.add_runtime_dependency 'pry-byebug', '~> 3.4.2'
+  # pry-byebug can have issues with native readline libs so add rb-readline
+  s.add_runtime_dependency 'rb-readline', '~> 0.5.3'
 
   s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'net-ssh', '~> 4.0'
