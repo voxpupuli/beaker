@@ -2,15 +2,49 @@ require 'spec_helper'
 
 module Beaker
   describe Hypervisor do
-    let( :hypervisor ) { Beaker::Hypervisor }
+    let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
 
-    it "includes custom hypervisor" do
-      expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(RuntimeError, "Invalid hypervisor: custom_hypervisor")
+    context "#create" do
+      let( :hypervisor ) { Beaker::Hypervisor }
+
+      it "includes custom hypervisor and call set_ssh_connection_preference" do
+        allow(hypervisor).to receive(:set_ssh_connection_preference).with([], hypervisor)
+        expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(RuntimeError, "Invalid hypervisor: custom_hypervisor")
+      end
+
+      it "sets ssh connection preference if connection_preference method is not overwritten" do
+        hypervisor.create('none', hosts, make_opts())
+        expect(hosts[0][:ssh_connection_preference]).to eq(['ip', 'vmhostname', 'hostname'])
+      end
+
+      it "concats overriding connection_preference array with the default connection_preference" do
+        allow(hypervisor).to receive(:connection_preference).and_return(['my', 'invalid', 'method_name'])
+        hypervisor.set_ssh_connection_preference(hosts, hypervisor)
+        expect(hosts[0][:ssh_connection_preference]).to eq(['my', 'invalid', 'method_name', 'ip', 'vmhostname', 'hostname'])
+      end
+
+      it "removes unique elements from concated array while preserving order of overriding methods" do
+        allow(hypervisor).to receive(:connection_preference).and_return(['my', 'ip', 'method_name'])
+        hypervisor.set_ssh_connection_preference(hosts, hypervisor)
+        expect(hosts[0][:ssh_connection_preference]).to eq(['my', 'ip', 'method_name', 'vmhostname', 'hostname'])
+      end
+
+      it "sets to new preference if connection_preference is overridden" do
+        allow(hypervisor).to receive(:connection_preference).and_return(['vmhostname', 'hostname', 'ip'])
+        hypervisor.set_ssh_connection_preference(hosts, hypervisor)
+        expect(hosts[0][:ssh_connection_preference]).to eq(['vmhostname', 'hostname', 'ip'])
+      end
+
+      it "does not override connection preference if its set in hosts file" do
+        hosts[0].options[:ssh_connection_preference] = ['set', 'in', 'hostfile']
+        hypervisor.create('none', hosts, make_opts())
+        expect(hosts[0][:ssh_connection_preference]).to eq(['set', 'in', 'hostfile'])
+      end
+
     end
 
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
-      let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
       let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
 
       context 'if :timesync option set true on host' do
