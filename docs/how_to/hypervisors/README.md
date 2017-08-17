@@ -32,14 +32,18 @@ that are needed for it. An example `.fog` file is below:
 
 # External Hypervisors
 
-Puppetlabs and its community have made several gems that support different hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's
+Puppet and its community have made several gems that support different
+hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's
 dependency footprint, and hypervisors are one of the places where we can often
 increase the load across all Beaker uses to benefit a small group that uses a
 particular hypervisor. 
 
-In order to offset this, we've made a listing of gems and community-supported forks that support other external hypervisors. Please check them out if you'd like to use those hypervisors, hopefully it'll save you from spending time trying to support a new hypervisor yourself.
+In order to offset this, we've made a listing of gems and community-supported forks
+that support other external hypervisors. Please check them out if you'd like to use
+those hypervisors, hopefully it'll save you from spending time trying to support a
+new hypervisor yourself.
 
-Hypervisor gems made by puppet (pre-included in beaker 3.x):
+### Hypervisor gems made by puppet (pre-included in beaker 3.x):
 
 | Hypervisor               | Fork                                                               |
 | :----------------------: | :---------------------------------------------------------:        |
@@ -52,7 +56,19 @@ Hypervisor gems made by puppet (pre-included in beaker 3.x):
 | Openstack                | [beaker-openstack](https://github.com/puppetlabs/beaker-openstack) |
 | Google Compute           | [beaker-google](https://github.com/puppetlabs/beaker-google)       |
 
-Hypervisor gems and beaker forks made by community:
+
+### beaker-abs
+
+There is another hypervisor made and used internally by puppet,
+[beaker-abs](https://github.com/puppetlabs/beaker-abs), but it isn't included
+in beaker 3.x. If you'd like to use beaker-abs, you'll have to include it yourself.
+
+You do that by requiring beaker-abs in your Gemfile as a sibling to beaker itself
+and then using `abs` as your hypervisor value in your hosts file. Please check the
+[beaker-abs README](https://github.com/puppetlabs/beaker-abs/blob/master/README.md)
+for more information.
+
+### Hypervisor gems and beaker forks made by community:
 
 | Hypervisor   | Fork                                                                 |
 |:------------:|:--------------------------------------------------------------------:|
