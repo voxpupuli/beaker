@@ -651,6 +651,24 @@ module Beaker
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Beaker::Result.new(host, 'output!'))
         expect(host.do_rsync_to(*args).cmd).to eq('output!')
       end
+
+      it "doesn't corrupt :ignore option" do
+        create_files(['source'])
+
+        ignore_list = ['.bundle']
+        args = ['source', 'target', {:ignore => ignore_list}]
+
+        key = host['ssh']['keys']
+        if key.is_a? Array
+          key = key.first
+        end
+
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
+        expect(Rsync).to receive(:run).twice.with(*rsync_args).and_return(Beaker::Result.new(host, 'output!'))
+
+        host.do_rsync_to *args
+        host.do_rsync_to *args
+      end
     end
 
     it 'interpolates to its "name"' do
