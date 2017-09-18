@@ -73,7 +73,6 @@ To prepare for a new gem release of Beaker (after the version has been bumped) t
 ````
 ## Submitting Changes
 
-* Sign the [Contributor License Agreement](http://links.puppetlabs.com/cla).
 * Push your changes to a topic branch in your fork of the repository.
 * Submit a pull request to [Beaker](https://github.com/puppetlabs/beaker)
 * Update your ticket
@@ -86,7 +85,6 @@ To prepare for a new gem release of Beaker (after the version has been bumped) t
 * [Puppet community guidelines](https://docs.puppet.com/community/community_guidelines.html)
 * [Bug tracker (Jira)](http://tickets.puppetlabs.com)
 * [BKR Jira Project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
-* [Contributor License Agreement](http://links.puppetlabs.com/cla)
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
 * Questions?  Comments?  Contact the Beaker team at the #puppet-dev IRC channel on freenode.org
