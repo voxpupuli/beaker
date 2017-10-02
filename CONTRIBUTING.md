@@ -43,6 +43,7 @@
 
 ### Documentation
 
+* Add an entry in the [CHANGELOG.md](CHANGELOG.md). Refer to the CHANGELOG itself for message style/form details.
 * Make sure that you have added documentation using [Yard](http://yardoc.org/) as necessary for any new code introduced.
 * More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
