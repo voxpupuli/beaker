@@ -13,12 +13,9 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.25.0...master)
 
-# 3.25.0 - 2017-09-26
+### Added
 
-### Removed
+- concept of `manual_test` and `manual_step`
 
-- mention of the CLA bot in CONTRIBUTING doc
+# [3.25.0](https://github.com/puppetlabs/beaker/compare/3.24.0...3.25.0) - 2017-09-26
 
-### Fixed
-
-- "tests" CLI argument in "Let's Write a Test" doc
