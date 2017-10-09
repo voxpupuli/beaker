@@ -19,5 +19,9 @@ git logs & PR history.
 
 - concept of `manual_test` and `manual_step`
 
+### Fixed
+
+- beaker --version causes error output
+
 # [3.25.0](https://github.com/puppetlabs/beaker/compare/3.24.0...3.25.0) - 2017-09-26
 
