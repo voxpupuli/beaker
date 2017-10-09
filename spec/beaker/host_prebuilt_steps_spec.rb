@@ -85,7 +85,7 @@ describe Beaker do
     ]
   end
 
-  ['centos','el-','redhat','fedora','amazon','eos'].each do | rhel_like |
+  ['centos','el-','redhat','rhel','amazon','fedora','eos'].each do | rhel_like |
     it_should_behave_like 'enables_root_login', rhel_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload"
@@ -331,26 +331,27 @@ describe Beaker do
 
     it 'adds extras for el-6 hosts' do
 
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 4 )
+      hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 5 )
       hosts[1][:platform] = Beaker::Platform.new('centos-6-arch')
       hosts[2][:platform] = Beaker::Platform.new('scientific-6-arch')
       hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
+      hosts[4][:platform] = Beaker::Platform.new('rhel-6-arch')
 
       expect( Beaker::Command ).to receive( :new ).with(
         "rpm -qa | grep epel-release"
-      ).exactly( 4 ).times
+      ).exactly( hosts.count ).times
       expect( Beaker::Command ).to receive( :new ).with(
         "rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
-      ).exactly( 4 ).times
+      ).exactly( hosts.count ).times
       expect( Beaker::Command ).to receive( :new ).with(
         "sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo"
-      ).exactly( 4 ).times
+      ).exactly( hosts.count ).times
       expect( Beaker::Command ).to receive( :new ).with(
         "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
-      ).exactly( 4 ).times
+      ).exactly( hosts.count ).times
       expect( Beaker::Command ).to receive( :new ).with(
         "yum clean all && yum makecache"
-      ).exactly( 4 ).times
+      ).exactly( hosts.count ).times
 
       subject.add_el_extras( hosts, options )
 
@@ -475,38 +476,40 @@ describe Beaker do
       end
     end
 
-    context "on other platforms" do
-      let(:host) { make_host( 'name', {
-        :platform => 'centos',
-        :stdout => stdout,
-      } ) }
+    ['rhel','centos','redhat'].each do |platform|
+      context "on platform '#{platform}'" do
+        let(:host) { make_host( 'name', {
+          :platform => platform,
+          :stdout => stdout,
+        } ) }
 
-      before(:each) do
-        expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
-      end
+        before(:each) do
+          expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
+        end
 
-      context "with a domain entry" do
-        let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+        context "with a domain entry" do
+          let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-        include_examples 'find domain name'
-      end
+          include_examples 'find domain name'
+        end
 
-      context "with a search entry" do
-        let(:stdout) { "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+        context "with a search entry" do
+          let(:stdout) { "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-        include_examples 'find domain name'
-      end
+          include_examples 'find domain name'
+        end
 
-      context "with a both a domain and a search entry" do
-        let(:stdout) { "domain labs.lan\nsearch d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+        context "with a both a domain and a search entry" do
+          let(:stdout) { "domain labs.lan\nsearch d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-        include_examples 'find domain name'
-      end
+          include_examples 'find domain name'
+        end
 
-      context "with a both a domain and a search entry, the search entry first" do
-        let(:stdout) { "search foo.example.net\ndomain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+        context "with a both a domain and a search entry, the search entry first" do
+          let(:stdout) { "search foo.example.net\ndomain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-        include_examples 'find domain name'
+          include_examples 'find domain name'
+        end
       end
     end
   end
@@ -574,15 +577,16 @@ describe Beaker do
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
 
-    it "can set proxy config on a centos host" do
-      host = make_host('name', { :platform => 'centos' } )
+    ['rhel','centos','redhat'].each do |platform|
+      it "can set proxy config on a '#{platform}' host" do
+        host = make_host('name', { :platform => platform } )
 
-      expect( Beaker::Command ).to receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
-      expect( host ).to receive( :exec ).once
+        expect( Beaker::Command ).to receive( :new ).with( "echo 'proxy=#{proxyurl}/' >> /etc/yum.conf" ).once
+        expect( host ).to receive( :exec ).once
 
-      subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+        subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
+      end
     end
-
   end
 
   context "set_env" do

@@ -97,11 +97,12 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'ubuntu-lucid-xxx'
       end
 
-      it "leaves centos-7-xxx alone" do
-        @name = 'centos-7-xxx'
-        expect( platform.with_version_codename ).to be === 'centos-7-xxx'
+      ['rhel','centos','redhat'].each do |p|
+        it "leaves #{p}-7-xxx alone" do
+          @name = "#{p}-7-xxx"
+          expect( platform.with_version_codename ).to be === "#{p}-7-xxx"
+        end
       end
-
     end
 
     context 'with_version_number' do
@@ -126,11 +127,12 @@ module Beaker
         expect( platform.with_version_number ).to be === 'ubuntu-1210-xxx'
       end
 
-      it "leaves centos-7-xxx alone" do
-        @name = 'centos-7-xxx'
-        expect( platform.with_version_number ).to be === 'centos-7-xxx'
+      ['rhel','centos','redhat'].each do |p|
+        it "leaves #{p}-7-xxx alone" do
+          @name = "#{p}-7-xxx"
+          expect( platform.with_version_number ).to be === "#{p}-7-xxx"
+        end
       end
-
     end
 
     context 'round tripping from yaml', if: RUBY_VERSION =~ /^1\.9/ do

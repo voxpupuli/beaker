@@ -4,8 +4,8 @@ module Beaker
 
     PERF_PACKAGES = ['sysstat']
     # SLES does not treat sysstat as a service that can be started
-    PERF_SUPPORTED_PLATFORMS = /debian|ubuntu|redhat|amazon|centos|oracle|scientific|fedora|el|eos|cumulus|sles/
-    PERF_START_PLATFORMS     = /debian|ubuntu|redhat|amazon|centos|oracle|scientific|fedora|el|eos|cumulus/
+    PERF_SUPPORTED_PLATFORMS = /debian|ubuntu|redhat|rhel|amazon|centos|oracle|scientific|fedora|el|eos|cumulus|sles/
+    PERF_START_PLATFORMS     = /debian|ubuntu|redhat|rhel|amazon|centos|oracle|scientific|fedora|el|eos|cumulus/
 
     # Create the Perf instance and runs setup_perf_on_host on all hosts if --collect-perf-data
     # was used as an option on the Baker command line invocation. Instances of this class do not
@@ -50,7 +50,7 @@ module Beaker
         @logger.perf_output("Enabling aggressive sysstat polling")
         if host['platform'] =~ /debian|ubuntu/
           host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
-        elsif host['platform'] =~ /centos|el|fedora|oracle|redhats|amazon|scientific/
+        elsif host['platform'] =~ /centos|rhel|el|fedora|oracle|redhat|amazon|scientific/
           host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
         end
       end
