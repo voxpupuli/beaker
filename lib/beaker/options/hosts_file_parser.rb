@@ -14,12 +14,17 @@ module Beaker
       # @raise [ArgumentError] Raises if hosts_file_path is not a valid YAML file
       # @raise [Errno::ENOENT] File not found error: hosts_file doesn't exist
       def self.parse_hosts_file(hosts_file_path = nil)
+        require 'erb'
+
         host_options = new_host_options
         return host_options unless hosts_file_path
         error_message = "#{hosts_file_path} is not a valid YAML file\n\t"
         host_options = self.merge_hosts_yaml( host_options, error_message ) {
           hosts_file_path = File.expand_path( hosts_file_path )
-          YAML.load_file( hosts_file_path )
+
+          raise "#{hosts_file_path} is not a valid path" unless File.exist?(hosts_file_path)
+
+          YAML.load(ERB.new(File.read(hosts_file_path), nil, '-').result(binding))
         }
         fix_roles_array( host_options )
       end
@@ -31,11 +36,13 @@ module Beaker
       # @return [OptionsHash] Contents of the hosts file as an OptionsHash
       # @raise [ArgumentError] If hosts_def_yaml is not a valid YAML string
       def self.parse_hosts_string(hosts_def_yaml = nil)
+        require 'erb'
+
         host_options = new_host_options
         return host_options unless hosts_def_yaml
         error_message = "#{hosts_def_yaml}\nis not a valid YAML string\n\t"
         host_options = self.merge_hosts_yaml( host_options, error_message ) {
-          YAML.load( hosts_def_yaml )
+          YAML.load(ERB.new(hosts_def_yaml, nil, '-').result(binding))
         }
         fix_roles_array( host_options )
       end
