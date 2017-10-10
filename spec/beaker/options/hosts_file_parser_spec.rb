@@ -28,14 +28,14 @@ module Beaker
 
         it "raises an error on no file found" do
           FakeFS.deactivate!
-          expect{parser.parse_hosts_file("not a valid path")}.to raise_error(Errno::ENOENT)
+          expect{parser.parse_hosts_file("not a valid path")}.to raise_error(/is not a valid path/)
         end
 
         it "raises an error on bad yaml file" do
           FakeFS.deactivate!
-          allow( YAML ).to receive(:load_file) { raise Psych::SyntaxError }
-          allow( File ).to receive(:exists?).and_return(true)
-          expect { parser.parse_hosts_file("not a valid path") }.to raise_error(ArgumentError)
+          expect( File ).to receive(:exist?).and_return(true)
+
+          expect { parser.parse_hosts_file("not a valid path") }.to raise_error(Errno::ENOENT)
         end
 
         it 'returns a #new_host_options hash if given no arguments' do
@@ -43,10 +43,10 @@ module Beaker
           expect( host_options ).to be === parser.new_host_options
         end
 
-        it 'passes a YAML.load_file call through to #merge_hosts_yaml' do
+        it 'passes a YAML.load call through to #merge_hosts_yaml' do
           yaml_string = 'not actually yaml, but that wont matter'
-          allow( File ).to receive( :expand_path ).with( yaml_string ) { yaml_string }
-          expect( YAML ).to receive( :load_file ).with( yaml_string )
+          expect( File ).to receive( :exist?).and_return(true)
+          expect( File ).to receive( :read ).and_return(yaml_string)
           parser.parse_hosts_file( yaml_string )
         end
       end
