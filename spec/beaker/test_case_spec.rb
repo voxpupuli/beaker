@@ -17,6 +17,8 @@ module Beaker
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pass
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'updates test_status to :skip on SkipTest' do
@@ -29,6 +31,8 @@ module Beaker
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :skip
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'updates test_status to :pending on PendingTest' do
@@ -41,6 +45,8 @@ module Beaker
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pending
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'updates test_status to :fail on FailTest' do
@@ -53,6 +59,8 @@ module Beaker
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :fail
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'correctly handles RuntimeError' do
@@ -63,6 +71,8 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(RuntimeError))
         testcase.run_test
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'correctly handles ScriptError' do
@@ -73,6 +83,8 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(ScriptError))
         testcase.run_test
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'correctly handles Timeout::Error' do
@@ -83,6 +95,8 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Timeout::Error))
         testcase.run_test
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'correctly handles CommandFailure' do
@@ -93,6 +107,8 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
         testcase.run_test
+        timed_node = testcase.instance_variable_get(:@timed_node)
+        expect(timed_node.name).to eql(path)
       end
 
       it 'records a test failure if an assertion fails in a teardown block' do

@@ -13,6 +13,34 @@ describe ClassMixedWithDSLStructure do
 
   before :each do
     allow( subject ).to receive(:metadata).and_return(metadata)
+
+    cur_time = 0
+    allow( Time ).to receive(:now) do
+      _cur_time = cur_time
+      cur_time = cur_time + 1
+      _cur_time
+    end
+
+    steps = 0
+    tests = 0
+    @timed_node = Tree::TreeNode.new("Root", 0.0)
+    subject.instance_variable_set :@timed_node, @timed_node
+    constructor = Tree::TreeNode.method(:new)
+    allow( Tree::TreeNode ).to receive(:new) do |label, start_time|
+      # Ensure proper arguments are passed-in
+      expect(label).to be_instance_of(Array)
+      expect(label.size).to eql(3)
+
+      kind, uuid, name = label
+      expect(kind).to match(/^(?:Step|Test)$/)
+      # from the source of SecureRandom.uuid in
+      # https://ruby-doc.org/stdlib-1.9.3/libdoc/securerandom/rdoc/SecureRandom.html
+      expect(uuid).to match(/^\h{8}-\h{4}-\h{4}-\h{4}-\h{4}\h{8}$/)
+      expect(start_time).to eql(cur_time - 1)
+
+      count = kind == "Step" ? steps = steps + 1 : tests = tests + 1
+      constructor.call("#{kind} #{count}: #{name}", start_time)
+    end
   end
 
   describe '#step' do
@@ -45,6 +73,107 @@ describe ClassMixedWithDSLStructure do
       step_name = 'pierceBrosnanTests'
       subject.step step_name
       expect( metadata[:step][:name] ).to be === step_name
+    end
+
+    it 'times how long the current step takes, while storing its overall structure' do
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow(  subject ).to receive( :set_current_step_name )
+      allow( logger ).to receive( :step_in )
+      allow( logger ).to receive( :step_out )
+      allow( logger ).to receive( :notify )
+
+      subject.step "A" do
+        subject.step "B" do
+          subject.step "C" do
+            subject.step "D" do
+            end
+          end
+        end
+        subject.step "E" do
+          subject.step "F" do
+          end
+        end
+        subject.step "G" do
+        end
+      end
+
+      # Readability
+      a, b, c, d, e, f, g = ("A".."G").each_with_index.map { |name, ix| "Step #{ix + 1}: #{name}" }
+      # This is a map of <Path> -> <Duration>, where <Path> represents the path
+      # to a specific node, and <Duration> represents the expected "Duration" of
+      # a node
+      structure = {
+        [a, b, c, d] => 1,
+        [a, b, c] => 3,
+        [a, b] => 5,
+        [a, e, f] => 1,
+        [a, e] => 3,
+        [a, g] => 1,
+        [a] => 13
+      }
+
+      # Ensure correct structure is stored. Note that the "duration" of a given
+      # node is the total # of times that Time.now has been called since that node's
+      # "start time" was recorded.
+      structure.each do |path, duration|
+        node = path.inject(@timed_node) { |node, child| node[child] }
+        expect(node).not_to be_nil
+        expect(node.content).to eql(duration)
+      end
+    end
+
+    context 'when the step fails' do
+      it 'marks the current step as a failure, preserves the durations (and structure) of previously successful steps, and skips any impending ones' do
+        subject.instance_variable_set :@options, {} 
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow(  subject ).to receive( :set_current_step_name )
+        allow( logger ).to receive( :step_in )
+        allow( logger ).to receive( :step_out )
+        allow( logger ).to receive( :notify )
+
+        steps_ran = ""
+
+        expect do
+          subject.step "A" do
+            subject.step "B" do
+              subject.step "C" do
+                subject.step "D" do
+                  steps_ran << "D"
+                end
+                steps_ran << "C"
+              end
+              steps_ran << "B"
+            end
+            subject.step "E" do
+              subject.step "F" do
+                steps_ran << "F"
+              end
+              raise "Fail this step!"
+              steps_ran << "E"
+            end
+            subject.step "G" do
+              steps_ran << "G"
+            end
+          end
+        end.to raise_exception("Fail this step!")
+
+        expect(steps_ran).to eql("DCBF")
+
+        a, b, c, d, e, f, g = ("A".."G").each_with_index.map { |name, ix| "Step #{ix + 1}: #{name}" }
+        structure = {
+          [a, b, c, d] => 1,
+          [a, b, c] => 3,
+          [a, b] => 5,
+          [a, e, f] => 1,
+          [a, e] => "X",
+          [a] => "X"
+        }
+        structure.each do |path, duration|
+          node = path.inject(@timed_node) { |node, child| node[child] }
+          expect(node).not_to be_nil
+          expect(node.content).to eql(duration)
+        end
+      end
     end
   end
 
@@ -180,6 +309,107 @@ describe ClassMixedWithDSLStructure do
       test_name = '15-05-08\'s weather is beautiful'
       subject.test_name test_name
       expect( metadata[:case][:name] ).to be === test_name
+    end
+
+    it 'times how long the current test takes, while storing its overall structure' do
+      allow( subject ).to receive( :logger ).and_return( logger )
+      allow(  subject ).to receive( :set_current_step_name )
+      allow( logger ).to receive( :step_in )
+      allow( logger ).to receive( :step_out )
+      allow( logger ).to receive( :notify )
+
+      subject.test_name "A" do
+        subject.test_name "B" do
+          subject.test_name "C" do
+            subject.test_name "D" do
+            end
+          end
+        end
+        subject.test_name "E" do
+          subject.test_name "F" do
+          end
+        end
+        subject.test_name "G" do
+        end
+      end
+
+      # Readability
+      a, b, c, d, e, f, g = ("A".."G").each_with_index.map { |name, ix| "Test #{ix + 1}: #{name}" }
+      # This is a map of <Path> -> (<Exists?>, <Duration>), where <Path> represents the path
+      # to a specific node, <Exists?> indicates if the node exists or not, and <Duration> 
+      # represents the expected "Duration" of a node
+      structure = {
+        [a, b, c, d] => 1,
+        [a, b, c] => 3,
+        [a, b] => 5,
+        [a, e, f] => 1,
+        [a, e] => 3,
+        [a, g] => 1,
+        [a] => 13
+      }
+
+      # Ensure correct structure is stored. Note that the "duration" of a given
+      # node is the total # of times that Time.now has been called since that node's
+      # "start time" was recorded.
+      structure.each do |path, duration|
+        node = path.inject(@timed_node) { |node, child| node[child] }
+        expect(node).not_to be_nil
+        expect(node.content).to eql(duration)
+      end
+    end
+
+    context 'when the test fails' do
+      it 'marks the current test as a failure, preserves the durations (and structure) of previously successful tests, and skips any impending ones' do
+        subject.instance_variable_set :@options, {} 
+        allow( subject ).to receive( :logger ).and_return( logger )
+        allow(  subject ).to receive( :set_current_step_name )
+        allow( logger ).to receive( :step_in )
+        allow( logger ).to receive( :step_out )
+        allow( logger ).to receive( :notify )
+
+        tests_ran = ""
+
+        expect do
+          subject.test_name "A" do
+            subject.test_name "B" do
+              subject.test_name "C" do
+                subject.test_name "D" do
+                  tests_ran << "D"
+                end
+                tests_ran << "C"
+              end
+              tests_ran << "B"
+            end
+            subject.test_name "E" do
+              subject.test_name "F" do
+                tests_ran << "F"
+              end
+              raise "Fail this test!"
+              tests_ran << "E"
+            end
+            subject.test_name "G" do
+              tests_ran << "G"
+            end
+          end
+        end.to raise_exception("Fail this test!")
+
+        expect(tests_ran).to eql("DCBF")
+
+        a, b, c, d, e, f, g = ("A".."G").each_with_index.map { |name, ix| "Test #{ix + 1}: #{name}" }
+        structure = {
+          [a, b, c, d] => 1,
+          [a, b, c] => 3,
+          [a, b] => 5,
+          [a, e, f] => 1,
+          [a, e] => "X",
+          [a] => "X"
+        }
+        structure.each do |path, duration|
+          node = path.inject(@timed_node) { |node, child| node[child] }
+          expect(node).not_to be_nil
+          expect(node.content).to eql(duration)
+        end
+      end
     end
   end
 

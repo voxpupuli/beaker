@@ -132,6 +132,36 @@ module Beaker
       summary_logger.notify("\n\n")
     end
 
+    #Plain text summay of the test suite's elapsed times for each test case,
+    #along with each test (and step) within the test case
+    #@param [Logger] summary_logger The logger we will print the summary to
+    def summarize_times(summary_logger)
+      @test_cases.each do |test_case|
+        summarize_times_helper(0, test_case.timed_node, summary_logger)
+        summary_logger.notify("")
+      end
+    end
+
+    # Unfortunately, rubytree's print_tree method is not very flexible with
+    # the "prefix" (i.e. indentation) when printing the tree. Their current
+    # implementation would generate a timing summary that, although structured,
+    # would be hard to parse-out. Thus, this method is used to print the information
+    # instead.
+    # @!visibility private
+    def summarize_times_helper(depth, subtree, summary_logger)
+      indent = '  ' * depth
+      if subtree.is_root?
+        prefix = ""
+        name = subtree.name
+      else
+        kind, _, name = subtree.name
+        prefix = kind + " "
+      end
+
+      summary_logger.notify("#{indent}(#{prefix}#{name}, #{subtree.content})")
+      subtree.children { |child| summarize_times_helper(depth + 1, child, summary_logger) }
+    end
+
     #A convenience method for printing the results of a {TestCase}
     #@param [TestCase] test_case The {TestCase} to examine and print results for
     def print_test_result(test_case)

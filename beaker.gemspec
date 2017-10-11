@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
   s.add_runtime_dependency 'thor', '~> 0.19'
+  s.add_runtime_dependency 'rubytree', '~> 0.9.2'
 
   # Run time dependencies that are Beaker libraries
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
