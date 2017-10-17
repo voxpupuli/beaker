@@ -146,6 +146,7 @@ module PlatformHelpers
                       'fedora',
                       'redhat',
                       'oracle',
+                      'amazon',
                       'scientific',
                       'eos'].concat(FEDORASYSTEMV)
 end
