@@ -11,7 +11,8 @@ module Beaker
                      "wheezy"  => "7",
                      "squeeze" => "6",
                    },
-        :ubuntu => { "zesty"   => "1704",
+        :ubuntu => { "artful"  => "1710",
+                     "zesty"   => "1704",
                      "yakkety" => "1610",
                      "xenial"  => "1604",
                      "wily"    => "1510",
@@ -24,10 +25,11 @@ module Beaker
                      "precise" => "1204",
                      "lucid"   => "1004",
                    },
-        :osx =>    { "sierra"    => "1012",
-                     "elcapitan" => "1011",
-                     "yosemite"  => "1010",
-                     "mavericks" => "109",
+        :osx =>    { "highsierra" => "1013",
+                     "sierra"     => "1012",
+                     "elcapitan"  => "1011",
+                     "yosemite"   => "1010",
+                     "mavericks"  => "109",
                    }
       }
 
