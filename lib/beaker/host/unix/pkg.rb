@@ -92,7 +92,7 @@ module Unix::Pkg
           name = "#{name}=#{version}"
         end
         update_apt_if_needed
-        execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
+        execute("DEBIAN_FRONTEND=noninteractive apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
       when /solaris-11/
         if opts[:acceptable_exit_codes]
           opts[:acceptable_exit_codes] << 4
