@@ -11,11 +11,14 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.26.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.27.0...master)
+
+# [3.27.0](https://github.com/puppetlabs/beaker/compare/3.26.0...3.27.0) - 2017-10-19
 
 ### Added
 
 - support amazon as a platform
+- add codenames for MacOS 10.13 and Ubuntu Artful
 
 # [3.26.0](https://github.com/puppetlabs/beaker/compare/3.25.0...3.26.0) - 2017-10-05
 
