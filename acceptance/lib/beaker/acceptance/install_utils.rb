@@ -3,7 +3,7 @@ module Beaker
     module InstallUtils
 
       PLATFORM_PATTERNS = {
-        :redhat        => /fedora|el|centos/,
+        :redhat        => /fedora|el|centos|amazon/,
         :debian        => /debian|ubuntu/,
         :debian_ruby18 => /debian|ubuntu-lucid|ubuntu-precise/,
         :solaris_10    => /solaris-10/,
