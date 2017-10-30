@@ -364,9 +364,11 @@ module Beaker
         expect( host.touch('touched_file') ).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
       end
 
-      it "generates the right absolute command for a unix host" do
-        @platform = 'centos'
-        expect( host.touch('touched_file') ).to be == "/bin/touch touched_file"
+      ['rhel','centos','redhat'].each do |platform|
+        it "generates the right absolute command for a #{platform} host" do
+          @platform = platform
+          expect( host.touch('touched_file') ).to be == "/bin/touch touched_file"
+        end
       end
 
       it "generates the right absolute command for an osx host" do

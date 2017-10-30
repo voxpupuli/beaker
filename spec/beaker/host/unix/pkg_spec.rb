@@ -111,12 +111,14 @@ module Beaker
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
-      it "checks correctly on centos" do
-        @opts = {'platform' => 'centos-is-me'}
-        pkg = 'centos_package'
-        expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
-        expect( instance.check_for_package(pkg) ).to be === true
+      ['rhel','centos','redhat'].each do |platform|
+        it "checks correctly on #{platform}" do
+          @opts = {'platform' => "#{platform}-is-me"}
+          pkg = "#{platform}_package"
+          expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
+          expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+          expect( instance.check_for_package(pkg) ).to be === true
+        end
       end
 
       it "checks correctly on EOS" do
@@ -298,6 +300,7 @@ module Beaker
                     'centos-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                     'oracle-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                     'redhat-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    'rhel-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                     'scientific-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"]
                   }
       platforms.each do |p, v|
@@ -485,7 +488,7 @@ module Beaker
 
       it 'Centos & EL: uses yum' do
         package_file = 'testing_789.yay'
-        ['centos', 'el'].each do |platform|
+        ['rhel','centos','redhat'].each do |platform|
           @platform = platform
           expect( instance ).to receive( :execute ).with( /^yum.*#{package_file}$/ )
           instance.install_local_package( package_file )

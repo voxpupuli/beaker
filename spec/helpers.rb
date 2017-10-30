@@ -134,6 +134,7 @@ module PlatformHelpers
 
   SYSTEMDPLATFORMS = ['el-7',
                       'centos-7',
+                      'rhel-7',
                       'redhat-7',
                       'oracle-7',
                       'scientific-7',
@@ -144,6 +145,7 @@ module PlatformHelpers
   SYSTEMVPLATFORMS = ['el-',
                       'centos',
                       'fedora',
+                      'rhel',
                       'redhat',
                       'oracle',
                       'amazon',
