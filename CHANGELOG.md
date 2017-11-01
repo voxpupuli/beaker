@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.27.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.28.0...master)
+
+# [3.28.0](https://github.com/puppetlabs/beaker/compare/3.27.0...3.28.0) - 2017-11-01
+
+### Fixed
+
+- corruption of `opts[:ignore]` when using `rsync`
 
 # [3.27.0](https://github.com/puppetlabs/beaker/compare/3.26.0...3.27.0) - 2017-10-19
 
@@ -25,10 +31,6 @@ git logs & PR history.
 ### Added
 
 - concept of `manual_test` and `manual_step`
-
-### Bug fixes
-
-- Fixed corruption of `opts[:ignore]` when using `rsync`
 
 # [3.25.0](https://github.com/puppetlabs/beaker/compare/3.24.0...3.25.0) - 2017-09-26
 
