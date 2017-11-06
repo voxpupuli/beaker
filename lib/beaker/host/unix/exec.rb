@@ -286,7 +286,7 @@ module Unix::Exec
     exec(Beaker::Command.new("touch #{self[:ssh_env_file]}"))
     #add the constructed env vars to this host
     add_env_var('PATH', '$PATH')
-    # FIXME
+    add_env_var('PATH', '/usr/local/bin')
     if self['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
       version = "#{$1}.#{$2}"
       arch = $3
