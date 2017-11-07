@@ -85,7 +85,7 @@ describe Beaker do
     ]
   end
 
-  ['centos','el-','redhat','fedora','amazon','eos'].each do | rhel_like |
+  ['centos','el-','redhat','fedora','eos'].each do | rhel_like |
     it_should_behave_like 'enables_root_login', rhel_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload"

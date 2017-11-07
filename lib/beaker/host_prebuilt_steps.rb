@@ -444,7 +444,7 @@ module Beaker
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
         elsif host['platform'] =~ /arch|centos-7|el-7|redhat-7|fedora-(1[4-9]|2[0-9])/
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
-        elsif host['platform'] =~ /centos|el-|redhat|amazon|fedora|eos/
+        elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
         elsif host['platform'] =~ /(free|open)bsd/
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
@@ -463,7 +463,7 @@ module Beaker
     def disable_se_linux host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|amazon|fedora|eos/
+        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
           @logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
         else
@@ -479,7 +479,7 @@ module Beaker
     def disable_iptables host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|amazon|fedora|eos/
+        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
           logger.debug("Disabling iptables on #{host.name}")
           host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
         else
@@ -502,7 +502,7 @@ module Beaker
         case host['platform']
           when /ubuntu/, /debian/, /cumulus/
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
-          when /^el-/, /centos/, /fedora/, /redhat/, /amazon/, /eos/
+          when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
@@ -596,7 +596,7 @@ module Beaker
     #
     # @return [Boolean] if the host is el_based
     def el_based? host
-      ['centos','redhat','amazon','scientific','el','oracle'].include?(host['platform'].variant)
+      ['centos','redhat','scientific','el','oracle'].include?(host['platform'].variant)
     end
 
   end

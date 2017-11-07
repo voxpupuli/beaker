@@ -23,7 +23,6 @@ git logs & PR history.
 
 ### Added
 
-- support amazon as a platform
 - add codenames for MacOS 10.13 and Ubuntu Artful
 
 # [3.26.0](https://github.com/puppetlabs/beaker/compare/3.25.0...3.26.0) - 2017-10-05
