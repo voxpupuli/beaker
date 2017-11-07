@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.28.0...master)
 
+### Removed
+
+- `amazon` as a platform value
+
 # [3.28.0](https://github.com/puppetlabs/beaker/compare/3.27.0...3.28.0) - 2017-11-01
 
 ### Fixed
@@ -23,6 +27,7 @@ git logs & PR history.
 
 ### Added
 
+- support amazon as a platform
 - add codenames for MacOS 10.13 and Ubuntu Artful
 
 # [3.26.0](https://github.com/puppetlabs/beaker/compare/3.25.0...3.26.0) - 2017-10-05
