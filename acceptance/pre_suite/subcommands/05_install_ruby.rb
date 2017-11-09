@@ -27,6 +27,6 @@ test_name 'Install and configure Ruby 2.2.5 on the SUT' do
   end
 
   step 'update gem on the SUT and install bundler' do
-    on default, 'gem update --system;gem install bundler'
+    on default, 'gem update --system;gem install --force bundler'
   end
 end
