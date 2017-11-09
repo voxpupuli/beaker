@@ -50,6 +50,19 @@ module Beaker
       Beaker::CLI.new.parse_options
     }
 
+    describe '#print_version' do
+      before do
+        options  = Beaker::Options::OptionsHash.new
+        options[:beaker_version] = 'version_number'
+        options[:beaker_version_print] = true
+        cli.instance_variable_set('@options', options)
+      end
+      it 'prints the version options withour error' do
+        expect(cli.logger).to receive(:info).exactly(3).times
+        cli.print_version_and_options
+      end
+    end
+
     context '#configured_options' do
       it 'returns a list of options that were not presets' do
         attribution = cli.instance_variable_get(:@attribution)
