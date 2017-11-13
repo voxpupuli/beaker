@@ -193,6 +193,7 @@ module Beaker
           :cache_files_locally    => false,
           :aws_keyname_modifier   => rand(10 ** 10).to_s.rjust(10,'0'), # 10 digit random number string
           :run_in_parallel        => [],
+          :use_fog_credentials    => true,
           :ssh                    => {
                                      :config                => false,
                                      :paranoid              => false,
