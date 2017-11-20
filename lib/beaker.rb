@@ -55,4 +55,7 @@ module Beaker
     # do nothing
   end
 
+  # For the timing extension
+  require 'tree'
+
 end

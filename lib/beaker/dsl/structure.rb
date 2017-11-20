@@ -1,4 +1,5 @@
 require 'beaker/dsl/assertions'
+require 'securerandom'
 module Beaker
   module DSL
     # These are simple structural elements necessary for writing
@@ -38,10 +39,12 @@ module Beaker
       def step step_name, &block
         logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
-        if block_given?
+        time("Step", step_name) do
+          next unless block
+
           logger.step_in()
           begin
-            yield
+            block.call
           rescue Exception => e
             if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
               logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
@@ -119,9 +122,11 @@ module Beaker
       def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
-        if block_given?
+        time("Test", my_name) do
+          next unless block
+
           logger.step_in()
-          yield
+          block.call
           logger.step_out()
         end
       end
@@ -357,6 +362,30 @@ module Beaker
           true_false
         end
       end
+
+      # @!visibility private
+      def time(kind, name, &block)
+        # make sure that the running test harness has this extension enabled
+        return block.call unless @timed_node
+
+        child = Tree::TreeNode.new([kind, SecureRandom.uuid, name], Time.now)
+        @timed_node << child
+        @timed_node = child
+        begin
+          block.call
+        rescue Exception => e
+          stop { |_| "X" }
+          raise e
+        end
+        stop { |start_time| Time.now - start_time }
+      end
+
+      # @!visibility private
+      def stop
+        @timed_node.content = yield @timed_node.content
+        @timed_node = @timed_node.parent
+      end
+
     end
   end
 end

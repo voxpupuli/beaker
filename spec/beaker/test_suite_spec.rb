@@ -69,6 +69,7 @@ module Beaker
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
+        allow( tsr ).to receive(:summarize_times).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 1
@@ -89,6 +90,7 @@ module Beaker
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
+        allow( tsr ).to receive(:summarize_times).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 0
@@ -109,6 +111,7 @@ module Beaker
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
+        allow( tsr ).to receive(:summarize_times).and_return( true )
 
         ts.run
         expect( tsr.errored_tests ).to be === 1
@@ -222,6 +225,58 @@ module Beaker
         test_suite_result.add_test_case( testcase2 )
         test_suite_result.add_test_case( testcase3 )
         expect( test_suite_result.elapsed_time ).to be == 111
+      end
+
+      describe '#summarize_times' do
+        it 'prints the durations of each test case in a structured fashion to the specified logger' do
+          output = ""
+          mock_logger = double
+          allow(mock_logger).to receive(:notify) { |str| output << str << "\n" }
+
+          # Test case 1
+          timed_node_1 = Tree::TreeNode.new("TestCase 1", 1)
+          test_11 = Tree::TreeNode.new(["Test", 1, "1"], 2)
+          test_11 << Tree::TreeNode.new(["Step", 1, "1"], 3)
+          test_11 << Tree::TreeNode.new(["Step", 2, "2"], 4)
+          timed_node_1 << test_11
+          test_12 = Tree::TreeNode.new(["Test", 2, "2"], 5)
+          test_12 << Tree::TreeNode.new(["Step", 1, "1"], 6)
+          test_12 << Tree::TreeNode.new(["Step", 2, "2"], 7)
+          test_12 << Tree::TreeNode.new(["Step", 3, "3"], 8)
+          timed_node_1 << test_12
+
+          mock_test_case_1 = double
+          expect(mock_test_case_1).to receive(:timed_node).and_return(timed_node_1)
+          test_suite_result.add_test_case( mock_test_case_1 )
+
+          # Test case 2
+          timed_node_2 = Tree::TreeNode.new("TestCase 2", 1)
+          test_21 = Tree::TreeNode.new(["Test", 1, "1"], 2)
+          timed_node_2 << test_21
+          test_22 = Tree::TreeNode.new(["Test", 2, "2"], 3)
+          test_22 << Tree::TreeNode.new(["Step", 1, "1"], 4)
+          timed_node_2 << test_22
+
+          mock_test_case_2 = double
+          expect(mock_test_case_2).to receive(:timed_node).and_return(timed_node_2)
+          test_suite_result.add_test_case( mock_test_case_2 )
+
+          test_suite_result.summarize_times(mock_logger)
+          expect(output).to eql(
+            "(TestCase 1, 1)\n"\
+            "  (Test 1, 2)\n"\
+            "    (Step 1, 3)\n"\
+            "    (Step 2, 4)\n"\
+            "  (Test 2, 5)\n"\
+            "    (Step 1, 6)\n"\
+            "    (Step 2, 7)\n"\
+            "    (Step 3, 8)\n\n"\
+            "(TestCase 2, 1)\n"\
+            "  (Test 1, 2)\n"\
+            "  (Test 2, 3)\n"\
+            "    (Step 1, 4)\n\n"
+          )
+        end
       end
 
       describe '#print_test_result' do

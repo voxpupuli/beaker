@@ -88,6 +88,15 @@ module Beaker
     # {Beaker::DSL::Helpers#on}.
     attr_accessor :result
 
+    # The tree that stores the timing information for the test case.
+    # Due to the possibility of there being steps with the same name
+    # (or tests with the same name), a node's label will be a 3-tuple
+    # (<kind>, <uuid>, <name>) where <kind> is whether that node is a
+    # "Test" or a "Step"; <uuid> is the UUID; and <name> is the name of
+    # the "Test"/"Step". Note: The root node (test-case itself) will not
+    # have this label.
+    attr_accessor :timed_node
+
     # @param [Hosts,Array<Host>] these_hosts The hosts to execute this test
     #                                        against/on.
     # @param [Logger] logger A logger that implements
@@ -107,6 +116,7 @@ module Beaker
       @teardown_procs = []
       @metadata = {}
       @exports  = []
+      @timed_node = Tree::TreeNode.new(@path.to_s, 0.0)  
       set_current_test_filename(@path ? File.basename(@path, '.rb') : nil)
 
 
@@ -151,6 +161,7 @@ module Beaker
               @logger.info('End teardown')
             end
           end
+          @timed_node.content = @runtime
           @sublog = @logger.get_sublog
           @last_result = @logger.last_result
           return self
