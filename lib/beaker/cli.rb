@@ -257,7 +257,7 @@ module Beaker
         file_host_hash = h.merge(file_host_hash)
         @hosts.each do |host|
           if host_name.to_s == host.name.to_s
-            newly_keyed_hosts_entries[host.reachable_name] = file_host_hash.merge(host.host_hash)
+            newly_keyed_hosts_entries[host.hostname] = file_host_hash.merge(host.host_hash)
             break
           end
         end
