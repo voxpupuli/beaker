@@ -19,6 +19,10 @@ git logs & PR history.
 
 - Adding default to read fog credentials
 
+### Removed
+
+- `amazon` as a platform value
+
 # [3.28.0](https://github.com/puppetlabs/beaker/compare/3.27.0...3.28.0) - 2017-11-01
 
 ### Fixed

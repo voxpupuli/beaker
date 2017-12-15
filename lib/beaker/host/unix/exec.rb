@@ -168,7 +168,7 @@ module Unix::Exec
       exec(Beaker::Command.new("service ssh restart"))
     when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7|fedora-(1[4-9]|2[0-9])|archlinux-/
       exec(Beaker::Command.new("systemctl restart sshd.service"))
-    when /el-|centos|fedora|redhat|amazon|oracle|scientific|eos/
+    when /el-|centos|fedora|redhat|oracle|scientific|eos/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /sles/
       exec(Beaker::Command.new("rcsshd restart"))
@@ -196,7 +196,7 @@ module Unix::Exec
       directory = create_tmpdir_on(self)
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
-    when /el-|centos|fedora|redhat|amazon|oracle|scientific|eos/
+    when /el-|centos|fedora|redhat|oracle|scientific|eos/
       directory = create_tmpdir_on(self)
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))

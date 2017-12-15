@@ -39,7 +39,7 @@ module Unix::Pkg
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
-      when /cisco|fedora|amazon|centos|eos|el-/
+      when /cisco|fedora|centos|eos|el-/
         result = execute("rpm -q #{name}", opts) { |result| result }
       when /ubuntu|debian|cumulus|huaweios/
         result = execute("dpkg -s #{name}", opts) { |result| result }
@@ -407,8 +407,8 @@ module Unix::Pkg
     when /^(solaris)$/
       release_path_end, release_file = solaris_puppet_agent_dev_package_info(
         puppet_collection, puppet_agent_version, opts )
-    when /^(sles|aix|el|centos|oracle|redhat|amazon|scientific)$/
-      variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|amazon|scientific)/)
+    when /^(sles|aix|el|centos|oracle|redhat|scientific)$/
+      variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
       arch = 'ppc' if variant == 'aix' && arch == 'power'
       version = '7.1' if variant == 'aix' && version == '7.2'
       release_path_end = "#{variant}/#{version}/#{puppet_collection}/#{arch}"
