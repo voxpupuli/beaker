@@ -61,7 +61,7 @@ module Beaker
       end
     end
 
-    context '#combined_instance_and_options_hosts' do
+    describe '#combined_instance_and_options_hosts' do
       let (:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
       let (:instance_host ) {
         [Beaker::Host.create('ubuntu', {:platform => 'host'}, {} )]
@@ -77,6 +77,26 @@ module Beaker
         expect(merged_host['ubuntu']).to have_key(:platform)
         expect(merged_host['ubuntu'][:options_attribute]).to eq('options')
         expect(merged_host['ubuntu'][:platform]).to eq('host')
+      end
+
+      context 'when hosts share IP addresses' do
+        let (:options_host) do
+          {'HOSTS' => {'host1' => {:options_attribute => 'options'},
+                       'host2' => {:options_attribute => 'options'}}}
+        end
+        let (:instance_host ) do
+          [Beaker::Host.create('host1',
+                               {:platform => 'host', :ip => '127.0.0.1'}, {} ),
+           Beaker::Host.create('host2',
+                               {:platform => 'host', :ip => '127.0.0.1'}, {} )]
+        end
+
+        it 'creates separate entries for each host' do
+          expected_hosts = instance_host.map(&:hostname)
+          merged_hosts = cli.combined_instance_and_options_hosts
+
+          expect(merged_hosts.keys).to eq(expected_hosts)
+        end
       end
     end
 
