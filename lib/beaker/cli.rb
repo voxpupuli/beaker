@@ -41,7 +41,6 @@ module Beaker
         return self
       end
 
-
       #add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
         @options[:load_path].each do |path|

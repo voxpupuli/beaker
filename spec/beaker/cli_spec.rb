@@ -47,6 +47,7 @@ module Beaker
 
     let(:cli)      {
       allow(File).to receive(:exists?).and_return(true)
+      allow(File).to receive(:exists?).with('.beaker.yml').and_return(false)
       Beaker::CLI.new.parse_options
     }
 

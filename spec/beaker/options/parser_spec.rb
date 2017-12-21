@@ -154,6 +154,12 @@ module Beaker
                   :auth_methods => 'auth_home_123'
               }
           }}
+          let(:project_file) {@project_file || {
+              :level => 'seventh',
+              :ssh => {
+                  :auth_methods => 'auth_project_123'
+              }
+          }}
           let(:presets) { {
               :level => 'lowest',
               :ssh => {
@@ -183,17 +189,31 @@ module Beaker
             allow(OptionsFileParser).to receive(:parse_options_file).and_return(opt_file)
             allow(parser).to receive(:parse_hosts_options).and_return(host_file)
 
-            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).and_return(homedir_file, subcommand_file)
+            allow(SubcommandOptionsParser).to receive(:parse_options_file).with(".beaker.yml").and_return(project_file)
+            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).with(anything, "#{ENV['HOME']}/.beaker/subcommand_options.yaml").and_return(homedir_file)
+            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).with(anything, Pathname(".beaker/subcommand_options.yaml")).and_return(subcommand_file)
           end
 
           it 'presets have the lowest priority' do
-            @env = @argv = @host_file = @opt_file = @subcommand_file = @homedir_file = {}
+            @env = @argv = @host_file = @opt_file = @subcommand_file = @homedir_file = @project_file = {}
             mock_out_parsing
 
             opts = parser.parse_args([])
             attribution = parser.attribution
             expect(opts[:level]).to be == 'lowest'
             expect(attribution[:level]).to be == 'preset'
+          end
+
+          it 'project options should have seventh priority' do
+            @env = @argv = @host_file = @opt_file = @subcommand_file = @homedir_file = {}
+            mock_out_parsing
+
+            opts = parser.parse_args([])
+            attribution = parser.attribution
+            expect(opts[:ssh][:auth_methods]).to be == 'auth_project_123'
+            expect(attribution[:ssh][:auth_methods]).to be == 'project'
+            expect(opts[:level]).to be == 'seventh'
+            expect(attribution[:level]).to be == 'project'
           end
 
           it 'home directory options should have sixth priority' do
@@ -266,6 +286,28 @@ module Beaker
             expect(attribution[:level]).to be == 'env'
           end
 
+          it "loads the options file from a project file" do
+            mock_out_parsing
+
+            project_file[:options_file] = 'my_options_file.rb'
+            allow(OptionsFileParser).to receive(:parse_options_file).with('my_options_file.rb').and_return(ssh: {config: true})
+
+            output = parser.parse_args([])
+            attribution = parser.attribution
+            expect(output[:ssh][:config]).to be true
+            expect(attribution[:ssh][:config]).to eq('options_file')
+          end
+
+          it "loads project file options with the init subcommand" do
+            @env = @argv = @host_file = @opt_file = @subcommand_file = @homedir_file = {}
+            mock_out_parsing
+
+            output = parser.parse_args(%w[init --hosts redhat7-64ma])
+            attribution = parser.attribution
+            expect(output[:level]).to eq('seventh')
+            expect(attribution[:level]).to eq('project')
+          end
+
         end
 
         it "can correctly combine arguments from different sources" do
@@ -293,7 +335,6 @@ module Beaker
           args = ["-h", hosts_path, "--log-level", "debug", "--fail-mode", "nope"]
           expect { parser.parse_args(args) }.to raise_error(ArgumentError)
         end
-
       end
 
       describe '#parse_hosts_options' do
