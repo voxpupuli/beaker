@@ -13,15 +13,23 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.29.0...master)
 
+### Changed
+
+- Use `host.hostname` when combining options host_hash with host instance options
+
+### Removed
+
+- `amazon` as a platform value
+
+### Added
+
+- Load project options from .beaker.yml
+
 # [3.29.0](https://github.com/puppetlabs/beaker/compare/3.28.0...3.29.0) - 2017-11-16
 
 ### Added
 
 - Adding default to read fog credentials
-
-### Removed
-
-- `amazon` as a platform value
 
 # [3.28.0](https://github.com/puppetlabs/beaker/compare/3.27.0...3.28.0) - 2017-11-01
 
