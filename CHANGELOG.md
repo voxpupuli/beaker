@@ -21,6 +21,10 @@ git logs & PR history.
 
 - `amazon` as a platform value
 
+### Added
+
+- Load project options from .beaker.yml
+
 # [3.29.0](https://github.com/puppetlabs/beaker/compare/3.28.0...3.29.0) - 2017-11-16
 
 ### Added
