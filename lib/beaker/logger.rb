@@ -232,9 +232,19 @@ module Beaker
       end
     end
 
+    # Indent the step level for the duration of block.
+    def with_indent(&block)
+      old_line_prefix = self.line_prefix.dup
+      self.line_prefix << '  '
+      yield
+    ensure
+      self.line_prefix = old_line_prefix
+    end
+
     # Sets the step level appropriately for logging to be indented correctly
     #
     # @return nil
+    # @deprecated use {Logger#with_indent}
     def step_in
       self.line_prefix = self.line_prefix + '  '
     end
@@ -242,6 +252,7 @@ module Beaker
     # Sets the step level appropriately for logging to be indented correctly
     #
     # @return nil
+    # @deprecated use {Logger#with_indent}
     def step_out
       self.line_prefix = self.line_prefix.chop.chop
     end
