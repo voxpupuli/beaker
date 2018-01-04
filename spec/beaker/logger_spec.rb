@@ -47,11 +47,18 @@ module Beaker
     end
 
     context '#prefix_log_line' do
-      def prefix_log_line_test_compare_helper(in_test, out_answer, step_in_loop=1)
+      around :each do |example|
         logger.line_prefix = ''
+        begin
+          example.run
+        ensure
+          logger.line_prefix = ''
+        end
+      end
+
+      def prefix_log_line_test_compare_helper(in_test, out_answer, step_in_loop=1)
         step_in_loop.times { logger.step_in() }
         expect( logger.prefix_log_line(in_test) ).to be === out_answer
-        logger.line_prefix = ''
       end
 
       it 'can be successfully called with a arrays' do
@@ -86,15 +93,21 @@ module Beaker
     end
 
     context '#step_* methods' do
-      it 'steps in correctly (simple case)' do
+      around :each do |example|
         logger.line_prefix = ''
+        begin
+          example.run
+        ensure
+          logger.line_prefix = ''
+        end
+      end
+
+      it 'steps in correctly (simple case)' do
         logger.step_in()
         expect( logger.line_prefix ).to be === '  '
-        logger.line_prefix = ''
       end
 
       it 'sets length correctly in mixed scenario ' do
-        logger.line_prefix = ''
         logger.step_in()
         logger.step_in()
         logger.step_out()
@@ -102,47 +115,37 @@ module Beaker
         logger.step_in()
         logger.step_out()
         expect( logger.line_prefix ).to be === '    '
-        logger.line_prefix = ''
       end
 
       it 'can be unevenly stepped out, will remain at base: 0' do
-        logger.line_prefix = ''
         logger.step_in()
         10.times { logger.step_out() }
         expect( logger.line_prefix ).to be === ''
       end
 
       it 'can handle arbitrary strings as prefixes' do
-        logger.line_prefix = ''
         logger.line_prefix = 'Some string:'
         expect( logger.line_prefix ).to be === 'Some string:'
-        logger.line_prefix = ''
       end
 
       it 'can handle stepping in with arbitrary strings' do
-        logger.line_prefix = ''
         logger.line_prefix = 'Some string:'
         logger.step_in()
         logger.step_in()
         expect( logger.line_prefix ).to be === 'Some string:    '
-        logger.line_prefix = ''
       end
 
       it 'can handle stepping out with arbitrary strings' do
-        logger.line_prefix = ''
         logger.line_prefix = 'Some string:'
         10.times { logger.step_out() }
         expect( logger.line_prefix ).to be === ''
-        logger.line_prefix = ''
       end
 
       it 'can handle stepping in and out with arbitrary strings' do
-        logger.line_prefix = ''
         logger.line_prefix = 'Some string:'
         10.times { logger.step_in() }
         10.times { logger.step_out() }
         expect( logger.line_prefix ).to be === 'Some string:'
-        logger.line_prefix = ''
       end
     end
 
