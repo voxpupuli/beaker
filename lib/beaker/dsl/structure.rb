@@ -39,9 +39,10 @@ module Beaker
         logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
         if block_given?
-          logger.step_in()
           begin
-            yield
+            logger.with_indent do
+              yield
+            end
           rescue Exception => e
             if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
               logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
@@ -50,7 +51,6 @@ module Beaker
             end
             raise e
           end
-          logger.step_out()
         end
       end
 
@@ -120,9 +120,9 @@ module Beaker
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
         if block_given?
-          logger.step_in()
-          yield
-          logger.step_out()
+          logger.with_indent do
+            yield
+          end
         end
       end
 

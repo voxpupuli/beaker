@@ -28,10 +28,9 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
+      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
       allow(  subject ).to receive( :set_current_step_name )
-      expect( logger ).to receive( :step_in )
-      expect( logger ).to receive( :step_out )
+      allow( logger ).to receive(:with_indent) { |&block| block.call }
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
@@ -130,10 +129,9 @@ describe ClassMixedWithDSLStructure do
 
       it 'yields if a block is given' do
         subject.instance_variable_set(:@options, options)
-        expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
+        expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
         expect( logger ).to receive( :notify )
-        expect( logger ).to receive( :step_in )
-        expect( logger ).to receive( :step_out )
+        allow( logger ).to receive(:with_indent) { |&block| block.call }
         expect( subject ).to receive( :foo )
         subject.manual_test 'blah' do
           subject.foo
@@ -164,10 +162,9 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(3).times
+      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
       expect( logger ).to receive( :notify )
-      expect( logger ).to receive( :step_in )
-      expect( logger ).to receive( :step_out )
+      allow( logger ).to receive(:with_indent) { |&block| block.call }
       expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo
