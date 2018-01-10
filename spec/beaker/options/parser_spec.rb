@@ -127,7 +127,7 @@ module Beaker
         before { FakeFS.deactivate! }
 
         it 'pulls the args into key called :command_line' do
-          my_args = ['--log-level', 'debug', '-h', hosts_path]  
+          my_args = ['--log-level', 'debug', '-h', hosts_path]
 
           expect(parser.parse_args(my_args)[:command_line]).to include(my_args.join(' '))
           expect(parser.attribution[:command_line]).to be == 'cmd'
@@ -164,7 +164,7 @@ module Beaker
               :level => 'lowest',
               :ssh => {
                   :config => 'config123',
-                  :paranoid => 'paranoid123',
+                  :verify_host_key => 'verify123',
                   :port => 'port123',
                   :forward_agent => 'forwardagent123',
                   :keys => 'keys123',
@@ -248,7 +248,7 @@ module Beaker
             expect(attribution[:ssh][:auth_methods]).to be == 'options_file'
             expect(attribution[:ssh][:user_known_hosts_file]).to be == 'options_file'
             expect(attribution[:ssh][:config]).to be == 'preset'
-            expect(attribution[:ssh][:paranoid]).to be == 'preset'
+            expect(attribution[:ssh][:verify_host_key]).to be == 'preset'
             expect(attribution[:ssh][:port]).to be == 'preset'
             expect(attribution[:ssh][:forward_agent]).to be == 'preset'
             expect(attribution[:ssh][:keys]).to be == 'preset'
@@ -321,7 +321,7 @@ module Beaker
           args   = ["-h", hosts_path, "--log-level", log_level, "--type", type, "--install", "PUPPET/1.0,HIERA/hello"]
           output = parser.parse_args(args)
           attribution = parser.attribution
-          expect(output[:hosts_file]).to be == hosts_path  
+          expect(output[:hosts_file]).to be == hosts_path
           expect(attribution[:hosts_file]).to be == 'cmd'
           expect(output[:jenkins_build_url]).to be == build_url
           expect(attribution[:jenkins_build_url]).to be == 'env'

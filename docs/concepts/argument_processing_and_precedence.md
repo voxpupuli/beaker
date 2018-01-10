@@ -266,7 +266,7 @@ Values already included in Beaker as defaults for required arguments.
           :run_in_parallel        => [],
           :ssh                    => {
                                      :config                => false,
-                                     :paranoid              => false,
+                                     :verify_host_key       => false,
                                      :auth_methods          => ["publickey"],
                                      :port                  => 22,
                                      :forward_agent         => true,
