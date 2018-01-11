@@ -240,10 +240,56 @@ module Beaker
       hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
       # remove copy of HOSTS information
       hosts_yaml['CONFIG']['provision'] = false
+      hosts_yaml['HOSTS'].each do |ip,host|
+        if ( ! host.key?(:instance) )
+          next
+        end
+        ec2_instance = host[:instance]
+        new_instance = ec2_instance_to_hash(ec2_instance)
+        host[:instance] = new_instance
+      end
+
       File.open(preserved_hosts_filename, 'w') do |file|
         YAML.dump(hosts_yaml, file)
       end
       @options[:hosts_preserved_yaml_file] = preserved_hosts_filename
+    end
+
+    # ec2_instance_to_hash
+    #
+    # converts an ec2 instance to a hash
+    # recurses into the instance variables looking for other AWS object to convert as well
+    # skips the configuration object because the AWS object doesn't write that to YAML
+    # This is specifically tailored to be a medium term solution to BKR-487
+    # It would be the wrong thing to use for anything else.
+    #
+    # @param obj
+    # @return [hash]
+    def ec2_instance_to_hash obj
+      h = Hash.new
+      if ( obj.class == AWS::Core::Configuration )
+        return obj
+      end
+      if ( obj.class.to_s =~ /^AWS/ )
+        obj.instance_variables.each do |var|
+          val = obj.instance_variable_get(var)
+          new_val = ec2_instance_to_hash(val)
+          if ( new_val.class != AWS::Core::Configuration )
+            h[var.to_s.delete("@")] = new_val
+          end
+        end
+      elsif ( obj.class == Hash )
+        obj.each do |key,val|
+          if ( val.class.to_s =~ /^AWS/ )
+            h[key] = ec2_instance_to_hash(val)
+          else
+            h[key] = val
+          end
+        end
+      else
+        return obj
+      end
+      return h
     end
 
     # Return a host_hash that is a merging of options host hashes with instance host objects
