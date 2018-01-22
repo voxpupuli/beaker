@@ -66,6 +66,11 @@ describe Beaker do
       "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
   ]
 
+  it_should_behave_like 'enables_root_login', 'osx-10.13', [
+      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
+  ]
+
   # Solaris
   it_should_behave_like 'enables_root_login', 'solaris-10', [
     "sudo -E svcadm restart network/ssh",
@@ -600,6 +605,10 @@ describe Beaker do
       test_host_ssh_permit_user_environment('osx-10.12')
     end
 
+    it "permits user environments on an OS X 10.13 host" do
+      test_host_ssh_permit_user_environment('osx-10.13')
+    end
+
     it "permits user environments on an ssh-based linux host" do
       test_host_ssh_permit_user_environment('ubuntu')
     end
@@ -639,6 +648,10 @@ describe Beaker do
 
     it "sets user ssh environment on an OS X 10.12 host" do
       test_host_ssh_set_user_environment('osx-10.12')
+    end
+
+    it "sets user ssh environment on an OS X 10.13 host" do
+      test_host_ssh_set_user_environment('osx-10.13')
     end
 
     it "sets user ssh environment on an ssh-based linux host" do
