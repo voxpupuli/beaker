@@ -11,7 +11,17 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.30.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.31.0...master)
+
+# [3.30.0](https://github.com/puppetlabs/beaker/compare/3.30.0...3.31.0) - 2018-01-22
+
+### Changed
+
+- Clean up ssh paranoid setting deprecation warnings
+
+### Added
+
+- Add macOS 10.13 support
 
 # [3.30.0](https://github.com/puppetlabs/beaker/compare/3.29.0...3.30.0) - 2018-01-10
 
