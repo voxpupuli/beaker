@@ -227,6 +227,8 @@ module Unix::Pkg
   #
   # @note See {Beaker::DSL::Helpers::HostHelpers#deploy_package_repo} for info on
   #       params
+  # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
+  # @visibility private
   def deploy_apt_repo(path, name, version)
     codename = self['platform'].codename
 
@@ -244,6 +246,8 @@ module Unix::Pkg
   #
   # @note See {Beaker::DSL::Helpers::HostHelpers#deploy_package_repo} for info on
   #       params
+  # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
+  # @visibility private
   def deploy_yum_repo(path, name, version)
     repo_file = "#{path}/rpm/pl-#{name}-#{version}-repos-pe-#{self['platform']}.repo"
     do_scp_to repo_file, "/etc/yum.repos.d/#{name}.repo", {}
@@ -253,6 +257,8 @@ module Unix::Pkg
   #
   # @note See {Beaker::DSL::Helpers::HostHelpers#deploy_package_repo} for info on
   #       params
+  # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
+  # @visibility private
   def deploy_zyp_repo(path, name, version)
     repo_file = "#{path}/rpm/pl-#{name}-#{version}-repos-pe-#{self['platform']}.repo"
     repo = IniFile.load(repo_file)
@@ -268,6 +274,8 @@ module Unix::Pkg
   #
   # @note See {Beaker::DSL::Helpers::HostHelpers#deploy_package_repo} for info on
   #       params
+  # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
+  # @visibility private
   def deploy_package_repo(path, name, version)
     if not File.exists? path
       @logger.warn "Was asked to deploy package repository from #{path}, but it doesn't exist!"
