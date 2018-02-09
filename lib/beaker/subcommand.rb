@@ -54,6 +54,8 @@ module Beaker
     class_option :'debug-errors', :type => :boolean, :group => 'Beaker run'
     class_option :'exec_manual_tests', :type => :boolean, :group => 'Beaker run'
     class_option :'test-tag-exclude', :type => :string, :group => 'Beaker run'
+    class_option :'test-tag-and', :type => :string, :group => 'Beaker run'
+    class_option :'test-tag-or', type => :string, :group => 'Beaker run'
 
     # The following are listed as deprecated in beaker --help, but needed now for
     # feature parity for beaker 3.x.
