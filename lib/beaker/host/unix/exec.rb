@@ -171,7 +171,7 @@ module Unix::Exec
     when /el-|centos|fedora|redhat|oracle|scientific|eos/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /sles/
-      exec(Beaker::Command.new("rcsshd restart"))
+      exec(Beaker::Command.new("/usr/sbin/rcsshd restart"))
     when /solaris/
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/
