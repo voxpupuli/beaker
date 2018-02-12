@@ -297,6 +297,8 @@ module Beaker
         #                          packaging tools. This can be determined with
         #                          `rake pl:print_build_params` from the packaging
         #                          repo.
+        # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
+        # @visibility private
         def deploy_package_repo host, path, name, version
           host.deploy_package_repo path, name, version
         end
