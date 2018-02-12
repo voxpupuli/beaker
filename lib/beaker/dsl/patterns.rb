@@ -22,7 +22,7 @@ module Beaker
       # @param [Block] block This method will yield to a block of code passed by the caller
       #
       # @return [Array<Result>, Result, nil] An array of results, a result object, or nil.
-      #   Check {#run_block_on} for more details on this.
+      #   Check {Beaker::Shared::HostManager#run_block_on} for more details on this.
       def block_on hosts_or_filter, opts={}, &block
         block_hosts = nil
         if defined? hosts
