@@ -32,6 +32,76 @@ module Beaker
       end
     end
 
+    context 'ensure that beaker options can be passed through' do
+
+      let (:beaker_options_list) { [
+        'options-file',
+        'helper',
+        'load-path',
+        'tests',
+        'pre-suite',
+        'post-suite',
+        'pre-cleanup',
+        'provision',
+        'preserve-hosts',
+        'root-keys',
+        'keyfile',
+        'timeout',
+        'install',
+        'modules',
+        'quiet',
+        'color',
+        'color-host-output',
+        'log-level',
+        'log-prefix',
+        'dry-run',
+        'fail-mode',
+        'ntp',
+        'repo-proxy',
+        'add-el-extras',
+        'package-proxy',
+        'validate',
+        'collect-perf-data',
+        'parse-only',
+        'tag',
+        'exclude-tags',
+        'xml-time-order',
+        'debug-errors',
+        'exec_manual_tests',
+        'test-tag-exclude',
+        'test-tag-and',
+        'test-tag-or',
+        'xml',
+        'type',
+        'debug',
+      ] }
+
+      let( :yaml_store_mock ) { double('yaml_store_mock') }
+
+      it 'should not error with valid beaker options' do
+        beaker_options_list.each do |option|
+          allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
+          allow(yaml_store_mock).to receive(:transaction).and_yield
+          allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
+          allow(File).to receive(:open)
+          allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
+          expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
+          expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
+          expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
+        end
+      end
+
+      it "should error with a bad option here" do
+        allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
+        allow(yaml_store_mock).to receive(:transaction).and_yield
+        allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
+        expect(File).not_to receive(:open)
+        expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
+        expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
+        expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
+      end
+    end
+
     context '#init' do
       let( :cli ) { subcommand.instance_variable_get(:@cli) }
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
