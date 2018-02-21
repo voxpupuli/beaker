@@ -558,32 +558,32 @@ module Beaker
 
       block_on host do |host|
         skip_msg = host.skip_set_env?
-        unless skip_msg.nil?
-          logger.debug( skip_msg )
-          next
+        if skip_msg.nil?
+          env = construct_env(host, opts)
+          logger.debug("setting local environment on #{host.name}")
+          if host['platform'] =~ /windows/ and host.is_cygwin?
+            env['CYGWIN'] = 'nodosfilewarning'
+          end
+          host.ssh_permit_user_environment
+          host.ssh_set_user_environment(env)
+        else
+          logger.debug(skip_msg)
         end
-
-        env = construct_env(host, opts)
-        logger.debug("setting local environment on #{host.name}")
-        if host['platform'] =~ /windows/ and host.is_cygwin?
-          env['CYGWIN'] = 'nodosfilewarning'
-        end
-        host.ssh_permit_user_environment()
-
-        host.ssh_set_user_environment(env)
 
         # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
         # this is the worst and i hate it
         Class.new.extend(Beaker::DSL).configure_type_defaults_on(host)
 
-        #close the host to re-establish the connection with the new sshd settings
-        host.close
+        if skip_msg.nil?
+          #close the host to re-establish the connection with the new sshd settings
+          host.close
 
-        # print out the working env
-        if host.is_powershell?
-          host.exec(Command.new("SET"))
-        else
-          host.exec(Command.new("cat #{host[:ssh_env_file]}"))
+          # print out the working env
+          if host.is_powershell?
+            host.exec(Command.new("SET"))
+          else
+            host.exec(Command.new("cat #{host[:ssh_env_file]}"))
+          end
         end
 
       end
