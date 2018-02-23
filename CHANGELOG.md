@@ -11,9 +11,21 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.31.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.32.0...master)
 
-# [3.30.0](https://github.com/puppetlabs/beaker/compare/3.30.0...3.31.0) - 2018-01-22
+# [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
+
+### Changed
+
+- Fully qualify sles ssh restart cmd
+- Deprecated deploy_package_repo methods
+- Configuration of host type in host_prebuilt_steps
+
+### Added
+
+- Added missing beaker options for subcommand passthorugh
+
+# [3.31.0](https://github.com/puppetlabs/beaker/compare/3.30.0...3.31.0) - 2018-01-22
 
 ### Changed
 
