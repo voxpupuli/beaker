@@ -181,9 +181,9 @@ module Beaker
           @cli.options[suite] = []
         end
         if Pathname(resource).directory?
-          @cli.options[:tests] = Dir.glob("#{Pathname(resource).expand_path}/*.rb")
+          @cli.options[:tests] = Dir.glob("#{Pathname(resource)}/*.rb")
         else
-          @cli.options[:tests] = [Pathname(resource).expand_path.to_s]
+          @cli.options[:tests] = [Pathname(resource).to_s]
         end
       elsif resource.match(/pre-suite|tests|post-suite|pre-cleanup/)
         # The regex match here is loose so that users can supply multiple suites,
