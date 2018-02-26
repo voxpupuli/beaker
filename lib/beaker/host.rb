@@ -452,7 +452,7 @@ module Beaker
         require 'pathname'
         required_dirs.each do |dir|
           dir_path = Pathname.new(dir)
-          if dir_path.absolute?
+          if dir_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
             mkdir_p(File.join(target, dir.gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, '')))
           else
             mkdir_p( File.join(target, dir) )
@@ -466,7 +466,7 @@ module Beaker
           next if File.directory?(s)
 
           s_path = Pathname.new(s)
-          if s_path.absolute?
+          if s_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
             file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/,''))
           else
             file_path = File.join(target, File.dirname(s))
