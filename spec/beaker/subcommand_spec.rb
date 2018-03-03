@@ -178,7 +178,6 @@ module Beaker
 
         expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
         expect_any_instance_of(Pathname).to receive(:directory?).and_return(false)
-        expect_any_instance_of(Pathname).to receive(:expand_path).once
         expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
         expect{subcommand.exec('resource')}.to_not raise_error
       end
@@ -187,7 +186,6 @@ module Beaker
         expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
         expect_any_instance_of(Pathname).to receive(:directory?).and_return(true)
         expect(Dir).to receive(:glob)
-        expect_any_instance_of(Pathname).to receive(:expand_path).once
         expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
         expect{subcommand.exec('resource')}.to_not raise_error
       end
