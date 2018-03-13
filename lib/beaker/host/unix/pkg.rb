@@ -93,14 +93,7 @@ module Unix::Pkg
         end
         update_apt_if_needed
         execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
-      when /solaris-11/
-        if opts[:acceptable_exit_codes]
-          opts[:acceptable_exit_codes] << 4
-        else
-          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
-        end
-        execute("pkg #{cmdline_args} install #{name}", opts)
-      when /solaris-10/
+      when /solaris-/
         if ! check_for_command('pkgutil')
           # https://www.opencsw.org/package/pkgutil/
           noask_text = self.noask_file_text
@@ -110,7 +103,7 @@ module Unix::Pkg
           execute('/opt/csw/bin/pkgutil -U', opts)
           execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
         end
-        execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
+        execute("/opt/csw/bin/pkgutil -i -y #{cmdline_args} #{name}", opts)
       when /openbsd/
         begin
           execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
