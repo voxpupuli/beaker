@@ -181,7 +181,7 @@ module Beaker
           @cli.options[suite] = []
         end
         if Pathname(resource).directory?
-          @cli.options[:tests] = Dir.glob("#{Pathname(resource)}/*.rb")
+          @cli.options[:tests] = Dir.glob("#{Pathname(resource)}/**/*.rb")
         else
           @cli.options[:tests] = [Pathname(resource).to_s]
         end
