@@ -38,7 +38,7 @@ module Beaker
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
       self.set_ssh_connection_preference(hosts_to_provision, hypervisor)
-      hypervisor.provision if options[:provision]
+      hypervisor.provision
 
       hypervisor
     end
