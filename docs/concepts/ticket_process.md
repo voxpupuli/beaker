@@ -11,9 +11,9 @@ stages as well.
 
 ## Administrivia
 
-- Beaker tickets live in the 
+- Beaker tickets live in the
 [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
-- Create a [Jira account](http://tickets.puppetlabs.com) to interact with them 
+- Create a [Jira account](http://tickets.puppetlabs.com) to interact with them
 
 ## Pre-Development States
 
@@ -39,14 +39,14 @@ person you need info from to move the ticket forward.
 
 This is the state for when a ticket has been triaged, but hasn't yet been
 estimated for work from someone on the Beaker team, or someone ready to
-take on the work. Any preliminary information needed to understand the 
+take on the work. Any preliminary information needed to understand the
 ticket (before investigation) should be gathered before this point.
 
 ### Ready for Engineering
 
 An accepted ticket that has been estimated should be put into the Ready for
-Engineering state. This does not necessarily mean that a ticket has been 
-prioritized against other Beaker work, but prioritization should occur by 
+Engineering state. This does not necessarily mean that a ticket has been
+prioritized against other Beaker work, but prioritization should occur by
 the time the issue has been picked up in a sprint.
 
 ## Development States
@@ -62,23 +62,23 @@ they're currently working on a particular issue.
 ### Ready for Merge
 
 Once a Pull Request (PR) is generated for an issue, the contributor should set
-the status to Ready for Merge. We do have a github integration setup, so if 
-you've titled your PR correctly (according to our 
-[contributor docs](/CONTRIBUTING.md)), 
+the status to Ready for Merge. We do have a github integration setup, so if
+you've titled your PR correctly (according to our
+[contributor docs](/CONTRIBUTING.md)),
 it will be linked from the JIRA ticket.
 
-In the Beaker project, we leave the assignee as the person who wrote the 
+In the Beaker project, we leave the assignee as the person who wrote the
 proposed change, so that they know that they have to keep pushing for their
 code to be merged.
 
 ### Resolved
 
-Once your PR is merged, then you can Resolve your ticket. 
+Once your PR is merged, then you can Resolve your ticket.
 
 **NOTE** that when you do this, you should set the FixedVersion to
 
     BKR.next
-    
-The reason that we do this now and not before is that we use this field to 
+
+The reason that we do this now and not before is that we use this field to
 autogenerate our release notes.  We want to make sure that we capture only
 work that is _in_ the next release, not work that's _intended_ for it.

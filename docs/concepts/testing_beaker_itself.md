@@ -6,7 +6,7 @@ While Beaker provides the testing harness for much of the acceptance testing tha
 
 ### Product Coverage
 
-Beaker test coverage covers the LTS PE version, currently 2016.4.0, and the latest released version of PE, currently 2016.5.0. 
+Beaker test coverage covers the LTS PE version, currently 2016.4.0, and the latest released version of PE, currently 2016.5.0.
 Since there is only a single major version of Puppet itself currently supported, beaker only run tests on the latest y-release of Puppet 4, currently 4.8.z. This currently resolves to puppet-agent 1.8.x.
 
 ### Platform Coverage
@@ -16,10 +16,10 @@ The platforms that beaker covers in its regression testing are largely what is s
 ## Test Suite Phases
 
 ### Beaker Spec
-The initial step in Beaker's pipeline is to execute spec testing with supported and future rubies; 2.2.5 and 2.3.1. 
+The initial step in Beaker's pipeline is to execute spec testing with supported and future rubies; 2.2.5 and 2.3.1.
 
-### Beaker Acceptance 
-All acceptance tests use actual OS's with beaker installed and use beaker itself to verify that its own methods and classes are working. 
+### Beaker Acceptance
+All acceptance tests use actual OS's with beaker installed and use beaker itself to verify that its own methods and classes are working.
 
 * The Base tests are tests that do not require puppet be installed on the SUT. This includes much of the DSL and host helpers.
 * The puppet tests rely on puppet being installed in the pre-suite

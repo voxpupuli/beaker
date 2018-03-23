@@ -1,6 +1,6 @@
 ## So What Are Types Anyway?
 
-Historically, Puppet Open Source and Enterprise have had different paths for different resources.  Beaker supports these configurations through the use of its `type` parameter.  The Beaker CLI exposes this parameter with the `--type` option.  
+Historically, Puppet Open Source and Enterprise have had different paths for different resources.  Beaker supports these configurations through the use of its `type` parameter.  The Beaker CLI exposes this parameter with the `--type` option.
 
 The two older types are represented by the `foss` and `pe` values.
 

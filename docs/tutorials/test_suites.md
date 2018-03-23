@@ -47,7 +47,7 @@ failure modes.
 
 The pre-suite is for setting up the Systems Under Test (SUTs) for the testing
 suite. No surprises here, usually these files are filled with the setup and
-installation code needed to verify that the operating assumptions of the 
+installation code needed to verify that the operating assumptions of the
 software being tested are true.
 
 Pre-suites, since they’re supposed to contain just setup code, will fail-fast

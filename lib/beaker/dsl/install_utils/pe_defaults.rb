@@ -72,7 +72,7 @@ module Beaker
           PE_DEFAULTS[platform].each_pair do |key, val|
             host[key] = val
           end
-          # add the type and group here for backwards compatability 
+          # add the type and group here for backwards compatability
           if host['platform'] =~ /windows/
             host['group'] = 'Administrators'
           else

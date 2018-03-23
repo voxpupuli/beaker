@@ -102,7 +102,7 @@ module Beaker
     describe '#ssh_service_restart' do
       PlatformHelpers::SYSTEMDPLATFORMS.each do |platform|
         it "calls the correct command for #{platform}" do
-          opts['platform'] = platform 
+          opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
           expect{instance.ssh_service_restart}.to_not raise_error

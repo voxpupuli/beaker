@@ -67,48 +67,48 @@ Hypervisor for w2k8r2 is none
 Hypervisor for w2k3r2 is none
 Beaker::Hypervisor, found some none boxes to create
 
-pe-centos6 10:55:27$  which curl  
+pe-centos6 10:55:27$  which curl
 /usr/bin/curl
 
 pe-centos6 executed in 0.14 seconds
 
-pe-centos6 10:55:27$  which ntpdate  
+pe-centos6 10:55:27$  which ntpdate
 /usr/sbin/ntpdate
 
 pe-centos6 executed in 0.01 seconds
 
-w2k8r2 10:55:27$  which curl  
+w2k8r2 10:55:27$  which curl
 /bin/curl
 
 w2k8r2 executed in 0.42 seconds
 
-w2k3r2 10:55:27$  which curl  
+w2k3r2 10:55:27$  which curl
 /bin/curl
 
 w2k3r2 executed in 0.29 seconds
 No tests to run for suite 'pre_suite'
 Begin tests/trypry.rb
 
-pe-centos6 10:55:28$  echo hello  
+pe-centos6 10:55:28$  echo hello
 hello
 
 pe-centos6 executed in 0.01 seconds
 
-pe-centos6 10:55:28$  echo test block  
+pe-centos6 10:55:28$  echo test block
 test block
 
 pe-centos6 executed in 0.01 seconds
 block result.stdout: test block
 block result.raw_stdout: test block
 
-pe-centos6 10:55:28$  echo test block, built in functions  
+pe-centos6 10:55:28$  echo test block, built in functions
 test block, built in functions
 
 pe-centos6 executed in 0.00 seconds
 built in function stdout: test block, built in functions
 built in function stderr:
 
-pe-centos6 10:55:28$  echo no block  
+pe-centos6 10:55:28$  echo no block
 no block
 
 pe-centos6 executed in 0.00 seconds
@@ -137,7 +137,7 @@ Here's some sample console calls:
 => [pe-centos6, w2k8r2, w2k3r2]
 [2] pry(#<Beaker::TestCase>)> on hosts[1], 'echo hello'
 
-w2k8r2 10:54:11$  echo hello  
+w2k8r2 10:54:11$  echo hello
 hello
 
 w2k8r2 executed in 0.07 seconds
@@ -153,7 +153,7 @@ w2k8r2 executed in 0.07 seconds
  @stdout="hello\n">
 [3] pry(#<Beaker::TestCase>)> on hosts[1], 'ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/'
 
-w2k8r2 10:56:15$  ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/  
+w2k8r2 10:56:15$  ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/
 Application Data
 Desktop
 Documents
@@ -184,7 +184,7 @@ w2k8r2 executed in 0.09 seconds
   "Application Data\nDesktop\nDocuments\nFavorites\nMicrosoft\nPackage Cache\nStart Menu\nTemplates\nVMware\nbeaker.gemspec\nntuser.pol\n">
 [4] pry(#<Beaker::TestCase>)> result = on hosts[1], 'ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/'
 
-w2k8r2 10:56:34$  ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/  
+w2k8r2 10:56:34$  ls /cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/
 Application Data
 Desktop
 Documents
@@ -239,10 +239,10 @@ Consider this example test case _test.rb_, which is going to fail:
       assert_equal(important_expected_value, actual_value, 'This product is faulty')
     end
 
-You can run this test using `beaker -t test.rb` or (to use the `run` subcommand and just run the test and bypass host provisioning etc) `beaker run -t test.rb`  
+You can run this test using `beaker -t test.rb` or (to use the `run` subcommand and just run the test and bypass host provisioning etc) `beaker run -t test.rb`
 It fails.
 
-Now try `beaker run -t test.rb --debug-errors`  
+Now try `beaker run -t test.rb --debug-errors`
 This will enter a pry console when the failure occurs.
 
     * Assert expected matches actual
@@ -250,9 +250,9 @@ This will enter a pry console when the failure occurs.
        Expected: 3
         Actual: 2>
       HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code
-    
+
     From: /home/puppet/code/beaker/lib/beaker/dsl/structure.rb @ line 51 Beaker::DSL::Structure#step:
-    
+
         38: def step step_name, &block
         39:   logger.notify "\n* #{step_name}\n"
         40:   set_current_step_name(step_name)
@@ -271,7 +271,7 @@ This will enter a pry console when the failure occurs.
         53:     logger.step_out()
         54:   end
         55: end
-    
+
     [1] pry(#<Beaker::TestCase>)>
 
 Because beaker is catching the exception, pry is showing you beaker code. But you can navigate to your own test code using the `backtrace` and `up` commands.
@@ -288,7 +288,7 @@ Because beaker is catching the exception, pry is showing you beaker code. But yo
 The arrow indicates pry is showing code at the top of the stack trace. At position #2 in the stack you can see line 5 of test.rb - this is the actual test code that failed. You can navigate there by entering the `up` command twice.
 
         From: /home/puppet/code/beaker/test.rb @ line 5 self.run_test:
-    
+
         1: test_name 'An important aspect of my product'
         2:
         3: important_expected_value = 3
@@ -297,7 +297,7 @@ The arrow indicates pry is showing code at the top of the stack trace. At positi
         6:   actual_value = 2
         7:   assert_equal(important_expected_value, actual_value, 'This product is faulty')
         8: end
-    
+
     [2] pry(#<Beaker::TestCase>)>
 
 > **NOTE:** Bear in mind that though you are navigating through your code here; pry is not rewinding code execution. When you exit pry, beaker will continue its execution from the top of the backtrace, failing the test due to the error that occurred.
@@ -307,7 +307,7 @@ From here, you can examine variables in your test. If you have hosts provisioned
 ## Defining external breakpoints with byebug
 This method is perhaps the least intuitive to use; but combines the advantages of letting you pick the line(s) of code to set breakpoints on; and being able to debug without needing to edit your test code directly. It is sometimes desirable to debug a test without changing the test's code at all; for example, if you want to compare a test at two or more different git commits, your test source needs to remain unmodified from its committed form.
 
-byebug allows you to externally define breakpoints to keep them separate from your source code. 
+byebug allows you to externally define breakpoints to keep them separate from your source code.
 
 ### Example
 Consider the following test file test.rb:

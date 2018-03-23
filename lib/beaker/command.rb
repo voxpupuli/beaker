@@ -66,7 +66,7 @@ module Beaker
     #                      interface.
     # @param [String] cmd  An command to call.
     # @param [Hash]   env  An optional hash of environment variables to be used
-    # @param [String] pc   An optional list of commands to prepend 
+    # @param [String] pc   An optional list of commands to prepend
     #
     # @return [String] This returns the fully formed command line invocation.
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
@@ -78,7 +78,7 @@ module Beaker
       end
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      if host[:platform] =~ /cisco_ios_xr/ 
+      if host[:platform] =~ /cisco_ios_xr/
         cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string]
       else
         cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]

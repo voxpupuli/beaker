@@ -19,14 +19,14 @@ module Beaker
           ex = Exception.new("ArgumentError")
           allow( ex ).to receive( :backtrace ).and_return(backtrace)
           mesg = "I'm the extra message"
-         
+
           backtrace.each_line do |line|
             expect( logger ).to receive( :error ).with(line)
           end
 
           expect( subject ).to receive( :raise ).once
 
-          subject.report_and_raise(logger, ex, mesg) 
+          subject.report_and_raise(logger, ex, mesg)
 
         end
 

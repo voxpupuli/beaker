@@ -7,7 +7,7 @@ class Response
   end
 end
 
-class MockFissionVM 
+class MockFissionVM
   attr_accessor :name
   @@snaps = []
   def initialize name
@@ -28,11 +28,11 @@ class MockFissionVM
   end
 
   def running?
-    Response.new(0, '', @running) 
+    Response.new(0, '', @running)
   end
 
   def start opt
-    @running = true 
+    @running = true
   end
 
   def exists?
@@ -40,7 +40,7 @@ class MockFissionVM
   end
 end
 
-class MockFission 
+class MockFission
   @@vms = []
   def self.presets hosts
     snaps = []

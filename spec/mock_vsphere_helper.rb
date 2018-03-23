@@ -175,7 +175,7 @@ class MockVsphereHelper
   def wait_for_tasks tasks, try, attempts
     true
   end
- 
+
   def close
     true
   end

@@ -25,7 +25,7 @@ file line that looks like this in our configuration:
       <hostname>:
         ...
         vrf: management
-    
+
 B. All Cisco hosts will also require a user to be set on the
 hosts.  This is because they don't allow ssh'ing as the root user,
 which is one of the main assumptions that Beaker operates under in

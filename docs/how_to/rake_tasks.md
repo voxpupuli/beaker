@@ -13,7 +13,7 @@ You will also need to have Beaker installed as part of your bundle.
 When you run:
 
     rake --tasks
-    
+
 from your project dir, you should see (as well as any rake tasks you have defined locally)
 
     rake beaker:test[hosts,type]  # Run Beaker Acceptance
@@ -41,9 +41,8 @@ Your options file would look something like:
 To use the more generic test task, you will need to pass in the type as the 2nd argument to the rake task:
 
     rake beaker:test[,smoke]
-    
+
 This will assume that you have created the file:
 
     acceptance/beaker-smoke.cfg
-    
-    
+

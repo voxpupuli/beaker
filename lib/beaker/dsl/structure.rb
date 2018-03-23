@@ -68,7 +68,7 @@ module Beaker
 
         set_current_step_name(step_name)
         # Here we prompt the user to tell us if the step passed or failed
-        loop do 
+        loop do
           input = Readline.readline('Did this step pass, Y/n? ', true).squeeze(" ").strip.downcase
           if %w(y yes).include?(input)
             break
@@ -102,7 +102,7 @@ module Beaker
       def manual_test manual_test_name, &block
         if(@options.has_key?(:exec_manual_tests) && @options[:exec_manual_tests] == true)
           # here the option is set so we run the test as normal
-          test_name manual_test_name, &block 
+          test_name manual_test_name, &block
         else
           # here no option was set so we log the test name and skip it
           test_name manual_test_name

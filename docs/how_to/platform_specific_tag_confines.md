@@ -18,7 +18,7 @@ hashes, where each hash specifies a platform to confine, based on the
 tags included in the test. The local options file key is
 `:platform_tag_confines`.
 
-An example local options file is included 
+An example local options file is included
 below (remember that local options files have to be readable into
 beaker as a ruby hash):
 
@@ -58,7 +58,7 @@ UI confine example like this:
 
     "ui" tests will be confined away from ubuntu-1404 hosts, because
     "TODO: We have not applied the UI tests to Ubuntu yet"
-    
+
 
 ## But Why Do We Need These?
 
