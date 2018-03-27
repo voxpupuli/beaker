@@ -3,7 +3,7 @@ class MockRbVmomiSnapshot
   attr_accessor :rootSnapshotList
   attr_accessor :childSnapshotList
 
-  def initialize 
+  def initialize
     @name = nil
     @rootSnapshotList = []
     @childSnapshotList = []
@@ -12,7 +12,7 @@ class MockRbVmomiSnapshot
   def print_nested_array arg
     str = '[ '
     arg.each do |arry|
-      if arry.is_a?(Array) 
+      if arry.is_a?(Array)
         str += print_nested_array( arry )
       elsif arry.is_a?(MockRbVmomiSnapshot)
         str += arry.to_s + ", "
@@ -43,7 +43,7 @@ class MockRbVmomiVM
     snaphash.each do | name, subsnaps |
       new_snap = MockRbVmomiSnapshot.new
       new_snap.name = name
-      if subsnaps.is_a?(Hash) 
+      if subsnaps.is_a?(Hash)
         new_snap.childSnapshotList = process_snaphash( subsnaps )
       end
       shotlist << new_snap
@@ -130,7 +130,7 @@ class MockRbVmomiConnection
 
     end
 
-    def initialize 
+    def initialize
       @results = ResultContainer.new
     end
 
@@ -221,7 +221,7 @@ class MockRbVmomiConnection
     @host = opts[ :host ]
     @user = opts[ :user ]
     @password = opts[ :password ]
-    @insecure = opts[ :insecure ] 
+    @insecure = opts[ :insecure ]
     @serviceinstance = ServiceInstance.new
     @servicemanager = ServiceManager.new
     @propertycollector = PropertyCollector.new

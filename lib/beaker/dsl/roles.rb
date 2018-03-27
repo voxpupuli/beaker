@@ -161,7 +161,7 @@ module Beaker
       end
 
       #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
-      #commands without having to refer to role by String or Symbol.  Will not add a new method 
+      #commands without having to refer to role by String or Symbol.  Will not add a new method
       #definition if the name is already in use.
       # @param [String, Symbol, Array[String,Symbol]] role The role that you wish to create a definition for, either a String
       # Symbol or an Array of Strings or Symbols.

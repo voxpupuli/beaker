@@ -22,7 +22,7 @@ If you haven't installed beaker yet, your guide to doing
 so can be found [here](installation.md).
 
 ## Quick Start
- 
+
 As a completely new beaker user, the
 [quick start rake tasks doc](quick_start_rake_tasks.md)
 will take you through getting beaker running for the

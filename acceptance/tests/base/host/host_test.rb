@@ -91,7 +91,7 @@ hosts.each do |host|
   # Use env_id a key to delete
   env_param3 = "#{env_id}"
   env_value3 = "#{env_id}"
-  
+
   host.add_env_var(env_param1,env_value1)
   host.add_env_var(env_param2,env_value2)
   host.add_env_var(env_param3,env_value3)

@@ -9,13 +9,13 @@ is that the **TestCase#hosts** array is modified to only contain the hosts that 
 
 Full method documentation here:
 
-* [confine](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Structure#confine-instance_method) 
+* [confine](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Structure#confine-instance_method)
 
 ## How does the optional Array<Host> parameter work?
 
 However, if you pass in the optional Array<Host> to the method, the criteria will be applied to this hosts array
 (not **TestCase#hosts**). Subsequently, any of the hosts contained in **TestCase#hosts** that were not included in the Array<Host>
-passed to the method, will remain in **TestCase#hosts**. But any hosts that were filtered out by the criteria match 
+passed to the method, will remain in **TestCase#hosts**. But any hosts that were filtered out by the criteria match
 will be overwritten.
 
 Take the following example:
@@ -69,7 +69,7 @@ is being applied directly to **TestCase#hosts** (which contains all hosts).
 
 `confine :except, { :platform => 'el-7-x86_64' }`
 
-Will return two hosts (ubuntu_master and ubuntu_agent). 
+Will return two hosts (ubuntu_master and ubuntu_agent).
 
 In order to limit the hosts to only the ubuntu agent, you would need to use:
 

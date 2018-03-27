@@ -119,15 +119,15 @@ module Cisco
     #   this will be raised with the appropriate message
     def validate_setup
       msg = nil
-      if self[:platform] =~ /cisco_nexus/ 
+      if self[:platform] =~ /cisco_nexus/
         if !self[:vrf]
-          msg = 'Cisco Nexus hosts must be provided with a :vrf value.' 
+          msg = 'Cisco Nexus hosts must be provided with a :vrf value.'
         end
         if !self[:user]
           msg = 'Cisco hosts must be provided with a :user value'
         end
       end
-      if self[:platform] =~ /cisco_ios_xr/ 
+      if self[:platform] =~ /cisco_ios_xr/
         if !self[:user]
           msg = 'Cisco hosts must be provided with a :user value'
         end

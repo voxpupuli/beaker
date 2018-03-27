@@ -171,7 +171,7 @@ module Beaker
 
       # Update the @attribution hash with the source of each key in the options_hash
       #
-      # @param [Hash] options_hash Options hash 
+      # @param [Hash] options_hash Options hash
       # @param [String] source Where the options were specified
       # @return [Hash] hash Hash of sources for each key
       def tag_sources(options_hash, source)

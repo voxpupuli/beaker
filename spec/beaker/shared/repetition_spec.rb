@@ -10,7 +10,7 @@ module Beaker
 
           block = double( 'block' )
           expect( block ).to receive( :exec ).exactly( 5 ).times.and_return( false )
-          
+
           subject.repeat_for( 5 ) do
             block.exec
           end
@@ -21,7 +21,7 @@ module Beaker
 
           block = double( 'block' )
           expect( block ).to receive( :exec ).once.and_return( true )
-          
+
           subject.repeat_for( 5 ) do
             block.exec
           end

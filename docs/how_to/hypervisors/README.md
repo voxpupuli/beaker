@@ -36,7 +36,7 @@ Puppet and its community have made several gems that support different
 hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's
 dependency footprint, and hypervisors are one of the places where we can often
 increase the load across all Beaker uses to benefit a small group that uses a
-particular hypervisor. 
+particular hypervisor.
 
 In order to offset this, we've made a listing of gems and community-supported forks
 that support other external hypervisors. Please check them out if you'd like to use

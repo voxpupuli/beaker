@@ -1,8 +1,8 @@
 # How To Upgrade from 2.y to 3.0
 
 This is a guide detailing all the issues to be aware of, and to help people make
-any changes that you might need to move from beaker 2.y to 3.0. To test out 
-beaker 3.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md) 
+any changes that you might need to move from beaker 2.y to 3.0. To test out
+beaker 3.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md)
 to ensure this new major release does not break your existing testing.
 
 ## Ruby version 1.9.3 no longer supported
@@ -39,10 +39,10 @@ doc for info on how to do this.
 
 ## EPEL package update
 
-In beaker < 3.0.0, the epel package names had hardcoded defaults listed in the 
+In beaker < 3.0.0, the epel package names had hardcoded defaults listed in the
 presets default; in beaker >= 3.0.0, beaker utilizes the `release-latest` file
 provided on epel mirrors for el versions 5, 6, and 7. Since only the latest epel
-packages are available on epel mirrors, beaker only supports installation of 
+packages are available on epel mirrors, beaker only supports installation of
 that latest version.
 
 ## Solaris and AIX Hypervisors removed
