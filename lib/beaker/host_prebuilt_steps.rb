@@ -432,6 +432,9 @@ module Beaker
         elsif host['platform'] =~ /solaris-11/
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+        elsif host['platform'] =~ /f5/
+          #interacting with f5 should using tmsh
+          logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
           host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), {:pty => true})
         elsif host.is_powershell?
