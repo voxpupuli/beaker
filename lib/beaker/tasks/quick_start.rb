@@ -54,7 +54,7 @@ namespace :beaker_quickstart do
     FileUtils.mkdir_p('acceptance/tests') # -p ignores when dir already exists
     if !File.exist?(smoke_test_file) then
       puts "Writing default smoke test to file - #{smoke_test_file}"
-      File.open("acceptance/tests/default_smoke_test.rb", 'w') do |fh|
+      File.open(smoke_test_file, 'w') do |fh|
         fh.print("test_name 'puppet install smoketest' do
   step 'puppet install smoketest: verify \\'puppet help\\' can be successfully called on
   all hosts' do
