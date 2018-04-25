@@ -38,6 +38,7 @@ describe Beaker do
     end
   end
 
+  it_should_behave_like 'enables_root_login', 'f5', []
   # Non-cygwin Windows
   it_should_behave_like 'enables_root_login', 'pswindows', [], false
 
