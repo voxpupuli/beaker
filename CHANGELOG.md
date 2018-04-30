@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.34.0...master)
 
+### Fixed
+
+- Report accurate location of generated smoke test
+
 # [3.34.0](https://github.com/puppetlabs/beaker/compare/3.33.0...3.34.0) - 2018-03-26
 
 ### Fixed
