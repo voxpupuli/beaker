@@ -181,34 +181,71 @@ module Beaker
       it 'calls execute! when no resource is given' do
         expect_any_instance_of(Pathname).to_not receive(:directory?)
         expect_any_instance_of(Pathname).to_not receive(:exist?)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
+        expect(subcommand.cli).to receive(:execute!).once
         expect{subcommand.exec}.to_not raise_error
       end
 
-      it 'checks to to see if the resource is a file_resource' do
-        expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
-        expect_any_instance_of(Pathname).to receive(:directory?).and_return(false)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('resource')}.to_not raise_error
-      end
+      it 'allows hard coded suite names to be specified' do
+        subcommand.cli.options[:pre_suite] = %w[step1.rb]
+        subcommand.cli.options[:post_suite] = %w[step2.rb]
+        subcommand.cli.options[:tests] = %w[tests/1.rb]
 
-      it 'checks to see if the resource is a directory' do
-        expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
-        expect_any_instance_of(Pathname).to receive(:directory?).and_return(true)
-        expect(Dir).to receive(:glob)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('resource')}.to_not raise_error
-      end
+        subcommand.exec('pre-suite,tests')
 
-      it 'allows a hard coded suite name to be specified' do
-        allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('tests')}.to_not raise_error
+        expect(subcommand.cli.options[:pre_suite]).to eq(%w[step1.rb])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/1.rb])
       end
 
       it 'errors when a resource is neither a valid file resource or suite name' do
         allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
         expect{subcommand.exec('blahblahblah')}.to raise_error(ArgumentError)
+      end
+
+      it 'accepts a tests directory, clearing all other suites' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:directory?).and_return(true)
+        allow(Dir).to receive(:glob)
+          .with('tests/**/*.rb')
+          .and_return(%w[tests/a.rb tests/b/c.rb])
+
+        subcommand.exec('tests')
+
+        expect(subcommand.cli.options[:pre_suite]).to eq([])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:pre_cleanup]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/a.rb tests/b/c.rb])
+      end
+
+      it 'accepts comma-separated list of tests, clearing all other suites' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:file?).and_return(true)
+
+        subcommand.exec('tests/1.rb,tests/2.rb')
+
+        expect(subcommand.cli.options[:pre_suite]).to eq([])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:pre_cleanup]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/1.rb tests/2.rb])
+      end
+
+      it 'accepts comma-separated list of directories, recursively scanning each' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:directory?).and_return(true)
+        allow(Dir).to receive(:glob).with('tests/a/**/*.rb').and_return(%w[tests/a/x.rb])
+        allow(Dir).to receive(:glob).with('tests/b/**/*.rb').and_return(%w[tests/b/x/y.rb tests/b/x/z.rb])
+
+        subcommand.exec('tests/a,tests/b')
+
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/a/x.rb tests/b/x/y.rb tests/b/x/z.rb])
+      end
+
+      it 'rejects comma-separated file and suite name' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
+
+        expect {
+          subcommand.exec('pre-suite,tests/whoops')
+        }.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
       end
     end
 
