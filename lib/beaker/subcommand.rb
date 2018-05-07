@@ -6,6 +6,7 @@ module Beaker
   class Subcommand < Thor
     SubcommandUtil = Beaker::Subcommands::SubcommandUtil
 
+    attr_reader :cli
 
     def initialize(*args)
       super
