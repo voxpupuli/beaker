@@ -6,6 +6,7 @@ module Beaker
   class Subcommand < Thor
     SubcommandUtil = Beaker::Subcommands::SubcommandUtil
 
+    attr_reader :cli
 
     def initialize(*args)
       super
@@ -171,8 +172,9 @@ module Beaker
       end
 
       beaker_suites = [:pre_suite, :tests, :post_suite, :pre_cleanup]
-
-      if Pathname(resource).exist?
+      resources = resource.split(',')
+      paths = resources.map { |r| Pathname(r) }
+      if paths.all?(&:exist?)
         # If we determine the resource is a valid file resource, then we empty
         # all the suites and run that file resource in the tests suite. In the
         # future, when we have the ability to have custom suites, we should change
@@ -180,12 +182,14 @@ module Beaker
         beaker_suites.each do |suite|
           @cli.options[suite] = []
         end
-        if Pathname(resource).directory?
-          @cli.options[:tests] = Dir.glob("#{Pathname(resource)}/**/*.rb")
-        else
-          @cli.options[:tests] = [Pathname(resource).to_s]
-        end
-      elsif resource.match(/pre-suite|tests|post-suite|pre-cleanup/)
+        @cli.options[:tests] = paths.map do |path|
+          if path.directory?
+            Dir.glob("#{path}/**/*.rb")
+          else
+            path.to_s
+          end
+        end.flatten
+      elsif resources.all? { |r| r =~ /^(pre-suite|tests|post-suite|pre-cleanup)$/ }
         # The regex match here is loose so that users can supply multiple suites,
         # such as `beaker exec pre-suite,tests`.
         beaker_suites.each do |suite|
@@ -194,6 +198,7 @@ module Beaker
       else
         raise ArgumentError, "Unable to parse #{resource} with beaker exec"
       end
+
       @cli.execute!
     end
 

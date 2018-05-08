@@ -9,9 +9,9 @@ module Beaker
 
     context '#initialize' do
       it 'creates a cli object' do
-        expect(Beaker::CLI).to receive(:new).once
-        subcommand
+        expect(subcommand.cli).to be
       end
+
       describe 'File operation initialization for subcommands' do
         it 'checks to ensure subcommand file resources exist' do
           expect(FileUtils).to receive(:mkdir_p).with(SubcommandUtil::CONFIG_DIR)
@@ -28,7 +28,6 @@ module Beaker
           expect(FileUtils).to receive(:touch).with(SubcommandUtil::SUBCOMMAND_STATE)
           subcommand
         end
-
       end
     end
 
@@ -80,6 +79,9 @@ module Beaker
 
       it 'should not error with valid beaker options' do
         beaker_options_list.each do |option|
+          allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
+          allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
+
           allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
           allow(yaml_store_mock).to receive(:transaction).and_yield
           allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
@@ -87,6 +89,7 @@ module Beaker
           allow_any_instance_of(Beaker::Logger).to receive(:notify).twice
           expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
           expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
+
           expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
         end
       end
@@ -103,13 +106,16 @@ module Beaker
     end
 
     context '#init' do
-      let( :cli ) { subcommand.instance_variable_get(:@cli) }
+      let( :cli ) { subcommand.cli }
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
-      it 'calculates options and writes them to disk and deletes the' do
-        expect(cli).to receive(:parse_options)
-        allow(cli).to receive(:configured_options).and_return(mock_options)
 
+      before :each do
+        allow(cli).to receive(:parse_options)
+        allow(cli).to receive(:configured_options).and_return(mock_options)
+      end
+
+      it 'calculates options and writes them to disk and deletes the' do
         allow(File).to receive(:open)
         allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
         allow(yaml_store_mock).to receive(:transaction).and_yield
@@ -117,13 +123,14 @@ module Beaker
         subcommand.init
         expect(mock_options).not_to have_key(:timestamp)
       end
+
       it 'requires hosts flag' do
         expect{subcommand.init}.to raise_error(NotImplementedError)
       end
     end
 
     context '#provision' do
-      let ( :cli ) { subcommand.instance_variable_get(:@cli) }
+      let ( :cli ) { subcommand.cli }
       let( :yaml_store_mock ) { double('yaml_store_mock') }
       let ( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
       let ( :cleaned_hosts ) {double()}
@@ -133,6 +140,7 @@ module Beaker
       let ( :hosts) {double('hosts')}
       let ( :hypervisors) {double('hypervisors')}
       let (:options) {double ('options')}
+
       it 'provisions the host and saves the host info' do
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
         allow(yaml_store_mock).to receive(:[]).and_return(false)
@@ -157,59 +165,103 @@ module Beaker
         expect(yaml_store_mock).to receive(:[]=).with('provisioned', true)
         subcommand.provision
       end
+
       it 'does not allow hosts to be passed' do
         subcommand.options = {:hosts => "myhost"}
         expect{subcommand.provision()}.to raise_error(NotImplementedError)
       end
     end
 
-
     context 'exec' do
+      before :each do
+        allow(subcommand.cli).to receive(:parse_options)
+        allow(subcommand.cli).to receive(:initialize_network_manager)
+      end
+
       it 'calls execute! when no resource is given' do
         expect_any_instance_of(Pathname).to_not receive(:directory?)
         expect_any_instance_of(Pathname).to_not receive(:exist?)
-        expect_any_instance_of(Beaker::CLI).to receive(:parse_options).once
-        expect_any_instance_of(Beaker::CLI).to receive(:initialize_network_manager).once
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
+        expect(subcommand.cli).to receive(:execute!).once
         expect{subcommand.exec}.to_not raise_error
       end
 
-      it 'checks to to see if the resource is a file_resource' do
+      it 'allows hard coded suite names to be specified' do
+        subcommand.cli.options[:pre_suite] = %w[step1.rb]
+        subcommand.cli.options[:post_suite] = %w[step2.rb]
+        subcommand.cli.options[:tests] = %w[tests/1.rb]
 
-        expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
-        expect_any_instance_of(Pathname).to receive(:directory?).and_return(false)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('resource')}.to_not raise_error
-      end
+        subcommand.exec('pre-suite,tests')
 
-      it 'checks to see if the resource is a directory' do
-        expect_any_instance_of(Pathname).to receive(:exist?).and_return(true)
-        expect_any_instance_of(Pathname).to receive(:directory?).and_return(true)
-        expect(Dir).to receive(:glob)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('resource')}.to_not raise_error
-      end
-
-      it 'allows a hard coded suite name to be specified' do
-
-        allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
-        expect_any_instance_of(Beaker::CLI).to receive(:execute!).once
-        expect{subcommand.exec('tests')}.to_not raise_error
+        expect(subcommand.cli.options[:pre_suite]).to eq(%w[step1.rb])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/1.rb])
       end
 
       it 'errors when a resource is neither a valid file resource or suite name' do
         allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
         expect{subcommand.exec('blahblahblah')}.to raise_error(ArgumentError)
       end
+
+      it 'accepts a tests directory, clearing all other suites' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:directory?).and_return(true)
+        allow(Dir).to receive(:glob)
+          .with('tests/**/*.rb')
+          .and_return(%w[tests/a.rb tests/b/c.rb])
+
+        subcommand.exec('tests')
+
+        expect(subcommand.cli.options[:pre_suite]).to eq([])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:pre_cleanup]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/a.rb tests/b/c.rb])
+      end
+
+      it 'accepts comma-separated list of tests, clearing all other suites' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:file?).and_return(true)
+
+        subcommand.exec('tests/1.rb,tests/2.rb')
+
+        expect(subcommand.cli.options[:pre_suite]).to eq([])
+        expect(subcommand.cli.options[:post_suite]).to eq([])
+        expect(subcommand.cli.options[:pre_cleanup]).to eq([])
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/1.rb tests/2.rb])
+      end
+
+      it 'accepts comma-separated list of directories, recursively scanning each' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+        allow_any_instance_of(Pathname).to receive(:directory?).and_return(true)
+        allow(Dir).to receive(:glob).with('tests/a/**/*.rb').and_return(%w[tests/a/x.rb])
+        allow(Dir).to receive(:glob).with('tests/b/**/*.rb').and_return(%w[tests/b/x/y.rb tests/b/x/z.rb])
+
+        subcommand.exec('tests/a,tests/b')
+
+        expect(subcommand.cli.options[:tests]).to eq(%w[tests/a/x.rb tests/b/x/y.rb tests/b/x/z.rb])
+      end
+
+      it 'rejects comma-separated file and suite name' do
+        allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
+
+        expect {
+          subcommand.exec('pre-suite,tests/whoops')
+        }.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
+      end
     end
 
     context 'destroy' do
-      let( :cli ) { subcommand.instance_variable_get(:@cli) }
+      let( :cli ) { subcommand.cli }
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
+      let( :network_manager) {double('network_manager')}
+
       it 'calls destroy and updates the yaml store' do
+        allow(cli).to receive(:parse_options)
+        allow(cli).to receive(:initialize_network_manager)
+        allow(cli).to receive(:network_manager).and_return(network_manager)
+        expect(network_manager).to receive(:cleanup)
+
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
-        allow(SubcommandUtil).to receive(:cleanup).with(cli).and_return(true)
         allow(yaml_store_mock).to receive(:transaction).and_yield
         allow(yaml_store_mock).to receive(:[]).with('provisioned').and_return(true)
         allow(yaml_store_mock).to receive(:delete).with('provisioned').and_return(true)

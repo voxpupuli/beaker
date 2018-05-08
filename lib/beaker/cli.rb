@@ -16,6 +16,7 @@ module Beaker
       # the options are parsed and replaced with a new logger based on what is passed
       # in to configure the logger.
       @logger = Beaker::Logger.new
+      @options = {}
     end
 
     def parse_options
