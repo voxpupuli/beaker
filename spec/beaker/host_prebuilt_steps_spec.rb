@@ -318,9 +318,11 @@ describe Beaker do
       expect( Beaker::Command ).to receive( :new ).with(
         "rpm -qa | grep epel-release"
       ).exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "rpm -i http://archive.fedoraproject.org/pub/archive/epel/epel-release-latest-5.noarch.rpm"
-      ).exactly( 2 ).times
+      hosts.each do |host|
+        expect(host).to receive( :install_package_with_rpm ).with(
+          "http://archive.fedoraproject.org/pub/archive/epel/epel-release-latest-5.noarch.rpm", "--replacepkgs", {:package_proxy => false}
+        ).once
+      end
       expect( Beaker::Command ).to receive( :new ).with(
         "sed -i -e 's;#baseurl.*$;baseurl=http://archive\\.fedoraproject\\.org/pub/archive/epel/5/$basearch;' /etc/yum.repos.d/epel.repo"
       ).exactly( 2 ).times
@@ -345,9 +347,11 @@ describe Beaker do
       expect( Beaker::Command ).to receive( :new ).with(
         "rpm -qa | grep epel-release"
       ).exactly( 4 ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "rpm -i http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
-      ).exactly( 4 ).times
+      hosts.each do |host|
+        expect(host).to receive( :install_package_with_rpm ).with(
+          "http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm", "--replacepkgs", {:package_proxy => false}
+        ).once
+      end
       expect( Beaker::Command ).to receive( :new ).with(
         "sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo"
       ).exactly( 4 ).times
