@@ -33,6 +33,10 @@ git logs & PR history.
 
 - Use relative paths for beaker exec
 
+### Added
+
+- Added optional ability to use ERB in nodeset YAML files
+
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
 ### Changed
