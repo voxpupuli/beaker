@@ -11,11 +11,18 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.34.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.35.0...master)
+
+# [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
 ### Fixed
 
 - Report accurate location of generated smoke test
+- Accept comma-separated tests for exec subcommand
+
+### Added
+
+- Added optional ability to use ERB in nodeset YAML files
 
 # [3.34.0](https://github.com/puppetlabs/beaker/compare/3.33.0...3.34.0) - 2018-03-26
 
@@ -32,10 +39,6 @@ git logs & PR history.
 ### Changed
 
 - Use relative paths for beaker exec
-
-### Added
-
-- Added optional ability to use ERB in nodeset YAML files
 
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
