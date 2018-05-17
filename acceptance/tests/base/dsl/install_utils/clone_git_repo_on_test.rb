@@ -18,10 +18,7 @@ test_name 'Clone from git' do
     :debian => [
       ['git', 'git-core'],
     ],
-    :solaris_11 => [
-      ['git', 'developer/versioning/git'],
-    ],
-    :solaris_10 => [
+    :solaris => [
       'coreutils',
       'curl', # update curl to fix "CURLOPT_SSL_VERIFYHOST no longer supports 1 as value!" issue
       'git',

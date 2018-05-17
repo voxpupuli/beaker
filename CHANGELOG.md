@@ -24,6 +24,10 @@ git logs & PR history.
 
 - Added optional ability to use ERB in nodeset YAML files
 
+### Changed
+
+- Make Solaris 11 package installs use the OpenCSW package repository, as is done on Solaris 10.
+
 # [3.34.0](https://github.com/puppetlabs/beaker/compare/3.33.0...3.34.0) - 2018-03-26
 
 ### Fixed
