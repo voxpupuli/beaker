@@ -171,11 +171,11 @@ module Unix
       end
 
       it 'sets the arch correctly on aix-power platforms' do
-        @platform = 'aix-14-power'
+        @platform = 'aix-6.1-power'
         release_path_end, release_file = host.puppet_agent_dev_package_info(
-          'pa_collection', 'pa_version2' )
-        expect( release_path_end ).to be === "aix/14/pa_collection/ppc"
-        expect( release_file ).to be === "puppet-agent-pa_version2-1.aix14.ppc.rpm"
+          'pa_collection', '6.0.0' )
+        expect( release_path_end ).to be === "aix/6.1/pa_collection/ppc"
+        expect( release_file ).to be === "puppet-agent-6.0.0-1.aix6.1.ppc.rpm"
       end
     end
 
