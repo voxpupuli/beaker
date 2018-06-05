@@ -1,12 +1,49 @@
 
 # Contributing Documentation to Beaker
 
-All inline documentation uses [YARD](http://yardoc.org/). Below is an example usage, a quick summary of documentation expectations, and finally a short reference for those new to YARD.
+## Documents
+
+Beyond the usual README, Beaker has an ever-growing amount of written documentation including tutorials, recipes, and other helpful information (see [docs/](docs)). Changes larger than bug fixes will usually be required to include such user-friendly documentation.
+
+## Style
+
+User-friendly Documentation (tutorials, how-tos, etc.) uses [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/). We adopt the following conventions.
+
+### Text
+
+- Don't hard-wrap text blocks (including lists). There is disagreement about the ideal editor width, so don't hard-wrap text. Code blocks may be wrapped as appropriate.
+
+### Lists
+
+- Use `-` lists to avoid confusion with `*emphasis*`.
+- Be sure to indent code blocks within list items.
+
+### Headers
+
+- Use Markdown Headers.
+- Always place a blank line before and after headers.
+
+### Code
+
+- Use inline code for snippets (paths, file names, variables, partial commands, etc.)
+- Use fenced blocks for code of one full line or greater
+- Offset fenced blocks with whitespace before and after, except in list items.
+- Mark the language of code blocks:
+  ~~~
+  ```console
+    $ beaker --help
+  ```
+  ~~~
+  Supported languages are documented [here](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml). You will probably be using `console`, `ruby`, `puppet`, or `yaml` most of the time.
+- It's nice to provide a shebang (`$`) in console examples to distinguish input from output.
+
+## Inline
+
+All inline/generated documentation uses [YARD](http://yardoc.org/). Below is an example usage, a quick summary of documentation expectations, and finally a short reference for those new to YARD.
 
 They say a picture is worth a thousand words, hopefully this example will be worth more than the 154 it’s composed of:
 
 ```ruby
-
     #
     # @param  [Array<Host>, Host, #execute] hosts    The host(s) to act on
     # @param  [String]                      action   The action to perform
@@ -41,7 +78,6 @@ They say a picture is worth a thousand words, hopefully this example will be wor
         yield result if block_given?
       end
     end
-
 ```
 
 ## Documentation Guide
@@ -64,11 +100,15 @@ While the `@params`, `@returns`, etc... may seem redundant, they encourage think
 
 You are encouraged to run the YARD documentation server locally by:
 
-    rake docs
+```console
+    $ rake docs
+```
 
 or
 
-    rake docs:bg
+```console
+    $ rake docs:bg
+```
 
 depending on whether you want the server to run in the foreground or not
 
@@ -81,34 +121,34 @@ A Hash that must be in `{:symbol => ‘string’}` format:
 
     @param [Hash<Symbol, String>] my_hash
 
-This is also valid, and maybe more obvious to those used to Ruby
+This is also valid, and maybe more obvious to those used to Ruby:
 
     @param [Hash{Symbol=>String}]
 
-When specifying an options hash you use @option to specify key/values
+When specifying an options hash you use `@option` to specify keys/values:
 
     @param [Hash{Symbol=>String}] my_opts An options hash
     @option my_opts [ClassOfValue] :key_in_question A Description
     @option my_opts [Fixnum]       :log_level       The log level to run in.
     @option my_opts [Boolean]      :turbo (true)    Who doesn’t want turbos?
 
-This parameter takes an unordered list of Strings, Fixnums, and Floats
+This parameter takes an unordered list of Strings, Fixnums, and Floats:
 
     @param [Array<String, Fixnum, Float>]
 
-This is an ordered list of String, then Fixnum
+This is an ordered list of String, then Fixnum:
 
     @param [Array<(String, Fixnum)>]
 
-This is a parameter that needs to implement certain methods
+This is a parameter that needs to implement certain methods:
 
     @param [#[], #to_s]
 
-This documents that a method may return any of the types listed
+This documents that a method may return any of the types listed:
 
     @return [String, self, nil]
 
-This is the return statement for a method only used for side effects
+This is the return statement for a method only used for side effects:
 
     @return [void]
 
@@ -120,11 +160,11 @@ List possible classes that the method may raise:
 
     @raise [Beaker::PendingTest]
 
-List parameter names yielded by a method
+List parameter names yielded by a method:
 
     @yield [result, self]
 
-And specify what kind of object is yielded with this
+And specify what kind of object is yielded:
 
     @yieldparam [Result] result
 
@@ -139,12 +179,13 @@ The `api` tag can have anything behind it, please use the following when documen
     @api public     Methods third party integrations can rely on
     @api private    Methods private to the harness, not to be used externally
 
-When deprecating a method include information on newer alternatives
+When deprecating a method include information on newer alternatives:
 
     @deprecated This method is horrible. Please use {#foo} or {#bar}.
 
-When you want to reference other information use
+When you want to reference other information use:
 
     @see ClassOrModule
+    @see #other_method
     @see http://web.url.com/reference Title for the link
 
