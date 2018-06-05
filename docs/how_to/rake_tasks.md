@@ -1,7 +1,5 @@
 # Rake test tasks for running beaker
 
-## How does it work?
-
 There are some rake tasks that you can use to run Beaker tests from your local project dir.
 
 To use them from within your own project, you will need to require the following file in your project's rakefile:
@@ -20,8 +18,7 @@ from your project dir, you should see (as well as any rake tasks you have define
     rake beaker:test:git[hosts]   # Run Beaker Git tests
     rake beaker:test:pe[hosts]    # Run Beaker PE tests
 
-The last two tasks assume that you have an options file in /acceptance named beaker-git.cfg and beaker-pe.cfg
-respectively.
+The last two tasks assume that you have an options file in `/acceptance` named `beaker-git.cfg` and `beaker-pe.cfg` respectively.
 
 Your options file would look something like:
 

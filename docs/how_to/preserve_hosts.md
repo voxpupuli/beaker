@@ -2,40 +2,23 @@
 
 ## Motivation
 
-Often when developing acceptance tests to be run with beaker, you'll want to be
-able to quickly iterate on those tests in an already setup System Under Test
-(SUT) configuration. Beaker provides the ability to do that using its preserved
-hosts functionality.
+Often when developing acceptance tests to be run with beaker, you'll want to be able to quickly iterate on those tests in an already setup System Under Test (SUT) configuration. Beaker provides the ability to do that using its preserved hosts functionality.
 
 ## But Is This The Right Solution?
 
-Many people are of the opinion that if you have to login to a SUT, then you've
-already failed, and that the purpose of good automation is so that you don't
-ever have to do this. Beaker supports a diverse group of developers and testers,
-and we try to remain flexible and support multiple approaches to these problems.
+Many people are of the opinion that if you have to login to a SUT, then you've already failed, and that the purpose of good automation is so that you don't ever have to do this. Beaker supports a diverse group of developers and testers, and we try to remain flexible and support multiple approaches to these problems.
 
-Another approach you might take to debugging failed tests, during development or
-test runs in your Continuous Integration (CI) systems, is to archive any
-artifacts or log files from the SUTs, so that you can read them all from the
-beaker coordinator. Beaker provides a Domain-Specific Language (DSL) method to
-accomodate this workflow, called `archive_file_from`. Check out the
-[how-to article](archive_sut_files.md) on this method for details on it.
+Another approach you might take to debugging failed tests, during development or test runs in your Continuous Integration (CI) systems, is to archive any artifacts or log files from the SUTs, so that you can read them all from the beaker coordinator. Beaker provides a Domain-Specific Language (DSL) method to accomodate this workflow, called `archive_file_from`. Check out the [how-to article](archive_sut_files.md) on this method for details on it.
 
-That being said, the preserved hosts functionality is still useful, particularly
-for new development. In this case, you might not be able to necessarily tell
-what files you might need from your SUTs, and exploration might be necessary.
+That being said, the preserved hosts functionality is still useful, particularly for new development. In this case, you might not be able to necessarily tell what files you might need from your SUTs, and exploration might be necessary.
 
 ## How Do I Use It?
 
-Note that where you decide to use this option will affect its precedence. You
-can learn more about this in our
-[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
+Note that where you decide to use this option will affect its precedence. You can learn more about this in our [argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
 
 ### Command-Line Option
 
-The primary way that this option is provided is through the command line, where
-it's represented by the `--preserved-hosts` option. It defaults to `never`, and
-if you run `beaker --help`, you'll see the range of values that can be taken:
+The primary way that this option is provided is through the command line, where it's represented by the `--preserved-hosts` option. It defaults to `never`, and if you run `beaker --help`, you'll see the range of values that can be taken:
 
     $ beaker --help
         ...
@@ -50,49 +33,25 @@ if you run `beaker --help`, you'll see the range of values that can be taken:
 
 ### Local Options or Global Config
 
-You can also provide a value for this option wherever you can provide a value
-that gets merged into beaker's global options hash. The two ways to do this are
-to provide it in a local options file, or in the global `CONFIG` section of your
-hosts file. To learn more about how to set these options, check out the
-[Options File Values](../concepts/argument_processing_and_precedence.md#options-file-values)
-and the
-[`CONFIG` Section of a Hosts File](../concepts/argument_processing_and_precedence.md#config-section-of-hosts-file)
-sections of the
-[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
+You can also provide a value for this option wherever you can provide a value that gets merged into beaker's global options hash. The two ways to do this are to provide it in a local options file, or in the global `CONFIG` section of your hosts file. To learn more about how to set these options, check out the [Options File Values](../concepts/argument_processing_and_precedence.md#options-file-values) and the [`CONFIG` Section of a Hosts File](../concepts/argument_processing_and_precedence.md#config-section-of-hosts-file) sections of the [argument processing & precedence doc](../concepts/argument_processing_and_precedence.md).
 
-Either way, the underlying property name that you will have to set if you use
-these options is `:preserve_hosts`.
+Either way, the underlying property name that you will have to set if you use these options is `:preserve_hosts`.
 
 ## What Does It Do (In Detail)?
 
-Using the preserved hosts functionality outputs a `hosts_preserved.yml` file into
-the directory that holds all of the log files for a particular beaker run. The
-short way to access that directory is to look into the `log/latest` path, which
-is a symlink to the actual log directory for the run.
+Using the preserved hosts functionality outputs a `hosts_preserved.yml` file into the directory that holds all of the log files for a particular beaker run. The short way to access that directory is to look into the `log/latest` path, which is a symlink to the actual log directory for the run.
 
-The `hosts_preserved.yml` file generated by a run differs from the original
-hosts file passed into Beaker in a number of ways:
+The `hosts_preserved.yml` file generated by a run differs from the original hosts file passed into Beaker in a number of ways:
 
-- all suites are emptied
-- the host names are updated to point to the IPs (or hostnames) of the VMs since
-they exist and no longer need provisioning
-- the `provision` option is set to `false` (check
-[Beaker Test Run's](../tutorials/test_run.md) provisioning section for details).
+- all suites are emptied - the host names are updated to point to the IPs (or hostnames) of the VMs since they exist and no longer need provisioning - the `provision` option is set to `false` (check [Beaker Test Run's](../tutorials/test_run.md) provisioning section for details).
 
 Beaker will also output the lines included below at the end of the run:
 
     You can re-run commands against the already provisioned SUT(s) with:
     /.../beaker --hosts log/centos7-64mdac-ubuntu1504-64a/2016-07-18_13_42_44/hosts_preserved.yml --tests smoke_simple.rb --preserve-hosts onpass
 
-The important piece here is the hosts argument, in that it's informing you of
-where the preserved hosts file is located. Of course, until you kick off another
-beaker run, you can also reach this file with the `log/latest/hosts_preserved.yml`
-symlink, as mentioned at the beginning of this section.
+The important piece here is the hosts argument, in that it's informing you of where the preserved hosts file is located. Of course, until you kick off another beaker run, you can also reach this file with the `log/latest/hosts_preserved.yml` symlink, as mentioned at the beginning of this section.
 
 ## What Do I Do With It?
 
-For subsequent runs, if you want to set something, you'll have to pay attention
-to the precedence of your arguments, to be sure that you are overriding what is
-set in the preserved hosts file. Checkout the
-[argument processing & precedence doc](../concepts/argument_processing_and_precedence.md)
-for more details on the precedence order of options parsing.
+For subsequent runs, if you want to set something, you'll have to pay attention to the precedence of your arguments, to be sure that you are overriding what is set in the preserved hosts file. Checkout the [argument processing & precedence doc](../concepts/argument_processing_and_precedence.md) for more details on the precedence order of options parsing.

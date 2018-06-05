@@ -1,19 +1,13 @@
 ## What is This?
 
-Beaker test tagging allows you to add tags to tests (using the
-[`tag` DSL method](http://www.rubydoc.info/github/puppetlabs/beaker/master/Beaker/DSL/TestTagging#tag-instance_method)),
-so that you can include or exclude a specific subset of the tests given for use
-in this run.  Why would you want to use this?  Here are some examples of what
-you can do with this functionality:
+Beaker test tagging allows you to add tags to tests (using the [`tag` DSL method](http://www.rubydoc.info/github/puppetlabs/beaker/master/Beaker/DSL/TestTagging#tag-instance_method)), so that you can include or exclude a specific subset of the tests given for use in this run.  Why would you want to use this?  Here are some examples of what you can do with this functionality:
 
 - Run groups of tests separately from the same testing codebase
 - Declare different actions that should be taken when a test fails
 - Make new tests go through a provisional process before being considered solid tests
 
 ## How Tagging Works
-
-Add tags to a Beaker test at the beginning, like you would if you were using
-confine.  Things to stay aware of:
+ Add tags to a Beaker test at the beginning, like you would if you were using confine.  Things to stay aware of:
 
 - A test that is not executed due to a tag will be considered a ‘skipped’ test
 - Tags are free form strings and will not be subjected to any correctness testing
@@ -53,8 +47,7 @@ Preferred style no-block example:
 
 Beaker will raise an error if `--test-tag-and` & `--test-tag-exclude` contain the same tag, however.
 
-Beaker will also raise an error if you use both `--test-tag-or` & `--test-tag-and`, because
-it won't be able to determine which order they should be used in.
+Beaker will also raise an error if you use both `--test-tag-or` & `--test-tag-and`, because it won't be able to determine which order they should be used in.
 
 ## CLI Examples
 

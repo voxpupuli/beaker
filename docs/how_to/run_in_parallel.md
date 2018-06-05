@@ -1,21 +1,21 @@
 # run_in_parallel global and command options
 
 ## run_in_parallel global option
-The run_in_parallel global option is an array with the following possible values: ['configure', 'install']
-It defaults to an empty array []
-It can be set in an options file, or overriden by the BEAKER_RUN_IN_PARALLEL environment variable
-example:
 
-export BEAKER_RUN_IN_PARALLEL=configure,install
+The run_in_parallel global option is an array with the following possible values: ['configure', 'install']. It defaults to an empty array `[]`. It can be set in an options file, or overriden by the `BEAKER_RUN_IN_PARALLEL` environment variable. Example:
+
+```console
+$ export BEAKER_RUN_IN_PARALLEL=configure,install
+```
 
 Including 'configure' causes timesync to execute in parallel (if timesync=true for any host)
 
 Including 'install' causes as much of the puppet install to happen in parallel as possible.
 
 ## run_in_parallel command option
-The run_in_parallel command option is a boolean value, specifying whether to execute each iteration (usually of hosts)
-in parallel, or not.  The block_on method is the primary method accepting the run_in_parallel command option,
-however many methods that call into block_on respect it as well:
+
+The run_in_parallel command option is a boolean value, specifying whether to execute each iteration (usually of hosts) in parallel, or not.  The block_on method is the primary method accepting the run_in_parallel command option, however many methods that call into block_on respect it as well:
+
 - on
 - run_block_on
 - block_on
@@ -25,9 +25,9 @@ however many methods that call into block_on respect it as well:
 - execute_powershell_script_on
 
 ## Using InParallel in your test scripts
-In addition to the options, you can use InParallel within your test scripts as well.
 
-Examples:
+In addition to the options, you can use InParallel within your test scripts as well. Examples:
+
 ```ruby
 include InParallel
 
