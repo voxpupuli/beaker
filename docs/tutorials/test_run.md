@@ -1,8 +1,6 @@
 # Beaker Test Runs
 
-A Beaker test run consists of two primary phases: an SUT provision phase and a
-suite execution phase. After suite execution, Beaker defaults to cleaning up and
-destroying the SUTs. Leave SUTs running with the `--preserve-hosts` flag.
+A Beaker test run consists of two primary phases: an SUT provision phase and a suite execution phase. After suite execution, Beaker defaults to cleaning up and destroying the SUTs. Leave SUTs running with the `--preserve-hosts` flag.
 
 
 * **Provision**

@@ -6,10 +6,7 @@ We have developed some rake tasks to help new Beaker users get up and running qu
 ## Pre-requisites
 
 * You will need to have already completed the Beaker installation tutorial - [Beaker Installation](installation.md)
-
-* Hypervisors are services that provision SUTs for Beaker. We have made two available in this quick start guide to allow you to get up 
-and running. See the docs on how to setup [Vmpooler](https://github.com/puppetlabs/beaker-vmpooler/blob/master/vmpooler.md) and [Vagrant](https://github.com/puppetlabs/beaker-vagrant/blob/master/docs/vagrant.md).
-
+* Hypervisors are services that provision SUTs for Beaker. We have made two available in this quick start guide to allow you to get up and running. See the docs on how to setup [Vmpooler](https://github.com/puppetlabs/beaker-vmpooler/blob/master/vmpooler.md) and [Vagrant](https://github.com/puppetlabs/beaker-vagrant/blob/master/docs/vagrant.md).
 
 ## How to use them
 
@@ -34,8 +31,7 @@ You should see them listed along with any rake tasks you have defined in your lo
 
 ### Hypervisor Argument
 
-Some of the tasks below take a 'hypervisor' argument that you can pass either 'vmpooler' or 'vagrant' to. If you leave it empty, the 
-task will default to using 'vagrant'.
+Some of the tasks below take a 'hypervisor' argument that you can pass either 'vmpooler' or 'vagrant' to. If you leave it empty, the task will default to using 'vagrant'.
 
 Example:
 
@@ -62,9 +58,7 @@ To run:
 
 The gen_hosts task will create a file 'default_hypervisor_hosts.yaml' in acceptance/config.
 
-If the file already exists, it will not be overwritten. This will allow you to play around with the config yourself, either by manually 
-editing the file or by using beaker-hostgenerator to generate a new hosts config.
-
+If the file already exists, it will not be overwritten. This will allow you to play around with the config yourself, either by manually editing the file or by using beaker-hostgenerator to generate a new hosts config.
 
 Vmpooler file (redhat 7 master and agent):
 
@@ -149,9 +143,7 @@ To run:
     
 This task will generate a default Beaker pre-suite file.
 
-The gen_pre-suite task will create a file 'default_pre_suite.rb' in acceptance/setup.
-
-If the file already exists, it will not be overwritten. This will allow you to edit the pre_suite file yourself if required.
+This task will generate a default Beaker pre-suite file. The gen_pre-suite task will create a file 'default_pre_suite.rb' in acceptance/setup. If the file already exists, it will not be overwritten. This will allow you to edit the pre_suite file yourself if required.
 
 pre_suite file:
 
@@ -165,12 +157,8 @@ See the [Test Suites doc](test_suites.md) in this directory for more information
 To run:
 
     rake beaker_quickstart:gen_smoke_test
-    
-This task will generate a default Beaker smoke test file.
 
-The gen_smoke_test task will create a file 'default_smoke_test.rb' in acceptance/tests.
-
-If the file already exists, it will not be overwritten. This will allow you to edit the test file yourself if required.
+This task will generate a default Beaker smoke test file. The gen_smoke_test task will create a file 'default_smoke_test.rb' in acceptance/tests. If the file already exists, it will not be overwritten. This will allow you to edit the test file yourself if required.
 
 smoke test file:
 
@@ -190,10 +178,7 @@ For more information on the Beaker dsl methods available to you in your tests se
 
 ### Run task
 
-The beaker_quickstart:run_test task will run all the above tasks in sequential order, to generate a hosts file, pre-suite file, smoke 
-test and then use these files to perform a Beaker test run. If the files already exist (see below for further info on file names and 
-location) then they will not be overwritten.
- 
+The beaker_quickstart:run_test task will run all the above tasks in sequential order, to generate a hosts file, pre-suite file, smoke test and then use these files to perform a Beaker test run. If the files already exist (see below for further info on file names and location) then they will not be overwritten.
 
 #### run_test
 

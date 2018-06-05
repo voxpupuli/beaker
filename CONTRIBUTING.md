@@ -20,22 +20,17 @@
 ````
     (BKR-1234) Make the example in CONTRIBUTING imperative and concrete
 
-    Without this patch applied the example commit message in the CONTRIBUTING
-    document is not a concrete example.  This is a problem because the
-    contributor is left to imagine what the commit message should look like
-    based on a description rather than an example.  This patch fixes the
-    problem by making the example concrete and imperative.
+    Without this patch applied the example commit message in the CONTRIBUTING document is not a concrete example.  This is a problem because the contributor is left to imagine what the commit message should look like based on a description rather than an example.  This patch fixes the problem by making the example concrete and imperative.
 
-    The first line is a real life imperative statement with a ticket number
-    from our issue tracker.  The body describes the behavior without the patch,
-    why this is a problem, and how the patch fixes the problem when applied.
-````
+    The first line is a real life imperative statement with a ticket number from our issue tracker.  The body describes the behavior without the patch, why this is a problem, and how the patch fixes the problem when applied.
+  ```
+* During the time that you are working on your patch the master Beaker branch may have changed - be sure to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will merge cleanly.
 
-* During the time that you are working on your patch the master Beaker branch may have changed - you'll want to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will cleanly merge into Beaker.
 
 ### Testing
 
-* Submitted PR's will be tested in a series of spec and acceptance level tests - the results of these tests will be evaluated by a Beaker team member, as test results are currently not accessible by the public. Testing failures that require code changes will be communicated in the PR discussion.
+Submitted PR's will be tested in a series of spec and acceptance level tests - the results of these tests will be evaluated by a Beaker team member, as acceptance test results are not accessible by the public. Testing failures that require code changes will be communicated in the PR discussion.
+
 * Make sure you have added [RSpec](http://rspec.info/) tests that exercise your new code.  These test should be located in the appropriate `beaker/spec/` subdirectory.  The addition of new methods/classes or the addition of code paths to existing methods/classes requires additional RSpec coverage.
   * Beaker uses RSpec 3.1.0+, and you should **NOT USE** deprecated `should`/`stub` methods - **USE** `expect`/`allow`. See a nice blog post from 2013 on [RSpec's new message expectation syntax](http://teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/).
   * Run the tests to assure nothing else was accidentally broken, using `rake test`
@@ -51,10 +46,10 @@
 
 ### Maintenance
 
-For changes of a trivial nature, it is not always necessary to create a new ticket in Jira. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number. 
+For changes of a trivial nature, it is not always necessary to create a new ticket in Jira. In this case, it is appropriate to start the first line of a commit with `(MAINT)` instead of a ticket/issue number.
 
 ````
-    (MAINT) Fix whitespace 
+    (MAINT) Fix whitespace
 
     - remove additional spaces that appear at EOL
 ````

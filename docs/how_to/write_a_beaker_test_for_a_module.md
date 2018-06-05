@@ -1,8 +1,9 @@
 # Beaker for Modules
 ## Read the Beaker Docs
 
-[Beaker How To](../tutorials/how_to_beaker.md)
-[Beaker DSL API](http://rubydoc.info/github/puppetlabs/beaker/frames)
+- [Beaker How To](../tutorials/how_to_beaker.md)
+
+- [Beaker DSL API](http://rubydoc.info/github/puppetlabs/beaker/frames)
 
 ## Understand the Difference Between beaker and beaker-rspec
 [beaker vs. beaker-rspec](../concepts/beaker_vs_beaker_rspec.md)

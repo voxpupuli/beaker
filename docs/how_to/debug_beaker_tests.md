@@ -17,8 +17,7 @@ There are several ways to have your tests break and enter debugging:
 
 ## Add a breakpoint to your test file
 
-Add Pry to individual tests by adding `require 'pry'` to the Ruby test file.
-Then add the statement `binding.pry` at the point in code where you want access to the full, current Beaker environment.
+Add Pry to individual tests by adding `require 'pry'` to the Ruby test file. Then add the statement `binding.pry` at the point in code where you want access to the full, current Beaker environment.
 
 ### Example
 #### Example test trypry.rb
@@ -239,11 +238,9 @@ Consider this example test case _test.rb_, which is going to fail:
       assert_equal(important_expected_value, actual_value, 'This product is faulty')
     end
 
-You can run this test using `beaker -t test.rb` or (to use the `run` subcommand and just run the test and bypass host provisioning etc) `beaker run -t test.rb`
-It fails.
+You can run this test using `beaker -t test.rb` or (to use the `run` subcommand and just run the test and bypass host provisioning etc) `beaker run -t test.rb`. It fails.
 
-Now try `beaker run -t test.rb --debug-errors`
-This will enter a pry console when the failure occurs.
+Now try `beaker run -t test.rb --debug-errors` This will enter a pry console when the failure occurs.
 
     * Assert expected matches actual
       Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #<Minitest::Assertion: This product is faulty.

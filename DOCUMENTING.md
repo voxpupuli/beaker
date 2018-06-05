@@ -1,13 +1,10 @@
 
 ## Contributing Documentation to Puppetlabs Test Harness ##
 
+All inline documentation uses [YARD](http://yardoc.org/). Below is an example usage, a quick summary of documentation expectations, and finally a short reference for those new to YARD.
 
-All inline documentation uses YARD, below is an example usage, a quick
-summary of documentation expectations and finally a short reference
-for those new to YARD.
+They say a picture is worth a thousand words, hopefully this example will be worth more than the 154 it’s composed of:
 
-They say a picture is worth a thousand words, hopefully this example will
-be worth more than the 154 it’s composed of:
 ```ruby
 
     #
@@ -49,10 +46,7 @@ be worth more than the 154 it’s composed of:
 
 
 ## Documentation Guide: ##
-
-
-Most of our documentation is done with the @tag syntax. With a few
-execptions tags follow this format:
+Most of our documentation is done with the `@tag` syntax. With a few execptions tags follow this format:
 
     @tag [TypeOfValueInBrackets] nameOfValue Multi-word description that
       can span multiple lines, as long as lines after the first have
@@ -60,20 +54,13 @@ execptions tags follow this format:
 
 Note: The `tag` name and the `nameOfValue` in question cannot contain spaces.
 
-All sections should be considered mandatory, but in practice a committer
-can walk a contributor through the process and help ensure a high quality
-of documentation.  When contributing keep especially in mind that an
+All sections should be considered mandatory, but in practice a committer can walk a contributor through the process and help ensure a high quality of documentation.  When contributing keep especially in mind that an
 `@example` block will go a long way in helping understand the use case
-(which also encourages use by others) and the @api tag helps to understand
-the scope of a Pull Request.
+(which also encourages use by others) and the @api tag helps to understand the scope of a Pull Request.
 
-Please be liberal with whitespace (not trailing whitespace) and vertical
-alignment as it helps readability while “in code”. Default indentation
-is two spaces unless there are readability/vertical alignment concerns.
+Please be liberal with whitespace (not trailing whitespace) and vertical alignment as it helps readability while “in code”. Default indentation is two spaces unless there are readability/vertical alignment concerns.
 
-While the `@params`, `@returns`, etc... may seem redundant they encourage
-thinking through exactly what you are doing and because of their strict
-format they allow a level of tooling not available in regular ruby.
+While the `@params`, `@returns`, etc... may seem redundant, they encourage thinking through exactly what you are doing and because of their strict format they allow a level of tooling not available in regular Ruby.
 
 You are encouraged to run the YARD documentation server locally by:
 
@@ -85,10 +72,7 @@ or
 
 depending on whether you want the server to run in the foreground or not
 
-Wait for the documentation to compile and then point your browser to:
-
-    http://localhost:8808
-
+Wait for the documentation to compile and then point your browser to [http://localhost:8808](http://localhost:8808).
 
 ## A Simple YARD Reference: ##
 
@@ -149,8 +133,7 @@ An `example` block contains a tag, description and then indented code:
     @example Accessing Host defaults using hash syntax
         host[‘platform’]  #=> ‘debian-6-amd64’
 
-The `api` tag can have anything behind it, please use the following
-when documenting harness methods:
+The `api` tag can have anything behind it, please use the following when documenting harness methods:
 
     @api dsl        Part of the testing dsl used within tests
     @api public     Methods third party integrations can rely on
