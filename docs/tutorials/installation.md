@@ -18,6 +18,7 @@ On an EL or Fedora system use:
     sudo yum install make gcc gcc-c++ libxml2-devel libxslt-devel ruby-devel
 
 ## Installing Beaker
+
 ### From Gem (Preferred)
 
     $ gem install beaker

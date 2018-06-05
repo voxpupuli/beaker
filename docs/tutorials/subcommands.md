@@ -39,6 +39,7 @@ this command executes the suites as they are defined in the configuration in the
 `subcommand_options.yaml`.
 
 ### beaker destroy
+
 Execute this command to deprovision your systems under test(SUTs).
 
 ## Basic workflow

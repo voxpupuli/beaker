@@ -6,7 +6,6 @@ existence of ENV variables in the shell that beaker is executing from. The code
 itself looks like this:
 
 ```ruby
-
 def location_for(place, fake_version = nil)
   if place =~ /^(git[:@][^#]*)#(.*)/
     [fake_version, { :git => $1, :branch => $2, :require => false }].compact
@@ -16,7 +15,6 @@ def location_for(place, fake_version = nil)
     [place, { :require => false }]
   end
 end
-
 ```
 
 Once this method definition is in place in the Gemfile, we can call it in a gem command, like
@@ -37,9 +35,11 @@ git://github.com/puppetlabs/beaker.git#master
 ```
 
 ### file locations
+
 ```
 file://../relative/path/to/beaker
 ```
+
 By adjusting the shell environment that beaker is running in, we can modify what version of
 beaker is installed by bundler on your test coordinator without modifying any of the test
 code. This strategy can be used for any gem dependency, and is often used when testing

@@ -3,6 +3,7 @@ Beaker maintains yard documentation, which covers the [Beaker DSL](http://www.ru
 
 
 ## Assertions ##
+
 To be used for confirming the result of a test is as expected.  Beaker include all Minitest assertions, plus some custom built assertions.
 
 * [Minitest assertions](http://docs.seattlerb.org/minitest/Minitest/Assertions.html)
@@ -10,15 +11,18 @@ To be used for confirming the result of a test is as expected.  Beaker include a
 * [assert_no_match](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Assertions#assert_no_match-instance_method)
 
 ## Helpers ##
+
 DSL methods designed to help you interact with installed projects (like facter and puppet), with hosts (like running arbitrary commands on hosts) or interacting with the web (checking is a given URL is alive or not).
 
 ### Facter ###
+
 DSL methods for interacting with facter.
 
 * [fact_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/FacterHelpers#fact_on-instance_method)
 * [fact](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/FacterHelpers#fact-instance_method)
 
 ### Host ###
+
 DSL methods for host manipulation.
 
 * [on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#on-instance_method)
@@ -46,7 +50,9 @@ DSL methods for host manipulation.
 * [echo_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#echo_on-instance_method)
 
 ### Puppet ###
+
 DSL methods for interacting with puppet.
+
 * [puppet_user](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/PuppetHelpers#puppet_user-instance_method)
 * [puppet_group](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/PuppetHelpers#puppet_group-instance_method)
 * [with_puppet_running_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/PuppetHelpers#with_puppet_running_on-instance_method)
@@ -79,12 +85,14 @@ DSL methods for interacting with puppet.
 * [create_tmpdir_for_user](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/PuppetHelpers#create_tmpdir_for_user-instance_method)
 
 ### TK ###
+
 Convenience methods for TrapperKeeper configuration.
 
 * [modify_tk_config](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/TkHelpers#modify_tk_config-instance_method)
 * [read_tk_config_string](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/TkHelpers#read_tk_config_string-instance_method)
 
 ### Web ###
+
 Helpers for web actions.
 
 * [port_open_within?](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/WebHelpers#port_open_within?-instance_method)
@@ -93,6 +101,7 @@ Helpers for web actions.
 * [fetch_http_dir](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/WebHelpers#fetch_http_dir-instance_method)
 
 ### Test ###
+
 DSL methods for setting information about the current test.
 
 * [current_test_name](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/TestHelpers#current_test_name-instance_method)
@@ -103,10 +112,13 @@ DSL methods for setting information about the current test.
 * [set_current_step_name](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/TestHelpers#set_current_step_name-instance_method)
 
 ## Install Utilities ##
+
 DSL methods for installing PuppetLabs projects.
 
 ### EZBake ###
+
 EZBake convenience methods.
+
 * [install_from_ezbake](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/EzbakeUtils#install_from_ezbake-instance_method)
 * [install_termini_from_ezbake](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/EzbakeUtils#install_termini_from_ezbake-instance_method)
 * [ezbake_dev_build](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/EzbakeUtils#ezbake_dev_build-instance_method)
@@ -123,6 +135,7 @@ EZBake convenience methods.
 * [conditionally_clone](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/EzbakeUtils#conditionally_clone-instance_method)
 
 ### AIO ###
+
 Agent-only installation utilities.
 
 * [add_platform_aio_defaults](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/AIODefaults#add_platform_aio_defaults-instance_method)
@@ -131,6 +144,7 @@ Agent-only installation utilities.
 * [remove_aio_defaults_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/AIODefaults#remove_aio_defaults_on-instance_method)
 
 ### FOSS ###
+
 DSL methods for installing FOSS PuppetLabs projects.
 
 * [add_platform_foss_defaults](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/FOSSDefaults#add_platform_foss_defaults-instance_method)
@@ -168,6 +182,7 @@ DSL methods for installing FOSS PuppetLabs projects.
 * [install_cert_on_windows](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/FOSSUtils#install_cert_on_windows-instance_method)
 
 ### PE ###
+
 DSL methods for installing Puppet Enterprise.
 
 * [add_platform_pe_defaults](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/PeDefaults#add_platform_pe_defaults-instance_method)
@@ -194,6 +209,7 @@ DSL methods for installing Puppet Enterprise.
 * [fetch_and_push_pe](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/PeUtils#fetch_and_push_pe-instance_method)
 
 ### Puppet ###
+
 DSL methods that can be used for both FOSS/PE puppet installations.
 
 * [normalize_type](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/PuppetUtils#normalize_type-instance_method)
@@ -205,6 +221,7 @@ DSL methods that can be used for both FOSS/PE puppet installations.
 * [remove_defaults_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/PuppetUtils#remove_defaults_on-instance_method)
 
 ### Windows ###
+
 DSL convenience methods for installing packages on Windows SUTs.
 
 * [get_temp_path](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/WindowsUtils#get_temp_path-instance_method)
@@ -213,6 +230,7 @@ DSL convenience methods for installing packages on Windows SUTs.
 * [install_msi_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/WindowsUtils#install_msi_on-instance_method)
 
 ### Module ###
+
 DSL methods for installing puppet modules.
 
 * [install_dev_puppet_module_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/ModuleUtils#install_dev_puppet_module_on-instance_method)
@@ -227,6 +245,7 @@ DSL methods for installing puppet modules.
 * [build_ignore_list](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/ModuleUtils#build_ignore_list-instance_method)
 
 ## Outcomes ##
+
 Methods that indicate how the given test completed (fail, pass, skip or pending).
 
 * [fail_test](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Outcomes#fail_test-instance_method)
@@ -236,11 +255,13 @@ Methods that indicate how the given test completed (fail, pass, skip or pending)
 * [formatted_message](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Outcomes#formatted_message-instance_method)
 
 ## Patterns ##
+
 Shared methods used as building blocks of other DSL methods.
 
 * [block_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Patterns#block_on-instance_method)
 
 ## Roles ##
+
 DSL methods for accessing hosts of various roles.
 
 * [agents](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Roles#agents-instance_method)
@@ -261,6 +282,7 @@ DSL methods for accessing hosts of various roles.
 * [find_at_most_one](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Roles#find_at_most_one-instance_method)
 
 ## Structure ##
+
 DSL methods that describe and define how a test is executed.
 
 * [step](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Structure#step-instance_method)
@@ -274,6 +296,7 @@ DSL methods that describe and define how a test is executed.
 * [inspect_host](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Structure#inspect_host-instance_method)
 
 ## Wrappers ##
+
 Wrappers around commonly used commands.
 
 * [facter](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Wrappers#facter-instance_method)
