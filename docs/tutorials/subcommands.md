@@ -30,13 +30,13 @@ Execute this command to deprovision your systems under test(SUTs).
 
 ## Basic workflow
 
-```
-beaker init -h hosts_file -o options_file --keyfile ssh_key --pre-suite ./setup/pre-suit/my_presuite.rb
-beaker provision
+```console
+$ beaker init -h hosts_file -o options_file --keyfile ssh_key --pre-suite ./setup/pre-suit/my_presuite.rb
+$ beaker provision
 # Note: do not pass in hosts file, or use the '-t' flag! Just the file
 # or directory. Do not pass GO. Do not collect $200.
-beaker exec ./tests/my_test.rb
+$ beaker exec ./tests/my_test.rb
 # Repeating the above command as needed
 # When you're done testing using the VM that Beaker provisioned
-beaker destroy
+$ beaker destroy
 ```

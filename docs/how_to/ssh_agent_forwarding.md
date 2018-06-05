@@ -2,12 +2,12 @@
 
 `ssh(1)` agent forwarding can is activated in the `CONFIG` section of the hosts file:
 
-~~~yaml
+```yaml
 HOSTS:
   ...
 CONFIG:
   forward_ssh_agent: true
-~~~
+```
 
 Beaker will then make the ssh agent running on the beaker coordinator available to the Systems Under Test (SUT).  There is a gotcha though: the agent socket file in the SUT is only available to the user who signed in.  If you want to access remote machine resources as another user, you *must* change the socket permission.
 
@@ -15,7 +15,7 @@ A dirty hack is to `chmod -R 777 /tmp/ssh-*` before changing to another user and
 
 Example:
 
-~~~puppet
+```puppet
 exec { '/bin/chmod -R 777 /tmp/ssh-*':
 } ->
 vcsrepo { '/var/www/app':
@@ -23,7 +23,7 @@ vcsrepo { '/var/www/app':
   source   => 'https://example.com/git/app.git',
   user     => 'deploy'
 }
-~~~
+```
 
 ## Cross-SUT access
 

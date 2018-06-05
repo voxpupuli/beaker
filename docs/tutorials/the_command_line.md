@@ -2,11 +2,15 @@
 
 * Using the gem
 
-        $ beaker --log-level debug --hosts sample.cfg --tests test.rb
+```console
+    $ beaker --log-level debug --hosts sample.cfg --tests test.rb
+```
 
 * Using latest git
 
-        $ bundle exec beaker --log-level debug --hosts sample.cfg --tests test.rb
+```console
+    $ bundle exec beaker --log-level debug --hosts sample.cfg --tests test.rb
+```
 
 ## Useful options
 
@@ -22,8 +26,12 @@ See all options with
 
 * Using the gem
 
+```console
         $ beaker --help
+```
 
 * Using latest git
 
+```console
         $ bundle exec beaker --help
+```

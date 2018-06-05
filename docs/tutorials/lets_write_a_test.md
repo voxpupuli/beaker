@@ -20,7 +20,9 @@ What needs to happen in this test:
 
 ## Create a host configuration file
 
+```console
     $ beaker-hostgenerator redhat7-64 > redhat7-64.yaml
+```
 
 This command will generate a host file for our system under test (SUT). It will use vmpooler as hypervisor for the host. Please check out [this](https://github.com/puppetlabs/beaker/tree/master/docs/how_to/hypervisors) doc to learn more about hypervisors for beaker.
 
@@ -86,6 +88,8 @@ end
 
 You can now run this with
 
-    beaker --host redhat7-64ma.yaml --pre-suite install.rb --tests mytest.rb
+```console
+    $ beaker --host redhat7-64ma.yaml --pre-suite install.rb --tests mytest.rb
+```
 
 Next up you may want to look at the [Beaker test for a module](../how_to/write_a_beaker_test_for_a_module.md) page.
