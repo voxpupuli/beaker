@@ -135,7 +135,7 @@ Vagrant file (ubuntu 14 master and agent):
 
 For more info on host generation and what these configs represent see - [Creating A Test Environment](creating_a_test_environment.md)
 
-### gen_pre_suite
+### `gen_pre_suite`
 
 To run:
 

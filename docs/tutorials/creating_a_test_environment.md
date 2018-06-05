@@ -29,7 +29,8 @@ Example hosts file:
       nfs_server: none
       consoleport: 443
 
-## Host Requirements ##
+## Host Requirements
+
 Hosts, or SUTs (Systems Under Test), must meet the following requirements:
 
 * The SUT will need a properly configured network, hosts will need to be able to reach each other by hostname.
@@ -39,7 +40,7 @@ Hosts, or SUTs (Systems Under Test), must meet the following requirements:
 * On Windows, `Cygwin` must be installed (with `curl`, `sshd`, `bash`) and the necessary windows gems (`sys-admin`, `win32-dir`, etc).
 * FOSS install: you must have `git`, `ruby`, and `rdoc` installed on your SUT.
 
-## Required Host Settings ##
+## Required Host Settings
 
 To properly define a host you must provide:
 
@@ -47,8 +48,8 @@ To properly define a host you must provide:
   * The string identifying this host.
 * platform
   * One of the Beaker supported platforms.
+## Optional Host Settings
 
-## Optional Host Settings ##
 Additionally, Beaker supports the following host options:
 
 * ip
@@ -67,7 +68,7 @@ Additionally, Beaker supports the following host options:
 * vagrant_memsize
   * The memory size (in MB) for this host
 
-## Supported Platforms ##
+## Supported Platforms
 
 Beaker depends upon each host in the configuration file having a platform type that is correctly formatted and supported.  The platform is used to determine how various operations are carried out internally (such as installing packages using the correct package manager for the given operating system).
 
@@ -86,4 +87,4 @@ The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one o
 
 `VERSION`'s format is not enforced, but should reflect the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, scientific-6-i386-agent, etc).  `ARCH`'s format is also not enforced, but should be appropriate to the `OSFAMILY` selected (ie, ubuntu-1204-i386-master, sles-11-x86_64-master, debian-7-amd64-master, etc).
 
-## [Supported Virtualization Providers](../how_to/hypervisors/README.md#external-hypervisors) ##
+## [Supported Virtualization Providers](../how_to/hypervisors/README.md#external-hypervisors)
