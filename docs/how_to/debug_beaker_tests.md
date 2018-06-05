@@ -7,6 +7,7 @@ beaker includes [pry-byebug](https://github.com/deivid-rodriguez/pry-byebug), a 
 [Pry](http://pryrepl.org/) is a powerful Ruby editing and debugging tool.  Beaker uses Pry runtime invocation to create a developer console.
 
 ### What is byebug?
+
 [Byebug](https://github.com/deivid-rodriguez/byebug) is a powerful debugger for ruby. It allows for flexible control of breakpoints, stepping through lines or the call stack. It lacks some features of pry such as source code editing and replaying code execution from within the debugging session, but can be used in combination with pry.
 
 There are several ways to have your tests break and enter debugging:
@@ -20,7 +21,9 @@ There are several ways to have your tests break and enter debugging:
 Add Pry to individual tests by adding `require 'pry'` to the Ruby test file. Then add the statement `binding.pry` at the point in code where you want access to the full, current Beaker environment.
 
 ### Example
+
 #### Example test trypry.rb
+
 Here's a test file that exercises different ways of running commands on Beaker hosts.  At the end of the main `hosts.each` loop I've included `binding.pry` to invoke the console.
 
 ```
@@ -48,6 +51,7 @@ end
 ```
 
 #### Sample output to the first `binding.pry` call:
+
 ```
 $ bundle exec beaker --tests tests/trypry.rb --hosts configs/fusion/winfusion.cfg --no-provision
 {
@@ -127,7 +131,9 @@ From: /Users/anode/beaker/tests/trypry.rb @ line 19 self.run_test:
 
 [1] pry(#<Beaker::TestCase>)>
 ```
+
 #### Using the console
+
 At this point I have access to the console.  I have full access to Beaker hosts, the Beaker DSL and Ruby.
 
 Here's some sample console calls:
@@ -215,8 +221,11 @@ w2k8r2 executed in 0.08 seconds
 [5] pry(#<Beaker::TestCase>)> result.stdout.chomp
 => "Application Data\nDesktop\nDocuments\nFavorites\nMicrosoft\nPackage Cache\nStart Menu\nTemplates\nVMware\nbeaker.gemspec\nntuser.pol"
 ```
+
 #### Continue regular test execution
+
 Simply `exit` the console.
+
 ```
 [6] pry(#<Beaker::TestCase>)> exit
 ```
@@ -302,11 +311,13 @@ The arrow indicates pry is showing code at the top of the stack trace. At positi
 From here, you can examine variables in your test. If you have hosts provisioned, you can send them commands using the [on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#on-instance_method) method, or in a separate terminal ssh into them to investigate their state at the point of failure.
 
 ## Defining external breakpoints with byebug
+
 This method is perhaps the least intuitive to use; but combines the advantages of letting you pick the line(s) of code to set breakpoints on; and being able to debug without needing to edit your test code directly. It is sometimes desirable to debug a test without changing the test's code at all; for example, if you want to compare a test at two or more different git commits, your test source needs to remain unmodified from its committed form.
 
 byebug allows you to externally define breakpoints to keep them separate from your source code.
 
 ### Example
+
 Consider the following test file test.rb:
 
 ```ruby

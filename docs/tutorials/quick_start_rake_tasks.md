@@ -2,7 +2,6 @@
 
 We have developed some rake tasks to help new Beaker users get up and running quickly with writing and running tests.
 
-
 ## Pre-requisites
 
 * You will need to have already completed the Beaker installation tutorial - [Beaker Installation](installation.md)
@@ -17,7 +16,6 @@ To use the tasks, you need to put the following line at the top of your project'
 To check that you have access to the quickstart tasks from your project, run:
 
     rake --tasks
-    
 You should see them listed along with any rake tasks you have defined in your local project rakefile:
 
     rake beaker_quickstart:gen_hosts[hypervisor]  # Generate Default Beaker Host Config File, valid options are: vmpooler or vagrant
@@ -40,7 +38,6 @@ Example:
 If you have the zsh shell then you will need to escape the square brackets:
 
     rake beaker_quickstart:gen_hosts\[vmpooler\]
-    
 
 ### Generate tasks
 
@@ -94,8 +91,6 @@ Vmpooler file (redhat 7 master and agent):
       nfs_server: none
       consoleport: 443
       pooling_api: http://vmpooler.delivery.puppetlabs.net/
-    
-
 
 Vagrant file (ubuntu 14 master and agent):
 
@@ -134,13 +129,11 @@ Vagrant file (ubuntu 14 master and agent):
 
 For more info on host generation and what these configs represent see - [Creating A Test Environment](creating_a_test_environment.md)
 
-
 ### gen_pre_suite
 
 To run:
 
     rake beaker_quickstart:gen_pre_suite
-    
 This task will generate a default Beaker pre-suite file.
 
 This task will generate a default Beaker pre-suite file. The gen_pre-suite task will create a file 'default_pre_suite.rb' in acceptance/setup. If the file already exists, it will not be overwritten. This will allow you to edit the pre_suite file yourself if required.
@@ -148,7 +141,6 @@ This task will generate a default Beaker pre-suite file. The gen_pre-suite task 
 pre_suite file:
 
     install_puppet
-  
 See the [Test Suites doc](test_suites.md) in this directory for more information on pre-suites.
 
 
@@ -174,7 +166,6 @@ smoke test file:
 This smoke test will check that Puppet has been successfully installed on the hosts.
 
 For more information on the Beaker dsl methods available to you in your tests see - [Beaker dsl](../how_to/the_beaker_dsl.md)
-
 
 ### Run task
 

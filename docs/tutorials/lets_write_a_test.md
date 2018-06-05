@@ -1,6 +1,7 @@
 ## The Task
 
 We will write a test to check if a package (specifically HTTPD) is installed and running. To do this we will write two files:
+
 1. `install.rb` - This file will install the package and start the service
 2. `mytest.rb` - This file will have our core tests that checks if the package is installed and running
 
@@ -18,6 +19,7 @@ What needs to happen in this test:
   * Test HTTPD service is running
 
 ## Create a host configuration file
+
     $ beaker-hostgenerator redhat7-64 > redhat7-64.yaml
 
 This command will generate a host file for our system under test (SUT). It will use vmpooler as hypervisor for the host. Please check out [this](https://github.com/puppetlabs/beaker/tree/master/docs/how_to/hypervisors) doc to learn more about hypervisors for beaker.
@@ -81,6 +83,7 @@ end
 ```
 
 ## Run it!
+
 You can now run this with
 
     beaker --host redhat7-64ma.yaml --pre-suite install.rb --tests mytest.rb

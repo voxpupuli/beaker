@@ -25,6 +25,7 @@ Provisions hosts defined in your `subcommand_options file`. You can pass the `--
 Run a single file, directory, or Beaker suite. If supplied a file or directory, that resource will be run in the context of the `tests` suite; if supplied a Beaker suite, then just that suite will run. If no resource is supplied, then this command executes the suites as they are defined in the configuration in the `subcommand_options.yaml`.
 
 ### beaker destroy
+
 Execute this command to deprovision your systems under test(SUTs).
 
 ## Basic workflow

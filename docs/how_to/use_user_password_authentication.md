@@ -30,7 +30,9 @@ Attempting ssh connection to pe-centos6, user: anode, opts: {:config=>false, :ve
 _/snip_
 
 ## Example 2: Use a list of authentication methods
+
 If you want to try a sequence of authentication techniques that fall through on failure simply include them (in their desired order) in your list of `auth_methods`.  If one of your methods is user/password be warned, after a failure Net::SSH will attempt keyboard-interactive password entry - if you do not want this behavior add `number_of_password_prompts: 0`.
+
 HOSTS:
   pe-centos6:
     roles:

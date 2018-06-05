@@ -15,9 +15,11 @@ The platforms that beaker covers in its regression testing are largely what is s
 ## Test Suite Phases
 
 ### Beaker Spec
+
 The initial step in Beaker's pipeline is to execute spec testing with supported and future rubies; 2.2.5 and 2.3.1.
 
 ### Beaker Acceptance
+
 All acceptance tests use actual OS's with beaker installed and use beaker itself to verify that its own methods and classes are working.
 
 * The Base tests are tests that do not require puppet be installed on the SUT. This includes much of the DSL and host helpers.
