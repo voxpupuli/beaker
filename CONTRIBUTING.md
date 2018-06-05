@@ -1,23 +1,48 @@
 # How To Contribute To Beaker
 
+Contributions are welcomed. Simple bug fixes and minor enhancements will usually be accepted. Larger features should be discussed with a team member before you invest in developing them with the expectation that they will be merged.
+
+## Recommended Tools
+
+It may be necessary to test Beaker against multiple versions of Ruby. The maintainers use [`rbenv`](https://github.com/rbenv/rbenv) to manage multiple Ruby versions; you can install it with Homebrew. You'll also want [`rbenv-bundler`](https://github.com/carsomyr/rbenv-bundler) to keep Gem dependencies from conflicting.
+
 ## Getting Started
+
+Beaker does not use GitHub Issues, but an internal ticketing system running Jira that interfaces with other services. To be accepted by the maintainers, changes must follow this workflow and tagging scheme. See [ticket process doc](docs/concepts/ticket_process.md) for a
 
 * Create a [Jira account](http://tickets.puppetlabs.com)
 * Make sure you have a [GitHub account](https://github.com/signup/free)
-* Submit a ticket for your issue, assuming one does not already exist.
+* Submit a ticket for your issue on Jira, assuming one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
-  * File a ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
+  * File the ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
 * Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker)
+
+## Installation/Setup for Development
+
+While most users will use Beaker as a Gem installed from some repository, you will need a live repo to work with. Here's how to configure Beaker and its dependencies so you can start contributing.
+
+* Clone your fork of Beaker
+* Install Beaker's dependencies into `vendor/bundle`:
+  ```console
+    $ bundle install --path vendor/bundle
+  ```
+  * Installing the dependencies globally ~~may~~ *will probably* cause conflicts and is not recommended.
+  * Please use `vendor/bundle`, not `_vendor` or `.vendor`.
+* Ensure the spec tests pass:
+  ```console
+    $ rake test:spec # assuming you have rbenv-bundler
+    # or
+    $ bundle exec rake test:spec # if you're *sure* your dependencies are tidy
+  ```
 
 ## Making Changes
 
-* Create a topic branch from your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker). 
-  * Please title the branch after the beaker ticket you intend to address, ie `BKR-1234`.
-* Make commits of logical units.
-* Check for unnecessary whitespace with `git diff --check` before committing.
-* Make sure your commit messages are in the proper format.
-
-````
+* Create a topic branch from your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker).
+  * Please title the branch after the beaker ticket you intend to address, i.e. `BKR-1234`.
+* Make commits of logical units. If your commits are a mess, you may be asked to [rebase or at least squash](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History) your PR.
+  * Check for unnecessary whitespace with `git diff --check` before committing.
+* Make sure your commit messages are in the proper format:
+  ```
     (BKR-1234) Make the example in CONTRIBUTING imperative and concrete
 
     Without this patch applied the example commit message in the CONTRIBUTING document is not a concrete example.  This is a problem because the contributor is left to imagine what the commit message should look like based on a description rather than an example.  This patch fixes the problem by making the example concrete and imperative.
@@ -26,6 +51,9 @@
   ```
 * During the time that you are working on your patch the master Beaker branch may have changed - be sure to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will merge cleanly.
 
+#### Courtesy
+
+Please do not introduce personal ignores into the `.gitignore`, such as IDE configurations, editor version files, or personal testing detritus. You may find it valuable to add the first two to [a global ignore](https://help.github.com/articles/ignoring-files/#create-a-global-gitignore), and the third to [a repository-level ignore](https://help.github.com/articles/ignoring-files/#explicit-repository-excludes).
 
 ### Testing
 
@@ -39,7 +67,7 @@ Submitted PR's will be tested in a series of spec and acceptance level tests - t
 ### Documentation
 
 * Add an entry in the [CHANGELOG.md](CHANGELOG.md). Refer to the CHANGELOG itself for message style/form details.
-* Make sure that you have added documentation using [Yard](http://yardoc.org/) as necessary for any new code introduced.
+* Make sure that you have added documentation using [YARD](http://yardoc.org/) as necessary for any new code introduced. See [DOCUMENTING](DOCUMENTING.md).
 * More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
 ## Making Trivial Changes
@@ -53,6 +81,7 @@ For changes of a trivial nature, it is not always necessary to create a new tick
 
     - remove additional spaces that appear at EOL
 ````
+
 ### Version Bump For Gem Release
 
 To prepare for a new gem release of Beaker the `version.rb` file is updated with the upcoming gem version number.  This is submitted with `(GEM)` instead of a ticket/issue number.
@@ -60,6 +89,7 @@ To prepare for a new gem release of Beaker the `version.rb` file is updated with
 ````
      (GEM) Update version for Beaker 1.16.1
 ````
+
 ### History File Update
 
 To prepare for a new gem release of Beaker (after the version has been bumped) the `HISTORY.md` file is updated with the latest GitHub log.  This is submitted with `(HISTORY)` instead of a ticket/issue number.
@@ -67,17 +97,18 @@ To prepare for a new gem release of Beaker (after the version has been bumped) t
 ````
     (HISTORY) Update history for release of Beaker 1.16.1
 ````
+
 ## Submitting Changes
 
 * Push your changes to a topic branch in your fork of the repository.
 * Submit a pull request to [Beaker](https://github.com/puppetlabs/beaker)
-* Update your ticket
-  * Update your [Jira](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR) ticket to mark that you have submitted code and are ready for it to be considered for merge (Status: Ready for Merge).
-    * Include a link to the pull request in the ticket.
-* PRs are reviewed as time permits.  
+* Update your [Jira](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR) ticket to mark that you have submitted code and are ready for it to be considered for merge (Status: Ready for Merge).
+
+PRs are reviewed as time permits.
 
 # Additional Resources
 
+* [Beaker Glossary](docs/concepts/glossary.md)
 * [Puppet community guidelines](https://docs.puppet.com/community/community_guidelines.html)
 * [Bug tracker (Jira)](http://tickets.puppetlabs.com)
 * [BKR Jira Project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
