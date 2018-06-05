@@ -5,29 +5,31 @@ anywhere and used with `beaker --hosts yourhost.yaml`
 
 Example hosts file:
 
-    HOSTS:
-      ubuntu-1404-x64-master:
-        roles:
-          - master
-          - agent
-          - dashboard
-          - database
-        platform: ubuntu-1404-x86_64
-        hypervisor: vagrant
-        box: puppetlabs/ubuntu-14.04-64-nocm
-        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
-        ip: 192.168.20.20
-      ubuntu-1404-x64-agent:
-        roles:
-          - agent
-        platform: ubuntu-1404-x86_64
-        hypervisor: vagrant
-        box: puppetlabs/ubuntu-14.04-64-nocm
-        box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
-        ip: 192.168.21.21
-    CONFIG:
-      nfs_server: none
-      consoleport: 443
+```yaml
+  HOSTS:
+    ubuntu-1404-x64-master:
+      roles:
+        - master
+        - agent
+        - dashboard
+        - database
+      platform: ubuntu-1404-x86_64
+      hypervisor: vagrant
+      box: puppetlabs/ubuntu-14.04-64-nocm
+      box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+      ip: 192.168.20.20
+    ubuntu-1404-x64-agent:
+      roles:
+        - agent
+      platform: ubuntu-1404-x86_64
+      hypervisor: vagrant
+      box: puppetlabs/ubuntu-14.04-64-nocm
+      box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm
+      ip: 192.168.21.21
+  CONFIG:
+    nfs_server: none
+    consoleport: 443
+```
 
 ## Host Requirements
 

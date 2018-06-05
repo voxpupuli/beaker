@@ -2,7 +2,7 @@ By default Beaker connects to hosts using public key authentication, but that ma
 
 ## Example 1: Use 'password' authentication
 
-```
+```yaml
 HOSTS:
   pe-centos6:
     roles:
@@ -12,10 +12,10 @@ HOSTS:
       - database
       - myrole
     platform: el-6-i386
-    snapshot : clean-w-keys
-    hypervisor : fusion
+    snapshot: clean-w-keys
+    hypervisor: fusion
     ssh:
-      password : anode
+      password: anode
       user: anode
       auth_methods:
         - password
@@ -34,7 +34,7 @@ _/snip_
 
 If you want to try a sequence of authentication techniques that fall through on failure simply include them (in their desired order) in your list of _auth_methods_.  If one of your methods is user/password be warned, after a failure Net::SSH will attempt keyboard-interactive password entry - if you do not want this behavior add _number_of_password_prompts: 0_.
 
-```
+```yaml
 HOSTS:
   pe-centos6:
     roles:
@@ -44,13 +44,13 @@ HOSTS:
       - database
       - myrole
     platform: el-6-i386
-    snapshot : clean-w-keys
-    hypervisor : fusion
+    snapshot: clean-w-keys
+    hypervisor: fusion
 CONFIG:
   ssh:
     auth_methods:
       - password
       - publickey
     number_of_password_prompts: 0
-    password : wootwoot
+    password: wootwoot
 ```
