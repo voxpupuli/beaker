@@ -1,7 +1,5 @@
 # Rake test tasks for running beaker
 
-## How does it work?
-
 There are some rake tasks that you can use to run Beaker tests from your local project dir.
 
 To use them from within your own project, you will need to require the following file in your project's rakefile:

@@ -1,5 +1,5 @@
 
-## Contributing Documentation to Puppetlabs Test Harness ##
+# Contributing Documentation to Beaker
 
 All inline documentation uses [YARD](http://yardoc.org/). Below is an example usage, a quick summary of documentation expectations, and finally a short reference for those new to YARD.
 
@@ -44,8 +44,8 @@ They say a picture is worth a thousand words, hopefully this example will be wor
 
 ```
 
+## Documentation Guide
 
-## Documentation Guide: ##
 Most of our documentation is done with the `@tag` syntax. With a few execptions tags follow this format:
 
     @tag [TypeOfValueInBrackets] nameOfValue Multi-word description that
@@ -74,8 +74,8 @@ depending on whether you want the server to run in the foreground or not
 
 Wait for the documentation to compile and then point your browser to [http://localhost:8808](http://localhost:8808).
 
-## A Simple YARD Reference: ##
 
+## A Simple YARD Reference
 
 A Hash that must be in `{:symbol => ‘string’}` format:
 
