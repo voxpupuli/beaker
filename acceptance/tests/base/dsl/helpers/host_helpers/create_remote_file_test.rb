@@ -66,7 +66,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+      end
 
       assert_raises Beaker::Host::CommandFailure do
         remote_contents = on(default, "cat #{remote_filename}").stdout
@@ -148,7 +150,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+      end
 
       hosts.each do |host|
         assert_raises Beaker::Host::CommandFailure do
@@ -164,6 +168,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_tmpdir = tmpdir_on default
 
       # NOTE: we do not do this step in the non-hosts-array version of the test, not sure why
+      # NOTE: this appears to be a workaround related to BKR-463
       on hosts, "mkdir -p #{remote_tmpdir}"
 
       remote_filename = File.join(remote_tmpdir, "testfile.txt")

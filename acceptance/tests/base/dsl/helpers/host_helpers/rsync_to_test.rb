@@ -21,7 +21,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = tmpdir_on default
 
-        rsync_to default, local_filename, remote_tmpdir
+        assert_raises Beaker::Host::CommandFailure do
+          rsync_to default, local_filename, remote_tmpdir
+        end
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         assert_raises Beaker::Host::CommandFailure do
