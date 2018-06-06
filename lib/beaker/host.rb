@@ -571,7 +571,9 @@ module Beaker
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
       result = Rsync.run(from_path, to_path, rsync_args)
       @logger.debug("rsync returned #{result.inspect}")
-      result
+
+      return result if result.success?
+      raise Beaker::Host::CommandFailure, result.error
     end
 
   end

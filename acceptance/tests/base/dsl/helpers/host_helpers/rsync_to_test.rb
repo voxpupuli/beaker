@@ -46,7 +46,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
-        rsync_to default, local_filename, "/non/existent/testfile.txt"
+        assert_raises Beaker::Host::CommandFailure do
+          rsync_to default, local_filename, "/non/existent/testfile.txt"
+        end
         assert_raises Beaker::Host::CommandFailure do
           on(default, "cat /non/existent/testfile.txt").exit_code
         end

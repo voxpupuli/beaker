@@ -24,10 +24,10 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  step "#create_remote_file CURRENTLY does not fail and does not create a remote file when the remote path does not exist, using rsync" do
-    # NOTE: would expect this to fail with Beaker::Host::CommandFailure
-
-    create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+  step "#create_remote_file fails and does not create a remote file when the remote path does not exist, using rsync" do
+    assert_raises Beaker::Host::CommandFailure do
+      create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+    end
 
     assert_raises Beaker::Host::CommandFailure do
       on(default, "cat /non/existent/testfile.txt").exit_code
