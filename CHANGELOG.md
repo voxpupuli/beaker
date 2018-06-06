@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.35.0...master)
 
+### Fixed
+
+- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
+
 # [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
 ### Fixed
