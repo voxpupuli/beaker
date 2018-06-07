@@ -23,11 +23,13 @@ On an EL or Fedora system use:
 
 ## Installing Beaker
 
+These instructions apply to installing Beaker for use; to set up a development environment for Beaker itself, [see below](#for-development).
+
 ### From Gem (Preferred)
 
 ```console
-    $ gem install beaker
-    $ beaker --help
+  $ gem install beaker
+  $ beaker --help
 ```
 
 ### From Latest Git
@@ -37,10 +39,10 @@ If you need the latest and greatest (and mostly likely broken/untested/no warran
 * Uses <a href = "http://bundler.io/">bundler</a>
 
 ```console
-    $ git clone https://github.com/puppetlabs/beaker
-    $ cd beaker
-    $ bundle install
-    $ bundle exec beaker --help
+  $ git clone https://github.com/puppetlabs/beaker
+  $ cd beaker
+  $ bundle install
+  $ bundle exec beaker --help
 ```
 
 ### From Latest Git, As Installed Gem
@@ -69,6 +71,37 @@ The beaker gem can be built and installed in the context of the current test sui
       gem 'beaker', :github => 'puppetlabs/beaker', :branch => 'master', :ref => 'fffe7'
     end
 ```
+
+## For Development
+
+If you intend to make changes to Beaker itself, follow these instructions.
+
+### Recommended Tools
+
+It may be necessary to test Beaker against multiple versions of Ruby. The maintainers use [`rbenv`](https://github.com/rbenv/rbenv) to manage multiple Ruby versions; you can install it with Homebrew. You'll also want [`rbenv-bundler`](https://github.com/carsomyr/rbenv-bundler) to keep Gem dependencies from conflicting.
+
+### Setup for Development
+
+While most users will use Beaker as a Gem installed from some repository, you will need a live repo to work with. Here's how to configure Beaker and its dependencies so you can start contributing:
+
+* Clone your fork of Beaker
+* Install Beaker's dependencies into `vendor/bundle`:
+  ```console
+    $ cd beaker/
+    $ bundle install --path vendor/bundle
+  ```
+  * Installing the dependencies globally ~~may~~ *will probably* cause conflicts and is not recommended.
+  * Please use `vendor/bundle`, not `_vendor` or `.vendor`.
+* Test your new environment by seeing if the spec tests pass (beaker/master is maintained in an always-passing state):
+  ```console
+    $ rake test:spec # assuming you have rbenv-bundler
+    # or
+    $ bundle exec rake test:spec # if you're *sure* your dependencies are tidy
+  ```
+
+### Contributing
+
+Contributions to Beaker are welcomed, see [CONTRIBUTING.md](/CONTRIBUTING.md)) for instructions.
 
 ## Ruby Version
 

@@ -2,42 +2,21 @@
 
 Contributions are welcomed. Simple bug fixes and minor enhancements will usually be accepted. Larger features should be discussed with a team member before you invest in developing them with the expectation that they will be merged.
 
-## Recommended Tools
-
-It may be necessary to test Beaker against multiple versions of Ruby. The maintainers use [`rbenv`](https://github.com/rbenv/rbenv) to manage multiple Ruby versions; you can install it with Homebrew. You'll also want [`rbenv-bundler`](https://github.com/carsomyr/rbenv-bundler) to keep Gem dependencies from conflicting.
-
 ## Getting Started
 
 Beaker does not use GitHub Issues, but an internal ticketing system running Jira that interfaces with other services. To be accepted by the maintainers, changes must follow this workflow and tagging scheme. See [ticket process doc](docs/concepts/ticket_process.md) for a
 
-* Create a [Jira account](http://tickets.puppetlabs.com)
-* Make sure you have a [GitHub account](https://github.com/signup/free)
+* Create a [Jira account](http://tickets.puppetlabs.com).
+* Make sure you have a [GitHub account](https://github.com/signup/free).
 * Submit a ticket for your issue on Jira, assuming one does not already exist.
   * Clearly describe the issue including steps to reproduce when it is a bug.
-  * File the ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR)
-* Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker)
-
-## Installation/Setup for Development
-
-While most users will use Beaker as a Gem installed from some repository, you will need a live repo to work with. Here's how to configure Beaker and its dependencies so you can start contributing.
-
-* Clone your fork of Beaker
-* Install Beaker's dependencies into `vendor/bundle`:
-  ```console
-    $ bundle install --path vendor/bundle
-  ```
-  * Installing the dependencies globally ~~may~~ *will probably* cause conflicts and is not recommended.
-  * Please use `vendor/bundle`, not `_vendor` or `.vendor`.
-* Ensure the spec tests pass:
-  ```console
-    $ rake test:spec # assuming you have rbenv-bundler
-    # or
-    $ bundle exec rake test:spec # if you're *sure* your dependencies are tidy
-  ```
+  * File the ticket in the [BKR project](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR).
+* Fork the [Beaker repository on GitHub](https://github.com/puppetlabs/beaker).
+* [Get Beaker set up for development](docs/tutorials/installation.md#for-development).
 
 ## Making Changes
 
-* Create a topic branch from your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker).
+* Create a topic branch on your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker).
   * Please title the branch after the beaker ticket you intend to address, i.e. `BKR-1234`.
 * Make commits of logical units. If your commits are a mess, you may be asked to [rebase or at least squash](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History) your PR.
   * Check for unnecessary whitespace with `git diff --check` before committing.
@@ -53,7 +32,7 @@ While most users will use Beaker as a Gem installed from some repository, you wi
 
 #### Courtesy
 
-Please do not introduce personal ignores into the `.gitignore`, such as IDE configurations, editor version files, or personal testing detritus. You may find it valuable to add the first two to [a global ignore](https://help.github.com/articles/ignoring-files/#create-a-global-gitignore), and the third to [a repository-level ignore](https://help.github.com/articles/ignoring-files/#explicit-repository-excludes).
+Please do not introduce personal ignores into the `.gitignore`, such as IDE configurations, editor version files, or personal testing artefacts. You may find it valuable to add the first two to [a global ignore](https://help.github.com/articles/ignoring-files/#create-a-global-gitignore), and the third to [a repository-level ignore](https://help.github.com/articles/ignoring-files/#explicit-repository-excludes).
 
 ### Testing
 
