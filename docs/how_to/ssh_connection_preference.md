@@ -24,7 +24,7 @@ End users can override the connection preference that is default or set by their
 
 Example of a host file:
 
-```
+```yaml
 HOSTS:
   ubuntu1604-64-1:
     hypervisor: vmpooler

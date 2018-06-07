@@ -1,14 +1,16 @@
 # Arch Linux
 
 > Arch Linux is an independently developed, i686/x86-64 general-purpose GNU/Linux distribution that strives to provide the latest stable versions of most software by following a rolling-release model. The default installation is a minimal base system, configured by the user to only add what is purposely required.
-**Source: https://wiki.archlinux.org/index.php/Arch_Linux**
+
+Source: https://wiki.archlinux.org/index.php/Arch_Linux
 
 # Installation
 
 ## Specifying a version to install
 
 > Arch Linux strives to maintain the latest stable release versions of its software as long as systemic package breakage can be reasonably avoided.
-**Source: https://wiki.archlinux.org/index.php/Arch_Linux**
+
+Source: https://wiki.archlinux.org/index.php/Arch_Linux
 
 Since Arch is a rolling release, the Puppet version installed by Pacman will always be the latest avaliable release from the upstream.
 

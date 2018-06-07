@@ -1,5 +1,5 @@
 
-## Contributing Documentation to Puppetlabs Test Harness ##
+# Contributing Documentation to Beaker
 
 
 All inline documentation uses YARD, below is an example usage, a quick
@@ -47,9 +47,7 @@ be worth more than the 154 it’s composed of:
 
 ```
 
-
-## Documentation Guide: ##
-
+## Documentation Guide
 
 Most of our documentation is done with the @tag syntax. With a few
 execptions tags follow this format:
@@ -90,8 +88,8 @@ Wait for the documentation to compile and then point your browser to:
     http://localhost:8808
 
 
-## A Simple YARD Reference: ##
 
+## A Simple YARD Reference
 
 A Hash that must be in `{:symbol => ‘string’}` format:
 
