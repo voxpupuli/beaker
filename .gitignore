@@ -1,20 +1,46 @@
-*.swp
-log/*
 !.gitignore
+
+# Gem structure
 junit
 acceptance-tests
 pkg
 Gemfile.lock
-options.rb
+
+# Beaker-generated & local testing
 test.cfg
+options.rb
+merged_options.rb
+tmp/
+log/
+sut-files.tgz
+
+# YARD
 .yardoc
 yard_docs
-coverage
+doc
+
+# Dependencies
+# NOTE: For consistency, please use `vendor/bundle` for Bundler-installed dependencies
 .bundle
 .vendor
 _vendor
-tmp/
-doc
+vendor
+
+# Byebug
+.byebugrc
+.byebug_history
+
+# SimpleCov
+coverage
+
+
+#
+# Editor/IDE Clutter
+#
+# (TODO: consider removing these; use local personal .gitignore instead)
+
+# Vim
+*.swp
 # JetBrains IDEA
 *.iml
 .idea/
@@ -24,6 +50,3 @@ doc
 # Vagrant folder
 .vagrant/
 .vagrant_files/
-# Byebug
-.byebugrc
-.byebug_history
