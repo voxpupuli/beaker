@@ -502,6 +502,8 @@ module Beaker
     # @param to_path [String] The destination path on the host
     # @param opts [Hash{Symbol=>String}] Options to alter execution
     # @option opts [Array<String>] :ignore An array of file/dir paths that will not be copied to the host
+    # @raise [Beaker::Host::CommandFailure] With Rsync error (if available)
+    # @return [Rsync::Result] Rsync result with status code
     def do_rsync_to from_path, to_path, opts = {}
       ssh_opts = self['ssh']
       rsync_args = []
