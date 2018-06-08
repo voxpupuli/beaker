@@ -17,7 +17,6 @@ Beaker does not use GitHub Issues, but an internal ticketing system running Jira
 ## Making Changes
 
 * Create a topic branch on your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker).
-  * Please title the branch after the beaker ticket you intend to address, i.e. `BKR-1234`.
 * Make commits of logical units. If your commits are a mess, you may be asked to [rebase or at least squash](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History) your PR.
   * Check for unnecessary whitespace with `git diff --check` before committing.
 * Make sure your commit messages are in the proper format:
@@ -49,7 +48,9 @@ Submitted PR's will be tested in a series of spec and acceptance level tests - t
 * Make sure that you have added documentation using [YARD](http://yardoc.org/) as necessary for any new code introduced. See [DOCUMENTING](DOCUMENTING.md).
 * More user friendly documentation will be required for PRs unless exempted. Documentation lives in the [docs/ folder](docs).
 
-## Making Trivial Changes
+## Making Changes Without a Ticket
+
+The following kinds of changes are made without a corresponding Jira ticket.
 
 ### Maintenance
 
