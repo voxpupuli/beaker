@@ -30,11 +30,11 @@ module Beaker
       end
 
       it "gives highest precedence to preference specified in host file followed by hypervisor" do
-        hosts[0].options[:ssh_preference] = ['set', 'in', 'hostfile']
+        hosts[0].options[:ssh_preference] = [:set, :in, :hostfile]
         hypervisor.create('none', hosts, make_opts())
         allow(hypervisor).to receive(:connection_preference).and_return([:hypervisor, :pref])
         hypervisor.set_ssh_connection_preference(hosts, hypervisor)
-        expect(hosts[0][:ssh_connection_preference]).to eq(['set', 'in', 'hostfile', :hypervisor, :pref, :ip, :vmhostname, :hostname])
+        expect(hosts[0][:ssh_connection_preference]).to eq([:set, :in, :hostfile, :hypervisor, :pref, :ip, :vmhostname, :hostname])
       end
 
     end
