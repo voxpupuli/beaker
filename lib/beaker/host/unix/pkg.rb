@@ -417,8 +417,15 @@ module Unix::Pkg
         puppet_collection, puppet_agent_version, opts )
     when /^(sles|aix|el|centos|oracle|redhat|scientific)$/
       variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
-      arch = 'ppc' if variant == 'aix' && arch == 'power'
-      version = '7.1' if variant == 'aix' && version == '7.2'
+      if variant == 'aix'
+        arch = 'ppc' if arch == 'power'
+        version_x, version_y = /^(\d+)\.(\d+)/.match(puppet_agent_version).captures.map(&:to_i)
+        if version_x < 5 || version_x == 5 && version_y < 99 # 5.99.z indicates pre-release puppet6
+          version = '7.1' if version == '7.2'
+        else
+          version = '6.1'
+        end
+      end
       release_path_end = "#{variant}/#{version}/#{puppet_collection}/#{arch}"
       release_file = "puppet-agent-#{puppet_agent_version}-1.#{variant}#{version}.#{arch}.rpm"
     else

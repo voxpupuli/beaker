@@ -288,25 +288,74 @@ module Beaker
     end
 
     describe '#puppet_agent_dev_package_info' do
-      puppet_collection = 'PC1'
-      puppet_agent_version = '1.2.3'
-      platforms = { 'solaris-10-x86_64' => ["solaris/10/#{puppet_collection}", "puppet-agent-#{puppet_agent_version}-1.i386.pkg.gz"],
-                    'solaris-11-x86_64' => ["solaris/11/#{puppet_collection}", "puppet-agent@#{puppet_agent_version},5.11-1.i386.p5p"],
-                    'sles-11-x86_64' => ["sles/11/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.sles11.x86_64.rpm"],
-                    'aix-5.3-power' => ["aix/5.3/#{puppet_collection}/ppc", "puppet-agent-#{puppet_agent_version}-1.aix5.3.ppc.rpm"],
-                    'el-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
-                    'centos-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
-                    'oracle-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
-                    'redhat-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
-                    'scientific-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"]
-                  }
-      platforms.each do |p, v|
-        it "accomodates platform #{p} without erroring" do
-          platform = Beaker::Platform.new(p)
-          @opts = {'platform' => platform}
-          allow( instance ).to receive(:link_exists?).and_return(true)
-          expect( instance.puppet_agent_dev_package_info( puppet_collection, puppet_agent_version, { :download_url => 'http://trust.me' } )).to eq(v)
+      let(:download_opts) {{download_url: 'http://trust.me'}}
+
+      # These platforms are consistent across puppet collections
+      shared_examples 'consistent platforms' do |puppet_collection, puppet_agent_version|
+        platforms = { 'solaris-10-x86_64' => ["solaris/10/#{puppet_collection}", "puppet-agent-#{puppet_agent_version}-1.i386.pkg.gz"],
+                      'solaris-11-x86_64' => ["solaris/11/#{puppet_collection}", "puppet-agent@#{puppet_agent_version},5.11-1.i386.p5p"],
+                      'sles-11-x86_64' => ["sles/11/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.sles11.x86_64.rpm"],
+                      'aix-6.1-power' => ["aix/6.1/#{puppet_collection}/ppc", "puppet-agent-#{puppet_agent_version}-1.aix6.1.ppc.rpm"],
+                      'el-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                      'centos-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                      'oracle-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                      'redhat-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                      'scientific-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                    }
+        platforms.each do |p, v|
+          it "accomodates platform #{p} without erroring" do
+            @opts = {'platform' => Beaker::Platform.new(p)}
+            allow( instance ).to receive(:link_exists?).and_return(true)
+            expect( instance.puppet_agent_dev_package_info(puppet_collection, puppet_agent_version, download_opts) ).to eq(v)
+          end
         end
+      end
+
+      # AIX platform/package pairs differ accross collections
+      shared_examples 'aix platform' do |package_version, platform_version, puppet_collection, puppet_agent_version|
+        it "selects AIX #{package_version} packages for AIX #{platform_version}" do
+          @opts = { 'platform' => Beaker::Platform.new("aix-#{platform_version}-power") }
+          allow( instance ).to receive(:link_exists?).and_return(true)
+          expect( instance.puppet_agent_dev_package_info(puppet_collection, puppet_agent_version, download_opts) )
+            .to eq(["aix/#{package_version}/#{puppet_collection}/ppc", "puppet-agent-#{puppet_agent_version}-1.aix#{package_version}.ppc.rpm"])
+        end
+      end
+
+      context 'with puppet-agent 1.y.z' do
+        puppet_collection = 'PC1'
+        puppet_agent_version = '1.2.3'
+
+        include_examples 'consistent platforms', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '5.3', '5.3', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '7.1', '7.1', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '7.1', '7.2', puppet_collection, puppet_agent_version
+      end
+
+      context 'with puppet-agent 5.y.z' do
+        puppet_collection = 'puppet5'
+        puppet_agent_version = '5.4.3'
+
+        include_examples 'consistent platforms', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '7.1', '7.1', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '7.1', '7.2', puppet_collection, puppet_agent_version
+      end
+
+      context 'with puppet-agent 5.99.z' do
+        puppet_collection = 'puppet6'
+        puppet_agent_version = '5.99.0'
+
+        include_examples 'consistent platforms', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '6.1', '7.1', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '6.1', '7.2', puppet_collection, puppet_agent_version
+      end
+
+      context 'with puppet6' do
+        puppet_collection = 'puppet6'
+        puppet_agent_version = '6.6.6'
+
+        include_examples 'consistent platforms', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '6.1', '7.1', puppet_collection, puppet_agent_version
+        include_examples 'aix platform', '6.1', '7.2', puppet_collection, puppet_agent_version
       end
     end
 
