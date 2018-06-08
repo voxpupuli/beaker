@@ -98,6 +98,10 @@ module Beaker
           expect{ host_handler.only_host_with_role( hosts, 'surprise' ) }.to raise_error(ArgumentError)
 
         end
+
+        it "throws an error when role = nil" do
+          expect{ host_handler.find_at_most_one_host_with_role( hosts, nil ) }.to raise_error(ArgumentError)
+        end
       end
 
       context "#find_at_most_one_host_with_role" do
@@ -117,6 +121,10 @@ module Beaker
 
           expect( host_handler.find_at_most_one_host_with_role( hosts, 'surprise' ) ).to be_nil
 
+        end
+
+        it "throws an error when role = nil" do
+          expect{ host_handler.find_at_most_one_host_with_role( hosts, nil ) }.to raise_error(ArgumentError)
         end
       end
 
