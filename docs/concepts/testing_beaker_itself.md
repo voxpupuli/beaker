@@ -6,8 +6,7 @@ While Beaker provides the testing harness for much of the acceptance testing tha
 
 ### Product Coverage
 
-Beaker test coverage covers the LTS PE version, currently 2016.4.0, and the latest released version of PE, currently 2016.5.0.
-Since there is only a single major version of Puppet itself currently supported, beaker only run tests on the latest y-release of Puppet 4, currently 4.8.z. This currently resolves to puppet-agent 1.8.x.
+Beaker test coverage covers the LTS PE version, currently 2016.4.0, and the latest released version of PE, currently 2016.5.0. Since there is only a single major version of Puppet itself currently supported, beaker only run tests on the latest y-release of Puppet 4, currently 4.8.z. This currently resolves to puppet-agent 1.8.x.
 
 ### Platform Coverage
 

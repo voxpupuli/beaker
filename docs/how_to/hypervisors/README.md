@@ -1,26 +1,16 @@
 # The Hypervisors Directory
 
-This directory contains docs explaining any peculiarities or details of a particular
-hypervisor's implementation.
+This directory contains docs explaining any peculiarities or details of a particular hypervisor's implementation.
 
-If you don't see a file here for a hypervisor, then it's either not yet documented
-(feel free to help us out here!), or it should conform to our normal hypervisor
-assumptions.
+If you don't see a file here for a hypervisor, then it's either not yet documented (feel free to help us out here!), or it should conform to our normal hypervisor assumptions.
 
 # Credentials File
 
-Beaker uses credentials from a `.fog` file for authentication. This file came
-from using the [fog cloud services library](http://fog.io). Beaker now only uses
-fog functionality in the openstack hypervisor, but we still use the `.fog` file
-for a credentials store.
+Beaker uses credentials from a `.fog` file for authentication. This file came from using the [fog cloud services library](http://fog.io). Beaker now only uses fog functionality in the openstack hypervisor, but we still use the `.fog` file for a credentials store.
 
-By default, the file is located under the user's home directory. This helps to
-keep the credentials confidential. The path of `.fog` file can be changed by
-setting the `dot_fog` global beaker option.
+By default, the file is located under the user's home directory. This helps to keep the credentials confidential. The path of `.fog` file can be changed by setting the `dot_fog` global beaker option.
 
-The `.fog` file is written in YAML. The keys are particular to the service that
-they correspond to, and each hypervisor's documentation should include the keys
-that are needed for it. An example `.fog` file is below:
+The `.fog` file is written in YAML. The keys are particular to the service that they correspond to, and each hypervisor's documentation should include the keys that are needed for it. An example `.fog` file is below:
 
 ```yaml
 :default:
@@ -32,16 +22,9 @@ that are needed for it. An example `.fog` file is below:
 
 # External Hypervisors
 
-Puppet and its community have made several gems that support different
-hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's
-dependency footprint, and hypervisors are one of the places where we can often
-increase the load across all Beaker uses to benefit a small group that uses a
-particular hypervisor.
+Puppet and its community have made several gems that support different hypervisors with beaker, the reason for this is that we're looking to decrease Beaker's dependency footprint, and hypervisors are one of the places where we can often increase the load across all Beaker uses to benefit a small group that uses a particular hypervisor.
 
-In order to offset this, we've made a listing of gems and community-supported forks
-that support other external hypervisors. Please check them out if you'd like to use
-those hypervisors, hopefully it'll save you from spending time trying to support a
-new hypervisor yourself.
+In order to offset this, we've made a listing of gems and community-supported forks that support other external hypervisors. Please check them out if you'd like to use those hypervisors, hopefully it'll save you from spending time trying to support a new hypervisor yourself.
 
 ### Hypervisor gems made by puppet (pre-included in beaker 3.x):
 
@@ -59,14 +42,9 @@ new hypervisor yourself.
 
 ### beaker-abs
 
-There is another hypervisor made and used internally by puppet,
-[beaker-abs](https://github.com/puppetlabs/beaker-abs), but it isn't included
-in beaker 3.x. If you'd like to use beaker-abs, you'll have to include it yourself.
+There is another hypervisor made and used internally by puppet, [beaker-abs](https://github.com/puppetlabs/beaker-abs), but it isn't included in beaker 3.x. If you'd like to use beaker-abs, you'll have to include it yourself.
 
-You do that by requiring beaker-abs in your Gemfile as a sibling to beaker itself
-and then using `abs` as your hypervisor value in your hosts file. Please check the
-[beaker-abs README](https://github.com/puppetlabs/beaker-abs/blob/master/README.md)
-for more information.
+You do that by requiring beaker-abs in your Gemfile as a sibling to beaker itself and then using `abs` as your hypervisor value in your hosts file. Please check the [beaker-abs README](https://github.com/puppetlabs/beaker-abs/blob/master/README.md) for more information.
 
 ### Hypervisor gems and beaker forks made by community:
 
