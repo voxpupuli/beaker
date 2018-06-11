@@ -1,7 +1,4 @@
-Hosts/Nodes/SUTs are defined in the --hosts (--config) file in Yaml format.
-This file defines each node in the test configuration. The file can be saved
-anywhere and used with `beaker --hosts yourhost.yaml`
-(see [The Command Line](the_command_line.md) for more info).
+Hosts/Nodes/SUTs are defined in the --hosts (--config) file in Yaml format. This file defines each node in the test configuration. The file can be saved anywhere and used with `beaker --hosts yourhost.yaml` (see [The Command Line](the_command_line.md) for more info).
 
 Example hosts file:
 

@@ -14,10 +14,9 @@ Changes to the default options can be made by editing the configuration file.
 
 Here are some examples:
 
-**Eg 1: Changing color of a particular type of message**
+**Ex 1: Changing color of a particular type of message**
 
-Add the following to the hosts file to change the color of `success` messages to `GREEN` and `warning` messages to `YELLOW`.
-To get the color-code corresponding to a color, refer to: [Colors Supported by Beaker] (https://github.com/puppetlabs/beaker/blob/master/lib/beaker/logger.rb#L14-L32)
+Add the following to the hosts file to change the color of `success` messages to `GREEN` and `warning` messages to `YELLOW`. To get the color-code corresponding to a color, refer to: [Colors Supported by Beaker] (https://github.com/puppetlabs/beaker/blob/master/lib/beaker/logger.rb#L14-L32)
 
       HOSTS:
         ...
@@ -26,7 +25,7 @@ To get the color-code corresponding to a color, refer to: [Colors Supported by B
           success: "\e[01;35m"
           warn: "\e[00;33m"
 
-**Eg 2: Turning off colors.**
+**Ex 2: Turning off colors.**
 
 The following option in the hosts file will print the whole output in one single color.
 
