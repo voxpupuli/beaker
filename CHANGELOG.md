@@ -21,6 +21,7 @@ git logs & PR history.
 
 - Installation instructions for contributors
 - Markdown formatting guidelines for `docs/`
+- Glossary for project jargon in [`docs/concepts/glossary.md`](docs/concepts/glossary.md)
 
 # [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
