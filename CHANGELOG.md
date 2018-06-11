@@ -17,6 +17,11 @@ git logs & PR history.
 
 - raise `ArgumentError` when passing `role = nil` to `only_host_with_role()` or `find_at_most_one_host_with_role()`
 
+### Added
+
+- Installation instructions for contributors
+- Markdown formatting guidelines for `docs/`
+
 # [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
 ### Fixed
