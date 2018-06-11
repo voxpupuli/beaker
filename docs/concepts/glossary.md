@@ -4,7 +4,7 @@ Most terms used in Beaker documentation should be common. The following document
 
 ## Coordinator
 
-The Coordinator is the system on which Beaker itself is run. In many environments this will be a local host, typically a developer's primary machine. Used instead of [Master](#master) to avoid confusion.
+The Coordinator is the system on which Beaker itself is run. In many environments this will be a local host, typically a developer's primary machine. Used instead of Master to avoid confusion (see [Roles](/docs/concepts/roles_what_are_they.md)).
 
 ## System Under Test
 
