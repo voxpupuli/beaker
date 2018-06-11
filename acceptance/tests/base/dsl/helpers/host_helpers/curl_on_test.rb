@@ -3,10 +3,10 @@ require "helpers/test_helper"
 # construct an appropriate local file URL for curl testing
 def host_local_url(host, path)
   if host.is_cygwin?
-    "file://#{path.gsub('/', '\\\\\\\\')}"
-  else
-    "file://#{path}"
+    path_result = on(host, "cygpath #{path}")
+    path = path_result.raw_output.chomp
   end
+  "file://#{path}"
 end
 
 test_name "dsl::helpers::host_helpers #curl_on" do
