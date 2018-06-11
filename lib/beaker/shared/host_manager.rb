@@ -33,9 +33,10 @@ module Beaker
       #@param [Array<Host>] hosts The hosts to examine
       #@param [String] role The host returned will have this role in its role list
       #@return [Host] The single host with the desired role in its roles list
-      #@raise [ArgumentError] Raised if more than one host has the given role defined, or if no host has the
-      #                       role defined.
+      #@raise [ArgumentError] Raised if more than one host has the given role defined, if no host has the
+      #                       role defined, or if role = nil since hosts_with_role(nil) returns all hosts.
       def only_host_with_role(hosts, role)
+        raise ArgumentError, "role cannot be nil." if role.nil?
         a_host = hosts_with_role(hosts, role)
         case
           when a_host.length == 0
@@ -53,8 +54,10 @@ module Beaker
       # @param [String] role The host returned will have this role in its role list
       # @return [Host] The single host with the desired role in its roles list
       #                     or nil if no host is found
-      # @raise [ArgumentError] Raised if more than one host has the given role defined
+      # @raise [ArgumentError] Raised if more than one host has the given role defined,
+      #   or if role = nil since hosts_with_role(nil) returns all hosts.
       def find_at_most_one_host_with_role(hosts, role)
+        raise ArgumentError, "role cannot be nil." if role.nil?
         role_hosts = hosts_with_role(hosts, role)
         host_with_role = nil
         case role_hosts.length
