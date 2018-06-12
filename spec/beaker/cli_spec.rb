@@ -32,6 +32,27 @@ module Beaker
         end
       end
 
+      describe '#parse_options special behavior' do
+        # NOTE: this `describe` block must be separate, with the following `before` block.
+        #       Use the above `describe` block for #parse_options when access to the logger object is not needed
+        before do
+          # Within parse_options() the reassignment of cli.logger makes it impossible to capture subsequent logger calls.
+          # So, hijack the reassignment call so that we can keep a reference to it.
+          allow(Beaker::Logger).to receive(:new).with(no_args).once.and_call_original
+          allow(Beaker::Logger).to receive(:new).once.and_return(cli.instance_variable_get(:@logger))
+        end
+
+        it 'prints the version and exits cleanly' do
+          expect(cli.logger).to receive(:notify).once
+          expect{ cli.parse_options(['--version']) }.to raise_exception(SystemExit) { |e| expect(e.success?).to eq(true) }
+        end
+
+        it 'prints the help and exits cleanly' do
+          expect(cli.logger).to receive(:notify).once
+          expect{ cli.parse_options(['--help']) }.to raise_exception(SystemExit) { |e| expect(e.success?).to eq(true) }
+        end
+      end
+
       describe '#print_version_and_options' do
         before do
           options  = Beaker::Options::OptionsHash.new

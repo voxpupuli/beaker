@@ -19,9 +19,9 @@ module Beaker
       @options = {}
     end
 
-    def parse_options
+    def parse_options(args = ARGV)
       @options_parser = Beaker::Options::Parser.new
-      @options = @options_parser.parse_args
+      @options = @options_parser.parse_args(args)
       @attribution = @options_parser.attribution
       @logger = Beaker::Logger.new(@options)
       InParallel::InParallelExecutor.logger = @logger
@@ -30,16 +30,18 @@ module Beaker
       @options_parser.update_option(:beaker_version, Beaker::Version::STRING, 'runtime')
       beaker_version_string = VERSION_STRING % @options[:beaker_version]
 
+      # Some flags should exit early
       if @options[:help]
         @logger.notify(@options_parser.usage)
-        @execute = false
-        return self
+        exit(0)
       end
-
       if @options[:beaker_version_print]
         @logger.notify(beaker_version_string)
-        @execute = false
-        return self
+        exit(0)
+      end
+      if @options[:parse_only]
+        print_version_and_options
+        exit(0)
       end
 
       #add additional paths to the LOAD_PATH
@@ -52,13 +54,6 @@ module Beaker
         require File.expand_path(helper)
       end
 
-      if @options[:parse_only]
-        print_version_and_options
-        @execute = false
-        return self
-      end
-
-      @execute = true
       self
     end
 
@@ -69,11 +64,8 @@ module Beaker
       @logger.info(@options.dump)
     end
 
-    #Provision, validate and configure all hosts as defined in the hosts file
+    # Provision, validate and configure all hosts as defined in the hosts file
     def provision
-      # return self if only invoking the OptionsParser help
-      return self if @options[:help]
-
       begin
         @hosts =  []
         initialize_network_manager
@@ -96,18 +88,13 @@ module Beaker
       end
     end
 
-    #Run Beaker tests.
+    # Run Beaker tests.
     #
-    # - provision hosts (includes validation and configuration)
     # - run pre-suite
     # - run tests
     # - run post-suite
     # - cleanup hosts
     def execute!
-      if !@execute
-        return
-      end
-
       print_version_and_options
 
       begin
