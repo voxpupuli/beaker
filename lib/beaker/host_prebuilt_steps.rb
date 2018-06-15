@@ -258,7 +258,7 @@ module Beaker
           if result.exit_code == 1
             url_base = opts[:epel_url]
             url_base = opts[:epel_url_archive] if host['platform'].version == '5'
-            host.exec(Command.new("rpm -i#{debug_opt} #{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm"))
+            host.install_package_with_rpm("#{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm", '--replacepkgs', { :package_proxy => opts[:package_proxy] })
             #update /etc/yum.repos.d/epel.repo for new baseurl
             host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{url_base}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
             #remove mirrorlist
