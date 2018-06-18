@@ -11,17 +11,21 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.35.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.36.0...master)
+
+# [3.36.0](https://github.com/puppetlabs/beaker/compare/3.35.0...3.36.0) - 2018-06-18
 
 ### Fixed
 
-- raise `ArgumentError` when passing `role = nil` to `only_host_with_role()` or `find_at_most_one_host_with_role()`
+- Raise `ArgumentError` when passing `role = nil` to `only_host_with_role()` or `find_at_most_one_host_with_role()`
+- Use `install_package_with_rpm` in `add_el_extras`
 
 ### Added
 
 - Installation instructions for contributors
 - Markdown formatting guidelines for `docs/`
 - Glossary for project jargon in [`docs/concepts/glossary.md`](docs/concepts/glossary.md)
+- Use AIX 6.1 packages everywhere for puppet6
 
 # [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
