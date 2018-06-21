@@ -17,6 +17,10 @@ git logs & PR history.
 
 - Exit early on --help/--version/--parse-only arguments instead of partial dry-run
 
+### Added
+
+- `Beaker::Shared::FogFileParser.parse_fog_file()` to parse .fog credential files
+
 # [3.36.0](https://github.com/puppetlabs/beaker/compare/3.35.0...3.36.0) - 2018-06-18
 
 ### Fixed
