@@ -6,23 +6,32 @@ module Beaker
       context "#parse_fog_file" do
         it 'raises ArgumentError when fog file is missing' do
           expect( File ).to receive( :exist? ) { false }
-          expect{ parse_fog_file(fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
+          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when fog file is empty' do
           expect( File ).to receive( :exist? ) { true }
           expect( File ).to receive( :open ) { "" }
 
-          expect{ parse_fog_file(fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
+          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
         end
 
-        it 'raises ArgumentError when fog file does not contain "default" section' do
+        it 'raises ArgumentError when fog file does not contain "default" section and no section is specified' do
           data = { :some => { :other => :data } }
 
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect{ parse_fog_file(fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
+          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
+        end
+
+        it 'raises ArgumentError when fog file does not contain another section passed by argument' do
+          data = { :some => { :other => :data } }
+
+          expect( File ).to receive( :exist? ) { true }
+          expect( YAML ).to receive( :load_file ) { data }
+
+          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when there are formatting errors in the fog file' do
@@ -40,7 +49,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           allow( File ).to receive( :open ).and_yield( StringIO.new( data ) )
 
-          expect{ parse_fog_file(fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError, /Psych::SyntaxError/ )
+          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError, /Psych::SyntaxError/ )
         end
 
         it 'returns the named credential section' do
@@ -55,7 +64,7 @@ module Beaker
           expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential )[:vmpooler_token] ).to eq( "correct_token" )
         end
 
-        it 'returns the named credential section from ENV' do
+        it 'returns the named credential section from ENV["FOG_CREDENTIAL"]' do
           ENV['FOG_CREDENTIAL'] = 'other_credential'
           data = {
             :default         => { :vmpooler_token => "wrong_token"},
@@ -66,19 +75,34 @@ module Beaker
           expect( YAML ).to receive( :load_file ) { data }
 
           expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' )[:vmpooler_token] ).to eq( "correct_token" )
+          ENV.delete( 'FOG_CREDENTIAL' )
         end
 
-        it 'returns the named credential section from ENV even when an argument is provided' do
+        it 'returns the named credential section from ENV["FOG_CREDENTIAL"] even when an argument is provided' do
           ENV['FOG_CREDENTIAL'] = 'other_credential'
           data = {
             :default         => { :vmpooler_token => "wrong_token"},
             :other_credential => { :vmpooler_token => "correct_token" }
           }
 
-          expect( File ).to receive( :exist? ) { true }
+          expect( File ).to receive( :exist? ).with( '/path/that/does/not/exist/.fog' ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' )[:vmpooler_token], credential = :default ).to eq( "correct_token" )
+          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
+          ENV.delete( 'FOG_CREDENTIAL' )
+        end
+
+        it 'returns the named credential section from ENV["FOG_RC"] path' do
+          ENV['FOG_RC'] = '/some/other/path/to/.fog'
+          data = {
+            :default         => { :vmpooler_token => "correct_token"},
+            :other_credential => { :vmpooler_token => "wrong_token" }
+          }
+
+          expect( File ).to receive( :exist? ).with( '/some/other/path/to/.fog' ) { true }
+          expect( YAML ).to receive( :load_file ) { data }
+
+          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
         end
       end
     end

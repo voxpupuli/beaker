@@ -13,12 +13,16 @@ By default, the file is located under the user's home directory. This helps to k
 The `.fog` file is written in YAML. The keys are particular to the service that they correspond to, and each hypervisor's documentation should include the keys that are needed for it. An example `.fog` file is below:
 
 ```yaml
-:default:
-  :vsphere_server: 'vsphere.example.com'
-  :vsphere_username: 'joe'
-  :vsphere_password: 'MyP@$$w0rd'
-  :vmpooler_token: 'randomtokentext'
+default:
+  vsphere_server: 'vsphere.example.com'
+  vsphere_username: 'joe'
+  vsphere_password: 'MyP@$$w0rd'
+  vmpooler_token: 'randomtokentext'
 ```
+
+Note: keys can be specified as either Strings or as Ruby Symbols (e.g. `:vsphere_server`). For interoprability with other systems, however, it is prudent to use Strings.
+
+The credentials file supports multiple sections. Hypervisors currently do not specify a section, and the normal behavior is to fall back to using the `default` section. You can override the section by specifying an environment variable, [as documented on the fog website](https://fog.io/about/getting_started.html). Set `ENV['FOG_CREDENTIAL']` to specify an alternative provider section and `Beaker::Shared::FogFileParser.parse_fog_file()` will attempt to load that section, no matter what other section the hypervisor specifies.
 
 # External Hypervisors
 
