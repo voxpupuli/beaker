@@ -176,6 +176,7 @@ module Beaker
       before :each do
         allow(subcommand.cli).to receive(:parse_options)
         allow(subcommand.cli).to receive(:initialize_network_manager)
+        allow(subcommand.cli).to receive(:execute!)
       end
 
       it 'calls execute! when no resource is given' do

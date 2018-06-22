@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.36.0...master)
 
+### Fixed
+
+- Exit early on --help/--version/--parse-only arguments instead of partial dry-run
+
 # [3.36.0](https://github.com/puppetlabs/beaker/compare/3.35.0...3.36.0) - 2018-06-18
 
 ### Fixed
