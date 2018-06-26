@@ -3,7 +3,7 @@ require 'stringify-hash'
 module Beaker
   module Shared
     # A set of functions to read .fog files
-    module FogFileParser
+    module FogCredentials
       # Read a .fog file
       #
       # @note Loaded .fog files may use symbols for keys.
@@ -11,11 +11,12 @@ module Beaker
       #    https://www.rubydoc.info/gems/fog-core/1.42.0/Fog#credential-class_method
       #    https://github.com/fog/fog-core/blob/7865ef77ea990fd0d085e49c28e15957b7ce0d2b/spec/utils_spec.rb#L11
       #
-      # @param fog_file_path [String] dot fog path. Overridden by
+      # @param fog_file_path [String] dot fog path. Overridden by ENV["FOG_RC"]
+      # @param credential_group [Symbol] Credential group to use. Overridden by ENV["FOG_CREDENTIAL"]
       # @return [StringifyHash] credentials stored in fog_file_path
       # @raise [ArgumentError] when the specified credential file is invalid, describing the reson
-      def parse_fog_file(fog_file_path = '~/.fog', credential = :default)
-        # respect credential location from env
+      def get_fog_credentials(fog_file_path = '~/.fog', credential_group = :default)
+        # respect file location from env
         if ENV["FOG_RC"]
           fog_file_path = ENV["FOG_RC"]
           from_env = ' set in ENV["FOG_RC"]'
@@ -36,12 +37,12 @@ module Beaker
         # respect credential from env
         # @note ENV must be a string, e.g. "default" not ":default"
         if ENV["FOG_CREDENTIAL"]
-          credential = ENV["FOG_CREDENTIAL"].to_sym
+          credential_group = ENV["FOG_CREDENTIAL"].to_sym
         end
-        if not fog[credential]
-          raise ArgumentError, ".fog file #{fog_file_path}'#{from_env} is missing the required section: `#{credential}`"
+        if not fog[credential_group]
+          raise ArgumentError, ".fog file #{fog_file_path}'#{from_env} is missing the required section: `#{credential_group}`"
         end
-        fog[credential]
+        fog[credential_group]
       end
     end
   end

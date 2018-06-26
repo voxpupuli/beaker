@@ -2,18 +2,18 @@ require 'spec_helper'
 
 module Beaker
   module Shared
-    describe FogFileParser do
-      context "#parse_fog_file" do
+    describe FogCredentials do
+      context "#get_fog_credentials" do
         it 'raises ArgumentError when fog file is missing' do
           expect( File ).to receive( :exist? ) { false }
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when fog file is empty' do
           expect( File ).to receive( :exist? ) { true }
           expect( File ).to receive( :open ) { "" }
 
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when fog file does not contain "default" section and no section is specified' do
@@ -22,7 +22,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when fog file does not contain another section passed by argument' do
@@ -31,7 +31,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential ) }.to raise_error( ArgumentError )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when there are formatting errors in the fog file' do
@@ -40,7 +40,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
         end
 
         it 'raises ArgumentError when there are syntax errors in the fog file' do
@@ -49,7 +49,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           allow( File ).to receive( :open ).and_yield( StringIO.new( data ) )
 
-          expect{ parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError, /Psych::SyntaxError/ )
+          expect{ get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError, /Psych::SyntaxError/ )
         end
 
         it 'returns the named credential section' do
@@ -61,7 +61,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential )[:vmpooler_token] ).to eq( "correct_token" )
+          expect( get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog', credential = :other_credential )[:vmpooler_token] ).to eq( "correct_token" )
         end
 
         it 'returns the named credential section from ENV["FOG_CREDENTIAL"]' do
@@ -74,7 +74,7 @@ module Beaker
           expect( File ).to receive( :exist? ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog' )[:vmpooler_token] ).to eq( "correct_token" )
+          expect( get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog' )[:vmpooler_token] ).to eq( "correct_token" )
           ENV.delete( 'FOG_CREDENTIAL' )
         end
 
@@ -88,7 +88,7 @@ module Beaker
           expect( File ).to receive( :exist? ).with( '/path/that/does/not/exist/.fog' ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
+          expect( get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
           ENV.delete( 'FOG_CREDENTIAL' )
         end
 
@@ -102,7 +102,7 @@ module Beaker
           expect( File ).to receive( :exist? ).with( '/some/other/path/to/.fog' ) { true }
           expect( YAML ).to receive( :load_file ) { data }
 
-          expect( parse_fog_file( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
+          expect( get_fog_credentials( fog_file_path = '/path/that/does/not/exist/.fog', credential = :default )[:vmpooler_token] ).to eq( "correct_token" )
         end
       end
     end
