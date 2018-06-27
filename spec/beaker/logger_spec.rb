@@ -24,6 +24,10 @@ module Beaker
           pending "not supported in ruby 1.8 (using #{RUBY_VERSION})"
         end
       end
+      it 'supports frozen strings' do
+        valid_utf8.freeze
+        expect( logger.convert(valid_utf8) ).to be === valid_utf8
+      end
     end
 
     context '#generate_dated_log_folder' do
