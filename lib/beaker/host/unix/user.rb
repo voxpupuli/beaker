@@ -19,6 +19,7 @@ module Unix::User
       fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
 
       yield result if block_given?
+      result
     end
   end
 

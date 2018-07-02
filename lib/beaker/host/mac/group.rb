@@ -39,6 +39,7 @@ module Mac::Group
       answer = "#{gi[:name]}:#{gi[:password]}:#{gi[:gid]}"
 
       yield answer if block_given?
+      answer
     end
   end
 

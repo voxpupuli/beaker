@@ -19,6 +19,7 @@ module PSWindows::User
       fail_test "failed to get user #{name}" if result.exit_code != 0
 
       yield result if block_given?
+      result
     end
   end
 

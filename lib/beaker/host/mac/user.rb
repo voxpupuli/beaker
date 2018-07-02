@@ -29,7 +29,6 @@ module Mac::User
   # @raise [FailTest] Raises an Assertion failure if it can't find the name
   #                   queried for in the returned block
   def user_get(name, &block)
-    answer = ""
     execute("dscacheutil -q user -a name #{name}") do |result|
       fail_test "failed to get user #{name}" unless result.stdout =~  /^name: #{name}/
       ui = Hash.new  # user info
@@ -41,8 +40,8 @@ module Mac::User
       answer << "#{ui[:name]}:#{ui[:dir]}:#{ui[:shell]}"
 
       yield result if block_given?
+      answer
     end
-    answer
   end
 
   # Makes sure the user is present, creating them if necessary
