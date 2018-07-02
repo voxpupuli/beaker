@@ -149,12 +149,14 @@ module Beaker
       end
     end
 
-    desc 'exec FILE/BEAKER_SUITE', 'execute a directory, file, or beaker suite'
+    desc 'exec FILE(S)/BEAKER_SUITE', 'execute directories, files, or beaker suites'
     long_desc <<-LONG_DESC
-    Run a single file, directory, or beaker suite. If supplied a file or directory,
+    Run either files, directories, or beaker suites. If supplied a file or directory,
     that resource will be run in the context of the `tests` suite; If supplied a beaker
     suite, then just that suite will run. If no resource is supplied, then this command
-    executes the suites as they are defined in the configuration.
+    executes the suites as they are defined in the configuration. Accepts a comma
+    -separated, homogeneous list. E.g. only files, only directories, or only suites,
+    such as: exec pre-suite,tests
     LONG_DESC
     option :help, :type => :boolean, :hide => true
     def exec(resource=nil)

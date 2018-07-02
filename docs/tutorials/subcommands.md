@@ -22,7 +22,7 @@ Provisions hosts defined in your `subcommand_options file`. You can pass the `--
 
 ### beaker exec
 
-Run a single file, directory, or Beaker suite. If supplied a file or directory, that resource will be run in the context of the `tests` suite; if supplied a Beaker suite, then just that suite will run. If no resource is supplied, then this command executes the suites as they are defined in the configuration in the `subcommand_options.yaml`.
+Run either files, directories, or beaker suites. If supplied a file or directory, that resource will be run in the context of the `tests` suite; If supplied a beaker suite, then just that suite will run. If no resource is supplied, then this command executes the suites as they are defined in the configuration. Accepts a comma-separated, homogeneous list. E.g. only files, only directories, or only suites, such as: `exec pre-suite,tests`
 
 ### beaker destroy
 
