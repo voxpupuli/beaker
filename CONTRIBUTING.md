@@ -16,8 +16,10 @@ Beaker does not use GitHub Issues, but an internal ticketing system running Jira
 
 ## Making Changes
 
-* Create a topic branch on your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker).
-* Make commits of logical units. If your commits are a mess, you may be asked to [rebase or at least squash](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History) your PR.
+Contributions are accepted in the form of pull requests against the master branch on GitHub.
+
+* Create a topic branch on your fork of [puppetlabs/beaker](https://github.com/puppetlabs/beaker) based on `master`.
+* Make commits of logical units. If your commits are a mess, you will be asked to [rebase or at least squash](https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History) your PR.
   * Check for unnecessary whitespace with `git diff --check` before committing.
 * Make sure your commit messages are in the proper format:
   ```
@@ -28,6 +30,48 @@ Beaker does not use GitHub Issues, but an internal ticketing system running Jira
     The first line is a real life imperative statement with a ticket number from our issue tracker.  The body describes the behavior without the patch, why this is a problem, and how the patch fixes the problem when applied.
   ```
 * During the time that you are working on your patch the master Beaker branch may have changed - be sure to [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of [Beaker's](https://github.com/puppetlabs/beaker) master branch before you submit your PR.  A successful rebase ensures that your PR will merge cleanly.
+* When you're ready for review, create a new pull request.
+
+#### PR Requirements
+
+Pull Requests are subject to the following requirements:
+
+* Commits must be logical units. Follow these [basic guidelines](https://github.com/trein/dev-best-practices/wiki/Git-Commit-Best-Practices#basic-rules), and don't be afraid to make too many commits: it's always easier to squash than to fixup.
+* Must not contain changes unrelated to the ticket being worked on. Issues you encounter as directly related to the main work for a ticket are fiar game. Many beaker components only get infrequent updates so it is not uncommon to encounter dependency version changes that cause problems. These can be addressed with a `(MAINT)` commit within the feature PR you're working on. Larger or only peripherally related changes should go through their own ticket, which you can create; tickets with attached PRs are generally accepted.
+* Must merge cleanly. Only fast-forward merges are accepted, so make sure the PR shows as a clean merge.
+* On that note, merge commits are not accepted. In order to keep your feature branch up-to-date and ensure a clean merge, you should [rebase](http://git-scm.com/book/en/Git-Branching-Rebasing) on top of beaker's master. You can also use this opportunity to keep your fork up to date. That workflow looks like this:
+    ~~~console
+    you@local:beaker $ git checkout master
+    Switched to branch 'master'
+    Your branch is up to date with 'origin/master'.
+    you@local:beaker $ git fetch upstream
+    you@local:beaker $ git merge upstream/master
+    Updating a01b5732..a565e1ac
+    Fast-forward
+     lib/beaker/logger.rb       | 2 +-
+     spec/beaker/logger_spec.rb | 4 ++++
+     2 files changed, 5 insertions(+), 1 deletion(-)
+    you@local:beaker $ git push
+    Total 0 (delta 0), reused 0 (delta 0)
+    To https://github.com/Dakta/beaker.git
+       a01b5732..a565e1ac  master -> master
+    you@local:beaker $ git checkout BKR-816
+    Switched to branch 'BKR-816'
+    you@local:beaker $ git rebase master
+    # if you have conflicts, they'll appear here. Manually fix the listed files then use `git rebase --continue`. Repeat as necessary for each conflicting commit.
+    First, rewinding head to replay your work on top of it...
+    Fast-forwarded BKR-816 to master.
+    you@local:beaker $ git push --set-upstream origin BKR-816
+    Counting objects: 9, done.
+    Delta compression using up to 8 threads.
+    Compressing objects: 100% (9/9), done.
+    Writing objects: 100% (9/9), 2.05 KiB | 2.05 MiB/s, done.
+    Total 9 (delta 6), reused 0 (delta 0)
+    remote: Resolving deltas: 100% (6/6), completed with 6 local objects.
+    To https://github.com/Dakta/beaker.git
+     + [new branch]        BKR-816 -> BKR-816
+    Branch 'BKR-816' set up to track remote branch 'BKR-816' from 'origin'.
+    ~~~
 
 #### Courtesy
 
