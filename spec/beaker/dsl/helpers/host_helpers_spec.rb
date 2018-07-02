@@ -353,8 +353,9 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe '#create_tmpdir_on' do
-    let(:host) { {'user' => 'puppet'} }
+    let(:host) { {'user' => 'puppet', 'group' => 'muppets'} }
     let(:result) { double.as_null_object }
+    let(:result2) { double.as_null_object }
 
     before :each do
       allow(host).to receive(:result).and_return(result)
@@ -366,41 +367,67 @@ describe ClassMixedWithDSLHelpers do
 
       context 'with no path name argument' do
         it 'executes chown once' do
-          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+          expect(host).to receive(:user_get).and_return(result)
+          expect(host).to receive(:group_get).and_return(result2)
           expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
-          expect(subject).to receive(:on).with(host, /chown puppet.puppet.*/)
+          expect(subject).to receive(:on).with(host, /chown puppet.muppets.*/)
           subject.create_tmpdir_on(host, '/tmp/beaker')
         end
       end
 
       context 'with path name argument' do
         it 'executes chown once' do
-          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
+          expect(host).to receive(:user_get).and_return(result)
+          expect(host).to receive(:group_get).and_return(result2)
           expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-          expect(subject).to receive(:on).with(host, /chown puppet.puppet \/tmp\/bogus.*/)
+          expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
           subject.create_tmpdir_on(host, "/tmp/bogus")
         end
       end
     end
 
-    context 'with an valid user argument' do
+    context 'with a valid user argument' do
       it 'executes chown once' do
-        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect(host).to receive(:user_get).and_return(result)
+        expect(host).to receive(:group_get).and_return(result2)
         expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-        expect(subject).to receive(:on).with(host, /chown curiousgeorge.curiousgeorge \/tmp\/bogus.*/)
-        subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
+        expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
+        subject.create_tmpdir_on(host, "/tmp/bogus", "puppet")
       end
     end
 
-    context 'with a invalid user argument' do
+    context 'with an invalid user argument' do
       it 'executes chown once' do
-        allow(result).to receive(:exit_code).and_return(1)
-        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
+        expect(host).to receive(:user_get).and_return(result)
+        expect(result).to receive(:success?).and_return(false)
         expect{
           subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
         }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
       end
     end
+
+    context 'with a valid group argument' do
+      it 'executes chown once' do
+        expect(host).to receive(:user_get).and_return(result)
+        expect(host).to receive(:group_get).and_return(result2)
+        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
+        expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
+        subject.create_tmpdir_on(host, "/tmp/bogus", "puppet", "muppets")
+      end
+    end
+
+    context 'with an invalid group argument' do
+      it 'executes chown once' do
+        expect(host).to receive(:user_get).and_return(result)
+        expect(result).to receive(:success?).and_return(true)
+        expect(host).to receive(:group_get).and_return(result2)
+        expect(result2).to receive(:success?).and_return(false)
+        expect{
+          subject.create_tmpdir_on(host, "/tmp/bogus", "puppet", "chimps")
+        }.to raise_error(RuntimeError, /Group chimps does not exist on/)
+      end
+    end
+
   end
 
   describe '#run_script_on' do

@@ -558,33 +558,39 @@ module Beaker
           end
         end
 
-        # Create a temp directory on remote host owned by specified user.
+        # Create a temp directory on remote host owned by specified user and group.
         #
-        # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
-        # @param [String] path_prefix A remote path prefix for the new temp
-        # directory.
-        # @param [String] user The name of user that should own the temp
-        # directory. If no username is specified defaults to the currently logged in user
-        # per host
+        # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon,
+        # or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] path_prefix A remote path prefix for the new temp directory.
+        # @param [String] user The name of user that should own the temp directory. If
+        # no username is specified defaults to the currently logged in user per host.
+        # @param [String] group The name of group that should own the temp directory.
+        # If no groupname is specified defaults to the current user's group per host.
         #
-        # @return [String, Array<String>] Returns the name of the newly-created dir, or an array
-        #                                of names of newly-created dirs per-host
-        def create_tmpdir_on(host, path_prefix = '', user=nil)
+        # @return [String, Array<String>] Returns the name of the newly-created dir, or
+        # an array of names of newly-created dirs per-host
+        def create_tmpdir_on(host, path_prefix = '', user = nil, group = nil)
 
           block_on host do | host |
             # use default user logged into this host
-            if not user
-              user = host['user']
+            user ||= host['user']
+            # use default group of that user
+            group ||= host['group']
+
+            # ensure user exists
+            if not host.user_get(user).success?
+              raise "User #{user} does not exist on #{host}."
             end
 
-            if not on(host, "getent passwd #{user}").exit_code == 0
-              raise "User #{user} does not exist on #{host}."
+            # ensure group exists
+            if not host.group_get(group).success?
+              raise "Group #{group} does not exist on #{host}."
             end
 
             if defined? host.tmpdir
               dir = host.tmpdir(path_prefix)
-              on host, "chown #{user}:#{user} #{dir}"
+              on host, "chown #{user}:#{group} #{dir}"
               dir
             else
               raise "Host platform not supported by `create_tmpdir_on`."
