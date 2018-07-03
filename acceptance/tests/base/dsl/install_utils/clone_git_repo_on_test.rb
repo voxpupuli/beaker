@@ -39,7 +39,7 @@ test_name 'Clone from git' do
   # implicitly tests build_giturl() and lookup_in_env()
   hosts.each do |host|
     on host, "echo #{GitHubSig} >> $HOME/.ssh/known_hosts"
-    testdir = tmpdir_on(host, File.basename(__FILE__))
+    testdir = create_tmpdir_on(host, File.basename(__FILE__))
 
     step 'should be able to successfully clone a git repo' do
       results = clone_git_repo_on(host, "#{testdir}", extract_repo_info_from(build_git_url('hiera')))
