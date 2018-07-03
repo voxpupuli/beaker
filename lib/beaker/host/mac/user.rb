@@ -21,26 +21,22 @@ module Mac::User
 
   # Gets the user information in /etc/passwd format
   #
+  # @note Calls POSIX-compliant `$ id -P <user>` to get /etc/passwd-style
+  # output
+  #
   # @param [String] name Name of the user
   # @param [Proc] block Additional actions or insertions
   #
-  # @yield [String] The actual mac dscacheutil output
-  # @return [String] User information in /etc/passwd format
+  # @yield [Result] User information in /etc/passwd format
+  # @return [Result] User information in /etc/passwd format
   # @raise [FailTest] Raises an Assertion failure if it can't find the name
   #                   queried for in the returned block
   def user_get(name, &block)
-    execute("dscacheutil -q user -a name #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^name: #{name}/
-      ui = Hash.new  # user info
-      result.stdout.each_line { |line|
-        pieces = line.split(': ')
-        ui[pieces[0].to_sym] = pieces[1].strip if pieces[1] != nil
-      }
-      answer  = "#{ui[:name]}:#{ui[:password]}:#{ui[:uid]}:#{ui[:gid]}:"
-      answer << "#{ui[:name]}:#{ui[:dir]}:#{ui[:shell]}"
+    execute("id -P #{name}") do |result|
+      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
 
       yield result if block_given?
-      answer
+      result
     end
   end
 
