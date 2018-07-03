@@ -32,6 +32,9 @@ EOS
 #{puppet2}
 EOS
   end
+  let( :etc_passwd_line ) do
+    "puppet1:*:67:234::0:0:puppet1:/Users/puppet1:/bin/sh"
+  end
   let( :command )  { 'ls' }
   let( :host ) { double.as_null_object }
   let( :result ) { Beaker::Result.new( host, command ) }
@@ -63,17 +66,11 @@ EOS
       expect { subject.user_get(user_name) }.to raise_error(MiniTest::Assertion, "failed to get user #{user_name}")
     end
 
-    it 'parses mac dscacheutil output into /etc/passwd format correctly' do
-      result.stdout = puppet1
-      expect( subject ).to receive( :execute ).and_yield(result)
-      expect( subject.user_get('puppet1') ).to be === "puppet1:*:67:234:puppet1:/Users/puppet1:/bin/bash"
-    end
-
     it 'yields correctly with the result object' do
-      result.stdout = puppet1
+      result.stdout = etc_passwd_line
       expect( subject ).to receive( :execute ).and_yield(result)
       subject.user_get('puppet1') do |result|
-        expect( result.stdout ).to be === puppet1
+        expect( result.stdout ).to be === etc_passwd_line
       end
     end
 
