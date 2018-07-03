@@ -598,93 +598,48 @@ describe Beaker do
   context "set_env" do
     subject { dummy_class.new }
 
-    it "permits user environments on an OS X 10.10 host" do
-      test_host_ssh_permit_user_environment('osx-10.10')
-    end
-
-    it "permits user environments on an OS X 10.11 host" do
-      test_host_ssh_permit_user_environment('osx-10.11')
-    end
-
-    it "permits user environments on an OS X 10.12 host" do
-      test_host_ssh_permit_user_environment('osx-10.12')
-    end
-
-    it "permits user environments on an OS X 10.13 host" do
-      test_host_ssh_permit_user_environment('osx-10.13')
-    end
-
-    it "permits user environments on an ssh-based linux host" do
-      test_host_ssh_permit_user_environment('ubuntu')
-    end
-
-    it "permits user environments on an sshd-based linux host" do
-      test_host_ssh_permit_user_environment('eos')
-    end
-
-    it "permits user environments on an sles host" do
-      test_host_ssh_permit_user_environment('sles')
-    end
-
-    it "permits user environments on a solaris host" do
-      test_host_ssh_permit_user_environment('solaris')
-    end
-
-    it "permits user environments on an aix host" do
-      test_host_ssh_permit_user_environment('aix')
-    end
-
-    it "permits user environments on a FreeBSD host" do
-      test_host_ssh_permit_user_environment('freebsd')
-    end
-
-    it "permits user environments on a windows host" do
-      test_host_ssh_permit_user_environment('windows')
-    end
-
-
     it "sets user ssh environment on an OS X 10.10 host" do
-      test_host_ssh_set_user_environment('osx-10.10')
+      test_host_ssh_calls('osx-10.10')
     end
 
     it "sets user ssh environment on an OS X 10.11 host" do
-      test_host_ssh_set_user_environment('osx-10.11')
+      test_host_ssh_calls('osx-10.11')
     end
 
     it "sets user ssh environment on an OS X 10.12 host" do
-      test_host_ssh_set_user_environment('osx-10.12')
+      test_host_ssh_calls('osx-10.12')
     end
 
     it "sets user ssh environment on an OS X 10.13 host" do
-      test_host_ssh_set_user_environment('osx-10.13')
+      test_host_ssh_calls('osx-10.13')
     end
 
     it "sets user ssh environment on an ssh-based linux host" do
-      test_host_ssh_set_user_environment('ubuntu')
+      test_host_ssh_calls('ubuntu')
     end
 
     it "sets user ssh environment on an sshd-based linux host" do
-      test_host_ssh_set_user_environment('eos')
+      test_host_ssh_calls('eos')
     end
 
     it "sets user ssh environment on an sles host" do
-      test_host_ssh_set_user_environment('sles')
+      test_host_ssh_calls('sles')
     end
 
     it "sets user ssh environment on a solaris host" do
-      test_host_ssh_set_user_environment('solaris')
+      test_host_ssh_calls('solaris')
     end
 
     it "sets user ssh environment on an aix host" do
-      test_host_ssh_set_user_environment('aix')
+      test_host_ssh_calls('aix')
     end
 
     it "sets user ssh environment on a FreeBSD host" do
-      test_host_ssh_set_user_environment('freebsd')
+      test_host_ssh_calls('freebsd')
     end
 
     it "sets user ssh environment on a windows host" do
-      test_host_ssh_set_user_environment('windows')
+      test_host_ssh_calls('windows')
     end
 
     it "skips an f5 host correctly" do
@@ -733,15 +688,7 @@ describe Beaker do
       subject.set_env(host, options.merge( opts ))
     end
 
-    def test_host_ssh_permit_user_environment(platform_name)
-      test_host_ssh_calls(platform_name, :ssh_permit_user_environment)
-    end
-
-    def test_host_ssh_set_user_environment(platform_name)
-      test_host_ssh_calls(platform_name, :ssh_set_user_environment)
-    end
-
-    def test_host_ssh_calls(platform_name, method_call_sym)
+    def test_host_ssh_calls(platform_name)
       host = make_host('name', {
           :platform     => platform_name,
           :ssh_env_file => 'ssh_env_file',
@@ -752,9 +699,11 @@ describe Beaker do
         :env2_key => :env2_value
       }
 
-      allow( host ).to receive( :skip_set_env? ).and_return(nil )
+      allow( host ).to receive( :skip_set_env? ).and_return( nil )
       expect( subject ).to receive( :construct_env ).and_return( opts )
-      expect( host ).to receive( method_call_sym )
+
+      expect( host ).to receive( :ssh_permit_user_environment )
+      expect( host ).to receive( :ssh_set_user_environment )
 
       subject.set_env(host, options.merge( opts ))
     end

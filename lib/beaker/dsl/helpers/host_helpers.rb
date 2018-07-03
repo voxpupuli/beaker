@@ -571,7 +571,6 @@ module Beaker
         # @return [String, Array<String>] Returns the name of the newly-created dir, or
         # an array of names of newly-created dirs per-host
         def create_tmpdir_on(host, path_prefix = '', user = nil, group = nil)
-
           block_on host do | host |
             # use default user logged into this host
             user ||= host['user']
