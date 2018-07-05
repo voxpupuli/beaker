@@ -139,7 +139,7 @@ module Beaker
           return !version_is_less(version, '4.0') if version && !version.empty?
         end
         return true if host[:roles] && host[:roles].include?('aio')
-        return true if host[:type] && !!(host[:type] =~ /(\A|-)aio(\Z|-)/ )
+        return true if host[:type] && !!(host[:type] =~ /(\A|-)(aio|git)(\Z|-)/ )
         false
       end
 
