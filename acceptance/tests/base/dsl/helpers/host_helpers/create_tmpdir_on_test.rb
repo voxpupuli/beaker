@@ -26,7 +26,13 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
 
   step "#create_tmpdir_on fails if a non-existent user is specified" do
     assert_raises Beaker::Host::CommandFailure do
-      tmpdir = create_tmpdir_on default, '', "fakeuser"
+      tmpdir = create_tmpdir_on default, '', 'fakeuser'
+    end
+  end
+
+  step "#create_tmpdir_on fails if a non-existent group is specified" do
+    assert_raises Beaker::Host::CommandFailure do
+      tmpdir = create_tmpdir_on default, '', nil, 'fakegroup'
     end
   end
 

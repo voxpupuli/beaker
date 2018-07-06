@@ -354,80 +354,95 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#create_tmpdir_on' do
     let(:host) { {'user' => 'puppet', 'group' => 'muppets'} }
-    let(:result) { double.as_null_object }
-    let(:result2) { double.as_null_object }
+    let(:result_success) { double.as_null_object }
+    let(:result_failure) { double.as_null_object }
+
+    # trailing whitespace in RegEx patterns in this describe group *is* meaningful
 
     before :each do
-      allow(host).to receive(:result).and_return(result)
-      allow(result).to receive(:exit_code).and_return(0)
-      allow(result).to receive(:stdout).and_return('puppet')
+      allow( host ).to receive( :tmpdir )
+      allow( host ).to receive( :result ).and_return( result_success )
+      allow( result_success ).to receive( :success? ).and_return( true )
+      allow( result_success ).to receive( :stdout ).and_return( 'puppet' )
+      allow( result_failure ).to receive( :success? ).and_return( false )
     end
 
-    context 'with no user argument' do
-
-      context 'with no path name argument' do
-        it 'executes chown once' do
-          expect(host).to receive(:user_get).and_return(result)
-          expect(host).to receive(:group_get).and_return(result2)
-          expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
-          expect(subject).to receive(:on).with(host, /chown puppet.muppets.*/)
-          subject.create_tmpdir_on(host, '/tmp/beaker')
-        end
-      end
-
-      context 'with path name argument' do
-        it 'executes chown once' do
-          expect(host).to receive(:user_get).and_return(result)
-          expect(host).to receive(:group_get).and_return(result2)
-          expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-          expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
-          subject.create_tmpdir_on(host, "/tmp/bogus")
-        end
+    context 'with the path_prefix argument' do
+      it 'passes path_prefix to host.tmpdir' do
+        expect( host ).to receive( :tmpdir ).with( 'beaker' )
+        subject.create_tmpdir_on( host, 'beaker' )
       end
     end
 
-    context 'with a valid user argument' do
-      it 'executes chown once' do
-        expect(host).to receive(:user_get).and_return(result)
-        expect(host).to receive(:group_get).and_return(result2)
-        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-        expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
-        subject.create_tmpdir_on(host, "/tmp/bogus", "puppet")
-      end
-    end
+    context 'with the user argument' do
+      it 'calls chown when a user is specified' do
+        expect( host ).to receive( :user_get ).and_return( result_success )
+        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
 
-    context 'with an invalid user argument' do
-      it 'executes chown once' do
-        expect(host).to receive(:user_get).and_return(result)
-        expect(result).to receive(:success?).and_return(false)
+        subject.create_tmpdir_on(host, 'beaker', host['user'])
+      end
+
+      it 'does not call chown when a user is not specified' do
+        expect( subject ).to_not receive( :on )
+
+        subject.create_tmpdir_on( host, 'beaker' )
+      end
+
+      it 'does not call chown and cleans up when the user does not exist on the host' do
+        expect( host ).to receive( :user_get ).and_return( result_failure )
+        expect( subject ).to receive( :on ).with( host, /rmdir / )
+
         expect{
-          subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
-        }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
+          subject.create_tmpdir_on( host, 'beaker', 'invalid.user' )
+        }.to raise_error( RuntimeError, /User invalid.user does not exist on /)
       end
     end
 
-    context 'with a valid group argument' do
-      it 'executes chown once' do
-        expect(host).to receive(:user_get).and_return(result)
-        expect(host).to receive(:group_get).and_return(result2)
-        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-        expect(subject).to receive(:on).with(host, /chown puppet.muppets \/tmp\/bogus.*/)
-        subject.create_tmpdir_on(host, "/tmp/bogus", "puppet", "muppets")
-      end
-    end
+    context 'with the group argument' do
+      it 'calls chgrp when a group is specified' do
+        expect( host ).to receive( :group_get ).and_return( result_success )
+        expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
 
-    context 'with an invalid group argument' do
-      it 'executes chown once' do
-        expect(host).to receive(:user_get).and_return(result)
-        expect(result).to receive(:success?).and_return(true)
-        expect(host).to receive(:group_get).and_return(result2)
-        expect(result2).to receive(:success?).and_return(false)
+        subject.create_tmpdir_on(host, 'beaker', nil, host['group'])
+      end
+
+      it 'does not call chgrp when a group is not specified' do
+        expect( subject ).to_not receive( :on )
+
+        subject.create_tmpdir_on( host, 'beaker' )
+      end
+
+      it 'does not call chgrp and cleans up when the group does not exist on the host' do
+        expect( host ).to receive( :group_get ).and_return( result_failure )
+        expect( subject ).to receive( :on ).with( host, /rmdir / )
+
         expect{
-          subject.create_tmpdir_on(host, "/tmp/bogus", "puppet", "chimps")
-        }.to raise_error(RuntimeError, /Group chimps does not exist on/)
+          subject.create_tmpdir_on( host, 'beaker', nil, 'invalid.group' )
+        }.to raise_error( RuntimeError, /Group invalid.group does not exist on /)
       end
     end
 
+    context 'with user and group arguments' do
+      # don't coalesce the group into chown, i.e. `chown user:group`
+      # this keeps execution paths simple, clean, and discrete
+      it 'calls chown and chgrp separately' do
+        expect( host ).to receive( :user_get ).and_return( result_success )
+        expect( host ).to receive( :group_get ).and_return( result_success )
+        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
+        expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
+
+        subject.create_tmpdir_on(host, 'beaker', host['user'], host['group'])
+      end
+      it 'does not pass group to chown' do
+        allow( host ).to receive( :user_get ).and_return( result_success )
+        expect( host ).to receive( :group_get ).and_return( result_success )
+        # the trailing whitespace here is critical to this test in particular
+        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
+        allow( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
+
+        subject.create_tmpdir_on(host, 'beaker', host['user'], host['group'])
+      end
+    end
   end
 
   describe '#run_script_on' do
