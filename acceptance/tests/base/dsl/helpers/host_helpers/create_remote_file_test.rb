@@ -165,7 +165,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   confine_block :except, :platform => /windows|fedora/ do
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = tmpdir_on default
+      remote_tmpdir = create_tmpdir_on default
 
       # NOTE: we do not do this step in the non-hosts-array version of the test, not sure why
       # NOTE: this appears to be a workaround related to BKR-463
