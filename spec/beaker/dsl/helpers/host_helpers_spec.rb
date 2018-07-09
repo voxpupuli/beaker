@@ -443,6 +443,17 @@ describe ClassMixedWithDSLHelpers do
         subject.create_tmpdir_on(host, 'beaker', host['user'], host['group'])
       end
     end
+
+    context 'with multiple hosts' do
+      it 'calls host.tmpdir on each host' do
+        expect( host ).to receive( :tmpdir ).twice
+        subject.create_tmpdir_on([host, host])
+      end
+
+      it 'returns an array of paths' do
+        expect( subject.create_tmpdir_on([host, host]) ).to be_an( Array )
+      end
+    end
   end
 
   describe '#run_script_on' do
