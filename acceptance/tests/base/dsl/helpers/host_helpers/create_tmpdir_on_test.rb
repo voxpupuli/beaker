@@ -20,7 +20,7 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
   end
 
   step "#create_tmpdir_on sets the user if specified" do
-    default.group_present('tmpdirtestuser')
+    default.user_present('tmpdirtestuser')
     tmpdir = create_tmpdir_on(default, nil, 'tmpdirtestuser', nil)
     assert_match /tmpdirtestuser/, on(default, "ls -ld #{tmpdir}").output
     default.group_absent('tmpdirtestuser')
