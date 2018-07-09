@@ -379,7 +379,7 @@ describe ClassMixedWithDSLHelpers do
         expect( host ).to receive( :user_get ).and_return( result_success )
         expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
 
-        subject.create_tmpdir_on(host, 'beaker', host['user'])
+        subject.create_tmpdir_on( host, 'beaker', host['user'] )
       end
 
       it 'does not call chown when a user is not specified' do
@@ -394,7 +394,7 @@ describe ClassMixedWithDSLHelpers do
 
         expect{
           subject.create_tmpdir_on( host, 'beaker', 'invalid.user' )
-        }.to raise_error( RuntimeError, /User invalid.user does not exist on /)
+        }.to raise_error( RuntimeError, /User invalid.user does not exist on / )
       end
     end
 
@@ -403,7 +403,7 @@ describe ClassMixedWithDSLHelpers do
         expect( host ).to receive( :group_get ).and_return( result_success )
         expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
 
-        subject.create_tmpdir_on(host, 'beaker', nil, host['group'])
+        subject.create_tmpdir_on( host, 'beaker', nil, host['group'] )
       end
 
       it 'does not call chgrp when a group is not specified' do
@@ -418,7 +418,7 @@ describe ClassMixedWithDSLHelpers do
 
         expect{
           subject.create_tmpdir_on( host, 'beaker', nil, 'invalid.group' )
-        }.to raise_error( RuntimeError, /Group invalid.group does not exist on /)
+        }.to raise_error( RuntimeError, /Group invalid.group does not exist on / )
       end
     end
 
@@ -431,7 +431,7 @@ describe ClassMixedWithDSLHelpers do
         expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
         expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
 
-        subject.create_tmpdir_on(host, 'beaker', host['user'], host['group'])
+        subject.create_tmpdir_on( host, 'beaker', host['user'], host['group'] )
       end
       it 'does not pass group to chown' do
         allow( host ).to receive( :user_get ).and_return( result_success )
@@ -440,18 +440,18 @@ describe ClassMixedWithDSLHelpers do
         expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
         allow( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
 
-        subject.create_tmpdir_on(host, 'beaker', host['user'], host['group'])
+        subject.create_tmpdir_on( host, 'beaker', host['user'], host['group'] )
       end
     end
 
     context 'with multiple hosts' do
       it 'calls host.tmpdir on each host' do
         expect( host ).to receive( :tmpdir ).twice
-        subject.create_tmpdir_on([host, host])
+        subject.create_tmpdir_on( [ host, host ] )
       end
 
       it 'returns an array of paths' do
-        expect( subject.create_tmpdir_on([host, host]) ).to be_an( Array )
+        expect( subject.create_tmpdir_on( [host, host ]) ).to be_an( Array )
       end
     end
   end
