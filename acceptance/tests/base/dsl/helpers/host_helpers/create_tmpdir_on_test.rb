@@ -1,17 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
-
-  step "#create_tmpdir_on chowns the created tempdir to the host user + group" do
-    tmpdir = create_tmpdir_on default
-    listing = on(default, "ls -al #{tmpdir}").stdout
-    tmpdir_ls = listing.split("\n").grep %r{\s+\./?\s*$}
-    assert_equal 1, tmpdir_ls.size
-    perms, inodes, owner, group, *rest = tmpdir_ls.first.split(/\s+/)
-    assert_equal default['user'], owner
-    assert_equal default['user'], group
-  end
-
   step "#create_tmpdir_on returns a temporary directory on the remote system" do
     tmpdir = create_tmpdir_on default
     assert_match %r{/}, tmpdir
@@ -30,10 +19,24 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
     end
   end
 
+  step "#create_tmpdir_on sets the user if specified" do
+    default.group_present('tmpdirtestuser')
+    tmpdir = create_tmpdir_on(default, nil, 'tmpdirtestuser', nil)
+    assert_match /tmpdirtestuser/, on(default, "ls -ld #{tmpdir}").output
+    default.group_absent('tmpdirtestuser')
+  end
+
   step "#create_tmpdir_on fails if a non-existent group is specified" do
     assert_raises Beaker::Host::CommandFailure do
       tmpdir = create_tmpdir_on default, '', nil, 'fakegroup'
     end
+  end
+
+  step "#create_tmpdir_on sets the group if specified" do
+    default.group_present('tmpdirtestgroup')
+    tmpdir = create_tmpdir_on(default, nil, nil, 'tmpdirtestgroup')
+    assert_match /testgroup/, on(default, "ls -ld #{tmpdir}").output
+    default.group_absent('tmpdirtestgroup')
   end
 
   step "#create_tmpdir_on operates on all hosts if given a hosts array" do
