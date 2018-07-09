@@ -23,7 +23,7 @@ test_name "dsl::helpers::host_helpers #create_tmpdir_on" do
     default.user_present('tmpdirtestuser')
     tmpdir = create_tmpdir_on(default, nil, 'tmpdirtestuser', nil)
     assert_match /tmpdirtestuser/, on(default, "ls -ld #{tmpdir}").output
-    default.group_absent('tmpdirtestuser')
+    default.user_absent('tmpdirtestuser')
   end
 
   step "#create_tmpdir_on fails if a non-existent group is specified" do
