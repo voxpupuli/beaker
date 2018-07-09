@@ -560,7 +560,7 @@ module Beaker
 
         # Create a temp directory on remote host, optionally owned by specified user and group.
         #
-        # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon,
+        # @param [Host, Array<Host>, String, Symbol] hosts One or more hosts to act upon,
         # or a role (String or Symbol) that identifies one or more hosts.
         # @param [String] path_prefix A remote path prefix for the new temp directory.
         # @param [String] user The name of user that should own the temp directory. If
@@ -573,8 +573,8 @@ module Beaker
         #
         # @note While tempting, this method should not be "optimized" to coalesce calls to
         # chown user:group when both options are passed, as doing so will muddy the spec.
-        def create_tmpdir_on(host, path_prefix = '', user = nil, group = nil)
-          block_on host do | host |
+        def create_tmpdir_on(hosts, path_prefix = '', user = nil, group = nil)
+          block_on hosts do | host |
             # create the directory
             dir = host.tmpdir(path_prefix)
             # only chown if explicitly passed; don't make assumptions about perms
@@ -600,7 +600,7 @@ module Beaker
               # chgrp
               on host, "chgrp #{group} #{dir}"
             end
-            return dir
+            dir
           end
         end
 
