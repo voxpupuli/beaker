@@ -13,6 +13,36 @@ module Unix::File
     '/tmp'
   end
 
+  # Change user ownership of a path
+  #
+  # @see http://pubs.opengroup.org/onlinepubs/9699919799/utilities/chown.html
+  #
+  # @note To maintain argument order consistency with the underlying
+  #   syscall, avoid having to specify nil arguments, and not do
+  #   anything hacky with the arguments list, this method does not
+  #   allow you to modify group ownership. Use Host::chgrp instead.
+  # @param [String] user User to chown to
+  # @param [String] path Path to chown
+  # @param [Boolean] recursive Whether to pass the recursive flag
+  #
+  # @return [Beaker::Result] result of command execution
+  def chown(user, path, recursive=false)
+    execute("chown #{recursive ? '-R ' : ''}#{user} #{path}")
+  end
+
+  # Change group ownership of a path
+  #
+  # @see http://pubs.opengroup.org/onlinepubs/9699919799/utilities/chgrp.html
+  #
+  # @param [String] group Group to chgrp to
+  # @param [String] path Path to chgrp
+  # @param [Boolean] recursive Whether to pass the recursive flag
+  #
+  # @return [Beaker::Result] result of command execution
+  def chgrp(group, path, recursive=false)
+    execute("chgrp #{recursive ? '-R ' : ''}#{group} #{path}")
+  end
+
   # Handles any changes needed in a path for SCP
   #
   # @param [String] path File path to SCP to
