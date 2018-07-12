@@ -583,22 +583,25 @@ module Beaker
               # ensure user exists
               if not host.user_get(user).success?
                 # clean up
-                on host, "rmdir #{dir}"
+                host.rm_rf("#{dir}")
                 raise "User #{user} does not exist on #{host}."
               end
               # chown only user
-              on host, "chown #{user} #{dir}"
+              host.chown(user, dir)
+              # on host, "chown #{user} #{dir}"
             end
             # only chgrp if explicitly passed; don't make assumptions about perms
             if group
               # ensure group exists
               if not host.group_get(group).success?
                 # clean up
-                on host, "rmdir #{dir}"
+                # on host, "rmdir #{dir}"
+                host.rm_rf(dir)
                 raise "Group #{group} does not exist on #{host}."
               end
               # chgrp
-              on host, "chgrp #{group} #{dir}"
+              # on host, "chgrp #{group} #{dir}"
+              host.chgrp(group, dir)
             end
             dir
           end

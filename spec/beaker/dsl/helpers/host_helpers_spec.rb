@@ -356,11 +356,10 @@ describe ClassMixedWithDSLHelpers do
     let(:host) { {'user' => 'puppet', 'group' => 'muppets'} }
     let(:result_success) { double.as_null_object }
     let(:result_failure) { double.as_null_object }
-
-    # trailing whitespace in RegEx patterns in this describe group *is* meaningful
+    let(:tmpdir) { '/tmp/beaker.XXXXXX/' }
 
     before :each do
-      allow( host ).to receive( :tmpdir )
+      allow( host ).to receive( :tmpdir ).and_return( tmpdir )
       allow( host ).to receive( :result ).and_return( result_success )
       allow( result_success ).to receive( :success? ).and_return( true )
       allow( result_success ).to receive( :stdout ).and_return( 'puppet' )
@@ -377,20 +376,20 @@ describe ClassMixedWithDSLHelpers do
     context 'with the user argument' do
       it 'calls chown when a user is specified' do
         expect( host ).to receive( :user_get ).and_return( result_success )
-        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
+        expect( host ).to receive( :chown ).with( host['user'], tmpdir )
 
         subject.create_tmpdir_on( host, 'beaker', host['user'] )
       end
 
       it 'does not call chown when a user is not specified' do
-        expect( subject ).to_not receive( :on )
+        expect( host ).to_not receive( :chown )
 
         subject.create_tmpdir_on( host, 'beaker' )
       end
 
       it 'does not call chown and cleans up when the user does not exist on the host' do
         expect( host ).to receive( :user_get ).and_return( result_failure )
-        expect( subject ).to receive( :on ).with( host, /rmdir / )
+        expect( host ).to receive( :rm_rf ).with( tmpdir )
 
         expect{
           subject.create_tmpdir_on( host, 'beaker', 'invalid.user' )
@@ -401,20 +400,20 @@ describe ClassMixedWithDSLHelpers do
     context 'with the group argument' do
       it 'calls chgrp when a group is specified' do
         expect( host ).to receive( :group_get ).and_return( result_success )
-        expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
+        expect( host ).to receive( :chgrp ).with( host['group'], tmpdir )
 
         subject.create_tmpdir_on( host, 'beaker', nil, host['group'] )
       end
 
       it 'does not call chgrp when a group is not specified' do
-        expect( subject ).to_not receive( :on )
+        expect( subject ).to_not receive( :chgrp )
 
         subject.create_tmpdir_on( host, 'beaker' )
       end
 
       it 'does not call chgrp and cleans up when the group does not exist on the host' do
         expect( host ).to receive( :group_get ).and_return( result_failure )
-        expect( subject ).to receive( :on ).with( host, /rmdir / )
+        expect( host ).to receive( :rm_rf ).with( tmpdir )
 
         expect{
           subject.create_tmpdir_on( host, 'beaker', nil, 'invalid.group' )
@@ -428,30 +427,20 @@ describe ClassMixedWithDSLHelpers do
       it 'calls chown and chgrp separately' do
         expect( host ).to receive( :user_get ).and_return( result_success )
         expect( host ).to receive( :group_get ).and_return( result_success )
-        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
-        expect( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
+        expect( host ).to receive( :chown ).with( host['user'], tmpdir )
+        expect( host ).to receive( :chgrp ).with( host['group'], tmpdir )
 
         subject.create_tmpdir_on( host, 'beaker', host['user'], host['group'] )
       end
+
       it 'does not pass group to chown' do
         allow( host ).to receive( :user_get ).and_return( result_success )
+        allow( host ).to receive( :chgrp ).with( host['group'], tmpdir )
+
         expect( host ).to receive( :group_get ).and_return( result_success )
-        # the trailing whitespace here is critical to this test in particular
-        expect( subject ).to receive( :on ).with( host, /chown #{host['user']} / )
-        allow( subject ).to receive( :on ).with( host, /chgrp #{host['group']} / )
+        expect( host ).to receive( :chown ).with( host['user'], tmpdir )
 
         subject.create_tmpdir_on( host, 'beaker', host['user'], host['group'] )
-      end
-    end
-
-    context 'with multiple hosts' do
-      it 'calls host.tmpdir on each host' do
-        expect( host ).to receive( :tmpdir ).twice
-        subject.create_tmpdir_on( [ host, host ] )
-      end
-
-      it 'returns an array of paths' do
-        expect( subject.create_tmpdir_on( [host, host ]) ).to be_an( Array )
       end
     end
   end
