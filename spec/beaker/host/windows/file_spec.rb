@@ -40,5 +40,16 @@ module Beaker
         host.chgrp( group, path, true )
       end
     end
+
+    describe '#ls_ld' do
+      let(:result) { Beaker::Result.new(host, 'ls') }
+
+      it 'calls cygpath first' do
+        expect( host ).to receive( :execute ).with( "cygpath -u #{path}" ).and_return( path )
+        expect( host ).to receive( :execute ).with( "ls -ld #{path}" )
+
+        host.ls_ld( path )
+      end
+    end
   end
 end

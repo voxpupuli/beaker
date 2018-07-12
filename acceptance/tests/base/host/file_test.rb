@@ -11,9 +11,7 @@ test_name 'File Test' do
       tmpfile = host.tmpfile('beaker')
       # ensure we have a user to chown to
       host.chown('testuser', tmpfile)
-      on host, "ls -l #{tmpfile}" do
-        assert_match /testuser/, stdout, "Should have found testuser in `ls -l` output"
-      end
+      assert_match /testuser/, host.ls_ld(tmpfile), "Should have found testuser in `ls -ld` output"
     end
   end
 
@@ -23,9 +21,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       # ensure we have a user to chown to
       host.chgrp('testgroup', tmpdir)
-      on host, "ls -ld #{tmpdir}" do
-        assert_match /testgroup/, stdout, "Should have found testgroup in `ls -l` output: #{stdout}"
-      end
+      assert_match /testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output: #{stdout}"
     end
   end
 
@@ -35,9 +31,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       on host, host.touch("#{tmpdir}/somefile.txt", false)
       host.chown('testuser', tmpdir, true)
-      on host, "ls -l #{tmpdir}/somefile.txt" do
-        assert_match /testuser/, stdout, "Should have found testuser in `ls -l` output for sub-file"
-      end
+      assert_match /testuser/, host.ls_ld("#{tmpdir}/somefile.txt"), "Should have found testuser in `ls -ld` output for sub-file"
     end
   end
 
@@ -47,9 +41,7 @@ test_name 'File Test' do
       tmpfile = host.tmpfile('beaker')
       # ensure we have a group to chgrp to
       host.chgrp('testgroup', tmpfile)
-      on host, "ls -l #{tmpfile}" do
-        assert_match /testgroup/, stdout, "Should have found testgroup in `ls -l` output"
-      end
+      assert_match /testgroup/, host.ls_ld(tmpfile), "Should have found testgroup in `ls -ld` output"
     end
   end
 
@@ -59,9 +51,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       # ensure we have a group to chgrp to
       host.chgrp('testgroup', tmpdir)
-      on host, "ls -ld #{tmpdir}" do
-        assert_match /testgroup/, stdout, "Should have found testgroup in `ls -l` output"
-      end
+      assert_match /testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output"
     end
   end
 
@@ -71,9 +61,15 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       on host, host.touch("#{tmpdir}/somefile.txt", false)
       host.chgrp('testgroup', tmpdir, true)
-      on host, "ls -l #{tmpdir}/somefile.txt" do
-        assert_match /testgroup/, stdout, "Should have found testgroup in `ls -l` output for sub-file"
-      end
+      assert_match /testgroup/, host.ls_ld("#{tmpdir}/somefile.txt"), "Should have found testgroup in `ls -ld` output for sub-file"
+    end
+  end
+
+  step "#ls_ld produces output" do
+    hosts.each do |host|
+      # create a tmp file to mangle
+      tmpdir = host.tmpdir('beaker')
+      assert_match /beaker/, host.ls_ld(tmpdir), "Should have found beaker in `ls -ld` output"
     end
   end
 

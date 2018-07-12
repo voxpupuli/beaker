@@ -43,6 +43,17 @@ module Unix::File
     execute("chgrp #{recursive ? '-R ' : ''}#{group} #{path}")
   end
 
+  # List long output of a path
+  #
+  # @see http://pubs.opengroup.org/onlinepubs/9699919799/utilities/ls.html
+  #
+  # @param [String] path Path to list properties of
+  #
+  # @return [Beaker::Result] result of command execution
+  def ls_ld(path)
+    execute("ls -ld #{path}")
+  end
+
   # Handles any changes needed in a path for SCP
   #
   # @param [String] path File path to SCP to
