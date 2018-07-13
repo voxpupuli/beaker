@@ -165,5 +165,44 @@ module Beaker
         expect( text ).to match( /basedir\=default/ )
       end
     end
+
+    describe '#chown' do
+      let (:user) { 'someuser' }
+      let (:path) { '/path/to/chown/on' }
+
+      it 'calls the system method' do
+        expect( instance ).to receive( :execute ).with( "chown #{user} #{path}" ).and_return( 0 )
+        expect( instance.chown( user, path ) ).to be === 0
+      end
+
+      it 'passes -R if recursive' do
+        expect( instance ).to receive( :execute ).with( "chown \-R #{user} #{path}" )
+        instance.chown( user, path, true )
+      end
+    end
+
+    describe '#chgrp' do
+      let (:group) { 'somegroup' }
+      let (:path) { '/path/to/chgrp/on' }
+
+      it 'calls the system method' do
+        expect( instance ).to receive( :execute ).with( "chgrp #{group} #{path}" ).and_return( 0 )
+        expect( instance.chgrp( group, path ) ).to be === 0
+      end
+
+      it 'passes -R if recursive' do
+        expect( instance ).to receive( :execute ).with( "chgrp \-R #{group} #{path}" )
+        instance.chgrp( group, path, true )
+      end
+    end
+
+    describe '#ls_ld' do
+      let (:path) { '/path/to/ls_ld' }
+
+      it 'calls the system method' do
+        expect( instance ).to receive( :execute ).with( "ls -ld #{path}" ).and_return( 0 )
+        expect( instance.ls_ld( path ) ).to be === 0
+      end
+    end
   end
 end

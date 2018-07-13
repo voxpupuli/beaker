@@ -15,6 +15,36 @@ module Windows::File
     tmp_path.gsub(/\n/, '') + '\\TEMP'
   end
 
+  # (see {Beaker::Host::Unix::File#chown})
+  # @note Cygwin's `chown` implementation does not support
+  #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.
+  #   This method simply wraps the normal Host#chown call with
+  #   a call to cygpath to sanitize input.
+  def chown(user, path, recursive=false)
+    cygpath = execute("cygpath -u #{path}")
+    super(user, cygpath, recursive)
+  end
+
+  # (see {Beaker::Host::Unix::File#chgrp})
+  # @note Cygwin's `chgrp` implementation does not support
+  #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.
+  #   This method simply wraps the normal Host#chgrp call with
+  #   a call to cygpath to sanitize input.
+  def chgrp(group, path, recursive=false)
+    cygpath = execute("cygpath -u #{path}")
+    super(group, cygpath, recursive)
+  end
+
+  # (see {Beaker::Host::Unix::File#ls_ld})
+  # @note Cygwin's `ls_ld` implementation does not support
+  #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.
+  #   This method simply wraps the normal Host#ls_ld call with
+  #   a call to cygpath to sanitize input.
+  def ls_ld(path)
+    cygpath = execute("cygpath -u #{path}")
+    super(cygpath)
+  end
+
   # Updates a file path for use with SCP, depending on the SSH Server
   #
   # @note This will fail with an SSH server that is not OpenSSL or BitVise.
