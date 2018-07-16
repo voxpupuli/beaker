@@ -17,6 +17,10 @@ git logs & PR history.
 
 - `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
 
+### Added
+
+- Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499) 
+
 # [3.37.0](https://github.com/puppetlabs/beaker/compare/3.36.0...3.37.0) - 2018-07-11
 
 ### Fixed
