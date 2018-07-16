@@ -13,6 +13,14 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/3.37.0...master)
 
+### Fixed
+
+- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
+
+### Added
+
+- Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499) 
+
 # [3.37.0](https://github.com/puppetlabs/beaker/compare/3.36.0...3.37.0) - 2018-07-11
 
 ### Fixed
@@ -36,10 +44,6 @@ git logs & PR history.
 - Markdown formatting guidelines for `docs/`
 - Glossary for project jargon in [`docs/concepts/glossary.md`](docs/concepts/glossary.md)
 - Use AIX 6.1 packages everywhere for puppet6
-
-### Fixed
-
-- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
 
 # [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
