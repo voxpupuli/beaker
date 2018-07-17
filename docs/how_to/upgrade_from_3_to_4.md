@@ -6,6 +6,10 @@ This is a guide detailing all the issues to be aware of, and to help people make
 
 In Beaker 3.0.0, `beaker-pe` was removed as a dependency. A mechanism to automatically include that module, if available, was added for convenience and to ease the transition. That shim has been removed. As of 4.0, you will have to explicitly require `beaker-pe` alongside `beaker` as a dependency in your project if you need it in your tests. You'll also need to add `require 'beaker-pe'` to any tests that use it.
 
-# `PEDefaults` and `#configure_type_defaults_on`
+## `PEDefaults` and `#configure_type_defaults_on`
 
 PEDefaults has been moved to `beaker-pe`. The call to `#configure_type_defaults_on` that was previously made in `#set_env` is no longer made. You will now need to explicitly call `#configure_type_defaults_on` in your tests when needed.
+
+## Puppet Dependency
+
+Just like `beaker-pe` was removed as a dependency in 3.0, we have removed `beaker-puppet` as a dependency in 4.0. This means that you will have to explicitly require `beaker-puppet` alongside `beaker` as a dependency in your project if you need it in your tests. You'll also need to add `require 'beaker-puppet'` to any of your tests that use it.

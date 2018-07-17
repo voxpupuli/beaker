@@ -4,7 +4,7 @@
 end
 
 require "beaker-hiera"
-require 'beaker-puppet'
+
 module Beaker
   module DSL
 
@@ -29,7 +29,6 @@ module Beaker
       include Beaker::DSL::Helpers::WebHelpers
       include Beaker::DSL::Helpers::HoconHelpers
       include Beaker::DSL::Helpers::Hiera
-      include BeakerPuppet::Helpers
     end
   end
 end
