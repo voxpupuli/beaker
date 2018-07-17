@@ -5,16 +5,6 @@ class ClassMixedWithDSLWrappers
 end
 
 describe ClassMixedWithDSLWrappers do
-  let(:empty_opts) { {'ENV' => {}, :cmdexe => true } }
-
-  describe '#hiera' do
-    it 'should split out the options and pass "hiera" as first arg to Command' do
-      expect( Beaker::Command ).to receive( :new ).
-        with('hiera', [ '-p' ], empty_opts)
-      subject.hiera( '-p' )
-    end
-  end
-
   describe '#host_command' do
     it 'delegates to HostCommand.new' do
       expect( Beaker::HostCommand ).to receive( :new ).with( 'blah' )
