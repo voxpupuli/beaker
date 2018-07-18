@@ -83,6 +83,13 @@ module Beaker
 
     def self.register(helper_module)
       include helper_module
+
+      # Modules added into a module which has previously been included are not
+      # retroactively included in the including class. Do this here so we don't
+      # have to in every DSL extension library.
+      #
+      # https://github.com/adrianomitre/retroactive_module_inclusion
+      Beaker::TestCase.class_eval { include Beaker::DSL }
     end
   end
 end
