@@ -2,10 +2,27 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #rsync_to" do
 
-  confine_block :to, :platform => /^centos|el-\d|fedora/ do
+  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
+    step "#rsync_to fails if rsync is not installed on the remote host" do
+      Dir.mktmpdir do |local_dir|
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+
+        hosts.each do |host|
+          remote_tmpdir = tmpdir_on host
+          remote_filename = File.join(remote_tmpdir, "testfile.txt")
+
+          assert_raises Beaker::Host::CommandFailure do
+            rsync_to default, local_filename, remote_tmpdir
+          end
+        end
+      end
+    end
+  end
+
+  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
     step "installing `rsync` on #{default['platform']} for all later test steps" do
       hosts.each do |host|
-        install_package host, "rsync"
+        host.install_package "rsync"
       end
     end
   end
@@ -109,7 +126,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     end
   end
 
-  confine_block :to, :platform => /centos|el-\d|fedora/ do
+  confine_block :to, :platform => /centos|el-\d|fedora|solaris/ do
 
     step "uninstall rsync package on #{default['platform']} for later test runs" do
       # NOTE: this is basically a #teardown section for test isolation

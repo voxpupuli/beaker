@@ -2,7 +2,7 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
 
-  confine_block :to, :platform => /^centos|el-\d|fedora/ do
+  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
     step "installing `rsync` on #{default['platform']} for all later test steps" do
       hosts.each do |host|
         install_package host, "rsync"
@@ -191,7 +191,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  confine_block :to, :platform => /centos|el-\d|fedora/ do
+  confine_block :to, :platform => /centos|el-\d|fedora|solaris/ do
 
     step "uninstall rsync package on #{default['platform']} for later test runs" do
       # NOTE: this is basically a #teardown section for test isolation
