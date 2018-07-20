@@ -608,10 +608,13 @@ module Beaker
         @options = { :logger => logger }
         args = [ 'source', 'target', {:ignore => ['.bundle']} ]
 
-        key = host['ssh']['keys']
-        if key.is_a? Array
-          key = key.first
-        end
+        # find the first SSH key that exists
+        key = lambda {
+          # backwards-compatibility: no guarantee that ssh_opts['keys'] is an Array
+          Array(host['ssh']['keys']).each do |k|
+            return k if File.exist?(k)
+          end
+        }.call
 
         rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
 

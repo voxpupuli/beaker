@@ -534,18 +534,18 @@ module Beaker
             ssh_opts.has_key?('auth_methods') and
             ssh_opts['auth_methods'].include?('publickey')
 
-          key = ssh_opts['keys']
+          # find the first SSH key that exists
+          key = lambda {
+            # backwards-compatibility: no guarantee that ssh_opts['keys'] is an Array
+            Array(ssh_opts['keys']).each do |k|
+              return k if File.exist?(k)
+            end
+          }.call
 
-          # If an array was set, then we use the first value
-          if key.is_a? Array
-            key = key.first
+          if key
+            # rsync doesn't always play nice with tilde, so be sure to expand first
+            ssh_args << "-i #{File.expand_path(key)}"
           end
-
-          # We need to expand tilde manually as rsync can be
-          # funny sometimes
-          key = File.expand_path(key)
-
-          ssh_args << "-i #{key}"
         end
       end
 
