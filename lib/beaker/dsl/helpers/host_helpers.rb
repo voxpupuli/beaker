@@ -394,6 +394,16 @@ module Beaker
           host.install_package package_name, '', package_version
         end
 
+        # Uninstall a package on a host
+        #
+        # @param [Host] host             A host object
+        # @param [String] package_name   Name of the package to uninstall
+        #
+        # @return [Result]   An object representing the outcome of *uninstall command*.
+        def uninstall_package host, package_name
+          host.uninstall_package package_name
+        end
+
         # Check to see if a package is installed on a remote host
         #
         # @param [Host] host             A host object

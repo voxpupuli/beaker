@@ -134,7 +134,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       #       clearer?
 
       hosts.each do |host|
-        on host, "yum -y remove rsync"
+        host.uninstall_package "rsync"
       end
     end
   end

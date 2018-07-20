@@ -50,5 +50,32 @@ test_name "dsl::helpers::host_helpers #install_package" do
         install_package hosts, "rsync"
       end
     end
+
+    step "#uninstall_package fails if package is not installed on the OS" do
+      assert_raises Beaker::Host::CommandFailure do
+        install_package default, "non-existent-package-name"
+      end
+    end
+
+    step "#uninstall_package uninstalls an installed package successfully" do
+      result = uninstall_package default, "rsync"
+      assert !check_for_package(default, "rsync"), "package was not successfully uninstalled"
+    end
+
+    step "#uninstall_package succeeds when uninstalling an already-uninstalled package" do
+      result = uninstall_package default, "rsync"
+      result = uninstall_package default, "rsync"
+      assert !check_for_package(default, "rsync"), "package was not successfully uninstalled"
+    end
+
+    step "#uninstall_package CURRENTLY fails if given a host array" do
+      # NOTE: would expect this to work across hosts, or to be better
+      #       documented. If not supported, should raise
+      #       Beaker::Host::CommandFailure
+
+      assert_raises NoMethodError do
+        uninstall_package hosts, "rsync"
+      end
+    end
   end
 end

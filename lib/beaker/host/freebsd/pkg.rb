@@ -25,6 +25,15 @@ module FreeBSD::Pkg
     execute(cmd, opts) { |result| result }
   end
 
+  def uninstall_package(package, cmdline_args = nil, opts = {})
+    cmd = if pkgng_active?
+            "pkg delete #{cmdline_args || '-y'} #{package}"
+          else
+            "pkg_delete #{cmdline_args || '-r'} #{package}"
+          end
+    execute(cmd, opts) { |result| result }
+  end
+
   def check_for_package(package, opts = {})
     opts = {:accept_all_exit_codes => true}.merge(opts)
     cmd = if pkgng_active?
