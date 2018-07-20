@@ -535,12 +535,9 @@ module Beaker
             ssh_opts['auth_methods'].include?('publickey')
 
           # find the first SSH key that exists
-          key = lambda {
-            # backwards-compatibility: no guarantee that ssh_opts['keys'] is an Array
-            Array(ssh_opts['keys']).each do |k|
-              return k if File.exist?(k)
-            end
-          }.call
+          key = Array(ssh_opts['keys']).find do |k|
+              File.exist?(k)
+          end
 
           if key
             # rsync doesn't always play nice with tilde, so be sure to expand first
