@@ -369,4 +369,18 @@ describe ClassMixedWithDSLHelpers do
       subject.run_script( '/tmp/test.sh' )
     end
   end
+
+  describe '#install_package' do
+    it 'delegates to Host#install_package with arguments on the passed Host' do
+      expect( host ).to receive( :install_package ).with( 'pkg_name', '', '1.2.3' )
+      subject.install_package( host, 'pkg_name', '1.2.3' )
+    end
+  end
+
+  describe '#uninstall_package' do
+    it 'delegates to Host#uninstall_package on the passed Host' do
+      expect( host ).to receive( :uninstall_package ).with( 'pkg_name' )
+      subject.uninstall_package( host, 'pkg_name' )
+    end
+  end
 end
