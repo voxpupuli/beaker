@@ -2,31 +2,6 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #rsync_to" do
 
-  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
-    step "#rsync_to fails if rsync is not installed on the remote host" do
-      Dir.mktmpdir do |local_dir|
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
-
-        hosts.each do |host|
-          remote_tmpdir = tmpdir_on host
-          remote_filename = File.join(remote_tmpdir, "testfile.txt")
-
-          assert_raises Beaker::Host::CommandFailure do
-            rsync_to default, local_filename, remote_tmpdir
-          end
-        end
-      end
-    end
-  end
-
-  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
-    step "installing `rsync` on #{default['platform']} for all later test steps" do
-      hosts.each do |host|
-        host.install_package "rsync"
-      end
-    end
-  end
-
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
   confine_block :to, :platform => /windows/ do
 
@@ -51,7 +26,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
   end
 
   confine_block :except, :platform => /windows/ do
-
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = default.tmpdir()
       assert_raises IOError do
@@ -59,9 +33,42 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       end
     end
 
-    step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
-      # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+    step "uninstalling rsync on hosts if needed" do
+      hosts.each do |host|
+        if host.check_for_package('rsync')
+          host[:rsync_installed] = true
+          host.uninstall_package "rsync"
+        else
+          host[:rsync_installed] = false
+        end
+      end
+    end
 
+    step "#rsync_to fails if rsync is not installed on the remote host" do
+      Dir.mktmpdir do |local_dir|
+        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+
+        hosts.each do |host|
+          # skip hosts that have rsync preinstalled
+          next if host.check_for_package('rsync')
+
+          remote_tmpdir = tmpdir_on host
+          remote_filename = File.join(remote_tmpdir, "testfile.txt")
+
+          assert_raises Beaker::Host::CommandFailure do
+            rsync_to default, local_filename, remote_tmpdir
+          end
+        end
+      end
+    end
+
+    step "installing rsync on hosts" do
+      hosts.each do |host|
+        host.install_package "rsync"
+      end
+    end
+
+    step "#rsync_to fails if the remote path cannot be found" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
@@ -124,17 +131,14 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         end
       end
     end
-  end
 
-  confine_block :to, :platform => /centos|el-\d|fedora|solaris/ do
-
-    step "uninstall rsync package on #{default['platform']} for later test runs" do
-      # NOTE: this is basically a #teardown section for test isolation
-      #       Could we reorganize tests into different files to make this
-      #       clearer?
-
+    step "uninstalling rsync on hosts if needed" do
       hosts.each do |host|
-        host.uninstall_package "rsync"
+        if !host[:rsync_installed]
+          # rsync wasn't installed on #{host} when we started, so we should clean up after ourselves
+          host.uninstall_package "rsync"
+        end
+        host.delete(:rsync_installed)
       end
     end
   end
