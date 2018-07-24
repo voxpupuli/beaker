@@ -1,11 +1,11 @@
 module Unix::File
   include Beaker::CommandFactory
 
-  def tmpfile(name)
+  def tmpfile(name = '')
     execute("mktemp -t #{name}.XXXXXX")
   end
 
-  def tmpdir(name)
+  def tmpdir(name = '')
     execute("mktemp -dt #{name}.XXXXXX")
   end
 
