@@ -3,7 +3,7 @@ require "helpers/test_helper"
 test_name "dsl::helpers::host_helpers #scp_from" do
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
-      remote_tmpdir = create_tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
 
       assert_raises Beaker::Host::CommandFailure do
@@ -22,7 +22,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
 
   step "#scp_from creates the file on the local system" do
     Dir.mktmpdir do |local_dir|
-      remote_tmpdir = create_tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
 
       scp_from default, remote_filename, local_dir
@@ -37,7 +37,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
     #       file repeatedly to generate an error
 
     Dir.mktmpdir do |local_dir|
-      remote_tmpdir = create_tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
       results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}

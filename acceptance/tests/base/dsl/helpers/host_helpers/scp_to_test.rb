@@ -2,7 +2,7 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #scp_to" do
   step "#scp_to fails if the local file cannot be found" do
-    remote_tmpdir = create_tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     assert_raises IOError do
       scp_to default, "/non/existent/file.txt", remote_tmpdir
     end
@@ -24,7 +24,7 @@ test_name "dsl::helpers::host_helpers #scp_to" do
   step "#scp_to creates the file on the remote system" do
     Dir.mktmpdir do |local_dir|
       local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
-      remote_tmpdir = create_tmpdir_on default
+      remote_tmpdir = default.tmpdir()
 
       scp_to default, local_filename, remote_tmpdir
 
@@ -38,7 +38,7 @@ test_name "dsl::helpers::host_helpers #scp_to" do
     Dir.mktmpdir do |local_dir|
       local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
-      remote_tmpdir = create_tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
