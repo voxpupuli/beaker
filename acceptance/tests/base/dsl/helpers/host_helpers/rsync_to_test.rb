@@ -5,8 +5,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
   confine_block :to, :platform => /windows/ do
 
-    # NOTE: rsync methods are not working currently on windows platforms. Would
-    #       expect this to be documented better.
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # However, these tests use Host#tmpdir which outputs mixed-style paths
+    # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
@@ -26,7 +27,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
   end
 
   confine_block :except, :platform => /windows/ do
-    # rsync is broken on Windows
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # However, these tests use Host#tmpdir which outputs mixed-style paths
+    # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = default.tmpdir()

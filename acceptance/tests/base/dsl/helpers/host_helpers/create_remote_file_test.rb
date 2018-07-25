@@ -79,7 +79,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
   confine_block :except, :platform => /windows/ do
     # these tests exercise the rsync backend
-    # Note that rsync currently does not work on Windows hosts.
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # However, these tests use Host#tmpdir which outputs mixed-style paths
+    # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
     confine_block :except, :platform => /osx/ do
       # packages are unsupported on OSX
@@ -183,8 +185,8 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
   confine_block :to, :platform => /windows/ do
-    # NOTE: rsync methods are not working currently on windows platforms
-
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # Fix me with BKR-1503
     step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
       remote_tmpdir = default.tmpdir("beaker")
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
@@ -196,28 +198,6 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
       assert_raises Beaker::Host::CommandFailure do
         remote_contents = on(default, "cat #{remote_filename}").stdout
-      end
-    end
-
-    step "#create_remote_file CURRENTLY fails when given an array of Hosts, using rsync" do
-      remote_tmpdir = "/tmp/beaker_remote_file_test"
-      # ensure remote dir exists on all hosts
-      hosts.each do |host|
-        # we can't use tmpdir here, because some hosts may have different tmpdir behavior.
-        host.mkdir_p(remote_tmpdir)
-      end
-
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      contents = fixture_contents("simple_text_file")
-
-      assert_raises Beaker::Host::CommandFailure do
-        create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
-      end
-
-      hosts.each do |host|
-        assert_raises Beaker::Host::CommandFailure do
-          remote_contents = on(host, "cat #{remote_filename}").stdout
-        end
       end
     end
   end
