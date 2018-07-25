@@ -42,31 +42,32 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         hosts.each do |host|
           if host.check_for_package('rsync')
             host[:rsync_installed] = true
-            host.uninstall_package "rsync"
+            rsync_package = "rsync"
+            # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
+            # TODO: fix this with BKR-1502
+            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            host.uninstall_package rsync_package
           else
             host[:rsync_installed] = false
           end
         end
       end
-    end
 
-    step "#rsync_to fails if rsync is not installed on the remote host" do
-      Dir.mktmpdir do |local_dir|
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+      # rsync is preinstalled on OSX
+      step "#rsync_to fails if rsync is not installed on the remote host" do
+        Dir.mktmpdir do |local_dir|
+          local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
-        hosts.each do |host|
-          remote_tmpdir = tmpdir_on host
-          remote_filename = File.join(remote_tmpdir, "testfile.txt")
+          hosts.each do |host|
+            remote_tmpdir = tmpdir_on host
+            remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-          assert_raises Beaker::Host::CommandFailure do
-            rsync_to default, local_filename, remote_tmpdir
+            assert_raises Beaker::Host::CommandFailure do
+              rsync_to default, local_filename, remote_tmpdir
+            end
           end
         end
       end
-    end
-
-    confine_block :except, :platform => /osx/ do
-      # packages are unsupported on OSX
 
       step "installing rsync on hosts" do
         hosts.each do |host|
