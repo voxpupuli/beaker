@@ -2,14 +2,6 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
 
-  confine_block :to, :platform => /^centos|el-\d|fedora|solaris/ do
-    step "installing `rsync` on #{default['platform']} for all later test steps" do
-      hosts.each do |host|
-        install_package host, "rsync"
-      end
-    end
-  end
-
   if test_scp_error_on_close?
     step "#create_remote_file fails when the remote path does not exist" do
       assert_raises Beaker::Host::CommandFailure do
@@ -24,18 +16,8 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-  step "#create_remote_file fails and does not create a remote file when the remote path does not exist, using rsync" do
-    assert_raises Beaker::Host::CommandFailure do
-      create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
-    end
-
-    assert_raises Beaker::Host::CommandFailure do
-      on(default, "cat /non/existent/testfile.txt").exit_code
-    end
-  end
-
   step "#create_remote_file creates a remote file with the specified contents" do
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir("beaker")
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
@@ -46,7 +28,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir("beaker")
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
@@ -56,30 +38,75 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     assert_equal contents, remote_contents
   end
 
-  # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
-  confine_block :to, :platform => /windows/ do
+  step "#create_remote_file creates remote files on all remote hosts, when given an array" do
+    remote_dir = "/tmp/beaker_remote_file_test"
+    # ensure remote dir exists on all hosts
+    hosts.each do |host|
+      # we can't use tmpdir here, because some hosts may have different tmpdir behavior.
+      host.mkdir_p(remote_dir)
+    end
 
-    # NOTE: rsync methods are not working currently on windows platforms
+    remote_filename = File.join(remote_dir, "testfile.txt")
+    contents = fixture_contents("simple_text_file")
 
-    step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
-      remote_tmpdir = default.tmpdir()
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      contents = fixture_contents("simple_text_file")
+    create_remote_file hosts, remote_filename, contents
 
-      assert_raises Beaker::Host::CommandFailure do
-        create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
-      end
-
-      assert_raises Beaker::Host::CommandFailure do
-        remote_contents = on(default, "cat #{remote_filename}").stdout
-      end
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remote_filename}").stdout
+      assert_equal contents, remote_contents
     end
   end
 
+  step "#create_remote_file creates remote files on all remote hosts, when given an array, using scp" do
+    remote_dir = "/tmp/beaker_remote_file_test"
+    # ensure remote dir exists on all hosts
+    hosts.each do |host|
+      # we can't use tmpdir here, because some hosts may have different tmpdir behavior.
+      host.mkdir_p(remote_dir)
+    end
+
+    remote_filename = File.join(remote_dir, "testfile.txt")
+    contents = fixture_contents("simple_text_file")
+
+    create_remote_file hosts, remote_filename, contents, { :protocol => 'scp' }
+
+    hosts.each do |host|
+      remote_contents = on(host, "cat #{remote_filename}").stdout
+      assert_equal contents, remote_contents
+    end
+  end
+
+
   confine_block :except, :platform => /windows/ do
+    # these tests exercise the rsync backend
+    # Note that rsync currently does not work on Windows hosts.
+
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
+      step "installing rsync on hosts if needed" do
+        hosts.each do |host|
+          if host.check_for_package('rsync')
+            host[:rsync_installed] = true
+          else
+            host[:rsync_installed] = false
+            host.install_package "rsync"
+          end
+        end
+      end
+    end
+
+    step "#create_remote_file fails and does not create a remote file when the remote path does not exist, using rsync" do
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file default, "/non/existent/testfile.txt", "contents\n", { :protocol => 'rsync' }
+      end
+
+      assert_raises Beaker::Host::CommandFailure do
+        on(default, "cat /non/existent/testfile.txt").exit_code
+      end
+    end
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
-      remote_tmpdir = default.tmpdir()
+      remote_tmpdir = default.tmpdir("beaker")
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
@@ -96,80 +123,14 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
           assert_equal contents, remote_contents
       end
     end
-  end
-
-  step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
-    remote_tmpdir = default.tmpdir()
-    remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    contents = fixture_contents("simple_text_file")
-
-    create_remote_file default, remote_filename, contents, { :protocol => 'unknown' }
-
-    assert_raises Beaker::Host::CommandFailure do
-      on(default, "cat #{remote_filename}").exit_code
-    end
-  end
-
-  step "#create_remote_file creates remote files on all remote hosts, when given an array" do
-    remote_tmpdir = default.tmpdir()
-    on hosts, "mkdir -p #{remote_tmpdir}"
-    remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    contents = fixture_contents("simple_text_file")
-
-    create_remote_file hosts, remote_filename, contents
-
-    hosts.each do |host|
-      remote_contents = on(host, "cat #{remote_filename}").stdout
-      assert_equal contents, remote_contents
-    end
-  end
-
-  step "#create_remote_file creates remote files on all remote hosts, when given an array, using scp" do
-    remote_tmpdir = default.tmpdir()
-    on hosts, "mkdir -p #{remote_tmpdir}"
-    remote_filename = File.join(remote_tmpdir, "testfile.txt")
-    contents = fixture_contents("simple_text_file")
-
-    create_remote_file hosts, remote_filename, contents, { :protocol => 'scp' }
-
-    hosts.each do |host|
-      remote_contents = on(host, "cat #{remote_filename}").stdout
-      assert_equal contents, remote_contents
-    end
-  end
-
-  # NOTE: there does not appear to be a way to confine just to cygwin hosts
-  confine_block :to, :platform => /windows/ do
-
-    # NOTE: rsync methods are not working currently on windows
-    #       platforms. Would expect this to be documented better.
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = default.tmpdir()
-      on hosts, "mkdir -p #{remote_tmpdir}"
-      remote_filename = File.join(remote_tmpdir, "testfile.txt")
-      contents = fixture_contents("simple_text_file")
-
-      assert_raises Beaker::Host::CommandFailure do
-        create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
-      end
-
+      remote_tmpdir = "/tmp/beaker_remote_file_test"
+      # ensure remote dir exists on all hosts
       hosts.each do |host|
-        assert_raises Beaker::Host::CommandFailure do
-          remote_contents = on(host, "cat #{remote_filename}").stdout
-        end
+        # we can't use tmpdir here, because some hosts may have different tmpdir behavior.
+        host.mkdir_p(remote_tmpdir)
       end
-    end
-  end
-
-  confine_block :except, :platform => /windows|fedora/ do
-
-    step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = default.tmpdir()
-
-      # NOTE: we do not do this step in the non-hosts-array version of the test, not sure why
-      # NOTE: this appears to be a workaround related to BKR-463
-      on hosts, "mkdir -p #{remote_tmpdir}"
 
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
@@ -189,17 +150,74 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
         end
       end
     end
+
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
+      step "uninstalling rsync on hosts if needed" do
+        hosts.each do |host|
+          if !host[:rsync_installed]
+            # rsync wasn't installed on #{host} when we started, so we should clean up after ourselves
+            rsync_package = "rsync"
+            # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
+            # TODO: fix this with BKR-1502
+            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            host.uninstall_package rsync_package
+          end
+          host.delete(:rsync_installed)
+        end
+      end
+    end
   end
 
-  confine_block :to, :platform => /centos|el-\d|fedora|solaris/ do
+  step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
+    remote_tmpdir = default.tmpdir("beaker")
+    remote_filename = File.join(remote_tmpdir, "testfile.txt")
+    contents = fixture_contents("simple_text_file")
 
-    step "uninstall rsync package on #{default['platform']} for later test runs" do
-      # NOTE: this is basically a #teardown section for test isolation
-      #       Could we reorganize tests into different files to make this
-      #       clearer?
+    create_remote_file default, remote_filename, contents, { :protocol => 'unknown' }
+
+    assert_raises Beaker::Host::CommandFailure do
+      on(default, "cat #{remote_filename}").exit_code
+    end
+  end
+
+  # NOTE: there does not appear to be a way to confine just to cygwin hosts
+  confine_block :to, :platform => /windows/ do
+    # NOTE: rsync methods are not working currently on windows platforms
+
+    step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
+      remote_tmpdir = default.tmpdir("beaker")
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      contents = fixture_contents("simple_text_file")
+
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+      end
+
+      assert_raises Beaker::Host::CommandFailure do
+        remote_contents = on(default, "cat #{remote_filename}").stdout
+      end
+    end
+
+    step "#create_remote_file CURRENTLY fails when given an array of Hosts, using rsync" do
+      remote_tmpdir = "/tmp/beaker_remote_file_test"
+      # ensure remote dir exists on all hosts
+      hosts.each do |host|
+        # we can't use tmpdir here, because some hosts may have different tmpdir behavior.
+        host.mkdir_p(remote_tmpdir)
+      end
+
+      remote_filename = File.join(remote_tmpdir, "testfile.txt")
+      contents = fixture_contents("simple_text_file")
+
+      assert_raises Beaker::Host::CommandFailure do
+        create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+      end
 
       hosts.each do |host|
-        host.uninstall_package "rsync"
+        assert_raises Beaker::Host::CommandFailure do
+          remote_contents = on(host, "cat #{remote_filename}").stdout
+        end
       end
     end
   end
