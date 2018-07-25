@@ -62,7 +62,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
           local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
           hosts.each do |host|
-            remote_tmpdir = tmpdir_on host
+            remote_tmpdir = host.tmpdir("beaker")
             remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
             assert_raises Beaker::Host::CommandFailure do
