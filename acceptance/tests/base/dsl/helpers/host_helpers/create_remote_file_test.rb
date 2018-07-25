@@ -35,7 +35,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents" do
-    remote_tmpdir = tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
@@ -46,7 +46,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file creates a remote file with the specified contents, using scp" do
-    remote_tmpdir = tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
@@ -62,7 +62,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     # NOTE: rsync methods are not working currently on windows platforms
 
     step "#create_remote_file CURRENTLY fails on #{default['platform']}, using rsync" do
-      remote_tmpdir = tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
@@ -79,7 +79,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   confine_block :except, :platform => /windows/ do
 
     step "#create_remote_file creates a remote file with the specified contents, using rsync" do
-      remote_tmpdir = tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
@@ -99,7 +99,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file' does not create a remote file when an unknown protocol is specified" do
-    remote_tmpdir = tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
@@ -111,7 +111,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file creates remote files on all remote hosts, when given an array" do
-    remote_tmpdir = tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
@@ -125,7 +125,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   end
 
   step "#create_remote_file creates remote files on all remote hosts, when given an array, using scp" do
-    remote_tmpdir = tmpdir_on default
+    remote_tmpdir = default.tmpdir()
     on hosts, "mkdir -p #{remote_tmpdir}"
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
@@ -145,7 +145,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     #       platforms. Would expect this to be documented better.
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = tmpdir_on default
+      remote_tmpdir = default.tmpdir()
       on hosts, "mkdir -p #{remote_tmpdir}"
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
@@ -165,7 +165,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
   confine_block :except, :platform => /windows|fedora/ do
 
     step "#create_remote_file creates remote files on all remote hosts, when given an array, using rsync" do
-      remote_tmpdir = tmpdir_on default
+      remote_tmpdir = default.tmpdir()
 
       # NOTE: we do not do this step in the non-hosts-array version of the test, not sure why
       # NOTE: this appears to be a workaround related to BKR-463

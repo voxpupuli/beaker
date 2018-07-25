@@ -19,6 +19,7 @@ module Unix::Group
       fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name}:.*:[0-9]+:/
 
       yield result if block_given?
+      result
     end
   end
 

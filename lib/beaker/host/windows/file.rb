@@ -1,11 +1,11 @@
 module Windows::File
   include Beaker::CommandFactory
 
-  def tmpfile(name)
+  def tmpfile(name = '')
     execute("cygpath -m $(mktemp -t #{name}.XXXXXX)")
   end
 
-  def tmpdir(name)
+  def tmpdir(name = '')
     execute("cygpath -m $(mktemp -td #{name}.XXXXXX)")
   end
 

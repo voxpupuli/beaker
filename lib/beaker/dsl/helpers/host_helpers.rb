@@ -558,40 +558,6 @@ module Beaker
           end
         end
 
-        # Create a temp directory on remote host owned by specified user.
-        #
-        # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
-        #                            or a role (String or Symbol) that identifies one or more hosts.
-        # @param [String] path_prefix A remote path prefix for the new temp
-        # directory.
-        # @param [String] user The name of user that should own the temp
-        # directory. If no username is specified defaults to the currently logged in user
-        # per host
-        #
-        # @return [String, Array<String>] Returns the name of the newly-created dir, or an array
-        #                                of names of newly-created dirs per-host
-        def create_tmpdir_on(host, path_prefix = '', user=nil)
-
-          block_on host do | host |
-            # use default user logged into this host
-            if not user
-              user = host['user']
-            end
-
-            if not on(host, "getent passwd #{user}").exit_code == 0
-              raise "User #{user} does not exist on #{host}."
-            end
-
-            if defined? host.tmpdir
-              dir = host.tmpdir(path_prefix)
-              on host, "chown #{user}:#{user} #{dir}"
-              dir
-            else
-              raise "Host platform not supported by `create_tmpdir_on`."
-            end
-          end
-        end
-
         # 'echo' the provided value on the given host(s)
         # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.

@@ -19,6 +19,7 @@ module Aix::User
       fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name} id/
 
       yield result if block_given?
+      result
     end
   end
 

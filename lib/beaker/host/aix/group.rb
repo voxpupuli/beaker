@@ -14,6 +14,7 @@ module Aix::Group
       fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name} id/
 
       yield result if block_given?
+      result
     end
   end
 

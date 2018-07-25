@@ -47,6 +47,10 @@ module Beaker
     def exit_code_in?(range)
       range.include?(@exit_code)
     end
+
+    def success?
+      exit_code == 0
+    end
   end
 
   class NullResult < Result

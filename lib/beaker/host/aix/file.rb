@@ -1,11 +1,11 @@
 module Aix::File
   include Beaker::CommandFactory
 
-  def tmpfile(name)
+  def tmpfile(name = '')
     execute("rndnum=${RANDOM} && touch /tmp/#{name}.${rndnum} && echo /tmp/#{name}.${rndnum}")
   end
 
-  def tmpdir(name)
+  def tmpdir(name = '')
     execute("rndnum=${RANDOM} && mkdir /tmp/#{name}.${rndnum} && echo /tmp/#{name}.${rndnum}")
   end
 

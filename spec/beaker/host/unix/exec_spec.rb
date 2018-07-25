@@ -82,7 +82,7 @@ module Beaker
           it "calls the correct commands for #{platform}" do
             opts['platform'] = platform
             expect(instance).to receive(:exec).twice
-            expect(instance).to receive(:create_tmpdir_on).and_return(directory)
+            expect(instance).to receive(:tmpdir).and_return(directory)
             expect(Beaker::Command).to receive(:new).with(ssh_move)
             expect(Beaker::Command).to receive(:new).with(ssh_command)
             expect(instance).to receive(:ssh_service_restart)

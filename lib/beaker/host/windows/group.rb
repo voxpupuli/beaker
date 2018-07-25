@@ -19,6 +19,7 @@ module Windows::Group
       fail_test "failed to get group #{name}" if result.exit_code != 0
 
       yield result if block_given?
+      result
     end
   end
 

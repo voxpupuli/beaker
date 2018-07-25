@@ -46,7 +46,7 @@ DSL methods for host manipulation.
 * [curl_with_retries](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#curl_with_retries-instance_method)
 * [retry_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#retry_on-instance_method)
 * [run_cron_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#run_cron_on-instance_method)
-* [create_tmpdir_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#create_tmpdir_on-instance_method)
+* [create_tmpdir_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#create_tmpdir_on-instance_method) MOVED to beaker-puppet
 * [echo_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#echo_on-instance_method)
 
 ### Puppet

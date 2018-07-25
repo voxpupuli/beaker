@@ -352,57 +352,6 @@ describe ClassMixedWithDSLHelpers do
     end
   end
 
-  describe '#create_tmpdir_on' do
-    let(:host) { {'user' => 'puppet'} }
-    let(:result) { double.as_null_object }
-
-    before :each do
-      allow(host).to receive(:result).and_return(result)
-      allow(result).to receive(:exit_code).and_return(0)
-      allow(result).to receive(:stdout).and_return('puppet')
-    end
-
-    context 'with no user argument' do
-
-      context 'with no path name argument' do
-        it 'executes chown once' do
-          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
-          expect(host).to receive(:tmpdir).with(/\/tmp\/beaker.*/)
-          expect(subject).to receive(:on).with(host, /chown puppet.puppet.*/)
-          subject.create_tmpdir_on(host, '/tmp/beaker')
-        end
-      end
-
-      context 'with path name argument' do
-        it 'executes chown once' do
-          expect(subject).to receive(:on).with(host, /^getent passwd puppet/).and_return(result)
-          expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-          expect(subject).to receive(:on).with(host, /chown puppet.puppet \/tmp\/bogus.*/)
-          subject.create_tmpdir_on(host, "/tmp/bogus")
-        end
-      end
-    end
-
-    context 'with an valid user argument' do
-      it 'executes chown once' do
-        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
-        expect(host).to receive(:tmpdir).with(/\/tmp\/bogus.*/).and_return("/tmp/bogus")
-        expect(subject).to receive(:on).with(host, /chown curiousgeorge.curiousgeorge \/tmp\/bogus.*/)
-        subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
-      end
-    end
-
-    context 'with a invalid user argument' do
-      it 'executes chown once' do
-        allow(result).to receive(:exit_code).and_return(1)
-        expect(subject).to receive(:on).with(host, /^getent passwd curiousgeorge/).and_return(result)
-        expect{
-          subject.create_tmpdir_on(host, "/tmp/bogus", "curiousgeorge")
-        }.to raise_error(RuntimeError, /User curiousgeorge does not exist on/)
-      end
-    end
-  end
-
   describe '#run_script_on' do
     it 'scps the script to a tmpdir and executes it on host(s)' do
       expect( subject ).to receive( :scp_to )
