@@ -55,9 +55,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
         hosts.each do |host|
-          # skip hosts that have rsync preinstalled
-          next if host.check_for_package('rsync')
-
           remote_tmpdir = tmpdir_on host
           remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
