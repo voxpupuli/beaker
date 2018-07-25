@@ -26,6 +26,8 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
   end
 
   confine_block :except, :platform => /windows/ do
+    # rsync is broken on Windows
+
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = default.tmpdir()
       assert_raises IOError do
@@ -33,13 +35,17 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       end
     end
 
-    step "uninstalling rsync on hosts if needed" do
-      hosts.each do |host|
-        if host.check_for_package('rsync')
-          host[:rsync_installed] = true
-          host.uninstall_package "rsync"
-        else
-          host[:rsync_installed] = false
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
+
+      step "uninstalling rsync on hosts if needed" do
+        hosts.each do |host|
+          if host.check_for_package('rsync')
+            host[:rsync_installed] = true
+            host.uninstall_package "rsync"
+          else
+            host[:rsync_installed] = false
+          end
         end
       end
     end
@@ -62,9 +68,13 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       end
     end
 
-    step "installing rsync on hosts" do
-      hosts.each do |host|
-        host.install_package "rsync"
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
+
+      step "installing rsync on hosts" do
+        hosts.each do |host|
+          host.install_package "rsync"
+        end
       end
     end
 
@@ -132,17 +142,21 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       end
     end
 
-    step "uninstalling rsync on hosts if needed" do
-      hosts.each do |host|
-        if !host[:rsync_installed]
-          # rsync wasn't installed on #{host} when we started, so we should clean up after ourselves
-          rsync_package = "rsync"
-          # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
-          # TODO: fix this with BKR-1502
-          rsync_package = "CSWrsync" if host[:platform] =~ /solaris-10/
-          host.uninstall_package rsync_package
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
+
+      step "uninstalling rsync on hosts if needed" do
+        hosts.each do |host|
+          if !host[:rsync_installed]
+            # rsync wasn't installed on #{host} when we started, so we should clean up after ourselves
+            rsync_package = "rsync"
+            # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
+            # TODO: fix this with BKR-1502
+            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-11/
+            host.uninstall_package rsync_package
+          end
+          host.delete(:rsync_installed)
         end
-        host.delete(:rsync_installed)
       end
     end
   end
