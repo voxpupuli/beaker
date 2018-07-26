@@ -2,19 +2,12 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #rsync_to" do
 
-  confine_block :to, :platform => /^centos|el-\d|fedora/ do
-    step "installing `rsync` on #{default['platform']} for all later test steps" do
-      hosts.each do |host|
-        install_package host, "rsync"
-      end
-    end
-  end
-
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
   confine_block :to, :platform => /windows/ do
 
-    # NOTE: rsync methods are not working currently on windows platforms. Would
-    #       expect this to be documented better.
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # However, these tests use Host#tmpdir which outputs mixed-style paths
+    # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
@@ -34,6 +27,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
   end
 
   confine_block :except, :platform => /windows/ do
+    # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
+    # However, these tests use Host#tmpdir which outputs mixed-style paths
+    # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = default.tmpdir()
@@ -42,9 +38,48 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       end
     end
 
-    step "#rsync_to CURRENTLY does not fail, but does not copy the file if the remote path cannot be found" do
-      # NOTE: would expect this to fail with Beaker::Host::CommandFailure
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
 
+      step "uninstalling rsync on hosts if needed" do
+        hosts.each do |host|
+          if host.check_for_package('rsync')
+            host[:rsync_installed] = true
+            rsync_package = "rsync"
+            # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
+            # TODO: fix this with BKR-1502
+            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            host.uninstall_package rsync_package
+          else
+            host[:rsync_installed] = false
+          end
+        end
+      end
+
+      # rsync is preinstalled on OSX
+      step "#rsync_to fails if rsync is not installed on the remote host" do
+        Dir.mktmpdir do |local_dir|
+          local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+
+          hosts.each do |host|
+            remote_tmpdir = host.tmpdir("beaker")
+            remote_filename = File.join(remote_tmpdir, "testfile.txt")
+
+            assert_raises Beaker::Host::CommandFailure do
+              rsync_to default, local_filename, remote_tmpdir
+            end
+          end
+        end
+      end
+
+      step "installing rsync on hosts" do
+        hosts.each do |host|
+          host.install_package "rsync"
+        end
+      end
+    end
+
+    step "#rsync_to fails if the remote path cannot be found" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
@@ -107,17 +142,22 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         end
       end
     end
-  end
 
-  confine_block :to, :platform => /centos|el-\d|fedora/ do
+    confine_block :except, :platform => /osx/ do
+      # packages are unsupported on OSX
 
-    step "uninstall rsync package on #{default['platform']} for later test runs" do
-      # NOTE: this is basically a #teardown section for test isolation
-      #       Could we reorganize tests into different files to make this
-      #       clearer?
-
-      hosts.each do |host|
-        on host, "yum -y remove rsync"
+      step "uninstalling rsync on hosts if needed" do
+        hosts.each do |host|
+          if !host[:rsync_installed]
+            # rsync wasn't installed on #{host} when we started, so we should clean up after ourselves
+            rsync_package = "rsync"
+            # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
+            # TODO: fix this with BKR-1502
+            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            host.uninstall_package rsync_package
+          end
+          host.delete(:rsync_installed)
+        end
       end
     end
   end

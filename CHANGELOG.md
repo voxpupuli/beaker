@@ -16,10 +16,13 @@ git logs & PR history.
 ### Fixed
 
 - `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
+- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync does not exist on remote system (BKR-462)
+- `host.rsync_to` now check through configured SSH keys to use the first valid one
 
 ### Added
 
-- Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499) 
+- Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499)
+- `#uninstall_package` host helper, to match `#install_package`
 
 # [3.37.0](https://github.com/puppetlabs/beaker/compare/3.36.0...3.37.0) - 2018-07-11
 

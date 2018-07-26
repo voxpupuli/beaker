@@ -608,10 +608,8 @@ module Beaker
         @options = { :logger => logger }
         args = [ 'source', 'target', {:ignore => ['.bundle']} ]
 
-        key = host['ssh']['keys']
-        if key.is_a? Array
-          key = key.first
-        end
+        key = host['ssh']['keys'].first
+        expect( File ).to receive( :exist? ).with( key ).and_return true
 
         rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
 
@@ -657,10 +655,8 @@ module Beaker
         ignore_list = ['.bundle']
         args = ['source', 'target', {:ignore => ignore_list}]
 
-        key = host['ssh']['keys']
-        if key.is_a? Array
-          key = key.first
-        end
+        key = host['ssh']['keys'].first
+        expect( File ).to receive( :exist? ).with( key ).twice.and_return true
 
         rsync_args = ['source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).twice.with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
