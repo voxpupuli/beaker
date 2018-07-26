@@ -24,6 +24,14 @@ git logs & PR history.
 - Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499)
 - `#uninstall_package` host helper, to match `#install_package`
 
+### Changed
+
+- `#set_env` no longer calls `#configure_type_defaults_on`
+
+### Removed
+
+- `PEDefaults` has been moved to `beaker-pe`
+
 # [3.37.0](https://github.com/puppetlabs/beaker/compare/3.36.0...3.37.0) - 2018-07-11
 
 ### Fixed

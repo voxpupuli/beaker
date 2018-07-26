@@ -573,10 +573,6 @@ module Beaker
           logger.debug(skip_msg)
         end
 
-        # REMOVE POST BEAKER 3: backwards compatability, do some setup based upon the global type
-        # this is the worst and i hate it
-        Class.new.extend(Beaker::DSL).configure_type_defaults_on(host)
-
         if skip_msg.nil?
           #close the host to re-establish the connection with the new sshd settings
           host.close
