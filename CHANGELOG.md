@@ -42,6 +42,11 @@ git logs & PR history.
 
 - `Beaker::Shared::FogCredentials.get_fog_credentials()` to parse .fog credential files
 
+### Changed
+
+- `beaker-pe` is no longer automagically included. See [the upgrade guide](/docs/how_to/upgrade_from_3_to_4.md}) for more info
+- `beaker-puppet` is no longer required as a dependency
+
 # [3.36.0](https://github.com/puppetlabs/beaker/compare/3.35.0...3.36.0) - 2018-06-18
 
 ### Fixed

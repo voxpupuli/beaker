@@ -26,6 +26,12 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'rake', '~> 10.0'
 
+  # Provisioner dependencies - needed for acceptance tests
+  # TODO: figure out how to remove these
+  s.add_development_dependency 'beaker-aws', '~> 0.1'
+  s.add_development_dependency 'beaker-abs', '~> 0.4'
+  s.add_development_dependency 'beaker-vmpooler', '~> 1.0'
+
   # Documentation dependencies
   s.add_development_dependency 'yard', '~> 0.9.11'
 
@@ -48,19 +54,5 @@ Gem::Specification.new do |s|
 
   # Run time dependencies that are Beaker libraries
   s.add_runtime_dependency 'stringify-hash', '~> 0.0'
-  s.add_runtime_dependency 'beaker-hiera', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
-  s.add_runtime_dependency 'beaker-puppet', '~> 0.0'
-
-  # Optional provisioner specific support
-  s.add_runtime_dependency 'beaker-docker', '~> 0.1'
-  s.add_runtime_dependency 'beaker-aws', '~> 0.1'
-  s.add_runtime_dependency 'beaker-abs', '~> 0.4'
-  s.add_runtime_dependency 'beaker-vmpooler', '~> 1.0'
-  s.add_runtime_dependency 'beaker-google', '~> 0.1'
-  s.add_runtime_dependency 'beaker-vagrant', '~> 0.1'
-  s.add_runtime_dependency 'beaker-vmware', '~> 0.1'
-  s.add_runtime_dependency 'beaker-openstack', '~> 0.1'
-  s.add_runtime_dependency 'beaker-vcloud', '~> 0.1'
-
 end

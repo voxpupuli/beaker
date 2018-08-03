@@ -45,14 +45,4 @@ module Beaker
   rescue LoadError
     # do nothing
   end
-
-  # If beaker-pe is available, pull it in. The gem beaker-pe will need to be
-  # specified in the project Gemfile independent of beaker itself. If not available,
-  # catch LoadError and continue.
-  begin
-    require 'beaker-pe'
-  rescue LoadError
-    # do nothing
-  end
-
 end

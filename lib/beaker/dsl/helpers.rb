@@ -3,13 +3,13 @@
       require "beaker/dsl/helpers/#{lib}_helpers"
 end
 
-require "beaker-hiera"
-require 'beaker-puppet'
 module Beaker
   module DSL
 
-    # Contains methods to help you manage and configure your SUTs and configure and interact with puppet, facter
-    # and hiera.
+    # Contains methods to help you manage and configure your SUTs.
+
+    # Extensions, available in separate modules, enable you to configure and interact with puppet, facter
+    # and hiera. See [the docs](/docs/how_to/the_beaker_dsl.md).
 
     # To mix this is into a class you need the following:
     # * a method *hosts* that yields any hosts implementing
@@ -28,8 +28,6 @@ module Beaker
       include Beaker::DSL::Helpers::TestHelpers
       include Beaker::DSL::Helpers::WebHelpers
       include Beaker::DSL::Helpers::HoconHelpers
-      include Beaker::DSL::Helpers::Hiera
-      include BeakerPuppet::Helpers
     end
   end
 end
