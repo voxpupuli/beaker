@@ -4,6 +4,8 @@ This doc will guide you through the process of installing Puppet Agent using bea
 
 Note that this is not a complete documentation of the process, but a general overview. There will be specific hiccups for particular platforms and special cases. These are not all included at this point. The idea is that as we come upon them, we will now have a place to document those details, so that we can over time bring this to 100% completeness.
 
+As of Beaker 4.0, these DSL extensions have been moved to `beaker-puppet`, so you'll need to add that gem in your project and require it in your test cases.
+
 # First Things First: What Do You Want to Install?
 
 If you understand [beaker's roles](https://github.com/puppetlabs/beaker/blob/master/docs/concepts/roles_what_are_they.md) and just want the shortcuts to installing Open Source Puppet across your testing environment, then you should go to our "High Level Shortcuts" section below.
