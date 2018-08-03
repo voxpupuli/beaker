@@ -28,11 +28,7 @@ module Beaker
           Beaker::Hypervisor
         else
           # Custom hypervisor
-          begin
-            require "beaker/hypervisor/#{type}"
-          rescue LoadError
-            raise "Invalid hypervisor: #{type}"
-          end
+          require "beaker/hypervisor/#{type}"
           Beaker.const_get(type.split('_').collect(&:capitalize).join)
         end
 
