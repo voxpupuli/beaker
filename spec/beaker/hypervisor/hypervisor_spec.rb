@@ -9,7 +9,7 @@ module Beaker
 
       it "includes custom hypervisor and call set_ssh_connection_preference" do
         allow(hypervisor).to receive(:set_ssh_connection_preference).with([], hypervisor)
-        expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(RuntimeError, "Invalid hypervisor: custom_hypervisor")
+        expect{ hypervisor.create('custom_hypervisor', [], make_opts() )}.to raise_error(LoadError, "cannot load such file -- beaker/hypervisor/custom_hypervisor")
       end
 
       it "sets ssh connection preference if connection_preference method is not overwritten" do
