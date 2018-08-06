@@ -44,3 +44,9 @@ The following hypervisor libraries were removed in 4.0:
 - [beaker-vmware](github.com/puppetlabs/beaker-vmware)
 
 For acceptance testing, beaker-vmpooler, beaker-aws, and beaker-abs have been retained as development dependencies. These will be removed as the CI pipelines is upgraded, so *do not rely on them being there for your project*.
+
+## `Host.rsync_to` and Rsync-dependent Methods
+
+The `Host.rsync_to()` method has been overhauled, fixing a number of lingering issues and edge cases including [BKR-462](http://tickets.puppetlabs.com/browse/BKR-462) and [BKR-463](http://tickets.puppetlabs.com/browse/BKR-463). When a call to `rsync_to` fails for any reason, Beaker will throw `CommandFailure` as standard, including an error message from the Rsync library. The two primary causes for previously silent Rsync failures are Rsync not installed on remote host (which caused failures on Windows, as well as hosts without Rsync installed by default) and remote path not existing, both documented in the linked tickets.
+
+However, it is important to note that any error causing Rsync to fail, including SSH transport errors and hostname mismatches, will throw `CommandFailure` for `rsync_to` *and any method that relies on `rsync_to` including `create_remote_file_on()`*. If the remote file is not created for any reason, the command will fail.
