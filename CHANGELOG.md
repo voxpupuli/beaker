@@ -27,6 +27,8 @@ git logs & PR history.
 ### Changed
 
 - `#set_env` no longer calls `#configure_type_defaults_on`
+- `beaker-puppet` DSL Extension Library has been formally split into a standard DSL Extension Library and removed as a dependency from Beaker. Please see our [upgrade guidelines](docs/how_to/upgrade_from_3_to_4.md).
+- Beaker's Hypervisor Libraries have been removed as dependencies. Please see our [upgrade guidelines](docs/how_to/upgrade_from_3_to_4.md).
 
 ### Removed
 

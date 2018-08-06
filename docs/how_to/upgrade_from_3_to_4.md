@@ -13,3 +13,34 @@ PEDefaults has been moved to `beaker-pe`. The call to `#configure_type_defaults_
 ## Puppet Dependency
 
 Just like `beaker-pe` was removed as a dependency in 3.0, we have removed `beaker-puppet` as a dependency in 4.0. This means that you will have to explicitly require `beaker-puppet` alongside `beaker` as a dependency in your project if you need it in your tests. You'll also need to add `require 'beaker-puppet'` to any of your tests that use it.
+
+## Hypervisor Loading
+
+We have also removed the explicit dependency on all previously-included hypervisor libraries. Don't worry, the transition should be easy.
+
+In order to use a specific hypervisor or DSL extension library in your project, you will need to include them alongside Beaker in your Gemfile or project.gemspec. E.g.
+
+~~~ruby
+# Gemfile
+gem 'beaker', '~>4.0'
+gem 'beaker-aws'
+# project.gemspec
+s.add_runtime_dependency 'beaker', '~>4.0'
+s.add_runtime_dependency 'beaker-aws'
+~~~
+
+Beaker will automatically load the appropriate hypervisors for any given hosts file, so as long as your project dependencies are satisfied there's nothing else to do. No need to `require` this library in your tests. Simply specify `hypervisor: hypervisor_name` in your hosts file.
+
+The following hypervisor libraries were removed in 4.0:
+
+- [beaker-abs](github.com/puppetlabs/beaker-abs)
+- [beaker-aws](github.com/puppetlabs/beaker-aws)
+- [beaker-docker](github.com/puppetlabs/beaker-docker)
+- [beaker-google](github.com/puppetlabs/beaker-google)
+- [beaker-openstack](github.com/puppetlabs/beaker-openstack)
+- [beaker-vagrant](github.com/puppetlabs/beaker-vagrant)
+- [beaker-vcloud](github.com/puppetlabs/beaker-vcloud)
+- [beaker-vmpooler](github.com/puppetlabs/beaker-vmpooler)
+- [beaker-vmware](github.com/puppetlabs/beaker-vmware)
+
+For acceptance testing, beaker-vmpooler, beaker-aws, and beaker-abs have been retained as development dependencies. These will be removed as the CI pipelines is upgraded, so *do not rely on them being there for your project*.
