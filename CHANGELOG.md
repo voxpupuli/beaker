@@ -23,6 +23,7 @@ git logs & PR history.
 
 - Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499)
 - `#uninstall_package` host helper, to match `#install_package`
+- Now easily check a command's exit status by calling `Result.success?()` for a simple, truthy result. No need to validate the exit code manually.
 
 ### Changed
 
