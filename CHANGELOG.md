@@ -11,18 +11,22 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/3.37.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.0.0...master)
+
+# [4.0.0](https://github.com/puppetlabs/beaker/compare/3.37.0...4.0.0) - 2018-08-06
 
 ### Fixed
 
 - `host.rsync_to` throws `Beaker::Host::CommandFailure` if rsync call fails (BKR-463)
 - `host.rsync_to` throws `Beaker::Host::CommandFailure` if rsync does not exist on remote system (BKR-462)
 - `host.rsync_to` now check through configured SSH keys to use the first valid one
+- Updated some `Beaker::Host` methods to always return a `Result` object
 
 ### Added
 
 - Adds `Beaker::Host#chown`, `#chgrp`, and `#ls_ld` methods (BKR-1499)
 - `#uninstall_package` host helper, to match `#install_package`
+- `Host.uninstall_package` for FreeBSD
 - Now easily check a command's exit status by calling `Result.success?()` for a simple, truthy result. No need to validate the exit code manually.
 
 ### Changed
