@@ -15,8 +15,8 @@ git logs & PR history.
 
 ### Fixed
 
-- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync call fails (BKR-463)
-- `host.rsync_to` throws `Beaker::Host::CommandFailed` if rsync does not exist on remote system (BKR-462)
+- `host.rsync_to` throws `Beaker::Host::CommandFailure` if rsync call fails (BKR-463)
+- `host.rsync_to` throws `Beaker::Host::CommandFailure` if rsync does not exist on remote system (BKR-462)
 - `host.rsync_to` now check through configured SSH keys to use the first valid one
 
 ### Added
