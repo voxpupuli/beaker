@@ -33,15 +33,15 @@ Beaker will automatically load the appropriate hypervisors for any given hosts f
 
 The following hypervisor libraries were removed in 4.0:
 
-- [beaker-abs](github.com/puppetlabs/beaker-abs)
-- [beaker-aws](github.com/puppetlabs/beaker-aws)
-- [beaker-docker](github.com/puppetlabs/beaker-docker)
-- [beaker-google](github.com/puppetlabs/beaker-google)
-- [beaker-openstack](github.com/puppetlabs/beaker-openstack)
-- [beaker-vagrant](github.com/puppetlabs/beaker-vagrant)
-- [beaker-vcloud](github.com/puppetlabs/beaker-vcloud)
-- [beaker-vmpooler](github.com/puppetlabs/beaker-vmpooler)
-- [beaker-vmware](github.com/puppetlabs/beaker-vmware)
+- [beaker-abs](https://github.com/puppetlabs/beaker-abs)
+- [beaker-aws](https://github.com/puppetlabs/beaker-aws)
+- [beaker-docker](https://github.com/puppetlabs/beaker-docker)
+- [beaker-google](https://github.com/puppetlabs/beaker-google)
+- [beaker-openstack](https://github.com/puppetlabs/beaker-openstack)
+- [beaker-vagrant](https://github.com/puppetlabs/beaker-vagrant)
+- [beaker-vcloud](https://github.com/puppetlabs/beaker-vcloud)
+- [beaker-vmpooler](https://github.com/puppetlabs/beaker-vmpooler)
+- [beaker-vmware](https://github.com/puppetlabs/beaker-vmware)
 
 For acceptance testing, beaker-vmpooler, beaker-aws, and beaker-abs have been retained as development dependencies. These will be removed as the CI pipelines is upgraded, so *do not rely on them being there for your project*.
 
