@@ -1,6 +1,6 @@
 # How To Upgrade from 3.y to 4.0
 
-This is a guide detailing all the issues to be aware of, and to help people make any changes that you might need to move from beaker 2.y to 3.0. To test out beaker 4.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md) to ensure this new major release does not break your existing testing.
+This is a guide detailing all the issues to be aware of, and to help people make any changes that you might need to move from beaker 3.y to 4.0. To test out beaker 4.0.0, we recommend implementing the strategy outlined [here](test_arbitrary_beaker_versions.md) to ensure this new major release does not break your existing testing.
 
 ## PE Dependency
 
