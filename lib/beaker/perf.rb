@@ -50,7 +50,7 @@ module Beaker
         @logger.perf_output("Enabling aggressive sysstat polling")
         if host['platform'] =~ /debian|ubuntu/
           host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
-        elsif host['platform'] =~ /centos|el|fedora|oracle|redhats|scientific/
+        elsif host['platform'] =~ /centos|el|fedora|oracle|redhat|scientific/
           host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
         end
       end

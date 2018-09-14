@@ -561,16 +561,9 @@ module Beaker
 
       block_on host do |host|
         skip_msg = host.skip_set_env?
-        if skip_msg.nil?
-          env = construct_env(host, opts)
-          logger.debug("setting local environment on #{host.name}")
-          if host['platform'] =~ /windows/ and host.is_cygwin?
-            env['CYGWIN'] = 'nodosfilewarning'
-          end
-          host.ssh_permit_user_environment
-          host.ssh_set_user_environment(env)
-        else
-          logger.debug(skip_msg)
+        unless skip_msg.nil?
+            logger.debug( skip_msg )
+            next
         end
 
         if skip_msg.nil?
