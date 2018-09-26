@@ -30,6 +30,7 @@ module Beaker
     class_option :'pre-cleanup', :type => :string, :group => 'Beaker run'
     class_option :'provision', :type => :boolean, :group => 'Beaker run'
     class_option :'preserve-hosts', :type => :string, :group => 'Beaker run'
+    class_option :'preserve-state', :type => :boolean, :group => 'Beaker run'
     class_option :'root-keys', :type => :boolean, :group => 'Beaker run'
     class_option :keyfile, :type => :string, :group => 'Beaker run'
     class_option :timeout, :type => :string, :group => 'Beaker run'
@@ -202,6 +203,15 @@ module Beaker
       end
 
       @cli.execute!
+
+      if options['preserve-state']
+        @cli.logger.notify 'updating HOSTS key in subcommand_options'
+        hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
+        options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
+        options_storage.transaction do
+          options_storage['HOSTS'] = hosts
+        end
+      end
     end
 
     desc "destroy", "Destroys the provisioned VMs"

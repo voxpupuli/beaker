@@ -13,6 +13,9 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.0.0...master)
 
+### Added
+- `--preserve-state` flag will preserve a given host options hash across subcommand runs(BKR-1541)
+
 ### Changed
 
 - Added additional tests for EL-like systems and added 'redhat' support where necessary

@@ -61,6 +61,14 @@ module Beaker
             @cmd_options[:pre_cleanup] = value
           end
 
+          opts.on '--preserve-state',
+                  'Preserve the state of the host vm hash for a beaker exec run',
+                  'This adds any additional host settings that are defined',
+                  'during a beaker subcommand run to .beaker/subcommand_options.yaml,',
+                  'allowing us to preserve state across beaker subcommand runs.' do |bool|
+            @cmd_options[:preserve_state] = bool
+          end
+
           opts.on '--[no-]provision',
                   'Do not provision vm images before testing',
                   '(default: true)' do |bool|

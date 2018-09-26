@@ -43,6 +43,7 @@ module Beaker
         'pre-cleanup',
         'provision',
         'preserve-hosts',
+        'preserve-state',
         'root-keys',
         'keyfile',
         'timeout',
@@ -247,6 +248,32 @@ module Beaker
         expect {
           subcommand.exec('pre-suite,tests/whoops')
         }.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
+      end
+
+
+      let( :yaml_store_mock ) { double('yaml_store_mock') }
+      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
+      let( :cleaned_hosts ) {double()}
+      it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
+        allow(yaml_store_mock).to receive(:[]).and_return(false)
+        allow(subcommand).to receive(:options).and_return('preserve-state' => true)
+
+        expect(subcommand.cli).to receive(:parse_options).and_return(subcommand.cli)
+        expect(subcommand.cli).to receive(:combined_instance_and_options_hosts).and_return(host_hash)
+        expect(SubcommandUtil).to receive(:sanitize_options_for_save).and_return(cleaned_hosts)
+        expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_OPTIONS).and_return(yaml_store_mock)
+        expect(yaml_store_mock).to receive(:transaction).and_yield.once
+        expect(yaml_store_mock).to receive(:[]=).with('HOSTS', cleaned_hosts)
+        expect(subcommand.cli.logger).to receive(:notify)
+
+        subcommand.exec('tests')
+      end
+
+      it 'does not attempt preserve state if the flag is not passed in' do
+        subcommand.exec('tests')
+
+        expect(SubcommandUtil).to receive(:sanitize_options_for_save).never
+        expect(subcommand.cli.options['preserve-state']).to be_nil
       end
     end
 
