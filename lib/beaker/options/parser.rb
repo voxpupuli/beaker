@@ -291,8 +291,11 @@ module Beaker
         $stdout.puts dne_message
         require 'beaker-hostgenerator'
 
+        host_generator_options = [ @options[:hosts_file] ]
+        host_generator_options += [ '--hypervisor', ENV['BEAKER_HYPERVISOR'] ] if ENV['BEAKER_HYPERVISOR']
+
         hosts_file_content = begin
-          bhg_cli = BeakerHostGenerator::CLI.new( [ @options[:hosts_file] ] )
+          bhg_cli = BeakerHostGenerator::CLI.new(host_generator_options)
           bhg_cli.execute
         rescue BeakerHostGenerator::Exceptions::Error,
           BeakerHostGenerator::Exceptions::InvalidNodeSpecError => error

@@ -376,11 +376,44 @@ module Beaker
             ).and_return( cli_execute_return )
             expect( BeakerHostGenerator::CLI ).to receive(
               :new
+            ).with(
+              [ 'notafile.yml' ]
             ).and_return( mock_beaker_hostgenerator_cli )
             allow( Beaker::Options::HostsFileParser ).to receive(
               :parse_hosts_string
             ).with( cli_execute_return )
             parser.parse_hosts_options
+          end
+
+          it 'calls beaker-hostgenerator to get hosts information with a default hypervisor' do
+            old_beaker_hypervisor = ENV['BEAKER_HYPERVISOR']
+            begin
+              ENV['BEAKER_HYPERVISOR'] = 'docker'
+
+              parser.instance_variable_set( :@options, {
+                :hosts_file => 'notafile.yml'
+              } )
+              allow( Beaker::Options::HostsFileParser ).to receive(
+                :parse_hosts_file
+              ).and_raise( Errno::ENOENT )
+
+              mock_beaker_hostgenerator_cli = Object.new
+              cli_execute_return = 'job150865'
+              expect( mock_beaker_hostgenerator_cli ).to receive(
+                :execute
+              ).and_return( cli_execute_return )
+              expect( BeakerHostGenerator::CLI ).to receive(
+                :new
+              ).with(
+                [ 'notafile.yml', '--hypervisor', 'docker' ]
+              ).and_return( mock_beaker_hostgenerator_cli )
+              allow( Beaker::Options::HostsFileParser ).to receive(
+                :parse_hosts_string
+              ).with( cli_execute_return )
+              parser.parse_hosts_options
+            ensure
+              ENV['BEAKER_HYPERVISOR'] = old_beaker_hypervisor
+            end
           end
 
           it 'sets the :hosts_file_generated flag to signal others when needed' do
