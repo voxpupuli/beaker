@@ -562,22 +562,30 @@ module Beaker
       block_on host do |host|
         skip_msg = host.skip_set_env?
         unless skip_msg.nil?
-            logger.debug( skip_msg )
-            next
+          logger.debug( skip_msg )
+          next
         end
 
-        if skip_msg.nil?
-          #close the host to re-establish the connection with the new sshd settings
-          host.close
+        env = construct_env(host, opts)
 
-          # print out the working env
-          if host.is_powershell?
-            host.exec(Command.new("SET"))
-          else
-            host.exec(Command.new("cat #{host[:ssh_env_file]}"))
-          end
+        logger.debug("setting local environment on #{host.name}")
+
+        if host['platform'] =~ /windows/ && host.is_cygwin?
+         env['CYGWIN'] = 'nodosfilewarning'
         end
 
+        host.ssh_permit_user_environment
+        host.ssh_set_user_environment(env)
+
+        #close the host to re-establish the connection with the new sshd settings
+        host.close
+
+        # print out the working env
+        if host.is_powershell?
+          host.exec(Command.new("SET"))
+        else
+          host.exec(Command.new("cat #{host[:ssh_env_file]}"))
+        end
       end
     end
 
