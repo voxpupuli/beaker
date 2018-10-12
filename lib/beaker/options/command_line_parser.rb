@@ -194,6 +194,12 @@ module Beaker
             @cmd_options[:fail_mode] = mode =~ /stop/ ? 'fast' :  mode
           end
 
+          opts.on '--test-results-file /FILE/TO/SAVE/TO.rb',
+                  'Path to persist errors/failures from the current run to',
+                  '(default: not saved)' do |value|
+            @cmd_options[:test_results_file] = value
+          end
+
           opts.on '--[no-]ntp',
                   'Sync time on SUTs before testing',
                   '(default: false)' do |bool|

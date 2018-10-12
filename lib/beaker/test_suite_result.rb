@@ -150,6 +150,17 @@ module Beaker
       "  Test Case #{test_case.path} #{test_reported}"
     end
 
+    # Saves failure and error cases as a JSON file for only-failures processing
+    #
+    # @param [String] filepath  Where to put the results
+    #
+    def persist_test_results(filepath)
+      return if filepath.empty?
+
+      results = @test_cases.select { |c| [:fail, :error].include? c.test_status }.map(&:path)
+      File.open(filepath, 'w') { |file| file.puts JSON.dump(results) }
+    end
+
     # Writes Junit XML of this {TestSuiteResult}
     #
     # @param [String] xml_file      Path to the XML file (from Beaker's running directory)

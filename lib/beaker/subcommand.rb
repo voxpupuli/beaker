@@ -43,6 +43,7 @@ module Beaker
     class_option :'log-prefix', :type => :string, :group => 'Beaker run'
     class_option :'dry-run', :type => :boolean, :group => 'Beaker run'
     class_option :'fail-mode', :type => :string, :group => 'Beaker run'
+    class_option :'test-results-file', :type => :string, :group => 'Beaker run'
     class_option :ntp, :type => :boolean, :group => 'Beaker run'
     class_option :'repo-proxy', :type => :boolean, :group => 'Beaker run'
     class_option :'add-el-extras', :type => :boolean, :group => 'Beaker run'
