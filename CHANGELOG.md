@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.0.0...master)
 
+### Changed
+
+- Added additional tests for EL-like systems and added 'redhat' support where necessary
+
 # [4.0.0](https://github.com/puppetlabs/beaker/compare/3.37.0...4.0.0) - 2018-08-06
 
 ### Fixed
@@ -94,10 +98,6 @@ git logs & PR history.
 ### Changed
 
 - Use relative paths for beaker exec
-
-### Changed
-
-- Added additional tests for EL-like systems and added 'redhat' support where necessary
 
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
