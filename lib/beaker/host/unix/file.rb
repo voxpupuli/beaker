@@ -80,7 +80,7 @@ module Unix::File
   # @return [String] Path to package config dir
   def package_config_dir
     case self['platform']
-    when /fedora|el-|centos/
+    when /fedora|el-|redhat|centos/
       '/etc/yum.repos.d/'
     when /sles/
       '/etc/zypp/repos.d/'
@@ -105,8 +105,9 @@ module Unix::File
     repo_filename = "pl-%s-%s-" % [ package_name, build_version ]
 
     case variant
-    when /fedora|el|centos|cisco_nexus|cisco_ios_xr|sles/
-      variant = 'el' if variant == 'centos'
+    when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|sles/
+      variant = 'el' if ['centos', 'redhat'].include?(variant)
+
       if variant == 'cisco_nexus'
         variant = 'cisco-wrlinux'
         version = '5'
@@ -144,7 +145,7 @@ module Unix::File
   # @return [String] Type of repo (rpm|deb)
   def repo_type
     case self['platform']
-    when /fedora|el-|centos|sles/
+    when /fedora|el-|redhat|centos|sles/
       'rpm'
     when /debian|ubuntu|cumulus|huaweios/
       'deb'

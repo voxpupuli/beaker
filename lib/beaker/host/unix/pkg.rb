@@ -39,7 +39,7 @@ module Unix::Pkg
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
-      when /cisco|fedora|centos|eos|el-/
+      when /cisco|fedora|centos|redhat|eos|el-/
         result = execute("rpm -q #{name}", opts) { |result| result }
       when /ubuntu|debian|cumulus|huaweios/
         result = execute("dpkg -s #{name}", opts) { |result| result }
@@ -82,7 +82,7 @@ module Unix::Pkg
           name = "#{name}-#{version}"
         end
         execute("dnf -y #{cmdline_args} install #{name}", opts)
-      when /cisco|fedora|centos|eos|el-/
+      when /cisco|fedora|centos|redhat|eos|el-/
         if version
           name = "#{name}-#{version}"
         end
@@ -170,7 +170,7 @@ module Unix::Pkg
         @logger.debug("Package uninstallation not supported on rhel4")
       when /edora-(2[2-9])/
         execute("dnf -y #{cmdline_args} remove #{name}", opts)
-      when /cisco|fedora|centos|eos|el-/
+      when /cisco|fedora|centos|redhat|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
       when /ubuntu|debian|cumulus|huaweios/
         execute("apt-get purge #{cmdline_args} -y #{name}", opts)
@@ -200,7 +200,7 @@ module Unix::Pkg
         @logger.debug("Package upgrade is not supported on rhel4")
       when /fedora-(2[2-9])/
         execute("dnf -y #{cmdline_args} update #{name}", opts)
-      when /cisco|fedora|centos|eos|el-/
+      when /cisco|fedora|centos|redhat|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}", opts)
       when /ubuntu|debian|cumulus|huaweios/
         update_apt_if_needed
@@ -285,7 +285,7 @@ module Unix::Pkg
     case self['platform']
       when /el-4/
         @logger.debug("Package repo deploy is not supported on rhel4")
-      when /fedora|centos|eos|el-/
+      when /fedora|centos|redhat|eos|el-/
         deploy_yum_repo(path, name, version)
       when /ubuntu|debian|cumulus|huaweios/
         deploy_apt_repo(path, name, version)
@@ -451,8 +451,8 @@ module Unix::Pkg
 
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos|sles)$/
-      variant = ((variant == 'centos') ? 'el' : variant)
+    when /^(fedora|el|centos|redhat|sles)$/
+      variant = ((['centos', 'redhat'].include?(variant)) ? 'el' : variant)
       release_file = "/repos/#{variant}/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*.rpm"
       download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
     when /^(debian|ubuntu|cumulus)$/
@@ -509,7 +509,7 @@ module Unix::Pkg
   def install_local_package(onhost_package_file, onhost_copy_dir = nil)
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos)$/
+    when /^(fedora|el|redhat|centos)$/
       command_name = 'yum'
       command_name = 'dnf 'if variant == 'fedora' && version > 21 && version <= 29
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
@@ -539,7 +539,7 @@ module Unix::Pkg
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos|sles|debian|ubuntu|cumulus)$/
+    when /^(fedora|el|centos|redhat|sles|debian|ubuntu|cumulus)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball

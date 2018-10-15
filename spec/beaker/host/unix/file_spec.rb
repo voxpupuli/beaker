@@ -37,9 +37,11 @@ module Beaker
 
     describe '#repo_type' do
 
-      it 'returns correctly for el-based platforms' do
-        @platform = 'centos-6-x86_64'
-        expect( instance.repo_type ).to be === 'rpm'
+      ['centos','redhat'].each do |platform|
+        it "returns correctly for platform '#{platform}'" do
+          @platform = "#{platform}-5-x86_64"
+          expect( instance.repo_type ).to be === 'rpm'
+        end
       end
 
       it 'returns correctly for debian-based platforms' do
@@ -57,9 +59,11 @@ module Beaker
 
     describe '#package_config_dir' do
 
-      it 'returns correctly for el-based platforms' do
-        @platform = 'centos-6-x86_64'
-        expect( instance.package_config_dir ).to be === '/etc/yum.repos.d/'
+      ['centos','redhat'].each do |platform|
+        it "returns correctly for platform '#{platform}'" do
+          @platform = "#{platform}-5-x86_64"
+          expect( instance.package_config_dir ).to be === '/etc/yum.repos.d/'
+        end
       end
 
       it 'returns correctly for debian-based platforms' do
@@ -82,11 +86,13 @@ module Beaker
 
     describe '#repo_filename' do
 
-      it 'sets the el portion correctly for centos platforms' do
-        @platform = 'centos-5-x86_64'
-        allow( instance ).to receive( :is_pe? ) { false }
-        filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
-        expect( filename ).to match( /sion7\-el\-/ )
+      ['centos','redhat'].each do |platform|
+        it "sets the el portion correctly for '#{platform}'" do
+          @platform = "#{platform}-5-x86_64"
+          allow( instance ).to receive( :is_pe? ) { false }
+          filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
+          expect( filename ).to match( /sion7\-el\-/ )
+        end
       end
 
       it 'sets the sles portion correctly for sles platforms' do

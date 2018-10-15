@@ -95,6 +95,10 @@ git logs & PR history.
 
 - Use relative paths for beaker exec
 
+### Changed
+
+- Added additional tests for EL-like systems and added 'redhat' support where necessary
+
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
 ### Changed
