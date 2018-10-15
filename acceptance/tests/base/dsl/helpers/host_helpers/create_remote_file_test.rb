@@ -112,7 +112,12 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      result = create_remote_file default, remote_filename, contents, { :protocol => "rsync" }
+      repeat_fibonacci_style_for(10) do
+        result = create_remote_file(
+          default, remote_filename, contents, { :protocol => "rsync" }
+        ) # return of block is whether or not we're done repeating
+        result.success?
+      end
 
       fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
         "default" => default,
