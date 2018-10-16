@@ -383,4 +383,77 @@ describe ClassMixedWithDSLHelpers do
       subject.uninstall_package( host, 'pkg_name' )
     end
   end
+
+  describe '#write_hosts' do
+    def stub_yaml_store(file, contents)
+      expect(YAML::Store).to receive(:new).with(file).and_return(contents)
+      expect(contents).to receive(:transaction).and_yield
+    end
+
+    let(:file) { 'hosts.yaml' }
+
+    context 'when the file does not exist' do
+      before(:each) do
+        allow(File).to receive(:exist?).with(file).and_return(false)
+      end
+
+      it 'creates the file and writes the hosts' do
+        contents = {}
+
+        stub_yaml_store(file, contents)
+
+        expected_contents = {}
+        expected_contents['HOSTS'] = {}
+        hosts.each do |host|
+          expected_contents['HOSTS'][host.hostname] = JSON.parse(host.host_hash.to_json)
+        end
+
+        subject.write_hosts(hosts, file)
+
+        expect(contents).to eql(expected_contents)
+      end
+    end
+
+    context 'when the file does exist' do
+      let(:contents) do
+        {
+          'HOSTS' => {
+            master.hostname => master.host_hash,
+            agent.hostname  => agent.host_hash
+          }
+        }
+      end
+
+      before(:each) do
+        allow(File).to receive(:exist?).with(file).and_return(true)
+        allow(YAML).to receive(:load_file).with(file).and_return(contents)
+
+        stub_yaml_store(file, contents)
+      end
+
+      it "adds new hosts" do
+        input_hosts = hosts - [master, agent]
+
+        expected_contents = contents.dup
+        input_hosts.each do |host|
+          expected_contents['HOSTS'][host.hostname] = JSON.parse(host.host_hash.to_json)
+        end
+
+        subject.write_hosts(input_hosts, file)
+
+        expect(contents).to eql(expected_contents)
+      end
+
+      it "updates existing hosts" do
+        master['some_key'] = 'some_value'
+
+        expected_contents = contents.dup
+        expected_contents['HOSTS'][master.hostname] = JSON.parse(master.host_hash.to_json)
+
+        subject.write_hosts([master], file)
+
+        expect(contents).to eql(expected_contents)
+      end
+    end
+  end
 end

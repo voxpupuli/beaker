@@ -582,6 +582,51 @@ module Beaker
             end
           end
         end
+
+        # Write the specified set of hosts to the given YAML file.
+        # If the file exists, then only the modified hosts in its
+        # 'HOSTS' key will be overwritten, and any new hosts will
+        # be added to it. Otherwise, the file will be created and
+        # will contain only the 'HOSTS' key with the specified set
+        # of hosts.
+        #
+        # Note that this helper is especially useful with the beaker
+        # subcommand workflow because it lets you preserve hosts across
+        # subcommands. For example, you can use it to ensure that any
+        # type defaults set in the pre-suite carry over to the tests.
+        # To use this capability, invoke the helper as
+        #     if File.exist?(Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
+        #       write_hosts(hosts, Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
+        #     end
+        # in your tests.
+        #
+        # @param [Host, Array<Host>, String, Symbol] hosts    One or more hosts to act upon,
+        #                            or a role (String or Symbol) that identifies one or more hosts.
+        # @param [String] file The file to write to. This should typically be an existent options file
+        #                 such as Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS
+        def write_hosts(hosts, file)
+          hosts_hash = {}
+          if File.exist?(file)
+            contents = YAML.load_file(file)
+            hosts_hash = contents['HOSTS'] || {}
+          end
+
+          block_on hosts do |host|
+            # host_hash returns an object that is a subclass of a simple hash. This means
+            # that the YAML library will add a tag to the object. Thus to avoid this
+            # unnecessary tag, we use the below hack to coerce host_hash into a simple
+            # hash.
+            #
+            # See http://stackoverflow.com/questions/18178098/how-do-i-have-ruby-yaml-dump-a-hash-subclass-as-a-simple-hash
+            hosts_hash[host.hostname] = JSON.parse(host.host_hash.to_json)
+          end
+
+          storage = YAML::Store.new(file)
+          storage.transaction do
+            logger.notify("Writing the hosts to #{file}")
+            storage['HOSTS'] = hosts_hash
+          end
+        end
       end
     end
   end
