@@ -125,14 +125,21 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
         repeat_fibonacci_style_for(10) do
-          result = rsync_to hosts, local_filename, remote_tmpdir
-          return result.success? if result.is_a? Rsync::Result
+          begin
+            result = rsync_to hosts, local_filename, remote_tmpdir
+            return result.success? if result.is_a? Rsync::Result
 
-          result.each do |individual_result| 
-            next if individual_result.success?
-            return false
+            result.each do |individual_result| 
+              next if individual_result.success?
+              return false
+            end
+            true
+          rescue Beaker::Host::CommandFailure => err
+            logger.info("Rsync threw command failure, details: ")
+            logger.info("  #{err}")
+            logger.info("continuing back-off execution")
+            false
           end
-          true
         end
 
         hosts.each do |host|
