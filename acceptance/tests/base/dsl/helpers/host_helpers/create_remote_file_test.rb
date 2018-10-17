@@ -113,10 +113,17 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       contents = fixture_contents("simple_text_file")
 
       repeat_fibonacci_style_for(10) do
-        result = create_remote_file(
-          default, remote_filename, contents, { :protocol => "rsync" }
-        ) # return of block is whether or not we're done repeating
-        result.success?
+        begin
+          result = create_remote_file(
+            default, remote_filename, contents, { :protocol => "rsync" }
+          ) # return of block is whether or not we're done repeating
+          result.success?
+        rescue Beaker::Host::CommandFailure => err
+          logger.info("Rsync threw command failure, details: ")
+          logger.info("  #{err}")
+          logger.info("continuing back-off execution")
+          false
+        end
       end
 
       fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
