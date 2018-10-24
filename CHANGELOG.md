@@ -99,6 +99,10 @@ git logs & PR history.
 
 - Use relative paths for beaker exec
 
+### Changed
+
+- Test if puppet module is installed in '/' and avoid stripping of path seperator
+
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
 ### Changed

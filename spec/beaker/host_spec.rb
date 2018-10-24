@@ -489,6 +489,67 @@ module Beaker
           host.do_scp_to *args
         end
       end
+
+      context "using an ignore array with an absolute source path in host root" do
+        let( :source_path ) { '/puppetlabs-inifile' }
+        let( :target_path ) { '/etc/puppetlabs/modules/inifile' }
+
+        before :each do
+          test_dir = "#{source_path}/tests"
+          other_test_dir = "#{source_path}/tests/tests2"
+          another_test_dir = "#{source_path}/tests/tests3"
+
+          files = [
+              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+              '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+
+          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
+          @fileset3 = files.shuffle.map {|file| another_test_dir + '/' + file }
+
+          create_files( @fileset1 )
+          create_files( @fileset2 )
+          create_files( @fileset3 )
+        end
+
+        it "should create target dirs with correct path seperator" do
+          create_files(['source'])
+          exclude_file = '04_ValidateSignCert.rb'
+          logger = host[:logger]
+          conn = double(:connection)
+          @options = { :logger => logger }
+          host.instance_variable_set :@connection, conn
+          args = [ source_path, target_path, {:ignore => [exclude_file]} ]
+          conn_args = args
+
+          allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 + @fileset3)
+
+          created_target_path = File.join(target_path, File.basename(source_path))
+          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests")
+          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests/tests2")
+          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests/tests3")
+
+          (@fileset1 + @fileset2 + @fileset3).each do |file|
+            if file !~ /#{exclude_file}/
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
+              expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+            else
+              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              conn_args = file_args
+              expect( conn ).to_not receive(:scp_to).with( *conn_args )
+            end
+          end
+          allow( conn ).to receive(:ip).and_return(host['ip'])
+          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow( conn ).to receive(:hostname).and_return(host.name)
+
+          host.do_scp_to *args
+        end
+      end
+
       context "using an ignore array" do
 
         before :each do
