@@ -11,14 +11,18 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.0.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.1.0...master)
+
+# [4.1.0](https://github.com/puppetlabs/beaker/compare/4.0.0...4.1.0) - 2018.10.25
 
 ### Added
+
 - `--preserve-state` flag will preserve a given host options hash across subcommand runs(BKR-1541)
 
 ### Changed
 
 - Added additional tests for EL-like systems and added 'redhat' support where necessary
+- Test if puppet module is installed in '/' and avoid stripping of path seperator
 
 # [4.0.0](https://github.com/puppetlabs/beaker/compare/3.37.0...4.0.0) - 2018-08-06
 
@@ -101,10 +105,6 @@ git logs & PR history.
 ### Changed
 
 - Use relative paths for beaker exec
-
-### Changed
-
-- Test if puppet module is installed in '/' and avoid stripping of path seperator
 
 # [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
