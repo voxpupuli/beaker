@@ -3,6 +3,30 @@ require "rsync"
 
 test_name "dsl::helpers::host_helpers #rsync_to" do
 
+  def rsync_to_with_backups hosts, local_filename, remote_dir
+    result = nil
+    repeat_fibonacci_style_for(10) do
+      begin
+        result = rsync_to(
+          hosts, local_filename, remote_dir
+        ) # return of block is whether or not we're done repeating
+        return result.success? if result.is_a? Rsync::Result
+
+        result.each do |individual_result| 
+          next if individual_result.success?
+          return false
+        end
+        true
+      rescue Beaker::Host::CommandFailure => err
+        logger.info("create_remote_file threw command failure, details: ")
+        logger.info("  #{err}")
+        logger.info("continuing back-off execution")
+        false
+      end
+    end
+    result
+  end
+
   # NOTE: there does not seem to be a reliable way to confine to cygwin hosts.
   confine_block :to, :platform => /windows/ do
 
@@ -99,7 +123,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         remote_tmpdir = default.tmpdir()
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-        result = rsync_to default, local_filename, remote_tmpdir
+        result = rsync_to_with_backups default, local_filename, remote_tmpdir
 
         fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
           "result"          => result,
@@ -124,23 +148,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         on hosts, "mkdir -p #{remote_tmpdir}"
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
-        repeat_fibonacci_style_for(10) do
-          begin
-            result = rsync_to hosts, local_filename, remote_tmpdir
-            return result.success? if result.is_a? Rsync::Result
-
-            result.each do |individual_result| 
-              next if individual_result.success?
-              return false
-            end
-            true
-          rescue Beaker::Host::CommandFailure => err
-            logger.info("Rsync threw command failure, details: ")
-            logger.info("  #{err}")
-            logger.info("continuing back-off execution")
-            false
-          end
-        end
+        result = rsync_to_with_backups(hosts, local_filename, remote_tmpdir)
 
         hosts.each do |host|
           fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",

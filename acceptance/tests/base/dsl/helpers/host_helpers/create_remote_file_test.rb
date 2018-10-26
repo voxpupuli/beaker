@@ -2,6 +2,32 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
 
+  def create_remote_file_with_backups host, remote_filename, contents, opts={}
+    result = nil
+    repeat_fibonacci_style_for(10) do
+      begin
+        result = create_remote_file(
+          host, remote_filename, contents, opts
+        ) # return of block is whether or not we're done repeating
+        if result.is_a?(Rsync::Result) || result.is_a?(Beaker::Result)
+          return result.success?
+        end
+
+        result.each do |individual_result| 
+          next if individual_result.success?
+          return false
+        end
+        true
+      rescue Beaker::Host::CommandFailure => err
+        logger.info("create_remote_file threw command failure, details: ")
+        logger.info("  #{err}")
+        logger.info("continuing back-off execution")
+        false
+      end
+    end
+    result
+  end
+
   if test_scp_error_on_close?
     step "#create_remote_file fails when the remote path does not exist" do
       assert_raises Beaker::Host::CommandFailure do
@@ -21,7 +47,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
-    create_remote_file default, remote_filename, contents
+    create_remote_file_with_backups default, remote_filename, contents
 
     remote_contents = on(default, "cat #{remote_filename}").stdout
     assert_equal contents, remote_contents
@@ -32,7 +58,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     remote_filename = File.join(remote_tmpdir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
-    create_remote_file default, remote_filename, contents, { :protocol => "scp" }
+    create_remote_file_with_backups default, remote_filename, contents, { :protocol => "scp" }
 
     remote_contents = on(default, "cat #{remote_filename}").stdout
     assert_equal contents, remote_contents
@@ -49,7 +75,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     remote_filename = File.join(remote_dir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
-    create_remote_file hosts, remote_filename, contents
+    create_remote_file_with_backups hosts, remote_filename, contents
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
@@ -68,7 +94,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     remote_filename = File.join(remote_dir, "testfile.txt")
     contents = fixture_contents("simple_text_file")
 
-    create_remote_file hosts, remote_filename, contents, { :protocol => 'scp' }
+    create_remote_file_with_backups hosts, remote_filename, contents, { :protocol => 'scp' }
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
@@ -112,19 +138,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      repeat_fibonacci_style_for(10) do
-        begin
-          result = create_remote_file(
-            default, remote_filename, contents, { :protocol => "rsync" }
-          ) # return of block is whether or not we're done repeating
-          result.success?
-        rescue Beaker::Host::CommandFailure => err
-          logger.info("Rsync threw command failure, details: ")
-          logger.info("  #{err}")
-          logger.info("continuing back-off execution")
-          false
-        end
-      end
+      create_remote_file_with_backups(
+        default, remote_filename, contents, { :protocol => "rsync" }
+      )
 
       fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
         "default" => default,
@@ -149,7 +165,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      result = create_remote_file hosts, remote_filename, contents, { :protocol => 'rsync' }
+      result = create_remote_file_with_backups(
+        hosts, remote_filename, contents, { :protocol => 'rsync' }
+      )
 
       hosts.each do |host|
         fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
