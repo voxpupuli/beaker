@@ -12,13 +12,12 @@ module Beaker
     # - only if we are running with ---provision
     # - only if we have a hypervisor
     # - only if either the specific hosts has no specification or has 'provision' in its config
-    # - always if it is a vagrant or docker box (vagrant boxes are always provisioned
-    #     as they always need ssh key hacking. docker boxes need to have docker_container_name
-    #     specified)
+    # - always if it is a vagrant box (vagrant boxes are always provisioned as
+    #   they always need ssh key hacking.)
     def provision? options, host
       command_line_says = options[:provision]
       host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true)
-      (command_line_says && host_says) or (host['hypervisor'] =~/(vagrant|docker)/)
+      (command_line_says && host_says) or (host['hypervisor'] =~/(vagrant)/)
     end
 
     attr_accessor :hosts, :hypervisors
