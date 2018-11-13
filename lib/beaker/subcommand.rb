@@ -83,14 +83,7 @@ module Beaker
 
       @cli.parse_options
 
-      # delete unnecessary keys for saving the options
-      options_to_write = @cli.configured_options
-      # Remove keys we don't want to save
-      [:timestamp, :logger, :command_line, :beaker_version, :hosts_file].each do |key|
-        options_to_write.delete(key)
-      end
-
-      options_to_write = SubcommandUtil.sanitize_options_for_save(options_to_write)
+      options_to_write = SubcommandUtil.sanitize_options_for_save(@cli.configured_options)
 
       @cli.logger.notify 'Writing configured options to disk'
       File.open(SubcommandUtil::SUBCOMMAND_OPTIONS, 'w') do |f|

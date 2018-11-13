@@ -104,6 +104,42 @@ module Beaker
         end
       end
 
+      describe 'prune_unpersisted' do
+        let(:good_options) do
+          { user: 'root', roles: ['agent'] }
+        end
+
+        let(:bad_options) do
+          { logger: Beaker::Logger.new, timestamp: Time.now }
+        end
+
+        let(:initial_options) do
+          Beaker::Options::OptionsHash.new.merge(good_options.merge(bad_options))
+        end
+
+        it 'removes unwanted keys from an options hash' do
+          result = subject.prune_unpersisted(initial_options)
+          good_options.keys.each { |key| expect(result).to have_key(key) }
+          bad_options.keys.each { |key| expect(result).not_to have_key(key) }
+        end
+
+        it 'recurses to remove any nested unwanted keys' do
+          opts = initial_options.merge(child: initial_options.merge(child: initial_options))
+          result = subject.prune_unpersisted(opts)
+
+          good_options.keys.each do |key|
+            expect(result).to have_key(key)
+            expect(result[:child]).to have_key(key)
+            expect(result[:child][:child]).to have_key(key)
+          end
+
+          bad_options.keys.each do |key|
+            expect(result).not_to have_key(key)
+            expect(result[:child]).not_to have_key(key)
+            expect(result[:child][:child]).not_to have_key(key)
+          end
+        end
+      end
     end
   end
 end

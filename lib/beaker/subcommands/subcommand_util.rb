@@ -16,10 +16,25 @@ module Beaker
       SUBCOMMAND_STATE = Pathname("#{CONFIG_DIR}/.subcommand_state.yaml")
       PERSISTED_HOSTS = Pathname("#{CONFIG_DIR}/.hosts.yaml")
       PERSISTED_HYPERVISORS = Pathname("#{CONFIG_DIR}/.hypervisors.yaml")
+      # These options should not be part of persisted subcommand state
+      UNPERSISTED_OPTIONS = [:beaker_version, :command_line, :hosts_file, :logger, :password_prompt, :timestamp]
 
       def self.execute_subcommand?(arg0)
         return false if arg0.nil?
         (Beaker::Subcommand.instance_methods(false) << :help).include? arg0.to_sym
+      end
+
+      def self.prune_unpersisted(options)
+        UNPERSISTED_OPTIONS.each do |unpersisted_key|
+          options.each do |key, value|
+            if key == unpersisted_key
+              options.delete(key)
+            elsif value.is_a?(Hash)
+              options[key] = self.prune_unpersisted(value) unless value.empty?
+            end
+          end
+        end
+        options
       end
 
       def self.sanitize_options_for_save(options)
@@ -27,7 +42,7 @@ module Beaker
         # hack is a way to force the options into the basic object types so that
         # an eventual YAML.dump or .to_yaml call doesn't add tags.
         # Relevant stackoverflow: http://stackoverflow.com/questions/18178098/how-do-i-have-ruby-yaml-dump-a-hash-subclass-as-a-simple-hash
-        JSON.parse(options.to_json)
+        JSON.parse(prune_unpersisted(options).to_json)
       end
 
       # Print a message to the console and exit with specified exit code, defaults to 1
