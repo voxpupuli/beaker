@@ -13,6 +13,10 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.1.0...master)
 
+### Added
+
+- `BEAKER_HYPERVISOR` environment variable to choose the beaker-hostgenerator hypervisor
+
 # [4.1.0](https://github.com/puppetlabs/beaker/compare/4.0.0...4.1.0) - 2018.10.25
 
 ### Added

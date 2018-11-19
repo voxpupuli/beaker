@@ -89,7 +89,27 @@ end
 You can now run this with
 
 ```console
-    $ beaker --host redhat7-64ma.yaml --pre-suite install.rb --tests mytest.rb
+$ beaker --host redhat7-64ma.yaml --pre-suite install.rb --tests mytest.rb
+```
+
+## Creating the host configuration on at runtime
+
+When you don't want to store a static file, you can also let [beaker-hostgenerator](https://github.com/puppetlabs/beaker-hostgenerator) generate it on the fly. The filename is used as a host specification. A simple example is:
+
+```console
+$ beaker --host centos7-64 --pre-suite install.rb --tests mytest.rb
+```
+
+It's also possible to set the hypervisor and hostname:
+
+```console
+$ beaker --host 'centos7-64{hypervisor=docker,hostname=centos7-64.example.com}' --pre-suite install.rb --tests mytest.rb
+```
+
+An alternative way to set the hypervisor is `BEAKER_HYPERVISOR`:
+
+```console
+$ BEAKER_HYPERVISOR=docker beaker --host centos7-64 --pre-suite install.rb --tests mytest.rb
 ```
 
 Next up you may want to look at the [Beaker test for a module](../how_to/write_a_beaker_test_for_a_module.md) page.
