@@ -51,6 +51,7 @@ module Beaker
       @environment = {}
       @cmdexe = @options.delete(:cmdexe) || false
       @prepend_cmds = @options.delete(:prepend_cmds) || nil
+      @append_cmds = @options.delete(:append_cmds) || nil
 
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
@@ -69,21 +70,17 @@ module Beaker
     # @param [String] pc   An optional list of commands to prepend
     #
     # @return [String] This returns the fully formed command line invocation.
-    def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds
+    def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds, ac = @append_cmds
       env_string = host.environment_string( env )
       prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
-      if host[:platform] =~ /cisco/ && host[:user] != 'root'
-        append_command = '"'
-        cmd = cmd.gsub('"') { '\\"' }
-      end
+      append_commands = host.append_commands( cmd, ac, :cmd_exe => @cmdexe )
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
       if host[:platform] =~ /cisco_ios_xr/
-        cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string]
+        cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string, append_commands]
       else
-        cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string]
+        cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string, append_commands]
       end
-      cmd_line_array << append_command unless (cmd =~ /ntpdate/ && host[:platform] =~ /cisco_nexus/)
       cmd_line_array.compact.reject( &:empty? ).join( ' ' )
     end
 
