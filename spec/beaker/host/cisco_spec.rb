@@ -101,6 +101,71 @@ module Cisco
       end
     end
 
+    describe '#append_commands' do
+
+      context 'for cisco_nexus-7' do
+
+        before :each do
+          @platform = 'cisco_nexus-7-x86_64'
+        end
+
+        it 'appends `"` for commands' do
+          answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil when vsh command' do
+          answer_correct = nil
+          answer_test = host.append_commands( '/isan/bin/vsh -c foo' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns `"` when command contains vsh' do
+          answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command -c foo vsh' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil when ntpdate command' do
+          answer_correct = nil
+          answer_test = host.append_commands( 'fake/ntpdate/command foo' )
+          expect( answer_test ).to be === answer_correct
+        end
+      end
+
+      context 'for cisco_ios_xr-6' do
+
+        before :each do
+          @platform = 'cisco_ios_xr-6-x86_64'
+        end
+
+        it 'appends `"` for commands' do
+          answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil when vsh command' do
+          answer_correct = nil
+          answer_test = host.append_commands( '/isan/bin/vsh -c foo' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns `"` when command contains vsh' do
+          answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command -c foo vsh' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil when ntpdate command' do
+          answer_correct = nil
+          answer_test = host.append_commands( 'fake/ntpdate/command foo' )
+          expect( answer_test ).to be === answer_correct
+        end
+      end
+    end
+
     describe '#environment_string' do
 
       context 'for cisco_nexus-7' do

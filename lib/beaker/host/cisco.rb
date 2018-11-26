@@ -85,6 +85,19 @@ module Cisco
       prepend_cmds.strip
     end
 
+    # Gets the specific append commands as needed for this host
+    #
+    # @param [String] command Command to be executed
+    # @param [String] user_ac List of user-specified commands to append
+    # @param [Hash] opts optional parameters
+    #
+    # @return [String] Command string as needed for this host
+    def append_commands(command = '', user_ac = '', opts = {})
+      command.gsub('"') {'\\"'}
+      # vsh commands and ntpdate commands do not require an appended `"`
+      return '"' unless command =~ /ntpdate|\/isan\/bin\/vsh/
+    end
+
     # Construct the environment string for this command
     #
     # @param [Hash{String=>String}] env   An optional Hash containing

@@ -32,6 +32,7 @@ module Beaker
         @args    = [ 'to', 'the', 'baz' ]
         @options = { :foo => 'bar' }
         allow( host ).to receive( :prepend_commands ).and_return( 'aloha!' )
+        allow( host ).to receive( :append_commands ).and_return( '' )
 
         expect( cmd.cmd_line( host ) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz"
       end
@@ -41,6 +42,29 @@ module Beaker
         @args    = [ 'to', 'the', 'baz' ]
         @options = { :foo => 'bar' }
         allow( host ).to receive( :prepend_commands ).and_return( '' )
+        allow( host ).to receive( :append_commands ).and_return( '' )
+
+        expect( cmd.cmd_line( host ) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
+      end
+    end
+
+    describe '#:append_commands' do
+      it 'can append commands' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar' }
+        allow( host ).to receive( :prepend_commands ).and_return( 'aloha!' )
+        allow( host ).to receive( :append_commands ).and_return( 'moo cow' )
+
+        expect( cmd.cmd_line( host ) ).to be ==  "aloha! /usr/bin/blah --foo=bar to the baz moo cow"
+      end
+
+      it 'can handle no append_cmds' do
+        @command = '/usr/bin/blah'
+        @args    = [ 'to', 'the', 'baz' ]
+        @options = { :foo => 'bar' }
+        allow( host ).to receive( :prepend_commands ).and_return( '' )
+        allow( host ).to receive( :append_commands ).and_return( '' )
 
         expect( cmd.cmd_line( host ) ).to be ==  "/usr/bin/blah --foo=bar to the baz"
       end
@@ -91,6 +115,7 @@ module Beaker
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
       allow( h ).to receive( :prepend_commands ).and_return( '' )
+      allow( h ).to receive( :append_commands ).and_return( '' )
       h
     }
     let(:platform)    { @platform   || 'unix' }

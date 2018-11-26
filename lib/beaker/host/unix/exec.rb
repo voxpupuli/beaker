@@ -270,6 +270,17 @@ module Unix::Exec
     user_pc
   end
 
+  # Gets the specific append commands as needed for this host
+  #
+  # @param [String] command Command to be executed
+  # @param [String] user_ac List of user-specified commands to append
+  # @param [Hash] opts optional parameters
+  #
+  # @return [String] Command string as needed for this host
+  def append_commands(command = '', user_ac = '', opts = {})
+    user_ac
+  end
+
   # Fills the user SSH environment file.
   #
   # @param [Hash{String=>String}] env Environment variables to set on the system,
