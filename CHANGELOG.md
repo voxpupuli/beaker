@@ -11,11 +11,24 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.1.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.2.0...master)
+
+# [4.2.0](https://github.com/puppetlabs/beaker/compare/4.1.0...4.2.0) - 2018.11.28
 
 ### Added
 
 - `BEAKER_HYPERVISOR` environment variable to choose the beaker-hostgenerator hypervisor
+
+### Changed
+
+- Handling of vsh appended commands for cisco_nexus (BKR-1556)
+- Acceptance tests: Add backoffs to other create_remote_file test
+
+### Fixed
+
+- Don't always start a new container with docker (can be reused between invocations of the provision and exec beaker subcommands) (BKR-1547)
+- Recursively remove unpersisted subcommand options (BKR-1549)
+
 
 # [4.1.0](https://github.com/puppetlabs/beaker/compare/4.0.0...4.1.0) - 2018.10.25
 
