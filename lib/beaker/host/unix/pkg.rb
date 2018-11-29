@@ -514,7 +514,7 @@ module Unix::Pkg
       command_name = 'dnf 'if variant == 'fedora' && version > 21 && version <= 29
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(sles)$/
-      execute("rpm -ihv #{onhost_package_file}")
+      execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
     when /^(debian|ubuntu|cumulus)$/
       execute("dpkg -i --force-all #{onhost_package_file}")
       execute("apt-get update")
