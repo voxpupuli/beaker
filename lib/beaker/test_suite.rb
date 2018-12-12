@@ -98,6 +98,9 @@ module Beaker
       else
         @test_suite_results.write_junit_xml( junit_file_log )
       end
+
+      @test_suite_results.persist_test_results(@options[:test_results_file])
+
       #All done with this run, remove run log
       @logger.remove_destination(run_log)
 

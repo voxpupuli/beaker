@@ -164,6 +164,7 @@ module Beaker
           :test_tag_exclude       => '',
           :timeout                => 900, # 15 minutes
           :fail_mode              => 'slow',
+          :test_results_file      => '',
           :accept_all_exit_codes  => false,
           :timesync               => false,
           :disable_iptables       => false,
