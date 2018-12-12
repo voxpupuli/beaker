@@ -11,7 +11,14 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.2.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.3.0...master)
+
+# [4.3.0](https://github.com/puppetlabs/beaker/compare/4.2.0...4.3.0) - 2018.12.12
+
+### Added
+
+- Use zypper to install RPM packages on SLES (PA-2336)
+- Add only-fails capability to beaker (BKR-1523)
 
 # [4.2.0](https://github.com/puppetlabs/beaker/compare/4.1.0...4.2.0) - 2018.11.28
 
