@@ -462,6 +462,54 @@ module Beaker
           end
         end
 
+        # Check whether a file exists on the host
+        #
+        # @param host [Beaker::Host] The target host
+        # @param file_path [String] The absolute path of the file
+        #
+        # @return [Boolean] Whether the file exists on the host (using `test -f`)
+        def file_exists_on(host, file_path)
+          host.execute(%(test -f "#{file_path}"), accept_all_exit_codes: true) do |result|
+            return result.exit_code.zero?
+          end
+        end
+
+        # Check whether a directory exists on the host
+        #
+        # @param host [Beaker::Host] The target host
+        # @param dir_path [String] The absolute path of the directory
+        #
+        # @return [Boolean] Whether the directory exists on the host (using `test -d`)
+        def directory_exists_on(host, dir_path)
+          host.execute(%(test -d "#{dir_path}"), accept_all_exit_codes: true) do |result|
+            return result.exit_code.zero?
+          end
+        end
+
+        # Check whether a symlink exists on the host
+        #
+        # @param host [Beaker::Host] The target host
+        # @param link_path [String] The absolute path of the symlink
+        #
+        # @return [Boolean] Whether the symlink exists on the host (using `test -L`)
+        def link_exists_on(host, link_path)
+          host.execute(%(test -L "#{link_path}"), accept_all_exit_codes: true) do |result|
+            return result.exit_code.zero?
+          end
+        end
+
+        # Get the contents of a file on the host
+        #
+        # @param host [Beaker::Host] The target host
+        # @param file_path [String] The absoltue path to the file
+        #
+        # @return [String] The contents of the file
+        def file_contents_on(host, file_path)
+          host.execute(%(cat "#{file_path}"), acceptable_exit_codes: [0]) do |result|
+            return result.stdout
+          end
+        end
+
         #Run a curl command on the provided host(s)
         #
         # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
