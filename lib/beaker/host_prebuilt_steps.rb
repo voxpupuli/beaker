@@ -12,6 +12,7 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
+    RHEL8_PACKAGES = ['curl', 'chrony']
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
@@ -51,13 +52,15 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-            when host['platform'] =~ /sles-/
-              ntp_command = "sntp #{ntp_server}"
-            when host['platform'] =~ /cisco_nexus/
-              ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
-              ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
-            else
-              ntp_command = "ntpdate -u -t 20 #{ntp_server}"
+          when host['platform'] =~ /el-8/
+            ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
+          when host['platform'] =~ /sles-/
+            ntp_command = "sntp #{ntp_server}"
+          when host['platform'] =~ /cisco_nexus/
+            ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
+            ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
+          else
+            ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
           success=false
           try = 0
@@ -98,6 +101,8 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
+        when host['platform'] =~ /el-8/
+          check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
         when host['platform'] =~ /sles-10/
           check_and_install_packages_if_needed(host, SLES10_PACKAGES)
         when host['platform'] =~ /sles-/
