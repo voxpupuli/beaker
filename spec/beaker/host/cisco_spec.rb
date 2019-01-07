@@ -107,10 +107,18 @@ module Cisco
 
         before :each do
           @platform = 'cisco_nexus-7-x86_64'
+          @options = { :user => 'non_root' }
         end
 
         it 'appends `"` for commands' do
           answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil for root user commands' do
+          @options = { :user => 'root' }
+          answer_correct = nil
           answer_test = host.append_commands( 'fake_command' )
           expect( answer_test ).to be === answer_correct
         end
@@ -138,10 +146,18 @@ module Cisco
 
         before :each do
           @platform = 'cisco_ios_xr-6-x86_64'
+          @options = { :user => 'non_root' }
         end
 
         it 'appends `"` for commands' do
           answer_correct = '"'
+          answer_test = host.append_commands( 'fake_command' )
+          expect( answer_test ).to be === answer_correct
+        end
+
+        it 'returns nil for root user commands' do
+          @options = { :user => 'root' }
+          answer_correct = nil
           answer_test = host.append_commands( 'fake_command' )
           expect( answer_test ).to be === answer_correct
         end
