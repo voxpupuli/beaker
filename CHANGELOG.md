@@ -17,7 +17,7 @@ git logs & PR history.
 
 ### Added
 
-- Return root considerations for appending on nexus devices (BKR-1526)
+- Return root considerations for appending on nexus devices (BKR-1562)
 - Permit user environment on osx-10.14 (BKR-1534)
 - Add host helpers for working with files (BKR-1560)
 
