@@ -11,7 +11,19 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.3.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.4.0...master)
+
+# [4.4.0](https://github.com/puppetlabs/beaker/compare/4.3.0...4.4.0) - 2019.01.09
+
+### Added
+
+- Return root considerations for appending on nexus devices (BKR-1526)
+- Permit user environment on osx-10.14 (BKR-1534)
+- Add host helpers for working with files (BKR-1560)
+
+### Changed
+
+- Replace ntpdate with crony on RHEL-8 (BKR-1555)
 
 # [4.3.0](https://github.com/puppetlabs/beaker/compare/4.2.0...4.3.0) - 2018.12.12
 
