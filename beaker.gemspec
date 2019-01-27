@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'minitar', '~> 0.6'
-  s.add_runtime_dependency 'pry-byebug', '~> 3.4.2'
+  s.add_runtime_dependency 'pry-byebug', '~> 3.6'
   # pry-byebug can have issues with native readline libs so add rb-readline
   s.add_runtime_dependency 'rb-readline', '~> 0.5.3'
 
