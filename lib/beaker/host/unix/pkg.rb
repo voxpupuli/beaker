@@ -35,7 +35,7 @@ module Unix::Pkg
           execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
           self[:sles_rpmkeys_nightly_pl_imported] = true
         end
-        result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
+        result = execute("zypper --non-interactive --no-gpg-checks se -i --match-exact #{name}", opts) { |result| result }
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
@@ -74,7 +74,7 @@ module Unix::Pkg
   def install_package(name, cmdline_args = '', version = nil, opts = {})
     case self['platform']
       when /sles-/
-        execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
+        execute("zypper --non-interactive --no-gpg-checks in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
       when /fedora-(2[2-9])/
