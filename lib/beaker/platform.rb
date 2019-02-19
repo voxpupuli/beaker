@@ -6,7 +6,8 @@ module Beaker
     PLATFORMS = /^(alpine|huaweios|cisco_nexus|cisco_ios_xr|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|scientific|sles|ubuntu|windows|solaris|aix|archlinux|el|eos|cumulus|f5|netscaler)\-.+\-.+$/
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
-      { :debian => { "stretch" => "9",
+      { :debian => { "buster"  => "10",
+                     "stretch" => "9",
                      "jessie"  => "8",
                      "wheezy"  => "7",
                      "squeeze" => "6",
