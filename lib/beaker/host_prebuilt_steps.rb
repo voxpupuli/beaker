@@ -23,7 +23,7 @@ module Beaker
     SLES_PACKAGES = ['curl', 'ntp']
     DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
     CUMULUS_PACKAGES = ['curl', 'ntpdate']
-    SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp']
+    SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp', 'wget']
     SOLARIS11_PACKAGES = ['curl', 'ntp']
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
