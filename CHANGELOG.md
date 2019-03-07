@@ -15,9 +15,9 @@ git logs & PR history.
 
 # [4.6.0](https://github.com/puppetlabs/beaker/compare/4.5.0...4.6.0) - 2019.03.07
 
-- Codename for Debian 10 'Buster'
-
 ### Added
+
+- Codename for Debian 10 'Buster'
 
 # [4.5.0](https://github.com/puppetlabs/beaker/compare/4.4.0...4.5.0) - 2019.01.23
 
