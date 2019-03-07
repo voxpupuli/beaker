@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.5.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.6.0...master)
+
+# [4.6.0](https://github.com/puppetlabs/beaker/compare/4.5.0...4.6.0) - 2019.03.07
+
+### Added
+
+- Codename for Debian 10 'Buster'
 
 # [4.5.0](https://github.com/puppetlabs/beaker/compare/4.4.0...4.5.0) - 2019.01.23
 
