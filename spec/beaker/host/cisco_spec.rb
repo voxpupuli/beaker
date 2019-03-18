@@ -2,7 +2,9 @@ require 'spec_helper'
 
 module Cisco
   describe Host do
-    let(:options)  { @options ? @options : {} }
+    let(:options)  { @options ? @options : {
+      :user => 'root',
+    } }
     let(:platform) {
       if @platform
         { :platform => Beaker::Platform.new( @platform) }
@@ -58,6 +60,7 @@ module Cisco
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
             :vrf  => 'fakevrf',
+            :user => 'root',
           }
           answer_prepend_commands = 'prepend'
           answer_correct = 'source /etc/profile;ip netns exec fakevrf prepend'
@@ -92,7 +95,10 @@ module Cisco
         end
 
         it 'retains user-specified prepend commands when adding vrf' do
-          @options = { :vrf  => 'fakevrf', }
+          @options = { 
+            :vrf  => 'fakevrf', 
+            :user => 'root',
+          }
           answer_prepend_commands = 'prepend'
           answer_correct = 'source /etc/profile;ip netns exec fakevrf prepend'
           answer_test = host.prepend_commands( 'fake_command', answer_prepend_commands )
