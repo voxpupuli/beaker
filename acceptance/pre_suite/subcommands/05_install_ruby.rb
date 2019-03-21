@@ -1,4 +1,4 @@
-test_name 'Install and configure Ruby 2.2.5 on the SUT' do
+test_name 'Install and configure Ruby 2.3.1 on the SUT' do
 
   step 'Ensure that the default system is an el-based system' do
     # The pre-suite currently only supports el systems, and we should
@@ -18,12 +18,12 @@ test_name 'Install and configure Ruby 2.2.5 on the SUT' do
     on default, 'yum install wget -y'
   end
 
-  step 'download and install ruby 2.2.5' do
-    on default, 'wget http://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.5.tar.gz'
-    on default, 'tar xvfz ruby-2.2.5.tar.gz'
-    on default, 'cd ruby-2.2.5;./configure'
-    on default, 'cd ruby-2.2.5;make'
-    on default, 'cd ruby-2.2.5;make install'
+  step 'download and install ruby 2.3.1' do
+    on default, 'wget http://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz'
+    on default, 'tar xvfz ruby-2.3.1.tar.gz'
+    on default, 'cd ruby-2.3.1;./configure'
+    on default, 'cd ruby-2.3.1;make'
+    on default, 'cd ruby-2.3.1;make install'
   end
 
   step 'update gem on the SUT and install bundler' do
