@@ -1,4 +1,9 @@
-test_name 'Install beaker and checkout branch if necessary' do
+ruby_version, ruby_source = ENV['RUBY_VER'], "job parameter"
+unless ruby_version
+  ruby_version = "2.3.1"
+  ruby_source = "default"
+end
+test_name 'Install and configure Ruby #{ruby_version} (from #{ruby_source}) on the SUT' do
 
   step 'Download the beaker git repo' do
    on default, 'git clone https://github.com/puppetlabs/beaker.git /opt/beaker/'
