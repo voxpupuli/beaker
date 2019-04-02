@@ -3,7 +3,7 @@ unless ruby_version
   ruby_version = "2.3.1"
   ruby_source = "default"
 end
-test_name 'Install and configure Ruby #{ruby_version} (from #{ruby_source}) on the SUT' do
+test_name "Install and configure Ruby #{ruby_version} (from #{ruby_source}) on the SUT" do
 
   step 'Ensure that the default system is an el-based system' do
     # The pre-suite currently only supports el systems, and we should
@@ -23,12 +23,12 @@ test_name 'Install and configure Ruby #{ruby_version} (from #{ruby_source}) on t
     on default, 'yum install wget -y'
   end
 
-  step 'download and install ruby #{ruby_version}' do
-    on default, 'wget http://cache.ruby-lang.org/pub/ruby/#{ruby_version[0..2]}/ruby-#{ruby_version}.tar.gz'
-    on default, 'tar xvfz ruby-#{ruby_version}.tar.gz'
-    on default, 'cd ruby-#{ruby_version};./configure'
-    on default, 'cd ruby-#{ruby_version};make'
-    on default, 'cd ruby-#{ruby_version};make install'
+  step "download and install ruby #{ruby_version}" do
+    on default, "wget http://cache.ruby-lang.org/pub/ruby/#{ruby_version[0..2]}/ruby-#{ruby_version}.tar.gz"
+    on default, "tar xvfz ruby-#{ruby_version}.tar.gz"
+    on default, "cd ruby-#{ruby_version};./configure"
+    on default, "cd ruby-#{ruby_version};make"
+    on default, "cd ruby-#{ruby_version};make install"
   end
 
   step 'update gem on the SUT and install bundler' do
