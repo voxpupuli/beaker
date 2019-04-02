@@ -1,4 +1,4 @@
-uby_version, ruby_source = ENV['RUBY_VER'], "job parameter"
+ruby_version, ruby_source = ENV['RUBY_VER'], "job parameter"
 unless ruby_version
   ruby_version = "2.3.1"
   ruby_source = "default"
