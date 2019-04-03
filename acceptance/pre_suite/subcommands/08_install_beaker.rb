@@ -17,6 +17,6 @@ test_name 'Install beaker and checkout branch if necessary' do
   step 'Build the gem and install it on the local system' do
     build_output = on(default, 'cd /opt/beaker/;gem build beaker.gemspec').stdout
     version = build_output.match(/^  File: (.+)$/)[1]
-    on(default, "cd /opt/beaker/;gem install #{version} --no-rdoc --no-ri; gem install beaker-vmpooler")
+    on(default, "cd /opt/beaker/;gem install #{version} --no-document; gem install beaker-vmpooler")
   end
 end
