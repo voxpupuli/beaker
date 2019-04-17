@@ -11,7 +11,20 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.6.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.7.0...master)
+
+# [4.7.0](https://github.com/puppetlabs/beaker/compare/4.6.0...4.7.0) - 2019-04-17
+
+### Added
+
+- Provide for OpenSSL 1.1.x+ support
+- enable Solaris10Sparc pkgutil SSL CA2 (IMAGES-844)
+
+### Changed
+- update pry-byebug dependency 3.4.2->3.6 (BKR-1568)
+- disabling hostkey checks for cisco hosts (QENG-7108)
+- Change behavior of ruby versioning to accept job-parameter RUBY\_VER
+- Change subcommand pre-suite to install ruby 2.3.1
 
 # [4.6.0](https://github.com/puppetlabs/beaker/compare/4.5.0...4.6.0) - 2019.03.07
 
