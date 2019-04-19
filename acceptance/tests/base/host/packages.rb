@@ -49,6 +49,8 @@ step '#install_package and #uninstall_package : remove and install a package suc
 hosts.each do |host|
   # this works on Windows as well, althought it pulls in
   # a lot of dependencies.
+  # skipping this test for windows since it requires a restart
+  next if host['platform'] =~ /windows/
   package = 'zsh'
   package = 'CSWzsh' if host['platform'] =~ /solaris-10/
   package = 'git' if host['platform'] =~ /sles/
