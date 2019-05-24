@@ -130,7 +130,7 @@ module PlatformHelpers
                      'huaweios']
 
 
-  FEDORASYSTEMD    = (14..29).to_a.collect! { |i| "fedora-#{i}" }
+  FEDORASYSTEMD    = (14..39).to_a.collect! { |i| "fedora-#{i}" }
 
   SYSTEMDPLATFORMS = ['el-7',
                       'centos-7',
