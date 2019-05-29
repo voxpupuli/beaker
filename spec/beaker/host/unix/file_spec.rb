@@ -114,7 +114,7 @@ module Beaker
         @platform = 'el-21-x86_64'
         allow( instance ).to receive( :is_pe? ) { true }
         filename = instance.repo_filename( 'pkg_name', 'pkg_version9' )
-        correct = 'pl-pkg_name-pkg_version9-repos-pe-el-21-x86_64.repo'
+        correct = 'pl-pkg_name-pkg_version9-el-21-x86_64.repo'
         expect( filename ).to be === correct
       end
 
