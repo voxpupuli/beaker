@@ -119,7 +119,6 @@ module Unix::File
       fedora_prefix = ((variant == 'fedora') ? 'f' : '')
 
       pattern = "%s-%s%s-%s.repo"
-      pattern = "repos-pe-#{pattern}" if self.is_pe?
 
       repo_filename << pattern % [
         variant,
