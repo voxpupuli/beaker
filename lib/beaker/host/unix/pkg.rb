@@ -77,7 +77,7 @@ module Unix::Pkg
         execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora-(2[2-9])/
+      when /fedora-(2[2-9]|3[0-9])/
         if version
           name = "#{name}-#{version}"
         end
@@ -168,7 +168,7 @@ module Unix::Pkg
         execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
-      when /edora-(2[2-9])/
+      when /edora-(2[2-9]|3[0-9])/
         execute("dnf -y #{cmdline_args} remove #{name}", opts)
       when /cisco|fedora|centos|redhat|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
@@ -198,7 +198,7 @@ module Unix::Pkg
         execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
-      when /fedora-(2[2-9])/
+      when /fedora-(2[2-9]|3[0-9])/
         execute("dnf -y #{cmdline_args} update #{name}", opts)
       when /cisco|fedora|centos|redhat|eos|el-/
         execute("yum -y #{cmdline_args} update #{name}", opts)
@@ -511,7 +511,7 @@ module Unix::Pkg
     case variant
     when /^(fedora|el|redhat|centos)$/
       command_name = 'yum'
-      command_name = 'dnf 'if variant == 'fedora' && version > 21 && version <= 29
+      command_name = 'dnf' if variant == 'fedora' && version > 21
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(sles)$/
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")

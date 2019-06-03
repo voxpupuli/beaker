@@ -239,7 +239,7 @@ module Beaker
         end
       end
 
-      (22..29).to_a.each do | fedora_release |
+      (22..39).to_a.each do | fedora_release |
         it "uses dnf on fedora-#{fedora_release}" do
           @opts = {'platform' => "fedora-#{fedora_release}-is-me"}
           pkg = 'fedora_package'
@@ -277,7 +277,7 @@ module Beaker
           end
         end
 
-        (22..29).to_a.each do | fedora_release |
+        (22..39).to_a.each do | fedora_release |
           it "uses dnf on fedora-#{fedora_release}" do
             @opts = {'platform' => "fedora-#{fedora_release}-is-me"}
             pkg = 'fedora_package'
@@ -515,8 +515,8 @@ module Beaker
         allow( instance ).to receive( :[] ).with( 'platform' ) { platform_mock }
       end
 
-      it 'Fedora 22-29: uses dnf' do
-        (22...29).each do |version|
+      it 'Fedora 22-39: uses dnf' do
+        (22...39).each do |version|
           @version = version
           package_file = 'test_123.yay'
           expect( instance ).to receive( :execute ).with( /^dnf.*#{package_file}$/ )
@@ -524,10 +524,10 @@ module Beaker
         end
       end
 
-      it 'Fedora 21 & 30: uses yum' do
+      it 'Fedora 21 uses yum' do
         package_file = 'testing_456.yay'
         platform_mock = Object.new
-        [21, 30].each do |version|
+        [21].each do |version|
           @version = version
           expect( instance ).to receive( :execute ).with( /^yum.*#{package_file}$/ )
           instance.install_local_package( package_file )
