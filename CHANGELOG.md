@@ -11,7 +11,17 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.7.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.8.0...master)
+
+# [4.8.0](https://github.com/puppetlabs/beaker/compare/4.7.0...4.8.0) - 2019-04-17
+
+### Added
+
+- Support for Fedora >= 30 (BKR-1589)
+- Codenames for Ubuntu 18.10, 19.04, and 19.10
+
+### Changed
+- Remove "repos-pe" prefix for repo filenames
 
 # [4.7.0](https://github.com/puppetlabs/beaker/compare/4.6.0...4.7.0) - 2019-04-17
 
