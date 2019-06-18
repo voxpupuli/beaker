@@ -86,24 +86,11 @@ module Beaker
     end
 
     describe '#execute' do
-      it 'retries if failed with a retryable exception' do
+      it 'raises an error if it fails' do
         mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
         connection.connect
 
-        allow( subject ).to receive( :close )
-        expect( subject ).to receive( :try_to_execute ).ordered.once { raise Timeout::Error }
-        expect( subject ).to receive( :try_to_execute ).ordered.once { Beaker::Result.new('name', 'ls') }
-        expect( subject ).to_not receive( :try_to_execute )
-        connection.execute('ls')
-      end
-
-      it 'raises an error if it fails both times' do
-        mock_ssh = Object.new
-        expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { mock_ssh }
-        connection.connect
-
-        allow( subject ).to receive( :close )
         allow( subject ).to receive( :try_to_execute ) { raise Timeout::Error }
 
         expect{ connection.execute('ls') }.to raise_error Timeout::Error
