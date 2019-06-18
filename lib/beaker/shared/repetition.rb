@@ -16,7 +16,7 @@ module Beaker
         attempt = 1
         last_wait, wait = 0, 1
         while not done and attempt <= attempts do
-          done = block.call
+          done = block.call attempt
           attempt += 1
           sleep wait
           last_wait, wait = wait, last_wait + wait

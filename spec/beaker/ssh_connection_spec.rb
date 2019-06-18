@@ -33,14 +33,14 @@ module Beaker
     end
 
     it 'attempts to connect by vmhostname address if ip connection fails' do
-      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(false)
+      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).exactly(4).times.and_return(false)
       expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(true).once
       expect( Net::SSH ).to receive( :start ).with( hostname, user, ssh_opts).never
       connection.connect
     end
 
     it 'attempts to connect by hostname, if vmhost + ipaddress have failed' do
-      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(false)
+      expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).exactly(4).times.and_return(false)
       expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(false)
       expect( Net::SSH ).to receive( :start ).with( hostname, user, ssh_opts).and_return(true).once
       connection.connect

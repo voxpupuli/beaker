@@ -1,6 +1,7 @@
 require 'socket'
 require 'timeout'
 require 'net/scp'
+require 'beaker/shared/repetition'
 
 module Beaker
   class SshConnection
@@ -45,25 +46,19 @@ module Beaker
     end
 
     def connect_block host, user, ssh_opts
-      try = 1
-      last_wait = 2
-      wait = 3
-      begin
-         @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
-         Net::SSH.start(host, user, ssh_opts)
-       rescue *RETRYABLE_EXCEPTIONS => e
-         if try <= 11
-           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
-           @logger.warn "Trying again in #{wait} seconds"
-           sleep wait
-          (last_wait, wait) = wait, last_wait + wait
-           try += 1
-           retry
-         else
-           @logger.warn "Failed to connect to #{host}, after #{try} attempts"
-           nil
-         end
-       end
+      attempts = 4
+      ssh_connection = repeat_fibonacci_style_for attempts do |iteration|
+        begin
+           @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
+           Net::SSH.start(host, user, ssh_opts)
+         rescue *RETRYABLE_EXCEPTIONS => e
+           @logger.warn "Try #{iteration} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
+        end
+      end
+      unless ssh_connection
+        @logger.warn "Failed to connect to #{host}, after #{attempts} attempts"
+      end
+      return ssh_connection
     end
 
     # connect to the host
