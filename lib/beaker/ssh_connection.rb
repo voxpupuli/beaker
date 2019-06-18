@@ -198,28 +198,9 @@ module Beaker
 
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
-      try = 1
-      wait = 1
-      last_wait = 0
-      begin
-        # ensure that we have a current connection object
-        connect
-        result = try_to_execute(command, options, stdout_callback, stderr_callback)
-      rescue *RETRYABLE_EXCEPTIONS => e
-        if try < 11
-           sleep wait
-          (last_wait, wait) = wait, last_wait + wait
-           try += 1
-          @logger.error "Command execution '#{@hostname}$ #{command}' failed (#{e.class.name} - #{e.message})"
-          close
-          @logger.debug "Preparing to retry: closed ssh object"
-          retry
-        else
-          raise
-        end
-      end
-
-      result
+      # ensure that we have a current connection object
+      connect
+      try_to_execute(command, options, stdout_callback, stderr_callback)
     end
 
     def request_terminal_for channel, command
