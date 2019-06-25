@@ -1,3 +1,4 @@
+# coding: utf-8
 module Unix::Exec
   include Beaker::CommandFactory
 
@@ -9,11 +10,11 @@ module Unix::Exec
     end
     down? # Verify the host went down
     begin
-      exec(Beaker::Command("exit"))
-    rescue CommandFailure => e
-      raise CommandFailure::RebootFailure, "Command failed in reboot: #{e.message}"
+      exec(Beaker::Command.new("exit"))
+    rescue Beaker::Host::CommandFailure => e
+      raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
     rescue Exception => e
-      raise CommandFailure::RebootFailure, "Unexpected exception in reboot: #{e.message}"
+      raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     end
   end
 
