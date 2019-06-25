@@ -582,16 +582,16 @@ module Beaker
     end
 
     def down?
-      host_down = false
+      host_up = true
       repeat_fibonacci_style_for 11 do
-        host_down = ! ping?
-        host_down
+        host_up = ping?
+        !host_up # host down? -> continue looping. up? -> finished
       end
-      unless host_down
-        raise Beaker::RebootException('things went wrong yo')
+      if host_up
+        raise Beaker::RebootException, 'Host failed to go down'
       end
+      true
     end
-
   end
 
   [
