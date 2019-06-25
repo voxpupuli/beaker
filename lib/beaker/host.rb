@@ -19,6 +19,7 @@ module Beaker
     include Beaker::DSL::Patterns
 
     class CommandFailure < StandardError; end
+    class RebootFailure < CommandFailure; end
 
     # This class provides array syntax for using puppet --configprint on a host
     class PuppetConfigReader

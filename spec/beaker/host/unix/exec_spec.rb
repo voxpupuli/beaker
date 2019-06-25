@@ -157,5 +157,16 @@ module Beaker
         expect(instance.selinux_enabled?).to be === false
       end
     end
+
+    describe '#reboot' do
+      it 'raises a reboot failure when command fails' do
+        allow(instance).to receive(:exec)
+        expect(instance).to receive(:exec).and_return(false)
+        expect(instance).to receive(:down?)
+        expect(instance).to receive(:exec).and_raise(Host::CommandFailure)
+
+        instance.reboot
+      end
+    end
   end
 end
