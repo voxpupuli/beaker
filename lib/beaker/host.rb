@@ -2,6 +2,7 @@ require 'socket'
 require 'timeout'
 require 'benchmark'
 require 'rsync'
+require 'net/ping'
 
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
@@ -573,6 +574,22 @@ module Beaker
 
       return result if result.success?
       raise Beaker::Host::CommandFailure, result.error
+    end
+
+    def ping?
+      check = Net::Ping::External.new(@host)
+      check.ping?
+    end
+
+    def down?
+      host_down = false
+      repeat_fibonacci_style_for 11 do
+        host_down = ! ping?
+        host_down
+      end
+      unless host_down
+        raise Beaker::RebootException('things went wrong yo')
+      end
     end
 
   end
