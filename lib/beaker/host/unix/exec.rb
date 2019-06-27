@@ -1,4 +1,3 @@
-# coding: utf-8
 module Unix::Exec
   include Beaker::CommandFactory
 

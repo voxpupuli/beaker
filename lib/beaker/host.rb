@@ -578,19 +578,22 @@ module Beaker
     end
 
     def ping?
-      check = Net::Ping::External.new(@host)
+      check = Net::Ping::External.new(self)
       check.ping?
     end
 
     def down?
+      @logger.debug("host.down?: checking if host has gone down using ping...")
       host_up = true
       repeat_fibonacci_style_for 11 do
-        host_up = ping?
+        host_up = self.ping?
+        @logger.debug("- ping result: #{host_up}. Done checking? #{!host_up}")
         !host_up # host down? -> continue looping. up? -> finished
       end
       if host_up
-        raise Beaker::RebootException, 'Host failed to go down'
+        raise Beaker::Host::RebootFailure, 'Host failed to go down'
       end
+      @logger.debug("host.down? host stopped responding, returning true")
       true
     end
   end
