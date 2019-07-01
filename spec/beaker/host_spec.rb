@@ -824,5 +824,30 @@ module Beaker
         expect(host.wait_for_port(22, 0)).to be false
       end
     end
+
+    describe "#down?" do
+
+      it "repeats 11 times & fails if ping never returns false" do
+        allow(host).to receive(:sleep)
+        expect(host).to receive(:ping?).exactly(11).times.and_return(true)
+        expect {
+          host.down?
+        }.to raise_error(Beaker::Host::RebootFailure, /failed to go down/)
+      end
+
+      it "returns that the host is down (true) if ping? is false" do
+        expect(host).to receive(:ping?).exactly(1).times.and_return(false)
+
+        expect(host.down?).to be true
+      end
+
+      it "cuts off execution correctly if host becomes unreachable" do
+        expect(host).to receive(:sleep).exactly(3).times
+        expect(host).to receive(:ping?).exactly(3).times.and_return(true).ordered
+        expect(host).to receive(:ping?).exactly(1).times.and_return(false).ordered
+
+        expect(host.down?).to be true
+      end
+    end
   end
 end

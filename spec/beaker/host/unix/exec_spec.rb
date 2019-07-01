@@ -157,5 +157,21 @@ module Beaker
         expect(instance.selinux_enabled?).to be === false
       end
     end
+
+    describe '#reboot' do
+      before :each do
+        expect(instance).to receive(:exec).and_return(false)
+        expect(instance).to receive(:down?)
+      end
+      it 'raises a reboot failure when command fails' do
+        expect(instance).to receive(:exec).and_raise(Host::CommandFailure)
+        expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
+      end
+
+      it 'raises a reboot failure when we receive an unexpected error' do
+        expect(instance).to receive(:exec).and_raise(Net::SSH::HostKeyError)
+        expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+      end
+    end
   end
 end

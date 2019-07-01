@@ -7,7 +7,14 @@ module Unix::Exec
     else
       exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
     end
-    sleep(10) #if we attempt a reconnect too quickly we end up blocking ¯\_(ツ)_/¯
+    down? # Verify the host went down
+    begin
+      exec(Beaker::Command.new("exit"))
+    rescue Beaker::Host::CommandFailure => e
+      raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
+    rescue Exception => e
+      raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
+    end
   end
 
   def echo(msg, abs=true)
