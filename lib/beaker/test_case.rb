@@ -133,6 +133,8 @@ module Beaker
               eval test,nil,path,1
             rescue FailTest, TEST_EXCEPTION_CLASS => e
               log_and_fail_test(e, :fail)
+            rescue PassTest
+              @test_status = :pass
             rescue PendingTest
               @test_status = :pending
             rescue SkipTest
