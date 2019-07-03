@@ -585,7 +585,8 @@ module Beaker
     def down?
       @logger.debug("host.down?: checking if host has gone down using ping...")
       host_up = true
-      repeat_fibonacci_style_for 11 do
+      # give it max 3 minutes to go down, check every 10 seconds
+      repeat_for_and_wait 180, 10 do
         host_up = self.ping?
         @logger.debug("- ping result: #{host_up}. Done checking? #{!host_up}")
         !host_up # host down? -> continue looping. up? -> finished

@@ -827,12 +827,11 @@ module Beaker
 
     describe "#down?" do
 
-      it "repeats 11 times & fails if ping never returns false" do
-        allow(host).to receive(:sleep)
-        expect(host).to receive(:ping?).exactly(11).times.and_return(true)
+      it "repeats & fails with 'failed to go down' after X seconds" do
+        allow(host).to receive(:repeat_for_and_wait).with(180,10).and_return(false)
         expect {
           host.down?
-        }.to raise_error(Beaker::Host::RebootFailure, /failed to go down/)
+        }.to raise_error(Beaker::Host::RebootFailure, "Host failed to go down")
       end
 
       it "returns that the host is down (true) if ping? is false" do
