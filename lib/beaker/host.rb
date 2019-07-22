@@ -209,6 +209,20 @@ module Beaker
       graceful
     end
 
+    # Returns true if the host is running in FIPS mode.
+    #
+    # We currently only test FIPS mode on Redhat 7. Other detection
+    # modes should be added here if we expand FIPS support to other
+    # platforms.
+    def fips_mode?
+      case self['platform']
+      when /el-7/
+        execute("cat /proc/sys/crypto/fips_enabled") == "1"
+      else
+        false
+      end
+    end
+
     # Modifies the host settings to indicate that it will be using passenger service scripts,
     # (apache2) by default.  Does nothing if this is a PE host, since it is already using
     # passenger.

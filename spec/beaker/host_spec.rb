@@ -849,5 +849,24 @@ module Beaker
         expect(host.down?).to be true
       end
     end
+
+    describe "#fips_mode?" do
+      it 'returns false on non-el7 hosts' do
+        @platform = 'windows'
+        expect(host.fips_mode?).to be false
+      end
+
+      it 'returns true when the `fips_enabled` file is present and contains "1"' do
+        @platform = 'el-7'
+        expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("1")
+        expect(host.fips_mode?).to be true
+      end
+
+      it 'returns false when the `fips_enabled` file is present and contains "0"' do
+        @platform = 'el-7'
+        expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("0")
+        expect(host.fips_mode?).to be false
+      end
+    end
   end
 end
