@@ -11,7 +11,14 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.10.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.11.0...master)
+
+# [4.11.0](https://github.com/puppetlabs/beaker/compare/4.10.0...4.11.0) - 2019-07-22
+
+### Added
+
+- FIPS detection host method (BKR-1604)
+- PassTest exception catching for standard reporting
 
 # [4.10.0](https://github.com/puppetlabs/beaker/compare/4.9.0...4.10.0) - 2019-07-01
 
