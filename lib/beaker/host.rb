@@ -290,9 +290,25 @@ module Beaker
 
     def connection
       # create new connection object if necessary
+      # Pull the connection information from the host configuration
+      ssh_opts = self['ssh']
+      ssh_opts = {} unless ssh_opts.is_a?(Hash)
+
+      if self.options['ssh']
+        if ssh_opts[:config]
+          # Load the configuration from the SSH config file
+          ssh_opts = self.options['ssh'].merge(Net::SSH::Config.load(ssh_opts[:config], self['ip']))
+        else
+          ssh_opts = self.options['ssh']
+        end
+      end
+
+      # Remove any options that don't apply to the Net::SSH library
+      ssh_opts = Net::SSH::Config.translate(ssh_opts)
+
       @connection ||= SshConnection.connect( { :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
                                              self['user'],
-                                             self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference]} )
+                                             ssh_opts, { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference]} )
       # update connection information
       if self['ip'] && (@connection.ip != self['ip'])
         @connection.ip = self['ip']
