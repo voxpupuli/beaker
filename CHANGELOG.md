@@ -13,6 +13,12 @@ git logs & PR history.
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.11.0...master)
 
+# [4.11.1](https://github.com/puppetlabs/beaker/compare/4.11.0...4.11.1) - 2019-08-13
+
+### Changed
+
+- `host.down?`'s wait from a fibonacci to a constant wait (BKR-1595)
+
 # [4.11.0](https://github.com/puppetlabs/beaker/compare/4.10.0...4.11.0) - 2019-07-22
 
 ### Added
