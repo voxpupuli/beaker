@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.11.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.12.0...master)
+
+# [4.12.0](https://github.com/puppetlabs/beaker/compare/4.11.1...4.12.0) - 2019-08-14
+
+### Added
+
+- redhatfips as a recognized platform (PE-27037)
 
 # [4.11.1](https://github.com/puppetlabs/beaker/compare/4.11.0...4.11.1) - 2019-08-13
 
