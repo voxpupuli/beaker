@@ -327,4 +327,16 @@ module Unix::Exec
     exec(Beaker::Command.new("sudo selinuxenabled"), :accept_all_exit_codes => true).exit_code == 0
   end
 
+  def enable_remote_rsyslog()
+    if self['platform'] !~ /ubuntu/
+      @logger.warn "Enabling rsyslog is only implemented for ubuntu hosts"
+      return
+    end
+    command = 'echo "*.* @rsyslog.ops.puppetlabs.net:514" >> /etc/rsyslog.d/51-sendrsyslogs'
+    result = exec(Beaker::Command.new(command), :accept_all_exit_codes => true)
+    command = 'systemctl restart rsyslog'
+    result = exec(Beaker::Command.new(command), :accept_all_exit_codes => true)
+    result.exit_code == 0
+  end
+
 end
