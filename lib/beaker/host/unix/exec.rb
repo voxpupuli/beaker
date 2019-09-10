@@ -332,11 +332,14 @@ module Unix::Exec
       @logger.warn "Enabling rsyslog is only implemented for ubuntu hosts"
       return
     end
-    command = 'echo "*.* @rsyslog.ops.puppetlabs.net:514" >> /etc/rsyslog.d/51-sendrsyslogs'
-    result = exec(Beaker::Command.new(command), :accept_all_exit_codes => true)
-    command = 'systemctl restart rsyslog'
-    result = exec(Beaker::Command.new(command), :accept_all_exit_codes => true)
-    result.exit_code == 0
+    commands = [
+      'echo "*.* @rsyslog.ops.puppetlabs.net:514" >> /etc/rsyslog.d/51-sendrsyslogs.conf',
+      'systemctl restart rsyslog'
+    ]
+    commands.each do |command|
+      exec(Beaker::Command.new(command))
+    end
+    true
   end
 
 end
