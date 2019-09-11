@@ -173,5 +173,16 @@ module Beaker
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
       end
     end
+
+    describe '#enable_remote_rsyslog' do
+      it 'always calls restart' do
+        opts['platform'] = 'ubuntu-18-x86_64'
+        allow(Beaker::Command).to receive(:new).with(anything)
+        allow(instance).to receive(:exec)
+        expect(Beaker::Command).to receive(:new).with("systemctl restart rsyslog")
+        instance.enable_remote_rsyslog
+      end
+
+    end
   end
 end
