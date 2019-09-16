@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.12.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.13.0...master)
+
+# [4.13.0](https://github.com/puppetlabs/beaker/compare/4.12.0...4.13.0) - 2019-09-16
+
+### Added
+
+- Host `enable_remote_rsyslog` method (QENG-7466)
 
 # [4.12.0](https://github.com/puppetlabs/beaker/compare/4.11.1...4.12.0) - 2019-08-14
 
