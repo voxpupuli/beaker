@@ -110,6 +110,15 @@ module Beaker
         expect( filename ).to be === correct
       end
 
+      it 'builds the filename correctly for redhatfips platforms' do
+        @platform = 'el-7-x86_64'
+        allow(instance).to receive(:[]).with('platform') { platform['platform'] }
+        expect(instance).to receive(:[]).with('packaging_platform') { 'redhatfips-7-x86_64' }
+        filename = instance.repo_filename('pkg_name', 'pkg_version')
+        correct = 'pl-pkg_name-pkg_version-redhatfips-7-x86_64.repo'
+        expect( filename ).to be === correct
+      end
+
       it 'adds in the PE portion of the filename correctly for el-based PE hosts' do
         @platform = 'el-21-x86_64'
         allow( instance ).to receive( :is_pe? ) { true }
