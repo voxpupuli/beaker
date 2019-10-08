@@ -44,37 +44,38 @@ module Beaker
       connection
     end
 
-    def connect_block host, user, ssh_opts
+    def connect_block host, user, ssh_opts, options
       try = 1
       last_wait = 2
       wait = 3
+      max_connection_tries = options[:max_connection_tries] || 11
       begin
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
          Net::SSH.start(host, user, ssh_opts)
        rescue *RETRYABLE_EXCEPTIONS => e
-         if try <= 11
-           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
-           @logger.warn "Trying again in #{wait} seconds"
+         if try <= max_connection_tries
+           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
+           @logger.warn "Trying again in #{wait} seconds" unless options[:silent]
            sleep wait
           (last_wait, wait) = wait, last_wait + wait
            try += 1
            retry
          else
-           @logger.warn "Failed to connect to #{host}, after #{try} attempts"
+           @logger.warn "Failed to connect to #{host}, after #{try} attempts" unless options[:silent]
            nil
          end
        end
     end
 
     # connect to the host
-    def connect
+    def connect options = {}
       # Try three ways to connect to host (vmhostname, ip, hostname)
       # Try each method in turn until we succeed
       methods = @ssh_connection_preference.dup
       while (not @ssh) && (not methods.empty?) do
         unless instance_variable_get("@#{methods[0]}").nil?
           if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts)
+            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts, options)
           else
             @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
             @ssh_connection_preference.delete(methods[0])
@@ -199,7 +200,7 @@ module Beaker
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
       # ensure that we have a current connection object
-      connect
+      connect(options)
       try_to_execute(command, options, stdout_callback, stderr_callback)
     end
 

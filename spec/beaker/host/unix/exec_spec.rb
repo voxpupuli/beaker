@@ -159,18 +159,35 @@ module Beaker
     end
 
     describe '#reboot' do
+      let (:response) { double( 'response' ) }
+
       before :each do
-        expect(instance).to receive(:exec).and_return(false)
-        expect(instance).to receive(:down?)
+        # stubs enough to survive the first uptime call & output parsing
+        #   note: just stubs input-chain between calls, parsing methods still run
+        allow( Beaker::Command ).to receive(:new).with("uptime").and_return(:uptime_command_stub)
+        allow( instance ).to receive( :exec ).with(:uptime_command_stub).and_return(response)
+        allow( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
+
+        allow( Beaker::Command ).to receive(:new).with("/sbin/shutdown -r now").and_return(:shutdown_command_stub)
       end
+
       it 'raises a reboot failure when command fails' do
-        expect(instance).to receive(:exec).and_raise(Host::CommandFailure)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
       end
 
       it 'raises a reboot failure when we receive an unexpected error' do
-        expect(instance).to receive(:exec).and_raise(Net::SSH::HostKeyError)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+      end
+
+      it 'raises RebootFailure if new uptime is never less than old uptime' do
+        # bypass shutdown command itself
+        allow( instance ).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
+        # allow the second uptime and the hash arguments in exec
+        allow( instance ).to receive( :exec ).with(:uptime_command_stub, anything).and_return(response)
+
+        expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Uptime did not reset/)
       end
     end
 
@@ -183,6 +200,41 @@ module Beaker
         instance.enable_remote_rsyslog
       end
 
+    end
+
+    describe '#parse_uptime' do
+      it 'parses variation of uptime string' do
+        expect(instance.parse_uptime("19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31")).to be == "14 mins"
+      end
+      it 'parses variation 2 of uptime string' do
+        expect(instance.parse_uptime("8:03 up 52 days, 20:47, 3 users, load averages: 1.36 1.42 1.40")).to be == "52 days, 20:47"
+      end
+      it 'parses variation 3 of uptime string' do
+        expect(instance.parse_uptime("22:19 up 54 days, 1 min, 4 users, load averages: 2.08 2.06 2.27")).to be == "54 days, 1 min"
+      end
+      it 'parses variation 4 of uptime string' do
+        expect(instance.parse_uptime("18:44:45 up 5 min,  0 users,  load average: 0.14, 0.11, 0.05")).to be == "5 min"
+      end
+      it 'parses solaris\'s "just up" without time message' do
+        opts['platform'] = 'solaris-11-x86_64'
+        expect(instance.parse_uptime("10:05am  up  0 users,  load average: 0.66, 0.14, 0.05")).to be == "0 min"
+      end
+     end
+
+    describe '#uptime_int' do
+      it 'parses time segment variation into a minute value' do
+        expect(instance.uptime_int("14 mins")).to be == 14
+      end
+      it 'parses time segment variation 2 into a minute value' do
+        expect(instance.uptime_int("52 days, 20:47")).to be == 76127
+      end
+      it 'parses time segment variation 3 into a minute value' do
+        expect(instance.uptime_int("54 days, 1 min")).to be == 77761
+        end
+      it 'parses time segment variation 4 into a minute value' do
+        expect(instance.uptime_int("54 days")).to be == 77760
+      end
+      it 'raises if we pass garbage to it'
     end
   end
 end
