@@ -3,7 +3,10 @@ module Unix::Exec
 
   def reboot
     begin
-    original_uptime = exec(Beaker::Command.new("uptime"))
+      original_uptime = exec(Beaker::Command.new("uptime"))
+      original_uptime_str = parse_uptime original_uptime
+      original_uptime_int = uptime_int original_uptime_str
+
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
     end
@@ -21,6 +24,26 @@ module Unix::Exec
     rescue Exception => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     end
+  end
+
+  def uptime_int(uptime_str)
+    time_array = uptime_str.split(", ")
+    accumulated_mins = 0
+    time_array.each do |time_segment|
+      value, unit = time_segment.split
+      if unit.nil?
+        # 20:47 case: hours & mins
+        hours, mins = value.split(":")
+        accumulated_mins += (hours.to_i * 60 + mins.to_i)
+      elsif unit == "days"
+        accumulated_mins += (value.to_i * 1440) # 60 * 24 = 1440
+      elsif unit =~ /min/
+        accumulated_mins += value.to_i
+      else
+        raise ArgumentError "can't parse uptime segment: #{time_segment}"
+      end
+    end
+    accumulated_mins
   end
 
   def parse_uptime(uptime)

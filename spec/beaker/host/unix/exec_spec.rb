@@ -196,5 +196,20 @@ module Beaker
         expect(instance.parse_uptime("22:19 up 54 days, 1 min, 4 users, load averages: 2.08 2.06 2.27")).to be == "54 days, 1 min"
       end
     end
+
+    describe '#uptime_int' do
+      it 'parses time segment variation into a minute value' do
+        expect(instance.uptime_int("14 mins")).to be == 14
+      end
+      it 'parses time segment variation 2 into a minute value' do
+        expect(instance.uptime_int("52 days, 20:47")).to be == 76127
+      end
+      it 'parses time segment variation 3 into a minute value' do
+        expect(instance.uptime_int("54 days, 1 min")).to be == 77761
+        end
+      it 'parses time segment variation 4 into a minute value' do
+        expect(instance.uptime_int("54 days")).to be == 77760
+      end
+    end
   end
 end
