@@ -159,9 +159,12 @@ module Beaker
     end
 
     describe '#reboot' do
+      let (:response) { double( 'response' ) }
+
       before :each do
-        expect(instance).to receive(:exec).and_return(false)
-        expect(instance).to receive(:down?)
+        expect( Beaker::Command ).to receive(:new).with("uptime").and_return(:foo)
+        expect( instance ).to receive( :exec ).with(:foo, :accept_all_exit_codes => true).and_return(response)
+        expect( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
       end
       it 'raises a reboot failure when command fails' do
         expect(instance).to receive(:exec).and_raise(Host::CommandFailure)

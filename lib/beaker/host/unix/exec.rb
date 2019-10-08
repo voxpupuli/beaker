@@ -4,7 +4,7 @@ module Unix::Exec
   def reboot
     begin
       original_uptime = exec(Beaker::Command.new("uptime"))
-      original_uptime_str = parse_uptime original_uptime
+      original_uptime_str = parse_uptime original_uptime.stdout
       original_uptime_int = uptime_int original_uptime_str
 
     rescue Beaker::Host::CommandFailure => e
@@ -18,7 +18,13 @@ module Unix::Exec
     end
     #use uptime to check if the host has rebooted
     begin
-      exec(Beaker::Command.new("exit"))
+      repeat_for_and_wait 180, 10 do
+        current_uptime_exec = exec(Beaker::Command.new("uptime"))
+        current_uptime = current_uptime_exec.stdout
+        current_uptime_str = parse_uptime current_uptime
+        current_uptime_int = uptime_int current_uptime_str
+        original_uptime_int > current_uptime_int
+      end
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
     rescue Exception => e
