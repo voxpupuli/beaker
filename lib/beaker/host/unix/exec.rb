@@ -2,12 +2,18 @@ module Unix::Exec
   include Beaker::CommandFactory
 
   def reboot
+    begin
+    original_uptime = exec(Beaker::Command.new("uptime"))
+    rescue Beaker::Host::CommandFailure => e
+      raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
+    end
+
     if self['platform'] =~ /solaris/
       exec(Beaker::Command.new("reboot"), :expect_connection_failure => true)
     else
       exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
     end
-    down? # Verify the host went down
+    #use uptime to check if the host has rebooted
     begin
       exec(Beaker::Command.new("exit"))
     rescue Beaker::Host::CommandFailure => e
@@ -15,6 +21,16 @@ module Unix::Exec
     rescue Exception => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     end
+  end
+
+  def parse_uptime(uptime)
+    # get String from up to users
+    # eg 19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31
+    # 8:03 up 52 days, 20:47, 3 users, load averages: 1.36 1.42 1.40
+    # 22:19 up 54 days, 1 min, 4 users, load averages: 2.08 2.06 2.27
+    regexp = /.*up (.*), [[:digit:]]+ user.*/
+    result = uptime.match regexp
+    uptime_string = result[1]
   end
 
   def echo(msg, abs=true)
