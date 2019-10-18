@@ -82,6 +82,10 @@ module Beaker
       nil
     rescue => e
       report_and_raise(logger, e, "timesync (--ntp)")
+    rescue SignalException => ex
+      if ex.signo == 15 #SIGTERM
+        report_and_raise(logger, e, "timesync (--ntp)")
+      end
     end
 
     # Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
@@ -132,6 +136,10 @@ module Beaker
       end
     rescue => e
       report_and_raise(logger, e, "validate")
+    rescue SignalException => ex
+      if ex.signo == 15 #SIGTERM
+        report_and_raise(logger, e, "validate")
+      end
     end
 
     # Installs the given packages if they aren't already on a host
@@ -187,6 +195,10 @@ module Beaker
       end
     rescue => e
       report_and_raise(logger, e, "sync_root_keys")
+    rescue SignalException => ex
+      if ex.signo == 15 #SIGTERM
+        report_and_raise(logger, e, "sync_root_keys")
+      end
     end
 
     # Run 'apt-get update' on the provided host or hosts.
@@ -242,6 +254,10 @@ module Beaker
       end
     rescue => e
       report_and_raise(logger, e, "proxy_config")
+    rescue SignalException => ex
+      if ex.signo == 15 #SIGTERM
+        report_and_raise(logger, e, "proxy_config")
+      end
     end
 
     #Install EPEL on host or hosts with platform = /el-(5|6|7)/.  Do nothing on host or hosts of other platforms.
@@ -276,6 +292,10 @@ module Beaker
       end
     rescue => e
       report_and_raise(logger, e, "add_repos")
+    rescue SignalException => ex
+      if ex.signo == 15 #SIGTERM
+        report_and_raise(logger, e, "add_repos")
+      end
     end
 
     #Determine the domain name of the provided host from its /etc/resolv.conf
