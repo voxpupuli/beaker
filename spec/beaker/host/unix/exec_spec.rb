@@ -162,12 +162,13 @@ module Beaker
       let (:response) { double( 'response' ) }
 
       before :each do
-        expect( Beaker::Command ).to receive(:new).with("uptime").and_return(:foo)
-        expect( Beaker::Command ).to receive(:new).with(/shutdown/).and_return(:bar)
-        expect( instance ).to receive( :exec ).with(:bar)
+        expect( Beaker::Command ).to receive(:new).with("uptime").and_return(:foo).ordered
         expect( instance ).to receive( :exec ).with(:foo).and_return(response)
-        expect( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31').ordered
+        expect( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
+        expect( Beaker::Command ).to receive(:new).with("/sbin/shutdown -r now").and_return(true).ordered
+        allow(instance).to receive(:sleep)
       end
+
       it 'raises a reboot failure when command fails' do
         expect(instance).to receive(:exec).and_raise(Host::CommandFailure)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
@@ -176,6 +177,11 @@ module Beaker
       it 'raises a reboot failure when we receive an unexpected error' do
         expect(instance).to receive(:exec).and_raise(Net::SSH::HostKeyError)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+      end
+
+      it 'receives the same uptime' do
+        expect(instance).to receive(:exec).and_return(true)
+        instance.reboot
       end
     end
 

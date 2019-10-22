@@ -22,13 +22,18 @@ module Unix::Exec
       end
       
       #use uptime to check if the host has rebooted
-      repeat_for_and_wait 180, 10 do
+      timeout_seconds = 180
+      result = repeat_for_and_wait timeout_seconds, 10 do
         current_uptime_exec = exec(Beaker::Command.new("uptime"))
         current_uptime = current_uptime_exec.stdout
         current_uptime_str = parse_uptime current_uptime
         current_uptime_int = uptime_int current_uptime_str
         original_uptime_int > current_uptime_int
       end
+      unless result
+        raise Beaker::Host::RebootFailure, "Failed to reboot in allowed time window #{timeout_seconds} seconds"
+      end
+      result
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
     rescue Exception => e
