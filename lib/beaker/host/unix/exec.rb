@@ -1,23 +1,27 @@
 module Unix::Exec
   include Beaker::CommandFactory
 
+  # Reboots the host, comparing uptime values to verify success
+  #
+  # #repeat_for_and_wait returns its done value, which is the
+  #   return value of the block we pass to it. In this case:
+  #   true if rebooted (new uptime < old uptime)
+  #   false if not     (new uptime > old uptime)
+  #
+  # @return [Bool] success see above
   def reboot
     begin
       original_uptime = exec(Beaker::Command.new("uptime"))
       original_uptime_str = parse_uptime original_uptime.stdout
       original_uptime_int = uptime_int original_uptime_str
 
-    rescue Beaker::Host::CommandFailure => e
-      raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
-    end
-
-    if self['platform'] =~ /solaris/
-      exec(Beaker::Command.new("reboot"), :expect_connection_failure => true)
-    else
-      exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
-    end
-    #use uptime to check if the host has rebooted
-    begin
+      if self['platform'] =~ /solaris/
+        exec(Beaker::Command.new("reboot"), :expect_connection_failure => true)
+      else
+        exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
+      end
+      
+      #use uptime to check if the host has rebooted
       repeat_for_and_wait 180, 10 do
         current_uptime_exec = exec(Beaker::Command.new("uptime"))
         current_uptime = current_uptime_exec.stdout
