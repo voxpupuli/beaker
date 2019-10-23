@@ -20,7 +20,7 @@ module Unix::Exec
       else
         exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
       end
-      
+
       #use uptime to check if the host has rebooted
       timeout_seconds = 180
       result = repeat_for_and_wait timeout_seconds, 10 do
