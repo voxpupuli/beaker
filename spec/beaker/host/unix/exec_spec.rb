@@ -162,26 +162,36 @@ module Beaker
       let (:response) { double( 'response' ) }
 
       before :each do
-        expect( Beaker::Command ).to receive(:new).with("uptime").and_return(:foo).ordered
-        expect( instance ).to receive( :exec ).with(:foo).and_return(response)
-        expect( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
-        expect( Beaker::Command ).to receive(:new).with("/sbin/shutdown -r now").and_return(true).ordered
-        allow(instance).to receive(:sleep)
+        # stubs enough to survive the first uptime call & output parsing
+        #   note: just stubs input-chain between calls, parsing methods still run
+        allow( Beaker::Command ).to receive(:new).with("uptime").and_return(:uptime_command_stub)
+        allow( instance ).to receive( :exec ).with(:uptime_command_stub).and_return(response)
+        allow( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
+
+        allow( Beaker::Command ).to receive(:new).with("/sbin/shutdown -r now").and_return(:shutdown_command_stub)
       end
 
       it 'raises a reboot failure when command fails' do
-        expect(instance).to receive(:exec).and_raise(Host::CommandFailure)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
       end
 
       it 'raises a reboot failure when we receive an unexpected error' do
-        expect(instance).to receive(:exec).and_raise(Net::SSH::HostKeyError)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError)
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
       end
 
-      it 'receives the same uptime' do
-        expect(instance).to receive(:exec).and_return(true)
-        instance.reboot
+      it 'raises RebootFailure if new uptime is never less than old uptime' do
+        # bypass shutdown command itself
+        allow( instance ).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
+
+        # verify we've made it to the after-reboot loop (also avoid its wait behavior, skip to yielding)
+        expect(instance).to receive(:repeat_for_and_wait).and_yield
+        # verify the block is run exactly once here (will have a previous run from first uptime check)
+        expect(instance).to receive(:parse_uptime).exactly(2).times
+        expect(instance).to receive(:uptime_int).exactly(2).times.and_return(173)
+        # verify the 'time window' RebootFailure is thrown & thus the block `done` value was never true
+        expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /in allowed time window/)
       end
     end
 
