@@ -42,6 +42,7 @@ module Beaker
     context "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
+      let( :logger ) { double() }
 
       context 'if :timesync option set true on host' do
         it 'does call timesync for host' do
@@ -49,6 +50,15 @@ module Beaker
           allow( hypervisor ).to receive( :set_env )
           expect( hypervisor ).to receive( :timesync ).once
           hypervisor.configure
+        end
+
+        it 'catches signal exceptions and returns stack trace' do
+          hosts[0].options[:timesync] = true
+          allow( logger ).to receive( :error )
+          allow( logger ).to receive( :pretty_backtrace ).and_return("multiline\nstring")
+          hypervisor.instance_variable_set(:@logger, logger)
+          allow(Beaker::Command).to receive(:new).and_raise(SignalException.new('SIGTERM'))
+          expect( hypervisor.configure ).to raise_error(SignalException)
         end
       end
 

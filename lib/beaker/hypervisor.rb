@@ -82,27 +82,34 @@ module Beaker
     #Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
     #to the provided SUT for test execution to be successful.
     def configure(opts = {})
-      return unless @options[:configure]
-      run_in_parallel = run_in_parallel? opts, @options, 'configure'
-      block_on @hosts, { :run_in_parallel => run_in_parallel} do |host|
-        if host[:timesync]
-          timesync(host, @options)
+      begin
+        return unless @options[:configure]
+        run_in_parallel = run_in_parallel? opts, @options, 'configure'
+        block_on @hosts, { :run_in_parallel => run_in_parallel} do |host|
+          if host[:timesync]
+            timesync(host, @options)
+          end
         end
-      end
-      if @options[:root_keys]
-        sync_root_keys(@hosts, @options)
-      end
-      if @options[:add_el_extras]
-        add_el_extras(@hosts, @options)
-      end
-      if @options[:disable_iptables]
-        disable_iptables @hosts, @options
-      end
-      if @options[:set_env]
-        set_env(@hosts, @options)
-      end
-      if @options[:disable_updates]
-        disable_updates(@hosts, @options)
+        if @options[:root_keys]
+          sync_root_keys(@hosts, @options)
+        end
+        if @options[:add_el_extras]
+          add_el_extras(@hosts, @options)
+        end
+        if @options[:disable_iptables]
+          disable_iptables @hosts, @options
+        end
+        if @options[:set_env]
+          set_env(@hosts, @options)
+        end
+        if @options[:disable_updates]
+          disable_updates(@hosts, @options)
+        end
+      rescue SignalException => ex
+        if ex.signo == 15 #SIGTERM
+          report_and_raise(@logger, ex, "validate")
+        end
+        raise
       end
     end
 
