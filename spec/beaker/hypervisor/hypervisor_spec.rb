@@ -58,7 +58,7 @@ module Beaker
           allow( logger ).to receive( :pretty_backtrace ).and_return("multiline\nstring")
           hypervisor.instance_variable_set(:@logger, logger)
           allow(Beaker::Command).to receive(:new).and_raise(SignalException.new('SIGTERM'))
-          expect( hypervisor.configure ).to raise_error(SignalException)
+          expect{ hypervisor.configure }.to raise_error(SignalException)
         end
       end
 
