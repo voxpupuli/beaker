@@ -1,0 +1,18 @@
+HOSTS:
+  redhat7-64-1:
+    pe_dir: http://enterprise.delivery.puppetlabs.net/2019.2/feature/ci-ready
+    pe_ver: 2019.2.0-rc1-207-g874950f-PEZ_cinext-jenkinsmaster-enterprise-prod-1
+    pe_upgrade_dir: 
+    pe_upgrade_ver: 
+    platform: el-7-x86_64
+    packaging_platform: el-7-x86_64
+    template: redhat-7-x86_64
+    hypervisor: vmpooler
+    roles:
+    - agent
+    - master
+    - dashboard
+    - database
+CONFIG:
+  pooling_api: http://vmpooler.delivery.puppetlabs.net/
+  consoleport: 443
