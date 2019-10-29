@@ -36,7 +36,7 @@ module Unix::Exec
       result
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
-    rescue Exception => e
+    rescue RuntimeError => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     end
   end
@@ -66,9 +66,10 @@ module Unix::Exec
     # eg 19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31
     # 8:03 up 52 days, 20:47, 3 users, load averages: 1.36 1.42 1.40
     # 22:19 up 54 days, 1 min, 4 users, load averages: 2.08 2.06 2.27
-    regexp = /.*up (.*), [[:digit:]]+ user.*/
+    regexp = /.*up (.*),[[:space:]]+[[:digit:]]+ user.*/
     result = uptime.match regexp
-    uptime_string = result[1]
+    raise "Couldn't parse uptime: #{uptime}" if result.nil?
+    result[1]
   end
 
   def echo(msg, abs=true)
