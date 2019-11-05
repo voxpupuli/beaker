@@ -66,10 +66,13 @@ module Unix::Exec
     # eg 19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31
     # 8:03 up 52 days, 20:47, 3 users, load averages: 1.36 1.42 1.40
     # 22:19 up 54 days, 1 min, 4 users, load averages: 2.08 2.06 2.27
-    regexp = /.*up (.*),[[:space:]]+[[:digit:]]+ user.*/
+    regexp = /.*up (.*)[[:space:]]+[[:digit:]]+ user.*/
     result = uptime.match regexp
+    if self['platform'] =~ /solaris-/ && result[1].empty?
+      return "0 min"
+    end
     raise "Couldn't parse uptime: #{uptime}" if result.nil?
-    result[1]
+    result[1].strip.chomp(",")
   end
 
   def echo(msg, abs=true)

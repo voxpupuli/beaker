@@ -219,6 +219,10 @@ module Beaker
       it 'parses variation 4 of uptime string' do
         expect(instance.parse_uptime("18:44:45 up 5 min,  0 users,  load average: 0.14, 0.11, 0.05")).to be == "5 min"
       end
+      it 'parses solaris\'s "just up" without time message' do
+        opts['platform'] = 'solaris-11-x86_64'
+        expect(instance.parse_uptime("10:05am  up  0 users,  load average: 0.66, 0.14, 0.05")).to be == "0 min"
+      end
      end
 
     describe '#uptime_int' do
