@@ -1,0 +1,8 @@
+  host-redhat-fips-7-x86_64:
+    platform: redhat-fips-7-x86_64
+    template: redhat-fips-7-x86_64
+    hypervisor: vmpooler
+  host-redhat-fips-7-x86_64-ipv6:
+    platform: redhat-fips-7-x86_64-ipv6
+    template: redhat-fips-7-x86_64-ipv6
+    hypervisor: vmpooler

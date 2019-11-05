@@ -1,0 +1,29 @@
+HOSTS:
+  #     m15bf0li24iyjbo.delivery.puppetlabs.net (host-solaris-10-x86_64) executed in 36.59 seconds
+  # Error in process 84413: Unexpected exception in reboot: Couldn't parse uptime:  10:05am  up  0 users,  load average: 9.13, 2.06, 0.70
+  host-solaris-10-x86_64:
+    platform: solaris-10-x86_64
+    template: solaris-10-x86_64
+    hypervisor: vmpooler
+  #     mcbvfmh3mgythww.delivery.puppetlabs.net (host-solaris-11-x86_64) executed in 35.95 seconds
+  # Error in process 84414: Unexpected exception in reboot: Couldn't parse uptime:  10:05am  up  0 users,  load average: 0.66, 0.14, 0.05
+  host-solaris-11-x86_64:
+    platform: solaris-11-x86_64
+    template: solaris-11-x86_64
+    hypervisor: vmpooler
+  # undefined method `ArgumentError' for #<Unix::Host:0x00007fe6aaab45f8>
+  #   ArgumentError: marshal data too short ??
+  # host-solaris-112-x86_64:
+  #   platform: solaris-112-x86_64
+  #   template: solaris-112-x86_64
+  #   hypervisor: vmpooler
+  #  yg5ly898tdmzsq2.delivery.puppetlabs.net (host-solaris-114-x86_64) executed in 72.26 seconds
+  # Error in process 84415: Unexpected exception in reboot: Couldn't parse uptime:   6:05pm  up  0 users,  load average: 1.51, 0.34, 0.12
+  host-solaris-114-x86_64:
+    platform: solaris-114-x86_64
+    template: solaris-114-x86_64
+    hypervisor: vmpooler
+CONFIG:
+  validate: false
+  pooling_api: http://vmpooler.delivery.puppetlabs.net/
+  consoleport: 443

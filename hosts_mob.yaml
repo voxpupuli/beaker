@@ -1,18 +1,150 @@
 HOSTS:
-  redhat7-64-1:
-    pe_dir: http://enterprise.delivery.puppetlabs.net/2019.2/feature/ci-ready
-    pe_ver: 2019.2.0-rc1-207-g874950f-PEZ_cinext-jenkinsmaster-enterprise-prod-1
-    pe_upgrade_dir: 
-    pe_upgrade_ver: 
-    platform: el-7-x86_64
-    packaging_platform: el-7-x86_64
+  host-centos-5-x86_64:
+    platform: centos-5-x86_64
+    template: centos-5-x86_64
+    hypervisor: vmpooler
+  host-centos-6-i386:
+    platform: centos-6-i386
+    template: centos-6-i386
+    hypervisor: vmpooler
+  host-centos-6-x86_64:
+    platform: centos-6-x86_64
+    template: centos-6-x86_64
+    hypervisor: vmpooler
+  host-centos-7-x86_64:
+    platform: centos-7-x86_64
+    template: centos-7-x86_64
+    hypervisor: vmpooler
+  # NTP issue? no ntpdate found
+  # host-centos-8-x86_64:
+  #   platform: centos-8-x86_64
+  #   template: centos-8-x86_64
+  #   hypervisor: vmpooler
+  host-debian-10-x86_64:
+    platform: debian-10-x86_64
+    template: debian-10-x86_64
+    hypervisor: vmpooler
+  host-debian-9-x86_64:
+    platform: debian-9-x86_64
+    template: debian-9-x86_64
+    hypervisor: vmpooler
+  host-fedora-28-x86_64:
+    platform: fedora-28-x86_64
+    template: fedora-28-x86_64
+    hypervisor: vmpooler
+  # CURL again?
+  # host-fedora-29-x86_64:
+  #   platform: fedora-29-x86_64
+  #   template: fedora-29-x86_64
+  #   hypervisor: vmpooler
+  # No... curl?
+  # host-fedora-30-x86_64:
+  #   platform: fedora-30-x86_64
+  #   template: fedora-30-x86_64
+  #   hypervisor: vmpooler
+  host-oracle-5-x86_64:
+    platform: oracle-5-x86_64
+    template: oracle-5-x86_64
+    hypervisor: vmpooler
+  # Never came back from reboot?
+  # RuntimeError: Child process ran longer than timeout of 1800
+  host-oracle-6-x86_64:
+    platform: oracle-6-x86_64
+    template: oracle-6-x86_64
+    hypervisor: vmpooler
+  host-oracle-7-x86_64:
+    platform: oracle-7-x86_64
+    template: oracle-7-x86_64
+    hypervisor: vmpooler
+  host-redhat-5-x86_64:
+    platform: redhat-5-x86_64
+    template: redhat-5-x86_64
+    hypervisor: vmpooler
+  host-redhat-6-x86_64:
+    platform: redhat-6-x86_64
+    template: redhat-6-x86_64
+    hypervisor: vmpooler
+  host-redhat-7-x86_64:
+    platform: redhat-7-x86_64
     template: redhat-7-x86_64
     hypervisor: vmpooler
-    roles:
-    - agent
-    - master
-    - dashboard
-    - database
+  host-redhat-8-x86_64:
+    platform: redhat-8-x86_64
+    template: redhat-8-x86_64
+    hypervisor: vmpooler
+  host-scientific-5-i386:
+    platform: scientific-5-i386
+    template: scientific-5-i386
+    hypervisor: vmpooler
+  host-scientific-5-x86_64:
+    platform: scientific-5-x86_64
+    template: scientific-5-x86_64
+    hypervisor: vmpooler
+  host-scientific-6-i386:
+    platform: scientific-6-i386
+    template: scientific-6-i386
+    hypervisor: vmpooler
+  host-scientific-6-x86_64:
+    platform: scientific-6-x86_64
+    template: scientific-6-x86_64
+    hypervisor: vmpooler
+  host-scientific-7-x86_64:
+    platform: scientific-7-x86_64
+    template: scientific-7-x86_64
+    hypervisor: vmpooler
+  host-sles-11-x86_64:
+    platform: sles-11-x86_64
+    template: sles-11-x86_64
+    hypervisor: vmpooler
+  host-sles-12-x86_64:
+    platform: sles-12-x86_64
+    template: sles-12-x86_64
+    hypervisor: vmpooler
+  host-sles-15-x86_64:
+    platform: sles-15-x86_64
+    template: sles-15-x86_64
+    hypervisor: vmpooler
+  #     m15bf0li24iyjbo.delivery.puppetlabs.net (host-solaris-10-x86_64) executed in 36.59 seconds
+  # Error in process 84413: Unexpected exception in reboot: Couldn't parse uptime:  10:05am  up  0 users,  load average: 9.13, 2.06, 0.70
+  host-solaris-10-x86_64:
+    platform: solaris-10-x86_64
+    template: solaris-10-x86_64
+    hypervisor: vmpooler
+  #     mcbvfmh3mgythww.delivery.puppetlabs.net (host-solaris-11-x86_64) executed in 35.95 seconds
+  # Error in process 84414: Unexpected exception in reboot: Couldn't parse uptime:  10:05am  up  0 users,  load average: 0.66, 0.14, 0.05
+  host-solaris-11-x86_64:
+    platform: solaris-11-x86_64
+    template: solaris-11-x86_64
+    hypervisor: vmpooler
+  # undefined method `ArgumentError' for #<Unix::Host:0x00007fe6aaab45f8>
+  #   ArgumentError: marshal data too short ??
+  # host-solaris-112-x86_64:
+  #   platform: solaris-112-x86_64
+  #   template: solaris-112-x86_64
+  #   hypervisor: vmpooler
+  #  yg5ly898tdmzsq2.delivery.puppetlabs.net (host-solaris-114-x86_64) executed in 72.26 seconds
+  # Error in process 84415: Unexpected exception in reboot: Couldn't parse uptime:   6:05pm  up  0 users,  load average: 1.51, 0.34, 0.12
+  host-solaris-114-x86_64:
+    platform: solaris-114-x86_64
+    template: solaris-114-x86_64
+    hypervisor: vmpooler
+  host-ubuntu-1404-x86_64:
+    platform: ubuntu-1404-x86_64
+    template: ubuntu-1404-x86_64
+    hypervisor: vmpooler
+  host-ubuntu-1604-x86_64:
+    platform: ubuntu-1604-x86_64
+    template: ubuntu-1604-x86_64
+    hypervisor: vmpooler
+  host-ubuntu-1804-x86_64:
+    platform: ubuntu-1804-x86_64
+    template: ubuntu-1804-x86_64
+    hypervisor: vmpooler
+  host-ubuntu-1810-x86_64:
+    platform: ubuntu-1810-x86_64
+    template: ubuntu-1810-x86_64
+    hypervisor: vmpooler
 CONFIG:
+  validate: false
   pooling_api: http://vmpooler.delivery.puppetlabs.net/
   consoleport: 443
