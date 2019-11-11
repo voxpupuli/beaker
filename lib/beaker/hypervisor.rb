@@ -107,7 +107,7 @@ module Beaker
         end
       rescue SignalException => ex
         if ex.signo == 15 #SIGTERM
-          report_and_raise(@logger, ex, "validate")
+          report_and_raise(@logger, ex, "configure")
         end
         raise
       end
