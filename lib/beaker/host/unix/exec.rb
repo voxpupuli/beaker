@@ -17,7 +17,9 @@ module Unix::Exec
       end
 
       #use uptime to check if the host has rebooted
-      current_uptime_exec = exec(Beaker::Command.new("uptime"))
+      options_hash = host.options
+      options_hash[:max_connection_tries] = 9
+      current_uptime_exec = exec(Beaker::Command.new("uptime"), options_hash)
       current_uptime = current_uptime_exec.stdout
       current_uptime_str = parse_uptime current_uptime
       current_uptime_int = uptime_int current_uptime_str
