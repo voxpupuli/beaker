@@ -9,4 +9,5 @@
 
 block_on @hosts, {:run_in_parallel => true} do |host|
   host.reboot
+  on host, 'echo itworked'
 end

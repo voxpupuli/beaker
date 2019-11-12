@@ -3,12 +3,7 @@ module Unix::Exec
 
   # Reboots the host, comparing uptime values to verify success
   #
-  # #repeat_for_and_wait returns its done value, which is the
-  #   return value of the block we pass to it. In this case:
-  #   true if rebooted (new uptime < old uptime)
-  #   false if not     (new uptime > old uptime)
-  #
-  # @return [Bool] success see above
+  # Will throw an exception RebootFailure if it fails
   def reboot
     begin
       original_uptime = exec(Beaker::Command.new("uptime"))
@@ -22,18 +17,13 @@ module Unix::Exec
       end
 
       #use uptime to check if the host has rebooted
-      timeout_seconds = 180
-      result = repeat_for_and_wait timeout_seconds, 10 do
-        current_uptime_exec = exec(Beaker::Command.new("uptime"))
-        current_uptime = current_uptime_exec.stdout
-        current_uptime_str = parse_uptime current_uptime
-        current_uptime_int = uptime_int current_uptime_str
-        original_uptime_int > current_uptime_int
+      current_uptime_exec = exec(Beaker::Command.new("uptime"))
+      current_uptime = current_uptime_exec.stdout
+      current_uptime_str = parse_uptime current_uptime
+      current_uptime_int = uptime_int current_uptime_str
+      unless original_uptime_int > current_uptime_int
+        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed."
       end
-      unless result
-        raise Beaker::Host::RebootFailure, "Failed to reboot in allowed time window #{timeout_seconds} seconds"
-      end
-      result
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
     rescue RuntimeError => e
@@ -50,12 +40,12 @@ module Unix::Exec
         # 20:47 case: hours & mins
         hours, mins = value.split(":")
         accumulated_mins += (hours.to_i * 60 + mins.to_i)
-      elsif unit == "days"
+      elsif unit =~ /day(s)?/
         accumulated_mins += (value.to_i * 1440) # 60 * 24 = 1440
-      elsif unit =~ /min/
+      elsif unit =~ /min(s)?/
         accumulated_mins += value.to_i
       else
-        raise ArgumentError "can't parse uptime segment: #{time_segment}"
+        raise ArgumentError, "can't parse uptime segment: #{time_segment}"
       end
     end
     accumulated_mins

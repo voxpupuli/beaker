@@ -1,0 +1,48 @@
+HOSTS:
+  host-centos-5-x86_64:
+    platform: centos-5-x86_64
+    template: centos-5-x86_64
+    hypervisor: vmpooler
+  host-centos-6-i386:
+    platform: centos-6-i386
+    template: centos-6-i386
+    hypervisor: vmpooler
+  host-centos-6-x86_64:
+    platform: centos-6-x86_64
+    template: centos-6-x86_64
+    hypervisor: vmpooler
+  host-centos-7-x86_64:
+    platform: centos-7-x86_64
+    template: centos-7-x86_64
+    hypervisor: vmpooler
+  # NTP issue? no ntpdate found
+  host-centos-8-x86_64:
+    platform: centos-8-x86_64
+    template: centos-8-x86_64
+    hypervisor: vmpooler
+  host-debian-10-x86_64:
+    platform: debian-10-x86_64
+    template: debian-10-x86_64
+    hypervisor: vmpooler
+  host-debian-9-x86_64:
+    platform: debian-9-x86_64
+    template: debian-9-x86_64
+    hypervisor: vmpooler
+  host-fedora-28-x86_64:
+    platform: fedora-28-x86_64
+    template: fedora-28-x86_64
+    hypervisor: vmpooler
+  # CURL again?
+  host-fedora-29-x86_64:
+    platform: fedora-29-x86_64
+    template: fedora-29-x86_64
+    hypervisor: vmpooler
+  # No... curl?
+  host-fedora-30-x86_64:
+    platform: fedora-30-x86_64
+    template: fedora-30-x86_64
+    hypervisor: vmpooler
+CONFIG:
+  validate: false
+  pooling_api: http://vmpooler.delivery.puppetlabs.net/
+  consoleport: 443
