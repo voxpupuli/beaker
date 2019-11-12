@@ -50,6 +50,16 @@ module Beaker
           expect( hypervisor ).to receive( :timesync ).once
           hypervisor.configure
         end
+
+        it 'catches signal exceptions and returns stack trace' do
+          logger = double()
+          hosts[0].options[:timesync] = true
+          allow( logger ).to receive( :error )
+          allow( logger ).to receive( :pretty_backtrace ).and_return("multiline\nstring")
+          hypervisor.instance_variable_set(:@logger, logger)
+          allow(Beaker::Command).to receive(:new).and_raise(SignalException.new('SIGTERM'))
+          expect{ hypervisor.configure }.to raise_error(SignalException)
+        end
       end
 
       context 'if :timesync option set true but false on host' do
