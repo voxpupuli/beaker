@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.13.1...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.14.0...master)
+
+# [4.14.0](https://github.com/puppetlabs/beaker/compare/4.13.1...4.14.0) - 2019-11-12
+
+### Added
+
+- Pre-built steps output stacktraces when aborted (QENG-7466)
 
 # [4.13.1](https://github.com/puppetlabs/beaker/compare/4.13.0...4.13.1) - 2019-10-07
 
