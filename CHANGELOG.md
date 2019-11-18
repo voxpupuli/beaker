@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.14.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.14.1...master)
+
+# [4.14.1](https://github.com/puppetlabs/beaker/compare/4.14.0...4.14.1) - 2019-11-18
+
+### Fixed
+
+- `fips_mode?` detection (#1607)
 
 # [4.14.0](https://github.com/puppetlabs/beaker/compare/4.13.1...4.14.0) - 2019-11-12
 
