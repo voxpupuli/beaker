@@ -217,7 +217,11 @@ module Beaker
     def fips_mode?
       case self['platform']
       when /el-7/
-        execute("cat /proc/sys/crypto/fips_enabled") == "1"
+        begin
+          execute("cat /proc/sys/crypto/fips_enabled") == "1"
+        rescue Beaker::Host::CommandFailure
+          false
+        end
       else
         false
       end
