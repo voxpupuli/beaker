@@ -825,30 +825,6 @@ module Beaker
       end
     end
 
-    describe "#down?" do
-
-      it "repeats & fails with 'failed to go down' after X seconds" do
-        allow(host).to receive(:repeat_for_and_wait).with(180,10).and_return(false)
-        expect {
-          host.down?
-        }.to raise_error(Beaker::Host::RebootFailure, "Host failed to go down")
-      end
-
-      it "returns that the host is down (true) if ping? is false" do
-        expect(host).to receive(:ping?).exactly(1).times.and_return(false)
-
-        expect(host.down?).to be true
-      end
-
-      it "cuts off execution correctly if host becomes unreachable" do
-        expect(host).to receive(:sleep).exactly(3).times
-        expect(host).to receive(:ping?).exactly(3).times.and_return(true).ordered
-        expect(host).to receive(:ping?).exactly(1).times.and_return(false).ordered
-
-        expect(host.down?).to be true
-      end
-    end
-
     describe "#fips_mode?" do
       it 'returns false on non-el7 hosts' do
         @platform = 'windows'
