@@ -234,7 +234,9 @@ module Beaker
       it 'parses time segment variation 4 into a minute value' do
         expect(instance.uptime_int("54 days")).to be == 77760
       end
-      it 'raises if we pass garbage to it'
+      it 'raises if we pass garbage to it' do
+        expect { instance.uptime_int("solaris roxx my soxx") }.to raise_error
+      end
     end
   end
 end

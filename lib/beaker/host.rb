@@ -2,7 +2,6 @@ require 'socket'
 require 'timeout'
 require 'benchmark'
 require 'rsync'
-require 'net/ping'
 
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
@@ -593,27 +592,6 @@ module Beaker
 
       return result if result.success?
       raise Beaker::Host::CommandFailure, result.error
-    end
-
-    def ping?
-      check = Net::Ping::External.new(self)
-      check.ping?
-    end
-
-    def down?
-      @logger.debug("host.down?: checking if host has gone down using ping...")
-      host_up = true
-      # give it max 3 minutes to go down, check every 10 seconds
-      repeat_for_and_wait 180, 10 do
-        host_up = self.ping?
-        @logger.debug("- ping result: #{host_up}. Done checking? #{!host_up}")
-        !host_up # host down? -> continue looping. up? -> finished
-      end
-      if host_up
-        raise Beaker::Host::RebootFailure, 'Host failed to go down'
-      end
-      @logger.debug("host.down? host stopped responding, returning true")
-      true
     end
   end
 
