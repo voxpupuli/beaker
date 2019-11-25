@@ -255,6 +255,7 @@ module Beaker
         local_opts[:recursive] = File.directory?(source)
       end
       local_opts[:chunk_size] ||= 16384
+      local_opts[:verbose] ||= true
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
@@ -288,6 +289,7 @@ module Beaker
         local_opts[:recursive] = true
       end
       local_opts[:chunk_size] ||= 16384
+      local_opts[:verbose] ||= true
 
       result = Result.new(@hostname, [source, target])
       result.stdout = "\n"
