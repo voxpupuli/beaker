@@ -231,9 +231,9 @@ module Beaker
       end
 
       it 'ensures the connection closes when scp.upload! errors' do
-        expect( @mock_scp ).to receive( :upload! ).once.and_raise(RuntimeError)
+        expect( @mock_scp ).to receive( :upload! ).once.and_raise(Net::SCP::Error)
         expect(connection).to receive(:close).once
-        connection.scp_to '', ''
+        expect{ connection.scp_to '', ''}.to raise_error(/Net::SCP::Error/)
       end
 
       it 'returns a result object' do
@@ -258,9 +258,9 @@ module Beaker
       end
 
       it 'ensures the connection closes when scp.download! errors' do
-        expect( @mock_scp ).to receive( :download! ).once.and_raise(RuntimeError)
+        expect( @mock_scp ).to receive( :download! ).once.and_raise(Net::SCP::Error)
         expect(connection).to receive(:close).once
-        connection.scp_from '', ''
+        expect{ connection.scp_from '', ''}.to raise_error(/Net::SCP::Error/)
       end
 
       it 'returns a result object' do

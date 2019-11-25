@@ -267,6 +267,7 @@ module Beaker
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
           "raise an error."
         close
+        raise "#{e}\n#{e.backtrace}"
       end
 
 
@@ -299,6 +300,7 @@ module Beaker
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
           "raise an error."
         close
+        raise "#{e}\n#{e.backtrace}"
       end
 
       # Setting these values allows reporting via result.log(test_name)
