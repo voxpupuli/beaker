@@ -16,6 +16,9 @@ module Unix::Exec
         exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
       end
 
+      # give the host a little time to shutdown
+      sleep 5 
+
       #use uptime to check if the host has rebooted
       current_uptime_exec = exec(Beaker::Command.new("uptime"), {:max_connection_tries => 9, :silent => true})
       current_uptime = current_uptime_exec.stdout
