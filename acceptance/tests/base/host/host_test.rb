@@ -147,7 +147,7 @@ hosts.each do |host|
   host.add_env_var("TEST", "3")
   logger.debug("ensure that TEST env var has correct setting")
   val = host.get_env_var("TEST")
-  assert_match(/TEST=3(;|:)2(;|:)1$/, val, "add_env_var can correctly add env vars")
+  assert_match(/TEST=1(;|:)2(;|:)3$/, val, "add_env_var can correctly add env vars")
 end
 
 step "#add_env_var : can preserve an environment between ssh connections"
@@ -166,7 +166,7 @@ hosts.each do |host|
   host.close
   logger.debug("ensure that TEST env var has correct setting")
   val = host.get_env_var("TEST")
-  assert_match(/TEST=3(;|:)2(;|:)1$/, val, "can preserve an environment between ssh connections")
+  assert_match(/TEST=1(;|:)2(;|:)3$/, val, "can preserve an environment between ssh connections")
 end
 
 step "#delete_env_var : can delete an environment"
@@ -174,7 +174,7 @@ hosts.each do |host|
   logger.debug("remove TEST=3")
   host.delete_env_var("TEST", "3")
   val = host.get_env_var("TEST")
-  assert_match(/TEST=2(;|:)1$/, val, "delete_env_var can correctly delete part of a chained env var")
+  assert_match(/TEST=1(;|:)2$/, val, "delete_env_var can correctly delete part of a chained env var")
   logger.debug("remove TEST=1")
   host.delete_env_var("TEST", "1")
   val = host.get_env_var("TEST")

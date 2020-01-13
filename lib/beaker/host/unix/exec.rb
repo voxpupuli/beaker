@@ -114,7 +114,7 @@ module Unix::Exec
       return #nothing to do here, key value pair already exists
     #see if the key already exists
     elsif exec(Beaker::Command.new("grep ^#{key}= #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
-      exec(Beaker::SedCommand.new(self['platform'], "s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
+      exec(Beaker::SedCommand.new(self['platform'], "/^#{key}=/ s/$/:#{escaped_val}/", env_file))
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
     end
