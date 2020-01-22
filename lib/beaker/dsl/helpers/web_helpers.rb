@@ -18,15 +18,19 @@ module Beaker
         #@example
         #  extension = link_exists?("#{URL}.tar.gz") ? ".tar.gz" : ".tar"
         def link_exists?(link)
-          require "net/http"
-          require "net/https"
-          require "open-uri"
-          url = URI.parse(link)
-          http = Net::HTTP.new(url.host, url.port)
-          http.use_ssl = (url.scheme == 'https')
-          http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
-          http.start do |http|
-            return http.head(url.request_uri).code == "200"
+          begin
+            require "net/http"
+            require "net/https"
+            require "open-uri"
+            url = URI.parse(link)
+            http = Net::HTTP.new(url.host, url.port)
+            http.use_ssl = (url.scheme == 'https')
+            http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
+            http.start do |http|
+              return http.head(url.request_uri).code == "200"
+            end
+          rescue
+            return false
           end
         end
 
