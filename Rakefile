@@ -192,14 +192,6 @@ Run the hypervisor beaker acceptance tests
     beaker_test(:hypervisor)
   end
 
-  desc <<-EOS
-Run the puppet beaker acceptance tests on a pe install.
-#{USAGE}
-  EOS
-  task :puppetpe  => 'gen_hosts' do
-    beaker_test(:puppetpe)
-  end
-
 
   desc 'Generate Beaker Host Config File'
   task :gen_hosts do
