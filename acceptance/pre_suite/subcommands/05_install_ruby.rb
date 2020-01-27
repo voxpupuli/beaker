@@ -1,6 +1,6 @@
 ruby_version, ruby_source = ENV['RUBY_VER'], "job parameter"
 unless ruby_version
-  ruby_version = "2.3.1"
+  ruby_version = "2.4.1"
   ruby_source = "default"
 end
 test_name "Install and configure Ruby #{ruby_version} (from #{ruby_source}) on the SUT" do
