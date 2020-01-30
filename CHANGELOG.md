@@ -11,7 +11,13 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.14.1...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.15.0...master)
+
+# [4.15.0](https://github.com/puppetlabs/beaker/compare/4.14.1...4.15.0) - 2020-01-30
+
+### Added
+
+- macOS 10.15 Catalina support (BKR-1621)
 
 # [4.14.1](https://github.com/puppetlabs/beaker/compare/4.14.0...4.14.1) - 2019-11-18
 
