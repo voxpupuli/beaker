@@ -40,4 +40,13 @@ If you'd like to contribute improvements to Beaker, please see [CONTRIBUTING](CO
 
 # Maintainers
 
-For information on project maintainers, please check out our [MAINTAINERS doc](MAINTAINERS.md).
+For information on project maintainers, please check out our [CODEOWNERS doc](CODEOWNERS).
+
+# Releasing
+
+Since the beaker project has always been the central hub for all beaker testing, its release process has been more involved than most beaker-libraries (ie. [beaker-puppet](https://github.com/puppetlabs/beaker-puppet)).
+Historically, the process has been described in [Confluence: Beaker Release Process](https://confluence.puppetlabs.com/display/SRE/Beaker+Release+Process) (apologies, most links in this section are Puppet-internal).
+
+To release new versions of beaker, please use this [jenkins job](https://jenkins-sre.delivery.puppetlabs.net/view/all/job/qe_beaker-gem_init-multijob_master/). This job lives on internal infrastructure.
+
+To run the job, click on `Build with Parameters` in the menu on the left. Make sure you verify the checkbox next to `PUBLIC` is checked and enter the appropriate version. The version should adhere to semantic version standards. When in doubt, consult [the maintainers of Beaker](#maintainers) for guidance.
