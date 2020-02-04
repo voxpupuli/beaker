@@ -44,6 +44,23 @@ module Beaker
       connection
     end
 
+    # Setup and return the ssh connection object
+    #
+    # @note For more information about Net::SSH library, check out these docs:
+    #       - {https://net-ssh.github.io/net-ssh/ Base Net::SSH docs}
+    #       - {http://net-ssh.github.io/net-ssh/Net/SSH.html#method-c-start Net::SSH.start method docs}
+    #       - {https://net-ssh.github.io/net-ssh/Net/SSH/Connection/Session.html Net::SSH::Connection::Session class docs}
+    #
+    # @param [String] host hostname of the machine to connect to
+    # @param [String] user username to login to the host as
+    # @param [Hash{Symbol=>String}] ssh_opts Options hash passed directly to Net::SSH.start method
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries Limit the number of connection start
+    #                                                 tries to this number (default: 11)
+    # @option options [Boolean] :silent Stops logging attempt failure messages if set to true
+    #                                   (default: true)
+    #
+    # @return [Net::SSH::Connection::Session] session returned from Net::SSH.start method
     def connect_block host, user, ssh_opts, options
       try = 1
       last_wait = 2
@@ -67,7 +84,11 @@ module Beaker
        end
     end
 
-    # connect to the host
+    # Connect to the host, creating a new connection if required
+    #
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries {#connect_block} option
+    # @option options [Boolean] :silent {#connect_block} option
     def connect options = {}
       # Try three ways to connect to host (vmhostname, ip, hostname)
       # Try each method in turn until we succeed
@@ -197,6 +218,11 @@ module Beaker
       result
     end
 
+    # Execute a command on a host, ensuring a connection exists first
+    #
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries {#connect_block} option (passed through {#connect})
+    # @option options [Boolean] :silent {#connect_block} option (passed through {#connect})
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
       # ensure that we have a current connection object
