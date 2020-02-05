@@ -44,37 +44,59 @@ module Beaker
       connection
     end
 
-    def connect_block host, user, ssh_opts
+    # Setup and return the ssh connection object
+    #
+    # @note For more information about Net::SSH library, check out these docs:
+    #       - {https://net-ssh.github.io/net-ssh/ Base Net::SSH docs}
+    #       - {http://net-ssh.github.io/net-ssh/Net/SSH.html#method-c-start Net::SSH.start method docs}
+    #       - {https://net-ssh.github.io/net-ssh/Net/SSH/Connection/Session.html Net::SSH::Connection::Session class docs}
+    #
+    # @param [String] host hostname of the machine to connect to
+    # @param [String] user username to login to the host as
+    # @param [Hash{Symbol=>String}] ssh_opts Options hash passed directly to Net::SSH.start method
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries Limit the number of connection start
+    #                                                 tries to this number (default: 11)
+    # @option options [Boolean] :silent Stops logging attempt failure messages if set to true
+    #                                   (default: true)
+    #
+    # @return [Net::SSH::Connection::Session] session returned from Net::SSH.start method
+    def connect_block host, user, ssh_opts, options
       try = 1
       last_wait = 2
       wait = 3
+      max_connection_tries = options[:max_connection_tries] || 11
       begin
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
          Net::SSH.start(host, user, ssh_opts)
        rescue *RETRYABLE_EXCEPTIONS => e
-         if try <= 11
-           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}"
-           @logger.warn "Trying again in #{wait} seconds"
+         if try <= max_connection_tries
+           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
+           @logger.warn "Trying again in #{wait} seconds" unless options[:silent]
            sleep wait
           (last_wait, wait) = wait, last_wait + wait
            try += 1
            retry
          else
-           @logger.warn "Failed to connect to #{host}, after #{try} attempts"
+           @logger.warn "Failed to connect to #{host}, after #{try} attempts" unless options[:silent]
            nil
          end
        end
     end
 
-    # connect to the host
-    def connect
+    # Connect to the host, creating a new connection if required
+    #
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries {#connect_block} option
+    # @option options [Boolean] :silent {#connect_block} option
+    def connect options = {}
       # Try three ways to connect to host (vmhostname, ip, hostname)
       # Try each method in turn until we succeed
       methods = @ssh_connection_preference.dup
       while (not @ssh) && (not methods.empty?) do
         unless instance_variable_get("@#{methods[0]}").nil?
           if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts)
+            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts, options)
           else
             @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
             @ssh_connection_preference.delete(methods[0])
@@ -196,10 +218,15 @@ module Beaker
       result
     end
 
+    # Execute a command on a host, ensuring a connection exists first
+    #
+    # @param [Hash{Symbol=>String}] options Options hash to control method conditionals
+    # @option options [Integer] :max_connection_tries {#connect_block} option (passed through {#connect})
+    # @option options [Boolean] :silent {#connect_block} option (passed through {#connect})
     def execute command, options = {}, stdout_callback = nil,
                 stderr_callback = stdout_callback
       # ensure that we have a current connection object
-      connect
+      connect(options)
       try_to_execute(command, options, stdout_callback, stderr_callback)
     end
 
