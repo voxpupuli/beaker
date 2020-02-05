@@ -11,7 +11,18 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.15.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.16.0...master)
+
+# [4.16.0](https://github.com/puppetlabs/beaker/compare/4.15.0...4.16.0) - 2020-02-05
+
+### Added
+
+- release section to README ([#1618](https://github.com/puppetlabs/beaker/pull/1618))
+- false return if `link_exists?` raises an error ([#1613](https://github.com/puppetlabs/beaker/pull/1613))
+
+### Fixed
+
+- `host.reboot` uses `uptime` rather than `ping` to check host status ([#1619](https://github.com/puppetlabs/beaker/pull/1619))
 
 # [4.15.0](https://github.com/puppetlabs/beaker/compare/4.14.1...4.15.0) - 2020-01-30
 
