@@ -431,7 +431,7 @@ module Beaker
         # @return nil
         def add_system32_hosts_entry(host, opts = {})
           if host.is_powershell?
-            hosts_file = "C:\\Windows\\System32\\Drivers\\etc\\hosts"
+            hosts_file = 'C:\Windows\System32\Drivers\etc\hosts'
             host_entry = "#{opts['ip']}`t`t#{opts['name']}"
             on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
           else
@@ -462,6 +462,28 @@ module Beaker
           end
         end
 
+        # Return a Hash with the Alternate Data Stream (ADS) name as well as the
+        # base file path
+        #
+        # @param file_path [String] The full path with the ADS attached
+        #
+        # @return [Hash] The base file path and ADS name
+        def win_ads_path(file_path)
+          ads_path = {
+            path: file_path,
+            ads: nil
+          }
+
+          split_path = file_path.split(':')
+
+          if split_path.size > 2
+            ads_path[:ads] = split_path.pop
+            ads_path[:path] = split_path.join(':')
+          end
+
+          return ads_path
+        end
+
         # Check whether a file exists on the host
         #
         # @param host [Beaker::Host] The target host
@@ -469,9 +491,22 @@ module Beaker
         #
         # @return [Boolean] Whether the file exists on the host (using `test -f`)
         def file_exists_on(host, file_path)
-          host.execute(%(test -f "#{file_path}"), accept_all_exit_codes: true) do |result|
-            return result.exit_code.zero?
+          if host['platform'] =~ /windows/
+            command = %(Test-Path #{file_path})
+
+            if file_path.include?(':')
+              split_path = win_ads_path(file_path)
+
+              command = %(Test-Path #{split_path[:path]})
+              command += %( -AND Get-Item -path #{split_path[:path]} -stream #{split_path[:ads]}) if split_path[:ads]
+            end
+
+            command = powershell(command)
+          else
+            command = %(test -f "#{file_path}")
           end
+
+          return on(host, command, { :accept_all_exit_codes => true}).exit_code.zero?
         end
 
         # Check whether a directory exists on the host
@@ -481,9 +516,15 @@ module Beaker
         #
         # @return [Boolean] Whether the directory exists on the host (using `test -d`)
         def directory_exists_on(host, dir_path)
-          host.execute(%(test -d "#{dir_path}"), accept_all_exit_codes: true) do |result|
-            return result.exit_code.zero?
+          if host['platform'] =~ /windows/
+            dir_path = "#{dir_path}\\" unless (dir_path[-1].chr == '\\')
+
+            command = Command.new(%{IF exist "#{dir_path}" ( exit 0 ) ELSE ( exit 1 )}, [], { :cmdexe => true })
+          else
+            command = Command.new(%(test -d "#{dir_path}"), [])
           end
+
+          return on(host, command, { :accept_all_exit_codes => true }).exit_code.zero?
         end
 
         # Check whether a symlink exists on the host
@@ -493,9 +534,10 @@ module Beaker
         #
         # @return [Boolean] Whether the symlink exists on the host (using `test -L`)
         def link_exists_on(host, link_path)
-          host.execute(%(test -L "#{link_path}"), accept_all_exit_codes: true) do |result|
-            return result.exit_code.zero?
-          end
+          # Links are weird on windows, fall back to seeing if the file exists
+          return file_exists_on(host, link_path) if host['platform'] =~ /windows/
+
+          return on(host, Command.new(%(test -L "#{link_path}"), accept_all_exit_codes: true)).exit_code.zero?
         end
 
         # Get the contents of a file on the host
@@ -505,12 +547,29 @@ module Beaker
         #
         # @return [String] The contents of the file
         def file_contents_on(host, file_path)
-          host.execute(%(cat "#{file_path}"), acceptable_exit_codes: [0]) do |result|
-            return result.stdout
+          file_contents = nil
+
+          split_path = win_ads_path(file_path)
+
+          if file_exists_on(host, split_path[:path])
+            if host['platform'] =~ /windows/
+              file_path.gsub!('/', '\\')
+
+              command = %{Get-Content -Raw -Path #{file_path}}
+              command += %{ -Stream #{split_path[:ads]}} if split_path[:ads]
+
+              file_contents = on(host, powershell(command))&.stdout&.strip
+            else
+              file_contents = on(host, %(cat "#{file_path}"))&.stdout&.strip
+            end
+          else
+            logger.warn("File '#{file_path}' on '#{host} does not exist")
           end
+
+          return file_contents
         end
 
-        #Run a curl command on the provided host(s)
+        # Run a curl command on the provided host(s)
         #
         # @param [Host, Array<Host>, String, Symbol] host    One or more hosts to act upon,
         #                            or a role (String or Symbol) that identifies one or more hosts.
