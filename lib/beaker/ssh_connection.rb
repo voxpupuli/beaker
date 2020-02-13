@@ -69,19 +69,21 @@ module Beaker
       begin
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
          Net::SSH.start(host, user, ssh_opts)
-       rescue *RETRYABLE_EXCEPTIONS => e
-         if try <= max_connection_tries
-           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
-           @logger.warn "Trying again in #{wait} seconds" unless options[:silent]
-           sleep wait
+      rescue *RETRYABLE_EXCEPTIONS => e
+        if try <= max_connection_tries
+          @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
+          @logger.warn "Trying again in #{wait} seconds" unless options[:silent]
+
+          sleep wait
           (last_wait, wait) = wait, last_wait + wait
-           try += 1
-           retry
-         else
-           @logger.warn "Failed to connect to #{host}, after #{try} attempts" unless options[:silent]
-           nil
-         end
-       end
+          try += 1
+
+          retry
+        else
+          @logger.warn "Failed to connect to #{host}, after #{try} attempts" unless options[:silent]
+          nil
+        end
+      end
     end
 
     # Connect to the host, creating a new connection if required
@@ -287,6 +289,10 @@ module Beaker
       result.stdout = "\n"
 
       begin
+        # This is probably windows with an environment variable so we need to
+        # expand it.
+        target = self.execute(%{echo "#{target}"}).output.strip.gsub('"','') if target.include?('%')
+
         @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
         end
@@ -319,6 +325,10 @@ module Beaker
       result.stdout = "\n"
 
       begin
+        # This is probably windows with an environment variable so we need to
+        # expand it.
+        source = self.execute(%{echo "#{source}"}).output.strip.gsub('"','') if source.include?('%')
+
         @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
         end
