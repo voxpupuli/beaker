@@ -303,6 +303,10 @@ module Beaker
                       'oracle-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                       'redhat-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                       'scientific-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
+                      'el-8-x86_64' => ["el/8/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el8.x86_64.rpm"],
+                      'centos-8-x86_64' => ["el/8/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el8.x86_64.rpm"],
+                      'oracle-8-x86_64' => ["el/8/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el8.x86_64.rpm"],
+                      'redhat-8-x86_64' => ["el/8/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el8.x86_64.rpm"],
                     }
         platforms.each do |p, v|
           it "accomodates platform #{p} without erroring" do
