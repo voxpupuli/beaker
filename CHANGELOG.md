@@ -11,7 +11,14 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.16.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.17.0...master)
+
+# [4.17.0](https://github.com/puppetlabs/beaker/compare/4.16.0...4.17.0) - 2020-02-20
+
+### Added
+
+- Windows support in `host_helpers` ([#1622](https://github.com/puppetlabs/beaker/pull/1622))
+- EL 8 support ([#1623](https://github.com/puppetlabs/beaker/pull/1623))
 
 # [4.16.0](https://github.com/puppetlabs/beaker/compare/4.15.0...4.16.0) - 2020-02-05
 
