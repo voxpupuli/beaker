@@ -159,35 +159,85 @@ module Beaker
     end
 
     describe '#reboot' do
+      # no-op response
       let (:response) { double( 'response' ) }
+      let (:uptime_initial_response) { double( 'response' ) }
+      let (:uptime_initial_stdout) { '19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31' }
+
+      let (:uptime_success_response) { double( 'response' ) }
+      let (:uptime_success_stdout) { '19:52  up 0 mins, 2 users, load averages: 2.95 4.19 4.31' }
+      let (:sleep_time) { 5 }
 
       before :each do
         # stubs enough to survive the first uptime call & output parsing
         #   note: just stubs input-chain between calls, parsing methods still run
-        allow( Beaker::Command ).to receive(:new).with("uptime").and_return(:uptime_command_stub)
-        allow( instance ).to receive( :exec ).with(:uptime_command_stub).and_return(response)
-        allow( response ).to receive(:stdout).and_return('19:52  up 14 mins, 2 users, load averages: 2.95 4.19 4.31')
+        allow(Beaker::Command).to receive(:new).with("uptime").and_return(:uptime_command_stub)
 
-        allow( Beaker::Command ).to receive(:new).with("/sbin/shutdown -r now").and_return(:shutdown_command_stub)
+        # mock initial uptime call
+        allow(instance).to receive( :exec ).with(:uptime_command_stub).and_return(uptime_initial_response).once
+        allow(uptime_initial_response).to receive(:stdout).and_return(uptime_initial_stdout)
+
+        allow(uptime_success_response).to receive(:stdout).and_return(uptime_success_stdout)
+
+        allow(instance).to receive(:sleep)
+
+        allow(Beaker::Command).to receive(:new).with("/sbin/shutdown -r now").and_return(:shutdown_command_stub)
       end
 
       it 'raises a reboot failure when command fails' do
-        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure)
+        expect(instance).not_to receive(:sleep)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
         expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
       end
 
       it 'raises a reboot failure when we receive an unexpected error' do
-        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError)
-        expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+        expect(instance).not_to receive(:sleep)
+        expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError).once
+        expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
       end
 
       it 'raises RebootFailure if new uptime is never less than old uptime' do
+        expect(instance).to receive(:sleep).with(sleep_time)
         # bypass shutdown command itself
-        allow( instance ).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
+        expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
         # allow the second uptime and the hash arguments in exec
-        allow( instance ).to receive( :exec ).with(:uptime_command_stub, anything).and_return(response)
+        expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_initial_response).once
 
         expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Uptime did not reset/)
+      end
+
+      it 'passes if new uptime is less than old uptime' do
+        expect(instance).to receive(:sleep).with(sleep_time)
+        # bypass shutdown command itself
+        expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+        # allow the second uptime and the hash arguments in exec
+        expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_success_response).once
+
+        expect(instance.reboot).to be(nil)
+      end
+
+      context 'with wait_time_parameter' do
+        it 'passes if new uptime is less than old uptime' do
+          expect(instance).to receive(:sleep).with(10)
+          # bypass shutdown command itself
+          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+          # allow the second uptime and the hash arguments in exec
+          expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_success_response).once
+
+          expect(instance.reboot(10)).to be(nil)
+        end
+      end
+
+      context 'with max_connection_tries parameter' do
+        it 'passes if new uptime is less than old uptime' do
+          expect(instance).to receive(:sleep).with(sleep_time)
+          # bypass shutdown command itself
+          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+          # allow the second uptime and the hash arguments in exec
+          expect(instance).to receive( :exec ).with(:uptime_command_stub, hash_including(:max_connection_tries => 20)).and_return(uptime_success_response).once
+
+          expect(instance.reboot(sleep_time, 20)).to be(nil)
+        end
       end
     end
 

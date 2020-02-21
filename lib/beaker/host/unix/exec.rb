@@ -2,9 +2,15 @@ module Unix::Exec
   include Beaker::CommandFactory
 
   # Reboots the host, comparing uptime values to verify success
+  # @param [Integer] wait_time How long to wait after sending the reboot 
+  #                            command before attempting to check in on the host
+  # @param [Integer] max_connection_tries How many times to retry connecting to 
+  #                            host after reboot. Note that there is an fibbonacci
+  #                            backoff when attempting retries so the time spent
+  #                            waiting on this can grow quickly.
   #
   # Will throw an exception RebootFailure if it fails
-  def reboot
+  def reboot(wait_time=5, max_connection_tries=9)
     begin
       original_uptime = exec(Beaker::Command.new("uptime"))
       original_uptime_str = parse_uptime original_uptime.stdout
@@ -17,10 +23,10 @@ module Unix::Exec
       end
 
       # give the host a little time to shutdown
-      sleep 5 
+      sleep wait_time
 
       #use uptime to check if the host has rebooted
-      current_uptime_exec = exec(Beaker::Command.new("uptime"), {:max_connection_tries => 9, :silent => true})
+      current_uptime_exec = exec(Beaker::Command.new("uptime"), {:max_connection_tries => max_connection_tries, :silent => true})
       current_uptime = current_uptime_exec.stdout
       current_uptime_str = parse_uptime current_uptime
       current_uptime_int = uptime_int current_uptime_str
