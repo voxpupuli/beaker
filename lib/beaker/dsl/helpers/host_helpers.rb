@@ -550,7 +550,6 @@ module Beaker
           file_contents = nil
 
           split_path = win_ads_path(file_path)
-
           if file_exists_on(host, split_path[:path])
             if host['platform'] =~ /windows/
               file_path.gsub!('/', '\\')

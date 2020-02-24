@@ -75,18 +75,14 @@ module Beaker
         Command.new("powershell.exe", ps_args)
       end
 
-      # Convert the provided command string to Base64
+      # Convert the provided command string to Base64 encoded UTF-16LE command
       # @param [String] cmd The command to convert to Base64
       # @return [String] The converted string
       # @api private
       def encode_command(cmd)
-        cmd = cmd.chars.to_a.join("\x00").chomp
-        cmd << "\x00" unless cmd[-1].eql? "\x00"
         # use strict_encode because linefeeds are not correctly handled in our model
-        cmd = Base64.strict_encode64(cmd).chomp
-        cmd
+        Base64.strict_encode64(cmd.encode(Encoding::UTF_16LE)).chomp
       end
-
     end
   end
 end
