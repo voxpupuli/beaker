@@ -8,9 +8,10 @@ module Unix::Exec
   #                            host after reboot. Note that there is an fibbonacci
   #                            backoff when attempting retries so the time spent
   #                            waiting on this can grow quickly.
+  # @param [Integer] uptime_retries How many times to check to see if the value of the uptime has reset.
   #
   # Will throw an exception RebootFailure if it fails
-  def reboot(wait_time=5, max_connection_tries=9)
+  def reboot(wait_time=10, max_connection_tries=9, uptime_retries=18)
     begin
       original_uptime = exec(Beaker::Command.new("uptime"))
       original_uptime_str = parse_uptime original_uptime.stdout
@@ -21,8 +22,16 @@ module Unix::Exec
       else
         exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
       end
+    rescue Beaker::Host::CommandFailure => e
+      raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
+    rescue RuntimeError => e
+      raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
+    end
 
+    attempts = 0
+    begin
       # give the host a little time to shutdown
+      @logger.debug("Waiting #{wait_time} for host to shut down.")
       sleep wait_time
 
       #use uptime to check if the host has rebooted
@@ -31,10 +40,18 @@ module Unix::Exec
       current_uptime_str = parse_uptime current_uptime
       current_uptime_int = uptime_int current_uptime_str
       unless original_uptime_int > current_uptime_int
-        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed."
+        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed." 
+      end
+    rescue Beaker::Host::RebootFailure => e
+      attempts += 1
+      if attempts < uptime_retries
+        @logger.debug("Uptime did not reset. Will retry #{uptime_retries - attempts} more times.")
+        retry
+      else
+        raise
       end
     rescue Beaker::Host::CommandFailure => e
-      raise Beaker::Host::RebootFailure, "Command failed in reboot: #{e.message}"
+      raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
     rescue RuntimeError => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     end

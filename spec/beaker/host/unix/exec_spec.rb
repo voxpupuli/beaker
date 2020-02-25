@@ -166,7 +166,7 @@ module Beaker
 
       let (:uptime_success_response) { double( 'response' ) }
       let (:uptime_success_stdout) { '19:52  up 0 mins, 2 users, load averages: 2.95 4.19 4.31' }
-      let (:sleep_time) { 5 }
+      let (:sleep_time) { 10 }
 
       before :each do
         # stubs enough to survive the first uptime call & output parsing
@@ -187,7 +187,7 @@ module Beaker
       it 'raises a reboot failure when command fails' do
         expect(instance).not_to receive(:sleep)
         expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
-        expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed in reboot: .*/)
+        expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed when attempting to reboot: .*/)
       end
 
       it 'raises a reboot failure when we receive an unexpected error' do
@@ -200,10 +200,20 @@ module Beaker
         expect(instance).to receive(:sleep).with(sleep_time)
         # bypass shutdown command itself
         expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
-        # allow the second uptime and the hash arguments in exec
-        expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_initial_response).once
+        # allow the second uptime and the hash arguments in exec, repeated 18 times by default in order to replicate the previous behavior of the ping based Host.down?
+        expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_initial_response).exactly(18).times
 
         expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Uptime did not reset/)
+      end
+
+      it 'raises RebootFailure if new uptime is never less than old uptime when the number of retries is changed' do
+        expect(instance).to receive(:sleep).with(sleep_time)
+        # bypass shutdown command itself
+        expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+        # allow the second uptime and the hash arguments in exec, repeated 10 times by default
+        expect(instance).to receive( :exec ).with(:uptime_command_stub, anything).and_return(uptime_initial_response).exactly(10).times
+
+        expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, uptime_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Uptime did not reset/)
       end
 
       it 'passes if new uptime is less than old uptime' do
