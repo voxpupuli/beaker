@@ -70,6 +70,7 @@ module Beaker
     def initialize name, host_hash, options
       @logger = host_hash[:logger] || options[:logger]
       @name, @host_hash, @options = name.to_s, host_hash.dup, options.dup
+      @host_hash['packaging_platform'] ||= @host_hash['platform']
 
       @host_hash = self.platform_defaults.merge(@host_hash)
       pkg_initialize
