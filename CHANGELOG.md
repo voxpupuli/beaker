@@ -11,7 +11,11 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.17.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.18.0...master)
+
+# [4.18.0](https://github.com/puppetlabs/beaker/compare/4.17.0...4.18.0) - 2020-02-26
+### Changed
+- Thor dependency bumped to >=1.0.1 <2.0
 
 # [4.17.0](https://github.com/puppetlabs/beaker/compare/4.16.0...4.17.0) - 2020-02-20
 
