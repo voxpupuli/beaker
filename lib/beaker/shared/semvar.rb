@@ -7,8 +7,11 @@ module Beaker
       #@param [String] b A version of the form '\d.\d.\d.*'
       #@return [Boolean] true if a is less than b, otherwise return false
       #
-      #@note 3.0.0-160-gac44cfb is greater than 3.0.0, and 2.8.2
-      #@note -rc being less than final builds is not yet implemented.
+      #@note This has been updated for our current versioning scheme.
+      #@note 2019.5.0 is greater than 2019.5.0-rc0
+      #@note 2019.5.0-rc0-1-gabc1234 is greater than 2019.5.0-rc0
+      #@note 2019.5.0-rc1 is greater than 2019.5.0-rc0-1-gabc1234
+      #@note 2019.5.0-1-gabc1234 is greater than 2019.5.0
       def version_is_less a, b
         a_nums = a.split('-')[0].split('.')
         b_nums = b.split('-')[0].split('.')
@@ -24,16 +27,45 @@ module Beaker
           end
         end
         #checks all dots, they are equal so examine the rest
-        a_rest = a.split('-', 2)[1]
-        b_rest = b.split('-', 2)[1]
-        if a_rest and b_rest and a_rest < b_rest
+        a_rest = a.split('-').drop(1)
+        a_is_release = a_rest.empty?
+        a_is_rc = !a_is_release && !!(a_rest[0] =~ /rc\d+/)
+        b_rest = b.split('-').drop(1)
+        b_is_release = b_rest.empty?
+        b_is_rc = !b_is_release && !!(b_rest[0] =~ /rc\d+/)
+
+        if a_is_release && b_is_release
+          # They are equal
           return false
-        elsif a_rest and not b_rest
-          return false
-        elsif not a_rest and b_rest
-          return true
+        elsif !a_is_release && !b_is_release
+          a_next = a_rest.shift
+          b_next = b_rest.shift
+          if a_is_rc && b_is_rc
+            a_rc = a_next.gsub('rc','').to_i
+            b_rc = b_next.gsub('rc','').to_i
+            if a_rc < b_rc
+              return true
+            elsif a_rc > b_rc
+              return false
+            else
+              a_next = a_rest.shift
+              b_next = b_rest.shift
+              if a_next && b_next
+                return a_next.to_i < b_next.to_i
+              else
+                # If a has nothing after -rc#, it is a tagged RC and 
+                # b must be a later build after this tag.
+                return a_next.nil?
+              end
+            end
+          else
+            # If one of them is not an rc (and also not a release), 
+            # that one is a post-release build. So if a is the RC, it is less.
+            return a_is_rc
+          end
+        else
+          return (b_is_release && a_is_rc) || (a_is_release && !b_is_rc)
         end
-        return false
       end
 
       # Gets the max semver version from a list of them
