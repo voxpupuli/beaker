@@ -21,7 +21,7 @@ module Beaker
     PSWINDOWS_PACKAGES = []
     SLES10_PACKAGES = ['curl']
     SLES_PACKAGES = ['curl', 'ntp']
-    DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release']
+    DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release', 'apt-transport-https']
     CUMULUS_PACKAGES = ['curl', 'ntpdate']
     SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp', 'wget']
     SOLARIS11_PACKAGES = ['curl', 'ntp']
