@@ -10,8 +10,24 @@ module Beaker
           expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '2016' ) ).to be === true
         end
 
-        it 'reports 2015.3.0-rc0-8-gf80879a is not less than 2015.3.0' do
-          expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '2015.3.0' ) ).to be === false
+        it 'reports 2015.3.0-rc0-8-gf80879a is less than 2015.3.0' do
+          expect( subject.version_is_less( '2015.3.0-rc0-8-gf80879a', '2015.3.0' ) ).to be === true
+        end
+
+        it 'reports that 2015.3.0-rc0 is less than 2015.3.0-rc0-8-gf80879a' do
+          expect( subject.version_is_less( '2015.3.0-rc0', '2015.3.0-rc0-8-gf80879a' ) ).to be === true
+        end
+
+        it 'reports that 2015.3.0-rc2 is less than 2015.3.0-rc10 (not using string comparison)' do
+          expect( subject.version_is_less( '2015.3.0-rc2', '2015.3.0-rc10' ) ).to be === true
+        end
+
+        it 'reports that 2015.3.0 is less than 2015.3.0-1-gabc1234' do
+          expect( subject.version_is_less( '2015.3.0', '2015.3.0-1-gabc1234' ) ).to be === true
+        end
+
+        it 'reports that 2015.3.0-rc2 is less than 2015.3.0-1-gabc1234' do 
+          expect( subject.version_is_less( '2015.3.0-rc2', '2015.3.0-1-gabc1234' ) ).to be === true
         end
 
         it 'reports 2015.3.0-rc0-8-gf80879a is not less than 3.0.0' do
@@ -40,6 +56,10 @@ module Beaker
 
         it 'reports 2.8 is less than 2.9' do
           expect( subject.version_is_less( '2.8', '2.9' ) ).to be === true
+        end
+
+        it 'reports that 2015.3.0 is not less than 2015.3.0' do
+          expect( subject.version_is_less( '2015.3.0', '2015.3.0' ) ).to be == false
         end
       end
 
