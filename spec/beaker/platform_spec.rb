@@ -77,6 +77,11 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'debian-squeeze-xxx'
       end
 
+      it "can convert unbuntu-2004-xxx to ubuntu-focal-xxx" do
+        @name = 'ubuntu-2004-xxx'
+        expect( platform.with_version_codename ).to be === 'ubuntu-focal-xxx'
+      end
+
       it "can convert unbuntu-1604-xxx to ubuntu-xenial-xxx" do
         @name = 'ubuntu-1604-xxx'
         expect( platform.with_version_codename ).to be === 'ubuntu-xenial-xxx'
