@@ -11,7 +11,32 @@ Tracking in this Changelog began for this project in version 3.25.0.
 If you're looking for changes from before this, refer to the project's
 git logs & PR history.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.18.0...master)
+The headers used in [Keep a Changelog](http://keepachangelog.com) are:
+
+- Added - for new features.
+- Changed - for changes in existing functionality.
+- Deprecated - for soon-to-be removed features.
+- Removed - for now removed features.
+- Fixed - for any bug fixes.
+- Security - in case of vulnerabilities.
+
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.19.0...master)
+
+# [4.19.0](https://github.com/puppetlabs/beaker/compare/4.18.0...4.19.0)
+
+### Added
+
+- `apt-transport-https` package will now be installed on Debian-based systems as part of the prebuilt process. ([#1631](https://github.com/puppetlabs/beaker/pull/1631))
+- Ubuntu 19.10 and 20.04 code name handling. ([#1632](https://github.com/puppetlabs/beaker/pull/1632))
+
+### Changed
+
+- The `wait_time`, `max_connection_tries`, and `uptime_retries` parameters have been added to `Host::Unix::Exec.reboot`. This allows for more fine-grained control over how the reboot is handled. ([#1625](https://github.com/puppetlabs/beaker/pull/1625)) 
+
+### Fixed
+
+- In `hosts.yml`, `packaging_platform` will now default to `platform` if unspecified. This fixed a bug where beaker would fail unless you specified both values in your config, even if both values were identical. ([#1628](https://github.com/puppetlabs/beaker/pull/1628))
+- `version_is_less` will now correctly handle builds and RCs when used in version numbers. ([#1630](https://github.com/puppetlabs/beaker/pull/1630))
 
 # [4.18.0](https://github.com/puppetlabs/beaker/compare/4.17.0...4.18.0) - 2020-02-26
 ### Changed
