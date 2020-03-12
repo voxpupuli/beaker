@@ -38,6 +38,9 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - In `hosts.yml`, `packaging_platform` will now default to `platform` if unspecified. This fixed a bug where beaker would fail unless you specified both values in your config, even if both values were identical. ([#1628](https://github.com/puppetlabs/beaker/pull/1628))
 - `version_is_less` will now correctly handle builds and RCs when used in version numbers. ([#1630](https://github.com/puppetlabs/beaker/pull/1630))
 
+### Security
+- Update `rake` to `~> 12.0`, which currently resolves to `12.3.3` to remediate [CVE-2020-8130](https://nvd.nist.gov/vuln/detail/CVE-2020-8130)
+
 # [4.18.0](https://github.com/puppetlabs/beaker/compare/4.17.0...4.18.0) - 2020-02-26
 ### Changed
 - Thor dependency bumped to >=1.0.1 <2.0
