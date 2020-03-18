@@ -547,8 +547,17 @@ module Beaker
 
       # vagrant uses temporary ssh configs in order to use dynamic keys
       # without this config option using ssh may prompt for password
-      if ssh_opts[:config] and File.exists?(ssh_opts[:config])
-        ssh_args << "-F #{ssh_opts[:config]}"
+      #
+      # We still want any user-set SSH config to win though
+      filesystem_ssh_config = nil
+      if ssh_opts[:config] && File.exists?(ssh_opts[:config])
+        filesystem_ssh_config = ssh_opts[:config]
+      elsif self[:vagrant_ssh_config] && File.exists?(self[:vagrant_ssh_config])
+        filesystem_ssh_config = self[:vagrant_ssh_config]
+      end
+
+      if filesystem_ssh_config
+        ssh_args << "-F #{filesystem_ssh_config}"
       else
         if ssh_opts.has_key?('keys') and
             ssh_opts.has_key?('auth_methods') and
