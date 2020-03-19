@@ -20,7 +20,13 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.19.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.20.0...master)
+
+# [4.20.0](https://github.com/puppetlabs/beaker/compare/4.19.0...4.20.0)
+
+### Added
+
+- Vagrant RSync/SSH settings will now be picked up if set via beaker-vagrant ([#1634)[https://github.com/puppetlabs/beaker/pull/1634]] and beaker-vagrant [#28](https://github.com/puppetlabs/beaker-vagrant/pull/28))
 
 # [4.19.0](https://github.com/puppetlabs/beaker/compare/4.18.0...4.19.0)
 
