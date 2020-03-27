@@ -275,6 +275,7 @@ module Unix::Exec
       directory = tmpdir()
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
+      exec(Beaker::Command.new("echo '' >/etc/environment")) if self['platform'] =~ /ubuntu-20.04/
     when /el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7|el-8|centos-8|redhat-8|oracle-8/
       directory = tmpdir()
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
