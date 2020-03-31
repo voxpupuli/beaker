@@ -20,15 +20,21 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.20.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.21.0...master)
 
-# [4.20.0](https://github.com/puppetlabs/beaker/compare/4.19.0...4.20.0)
+# [4.21.0](https://github.com/puppetlabs/beaker/compare/4.20.0...4.21.0) - 2020-03-31
 
 ### Added
 
-- Vagrant RSync/SSH settings will now be picked up if set via beaker-vagrant ([#1634)[https://github.com/puppetlabs/beaker/pull/1634]] and beaker-vagrant [#28](https://github.com/puppetlabs/beaker-vagrant/pull/28))
+- Empty file `/etc/environment` while preparing ssh environment on Ubuntu 20.04 to keep the current behavior and consider all variables from `~/.ssh/environment`. ([#1635](https://github.com/puppetlabs/beaker/pull/1635))
 
-# [4.19.0](https://github.com/puppetlabs/beaker/compare/4.18.0...4.19.0)
+# [4.20.0](https://github.com/puppetlabs/beaker/compare/4.19.0...4.20.0) - 2020-03-19
+
+### Added
+
+- Vagrant RSync/SSH settings will now be picked up if set via beaker-vagrant ([#1634](https://github.com/puppetlabs/beaker/pull/1634) and [beaker-vagrant#28](https://github.com/puppetlabs/beaker-vagrant/pull/28))
+
+# [4.19.0](https://github.com/puppetlabs/beaker/compare/4.18.0...4.19.0) - 2020-03-13
 
 ### Added
 
