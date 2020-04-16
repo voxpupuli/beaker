@@ -30,6 +30,10 @@ module Unix::File
     execute("chown #{recursive ? '-R ' : ''}#{user} #{path}")
   end
 
+  def chmod(mod, path, recursive=false)
+    execute("chmod #{recursive ? '-R ' : ''}#{mod} #{path}")
+  end
+
   # Change group ownership of a path
   #
   # @see http://pubs.opengroup.org/onlinepubs/9699919799/utilities/chgrp.html

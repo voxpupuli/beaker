@@ -50,6 +50,38 @@ module Beaker
         expect( instance.mv(origin, destination, false) ).to be === 0
       end
     end
+
+    describe '#modified_at' do
+      before do
+        allow(instance).to receive(:execute).and_return(stdout)
+      end
+
+      context 'file exists' do
+        let(:stdout) { 'True' }
+        it 'sets the modified_at date' do
+          file = 'C:\path\to\file'
+          expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
+          expect(instance).to receive(:execute).with(
+            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'"
+          )
+          instance.modified_at(file, '197001010000')
+        end
+      end
+
+      context 'file does not exist' do
+        let(:stdout) { 'False' }
+        it 'creates it and sets the modified_at date' do
+          file = 'C:\path\to\file'
+          expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
+          expect(instance).to receive(:execute).with("powershell New-Item -ItemType file #{file}")
+          expect(instance).to receive(:execute).with(
+            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'"
+          )
+          instance.modified_at(file, '197001010000')
+        end
+      end
+    end
+
     describe '#environment_string' do
       let(:host) { {'pathseparator' => ':'} }
 

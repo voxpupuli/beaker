@@ -35,4 +35,13 @@ module Mac::Exec
     false
   end
 
+  # Update ModifiedDate on a file
+  # @param [String] file Path to the file
+  # @param [String] timestamp Timestamp to set
+  def modified_at(file, timestamp = nil)
+    require 'date'
+    time = timestamp ? DateTime.parse("#{timestamp}") : DateTime.now
+    timestamp = time.strftime('%Y%m%d%H%M')
+    execute("touch -mt #{timestamp} #{file}")
+  end
 end

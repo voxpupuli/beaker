@@ -35,6 +35,9 @@ module Windows::File
     super(group, cygpath, recursive)
   end
 
+  # Not needed on windows
+  def chmod(mod, path, recursive=false); end
+
   # (see {Beaker::Host::Unix::File#ls_ld})
   # @note Cygwin's `ls_ld` implementation does not support
   #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.

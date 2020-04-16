@@ -31,5 +31,15 @@ module Beaker
         expect(instance.selinux_enabled?).to be === false
       end
     end
+
+    describe '#modified_at' do
+      it 'calls execute with touch and timestamp' do
+        time = '190101010000'
+        path = '/path/to/file'
+        expect( instance ).to receive(:execute).with("touch -mt #{time} #{path}").and_return(0)
+
+        instance.modified_at(path, time)
+      end
+    end
   end
 end
