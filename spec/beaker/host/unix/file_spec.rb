@@ -196,6 +196,14 @@ module Beaker
       end
     end
 
+    describe '#cat' do
+      let (:path) { '/path/to/cat/on' }
+      it 'calls cat for path' do
+        expect( instance ).to receive( :execute ).with( "cat #{path}" ).and_return( 0 )
+        expect( instance.cat( path ) ).to be === 0
+      end
+    end
+
     describe '#chmod' do
       context 'not recursive' do
         it 'calls execute with chmod' do
