@@ -244,7 +244,7 @@ module Beaker
       report_and_raise(logger, e, "proxy_config")
     end
 
-    #Install EPEL on host or hosts with platform = /el-(5|6|7)/.  Do nothing on host or hosts of other platforms.
+    #Install EPEL on host or hosts with platform = /el-(6|7)/.  Do nothing on host or hosts of other platforms.
     # @param [Host, Array<Host>] host One or more hosts to act upon.  Will use individual host epel_url, epel_arch
     #                                 and epel_pkg before using defaults provided in opts.
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -258,11 +258,10 @@ module Beaker
       debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
-        when el_based?(host) && ['5','6','7'].include?(host['platform'].version)
+        when el_based?(host) && ['6','7'].include?(host['platform'].version)
           result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
           if result.exit_code == 1
             url_base = opts[:epel_url]
-            url_base = opts[:epel_url_archive] if host['platform'].version == '5'
             host.install_package_with_rpm("#{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm", '--replacepkgs', { :package_proxy => opts[:package_proxy] })
             #update /etc/yum.repos.d/epel.repo for new baseurl
             host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{url_base}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
