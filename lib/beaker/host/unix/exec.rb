@@ -2,9 +2,9 @@ module Unix::Exec
   include Beaker::CommandFactory
 
   # Reboots the host, comparing uptime values to verify success
-  # @param [Integer] wait_time How long to wait after sending the reboot 
+  # @param [Integer] wait_time How long to wait after sending the reboot
   #                            command before attempting to check in on the host
-  # @param [Integer] max_connection_tries How many times to retry connecting to 
+  # @param [Integer] max_connection_tries How many times to retry connecting to
   #                            host after reboot. Note that there is an fibbonacci
   #                            backoff when attempting retries so the time spent
   #                            waiting on this can grow quickly.
@@ -40,7 +40,7 @@ module Unix::Exec
       current_uptime_str = parse_uptime current_uptime
       current_uptime_int = uptime_int current_uptime_str
       unless original_uptime_int > current_uptime_int
-        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed." 
+        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed."
       end
     rescue Beaker::Host::RebootFailure => e
       attempts += 1
@@ -89,7 +89,7 @@ module Unix::Exec
       return "0 min"
     end
     raise "Couldn't parse uptime: #{uptime}" if result.nil?
-    
+
     result[1].strip.chomp(",")
   end
 
@@ -99,6 +99,16 @@ module Unix::Exec
 
   def touch(file, abs=true)
     (abs ? '/bin/touch' : 'touch') + " #{file}"
+  end
+
+  # Update ModifiedDate on a file
+  # @param [String] file Path to the file
+  # @param [String] timestamp Timestamp to set
+  def modified_at(file, timestamp = nil)
+    require 'date'
+    time = timestamp ? DateTime.parse("#{timestamp}") : DateTime.now
+    timestamp = time.strftime('%Y%m%d%H%M')
+    execute("/bin/touch -mt #{timestamp} #{file}")
   end
 
   def path
@@ -117,7 +127,7 @@ module Unix::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    cmd = "mkdir -p #{dir}"
+    cmd = "mkdir -p '#{dir}'"
     result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end
@@ -125,7 +135,7 @@ module Unix::Exec
   # Recursively remove the path provided
   # @param [String] path The path to remove
   def rm_rf path
-    execute("rm -rf #{path}")
+    execute("rm -rf '#{path}'")
   end
 
   # Move the origin to destination. The destination is removed prior to moving.
@@ -134,7 +144,7 @@ module Unix::Exec
   # @param [Boolean] rm Remove the destination prior to move
   def mv orig, dest, rm=true
     rm_rf dest unless !rm
-    execute("mv #{orig} #{dest}")
+    execute("mv '#{orig}' '#{dest}'")
   end
 
   # Attempt to ping the provided target hostname

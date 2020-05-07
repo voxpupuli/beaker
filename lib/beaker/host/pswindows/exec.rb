@@ -37,6 +37,28 @@ module PSWindows::Exec
     execute("move /y #{orig} #{dest}")
   end
 
+  # Update ModifiedDate on a file
+  # @param [String] file Path to the file
+  # @param [String] timestamp Timestamp to set
+  def modified_at(file, timestamp = nil)
+    require 'date'
+    time = timestamp ? DateTime.parse("#{timestamp}") : DateTime.now
+
+    result = execute("powershell Test-Path #{file} -PathType Leaf")
+
+    if result.include? 'False'
+      execute("powershell New-Item -ItemType file #{file}")
+    end
+    execute("powershell (gci #{file}).LastWriteTime = Get-Date " \
+      "-Year '#{time.year}'" \
+      "-Month '#{time.month}'" \
+      "-Day '#{time.day}'" \
+      "-Hour '#{time.hour}'" \
+      "-Minute '#{time.minute}'" \
+      "-Second '#{time.second}'"
+    )
+  end
+
   def path
     'c:/windows/system32;c:/windows'
   end

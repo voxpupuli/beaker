@@ -196,6 +196,28 @@ module Beaker
       end
     end
 
+    describe '#chmod' do
+      context 'not recursive' do
+        it 'calls execute with chmod' do
+          path = '/path/to/file'
+          mod = '+x'
+
+          expect( instance ).to receive(:execute).with("chmod #{mod} #{path}")
+          instance.chmod(mod, path)
+        end
+      end
+
+      context 'recursive' do
+        it 'calls execute with chmod' do
+          path = '/path/to/file'
+          mod = '+x'
+
+          expect( instance ).to receive(:execute).with("chmod -R #{mod} #{path}")
+          instance.chmod(mod, path, true)
+        end
+      end
+    end
+
     describe '#chgrp' do
       let (:group) { 'somegroup' }
       let (:path) { '/path/to/chgrp/on' }
