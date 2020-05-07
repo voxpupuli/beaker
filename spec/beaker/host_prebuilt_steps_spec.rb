@@ -329,33 +329,6 @@ describe Beaker do
   context "add_el_extras" do
     subject { dummy_class.new }
 
-    it 'adds archived extras for el-5 hosts' do
-
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-5-arch'), :exit_code => 1 }, 2 )
-      hosts[1][:platform] = Beaker::Platform.new('oracle-5-arch')
-
-      expect( Beaker::Command ).to receive( :new ).with(
-        "rpm -qa | grep epel-release"
-      ).exactly( 2 ).times
-      hosts.each do |host|
-        expect(host).to receive( :install_package_with_rpm ).with(
-          "http://archive.fedoraproject.org/pub/archive/epel/epel-release-latest-5.noarch.rpm", "--replacepkgs", {:package_proxy => false}
-        ).once
-      end
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e 's;#baseurl.*$;baseurl=http://archive\\.fedoraproject\\.org/pub/archive/epel/5/$basearch;' /etc/yum.repos.d/epel.repo"
-      ).exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
-      ).exactly( 2 ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "yum clean all && yum makecache"
-      ).exactly( 2 ).times
-
-      subject.add_el_extras( hosts, options )
-
-    end
-
     it 'adds extras for el-6 hosts' do
 
       hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 4 )

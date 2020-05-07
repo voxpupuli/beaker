@@ -174,7 +174,6 @@ module Beaker
           :package_proxy          => false,
           :add_el_extras          => false,
           :epel_url               => "http://dl.fedoraproject.org/pub/epel",
-          :epel_url_archive       => 'http://archive.fedoraproject.org/pub/archive/epel',
           :consoleport            => 443,
           :pe_dir                 => '/opt/enterprise/dists',
           :pe_version_file        => 'LATEST',
