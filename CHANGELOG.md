@@ -20,7 +20,17 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.21.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.22.0...master)
+
+# [4.22.0](https://github.com/puppetlabs/beaker/compare/4.21.0...4.22.0) - 2020-05-08
+
+### Added
+
+- Host methods chmod and modified_at. ([#1638](https://github.com/puppetlabs/beaker/pull/1638))
+
+### Removed
+
+- Support for EL-5. ([#1639](https://github.com/puppetlabs/beaker/pull/1639)) ([#1640](https://github.com/puppetlabs/beaker/pull/1640))
 
 # [4.21.0](https://github.com/puppetlabs/beaker/compare/4.20.0...4.21.0) - 2020-03-31
 
@@ -43,7 +53,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 ### Changed
 
-- The `wait_time`, `max_connection_tries`, and `uptime_retries` parameters have been added to `Host::Unix::Exec.reboot`. This allows for more fine-grained control over how the reboot is handled. ([#1625](https://github.com/puppetlabs/beaker/pull/1625)) 
+- The `wait_time`, `max_connection_tries`, and `uptime_retries` parameters have been added to `Host::Unix::Exec.reboot`. This allows for more fine-grained control over how the reboot is handled. ([#1625](https://github.com/puppetlabs/beaker/pull/1625))
 
 ### Fixed
 
