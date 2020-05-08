@@ -20,7 +20,13 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.22.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.22.1...master)
+
+# [4.22.1](https://github.com/puppetlabs/beaker/compare/4.22.0...4.22.1)
+
+### Fixed
+
+- Removed single quotes around paths for file operation commands on `Host` https://github.com/puppetlabs/beaker/pull/1642
 
 # [4.22.0](https://github.com/puppetlabs/beaker/compare/4.21.0...4.22.0) - 2020-05-08
 
