@@ -12,20 +12,23 @@ module Unix::Exec
   #
   # Will throw an exception RebootFailure if it fails
   def reboot(wait_time=10, max_connection_tries=9, uptime_retries=18)
-    begin
-      original_uptime = exec(Beaker::Command.new("uptime"))
-      original_uptime_str = parse_uptime original_uptime.stdout
-      original_uptime_int = uptime_int original_uptime_str
+    require 'time'
 
-      if self['platform'] =~ /solaris/
-        exec(Beaker::Command.new("reboot"), :expect_connection_failure => true)
-      else
-        exec(Beaker::Command.new("/sbin/shutdown -r now"), :expect_connection_failure => true)
-      end
+    begin
+      original_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      original_boot_time_line = original_boot_time_str.lines.grep(/boot/).first
+
+      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': #{original_boot_time_str}" unless original_boot_time_line
+
+      original_boot_time = Time.parse(original_boot_time_line)
+
+      exec(Beaker::Command.new('/bin/systemctl reboot -i || reboot || /sbin/shutdown -r now'), :expect_connection_failure => true)
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
     rescue RuntimeError => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
+    rescue ArgumentError => e
+      raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     end
 
     attempts = 0
@@ -34,18 +37,19 @@ module Unix::Exec
       @logger.debug("Waiting #{wait_time} for host to shut down.")
       sleep wait_time
 
-      #use uptime to check if the host has rebooted
-      current_uptime_exec = exec(Beaker::Command.new("uptime"), {:max_connection_tries => max_connection_tries, :silent => true})
-      current_uptime = current_uptime_exec.stdout
-      current_uptime_str = parse_uptime current_uptime
-      current_uptime_int = uptime_int current_uptime_str
-      unless original_uptime_int > current_uptime_int
-        raise Beaker::Host::RebootFailure, "Uptime did not reset. Reboot appears to have failed."
+      current_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      current_boot_time = Time.parse(current_boot_time_str.lines.grep(/boot/).first)
+
+      @logger.debug("Original Boot Time: #{original_boot_time}")
+      @logger.debug("Current Boot Time: #{current_boot_time}")
+
+      unless current_boot_time > original_boot_time
+        raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed."
       end
     rescue Beaker::Host::RebootFailure => e
       attempts += 1
       if attempts < uptime_retries
-        @logger.debug("Uptime did not reset. Will retry #{uptime_retries - attempts} more times.")
+        @logger.debug("Boot time did not reset. Will retry #{uptime_retries - attempts} more times.")
         retry
       else
         raise
@@ -54,6 +58,8 @@ module Unix::Exec
       raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
     rescue RuntimeError => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
+    rescue ArgumentError => e
+      raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     end
   end
 
