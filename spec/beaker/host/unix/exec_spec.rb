@@ -40,13 +40,13 @@ module Beaker
 
       it 'rm first' do
         expect( instance ).to receive(:execute).with("rm -rf #{destination}").and_return(0)
-        expect( instance ).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
+        expect( instance ).to receive(:execute).with("mv \"#{origin}\" \"#{destination}\"").and_return(0)
         expect( instance.mv(origin, destination) ).to be === 0
 
       end
 
       it 'does not rm' do
-         expect( instance ).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
+         expect( instance ).to receive(:execute).with("mv \"#{origin}\" \"#{destination}\"").and_return(0)
          expect( instance.mv(origin, destination, false) ).to be === 0
       end
     end
