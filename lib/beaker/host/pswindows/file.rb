@@ -7,12 +7,21 @@ module PSWindows::File
   end
 
   def tmpdir(name = '')
-    result = exec(powershell('[System.IO.Path]::GetTempPath()'))
-    result.stdout.chomp()
+    tmp_path = exec(powershell('[System.IO.Path]::GetTempPath()')).stdout.chomp()
+
+    if name == ''
+      name = exec(powershell('[System.IO.Path]::GetRandomFileName()')).stdout.chomp()
+    end
+    exec(powershell("New-Item -Path '#{tmp_path}' -Force -Name '#{name}' -ItemType 'directory'"))
+    File.join(tmp_path, name)
   end
 
   def path_split(paths)
     paths.split(';')
+  end
+
+  def cat(path)
+    exec(powershell("type #{path}"))
   end
 
   def file_exist?(path)
