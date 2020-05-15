@@ -492,12 +492,12 @@ module Beaker
         # @return [Boolean] Whether the file exists on the host (using `test -f`)
         def file_exists_on(host, file_path)
           if host['platform'] =~ /windows/
-            command = %(Test-Path #{file_path})
+            command = %(Test-Path "#{file_path}")
 
             if file_path.include?(':')
               split_path = win_ads_path(file_path)
 
-              command = %(Test-Path #{split_path[:path]})
+              command = %(Test-Path "#{split_path[:path]}")
               command += %( -AND Get-Item -path #{split_path[:path]} -stream #{split_path[:ads]}) if split_path[:ads]
             end
 
@@ -555,7 +555,7 @@ module Beaker
             if host['platform'] =~ /windows/
               file_path.gsub!('/', '\\')
 
-              command = %{Get-Content -Raw -Path #{file_path}}
+              command = %{Get-Content -Raw -Path "#{file_path}"}
               command += %{ -Stream #{split_path[:ads]}} if split_path[:ads]
 
               file_contents = on(host, powershell(command))&.stdout&.strip
