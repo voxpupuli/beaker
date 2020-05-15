@@ -20,7 +20,24 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.22.1...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.0...master)
+
+# [4.23.0](https://github.com/puppetlabs/beaker/compare/4.22.1...4.23.0)
+
+### Added
+
+- Relaxed dependency on `net-ssh` to `>= 5` to support newer versions. (#1648)
+- `cat` DSL method added. Works on both Unix and Windows hosts. (#1645)
+
+### Changed
+
+- The `mkdir_p` and `mv` commands now double quote their file arguments. (#1644) If you rely on file globbing in these methods or elsewhere, please open an issue on the BEAKER project.
+- Change `reboot` method to use `who -b` for uptime detection (#1643)
+
+### Fixed
+
+- Use Base64 UTF-16LE encoding for commands (#1626)
+- Fix `tmpdir` method for Powershell on Windows (#1645)
 
 # [4.22.1](https://github.com/puppetlabs/beaker/compare/4.22.0...4.22.1)
 
