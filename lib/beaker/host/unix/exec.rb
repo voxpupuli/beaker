@@ -127,7 +127,7 @@ module Unix::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    cmd = "mkdir -p #{dir}"
+    cmd = "mkdir -p \"#{dir}\""
     result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end
@@ -144,7 +144,7 @@ module Unix::Exec
   # @param [Boolean] rm Remove the destination prior to move
   def mv orig, dest, rm=true
     rm_rf dest unless !rm
-    execute("mv #{orig} #{dest}")
+    execute("mv \"#{orig}\" \"#{dest}\"")
   end
 
   # Attempt to ping the provided target hostname
