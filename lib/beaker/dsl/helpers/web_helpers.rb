@@ -14,10 +14,11 @@ module Beaker
 
         #Determine is a given URL is accessible
         #@param [String] link The URL to examine
-        #@return [Boolean] true if the URL has a '200' HTTP response code, false otherwise
+        #@param [Integer] limit redirect limit, will follow redirects that many times
+        #@return [Boolean] true if the ultimate URL after following redirects (301&302) has a '200' HTTP response code, false otherwise
         #@example
         #  extension = link_exists?("#{URL}.tar.gz") ? ".tar.gz" : ".tar"
-        def link_exists?(link)
+        def link_exists?(link, limit=10)
           begin
             require "net/http"
             require "net/https"
@@ -26,8 +27,12 @@ module Beaker
             http = Net::HTTP.new(url.host, url.port)
             http.use_ssl = (url.scheme == 'https')
             http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
-            http.start do |http|
-              return http.head(url.request_uri).code == "200"
+            response = http.start { |http| http.head(url.request_uri) }
+            if (['301', '302'].include? response.code) && limit > 0
+              logger.debug("#{__method__} following #{response.code} to #{response['location']}")
+              link_exists?(response['location'], limit - 1)
+            else
+              response.code == "200"
             end
           rescue
             return false
