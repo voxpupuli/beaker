@@ -435,4 +435,12 @@ module Unix::Exec
     true
   end
 
+  def which(command, additional_paths='')
+    which_command = "env PATH=\"#{additional_paths}:$PATH\" which #{command}"
+
+    result = exec(Beaker::Command.new(which_command), :accept_all_exit_codes => true).stdout.chomp
+    return '' if result.empty?
+
+    result
+  end
 end

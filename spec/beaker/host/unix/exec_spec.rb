@@ -349,5 +349,65 @@ module Beaker
         expect { instance.uptime_int("solaris roxx my soxx") }.to raise_error
       end
     end
+
+    describe '#which' do
+      let(:host) { double.as_null_object }
+      let(:beaker_result) { Beaker::Result.new(host, where_command) }
+      let(:beaker_command) { instance_spy(Beaker::Command) }
+
+      before do
+        beaker_result.stdout = result
+        allow(instance).to receive(:exec)
+                               .with(beaker_command, :accept_all_exit_codes => true).and_return(beaker_result)
+        allow(Beaker::Command).to receive(:new).with(where_command).and_return(beaker_command)
+      end
+
+      context 'when only the environment variable PATH is used' do
+        let(:where_command) { "env PATH=\":$PATH\" which ruby" }
+        let(:result) { "/usr/bin/ruby.exe" }
+
+
+        it 'calls Beaker::Command with no additional paths' do
+          instance.which('ruby')
+
+          expect(Beaker::Command).to have_received(:new).with(where_command)
+        end
+
+        it 'returns the correct path' do
+          response = instance.which('ruby')
+
+          expect(response).to eq(result)
+        end
+      end
+
+      context 'when the search is performed in additional paths' do
+        let(:privatebindir) { "/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin" }
+        let(:where_command) { "env PATH=\"#{privatebindir}:$PATH\" which ruby" }
+        let(:result) { "/opt/puppetlabs/bin/ruby.exe" }
+
+        it 'calls Beaker::Command with additional paths' do
+          instance.which('ruby', privatebindir)
+
+          expect(Beaker::Command).to have_received(:new).with(where_command)
+        end
+
+        it 'returns the correct path' do
+          result = instance.which('ruby', privatebindir)
+
+          expect(result).to eq(result)
+        end
+      end
+
+      context 'when command is not found' do
+        let(:where_command) { "env PATH=\":$PATH\" which unknown" }
+        let(:result) { '' }
+
+        it 'return empty string if command is not found' do
+          response = instance.which('unknown')
+
+          expect(response).to eq(result)
+        end
+      end
+    end
   end
 end

@@ -237,4 +237,17 @@ module PSWindows::Exec
     end
   end
 
+  #Delete the environment variable from the current ssh environment
+  #@param [String] key The key to delete
+  #@example
+  #  host.clear_env_var('PATH')
+  def which(command, additional_paths='')
+    normalized_paths = additional_paths.gsub("\"", '')
+    where_command = "cmd /V /C \"set PATH=#{normalized_paths};!PATH! && where #{command}\""
+
+    result = exec(Beaker::Command.new(where_command), :accept_all_exit_codes => true).stdout.chomp
+    return '' if result.empty?
+
+    result.split("\n").first
+  end
 end
