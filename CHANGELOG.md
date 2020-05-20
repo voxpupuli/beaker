@@ -20,7 +20,13 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.1...master)
+
+# [4.23.1](https://github.com/puppetlabs/beaker/compare/4.23.0...4.23.1)
+
+### Changed/Removed
+
+- Reversed the quoting changes on Unix from #1644 in favor of only quoting on Windows. (#1650)
 
 # [4.23.0](https://github.com/puppetlabs/beaker/compare/4.22.1...4.23.0)
 
