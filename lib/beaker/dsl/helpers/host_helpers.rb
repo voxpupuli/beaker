@@ -556,7 +556,7 @@ module Beaker
               file_path.gsub!('/', '\\')
 
               command = %{Get-Content -Raw -Path "#{file_path}"}
-              command += %{ -Stream #{split_path[:ads]}} if split_path[:ads]
+              command += %{ -Stream "#{split_path[:ads]}"} if split_path[:ads]
 
               file_contents = on(host, powershell(command))&.stdout&.strip
             else
