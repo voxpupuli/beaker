@@ -20,7 +20,14 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.1...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.2...master)
+
+# [4.23.2](https://github.com/puppetlabs/beaker/compare/4.23.1...4.23.2)
+
+### Fixed
+
+- Fixed Beaker's behavior when the `strict_host_key_checking` option is 
+  provided in the SSH config and Net-SSH > 5 is specified. (#1652)
 
 # [4.23.1](https://github.com/puppetlabs/beaker/compare/4.23.0...4.23.1)
 
