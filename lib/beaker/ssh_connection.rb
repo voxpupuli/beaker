@@ -68,6 +68,11 @@ module Beaker
       max_connection_tries = options[:max_connection_tries] || 11
       begin
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
+
+         if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
+           ssh_opts[:paranoid] = ssh_opts.delete(:strict_host_key_checking)
+         end
+
          Net::SSH.start(host, user, ssh_opts)
       rescue *RETRYABLE_EXCEPTIONS => e
         if try <= max_connection_tries
