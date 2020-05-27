@@ -119,6 +119,25 @@ module Windows::Exec
     false
   end
 
+  # Create the provided directory structure on the host
+  # @param [String] dir The directory structure to create on the host
+  # @return [Boolean] True, if directory construction succeeded, otherwise False
+  def mkdir_p dir
+    cmd = "mkdir -p \"#{dir}\""
+    result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
+    result.exit_code == 0
+  end
+
+  # Move the origin to destination. The destination is removed prior to moving.
+  # @param [String] orig The origin path
+  # @param [String] dest the destination path
+  # @param [Boolean] rm Remove the destination prior to move
+  def mv orig, dest, rm=true
+    rm_rf dest unless !rm
+    execute("mv \"#{orig}\" \"#{dest}\"")
+  end
+
+
   # Determine if cygwin is actually installed on the SUT. Differs from
   # is_cygwin?, which is just a type check for a Windows::Host.
   #
