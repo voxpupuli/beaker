@@ -21,11 +21,11 @@ module PSWindows::File
   end
 
   def cat(path)
-    exec(powershell("type #{path}"))
+    exec(powershell("type #{path}")).stdout
   end
 
   def file_exist?(path)
-    result = exec(Beaker::Command.new("if exist #{path} echo true"), :acceptable_exit_codes => [0, 1])
-    result.stdout =~ /true/
+    result = exec(Beaker::Command.new("if exist #{path} echo true"), accept_all_exit_codes: true)
+    result.stdout.strip == 'true'
   end
 end
