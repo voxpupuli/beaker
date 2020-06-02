@@ -69,8 +69,15 @@ module Beaker
       begin
          @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
 
+         # Work around net-ssh 6+ incompatibilities
          if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
-           ssh_opts[:paranoid] = ssh_opts.delete(:strict_host_key_checking)
+           strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
+
+           if ssh_opts[:verify_host_key].nil?
+             ssh_opts[:verify_host_key] = strict_host_key_checking ? :always : :never
+           else
+             ssh_opts[:verify_host_key] = (ssh_opts[:verify_host_key] ? :always : :never) unless ssh_opts[:verify_host_key].is_a?(Symbol)
+           end
          end
 
          Net::SSH.start(host, user, ssh_opts)
