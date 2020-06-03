@@ -14,15 +14,27 @@ module Unix::Exec
   def reboot(wait_time=10, max_connection_tries=9, uptime_retries=18)
     require 'time'
 
+    attempts = 0
+
+    original_boot_time_str = nil
+    original_boot_time_line = nil
     begin
       original_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
       original_boot_time_line = original_boot_time_str.lines.grep(/boot/).first
 
-      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': #{original_boot_time_str}" unless original_boot_time_line
+      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': '#{original_boot_time_str}'" unless original_boot_time_line
 
       original_boot_time = Time.parse(original_boot_time_line)
 
       exec(Beaker::Command.new('/bin/systemctl reboot -i || reboot || /sbin/shutdown -r now'), :expect_connection_failure => true)
+    rescue Beaker::Host::RebootFailure => e
+      attempts += 1
+      if attempts < uptime_retries
+        @logger.debug("Could not get initial boot time. Will retry #{uptime_retries - attempts} more times.")
+        retry
+      else
+        raise
+      end
     rescue Beaker::Host::CommandFailure => e
       raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
     rescue RuntimeError => e
