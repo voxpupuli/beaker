@@ -237,4 +237,19 @@ module PSWindows::Exec
     end
   end
 
+  #First path it finds for the command executable
+  #@param [String] command The command executable to search for
+  #
+  # @return [String] Path to the searched executable or empty string if not found
+  #
+  #@example
+  #  host.which('ruby')
+  def which(command)
+    where_command = "cmd /C \"where #{command}\""
+
+    result = execute(where_command, :accept_all_exit_codes => true)
+    return '' if result.empty?
+
+    result
+  end
 end

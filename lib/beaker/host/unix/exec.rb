@@ -399,4 +399,19 @@ module Unix::Exec
     true
   end
 
+  #First path it finds for the command executable
+  #@param [String] command The command executable to search for
+  #
+  # @return [String] Path to the searched executable or empty string if not found
+  #
+  #@example
+  #  host.which('ruby')
+  def which(command)
+    which_command = "which #{command}"
+
+    result = execute(which_command, :accept_all_exit_codes => true)
+    return '' if result.empty?
+
+    result
+  end
 end

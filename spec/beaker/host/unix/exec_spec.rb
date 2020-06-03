@@ -312,5 +312,34 @@ module Beaker
       end
 
     end
+
+    describe '#which' do
+      before do
+        allow(instance).to receive(:execute)
+                               .with(where_command, :accept_all_exit_codes => true).and_return(result)
+      end
+
+      context 'when only the environment variable PATH is used' do
+        let(:where_command) { "which ruby" }
+        let(:result) { "/usr/bin/ruby.exe" }
+
+        it 'returns the correct path' do
+          response = instance.which('ruby')
+
+          expect(response).to eq(result)
+        end
+      end
+
+      context 'when command is not found' do
+        let(:where_command) { "which unknown" }
+        let(:result) { '' }
+
+        it 'return empty string if command is not found' do
+          response = instance.which('unknown')
+
+          expect(response).to eq(result)
+        end
+      end
+    end
   end
 end
