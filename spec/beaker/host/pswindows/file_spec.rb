@@ -25,11 +25,31 @@ module Beaker
     let (:instance) { PSWindowsFileTest.new(opts, logger) }
 
     describe '#cat' do
+      let(:path) { '/path/to/cat' }
+      let(:content) { 'file content' }
       it 'reads output for file' do
-        path = '/path/to/delete'
-        expect(instance).to receive(:exec)
+        expect(instance).to receive(:exec).and_return(double(stdout: content))
         expect(Beaker::Command).to receive(:new).with('powershell.exe', array_including("-Command type #{path}"))
-        instance.cat(path)
+        expect(instance.cat(path)).to eq(content)
+      end
+    end
+
+    describe '#file_exist?' do
+      let(:path) { '/path/to/test/file.txt' }
+      context 'file exists' do
+        it 'returns true' do
+          expect(instance).to receive(:exec).and_return(double(stdout: "true\n"))
+          expect(Beaker::Command).to receive(:new).with("if exist #{path} echo true")
+          expect(instance.file_exist?(path)).to eq(true)
+        end
+      end
+
+      context 'file does not exist' do
+        it 'returns false' do
+          expect(instance).to receive(:exec).and_return(double(stdout: ""))
+          expect(Beaker::Command).to receive(:new).with("if exist #{path} echo true")
+          expect(instance.file_exist?(path)).to eq(false)
+        end
       end
     end
 
@@ -39,7 +59,6 @@ module Beaker
 
       before do
         allow(instance).to receive(:execute).with(anything)
-
       end
 
       context 'with dirname sent' do
