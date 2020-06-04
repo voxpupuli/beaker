@@ -128,5 +128,30 @@ module Beaker
         end
       end
     end
+
+    describe '#mkdir_p' do
+        let(:dir_path) { "C:\\tmpdir\\my_dir" }
+        let(:beaker_command) { instance_spy(Beaker::Command) }
+        let(:command) {"-Command New-Item -Path '#{dir_path}' -ItemType 'directory'"}
+        let(:result) { instance_spy(Beaker::Result) }
+
+        before do
+          allow(Beaker::Command).to receive(:new).
+              with('powershell.exe', array_including(command)).and_return(beaker_command)
+          allow(instance).to receive(:exec).with(beaker_command, :acceptable_exit_codes => [0, 1]).and_return(result)
+        end
+
+        it 'returns true and creates folder structure' do
+          allow(result).to receive(:exit_code).and_return(0)
+
+          expect(instance.mkdir_p(dir_path)).to be(true)
+        end
+
+        it 'returns false if failed to create directory structure' do
+          allow(result).to receive(:exit_code).and_return(1)
+
+          expect(instance.mkdir_p(dir_path)).to be(false)
+        end
+      end
   end
 end

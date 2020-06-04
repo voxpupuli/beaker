@@ -104,9 +104,9 @@ module PSWindows::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    windows_dirstring = dir.gsub('/','\\')
-    cmd = "if not exist #{windows_dirstring} (md #{windows_dirstring})"
-    result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
+    normalized_path = dir.gsub('/','\\')
+    result = exec(powershell("New-Item -Path '#{normalized_path}' -ItemType 'directory'"),
+                  :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end
 
