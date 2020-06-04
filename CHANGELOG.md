@@ -22,11 +22,22 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.2...master)
 
+# [4.24.0](https://github.com/puppetlabs/beaker/compare/4.23.0...4.24.0) - 2020-06-05
+
+### Added
+
+- Host method which ([#1651](https://github.com/puppetlabs/beaker/pull/1651))
+
+### Fixed
+
+- Fixed implementation for cat and file_exists? host methods for PSWindows ([#1654](https://github.com/puppetlabs/beaker/pull/1654))
+- Fixed implementation for mkdir_p host method for PSWindows ([#1657](https://github.com/puppetlabs/beaker/pull/1657))
+
 # [4.23.2](https://github.com/puppetlabs/beaker/compare/4.23.1...4.23.2)
 
 ### Fixed
 
-- Fixed Beaker's behavior when the `strict_host_key_checking` option is 
+- Fixed Beaker's behavior when the `strict_host_key_checking` option is
   provided in the SSH config and Net-SSH > 5 is specified. (#1652)
 
 # [4.23.1](https://github.com/puppetlabs/beaker/compare/4.23.0...4.23.1)
