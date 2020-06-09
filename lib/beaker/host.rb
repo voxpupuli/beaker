@@ -6,7 +6,7 @@ require 'rsync'
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
 
-[ 'command', 'ssh_connection'].each do |lib|
+[ 'command', 'ssh_connection', 'local_connection' ].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -294,6 +294,11 @@ module Beaker
 
     def connection
       # create new connection object if necessary
+      if self['hypervisor'] == 'none' && @name == 'localhost'
+        @connection ||= LocalConnection.connect( { :ssh_env_file => self['ssh_env_file'], :logger => @logger })
+        return @connection
+      end
+
       @connection ||= SshConnection.connect( { :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
                                              self['user'],
                                              self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference]} )
