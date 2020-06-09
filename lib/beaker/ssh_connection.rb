@@ -73,10 +73,8 @@ module Beaker
          if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
            strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
 
-           if ssh_opts[:verify_host_key].nil?
-             ssh_opts[:verify_host_key] = strict_host_key_checking ? :always : :never
-           else
-             ssh_opts[:verify_host_key] = (ssh_opts[:verify_host_key] ? :always : :never) unless ssh_opts[:verify_host_key].is_a?(Symbol)
+           unless ssh_opts[:verify_host_key].is_a?(Symbol)
+             ssh_opts[:verify_host_key] ||= strict_host_key_checking ? :always : :never
            end
          end
 
