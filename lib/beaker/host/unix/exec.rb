@@ -50,7 +50,11 @@ module Unix::Exec
       sleep wait_time
 
       current_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
-      current_boot_time = Time.parse(current_boot_time_str.lines.grep(/boot/).first)
+      current_boot_time_line = current_boot_time_str.lines.grep(/boot/).first
+
+      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': '#{current_boot_time_str}'" unless current_boot_time_line
+
+      current_boot_time = Time.parse(current_boot_time_line)
 
       @logger.debug("Original Boot Time: #{original_boot_time}")
       @logger.debug("Current Boot Time: #{current_boot_time}")
