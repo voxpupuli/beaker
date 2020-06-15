@@ -26,11 +26,11 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 ### Added
 
-- Execution of Beaker directly through ruby on localhost #1637
+- Execution of Beaker directly through ruby on localhost #1637 ([#1637](https://github.com/puppetlabs/beaker/pull/1637))
 
 ### Fixed
 
-- Reliability improvements to the `Host#reboot` method #1656 #1659
+- Reliability improvements to the `Host#reboot` method ([#1656](https://github.com/puppetlabs/beaker/pull/1656)) ([#1659](https://github.com/puppetlabs/beaker/pull/1659))
 
 # [4.24.0](https://github.com/puppetlabs/beaker/compare/4.23.0...4.24.0) - 2020-06-05
 
