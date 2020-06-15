@@ -20,7 +20,17 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.23.2...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.25.0...master)
+
+# [4.25.0](https://github.com/puppetlabs/beaker/compare/4.24.0...4.25.0)
+
+### Added
+
+- Execution of Beaker directly through ruby on localhost #1637
+
+### Fixed
+
+- Reliability improvements to the `Host#reboot` method #1656 #1659
 
 # [4.24.0](https://github.com/puppetlabs/beaker/compare/4.23.0...4.24.0) - 2020-06-05
 
