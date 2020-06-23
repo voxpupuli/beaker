@@ -20,7 +20,17 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.25.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.26.0...master)
+
+# [4.26.0](https://github.com/puppetlabs/beaker/compare/4.25.0...4.26.0)
+
+### Changed
+
+- Fixed deprecated SSH option handling for `verify_ssh_key` being passed into Net::SSH. #1655
+
+### Removed
+
+- Removed deprecated use of `paranoid` flag with Net::SSH. #1655
 
 # [4.25.0](https://github.com/puppetlabs/beaker/compare/4.24.0...4.25.0)
 
