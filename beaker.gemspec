@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = Gem::Requirement.new('>= 2.1.8')
+  s.required_ruby_version = Gem::Requirement.new('>= 2.4')
 
   # Testing dependencies
   s.add_development_dependency 'rspec', '~> 3.0'
@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'minitar', '~> 0.6'
-  s.add_runtime_dependency 'pry-byebug', '~> 3.6'
+  s.add_runtime_dependency 'pry-byebug', '~> 3.9'
   # pry-byebug can have issues with native readline libs so add rb-readline
   s.add_runtime_dependency 'rb-readline', '~> 0.5.3'
 
