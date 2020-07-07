@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-its'
   s.add_development_dependency 'fakefs', '~> 0.6', '< 0.14.0'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'rake', '~> 12.0'
+  s.add_development_dependency 'rake', '~> 13.0'
 
   # Provisioner dependencies - needed for acceptance tests
   # TODO: figure out how to remove these
