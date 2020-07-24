@@ -26,10 +26,7 @@ task :history do
   Rake::Task['history:gen'].invoke
 end
 
-task :travis do
-  Rake::Task['yard'].invoke if !Beaker::Shared::Semvar.version_is_less(RUBY_VERSION, '2.0.0')
-  Rake::Task['spec'].invoke
-end
+task travis: [:yard, :test]
 
 module HarnessOptions
   defaults = {
