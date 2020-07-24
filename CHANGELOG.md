@@ -20,7 +20,17 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.26.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.27.0...master)
+
+# [4.27.0](https://github.com/puppetlabs/beaker/compare/4.26.0...4.27.0) - 07-24-2020
+
+### Changed
+
+- Updated dependency versions and minimum Ruby version in gemspec to Ruby 2.4, which is the minimum
+  version Beaker will run with.
+- Added Travis unit testing and disabled Jenkins integrations in preparation for transferring the
+  repo to Vox Pupuli
+
 
 # [4.26.0](https://github.com/puppetlabs/beaker/compare/4.25.0...4.26.0)
 
