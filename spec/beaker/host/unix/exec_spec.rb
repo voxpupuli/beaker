@@ -169,6 +169,64 @@ module Beaker
     end
 
     describe '#reboot' do
+      check_cmd_output = {
+        :centos6 => {
+          :who => {
+            :initial => '      system boot  2020-05-13 03:51',
+            :success => '      system boot  2020-05-13 03:52',
+          },
+          :last => {
+              :initial => <<~LAST_F,
+              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:34:52 2020 - Tue May 5 17:52:48 2020  (00:17)
+              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              LAST_F
+              :success => <<~LAST_F,
+              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 2020 - Tue May 5 17:52:49 2020  (00:17)
+              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              LAST_F
+          },
+        },
+        :centos7 => {
+          :who => {
+            :initial => '      system boot  2020-05-13 03:51',
+            :success => '      system boot  2020-05-13 03:52',
+          },
+          :last => {
+              :initial => <<~LAST_F,
+              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:34:52 2020 - Tue May 5 17:52:48 2020  (00:17)
+              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              LAST_F
+              :success => <<~LAST_F,
+              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 2020 - Tue May 5 17:52:49 2020  (00:17)
+              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              LAST_F
+          },
+        },
+        :centos8 => {
+          :who => {
+            :initial => '      system boot  2020-05-13 03:51',
+            :success => '      system boot  2020-05-13 03:52',
+          },
+          :last => {
+              :initial => <<~LAST_F,
+              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:52 2020 still running
+              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 2020 - Tue May 5 17:00:00 2020 (5+00:11)
+              LAST_F
+              :success => <<~LAST_F,
+              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 2020 still running
+              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 2020 - Tue May 5 17:00:00 2020 (5+00:11)
+              LAST_F
+          },
+        },
+        :freebsd => {
+          # last -F doesn't work on freebsd so no output will be returned
+          :who => {
+            :initial => '      system boot  May 13 03:51',
+            :success => '      system boot  May 13 03:52',
+          }
+        },
+      }
+
       # no-op response
       let (:response) { double( 'response' ) }
       let (:boot_time_initial_response) { double( 'response' ) }
@@ -179,7 +237,7 @@ module Beaker
       before :each do
         # stubs enough to survive the first boot_time call & output parsing
         #   note: just stubs input-chain between calls, parsing methods still run
-        allow(Beaker::Command).to receive(:new).with('who -b').and_return(:boot_time_command_stub)
+        allow(Beaker::Command).to receive(:new).with('last -F reboot || who -b').and_return(:boot_time_command_stub)
 
         allow(boot_time_initial_response).to receive(:stdout).and_return(boot_time_initial_stdout)
         allow(boot_time_success_response).to receive(:stdout).and_return(boot_time_success_stdout)
@@ -190,116 +248,130 @@ module Beaker
       end
 
       context 'new boot time greater than old boot time' do
-        let (:boot_time_initial_stdout) { '      system boot  2020-05-13 03:51' }
-        let (:boot_time_success_stdout) { '      system boot  2020-05-13 03:52' }
+        check_cmd_output.each do |check_os, cmd_opts|
+          cmd_opts.each do |cmd_name, cmd_outputs|
+            context "on '#{check_os}' with the '#{cmd_name}' command" do
+              let (:boot_time_initial_stdout) { cmd_outputs[:initial] }
+              let (:boot_time_success_stdout) { cmd_outputs[:success] }
 
-        it 'passes with defaults' do
-          expect(instance).to receive(:sleep).with(sleep_time)
-          # bypass shutdown command itself
-          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
-          # allow the second boot_time and the hash arguments in exec
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
-
-          expect(instance.reboot).to be(nil)
-        end
-
-        it 'passes with wait_time_parameter' do
-          expect(instance).to receive(:sleep).with(10)
-          # bypass shutdown command itself
-          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          # allow the second boot_time and the hash arguments in exec
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
-
-          expect(instance.reboot(10)).to be(nil)
-        end
-
-        it 'passes with max_connection_tries parameter' do
-          expect(instance).to receive(:sleep).with(sleep_time)
-          # bypass shutdown command itself
-          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          # allow the second boot_time and the hash arguments in exec
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, hash_including(:max_connection_tries => 20)).and_return(boot_time_success_response).once
-
-          expect(instance.reboot(sleep_time, 20)).to be(nil)
-        end
-
-        context 'command errors' do
-          before :each do
-            allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          end
-
-          it 'raises a reboot failure when command fails' do
-            expect(instance).not_to receive(:sleep)
-            expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
-
-            expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed when attempting to reboot: .*/)
-          end
-
-          it 'raises a reboot failure when we receive an unexpected error' do
-            expect(instance).not_to receive(:sleep)
-            expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError).once
-
-            expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
-          end
-
-          context 'incorrect time string' do
-            context 'original time' do
-              let (:boot_time_initial_stdout) { 'boot bad' }
-
-              it 'raises a reboot failure' do
-                expect(instance).not_to receive(:sleep)
-
-                expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unable to parse time: .*/)
-              end
-            end
-
-            context 'current time' do
-              let (:boot_time_success_stdout) { 'boot bad' }
-
-              it 'raises a reboot failure' do
-                expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_return(response).once
+              it 'passes with defaults' do
+                expect(instance).to receive(:sleep).with(sleep_time)
+                # bypass shutdown command itself
+                expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
+                # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-                # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
-                expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unable to parse time: .*/)
+                expect(instance.reboot).to be(nil)
+              end
+
+              it 'passes with wait_time_parameter' do
+                expect(instance).to receive(:sleep).with(10)
+                # bypass shutdown command itself
+                expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                # allow the second boot_time and the hash arguments in exec
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
+
+                expect(instance.reboot(10)).to be(nil)
+              end
+
+              it 'passes with max_connection_tries parameter' do
+                expect(instance).to receive(:sleep).with(sleep_time)
+                # bypass shutdown command itself
+                expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                # allow the second boot_time and the hash arguments in exec
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, hash_including(:max_connection_tries => 20)).and_return(boot_time_success_response).once
+
+                expect(instance.reboot(sleep_time, 20)).to be(nil)
+              end
+
+              context 'command errors' do
+                before :each do
+                  allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                end
+
+                it 'raises a reboot failure when command fails' do
+                  expect(instance).to receive(:sleep).once
+                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
+
+                  expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed when attempting to reboot: .*/)
+                end
+
+                it 'raises a reboot failure when we receive an unexpected error' do
+                  expect(instance).to receive(:sleep).once
+                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError).once
+
+                  expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+                end
+
+                context 'incorrect time string' do
+                  context 'original time' do
+                    let (:boot_time_initial_stdout) { 'boot bad' }
+
+                    it 'raises a reboot failure' do
+                      # Handle the 'retry'
+                      allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).at_least(:once)
+
+                      expect(instance).not_to receive(:sleep)
+
+                      expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Found no valid times in .*/)
+                    end
+                  end
+
+                  context 'current time' do
+                    let (:boot_time_success_stdout) { 'boot bad' }
+
+                    it 'raises a reboot failure' do
+                      expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_return(response).once
+                      expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                      # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
+                      expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
+
+                      expect { instance.reboot(10,9,1) }.to raise_error(Beaker::Host::RebootFailure, /Found no valid times in .*/)
+                    end
+                  end
+                end
               end
             end
           end
         end
       end
 
-      context 'new boot time less than old boot time' do
-        let (:boot_time_initial_stdout) { '      system boot  2020-05-13 03:51' }
-        let (:boot_time_success_stdout) { '      system boot  2020-05-13 03:50' }
+      context 'system did not reboot' do
+        check_cmd_output.each do |check_os, cmd_opts|
+          cmd_opts.each do |cmd_name, cmd_outputs|
+            context "on '#{check_os}' with the '#{cmd_name}' command" do
+              let (:boot_time_initial_stdout) { cmd_outputs[:initial] }
+              let (:boot_time_success_stdout) { cmd_outputs[:initial] }
 
-        it 'raises RebootFailure' do
-          expect(instance).to receive(:sleep).with(sleep_time)
-          # bypass shutdown command itself
-          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+              it 'raises RebootFailure' do
+                expect(instance).to receive(:sleep).with(sleep_time)
+                # bypass shutdown command itself
+                expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
 
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          # allow the second boot_time and the hash arguments in exec, repeated 18 times by default in order to replicate the previous behavior of the ping based Host.down?
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(18).times
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                # allow the second boot_time and the hash arguments in exec, repeated 18 times by default in order to replicate the previous behavior of the ping based Host.down?
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(18).times
 
-          expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
-        end
+                expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
+              end
 
-        it 'raises RebootFailure if the number of retries is changed' do
-          expect(instance).to receive(:sleep).with(sleep_time)
-          # bypass shutdown command itself
-          expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-          # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
-          expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(10).times
+              it 'raises RebootFailure if the number of retries is changed' do
+                expect(instance).to receive(:sleep).with(sleep_time)
+                # bypass shutdown command itself
+                expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(10).times
 
-          expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, boot_time_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
+                expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, boot_time_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
+              end
+            end
+          end
         end
       end
-
     end
 
     describe '#enable_remote_rsyslog' do

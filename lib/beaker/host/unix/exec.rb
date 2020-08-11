@@ -16,15 +16,37 @@ module Unix::Exec
 
     attempts = 0
 
+    # Some systems don't support 'last -F reboot' but it has second granularity
+    boot_time_cmd = 'last -F reboot || who -b'
+
+    # Try to match all of the common formats for 'last' and 'who'
+    current_year = Time.now.strftime("%Y")
+    boot_time_regex = Regexp.new(%{((?:#{(Date::ABBR_DAYNAMES + Date::ABBR_MONTHNAMES).compact.join('|')}|#{current_year}).+?(\\d+:\\d+)+?(?::(\\d+).+?#{current_year})?)})
+
     original_boot_time_str = nil
     original_boot_time_line = nil
     begin
-      original_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      # Number of seconds to sleep before rebooting.
+      reboot_sleep = 1
+
+      original_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true}).stdout.lines.first
       original_boot_time_line = original_boot_time_str.lines.grep(/boot/).first
 
-      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': '#{original_boot_time_str}'" unless original_boot_time_line
+      raise Beaker::Host::RebootFailure, "Could not find system boot time using '#{boot_time_cmd}': '#{original_boot_time_str}'" unless original_boot_time_line
 
-      original_boot_time = Time.parse(original_boot_time_line)
+      original_boot_time_matches = original_boot_time_line.scan(boot_time_regex).last
+
+      raise Beaker::Host::RebootFailure, "Found no valid times in '#{original_boot_time_line}'" unless original_boot_time_matches
+
+      original_boot_time = Time.parse(original_boot_time_matches.first)
+
+      unless original_boot_time_matches.last
+        reboot_sleep = (61 - Time.now.strftime("%S").to_i)
+      end
+
+      @logger.notify("Sleeping #{reboot_sleep} seconds before rebooting")
+
+      sleep(reboot_sleep)
 
       exec(Beaker::Command.new('/bin/systemctl reboot -i || reboot || /sbin/shutdown -r now'), :expect_connection_failure => true)
     rescue Beaker::Host::RebootFailure => e
@@ -49,12 +71,16 @@ module Unix::Exec
       @logger.debug("Waiting #{wait_time} for host to shut down.")
       sleep wait_time
 
-      current_boot_time_str = exec(Beaker::Command.new('who -b'), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      current_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
       current_boot_time_line = current_boot_time_str.lines.grep(/boot/).first
 
-      raise Beaker::Host::RebootFailure, "Could not find system boot time using 'who -b': '#{current_boot_time_str}'" unless current_boot_time_line
+      raise Beaker::Host::RebootFailure, "Could not find system boot time using '#{boot_time_cmd}': '#{current_boot_time_str}'" unless current_boot_time_line
 
-      current_boot_time = Time.parse(current_boot_time_line)
+      current_boot_time_matches = current_boot_time_line.scan(boot_time_regex).last
+
+      raise Beaker::Host::RebootFailure, "Found no valid times in '#{current_boot_time_line}'" unless current_boot_time_matches
+
+      current_boot_time = Time.parse(current_boot_time_matches.first)
 
       @logger.debug("Original Boot Time: #{original_boot_time}")
       @logger.debug("Current Boot Time: #{current_boot_time}")
