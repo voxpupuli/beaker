@@ -289,14 +289,14 @@ module Beaker
 
               context 'command errors' do
                 before :each do
-                  allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                  allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).at_least(:once)
                 end
 
                 it 'raises a reboot failure when command fails' do
-                  expect(instance).to receive(:sleep).once
-                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
+                  expect(instance).to receive(:sleep).at_least(:once)
+                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).at_least(:once)
 
-                  expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed when attempting to reboot: .*/)
+                  expect{ instance.reboot }.to raise_error(Beaker::Host::CommandFailure)
                 end
 
                 it 'raises a reboot failure when we receive an unexpected error' do

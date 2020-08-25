@@ -29,7 +29,7 @@ module Unix::Exec
       # Number of seconds to sleep before rebooting.
       reboot_sleep = 1
 
-      original_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true}).stdout.lines.first
+      original_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true}).stdout
       original_boot_time_line = original_boot_time_str.lines.grep(/boot/).first
 
       raise Beaker::Host::RebootFailure, "Could not find system boot time using '#{boot_time_cmd}': '#{original_boot_time_str}'" unless original_boot_time_line
@@ -49,20 +49,20 @@ module Unix::Exec
       sleep(reboot_sleep)
 
       exec(Beaker::Command.new('/bin/systemctl reboot -i || reboot || /sbin/shutdown -r now'), :expect_connection_failure => true)
-    rescue Beaker::Host::RebootFailure => e
-      attempts += 1
-      if attempts < uptime_retries
-        @logger.debug("Could not get initial boot time. Will retry #{uptime_retries - attempts} more times.")
-        retry
-      else
-        raise
-      end
-    rescue Beaker::Host::CommandFailure => e
-      raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
     rescue RuntimeError => e
       raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
     rescue ArgumentError => e
       raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
+    rescue => e
+      # Yes, this isn't best practice but rebooting is weird and we really want
+      # to make sure we retry if something went wrong (no matter what it was).
+      attempts += 1
+      if attempts < uptime_retries
+        @logger.warn("Could not get initial boot time. Will retry #{uptime_retries - attempts} more times.")
+        retry
+      else
+        raise
+      end
     end
 
     attempts = 0
@@ -71,7 +71,7 @@ module Unix::Exec
       @logger.debug("Waiting #{wait_time} for host to shut down.")
       sleep wait_time
 
-      current_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      current_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true}).stdout
       current_boot_time_line = current_boot_time_str.lines.grep(/boot/).first
 
       raise Beaker::Host::RebootFailure, "Could not find system boot time using '#{boot_time_cmd}': '#{current_boot_time_str}'" unless current_boot_time_line
@@ -85,10 +85,17 @@ module Unix::Exec
       @logger.debug("Original Boot Time: #{original_boot_time}")
       @logger.debug("Current Boot Time: #{current_boot_time}")
 
+      # This actually may fail a few times before succeeding because virtual
+      # machines can skew backwards in time so we need to let the retry happen.
       unless current_boot_time > original_boot_time
         raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed."
       end
-    rescue Beaker::Host::RebootFailure => e
+    rescue ArgumentError => e
+      raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
+    rescue => e
+      # Yes, this isn't best practice but rebooting is weird and we really want
+      # to make sure we retry if something went wrong (no matter what it was,
+      # including hosts going back in time).
       attempts += 1
       if attempts < uptime_retries
         @logger.debug("Boot time did not reset. Will retry #{uptime_retries - attempts} more times.")
@@ -96,12 +103,6 @@ module Unix::Exec
       else
         raise
       end
-    rescue Beaker::Host::CommandFailure => e
-      raise Beaker::Host::RebootFailure, "Command failed when attempting to reboot: #{e.message}"
-    rescue RuntimeError => e
-      raise Beaker::Host::RebootFailure, "Unexpected exception in reboot: #{e.message}"
-    rescue ArgumentError => e
-      raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     end
   end
 
