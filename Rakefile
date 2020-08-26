@@ -26,8 +26,6 @@ task :history do
   Rake::Task['history:gen'].invoke
 end
 
-task travis: [:yard, :test]
-
 module HarnessOptions
   defaults = {
       :tests  => ['tests'],

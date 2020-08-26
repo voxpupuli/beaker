@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  - pull_request
+  - push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "2.4"
+          - "2.5"
+          - "2.6"
+          - "2.7"
+    name: Ruby ${{ matrix.ruby }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Build docs
+        run: bundle exec rake yard
+      - name: Run tests
+        run: bundle exec rake spec
