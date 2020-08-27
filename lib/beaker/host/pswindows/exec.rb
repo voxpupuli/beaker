@@ -22,7 +22,7 @@ module PSWindows::Exec
   def rm_rf path
     # ensure that we have the right slashes for windows
     path = path.gsub(/\//, '\\')
-    execute("del /s /q #{path}")
+    execute(%(del /s /q "#{path}"))
   end
 
   # Move the origin to destination. The destination is removed prior to moving.
