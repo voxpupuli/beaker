@@ -19,6 +19,7 @@ module Beaker
 
     class CommandFailure < StandardError; end
     class RebootFailure < CommandFailure; end
+    class RebootWarning < StandardError; end
 
     # This class provides array syntax for using puppet --configprint on a host
     class PuppetConfigReader
