@@ -289,21 +289,21 @@ module Beaker
 
               context 'command errors' do
                 before :each do
-                  allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                  allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).at_least(:once)
                 end
 
                 it 'raises a reboot failure when command fails' do
-                  expect(instance).to receive(:sleep).once
-                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).once
+                  expect(instance).to receive(:sleep).at_least(:once)
+                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Host::CommandFailure).at_least(:once)
 
-                  expect{ instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Command failed when attempting to reboot: .*/)
+                  expect{ instance.reboot }.to raise_error(Beaker::Host::CommandFailure)
                 end
 
                 it 'raises a reboot failure when we receive an unexpected error' do
-                  expect(instance).to receive(:sleep).once
-                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError).once
+                  expect(instance).to receive(:sleep).at_least(:once)
+                  expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_raise(Net::SSH::HostKeyError).at_least(:once)
 
-                  expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Unexpected exception in reboot: .*/)
+                  expect { instance.reboot }.to raise_error(Net::SSH::HostKeyError)
                 end
 
                 context 'incorrect time string' do
@@ -316,7 +316,7 @@ module Beaker
 
                       expect(instance).not_to receive(:sleep)
 
-                      expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Found no valid times in .*/)
+                      expect { instance.reboot }.to raise_error(Beaker::Host::RebootWarning, /Found no valid times in .*/)
                     end
                   end
 
@@ -327,9 +327,9 @@ module Beaker
                       expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_return(response).once
                       expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
                       # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
-                      expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
+                      expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).at_least(:once)
 
-                      expect { instance.reboot(10,9,1) }.to raise_error(Beaker::Host::RebootFailure, /Found no valid times in .*/)
+                      expect { instance.reboot(10,9,1) }.to raise_error(Beaker::Host::RebootWarning, /Found no valid times in .*/)
                     end
                   end
                 end
@@ -352,8 +352,7 @@ module Beaker
                 expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
 
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-                # allow the second boot_time and the hash arguments in exec, repeated 18 times by default in order to replicate the previous behavior of the ping based Host.down?
-                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(18).times
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
                 expect { instance.reboot }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
               end
@@ -363,8 +362,7 @@ module Beaker
                 # bypass shutdown command itself
                 expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response).once
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
-                # allow the second boot_time and the hash arguments in exec, repeated 10 times by default
-                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).exactly(10).times
+                expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
                 expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, boot_time_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
               end
