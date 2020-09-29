@@ -22,6 +22,19 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.27.0...master)
 
+# [4.27.1](https://github.com/puppetlabs/beaker/compare/4.27.0...4.27.1) - 09-29-2020
+
+### Changed
+
+- Update net-scp requirement from "~> 1.2" to ">= 1.2, < 4.0"
+
+### Fixed
+
+- Handle systems going back in time after reboot
+- Enhanced error handling during the reboot sequence
+- Fixed time check logic during reboot
+- Wrap paths around "" on pswindows
+
 # [4.27.0](https://github.com/puppetlabs/beaker/compare/4.26.0...4.27.0) - 07-24-2020
 
 ### Changed
