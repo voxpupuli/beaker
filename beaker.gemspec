@@ -7,11 +7,11 @@ Gem::Specification.new do |s|
   s.name        = "beaker"
   s.version     = Beaker::Version::STRING
   s.authors     = ["Puppet"]
-  s.email       = ["delivery@puppet.com"]
-  s.homepage    = "https://github.com/puppetlabs/beaker"
+  s.email       = ["voxpupuli@groups.io"]
+  s.homepage    = "https://github.com/voxpupuli/beaker"
   s.summary     = %q{Let's test Puppet!}
   s.description = %q{Puppet's accceptance testing harness}
-  s.license     = 'Apache2'
+  s.license     = 'Apache-2.0'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
