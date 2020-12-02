@@ -2,6 +2,9 @@ before_install:
   - gem update
   - gem --version
 language: ruby
+arch:
+ - amd64
+ - ppc64le
 script: "bundle exec rake travis"
 notifications:
   email: false
