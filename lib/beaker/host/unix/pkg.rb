@@ -5,6 +5,7 @@ module Unix::Pkg
   # unix-specific package management setup
   def pkg_initialize
     @apt_needs_update = true
+    @pacman_needs_update = true
   end
 
   def check_for_command(name)
@@ -67,6 +68,17 @@ module Unix::Pkg
       if @apt_needs_update
         execute("apt-get update")
         @apt_needs_update = false
+      end
+    end
+  end
+
+  # Arch Linux is a rolling release distribution. We need to ensure that it is up2date
+  # Except for the kernel. An upgrade will purge the modules for the currently running kernel
+  def update_pacman_if_needed
+    if self['platform'] =~ /archlinux/
+      if @pacman_needs_update
+        execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
+        @pacman_needs_update = false
       end
     end
   end
@@ -138,6 +150,7 @@ module Unix::Pkg
           retry
         end
       when /archlinux/
+        update_pacman_if_needed
         execute("pacman -S --noconfirm #{cmdline_args} #{name}", opts)
       else
         raise "Package #{name} cannot be installed on #{self}"
