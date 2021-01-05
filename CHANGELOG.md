@@ -20,7 +20,19 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.27.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.0...master)
+
+# [4.28.0](https://github.com/puppetlabs/beaker/compare/4.27.1...4.28.0) - 12-21-2020
+
+### Changed
+
+- Arch Linux: Update box before installing packages ([#1688](https://github.com/voxpupuli/beaker/pull/1688))
+- Move the entire workflow to Github Actions ([#1678](https://github.com/voxpupuli/beaker/pull/1678))
+- Allow fakefs dependency in version >= 1 < 2 ([#1687](https://github.com/voxpupuli/beaker/pull/1687))
+
+### Fixed
+
+- Fix License text and SPDX code ([#1681](https://github.com/voxpupuli/beaker/pull/1678))
 
 # [4.27.1](https://github.com/puppetlabs/beaker/compare/4.27.0...4.27.1) - 09-29-2020
 
