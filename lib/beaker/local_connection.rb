@@ -53,9 +53,12 @@ module Beaker
           result.stdout << std_out
           result.stderr << std_err
           result.exit_code = status.exitstatus
+          @logger.info(result.stdout) unless result.stdout.empty?
+          @logger.info(result.stderr) unless result.stderr.empty?
         end
       rescue => e
         result.stderr << e.inspect
+        @logger.info(result.stderr)
         result.exit_code = 1
       end
 
