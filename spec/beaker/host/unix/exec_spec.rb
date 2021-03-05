@@ -169,52 +169,54 @@ module Beaker
     end
 
     describe '#reboot' do
+      year = Time.now.strftime('%Y')
+
       check_cmd_output = {
         :centos6 => {
           :who => {
-            :initial => '      system boot  2020-05-13 03:51',
-            :success => '      system boot  2020-05-13 03:52',
+            :initial => "      system boot  #{year}-05-13 03:51",
+            :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
               :initial => <<~LAST_F,
-              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:34:52 2020 - Tue May 5 17:52:48 2020  (00:17)
-              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
+              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
               LAST_F
               :success => <<~LAST_F,
-              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 2020 - Tue May 5 17:52:49 2020  (00:17)
-              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
+              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
               LAST_F
           },
         },
         :centos7 => {
           :who => {
-            :initial => '      system boot  2020-05-13 03:51',
-            :success => '      system boot  2020-05-13 03:52',
+            :initial => "      system boot  #{year}-05-13 03:51",
+            :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
               :initial => <<~LAST_F,
-              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:34:52 2020 - Tue May 5 17:52:48 2020  (00:17)
-              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
+              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
               LAST_F
               :success => <<~LAST_F,
-              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 2020 - Tue May 5 17:52:49 2020  (00:17)
-              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 2020 - Mon May 5 05:35:44 2020 (4+01:50)
+              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
+              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
               LAST_F
           },
         },
         :centos8 => {
           :who => {
-            :initial => '      system boot  2020-05-13 03:51',
-            :success => '      system boot  2020-05-13 03:52',
+            :initial => "      system boot  #{year}-05-13 03:51",
+            :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
               :initial => <<~LAST_F,
-              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:52 2020 still running
-              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 2020 - Tue May 5 17:00:00 2020 (5+00:11)
+              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:52 #{year} still running
+              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
               LAST_F
               :success => <<~LAST_F,
-              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 2020 still running
-              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 2020 - Tue May 5 17:00:00 2020 (5+00:11)
+              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 #{year} still running
+              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
               LAST_F
           },
         },
@@ -258,8 +260,8 @@ module Beaker
                 expect(instance).to receive(:sleep).with(sleep_time)
                 # bypass shutdown command itself
                 expect(instance).to receive( :exec ).with(:shutdown_command_stub, anything).and_return(response)
-                # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
+                # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
                 expect(instance.reboot).to be(nil)
@@ -384,30 +386,86 @@ module Beaker
     end
 
     describe '#which' do
-      before do
-        allow(instance).to receive(:execute)
-                               .with(where_command, :accept_all_exit_codes => true).and_return(result)
-      end
+      context 'when type -P works' do
+        before do
+          expect(instance).to receive(:execute)
+            .with('type -P true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
-      context 'when only the environment variable PATH is used' do
-        let(:where_command) { "which ruby" }
-        let(:result) { "/usr/bin/ruby.exe" }
+          allow(instance).to receive(:execute)
+                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+        end
 
-        it 'returns the correct path' do
-          response = instance.which('ruby')
+        context 'when only the environment variable PATH is used' do
+          let(:where_command) { "type -P ruby" }
+          let(:result) { "/usr/bin/ruby.exe" }
 
-          expect(response).to eq(result)
+          it 'returns the correct path' do
+            response = instance.which('ruby')
+
+            expect(response).to eq(result)
+          end
+        end
+
+        context 'when command is not found' do
+          let(:where_command) { "type -P unknown" }
+          let(:result) { '' }
+
+          it 'return empty string if command is not found' do
+            response = instance.which('unknown')
+
+            expect(response).to eq(result)
+          end
         end
       end
 
-      context 'when command is not found' do
-        let(:where_command) { "which unknown" }
-        let(:result) { '' }
+      context 'when which works' do
+        before do
+          expect(instance).to receive(:execute)
+            .with('type -P true', :accept_all_exit_codes => true).and_return('').once
 
-        it 'return empty string if command is not found' do
-          response = instance.which('unknown')
+          expect(instance).to receive(:execute)
+            .with('which true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
-          expect(response).to eq(result)
+          allow(instance).to receive(:execute)
+                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+        end
+
+        context 'when only the environment variable PATH is used' do
+          let(:where_command) { "which ruby" }
+          let(:result) { "/usr/bin/ruby.exe" }
+
+          it 'returns the correct path' do
+            response = instance.which('ruby')
+
+            expect(response).to eq(result)
+          end
+        end
+
+        context 'when command is not found' do
+          let(:where_command) { "which unknown" }
+          let(:result) { '' }
+
+          it 'return empty string if command is not found' do
+            response = instance.which('unknown')
+
+            expect(response).to eq(result)
+          end
+        end
+      end
+
+      context 'when neither works' do
+        before do
+          expect(instance).to receive(:execute)
+            .with('type -P true', :accept_all_exit_codes => true).and_return('').once
+
+          expect(instance).to receive(:execute)
+            .with('which true', :accept_all_exit_codes => true).and_return('').once
+        end
+
+        context 'when only the environment variable PATH is used' do
+          it 'fails correctly' do
+            expect{instance.which('ruby')}.to raise_error(/suitable/)
+          end
         end
       end
     end
