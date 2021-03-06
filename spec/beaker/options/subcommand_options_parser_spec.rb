@@ -4,8 +4,9 @@ module Beaker
   module Options
     describe '#parse_subcommand_options' do
       let(:home_options_file_path) {ENV['HOME']+'/.beaker/subcommand_options.yaml'}
-      let( :parser ) {Beaker::Options::SubcommandOptionsParser.parse_subcommand_options(argv, options_file)}
-      let( :file_parser ){Beaker::Options::SubcommandOptionsParser.parse_options_file({})}
+      let(:parser_mod) { Beaker::Options::SubcommandOptionsParser }
+      let( :parser ) {parser_mod.parse_subcommand_options(argv, options_file)}
+      let( :file_parser ){parser_mod.parse_options_file({})}
       let( :argv ) {[]}
       let( :options_file ) {""}
 
@@ -26,14 +27,14 @@ module Beaker
         let( :argv ) {['provision']}
         let(:options_file) {Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS}
         it 'calls parse_options_file with subcommand options file when home_dir is false' do
-          allow(parser).to receive(:execute_subcommand?).with('provision').and_return true
-          allow(parser).to receive(:parse_options_file).with(Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
+          allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true
+          allow(parser_mod).to receive(:parse_options_file).with(Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
         end
 
         let( :options_file ) {home_options_file_path}
         it 'calls parse_options_file with home directory options file when home_dir is true' do
-          allow(parser).to receive(:execute_subcommand?).with('provision').and_return true
-          allow(parser).to receive(:parse_options_file).with(home_options_file_path)
+          allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true
+          allow(parser_mod).to receive(:parse_options_file).with(home_options_file_path)
         end
 
         it 'checks for file existence and loads the YAML file' do
@@ -49,7 +50,6 @@ module Beaker
           expect(parser).to be_kind_of(OptionsHash)
           expect(parser).to be_empty
         end
-
       end
     end
   end

@@ -456,9 +456,19 @@ module Unix::Exec
   #@example
   #  host.which('ruby')
   def which(command)
-    which_command = "which #{command}"
+    unless @which_command
+      if execute('type -P true', :accept_all_exit_codes => true).empty?
+        if execute('which true', :accept_all_exit_codes => true).empty?
+          raise ArgumentError, "Could not find suitable 'which' command"
+        else
+          @which_command = 'which'
+        end
+      else
+        @which_command = 'type -P'
+      end
+    end
 
-    result = execute(which_command, :accept_all_exit_codes => true)
+    result = execute("#{@which_command} #{command}", :accept_all_exit_codes => true)
     return '' if result.empty?
 
     result
