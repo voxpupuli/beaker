@@ -20,8 +20,6 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/voxpupuli/beaker/compare/4.28.1...master)
-
 # [4.28.1](https://github.com/voxpupuli/beaker/compare/4.28.0...4.28.1) - 03-10-2021
 
 ### Fixed
