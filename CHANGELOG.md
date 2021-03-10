@@ -22,7 +22,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 # [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.1...master)
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.0...4.28.1) - 03-10-2021
+# [4.28.1](https://github.com/puppetlabs/beaker/compare/4.28.0...4.28.1) - 03-10-2021
 
 ### Fixed
 
