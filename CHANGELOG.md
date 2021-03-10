@@ -20,7 +20,16 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.0...master)
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.1...master)
+
+# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.0...4.28.1) - 03-10-2021
+
+### Fixed
+
+- Updated the ssh_preference example
+- Fixed various spec tests
+- Updated the `which` command to try `type -P` before falling back to `which`
+  for systems that may not have `which` installed
 
 # [4.28.0](https://github.com/puppetlabs/beaker/compare/4.27.1...4.28.0) - 12-21-2020
 
