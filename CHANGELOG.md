@@ -20,9 +20,9 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
-# [Unreleased](https://github.com/puppetlabs/beaker/compare/4.28.1...master)
+# [Unreleased](https://github.com/voxpupuli/beaker/compare/4.28.1...master)
 
-# [4.28.1](https://github.com/puppetlabs/beaker/compare/4.28.0...4.28.1) - 03-10-2021
+# [4.28.1](https://github.com/voxpupuli/beaker/compare/4.28.0...4.28.1) - 03-10-2021
 
 ### Fixed
 
@@ -31,7 +31,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Updated the `which` command to try `type -P` before falling back to `which`
   for systems that may not have `which` installed
 
-# [4.28.0](https://github.com/puppetlabs/beaker/compare/4.27.1...4.28.0) - 12-21-2020
+# [4.28.0](https://github.com/voxpupuli/beaker/compare/4.27.1...4.28.0) - 12-21-2020
 
 ### Changed
 
@@ -43,7 +43,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Fix License text and SPDX code ([#1681](https://github.com/voxpupuli/beaker/pull/1678))
 
-# [4.27.1](https://github.com/puppetlabs/beaker/compare/4.27.0...4.27.1) - 09-29-2020
+# [4.27.1](https://github.com/voxpupuli/beaker/compare/4.27.0...4.27.1) - 09-29-2020
 
 ### Changed
 
@@ -56,7 +56,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed time check logic during reboot
 - Wrap paths around "" on pswindows
 
-# [4.27.0](https://github.com/puppetlabs/beaker/compare/4.26.0...4.27.0) - 07-24-2020
+# [4.27.0](https://github.com/voxpupuli/beaker/compare/4.26.0...4.27.0) - 07-24-2020
 
 ### Changed
 
@@ -66,7 +66,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
   repo to Vox Pupuli
 
 
-# [4.26.0](https://github.com/puppetlabs/beaker/compare/4.25.0...4.26.0)
+# [4.26.0](https://github.com/voxpupuli/beaker/compare/4.25.0...4.26.0)
 
 ### Changed
 
@@ -76,41 +76,41 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Removed deprecated use of `paranoid` flag with Net::SSH. #1655
 
-# [4.25.0](https://github.com/puppetlabs/beaker/compare/4.24.0...4.25.0)
+# [4.25.0](https://github.com/voxpupuli/beaker/compare/4.24.0...4.25.0)
 
 ### Added
 
-- Execution of Beaker directly through ruby on localhost #1637 ([#1637](https://github.com/puppetlabs/beaker/pull/1637))
+- Execution of Beaker directly through ruby on localhost #1637 ([#1637](https://github.com/voxpupuli/beaker/pull/1637))
 
 ### Fixed
 
-- Reliability improvements to the `Host#reboot` method ([#1656](https://github.com/puppetlabs/beaker/pull/1656)) ([#1659](https://github.com/puppetlabs/beaker/pull/1659))
+- Reliability improvements to the `Host#reboot` method ([#1656](https://github.com/voxpupuli/beaker/pull/1656)) ([#1659](https://github.com/voxpupuli/beaker/pull/1659))
 
-# [4.24.0](https://github.com/puppetlabs/beaker/compare/4.23.0...4.24.0) - 2020-06-05
+# [4.24.0](https://github.com/voxpupuli/beaker/compare/4.23.0...4.24.0) - 2020-06-05
 
 ### Added
 
-- Host method which ([#1651](https://github.com/puppetlabs/beaker/pull/1651))
+- Host method which ([#1651](https://github.com/voxpupuli/beaker/pull/1651))
 
 ### Fixed
 
-- Fixed implementation for cat and file_exists? host methods for PSWindows ([#1654](https://github.com/puppetlabs/beaker/pull/1654))
-- Fixed implementation for mkdir_p host method for PSWindows ([#1657](https://github.com/puppetlabs/beaker/pull/1657))
+- Fixed implementation for cat and file_exists? host methods for PSWindows ([#1654](https://github.com/voxpupuli/beaker/pull/1654))
+- Fixed implementation for mkdir_p host method for PSWindows ([#1657](https://github.com/voxpupuli/beaker/pull/1657))
 
-# [4.23.2](https://github.com/puppetlabs/beaker/compare/4.23.1...4.23.2)
+# [4.23.2](https://github.com/voxpupuli/beaker/compare/4.23.1...4.23.2)
 
 ### Fixed
 
 - Fixed Beaker's behavior when the `strict_host_key_checking` option is
   provided in the SSH config and Net-SSH > 5 is specified. (#1652)
 
-# [4.23.1](https://github.com/puppetlabs/beaker/compare/4.23.0...4.23.1)
+# [4.23.1](https://github.com/voxpupuli/beaker/compare/4.23.0...4.23.1)
 
 ### Changed/Removed
 
 - Reversed the quoting changes on Unix from #1644 in favor of only quoting on Windows. (#1650)
 
-# [4.23.0](https://github.com/puppetlabs/beaker/compare/4.22.1...4.23.0)
+# [4.23.0](https://github.com/voxpupuli/beaker/compare/4.22.1...4.23.0)
 
 ### Added
 
@@ -127,137 +127,137 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Use Base64 UTF-16LE encoding for commands (#1626)
 - Fix `tmpdir` method for Powershell on Windows (#1645)
 
-# [4.22.1](https://github.com/puppetlabs/beaker/compare/4.22.0...4.22.1)
+# [4.22.1](https://github.com/voxpupuli/beaker/compare/4.22.0...4.22.1)
 
 ### Fixed
 
-- Removed single quotes around paths for file operation commands on `Host` https://github.com/puppetlabs/beaker/pull/1642
+- Removed single quotes around paths for file operation commands on `Host` https://github.com/voxpupuli/beaker/pull/1642
 
-# [4.22.0](https://github.com/puppetlabs/beaker/compare/4.21.0...4.22.0) - 2020-05-08
+# [4.22.0](https://github.com/voxpupuli/beaker/compare/4.21.0...4.22.0) - 2020-05-08
 
 ### Added
 
-- Host methods chmod and modified_at. ([#1638](https://github.com/puppetlabs/beaker/pull/1638))
+- Host methods chmod and modified_at. ([#1638](https://github.com/voxpupuli/beaker/pull/1638))
 
 ### Removed
 
-- Support for EL-5. ([#1639](https://github.com/puppetlabs/beaker/pull/1639)) ([#1640](https://github.com/puppetlabs/beaker/pull/1640))
+- Support for EL-5. ([#1639](https://github.com/voxpupuli/beaker/pull/1639)) ([#1640](https://github.com/voxpupuli/beaker/pull/1640))
 
-# [4.21.0](https://github.com/puppetlabs/beaker/compare/4.20.0...4.21.0) - 2020-03-31
-
-### Added
-
-- Empty file `/etc/environment` while preparing ssh environment on Ubuntu 20.04 to keep the current behavior and consider all variables from `~/.ssh/environment`. ([#1635](https://github.com/puppetlabs/beaker/pull/1635))
-
-# [4.20.0](https://github.com/puppetlabs/beaker/compare/4.19.0...4.20.0) - 2020-03-19
+# [4.21.0](https://github.com/voxpupuli/beaker/compare/4.20.0...4.21.0) - 2020-03-31
 
 ### Added
 
-- Vagrant RSync/SSH settings will now be picked up if set via beaker-vagrant ([#1634](https://github.com/puppetlabs/beaker/pull/1634) and [beaker-vagrant#28](https://github.com/puppetlabs/beaker-vagrant/pull/28))
+- Empty file `/etc/environment` while preparing ssh environment on Ubuntu 20.04 to keep the current behavior and consider all variables from `~/.ssh/environment`. ([#1635](https://github.com/voxpupuli/beaker/pull/1635))
 
-# [4.19.0](https://github.com/puppetlabs/beaker/compare/4.18.0...4.19.0) - 2020-03-13
+# [4.20.0](https://github.com/voxpupuli/beaker/compare/4.19.0...4.20.0) - 2020-03-19
 
 ### Added
 
-- `apt-transport-https` package will now be installed on Debian-based systems as part of the prebuilt process. ([#1631](https://github.com/puppetlabs/beaker/pull/1631))
-- Ubuntu 19.10 and 20.04 code name handling. ([#1632](https://github.com/puppetlabs/beaker/pull/1632))
+- Vagrant RSync/SSH settings will now be picked up if set via beaker-vagrant ([#1634](https://github.com/voxpupuli/beaker/pull/1634) and [beaker-vagrant#28](https://github.com/voxpupuli/beaker-vagrant/pull/28))
+
+# [4.19.0](https://github.com/voxpupuli/beaker/compare/4.18.0...4.19.0) - 2020-03-13
+
+### Added
+
+- `apt-transport-https` package will now be installed on Debian-based systems as part of the prebuilt process. ([#1631](https://github.com/voxpupuli/beaker/pull/1631))
+- Ubuntu 19.10 and 20.04 code name handling. ([#1632](https://github.com/voxpupuli/beaker/pull/1632))
 
 ### Changed
 
-- The `wait_time`, `max_connection_tries`, and `uptime_retries` parameters have been added to `Host::Unix::Exec.reboot`. This allows for more fine-grained control over how the reboot is handled. ([#1625](https://github.com/puppetlabs/beaker/pull/1625))
+- The `wait_time`, `max_connection_tries`, and `uptime_retries` parameters have been added to `Host::Unix::Exec.reboot`. This allows for more fine-grained control over how the reboot is handled. ([#1625](https://github.com/voxpupuli/beaker/pull/1625))
 
 ### Fixed
 
-- In `hosts.yml`, `packaging_platform` will now default to `platform` if unspecified. This fixed a bug where beaker would fail unless you specified both values in your config, even if both values were identical. ([#1628](https://github.com/puppetlabs/beaker/pull/1628))
-- `version_is_less` will now correctly handle builds and RCs when used in version numbers. ([#1630](https://github.com/puppetlabs/beaker/pull/1630))
+- In `hosts.yml`, `packaging_platform` will now default to `platform` if unspecified. This fixed a bug where beaker would fail unless you specified both values in your config, even if both values were identical. ([#1628](https://github.com/voxpupuli/beaker/pull/1628))
+- `version_is_less` will now correctly handle builds and RCs when used in version numbers. ([#1630](https://github.com/voxpupuli/beaker/pull/1630))
 
 ### Security
 - Update `rake` to `~> 12.0`, which currently resolves to `12.3.3` to remediate [CVE-2020-8130](https://nvd.nist.gov/vuln/detail/CVE-2020-8130)
 
-# [4.18.0](https://github.com/puppetlabs/beaker/compare/4.17.0...4.18.0) - 2020-02-26
+# [4.18.0](https://github.com/voxpupuli/beaker/compare/4.17.0...4.18.0) - 2020-02-26
 ### Changed
 - Thor dependency bumped to >=1.0.1 <2.0
 
-# [4.17.0](https://github.com/puppetlabs/beaker/compare/4.16.0...4.17.0) - 2020-02-20
+# [4.17.0](https://github.com/voxpupuli/beaker/compare/4.16.0...4.17.0) - 2020-02-20
 
 ### Added
 
-- Windows support in `host_helpers` ([#1622](https://github.com/puppetlabs/beaker/pull/1622))
-- EL 8 support ([#1623](https://github.com/puppetlabs/beaker/pull/1623))
+- Windows support in `host_helpers` ([#1622](https://github.com/voxpupuli/beaker/pull/1622))
+- EL 8 support ([#1623](https://github.com/voxpupuli/beaker/pull/1623))
 
-# [4.16.0](https://github.com/puppetlabs/beaker/compare/4.15.0...4.16.0) - 2020-02-05
+# [4.16.0](https://github.com/voxpupuli/beaker/compare/4.15.0...4.16.0) - 2020-02-05
 
 ### Added
 
-- release section to README ([#1618](https://github.com/puppetlabs/beaker/pull/1618))
-- false return if `link_exists?` raises an error ([#1613](https://github.com/puppetlabs/beaker/pull/1613))
+- release section to README ([#1618](https://github.com/voxpupuli/beaker/pull/1618))
+- false return if `link_exists?` raises an error ([#1613](https://github.com/voxpupuli/beaker/pull/1613))
 
 ### Fixed
 
-- `host.reboot` uses `uptime` rather than `ping` to check host status ([#1619](https://github.com/puppetlabs/beaker/pull/1619))
+- `host.reboot` uses `uptime` rather than `ping` to check host status ([#1619](https://github.com/voxpupuli/beaker/pull/1619))
 
-# [4.15.0](https://github.com/puppetlabs/beaker/compare/4.14.1...4.15.0) - 2020-01-30
+# [4.15.0](https://github.com/voxpupuli/beaker/compare/4.14.1...4.15.0) - 2020-01-30
 
 ### Added
 
 - macOS 10.15 Catalina support (BKR-1621)
 
-# [4.14.1](https://github.com/puppetlabs/beaker/compare/4.14.0...4.14.1) - 2019-11-18
+# [4.14.1](https://github.com/voxpupuli/beaker/compare/4.14.0...4.14.1) - 2019-11-18
 
 ### Fixed
 
 - `fips_mode?` detection (#1607)
 
-# [4.14.0](https://github.com/puppetlabs/beaker/compare/4.13.1...4.14.0) - 2019-11-12
+# [4.14.0](https://github.com/voxpupuli/beaker/compare/4.13.1...4.14.0) - 2019-11-12
 
 ### Added
 
 - Pre-built steps output stacktraces when aborted (QENG-7466)
 
-# [4.13.1](https://github.com/puppetlabs/beaker/compare/4.13.0...4.13.1) - 2019-10-07
+# [4.13.1](https://github.com/voxpupuli/beaker/compare/4.13.0...4.13.1) - 2019-10-07
 
 ### Fixed
 
 - Use correct platform variant for FIPS repo configs download (BKR-1616)
 
-# [4.13.0](https://github.com/puppetlabs/beaker/compare/4.12.0...4.13.0) - 2019-09-16
+# [4.13.0](https://github.com/voxpupuli/beaker/compare/4.12.0...4.13.0) - 2019-09-16
 
 ### Added
 
 - Host `enable_remote_rsyslog` method (QENG-7466)
 
-# [4.12.0](https://github.com/puppetlabs/beaker/compare/4.11.1...4.12.0) - 2019-08-14
+# [4.12.0](https://github.com/voxpupuli/beaker/compare/4.11.1...4.12.0) - 2019-08-14
 
 ### Added
 
 - redhatfips as a recognized platform (PE-27037)
 
-# [4.11.1](https://github.com/puppetlabs/beaker/compare/4.11.0...4.11.1) - 2019-08-13
+# [4.11.1](https://github.com/voxpupuli/beaker/compare/4.11.0...4.11.1) - 2019-08-13
 
 ### Changed
 
 - `host.down?`'s wait from a fibonacci to a constant wait (BKR-1595)
 
-# [4.11.0](https://github.com/puppetlabs/beaker/compare/4.10.0...4.11.0) - 2019-07-22
+# [4.11.0](https://github.com/voxpupuli/beaker/compare/4.10.0...4.11.0) - 2019-07-22
 
 ### Added
 
 - FIPS detection host method (BKR-1604)
 - PassTest exception catching for standard reporting
 
-# [4.10.0](https://github.com/puppetlabs/beaker/compare/4.9.0...4.10.0) - 2019-07-01
+# [4.10.0](https://github.com/voxpupuli/beaker/compare/4.9.0...4.10.0) - 2019-07-01
 
 ### Added
 
 - Down & Up Checking to Host#reboot (BKR-1595)
 
-# [4.9.0](https://github.com/puppetlabs/beaker/compare/4.8.0...4.9.0) - 2019-06-19
+# [4.9.0](https://github.com/voxpupuli/beaker/compare/4.8.0...4.9.0) - 2019-06-19
 
 ### Changed
 
 - SSH Connection failure backoff shortened (BKR-1599)
 
-# [4.8.0](https://github.com/puppetlabs/beaker/compare/4.7.0...4.8.0) - 2019-04-17
+# [4.8.0](https://github.com/voxpupuli/beaker/compare/4.7.0...4.8.0) - 2019-04-17
 
 ### Added
 
@@ -268,7 +268,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Remove "repos-pe" prefix for repo filenames
 
-# [4.7.0](https://github.com/puppetlabs/beaker/compare/4.6.0...4.7.0) - 2019-04-17
+# [4.7.0](https://github.com/voxpupuli/beaker/compare/4.6.0...4.7.0) - 2019-04-17
 
 ### Added
 
@@ -282,19 +282,19 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Change behavior of ruby versioning to accept job-parameter RUBY\_VER
 - Change subcommand pre-suite to install ruby 2.3.1
 
-# [4.6.0](https://github.com/puppetlabs/beaker/compare/4.5.0...4.6.0) - 2019.03.07
+# [4.6.0](https://github.com/voxpupuli/beaker/compare/4.5.0...4.6.0) - 2019.03.07
 
 ### Added
 
 - Codename for Debian 10 'Buster'
 
-# [4.5.0](https://github.com/puppetlabs/beaker/compare/4.4.0...4.5.0) - 2019.01.23
+# [4.5.0](https://github.com/voxpupuli/beaker/compare/4.4.0...4.5.0) - 2019.01.23
 
 ### Changed
 
 - Do not mirror profile.d on Debian (BKR-1559)
 
-# [4.4.0](https://github.com/puppetlabs/beaker/compare/4.3.0...4.4.0) - 2019.01.09
+# [4.4.0](https://github.com/voxpupuli/beaker/compare/4.3.0...4.4.0) - 2019.01.09
 
 ### Added
 
@@ -306,14 +306,14 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Replace ntpdate with crony on RHEL-8 (BKR-1555)
 
-# [4.3.0](https://github.com/puppetlabs/beaker/compare/4.2.0...4.3.0) - 2018.12.12
+# [4.3.0](https://github.com/voxpupuli/beaker/compare/4.2.0...4.3.0) - 2018.12.12
 
 ### Added
 
 - Use zypper to install RPM packages on SLES (PA-2336)
 - Add only-fails capability to beaker (BKR-1523)
 
-# [4.2.0](https://github.com/puppetlabs/beaker/compare/4.1.0...4.2.0) - 2018.11.28
+# [4.2.0](https://github.com/voxpupuli/beaker/compare/4.1.0...4.2.0) - 2018.11.28
 
 ### Added
 
@@ -330,7 +330,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Recursively remove unpersisted subcommand options (BKR-1549)
 
 
-# [4.1.0](https://github.com/puppetlabs/beaker/compare/4.0.0...4.1.0) - 2018.10.25
+# [4.1.0](https://github.com/voxpupuli/beaker/compare/4.0.0...4.1.0) - 2018.10.25
 
 ### Added
 
@@ -341,7 +341,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Added additional tests for EL-like systems and added 'redhat' support where necessary
 - Test if puppet module is installed in '/' and avoid stripping of path seperator
 
-# [4.0.0](https://github.com/puppetlabs/beaker/compare/3.37.0...4.0.0) - 2018-08-06
+# [4.0.0](https://github.com/voxpupuli/beaker/compare/3.37.0...4.0.0) - 2018-08-06
 
 ### Fixed
 
@@ -367,7 +367,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - `PEDefaults` has been moved to `beaker-pe`
 
-# [3.37.0](https://github.com/puppetlabs/beaker/compare/3.36.0...3.37.0) - 2018-07-11
+# [3.37.0](https://github.com/voxpupuli/beaker/compare/3.36.0...3.37.0) - 2018-07-11
 
 ### Fixed
 
@@ -382,7 +382,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - `beaker-pe` is no longer automagically included. See [the upgrade guide](/docs/how_to/upgrade_from_3_to_4.md}) for more info
 - `beaker-puppet` is no longer required as a dependency
 
-# [3.36.0](https://github.com/puppetlabs/beaker/compare/3.35.0...3.36.0) - 2018-06-18
+# [3.36.0](https://github.com/voxpupuli/beaker/compare/3.35.0...3.36.0) - 2018-06-18
 
 ### Fixed
 
@@ -396,7 +396,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Glossary for project jargon in [`docs/concepts/glossary.md`](docs/concepts/glossary.md)
 - Use AIX 6.1 packages everywhere for puppet6
 
-# [3.35.0](https://github.com/puppetlabs/beaker/compare/3.34.0...3.35.0) - 2018-05-16
+# [3.35.0](https://github.com/voxpupuli/beaker/compare/3.34.0...3.35.0) - 2018-05-16
 
 ### Fixed
 
@@ -407,7 +407,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Added optional ability to use ERB in nodeset YAML files
 
-# [3.34.0](https://github.com/puppetlabs/beaker/compare/3.33.0...3.34.0) - 2018-03-26
+# [3.34.0](https://github.com/voxpupuli/beaker/compare/3.33.0...3.34.0) - 2018-03-26
 
 ### Fixed
 
@@ -417,13 +417,13 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Codename for Ubuntu 18.04 'Bionic'
 
-# [3.33.0](https://github.com/puppetlabs/beaker/compare/3.32.0...3.33.0) - 2018-03-07
+# [3.33.0](https://github.com/voxpupuli/beaker/compare/3.32.0...3.33.0) - 2018-03-07
 
 ### Changed
 
 - Use relative paths for beaker exec
 
-# [3.32.0](https://github.com/puppetlabs/beaker/compare/3.31.0...3.32.0) - 2018-02-22
+# [3.32.0](https://github.com/voxpupuli/beaker/compare/3.31.0...3.32.0) - 2018-02-22
 
 ### Changed
 
@@ -435,7 +435,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Added missing beaker options for subcommand passthorugh
 
-# [3.31.0](https://github.com/puppetlabs/beaker/compare/3.30.0...3.31.0) - 2018-01-22
+# [3.31.0](https://github.com/voxpupuli/beaker/compare/3.30.0...3.31.0) - 2018-01-22
 
 ### Changed
 
@@ -445,7 +445,7 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Add macOS 10.13 support
 
-# [3.30.0](https://github.com/puppetlabs/beaker/compare/3.29.0...3.30.0) - 2018-01-10
+# [3.30.0](https://github.com/voxpupuli/beaker/compare/3.29.0...3.30.0) - 2018-01-10
 
 ### Changed
 
@@ -459,30 +459,30 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 
 - Load project options from .beaker.yml
 
-# [3.29.0](https://github.com/puppetlabs/beaker/compare/3.28.0...3.29.0) - 2017-11-16
+# [3.29.0](https://github.com/voxpupuli/beaker/compare/3.28.0...3.29.0) - 2017-11-16
 
 ### Added
 
 - Adding default to read fog credentials
 
-# [3.28.0](https://github.com/puppetlabs/beaker/compare/3.27.0...3.28.0) - 2017-11-01
+# [3.28.0](https://github.com/voxpupuli/beaker/compare/3.27.0...3.28.0) - 2017-11-01
 
 ### Fixed
 
 - corruption of `opts[:ignore]` when using `rsync`
 
-# [3.27.0](https://github.com/puppetlabs/beaker/compare/3.26.0...3.27.0) - 2017-10-19
+# [3.27.0](https://github.com/voxpupuli/beaker/compare/3.26.0...3.27.0) - 2017-10-19
 
 ### Added
 
 - support amazon as a platform
 - add codenames for MacOS 10.13 and Ubuntu Artful
 
-# [3.26.0](https://github.com/puppetlabs/beaker/compare/3.25.0...3.26.0) - 2017-10-05
+# [3.26.0](https://github.com/voxpupuli/beaker/compare/3.25.0...3.26.0) - 2017-10-05
 
 ### Added
 
 - concept of `manual_test` and `manual_step`
 
-# [3.25.0](https://github.com/puppetlabs/beaker/compare/3.24.0...3.25.0) - 2017-09-26
+# [3.25.0](https://github.com/voxpupuli/beaker/compare/3.24.0...3.25.0) - 2017-09-26
 
