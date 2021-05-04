@@ -90,7 +90,7 @@ module Unix::File
     case self['platform']
     when /fedora|el-|redhat|centos/
       '/etc/yum.repos.d/'
-    when /sles/
+    when /opensuse|sles/
       '/etc/zypp/repos.d/'
     when /debian|ubuntu|cumulus|huaweios/
       '/etc/apt/sources.list.d'
@@ -113,7 +113,7 @@ module Unix::File
     repo_filename = "pl-%s-%s-" % [ package_name, build_version ]
 
     case variant
-    when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|sles/
+    when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
       variant = 'el' if ['centos', 'redhat'].include?(variant)
 
       variant = 'redhatfips' if self['packaging_platform'] =~ /redhatfips/
@@ -154,7 +154,7 @@ module Unix::File
   # @return [String] Type of repo (rpm|deb)
   def repo_type
     case self['platform']
-    when /fedora|el-|redhat|centos|sles/
+    when /fedora|el-|redhat|centos|opensuse|sles/
       'rpm'
     when /debian|ubuntu|cumulus|huaweios/
       'deb'

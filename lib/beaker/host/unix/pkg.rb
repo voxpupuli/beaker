@@ -28,7 +28,7 @@ module Unix::Pkg
       when /sles-10/
         result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
         result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
-      when /sles-/
+      when /opensuse|sles-/
         if !self[:sles_rpmkeys_nightly_pl_imported]
           # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
           # time. It's just to make sure that we only do the key import once, &
@@ -85,7 +85,7 @@ module Unix::Pkg
 
   def install_package(name, cmdline_args = '', version = nil, opts = {})
     case self['platform']
-      when /sles-/
+      when /opensuse|sles-/
         execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
@@ -177,7 +177,7 @@ module Unix::Pkg
 
   def uninstall_package(name, cmdline_args = '', opts = {})
     case self['platform']
-      when /sles-/
+      when /opensuse|sles-/
         execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
@@ -207,7 +207,7 @@ module Unix::Pkg
   #                               the package manager
   def upgrade_package(name, cmdline_args = '', opts = {})
     case self['platform']
-      when /sles-/
+      when /opensuse|sles-/
         execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
       when /el-4/
         @logger.debug("Package upgrade is not supported on rhel4")
@@ -302,7 +302,7 @@ module Unix::Pkg
         deploy_yum_repo(path, name, version)
       when /ubuntu|debian|cumulus|huaweios/
         deploy_apt_repo(path, name, version)
-      when /sles/
+      when /opensuse|sles/
         deploy_zyp_repo(path, name, version)
       else
         # solaris, windows
@@ -424,12 +424,15 @@ module Unix::Pkg
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
 
     variant, version, arch, codename = self['platform'].to_array
+
     case variant
     when /^(solaris)$/
       release_path_end, release_file = solaris_puppet_agent_dev_package_info(
         puppet_collection, puppet_agent_version, opts )
-    when /^(sles|aix|el|centos|oracle|redhat|scientific)$/
+    when /^(opensuse|sles|aix|el|centos|oracle|redhat|scientific)$/
       variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
+      variant = 'sles' if variant == 'opensuse'
+
       if variant == 'aix'
         arch = 'ppc' if arch == 'power'
         version_x, version_y = /^(\d+)\.(\d+)/.match(puppet_agent_version).captures.map(&:to_i)
@@ -464,7 +467,7 @@ module Unix::Pkg
 
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos|redhat|sles)$/
+    when /^(fedora|el|centos|redhat|opensuse|sles)$/
       variant = ((['centos', 'redhat'].include?(variant)) ? 'el' : variant)
       release_file = "/repos/#{variant}/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*.rpm"
       download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
@@ -526,7 +529,7 @@ module Unix::Pkg
       command_name = 'yum'
       command_name = 'dnf' if variant == 'fedora' && version > 21
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
-    when /^(sles)$/
+    when /^(opensuse|sles)$/
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
     when /^(debian|ubuntu|cumulus)$/
       execute("dpkg -i --force-all #{onhost_package_file}")
@@ -552,7 +555,7 @@ module Unix::Pkg
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
     variant, version, arch, codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos|redhat|sles|debian|ubuntu|cumulus)$/
+    when /^(fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball

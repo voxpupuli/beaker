@@ -73,6 +73,13 @@ module Beaker
           instance.deploy_package_repo(path,name,version)
         end
 
+        it 'calls #deploy_zyp_repo for opensuse systems' do
+          @opts = {'platform' => 'opensuse-is-me'}
+          expect(instance).to receive(:deploy_zyp_repo)
+          allow(File).to receive(:exists?).with(path).and_return(true)
+          instance.deploy_package_repo(path,name,version)
+        end
+
         it 'raises an error for unsupported systems' do
           @opts = {'platform' => 'windows-is-me'}
           allow(File).to receive(:exists?).with(path).and_return(true)
@@ -96,6 +103,14 @@ module Beaker
     context "check_for_package" do
       it "checks correctly on sles" do
         @opts = {'platform' => 'sles-is-me'}
+        pkg = 'sles_package'
+        expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
+        expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
+        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance.check_for_package(pkg) ).to be === true
+      end
+      it "checks correctly on opensuse" do
+        @opts = {'platform' => 'opensuse-is-me'}
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
@@ -297,6 +312,7 @@ module Beaker
         platforms = { 'solaris-10-x86_64' => ["solaris/10/#{puppet_collection}", "puppet-agent-#{puppet_agent_version}-1.i386.pkg.gz"],
                       'solaris-11-x86_64' => ["solaris/11/#{puppet_collection}", "puppet-agent@#{puppet_agent_version},5.11-1.i386.p5p"],
                       'sles-11-x86_64' => ["sles/11/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.sles11.x86_64.rpm"],
+                      'opensuse-15-x86_64' => ["sles/15/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.sles15.x86_64.rpm"],
                       'aix-6.1-power' => ["aix/6.1/#{puppet_collection}/ppc", "puppet-agent-#{puppet_agent_version}-1.aix6.1.ppc.rpm"],
                       'el-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
                       'centos-7-x86_64' => ["el/7/#{puppet_collection}/x86_64", "puppet-agent-#{puppet_agent_version}-1.el7.x86_64.rpm"],
@@ -599,6 +615,14 @@ module Beaker
 
       it 'untars the file given' do
         @platform = 'sles'
+        expect( instance ).to receive( :execute ).with(
+          /^tar .* #{tar_file} .* #{base_dir}$/
+        )
+        instance.uncompress_local_tarball( tar_file, base_dir, download_file )
+      end
+
+      it 'untars the file given' do
+        @platform = 'opensuse'
         expect( instance ).to receive( :execute ).with(
           /^tar .* #{tar_file} .* #{base_dir}$/
         )

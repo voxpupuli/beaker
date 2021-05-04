@@ -5,7 +5,7 @@ def get_host_pkg(host)
   case
     when host['platform'] =~ /sles-10/
       Beaker::HostPrebuiltSteps::SLES10_PACKAGES
-    when host['platform'] =~ /sles-/
+    when host['platform'] =~ /opensuse|sles-/
       Beaker::HostPrebuiltSteps::SLES_PACKAGES
     when host['platform'] =~ /debian/
       Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
@@ -53,7 +53,7 @@ hosts.each do |host|
   next if host['platform'] =~ /windows/
   package = 'zsh'
   package = 'CSWzsh' if host['platform'] =~ /solaris-10/
-  package = 'git' if host['platform'] =~ /sles/
+  package = 'git' if host['platform'] =~ /opensuse|sles/
 
   if host['platform'] =~ /solaris-11/
     logger.debug("#{package} should be uninstalled on #{host}")

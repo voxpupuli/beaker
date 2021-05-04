@@ -54,7 +54,7 @@ module Beaker
           case
           when host['platform'] =~ /el-8/
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
-          when host['platform'] =~ /sles-/
+          when host['platform'] =~ /opensuse-|sles-/
             ntp_command = "sntp #{ntp_server}"
           when host['platform'] =~ /cisco_nexus/
             ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
@@ -105,7 +105,7 @@ module Beaker
           check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
         when host['platform'] =~ /sles-10/
           check_and_install_packages_if_needed(host, SLES10_PACKAGES)
-        when host['platform'] =~ /sles-/
+        when host['platform'] =~ /opensuse|sles-/
           check_and_install_packages_if_needed(host, SLES_PACKAGES)
         when host['platform'] =~ /debian/
           check_and_install_packages_if_needed(host, DEBIAN_PACKAGES)
@@ -126,7 +126,7 @@ module Beaker
           check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
         when host['platform'] =~ /archlinux/
           check_and_install_packages_if_needed(host, ARCHLINUX_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|sles-|osx-|cumulus|f5-|netscaler|cisco_/
+        when host['platform'] !~ /debian|aix|solaris|windows|opensuse-|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end
       end

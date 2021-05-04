@@ -70,6 +70,7 @@ The platform's format is `/^OSFAMILY-VERSION-ARCH.*$/` where `OSFAMILY` is one o
 * oracle
 * scientific
 * sles
+* opensuse
 * ubuntu
 * windows
 * solaris

@@ -76,6 +76,11 @@ module Beaker
         expect( instance.package_config_dir ).to be === '/etc/zypp/repos.d/'
       end
 
+      it 'returns correctly for opensuse-based platforms' do
+        @platform = 'opensuse-15-x86_64'
+        expect( instance.package_config_dir ).to be === '/etc/zypp/repos.d/'
+      end
+
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
         expect {
@@ -100,6 +105,13 @@ module Beaker
         allow( instance ).to receive( :is_pe? ) { false }
         filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
         expect( filename ).to match( /sion7\-sles\-/ )
+      end
+
+      it 'sets the opensuse portion correctly for opensuse platforms' do
+        @platform = 'opensuse-15-x86_64'
+        allow( instance ).to receive( :is_pe? ) { false }
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
+        expect( filename ).to match( /sion7\-opensuse\-/ )
       end
 
       it 'builds the filename correctly for el-based platforms' do

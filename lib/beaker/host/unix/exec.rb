@@ -186,8 +186,8 @@ module Unix::Exec
   # This is for sles based hosts.
   # @param [String] env_file The ssh environment file to read from
   def mirror_env_to_profile_d env_file
-    if self[:platform] =~ /sles-/
-      @logger.debug("mirroring environment to /etc/profile.d on sles platform host")
+    if self[:platform] =~ /opensuse|sles-/
+      @logger.debug("mirroring environment to /etc/profile.d on opensuse/sles platform host")
       cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
       shell_env = ''
       cur_env.each_line do |env_line|
@@ -282,7 +282,7 @@ module Unix::Exec
       exec(Beaker::Command.new("systemctl restart sshd.service"))
     when /el-|centos|fedora|redhat|oracle|scientific|eos/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
-    when /sles/
+    when /opensuse|sles/
       exec(Beaker::Command.new("/usr/sbin/rcsshd restart"))
     when /solaris/
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
@@ -313,7 +313,7 @@ module Unix::Exec
       directory = tmpdir()
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
-    when /sles/
+    when /opensuse|sles/
       directory = tmpdir()
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
