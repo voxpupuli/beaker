@@ -67,6 +67,11 @@ module Beaker
 
     context 'with_version_codename' do
 
+      it "can convert debian-11-xxx to debian-bullseye-xxx" do
+        @name = 'debian-11-xxx'
+        expect( platform.with_version_codename ).to be === 'debian-bullseye-xxx'
+      end
+
       it "can convert debian-7-xxx to debian-wheezy-xxx" do
         @name = 'debian-7-xxx'
         expect( platform.with_version_codename ).to be === 'debian-wheezy-xxx'
