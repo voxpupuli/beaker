@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'pry-byebug', '~> 3.9'
   # pry-byebug can have issues with native readline libs so add rb-readline
   s.add_runtime_dependency 'rb-readline', '~> 0.5.3'
+  s.add_runtime_dependency 'rexml'
 
   s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'net-ssh', '>= 5.0'
