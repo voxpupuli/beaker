@@ -12,6 +12,7 @@ describe Beaker do
   let( :unix_only_pkgs ) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
   let( :sles_only_pkgs ) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
   let( :rhel8_packages ) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
+  let( :fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let( :platform )       { @platform || 'unix' }
   let( :ip )             { "ip.address.0.0" }
   let( :stdout)          { @stdout || ip }
@@ -152,6 +153,15 @@ describe Beaker do
 
     it "can sync time on RHEL8 hosts" do
       hosts = make_hosts(:platform => 'el-8-x86_x64')
+      expect(Beaker::Command).to receive(:new)
+        .with("chronyc add server #{ntpserver} prefer trust;chronyc makestep;chronyc burst 1/2")
+        .exactly(3)
+        .times
+      subject.timesync(hosts, options)
+    end
+
+    it "can sync time on Fedora hosts" do
+      hosts = make_hosts(:platform => 'fedora-32-x86_64')
       expect(Beaker::Command).to receive(:new)
         .with("chronyc add server #{ntpserver} prefer trust;chronyc makestep;chronyc burst 1/2")
         .exactly(3)
@@ -442,6 +452,19 @@ describe Beaker do
 
       hosts.each do |host|
         rhel8_packages.each do |pkg|
+          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+          expect(host).to receive(:install_package).with(pkg).once
+        end
+      end
+
+      subject.validate_host(hosts, options)
+    end
+
+    it "can validate Fedora hosts" do
+      @platform = 'fedora-32-x86_64'
+
+      hosts.each do |host|
+        fedora_packages.each do |pkg|
           expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
           expect(host).to receive(:install_package).with(pkg).once
         end
