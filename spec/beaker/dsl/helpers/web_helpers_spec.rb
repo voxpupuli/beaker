@@ -89,6 +89,7 @@ describe ClassMixedWithDSLHelpers do
   describe "#fetch_http_dir" do
     let( :logger) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
     let( :result) { double(:each_line => []) }
+    let( :status) { double('Process::Status', success?: true) }
 
     before do
       fetch_allows
@@ -97,8 +98,7 @@ describe ClassMixedWithDSLHelpers do
     describe "given valid arguments" do
 
       it "returns basename of first argument concatenated to second." do
-        expect(subject).to receive(:`).with(/^wget.*/).ordered { result }
-        expect($?).to receive(:to_i).and_return(0)
+        expect(Open3).to receive(:capture2e).with(/^wget.*/).ordered { result }.and_return(['', status])
         result = subject.fetch_http_dir "#{url}/beep", destdir
         expect(result).to eq("#{destdir}/beep")
       end

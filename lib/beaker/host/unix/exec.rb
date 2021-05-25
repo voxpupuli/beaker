@@ -138,7 +138,9 @@ module Unix::Exec
     if self['platform'].include?('solaris') || self['platform'].include?('osx')
       execute("ifconfig -a inet| awk '/broadcast/ {print $2}' | cut -d/ -f1 | head -1").strip
     else
-      execute("ip a | awk '/global/{print$2}' | cut -d/ -f1 | #{self['hypervisor'] == 'vagrant' ? 'tail' : 'head'} -1").strip
+
+      pipe_cmd = "#{self['hypervisor']}".include?('vagrant') ? 'tail' : 'head'
+      execute("ip a | awk '/global/{print$2}' | cut -d/ -f1 | #{pipe_cmd} -1").strip
     end
   end
 

@@ -107,12 +107,11 @@ module Beaker
           logger.notify "  and saving to #{dst}"
           logger.notify "  using command: #{wget_command}"
 
-          #in ruby 1.9+ we can upgrade this to popen3 to gain access to the subprocess pid
-          result = `#{wget_command} 2>&1`
-          result.each_line do |line|
+          stdout_and_stderr_str, status = Open3.capture2e(wget_command)
+          stdout_and_stderr_str.each_line do |line|
             logger.debug(line)
           end
-          if $?.to_i != 0
+          unless status.success?
             raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
           end
           dst

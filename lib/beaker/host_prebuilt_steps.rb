@@ -13,6 +13,7 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     RHEL8_PACKAGES = ['curl', 'chrony']
+    FEDORA_PACKAGES = ['curl', 'chrony']
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
@@ -52,7 +53,7 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-          when host['platform'] =~ /el-8/
+          when host['platform'] =~ /el-8|fedora/
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           when host['platform'] =~ /opensuse-|sles-/
             ntp_command = "sntp #{ntp_server}"
@@ -126,6 +127,8 @@ module Beaker
           check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
         when host['platform'] =~ /archlinux/
           check_and_install_packages_if_needed(host, ARCHLINUX_PACKAGES)
+        when host['platform'] =~ /fedora/
+          check_and_install_packages_if_needed(host, FEDORA_PACKAGES)
         when host['platform'] !~ /debian|aix|solaris|windows|opensuse-|sles-|osx-|cumulus|f5-|netscaler|cisco_/
           check_and_install_packages_if_needed(host, UNIX_PACKAGES)
         end

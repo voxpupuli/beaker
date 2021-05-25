@@ -20,6 +20,12 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
+# [4.29.0](https://github.com/voxpupuli/beaker/compare/4.28.1...4.29.0) - 19-05-2021
+
+### Added
+
+- Ruby 3.0 support
+
 # [4.28.1](https://github.com/voxpupuli/beaker/compare/4.28.0...4.28.1) - 03-10-2021
 
 ### Fixed
