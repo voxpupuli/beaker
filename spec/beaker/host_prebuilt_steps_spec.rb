@@ -447,6 +447,21 @@ describe Beaker do
 
     end
 
+    it "can validate opensuse hosts" do
+      @platform = 'opensuse-15-x86_x64'
+
+      hosts.each do |host|
+        sles_only_pkgs.each do |pkg|
+          expect( host ).to receive( :check_for_package).with( pkg ).once.and_return( false )
+          expect( host ).to receive( :install_package ).with( pkg ).once
+        end
+
+      end
+
+      subject.validate_host(hosts, options)
+
+    end
+
     it "can validate RHEL8 hosts" do
       @platform = 'el-8-x86_x64'
 

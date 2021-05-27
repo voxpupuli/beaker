@@ -170,6 +170,14 @@ module Unix
         expect( release_file ).to be === "puppet-agent-pa_version1-1.sles12.arch.rpm"
       end
 
+      it 'sets up opensuse platforms correctly' do
+        @platform = 'opensuse-15-x86_64'
+        release_path_end, release_file = host.puppet_agent_dev_package_info(
+          'pa_collection', 'pa_version1' )
+        expect( release_path_end ).to be === "sles/15/pa_collection/x86_64"
+        expect( release_file ).to be === "puppet-agent-pa_version1-1.sles15.x86_64.rpm"
+      end
+
       it 'sets the arch correctly on aix-power platforms' do
         @platform = 'aix-6.1-power'
         release_path_end, release_file = host.puppet_agent_dev_package_info(

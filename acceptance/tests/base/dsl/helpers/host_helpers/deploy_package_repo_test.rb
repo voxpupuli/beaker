@@ -97,7 +97,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
     end
   end
 
-  confine_block :to, :platform => /sles/i do
+  confine_block :to, :platform => /opensuse|sles/i do
 
     step "#deploy_package_repo updates zypper repository list on the remote host" do
       Dir.mktmpdir do |local_dir|
@@ -119,7 +119,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
     end
   end
 
-  confine_block :except, :platform => /el-\d|fedora|centos|eos|ubuntu|debian|cumulus|sles/i do
+  confine_block :except, :platform => /el-\d|fedora|centos|eos|ubuntu|debian|cumulus|opensuse|sles/i do
 
     # OS X, windows (cygwin, powershell), solaris, etc.
 

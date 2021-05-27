@@ -44,9 +44,10 @@ module Beaker
       end
 
       it 'creates a new Perf object with multiple hosts, :collect_perf_data = true, SLES' do
-        hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
+        hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options), make_host("myThirdHost", @options) ]
         hosts[0]['platform'] = "centos-6-x86_64"
         hosts[1]['platform'] = "sles-11-x86_64"
+        hosts[2]['platform'] = "opensuse-15-x86_64"
         @my_logger.remove_destination(STDOUT)
         perf = Perf.new( hosts, @options )
         expect( perf ).to be_a_kind_of Perf
