@@ -1,5 +1,13 @@
 # Beaker
 
+[![License](https://img.shields.io/github/license/voxpupuli/beaker.svg)](https://github.com/voxpupuli/beaker/blob/master/LICENSE)
+[![Test](https://github.com/voxpupuli/beaker/actions/workflows/test.yml/badge.svg)](https://github.com/voxpupuli/beaker/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/voxpupuli/beaker/branch/master/graph/badge.svg?token=Mypkl78hvK)](https://codecov.io/gh/voxpupuli/beaker)
+[![Release](https://github.com/voxpupuli/beaker/actions/workflows/release.yml/badge.svg)](https://github.com/voxpupuli/beaker/actions/workflows/release.yml)
+[![RubyGem Version](https://img.shields.io/gem/v/beaker.svg)](https://rubygems.org/gems/beaker)
+[![RubyGem Downloads](https://img.shields.io/gem/dt/beaker.svg)](https://rubygems.org/gems/beaker)
+[![Donated by Puppet Inc](https://img.shields.io/badge/donated%20by-Puppet%20Inc-fb7047.svg)](#transfer-notice)
+
 Beaker is a test harness focused on acceptance testing via interactions between multiple (virtual) machines. It provides platform abstraction between different Systems Under Test (SUTs), and it can also be used as a virtual machine provisioner - setting up machines, running any commands on those machines, and then exiting.
 
 Beaker runs tests written in Ruby, and provides additional Domain-Specific Language (DSL) methods.  This gives you access to all standard Ruby along with acceptance testing specific commands.
@@ -24,10 +32,6 @@ Documentation for Beaker can be found in this repository in
 
 Beaker functionality has been extended through the use of libraries available as gems. See the [complete list](docs/concepts/beaker_libraries.md) for available gems. See the [beaker-template documentation](https://github.com/puppetlabs/beaker-template/blob/master/README.md) for documentation on creating beaker-libraries.
 
-# License
-
-See [LICENSE](LICENSE) file.
-
 # Support & Issues
 
 Please log tickets and issues at our [Beaker Issue Tracker](https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20BKR). In addition there is an active #puppet-dev channel on Freenode.
@@ -42,11 +46,24 @@ If you'd like to contribute improvements to Beaker, please see [CONTRIBUTING](CO
 
 For information on project maintainers, please check out our [CODEOWNERS doc](CODEOWNERS).
 
-# Releasing
+## Transfer Notice
 
-Since the beaker project has always been the central hub for all beaker testing, its release process has been more involved than most beaker-libraries (ie. [beaker-puppet](https://github.com/puppetlabs/beaker-puppet)).
-Historically, the process has been described in [Confluence: Beaker Release Process](https://confluence.puppetlabs.com/display/SRE/Beaker+Release+Process) (apologies, most links in this section are Puppet-internal).
+This plugin was originally authored by [Puppet Inc](http://puppet.com).
+The maintainer preferred that Puppet Community take ownership of the module for future improvement and maintenance.
+Existing pull requests and issues were transferred over, please fork and continue to contribute here.
 
-To release new versions of beaker, please use this [jenkins job](https://jenkins-sre.delivery.puppetlabs.net/view/all/job/qe_beaker-gem_init-multijob_master/). This job lives on internal infrastructure.
+Previously: https://github.com/puppetlabs/beaker
 
-To run the job, click on `Build with Parameters` in the menu on the left. Make sure you verify the checkbox next to `PUBLIC` is checked and enter the appropriate version. The version should adhere to semantic version standards. When in doubt, consult [the maintainers of Beaker](#maintainers) for guidance.
+## License
+
+This gem is licensed under the Apache-2 license.
+
+## Release information
+
+To make a new release, please do:
+* update the version in the gemspec file
+* Install gems with `bundle install --with release --path .vendor`
+* generate the changelog with `bundle exec rake changelog`
+* Check if the new version matches the closed issues/PRs in the changelog
+* Create a PR with it
+* After it got merged, push a tag. GitHub actions will do the actual release to rubygems and GitHub Packages

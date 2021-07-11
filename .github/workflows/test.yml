@@ -4,19 +4,22 @@ on:
   - pull_request
   - push
 
+env:
+  BUNDLE_WITHOUT: release
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        ruby:
-          - "2.4"
-          - "2.5"
-          - "2.6"
-          - "2.7"
-          - "3.0"
-    name: Ruby ${{ matrix.ruby }}
+        include:
+          - ruby: "2.4"
+          - ruby: "2.5"
+          - ruby: "2.6"
+          - ruby: "2.7"
+          - ruby: "3.0"
+            coverage: "yes"
     steps:
       - uses: actions/checkout@v2
       - name: Install Ruby ${{ matrix.ruby }}
@@ -24,7 +27,9 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Build docs
-        run: bundle exec rake yard
+        env:
+          BUNDLE_WITHOUT: release
       - name: Run tests
+        env:
+          COVERAGE: ${{ matrix.coverage }}
         run: bundle exec rake spec

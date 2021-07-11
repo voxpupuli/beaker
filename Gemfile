@@ -1,4 +1,4 @@
-source ENV['GEM_SOURCE'] || "https://rubygems.org"
+source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gemspec
 
@@ -18,4 +18,8 @@ if ENV['BEAKER_PE_PR_REPO_URL']
   author = ENV['BEAKER_PE_PR_AUTHOR']
   ref = ENV['BEAKER_PE_PR_COMMIT']
   gem lib, :git => "git@github.com:#{author}/#{lib}.git", :branch => ref
+end
+
+group :release do
+  gem 'github_changelog_generator', require: false
 end
