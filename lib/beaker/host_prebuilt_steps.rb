@@ -52,7 +52,7 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-          when host['platform'] =~ /el-8/
+          when host['platform'] =~ /el-8|fedora-/
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           when host['platform'] =~ /sles-/
             ntp_command = "sntp #{ntp_server}"
@@ -101,7 +101,7 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
-        when host['platform'] =~ /el-8/
+        when host['platform'] =~ /el-8|fedora-/
           check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
         when host['platform'] =~ /sles-10/
           check_and_install_packages_if_needed(host, SLES10_PACKAGES)
