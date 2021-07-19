@@ -20,6 +20,12 @@ The headers used in [Keep a Changelog](http://keepachangelog.com) are:
 - Fixed - for any bug fixes.
 - Security - in case of vulnerabilities.
 
+# [4.30.0](https://github.com/voxpupuli/beaker/compare/4.29.1...4.30.0) - 19-07-2021
+
+### Changed
+
+- Use chrony instead of ntpdate on Fedora [\#1702](https://github.com/voxpupuli/beaker/pull/1702) ([GabrielNagy](https://github.com/GabrielNagy))
+
 # [4.29.1](https://github.com/voxpupuli/beaker/compare/4.29.0...4.29.1) - 25-05-2021
 
 ### Fixed
