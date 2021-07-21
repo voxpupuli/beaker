@@ -338,7 +338,7 @@ begin
     config.user = 'voxpupuli'
     config.project = 'beaker'
     gem_version = Gem::Specification.load("#{config.project}.gemspec").version
-    config.future_release = "v#{gem_version}"
+    config.future_release = gem_version
   end
 rescue LoadError
 end
