@@ -525,14 +525,9 @@ module Beaker
     describe '#install_local_package' do
       let( :platform      ) { @platform || 'fedora' }
       let( :version       ) { @version  || 6        }
-      let( :platform_mock ) {
-        mock = Object.new
-        allow( mock ).to receive( :to_array ) { [platform, version, '', ''] }
-        mock
-      }
 
       before :each do
-        allow( instance ).to receive( :[] ).with( 'platform' ) { platform_mock }
+        allow( instance ).to receive( :[] ).with( 'platform' ) { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
       end
 
       it 'Fedora 22-39: uses dnf' do
@@ -546,7 +541,6 @@ module Beaker
 
       it 'Fedora 21 uses yum' do
         package_file = 'testing_456.yay'
-        platform_mock = Object.new
         [21].each do |version|
           @version = version
           expect( instance ).to receive( :execute ).with( /^yum.*#{package_file}$/ )
@@ -594,18 +588,13 @@ module Beaker
       let( :tar_file      ) { 'test.tar.gz'         }
       let( :base_dir      ) { '/base/dir/fake'      }
       let( :download_file ) { 'download_file.txt'   }
-      let( :platform_mock ) {
-        mock = Object.new
-        allow( mock ).to receive( :to_array ) { [platform, version, '', ''] }
-        mock
-      }
 
       before :each do
-        allow( instance ).to receive( :[] ).with( 'platform' ) { platform_mock }
+        allow( instance ).to receive( :[] ).with( 'platform' ) {  Beaker::Platform.new("#{platform}-#{version}-x86_64")  }
       end
 
       it 'rejects unsupported platforms' do
-        @platform = 'huawei'
+        @platform = 'cisco_nexus'
         expect {
           instance.uncompress_local_tarball( tar_file, base_dir, download_file )
         }.to raise_error(

@@ -527,7 +527,7 @@ module Unix::Pkg
     case variant
     when /^(fedora|el|redhat|centos)$/
       command_name = 'yum'
-      command_name = 'dnf' if variant == 'fedora' && version > 21
+      command_name = 'dnf' if variant == 'fedora' && version.to_i > 21
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(opensuse|sles)$/
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
