@@ -26,12 +26,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakefs', '~> 1.0'
   s.add_development_dependency 'rake', '~> 13.0'
 
-  # Provisioner dependencies - needed for acceptance tests
-  # TODO: figure out how to remove these
-  s.add_development_dependency 'beaker-aws', '~> 0.1'
-  s.add_development_dependency 'beaker-abs', '>= 0.4'
-  s.add_development_dependency 'beaker-vmpooler', '~> 1.0'
-
   # Documentation dependencies
   s.add_development_dependency 'yard', '~> 0.9.11'
 
