@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
 
   # Provisioner dependencies - needed for acceptance tests
   # TODO: figure out how to remove these
-  s.add_development_dependency 'beaker-aws', '~> 0.1'
+  s.add_development_dependency 'beaker-aws', '~> 1.0'
   s.add_development_dependency 'beaker-abs', '>= 0.4'
   s.add_development_dependency 'beaker-vmpooler', '~> 1.0'
 
