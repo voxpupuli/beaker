@@ -26,15 +26,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakefs', '~> 1.0'
   s.add_development_dependency 'rake', '~> 13.0'
 
-  # Documentation dependencies
-  s.add_development_dependency 'yard', '~> 0.9.11'
-
   # Run time dependencies
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'minitar', '~> 0.6'
-  s.add_runtime_dependency 'pry-byebug', '~> 3.9'
-  # pry-byebug can have issues with native readline libs so add rb-readline
-  s.add_runtime_dependency 'rb-readline', '~> 0.5.3'
   s.add_runtime_dependency 'rexml'
 
   s.add_runtime_dependency 'hocon', '~> 1.0'
