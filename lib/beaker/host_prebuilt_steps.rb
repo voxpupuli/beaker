@@ -1,5 +1,3 @@
-require 'pathname'
-
 [ 'command', "dsl" ].each do |lib|
   require "beaker/#{lib}"
 end
