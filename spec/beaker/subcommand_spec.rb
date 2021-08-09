@@ -58,7 +58,6 @@ module Beaker
         'fail-mode',
         'ntp',
         'repo-proxy',
-        'add-el-extras',
         'package-proxy',
         'validate',
         'collect-perf-data',

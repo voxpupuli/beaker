@@ -149,8 +149,6 @@ Usage: beaker [options...]
                                      (default: false)
         --repo-proxy                 Proxy packaging repositories on ubuntu, debian, cumulus and solaris-11
                                      (default: false)
-        --add-el-extras              Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts
-                                     (default: false)
         --package-proxy URL          Set proxy url for package managers (yum and apt)
         --[no-]validate              Validate that SUTs are correctly provisioned before running tests
                                      (default: true)
@@ -239,12 +237,6 @@ Values already included in Beaker as defaults for required arguments.
           :disable_updates        => true,
           :repo_proxy             => false,
           :package_proxy          => false,
-          :add_el_extras          => false,
-          :epel_url               => "http://mirrors.kernel.org/fedora-epel",
-          :epel_arch              => "i386",
-          :epel_7_pkg             => "epel-release-7-6.noarch.rpm",
-          :epel_6_pkg             => "epel-release-6-8.noarch.rpm",
-          :epel_5_pkg             => "epel-release-5-4.noarch.rpm",
           :consoleport            => 443,
           :pe_dir                 => '/opt/enterprise/dists',
           :pe_version_file        => 'LATEST',

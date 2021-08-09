@@ -264,38 +264,6 @@ module Beaker
       report_and_raise(logger, e, "proxy_config")
     end
 
-    #Install EPEL on host or hosts with platform = /el-(6|7)/.  Do nothing on host or hosts of other platforms.
-    # @param [Host, Array<Host>] host One or more hosts to act upon.  Will use individual host epel_url, epel_arch
-    #                                 and epel_pkg before using defaults provided in opts.
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    # @option opts [String] :epel_url Link to download from
-    def add_el_extras( host, opts )
-      #add_el_extras
-      #only supports el-* platforms
-      logger = opts[:logger]
-      block_on host do |host|
-        case
-        when el_based?(host) && ['6','7'].include?(host['platform'].version)
-          result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
-          if result.exit_code == 1
-            url_base = opts[:epel_url]
-            host.install_package_with_rpm("#{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm", '--replacepkgs', { :package_proxy => opts[:package_proxy] })
-            #update /etc/yum.repos.d/epel.repo for new baseurl
-            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{url_base}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
-            #remove mirrorlist
-            host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
-            host.exec(Command.new('yum clean all && yum makecache'))
-          end
-        else
-          logger.debug "#{host}: package repo configuration not modified"
-        end
-      end
-    rescue => e
-      report_and_raise(logger, e, "add_repos")
-    end
-
     #Determine the domain name of the provided host from its /etc/resolv.conf
     # @param [Host] host the host to act upon
     def get_domain_name(host)
@@ -598,17 +566,6 @@ module Beaker
         end
       end
     end
-
-    private
-
-    # A helper to tell whether a host is el-based
-    # @param [Host] host the host to act upon
-    #
-    # @return [Boolean] if the host is el_based
-    def el_based? host
-      ['centos','redhat','scientific','el','oracle'].include?(host['platform'].variant)
-    end
-
   end
 
 end

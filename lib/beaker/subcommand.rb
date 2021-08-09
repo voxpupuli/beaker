@@ -46,7 +46,6 @@ module Beaker
     class_option :'test-results-file', :type => :string, :group => 'Beaker run'
     class_option :ntp, :type => :boolean, :group => 'Beaker run'
     class_option :'repo-proxy', :type => :boolean, :group => 'Beaker run'
-    class_option :'add-el-extras', :type => :boolean, :group => 'Beaker run'
     class_option :'package-proxy', :type => :string, :group => 'Beaker run'
     class_option :validate, :type => :boolean, :group => 'Beaker run'
     class_option :'collect-perf-data', :type => :boolean, :group => 'Beaker run'

@@ -337,48 +337,6 @@ describe Beaker do
     end
   end
 
-  context "add_el_extras" do
-    subject { dummy_class.new }
-
-    it 'adds extras for el-6 hosts' do
-
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 4 )
-      hosts[1][:platform] = Beaker::Platform.new('centos-6-arch')
-      hosts[2][:platform] = Beaker::Platform.new('scientific-6-arch')
-      hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
-
-      expect( Beaker::Command ).to receive( :new ).with(
-        "rpm -qa | grep epel-release"
-      ).exactly( hosts.count ).times
-      hosts.each do |host|
-        expect(host).to receive( :install_package_with_rpm ).with(
-          "http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm", "--replacepkgs", {:package_proxy => false}
-        ).once
-      end
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo"
-      ).exactly( hosts.count ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
-      ).exactly( hosts.count ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "yum clean all && yum makecache"
-      ).exactly( hosts.count ).times
-
-      subject.add_el_extras( hosts, options )
-
-    end
-
-    it "does nothing for non el-5/6 hosts" do
-      hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
-
-      expect( Beaker::Command ).not_to receive( :new )
-
-      subject.add_el_extras( hosts, options )
-
-    end
-  end
-
   context "sync_root_keys" do
     subject { dummy_class.new }
 

@@ -129,12 +129,10 @@ module Beaker
           options[:configure]         = false
           options[:timesync]          = true
           options[:root_keys]         = true
-          options[:add_el_extras]     = true
           options[:disable_iptables]  = true
           options[:host_name_prefix]  = "test-"
           expect( hypervisor ).not_to receive( :timesync )
           expect( hypervisor ).not_to receive( :sync_root_keys )
-          expect( hypervisor ).not_to receive( :add_el_extras )
           expect( hypervisor ).not_to receive( :disable_iptables )
           expect( hypervisor ).not_to receive( :set_env )
           expect( hypervisor ).not_to receive( :host_name_prefix )

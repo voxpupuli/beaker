@@ -93,9 +93,6 @@ module Beaker
         if @options[:root_keys]
           sync_root_keys(@hosts, @options)
         end
-        if @options[:add_el_extras]
-          add_el_extras(@hosts, @options)
-        end
         if @options[:disable_iptables]
           disable_iptables @hosts, @options
         end

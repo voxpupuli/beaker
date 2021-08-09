@@ -173,7 +173,6 @@ module Beaker
           :repo_proxy             => false,
           :package_proxy          => false,
           :add_el_extras          => false,
-          :epel_url               => "http://dl.fedoraproject.org/pub/epel",
           :consoleport            => 443,
           :pe_dir                 => '/opt/enterprise/dists',
           :pe_version_file        => 'LATEST',
