@@ -32,8 +32,6 @@ module Beaker
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
-    APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
-    IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
     #Run timesync on the provided hosts
     # @param [Host, Array<Host>] host One or more hosts to act upon
@@ -233,35 +231,6 @@ module Beaker
           host.do_scp_to(tempfile.path, file_path, @options)
         end
       end
-    end
-
-    # On ubuntu, debian, or cumulus host or hosts: alter apt configuration to use
-    # the internal Puppet Labs proxy {HostPrebuiltSteps::APT_CFG} proxy.
-    # On solaris-11 host or hosts: alter pkg to point to
-    # the internal Puppet Labs proxy {HostPrebuiltSteps::IPS_PKG_REPO}.
-    #
-    # Do nothing for other platform host or hosts.
-    #
-    # @param [Host, Array<Host>] host One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def proxy_config( host, opts )
-      logger = opts[:logger]
-      block_on host do |host|
-        case
-        when /ubuntu|debian|cumulus/.match?(host['platform'])
-          host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
-          copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
-          apt_get_update(host)
-        when host['platform'].include?('solaris-11')
-          host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-          host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
-        else
-          logger.debug "#{host}: repo proxy configuration not modified"
-        end
-      end
-    rescue => e
-      report_and_raise(logger, e, "proxy_config")
     end
 
     #Determine the domain name of the provided host from its /etc/resolv.conf
@@ -485,6 +454,9 @@ module Beaker
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
           when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
+          when /solaris-11/
+            host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
+            host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
         end

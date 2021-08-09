@@ -5,8 +5,6 @@ describe Beaker do
   let( :ntpserver_set )  { "ntp_server_set" }
   let( :options_ntp )    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let( :ntpserver )      { Beaker::HostPrebuiltSteps::NTPSERVER }
-  let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
-  let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
   let( :sync_cmd )       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
   let( :windows_pkgs )   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
   let( :unix_only_pkgs ) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
@@ -271,70 +269,6 @@ describe Beaker do
 
     end
 
-  end
-
-  context "proxy_config" do
-    subject { dummy_class.new }
-
-    it "correctly configures ubuntu hosts" do
-      hosts = make_hosts( { :platform => 'ubuntu', :exit_code => 1 } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 )
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures debian hosts" do
-      hosts = make_hosts( { :platform => 'debian' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures cumulus hosts" do
-      hosts = make_hosts( { :platform => 'cumulus' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures solaris-11 hosts" do
-      hosts = make_hosts( { :platform => 'solaris-11' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
-      hosts.each do |_host|
-        expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "does nothing for non ubuntu/debian/cumulus/solaris-11 hosts" do
-      hosts = make_hosts( { :platform => 'windows' } )
-
-      expect( Beaker::Command ).not_to receive( :new )
-
-      subject.proxy_config( hosts, options )
-
-    end
   end
 
   context "sync_root_keys" do
