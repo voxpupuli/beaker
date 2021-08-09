@@ -232,7 +232,6 @@ Values already included in Beaker as defaults for required arguments.
           :fail_mode              => 'slow',
           :accept_all_exit_codes  => false,
           :timesync               => false,
-          :disable_iptables       => false,
           :set_env                => true,
           :disable_updates        => true,
           :repo_proxy             => false,

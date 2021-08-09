@@ -422,22 +422,6 @@ module Beaker
       end
     end
 
-    #Disable iptables on centos, does nothing on other platforms
-    # @param [Host, Array<Host>] host One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def disable_iptables host, opts
-      logger = opts[:logger]
-      block_on host do |host|
-        if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
-          logger.debug("Disabling iptables on #{host.name}")
-          host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
-        else
-          logger.warn("Attempting to disable iptables on non-supported platform: #{host.name}: #{host['platform']}")
-        end
-      end
-    end
-
     # Setup files for enabling requests to pass to a proxy server
     # This works for the APT package manager on debian, ubuntu, and cumulus
     # and YUM package manager on el, centos, fedora and redhat.
