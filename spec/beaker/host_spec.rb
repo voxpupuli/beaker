@@ -832,21 +832,29 @@ module Beaker
     end
 
     describe "#fips_mode?" do
-      it 'returns false on non-el7 hosts' do
+      it 'returns false on non-linux hosts' do
         @platform = 'windows'
+        expect(host).to receive(:file_exist?).with('/proc/sys/crypto/fips_enabled').and_return(false)
         expect(host.fips_mode?).to be false
       end
 
-      it 'returns true when the `fips_enabled` file is present and contains "1"' do
-        @platform = 'el-7'
-        expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("1")
-        expect(host.fips_mode?).to be true
-      end
+      platforms = ['el-7', 'el-8', 'centos']
 
-      it 'returns false when the `fips_enabled` file is present and contains "0"' do
-        @platform = 'el-7'
-        expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("0")
-        expect(host.fips_mode?).to be false
+      platforms.each do |platform|
+        context "on #{platform}" do
+          it 'returns true when the `fips_enabled` file is present and contains "1"' do
+            @platform = platform
+            expect(host).to receive(:file_exist?).with('/proc/sys/crypto/fips_enabled').and_return(true)
+            expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("1")
+            expect(host.fips_mode?).to be true
+          end
+
+          it 'returns false when the `fips_enabled` file is present and contains "0"' do
+            @platform = platform
+            expect(host).to receive(:execute).with("cat /proc/sys/crypto/fips_enabled").and_return("0")
+            expect(host.fips_mode?).to be false
+          end
+        end
       end
     end
   end

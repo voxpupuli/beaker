@@ -211,13 +211,8 @@ module Beaker
     end
 
     # Returns true if the host is running in FIPS mode.
-    #
-    # We currently only test FIPS mode on Redhat 7. Other detection
-    # modes should be added here if we expand FIPS support to other
-    # platforms.
     def fips_mode?
-      case self['platform']
-      when /el-7/
+      if self.file_exist?('/proc/sys/crypto/fips_enabled')
         begin
           execute("cat /proc/sys/crypto/fips_enabled") == "1"
         rescue Beaker::Host::CommandFailure
