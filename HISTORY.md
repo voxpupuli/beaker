@@ -1,4 +1,14 @@
-## [4.30.0](https://github.com/voxpupuli/beaker/compare/4.29.1...4.30.0) (2021-07-21)
+## [4.31.0](https://github.com/voxpupuli/beaker/tree/4.31.0) (2021-11-02)
+
+### Fixed
+
+- (BKR-1690) Fix localhost logging ([#1691](https://github.com/voxpupuli/beaker/pull/1691))
+
+### Added
+
+- Made fips_check? more generally applicable ([#1717]https://github.com/voxpupuli/beaker/pull/1717))
+
+## [4.30.0](https://github.com/voxpupuli/beaker/tree/4.30.0) (2021-07-21)
 
 ### Fixed
 
