@@ -88,53 +88,59 @@ module Beaker
     # Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
     # install them.
     #
-    # Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
-    # {HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts,
-    # {HostPrebuiltSteps::DEBIAN_PACKAGES} on debian platform hosts,
-    # {HostPrebuiltSteps::CUMULUS_PACKAGES} on cumulus platform hosts,
-    # {HostPrebuiltSteps::WINDOWS_PACKAGES} on cygwin-installed windows platform hosts,
-    # and {HostPrebuiltSteps::PSWINDOWS_PACKAGES} on non-cygwin windows platform hosts.
-    #
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
+    # @see #packages_to_install
     def validate_host host, opts
       logger = opts[:logger]
       block_on host do |host|
-        case
-        when host['platform'] =~ /el-8/
-          check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
-        when host['platform'] =~ /sles-10/
-          check_and_install_packages_if_needed(host, SLES10_PACKAGES)
-        when host['platform'] =~ /opensuse|sles-/
-          check_and_install_packages_if_needed(host, SLES_PACKAGES)
-        when host['platform'] =~ /debian/
-          check_and_install_packages_if_needed(host, DEBIAN_PACKAGES)
-        when host['platform'] =~ /cumulus/
-          check_and_install_packages_if_needed(host, CUMULUS_PACKAGES)
-        when (host['platform'] =~ /windows/ and host.is_cygwin?)
-          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
-          check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
-        when (host['platform'] =~ /windows/ and not host.is_cygwin?)
-          check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)
-        when host['platform'] =~ /freebsd/
-          check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
-        when host['platform'] =~ /openbsd/
-          check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
-        when host['platform'] =~ /solaris-10/
-          check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
-        when host['platform'] =~ /solaris-1[1-9]/
-          check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
-        when host['platform'] =~ /archlinux/
-          check_and_install_packages_if_needed(host, ARCHLINUX_PACKAGES)
-        when host['platform'] =~ /fedora/
-          check_and_install_packages_if_needed(host, FEDORA_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|opensuse-|sles-|osx-|cumulus|f5-|netscaler|cisco_/
-          check_and_install_packages_if_needed(host, UNIX_PACKAGES)
-        end
+        check_and_install_packages_if_needed(host, packages_to_install(host))
       end
     rescue => e
       report_and_raise(logger, e, "validate")
+    end
+
+    # @param [Host] host A host to act upon
+    # @return [Array<String>] A list of packages to ensure on the given host
+    def packages_to_install host
+      case host['platform']
+      when /el-8/
+        RHEL8_PACKAGES
+      when /sles-10/
+        SLES10_PACKAGES
+      when /opensuse|sles-/
+        SLES_PACKAGES
+      when /debian/
+        DEBIAN_PACKAGES
+      when /cumulus/
+        CUMULUS_PACKAGES
+      when /windows/
+        if host.is_cygwin?
+          raise RuntimeError, "cygwin is not installed on #{host}" unless host.cygwin_installed?
+          WINDOWS_PACKAGES
+        else
+          PSWINDOWS_PACKAGES
+        end
+      when /freebsd/
+        FREEBSD_PACKAGES
+      when /openbsd/
+        OPENBSD_PACKAGES
+      when /solaris-10/
+        SOLARIS10_PACKAGES
+      when /solaris-1[1-9]/
+        SOLARIS11_PACKAGES
+      when /archlinux/
+        ARCHLINUX_PACKAGES
+      when /fedora/
+        FEDORA_PACKAGES
+      else
+        if host['platform'] !~ /aix|solaris|osx-|f5-|netscaler|cisco_/
+          UNIX_PACKAGES
+        else
+          []
+        end
+      end
     end
 
     # Installs the given packages if they aren't already on a host
