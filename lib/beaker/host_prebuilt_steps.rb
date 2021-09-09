@@ -53,7 +53,7 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-          when host['platform'] =~ /el-8|fedora/
+          when host['platform'] =~ /el-[89]|fedora/
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           when host['platform'] =~ /opensuse-|sles-/
             ntp_command = "sntp #{ntp_server}"
@@ -102,7 +102,7 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
-        when host['platform'] =~ /el-8/
+        when host['platform'] =~ /el-[89]/
           check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
         when host['platform'] =~ /sles-10/
           check_and_install_packages_if_needed(host, SLES10_PACKAGES)
@@ -452,7 +452,7 @@ module Beaker
         #restart sshd
         if host['platform'] =~ /debian|ubuntu|cumulus/
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /arch|centos-7|el-7|redhat-7|centos-8|el-8|redhat-8|fedora-(1[4-9]|2[0-9]|3[0-9])/
+        elsif host['platform'] =~ /arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
