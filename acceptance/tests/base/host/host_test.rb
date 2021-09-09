@@ -197,7 +197,7 @@ hosts.each do |host|
 end
 
 step "#do_scp_to : can copy a directory to the host with no ignores"
-current_dir = File.dirname(__FILE__)
+current_dir = __dir__
 module_fixture = File.join(current_dir, "../../../fixtures/module")
 hosts.each do |host|
   logger.debug("can recursively copy a module over")
@@ -222,7 +222,7 @@ hosts.each do |host|
 end
 
 step "#do_scp_to with :ignore : can copy a dir to the host, excluding ignored patterns that DO NOT appear in the source absolute path"
-current_dir = File.dirname(__FILE__)
+current_dir = __dir__
 module_fixture = File.expand_path(File.join(current_dir, "../../../fixtures/module"))
 hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some files/dirs")
@@ -252,7 +252,7 @@ hosts.each do |host|
 end
 
 step "#do_scp_to with :ignore : can copy a dir to the host, excluding ignored patterns that DO appear in the source absolute path"
-current_dir = File.dirname(__FILE__)
+current_dir = __dir__
 module_fixture = File.expand_path(File.join(current_dir, "../../../fixtures/module"))
 hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some sub-files/sub-dirs that also appear in the absolute path")

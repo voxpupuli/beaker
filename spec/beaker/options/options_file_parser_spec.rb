@@ -5,7 +5,7 @@ module Beaker
     describe OptionsFileParser do
 
       let(:parser) {described_class}
-      let(:simple_opts) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt")}
+      let(:simple_opts) {File.join(__dir__, "data", "opts.txt")}
 
       it "can correctly read options from a file" do
         FakeFS.deactivate!

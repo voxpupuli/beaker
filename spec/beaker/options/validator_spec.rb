@@ -7,8 +7,8 @@ module Beaker
       let(:validator) { described_class.new }
 
       describe '#check_yaml_file' do
-        let(:bad_yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'badyaml.cfg') }
-        let(:yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'hosts.cfg') }
+        let(:bad_yaml_path) { File.join(File.expand_path(__dir__), 'data', 'badyaml.cfg') }
+        let(:yaml_path) { File.join(File.expand_path(__dir__), 'data', 'hosts.cfg') }
 
         before do
           FakeFS.deactivate!

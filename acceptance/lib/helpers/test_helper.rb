@@ -11,7 +11,7 @@ end
 # Returns the absolute path where file fixtures are located.
 def fixture_path
   @fixture_path ||=
-    File.expand_path(File.join(__FILE__, '..', '..', '..', 'fixtures', 'files'))
+    File.expand_path(File.join(__dir__, '..', '..', 'fixtures', 'files'))
 end
 
 # Returns the contents of a named fixture file, to be found in `fixture_path`.

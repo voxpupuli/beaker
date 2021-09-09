@@ -215,7 +215,7 @@ Values already included in Beaker as defaults for required arguments.
           :preserve_hosts         => 'never',
           :root_keys              => false,
           :quiet                  => false,
-          :project_root           => File.expand_path(File.join(File.dirname(__FILE__), "../")),
+          :project_root           => File.expand_path(File.join(__dir__, "../")),
           :xml_dir                => 'junit',
           :xml_file               => 'beaker_junit.xml',
           :xml_time               => 'beaker_times.xml',
