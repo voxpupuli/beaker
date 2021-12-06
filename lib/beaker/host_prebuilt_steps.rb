@@ -17,7 +17,7 @@ module Beaker
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
-    ARCHLINUX_PACKAGES = ['curl', 'ntp']
+    ARCHLINUX_PACKAGES = ['curl', 'ntp', 'net-tools', 'openssh']
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
     SLES10_PACKAGES = ['curl']
