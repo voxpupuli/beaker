@@ -28,3 +28,6 @@ group :coverage, optional: ENV['COVERAGE']!='yes' do
   gem 'simplecov-console', :require => false
   gem 'codecov', :require => false
 end
+
+# newer rdoc pulls in newer psych which breaks a lot of things
+gem 'rdoc', '< 6.4' if RUBY_VERSION < '3.1'
