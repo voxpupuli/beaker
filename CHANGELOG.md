@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.33.0](https://github.com/voxpupuli/beaker/tree/4.33.0) (2022-01-21)
+
+### Added
+
+- Add ed25519 ad runtime dependency  ([#1726](https://github.com/voxpupuli/beaker/pull/1726))
+
 ## [4.32.0](https://github.com/voxpupuli/beaker/tree/4.32.0) (2021-12-06)
 
 ### Fixed
