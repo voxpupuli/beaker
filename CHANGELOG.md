@@ -1,10 +1,22 @@
 # Changelog
 
+## [4.34.0](https://github.com/voxpupuli/beaker/tree/4.34.0) (2022-01-27)
+
+### Added
+
+- Extract a host_packages method from validate_host ([#1729](https://github.com/voxpupuli/beaker/pull/1729))
+- Reduce duplication in ssh_permit_user_environment ([#1728](https://github.com/voxpupuli/beaker/pull/1728))
+
+### Fixed
+
+- Do not install curl on EL9 ([#1728](https://github.com/voxpupuli/beaker/pull/1732))
+- Drop old Ruby 1.8 compatibility code ([#1728](https://github.com/voxpupuli/beaker/pull/1730))
+
 ## [4.33.0](https://github.com/voxpupuli/beaker/tree/4.33.0) (2022-01-21)
 
 ### Added
 
-- Add ed25519 ad runtime dependency  ([#1726](https://github.com/voxpupuli/beaker/pull/1726))
+- Add ed25519 as runtime dependency ([#1726](https://github.com/voxpupuli/beaker/pull/1726))
 
 ## [4.32.0](https://github.com/voxpupuli/beaker/tree/4.32.0) (2021-12-06)
 
