@@ -17,12 +17,7 @@ module Beaker
         expect( logger.convert(valid_utf8) ).to be === valid_utf8
       end
       it 'strips out invalid utf-8 characters' do
-        #this is 1.9 behavior only
-        if RUBY_VERSION.to_f >= 1.9
-          expect( logger.convert(invalid_utf8) ).to be === valid_utf8
-        else
-          pending "not supported in ruby 1.8 (using #{RUBY_VERSION})"
-        end
+        expect( logger.convert(invalid_utf8) ).to be === valid_utf8
       end
       it 'supports frozen strings' do
         valid_utf8.freeze
