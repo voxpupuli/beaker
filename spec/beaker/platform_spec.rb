@@ -145,7 +145,7 @@ module Beaker
       end
     end
 
-    context 'round tripping from yaml', if: RUBY_VERSION =~ /^1\.9/ do
+    context 'round tripping from yaml' do
       before do
         @name = 'ubuntu-14.04-x86_64'
       end
