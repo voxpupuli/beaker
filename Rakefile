@@ -140,27 +140,26 @@ Commandline options set through the above environment variables will override se
 
   desc 'Run specs and check for deprecation warnings'
   task :spec do
-    original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    exit_status = 1
-    output = ''
-    Open3.popen3("bundle exec rspec") {|_stdin, stdout, _stderr, wait_thr|
-      while(line = stdout.gets)
-        puts line
-      end
-      output = stdout.to_s
-      if not wait_thr.value.success?
-        fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
-      end
-      exit_status = wait_thr.value
-    }
-    if exit_status != /0/
-      #check for deprecation warnings
-      if output.include?('Deprecation Warnings')
-        fail "DEPRECATION WARNINGS in spec generation, please fix!"
+    Dir.chdir(__dir__) do
+      exit_status = 1
+      output = ''
+      Open3.popen3("bundle exec rspec") {|_stdin, stdout, _stderr, wait_thr|
+        while(line = stdout.gets)
+          puts line
+        end
+        output = stdout.to_s
+        if not wait_thr.value.success?
+          fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
+        end
+        exit_status = wait_thr.value
+      }
+      if exit_status != /0/
+        #check for deprecation warnings
+        if output.include?('Deprecation Warnings')
+          fail "DEPRECATION WARNINGS in spec generation, please fix!"
+        end
       end
     end
-    Dir.chdir( original_dir )
   end
 
   desc <<-EOS
@@ -210,14 +209,13 @@ end
 namespace :history do
   desc 'Generate HISTORY.md'
   task :gen do
-    original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    output = `bundle exec ruby history.rb .`
-    puts output
-    if !output.include?('success')
-      raise "History generation failed"
+    Dir.chdir(__dir__) do
+      output = `bundle exec ruby history.rb .`
+      puts output
+      if !output.include?('success')
+        raise "History generation failed"
+      end
     end
-    Dir.chdir( original_dir )
   end
 
 end
@@ -248,32 +246,29 @@ end
 
 desc 'Start the documentation server in the foreground'
 task :docs => 'docs:clear' do
-  original_dir = Dir.pwd
-  Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-  sh FOREGROUND_SERVER
-  Dir.chdir( original_dir )
+  Dir.chdir(__dir__) do
+    sh FOREGROUND_SERVER
+  end
 end
 
 namespace :docs do
 
   desc 'Clear the generated documentation cache'
   task :clear do
-    original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    sh "rm -rf #{DOCS_DIR}"
-    Dir.chdir( original_dir )
+    Dir.chdir(__dir__) do
+      sh "rm -rf #{DOCS_DIR}"
+    end
   end
 
   desc 'Generate static documentation'
   task :gen => 'docs:clear' do
-    original_dir = Dir.pwd
-    Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-    output = `bundle exec yard doc -o #{DOCS_DIR}`
-    puts output
-    if /\[warn\]|\[error\]/.match?(output)
-      fail "Errors/Warnings during yard documentation generation"
+    Dir.chdir(__dir__) do
+      output = `bundle exec yard doc -o #{DOCS_DIR}`
+      puts output
+      if /\[warn\]|\[error\]/.match?(output)
+        fail "Errors/Warnings during yard documentation generation"
+      end
     end
-    Dir.chdir( original_dir )
   end
 
   desc 'Run the documentation server in the background, alias `bg`'
@@ -283,10 +278,9 @@ namespace :docs do
       puts "Not starting a new YARD Server..."
       puts "Found one running with pid #{pid_from( output )}."
     else
-      original_dir = Dir.pwd
-      Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
-      sh "bundle exec #{DOCS_DAEMON}"
-      Dir.chdir( original_dir )
+      Dir.chdir(__dir__) do
+        sh "bundle exec #{DOCS_DAEMON}"
+      end
     end
   end
 
