@@ -13,6 +13,7 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     RHEL8_PACKAGES = ['curl', 'chrony']
+    RHEL9_PACKAGES = ['chrony']
     FEDORA_PACKAGES = ['curl', 'chrony']
     UNIX_PACKAGES = ['curl', 'ntpdate']
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
@@ -113,8 +114,10 @@ module Beaker
     # @return [Array<String>] A list of packages to install
     def host_packages(host)
       case host['platform']
-      when /el-[89]/
+      when /el-8/
         RHEL8_PACKAGES
+      when /el-9/
+        RHEL9_PACKAGES
       when /sles-10/
         SLES10_PACKAGES
       when /opensuse|sles-/
