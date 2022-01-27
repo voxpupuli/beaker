@@ -489,9 +489,9 @@ describe Beaker do
     end
 
     it 'skips validation on cisco hosts' do
-      @platform = 'cisco_nexus-7-x86_64'
-      expect( subject ).to receive( :check_and_install_packages_if_needed ).never
-      subject.validate_host(hosts, options)
+      host = make_host('cisco-7', { stdout: stdout, platform: 'cisco_nexus-7-x86_64' })
+      expect( subject ).to receive( :check_and_install_packages_if_needed ).with(host, []).once
+      subject.validate_host(host, options)
     end
   end
 

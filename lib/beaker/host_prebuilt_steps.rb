@@ -101,40 +101,54 @@ module Beaker
     def validate_host host, opts
       logger = opts[:logger]
       block_on host do |host|
-        case
-        when host['platform'] =~ /el-[89]/
-          check_and_install_packages_if_needed(host, RHEL8_PACKAGES)
-        when host['platform'] =~ /sles-10/
-          check_and_install_packages_if_needed(host, SLES10_PACKAGES)
-        when host['platform'] =~ /opensuse|sles-/
-          check_and_install_packages_if_needed(host, SLES_PACKAGES)
-        when host['platform'] =~ /debian/
-          check_and_install_packages_if_needed(host, DEBIAN_PACKAGES)
-        when host['platform'] =~ /cumulus/
-          check_and_install_packages_if_needed(host, CUMULUS_PACKAGES)
-        when (host['platform'] =~ /windows/ and host.is_cygwin?)
-          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
-          check_and_install_packages_if_needed(host, WINDOWS_PACKAGES)
-        when (host['platform'] =~ /windows/ and not host.is_cygwin?)
-          check_and_install_packages_if_needed(host, PSWINDOWS_PACKAGES)
-        when host['platform'] =~ /freebsd/
-          check_and_install_packages_if_needed(host, FREEBSD_PACKAGES)
-        when host['platform'] =~ /openbsd/
-          check_and_install_packages_if_needed(host, OPENBSD_PACKAGES)
-        when host['platform'] =~ /solaris-10/
-          check_and_install_packages_if_needed(host, SOLARIS10_PACKAGES)
-        when host['platform'] =~ /solaris-1[1-9]/
-          check_and_install_packages_if_needed(host, SOLARIS11_PACKAGES)
-        when host['platform'] =~ /archlinux/
-          check_and_install_packages_if_needed(host, ARCHLINUX_PACKAGES)
-        when host['platform'] =~ /fedora/
-          check_and_install_packages_if_needed(host, FEDORA_PACKAGES)
-        when host['platform'] !~ /debian|aix|solaris|windows|opensuse-|sles-|osx-|cumulus|f5-|netscaler|cisco_/
-          check_and_install_packages_if_needed(host, UNIX_PACKAGES)
-        end
+        check_and_install_packages_if_needed(host, host_packages(host))
       end
     rescue => e
       report_and_raise(logger, e, "validate")
+    end
+
+    # Return a list of packages that should be present.
+    #
+    # @param [Host] host A host return the packages for
+    # @return [Array<String>] A list of packages to install
+    def host_packages(host)
+      case host['platform']
+      when /el-[89]/
+        RHEL8_PACKAGES
+      when /sles-10/
+        SLES10_PACKAGES
+      when /opensuse|sles-/
+        SLES_PACKAGES
+      when /debian/
+        DEBIAN_PACKAGES
+      when /cumulus/
+        CUMULUS_PACKAGES
+      when /windows/
+        if host.is_cygwin?
+          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
+          WINDOWS_PACKAGES
+        else
+          PSWINDOWS_PACKAGES
+        end
+      when /freebsd/
+        FREEBSD_PACKAGES
+      when /openbsd/
+        OPENBSD_PACKAGES
+      when /solaris-10/
+        SOLARIS10_PACKAGES
+      when /solaris-1[1-9]/
+        SOLARIS11_PACKAGES
+      when /archlinux/
+        ARCHLINUX_PACKAGES
+      when /fedora/
+        FEDORA_PACKAGES
+      else
+        if host['platform'] !~ /aix|solaris|osx-|f5-|netscaler|cisco_/
+          UNIX_PACKAGES
+        else
+          []
+        end
+      end
     end
 
     # Installs the given packages if they aren't already on a host
