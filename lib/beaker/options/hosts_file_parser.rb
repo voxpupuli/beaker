@@ -24,7 +24,7 @@ module Beaker
 
           raise "#{hosts_file_path} is not a valid path" unless File.exist?(hosts_file_path)
 
-          YAML.load(ERB.new(File.read(hosts_file_path), nil, '-').result(binding))
+          process_yaml(File.read(hosts_file_path), binding)
         }
         fix_roles_array( host_options )
       end
@@ -42,7 +42,7 @@ module Beaker
         return host_options unless hosts_def_yaml
         error_message = "#{hosts_def_yaml}\nis not a valid YAML string\n\t"
         host_options = self.merge_hosts_yaml( host_options, error_message ) {
-          YAML.load(ERB.new(hosts_def_yaml, nil, '-').result(binding))
+          process_yaml(hosts_def_yaml, binding)
         }
         fix_roles_array( host_options )
       end
@@ -85,6 +85,19 @@ module Beaker
         host_options.merge( loaded_host_options )
       end
 
+      # A helper to parse the YAML file and apply ERB templating
+      #
+      # @param [String] path Path to the file to read
+      # @param [Binding] b The binding to pass to ERB rendering
+      # @api private
+      def self.process_yaml(template, b)
+        erb_obj = if RUBY_VERSION >= '2.7'
+                     ERB.new(template, trim_mode: '-')
+                   else
+                     ERB.new(template, nil, '-')
+                   end
+        YAML.load(erb_obj.result(b))
+      end
     end
   end
 end
