@@ -1,6 +1,6 @@
 # Debug beaker tests
 
-beaker includes [pry-byebug](https://github.com/deivid-rodriguez/pry-byebug), a gem that combines two powerful related tools: pry and byebug
+beaker can use [pry-byebug](https://github.com/deivid-rodriguez/pry-byebug), a gem that combines two powerful related tools: pry and byebug. It falls back to [debug](https://github.com/ruby/debug) if pry is unavailable.
 
 ### What is Pry?
 
@@ -15,6 +15,10 @@ There are several ways to have your tests break and enter debugging:
  1. [Add a breakpoint to your test file](#add-a-breakpoint-to-your-test-file)
  2. [Use the --debug-errors option](#use-the---debug-errors-option)
  3. [Defining external breakpoints with byebug](#defining-external-breakpoints-with-byebug)
+
+### What is debug?
+
+[debug](https://github.com/ruby/debug) is the new debugger bundled since Ruby 3.1.
 
 ## Add a breakpoint to your test file
 
@@ -232,7 +236,7 @@ Simply `exit` the console.
 
 ## Use the --debug-errors option
 
-You can run beaker and pass the option `--debug-errors` to have beaker enter the pry console if or when a test error occurs. This is useful for transient/intermittent errors where you may need to run the test a large number of times before seeing the failure. It's also useful to keep your hosts at the state where error occurred, as the test's teardown will not (yet) have executed.
+You can run beaker and pass the option `--debug-errors` to have beaker enter the pry or debug console if or when a test error occurs. This is useful for transient/intermittent errors where you may need to run the test a large number of times before seeing the failure. It's also useful to keep your hosts at the state where error occurred, as the test's teardown will not (yet) have executed.
 
 ### Example
 
@@ -249,10 +253,10 @@ Consider this example test case _test.rb_, which is going to fail:
 
 You can run this test using `beaker -t test.rb` or (to use the `run` subcommand and just run the test and bypass host provisioning etc) `beaker run -t test.rb`. It fails.
 
-Now try `beaker run -t test.rb --debug-errors` This will enter a pry console when the failure occurs.
+Now try `beaker run -t test.rb --debug-errors` This will enter a pry or debug console when the failure occurs.
 
     * Assert expected matches actual
-      Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #<Minitest::Assertion: This product is faulty.
+      Exception raised during step execution and debug-errors option is set, entering pry or debug. Exception was: #<Minitest::Assertion: This product is faulty.
        Expected: 3
         Actual: 2>
       HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code

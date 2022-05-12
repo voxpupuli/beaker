@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'readline'
 
 class ClassMixedWithDSLStructure
   include Beaker::DSL::Structure
