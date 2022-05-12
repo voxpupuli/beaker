@@ -150,7 +150,14 @@ module Beaker
         @name = 'ubuntu-14.04-x86_64'
       end
 
-      let(:round_tripped) { YAML.load(YAML.dump(platform)) }
+      let(:round_tripped) do
+        # Ruby 2 has no unsafe_load
+        if YAML.respond_to?(:unsafe_load)
+          YAML.unsafe_load(YAML.dump(platform))
+        else
+          YAML.load(YAML.dump(platform))
+        end
+      end
 
       [:variant, :arch, :version, :codename].each do |field|
         it "deserializes the '#{field}' field" do
