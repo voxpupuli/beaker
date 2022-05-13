@@ -66,9 +66,10 @@ module Beaker
           expect( host_options ).to be === parser.new_host_options
         end
 
-        it 'passes a YAML.load call through to #merge_hosts_yaml' do
+        it 'passes a process_yaml call through to #merge_hosts_yaml' do
           yaml_string = 'not actually yaml, but that wont matter'
-          expect( YAML ).to receive( :load ).with( yaml_string )
+          expect(described_class).to receive(:process_yaml).with(yaml_string, instance_of(Binding))
+
           parser.parse_hosts_string( yaml_string )
         end
       end

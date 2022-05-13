@@ -28,3 +28,5 @@ group :coverage, optional: ENV['COVERAGE']!='yes' do
   gem 'simplecov-console', :require => false
   gem 'codecov', :require => false
 end
+
+gem 'rdoc' if RUBY_VERSION >= '3.1'

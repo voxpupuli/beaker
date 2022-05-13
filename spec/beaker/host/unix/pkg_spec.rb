@@ -106,7 +106,7 @@ module Beaker
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
         expect( instance.check_for_package(pkg) ).to be === true
       end
       it "checks correctly on opensuse" do
@@ -114,7 +114,7 @@ module Beaker
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -122,7 +122,7 @@ module Beaker
         @opts = {'platform' => 'fedora-is-me'}
         pkg = 'fedora_package'
         expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -131,7 +131,7 @@ module Beaker
           @opts = {'platform' => "#{platform}-is-me"}
           pkg = "#{platform}_package"
           expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-          expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+          expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
           expect( instance.check_for_package(pkg) ).to be === true
         end
       end
@@ -140,7 +140,7 @@ module Beaker
         @opts = {'platform' => 'eos-is-me'}
         pkg = 'eos-package'
         expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -148,7 +148,7 @@ module Beaker
         @opts = {'platform' => 'el-is-me'}
         pkg = 'el_package'
         expect( Beaker::Command ).to receive(:new).with("rpm -q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -156,14 +156,14 @@ module Beaker
         @opts = {'platform' => 'huaweios-is-me'}
         pkg = 'debian_package'
         expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
       it "checks correctly on debian" do
         @opts = {'platform' => 'debian-is-me'}
         pkg = 'debian_package'
         expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -171,7 +171,7 @@ module Beaker
         @opts = {'platform' => 'ubuntu-is-me'}
         pkg = 'ubuntu_package'
         expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -179,7 +179,7 @@ module Beaker
         @opts = {'platform' => 'cumulus-is-me'}
         pkg = 'cumulus_package'
         expect( Beaker::Command ).to receive(:new).with("dpkg -s #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -187,7 +187,7 @@ module Beaker
         @opts = {'platform' => 'solaris-11-is-me'}
         pkg = 'solaris-11_package'
         expect( Beaker::Command ).to receive(:new).with("pkg info #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -195,7 +195,7 @@ module Beaker
         @opts = {'platform' => 'solaris-10-is-me'}
         pkg = 'solaris-10_package'
         expect( Beaker::Command ).to receive(:new).with("pkginfo #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -203,7 +203,7 @@ module Beaker
         @opts = {'platform' => 'archlinux-is-me'}
         pkg = 'archlinux_package'
         expect( Beaker::Command ).to receive(:new).with("pacman -Q #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', :accept_all_exit_codes => true).and_return(generate_result("hello", {:exit_code => 0}))
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
 

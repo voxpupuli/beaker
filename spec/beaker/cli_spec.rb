@@ -1,5 +1,15 @@
 require 'spec_helper'
 
+def load_yaml_file(path)
+  # Ruby 2.x has no safe_load_file
+  if YAML.respond_to?(:safe_load_file)
+    permitted = [Beaker::Options::OptionsHash, Symbol, RSpec::Mocks::Double, Time]
+    YAML.safe_load_file(path, permitted_classes: permitted, aliases: true)
+  else
+    YAML.load_file(path)
+  end
+end
+
 module Beaker
   describe CLI do
 
@@ -361,7 +371,7 @@ module Beaker
           cli.instance_variable_set(:@hosts, hosts)
 
           preserved_file = cli.preserve_hosts_file
-          hosts_yaml = YAML.load_file(preserved_file)
+          hosts_yaml = load_yaml_file(preserved_file)
           expect(hosts_yaml['CONFIG'][:tests]).to be == []
           expect(hosts_yaml['CONFIG'][:pre_suite]).to be == []
           expect(hosts_yaml['CONFIG'][:post_suite]).to be == []
@@ -428,7 +438,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect{ YAML.load_file(copied_hosts_file) }.to_not raise_error
+            expect{ load_yaml_file(copied_hosts_file) }.to_not raise_error
           end
         end
 
@@ -440,7 +450,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            yaml_content = YAML.load_file(copied_hosts_file)
+            yaml_content = load_yaml_file(copied_hosts_file)
             expect( yaml_content['CONFIG']['provision'] ).to be_falsy
           end
         end
