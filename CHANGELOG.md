@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.35.0](https://github.com/voxpupuli/beaker/tree/4.35.0) (2022-05-13)
+
+## Added
+
+- Add Ruby 3.1 support ([#1736](https://github.com/voxpupuli/beaker/pull/1736))
+- Build gem during CI runs ([#1738](https://github.com/voxpupuli/beaker/pull/1738))
+
 ## [4.34.0](https://github.com/voxpupuli/beaker/tree/4.34.0) (2022-01-27)
 
 ### Added
