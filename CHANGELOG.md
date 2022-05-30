@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.36.0](https://github.com/voxpupuli/beaker/tree/4.36.0) (2022-05-30)
+
+## Added
+
+- (PE-33493) Add Ubuntu 2204 codename ([#1740](https://github.com/voxpupuli/beaker/pull/1740))
+
+
 ## [4.35.0](https://github.com/voxpupuli/beaker/tree/4.35.0) (2022-05-13)
 
 ## Added
