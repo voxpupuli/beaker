@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.36.1](https://github.com/voxpupuli/beaker/tree/4.36.1) (2022-06-16)
+
+## Fixed
+
+- (maint) Remove /etc/environment file for ubuntu2204 ([#1742](https://github.com/voxpupuli/beaker/pull/1742))
+
 ## [4.36.0](https://github.com/voxpupuli/beaker/tree/4.36.0) (2022-05-30)
 
 ## Added
