@@ -59,9 +59,11 @@ module Windows::File
     case determine_ssh_server
     when :bitvise
       # swap out separators
-      network_path = path.gsub('\\', scp_separator)
+      path.gsub('\\', scp_separator)
     when :openssh
       path
+    when :win32_openssh
+      path.gsub('\\', '/')
     else
       raise ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: '#{determine_ssh_server}'"
     end

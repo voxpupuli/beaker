@@ -71,6 +71,11 @@ module Beaker
         expect(host.scp_path(path)).to eq('C:\Windows')
       end
 
+      it 'replace backslashes with forward slashes when using Win32-OpenSSH' do
+        allow(host).to receive(:determine_ssh_server).and_return(:win32_openssh)
+        expect(host.scp_path(path)).to eq('C:/Windows')
+      end
+
       it 'raises if the server can not be recognized' do
         allow(host).to receive(:determine_ssh_server).and_return(:unknown)
         expect {
