@@ -63,7 +63,7 @@ module Windows::File
     when :openssh
       path
     else
-      raise ArgumentError("windows/file.rb:scp_path: ssh server not recognized: '#{determine_ssh_server}'")
+      raise ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: '#{determine_ssh_server}'"
     end
   end
 

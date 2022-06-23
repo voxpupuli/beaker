@@ -51,5 +51,32 @@ module Beaker
         host.ls_ld( path )
       end
     end
+
+    describe "#scp_to" do
+      let(:path) { 'C:\Windows' }
+
+      it 'replaces backslashes with ??? when using BitVise and cmd' do
+        allow(host).to receive(:determine_ssh_server).and_return(:bitvise)
+        expect(host.scp_path(path)).to eq('C:\Windows')
+      end
+
+      it 'replaces backslashes with forward slashes when using BitVise and powershell' do
+        host = make_host('name', platform: 'windows', is_cygwin: false)
+        allow(host).to receive(:determine_ssh_server).and_return(:bitvise)
+        expect(host.scp_path(path)).to eq('C:/Windows')
+      end
+
+      it 'leaves backslashes as is when using cygwin' do
+        allow(host).to receive(:determine_ssh_server).and_return(:openssh)
+        expect(host.scp_path(path)).to eq('C:\Windows')
+      end
+
+      it 'raises if the server can not be recognized' do
+        allow(host).to receive(:determine_ssh_server).and_return(:unknown)
+        expect {
+          host.scp_path(path)
+        }.to raise_error(ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: 'unknown'")
+      end
+    end
   end
 end
