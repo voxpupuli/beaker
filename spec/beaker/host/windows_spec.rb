@@ -37,7 +37,7 @@ module Windows
 
     describe '#determine_ssh_server' do
       it 'does not care about return codes from the execute call' do
-        expect( host ).to receive( :execute ).with( anything, :accept_all_exit_codes => true )
+        expect( host ).to receive( :execute ).with( anything, :accept_all_exit_codes => true ).twice
         host.determine_ssh_server
       end
 
@@ -51,6 +51,28 @@ module Windows
         output = bitvise_check_output( :success )
         allow( host ).to receive( :execute ).and_return( output )
         expect( host.determine_ssh_server ).to be === :bitvise
+      end
+
+      it 'reads Windows OpenSSH status correctly' do
+        allow(host).to receive(:execute)
+          .with('cmd.exe /c sc query BvSshServer', anything).and_return(bitvise_check_output(:failure))
+        allow(host).to receive(:execute)
+          .with('cmd.exe /c sc qc sshd', anything).and_return(<<~END)
+        [SC] QueryServiceConfig SUCCESS
+
+        SERVICE_NAME: sshd
+                TYPE               : 10  WIN32_OWN_PROCESS 
+                START_TYPE         : 2   AUTO_START
+                ERROR_CONTROL      : 1   NORMAL
+                BINARY_PATH_NAME   : C:\\Windows\\System32\\OpenSSH\\sshd.exe
+                LOAD_ORDER_GROUP   : 
+                TAG                : 0
+                DISPLAY_NAME       : OpenSSH SSH Server
+                DEPENDENCIES       : 
+                SERVICE_START_NAME : LocalSystem
+        END
+
+        expect(host.determine_ssh_server).to eq :win32_openssh
       end
 
       it 'returns old value if it has already determined before' do
