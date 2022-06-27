@@ -120,10 +120,16 @@ module Windows::Exec
   end
 
   # Create the provided directory structure on the host
-  # @param [String] dir The directory structure to create on the host
+  # @param [String,Pathname] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
-  def mkdir_p dir
-    cmd = "mkdir -p \"#{dir}\""
+  def mkdir_p(dir)
+    # single or double quotes will disable ~ expansion, so only quote if we have to
+    str = dir.to_s
+    cmd = if str.start_with?('~') && !str.include?(' ')
+            "mkdir -p #{str}"
+          else
+            "mkdir -p \"#{str}\""
+          end
     result = exec(Beaker::Command.new(cmd), :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end

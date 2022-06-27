@@ -96,5 +96,35 @@ module Beaker
          expect( instance.mv(origin, destination, false) ).to be === 0
       end
     end
+
+    context 'mkdir_p' do
+      let(:path) { '~/.ssh' }
+      let(:result) do
+        result = Beaker::Result.new(nil, '')
+        result.exit_code = 0
+        result
+      end
+
+      it 'accepts Pathname arguments' do
+        expect( instance ).to receive(:exec).with(having_attributes(command: "mkdir -p #{path}"), anything).and_return(result)
+        expect(instance.mkdir_p(Pathname.new(path))).to eq(true)
+      end
+
+      it 'omits quotes if the path starts with ~ and does not contain spaces' do
+        expect( instance ).to receive(:exec).with(having_attributes(command: "mkdir -p #{path}"), anything).and_return(result)
+        expect(instance.mkdir_p(path)).to eq(true)
+      end
+
+      it 'double quotes paths containing spaces' do
+        expect( instance ).to receive(:exec).with(having_attributes(command: "mkdir -p \"~/.foo bar\""), anything).and_return(result)
+        expect(instance.mkdir_p("~/.foo bar")).to eq(true)
+      end
+
+      it 'returns false if the command failed' do
+        result.exit_code = 1
+        expect( instance ).to receive(:exec).with(having_attributes(command: "mkdir -p #{path}"), anything).and_return(result)
+        expect(instance.mkdir_p(path)).to eq(false)
+      end
+    end
   end
 end
