@@ -38,8 +38,14 @@ module Windows
       return @ssh_server if @ssh_server
       @ssh_server = :openssh
       status = execute('cmd.exe /c sc query BvSshServer', :accept_all_exit_codes => true)
-      @ssh_server = :bitvise if status =~ /4  RUNNING/
-      logger.debug("windows.rb:determine_ssh_server: determined ssh server: '#{@ssh_server}'")
+      if status =~ /4  RUNNING/
+        @ssh_server = :bitvise
+      else
+        status = execute('cmd.exe /c sc qc sshd', :accept_all_exit_codes => true)
+        if status =~ /C:\\Windows\\System32\\OpenSSH\\sshd\.exe/
+          @ssh_server = :win32_openssh
+        end
+      end
       @ssh_server
     end
 
