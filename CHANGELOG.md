@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.37.0](https://github.com/voxpupuli/beaker/tree/4.37.0) (2022-06-27)
+
+## Added
+
+- Add support for Win32-OpenSSH ([#1744](https://github.com/voxpupuli/beaker/pull/1744))
+
+## Fixed
+
+- Create ~/.ssh on Windows if it doesn't exist ([#1745](https://github.com/voxpupuli/beaker/pull/1745))
+
 ## [4.36.1](https://github.com/voxpupuli/beaker/tree/4.36.1) (2022-06-16)
 
 ## Fixed
