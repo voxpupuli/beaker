@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.37.1](https://github.com/voxpupuli/beaker/tree/4.37.1) (2022-07-27)
+
+## Fixed
+
+- macOS PE tarballs include arch now ([#1747](https://github.com/voxpupuli/beaker/pull/1747))
+
 ## [4.37.0](https://github.com/voxpupuli/beaker/tree/4.37.0) (2022-06-27)
 
 ## Added
