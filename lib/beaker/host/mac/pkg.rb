@@ -118,7 +118,15 @@ module Mac::Pkg
 
     variant, version, arch, codename = self['platform'].to_array
     release_file = "/repos/apple/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*"
-    download_file = "puppet-agent-#{variant}-#{version}.tar.gz"
+
+    # macOS puppet-agent tarballs haven't always included arch
+    agent_version = opts[:puppet_agent_version]
+    download_file = if agent_version && (agent_version.to_f < 6.28 || agent_version.to_f < 7.18)
+                      "puppet-agent-#{variant}-#{version}.tar.gz"
+                    else
+                      "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
+                    end
+
     return '', release_file, download_file
   end
 
