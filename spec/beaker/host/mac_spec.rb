@@ -82,5 +82,32 @@ module Mac
         expect( release_path_end ).to be === "apple/PC8"
       end
     end
+
+    describe '#pe_puppet_agent_promoted_package_info' do
+      before :each do
+        @platform = "osx-10.15-x86_64"
+      end
+
+      it "uses the old scheme if the version is omitted" do
+        _, _, download_file = host.pe_puppet_agent_promoted_package_info('pa_collection')
+
+        expect(download_file).to eq('puppet-agent-osx-10.15.tar.gz')
+      end
+
+      {
+        '5.5.22' => 'puppet-agent-osx-10.15.tar.gz',
+        '6.27.0' => 'puppet-agent-osx-10.15.tar.gz',
+        '6.28.0' => 'puppet-agent-osx-10.15-x86_64.tar.gz',
+        '7.0.0'  => 'puppet-agent-osx-10.15.tar.gz',
+        '7.18.0' => 'puppet-agent-osx-10.15-x86_64.tar.gz',
+        '8.0.0'  => 'puppet-agent-osx-10.15-x86_64.tar.gz',
+      }.each_pair do |version, expected|
+        it "returns #{expected} for puppet-agent #{version}" do
+          _, _, download_file = host.pe_puppet_agent_promoted_package_info('pa_collection', puppet_agent_version: version)
+
+          expect(download_file).to eq(expected)
+        end
+      end
+    end
   end
 end

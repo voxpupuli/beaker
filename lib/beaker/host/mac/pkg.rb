@@ -121,7 +121,9 @@ module Mac::Pkg
 
     # macOS puppet-agent tarballs haven't always included arch
     agent_version = opts[:puppet_agent_version]
-    download_file = if agent_version && (agent_version.to_f < 6.28 || agent_version.to_f < 7.18)
+    agent_version_f = agent_version&.to_f
+
+    download_file = if agent_version_f.nil? || (agent_version_f < 6.28 || (agent_version_f >= 7.0 && agent_version_f < 7.18))
                       "puppet-agent-#{variant}-#{version}.tar.gz"
                     else
                       "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
