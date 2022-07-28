@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.37.2](https://github.com/voxpupuli/beaker/tree/4.37.2) (2022-07-28)
+
+## Fixed
+
+- Use the new scheme for agent versions >= 6.28 and < 7 [\#1749](https://github.com/voxpupuli/beaker/pull/1749) ([joshcooper](https://github.com/joshcooper))
+
 ## [4.37.1](https://github.com/voxpupuli/beaker/tree/4.37.1) (2022-07-27)
 
 ## Fixed
