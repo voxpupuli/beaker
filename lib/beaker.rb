@@ -38,11 +38,4 @@ module Beaker
 
   # MiniTest, for including MiniTest::Assertions
   require 'minitest/test'
-
-  # Add pry support when available
-  begin
-    require 'pry'
-  rescue LoadError
-    # do nothing
-  end
 end
