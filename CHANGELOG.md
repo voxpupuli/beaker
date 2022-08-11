@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.38.0](https://github.com/voxpupuli/beaker/tree/4.37.2) (2022-08-11)
+
+## Added
+
+- Drop pry dependency, allow using debug gem ([#1737](https://github.com/voxpupuli/beaker/pull/1737))
+
 ## [4.37.2](https://github.com/voxpupuli/beaker/tree/4.37.2) (2022-07-28)
 
 ## Fixed
