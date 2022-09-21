@@ -1,6 +1,12 @@
 # Changelog
 
-## [4.38.0](https://github.com/voxpupuli/beaker/tree/4.37.2) (2022-08-11)
+## [4.38.1](https://github.com/voxpupuli/beaker/tree/4.38.1) (2022-09-21)
+
+## Added
+
+- Arch Linux testing: Ensure the keyring is up2date before installing packages ([#1755](https://github.com/voxpupuli/beaker/pull/1755))
+
+## [4.38.0](https://github.com/voxpupuli/beaker/tree/4.38.0) (2022-08-11)
 
 ## Added
 
