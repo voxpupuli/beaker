@@ -74,9 +74,11 @@ module Unix::Pkg
 
   # Arch Linux is a rolling release distribution. We need to ensure that it is up2date
   # Except for the kernel. An upgrade will purge the modules for the currently running kernel
+  # Before upgrading packages, we need to ensure we've the latest keyring
   def update_pacman_if_needed
     if self['platform'] =~ /archlinux/
       if @pacman_needs_update
+        execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
         execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
         @pacman_needs_update = false
       end
