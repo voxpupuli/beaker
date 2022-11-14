@@ -6,6 +6,7 @@ module Beaker
 
       let(:parser)      {HostsFileParser}
       let(:filepath)    {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg")}
+      let(:filepath_yaml) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts_preserved.yml")}
 
       describe '#parse_hosts_file' do
         it "can correctly read a host file" do
@@ -56,6 +57,12 @@ module Beaker
           expect( File ).to receive( :read ).and_return(yaml_string)
           beaker_options_hash = parser.parse_hosts_file( yaml_string )
           expect(beaker_options_hash['1 plus 2']).to eq(3)
+        end
+
+        it "can correctly read a hosts_preserved.yml file" do
+          FakeFS.deactivate!
+          expect{ parser.parse_hosts_file(filepath_yaml) }.not_to raise_error
+          expect(parser.parse_hosts_file(filepath_yaml).dig(:HOSTS, :"primary.host")).not_to be_nil
         end
       end
 
