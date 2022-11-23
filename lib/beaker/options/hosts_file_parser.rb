@@ -2,7 +2,24 @@ module Beaker
   module Options
     #A set of functions to parse hosts files
     module HostsFileParser
-      PERMITTED_YAML_CLASSES = [Beaker::Options::OptionsHash, Beaker::Platform, Symbol, Time]
+      PERMITTED_YAML_CLASSES = [
+        'Beaker',
+        'Beaker::Logger',
+        'Beaker::Options::OptionsHash',
+        'Beaker::Platform',
+        'Beaker::Result',
+        'File',
+        'IO',
+        'Logger',
+        'Logger::Formatter',
+        'Logger::LogDevice',
+        'Monitor',
+        'Net::SSH::Prompt',
+        'StringifyHash',
+        'StringIO',
+        'Symbol',
+        'Time',
+      ]
 
       # Read the contents of the hosts.cfg into an OptionsHash, merge the 'CONFIG' section into the OptionsHash, return OptionsHash
       # @param [String] hosts_file_path The path to the hosts file
@@ -98,7 +115,7 @@ module Beaker
                      ERB.new(template, nil, '-')
                    end
         if RUBY_VERSION >= '2.6'
-          YAML.safe_load(erb_obj.result(b), permitted_classes: PERMITTED_YAML_CLASSES)
+          YAML.safe_load(erb_obj.result(b), permitted_classes: PERMITTED_YAML_CLASSES, aliases: true)
         else
           YAML.load(erb_obj.result(b))
         end

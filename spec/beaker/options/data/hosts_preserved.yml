@@ -1,0 +1,395 @@
+--- !ruby/hash:Beaker::Options::OptionsHash
+:project: Beaker
+:department: unknown
+:created_by: rspec
+:host_tags: !ruby/hash:Beaker::Options::OptionsHash {}
+:openstack_api_key: 
+:openstack_username: 
+:openstack_auth_url: "/tokens"
+:openstack_tenant: 
+:openstack_keyname: 
+:openstack_network: 
+:openstack_region: 
+:openstack_volume_support: true
+:jenkins_build_url: 
+:validate: true
+:configure: true
+:log_level: debug
+:trace_limit: 10
+:master-start-curl-retries: 120
+:masterless: false
+:options_file: 
+:type: pe
+:provision: true
+:preserve_hosts: always
+:root_keys: false
+:quiet: false
+:project_root: "/path/to/project"
+:xml_dir: junit
+:xml_file: beaker_junit.xml
+:xml_time: beaker_times.xml
+:xml_time_enabled: false
+:xml_stylesheet: junit.xsl
+:default_log_prefix: beaker_logs
+:log_dir: log
+:log_sut_event: sut.log
+:color: true
+:dry_run: false
+:test_tag_and: &3 []
+:test_tag_or: &4 []
+:test_tag_exclude: &5 []
+:timeout: 900
+:fail_mode: slow
+:test_results_file: ''
+:accept_all_exit_codes: false
+:timesync: false
+:disable_iptables: false
+:set_env: true
+:disable_updates: true
+:repo_proxy: false
+:package_proxy: false
+:add_el_extras: false
+:epel_url: http://dl.fedoraproject.org/pub/epel
+:consoleport: 443
+:pe_dir: "/opt/enterprise/dists"
+:pe_version_file: LATEST
+:pe_version_file_win: LATEST-win
+:host_env: !ruby/hash:Beaker::Options::OptionsHash {}
+:host_name_prefix: 
+:ssh_env_file: "~/.ssh/environment"
+:profile_d_env_file: "/etc/profile.d/beaker_env.sh"
+:dot_fog: "/home/user/.fog"
+:ec2_yaml: config/image_templates/ec2.yaml
+:help: false
+:collect_perf_data: none
+:puppetdb_port_ssl: 8081
+:puppetdb_port_nonssl: 8080
+:puppetserver_port: 8140
+:nodeclassifier_port: 4433
+:cache_files_locally: false
+:aws_keyname_modifier: '1234567890'
+:run_in_parallel: &6 []
+:use_fog_credentials: true
+:ssh: !ruby/hash:Beaker::Options::OptionsHash
+  :config: true
+  :verify_host_key: false
+  :auth_methods: &7
+  - publickey
+  :port: 22
+  :forward_agent: 'true'
+  :keys: &8
+  - "/home/user/.ssh/id_rsa"
+  :user_known_hosts_file: "/home/user/.ssh/known_hosts"
+  :keepalive: true
+  :logger: &9 !ruby/object:Logger
+    level: 4
+    progname: 
+    default_formatter: !ruby/object:Logger::Formatter
+      datetime_format: 
+    formatter: 
+    logdev: !ruby/object:Logger::LogDevice
+      shift_period_suffix: 
+      shift_size: 
+      shift_age: 
+      filename: 
+      dev: !ruby/object:IO {}
+      binmode: false
+      mon_data: !ruby/object:Monitor {}
+      mon_data_owner_object_id: 4980
+  :password_prompt: &10 !ruby/object:Net::SSH::Prompt {}
+  :user: root
+:helper: &11
+- lib/beaker_helper.rb
+:keyfile: "/home/user/.ssh/id_rsa"
+:hosts_file: "/path/to/hosts.cfg"
+:pre_suite: &12 []
+:command_line: "/path/to/beaker
+  --helper lib/beaker_helper.rb --debug --keyfile /home/user/.ssh/id_rsa
+  --hosts=hosts.cfg --pre-suite=setup/install.rb"
+:HOSTS:
+  primary.host: !ruby/hash:Beaker::Options::OptionsHash
+    :pe_dir: https://where.we.keep.pe
+    :pe_ver: 2021.5.0
+    :pe_upgrade_dir: https://where.we.keep.pe/upgrade
+    :pe_upgrade_ver: 2021.7.0
+    :platform: &1 !ruby/string:Beaker::Platform
+      str: el-7-x86_64
+      variant: !ruby/string:Beaker::Platform el
+      arch: !ruby/string:Beaker::Platform x86_64
+      version: !ruby/string:Beaker::Platform '7'
+      codename: 
+    :template: redhat-7-x86_64
+    :hypervisor: vmpooler
+    :roles:
+    - agent
+    - master
+    - dashboard
+    - database
+    - default
+    :host_tags: !ruby/hash:Beaker::Options::OptionsHash {}
+    :user: root
+    :group: puppet
+    :pathseparator: ":"
+    :packaging_platform: *1
+    :ssh_connection_preference:
+    - :ip
+    - :vmhostname
+    - :hostname
+    :vmhostname: primary.host
+    :ip: 
+    :puppetserver-confdir: "/etc/puppetlabs/puppetserver/conf.d"
+    :puppetservice: pe-puppetserver
+    :puppetpath: "/etc/puppetlabs/puppet"
+    :puppetconfdir: "/etc/puppetlabs/puppet"
+    :puppetbin: "/opt/puppet/bin/puppet"
+    :puppetbindir: "/opt/puppetlabs/bin"
+    :puppetsbindir: "/opt/puppet/sbin"
+    :privatebindir: "/opt/puppetlabs/puppet/bin"
+    :puppetvardir: "/var/opt/lib/pe-puppet"
+    :hieradatadir: "/var/lib/hiera"
+    :hieraconf: "/etc/puppetlabs/puppet/hiera.yaml"
+    :distmoduledir: "/etc/puppetlabs/code/modules"
+    :sitemoduledir: "/opt/puppetlabs/puppet/modules"
+    :type: pe
+    :pe_installer: puppet-enterprise-installer
+    :dist: puppet-enterprise-2021.5.0-el-7-x86_64
+    :working_dir: "/tmp/workingdir"
+    :pe_installer_conf_file: "/tmp/workingdir/pe.conf"
+    :pe_installer_conf_setting: "-c /tmp/workingdir/pe.conf"
+    :answers: !ruby/hash:Beaker::Options::OptionsHash
+      :q_install: y
+      :q_vendor_packages_install: y
+      :q_puppetagent_install: y
+      :q_verify_packages: y
+      :q_puppet_symlinks_install: y
+      :q_puppetagent_certname: primary.host
+      :q_puppetmaster_install: y
+      :q_all_in_one_install: y
+      :q_puppet_enterpriseconsole_install: y
+      :q_puppetdb_install: y
+      :q_database_install: y
+      :q_puppetagent_server: primary.host
+      :q_puppetdb_hostname: primary.host
+      :q_puppetdb_port: 8081
+      :q_puppetmaster_dnsaltnames: primary.host,puppet
+      :q_puppetmaster_enterpriseconsole_hostname: primary.host
+      :q_puppetmaster_enterpriseconsole_port: 443
+      :q_puppetmaster_certname: primary.host
+      :q_puppetdb_database_name: pe-puppetdb
+      :q_puppetdb_database_user: pdb_user
+      :q_puppetdb_database_password: "''"
+      :q_puppet_enterpriseconsole_auth_database_name: console_auth
+      :q_puppet_enterpriseconsole_auth_database_user: console_auth_user
+      :q_puppet_enterpriseconsole_auth_database_password: "''"
+      :q_puppet_enterpriseconsole_database_name: console
+      :q_puppet_enterpriseconsole_database_user: console_database_user
+      :q_puppet_enterpriseconsole_database_password: "''"
+      :q_database_host: primary.host
+      :q_database_port: 
+      :q_pe_database: y
+      :q_puppet_enterpriseconsole_inventory_hostname: primary.host
+      :q_puppet_enterpriseconsole_inventory_certname: primary.host
+      :q_puppet_enterpriseconsole_inventory_dnsaltnames: primary.host
+      :q_puppet_enterpriseconsole_inventory_port: 8140
+      :q_puppet_enterpriseconsole_master_hostname: primary.host
+      :q_puppet_enterpriseconsole_auth_user_email: "''"
+      :q_puppet_enterpriseconsole_auth_password: "''"
+      :q_puppet_enterpriseconsole_httpd_port: 443
+      :q_puppet_enterpriseconsole_smtp_host: "'primary.host'"
+      :q_puppet_enterpriseconsole_smtp_use_tls: "''"
+      :q_puppet_enterpriseconsole_smtp_port: "''"
+      :q_database_root_password: "'supersecurepassword'"
+      :q_database_root_user: pe-postgres
+      :q_pe_check_for_updates: n
+      :q_classifier_database_user: classifier_user
+      :q_classifier_database_name: pe-classifier
+      :q_classifier_database_password: "''"
+      :q_activity_database_user: activity_user
+      :q_activity_database_name: pe-activity
+      :q_activity_database_password: "''"
+      :q_rbac_database_user: rbac_user
+      :q_rbac_database_name: pe-rbac
+      :q_rbac_database_password: "''"
+      :q_exit_for_nc_migrate: n
+      :q_enable_future_parser: n
+      :q_update_server_host: primary.host
+      :q_install_update_server: y
+      :q_orchestrator_database_name: 
+      :q_orchestrator_database_user: 
+      :q_orchestrator_database_password: "''"
+      :q_use_application_services: y
+:nfs_server: none
+:forge_host: forge.puppet.com
+:pooling_api: https://pooler.host
+:home: "/home/user"
+:load_path: &13 []
+:tests: &14 []
+:post_suite: &15 []
+:install: &16 []
+:pre_cleanup: &17 []
+:modules: &18 []
+:logger: !ruby/object:Beaker::Logger
+  color: true
+  sublog: &2 !ruby/object:StringIO {}
+  log_level: :debug
+  last_result: !ruby/object:Beaker::Result
+    host: redhat7-64-1
+    cmd: puppet agent -t
+    stdout: "Things happened here"
+    stderr: ''
+    output: "Things happened here"
+    exit_code: 2
+    raw_stdout: "Things happened here"
+    raw_stderr: ''
+    raw_output: "Things happened here"
+  line_prefix: ''
+  destinations:
+  - !ruby/object:IO {}
+  - *2
+  log_colors:
+    :error: "\e[00;31m"
+    :warn: "\e[01;31m"
+    :success: "\e[00;35m"
+    :notify: "\e[00;34m"
+    :info: "\e[00;32m"
+    :debug: "\e[00;37m"
+    :trace: "\e[01;33m"
+    :perf: "\e[01;35m"
+    :host: "\e[00;33m"
+:timestamp: 2022-07-28 21:06:27.978864297 +00:00
+:beaker_version: 4.37.1
+:log_prefix: hosts.cfg
+:xml_dated_dir: junit/hosts.cfg/2022-07-28_21_06_27
+:log_dated_dir: log/hosts.cfg/2022-07-28_21_06_27
+:logger_sut: !ruby/object:Beaker::Logger
+  color: 
+  sublog: 
+  log_level: :verbose
+  last_result: 
+  line_prefix: ''
+  destinations:
+  - !ruby/object:File {}
+  log_colors:
+    :error: "\e[00;31m"
+    :warn: "\e[01;31m"
+    :success: "\e[00;35m"
+    :notify: "\e[00;34m"
+    :info: "\e[00;32m"
+    :debug: "\e[00;37m"
+    :trace: "\e[01;33m"
+    :perf: "\e[01;35m"
+    :host: "\e[00;33m"
+:net_diag_hosts: &19
+- https://host1
+- https://host2
+- http://host3
+- https://host4
+:answers:
+  puppet_enterprise::master::recover_configuration::recover_configuration_interval: 0
+  :feature_flags: !ruby/hash:StringifyHash {}
+:CONFIG: !ruby/hash:Beaker::Options::OptionsHash
+  :project: Beaker
+  :department: unknown
+  :created_by: user
+  :host_tags: !ruby/hash:Beaker::Options::OptionsHash {}
+  :openstack_api_key: 
+  :openstack_username: 
+  :openstack_auth_url: "/tokens"
+  :openstack_tenant: 
+  :openstack_keyname: 
+  :openstack_network: 
+  :openstack_region: 
+  :openstack_volume_support: true
+  :jenkins_build_url: 
+  :validate: true
+  :configure: true
+  :log_level: debug
+  :trace_limit: 10
+  :master-start-curl-retries: 120
+  :masterless: false
+  :options_file: 
+  :type: pe
+  :provision: false
+  :preserve_hosts: always
+  :root_keys: false
+  :quiet: false
+  :project_root: "/path/to/project"
+  :xml_dir: junit
+  :xml_file: beaker_junit.xml
+  :xml_time: beaker_times.xml
+  :xml_time_enabled: false
+  :xml_stylesheet: junit.xsl
+  :log_dir: log
+  :log_sut_event: sut.log
+  :color: true
+  :dry_run: false
+  :test_tag_and: *3
+  :test_tag_or: *4
+  :test_tag_exclude: *5
+  :timeout: 900
+  :fail_mode: slow
+  :test_results_file: ''
+  :accept_all_exit_codes: false
+  :timesync: false
+  :disable_iptables: false
+  :set_env: true
+  :disable_updates: true
+  :repo_proxy: false
+  :package_proxy: false
+  :add_el_extras: false
+  :epel_url: http://dl.fedoraproject.org/pub/epel
+  :consoleport: 443
+  :pe_dir: "/opt/enterprise/dists"
+  :pe_version_file: LATEST
+  :pe_version_file_win: LATEST-win
+  :host_env: !ruby/hash:Beaker::Options::OptionsHash {}
+  :host_name_prefix: 
+  :ssh_env_file: "~/.ssh/environment"
+  :profile_d_env_file: "/etc/profile.d/beaker_env.sh"
+  :dot_fog: "/home/user/.fog"
+  :ec2_yaml: config/image_templates/ec2.yaml
+  :help: false
+  :collect_perf_data: none
+  :puppetdb_port_ssl: 8081
+  :puppetdb_port_nonssl: 8080
+  :puppetserver_port: 8140
+  :nodeclassifier_port: 4433
+  :cache_files_locally: false
+  :aws_keyname_modifier: '1234567890'
+  :run_in_parallel: *6
+  :use_fog_credentials: true
+  :ssh: !ruby/hash:Beaker::Options::OptionsHash
+    :config: true
+    :verify_host_key: false
+    :auth_methods: *7
+    :port: 22
+    :forward_agent: 'true'
+    :keys: *8
+    :user_known_hosts_file: "/home/user/.ssh/known_hosts"
+    :keepalive: true
+    :logger: *9
+    :password_prompt: *10
+    :user: root
+  :helper: *11
+  :keyfile: "/home/user/.ssh/id_rsa"
+  :hosts_file: "/path/to/hosts.cfg"
+  :pre_suite: *12
+  :command_line: "/path/to/beaker
+    --helper lib/beaker_helper.rb --debug --keyfile /home/user/.ssh/id_rsa
+    --hosts=hosts.cfg --pre-suite=setup/install.rb"
+  :nfs_server: none
+  :forge_host: forge.puppet.com
+  :pooling_api: https://pooler.host
+  :home: "/home/user"
+  :load_path: *13
+  :tests: *14
+  :post_suite: *15
+  :install: *16
+  :pre_cleanup: *17
+  :modules: *18
+  :beaker_version: 4.37.1
+  :net_diag_hosts: *19
+  :answers: !ruby/hash:Beaker::Options::OptionsHash
+    :puppet_enterprise::master::recover_configuration::recover_configuration_interval: 0
+    :feature_flags: !ruby/hash:Beaker::Options::OptionsHash {}
+  :CONFIG: !ruby/hash:Beaker::Options::OptionsHash {}
