@@ -1,3 +1,106 @@
+## [4.38.1](https://github.com/voxpupuli/beaker/tree/4.38.1) (2022-09-21)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.0...4.38.1)
+
+**Fixed bugs:**
+
+- Arch Linux: Ensure keyring is up2date [\#1755](https://github.com/voxpupuli/beaker/pull/1755) ([bastelfreak](https://github.com/bastelfreak))
+
+## [4.38.0](https://github.com/voxpupuli/beaker/tree/4.38.0) (2022-08-11)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.37.2...4.38.0)
+
+**Implemented enhancements:**
+
+- Drop pry dependency, allow using debug gem [\#1737](https://github.com/voxpupuli/beaker/pull/1737) ([ekohl](https://github.com/ekohl))
+
+## [4.37.2](https://github.com/voxpupuli/beaker/tree/4.37.2) (2022-07-29)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.37.1...4.37.2)
+
+**Fixed bugs:**
+
+- Use the new scheme for agent versions \>= 6.28 and \< 7 [\#1749](https://github.com/voxpupuli/beaker/pull/1749) ([joshcooper](https://github.com/joshcooper))
+
+## [4.37.1](https://github.com/voxpupuli/beaker/tree/4.37.1) (2022-07-27)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.37.0...4.37.1)
+
+**Fixed bugs:**
+
+- macOS PE tarballs include arch now [\#1747](https://github.com/voxpupuli/beaker/pull/1747) ([joshcooper](https://github.com/joshcooper))
+
+## [4.37.0](https://github.com/voxpupuli/beaker/tree/4.37.0) (2022-06-28)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.36.1...4.37.0)
+
+**Implemented enhancements:**
+
+- Add support for Win32-OpenSSH [\#1744](https://github.com/voxpupuli/beaker/pull/1744) ([joshcooper](https://github.com/joshcooper))
+
+**Fixed bugs:**
+
+- Create ~/.ssh on Windows if it doesn't exist [\#1745](https://github.com/voxpupuli/beaker/pull/1745) ([joshcooper](https://github.com/joshcooper))
+
+## [4.36.1](https://github.com/voxpupuli/beaker/tree/4.36.1) (2022-06-16)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.36.0...4.36.1)
+
+**Implemented enhancements:**
+
+- \(maint\) Remove /etc/environment file for ubuntu2204 [\#1742](https://github.com/voxpupuli/beaker/pull/1742) ([cthorn42](https://github.com/cthorn42))
+
+## [4.36.0](https://github.com/voxpupuli/beaker/tree/4.36.0) (2022-05-30)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.35.0...4.36.0)
+
+**Implemented enhancements:**
+
+- \(PE-33493\) Add Ubuntu 2204 codename [\#1740](https://github.com/voxpupuli/beaker/pull/1740) ([cthorn42](https://github.com/cthorn42))
+
+## [4.35.0](https://github.com/voxpupuli/beaker/tree/4.35.0) (2022-05-13)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.34.0...4.35.0)
+
+**Implemented enhancements:**
+
+- Build gem during CI runs [\#1738](https://github.com/voxpupuli/beaker/pull/1738) ([bastelfreak](https://github.com/bastelfreak))
+- Add Ruby 3.1 support [\#1736](https://github.com/voxpupuli/beaker/pull/1736) ([ekohl](https://github.com/ekohl))
+
+## [4.34.0](https://github.com/voxpupuli/beaker/tree/4.34.0) (2022-01-27)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.33.0...4.34.0)
+
+**Implemented enhancements:**
+
+- Extract a host\_packages method from validate\_host [\#1729](https://github.com/voxpupuli/beaker/pull/1729) ([ekohl](https://github.com/ekohl))
+- Reduce duplication in ssh\_permit\_user\_environment [\#1728](https://github.com/voxpupuli/beaker/pull/1728) ([ekohl](https://github.com/ekohl))
+
+**Fixed bugs:**
+
+- Do not install curl on EL9 [\#1732](https://github.com/voxpupuli/beaker/pull/1732) ([ekohl](https://github.com/ekohl))
+- Drop old Ruby 1.8 compatibility code [\#1730](https://github.com/voxpupuli/beaker/pull/1730) ([ekohl](https://github.com/ekohl))
+
+## [4.33.0](https://github.com/voxpupuli/beaker/tree/4.33.0) (2022-01-21)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.32.0...4.33.0)
+
+**Implemented enhancements:**
+
+- Add ed25519 as runtime dependency [\#1726](https://github.com/voxpupuli/beaker/pull/1726) ([bastelfreak](https://github.com/bastelfreak))
+
+## [4.32.0](https://github.com/voxpupuli/beaker/tree/4.32.0) (2021-12-06)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.31.0...4.32.0)
+
+**Implemented enhancements:**
+
+- Initial EL9 support [\#1719](https://github.com/voxpupuli/beaker/pull/1719) ([ekohl](https://github.com/ekohl))
+
+**Fixed bugs:**
+
+- Arch Linux: install net-tools and openssh [\#1722](https://github.com/voxpupuli/beaker/pull/1722) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [4.31.0](https://github.com/voxpupuli/beaker/tree/4.31.0) (2021-11-02)
 
 ### Fixed
