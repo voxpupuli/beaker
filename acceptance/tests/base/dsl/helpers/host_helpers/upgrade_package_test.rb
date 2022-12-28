@@ -43,7 +43,7 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
         #       > No Packages marked for Update
 
         result = upgrade_package default, "non-existent-package-name"
-        assert_match /No Packages marked for Update/i, result
+        assert_match(/No Packages marked for Update/i, result)
       end
     end
 

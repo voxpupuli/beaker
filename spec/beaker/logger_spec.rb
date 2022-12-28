@@ -257,7 +257,7 @@ module Beaker
         expect( File.exists?( 'my_tmp_file' ) ).to be_truthy
 
         io = logger.destinations.select {|d| d.respond_to? :path }.first
-        expect( io.path ).to match /my_tmp_file/
+        expect( io.path ).to match(/my_tmp_file/)
       end
 
       it 'remove destinations with the remove_destinations method' do
