@@ -226,7 +226,7 @@ module Beaker
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
         it "calls update for #{platform}" do
           @opts = {'platform' => platform}
-          instance.instance_variable_set("@apt_needs_update", true)
+          instance.instance_variable_set(:@apt_needs_update, true)
           expect(instance).to receive('execute').with("apt-get update")
           expect{instance.update_apt_if_needed}.to_not raise_error
         end

@@ -67,7 +67,7 @@ module Beaker
         before do
           options  = Beaker::Options::OptionsHash.new
           options[:beaker_version] = 'version_number'
-          cli.instance_variable_set('@options', options)
+          cli.instance_variable_set(:@options, options)
         end
         it 'prints the version and dumps the options' do
           expect(cli.logger).to receive(:info).exactly(3).times
