@@ -94,8 +94,8 @@ module Beaker
     end
 
     describe '#combined_instance_and_options_hosts' do
-      let (:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
-      let (:instance_host ) {
+      let(:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
+      let(:instance_host ) {
         [Beaker::Host.create('ubuntu', {:platform => 'host'}, {} )]
       }
       before do
@@ -112,11 +112,11 @@ module Beaker
       end
 
       context 'when hosts share IP addresses' do
-        let (:options_host) do
+        let(:options_host) do
           {'HOSTS' => {'host1' => {:options_attribute => 'options'},
                        'host2' => {:options_attribute => 'options'}}}
         end
-        let (:instance_host ) do
+        let(:instance_host ) do
           [Beaker::Host.create('host1',
                                {:platform => 'host', :ip => '127.0.0.1'}, {} ),
            Beaker::Host.create('host2',

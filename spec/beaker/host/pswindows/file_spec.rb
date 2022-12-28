@@ -20,9 +20,9 @@ module Beaker
       end
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { PSWindowsFileTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { PSWindowsFileTest.new(opts, logger) }
 
     describe '#cat' do
       let(:path) { '/path/to/cat' }

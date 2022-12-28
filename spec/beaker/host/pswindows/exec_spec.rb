@@ -20,9 +20,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { PSWindowsExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { PSWindowsExecTest.new(opts, logger) }
 
     context "rm" do
 

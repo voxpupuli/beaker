@@ -9,8 +9,8 @@ end
 describe ClassMixedWithDSLStructure do
   include Beaker::DSL::Assertions
 
-  let (:logger) { double }
-  let (:metadata) { @metadata ||= {} }
+  let(:logger) { double }
+  let(:metadata) { @metadata ||= {} }
 
   before :each do
     allow( subject ).to receive(:metadata).and_return(metadata)

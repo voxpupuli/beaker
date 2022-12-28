@@ -24,9 +24,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { WindowsPkgTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { WindowsPkgTest.new(opts, logger) }
 
     describe '#install_package' do
       before :each do

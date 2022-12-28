@@ -33,7 +33,7 @@ module Beaker
 
     context 'ensure that beaker options can be passed through' do
 
-      let (:beaker_options_list) { [
+      let(:beaker_options_list) { [
         'options-file',
         'helper',
         'load-path',
@@ -131,16 +131,16 @@ module Beaker
     end
 
     context '#provision' do
-      let ( :cli ) { subcommand.cli }
+      let( :cli ) { subcommand.cli }
       let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let ( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let ( :cleaned_hosts ) {double()}
-      let ( :yielded_host_hash ) {double()}
-      let ( :yielded_host_name) {double()}
-      let ( :network_manager) {double('network_manager')}
-      let ( :hosts) {double('hosts')}
-      let ( :hypervisors) {double('hypervisors')}
-      let (:options) {double ('options')}
+      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
+      let( :cleaned_hosts ) {double()}
+      let( :yielded_host_hash ) {double()}
+      let( :yielded_host_name) {double()}
+      let( :network_manager) {double('network_manager')}
+      let( :hosts) {double('hosts')}
+      let( :hypervisors) {double('hypervisors')}
+      let(:options) {double('options')}
 
       it 'provisions the host and saves the host info' do
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)

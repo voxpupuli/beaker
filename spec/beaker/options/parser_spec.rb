@@ -586,10 +586,10 @@ module Beaker
       end
 
       describe '#normalize_tags!' do
-        let (:test_tag_and      ) { @test_tag_and     || [] }
-        let (:test_tag_or       ) { @test_tag_or      || [] }
-        let (:test_tag_exclude  ) { @test_tag_exclude || [] }
-        let (:options           ) {
+        let(:test_tag_and      ) { @test_tag_and     || [] }
+        let(:test_tag_or       ) { @test_tag_or      || [] }
+        let(:test_tag_exclude  ) { @test_tag_exclude || [] }
+        let(:options           ) {
           opts                    = Beaker::Options::OptionsHash.new
           opts[:test_tag_and]     = test_tag_and
           opts[:test_tag_or]      = test_tag_or
@@ -644,7 +644,7 @@ module Beaker
       end
 
       describe '#resolve_symlinks' do
-        let (:options) { Beaker::Options::OptionsHash.new }
+        let(:options) { Beaker::Options::OptionsHash.new }
 
         it 'calls File.realpath if hosts_file is set' do
           options[:hosts_file] = opts_path
@@ -691,8 +691,8 @@ module Beaker
       end
 
       describe '#check_hypervisor_config' do
-        let (:options) { Beaker::Options::OptionsHash.new }
-        let (:invalid_file) { '/tmp/doesnotexist_visor.yml' }
+        let(:options) { Beaker::Options::OptionsHash.new }
+        let(:invalid_file) { '/tmp/doesnotexist_visor.yml' }
 
         before :each do
           FakeFS.deactivate!

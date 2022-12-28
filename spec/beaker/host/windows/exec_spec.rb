@@ -21,9 +21,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { WindowsExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { WindowsExecTest.new(opts, logger) }
 
     describe '#prepend_commands' do
       it 'sets spacing correctly if both parts are defined' do
@@ -63,7 +63,7 @@ module Beaker
     end
 
     describe '#cygwin_installed?' do
-      let (:response) { double( 'response' ) }
+      let(:response) { double( 'response' ) }
 
       it 'uses cygcheck to see if cygwin is installed' do
         expect( Beaker::Command ).to receive(:new).with("cygcheck --check-setup cygwin").and_return(:foo)

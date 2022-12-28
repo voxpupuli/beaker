@@ -24,16 +24,16 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:platform) {
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:platform) {
       if @platform
         { 'platform' => Beaker::Platform.new( @platform) }
       else
         { 'platform' => Beaker::Platform.new( 'osx-10.9-x86_64' ) }
       end
     }
-    let (:instance) { UnixFileTest.new(opts.merge(platform), logger) }
+    let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
 
@@ -194,8 +194,8 @@ module Beaker
     end
 
     describe '#chown' do
-      let (:user) { 'someuser' }
-      let (:path) { '/path/to/chown/on' }
+      let(:user) { 'someuser' }
+      let(:path) { '/path/to/chown/on' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "chown #{user} #{path}" ).and_return( 0 )
@@ -209,7 +209,7 @@ module Beaker
     end
 
     describe '#cat' do
-      let (:path) { '/path/to/cat/on' }
+      let(:path) { '/path/to/cat/on' }
       it 'calls cat for path' do
         expect( instance ).to receive( :execute ).with( "cat #{path}" ).and_return( 0 )
         expect( instance.cat( path ) ).to be === 0
@@ -239,8 +239,8 @@ module Beaker
     end
 
     describe '#chgrp' do
-      let (:group) { 'somegroup' }
-      let (:path) { '/path/to/chgrp/on' }
+      let(:group) { 'somegroup' }
+      let(:path) { '/path/to/chgrp/on' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "chgrp #{group} #{path}" ).and_return( 0 )
@@ -254,7 +254,7 @@ module Beaker
     end
 
     describe '#ls_ld' do
-      let (:path) { '/path/to/ls_ld' }
+      let(:path) { '/path/to/ls_ld' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "ls -ld #{path}" ).and_return( 0 )

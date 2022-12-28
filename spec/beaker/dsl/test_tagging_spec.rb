@@ -8,18 +8,18 @@ end
 describe ClassMixedWithDSLStructure do
   include Beaker::DSL::Assertions
 
-  let (:logger) { double }
-  let (:metadata) { @metadata ||= {} }
+  let(:logger) { double }
+  let(:metadata) { @metadata ||= {} }
 
   before :each do
     allow( subject ).to receive(:metadata).and_return(metadata)
   end
 
   describe '#tag' do
-    let ( :test_tag_and     ) { @test_tag_and     || [] }
-    let ( :test_tag_or      ) { @test_tag_or      || [] }
-    let ( :test_tag_exclude ) { @test_tag_exclude || [] }
-    let ( :options          ) {
+    let( :test_tag_and     ) { @test_tag_and     || [] }
+    let( :test_tag_or      ) { @test_tag_or      || [] }
+    let( :test_tag_exclude ) { @test_tag_exclude || [] }
+    let( :options          ) {
       opts                    = Beaker::Options::OptionsHash.new
       opts[:test_tag_and]     = test_tag_and
       opts[:test_tag_or]      = test_tag_or
@@ -131,8 +131,8 @@ describe ClassMixedWithDSLStructure do
 end
 
 describe Beaker::DSL::TestTagging::PlatformTagConfiner do
-  let ( :confines_array ) { @confines_array || [] }
-  let ( :confiner ) {
+  let( :confines_array ) { @confines_array || [] }
+  let( :confiner ) {
     Beaker::DSL::TestTagging::PlatformTagConfiner.new( confines_array )
   }
 

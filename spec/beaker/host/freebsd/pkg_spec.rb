@@ -24,9 +24,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { FreeBSDPkgTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { FreeBSDPkgTest.new(opts, logger) }
     let(:cond) do
       'TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexist pkg info -x "pkg(-devel)?\\$" > /dev/null 2>&1'
     end
