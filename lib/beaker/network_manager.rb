@@ -53,7 +53,7 @@ module Beaker
       end
       @hypervisors = {}
       #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
-      hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select{ |k,_v| k.to_s !~ /HOSTS/})
+      hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select{ |k,_v| !k.to_s.include?('HOSTS')})
       @options['HOSTS'].each_key do |name|
         host_hash = @options['HOSTS'][name]
         hypervisor = host_hash['hypervisor']

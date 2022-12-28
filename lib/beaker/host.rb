@@ -177,7 +177,7 @@ module Beaker
     end
 
     def is_pe?
-      self['type'] && self['type'].to_s =~ /pe/
+      self['type'] && self['type'].to_s.include?('pe')
     end
 
     def is_cygwin?

@@ -35,7 +35,7 @@ test_name 'Hocon Helpers Test' do
         end
         fail('execution should not continue in failure mode')
       rescue ArgumentError => e
-        assert(e.to_s =~ /requires a filename/)
+        assert(e.to_s.include?('requires a filename'))
       else
         fail('No exception raised in failure mode')
       end
@@ -54,7 +54,7 @@ test_name 'Hocon Helpers Test' do
         hocon_file_edit_on(hosts, hocon_filename)
         fail('execution should not continue in failure mode')
       rescue ArgumentError => e
-        assert(e.to_s =~ /No block was provided/)
+        assert(e.to_s.include?('No block was provided'))
       else
         fail('No exception raised in failure mode')
       end

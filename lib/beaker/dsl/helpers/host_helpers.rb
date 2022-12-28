@@ -193,7 +193,7 @@ module Beaker
         # @return [Result] Returns the result of the SCP operation
         def scp_to host, from_path, to_path, opts = {}
           block_on host do | host |
-            if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = on host, "echo #{to_path}"
               to_path = result.raw_output.chomp
             end
@@ -215,7 +215,7 @@ module Beaker
         # @return [Result] Returns the result of the rsync operation
         def rsync_to host, from_path, to_path, opts = {}
           block_on host do | host |
-            if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = host.echo "#{to_path}"
               to_path = result.raw_output.chomp
             end

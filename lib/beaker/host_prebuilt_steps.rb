@@ -338,7 +338,7 @@ module Beaker
     def set_etc_hosts(host, etc_hosts)
       if /freebsd/.match?(host['platform'])
         host.echo_to_file(etc_hosts, '/etc/hosts')
-      elsif ((host['platform'] =~ /windows/) and not host.is_cygwin?)
+      elsif ((host['platform'].include?('windows')) and not host.is_cygwin?)
         host.exec(Command.new("echo '#{etc_hosts}' >> C:\\Windows\\System32\\drivers\\etc\\hosts"))
       else
         host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
@@ -361,10 +361,10 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         logger.debug "Give root a copy of current user's keys, on #{host.name}"
-        if host['platform'] =~ /windows/ and host.is_cygwin?
+        if host['platform'].include?('windows') and host.is_cygwin?
           host.exec(Command.new('cp -r .ssh /cygdrive/c/Users/Administrator/.'))
           host.exec(Command.new('chown -R Administrator /cygdrive/c/Users/Administrator/.ssh'))
-        elsif host['platform'] =~ /windows/ and not host.is_cygwin?
+        elsif host['platform'].include?('windows') and not host.is_cygwin?
           # from https://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/xcopy.mspx?mfr=true:
           #    /i : If Source is a directory or contains wildcards and Destination
           #      does not exist, xcopy assumes destination specifies a directory
@@ -451,7 +451,7 @@ module Beaker
         elsif /solaris-11/.match?(host['platform'])
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host['platform'] =~ /f5/ || host.is_powershell?
+        elsif host['platform'].include?('f5') || host.is_powershell?
           #interacting with f5 should using tmsh
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
@@ -587,7 +587,7 @@ module Beaker
 
         logger.debug("setting local environment on #{host.name}")
 
-        if host['platform'] =~ /windows/ && host.is_cygwin?
+        if host['platform'].include?('windows') && host.is_cygwin?
          env['CYGWIN'] = 'nodosfilewarning'
         end
 

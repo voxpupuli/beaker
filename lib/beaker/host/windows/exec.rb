@@ -150,7 +150,7 @@ module Windows::Exec
   # @return [Boolean]
   def cygwin_installed?
     output = exec(Beaker::Command.new('cygcheck --check-setup cygwin'), :accept_all_exit_codes => true).stdout
-    return true if output.match(/cygwin/) && output.match(/OK/)
+    return true if output.include?('cygwin') && output.include?('OK')
     false
   end
 

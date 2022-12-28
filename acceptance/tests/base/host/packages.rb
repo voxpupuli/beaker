@@ -11,9 +11,9 @@ def get_host_pkg(host)
       Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
     when /cumulus/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
-    when (host['platform'] =~ /windows/ and host.is_cygwin?)
+    when (host['platform'].include?('windows') and host.is_cygwin?)
       Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES
-    when (host['platform'] =~ /windows/ and not host.is_cygwin?)
+    when (host['platform'].include?('windows') and not host.is_cygwin?)
       Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
     when /freebsd/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
@@ -66,7 +66,7 @@ hosts.each do |host|
   cmdline_args = ''
   # Newer vmpooler hosts created by Packer templates, and running Cygwin 2.4,
   # must have these switches passed
-  cmdline_args = '--local-install --download' if (host['platform'] =~ /windows/ and host.is_cygwin?)
+  cmdline_args = '--local-install --download' if (host['platform'].include?('windows') and host.is_cygwin?)
   host.install_package(package, cmdline_args)
   assert(host.check_for_package(package), "'#{package}' should be installed")
 

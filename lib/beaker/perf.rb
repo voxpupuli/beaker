@@ -46,7 +46,7 @@ module Beaker
         @logger.perf_output("Creating symlink from /etc/sysstat/sysstat.cron to /etc/cron.d")
         host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'),:acceptable_exit_codes => [0,1])
       end
-      if /aggressive/.match?(@options[:collect_perf_data])
+      if @options[:collect_perf_data]&.include?('aggressive')
         @logger.perf_output("Enabling aggressive sysstat polling")
         if /debian|ubuntu/.match?(host['platform'])
           host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
@@ -74,7 +74,7 @@ module Beaker
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
       if PERF_SUPPORTED_PLATFORMS.match?(host['platform']) # All flavours of Linux
-        if not @options[:collect_perf_data] =~ /aggressive/
+        if not @options[:collect_perf_data]&.include?('aggressive')
           host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"),:acceptable_exit_codes => [0,1,2])
         end
         if (defined? @options[:graphite_server] and not @options[:graphite_server].nil?) and
