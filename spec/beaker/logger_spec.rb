@@ -256,7 +256,7 @@ module Beaker
         logger.add_destination 'my_tmp_file'
         expect( File.exist?( 'my_tmp_file' ) ).to be_truthy
 
-        io = logger.destinations.select {|d| d.respond_to? :path }.first
+        io = logger.destinations.find {|d| d.respond_to? :path }
         expect( io.path ).to match(/my_tmp_file/)
       end
 

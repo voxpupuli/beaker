@@ -165,7 +165,7 @@ module Beaker
 
           # After marshal load and marshal unload, the logger option (an rspec double) is no longer 'equal' to the original.
           # Array of results can be in different order.
-          new_host = myhosts.select{ |host| host.name == hosts[0].name}.first
+          new_host = myhosts.find{ |host| host.name == hosts[0].name}
           hosts[0].options.each { |option|
             expect(option[1]).to eq(new_host.options[option[0]]) unless option[0] == :logger
           }
