@@ -401,7 +401,7 @@ module Beaker
         allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
         allow( conn ).to receive(:hostname).and_return(host.name)
 
-        host.do_scp_to *args
+        host.do_scp_to(*args)
       end
 
       it 'calls for host scp post operations after SCPing happens' do
@@ -422,7 +422,7 @@ module Beaker
         allow( conn ).to receive(:hostname).and_return(host.name)
         expect( host ).to receive( :scp_post_operations ).ordered
 
-        host.do_scp_to *args
+        host.do_scp_to(*args)
       end
 
       it 'throws an IOError when the file given doesn\'t exist' do
@@ -460,7 +460,7 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).exactly(0).times
           expect( conn ).to receive(:scp_to).exactly(0).times
 
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
         it 'can take an ignore list that excludes a single file and scp the rest' do
           created_target_path = File.join(target_path, File.basename(source_path))
@@ -492,7 +492,7 @@ module Beaker
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
 
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
       end
 
@@ -552,7 +552,7 @@ module Beaker
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
 
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
       end
 
@@ -586,7 +586,7 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).exactly(0).times
           expect( conn ).to receive(:scp_to).exactly(0).times
 
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
 
         it 'can take an ignore list that excludes a single file and scp the rest' do
@@ -616,7 +616,7 @@ module Beaker
           allow( conn ).to receive(:ip).and_return(host['ip'])
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
 
         it 'can take an ignore list that excludes a dir and scp the rest' do
@@ -646,7 +646,7 @@ module Beaker
           allow( conn ).to receive(:ip).and_return(host['ip'])
           allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
           allow( conn ).to receive(:hostname).and_return(host.name)
-          host.do_scp_to *args
+          host.do_scp_to(*args)
         end
       end
     end
@@ -666,7 +666,7 @@ module Beaker
         allow( conn ).to receive(:ip).and_return(host['ip'])
         allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
         allow( conn ).to receive(:hostname).and_return(host.name)
-        host.do_scp_from *args
+        host.do_scp_from(*args)
       end
     end
 
@@ -686,7 +686,7 @@ module Beaker
 
         expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Rsync::Result.new('raw rsync output', 0))
 
-        host.do_rsync_to *args
+        host.do_rsync_to(*args)
 
         expect(Rsync.host).to eq('root@default.ip.address')
       end
@@ -730,8 +730,8 @@ module Beaker
         rsync_args = ['source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).twice.with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
 
-        host.do_rsync_to *args
-        host.do_rsync_to *args
+        host.do_rsync_to(*args)
+        host.do_rsync_to(*args)
       end
     end
 

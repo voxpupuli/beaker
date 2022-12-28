@@ -187,7 +187,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set :@teardown_procs, teardown_array
       block = lambda { 'blah' }
       expect( teardown_array ).to receive( :<< ).with( block )
-      subject.teardown &block
+      subject.teardown(&block)
     end
   end
 
