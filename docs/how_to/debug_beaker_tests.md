@@ -33,7 +33,7 @@ Here's a test file that exercises different ways of running commands on Beaker h
 ```
 hosts.each do |h|
   on h, "echo hello"
-  if h['platform'] =~ /windows/
+  if h['platform'].include?('windows')
     scp_to h, "beaker.gemspec", "/cygdrive/c/Documents\ and\ Settings/All\ Users/Application\ Data/"
   end
   on(h, "echo test block") do |result|

@@ -364,7 +364,7 @@ module Beaker
           when String
             true_false = host[property.to_s].include? value
           when Regexp
-            true_false = host[property.to_s] =~ value
+            true_false = value.match?(host[property.to_s])
           end
           true_false
         end

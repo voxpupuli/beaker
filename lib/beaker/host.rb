@@ -450,7 +450,7 @@ module Beaker
       end
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
-        if has_ignore and (source =~ ignore_re)
+        if has_ignore and ignore_re&.match?(source)
           @logger.trace "After rejecting ignored files/dirs, there is no file to copy"
           source_file = nil
           result.stdout = "No files to copy"
@@ -462,7 +462,7 @@ module Beaker
         end
       else # a directory with ignores
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
-          f.gsub(/\A#{Regexp.escape(source)}/, '') =~ ignore_re #only match against subdirs, not full path
+          ignore_re&.match?(f.gsub(/\A#{Regexp.escape(source)}/, '')) #only match against subdirs, not full path
         end
         @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
 

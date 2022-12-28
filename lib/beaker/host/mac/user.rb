@@ -47,7 +47,7 @@ module Mac::User
   def user_present(name)
     user_exists = false
     execute("dscacheutil -q user -a name #{name}") do |result|
-       user_exists = result.stdout =~  /^name: #{name}/
+      user_exists = result.stdout.start_with?("name: #{name}")
     end
 
     return if user_exists

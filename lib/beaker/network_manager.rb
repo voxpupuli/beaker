@@ -17,7 +17,7 @@ module Beaker
     def provision? options, host
       command_line_says = options[:provision]
       host_says = host['hypervisor'] && (host.has_key?('provision') ? host['provision'] : true)
-      (command_line_says && host_says) or (host['hypervisor'] =~/(vagrant)/)
+      (command_line_says && host_says) or host['hypervisor'].include?('vagrant')
     end
 
     attr_accessor :hosts, :hypervisors

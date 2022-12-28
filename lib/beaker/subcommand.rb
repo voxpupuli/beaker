@@ -186,7 +186,7 @@ module Beaker
             path.to_s
           end
         end.flatten
-      elsif resources.all? { |r| r =~ /^(pre-suite|tests|post-suite|pre-cleanup)$/ }
+      elsif resources.all? { |r| /^(pre-suite|tests|post-suite|pre-cleanup)$/.match?(r) }
         # The regex match here is loose so that users can supply multiple suites,
         # such as `beaker exec pre-suite,tests`.
         beaker_suites.each do |suite|

@@ -29,10 +29,10 @@ module Beaker
         #checks all dots, they are equal so examine the rest
         a_rest = a.split('-').drop(1)
         a_is_release = a_rest.empty?
-        a_is_rc = !a_is_release && !!(a_rest[0] =~ /rc\d+/)
+        a_is_rc = !a_is_release && /rc\d+/.match?(a_rest[0])
         b_rest = b.split('-').drop(1)
         b_is_release = b_rest.empty?
-        b_is_rc = !b_is_release && !!(b_rest[0] =~ /rc\d+/)
+        b_is_rc = !b_is_release && /rc\d+/.match?(b_rest[0])
 
         if a_is_release && b_is_release
           # They are equal

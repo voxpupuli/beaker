@@ -213,7 +213,7 @@ hosts.each do |host|
     #each local file should have a single match on the host
     local_paths.each do |path|
       search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
-      matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
+      matched = host_paths.select{ |check| /#{Regexp.escape(search_name)}$/.match?(check) }
       assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       host_paths = host_paths - matched
     end
@@ -238,7 +238,7 @@ hosts.each do |host|
     #each local file should have a single match on the host
     local_paths.each do |path|
       search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
-      matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
+      matched = host_paths.select{ |check| /#{Regexp.escape(search_name)}$/.match?(check) }
       re =  /((\/|\A)tests(\/|\z))|((\/|\A)Gemfile(\/|\z))/
       if !path&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")

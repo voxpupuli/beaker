@@ -16,7 +16,7 @@ end
 
 # Returns the contents of a named fixture file, to be found in `fixture_path`.
 def fixture_contents(fixture)
-  fixture_file = Dir.entries(fixture_path).find { |e| /^#{fixture}$|#{fixture}\.[a-z]/ =~ e }
+  fixture_file = Dir.entries(fixture_path).find { |e| /^#{fixture}$|#{fixture}\.[a-z]/.match?(e) }
   File.read("#{fixture_path}/#{fixture_file}")
 end
 

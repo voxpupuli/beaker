@@ -68,7 +68,7 @@ module Mac::Group
   def group_present(name)
     group_exists = false
     execute("dscacheutil -q group -a name #{name}") do |result|
-      group_exists = result.stdout =~  /^name: #{name}/
+      group_exists = result.stdout.start_with?("name: #{name}")
     end
 
     return if group_exists

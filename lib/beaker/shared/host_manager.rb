@@ -24,7 +24,7 @@ module Beaker
       #@return [Array<Host>] The hosts that have the desired name/vmhostname/ip
       def hosts_with_name(hosts, name = nil)
         hosts.select do |host|
-          name.nil? or host.name =~ /\A#{name}/ or host[:vmhostname] =~ /\A#{name}/ or host[:ip] =~ /\A#{name}/
+          name.nil? or host.name&.start_with?(name) or host[:vmhostname]&.start_with?(name) or host[:ip]&.start_with?(name)
         end
       end
 

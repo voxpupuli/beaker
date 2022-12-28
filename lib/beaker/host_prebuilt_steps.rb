@@ -377,7 +377,7 @@ module Beaker
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif /osx/.match?(host['platform'])
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
-        elsif host['platform'] =~ /(free|open)bsd/ or host['platform'] =~ /solaris-11/
+        elsif /(free|open)bsd/.match?(host['platform']) || host['platform'].include?('solaris-11')
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         elsif /solaris-10/.match?(host['platform'])
           host.exec(Command.new('sudo cp -r .ssh /.'), {:pty => true})

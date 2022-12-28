@@ -108,7 +108,7 @@ module Cisco
     def append_commands(command = '', _user_ac = '', _opts = {})
       command.gsub('"') {'\\"'}
       # vsh commands, ntpdate or when user is root commands do not require an appended `"`
-      return '"' unless command =~ /ntpdate|\/isan\/bin\/vsh/ || self[:user] == 'root'
+      return '"' unless /ntpdate|\/isan\/bin\/vsh/.match?(command) || self[:user] == 'root'
     end
 
     # Construct the environment string for this command

@@ -223,7 +223,7 @@ module Beaker
       hosts_yaml['HOSTS'] = combined_instance_and_options_hosts
       hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
       # save the rest of the options, excepting the HOSTS that we have already processed
-      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,_v| k =~ dontpreserve })
+      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,_v| dontpreserve.match?(k) })
       # remove copy of HOSTS information
       hosts_yaml['CONFIG']['provision'] = false
       File.open(preserved_hosts_filename, 'w') do |file|

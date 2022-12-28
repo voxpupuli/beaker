@@ -57,7 +57,7 @@ test_name 'The source attribute' do
   target_file_on_nix = '/tmp/source_attr_test'
   teardown do
     hosts.each do |host|
-      on(host, "rm #{target_file_on_nix}", :accept_all_exit_codes => true) unless host['platform'] =~ /^win/
+      on(host, "rm #{target_file_on_nix}", :accept_all_exit_codes => true) unless host['platform'].start_with('win')
     end
   end
   ...

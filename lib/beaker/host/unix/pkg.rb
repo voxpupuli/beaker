@@ -144,7 +144,7 @@ module Unix::Pkg
               raise ArgumentException
             end
             # If the package advises symlinks to be created, do it
-            command.stdout.split("\n").select { |x| x =~ /^\s+ln\s/ }.each do |ln|
+            command.stdout.split("\n").select { |x| /^\s+ln\s/.match?(x) }.each do |ln|
               execute(ln, opts)
             end
           end
@@ -171,7 +171,7 @@ module Unix::Pkg
   # @api public
   def install_package_with_rpm(name, cmdline_args = '', opts = {})
     proxy = ''
-    if name =~ /^http/ and opts[:package_proxy]
+    if name&.start_with?('http') and opts[:package_proxy]
       proxy = extract_rpm_proxy_options(opts[:package_proxy])
     end
     execute("rpm #{cmdline_args} -Uvh #{name} #{proxy}")
