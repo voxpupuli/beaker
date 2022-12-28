@@ -64,7 +64,7 @@ module Beaker
     it 'uses user defined log prefix if it is provided' do
       @log_prefix = 'dummy_log_prefix'
       @hosts_file = 'dummy_hosts'
-      nm = network_manager
+      network_manager
       cur_prefix = options[:log_prefix]
       expect(cur_prefix).to be === @log_prefix
     end
@@ -72,7 +72,7 @@ module Beaker
     it 'uses host based log prefix, when there is not user defined log prefix' do
       @log_prefix = nil
       @hosts_file = 'dummy_hosts'
-      nm = network_manager
+      network_manager
       cur_prefix = options[:log_prefix]
       expect(cur_prefix).to be === @hosts_file
     end
@@ -80,7 +80,7 @@ module Beaker
     it 'uses default log prefix, when there is no user defined and no host file' do
       @log_prefix = nil
       @hosts_file = nil
-      nm = network_manager
+      network_manager
       cur_prefix = options[:log_prefix]
       expect(cur_prefix).to be === 'hello_default'
     end

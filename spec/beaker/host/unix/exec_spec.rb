@@ -366,7 +366,7 @@ module Beaker
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
-                expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, boot_time_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
+                expect { instance.reboot(sleep_time, 9, 10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
               end
             end
           end

@@ -18,9 +18,6 @@ module Beaker
       @logger = options[:logger]
       @name = name
       @test_cases = []
-      #Set some defaults, just in case you attempt to print without including them
-      start_time = Time.at(0)
-      stop_time = Time.at(1)
     end
 
     #Add a {TestCase} to this {TestSuiteResult} instance, used in calculating {TestSuiteResult} data.

@@ -361,7 +361,7 @@ module Unix::Pkg
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
     raise ArgumentError, error_message % "opts[:download_url]" unless opts[:download_url]
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
 
     version = version.split('.')[0] # packages are only published for major versions
 
@@ -425,7 +425,7 @@ module Unix::Pkg
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
 
     case variant
     when /^(solaris)$/
@@ -525,7 +525,7 @@ module Unix::Pkg
   #
   # @return nil
   def install_local_package(onhost_package_file, onhost_copy_dir = nil)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
     case variant
     when /^(fedora|el|redhat|centos)$/
       command_name = 'yum'
@@ -555,7 +555,7 @@ module Unix::Pkg
   #
   # @return nil
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
     case variant
     when /^(fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
@@ -587,7 +587,7 @@ module Unix::Pkg
   #
   # @return [Beaker::Result] Result of installation command execution
   def solaris_install_local_package(package_path, noask_directory = nil)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
 
     version = version.split('.')[0] # packages are only published for major versions
 

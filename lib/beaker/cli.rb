@@ -108,8 +108,6 @@ module Beaker
           @perf = Beaker::Perf.new( @hosts, @options )
         end
 
-        errored = false
-
         #pre acceptance  phase
         run_suite(:pre_suite, :fast)
 

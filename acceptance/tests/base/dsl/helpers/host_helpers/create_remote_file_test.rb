@@ -227,7 +227,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       end
 
       assert_raises Beaker::Host::CommandFailure do
-        remote_contents = on(default, "cat #{remote_filename}").stdout
+        on(default, "cat #{remote_filename}").stdout
       end
     end
   end

@@ -275,7 +275,6 @@ module Beaker
       #add_el_extras
       #only supports el-* platforms
       logger = opts[:logger]
-      debug_opt = opts[:debug] ? 'vh' : ''
       block_on host do |host|
         case
         when el_based?(host) && ['6','7'].include?(host['platform'].version)

@@ -86,7 +86,7 @@ module Beaker
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = puppet_configprint['node_name_value'].strip
+      puppet_configprint['node_name_value'].strip
     end
 
     def port_open? port

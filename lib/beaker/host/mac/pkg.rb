@@ -116,7 +116,7 @@ module Mac::Pkg
     error_message = "Must provide %s argument to get puppet agent dev package information"
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
     release_file = "/repos/apple/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*"
 
     # macOS puppet-agent tarballs haven't always included arch

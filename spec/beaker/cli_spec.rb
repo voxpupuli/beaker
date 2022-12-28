@@ -490,7 +490,6 @@ module Beaker
             options = cli.instance_variable_get(:@options)
             Dir.mktmpdir do |dir|
               options[:log_dated_dir] = File.absolute_path(dir)
-              copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
               hosts << make_host('fusion', { :hypervisor => 'fusion' })
@@ -510,7 +509,6 @@ module Beaker
             options = cli.instance_variable_get(:@options)
             Dir.mktmpdir do |dir|
               options[:log_dated_dir] = File.absolute_path(dir)
-              copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
               hosts << make_host('fusion', { :hypervisor => 'fusion' })

@@ -60,7 +60,6 @@ module Beaker
 
       it 'opens the given file for writing, and writes the doc to it' do
         mock_doc = Object.new
-        doc_xml = 'flibbity-floo'
         allow( mock_doc ).to receive( :write ).with(File, 2)
         expect( File ).to receive( :open ).with( xml_file, 'w' )
         LoggerJunit.finish(mock_doc, xml_file)

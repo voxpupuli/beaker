@@ -15,8 +15,6 @@ test_name "dsl::structure" do
 
   step "#confine_block leaves hosts array intact after running block on matching hosts" do
     begin
-      previous_hosts = hosts.dup
-
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
         @in_confine +=1
@@ -46,8 +44,6 @@ test_name "dsl::structure" do
 
   step "#confine_block leaves hosts array intact after skipping block on non-matching hosts" do
     begin
-      previous_hosts = hosts.dup
-
       @in_confine = 0
       confine_block :except, :platform => default["platform"] do
         @in_confine +=1
@@ -62,8 +58,6 @@ test_name "dsl::structure" do
   end
 
   step "#confine_block allows blocks to raise skip_test" do
-    previous_hosts = hosts.dup
-
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do

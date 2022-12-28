@@ -170,8 +170,7 @@ module Unix::File
   #
   # @return [String] the text of the noask file
   def noask_file_text
-    variant, version, arch, codename = self['platform'].to_array
-    if variant == 'solaris' && version == '10'
+    if self['platform'].variant == 'solaris' && self['platform'].version == '10'
       noask = <<NOASK
 # Write the noask file to a temporary directory
 # please see man -s 4 admin for details about this file:

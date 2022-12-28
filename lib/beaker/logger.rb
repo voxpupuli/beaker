@@ -438,7 +438,7 @@ module Beaker
       end
 
       # And remove lines that contain our program name in them
-      completely_purged = mostly_purged.reject {|line| line.include? $0 }
+      mostly_purged.reject {|line| line.include? $0 }
     end
 
     # Utility method that takes a path as input, checks each component

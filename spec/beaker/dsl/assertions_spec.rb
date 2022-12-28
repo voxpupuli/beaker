@@ -69,15 +69,6 @@ Holy Crap, what HAPPENED!?!?!?
 And THIS is again on stdout
 OUTPUT
 
-        stdout = <<STDOUT
-This is on stdout
-And THIS is again on stdout
-STDOUT
-
-        stderr = <<STDERR
-Holy Crap, what HAPPENED!?!?!?
-STDERR
-
         expectation = <<EXPECT
         STDOUT> This is on stdout
         STDERR> While this is on stderr

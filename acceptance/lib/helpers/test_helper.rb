@@ -69,7 +69,7 @@ def fails_intermittently(issue_link, args = {})
   raise ArgumentError, "provide a Jira ticket link" unless issue_link
   raise ArgumentError, "a block is required" unless block_given?
   yield
-rescue MiniTest::Assertion, StandardError, SignalException => e # we have a test failure!
+rescue MiniTest::Assertion, StandardError, SignalException # we have a test failure!
   STDERR.puts "\n\nIntermittent test failure! See: #{issue_link}"
 
   if args.empty?

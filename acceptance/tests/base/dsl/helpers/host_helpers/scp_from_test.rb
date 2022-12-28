@@ -4,7 +4,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
   if test_scp_error_on_close?
     step "#scp_from fails if the local path cannot be found" do
       remote_tmpdir = default.tmpdir()
-      remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
+      remote_filename, _contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
 
       assert_raises Beaker::Host::CommandFailure do
         scp_from default, remote_filename, "/non/existent/file.txt"
@@ -40,7 +40,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
       remote_tmpdir = default.tmpdir()
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
-      results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
+      on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
 
       scp_from hosts, remote_filename, local_dir
       remote_contents = on(hosts.last, "cat #{remote_filename}").stdout

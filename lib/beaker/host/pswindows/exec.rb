@@ -118,7 +118,7 @@ module PSWindows::Exec
   def add_env_var key, val
     key = key.to_s.upcase
     #see if the key/value pair already exists
-    cur_val = subbed_val = get_env_var(key, true)
+    cur_val = get_env_var(key, true)
     subbed_val = cur_val.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
     if cur_val.empty?
       exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', '#{val}', 'Machine')"))
@@ -137,7 +137,7 @@ module PSWindows::Exec
   def delete_env_var key, val
     key = key.to_s.upcase
     #get the current value of the key
-    cur_val = subbed_val = get_env_var(key, true)
+    cur_val = get_env_var(key, true)
     subbed_val = (cur_val.split(';') - [val.gsub(/'|"/, '')]).join(';')
     if subbed_val != cur_val
       #remove the current key value

@@ -311,10 +311,10 @@ namespace :docs do
       puts "Found a YARD Server running with pid #{pid}"
       `kill #{pid}`
       puts "Stopping..."
-      yes, output = running?( DOCS_DAEMON )
+      yes, _output = running?( DOCS_DAEMON )
       if yes
         `kill -9 #{pid}`
-        yes, output = running?( DOCS_DAEMON )
+        yes, _output = running?( DOCS_DAEMON )
         if yes
           puts "Could not Stop Server!"
         else
