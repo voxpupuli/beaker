@@ -62,7 +62,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 
@@ -93,7 +93,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 
@@ -113,7 +113,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 

@@ -271,7 +271,7 @@ module Beaker
         end
 
         it 'doesn\'t re-order test cases themselves on time_sort' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
 
           @test_cases.each_with_index do |tc,index|
             tc.instance_variable_set(:@runtime, 3**index)
@@ -286,7 +286,7 @@ module Beaker
         end
 
         it 'writes @export nested hashes properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           inner_value = {'second' => '2nd'}
           @test_cases.each do |tc|
             tc.instance_variable_set(:@runtime, 0)
@@ -301,7 +301,7 @@ module Beaker
         end
 
         it 'writes @export array of hashes properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           @test_cases.each do |tc|
             tc.instance_variable_set(:@runtime, 0)
             tc.instance_variable_set(:@exports, [{:yes => 'hello'}, {:uh => 'sher'}])
@@ -315,7 +315,7 @@ module Beaker
         end
 
         it 'writes @export hashes per test case properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           @test_cases.each_with_index do |tc,index|
             tc.instance_variable_set(:@runtime, 0)
             tc.instance_variable_set(:@exports, [{"yes_#{index}" => "hello#{index}"}])

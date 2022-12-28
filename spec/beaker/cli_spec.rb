@@ -250,7 +250,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.not_to raise_error
 
@@ -268,7 +268,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.to raise_error
         end
@@ -303,7 +303,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.to raise_error
 
@@ -342,7 +342,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.not_to raise_error
         end
@@ -404,7 +404,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
 
           allow( cli ).to receive( :print_env_vars_affecting_beaker )
@@ -482,9 +482,9 @@ module Beaker
               copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               logger = cli.instance_variable_get(:@logger)
-              expect( logger ).to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) by following these steps:\n").never
-              expect( logger ).to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}").never
-              expect( logger ).to receive( :send ).with( anything, '- use the --no-provision flag').never
+              expect( logger ).not_to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) by following these steps:\n")
+              expect( logger ).not_to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}")
+              expect( logger ).not_to receive( :send ).with( anything, '- use the --no-provision flag')
 
               cli.execute!
             end
@@ -540,10 +540,10 @@ module Beaker
               hosts << make_host('docker', { :hypervisor => 'docker' })
 
               logger = cli.instance_variable_get(:@logger)
-              expect( logger ).to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) with:\n").never
-              expect( logger ).to receive( :send ).with( anything, '(docker support is untested for this feature. please reference the docs for more info)').never
-              expect( logger ).to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}").never
-              expect( logger ).to receive( :send ).with( anything, '- use the --no-provision flag').never
+              expect( logger ).not_to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
+              expect( logger ).not_to receive( :send ).with( anything, '(docker support is untested for this feature. please reference the docs for more info)')
+              expect( logger ).not_to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}")
+              expect( logger ).not_to receive( :send ).with( anything, '- use the --no-provision flag')
 
               cli.execute!
             end

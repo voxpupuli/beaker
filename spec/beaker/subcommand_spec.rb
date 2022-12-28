@@ -274,7 +274,7 @@ module Beaker
       it 'does not attempt preserve state if the flag is not passed in' do
         subcommand.exec('tests')
 
-        expect(SubcommandUtil).to receive(:sanitize_options_for_save).never
+        expect(SubcommandUtil).not_to receive(:sanitize_options_for_save)
         expect(subcommand.cli.options['preserve-state']).to be_nil
       end
     end

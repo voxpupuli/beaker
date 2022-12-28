@@ -92,7 +92,7 @@ module Beaker
         it "does not call disable_iptables" do
           options[:disable_iptables] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_iptables ).never
+          expect( hypervisor ).not_to receive( :disable_iptables )
           hypervisor.configure
         end
       end
@@ -119,7 +119,7 @@ module Beaker
         it "does not call disable_updates_puppetlabs_com" do
           options[:disable_updates] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_updates ).never
+          expect( hypervisor ).not_to receive( :disable_updates )
           hypervisor.configure
         end
       end

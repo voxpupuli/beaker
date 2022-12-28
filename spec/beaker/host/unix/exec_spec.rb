@@ -65,7 +65,7 @@ module Beaker
       let(:host) { {'pathseparator' => ':'} }
 
       it 'returns a blank string if theres no env' do
-        expect( instance ).to receive( :is_powershell? ).never
+        expect( instance ).not_to receive( :is_powershell? )
         expect( instance.environment_string( {} ) ).to be == ''
       end
 

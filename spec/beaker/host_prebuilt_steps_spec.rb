@@ -242,7 +242,7 @@ describe Beaker do
     it "does nothing on non debian/ubuntu/cumulus hosts" do
       host = make_host( 'testhost', { :platform => 'windows' } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.apt_get_update( host )
 
@@ -330,7 +330,7 @@ describe Beaker do
     it "does nothing for non ubuntu/debian/cumulus/solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.proxy_config( hosts, options )
 
@@ -372,7 +372,7 @@ describe Beaker do
     it "does nothing for non el-5/6 hosts" do
       hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.add_el_extras( hosts, options )
 

@@ -41,7 +41,7 @@ module Beaker
           expect( subject ).to receive( :sleep ).with( 2 ).once
           expect( subject ).to receive( :sleep ).with( 3 ).once
           expect( subject ).to receive( :sleep ).with( 5 ).once
-          expect( subject ).to receive( :sleep ).with( 8 ).never
+          expect( subject ).not_to receive( :sleep ).with( 8 )
 
           subject.repeat_fibonacci_style_for( 5 ) do
             block.exec
@@ -55,7 +55,7 @@ module Beaker
           expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
           expect(subject).to receive(:sleep).with(3).once
-          expect(subject).to receive(:sleep).with(anything).never
+          expect(subject).not_to receive(:sleep).with(anything)
 
           subject.repeat_fibonacci_style_for(20) do
             block.exec
@@ -67,7 +67,7 @@ module Beaker
 
           expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
-          expect(subject).to receive(:sleep).with(anything).never
+          expect(subject).not_to receive(:sleep).with(anything)
 
           success_result = subject.repeat_fibonacci_style_for(3) do
             block.abcd
@@ -78,7 +78,7 @@ module Beaker
         it "never sleeps if block is successful right at first (returns true)" do
           expect(block).to receive(:fake01).once.and_return(true)
 
-          expect(subject).to receive(:sleep).never
+          expect(subject).not_to receive(:sleep)
 
           subject.repeat_fibonacci_style_for(3) do
             block.fake01
