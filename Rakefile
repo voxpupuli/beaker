@@ -145,7 +145,7 @@ Commandline options set through the above environment variables will override se
     exit_status = 1
     output = ''
     Open3.popen3("bundle exec rspec") {|stdin, stdout, stderr, wait_thr|
-      while line = stdout.gets
+      while(line = stdout.gets)
         puts line
       end
       output = stdout
