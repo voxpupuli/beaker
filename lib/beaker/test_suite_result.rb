@@ -259,7 +259,7 @@ module Beaker
           end
         end
       rescue Exception => e
-        @logger.error "failure in XML output: \n#{e.to_s}" + e.backtrace.join("\n")
+        @logger.error "failure in XML output: \n#{e}" + e.backtrace.join("\n")
       end
     end
 

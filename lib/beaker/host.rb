@@ -37,7 +37,7 @@ module Beaker
       end
 
       def [](k)
-        cmd = PuppetCommand.new(@command, "--configprint #{k.to_s}")
+        cmd = PuppetCommand.new(@command, "--configprint #{k}")
         @host.exec(cmd).stdout.strip
       end
     end

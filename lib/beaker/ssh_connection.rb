@@ -108,7 +108,7 @@ module Beaker
       while (not @ssh) && (not methods.empty?) do
         unless instance_variable_get("@#{methods[0]}").nil?
           if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts, options)
+            @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
           else
             @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
             @ssh_connection_preference.delete(methods[0])

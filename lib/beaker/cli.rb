@@ -184,7 +184,7 @@ module Beaker
     #                                 continue to execute tests.
     def run_suite(suite_name, failure_strategy = nil)
       if (@options[suite_name].empty?)
-        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
+        @logger.notify("No tests to run for suite '#{suite_name}'")
         return
       end
       Beaker::TestSuite.new(
