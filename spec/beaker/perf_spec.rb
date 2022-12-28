@@ -14,6 +14,7 @@ module Beaker
         @my_logger.add_destination(@my_io)
         @options[:logger] = @my_logger
       end
+
       it 'creates a new Perf object' do
         hosts = Array.new
         options = Hash.new
