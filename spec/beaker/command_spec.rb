@@ -90,6 +90,7 @@ module Beaker
 
 
   end
+
   describe HostCommand do
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
@@ -112,6 +113,7 @@ module Beaker
       expect( cmd.cmd_line host ).to be === ""
     end
   end
+
   describe SedCommand do
     let(:host)        {
       h = Hash.new

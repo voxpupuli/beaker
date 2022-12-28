@@ -66,6 +66,7 @@ module Beaker
           instance.install_package('rsync')
         end
       end
+
       context "with pkgng" do
         it "runs the correct install command" do
           expect( instance ).to receive(:pkgng_active?).once.and_return(true)
@@ -85,6 +86,7 @@ module Beaker
           instance.check_for_package('rsync')
         end
       end
+
       context "with pkgng" do
         it "runs the correct checking command" do
           expect( instance ).to receive(:pkgng_active?).once.and_return(true)

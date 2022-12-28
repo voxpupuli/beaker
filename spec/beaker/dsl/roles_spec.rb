@@ -32,6 +32,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.agents ).to be == []
     end
   end
+
   describe '#master' do
     it 'returns the master if there is one' do
       @hosts = [ master, agent1 ]
@@ -52,6 +53,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.master ).to be_nil
     end
   end
+
   describe '#dashboard' do
     it 'returns the dashboard if there is one' do
       @hosts = [ a_and_dash, agent1 ]
@@ -78,6 +80,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.dashboard ).to be_nil
     end
   end
+
   describe '#database' do
     it 'returns the database if there is one' do
       @hosts = [ db, agent1 ]
@@ -104,6 +107,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.database ).to be_nil
     end
   end
+
   describe '#not_controller' do
     it 'returns true when a host does not have the roles master/database/dashboard' do
       expect( subject.not_controller(agent1) ).to be == true
@@ -113,6 +117,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.not_controller(a_and_dash) ).to be == false
     end
   end
+
   describe '#agent_only' do
     it 'returns true when a host has the single role agent' do
       expect( subject.agent_only(agent1) ).to be == true
@@ -126,6 +131,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.agent_only(master) ).to be == false
     end
   end
+
   describe '#aio_version?' do
     it 'returns false if the host doesn\'t have a :pe_ver or :version' do
       agent1[:pe_ver] = nil
@@ -305,6 +311,7 @@ describe ClassMixedWithDSLRoles do
     end
 
   end
+
   describe '#aio_agent?' do
     it 'returns false if agent_only check doesn\'t pass' do
       agent1[:roles] = ['agent', 'headless']
@@ -321,6 +328,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.aio_agent?(agent1) ).to be === true
     end
   end
+
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
@@ -347,6 +355,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.default ).to be_nil
     end
   end
+
   describe '#add_role_def' do
     it 'raises an error on unsupported role format "1role"' do
       expect { subject.add_role_def( "1role" ) }.to raise_error ArgumentError
@@ -387,6 +396,7 @@ describe ClassMixedWithDSLRoles do
       subject.class.send( :undef_method, test_role )
     end
   end
+
   describe '#any_hosts_as?' do
     it 'returns true if a host exists, false otherwise' do
       @hosts = [ agent1, agent2 ]

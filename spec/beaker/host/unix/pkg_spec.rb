@@ -234,6 +234,7 @@ module Beaker
         end
       end
     end
+
     context "install_package" do
 
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
@@ -393,6 +394,7 @@ module Beaker
         end
       end
     end
+
     context "install_package_with_rpm" do
 
       it "accepts a package as a single argument" do

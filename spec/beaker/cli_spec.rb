@@ -548,6 +548,7 @@ module Beaker
 
         end
       end
+
       describe '#build_hosts_preserved_reproducing_command' do
 
         it 'replaces the hosts file' do
