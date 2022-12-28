@@ -4,7 +4,7 @@ module Beaker
   module Options
     describe OptionsFileParser do
 
-      let(:parser) {Beaker::Options::OptionsFileParser}
+      let(:parser) {described_class}
       let(:simple_opts) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt")}
 
       it "can correctly read options from a file" do

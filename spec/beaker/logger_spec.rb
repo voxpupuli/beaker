@@ -4,8 +4,8 @@ require 'spec_helper'
 module Beaker
   describe Logger do
     let(:my_io)     { StringIO.new                         }
-    let(:logger)    { Logger.new(my_io, :quiet => true)  }
-    let(:basic_logger)    { Logger.new(:quiet => true)  }
+    let(:logger)    { described_class.new(my_io, :quiet => true)  }
+    let(:basic_logger)    { described_class.new(:quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
@@ -29,18 +29,18 @@ module Beaker
 
       it 'generates path for a given timestamp' do
         input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
-        expect( Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
+        expect( described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
       end
 
       it 'generates directory for a given timestamp' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be_truthy
+        expect( File.directory? described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be_truthy
       end
 
       it 'generates nested directories if given as a log_prefix' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
         prefix = 'a/man/a/plan/a/canal/panama'
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, prefix, input_time) ).to be_truthy
+        expect( File.directory? described_class.generate_dated_log_folder(test_dir, prefix, input_time) ).to be_truthy
       end
 
     end
@@ -157,7 +157,7 @@ module Beaker
 
     context 'new' do
       it 'does not duplicate STDOUT when directly passed to it' do
-        stdout_logger = Logger.new STDOUT
+        stdout_logger = described_class.new STDOUT
         expect( stdout_logger.destinations.size ).to be === 1
       end
 
@@ -200,7 +200,7 @@ module Beaker
             }
           }
 
-          let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+          let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
           it 'should override the specified log colors' do
             expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -233,7 +233,7 @@ module Beaker
               }
             }
 
-            let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+            let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
             it 'should override the specified log colors' do
               expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -275,7 +275,7 @@ module Beaker
       end
 
       it 'colors strings if @color is set' do
-        colorized_logger = Logger.new my_io, :color => true, :quiet => true
+        colorized_logger = described_class.new my_io, :color => true, :quiet => true
 
         expect( my_io ).to receive( :print ).with "\e[00;30m"
         expect( my_io ).to receive( :print )
@@ -285,7 +285,7 @@ module Beaker
       end
 
       context 'at trace log_level' do
-        subject( :trace_logger )  { Logger.new( my_io,
+        subject( :trace_logger )  { described_class.new( my_io,
                                               :log_level => 'trace',
                                               :quiet => true,
                                               :color => true )
@@ -311,7 +311,7 @@ module Beaker
       end
 
       context 'at verbose log_level' do
-        subject( :verbose_logger )  { Logger.new( my_io,
+        subject( :verbose_logger )  { described_class.new( my_io,
                                               :log_level => 'verbose',
                                               :quiet => true,
                                               :color => true )
@@ -337,7 +337,7 @@ module Beaker
       end
 
       context 'at debug log_level' do
-        subject( :debug_logger )  { Logger.new( my_io,
+        subject( :debug_logger )  { described_class.new( my_io,
                                               :log_level => 'debug',
                                               :quiet => true,
                                               :color => true )
@@ -362,7 +362,7 @@ module Beaker
       end
 
       context 'at info log_level' do
-        subject( :info_logger ) { Logger.new( my_io,
+        subject( :info_logger ) { described_class.new( my_io,
                                               :log_level => :info,
                                               :quiet     => true,
                                               :color     => true )
@@ -398,7 +398,7 @@ module Beaker
       context 'SUT output logging' do
 
         context 'host output logging' do
-          subject( :host_output ) { Logger.new( my_io,
+          subject( :host_output ) { described_class.new( my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
                                               :color     => true )}
@@ -416,7 +416,7 @@ module Beaker
         end
 
         context 'color host output' do
-          subject( :color_host_output ) { Logger.new( my_io,
+          subject( :color_host_output ) { described_class.new( my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
                                               :color     => true )}

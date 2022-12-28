@@ -170,7 +170,7 @@ describe ClassMixedWithDSLHelpers do
       it 'yields self' do
         subject.on host, command do
           expect( subject ).
-            to be_an_instance_of( ClassMixedWithDSLHelpers )
+            to be_an_instance_of( described_class )
         end
       end
 

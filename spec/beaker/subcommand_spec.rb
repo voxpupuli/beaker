@@ -4,7 +4,7 @@ module Beaker
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
   describe Subcommand do
     let( :subcommand ) {
-      Beaker::Subcommand.new
+      described_class.new
     }
 
     describe '#initialize' do
@@ -91,7 +91,7 @@ module Beaker
           expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
           expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
-          expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
+          expect {described_class.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
         end
       end
 
@@ -102,7 +102,7 @@ module Beaker
         expect(File).not_to receive(:open)
         expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
         expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
-        expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
+        expect {described_class.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
       end
     end
 

@@ -4,7 +4,7 @@ module Beaker
   module Options
 
     describe Validator do
-      let(:validator) { Validator.new }
+      let(:validator) { described_class.new }
 
       describe '#check_yaml_file' do
         let(:bad_yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'badyaml.cfg') }

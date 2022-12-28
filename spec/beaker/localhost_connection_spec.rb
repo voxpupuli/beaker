@@ -4,7 +4,7 @@ require 'net/ssh'
 module Beaker
   describe LocalConnection do
     let( :options )   { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file'} }
-    subject(:connection) { LocalConnection.new(options) }
+    subject(:connection) { described_class.new(options) }
 
     before :each do
       allow( subject ).to receive(:sleep)
@@ -13,8 +13,8 @@ module Beaker
     describe '#self.connect' do
       it 'loggs message' do
         expect(options[:logger]).to receive(:debug).with('Local connection, no connection to start')
-        connection_constructor = LocalConnection.connect(options)
-        expect( connection_constructor ).to be_a_kind_of LocalConnection
+        connection_constructor = described_class.connect(options)
+        expect( connection_constructor ).to be_a_kind_of described_class
       end
     end
 

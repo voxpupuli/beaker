@@ -10,7 +10,7 @@ module Beaker
     describe HostManager do
       # The logger double as nil object doesn't work with marshal.load and marshal.unload needed for run_in_parallel.
       let( :logger )         { double('logger') }
-      let( :host_handler )   { Beaker::Shared::HostManager }
+      let( :host_handler )   { described_class }
       let( :spec_block )     { Proc.new { |arr| arr } }
       let( :platform )       { @platform || 'unix' }
       let( :role0 )          { "role0" }

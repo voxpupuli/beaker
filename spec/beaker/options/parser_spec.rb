@@ -4,7 +4,7 @@ module Beaker
   module Options
 
     describe Parser do
-      let(:parser) { Parser.new }
+      let(:parser) { described_class.new }
       let(:opts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
       let(:hosts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
 

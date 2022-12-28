@@ -133,7 +133,7 @@ end
 describe Beaker::DSL::TestTagging::PlatformTagConfiner do
   let( :confines_array ) { @confines_array || [] }
   let( :confiner ) {
-    Beaker::DSL::TestTagging::PlatformTagConfiner.new( confines_array )
+    described_class.new( confines_array )
   }
 
   describe '#initialize' do

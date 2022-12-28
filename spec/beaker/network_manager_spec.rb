@@ -16,7 +16,7 @@ module Beaker
         :default_log_prefix => 'hello_default',
       })
     }
-    let( :network_manager ) { NetworkManager.new(options, options[:logger]) }
+    let( :network_manager ) { described_class.new(options, options[:logger]) }
     let( :hosts ) { make_hosts }
     let( :host ) { hosts[0] }
 

@@ -10,7 +10,7 @@ module Beaker
     let( :vmhostname ){ "vmhostname" }
     let( :hostname)   { "my_host" }
     let( :name_hash ) { { :ip => ip, :vmhostname => vmhostname, :hostname => hostname } }
-    subject(:connection) { SshConnection.new name_hash, user, ssh_opts, options }
+    subject(:connection) { described_class.new name_hash, user, ssh_opts, options }
 
     before :each do
       allow( subject ).to receive(:sleep)
@@ -18,8 +18,8 @@ module Beaker
 
     it 'self.connect creates connects and returns a proxy for that connection' do
       expect( Net::SSH ).to receive(:start).with( "default.ip.address", user, ssh_opts ).and_return(true)
-      connection_constructor = SshConnection.connect name_hash, user, ssh_opts, options
-      expect( connection_constructor ).to be_a_kind_of SshConnection
+      connection_constructor = described_class.connect name_hash, user, ssh_opts, options
+      expect( connection_constructor ).to be_a_kind_of described_class
     end
 
     it 'connect creates a new connection' do

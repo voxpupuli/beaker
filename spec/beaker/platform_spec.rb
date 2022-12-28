@@ -4,7 +4,7 @@ module Beaker
   describe Platform do
 
     let( :logger )    { double( 'logger' ) }
-    let( :platform )  { Platform.new(@name) }
+    let( :platform )  { described_class.new(@name) }
 
     context 'initialize' do
 

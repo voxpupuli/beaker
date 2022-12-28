@@ -4,7 +4,7 @@ module Beaker
   module Options
     describe HostsFileParser do
 
-      let(:parser)      {HostsFileParser}
+      let(:parser)      {described_class}
       let(:filepath)    {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg")}
       let(:filepath_yaml) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts_preserved.yml")}
 

@@ -15,7 +15,7 @@ module Beaker
 
     context 'initializing and parsing' do
       let( :cli ) {
-        Beaker::CLI.new
+        described_class.new
       }
 
       describe 'instance variable initialization' do
@@ -32,7 +32,7 @@ module Beaker
 
       describe '#parse_options' do
         it 'returns self' do
-          expect(cli.parse_options).to be_instance_of(Beaker::CLI)
+          expect(cli.parse_options).to be_instance_of(described_class)
         end
 
         it 'replaces the logger object with a new one' do
@@ -79,7 +79,7 @@ module Beaker
     let(:cli)      {
       allow(File).to receive(:exist?).and_call_original
       allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
-      Beaker::CLI.new.parse_options
+      described_class.new.parse_options
     }
 
     describe '#configured_options' do

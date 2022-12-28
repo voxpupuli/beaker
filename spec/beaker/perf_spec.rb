@@ -10,8 +10,8 @@ module Beaker
         options[:log_level] = :debug
         my_logger = Beaker::Logger.new(options)
         options[:logger] = my_logger
-        perf = Perf.new( hosts, options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( hosts, options )
+        expect( perf ).to be_a_kind_of described_class
       end
 
       before(:each) do
@@ -29,8 +29,8 @@ module Beaker
         hosts = [ make_host("myHost", @options) ]
         hosts.each { |host| host['platform'] = "centos-6-x86_64" }
         @my_logger.remove_destination(STDOUT)
-        perf = Perf.new( hosts, @options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( hosts, @options )
+        expect( perf ).to be_a_kind_of described_class
         expect(@my_io.string).to match(/Setup perf on host: myHost/)
       end
 
@@ -38,8 +38,8 @@ module Beaker
         hosts = [ make_host("myHost", @options), make_host("myOtherHost", @options) ]
         hosts.each { |host| host['platform'] = "centos-6-x86_64" }
         @my_logger.remove_destination(STDOUT)
-        perf = Perf.new( hosts, @options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( hosts, @options )
+        expect( perf ).to be_a_kind_of described_class
         expect(@my_io.string).to match(/Setup perf on host: myHost*\nSetup perf on host: myOtherHost/)
       end
 
@@ -49,8 +49,8 @@ module Beaker
         hosts[1]['platform'] = "sles-11-x86_64"
         hosts[2]['platform'] = "opensuse-15-x86_64"
         @my_logger.remove_destination(STDOUT)
-        perf = Perf.new( hosts, @options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( hosts, @options )
+        expect( perf ).to be_a_kind_of described_class
         expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost/)
       end
     end
@@ -71,8 +71,8 @@ module Beaker
       it "Does the Right Thing on Linux hosts" do
         @hosts[0]['platform'] = "centos-6-x86_64"
         @my_logger.remove_destination(STDOUT)
-        perf = Perf.new( @hosts, @options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( @hosts, @options )
+        expect( perf ).to be_a_kind_of described_class
         perf.print_perf_info
         expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
       end
@@ -80,8 +80,8 @@ module Beaker
       it "Does the Right Thing on non-Linux hosts" do
         @hosts[0]['platform'] = "windows"
         @my_logger.remove_destination(STDOUT)
-        perf = Perf.new( @hosts, @options )
-        expect( perf ).to be_a_kind_of Perf
+        perf = described_class.new( @hosts, @options )
+        expect( perf ).to be_a_kind_of described_class
         perf.print_perf_info
         expect(@my_io.string).to match(/Setup perf on host: myHost\nPerf \(sysstat\) not supported on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nPerf \(sysstat\) not supported on host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
       end

@@ -199,7 +199,7 @@ module Beaker
 
     describe "executing commands" do
       let(:command) { Beaker::Command.new('ls') }
-      let(:host) { Beaker::Host.create('host', {}, make_host_opts('host', options.merge(platform))) }
+      let(:host) { described_class.create('host', {}, make_host_opts('host', options.merge(platform))) }
       let(:result) { Beaker::Result.new(host, 'ls') }
 
       before :each do

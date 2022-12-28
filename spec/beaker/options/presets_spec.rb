@@ -4,7 +4,7 @@ module Beaker
   module Options
 
     describe Presets do
-      let(:presets)    { Presets.new }
+      let(:presets)    { described_class.new }
 
       it "returns an env_vars OptionsHash" do
         expect(presets.env_vars).to be_instance_of(Beaker::Options::OptionsHash)

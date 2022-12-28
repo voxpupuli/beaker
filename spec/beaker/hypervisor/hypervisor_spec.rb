@@ -5,7 +5,7 @@ module Beaker
     let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
 
     describe "#create" do
-      let( :hypervisor ) { Beaker::Hypervisor }
+      let( :hypervisor ) { described_class }
 
       it "includes custom hypervisor and call set_ssh_connection_preference" do
         allow(hypervisor).to receive(:set_ssh_connection_preference).with([], hypervisor)
@@ -41,7 +41,7 @@ module Beaker
 
     describe "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
-      let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
+      let( :hypervisor ) { described_class.new( hosts, options ) }
 
       context 'if :timesync option set true on host' do
         it 'does call timesync for host' do

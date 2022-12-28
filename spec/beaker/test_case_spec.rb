@@ -4,7 +4,7 @@ module Beaker
   describe TestCase do
     let(:logger) {  double('logger').as_null_object }
     let(:path) { @path || '/tmp/nope' }
-    let(:testcase) { TestCase.new({}, logger, {}, path) }
+    let(:testcase) { described_class.new({}, logger, {}, path) }
 
     context 'run_test' do
       it 'defaults to test_status :pass on success' do
@@ -148,7 +148,7 @@ module Beaker
         end
         @path = path
         # we have to create a TestCase by hand, so that we can set old
-        tc = TestCase.new({}, logger, {}, path)
+        tc = described_class.new({}, logger, {}, path)
         # metadata on it, so that we can test that it's being reset correctly
         old_metadata = { :step => { :name => 'CharlieBrown' } }
         tc.instance_variable_set(:@metadata, old_metadata)
