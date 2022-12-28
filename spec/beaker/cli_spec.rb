@@ -136,7 +136,7 @@ module Beaker
     end
 
     context 'execute!' do
-      before :each do
+      before do
        stub_const("Beaker::Logger", double().as_null_object )
         File.open("sample.cfg", "w+") do |file|
           file.write("HOSTS:\n")
@@ -384,7 +384,7 @@ module Beaker
 
       describe 'hosts file saving when preserve_hosts should happen' do
 
-        before :each do
+        before do
           options = cli.instance_variable_get(:@options)
           options[:fail_mode] = 'fast'
           options[:preserve_hosts] = 'onpass'

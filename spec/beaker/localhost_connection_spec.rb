@@ -7,7 +7,7 @@ module Beaker
 
     subject(:connection) { described_class.new(options) }
 
-    before :each do
+    before do
       allow( subject ).to receive(:sleep)
     end
 

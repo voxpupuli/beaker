@@ -78,7 +78,7 @@ module Beaker
         let(:test_dir) { 'tmp/tests' }
         let(:other_test_dir) { 'tmp/tests2' }
 
-        before :each do
+        before do
           files = [
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
@@ -172,7 +172,7 @@ module Beaker
               }
           }}
 
-          before :each do
+          before do
             expect(parser).to receive(:normalize_args).and_return(true)
           end
 
@@ -340,7 +340,7 @@ module Beaker
       describe '#parse_hosts_options' do
 
         context 'Hosts file exists' do
-          before :each do
+          before do
             allow(File).to receive(:exist?).and_return(true)
           end
 
@@ -357,7 +357,7 @@ module Beaker
 
         context 'Hosts file does not exist' do
           require 'beaker-hostgenerator'
-          before :each do
+          before do
             allow(File).to receive(:exist?).and_return(false)
           end
 
@@ -694,7 +694,7 @@ module Beaker
         let(:options) { Beaker::Options::OptionsHash.new }
         let(:invalid_file) { '/tmp/doesnotexist_visor.yml' }
 
-        before :each do
+        before do
           FakeFS.deactivate!
         end
 

@@ -14,7 +14,7 @@ module Beaker
         expect( perf ).to be_a_kind_of described_class
       end
 
-      before(:each) do
+      before do
         @options = make_opts
         @options[:collect_perf_data] = 'normal'
         @options[:log_level] = :debug
@@ -56,7 +56,7 @@ module Beaker
     end
 
     context "When testing is finished" do
-      before(:each) do
+      before do
         @options = make_opts
         @options[:collect_perf_data] = 'normal'
         @options[:log_level] = :debug

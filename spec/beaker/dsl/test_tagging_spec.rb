@@ -11,7 +11,7 @@ describe ClassMixedWithDSLStructure do
   let(:logger) { double }
   let(:metadata) { @metadata ||= {} }
 
-  before :each do
+  before do
     allow( subject ).to receive(:metadata).and_return(metadata)
   end
 
@@ -27,7 +27,7 @@ describe ClassMixedWithDSLStructure do
       opts
     }
 
-    before :each do
+    before do
       allow( subject ).to receive( :platform_specific_tag_confines )
     end
 
@@ -240,7 +240,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       key_combos_to_test << [ 'tag2', 'tag3', 'tag4' ]
       key_combos_to_test << fake_confine_details_hash.keys()
 
-      before :each do
+      before do
         confiner.instance_variable_set(
           :@tag_confine_details_hash, fake_confine_details_hash
         )

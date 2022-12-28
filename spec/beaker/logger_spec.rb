@@ -48,7 +48,7 @@ module Beaker
     end
 
     describe '#prefix_log_line' do
-      around :each do |example|
+      around do |example|
         logger.line_prefix = ''
         begin
           example.run
@@ -101,7 +101,7 @@ module Beaker
     end
 
     context 'when indenting' do
-      around :each do |example|
+      around do |example|
         logger.line_prefix = ''
         begin
           example.run
@@ -172,11 +172,11 @@ module Beaker
       context 'log_colors' do
         original_build_number = ENV['BUILD_NUMBER']
 
-        before :each do
+        before do
           ENV['BUILD_NUMBER'] = nil
         end
 
-        after :each do
+        after do
           ENV['BUILD_NUMER'] = original_build_number
         end
 
@@ -214,7 +214,7 @@ module Beaker
         end
 
         context 'with CI detected' do
-          before :each do
+          before do
             ENV['BUILD_NUMBER'] = 'bob'
           end
 

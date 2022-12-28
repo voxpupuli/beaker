@@ -439,7 +439,7 @@ module Beaker
 
     describe '#pe_puppet_agent_promoted_package_install' do
       context 'on solaris platforms' do
-        before :each do
+        before do
           allow( subject ).to receive( :fetch_http_file )
           allow( subject ).to receive( :scp_to )
           allow( subject ).to receive( :configure_type_defaults_on )
@@ -481,7 +481,7 @@ module Beaker
         end
 
         context 'on solaris 10' do
-          before :each do
+          before do
             solaris_platform = Beaker::Platform.new('solaris-10-x86_64')
             @opts = {'platform' => solaris_platform}
           end
@@ -509,7 +509,7 @@ module Beaker
         end
 
         context 'on solaris 11' do
-          before :each do
+          before do
             solaris_platform = Beaker::Platform.new('solaris-11-x86_64')
             @opts = {'platform' => solaris_platform}
           end
@@ -530,7 +530,7 @@ module Beaker
       let( :platform      ) { @platform || 'fedora' }
       let( :version       ) { @version  || 6        }
 
-      before :each do
+      before do
         allow( instance ).to receive( :[] ).with( 'platform' ) { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
       end
 
@@ -593,7 +593,7 @@ module Beaker
       let( :base_dir      ) { '/base/dir/fake'      }
       let( :download_file ) { 'download_file.txt'   }
 
-      before :each do
+      before do
         allow( instance ).to receive( :[] ).with( 'platform' ) {  Beaker::Platform.new("#{platform}-#{version}-x86_64")  }
       end
 
@@ -624,7 +624,7 @@ module Beaker
 
       context 'on solaris' do
 
-        before :each do
+        before do
           @platform = 'solaris'
         end
 

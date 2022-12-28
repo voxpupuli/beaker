@@ -21,7 +21,7 @@ module Beaker
     let( :host ) { hosts[0] }
 
     describe '#log_sut_event' do
-      before :each do
+      before do
         @log_prefix = 'log_prefix_dummy'
         @hosts_file = 'dummy_hosts'
       end

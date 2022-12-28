@@ -28,7 +28,7 @@ Name=#{group_name}
       EOS
     end
 
-    before(:each) do
+    before do
       expect( instance ).to receive(:execute).with(/wmic group where/).and_yield(result)
     end
 

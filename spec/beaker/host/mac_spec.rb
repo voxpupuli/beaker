@@ -84,7 +84,7 @@ module Mac
     end
 
     describe '#pe_puppet_agent_promoted_package_info' do
-      before :each do
+      before do
         @platform = "osx-10.15-x86_64"
       end
 

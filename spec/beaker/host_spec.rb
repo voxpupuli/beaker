@@ -202,7 +202,7 @@ module Beaker
       let(:host) { described_class.create('host', {}, make_host_opts('host', options.merge(platform))) }
       let(:result) { Beaker::Result.new(host, 'ls') }
 
-      before :each do
+      before do
         result.stdout = 'stdout'
         result.stderr = 'stderr'
 
@@ -438,7 +438,7 @@ module Beaker
         let( :source_path ) { '/repos/puppetlabs-inifile' }
         let( :target_path ) { '/etc/puppetlabs/modules/inifile' }
 
-        before :each do
+        before do
           test_dir = "#{source_path}/tests"
           other_test_dir = "#{source_path}/tests2"
 
@@ -507,7 +507,7 @@ module Beaker
         let( :source_path ) { '/puppetlabs-inifile' }
         let( :target_path ) { '/etc/puppetlabs/modules/inifile' }
 
-        before :each do
+        before do
           test_dir = "#{source_path}/tests"
           other_test_dir = "#{source_path}/tests/tests2"
           another_test_dir = "#{source_path}/tests/tests3"
@@ -565,7 +565,7 @@ module Beaker
 
       context "using an ignore array" do
 
-        before :each do
+        before do
           test_dir = 'tmp/tests'
           other_test_dir = 'tmp/tests2'
 

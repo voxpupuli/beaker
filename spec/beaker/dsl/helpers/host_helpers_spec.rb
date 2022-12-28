@@ -27,7 +27,7 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#on' do
 
-    before :each do
+    before do
       result.stdout = 'stdout'
       result.stderr = 'stderr'
       result.exit_code = 0
@@ -106,7 +106,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'upon command completion' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
         @res = subject.on( host, command )
@@ -130,7 +130,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'when passed a block with arity of 1' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
       end
@@ -162,7 +162,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'when passed a block with arity of 0' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
       end

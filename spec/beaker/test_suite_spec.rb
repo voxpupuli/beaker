@@ -253,7 +253,7 @@ module Beaker
                                          :xml_dated_dir => '.'}) }
         let(:rb_test) { 'my_ruby_file.rb' }
 
-        before(:each) do
+        before do
           @files = [ rb_test, rb_test, rb_test]
           @ts    = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :fast )
           @tsr   = @ts.instance_variable_get( :@test_suite_results )

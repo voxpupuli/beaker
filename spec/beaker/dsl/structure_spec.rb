@@ -12,7 +12,7 @@ describe ClassMixedWithDSLStructure do
   let(:logger) { double }
   let(:metadata) { @metadata ||= {} }
 
-  before :each do
+  before do
     allow( subject ).to receive(:metadata).and_return(metadata)
   end
 

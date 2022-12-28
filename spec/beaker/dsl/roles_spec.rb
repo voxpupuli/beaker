@@ -203,14 +203,14 @@ describe ClassMixedWithDSLRoles do
 
     context 'truth table-type testing' do
 
-      before :each do
+      before do
         @old_pe_ver  = agent1[:pe_ver]
         @old_version = agent1[:version]
         @old_roles   = agent1[:roles]
         @old_type    = agent1[:type]
       end
 
-      after :each do
+      after do
         agent1[:pe_ver]   = @old_pe_ver
         agent1[:version]  = @old_version
         agent1[:roles]    = @old_roles

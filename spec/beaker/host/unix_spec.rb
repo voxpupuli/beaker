@@ -60,7 +60,7 @@ module Unix
 
       context 'sets release_file name appropriately for puppet-agent version' do
         context 'on solaris 10' do
-          before :each do
+          before do
             @platform = 'solaris-10-arch'
           end
 
@@ -92,7 +92,7 @@ module Unix
         end
 
         context 'on solaris 11' do
-          before :each do
+          before do
             @platform = 'solaris-11-arch'
           end
 

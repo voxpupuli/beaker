@@ -10,7 +10,7 @@ module Beaker
         let(:bad_yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'badyaml.cfg') }
         let(:yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'hosts.cfg') }
 
-        before :each do
+        before do
           FakeFS.deactivate!
         end
 

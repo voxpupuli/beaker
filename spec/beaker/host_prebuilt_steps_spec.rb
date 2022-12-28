@@ -515,7 +515,7 @@ describe Beaker do
       context "with cygwin" do
         let(:cygwin) { true }
 
-        before(:each) do
+        before do
           expect( Beaker::Command ).to receive( :new ).with( "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" ).once
         end
 
@@ -525,7 +525,7 @@ describe Beaker do
       context "without cygwin" do
         let(:cygwin) { false }
 
-        before(:each) do
+        before do
           expect( Beaker::Command ).to receive( :new ).with( 'type C:\Windows\System32\drivers\etc\hosts' ).once
         end
 
@@ -540,7 +540,7 @@ describe Beaker do
           :stdout => stdout,
         } ) }
 
-        before(:each) do
+        before do
           expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
         end
 

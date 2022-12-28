@@ -13,7 +13,7 @@ module Beaker
 
     subject(:connection) { described_class.new name_hash, user, ssh_opts, options }
 
-    before :each do
+    before do
       allow( subject ).to receive(:sleep)
     end
 
@@ -112,7 +112,7 @@ module Beaker
     end
 
     describe '#register_stdout_for' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
         connection.connect
@@ -148,7 +148,7 @@ module Beaker
     describe '#register_stderr_for' do
       let( :result ) { Beaker::Result.new('hostname', 'command') }
 
-      before :each do
+      before do
         @mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
         connection.connect
@@ -217,7 +217,7 @@ module Beaker
     end
 
     describe '#scp_to' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :upload! )
@@ -244,7 +244,7 @@ module Beaker
     end
 
     describe '#scp_from' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :download! )

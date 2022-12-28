@@ -111,7 +111,7 @@ module Beaker
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
 
-      before :each do
+      before do
         allow(cli).to receive(:parse_options)
         allow(cli).to receive(:configured_options).and_return(mock_options)
       end
@@ -174,7 +174,7 @@ module Beaker
     end
 
     context 'exec' do
-      before :each do
+      before do
         allow(subcommand.cli).to receive(:parse_options)
         allow(subcommand.cli).to receive(:initialize_network_manager)
         allow(subcommand.cli).to receive(:execute!)

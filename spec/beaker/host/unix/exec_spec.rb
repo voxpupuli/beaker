@@ -236,7 +236,7 @@ module Beaker
       let(:boot_time_success_response) { double( 'response' ) }
       let(:sleep_time) { 10 }
 
-      before :each do
+      before do
         # stubs enough to survive the first boot_time call & output parsing
         #   note: just stubs input-chain between calls, parsing methods still run
         allow(Beaker::Command).to receive(:new).with('last -F reboot || who -b').and_return(:boot_time_command_stub)
@@ -290,7 +290,7 @@ module Beaker
               end
 
               context 'command errors' do
-                before :each do
+                before do
                   allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).at_least(:once)
                 end
 
