@@ -41,48 +41,48 @@ module Beaker
 
         it 'returns a warning if there is no file at the path specified' do
           expect(logger).to receive(:warn)
-          allow(File).to receive(:exists?).with(path).and_return(false)
+          allow(File).to receive(:exist?).with(path).and_return(false)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_apt_repo for huaweios systems' do
           @opts = {'platform' => 'huaweios-is-me'}
           expect(instance).to receive(:deploy_apt_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_apt_repo for debian systems' do
           @opts = {'platform' => 'ubuntu-is-me'}
           expect(instance).to receive(:deploy_apt_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_yum_repo for el systems' do
           @opts = {'platform' => 'el-is-me'}
           expect(instance).to receive(:deploy_yum_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_zyp_repo for sles systems' do
           @opts = {'platform' => 'sles-is-me'}
           expect(instance).to receive(:deploy_zyp_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_zyp_repo for opensuse systems' do
           @opts = {'platform' => 'opensuse-is-me'}
           expect(instance).to receive(:deploy_zyp_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'raises an error for unsupported systems' do
           @opts = {'platform' => 'windows-is-me'}
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           expect{instance.deploy_package_repo(path,name,version)}.to raise_error(RuntimeError)
         end
       end
@@ -94,7 +94,7 @@ module Beaker
           expect(logger).to receive(:warn)
           allow(@opts['platform']).to receive(:codename).and_return(nil)
           expect(instance).to receive(:deploy_apt_repo).and_return(instance.deploy_apt_repo(path,name,version))
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
       end

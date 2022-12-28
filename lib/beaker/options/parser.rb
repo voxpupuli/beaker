@@ -281,7 +281,7 @@ module Beaker
       # @raise [ArgumentError] if a hosts file is generated, but it can't
       #   be read by the HostsFileParser
       def parse_hosts_options
-        if @options[:hosts_file].nil? || File.exists?(@options[:hosts_file])
+        if @options[:hosts_file].nil? || File.exist?(@options[:hosts_file])
           #read the hosts file that contains the node configuration and hypervisor info
           return Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
         end

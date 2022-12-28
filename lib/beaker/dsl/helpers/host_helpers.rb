@@ -268,7 +268,7 @@ module Beaker
           FileUtils.mkdir_p(targetdir)
           scp_from(host, from_path, targetdir, opts)
           # scp_from does succeed on a non-existant file, checking if the file/folder actually exists
-          if not File.exists?(filename)
+          if not File.exist?(filename)
             raise IOError, "No such file or directory - #{filename}"
           end
           create_tarball(archive_root, archive_name)

@@ -292,7 +292,7 @@ module Unix::Pkg
   # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
   # @visibility private
   def deploy_package_repo(path, name, version)
-    if not File.exists? path
+    if not File.exist? path
       @logger.warn "Was asked to deploy package repository from #{path}, but it doesn't exist!"
       return
     end

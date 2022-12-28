@@ -426,7 +426,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect( File.exists?(copied_hosts_file) ).to be_truthy
+            expect( File.exist?(copied_hosts_file) ).to be_truthy
           end
         end
 
