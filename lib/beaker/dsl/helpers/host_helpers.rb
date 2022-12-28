@@ -83,7 +83,7 @@ module Beaker
             @result = host.exec(command_object, opts)
 
             # Also, let additional checking be performed by the caller.
-            if block_given?
+            if block
               case block.arity
                 #block with arity of 0, just hand back yourself
                 when 0

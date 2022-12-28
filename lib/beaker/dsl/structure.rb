@@ -37,7 +37,7 @@ module Beaker
       def step step_name, &block
         logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
-        if block_given?
+        if block
           begin
             logger.with_indent do
               yield

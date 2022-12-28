@@ -21,7 +21,7 @@ module Beaker
     def self.write_xml(xml_file, stylesheet, &block)
       doc, suites = self.get_xml_contents(xml_file, name, stylesheet)
 
-      if block_given?
+      if block
         case block.arity
         when 2
           yield doc, suites
