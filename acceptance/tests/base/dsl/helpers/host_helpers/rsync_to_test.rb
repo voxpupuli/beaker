@@ -126,7 +126,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         result = rsync_to_with_backups default, local_filename, remote_tmpdir
 
         fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
-          "result"          => result,
           "default"         => default,
           "contents"        => contents,
           "local_filename"  => local_filename,
@@ -152,7 +151,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
 
         hosts.each do |host|
           fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
-            "result"          => result,
             "host"            => host,
             "contents"        => contents,
             "local_filename"  => local_filename,
