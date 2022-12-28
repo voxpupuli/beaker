@@ -12,7 +12,7 @@ describe "my tests" do
   # an example using Serverspec
   # use http://serverspec.org/resource_types.html
   describe package('puppet') do
-    it { should be_installed }
+    it { is_expected.to be_installed }
   end
 
   it "can create and confirm a file" do
@@ -35,15 +35,15 @@ describe "my tests" do
   end
 
   describe service('sshd') do
-    it { should be_running }
+    it { is_expected.to be_running }
   end
 
   describe user('root') do
-    it { should exist }
+    it { is_expected.to exist }
   end
 
   describe user('foo') do
-    it { should_not exist }
+    it { is_expected.to_not exist }
   end
 
   context "can use both serverspec and Beaker DSL" do
@@ -60,11 +60,11 @@ describe "my tests" do
     end
 
     describe file('/tmp/demo.txt') do
-      it { should be_file }
+      it { is_expected.to be_file }
     end
 
     describe file('/tmp/demo.txt') do
-      it { should contain 'this is my file.' }
+      it { is_expected.to contain 'this is my file.' }
     end
   end
 

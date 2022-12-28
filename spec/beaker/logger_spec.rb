@@ -164,9 +164,9 @@ module Beaker
       end
 
       context 'default for' do
-        its(:destinations)  { should include(STDOUT)  }
-        its(:color)         { should be_nil           }
-        its(:log_level)     { should be :verbose      }
+        its(:destinations)  { is_expected.to include(STDOUT)  }
+        its(:color)         { is_expected.to be_nil           }
+        its(:log_level)     { is_expected.to be :verbose      }
       end
 
       context 'log_colors' do
@@ -293,9 +293,9 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_debug? ) { should be_truthy }
-        its( :is_trace? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_debug? ) { is_expected.to be_truthy }
+        its( :is_trace? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'but print' do
           before do
@@ -319,10 +319,10 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_falsy }
-        its( :is_debug? ) { should be_falsy }
-        its( :is_verbose? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_trace? ) { is_expected.to be_falsy }
+        its( :is_debug? ) { is_expected.to be_falsy }
+        its( :is_verbose? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'but print' do
           before do
@@ -345,9 +345,9 @@ module Beaker
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_falsy }
-        its( :is_debug? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_trace? ) { is_expected.to be_falsy }
+        its( :is_debug? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'successfully print' do
           before do
@@ -370,8 +370,8 @@ module Beaker
                                               :color     => true )
                                   }
 
-        its( :is_debug? ) { should be_falsy }
-        its( :is_trace? ) { should be_falsy }
+        its( :is_debug? ) { is_expected.to be_falsy }
+        its( :is_trace? ) { is_expected.to be_falsy }
 
 
         context 'skip' do
