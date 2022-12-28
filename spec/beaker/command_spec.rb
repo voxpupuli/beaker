@@ -2,10 +2,10 @@ require 'spec_helper'
 
 module Beaker
   describe Command do
+    subject(:cmd) { described_class.new( command, args, options ) }
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
-    subject(:cmd) { described_class.new( command, args, options ) }
 
     let(:host)    {
       h = Hash.new
@@ -93,10 +93,10 @@ module Beaker
   end
 
   describe HostCommand do
+    subject(:cmd) { described_class.new( command, args, options ) }
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
-    subject(:cmd) { described_class.new( command, args, options ) }
 
     let(:host)    { Hash.new }
 
@@ -117,6 +117,7 @@ module Beaker
   end
 
   describe SedCommand do
+    subject(:cmd)     { described_class.new( platform, expression, filename, options ) }
     let(:host)        {
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
@@ -129,7 +130,6 @@ module Beaker
     let(:filename)    { @filename   || '/fakefile' }
     let(:options)     { @options    || Hash.new  }
 
-    subject(:cmd)     { described_class.new( platform, expression, filename, options ) }
 
     it 'forms a basic sed command correctly' do
       expect( cmd.cmd_line host ).to be === "sed -i -e \"#{expression}\" #{filename}"
