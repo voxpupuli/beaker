@@ -432,7 +432,7 @@ module Unix::Pkg
       release_path_end, release_file = solaris_puppet_agent_dev_package_info(
         puppet_collection, puppet_agent_version, opts )
     when /^(opensuse|sles|aix|el|centos|oracle|redhat|scientific)$/
-      variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
+      variant = 'el' if variant.match?(/(?:el|centos|oracle|redhat|scientific)/)
       variant = 'sles' if variant == 'opensuse'
 
       if variant == 'aix'
