@@ -106,7 +106,7 @@ module Beaker
           if block_hosts.length > 0
             if run_in_parallel? opts
               # Pass caller[1] - the line that called block_on - for logging purposes.
-              result = block_hosts.map.each_in_parallel(caller[1]) do |h|
+              result = block_hosts.map.each_in_parallel(caller(2..2).first) do |h|
                 run_block_on h, &block
               end
               hosts.each{|host| host.close}# For some reason, I have to close the SSH connection
