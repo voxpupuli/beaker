@@ -226,7 +226,7 @@ module Beaker
 
       it 'acts on the host\'s logger and connection object' do
         result.exit_code = 0
-        expect( host.instance_variable_get(:@logger) ).to receive(:debug).at_least(1).times
+        expect( host.instance_variable_get(:@logger) ).to receive(:debug).at_least(:once)
         expect( host.instance_variable_get(:@connection) ).to receive(:execute).once
         host.exec(command)
       end

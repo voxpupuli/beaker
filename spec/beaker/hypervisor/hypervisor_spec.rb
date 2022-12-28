@@ -101,7 +101,7 @@ module Beaker
         it "calls disable_iptables once" do
           options[:disable_iptables] = true
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_iptables ).exactly( 1 ).times
+          expect( hypervisor ).to receive( :disable_iptables ).once
           hypervisor.configure
         end
       end

@@ -42,7 +42,7 @@ describe ClassMixedWithDSLRoles do
 
     it 'raises an error if there is more than one master' do
       @hosts = [ master, monolith ]
-      expect( subject ).to receive( :hosts ).exactly( 1 ).times.and_return( hosts )
+      expect( subject ).to receive( :hosts ).once.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
     end
 
@@ -332,7 +332,7 @@ describe ClassMixedWithDSLRoles do
   describe '#default' do
     it 'returns the default host when one is specified' do
       @hosts = [ db, agent1, agent2, default, master]
-      expect( subject ).to receive( :hosts ).exactly( 1  ).times.and_return( hosts )
+      expect( subject ).to receive( :hosts ).once.and_return( hosts )
       expect( subject.default ).to be == default
     end
 
@@ -401,7 +401,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns true if a host exists, false otherwise' do
       @hosts = [ agent1, agent2 ]
       # expect( subject ).to receive( :hosts ).and_return( hosts )
-      expect( subject ).to receive( :hosts ).exactly( 2 ).times.and_return( hosts )
+      expect( subject ).to receive( :hosts ).twice.and_return( hosts )
       expect( subject.any_hosts_as?( "agent" )).to be == true
       expect( subject.any_hosts_as?( "custom_role" )).to be == false
     end

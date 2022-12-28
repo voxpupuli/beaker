@@ -29,7 +29,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+      expect( subject ).to receive( :logger ).and_return( logger ).twice
       allow(  subject ).to receive( :set_current_step_name )
       allow( logger ).to receive(:with_indent) { |&block| block.call }
       expect( logger ).to receive( :notify )
@@ -135,7 +135,7 @@ describe ClassMixedWithDSLStructure do
 
       it 'yields if a block is given' do
         subject.instance_variable_set(:@options, options)
-        expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+        expect( subject ).to receive( :logger ).and_return( logger ).twice
         expect( logger ).to receive( :notify )
         allow( logger ).to receive(:with_indent) { |&block| block.call }
         expect( subject ).to receive( :foo )
@@ -168,7 +168,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+      expect( subject ).to receive( :logger ).and_return( logger ).twice
       expect( logger ).to receive( :notify )
       allow( logger ).to receive(:with_indent) { |&block| block.call }
       expect( subject ).to receive( :foo )

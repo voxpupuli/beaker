@@ -162,7 +162,7 @@ module Beaker
           allow( cli ).to receive(:run_suite).with(:post_suite).and_return(true)
           allow( cli ).to receive(:run_suite).with(:pre_cleanup).and_return(true)
 
-          expect( cli ).to receive(:run_suite).exactly( 2 ).times
+          expect( cli ).to receive(:run_suite).twice
           expect{ cli.execute! }.to raise_error
           expect(cli.instance_variable_get(:@attribution)[:logger]).to be == 'runtime'
           expect(cli.instance_variable_get(:@attribution)[:timestamp]).to be == 'runtime'

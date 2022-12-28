@@ -37,7 +37,7 @@ module Beaker
           expect( block ).to receive( :exec ).exactly( 5 ).times.and_return( false )
           allow( subject ).to receive( 'sleep' ).and_return( true )
 
-          expect( subject ).to receive( :sleep ).with( 1 ).exactly( 2 ).times
+          expect( subject ).to receive( :sleep ).with( 1 ).twice
           expect( subject ).to receive( :sleep ).with( 2 ).once
           expect( subject ).to receive( :sleep ).with( 3 ).once
           expect( subject ).to receive( :sleep ).with( 5 ).once
@@ -52,7 +52,7 @@ module Beaker
           expect(block).to receive(:exec).and_return(false).ordered.exactly(4).times
           expect(block).to receive(:exec).and_return( true).ordered.once
 
-          expect(subject).to receive(:sleep).with(1).exactly(2).times
+          expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
           expect(subject).to receive(:sleep).with(3).once
           expect(subject).to receive(:sleep).with(anything).never
@@ -65,7 +65,7 @@ module Beaker
         it "returns false if block never returns that it is done (true)" do
           expect(block).to receive(:abcd).exactly(3).times.and_return(false)
 
-          expect(subject).to receive(:sleep).with(1).exactly(2).times
+          expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
           expect(subject).to receive(:sleep).with(anything).never
 

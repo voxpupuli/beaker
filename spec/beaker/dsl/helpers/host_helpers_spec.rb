@@ -319,7 +319,7 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true }
       tmpfile = double
 
-      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+      expect( tmpfile ).to receive( :path ).twice.
         and_return( '/local/path/to/blah' )
 
       expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
@@ -338,7 +338,7 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true, :protocol => 'rsync' }
       tmpfile = double
 
-      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+      expect( tmpfile ).to receive( :path ).twice.
         and_return( '/local/path/to/blah' )
 
       expect( Tempfile ).to receive( :open ).and_yield( tmpfile )

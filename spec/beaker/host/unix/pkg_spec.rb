@@ -106,7 +106,7 @@ module Beaker
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).twice
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -115,7 +115,7 @@ module Beaker
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).twice
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
