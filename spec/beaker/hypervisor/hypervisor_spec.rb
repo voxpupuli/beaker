@@ -4,7 +4,7 @@ module Beaker
   describe Hypervisor do
     let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
 
-    context "#create" do
+    describe "#create" do
       let( :hypervisor ) { Beaker::Hypervisor }
 
       it "includes custom hypervisor and call set_ssh_connection_preference" do
@@ -39,7 +39,7 @@ module Beaker
 
     end
 
-    context "#configure" do
+    describe "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
       let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
 

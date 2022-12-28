@@ -7,7 +7,7 @@ module Beaker
       Beaker::Subcommand.new
     }
 
-    context '#initialize' do
+    describe '#initialize' do
       it 'creates a cli object' do
         expect(subcommand.cli).to be_instance_of(Beaker::CLI)
       end
@@ -106,7 +106,7 @@ module Beaker
       end
     end
 
-    context '#init' do
+    describe '#init' do
       let( :cli ) { subcommand.cli }
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
@@ -130,7 +130,7 @@ module Beaker
       end
     end
 
-    context '#provision' do
+    describe '#provision' do
       let( :cli ) { subcommand.cli }
       let( :yaml_store_mock ) { double('yaml_store_mock') }
       let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}

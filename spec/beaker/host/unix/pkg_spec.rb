@@ -433,7 +433,7 @@ module Beaker
 
     end
 
-    context '#pe_puppet_agent_promoted_package_install' do
+    describe '#pe_puppet_agent_promoted_package_install' do
       context 'on solaris platforms' do
         before :each do
           allow( subject ).to receive( :fetch_http_file )

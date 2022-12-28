@@ -22,7 +22,7 @@ module Beaker
                                hosts[2][:roles] = ['agent', role2]
                                hosts }
 
-      context "#hosts_with_name" do
+      describe "#hosts_with_name" do
 
         it "can identify the host by name" do
 
@@ -59,7 +59,7 @@ module Beaker
 
       end
 
-      context "#hosts_with_role" do
+      describe "#hosts_with_role" do
         it "can find the master in a set of hosts" do
 
           expect( host_handler.hosts_with_role( hosts, 'master' ) ).to be === [hosts[1]]
@@ -80,7 +80,7 @@ module Beaker
 
       end
 
-      context "#only_host_with_role" do
+      describe "#only_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.only_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -104,7 +104,7 @@ module Beaker
         end
       end
 
-      context "#find_at_most_one_host_with_role" do
+      describe "#find_at_most_one_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.find_at_most_one_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -128,7 +128,7 @@ module Beaker
         end
       end
 
-      context "#run_block_on" do
+      describe "#run_block_on" do
         it "can execute a block against hosts identified by a string" do
           myhosts = host_handler.run_block_on( hosts, role0 ) do |hosts|
             hosts

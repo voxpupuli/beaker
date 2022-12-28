@@ -9,7 +9,7 @@ module Beaker
     let(:test_dir)  { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
-    context '#convert' do
+    describe '#convert' do
       let(:valid_utf8)  { "/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\n" }
       let(:invalid_utf8) {"/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\xAD\n"}
 
@@ -25,7 +25,7 @@ module Beaker
       end
     end
 
-    context '#generate_dated_log_folder' do
+    describe '#generate_dated_log_folder' do
 
       it 'generates path for a given timestamp' do
         input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
@@ -45,7 +45,7 @@ module Beaker
 
     end
 
-    context '#prefix_log_line' do
+    describe '#prefix_log_line' do
       around :each do |example|
         logger.line_prefix = ''
         begin

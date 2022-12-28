@@ -82,7 +82,7 @@ module Beaker
       Beaker::CLI.new.parse_options
     }
 
-    context '#configured_options' do
+    describe '#configured_options' do
       it 'returns a list of options that were not presets' do
         attribution = cli.instance_variable_get(:@attribution)
         attribution.each do |attribute, setter|

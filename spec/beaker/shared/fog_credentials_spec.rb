@@ -3,7 +3,7 @@ require 'spec_helper'
 module Beaker
   module Shared
     describe FogCredentials do
-      context "#get_fog_credentials" do
+      describe "#get_fog_credentials" do
         it 'raises ArgumentError when fog file is missing' do
           expect{ get_fog_credentials( '/path/that/does/not/exist/.fog' ) }.to raise_error( ArgumentError )
         end
