@@ -369,7 +369,7 @@ describe Beaker do
 
     end
 
-    it "should do nothing for non el-5/6 hosts" do
+    it "does nothing for non el-5/6 hosts" do
       hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
       expect( Beaker::Command ).to receive( :new ).never

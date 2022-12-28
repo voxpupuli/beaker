@@ -181,7 +181,7 @@ module Beaker
         end
 
 
-        it 'should have the default log_colors' do
+        it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
               :error=> Beaker::Logger::RED,
               :warn=> Beaker::Logger::BRIGHT_RED,
@@ -204,11 +204,11 @@ module Beaker
 
           let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
-          it 'should override the specified log colors' do
+          it 'overrides the specified log colors' do
             expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
           end
 
-          it 'should leave other colors as the default' do
+          it 'leaves other colors as the default' do
             expect(logger.log_colors[:warn]).to be == Beaker::Logger::BRIGHT_RED
           end
         end
@@ -219,11 +219,11 @@ module Beaker
           end
 
           context 'when using the default log colors' do
-            it 'should override notify with NORMAL' do
+            it 'overrides notify with NORMAL' do
               expect(logger.log_colors[:notify]).to be == Beaker::Logger::NORMAL
             end
 
-            it 'should override info with NORMAL' do
+            it 'overrides info with NORMAL' do
               expect(logger.log_colors[:info]).to be == Beaker::Logger::NORMAL
             end
           end
@@ -237,15 +237,15 @@ module Beaker
 
             let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
-            it 'should override the specified log colors' do
+            it 'overrides the specified log colors' do
               expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
             end
 
-            it 'should not override notify with NORMAL' do
+            it 'does not override notify with NORMAL' do
               expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
             end
 
-            it 'should not override info with NORMAL' do
+            it 'does not override info with NORMAL' do
               expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
             end
           end
@@ -405,7 +405,7 @@ module Beaker
                                               :quiet     => true,
                                               :color     => true )}
 
-          it 'should output GREY when @color is set to true' do
+          it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
 
             expect( my_io ).to receive( :print ).with "\e[01;30m"

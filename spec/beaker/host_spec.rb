@@ -527,7 +527,7 @@ module Beaker
           create_files( @fileset3 )
         end
 
-        it "should create target dirs with correct path seperator" do
+        it "creates target dirs with correct path seperator" do
           create_files(['source'])
           exclude_file = '04_ValidateSignCert.rb'
           logger = host[:logger]

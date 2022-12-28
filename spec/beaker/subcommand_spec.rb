@@ -78,7 +78,7 @@ module Beaker
 
       let( :yaml_store_mock ) { double('yaml_store_mock') }
 
-      it 'should not error with valid beaker options' do
+      it 'does not error with valid beaker options' do
         beaker_options_list.each do |option|
           allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
           allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
@@ -95,7 +95,7 @@ module Beaker
         end
       end
 
-      it "should error with a bad option here" do
+      it "errors with a bad option here" do
         allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
         allow(yaml_store_mock).to receive(:transaction).and_yield
         allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)

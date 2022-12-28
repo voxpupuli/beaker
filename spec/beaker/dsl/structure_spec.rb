@@ -355,7 +355,7 @@ describe ClassMixedWithDSLStructure do
       allow( subject ).to receive( :logger ).and_return( logger )
     end
 
-    it 'it returns an empty array if there are no applicable hosts' do
+    it 'returns an empty array if there are no applicable hosts' do
       hosts = [ {'thing' => 'foo'}, {'thing' => 'bar'} ]
 
       expect(subject.select_hosts( {'thing' => 'nope'}, hosts )).to be == []

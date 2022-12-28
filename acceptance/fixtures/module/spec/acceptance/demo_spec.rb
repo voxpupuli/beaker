@@ -4,7 +4,7 @@ describe "my tests" do
 
   # an example using the beaker DSL
   # use http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL
-  it "should say hello!" do
+  it "says hello!" do
     result = shell( 'echo hello' )
     expect(result.stdout).to match(/hello/)
   end
@@ -22,7 +22,7 @@ describe "my tests" do
     shell( 'grep bar demo.txt', :acceptable_exit_codes => [1] )
   end
 
-  it "should be able to apply manifests" do
+  it "is able to apply manifests" do
     manifest_1 = "user {'foo':
           ensure => present,}"
     manifest_2 = "user {'foo':

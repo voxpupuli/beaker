@@ -16,7 +16,7 @@ module Beaker
           end
         end
 
-        it "should short circuit if the block is complete" do
+        it "shorts circuit if the block is complete" do
           allow( Time ).to receive( :now ).and_return( 0, 1, 2, 3, 4, 5 )
 
           block = double( 'block' )
@@ -48,7 +48,7 @@ module Beaker
           end
         end
 
-        it "should short circuit if the block succeeds (returns true)" do
+        it "shorts circuit if the block succeeds (returns true)" do
           expect(block).to receive(:exec).and_return(false).ordered.exactly(4).times
           expect(block).to receive(:exec).and_return( true).ordered.once
 
