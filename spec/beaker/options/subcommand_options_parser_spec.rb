@@ -26,8 +26,6 @@ module Beaker
 
       describe 'when the subcommand is not init' do
         let( :argv ) {['provision']}
-        let(:options_file) {Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS}
-        let(:options_file) {""}
         let( :options_file ) {home_options_file_path}
 
         it 'calls parse_options_file with subcommand options file when home_dir is false' do
