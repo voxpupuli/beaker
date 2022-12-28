@@ -31,7 +31,7 @@ describe ClassMixedWithDSLStructure do
     it 'yields if a block is given' do
       expect( subject ).to receive( :logger ).and_return( logger ).twice
       allow(  subject ).to receive( :set_current_step_name )
-      allow( logger ).to receive(:with_indent) { |&block| block.call }
+      allow( logger ).to receive(:with_indent).and_yield
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
@@ -137,7 +137,7 @@ describe ClassMixedWithDSLStructure do
         subject.instance_variable_set(:@options, options)
         expect( subject ).to receive( :logger ).and_return( logger ).twice
         expect( logger ).to receive( :notify )
-        allow( logger ).to receive(:with_indent) { |&block| block.call }
+        allow( logger ).to receive(:with_indent).and_yield
         expect( subject ).to receive( :foo )
         subject.manual_test 'blah' do
           subject.foo
@@ -170,7 +170,7 @@ describe ClassMixedWithDSLStructure do
     it 'yields if a block is given' do
       expect( subject ).to receive( :logger ).and_return( logger ).twice
       expect( logger ).to receive( :notify )
-      allow( logger ).to receive(:with_indent) { |&block| block.call }
+      allow( logger ).to receive(:with_indent).and_yield
       expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo

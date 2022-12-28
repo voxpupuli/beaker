@@ -209,7 +209,7 @@ module Beaker
         logger = double(:logger)
         allow( logger ).to receive(:host_output)
         allow( logger ).to receive(:debug)
-        allow( logger ).to receive(:with_indent) { |&block| block.call }
+        allow( logger ).to receive(:with_indent).and_yield
         host.instance_variable_set :@logger, logger
         conn = double(:connection)
         allow( conn ).to receive(:execute).and_return(result)
