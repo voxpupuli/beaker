@@ -185,7 +185,7 @@ module PSWindows::Exec
     env_array = self.environment_variable_string_pair_array( env )
 
     environment_string = ''
-    env_array.each_with_index do |env|
+    env_array.each do |env|
       environment_string += "set \"#{env}\" && "
     end
     environment_string
