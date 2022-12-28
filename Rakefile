@@ -341,4 +341,5 @@ begin
     config.future_release = gem_version
   end
 rescue LoadError
+  # Optional group in bundler
 end
