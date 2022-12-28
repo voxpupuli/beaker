@@ -43,7 +43,7 @@ module Unix
 
       it 'sets release_path_end correctly' do
         @platform = 'solaris-10-arch'
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
         release_path_end, _ = host.solaris_puppet_agent_dev_package_info(
           'pa_collection4', 'pa_version', opts )
         expect( release_path_end ).to be === "solaris/10/pa_collection4"
@@ -51,7 +51,7 @@ module Unix
 
       it 'sets the arch correctly for x86_64 platforms' do
         @platform = 'solaris-10-x86_64'
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
         _, release_file = host.solaris_puppet_agent_dev_package_info(
           'pa_collection', 'pa_version', opts )
         expect( release_file ).to     match( /i386/   )
@@ -75,14 +75,14 @@ module Unix
 
             context "#{pa_version}" do
               it "URL exists" do
-                allow( host ).to receive( :link_exists? ) { true }
+                allow( host ).to receive( :link_exists? ).and_return(true)
                 _, release_file = host.solaris_puppet_agent_dev_package_info(
                   'pa_collection', pa_version, opts )
                 expect( release_file ).to be === "puppet-agent-#{pa_version}-1.arch.pkg.gz"
               end
 
               it "fallback URL" do
-                allow( host ).to receive( :link_exists? ) { false }
+                allow( host ).to receive( :link_exists? ).and_return(false)
                 _, release_file = host.solaris_puppet_agent_dev_package_info(
                   'pa_collection', pa_version, opts )
                 expect( release_file ).to be === "puppet-agent-#{pa_version}.arch.pkg.gz"
@@ -109,14 +109,14 @@ module Unix
 
             context "#{pa_version}" do
               it "URL exists" do
-                allow( host ).to receive( :link_exists? ) { true }
+                allow( host ).to receive( :link_exists? ).and_return(true)
                 _, release_file = host.solaris_puppet_agent_dev_package_info(
                   'pa_collection', pa_version, opts )
                 expect( release_file ).to be === "puppet-agent@#{pa_version_cleaned},5.11-1.arch.p5p"
               end
 
               it "fallback URL" do
-                allow( host ).to receive( :link_exists? ) { false }
+                allow( host ).to receive( :link_exists? ).and_return(false)
                 _, release_file = host.solaris_puppet_agent_dev_package_info(
                   'pa_collection', pa_version, opts )
                 expect( release_file ).to be === "puppet-agent@#{pa_version_cleaned},5.11.arch.p5p"

@@ -42,14 +42,14 @@ module Beaker
     describe '#copy_stylesheet_into_xml_dir' do
 
       it 'copies the stylesheet into the correct location' do
-        allow( File ).to receive( :file? ) { false }
+        allow( File ).to receive( :file? ).and_return(false)
         correct_location = File.join(File.dirname(xml_file), File.basename(stylesheet))
         expect( FileUtils ).to receive( :copy ).with( stylesheet, correct_location )
         described_class.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
       end
 
       it 'skips action if the file doesn\'t exist' do
-        allow( File ).to receive( :file? ) { true }
+        allow( File ).to receive( :file? ).and_return(true)
         expect( FileUtils ).not_to receive( :copy )
         described_class.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
       end

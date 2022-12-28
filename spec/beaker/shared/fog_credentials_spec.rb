@@ -9,7 +9,7 @@ module Beaker
         end
 
         it 'raises ArgumentError when fog file is empty' do
-          expect( File ).to receive( :open ) { "" }
+          expect( File ).to receive( :open ).and_return("")
 
           expect{ get_fog_credentials( '/path/that/does/not/exist/.fog') }.to raise_error( ArgumentError )
         end
