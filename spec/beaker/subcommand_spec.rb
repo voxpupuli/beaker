@@ -9,7 +9,7 @@ module Beaker
 
     context '#initialize' do
       it 'creates a cli object' do
-        expect(subcommand.cli).to be
+        expect(subcommand.cli).to be_instance_of(Beaker::CLI)
       end
 
       describe 'File operation initialization for subcommands' do
