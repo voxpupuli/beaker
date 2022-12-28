@@ -18,9 +18,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
           return false
         end
         true
-      rescue Beaker::Host::CommandFailure => err
+      rescue Beaker::Host::CommandFailure => e
         logger.info("create_remote_file threw command failure, details: ")
-        logger.info("  #{err}")
+        logger.info("  #{e}")
         logger.info("continuing back-off execution")
         false
       end

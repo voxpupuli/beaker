@@ -298,11 +298,11 @@ module Beaker
           bhg_cli = BeakerHostGenerator::CLI.new(host_generator_options)
           bhg_cli.execute
         rescue BeakerHostGenerator::Exceptions::Error,
-          BeakerHostGenerator::Exceptions::InvalidNodeSpecError => error
+          BeakerHostGenerator::Exceptions::InvalidNodeSpecError => e
           error_message = "\nbeaker-hostgenerator was not able to use this value as input."
           error_message << "\nExiting with an Error.\n\n"
           $stderr.puts error_message
-          raise error
+          raise e
         end
 
         @options[:hosts_file_generated] = true
