@@ -33,27 +33,27 @@ module Beaker
 
     #How many passed {TestCase} instances are in this {TestSuiteResult}
     def passed_tests
-      @test_cases.select { |c| c.test_status == :pass }.length
+      @test_cases.count { |c| c.test_status == :pass }
     end
 
     #How many errored {TestCase} instances are in this {TestSuiteResult}
     def errored_tests
-      @test_cases.select { |c| c.test_status == :error }.length
+      @test_cases.count { |c| c.test_status == :error }
     end
 
     #How many failed {TestCase} instances are in this {TestSuiteResult}
     def failed_tests
-      @test_cases.select { |c| c.test_status == :fail }.length
+      @test_cases.count { |c| c.test_status == :fail }
     end
 
     #How many skipped {TestCase} instances are in this {TestSuiteResult}
     def skipped_tests
-      @test_cases.select { |c| c.test_status == :skip }.length
+      @test_cases.count { |c| c.test_status == :skip }
     end
 
     #How many pending {TestCase} instances are in this {TestSuiteResult}
     def pending_tests
-      @test_cases.select {|c| c.test_status == :pending}.length
+      @test_cases.count {|c| c.test_status == :pending}
     end
 
     #How many {TestCase} instances failed in this {TestSuiteResult}
