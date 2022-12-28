@@ -378,14 +378,10 @@ module Beaker
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif host['platform'] =~ /osx/
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
-        elsif host['platform'] =~ /freebsd/
-          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
-        elsif host['platform'] =~ /openbsd/
+        elsif host['platform'] =~ /(free|open)bsd/ or host['platform'] =~ /solaris-11/
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         elsif host['platform'] =~ /solaris-10/
           host.exec(Command.new('sudo cp -r .ssh /.'), {:pty => true})
-        elsif host['platform'] =~ /solaris-11/
-          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
         end
@@ -456,13 +452,11 @@ module Beaker
         elsif host['platform'] =~ /solaris-11/
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host['platform'] =~ /f5/
+        elsif host['platform'] =~ /f5/ || host.is_powershell?
           #interacting with f5 should using tmsh
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
           host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), {:pty => true})
-        elsif host.is_powershell?
-          logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         else
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         end

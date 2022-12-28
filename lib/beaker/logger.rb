@@ -65,8 +65,6 @@ module Beaker
         @log_level = :trace
       when /debug/i, :debug
         @log_level = :debug
-      when /verbose/i, :verbose
-        @log_level = :verbose
       when /info/i, :info
         @log_level = :info
       when /notify/i, :notify
@@ -132,9 +130,7 @@ module Beaker
     # @param [Array<IO, String>] dest Array of strings (each used as a file path) and IO steams that messages will be printed to
     def add_destination(dest)
       case dest
-      when IO
-        @destinations << dest
-      when StringIO
+      when IO, StringIO
         @destinations << dest
       when String
         @destinations << File.open(dest, 'w')
@@ -147,9 +143,7 @@ module Beaker
     # @param [String, IO] dest String representing a file path or IO stream
     def remove_destination(dest)
       case dest
-      when IO
-        @destinations.delete(dest)
-      when StringIO
+      when IO, StringIO
         @destinations.delete(dest)
       when String
         @destinations.delete_if {|d| d.respond_to?(:path) and d.path == dest}

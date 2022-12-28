@@ -31,8 +31,6 @@ module Beaker
         case self[:type]
         when /pe/
           :pe
-        when /foss/
-          :foss
         else
           :foss
         end
