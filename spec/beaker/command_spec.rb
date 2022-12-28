@@ -3,6 +3,7 @@ require 'spec_helper'
 module Beaker
   describe Command do
     subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
@@ -94,6 +95,7 @@ module Beaker
 
   describe HostCommand do
     subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
@@ -118,6 +120,7 @@ module Beaker
 
   describe SedCommand do
     subject(:cmd)     { described_class.new( platform, expression, filename, options ) }
+
     let(:host)        {
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
