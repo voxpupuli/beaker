@@ -61,9 +61,6 @@ describe "my tests" do
 
     describe file('/tmp/demo.txt') do
       it { is_expected.to be_file }
-    end
-
-    describe file('/tmp/demo.txt') do
       it { is_expected.to contain 'this is my file.' }
     end
   end
