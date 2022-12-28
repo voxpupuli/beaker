@@ -59,16 +59,15 @@ module Beaker
       def find_at_most_one_host_with_role(hosts, role)
         raise ArgumentError, "role cannot be nil." if role.nil?
         role_hosts = hosts_with_role(hosts, role)
-        host_with_role = nil
         case role_hosts.length
         when 0
+          nil
         when 1
-          host_with_role = role_hosts[0]
+          role_hosts[0]
         else
           host_string = ( role_hosts.map { |host| host.name } ).join( ', ')
           raise ArgumentError, "There should be only one host with #{role} defined, but I found #{role_hosts.length} (#{host_string})"
         end
-        host_with_role
       end
 
       # Execute a block selecting the hosts that match with the provided criteria
