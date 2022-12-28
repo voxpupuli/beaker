@@ -20,7 +20,7 @@ test_name 'Hocon Helpers Test' do
   end
 
   step '#hocon_file_edit_on : set_value and verify it exists' do
-    hocon_file_edit_on(hosts, hocon_filename) do |host, doc|
+    hocon_file_edit_on(hosts, hocon_filename) do |_host, doc|
       doc2 = doc.set_value('c', '[4, 5]')
 
       assert(doc2.has_value?('c'), 'Should have inserted "c" value!')
@@ -70,7 +70,7 @@ test_name 'Hocon Helpers Test' do
     end
 
     step '#hocon_file_edit_on : independently read value to verify save' do
-      hocon_file_edit_on(hosts, hocon_filename) do |host, doc|
+      hocon_file_edit_on(hosts, hocon_filename) do |_host, doc|
         msg_fail = 'Should have saved "a.b" value inserted in previous step'
         assert(doc.has_value?('a.b'), msg_fail)
       end
@@ -79,13 +79,13 @@ test_name 'Hocon Helpers Test' do
 
   step '#hocon_file_edit_in_place_on : verify auto-saving workflow' do
     step '#hocon_file_edit_in_place_on : set_value and save' do
-      hocon_file_edit_in_place_on(hosts, hocon_filename) do |host, doc|
+      hocon_file_edit_in_place_on(hosts, hocon_filename) do |_host, doc|
         doc.set_value('c.d', '[6, 2, 73, 4, 45]')
       end
     end
 
     step '#hocon_file_edit_in_place_on : verify save' do
-      hocon_file_edit_on(hosts, hocon_filename) do |host, doc|
+      hocon_file_edit_on(hosts, hocon_filename) do |_host, doc|
         msg_fail = 'Should have saved "c.d" value inserted in previous step'
         assert(doc.has_value?('c.d'), msg_fail)
       end

@@ -144,7 +144,7 @@ Commandline options set through the above environment variables will override se
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     exit_status = 1
     output = ''
-    Open3.popen3("bundle exec rspec") {|stdin, stdout, stderr, wait_thr|
+    Open3.popen3("bundle exec rspec") {|_stdin, stdout, _stderr, wait_thr|
       while(line = stdout.gets)
         puts line
       end

@@ -105,7 +105,7 @@ module Beaker
         found = found.merge(format_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC )))
         found[:answers] = select_env_by_regex('\\Aq_')
 
-        found.delete_if {|key, value| value.nil? or value.empty? }
+        found.delete_if {|_key, value| value.nil? or value.empty? }
         found
       end
 

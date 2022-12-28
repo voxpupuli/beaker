@@ -124,7 +124,7 @@ module Beaker
 
       # Update each host provisioned with a flag indicating that it no longer needs
       # provisioning
-      cleaned_hosts.each do |host, host_hash|
+      cleaned_hosts.each do |_host, host_hash|
         host_hash['provision'] = false
       end
 

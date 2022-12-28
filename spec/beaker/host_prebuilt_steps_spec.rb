@@ -318,7 +318,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'solaris-11' } )
 
       expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
-      hosts.each do |host|
+      hosts.each do |_host|
         expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
       end
 

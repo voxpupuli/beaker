@@ -121,7 +121,7 @@ module Beaker
 
           parser.fix_roles_array( host_options )
 
-          host_options['HOSTS'].each do |host_name, host_hash|
+          host_options['HOSTS'].each do |_host_name, host_hash|
             expect( host_hash['roles'] ).to be === []
           end
         end

@@ -178,7 +178,7 @@ module Beaker
       stylesheet = File.join(@options[:project_root], @options[:xml_stylesheet])
 
       begin
-        LoggerJunit.write_xml(xml_file, stylesheet) do |doc, suites|
+        LoggerJunit.write_xml(xml_file, stylesheet) do |_doc, suites|
 
           meta_info = suites.add_element(REXML::Element.new('meta_test_info'))
           unless file_to_link.nil?

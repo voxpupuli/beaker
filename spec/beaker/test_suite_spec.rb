@@ -260,7 +260,7 @@ module Beaker
           allow( @tsr ).to receive( :start_time ).and_return(0)
           allow( @tsr ).to receive( :stop_time ).and_return(10)
           @test_cases = []
-          @files.each_with_index do |file, index|
+          @files.each_with_index do |_file, _index|
             tc = Beaker::TestCase.new( hosts, options[:logger], options, rb_test)
             allow( tc ).to receive( :sublog ).and_return( false )
             @test_cases << tc

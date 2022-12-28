@@ -544,7 +544,7 @@ module Beaker
     def additive_hash_merge h1, h2
       merged_hash = {}
       normalized_h2 = h2.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v; h }
-      h1.each_pair do |key, val|
+      h1.each_pair do |key, _val|
         normalized_key = key.to_s.upcase
         if normalized_h2.has_key?(normalized_key)
           merged_hash[key] = [h1[key], normalized_h2[normalized_key]]
