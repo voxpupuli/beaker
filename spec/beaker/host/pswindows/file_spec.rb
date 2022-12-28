@@ -27,6 +27,7 @@ module Beaker
     describe '#cat' do
       let(:path) { '/path/to/cat' }
       let(:content) { 'file content' }
+
       it 'reads output for file' do
         expect(instance).to receive(:exec).and_return(double(stdout: content))
         expect(Beaker::Command).to receive(:new).with('powershell.exe', array_including("-Command type #{path}"))
@@ -36,6 +37,7 @@ module Beaker
 
     describe '#file_exist?' do
       let(:path) { '/path/to/test/file.txt' }
+
       context 'file exists' do
         it 'returns true' do
           expect(instance).to receive(:exec).and_return(double(stdout: "true\n"))
@@ -63,6 +65,7 @@ module Beaker
 
       context 'with dirname sent' do
         let(:name) { 'my_dir' }
+
         it 'returns the path to my_dir' do
           expect(Beaker::Command).to receive(:new).
             with('powershell.exe', array_including('-Command [System.IO.Path]::GetTempPath()')).

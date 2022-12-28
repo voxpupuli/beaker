@@ -17,6 +17,7 @@ module Beaker
 
       describe 'when the subcommand is init' do
         let( :argv ) {['init']}
+
         it 'returns an empty OptionsHash' do
           expect(parser).to be_kind_of(OptionsHash)
           expect(parser).to be_empty
@@ -45,6 +46,7 @@ module Beaker
         end
 
         let(:options_file) {""}
+
         it 'returns an empty options hash when file does not exist' do
           allow(File).to receive(:exist?).and_return false
           expect(parser).to be_kind_of(OptionsHash)

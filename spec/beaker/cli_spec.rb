@@ -98,6 +98,7 @@ module Beaker
       let(:instance_host ) {
         [Beaker::Host.create('ubuntu', {:platform => 'host'}, {} )]
       }
+
       before do
         cli.instance_variable_set(:@options, options_host)
         cli.instance_variable_set(:@hosts, instance_host)

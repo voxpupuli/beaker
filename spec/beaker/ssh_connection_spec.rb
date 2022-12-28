@@ -10,6 +10,7 @@ module Beaker
     let( :vmhostname ){ "vmhostname" }
     let( :hostname)   { "my_host" }
     let( :name_hash ) { { :ip => ip, :vmhostname => vmhostname, :hostname => hostname } }
+
     subject(:connection) { described_class.new name_hash, user, ssh_opts, options }
 
     before :each do

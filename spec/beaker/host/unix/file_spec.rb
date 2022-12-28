@@ -210,6 +210,7 @@ module Beaker
 
     describe '#cat' do
       let(:path) { '/path/to/cat/on' }
+
       it 'calls cat for path' do
         expect( instance ).to receive( :execute ).with( "cat #{path}" ).and_return( 0 )
         expect( instance.cat( path ) ).to be === 0

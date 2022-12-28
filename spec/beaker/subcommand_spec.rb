@@ -254,6 +254,7 @@ module Beaker
       let( :yaml_store_mock ) { double('yaml_store_mock') }
       let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
       let( :cleaned_hosts ) {double()}
+
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
         allow(yaml_store_mock).to receive(:[]).and_return(false)
         allow(subcommand).to receive(:options).and_return('preserve-state' => true)

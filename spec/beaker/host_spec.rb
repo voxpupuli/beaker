@@ -760,6 +760,7 @@ module Beaker
 
     describe '#get_public_ip' do
       let(:aws) { double('AWSmock')}
+
       it 'calls upon the ec2 instance to get the ip address' do
         host.host_hash[:hypervisor] = 'ec2'
         host.host_hash[:instance] = aws

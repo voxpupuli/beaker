@@ -51,6 +51,7 @@ describe ClassMixedWithDSLStructure do
   describe '#manual_step' do
     context 'without exec manual test option' do
       let( :options ) { {} }
+
       it 'throws an error' do
         expect( Readline ).not_to receive( :readline )
         expect { subject.manual_step 'blah' do; end }.to raise_error StandardError
@@ -59,6 +60,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option' do
       let( :options ) { {exec_manual_tests: nil} }
+
       it 'requires a name' do
         expect { subject.manual_step do; end }.to raise_error ArgumentError
       end
@@ -75,6 +77,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option set to true' do
       let( :options ) { {exec_manual_tests: true} }
+
       it 'requires a name' do
         expect { subject.manual_step do; end }.to raise_error ArgumentError
       end
@@ -102,6 +105,7 @@ describe ClassMixedWithDSLStructure do
   describe '#manual_test' do
     context 'without exec manual test option' do
       let( :options ) { {} }
+
       it 'requires a name' do
         expect { subject.manual_test do; end }.to raise_error ArgumentError
       end
@@ -117,6 +121,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option' do
       let( :options ) { {exec_manual_tests: true} }
+
       it 'requires a name' do
         expect { subject.manual_test do; end }.to raise_error ArgumentError
       end
@@ -221,6 +226,7 @@ describe ClassMixedWithDSLStructure do
 
   describe 'confine' do
     let(:logger) { double.as_null_object }
+
     before do
       allow( subject ).to receive( :logger ).and_return( logger )
     end
@@ -344,6 +350,7 @@ describe ClassMixedWithDSLStructure do
 
   describe '#select_hosts' do
     let(:logger) { double.as_null_object }
+
     before do
       allow( subject ).to receive( :logger ).and_return( logger )
     end

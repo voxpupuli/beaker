@@ -6,6 +6,7 @@ end
 
 describe ClassMixedWithDSLOutcomes do
   let(:logger) { double }
+
   before { allow( subject ).to receive( :logger ).and_return( logger ) }
 
   describe '#pass_test' do

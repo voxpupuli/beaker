@@ -126,6 +126,7 @@ module Beaker
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
     let(:options)     { @options    || Hash.new  }
+
     subject(:cmd)     { described_class.new( platform, expression, filename, options ) }
 
     it 'forms a basic sed command correctly' do

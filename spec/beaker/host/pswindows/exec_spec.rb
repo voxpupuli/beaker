@@ -57,6 +57,7 @@ module Beaker
 
       context 'file exists' do
         let(:stdout) { 'True' }
+
         it 'sets the modified_at date' do
           file = 'C:\path\to\file'
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
@@ -69,6 +70,7 @@ module Beaker
 
       context 'file does not exist' do
         let(:stdout) { 'False' }
+
         it 'creates it and sets the modified_at date' do
           file = 'C:\path\to\file'
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
