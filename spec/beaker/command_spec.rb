@@ -6,6 +6,7 @@ module Beaker
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
     subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:host)    {
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
@@ -96,6 +97,7 @@ module Beaker
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
     subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:host)    { Hash.new }
 
     it 'returns a simple string passed in' do

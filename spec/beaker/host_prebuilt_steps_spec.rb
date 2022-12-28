@@ -25,6 +25,7 @@ describe Beaker do
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
     subject { dummy_class.new }
+
     it "can enable root login on #{platform}" do
       hosts = make_hosts( { :platform => platform, :is_cygwin => non_cygwin} )
 
@@ -622,6 +623,7 @@ describe Beaker do
   context "package_proxy" do
 
     subject { dummy_class.new }
+
     proxyurl = "http://192.168.2.100:3128"
 
     it "can set proxy config on a debian/ubuntu/cumulus host" do
