@@ -109,6 +109,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
         expect( instance.check_for_package(pkg) ).to be === true
       end
+
       it "checks correctly on opensuse" do
         @opts = {'platform' => 'opensuse-is-me'}
         pkg = 'sles_package'
@@ -159,6 +160,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
+
       it "checks correctly on debian" do
         @opts = {'platform' => 'debian-is-me'}
         pkg = 'debian_package'

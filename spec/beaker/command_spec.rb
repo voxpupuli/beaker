@@ -101,10 +101,12 @@ module Beaker
       @command = "pants"
       expect( cmd.cmd_line host ).to be === @command
     end
+
     it 'returns single quoted string correctly' do
       @command = "str_p = 'pants'; str_p"
       expect( cmd.cmd_line host ).to be === @command
     end
+
     it 'returns empty strings when given the escaped version of the same' do
       @command = "\"\""
       expect( cmd.cmd_line host ).to be === ""

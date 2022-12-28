@@ -48,6 +48,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('',{:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.pkgng_active? ).to be true
       end
+
       it "returns false if pkgng is unavailable" do
         expect( instance ).to receive(:check_pkgng_sh).once.and_return("do you have pkgng?")
         expect( Beaker::Command ).to receive(:new).with("/bin/sh -c 'do you have pkgng?'", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')

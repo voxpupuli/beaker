@@ -293,22 +293,27 @@ module Beaker
           result.exit_code = 0
           expect{ host.exec(command,{}) }.to_not raise_error
         end
+
         it "and fails a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 1
           expect{ host.exec(command,{}) }.to raise_error
         end
+
         it "and passes a test if the exit_code matches :acceptable_exit_codes" do
           result.exit_code = 0
           expect{ host.exec(command,{:acceptable_exit_codes => 0}) }.to_not raise_error
         end
+
         it "and fails a test if the exit_code doesn't match :acceptable_exit_codes" do
           result.exit_code = 0
           expect{ host.exec(command,{:acceptable_exit_codes => 1}) }.to raise_error
         end
+
         it "and passes a test if the exit_code matches one of the :acceptable_exit_codes" do
           result.exit_code = 127
           expect{ host.exec(command,{:acceptable_exit_codes => [1,127]}) }.to_not raise_error
         end
+
         it "and passes a test if the exit_code matches one of the range of :acceptable_exit_codes" do
           result.exit_code = 1
           expect{ host.exec(command,{:acceptable_exit_codes => (0..127)}) }.to_not raise_error
@@ -462,6 +467,7 @@ module Beaker
 
           host.do_scp_to(*args)
         end
+
         it 'can take an ignore list that excludes a single file and scp the rest' do
           created_target_path = File.join(target_path, File.basename(source_path))
           exclude_file = '07_InstallCACerts.rb'

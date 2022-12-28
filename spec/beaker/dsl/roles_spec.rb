@@ -38,11 +38,13 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject.master ).to be == master
     end
+
     it 'raises an error if there is more than one master' do
       @hosts = [ master, monolith ]
       expect( subject ).to receive( :hosts ).exactly( 1 ).times.and_return( hosts )
       expect { subject.master }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'returns nil if no master and masterless is set' do
       @options = { :masterless => true }
       expect( subject ).to receive( :hosts ).and_return( hosts )
@@ -56,16 +58,19 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject.dashboard ).to be == a_and_dash
     end
+
     it 'raises an error if there is more than one dashboard' do
       @hosts = [ a_and_dash, monolith ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.dashboard }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'and raises an error if there is no dashboard' do
       @hosts = [ agent1, agent2, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.dashboard }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'returns nil if no dashboard and masterless is set' do
       @options = { :masterless => true }
       expect( subject ).to receive( :hosts ).and_return( hosts )
@@ -79,16 +84,19 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect( subject.database ).to be == db
     end
+
     it 'raises an error if there is more than one database' do
       @hosts = [ db, monolith ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'and raises an error if there is no database' do
       @hosts = [ agent1, agent2, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.database }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'returns nil if no database and masterless is set' do
       @options = { :masterless => true }
       expect( subject ).to receive( :hosts ).and_return( hosts )
@@ -100,6 +108,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns true when a host does not have the roles master/database/dashboard' do
       expect( subject.not_controller(agent1) ).to be == true
     end
+
     it 'returns false when a host has one of the roles master/database/dashboard' do
       expect( subject.not_controller(a_and_dash) ).to be == false
     end
@@ -108,9 +117,11 @@ describe ClassMixedWithDSLRoles do
     it 'returns true when a host has the single role agent' do
       expect( subject.agent_only(agent1) ).to be == true
     end
+
     it 'returns false when a host has more than a single role' do
       expect( subject.agent_only(a_and_dash) ).to be == false
     end
+
     it 'returns false when a host has the role master' do
       expect( subject.agent_only(master) ).to be == false
     end
@@ -121,52 +132,64 @@ describe ClassMixedWithDSLRoles do
       agent1[:version] = nil
       expect( subject.aio_version?(agent1) ).to be === false
     end
+
     it 'returns false if :version < 4.0 and pe_ver is nil, type foss' do
       agent1[:pe_ver] = nil
       agent1[:version] = '3.8'
       agent1[:type] = 'foss'
       expect( subject.aio_version?(agent1) ).to be === false
     end
+
     it 'returns false if the host :pe_ver is set < 4.0' do
       agent1[:pe_ver] = '3.8'
       expect( subject.aio_version?(agent1) ).to be === false
     end
+
     it 'returns false if the host :version is set < 4.0' do
       agent1[:version] = '3.8'
       expect( subject.aio_version?(agent1) ).to be === false
     end
+
     it 'returns true if the host :pe_ver is 4.0' do
       agent1[:pe_ver] = '4.0'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host :version is 4.0' do
       agent1[:version] = '4.0'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host :pe_ver is 2015.5' do
       agent1[:pe_ver] = '2015.5'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host has role aio' do
       agent1[:roles] = agent1[:roles] | ['aio']
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host is type aio' do
       agent1[:type] = 'aio'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host is type aio-foss' do
       agent1[:type] = 'aio-foss'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'returns true if the host is type foss-aio' do
       agent1[:type] = 'aio-foss'
       expect( subject.aio_version?(agent1) ).to be === true
     end
+
     it 'can take an empty string for pe_ver' do
       agent1[:pe_ver] = ''
       expect{ subject.aio_version?(agent1) }.not_to raise_error
     end
+
     it 'can take an empty string for FOSS version' do
       agent1[:version] = ''
       expect{ subject.aio_version?(agent1) }.not_to raise_error
@@ -287,10 +310,12 @@ describe ClassMixedWithDSLRoles do
       agent1[:roles] = ['agent', 'headless']
       expect( subject.aio_agent?(agent1) ).to be === false
     end
+
     it 'returns false if aio_capable? check doesn\'t pass' do
       agent1[:pe_ver] = '3.8'
       expect( subject.aio_agent?(agent1) ).to be === false
     end
+
     it 'returns true if both checks pass' do
       agent1[:pe_ver] = '4.0'
       expect( subject.aio_agent?(agent1) ).to be === true
@@ -302,16 +327,19 @@ describe ClassMixedWithDSLRoles do
       expect( subject ).to receive( :hosts ).exactly( 1  ).times.and_return( hosts )
       expect( subject.default ).to be == default
     end
+
     it 'raises an error if there is more than one default' do
       @hosts = [ db, monolith, default, default ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.default }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'and raises an error if there is no default' do
       @hosts = [ agent1, agent2, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
       expect { subject.default }.to raise_error Beaker::DSL::FailTest
     end
+
     it 'returns nil if no default and masterless is set' do
       @options = { :masterless => true }
       expect( subject ).to receive( :hosts ).and_return( hosts )
@@ -323,18 +351,22 @@ describe ClassMixedWithDSLRoles do
     it 'raises an error on unsupported role format "1role"' do
       expect { subject.add_role_def( "1role" ) }.to raise_error ArgumentError
     end
+
     it 'raises an error on unsupported role format "role_!a"' do
       expect { subject.add_role_def( "role_!a" ) }.to raise_error ArgumentError
     end
+
     it 'raises an error on unsupported role format "role=="' do
       expect { subject.add_role_def( "role==" ) }.to raise_error ArgumentError
     end
+
     it 'creates new method for role "role_correct!"' do
       test_role = "role_correct!"
       subject.add_role_def( test_role )
       expect( subject ).to respond_to test_role
       subject.class.send( :undef_method, test_role )
     end
+
     it 'returns a single node for a new method for a role defined in a single node' do
       @hosts = [ agent1, agent2, monolith ]
       expect( subject ).to receive( :hosts ).and_return( hosts )
@@ -344,6 +376,7 @@ describe ClassMixedWithDSLRoles do
       expect( subject.send( test_role )).to be == @hosts[2]
       subject.class.send( :undef_method, test_role )
     end
+
     it 'returns an array of nodes for a new method for a role defined in multiple nodes' do
       @hosts = [ agent1, agent2, monolith, custom ]
       expect( subject ).to receive( :hosts ).and_return( hosts )

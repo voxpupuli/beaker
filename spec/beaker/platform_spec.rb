@@ -97,6 +97,7 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'ubuntu-xenial-xxx'
 
       end
+
       it "can convert ubuntu-1310-xxx to ubuntu-saucy-xxx" do
         @name = 'ubuntu-1310-xxx'
         expect( platform.with_version_codename ).to be === 'ubuntu-saucy-xxx'

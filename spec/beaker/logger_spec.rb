@@ -16,9 +16,11 @@ module Beaker
       it 'preserves valid utf-8 strings' do
         expect( logger.convert(valid_utf8) ).to be === valid_utf8
       end
+
       it 'strips out invalid utf-8 characters' do
         expect( logger.convert(invalid_utf8) ).to be === valid_utf8
       end
+
       it 'supports frozen strings' do
         valid_utf8.freeze
         expect( logger.convert(valid_utf8) ).to be === valid_utf8
