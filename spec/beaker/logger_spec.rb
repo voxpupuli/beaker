@@ -254,7 +254,7 @@ module Beaker
     context 'it can' do
       it 'open/create a file when a string is given to add_destination' do
         logger.add_destination 'my_tmp_file'
-        expect( File.exists?( 'my_tmp_file' ) ).to be_truthy
+        expect( File.exist?( 'my_tmp_file' ) ).to be_truthy
 
         io = logger.destinations.select {|d| d.respond_to? :path }.first
         expect( io.path ).to match(/my_tmp_file/)

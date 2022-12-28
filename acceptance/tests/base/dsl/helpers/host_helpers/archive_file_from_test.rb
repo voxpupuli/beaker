@@ -9,14 +9,14 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
 
     # Prepare cleanup so we don't pollute the local filesystem
     teardown do
-      FileUtils.rm_rf('archive') if Dir.exists?('archive')
+      FileUtils.rm_rf('archive') if Dir.exist?('archive')
     end
 
     # Test that the archiveroot default directory is created
-    assert_equal(false, Dir.exists?('archive'))
-    assert_equal(false, Dir.exists?('archive/sut-files'))
+    assert_equal(false, Dir.exist?('archive'))
+    assert_equal(false, Dir.exist?('archive/sut-files'))
     archive_file_from(default, filepath)
-    assert_equal(true, Dir.exists?('archive/sut-files'))
+    assert_equal(true, Dir.exist?('archive/sut-files'))
   end
 
   step "fails archive_file_from when from_path is non-existant" do
@@ -30,13 +30,13 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
     # Create a remote file to archive
     filepath = default.tmpfile('archive-file-test')
     create_remote_file(default, filepath, 'number of the beast')
-    assert_equal(false, Dir.exists?(filepath))
+    assert_equal(false, Dir.exist?(filepath))
 
     # Test that the file is copied locally to <archiveroot>/<hostname>/<filepath>
     Dir.mktmpdir do |tmpdir|
       tar_path = File.join(tmpdir, default, filepath + '.tgz')
       archive_file_from(default, filepath, {}, tmpdir, tar_path)
-      assert(File.exists?(tar_path))
+      assert(File.exist?(tar_path))
       expected_path = File.join(tmpdir, default)
 
       tgz = Zlib::GzipReader.new(File.open(tar_path, 'rb'))

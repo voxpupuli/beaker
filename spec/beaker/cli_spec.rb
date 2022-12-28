@@ -77,8 +77,8 @@ module Beaker
     end
 
     let(:cli)      {
-      allow(File).to receive(:exists?).and_return(true)
-      allow(File).to receive(:exists?).with('.beaker.yml').and_return(false)
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
       Beaker::CLI.new.parse_options
     }
 
@@ -426,7 +426,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect( File.exists?(copied_hosts_file) ).to be_truthy
+            expect( File.exist?(copied_hosts_file) ).to be_truthy
           end
         end
 

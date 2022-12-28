@@ -37,7 +37,7 @@ module HarnessOptions
 
   def self.get_options(file_path)
     puts "Attempting to merge config file: #{file_path}"
-    if File.exists? file_path
+    if File.exist? file_path
       options = eval(File.read(file_path), binding)
     else
       puts "No options file found at #{File.expand_path(file_path)}... skipping"

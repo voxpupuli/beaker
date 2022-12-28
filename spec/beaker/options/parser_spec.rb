@@ -341,7 +341,7 @@ module Beaker
 
         context 'Hosts file exists' do
           before :each do
-            allow(File).to receive(:exists?).and_return(true)
+            allow(File).to receive(:exist?).and_return(true)
           end
 
           it 'returns the parser\'s output' do
@@ -358,7 +358,7 @@ module Beaker
         context 'Hosts file does not exist' do
           require 'beaker-hostgenerator'
           before :each do
-            allow(File).to receive(:exists?).and_return(false)
+            allow(File).to receive(:exist?).and_return(false)
           end
 
           it 'calls beaker-hostgenerator to get hosts information' do

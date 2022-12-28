@@ -53,7 +53,7 @@ describe ClassMixedWithDSLHelpers do
       context ':cache_files_locally option is set' do
         it 'caches if the file exists locally' do
           options[:cache_files_locally] = true
-          allow(File).to receive(:exists?).and_return(true)
+          allow(File).to receive(:exist?).and_return(true)
 
           expect( logger ).to receive( :notify ).with( /^Already\ fetched\ / )
           expect( subject ).not_to receive( :open )
@@ -63,7 +63,7 @@ describe ClassMixedWithDSLHelpers do
 
         it 'doesn\'t cache if the file doesn\'t exist locally' do
           options[:cache_files_locally] = true
-          allow(File).to receive(:exists?).and_return(false)
+          allow(File).to receive(:exist?).and_return(false)
 
           expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
           expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered

@@ -551,9 +551,9 @@ module Beaker
       #
       # We still want any user-set SSH config to win though
       filesystem_ssh_config = nil
-      if ssh_opts[:config] && File.exists?(ssh_opts[:config])
+      if ssh_opts[:config] && File.exist?(ssh_opts[:config])
         filesystem_ssh_config = ssh_opts[:config]
-      elsif self[:vagrant_ssh_config] && File.exists?(self[:vagrant_ssh_config])
+      elsif self[:vagrant_ssh_config] && File.exist?(self[:vagrant_ssh_config])
         filesystem_ssh_config = self[:vagrant_ssh_config]
       end
 
