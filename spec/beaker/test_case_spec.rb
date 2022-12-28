@@ -15,8 +15,7 @@ module Beaker
         @path = path
         expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
-        status = testcase.instance_variable_get(:@test_status)
-        expect(status).to be === :pass
+        expect(testcase.test_status).to be === :pass
       end
 
       it 'updates test_status to :skip on SkipTest' do
@@ -27,8 +26,7 @@ module Beaker
         @path = path
         expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
-        status = testcase.instance_variable_get(:@test_status)
-        expect(status).to be === :skip
+        expect(testcase.test_status).to be === :skip
       end
 
       it 'updates test_status to :pending on PendingTest' do
@@ -39,8 +37,7 @@ module Beaker
         @path = path
         expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
-        status = testcase.instance_variable_get(:@test_status)
-        expect(status).to be === :pending
+        expect(testcase.test_status).to be === :pending
       end
 
       it 'updates test_status to :fail on FailTest' do
@@ -51,8 +48,7 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
         testcase.run_test
-        status = testcase.instance_variable_get(:@test_status)
-        expect(status).to be === :fail
+        expect(testcase.test_status).to be === :fail
       end
 
       it 'correctly handles RuntimeError' do
@@ -107,7 +103,7 @@ module Beaker
         @path = path
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
-        expect @test_status == :error
+        expect(testcase.test_status).to eq(:error)
       end
 
       it 'does not overwrite a test failure if an assertion also happens in a teardown block' do
@@ -124,7 +120,7 @@ module Beaker
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :fail).and_call_original
         expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
-        expect @test_status == :fail
+        expect(testcase.test_status).to eq(:fail)
       end
     end
 
