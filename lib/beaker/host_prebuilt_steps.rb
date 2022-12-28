@@ -248,10 +248,10 @@ module Beaker
         resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
       end
       resolv_conf.each_line { |line|
-        if line =~ /^\s*domain\s+(\S+)/
-          domain = $1
-        elsif line =~ /^\s*search\s+(\S+)/
-          search = $1
+        if (match = /^\s*domain\s+(\S+)/.match(line))
+          domain = match[1]
+        elsif (match = /^\s*search\s+(\S+)/.match(line))
+          search = match[1]
         end
       }
       return_value ||= domain
