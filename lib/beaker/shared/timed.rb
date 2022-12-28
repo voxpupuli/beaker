@@ -4,7 +4,7 @@ module Beaker
 
       def run_and_report_duration &block
         start = Time.now
-        block.call
+        yield
         Time.now - start
       end
 

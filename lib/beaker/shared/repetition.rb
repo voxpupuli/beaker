@@ -11,7 +11,7 @@ module Beaker
         timeout = Time.now + seconds
         done = false
         until done or timeout < Time.now do
-          done = block.call
+          done = yield
           sleep wait unless done
         end
         return done
@@ -22,7 +22,7 @@ module Beaker
         attempt = 1
         last_wait, wait = 0, 1
         while not done and attempt <= attempts do
-          done = block.call
+          done = yield
           attempt += 1
           sleep wait unless done
           last_wait, wait = wait, last_wait + wait
