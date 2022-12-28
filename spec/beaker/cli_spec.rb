@@ -13,6 +13,11 @@ end
 module Beaker
   describe CLI do
 
+    let(:cli)      {
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
+      described_class.new.parse_options
+    }
     context 'initializing and parsing' do
       let( :cli ) {
         described_class.new
@@ -77,11 +82,6 @@ module Beaker
       end
     end
 
-    let(:cli)      {
-      allow(File).to receive(:exist?).and_call_original
-      allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
-      described_class.new.parse_options
-    }
 
     describe '#configured_options' do
       it 'returns a list of options that were not presets' do

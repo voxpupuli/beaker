@@ -27,12 +27,13 @@ module Beaker
       describe 'when the subcommand is not init' do
         let( :argv ) {['provision']}
         let(:options_file) {Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS}
+        let(:options_file) {""}
+        let( :options_file ) {home_options_file_path}
         it 'calls parse_options_file with subcommand options file when home_dir is false' do
           allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true
           allow(parser_mod).to receive(:parse_options_file).with(Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
         end
 
-        let( :options_file ) {home_options_file_path}
         it 'calls parse_options_file with home directory options file when home_dir is true' do
           allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true
           allow(parser_mod).to receive(:parse_options_file).with(home_options_file_path)
@@ -45,7 +46,6 @@ module Beaker
           expect(file_parser).not_to be_kind_of(OptionsHash)
         end
 
-        let(:options_file) {""}
 
         it 'returns an empty options hash when file does not exist' do
           allow(File).to receive(:exist?).and_return false

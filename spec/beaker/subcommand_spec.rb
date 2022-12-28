@@ -180,6 +180,9 @@ module Beaker
         allow(subcommand.cli).to receive(:execute!)
       end
 
+      let( :cleaned_hosts ) {double()}
+      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
+      let( :yaml_store_mock ) { double('yaml_store_mock') }
       it 'calls execute! when no resource is given' do
         expect_any_instance_of(Pathname).to_not receive(:directory?)
         expect_any_instance_of(Pathname).to_not receive(:exist?)
@@ -251,9 +254,6 @@ module Beaker
       end
 
 
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let( :cleaned_hosts ) {double()}
 
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
         allow(yaml_store_mock).to receive(:[]).and_return(false)
