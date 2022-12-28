@@ -20,6 +20,13 @@ if ENV['BEAKER_PE_PR_REPO_URL']
   gem lib, :git => "git@github.com:#{author}/#{lib}.git", :branch => ref
 end
 
+group :rubocop do
+  gem 'rubocop', '~> 1.12.0'
+  gem 'rubocop-performance'
+  gem 'rubocop-rake'
+  gem 'rubocop-rspec'
+end
+
 group :release do
   gem 'github_changelog_generator', require: false
 end

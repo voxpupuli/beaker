@@ -117,7 +117,7 @@ module Beaker
         if RUBY_VERSION >= '2.6'
           YAML.safe_load(erb_obj.result(b), permitted_classes: PERMITTED_YAML_CLASSES, aliases: true)
         else
-          YAML.load(erb_obj.result(b))
+          YAML.load(erb_obj.result(b)) # rubocop:disable Security/YAMLLoad
         end
       end
     end
