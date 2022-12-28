@@ -69,7 +69,7 @@ module Beaker
                 end
               end
             rescue OpenURI::HTTPError => e
-              if e.message =~ /404.*/
+              if /404.*/.match?(e.message)
                 raise "Failed to fetch_remote_file '#{src}' (#{e.message})"
               else
                 raise e
@@ -92,7 +92,7 @@ module Beaker
         # @!visibility private
         def fetch_http_dir(url, dst_dir)
           logger.notify "fetch_http_dir (url: #{url}, dst_dir #{dst_dir})"
-          if url[-1, 1] !~ /\//
+          if !/\//.match?(url[-1, 1])
             url += '/'
           end
           url = URI.parse(url)

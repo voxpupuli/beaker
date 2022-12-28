@@ -20,7 +20,7 @@ end
 
 step "#is_x86_64? : can determine arch on hosts"
 hosts.each do |host|
-  if host['platform'] =~ /x86_64|_64|amd64|-64/
+  if /x86_64|_64|amd64|-64/.match?(host['platform'])
     assert_equal(true, host.is_x86_64?, "is_x86_64? should be true on #{host}: #{host['platform']}")
   else
     assert_equal(false, host.is_x86_64?, "is_x86_64? should be false on #{host}: #{host['platform']}")
@@ -240,7 +240,7 @@ hosts.each do |host|
       search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
       matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
       re =  /((\/|\A)tests(\/|\z))|((\/|\A)Gemfile(\/|\z))/
-      if path !~ re
+      if !path&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       else
         assert_equal(0, matched.length, "should have found no instances of path #{search_name}, found #{matched.length}: \n #{matched}")
@@ -270,7 +270,7 @@ hosts.each do |host|
       search_name = path.gsub(/^.*fixtures\/module\//, '') #reduce down to the path that should match
       matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
       re =  /((\/|\A)module(\/|\z))|((\/|\A)Gemfile(\/|\z))/
-      if path.gsub(/^.*module\//, '') !~ re
+      if !path.gsub(/^.*module\//, '')&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       else
         assert_equal(0, matched.length, "should have found no instances of path #{search_name}, found #{matched.length}: \n #{matched}")

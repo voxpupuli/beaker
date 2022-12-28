@@ -82,7 +82,7 @@ module Beaker
     # * netscaler
     # * archlinux
     def initialize(name)
-      if name !~ PLATFORMS
+      if !PLATFORMS.match?(name)
         raise ArgumentError, "Unsupported platform name #{name}"
       end
 

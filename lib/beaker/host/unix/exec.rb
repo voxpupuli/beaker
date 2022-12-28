@@ -188,7 +188,7 @@ module Unix::Exec
   # This is for sles based hosts.
   # @param [String] env_file The ssh environment file to read from
   def mirror_env_to_profile_d env_file
-    if self[:platform] =~ /opensuse|sles-/
+    if /opensuse|sles-/.match?(self[:platform])
       @logger.debug("mirroring environment to /etc/profile.d on opensuse/sles platform host")
       cur_env = exec(Beaker::Command.new("cat #{env_file}")).stdout
       shell_env = ''
@@ -306,7 +306,7 @@ module Unix::Exec
       directory = tmpdir()
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
-      exec(Beaker::Command.new("echo '' >/etc/environment")) if self['platform'] =~ /ubuntu-2(0|2).04/
+      exec(Beaker::Command.new("echo '' >/etc/environment")) if /ubuntu-2(0|2).04/.match?(self['platform'])
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
     else
@@ -400,7 +400,7 @@ module Unix::Exec
       arch = $3
       arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
       add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
-    elsif self['platform'] =~ /solaris-10/
+    elsif /solaris-10/.match?(self['platform'])
       add_env_var('PATH', '/opt/csw/bin')
     end
 
@@ -418,7 +418,7 @@ module Unix::Exec
   end
 
   def enable_remote_rsyslog(server = 'rsyslog.ops.puppetlabs.net', port = 514)
-    if self['platform'] !~ /ubuntu/
+    if !/ubuntu/.match?(self['platform'])
       @logger.warn "Enabling rsyslog is only implemented for ubuntu hosts"
       return
     end

@@ -16,7 +16,7 @@ module Unix::User
 
   def user_get(name)
     execute("getent passwd #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
+      fail_test "failed to get user #{name}" unless /^#{name}:/.match?(result.stdout)
 
       yield result if block_given?
       result

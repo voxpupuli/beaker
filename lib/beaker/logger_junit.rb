@@ -86,7 +86,7 @@ module Beaker
         suites = REXML::XPath.first(doc, "testsuites")
         #remove old data
         suites.elements.each("testsuite") do |e|
-          if e.name =~ /#{name}/
+          if /#{name}/.match?(e.name)
             suites.delete_element e
           end
         end

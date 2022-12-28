@@ -52,7 +52,7 @@ module Beaker
       # @return [nil] Does not return anything
       def validate_fail_mode(fail_mode)
         #check for valid fail mode
-        if fail_mode !~ VALID_FAIL_MODES
+        unless fail_mode.is_a?(String) && VALID_FAIL_MODES.match?(fail_mode)
           validator_error "--fail-mode must be one of fast or slow, not '#{fail_mode}'"
         end
       end
@@ -63,7 +63,7 @@ module Beaker
       # @return [nil] Does not return anything
       def validate_preserve_hosts(hosts_setting)
         #check for valid preserve_hosts option
-        if hosts_setting !~ VALID_PRESERVE_HOSTS
+        unless hosts_setting.is_a?(String) && VALID_PRESERVE_HOSTS.match?(hosts_setting)
           validator_error("--preserve_hosts must be one of always, onfail, onpass or never, not '#{hosts_setting}'")
         end
       end

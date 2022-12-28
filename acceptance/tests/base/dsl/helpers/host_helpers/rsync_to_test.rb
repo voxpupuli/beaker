@@ -73,7 +73,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
             rsync_package = "rsync"
             # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
             # TODO: fix this with BKR-1502
-            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            rsync_package = "CSWrsync" if /solaris-10/.match?(host['platform'])
             host.uninstall_package rsync_package
           else
             host[:rsync_installed] = false
@@ -175,7 +175,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
             rsync_package = "rsync"
             # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
             # TODO: fix this with BKR-1502
-            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            rsync_package = "CSWrsync" if /solaris-10/.match?(host['platform'])
             host.uninstall_package rsync_package
           end
           host.delete(:rsync_installed)

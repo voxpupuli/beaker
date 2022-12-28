@@ -45,7 +45,7 @@ module Beaker
       def select_env_by_regex regex
         envs = Beaker::Options::OptionsHash.new
         ENV.each_pair do | k, v |
-          if k.to_s =~ /#{regex}/
+          if /#{regex}/.match?(k.to_s)
             envs[k] = v
           end
         end

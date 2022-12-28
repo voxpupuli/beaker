@@ -16,9 +16,9 @@ def clean_file(host, file)
 end
 
 def pkg_file(host, pkg_name)
-  if host['platform'] =~ /debian|ubuntu/
+  if /debian|ubuntu/.match?(host['platform'])
     "/etc/apt/sources.list.d/#{pkg_name}.list"
-  elsif host['platform'] =~ /el/
+  elsif /el/.match?(host['platform'])
     "/etc/yum.repos.d/#{pkg_name}.repo"
   else
     nil
@@ -33,7 +33,7 @@ end
 step '#deploy_apt_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
 
-  if host['platform'] =~ /debian|ubuntu/
+  if /debian|ubuntu/.match?(host['platform'])
     clean_file(host, pkg_name)
     host.deploy_apt_repo(pkg_fixtures, pkg_name, 'latest')
     assert(host.file_exist?(pkg_file(host, pkg_name)), 'apt file should exist')
@@ -45,7 +45,7 @@ end
 step '#deploy_yum_repo : deploy puppet-server nightly repo'
 hosts.each do |host|
 
-  if host['platform'] =~ /el/
+  if /el/.match?(host['platform'])
     clean_file(host, pkg_name)
     host.deploy_yum_repo(pkg_fixtures, pkg_name, 'latest')
     assert(host.file_exist?(pkg_file(host, pkg_name)), 'yum file should exist')

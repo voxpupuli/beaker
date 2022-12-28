@@ -491,7 +491,7 @@ module Beaker
         #
         # @return [Boolean] Whether the file exists on the host (using `test -f`)
         def file_exists_on(host, file_path)
-          if host['platform'] =~ /windows/
+          if /windows/.match?(host['platform'])
             command = %(Test-Path #{file_path})
 
             if file_path.include?(':')
@@ -516,7 +516,7 @@ module Beaker
         #
         # @return [Boolean] Whether the directory exists on the host (using `test -d`)
         def directory_exists_on(host, dir_path)
-          if host['platform'] =~ /windows/
+          if /windows/.match?(host['platform'])
             dir_path = "#{dir_path}\\" unless (dir_path[-1].chr == '\\')
 
             command = Command.new(%{IF exist "#{dir_path}" ( exit 0 ) ELSE ( exit 1 )}, [], { :cmdexe => true })
@@ -535,7 +535,7 @@ module Beaker
         # @return [Boolean] Whether the symlink exists on the host (using `test -L`)
         def link_exists_on(host, link_path)
           # Links are weird on windows, fall back to seeing if the file exists
-          return file_exists_on(host, link_path) if host['platform'] =~ /windows/
+          return file_exists_on(host, link_path) if /windows/.match?(host['platform'])
 
           return on(host, Command.new(%(test -L "#{link_path}"), accept_all_exit_codes: true)).exit_code.zero?
         end
@@ -551,7 +551,7 @@ module Beaker
 
           split_path = win_ads_path(file_path)
           if file_exists_on(host, split_path[:path])
-            if host['platform'] =~ /windows/
+            if /windows/.match?(host['platform'])
               file_path.gsub!('/', '\\')
 
               command = %{Get-Content -Raw -Path #{file_path}}

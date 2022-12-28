@@ -43,7 +43,7 @@ module Beaker
         arry = []
         if arg.is_a?(Array)
           arry += arg
-        elsif arg =~ /,/
+        elsif /,/.match?(arg)
           arry += arg.split(',')
         else
           arry << arg
@@ -375,7 +375,7 @@ module Beaker
         #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          if host[:platform] =~ /windows|el-4/
+          if /windows|el-4/.match?(host[:platform])
             test_host_roles(name, host)
           end
 

@@ -314,7 +314,7 @@ module Beaker
       rescue Beaker::DSL::Outcomes::SkipTest => e
         # I don't like this much, but adding options to confine is a breaking change
         # to the DSL that would involve a major version bump
-        if e.message !~ /No suitable hosts found/
+        if !/No suitable hosts found/.match?(e.message)
           # a skip generated from the provided block, pass it up the chain
           raise e
         end

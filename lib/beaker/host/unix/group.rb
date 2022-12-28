@@ -16,7 +16,7 @@ module Unix::Group
 
   def group_get(name)
     execute("getent group #{name}") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name}:.*:[0-9]+:/
+      fail_test "failed to get group #{name}" unless /^#{name}:.*:[0-9]+:/.match?(result.stdout)
 
       yield result if block_given?
       result

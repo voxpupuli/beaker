@@ -16,7 +16,7 @@ module Aix::User
 
   def user_get(name)
     execute("lsuser #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name} id/
+      fail_test "failed to get user #{name}" unless /^#{name} id/.match?(result.stdout)
 
       yield result if block_given?
       result

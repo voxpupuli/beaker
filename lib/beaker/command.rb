@@ -76,7 +76,7 @@ module Beaker
       append_commands = host.append_commands( cmd, ac, :cmd_exe => @cmdexe )
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      if host[:platform] =~ /cisco_ios_xr/
+      if /cisco_ios_xr/.match?(host[:platform])
         cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string, append_commands]
       else
         cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string, append_commands]
@@ -162,7 +162,7 @@ module Beaker
     # @return a new {SedCommand} object
     def initialize platform, expression, filename, opts = {}
       command = "sed -i -e \"#{expression}\" #{filename}"
-      if platform =~ /solaris|aix|osx|openbsd/
+      if /solaris|aix|osx|openbsd/.match?(platform)
         command.slice! '-i '
         temp_file = opts[:temp_file] ? opts[:temp_file] : "#{filename}.tmp"
         command << " > #{temp_file} && mv #{temp_file} #{filename} && rm -f #{temp_file}"

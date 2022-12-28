@@ -148,7 +148,7 @@ Commandline options set through the above environment variables will override se
       while(line = stdout.gets)
         puts line
       end
-      output = stdout
+      output = stdout.to_s
       if not wait_thr.value.success?
         fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
       end
@@ -156,7 +156,7 @@ Commandline options set through the above environment variables will override se
     }
     if exit_status != /0/
       #check for deprecation warnings
-      if output =~ /Deprecation Warnings/
+      if output.include?('Deprecation Warnings')
         fail "DEPRECATION WARNINGS in spec generation, please fix!"
       end
     end
@@ -214,7 +214,7 @@ namespace :history do
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     output = `bundle exec ruby history.rb .`
     puts output
-    if output !~ /success/
+    if !/success/.match?(output)
       raise "History generation failed"
     end
     Dir.chdir( original_dir )
@@ -270,7 +270,7 @@ namespace :docs do
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     output = `bundle exec yard doc -o #{DOCS_DIR}`
     puts output
-    if output =~ /\[warn\]|\[error\]/
+    if /\[warn\]|\[error\]/.match?(output)
       fail "Errors/Warnings during yard documentation generation"
     end
     Dir.chdir( original_dir )

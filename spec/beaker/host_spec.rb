@@ -478,7 +478,7 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests2")
 
           (@fileset1 + @fileset2).each do |file|
-            if file !~ /#{exclude_file}/
+            if !/#{exclude_file}/.match?(file)
               file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
@@ -538,7 +538,7 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests/tests3")
 
           (@fileset1 + @fileset2 + @fileset3).each do |file|
-            if file !~ /#{exclude_file}/
+            if !/#{exclude_file}/.match?(file)
               file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
@@ -603,7 +603,7 @@ module Beaker
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests')
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
-            if file !~ /#{exclude_file}/
+            if !/#{exclude_file}/.match?(file)
               file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
               expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))

@@ -55,7 +55,7 @@ module Windows::Pkg
     arch_suffix = should_install_64bit ? '64' : '86'
     # If a version was specified, use it; otherwise fall back to a default name.
     # Avoid when puppet_agent_version is set to a SHA, which isn't used in package names.
-    if puppet_agent_version =~ /^\d+\.\d+\.\d+/
+    if /^\d+\.\d+\.\d+/.match?(puppet_agent_version)
       release_file = "puppet-agent-#{puppet_agent_version}-x#{arch_suffix}.msi"
     else
       release_file = "puppet-agent-x#{arch_suffix}.msi"
@@ -89,7 +89,7 @@ module Windows::Pkg
 
   # @api private
   def identify_windows_architecture
-    platform.arch =~ /64/ ? '64' : '32'
+    /64/.match?(platform.arch) ? '64' : '32'
   end
 
 end

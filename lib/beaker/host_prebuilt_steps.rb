@@ -54,11 +54,11 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-          when host['platform'] =~ /el-[89]|fedora/
+          when /el-[89]|fedora/.match?(host['platform'])
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
-          when host['platform'] =~ /opensuse-|sles-/
+          when /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
-          when host['platform'] =~ /cisco_nexus/
+          when /cisco_nexus/.match?(host['platform'])
             ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
             ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
           else
@@ -146,7 +146,7 @@ module Beaker
       when /fedora/
         FEDORA_PACKAGES
       else
-        if host['platform'] !~ /aix|solaris|osx-|f5-|netscaler|cisco_/
+        if !/aix|solaris|osx-|f5-|netscaler|cisco_/.match?(host['platform'])
           UNIX_PACKAGES
         else
           []
@@ -197,9 +197,9 @@ module Beaker
       block_on host do |host|
       logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if host['platform'] =~ /solaris|eos/
+        if /solaris|eos/.match?(host['platform'])
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
-        elsif host['platform'] =~ /aix/
+        elsif /aix/.match?(host['platform'])
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
         else
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
@@ -215,7 +215,7 @@ module Beaker
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        if host[:platform] =~ /ubuntu|debian|cumulus/
+        if /ubuntu|debian|cumulus/.match?(host[:platform])
           host.exec(Command.new("apt-get update"))
         end
       end
@@ -249,11 +249,11 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         case
-        when host['platform'] =~ /ubuntu|debian|cumulus/
+        when /ubuntu|debian|cumulus/.match?(host['platform'])
           host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
           copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
           apt_get_update(host)
-        when host['platform'] =~ /solaris-11/
+        when /solaris-11/.match?(host['platform'])
           host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
           host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
         else
@@ -301,7 +301,7 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      if host['platform'] =~ /windows/
+      if /windows/.match?(host['platform'])
         if host.is_cygwin?
           resolv_conf = host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
         else
@@ -336,7 +336,7 @@ module Beaker
     # @param [Host] host the host to act upon
     # @param [String] etc_hosts The string to append to the /etc/hosts file
     def set_etc_hosts(host, etc_hosts)
-      if host['platform'] =~ /freebsd/
+      if /freebsd/.match?(host['platform'])
         host.echo_to_file(etc_hosts, '/etc/hosts')
       elsif ((host['platform'] =~ /windows/) and not host.is_cygwin?)
         host.exec(Command.new("echo '#{etc_hosts}' >> C:\\Windows\\System32\\drivers\\etc\\hosts"))
@@ -344,7 +344,7 @@ module Beaker
         host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
       end
       # AIX must be configured to prefer local DNS over external
-      if host['platform'] =~ /aix/
+      if /aix/.match?(host['platform'])
         aix_netsvc = '/etc/netsvc.conf'
         aix_local_resolv = 'hosts = local, bind'
         unless host.exec(Command.new("grep '#{aix_local_resolv}' #{aix_netsvc}"), :accept_all_exit_codes => true).exit_code == 0
@@ -375,11 +375,11 @@ module Beaker
           #    /y : Suppresses prompting to confirm that you want to overwrite an
           #      existing destination file.
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
-        elsif host['platform'] =~ /osx/
+        elsif /osx/.match?(host['platform'])
           host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
         elsif host['platform'] =~ /(free|open)bsd/ or host['platform'] =~ /solaris-11/
           host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
-        elsif host['platform'] =~ /solaris-10/
+        elsif /solaris-10/.match?(host['platform'])
           host.exec(Command.new('sudo cp -r .ssh /.'), {:pty => true})
         else
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
@@ -418,7 +418,7 @@ module Beaker
     def disable_updates hosts, opts
       logger = opts[:logger]
       hosts.each do |host|
-        next if host['platform'] =~ /netscaler/
+        next if /netscaler/.match?(host['platform'])
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
@@ -435,20 +435,20 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         logger.debug "Update sshd_config to allow root login"
-        if host['platform'] =~ /osx/
+        if /osx/.match?(host['platform'])
           # If osx > 10.10 use '/private/etc/ssh/sshd_config', else use '/etc/sshd_config'
           ssh_config_file = '/private/etc/ssh/sshd_config'
-          ssh_config_file = '/etc/sshd_config' if host['platform'] =~ /^osx-10\.(9|10)/i
+          ssh_config_file = '/etc/sshd_config' if /^osx-10\.(9|10)/i.match?(host['platform'])
 
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' #{ssh_config_file}"))
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' #{ssh_config_file}"))
-        elsif host['platform'] =~ /freebsd/
+        elsif /freebsd/.match?(host['platform'])
           host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host['platform'] =~ /openbsd/
+        elsif /openbsd/.match?(host['platform'])
           host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host['platform'] =~ /solaris-10/
+        elsif /solaris-10/.match?(host['platform'])
           host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
-        elsif host['platform'] =~ /solaris-11/
+        elsif /solaris-11/.match?(host['platform'])
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
         elsif host['platform'] =~ /f5/ || host.is_powershell?
@@ -460,15 +460,15 @@ module Beaker
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
         end
         #restart sshd
-        if host['platform'] =~ /debian|ubuntu|cumulus/
+        if /debian|ubuntu|cumulus/.match?(host['platform'])
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif host['platform'] =~ /arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/
+        elsif /arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
-        elsif host['platform'] =~ /centos|el-|redhat|fedora|eos/
+        elsif /centos|el-|redhat|fedora|eos/.match?(host['platform'])
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
-        elsif host['platform'] =~ /(free|open)bsd/
+        elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
-        elsif host['platform'] =~ /solaris/
+        elsif /solaris/.match?(host['platform'])
           host.exec(Command.new("sudo -E svcadm restart network/ssh"), {:pty => true} )
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
@@ -483,7 +483,7 @@ module Beaker
     def disable_se_linux host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
+        if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
           logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
         else
@@ -499,7 +499,7 @@ module Beaker
     def disable_iptables host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if host['platform'] =~ /centos|el-|redhat|fedora|eos/
+        if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
           logger.debug("Disabling iptables on #{host.name}")
           host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
         else

@@ -10,7 +10,7 @@ module Mac::User
     execute('dscacheutil -q user') do |result|
       users = []
       result.stdout.each_line do |line|
-        users << line.split(': ')[1].strip if line =~ /^name:/
+        users << line.split(': ')[1].strip if /^name:/.match?(line)
       end
 
       yield result if block_given?
@@ -33,7 +33,7 @@ module Mac::User
   #                   queried for in the returned block
   def user_get(name)
     execute("id -P #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
+      fail_test "failed to get user #{name}" unless /^#{name}:/.match?(result.stdout)
 
       yield result if block_given?
       result

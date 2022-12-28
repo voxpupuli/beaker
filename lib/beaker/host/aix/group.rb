@@ -11,7 +11,7 @@ module Aix::Group
 
   def group_get(name)
     execute("lsgroup #{name}") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name} id/
+      fail_test "failed to get group #{name}" unless /^#{name} id/.match?(result.stdout)
 
       yield result if block_given?
       result

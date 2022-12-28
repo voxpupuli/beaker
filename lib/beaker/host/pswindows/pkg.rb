@@ -37,7 +37,7 @@ module PSWindows::Pkg
     arch = nil
     execute("wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
       arch = if result.exit_code == 0
-        result.stdout =~ /64/ ? '64' : '32'
+        /64/.match?(result.stdout) ? '64' : '32'
       else
         identify_windows_architecture_from_os_name_for_win2003
       end
@@ -49,7 +49,7 @@ module PSWindows::Pkg
   def identify_windows_architecture_from_os_name_for_win2003
     arch = nil
     execute("wmic os get name", :accept_all_exit_codes => true) do |result|
-      arch = result.stdout =~ /64/ ? '64' : '32'
+      arch = /64/.match?(result.stdout) ? '64' : '32'
     end
     arch
   end

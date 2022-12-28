@@ -29,7 +29,7 @@ module Beaker
     def setup_perf_on_host(host)
       @logger.perf_output("Setup perf on host: " + host)
       # Install sysstat if required
-      if host['platform'] =~ PERF_SUPPORTED_PLATFORMS
+      if PERF_SUPPORTED_PLATFORMS.match?(host['platform'])
         PERF_PACKAGES.each do |pkg|
           if not host.check_for_package pkg
             host.install_package pkg
@@ -39,22 +39,22 @@ module Beaker
         @logger.perf_output("Perf (sysstat) not supported on host: " + host)
       end
 
-      if host['platform'] =~ /debian|ubuntu|cumulus/
+      if /debian|ubuntu|cumulus/.match?(host['platform'])
         @logger.perf_output("Modify /etc/default/sysstat on Debian and Ubuntu platforms")
         host.exec(Command.new('sed -i s/ENABLED=\"false\"/ENABLED=\"true\"/ /etc/default/sysstat'))
-      elsif host['platform'] =~ /opensuse|sles/
+      elsif /opensuse|sles/.match?(host['platform'])
         @logger.perf_output("Creating symlink from /etc/sysstat/sysstat.cron to /etc/cron.d")
         host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'),:acceptable_exit_codes => [0,1])
       end
-      if @options[:collect_perf_data] =~ /aggressive/
+      if /aggressive/.match?(@options[:collect_perf_data])
         @logger.perf_output("Enabling aggressive sysstat polling")
-        if host['platform'] =~ /debian|ubuntu/
+        if /debian|ubuntu/.match?(host['platform'])
           host.exec(Command.new('sed -i s/5-55\\\/10/*/ /etc/cron.d/sysstat'))
-        elsif host['platform'] =~ /centos|el|fedora|oracle|redhat|scientific/
+        elsif /centos|el|fedora|oracle|redhat|scientific/.match?(host['platform'])
           host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
         end
       end
-      if host['platform'] =~ PERF_START_PLATFORMS # SLES doesn't need this step
+      if PERF_START_PLATFORMS.match?(host['platform']) # SLES doesn't need this step
         host.exec(Command.new('service sysstat start'))
       end
     end
@@ -73,7 +73,7 @@ module Beaker
     # @return [void]  The report is sent to the logging output
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
-      if host['platform'] =~ PERF_SUPPORTED_PLATFORMS # All flavours of Linux
+      if PERF_SUPPORTED_PLATFORMS.match?(host['platform']) # All flavours of Linux
         if not @options[:collect_perf_data] =~ /aggressive/
           host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"),:acceptable_exit_codes => [0,1,2])
         end
