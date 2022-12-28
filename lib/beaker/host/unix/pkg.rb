@@ -144,7 +144,7 @@ module Unix::Pkg
               raise ArgumentException
             end
             # If the package advises symlinks to be created, do it
-            command.stdout.split(/\n/).select { |x| x =~ /^\s+ln\s/ }.each do |ln|
+            command.stdout.split("\n").select { |x| x =~ /^\s+ln\s/ }.each do |ln|
               execute(ln, opts)
             end
           end

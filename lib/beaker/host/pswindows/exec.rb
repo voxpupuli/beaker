@@ -159,7 +159,7 @@ module PSWindows::Exec
     if val.empty?
       return ''
     else
-      val = val.split(/\n/)[0] # only take the first result
+      val = val.split("\n")[0] # only take the first result
       if clean
         val.gsub(/#{key}=/i,'')
       else
