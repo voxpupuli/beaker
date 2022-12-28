@@ -4,16 +4,6 @@ module Beaker
   describe Perf do
 
     context "When a Perf object is created" do
-      it 'creates a new Perf object' do
-        hosts = Array.new
-        options = Hash.new
-        options[:log_level] = :debug
-        my_logger = Beaker::Logger.new(options)
-        options[:logger] = my_logger
-        perf = described_class.new( hosts, options )
-        expect( perf ).to be_a_kind_of described_class
-      end
-
       before do
         @options = make_opts
         @options[:collect_perf_data] = 'normal'
@@ -24,6 +14,16 @@ module Beaker
         @my_logger.add_destination(@my_io)
         @options[:logger] = @my_logger
       end
+      it 'creates a new Perf object' do
+        hosts = Array.new
+        options = Hash.new
+        options[:log_level] = :debug
+        my_logger = Beaker::Logger.new(options)
+        options[:logger] = my_logger
+        perf = described_class.new( hosts, options )
+        expect( perf ).to be_a_kind_of described_class
+      end
+
 
       it 'creates a new Perf object with a single host' do
         hosts = [ make_host("myHost", @options) ]
