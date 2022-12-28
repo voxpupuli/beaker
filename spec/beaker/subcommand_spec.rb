@@ -183,6 +183,7 @@ module Beaker
       let( :cleaned_hosts ) {double()}
       let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
+
       it 'calls execute! when no resource is given' do
         expect_any_instance_of(Pathname).to_not receive(:directory?)
         expect_any_instance_of(Pathname).to_not receive(:exist?)

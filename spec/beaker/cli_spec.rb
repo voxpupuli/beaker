@@ -18,6 +18,7 @@ module Beaker
       allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
       described_class.new.parse_options
     }
+
     context 'initializing and parsing' do
       let( :cli ) {
         described_class.new

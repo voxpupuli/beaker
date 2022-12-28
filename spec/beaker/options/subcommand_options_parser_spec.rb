@@ -29,6 +29,7 @@ module Beaker
         let(:options_file) {Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS}
         let(:options_file) {""}
         let( :options_file ) {home_options_file_path}
+
         it 'calls parse_options_file with subcommand options file when home_dir is false' do
           allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true
           allow(parser_mod).to receive(:parse_options_file).with(Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS)
