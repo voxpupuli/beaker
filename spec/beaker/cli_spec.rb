@@ -430,7 +430,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect( File.exist?(copied_hosts_file) ).to be_truthy
+            expect( File ).to exist(copied_hosts_file)
           end
         end
 
@@ -464,9 +464,9 @@ module Beaker
           Dir.mktmpdir do |dir|
             options[:log_dated_dir] = File.absolute_path(dir)
 
-            expect( options.has_key?(:hosts_preserved_yaml_file) ).to be_falsy
+            expect( options ).not_to have_key(:hosts_preserved_yaml_file)
             cli.execute!
-            expect( options.has_key?(:hosts_preserved_yaml_file) ).to be_truthy
+            expect( options ).to have_key(:hosts_preserved_yaml_file)
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
             expect( options[:hosts_preserved_yaml_file] ).to be === copied_hosts_file
@@ -561,7 +561,7 @@ module Beaker
           command_correct = "p --log-level debug --hosts #{new_hosts_file} jam --jankies --flag-business"
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, new_hosts_file)
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'doesn\'t replace an entry if no --hosts key is found' do
@@ -569,7 +569,7 @@ module Beaker
           command_correct = 'p --log-level debug johnnypantaloons7 --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'john/deer/plans.txt')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'removes any old --provision flags' do
@@ -577,7 +577,7 @@ module Beaker
           command_correct = 'jam --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/pigs.yml')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'removes any old --no-provision flags' do
@@ -585,7 +585,7 @@ module Beaker
           command_correct = 'jam --jankoos --flag-businesses'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/bears.yml')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
       end
 

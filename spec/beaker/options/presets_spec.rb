@@ -34,7 +34,7 @@ module Beaker
       end
 
       it 'has empty host_tags' do
-        expect(presets.presets.has_key?(:host_tags)).to be_truthy
+        expect(presets.presets).to have_key(:host_tags)
         expect(presets.presets[:host_tags]).to eq({})
       end
 

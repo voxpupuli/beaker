@@ -36,13 +36,13 @@ module Beaker
 
       it 'generates directory for a given timestamp' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
-        expect( File.directory? described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be_truthy
+        expect( File ).to be_directory described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time)
       end
 
       it 'generates nested directories if given as a log_prefix' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
         prefix = 'a/man/a/plan/a/canal/panama'
-        expect( File.directory? described_class.generate_dated_log_folder(test_dir, prefix, input_time) ).to be_truthy
+        expect( File ).to be_directory described_class.generate_dated_log_folder(test_dir, prefix, input_time)
       end
 
     end
@@ -256,7 +256,7 @@ module Beaker
     context 'it can' do
       it 'open/create a file when a string is given to add_destination' do
         logger.add_destination 'my_tmp_file'
-        expect( File.exist?( 'my_tmp_file' ) ).to be_truthy
+        expect( File ).to exist( 'my_tmp_file' )
 
         io = logger.destinations.find {|d| d.respond_to? :path }
         expect( io.path ).to match(/my_tmp_file/)

@@ -347,15 +347,15 @@ module Beaker
         # the base directory is where the latest symlink itself should live
 
         it 'in the usual case' do
-          expect( File.symlink?('man/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('man/latest')
           testsuite.log_path('foo.txt', 'man/date')
-          expect( File.symlink?('man/latest') ).to be_truthy
+          expect( File ).to be_symlink('man/latest')
         end
 
         it 'if given a nested directory' do
-          expect( File.symlink?('a/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('a/latest')
           testsuite.log_path('foo.txt', 'a/b/c/d/e/f')
-          expect( File.symlink?('a/latest') ).to be_truthy
+          expect( File ).to be_symlink('a/latest')
         end
       end
 
@@ -363,13 +363,13 @@ module Beaker
         # the symlink directory is where the symlink points to
 
         it 'in the usual case' do
-          expect( File.symlink?('d/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('d/latest')
           testsuite.log_path('foo.txt', 'd/e')
           expect( File.readlink('d/latest') ).to be === 'e'
         end
 
         it 'if given a nested directory' do
-          expect( File.symlink?('f/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('f/latest')
           testsuite.log_path('foo.txt', 'f/g/h/i/j/k')
           expect( File.readlink('f/latest') ).to be === 'g/h/i/j/k'
         end

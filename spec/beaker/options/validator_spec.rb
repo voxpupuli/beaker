@@ -35,7 +35,7 @@ module Beaker
 
       describe '#default_set?' do
         it 'is false when empty' do
-          expect(validator.default_set?([])).to be_falsey
+          expect(validator).not_to be_default_set([])
         end
 
         it 'throws error when more than 1' do
@@ -44,7 +44,7 @@ module Beaker
 
         ['test', 1, 3.4, true, Object.new].each do |val|
           it "is true when contents are #{val.class}" do
-            expect(validator.default_set?([val])).to be_truthy
+            expect(validator).to be_default_set([val])
           end
         end
       end
