@@ -226,7 +226,7 @@ module Beaker
               status = item.add_element(REXML::Element.new('failure'))
               status.add_attribute('type', test.test_status.to_s)
               if test.exception
-                status.add_attribute('message', test.exception.to_s.gsub(/\e/,''))
+                status.add_attribute('message', test.exception.to_s.delete("\e"))
                 data = LoggerJunit.format_cdata(test.exception.backtrace.join('\n'))
                 REXML::CData.new(data, true, status)
               end

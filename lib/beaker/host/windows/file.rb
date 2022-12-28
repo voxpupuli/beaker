@@ -12,7 +12,7 @@ module Windows::File
   def system_temp_path
     # under CYGWIN %TEMP% may not be set
     tmp_path = execute('ECHO %SYSTEMROOT%', :cmdexe => true)
-    tmp_path.gsub(/\n/, '') + '\\TEMP'
+    tmp_path.delete("\n") + '\\TEMP'
   end
 
   # (see {Beaker::Host::Unix::File#chown})
@@ -63,7 +63,7 @@ module Windows::File
     when :openssh
       path
     when :win32_openssh
-      path.gsub('\\', '/')
+      path.tr('\\', '/')
     else
       raise ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: '#{determine_ssh_server}'"
     end

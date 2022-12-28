@@ -190,7 +190,7 @@ module Beaker
         # The regex match here is loose so that users can supply multiple suites,
         # such as `beaker exec pre-suite,tests`.
         beaker_suites.each do |suite|
-          @cli.options[suite] = [] unless resource.gsub(/-/, '_').match(suite.to_s)
+          @cli.options[suite] = [] unless resource.tr('-', '_').match(suite.to_s)
         end
       else
         raise ArgumentError, "Unable to parse #{resource} with beaker exec"

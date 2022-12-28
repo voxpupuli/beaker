@@ -214,7 +214,7 @@ module Beaker
           prefix_log_line s
         end
       else
-        line.gsub!(/\r/, '')
+        line.delete!("\r")
         has_ending_newline = line.end_with?("\n")
         actual_lines = line.split("\n")
         actual_lines.map! do |actual_line|

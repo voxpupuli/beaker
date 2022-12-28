@@ -21,7 +21,7 @@ module PSWindows::Exec
 
   def rm_rf path
     # ensure that we have the right slashes for windows
-    path = path.gsub(/\//, '\\')
+    path = path.tr('/', '\\')
     execute(%(del /s /q "#{path}"))
   end
 
@@ -31,8 +31,8 @@ module PSWindows::Exec
   # @param [Boolean] rm Remove the destination prior to move
   def mv(orig, dest, rm=true)
     # ensure that we have the right slashes for windows
-    orig = orig.gsub(/\//,'\\')
-    dest = dest.gsub(/\//,'\\')
+    orig = orig.tr('/','\\')
+    dest = dest.tr('/','\\')
     rm_rf dest unless !rm
     execute("move /y #{orig} #{dest}")
   end
@@ -104,7 +104,7 @@ module PSWindows::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    normalized_path = dir.gsub('/','\\')
+    normalized_path = dir.tr('/','\\')
     result = exec(powershell("New-Item -Path '#{normalized_path}' -ItemType 'directory'"),
                   :acceptable_exit_codes => [0, 1])
     result.exit_code == 0

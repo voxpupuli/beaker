@@ -348,7 +348,7 @@ module Beaker
           block_on hosts, opts do |host|
             script_path = "beaker_powershell_script_#{Time.now.to_i}.ps1"
             create_remote_file(host, script_path, powershell_script, opts)
-            native_path = script_path.gsub(/\//, "\\")
+            native_path = script_path.tr('/', "\\")
             on host, powershell("", {"File" => native_path }), opts
           end
 
@@ -552,7 +552,7 @@ module Beaker
           split_path = win_ads_path(file_path)
           if file_exists_on(host, split_path[:path])
             if /windows/.match?(host['platform'])
-              file_path.gsub!('/', '\\')
+              file_path.tr!('/', '\\')
 
               command = %{Get-Content -Raw -Path #{file_path}}
               command += %{ -Stream #{split_path[:ads]}} if split_path[:ads]

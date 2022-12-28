@@ -301,7 +301,7 @@ module Beaker
       begin
         # This is probably windows with an environment variable so we need to
         # expand it.
-        target = self.execute(%{echo "#{target}"}).output.strip.gsub('"','') if target.include?('%')
+        target = self.execute(%{echo "#{target}"}).output.strip.delete('"') if target.include?('%')
 
         @ssh.scp.upload! source, target, local_opts do |_ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
@@ -337,7 +337,7 @@ module Beaker
       begin
         # This is probably windows with an environment variable so we need to
         # expand it.
-        source = self.execute(%{echo "#{source}"}).output.strip.gsub('"','') if source.include?('%')
+        source = self.execute(%{echo "#{source}"}).output.strip.delete('"') if source.include?('%')
 
         @ssh.scp.download! source, target, local_opts do |_ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
