@@ -58,7 +58,7 @@ module Beaker
               else
                 logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
                 logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
-                binding.pry
+                binding.pry # rubocop:disable Lint/Debugger
               end
             end
             raise e
