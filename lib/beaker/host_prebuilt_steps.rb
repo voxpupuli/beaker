@@ -491,10 +491,10 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
         if host['platform'] =~ /centos|el-|redhat|fedora|eos/
-          @logger.debug("Disabling se_linux on #{host.name}")
+          logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
         else
-          @logger.warn("Attempting to disable SELinux on non-supported platform: #{host.name}: #{host['platform']}")
+          logger.warn("Attempting to disable SELinux on non-supported platform: #{host.name}: #{host['platform']}")
         end
       end
     end
