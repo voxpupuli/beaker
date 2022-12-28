@@ -25,7 +25,7 @@ module Windows::Pkg
     execute("#{cygwin} -q -n -N -d -R #{rootdir} -s http://cygwin.osuosl.org -P #{name} #{cmdline_args}")
   end
 
-  def uninstall_package(name, cmdline_args = '')
+  def uninstall_package(name, _cmdline_args = '')
     raise "Package #{name} cannot be uninstalled on #{self}"
   end
 
@@ -45,7 +45,7 @@ module Windows::Pkg
   #   time. Note that it will not fail if not provided, however
   #
   # @return [String, String] Path to the directory and filename of the package, respectively
-  def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+  def puppet_agent_dev_package_info( _puppet_collection = nil, puppet_agent_version = nil, opts = {} )
     release_path_end = 'windows'
     is_config_32 = self['ruby_arch'] == 'x86' || self['install_32'] || opts['install_32']
     should_install_64bit = self.is_x86_64? && !is_config_32
@@ -72,7 +72,7 @@ module Windows::Pkg
   #   1. release_path_end Suffix for the release_path
   #   2. release_file Path to the file on release build servers
   #   3. download_file Filename for the package itself
-  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, opts = {} )
+  def pe_puppet_agent_promoted_package_info( _puppet_collection = nil, _opts = {} )
     is_config_32 = self['ruby_arch'] == 'x86' || self['install_32'] || self['install_32']
     should_install_64bit = self.is_x86_64? && !is_config_32
     # only install 64bit builds if

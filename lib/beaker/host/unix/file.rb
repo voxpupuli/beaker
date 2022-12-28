@@ -217,7 +217,7 @@ NOASK
   # @param [String] scp_file_target File path to target SCP location on host
   #
   # @return nil
-  def scp_post_operations(scp_file_actual, scp_file_target)
+  def scp_post_operations(_scp_file_actual, _scp_file_target)
     nil
   end
 end

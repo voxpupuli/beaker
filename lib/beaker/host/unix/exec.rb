@@ -363,7 +363,7 @@ module Unix::Exec
   # @param [Hash] opts optional parameters
   #
   # @return [String] Command string as needed for this host
-  def prepend_commands(command = '', user_pc = '', opts = {})
+  def prepend_commands(_command = '', user_pc = '', _opts = {})
     user_pc
   end
 
@@ -374,7 +374,7 @@ module Unix::Exec
   # @param [Hash] opts optional parameters
   #
   # @return [String] Command string as needed for this host
-  def append_commands(command = '', user_ac = '', opts = {})
+  def append_commands(_command = '', user_ac = '', _opts = {})
     user_ac
   end
 

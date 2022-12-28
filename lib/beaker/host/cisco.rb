@@ -81,7 +81,7 @@ module Cisco
     # @param [Hash] opts optional parameters
     #
     # @return [String] Command string as needed for this host
-    def prepend_commands(command = '', user_pc = '', opts = {})
+    def prepend_commands(command = '', user_pc = '', _opts = {})
       return user_pc unless command.index('vsh').nil?
       if self[:platform] =~ /cisco_nexus/
         return user_pc unless command.index('ntpdate').nil?
@@ -105,7 +105,7 @@ module Cisco
     # @param [Hash] opts optional parameters
     #
     # @return [String] Command string as needed for this host
-    def append_commands(command = '', user_ac = '', opts = {})
+    def append_commands(command = '', _user_ac = '', _opts = {})
       command.gsub('"') {'\\"'}
       # vsh commands, ntpdate or when user is root commands do not require an appended `"`
       return '"' unless command =~ /ntpdate|\/isan\/bin\/vsh/ || self[:user] == 'root'

@@ -1,7 +1,7 @@
 module PSWindows::Group
   include Beaker::CommandFactory
 
-  def group_list(&block)
+  def group_list()
     execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
       groups = []
       result.stdout.each_line do |line|
@@ -14,7 +14,7 @@ module PSWindows::Group
     end
   end
 
-  def group_get(name, &block)
+  def group_get(name)
     execute("net localgroup \"#{name}\"") do |result|
       fail_test "failed to get group #{name}" if result.exit_code != 0
 
@@ -23,7 +23,7 @@ module PSWindows::Group
     end
   end
 
-  def group_gid(name)
+  def group_gid(_name)
     raise NotImplementedError, "Can't retrieve group gid on a Windows host"
   end
 

@@ -400,7 +400,7 @@ module Beaker
     # @param [Host, Array<Host>] hosts An array of hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def hack_etc_hosts hosts, opts
+    def hack_etc_hosts hosts, _opts
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       hosts.each do |host|
         ip = host['vm_ip'] || host['ip'].to_s

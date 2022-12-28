@@ -27,7 +27,7 @@ module Beaker
     #
     # @api private
     # @return [String] Stdout from command execution
-    def execute(command, options={}, &block)
+    def execute(command, options={})
       cmd_create_options = {}
       exec_opts = options.dup
       cmd_create_options[:prepend_cmds] = exec_opts.delete(:prepend_cmds) || nil

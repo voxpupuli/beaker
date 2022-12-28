@@ -18,7 +18,7 @@ module Eos
     #   puppet_agent_version) is either not passed or set to nil
     #
     # @return [String, String] Path to the directory and filename of the package, respectively
-    def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, opts = {} )
+    def puppet_agent_dev_package_info( puppet_collection = nil, puppet_agent_version = nil, _opts = {} )
       error_message = "Must provide %s argument to get puppet agent dev package information"
       raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
       raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
@@ -38,7 +38,7 @@ module Eos
     #   about location, so that parameter is ignored
     #
     # @return [Result] The result of copying that file to the host
-    def get_remote_file( remote_url, host_directory = '' )
+    def get_remote_file( remote_url, _host_directory = '' )
       commands = ['enable', "copy #{remote_url} extension:"]
       command = commands.join("\n")
       execute("Cli -c '#{command}'")

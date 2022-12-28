@@ -6,19 +6,19 @@ module PSWindows::Pkg
     result.exit_code == 0
   end
 
-  def check_for_package(name)
+  def check_for_package(_name)
     #HACK NOOP
     #raise "Cannot check for package #{name} on #{self}"
     0
   end
 
-  def install_package(name, cmdline_args = '')
+  def install_package(_name, _cmdline_args = '')
     #HACK NOOP
     #raise "Package #{name} cannot be installed on #{self}"
     0
   end
 
-  def uninstall_package(name, cmdline_args = '')
+  def uninstall_package(_name, _cmdline_args = '')
     #HACK NOOP
     #raise "Package #{name} cannot be uninstalled on #{self}"
     0

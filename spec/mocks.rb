@@ -26,7 +26,7 @@ module MockNet
         @uri = uri
       end
 
-      def body= *args
+      def body= *_args
         hash
       end
     end
@@ -36,7 +36,7 @@ module MockNet
         @uri = uri
       end
 
-      def body= *args
+      def body= *_args
         hash
       end
     end
@@ -52,7 +52,7 @@ module MockNet
       @port = port
     end
 
-    def request req
+    def request _req
       Response.new
     end
   end
@@ -80,7 +80,7 @@ module FakeHost
 
     attr_accessor :commands
 
-    def port_open?(port)
+    def port_open?(_port)
       true
     end
 
@@ -88,7 +88,7 @@ module FakeHost
       RSpec::Mocks::Double.new('exec-result').as_null_object
     end
 
-    def exec(command, options = {})
+    def exec(command, _options = {})
       commands << command
       any_exec_result
     end

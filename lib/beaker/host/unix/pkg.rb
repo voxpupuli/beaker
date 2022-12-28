@@ -463,7 +463,7 @@ module Unix::Pkg
   #   {Windows::Pkg#pe_puppet_agent_promoted_package_info} to see usage.
   #   2. release_file Path to the file on release build servers
   #   3. download_file Filename for the package itself
-  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, opts = {} )
+  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, _opts = {} )
     error_message = "Must provide %s argument to get puppet agent dev package information"
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
 
@@ -502,7 +502,7 @@ module Unix::Pkg
   #
   # @return nil
   def pe_puppet_agent_promoted_package_install(
-    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
+    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, _opts
   )
     uncompress_local_tarball( onhost_copied_download, onhost_copy_base, download_file )
     if self['platform'] =~ /^solaris/

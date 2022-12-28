@@ -65,7 +65,7 @@ end
 # Analyzer (or similar), to detect these failures without failing the build.
 #
 # Returns the value of the yielded block.
-def fails_intermittently(issue_link, args = {}, &block)
+def fails_intermittently(issue_link, args = {})
   raise ArgumentError, "provide a Jira ticket link" unless issue_link
   raise ArgumentError, "a block is required" unless block_given?
   yield

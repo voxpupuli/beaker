@@ -94,7 +94,7 @@ module Windows::Exec
   # @option opts [Boolean] :cmd_exe whether cmd.exe should be used
   #
   # @return [String] Command string as needed for this host
-  def prepend_commands(command = '', user_pc = nil, opts = {})
+  def prepend_commands(_command = '', user_pc = nil, opts = {})
     cygwin_prefix = (self.is_cygwin? and opts[:cmd_exe]) ? 'cmd.exe /c' : ''
     spacing = (user_pc && !cygwin_prefix.empty?) ? ' ' : ''
     "#{cygwin_prefix}#{spacing}#{user_pc}"
@@ -107,7 +107,7 @@ module Windows::Exec
   # @param [Hash] opts optional parameters
   #
   # @return [String] Command string as needed for this host
-  def append_commands(command = '', user_ac = '', opts = {})
+  def append_commands(_command = '', user_ac = '', _opts = {})
     user_ac
   end
 

@@ -141,7 +141,7 @@ module Beaker
   end
 
   class HostCommand < Command
-    def cmd_line host
+    def cmd_line _host
       eval "\"#{@command}\""
     end
   end

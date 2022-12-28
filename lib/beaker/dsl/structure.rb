@@ -128,7 +128,7 @@ module Beaker
       # @param [String] my_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      def test_name my_name, &block
+      def test_name my_name
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
         if block_given?
@@ -190,7 +190,7 @@ module Beaker
       #                       a {Beaker::Assertions} (i.e., if the assert
       #                       passes)
       # @author Chris Cowell-Shah (<tt>ccs@puppetlabs.com</tt>)
-      def expect_failure(explanation, &block)
+      def expect_failure(explanation)
         begin
           yield if block_given?  # code block should contain an assert that you expect to fail
         rescue Beaker::DSL::Assertions, Minitest::Assertion => failed_assertion
@@ -304,7 +304,7 @@ module Beaker
       # TestCase#hosts is reset after block has executed.
       #
       # @see #confine
-      def confine_block(type, criteria, host_array = nil, &block)
+      def confine_block(type, criteria, host_array = nil)
         host_array = Array( host_array || hosts )
         original_hosts = self.hosts.dup
         confine(type, criteria, host_array)
@@ -340,7 +340,7 @@ module Beaker
       #   should return true if the host matches this additional criteria.
       #
       # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
-      def select_hosts(criteria, host_array = nil, &block)
+      def select_hosts(criteria, host_array = nil)
         hosts_to_select_from = host_array || hosts
         criteria.each_pair do |property, value|
           hosts_to_select_from = hosts_to_select_from.select do |host|

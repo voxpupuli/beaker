@@ -1,7 +1,7 @@
 module Unix::User
   include Beaker::CommandFactory
 
-  def user_list(&block)
+  def user_list()
     execute("getent passwd") do |result|
       users = []
       result.stdout.each_line do |line|
@@ -14,7 +14,7 @@ module Unix::User
     end
   end
 
-  def user_get(name, &block)
+  def user_get(name)
     execute("getent passwd #{name}") do |result|
       fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
 

@@ -1,7 +1,7 @@
 module PSWindows::File
   include Beaker::CommandFactory
 
-  def tmpfile(name = '')
+  def tmpfile(_name = '')
     result = exec(powershell('[System.IO.Path]::GetTempFileName()'))
     result.stdout.chomp()
   end

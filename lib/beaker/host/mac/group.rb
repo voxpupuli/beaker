@@ -6,7 +6,7 @@ module Mac::Group
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of group names on the system
-  def group_list(&block)
+  def group_list()
     execute('dscacheutil -q group') do |result|
       groups = []
       result.stdout.each_line do |line|
@@ -28,7 +28,7 @@ module Mac::Group
   # @return [String] Group information in /etc/group format
   # @raise [FailTest] Raises an Assertion failure if it can't find the name
   #                   queried for in the returned block
-  def group_get(name, &block)
+  def group_get(name)
     execute("dscacheutil -q group -a name #{name}") do |result|
       fail_test "failed to get group #{name}" unless result.stdout =~ /^name: #{name}/
       gi = Hash.new  # group info
@@ -65,7 +65,7 @@ module Mac::Group
   #
   # @param [String] name Name of the group
   # @param [Proc] block Additional actions or insertions
-  def group_present(name, &block)
+  def group_present(name)
     group_exists = false
     execute("dscacheutil -q group -a name #{name}") do |result|
       group_exists = result.stdout =~  /^name: #{name}/

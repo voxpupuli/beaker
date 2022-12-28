@@ -580,7 +580,7 @@ module Beaker
           on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
-        def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
+        def curl_with_retries(_desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
           opts = {
             :desired_exit_codes => desired_exit_codes,
             :max_retries => max_retries,
