@@ -203,14 +203,14 @@ describe ClassMixedWithDSLStructure do
       # We changed this lambda to use the simplest assert possible; using assert_equal
       # caused an error in minitest 5.9.0 trying to write to the file system.
       block = lambda { assert(false, 'this assertion should be caught') }
-      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+      expect{ subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'passes when a Beaker assertion is raised' do
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       block = lambda { assert_no_match('1', '1', '1 and 1 should not match') }
-      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+      expect{ subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'fails when a non-Beaker, non-MiniTest assertion is raised' do

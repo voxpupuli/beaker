@@ -39,7 +39,7 @@ module Beaker
       end
 
       it "can produce a usage description" do
-        expect{parser.usage}.to_not raise_error
+        expect{parser.usage}.not_to raise_error
       end
 
       context '--no-provision flag effects other options' do

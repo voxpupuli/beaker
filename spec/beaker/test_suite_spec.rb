@@ -232,7 +232,7 @@ module Beaker
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
           expect(test_suite_result.print_test_result(tc)).not_to match(/Test line:/)
-          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+          expect{ test_suite_result.print_test_result(tc) }.not_to raise_error
         end
 
         it 'prints the test result and line number from test case file on failure' do
@@ -242,7 +242,7 @@ module Beaker
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
           expect(test_suite_result.print_test_result(tc)).to match(/Test line:/)
-          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+          expect{ test_suite_result.print_test_result(tc) }.not_to raise_error
         end
       end
 

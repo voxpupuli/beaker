@@ -230,7 +230,7 @@ module Beaker
           @opts = {'platform' => platform}
           instance.instance_variable_set(:@apt_needs_update, true)
           expect(instance).to receive('execute').with("apt-get update")
-          expect{instance.update_apt_if_needed}.to_not raise_error
+          expect{instance.update_apt_if_needed}.not_to raise_error
         end
       end
     end

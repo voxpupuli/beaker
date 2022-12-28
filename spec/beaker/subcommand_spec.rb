@@ -91,7 +91,7 @@ module Beaker
           expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
           expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
-          expect {described_class.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
+          expect {described_class.start(['init', '--hosts', 'centos', "--#{option}"])}.not_to output(/ERROR/).to_stderr
         end
       end
 
@@ -185,10 +185,10 @@ module Beaker
       let( :yaml_store_mock ) { double('yaml_store_mock') }
 
       it 'calls execute! when no resource is given' do
-        expect_any_instance_of(Pathname).to_not receive(:directory?)
-        expect_any_instance_of(Pathname).to_not receive(:exist?)
+        expect_any_instance_of(Pathname).not_to receive(:directory?)
+        expect_any_instance_of(Pathname).not_to receive(:exist?)
         expect(subcommand.cli).to receive(:execute!).once
-        expect{subcommand.exec}.to_not raise_error
+        expect{subcommand.exec}.not_to raise_error
       end
 
       it 'allows hard coded suite names to be specified' do

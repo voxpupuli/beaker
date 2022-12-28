@@ -177,9 +177,9 @@ module Beaker
         allow( @mock_channel ).to receive( :on_extended_data ).and_yield(nil, '1', @data)
 
         @mock_callback = Object.new
-        expect( @mock_callback ).to_not receive( :[] )
-        expect( result.stderr ).to_not receive( :<< )
-        expect( result.output ).to_not receive( :<< )
+        expect( @mock_callback ).not_to receive( :[] )
+        expect( result.stderr ).not_to receive( :<< )
+        expect( result.output ).not_to receive( :<< )
 
         connection.register_stderr_for @mock_channel, result, @mock_callback
       end

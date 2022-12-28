@@ -13,7 +13,7 @@ module Beaker
           f.write ""
         end
         @path = path
-        expect( testcase ).to_not receive( :log_and_fail_test )
+        expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pass
@@ -25,7 +25,7 @@ module Beaker
           f.write "raise SkipTest"
         end
         @path = path
-        expect( testcase ).to_not receive( :log_and_fail_test )
+        expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :skip
@@ -37,7 +37,7 @@ module Beaker
           f.write "raise PendingTest"
         end
         @path = path
-        expect( testcase ).to_not receive( :log_and_fail_test )
+        expect( testcase ).not_to receive( :log_and_fail_test )
         testcase.run_test
         status = testcase.instance_variable_get(:@test_status)
         expect(status).to be === :pending

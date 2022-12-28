@@ -9,7 +9,7 @@ module Beaker
       let(:hosts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
 
       it "supports usage function" do
-        expect { parser.usage }.to_not raise_error
+        expect { parser.usage }.not_to raise_error
       end
 
       describe 'parse_git_repos' do
@@ -658,7 +658,7 @@ module Beaker
           options[:hosts_file] = nil
           parser.instance_variable_set(:@options, options)
 
-          expect { parser.resolve_symlinks! }.to_not raise_error
+          expect { parser.resolve_symlinks! }.not_to raise_error
         end
       end
 
@@ -703,7 +703,7 @@ module Beaker
           options[:dot_fog]  = invalid_file
           parser.instance_variable_set(:@options, options)
 
-          expect { parser.check_hypervisor_config('blimpy') }.to_not raise_error
+          expect { parser.check_hypervisor_config('blimpy') }.not_to raise_error
         end
 
         it 'throws an error if ec2_yaml for blimpy is invalid' do
@@ -720,7 +720,7 @@ module Beaker
             options[:dot_fog]  = hosts_path
             parser.instance_variable_set(:@options, options)
 
-            expect { parser.check_hypervisor_config(visor) }.to_not raise_error
+            expect { parser.check_hypervisor_config(visor) }.not_to raise_error
           end
 
           it "throws an error if dot_fog for #{visor} is invalid" do
@@ -733,7 +733,7 @@ module Beaker
         end
 
         it 'does not throw error on unknown visor' do
-          expect { parser.check_hypervisor_config('unknown_visor') }.to_not raise_error
+          expect { parser.check_hypervisor_config('unknown_visor') }.not_to raise_error
         end
       end
     end

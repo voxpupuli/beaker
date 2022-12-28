@@ -96,7 +96,7 @@ module Beaker
             expect(Beaker::Command).to receive(:new).with(ssh_move)
             expect(Beaker::Command).to receive(:new).with(ssh_command)
             expect(instance).to receive(:ssh_service_restart)
-            expect{instance.ssh_permit_user_environment}.to_not raise_error
+            expect{instance.ssh_permit_user_environment}.not_to raise_error
           end
         end
       end
@@ -115,7 +115,7 @@ module Beaker
           opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 
@@ -124,7 +124,7 @@ module Beaker
           opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("service ssh restart")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 
@@ -133,7 +133,7 @@ module Beaker
           opts['platform'] = "#{platform}-arch"
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("/sbin/service sshd restart")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 

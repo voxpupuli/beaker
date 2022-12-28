@@ -262,7 +262,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
 
           details = confiner.confine_details( key_combo_to_have )
           have_nots.each do |confine_details|
-            expect( details ).to_not include( confine_details )
+            expect( details ).not_to include( confine_details )
           end
           haves.each do |confine_details|
             expect( details ).to     include( confine_details )

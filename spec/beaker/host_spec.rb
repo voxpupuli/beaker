@@ -16,7 +16,7 @@ module Beaker
     end
 
     it 'can be read like a hash' do
-      expect{ host['value'] }.to_not raise_error
+      expect{ host['value'] }.not_to raise_error
     end
 
     it 'can be written like a hash' do
@@ -221,7 +221,7 @@ module Beaker
 
       it 'takes a command object and a hash of options' do
         result.exit_code = 0
-        expect{ host.exec(command, {}) }.to_not raise_error
+        expect{ host.exec(command, {}) }.not_to raise_error
       end
 
       it 'acts on the host\'s logger and connection object' do
@@ -280,18 +280,18 @@ module Beaker
         }
         expect( host.logger ).to receive( :warn ).with( /overrides/ )
 
-        expect { host.exec(command, opts) }.to_not raise_error
+        expect { host.exec(command, opts) }.not_to raise_error
       end
 
       it 'explicitly closes the connection when :reset_connection is set' do
         expect( host ).to receive( :close )
-        expect { host.exec(command, :reset_connection => true) }.to_not raise_error
+        expect { host.exec(command, :reset_connection => true) }.not_to raise_error
       end
 
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0
-          expect{ host.exec(command,{}) }.to_not raise_error
+          expect{ host.exec(command,{}) }.not_to raise_error
         end
 
         it "and fails a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
@@ -301,7 +301,7 @@ module Beaker
 
         it "and passes a test if the exit_code matches :acceptable_exit_codes" do
           result.exit_code = 0
-          expect{ host.exec(command,{:acceptable_exit_codes => 0}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => 0}) }.not_to raise_error
         end
 
         it "and fails a test if the exit_code doesn't match :acceptable_exit_codes" do
@@ -311,12 +311,12 @@ module Beaker
 
         it "and passes a test if the exit_code matches one of the :acceptable_exit_codes" do
           result.exit_code = 127
-          expect{ host.exec(command,{:acceptable_exit_codes => [1,127]}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => [1,127]}) }.not_to raise_error
         end
 
         it "and passes a test if the exit_code matches one of the range of :acceptable_exit_codes" do
           result.exit_code = 1
-          expect{ host.exec(command,{:acceptable_exit_codes => (0..127)}) }.to_not raise_error
+          expect{ host.exec(command,{:acceptable_exit_codes => (0..127)}) }.not_to raise_error
         end
       end
     end
@@ -492,7 +492,7 @@ module Beaker
             else
               file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
-              expect( conn ).to_not receive(:scp_to).with( *conn_args )
+              expect( conn ).not_to receive(:scp_to).with( *conn_args )
             end
           end
           allow( conn ).to receive(:ip).and_return(host['ip'])
@@ -552,7 +552,7 @@ module Beaker
             else
               file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
-              expect( conn ).to_not receive(:scp_to).with( *conn_args )
+              expect( conn ).not_to receive(:scp_to).with( *conn_args )
             end
           end
           allow( conn ).to receive(:ip).and_return(host['ip'])
@@ -617,7 +617,7 @@ module Beaker
             else
               file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
               conn_args = file_args
-              expect( conn ).to_not receive(:scp_to).with( *conn_args )
+              expect( conn ).not_to receive(:scp_to).with( *conn_args )
             end
           end
           allow( conn ).to receive(:ip).and_return(host['ip'])
@@ -637,12 +637,12 @@ module Beaker
           allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
 
           expect( logger ).to receive(:trace)
-          expect( host ).to_not receive( :mkdir_p ).with('target/tmp/tests')
+          expect( host ).not_to receive( :mkdir_p ).with('target/tmp/tests')
           expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
           (@fileset1).each do |file|
             file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
             conn_args = file_args
-            expect( conn ).to_not receive(:scp_to).with( *conn_args )
+            expect( conn ).not_to receive(:scp_to).with( *conn_args )
           end
           (@fileset2).each do |file|
             file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
@@ -755,7 +755,7 @@ module Beaker
         end
 
         it 'does not raise an error' do
-          expect { host.close }.to_not raise_error
+          expect { host.close }.not_to raise_error
         end
       end
     end
@@ -823,7 +823,7 @@ module Beaker
 
       it 'does not call get_ip when #get_public_ip returns an address' do
         allow( host ).to receive(:get_public_ip).and_return('127.0.0.1')
-        expect(host).to_not receive(:get_ip)
+        expect(host).not_to receive(:get_ip)
         expect(host.ip).to eq('127.0.0.1')
       end
     end

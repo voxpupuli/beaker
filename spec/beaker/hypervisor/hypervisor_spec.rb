@@ -67,7 +67,7 @@ module Beaker
           options[:timesync] = true
           hosts[0].options[:timesync] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to_not receive( :timesync )
+          expect( hypervisor ).not_to receive( :timesync )
           hypervisor.configure
         end
       end
@@ -132,12 +132,12 @@ module Beaker
           options[:add_el_extras]     = true
           options[:disable_iptables]  = true
           options[:host_name_prefix]  = "test-"
-          expect( hypervisor ).to_not receive( :timesync )
-          expect( hypervisor ).to_not receive( :sync_root_keys )
-          expect( hypervisor ).to_not receive( :add_el_extras )
-          expect( hypervisor ).to_not receive( :disable_iptables )
-          expect( hypervisor ).to_not receive( :set_env )
-          expect( hypervisor ).to_not receive( :host_name_prefix )
+          expect( hypervisor ).not_to receive( :timesync )
+          expect( hypervisor ).not_to receive( :sync_root_keys )
+          expect( hypervisor ).not_to receive( :add_el_extras )
+          expect( hypervisor ).not_to receive( :disable_iptables )
+          expect( hypervisor ).not_to receive( :set_env )
+          expect( hypervisor ).not_to receive( :host_name_prefix )
           hypervisor.configure
         end
       end

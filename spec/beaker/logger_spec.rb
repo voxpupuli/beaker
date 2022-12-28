@@ -376,8 +376,8 @@ module Beaker
 
         context 'skip' do
           before do
-            expect( my_io ).to_not receive :puts
-            expect( my_io ).to_not receive :print
+            expect( my_io ).not_to receive :puts
+            expect( my_io ).not_to receive :print
           end
 
           it( 'debugs' )    { info_logger.debug 'NOT DEBUGGING!' }

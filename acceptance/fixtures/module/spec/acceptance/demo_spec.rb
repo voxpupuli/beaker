@@ -43,7 +43,7 @@ describe "my tests" do
   end
 
   describe user('foo') do
-    it { is_expected.to_not exist }
+    it { is_expected.not_to exist }
   end
 
   context "can use both serverspec and Beaker DSL" do

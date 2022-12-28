@@ -230,7 +230,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).once
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -252,7 +252,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).never
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -287,7 +287,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).once
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -344,7 +344,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).never
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
         end
       end
 
@@ -418,7 +418,7 @@ module Beaker
           Dir.mktmpdir do |dir|
             options[:log_dated_dir] = File.absolute_path(dir)
 
-            expect{ cli.execute! }.to_not raise_error
+            expect{ cli.execute! }.not_to raise_error
           end
         end
 
@@ -442,7 +442,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect{ load_yaml_file(copied_hosts_file) }.to_not raise_error
+            expect{ load_yaml_file(copied_hosts_file) }.not_to raise_error
           end
         end
 
