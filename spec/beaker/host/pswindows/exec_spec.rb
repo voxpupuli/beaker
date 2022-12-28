@@ -106,6 +106,7 @@ module Beaker
         allow(instance).to receive(:execute)
                                .with(where_command, :accept_all_exit_codes => true).and_return(result)
       end
+
       let(:where_command) { "cmd /C \"where ruby\"" }
 
       context 'when only the environment variable PATH is used' do

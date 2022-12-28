@@ -454,6 +454,7 @@ module Beaker
           create_files( @fileset1 )
           create_files( @fileset2 )
         end
+
         it 'can take an ignore list that excludes all files and not call scp_to' do
           logger = host[:logger]
           conn = double(:connection)
@@ -752,6 +753,7 @@ module Beaker
           host.instance_variable_set :@connection, conn
           allow(host).to receive(:close).and_call_original
         end
+
         it 'does not raise an error' do
           expect { host.close }.to_not raise_error
         end

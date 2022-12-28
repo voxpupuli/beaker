@@ -69,6 +69,7 @@ module Beaker
           options[:beaker_version] = 'version_number'
           cli.instance_variable_set(:@options, options)
         end
+
         it 'prints the version and dumps the options' do
           expect(cli.logger).to receive(:info).exactly(3).times
           cli.print_version_and_options
@@ -103,6 +104,7 @@ module Beaker
         cli.instance_variable_set(:@options, options_host)
         cli.instance_variable_set(:@hosts, instance_host)
       end
+
       it 'combines the options and instance host objects' do
         merged_host = cli.combined_instance_and_options_hosts
         expect(merged_host).to have_key('ubuntu')

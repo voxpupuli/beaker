@@ -517,6 +517,7 @@ describe Beaker do
         before(:each) do
           expect( Beaker::Command ).to receive( :new ).with( "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" ).once
         end
+
         include_examples 'find domain name'
       end
 
@@ -526,6 +527,7 @@ describe Beaker do
         before(:each) do
           expect( Beaker::Command ).to receive( :new ).with( 'type C:\Windows\System32\drivers\etc\hosts' ).once
         end
+
         include_examples 'find domain name'
       end
     end
