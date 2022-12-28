@@ -546,7 +546,7 @@ module Beaker
           filename
         end
 
-        shared_examples_for(:a_platform_supporting_only_agents) do |platform, _type|
+        shared_examples_for('a platform supporting only agents') do |platform, _type|
 
           it "restricts #{platform} hosts to agent" do
             args = []
@@ -556,8 +556,8 @@ module Beaker
         end
 
         context "restricts agents" do
-          it_behaves_like(:a_platform_supporting_only_agents, 'windows-version-arch')
-          it_behaves_like(:a_platform_supporting_only_agents, 'el-4-arch')
+          it_behaves_like('a platform supporting only agents', 'windows-version-arch')
+          it_behaves_like('a platform supporting only agents', 'el-4-arch')
         end
 
         context "ssh user" do
