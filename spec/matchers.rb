@@ -53,7 +53,7 @@ RSpec::Matchers.define :execute_commands_matching_in_order do |*patterns|
   end
 
   def message(actual, patterns)
-    msg = "#{patterns.join(', ')} in order" +
+    "#{patterns.join(', ')} in order" +
       " in:\n #{actual.command_strings.pretty_inspect}"
   end
 

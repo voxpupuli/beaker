@@ -4,8 +4,8 @@ module Beaker
   describe Hypervisor do
     let( :hosts ) { make_hosts( { :platform => 'el-5' } ) }
 
-    context "#create" do
-      let( :hypervisor ) { Beaker::Hypervisor }
+    describe "#create" do
+      let( :hypervisor ) { described_class }
 
       it "includes custom hypervisor and call set_ssh_connection_preference" do
         allow(hypervisor).to receive(:set_ssh_connection_preference).with([], hypervisor)
@@ -39,9 +39,9 @@ module Beaker
 
     end
 
-    context "#configure" do
+    describe "#configure" do
       let( :options ) { make_opts.merge({ 'logger' => double().as_null_object }) }
-      let( :hypervisor ) { Beaker::Hypervisor.new( hosts, options ) }
+      let( :hypervisor ) { described_class.new( hosts, options ) }
 
       context 'if :timesync option set true on host' do
         it 'does call timesync for host' do
@@ -67,7 +67,7 @@ module Beaker
           options[:timesync] = true
           hosts[0].options[:timesync] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to_not receive( :timesync )
+          expect( hypervisor ).not_to receive( :timesync )
           hypervisor.configure
         end
       end
@@ -92,7 +92,7 @@ module Beaker
         it "does not call disable_iptables" do
           options[:disable_iptables] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_iptables ).never
+          expect( hypervisor ).not_to receive( :disable_iptables )
           hypervisor.configure
         end
       end
@@ -101,7 +101,7 @@ module Beaker
         it "calls disable_iptables once" do
           options[:disable_iptables] = true
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_iptables ).exactly( 1 ).times
+          expect( hypervisor ).to receive( :disable_iptables ).once
           hypervisor.configure
         end
       end
@@ -119,7 +119,7 @@ module Beaker
         it "does not call disable_updates_puppetlabs_com" do
           options[:disable_updates] = false
           allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_updates ).never
+          expect( hypervisor ).not_to receive( :disable_updates )
           hypervisor.configure
         end
       end
@@ -132,12 +132,12 @@ module Beaker
           options[:add_el_extras]     = true
           options[:disable_iptables]  = true
           options[:host_name_prefix]  = "test-"
-          expect( hypervisor ).to_not receive( :timesync )
-          expect( hypervisor ).to_not receive( :sync_root_keys )
-          expect( hypervisor ).to_not receive( :add_el_extras )
-          expect( hypervisor ).to_not receive( :disable_iptables )
-          expect( hypervisor ).to_not receive( :set_env )
-          expect( hypervisor ).to_not receive( :host_name_prefix )
+          expect( hypervisor ).not_to receive( :timesync )
+          expect( hypervisor ).not_to receive( :sync_root_keys )
+          expect( hypervisor ).not_to receive( :add_el_extras )
+          expect( hypervisor ).not_to receive( :disable_iptables )
+          expect( hypervisor ).not_to receive( :set_env )
+          expect( hypervisor ).not_to receive( :host_name_prefix )
           hypervisor.configure
         end
       end

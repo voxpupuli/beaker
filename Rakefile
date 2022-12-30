@@ -37,7 +37,7 @@ module HarnessOptions
 
   def self.get_options(file_path)
     puts "Attempting to merge config file: #{file_path}"
-    if File.exists? file_path
+    if File.exist? file_path
       options = eval(File.read(file_path), binding)
     else
       puts "No options file found at #{File.expand_path(file_path)}... skipping"
@@ -144,11 +144,11 @@ Commandline options set through the above environment variables will override se
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     exit_status = 1
     output = ''
-    Open3.popen3("bundle exec rspec") {|stdin, stdout, stderr, wait_thr|
-      while line = stdout.gets
+    Open3.popen3("bundle exec rspec") {|_stdin, stdout, _stderr, wait_thr|
+      while(line = stdout.gets)
         puts line
       end
-      output = stdout
+      output = stdout.to_s
       if not wait_thr.value.success?
         fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
       end
@@ -156,7 +156,7 @@ Commandline options set through the above environment variables will override se
     }
     if exit_status != /0/
       #check for deprecation warnings
-      if output =~ /Deprecation Warnings/
+      if output.include?('Deprecation Warnings')
         fail "DEPRECATION WARNINGS in spec generation, please fix!"
       end
     end
@@ -214,7 +214,7 @@ namespace :history do
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     output = `bundle exec ruby history.rb .`
     puts output
-    if output !~ /success/
+    if !/success/.match?(output)
       raise "History generation failed"
     end
     Dir.chdir( original_dir )
@@ -270,7 +270,7 @@ namespace :docs do
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     output = `bundle exec yard doc -o #{DOCS_DIR}`
     puts output
-    if output =~ /\[warn\]|\[error\]/
+    if /\[warn\]|\[error\]/.match?(output)
       fail "Errors/Warnings during yard documentation generation"
     end
     Dir.chdir( original_dir )
@@ -311,10 +311,10 @@ namespace :docs do
       puts "Found a YARD Server running with pid #{pid}"
       `kill #{pid}`
       puts "Stopping..."
-      yes, output = running?( DOCS_DAEMON )
+      yes, _output = running?( DOCS_DAEMON )
       if yes
         `kill -9 #{pid}`
-        yes, output = running?( DOCS_DAEMON )
+        yes, _output = running?( DOCS_DAEMON )
         if yes
           puts "Could not Stop Server!"
         else
@@ -341,4 +341,5 @@ begin
     config.future_release = gem_version
   end
 rescue LoadError
+  # Optional group in bundler
 end

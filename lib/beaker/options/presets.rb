@@ -45,7 +45,7 @@ module Beaker
       def select_env_by_regex regex
         envs = Beaker::Options::OptionsHash.new
         ENV.each_pair do | k, v |
-          if k.to_s =~ /#{regex}/
+          if /#{regex}/.match?(k.to_s)
             envs[k] = v
           end
         end
@@ -105,7 +105,7 @@ module Beaker
         found = found.merge(format_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC )))
         found[:answers] = select_env_by_regex('\\Aq_')
 
-        found.delete_if {|key, value| value.nil? or value.empty? }
+        found.delete_if {|_key, value| value.nil? or value.empty? }
         found
       end
 

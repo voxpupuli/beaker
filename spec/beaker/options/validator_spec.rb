@@ -4,13 +4,13 @@ module Beaker
   module Options
 
     describe Validator do
-      let(:validator) { Validator.new }
+      let(:validator) { described_class.new }
 
       describe '#check_yaml_file' do
         let(:bad_yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'badyaml.cfg') }
         let(:yaml_path) { File.join(File.expand_path(File.dirname(__FILE__)), 'data', 'hosts.cfg') }
 
-        before :each do
+        before do
           FakeFS.deactivate!
         end
 
@@ -23,7 +23,7 @@ module Beaker
         end
 
         it 'does not throw errors on valid yaml files' do
-          expect { validator.check_yaml_file(yaml_path) }.to_not raise_error
+          expect { validator.check_yaml_file(yaml_path) }.not_to raise_error
         end
       end
 
@@ -35,7 +35,7 @@ module Beaker
 
       describe '#default_set?' do
         it 'is false when empty' do
-          expect(validator.default_set?([])).to be_falsey
+          expect(validator).not_to be_default_set([])
         end
 
         it 'throws error when more than 1' do
@@ -44,7 +44,7 @@ module Beaker
 
         ['test', 1, 3.4, true, Object.new].each do |val|
           it "is true when contents are #{val.class}" do
-            expect(validator.default_set?([val])).to be_truthy
+            expect(validator).to be_default_set([val])
           end
         end
       end
@@ -52,7 +52,7 @@ module Beaker
       describe '#valid_fail_mode?' do
         %w(stop fast slow).each do |val|
           it "does not throw error when set to #{val}" do
-            expect { validator.validate_fail_mode(val) }.to_not raise_error
+            expect { validator.validate_fail_mode(val) }.not_to raise_error
           end
 
           it "raises error when set to #{val.upcase}" do
@@ -74,7 +74,7 @@ module Beaker
       describe '#valid_preserve_hosts?' do
         %w(always onfail onpass never).each do |val|
           it "does not raise error when set to #{val}" do
-            expect { validator.validate_preserve_hosts(val) }.to_not raise_error
+            expect { validator.validate_preserve_hosts(val) }.not_to raise_error
           end
 
           it "raises error when set to #{val.upcase}" do
@@ -109,7 +109,7 @@ module Beaker
 
           expect {
             validator.validate_test_tags(tag_includes, [], tag_excludes)
-          }.to_not raise_error
+          }.not_to raise_error
         end
 
         it 'raises an error if AND and OR are both used' do
@@ -126,11 +126,11 @@ module Beaker
 
       describe '#validate_frictionless_roles' do
         it 'does nothing when roles are correct' do
-          expect { validator.validate_frictionless_roles(%w(frictionless)) }.to_not raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless agent)) }.to_not raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless test1)) }.to_not raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless a role)) }.to_not raise_error
-          expect { validator.validate_frictionless_roles(%w(frictionless frictionless some_role)) }.to_not raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless agent)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless test1)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless a role)) }.not_to raise_error
+          expect { validator.validate_frictionless_roles(%w(frictionless frictionless some_role)) }.not_to raise_error
         end
 
         it 'throws errors when roles conflict' do
@@ -144,7 +144,7 @@ module Beaker
 
       describe '#validate_master_count' do
         it 'does nothing when count is exactly 1' do
-          expect { validator.validate_master_count(1) }.to_not raise_error
+          expect { validator.validate_master_count(1) }.not_to raise_error
         end
 
         it 'throws errors when greater than 1' do
@@ -156,8 +156,8 @@ module Beaker
 
       describe '#validate_files' do
         it 'does not throw an error with non-empty list' do
-          expect { validator.validate_files(['filea'], '.') }.to_not raise_error
-          expect { validator.validate_files(%w(filea fileb), '.') }.to_not raise_error
+          expect { validator.validate_files(['filea'], '.') }.not_to raise_error
+          expect { validator.validate_files(%w(filea fileb), '.') }.not_to raise_error
         end
 
         it 'raises error when file list is empty' do
@@ -168,7 +168,7 @@ module Beaker
       describe '#validate_path' do
         it 'does not throw an error when path is valid' do
           FakeFS do
-            expect { validator.validate_path('.') }.to_not raise_error
+            expect { validator.validate_path('.') }.not_to raise_error
           end
         end
 
@@ -182,7 +182,7 @@ module Beaker
         let(:blank_platform) { {'platform' => ''} }
 
         it 'does not throw an error when host has a platform' do
-          expect { validator.validate_platform(valid_platform, 'vm1') }.to_not raise_error
+          expect { validator.validate_platform(valid_platform, 'vm1') }.not_to raise_error
         end
 
         it 'throws an error when platform is not included' do

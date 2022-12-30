@@ -12,7 +12,7 @@ module PSWindows
     }
     let(:host)    {
       opts = options.merge(platform)
-      opts.merge!({ :is_cygwin => false })
+      opts[:is_cygwin] = false
       make_host( 'name', opts )
     }
 

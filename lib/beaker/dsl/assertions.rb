@@ -24,7 +24,7 @@ module Beaker
       # +assertions+. This is not provided by Assertions and must be
       # provided by the thing including Assertions. See Minitest::Runnable
       # for an example.
-      attr_accessor :assertions
+      attr_writer :assertions
       def assertions
         @assertions || 0
       end

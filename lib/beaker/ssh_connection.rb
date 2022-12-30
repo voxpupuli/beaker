@@ -108,7 +108,7 @@ module Beaker
       while (not @ssh) && (not methods.empty?) do
         unless instance_variable_get("@#{methods[0]}").nil?
           if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0].to_s}"), @user, @ssh_opts, options)
+            @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
           else
             @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
             @ssh_connection_preference.delete(methods[0])
@@ -243,7 +243,7 @@ module Beaker
     end
 
     def request_terminal_for channel, command
-      channel.request_pty do |ch, success|
+      channel.request_pty do |_ch, success|
         if success
           @logger.debug "Allocated a PTY on #{@hostname} for #{command.inspect}"
         else
@@ -254,7 +254,7 @@ module Beaker
     end
 
     def register_stdout_for channel, output, callback = nil
-      channel.on_data do |ch, data|
+      channel.on_data do |_ch, data|
         callback[data] if callback
         output.stdout << data
         output.output << data
@@ -262,7 +262,7 @@ module Beaker
     end
 
     def register_stderr_for channel, output, callback = nil
-      channel.on_extended_data do |ch, type, data|
+      channel.on_extended_data do |_ch, type, data|
         if type == 1
           callback[data] if callback
           output.stderr << data
@@ -272,7 +272,7 @@ module Beaker
     end
 
     def register_exit_code_for channel, output
-      channel.on_request("exit-status") do |ch, data|
+      channel.on_request("exit-status") do |_ch, data|
         output.exit_code = data.read_long
       end
     end
@@ -301,9 +301,9 @@ module Beaker
       begin
         # This is probably windows with an environment variable so we need to
         # expand it.
-        target = self.execute(%{echo "#{target}"}).output.strip.gsub('"','') if target.include?('%')
+        target = self.execute(%{echo "#{target}"}).output.strip.delete('"') if target.include?('%')
 
-        @ssh.scp.upload! source, target, local_opts do |ch, name, sent, total|
+        @ssh.scp.upload! source, target, local_opts do |_ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
         end
       rescue => e
@@ -337,9 +337,9 @@ module Beaker
       begin
         # This is probably windows with an environment variable so we need to
         # expand it.
-        source = self.execute(%{echo "#{source}"}).output.strip.gsub('"','') if source.include?('%')
+        source = self.execute(%{echo "#{source}"}).output.strip.delete('"') if source.include?('%')
 
-        @ssh.scp.download! source, target, local_opts do |ch, name, sent, total|
+        @ssh.scp.download! source, target, local_opts do |_ch, name, sent, total|
           result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
         end
       rescue => e

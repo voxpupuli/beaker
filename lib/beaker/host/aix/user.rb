@@ -1,7 +1,7 @@
 module Aix::User
   include Beaker::CommandFactory
 
-  def user_list(&block)
+  def user_list()
     execute("lsuser ALL") do |result|
       users = []
       result.stdout.each_line do |line|
@@ -14,9 +14,9 @@ module Aix::User
     end
   end
 
-  def user_get(name, &block)
+  def user_get(name)
     execute("lsuser #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name} id/
+      fail_test "failed to get user #{name}" unless /^#{name} id/.match?(result.stdout)
 
       yield result if block_given?
       result

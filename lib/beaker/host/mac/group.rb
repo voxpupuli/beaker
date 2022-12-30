@@ -6,11 +6,11 @@ module Mac::Group
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of group names on the system
-  def group_list(&block)
+  def group_list()
     execute('dscacheutil -q group') do |result|
       groups = []
       result.stdout.each_line do |line|
-        groups << line.split(': ')[1].strip if line =~ /^name:/
+        groups << line.split(': ')[1].strip if /^name:/.match?(line)
       end
 
       yield result if block_given?
@@ -28,9 +28,9 @@ module Mac::Group
   # @return [String] Group information in /etc/group format
   # @raise [FailTest] Raises an Assertion failure if it can't find the name
   #                   queried for in the returned block
-  def group_get(name, &block)
+  def group_get(name)
     execute("dscacheutil -q group -a name #{name}") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^name: #{name}/
+      fail_test "failed to get group #{name}" unless /^name: #{name}/.match?(result.stdout)
       gi = Hash.new  # group info
       result.stdout.each_line { |line|
         pieces = line.split(': ')
@@ -52,7 +52,7 @@ module Mac::Group
     gid = -1
     execute("dscacheutil -q group -a name #{name}") do |result|
       result.stdout.each_line { |line|
-        if line =~ /^gid:/
+        if /^gid:/.match?(line)
           gid = (line[5, line.length - 5]).chomp
           break
         end
@@ -65,10 +65,10 @@ module Mac::Group
   #
   # @param [String] name Name of the group
   # @param [Proc] block Additional actions or insertions
-  def group_present(name, &block)
+  def group_present(name)
     group_exists = false
     execute("dscacheutil -q group -a name #{name}") do |result|
-      group_exists = result.stdout =~  /^name: #{name}/
+      group_exists = result.stdout.start_with?("name: #{name}")
     end
 
     return if group_exists

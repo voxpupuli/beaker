@@ -34,7 +34,7 @@ module Cisco
     #
     # @return nil
     def scp_post_operations(scp_file_actual, scp_file_target)
-      if self[:platform] =~ /cisco_nexus/
+      if /cisco_nexus/.match?(self[:platform])
         execute( "mv #{scp_file_actual} #{scp_file_target}" )
       end
       nil
@@ -47,10 +47,10 @@ module Cisco
     # @return [String] path, changed if needed due to host
     #   constraints
     def scp_path(path)
-      if self[:platform] =~ /cisco_nexus/
+      if /cisco_nexus/.match?(self[:platform])
         @home_dir ||= execute( 'pwd' )
         answer = "#{@home_dir}/#{File.basename( path )}"
-        answer << '/' if path =~ /\/$/
+        answer << '/' if /\/$/.match?(path)
         return answer
       end
       path
@@ -81,9 +81,9 @@ module Cisco
     # @param [Hash] opts optional parameters
     #
     # @return [String] Command string as needed for this host
-    def prepend_commands(command = '', user_pc = '', opts = {})
+    def prepend_commands(command = '', user_pc = '', _opts = {})
       return user_pc unless command.index('vsh').nil?
-      if self[:platform] =~ /cisco_nexus/
+      if /cisco_nexus/.match?(self[:platform])
         return user_pc unless command.index('ntpdate').nil?
       end
 
@@ -105,10 +105,10 @@ module Cisco
     # @param [Hash] opts optional parameters
     #
     # @return [String] Command string as needed for this host
-    def append_commands(command = '', user_ac = '', opts = {})
+    def append_commands(command = '', _user_ac = '', _opts = {})
       command.gsub('"') {'\\"'}
       # vsh commands, ntpdate or when user is root commands do not require an appended `"`
-      return '"' unless command =~ /ntpdate|\/isan\/bin\/vsh/ || self[:user] == 'root'
+      return '"' unless /ntpdate|\/isan\/bin\/vsh/.match?(command) || self[:user] == 'root'
     end
 
     # Construct the environment string for this command
@@ -128,13 +128,13 @@ module Cisco
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
 
-      if self[:platform] =~ /cisco_nexus/
+      if /cisco_nexus/.match?(self[:platform])
         prestring << " export"
       else
         prestring << " env"
       end
       environment_string = "#{prestring} #{environment_string}"
-      environment_string << ';' if prestring =~ /export/
+      environment_string << ';' if /export/.match?(prestring)
       environment_string
     end
 
@@ -145,7 +145,7 @@ module Cisco
     #   this will be raised with the appropriate message
     def validate_setup
       msg = nil
-      if self[:platform] =~ /cisco_nexus/
+      if /cisco_nexus/.match?(self[:platform])
         if !self[:vrf]
           msg = 'Cisco Nexus hosts must be provided with a :vrf value.'
         end
@@ -153,7 +153,7 @@ module Cisco
           msg = 'Cisco hosts must be provided with a :user value'
         end
       end
-      if self[:platform] =~ /cisco_ios_xr/
+      if /cisco_ios_xr/.match?(self[:platform])
         if !self[:user]
           msg = 'Cisco hosts must be provided with a :user value'
         end

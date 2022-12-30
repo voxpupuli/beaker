@@ -13,9 +13,15 @@ end
 module Beaker
   describe CLI do
 
+    let(:cli)      {
+      allow(File).to receive(:exist?).and_call_original
+      allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
+      described_class.new.parse_options
+    }
+
     context 'initializing and parsing' do
       let( :cli ) {
-        Beaker::CLI.new
+        described_class.new
       }
 
       describe 'instance variable initialization' do
@@ -32,7 +38,7 @@ module Beaker
 
       describe '#parse_options' do
         it 'returns self' do
-          expect(cli.parse_options).to be_instance_of(Beaker::CLI)
+          expect(cli.parse_options).to be_instance_of(described_class)
         end
 
         it 'replaces the logger object with a new one' do
@@ -67,8 +73,9 @@ module Beaker
         before do
           options  = Beaker::Options::OptionsHash.new
           options[:beaker_version] = 'version_number'
-          cli.instance_variable_set('@options', options)
+          cli.instance_variable_set(:@options, options)
         end
+
         it 'prints the version and dumps the options' do
           expect(cli.logger).to receive(:info).exactly(3).times
           cli.print_version_and_options
@@ -76,13 +83,8 @@ module Beaker
       end
     end
 
-    let(:cli)      {
-      allow(File).to receive(:exists?).and_return(true)
-      allow(File).to receive(:exists?).with('.beaker.yml').and_return(false)
-      Beaker::CLI.new.parse_options
-    }
 
-    context '#configured_options' do
+    describe '#configured_options' do
       it 'returns a list of options that were not presets' do
         attribution = cli.instance_variable_get(:@attribution)
         attribution.each do |attribute, setter|
@@ -94,14 +96,16 @@ module Beaker
     end
 
     describe '#combined_instance_and_options_hosts' do
-      let (:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
-      let (:instance_host ) {
+      let(:options_host) { {'HOSTS' => {'ubuntu' => {:options_attribute => 'options'}} }}
+      let(:instance_host ) {
         [Beaker::Host.create('ubuntu', {:platform => 'host'}, {} )]
       }
+
       before do
         cli.instance_variable_set(:@options, options_host)
         cli.instance_variable_set(:@hosts, instance_host)
       end
+
       it 'combines the options and instance host objects' do
         merged_host = cli.combined_instance_and_options_hosts
         expect(merged_host).to have_key('ubuntu')
@@ -112,11 +116,11 @@ module Beaker
       end
 
       context 'when hosts share IP addresses' do
-        let (:options_host) do
+        let(:options_host) do
           {'HOSTS' => {'host1' => {:options_attribute => 'options'},
                        'host2' => {:options_attribute => 'options'}}}
         end
-        let (:instance_host ) do
+        let(:instance_host ) do
           [Beaker::Host.create('host1',
                                {:platform => 'host', :ip => '127.0.0.1'}, {} ),
            Beaker::Host.create('host2',
@@ -133,7 +137,7 @@ module Beaker
     end
 
     context 'execute!' do
-      before :each do
+      before do
        stub_const("Beaker::Logger", double().as_null_object )
         File.open("sample.cfg", "w+") do |file|
           file.write("HOSTS:\n")
@@ -158,7 +162,7 @@ module Beaker
           allow( cli ).to receive(:run_suite).with(:post_suite).and_return(true)
           allow( cli ).to receive(:run_suite).with(:pre_cleanup).and_return(true)
 
-          expect( cli ).to receive(:run_suite).exactly( 2 ).times
+          expect( cli ).to receive(:run_suite).twice
           expect{ cli.execute! }.to raise_error
           expect(cli.instance_variable_get(:@attribution)[:logger]).to be == 'runtime'
           expect(cli.instance_variable_get(:@attribution)[:timestamp]).to be == 'runtime'
@@ -226,7 +230,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).once
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -246,9 +250,9 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -264,7 +268,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.to raise_error
         end
@@ -283,7 +287,7 @@ module Beaker
           cli.instance_variable_set(:@network_manager, netmanager)
           expect( netmanager ).to receive(:cleanup).once
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
 
         end
 
@@ -299,7 +303,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
           expect{ cli.execute! }.to raise_error
 
@@ -338,9 +342,9 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
-          expect{ cli.execute! }.to_not raise_error
+          expect{ cli.execute! }.not_to raise_error
         end
       end
 
@@ -381,7 +385,7 @@ module Beaker
 
       describe 'hosts file saving when preserve_hosts should happen' do
 
-        before :each do
+        before do
           options = cli.instance_variable_get(:@options)
           options[:fail_mode] = 'fast'
           options[:preserve_hosts] = 'onpass'
@@ -400,7 +404,7 @@ module Beaker
 
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
-          expect( netmanager ).to receive(:cleanup).never
+          expect( netmanager ).not_to receive(:cleanup)
 
 
           allow( cli ).to receive( :print_env_vars_affecting_beaker )
@@ -414,7 +418,7 @@ module Beaker
           Dir.mktmpdir do |dir|
             options[:log_dated_dir] = File.absolute_path(dir)
 
-            expect{ cli.execute! }.to_not raise_error
+            expect{ cli.execute! }.not_to raise_error
           end
         end
 
@@ -426,7 +430,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect( File.exists?(copied_hosts_file) ).to be_truthy
+            expect( File ).to exist(copied_hosts_file)
           end
         end
 
@@ -438,7 +442,7 @@ module Beaker
             cli.execute!
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
-            expect{ load_yaml_file(copied_hosts_file) }.to_not raise_error
+            expect{ load_yaml_file(copied_hosts_file) }.not_to raise_error
           end
         end
 
@@ -460,9 +464,9 @@ module Beaker
           Dir.mktmpdir do |dir|
             options[:log_dated_dir] = File.absolute_path(dir)
 
-            expect( options.has_key?(:hosts_preserved_yaml_file) ).to be_falsy
+            expect( options ).not_to have_key(:hosts_preserved_yaml_file)
             cli.execute!
-            expect( options.has_key?(:hosts_preserved_yaml_file) ).to be_truthy
+            expect( options ).to have_key(:hosts_preserved_yaml_file)
 
             copied_hosts_file = File.join(File.absolute_path(dir), 'hosts_preserved.yml')
             expect( options[:hosts_preserved_yaml_file] ).to be === copied_hosts_file
@@ -478,9 +482,9 @@ module Beaker
               copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               logger = cli.instance_variable_get(:@logger)
-              expect( logger ).to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) by following these steps:\n").never
-              expect( logger ).to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}").never
-              expect( logger ).to receive( :send ).with( anything, '- use the --no-provision flag').never
+              expect( logger ).not_to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) by following these steps:\n")
+              expect( logger ).not_to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}")
+              expect( logger ).not_to receive( :send ).with( anything, '- use the --no-provision flag')
 
               cli.execute!
             end
@@ -490,7 +494,6 @@ module Beaker
             options = cli.instance_variable_get(:@options)
             Dir.mktmpdir do |dir|
               options[:log_dated_dir] = File.absolute_path(dir)
-              copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
               hosts << make_host('fusion', { :hypervisor => 'fusion' })
@@ -510,7 +513,6 @@ module Beaker
             options = cli.instance_variable_get(:@options)
             Dir.mktmpdir do |dir|
               options[:log_dated_dir] = File.absolute_path(dir)
-              copied_hosts_file = File.join(File.absolute_path(dir), options[:hosts_file])
 
               hosts = cli.instance_variable_get(:@hosts)
               hosts << make_host('fusion', { :hypervisor => 'fusion' })
@@ -538,10 +540,10 @@ module Beaker
               hosts << make_host('docker', { :hypervisor => 'docker' })
 
               logger = cli.instance_variable_get(:@logger)
-              expect( logger ).to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) with:\n").never
-              expect( logger ).to receive( :send ).with( anything, '(docker support is untested for this feature. please reference the docs for more info)').never
-              expect( logger ).to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}").never
-              expect( logger ).to receive( :send ).with( anything, '- use the --no-provision flag').never
+              expect( logger ).not_to receive( :send ).with( anything, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
+              expect( logger ).not_to receive( :send ).with( anything, '(docker support is untested for this feature. please reference the docs for more info)')
+              expect( logger ).not_to receive( :send ).with( anything, "- change the hosts file to #{copied_hosts_file}")
+              expect( logger ).not_to receive( :send ).with( anything, '- use the --no-provision flag')
 
               cli.execute!
             end
@@ -550,6 +552,7 @@ module Beaker
 
         end
       end
+
       describe '#build_hosts_preserved_reproducing_command' do
 
         it 'replaces the hosts file' do
@@ -558,7 +561,7 @@ module Beaker
           command_correct = "p --log-level debug --hosts #{new_hosts_file} jam --jankies --flag-business"
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, new_hosts_file)
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'doesn\'t replace an entry if no --hosts key is found' do
@@ -566,7 +569,7 @@ module Beaker
           command_correct = 'p --log-level debug johnnypantaloons7 --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'john/deer/plans.txt')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'removes any old --provision flags' do
@@ -574,7 +577,7 @@ module Beaker
           command_correct = 'jam --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/pigs.yml')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
 
         it 'removes any old --no-provision flags' do
@@ -582,7 +585,7 @@ module Beaker
           command_correct = 'jam --jankoos --flag-businesses'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/bears.yml')
-          expect( answer.start_with?(command_correct) ).to be_truthy
+          expect( answer ).to be_start_with(command_correct)
         end
       end
 

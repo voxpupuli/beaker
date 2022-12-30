@@ -37,7 +37,7 @@ module Beaker
       end
 
       def [](k)
-        cmd = PuppetCommand.new(@command, "--configprint #{k.to_s}")
+        cmd = PuppetCommand.new(@command, "--configprint #{k}")
         @host.exec(cmd).stdout.strip
       end
     end
@@ -86,7 +86,7 @@ module Beaker
       # TODO: might want to consider caching here; not doing it for now because
       #  I haven't thought through all of the possible scenarios that could
       #  cause the value to change after it had been cached.
-      result = puppet_configprint['node_name_value'].strip
+      puppet_configprint['node_name_value'].strip
     end
 
     def port_open? port
@@ -177,7 +177,7 @@ module Beaker
     end
 
     def is_pe?
-      self['type'] && self['type'].to_s =~ /pe/
+      self['type'] && self['type'].to_s.include?('pe')
     end
 
     def is_cygwin?
@@ -450,7 +450,7 @@ module Beaker
       end
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
-        if has_ignore and (source =~ ignore_re)
+        if has_ignore and ignore_re&.match?(source)
           @logger.trace "After rejecting ignored files/dirs, there is no file to copy"
           source_file = nil
           result.stdout = "No files to copy"
@@ -462,7 +462,7 @@ module Beaker
         end
       else # a directory with ignores
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
-          f.gsub(/\A#{Regexp.escape(source)}/, '') =~ ignore_re #only match against subdirs, not full path
+          ignore_re&.match?(f.gsub(/\A#{Regexp.escape(source)}/, '')) #only match against subdirs, not full path
         end
         @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
 
@@ -551,9 +551,9 @@ module Beaker
       #
       # We still want any user-set SSH config to win though
       filesystem_ssh_config = nil
-      if ssh_opts[:config] && File.exists?(ssh_opts[:config])
+      if ssh_opts[:config] && File.exist?(ssh_opts[:config])
         filesystem_ssh_config = ssh_opts[:config]
-      elsif self[:vagrant_ssh_config] && File.exists?(self[:vagrant_ssh_config])
+      elsif self[:vagrant_ssh_config] && File.exist?(self[:vagrant_ssh_config])
         filesystem_ssh_config = self[:vagrant_ssh_config]
       end
 

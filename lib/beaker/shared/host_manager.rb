@@ -24,7 +24,7 @@ module Beaker
       #@return [Array<Host>] The hosts that have the desired name/vmhostname/ip
       def hosts_with_name(hosts, name = nil)
         hosts.select do |host|
-          name.nil? or host.name =~ /\A#{name}/ or host[:vmhostname] =~ /\A#{name}/ or host[:ip] =~ /\A#{name}/
+          name.nil? or host.name&.start_with?(name) or host[:vmhostname]&.start_with?(name) or host[:ip]&.start_with?(name)
         end
       end
 
@@ -59,16 +59,15 @@ module Beaker
       def find_at_most_one_host_with_role(hosts, role)
         raise ArgumentError, "role cannot be nil." if role.nil?
         role_hosts = hosts_with_role(hosts, role)
-        host_with_role = nil
         case role_hosts.length
         when 0
+          nil
         when 1
-          host_with_role = role_hosts[0]
+          role_hosts[0]
         else
           host_string = ( role_hosts.map { |host| host.name } ).join( ', ')
           raise ArgumentError, "There should be only one host with #{role} defined, but I found #{role_hosts.length} (#{host_string})"
         end
-        host_with_role
       end
 
       # Execute a block selecting the hosts that match with the provided criteria
@@ -107,7 +106,7 @@ module Beaker
           if block_hosts.length > 0
             if run_in_parallel? opts
               # Pass caller[1] - the line that called block_on - for logging purposes.
-              result = block_hosts.map.each_in_parallel(caller[1]) do |h|
+              result = block_hosts.map.each_in_parallel(caller(2..2).first) do |h|
                 run_block_on h, &block
               end
               hosts.each{|host| host.close}# For some reason, I have to close the SSH connection

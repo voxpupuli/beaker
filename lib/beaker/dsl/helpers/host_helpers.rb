@@ -83,7 +83,7 @@ module Beaker
             @result = host.exec(command_object, opts)
 
             # Also, let additional checking be performed by the caller.
-            if block_given?
+            if block
               case block.arity
                 #block with arity of 0, just hand back yourself
                 when 0
@@ -193,7 +193,7 @@ module Beaker
         # @return [Result] Returns the result of the SCP operation
         def scp_to host, from_path, to_path, opts = {}
           block_on host do | host |
-            if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = on host, "echo #{to_path}"
               to_path = result.raw_output.chomp
             end
@@ -215,7 +215,7 @@ module Beaker
         # @return [Result] Returns the result of the rsync operation
         def rsync_to host, from_path, to_path, opts = {}
           block_on host do | host |
-            if host['platform'] =~ /windows/ && to_path.match('`cygpath')
+            if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = host.echo "#{to_path}"
               to_path = result.raw_output.chomp
             end
@@ -268,7 +268,7 @@ module Beaker
           FileUtils.mkdir_p(targetdir)
           scp_from(host, from_path, targetdir, opts)
           # scp_from does succeed on a non-existant file, checking if the file/folder actually exists
-          if not File.exists?(filename)
+          if not File.exist?(filename)
             raise IOError, "No such file or directory - #{filename}"
           end
           create_tarball(archive_root, archive_name)
@@ -348,7 +348,7 @@ module Beaker
           block_on hosts, opts do |host|
             script_path = "beaker_powershell_script_#{Time.now.to_i}.ps1"
             create_remote_file(host, script_path, powershell_script, opts)
-            native_path = script_path.gsub(/\//, "\\")
+            native_path = script_path.tr('/', "\\")
             on host, powershell("", {"File" => native_path }), opts
           end
 
@@ -491,7 +491,7 @@ module Beaker
         #
         # @return [Boolean] Whether the file exists on the host (using `test -f`)
         def file_exists_on(host, file_path)
-          if host['platform'] =~ /windows/
+          if /windows/.match?(host['platform'])
             command = %(Test-Path #{file_path})
 
             if file_path.include?(':')
@@ -516,7 +516,7 @@ module Beaker
         #
         # @return [Boolean] Whether the directory exists on the host (using `test -d`)
         def directory_exists_on(host, dir_path)
-          if host['platform'] =~ /windows/
+          if /windows/.match?(host['platform'])
             dir_path = "#{dir_path}\\" unless (dir_path[-1].chr == '\\')
 
             command = Command.new(%{IF exist "#{dir_path}" ( exit 0 ) ELSE ( exit 1 )}, [], { :cmdexe => true })
@@ -535,7 +535,7 @@ module Beaker
         # @return [Boolean] Whether the symlink exists on the host (using `test -L`)
         def link_exists_on(host, link_path)
           # Links are weird on windows, fall back to seeing if the file exists
-          return file_exists_on(host, link_path) if host['platform'] =~ /windows/
+          return file_exists_on(host, link_path) if /windows/.match?(host['platform'])
 
           return on(host, Command.new(%(test -L "#{link_path}"), accept_all_exit_codes: true)).exit_code.zero?
         end
@@ -551,8 +551,8 @@ module Beaker
 
           split_path = win_ads_path(file_path)
           if file_exists_on(host, split_path[:path])
-            if host['platform'] =~ /windows/
-              file_path.gsub!('/', '\\')
+            if /windows/.match?(host['platform'])
+              file_path.tr!('/', '\\')
 
               command = %{Get-Content -Raw -Path #{file_path}}
               command += %{ -Stream #{split_path[:ads]}} if split_path[:ads]
@@ -580,7 +580,7 @@ module Beaker
           on host, "curl --tlsv1 %s" % cmd, opts, &block
         end
 
-        def curl_with_retries(desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
+        def curl_with_retries(_desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
           opts = {
             :desired_exit_codes => desired_exit_codes,
             :max_retries => max_retries,

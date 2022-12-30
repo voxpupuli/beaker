@@ -16,7 +16,7 @@ module Beaker
           end
         end
 
-        it "should short circuit if the block is complete" do
+        it "shorts circuit if the block is complete" do
           allow( Time ).to receive( :now ).and_return( 0, 1, 2, 3, 4, 5 )
 
           block = double( 'block' )
@@ -37,25 +37,25 @@ module Beaker
           expect( block ).to receive( :exec ).exactly( 5 ).times.and_return( false )
           allow( subject ).to receive( 'sleep' ).and_return( true )
 
-          expect( subject ).to receive( :sleep ).with( 1 ).exactly( 2 ).times
+          expect( subject ).to receive( :sleep ).with( 1 ).twice
           expect( subject ).to receive( :sleep ).with( 2 ).once
           expect( subject ).to receive( :sleep ).with( 3 ).once
           expect( subject ).to receive( :sleep ).with( 5 ).once
-          expect( subject ).to receive( :sleep ).with( 8 ).never
+          expect( subject ).not_to receive( :sleep ).with( 8 )
 
           subject.repeat_fibonacci_style_for( 5 ) do
             block.exec
           end
         end
 
-        it "should short circuit if the block succeeds (returns true)" do
+        it "shorts circuit if the block succeeds (returns true)" do
           expect(block).to receive(:exec).and_return(false).ordered.exactly(4).times
           expect(block).to receive(:exec).and_return( true).ordered.once
 
-          expect(subject).to receive(:sleep).with(1).exactly(2).times
+          expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
           expect(subject).to receive(:sleep).with(3).once
-          expect(subject).to receive(:sleep).with(anything).never
+          expect(subject).not_to receive(:sleep).with(anything)
 
           subject.repeat_fibonacci_style_for(20) do
             block.exec
@@ -65,9 +65,9 @@ module Beaker
         it "returns false if block never returns that it is done (true)" do
           expect(block).to receive(:abcd).exactly(3).times.and_return(false)
 
-          expect(subject).to receive(:sleep).with(1).exactly(2).times
+          expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once
-          expect(subject).to receive(:sleep).with(anything).never
+          expect(subject).not_to receive(:sleep).with(anything)
 
           success_result = subject.repeat_fibonacci_style_for(3) do
             block.abcd
@@ -78,7 +78,7 @@ module Beaker
         it "never sleeps if block is successful right at first (returns true)" do
           expect(block).to receive(:fake01).once.and_return(true)
 
-          expect(subject).to receive(:sleep).never
+          expect(subject).not_to receive(:sleep)
 
           subject.repeat_fibonacci_style_for(3) do
             block.fake01

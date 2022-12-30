@@ -3,20 +3,20 @@ require "spec_helper"
 module Beaker
   module Options
     describe OptionsHash do
-      let(:options)    { Beaker::Options::OptionsHash.new }
+      let(:options)    { described_class.new }
 
 
       it "supports is_pe?, defaults to pe" do
-        expect(options.is_pe?).to be_truthy
+        expect(options).to be_is_pe
       end
 
       it "supports is_pe?, respects :type == foss" do
         options[:type] = 'foss'
-        expect(options.is_pe?).to be_falsy
+        expect(options).not_to be_is_pe
       end
 
       describe '#get_type' do
-        let(:options) { Beaker::Options::OptionsHash.new }
+        let(:options) { described_class.new }
 
         it 'returns pe as expected in the normal case' do
           newhash = options.merge({:type => 'pe'})

@@ -21,9 +21,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { UnixExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { UnixExecTest.new(opts, logger) }
 
     context "rm" do
 
@@ -65,7 +65,7 @@ module Beaker
       let(:host) { {'pathseparator' => ':'} }
 
       it 'returns a blank string if theres no env' do
-        expect( instance ).to receive( :is_powershell? ).never
+        expect( instance ).not_to receive( :is_powershell? )
         expect( instance.environment_string( {} ) ).to be == ''
       end
 
@@ -82,9 +82,9 @@ module Beaker
 
     describe '#ssh_permit_user_environment' do
       context 'When called without error' do
-        let (:directory) {'/directory'}
-        let (:ssh_command) {"echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"}
-        let (:ssh_move) {"mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"}
+        let(:directory) {'/directory'}
+        let(:ssh_command) {"echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"}
+        let(:ssh_move) {"mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"}
 
         platforms = PlatformHelpers::SYSTEMDPLATFORMS + PlatformHelpers::DEBIANPLATFORMS + PlatformHelpers::SYSTEMVPLATFORMS
 
@@ -96,7 +96,7 @@ module Beaker
             expect(Beaker::Command).to receive(:new).with(ssh_move)
             expect(Beaker::Command).to receive(:new).with(ssh_command)
             expect(instance).to receive(:ssh_service_restart)
-            expect{instance.ssh_permit_user_environment}.to_not raise_error
+            expect{instance.ssh_permit_user_environment}.not_to raise_error
           end
         end
       end
@@ -115,7 +115,7 @@ module Beaker
           opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 
@@ -124,7 +124,7 @@ module Beaker
           opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("service ssh restart")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 
@@ -133,7 +133,7 @@ module Beaker
           opts['platform'] = "#{platform}-arch"
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("/sbin/service sshd restart")
-          expect{instance.ssh_service_restart}.to_not raise_error
+          expect{instance.ssh_service_restart}.not_to raise_error
         end
       end
 
@@ -230,13 +230,13 @@ module Beaker
       }
 
       # no-op response
-      let (:response) { double( 'response' ) }
-      let (:boot_time_initial_response) { double( 'response' ) }
+      let(:response) { double( 'response' ) }
+      let(:boot_time_initial_response) { double( 'response' ) }
 
-      let (:boot_time_success_response) { double( 'response' ) }
-      let (:sleep_time) { 10 }
+      let(:boot_time_success_response) { double( 'response' ) }
+      let(:sleep_time) { 10 }
 
-      before :each do
+      before do
         # stubs enough to survive the first boot_time call & output parsing
         #   note: just stubs input-chain between calls, parsing methods still run
         allow(Beaker::Command).to receive(:new).with('last -F reboot || who -b').and_return(:boot_time_command_stub)
@@ -253,8 +253,8 @@ module Beaker
         check_cmd_output.each do |check_os, cmd_opts|
           cmd_opts.each do |cmd_name, cmd_outputs|
             context "on '#{check_os}' with the '#{cmd_name}' command" do
-              let (:boot_time_initial_stdout) { cmd_outputs[:initial] }
-              let (:boot_time_success_stdout) { cmd_outputs[:success] }
+              let(:boot_time_initial_stdout) { cmd_outputs[:initial] }
+              let(:boot_time_success_stdout) { cmd_outputs[:success] }
 
               it 'passes with defaults' do
                 expect(instance).to receive(:sleep).with(sleep_time)
@@ -290,7 +290,7 @@ module Beaker
               end
 
               context 'command errors' do
-                before :each do
+                before do
                   allow(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).at_least(:once)
                 end
 
@@ -310,7 +310,7 @@ module Beaker
 
                 context 'incorrect time string' do
                   context 'original time' do
-                    let (:boot_time_initial_stdout) { 'boot bad' }
+                    let(:boot_time_initial_stdout) { 'boot bad' }
 
                     it 'raises a reboot failure' do
                       # Handle the 'retry'
@@ -323,7 +323,7 @@ module Beaker
                   end
 
                   context 'current time' do
-                    let (:boot_time_success_stdout) { 'boot bad' }
+                    let(:boot_time_success_stdout) { 'boot bad' }
 
                     it 'raises a reboot failure' do
                       expect(instance).to receive(:exec).with(:shutdown_command_stub, anything).and_return(response).once
@@ -345,8 +345,8 @@ module Beaker
         check_cmd_output.each do |check_os, cmd_opts|
           cmd_opts.each do |cmd_name, cmd_outputs|
             context "on '#{check_os}' with the '#{cmd_name}' command" do
-              let (:boot_time_initial_stdout) { cmd_outputs[:initial] }
-              let (:boot_time_success_stdout) { cmd_outputs[:initial] }
+              let(:boot_time_initial_stdout) { cmd_outputs[:initial] }
+              let(:boot_time_success_stdout) { cmd_outputs[:initial] }
 
               it 'raises RebootFailure' do
                 expect(instance).to receive(:sleep).with(sleep_time)
@@ -366,7 +366,7 @@ module Beaker
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_initial_response).once
                 expect(instance).to receive( :exec ).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
-                expect { instance.reboot(wait_time=sleep_time, max_connection_tries=9, boot_time_retries=10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
+                expect { instance.reboot(sleep_time, 9, 10) }.to raise_error(Beaker::Host::RebootFailure, /Boot time did not reset/)
               end
             end
           end

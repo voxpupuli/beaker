@@ -4,12 +4,12 @@ module Beaker
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
   describe Subcommand do
     let( :subcommand ) {
-      Beaker::Subcommand.new
+      described_class.new
     }
 
-    context '#initialize' do
+    describe '#initialize' do
       it 'creates a cli object' do
-        expect(subcommand.cli).to be
+        expect(subcommand.cli).to be_instance_of(Beaker::CLI)
       end
 
       describe 'File operation initialization for subcommands' do
@@ -33,7 +33,7 @@ module Beaker
 
     context 'ensure that beaker options can be passed through' do
 
-      let (:beaker_options_list) { [
+      let(:beaker_options_list) { [
         'options-file',
         'helper',
         'load-path',
@@ -78,7 +78,7 @@ module Beaker
 
       let( :yaml_store_mock ) { double('yaml_store_mock') }
 
-      it 'should not error with valid beaker options' do
+      it 'does not error with valid beaker options' do
         beaker_options_list.each do |option|
           allow_any_instance_of(Beaker::CLI).to receive(:parse_options)
           allow_any_instance_of(Beaker::CLI).to receive(:configured_options).and_return({})
@@ -91,27 +91,27 @@ module Beaker
           expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
           expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
-          expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', "--#{option}"])}.to_not output(/ERROR/).to_stderr
+          expect {described_class.start(['init', '--hosts', 'centos', "--#{option}"])}.not_to output(/ERROR/).to_stderr
         end
       end
 
-      it "should error with a bad option here" do
+      it "errors with a bad option here" do
         allow(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
         allow(yaml_store_mock).to receive(:transaction).and_yield
         allow(yaml_store_mock).to receive(:[]=).with('provisioned', false)
         expect(File).not_to receive(:open)
         expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
         expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
-        expect {Beaker::Subcommand.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
+        expect {described_class.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
       end
     end
 
-    context '#init' do
+    describe '#init' do
       let( :cli ) { subcommand.cli }
       let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
       let( :yaml_store_mock ) { double('yaml_store_mock') }
 
-      before :each do
+      before do
         allow(cli).to receive(:parse_options)
         allow(cli).to receive(:configured_options).and_return(mock_options)
       end
@@ -130,17 +130,17 @@ module Beaker
       end
     end
 
-    context '#provision' do
-      let ( :cli ) { subcommand.cli }
+    describe '#provision' do
+      let( :cli ) { subcommand.cli }
       let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let ( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let ( :cleaned_hosts ) {double()}
-      let ( :yielded_host_hash ) {double()}
-      let ( :yielded_host_name) {double()}
-      let ( :network_manager) {double('network_manager')}
-      let ( :hosts) {double('hosts')}
-      let ( :hypervisors) {double('hypervisors')}
-      let (:options) {double ('options')}
+      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
+      let( :cleaned_hosts ) {double()}
+      let( :yielded_host_hash ) {double()}
+      let( :yielded_host_name) {double()}
+      let( :network_manager) {double('network_manager')}
+      let( :hosts) {double('hosts')}
+      let( :hypervisors) {double('hypervisors')}
+      let(:options) {double('options')}
 
       it 'provisions the host and saves the host info' do
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
@@ -174,17 +174,21 @@ module Beaker
     end
 
     context 'exec' do
-      before :each do
+      before do
         allow(subcommand.cli).to receive(:parse_options)
         allow(subcommand.cli).to receive(:initialize_network_manager)
         allow(subcommand.cli).to receive(:execute!)
       end
 
+      let( :cleaned_hosts ) {double()}
+      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
+      let( :yaml_store_mock ) { double('yaml_store_mock') }
+
       it 'calls execute! when no resource is given' do
-        expect_any_instance_of(Pathname).to_not receive(:directory?)
-        expect_any_instance_of(Pathname).to_not receive(:exist?)
+        expect_any_instance_of(Pathname).not_to receive(:directory?)
+        expect_any_instance_of(Pathname).not_to receive(:exist?)
         expect(subcommand.cli).to receive(:execute!).once
-        expect{subcommand.exec}.to_not raise_error
+        expect{subcommand.exec}.not_to raise_error
       end
 
       it 'allows hard coded suite names to be specified' do
@@ -251,9 +255,7 @@ module Beaker
       end
 
 
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let( :cleaned_hosts ) {double()}
+
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
         allow(yaml_store_mock).to receive(:[]).and_return(false)
         allow(subcommand).to receive(:options).and_return('preserve-state' => true)
@@ -272,7 +274,7 @@ module Beaker
       it 'does not attempt preserve state if the flag is not passed in' do
         subcommand.exec('tests')
 
-        expect(SubcommandUtil).to receive(:sanitize_options_for_save).never
+        expect(SubcommandUtil).not_to receive(:sanitize_options_for_save)
         expect(subcommand.cli.options['preserve-state']).to be_nil
       end
     end

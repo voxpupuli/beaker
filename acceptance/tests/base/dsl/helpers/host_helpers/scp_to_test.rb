@@ -11,7 +11,7 @@ test_name "dsl::helpers::host_helpers #scp_to" do
   if test_scp_error_on_close?
     step "#scp_to fails if the remote path cannot be found" do
       Dir.mktmpdir do |local_dir|
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+        local_filename, _contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
         # assert_raises Beaker::Host::CommandFailure do
         assert_raises RuntimeError do

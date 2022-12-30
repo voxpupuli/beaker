@@ -64,7 +64,7 @@ module Beaker
                                                                                                                                 .application.last_comment)
         task name, *args do |_, task_args|
           RakeFileUtils.__send__(:verbose, verbose) do
-            task_block.call(*[self, task_args].slice(0, task_block.arity)) if task_block
+            yield(*[self, task_args].slice(0, task_block.arity)) if task_block
             run_task verbose
           end
         end
@@ -75,7 +75,7 @@ module Beaker
       #   if no other options file is provided
       #
       def check_for_beaker_type_config
-        if !@options_file && File.exists?("#{@acceptance_root}/.beaker-#{@type}.cfg")
+        if !@options_file && File.exist?("#{@acceptance_root}/.beaker-#{@type}.cfg")
           @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
         end
       end
@@ -84,7 +84,7 @@ module Beaker
       # Check for existence of ENV variables for test if !@tests is undef
       #
       def check_env_variables
-        if File.exists?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
+        if File.exist?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
           @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests')
         end
         @tests = ENV['TESTS'] || ENV['TEST'] if !@tests

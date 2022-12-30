@@ -27,7 +27,7 @@ describe ClassMixedWithDSLHelpers do
 
   describe '#on' do
 
-    before :each do
+    before do
       result.stdout = 'stdout'
       result.stderr = 'stderr'
       result.exit_code = 0
@@ -106,7 +106,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'upon command completion' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
         @res = subject.on( host, command )
@@ -130,7 +130,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'when passed a block with arity of 1' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
       end
@@ -162,7 +162,7 @@ describe ClassMixedWithDSLHelpers do
     end
 
     context 'when passed a block with arity of 0' do
-      before :each do
+      before do
         allow( subject ).to receive( :hosts ).and_return( hosts )
         expect( host ).to receive( :exec ).and_return( result )
       end
@@ -170,7 +170,7 @@ describe ClassMixedWithDSLHelpers do
       it 'yields self' do
         subject.on host, command do
           expect( subject ).
-            to be_an_instance_of( ClassMixedWithDSLHelpers )
+            to be_an_instance_of( described_class )
         end
       end
 
@@ -319,7 +319,7 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true }
       tmpfile = double
 
-      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+      expect( tmpfile ).to receive( :path ).twice.
         and_return( '/local/path/to/blah' )
 
       expect( Tempfile ).to receive( :open ).and_yield( tmpfile )
@@ -338,7 +338,7 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true, :protocol => 'rsync' }
       tmpfile = double
 
-      expect( tmpfile ).to receive( :path ).exactly( 2 ).times.
+      expect( tmpfile ).to receive( :path ).twice.
         and_return( '/local/path/to/blah' )
 
       expect( Tempfile ).to receive( :open ).and_yield( tmpfile )

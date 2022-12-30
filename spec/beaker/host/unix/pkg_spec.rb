@@ -28,9 +28,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { UnixPkgTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { UnixPkgTest.new(opts, logger) }
 
     context 'Package deployment tests' do
       path = '/some/file/path'
@@ -41,48 +41,48 @@ module Beaker
 
         it 'returns a warning if there is no file at the path specified' do
           expect(logger).to receive(:warn)
-          allow(File).to receive(:exists?).with(path).and_return(false)
+          allow(File).to receive(:exist?).with(path).and_return(false)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_apt_repo for huaweios systems' do
           @opts = {'platform' => 'huaweios-is-me'}
           expect(instance).to receive(:deploy_apt_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_apt_repo for debian systems' do
           @opts = {'platform' => 'ubuntu-is-me'}
           expect(instance).to receive(:deploy_apt_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_yum_repo for el systems' do
           @opts = {'platform' => 'el-is-me'}
           expect(instance).to receive(:deploy_yum_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_zyp_repo for sles systems' do
           @opts = {'platform' => 'sles-is-me'}
           expect(instance).to receive(:deploy_zyp_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'calls #deploy_zyp_repo for opensuse systems' do
           @opts = {'platform' => 'opensuse-is-me'}
           expect(instance).to receive(:deploy_zyp_repo)
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
 
         it 'raises an error for unsupported systems' do
           @opts = {'platform' => 'windows-is-me'}
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           expect{instance.deploy_package_repo(path,name,version)}.to raise_error(RuntimeError)
         end
       end
@@ -94,7 +94,7 @@ module Beaker
           expect(logger).to receive(:warn)
           allow(@opts['platform']).to receive(:codename).and_return(nil)
           expect(instance).to receive(:deploy_apt_repo).and_return(instance.deploy_apt_repo(path,name,version))
-          allow(File).to receive(:exists?).with(path).and_return(true)
+          allow(File).to receive(:exist?).with(path).and_return(true)
           instance.deploy_package_repo(path,name,version)
         end
       end
@@ -106,15 +106,16 @@ module Beaker
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).twice
         expect( instance.check_for_package(pkg) ).to be === true
       end
+
       it "checks correctly on opensuse" do
         @opts = {'platform' => 'opensuse-is-me'}
         pkg = 'sles_package'
         expect( Beaker::Command ).to receive( :new ).with( /^rpmkeys.*nightlies.puppetlabs.com.*/, anything, anything ).and_return('').ordered.once
         expect( Beaker::Command ).to receive(:new).with("zypper --gpg-auto-import-keys se -i --match-exact #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('').ordered.once
-        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).exactly(2).times
+        expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0})).twice
         expect( instance.check_for_package(pkg) ).to be === true
       end
 
@@ -159,6 +160,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('', {:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.check_for_package(pkg) ).to be === true
       end
+
       it "checks correctly on debian" do
         @opts = {'platform' => 'debian-is-me'}
         pkg = 'debian_package'
@@ -226,12 +228,13 @@ module Beaker
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
         it "calls update for #{platform}" do
           @opts = {'platform' => platform}
-          instance.instance_variable_set("@apt_needs_update", true)
+          instance.instance_variable_set(:@apt_needs_update, true)
           expect(instance).to receive('execute').with("apt-get update")
-          expect{instance.update_apt_if_needed}.to_not raise_error
+          expect{instance.update_apt_if_needed}.not_to raise_error
         end
       end
     end
+
     context "install_package" do
 
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
@@ -391,6 +394,7 @@ module Beaker
         end
       end
     end
+
     context "install_package_with_rpm" do
 
       it "accepts a package as a single argument" do
@@ -433,9 +437,9 @@ module Beaker
 
     end
 
-    context '#pe_puppet_agent_promoted_package_install' do
+    describe '#pe_puppet_agent_promoted_package_install' do
       context 'on solaris platforms' do
-        before :each do
+        before do
           allow( subject ).to receive( :fetch_http_file )
           allow( subject ).to receive( :scp_to )
           allow( subject ).to receive( :configure_type_defaults_on )
@@ -477,7 +481,7 @@ module Beaker
         end
 
         context 'on solaris 10' do
-          before :each do
+          before do
             solaris_platform = Beaker::Platform.new('solaris-10-x86_64')
             @opts = {'platform' => solaris_platform}
           end
@@ -505,7 +509,7 @@ module Beaker
         end
 
         context 'on solaris 11' do
-          before :each do
+          before do
             solaris_platform = Beaker::Platform.new('solaris-11-x86_64')
             @opts = {'platform' => solaris_platform}
           end
@@ -526,7 +530,7 @@ module Beaker
       let( :platform      ) { @platform || 'fedora' }
       let( :version       ) { @version  || 6        }
 
-      before :each do
+      before do
         allow( instance ).to receive( :[] ).with( 'platform' ) { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
       end
 
@@ -589,7 +593,7 @@ module Beaker
       let( :base_dir      ) { '/base/dir/fake'      }
       let( :download_file ) { 'download_file.txt'   }
 
-      before :each do
+      before do
         allow( instance ).to receive( :[] ).with( 'platform' ) {  Beaker::Platform.new("#{platform}-#{version}-x86_64")  }
       end
 
@@ -620,7 +624,7 @@ module Beaker
 
       context 'on solaris' do
 
-        before :each do
+        before do
           @platform = 'solaris'
         end
 

@@ -56,7 +56,7 @@ module Beaker
 
     DEFAULT_CONNECTION_PREFERENCE = [:ip, :vmhostname, :hostname]
     # SSH connection method preference. Can be overwritten by hypervisor to change the order
-    def connection_preference(host)
+    def connection_preference(_host)
       DEFAULT_CONNECTION_PREFERENCE
     end
 
@@ -105,9 +105,9 @@ module Beaker
         if @options[:disable_updates]
           disable_updates(@hosts, @options)
         end
-      rescue SignalException => ex
-        if ex.signo == 15 #SIGTERM
-          report_and_raise(@logger, ex, "configure")
+      rescue SignalException => e
+        if e.signo == 15 #SIGTERM
+          report_and_raise(@logger, e, "configure")
         end
         raise
       end

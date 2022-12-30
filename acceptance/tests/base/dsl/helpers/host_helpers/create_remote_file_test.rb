@@ -18,9 +18,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
           return false
         end
         true
-      rescue Beaker::Host::CommandFailure => err
+      rescue Beaker::Host::CommandFailure => e
         logger.info("create_remote_file threw command failure, details: ")
-        logger.info("  #{err}")
+        logger.info("  #{e}")
         logger.info("continuing back-off execution")
         false
       end
@@ -192,7 +192,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
             rsync_package = "rsync"
             # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
             # TODO: fix this with BKR-1502
-            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            rsync_package = "CSWrsync" if /solaris-10/.match?(host['platform'])
             host.uninstall_package rsync_package
           end
           host.delete(:rsync_installed)
@@ -227,7 +227,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       end
 
       assert_raises Beaker::Host::CommandFailure do
-        remote_contents = on(default, "cat #{remote_filename}").stdout
+        on(default, "cat #{remote_filename}").stdout
       end
     end
   end

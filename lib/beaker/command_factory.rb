@@ -10,7 +10,7 @@ module Beaker
     # +assertions+. This is not provided by Assertions and must be
     # provided by the thing including Assertions. See Minitest::Runnable
     # for an example.
-    attr_accessor :assertions
+    attr_writer :assertions
     def assertions
       @assertions || 0
     end
@@ -27,7 +27,7 @@ module Beaker
     #
     # @api private
     # @return [String] Stdout from command execution
-    def execute(command, options={}, &block)
+    def execute(command, options={})
       cmd_create_options = {}
       exec_opts = options.dup
       cmd_create_options[:prepend_cmds] = exec_opts.delete(:prepend_cmds) || nil

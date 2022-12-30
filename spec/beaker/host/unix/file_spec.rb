@@ -24,16 +24,16 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:platform) {
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:platform) {
       if @platform
         { 'platform' => Beaker::Platform.new( @platform) }
       else
         { 'platform' => Beaker::Platform.new( 'osx-10.9-x86_64' ) }
       end
     }
-    let (:instance) { UnixFileTest.new(opts.merge(platform), logger) }
+    let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
 
@@ -94,7 +94,7 @@ module Beaker
       ['centos','redhat'].each do |platform|
         it "sets the el portion correctly for '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
-          allow( instance ).to receive( :is_pe? ) { false }
+          allow( instance ).to receive( :is_pe? ).and_return(false)
           filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
           expect( filename ).to match( /sion7\-el\-/ )
         end
@@ -102,21 +102,21 @@ module Beaker
 
       it 'sets the sles portion correctly for sles platforms' do
         @platform = 'sles-11-x86_64'
-        allow( instance ).to receive( :is_pe? ) { false }
+        allow( instance ).to receive( :is_pe? ).and_return(false)
         filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
         expect( filename ).to match( /sion7\-sles\-/ )
       end
 
       it 'sets the opensuse portion correctly for opensuse platforms' do
         @platform = 'opensuse-15-x86_64'
-        allow( instance ).to receive( :is_pe? ) { false }
+        allow( instance ).to receive( :is_pe? ).and_return(false)
         filename = instance.repo_filename( 'pkg_name', 'pkg_version7' )
         expect( filename ).to match( /sion7\-opensuse\-/ )
       end
 
       it 'builds the filename correctly for el-based platforms' do
         @platform = 'el-21-x86_64'
-        allow( instance ).to receive( :is_pe? ) { false }
+        allow( instance ).to receive( :is_pe? ).and_return(false)
         filename = instance.repo_filename( 'pkg_name', 'pkg_version8' )
         correct = 'pl-pkg_name-pkg_version8-el-21-x86_64.repo'
         expect( filename ).to be === correct
@@ -125,7 +125,7 @@ module Beaker
       it 'builds the filename correctly for redhatfips platforms' do
         @platform = 'el-7-x86_64'
         allow(instance).to receive(:[]).with('platform') { platform['platform'] }
-        expect(instance).to receive(:[]).with('packaging_platform') { 'redhatfips-7-x86_64' }
+        expect(instance).to receive(:[]).with('packaging_platform').and_return('redhatfips-7-x86_64')
         filename = instance.repo_filename('pkg_name', 'pkg_version')
         correct = 'pl-pkg_name-pkg_version-redhatfips-7-x86_64.repo'
         expect( filename ).to be === correct
@@ -133,7 +133,7 @@ module Beaker
 
       it 'adds in the PE portion of the filename correctly for el-based PE hosts' do
         @platform = 'el-21-x86_64'
-        allow( instance ).to receive( :is_pe? ) { true }
+        allow( instance ).to receive( :is_pe? ).and_return(true)
         filename = instance.repo_filename( 'pkg_name', 'pkg_version9' )
         correct = 'pl-pkg_name-pkg_version9-el-21-x86_64.repo'
         expect( filename ).to be === correct
@@ -155,7 +155,7 @@ module Beaker
 
       it 'adds wrlinux to variant on cisco platforms' do
         @platform = 'cisco_nexus-7-x86_64'
-        allow( instance ).to receive( :is_pe? ) { false }
+        allow( instance ).to receive( :is_pe? ).and_return(false)
         filename = instance.repo_filename( 'pkg_name', 'pkg_version12' )
         expect( filename ).to match( /sion12\-cisco\-wrlinux\-/ )
       end
@@ -194,8 +194,8 @@ module Beaker
     end
 
     describe '#chown' do
-      let (:user) { 'someuser' }
-      let (:path) { '/path/to/chown/on' }
+      let(:user) { 'someuser' }
+      let(:path) { '/path/to/chown/on' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "chown #{user} #{path}" ).and_return( 0 )
@@ -209,7 +209,8 @@ module Beaker
     end
 
     describe '#cat' do
-      let (:path) { '/path/to/cat/on' }
+      let(:path) { '/path/to/cat/on' }
+
       it 'calls cat for path' do
         expect( instance ).to receive( :execute ).with( "cat #{path}" ).and_return( 0 )
         expect( instance.cat( path ) ).to be === 0
@@ -239,8 +240,8 @@ module Beaker
     end
 
     describe '#chgrp' do
-      let (:group) { 'somegroup' }
-      let (:path) { '/path/to/chgrp/on' }
+      let(:group) { 'somegroup' }
+      let(:path) { '/path/to/chgrp/on' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "chgrp #{group} #{path}" ).and_return( 0 )
@@ -254,7 +255,7 @@ module Beaker
     end
 
     describe '#ls_ld' do
-      let (:path) { '/path/to/ls_ld' }
+      let(:path) { '/path/to/ls_ld' }
 
       it 'calls the system method' do
         expect( instance ).to receive( :execute ).with( "ls -ld #{path}" ).and_return( 0 )

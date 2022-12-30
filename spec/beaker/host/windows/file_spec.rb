@@ -2,10 +2,10 @@ require 'spec_helper'
 
 module Beaker
   describe Windows::File do
-    let (:user) { 'someuser' }
-    let (:group) { 'somegroup' }
-    let (:path) { 'C:\Foo\Bar' }
-    let (:newpath) { '/Foo/Bar' }
+    let(:user) { 'someuser' }
+    let(:group) { 'somegroup' }
+    let(:path) { 'C:\Foo\Bar' }
+    let(:newpath) { '/Foo/Bar' }
     let(:host)    { make_host( 'name', { :platform => 'windows' } ) }
 
 

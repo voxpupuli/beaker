@@ -38,7 +38,7 @@ test_name "dsl::helpers::host_helpers #curl_on" do
     end
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
 
-    result = curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
+    curl_on hosts, "-o #{remote_targetfilename} #{host_local_url default, remote_filename}"
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_targetfilename}").stdout

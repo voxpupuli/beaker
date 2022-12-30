@@ -21,7 +21,7 @@ module Mac::Exec
   #   (from {#ssh_service_restart})
   def ssh_permit_user_environment
     ssh_config_file = '/etc/sshd_config'
-    ssh_config_file = '/private/etc/ssh/sshd_config' if self['platform'] =~ /^osx-/
+    ssh_config_file = '/private/etc/ssh/sshd_config' if /^osx-/.match?(self['platform'])
 
     exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> #{ssh_config_file}"))
     ssh_service_restart()

@@ -3,6 +3,8 @@ require 'net/ssh'
 
 module Beaker
   describe SshConnection do
+    subject(:connection) { described_class.new name_hash, user, ssh_opts, options }
+
     let( :user )      { 'root'    }
     let( :ssh_opts )  { { keepalive: true, keepalive_interval: 2 } }
     let( :options )   { { :logger => double('logger').as_null_object, :ssh_connection_preference => [:ip, :vmhostname, :hostname]} }
@@ -10,16 +12,16 @@ module Beaker
     let( :vmhostname ){ "vmhostname" }
     let( :hostname)   { "my_host" }
     let( :name_hash ) { { :ip => ip, :vmhostname => vmhostname, :hostname => hostname } }
-    subject(:connection) { SshConnection.new name_hash, user, ssh_opts, options }
 
-    before :each do
+
+    before do
       allow( subject ).to receive(:sleep)
     end
 
     it 'self.connect creates connects and returns a proxy for that connection' do
       expect( Net::SSH ).to receive(:start).with( "default.ip.address", user, ssh_opts ).and_return(true)
-      connection_constructor = SshConnection.connect name_hash, user, ssh_opts, options
-      expect( connection_constructor ).to be_a_kind_of SshConnection
+      connection_constructor = described_class.connect name_hash, user, ssh_opts, options
+      expect( connection_constructor ).to be_a_kind_of described_class
     end
 
     it 'connect creates a new connection' do
@@ -35,7 +37,7 @@ module Beaker
     it 'attempts to connect by vmhostname address if ip connection fails' do
       expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts).and_return(false)
       expect( Net::SSH ).to receive( :start ).with( vmhostname, user, ssh_opts).and_return(true).once
-      expect( Net::SSH ).to receive( :start ).with( hostname, user, ssh_opts).never
+      expect( Net::SSH ).not_to receive( :start ).with( hostname, user, ssh_opts)
       connection.connect
     end
 
@@ -111,7 +113,7 @@ module Beaker
     end
 
     describe '#register_stdout_for' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
         connection.connect
@@ -147,7 +149,7 @@ module Beaker
     describe '#register_stderr_for' do
       let( :result ) { Beaker::Result.new('hostname', 'command') }
 
-      before :each do
+      before do
         @mock_ssh = Object.new
         expect( Net::SSH ).to receive( :start ).with( ip, user, ssh_opts) { @mock_ssh }
         connection.connect
@@ -175,9 +177,9 @@ module Beaker
         allow( @mock_channel ).to receive( :on_extended_data ).and_yield(nil, '1', @data)
 
         @mock_callback = Object.new
-        expect( @mock_callback ).to_not receive( :[] )
-        expect( result.stderr ).to_not receive( :<< )
-        expect( result.output ).to_not receive( :<< )
+        expect( @mock_callback ).not_to receive( :[] )
+        expect( result.stderr ).not_to receive( :<< )
+        expect( result.output ).not_to receive( :<< )
 
         connection.register_stderr_for @mock_channel, result, @mock_callback
       end
@@ -216,7 +218,7 @@ module Beaker
     end
 
     describe '#scp_to' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :upload! )
@@ -243,7 +245,7 @@ module Beaker
     end
 
     describe '#scp_from' do
-      before :each do
+      before do
         @mock_ssh = Object.new
         @mock_scp = Object.new
         allow( @mock_scp ).to receive( :download! )

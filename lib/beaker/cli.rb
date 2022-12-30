@@ -104,11 +104,9 @@ module Beaker
         end
 
         # Setup perf monitoring if needed
-        if @options[:collect_perf_data].to_s =~ /(aggressive)|(normal)/
+        if /(aggressive)|(normal)/.match?(@options[:collect_perf_data].to_s)
           @perf = Beaker::Perf.new( @hosts, @options )
         end
-
-        errored = false
 
         #pre acceptance  phase
         run_suite(:pre_suite, :fast)
@@ -120,7 +118,7 @@ module Beaker
         rescue => e
           #post acceptance on failure
           #run post-suite if we are in fail-slow mode
-          if @options[:fail_mode].to_s =~ /slow/
+          if /slow/.match?(@options[:fail_mode].to_s)
             run_suite(:post_suite)
             @perf.print_perf_info if defined? @perf
           end
@@ -140,7 +138,7 @@ module Beaker
         end
 
         #cleanup on error
-        if @options[:preserve_hosts].to_s =~ /(never)|(onpass)/
+        if /(never)|(onpass)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
             @network_manager.cleanup
@@ -163,7 +161,7 @@ module Beaker
         end
 
         #cleanup on success
-        if @options[:preserve_hosts].to_s =~ /(never)|(onfail)/
+        if /(never)|(onfail)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after successful run"
           if @network_manager
             @network_manager.cleanup
@@ -184,7 +182,7 @@ module Beaker
     #                                 continue to execute tests.
     def run_suite(suite_name, failure_strategy = nil)
       if (@options[suite_name].empty?)
-        @logger.notify("No tests to run for suite '#{suite_name.to_s}'")
+        @logger.notify("No tests to run for suite '#{suite_name}'")
         return
       end
       Beaker::TestSuite.new(
@@ -225,7 +223,7 @@ module Beaker
       hosts_yaml['HOSTS'] = combined_instance_and_options_hosts
       hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
       # save the rest of the options, excepting the HOSTS that we have already processed
-      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,v| k =~ dontpreserve })
+      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,_v| dontpreserve.match?(k) })
       # remove copy of HOSTS information
       hosts_yaml['CONFIG']['provision'] = false
       File.open(preserved_hosts_filename, 'w') do |file|

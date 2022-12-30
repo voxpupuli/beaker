@@ -43,7 +43,7 @@ module Beaker
         arry = []
         if arg.is_a?(Array)
           arry += arg
-        elsif arg =~ /,/
+        elsif /,/.match?(arg)
           arry += arg.split(',')
         else
           arry << arg
@@ -281,7 +281,7 @@ module Beaker
       # @raise [ArgumentError] if a hosts file is generated, but it can't
       #   be read by the HostsFileParser
       def parse_hosts_options
-        if @options[:hosts_file].nil? || File.exists?(@options[:hosts_file])
+        if @options[:hosts_file].nil? || File.exist?(@options[:hosts_file])
           #read the hosts file that contains the node configuration and hypervisor info
           return Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
         end
@@ -298,11 +298,11 @@ module Beaker
           bhg_cli = BeakerHostGenerator::CLI.new(host_generator_options)
           bhg_cli.execute
         rescue BeakerHostGenerator::Exceptions::Error,
-          BeakerHostGenerator::Exceptions::InvalidNodeSpecError => error
+          BeakerHostGenerator::Exceptions::InvalidNodeSpecError => e
           error_message = "\nbeaker-hostgenerator was not able to use this value as input."
           error_message << "\nExiting with an Error.\n\n"
           $stderr.puts error_message
-          raise error
+          raise e
         end
 
         @options[:hosts_file_generated] = true
@@ -375,7 +375,7 @@ module Beaker
         #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          if host[:platform] =~ /windows|el-4/
+          if /windows|el-4/.match?(host[:platform])
             test_host_roles(name, host)
           end
 
@@ -461,7 +461,7 @@ module Beaker
         exclude_roles = %w(master database dashboard)
         host_roles    = host_hash[:roles]
         unless (host_roles & exclude_roles).empty?
-          @validator.parser_error "#{host_hash[:platform].to_s} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
+          @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
         end
       end
 

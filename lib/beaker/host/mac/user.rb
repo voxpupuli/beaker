@@ -6,11 +6,11 @@ module Mac::User
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of user names on the system
-  def user_list(&block)
+  def user_list()
     execute('dscacheutil -q user') do |result|
       users = []
       result.stdout.each_line do |line|
-        users << line.split(': ')[1].strip if line =~ /^name:/
+        users << line.split(': ')[1].strip if /^name:/.match?(line)
       end
 
       yield result if block_given?
@@ -31,9 +31,9 @@ module Mac::User
   # @return [Result] User information in /etc/passwd format
   # @raise [FailTest] Raises an Assertion failure if it can't find the name
   #                   queried for in the returned block
-  def user_get(name, &block)
+  def user_get(name)
     execute("id -P #{name}") do |result|
-      fail_test "failed to get user #{name}" unless result.stdout =~  /^#{name}:/
+      fail_test "failed to get user #{name}" unless /^#{name}:/.match?(result.stdout)
 
       yield result if block_given?
       result
@@ -44,10 +44,10 @@ module Mac::User
   #
   # @param [String] name Name of the user
   # @param [Proc] block Additional actions or insertions
-  def user_present(name, &block)
+  def user_present(name)
     user_exists = false
     execute("dscacheutil -q user -a name #{name}") do |result|
-       user_exists = result.stdout =~  /^name: #{name}/
+      user_exists = result.stdout.start_with?("name: #{name}")
     end
 
     return if user_exists

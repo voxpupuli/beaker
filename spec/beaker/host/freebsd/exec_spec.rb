@@ -19,9 +19,9 @@ module Beaker
       end
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { FreeBSDExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { FreeBSDExecTest.new(opts, logger) }
 
     context "echo_to_file" do
 

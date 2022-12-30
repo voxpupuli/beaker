@@ -6,19 +6,19 @@ module PSWindows::Pkg
     result.exit_code == 0
   end
 
-  def check_for_package(name)
+  def check_for_package(_name)
     #HACK NOOP
     #raise "Cannot check for package #{name} on #{self}"
     0
   end
 
-  def install_package(name, cmdline_args = '')
+  def install_package(_name, _cmdline_args = '')
     #HACK NOOP
     #raise "Package #{name} cannot be installed on #{self}"
     0
   end
 
-  def uninstall_package(name, cmdline_args = '')
+  def uninstall_package(_name, _cmdline_args = '')
     #HACK NOOP
     #raise "Package #{name} cannot be uninstalled on #{self}"
     0
@@ -27,7 +27,7 @@ module PSWindows::Pkg
   #Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
   #@return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    (identify_windows_architecture =~ /64/) == 0
+    (identify_windows_architecture.include?('64')) == 0
   end
 
   private
@@ -37,7 +37,7 @@ module PSWindows::Pkg
     arch = nil
     execute("wmic os get osarchitecture", :accept_all_exit_codes => true) do |result|
       arch = if result.exit_code == 0
-        result.stdout =~ /64/ ? '64' : '32'
+        /64/.match?(result.stdout) ? '64' : '32'
       else
         identify_windows_architecture_from_os_name_for_win2003
       end
@@ -49,7 +49,7 @@ module PSWindows::Pkg
   def identify_windows_architecture_from_os_name_for_win2003
     arch = nil
     execute("wmic os get name", :accept_all_exit_codes => true) do |result|
-      arch = result.stdout =~ /64/ ? '64' : '32'
+      arch = /64/.match?(result.stdout) ? '64' : '32'
     end
     arch
   end

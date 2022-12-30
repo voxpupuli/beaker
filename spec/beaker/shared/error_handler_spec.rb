@@ -7,7 +7,7 @@ module Beaker
       let( :backtrace ) { "I'm the backtrace\nYes I am!\nI have important information" }
       let( :logger )    { double( 'logger' ) }
 
-      before :each do
+      before do
         allow( logger ).to receive( :error ).and_return( true )
         allow( logger ).to receive( :pretty_backtrace ).and_return( backtrace )
 

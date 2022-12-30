@@ -17,9 +17,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
           return false
         end
         true
-      rescue Beaker::Host::CommandFailure => err
+      rescue Beaker::Host::CommandFailure => e
         logger.info("create_remote_file threw command failure, details: ")
-        logger.info("  #{err}")
+        logger.info("  #{e}")
         logger.info("continuing back-off execution")
         false
       end
@@ -36,7 +36,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
 
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+        local_filename, _contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
         remote_tmpdir = default.tmpdir()
 
         assert_raises Beaker::Host::CommandFailure do
@@ -45,7 +45,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
 
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
         assert_raises Beaker::Host::CommandFailure do
-          remote_contents = on(default, "cat #{remote_filename}").stdout
+          on(default, "cat #{remote_filename}").stdout
         end
       end
     end
@@ -73,7 +73,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
             rsync_package = "rsync"
             # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
             # TODO: fix this with BKR-1502
-            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            rsync_package = "CSWrsync" if /solaris-10/.match?(host['platform'])
             host.uninstall_package rsync_package
           else
             host[:rsync_installed] = false
@@ -84,11 +84,10 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
       # rsync is preinstalled on OSX
       step "#rsync_to fails if rsync is not installed on the remote host" do
         Dir.mktmpdir do |local_dir|
-          local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+          local_filename, _contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
           hosts.each do |host|
             remote_tmpdir = host.tmpdir("beaker")
-            remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
             assert_raises Beaker::Host::CommandFailure do
               rsync_to default, local_filename, remote_tmpdir
@@ -106,7 +105,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
 
     step "#rsync_to fails if the remote path cannot be found" do
       Dir.mktmpdir do |local_dir|
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
+        local_filename, _contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
 
         assert_raises Beaker::Host::CommandFailure do
           rsync_to default, local_filename, "/non/existent/testfile.txt"
@@ -126,7 +125,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         result = rsync_to_with_backups default, local_filename, remote_tmpdir
 
         fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
-          "result"          => result,
           "default"         => default,
           "contents"        => contents,
           "local_filename"  => local_filename,
@@ -152,7 +150,6 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
 
         hosts.each do |host|
           fails_intermittently("https://tickets.puppetlabs.com/browse/QENG-3053",
-            "result"          => result,
             "host"            => host,
             "contents"        => contents,
             "local_filename"  => local_filename,
@@ -178,7 +175,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
             rsync_package = "rsync"
             # solaris-10 uses OpenCSW pkgutil, which prepends "CSW" to its provided packages
             # TODO: fix this with BKR-1502
-            rsync_package = "CSWrsync" if host['platform'] =~ /solaris-10/
+            rsync_package = "CSWrsync" if /solaris-10/.match?(host['platform'])
             host.uninstall_package rsync_package
           end
           host.delete(:rsync_installed)

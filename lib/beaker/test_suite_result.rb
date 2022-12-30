@@ -18,9 +18,6 @@ module Beaker
       @logger = options[:logger]
       @name = name
       @test_cases = []
-      #Set some defaults, just in case you attempt to print without including them
-      start_time = Time.at(0)
-      stop_time = Time.at(1)
     end
 
     #Add a {TestCase} to this {TestSuiteResult} instance, used in calculating {TestSuiteResult} data.
@@ -36,27 +33,27 @@ module Beaker
 
     #How many passed {TestCase} instances are in this {TestSuiteResult}
     def passed_tests
-      @test_cases.select { |c| c.test_status == :pass }.length
+      @test_cases.count { |c| c.test_status == :pass }
     end
 
     #How many errored {TestCase} instances are in this {TestSuiteResult}
     def errored_tests
-      @test_cases.select { |c| c.test_status == :error }.length
+      @test_cases.count { |c| c.test_status == :error }
     end
 
     #How many failed {TestCase} instances are in this {TestSuiteResult}
     def failed_tests
-      @test_cases.select { |c| c.test_status == :fail }.length
+      @test_cases.count { |c| c.test_status == :fail }
     end
 
     #How many skipped {TestCase} instances are in this {TestSuiteResult}
     def skipped_tests
-      @test_cases.select { |c| c.test_status == :skip }.length
+      @test_cases.count { |c| c.test_status == :skip }
     end
 
     #How many pending {TestCase} instances are in this {TestSuiteResult}
     def pending_tests
-      @test_cases.select {|c| c.test_status == :pending}.length
+      @test_cases.count {|c| c.test_status == :pending}
     end
 
     #How many {TestCase} instances failed in this {TestSuiteResult}
@@ -178,7 +175,7 @@ module Beaker
       stylesheet = File.join(@options[:project_root], @options[:xml_stylesheet])
 
       begin
-        LoggerJunit.write_xml(xml_file, stylesheet) do |doc, suites|
+        LoggerJunit.write_xml(xml_file, stylesheet) do |_doc, suites|
 
           meta_info = suites.add_element(REXML::Element.new('meta_test_info'))
           unless file_to_link.nil?
@@ -229,7 +226,7 @@ module Beaker
               status = item.add_element(REXML::Element.new('failure'))
               status.add_attribute('type', test.test_status.to_s)
               if test.exception
-                status.add_attribute('message', test.exception.to_s.gsub(/\e/,''))
+                status.add_attribute('message', test.exception.to_s.delete("\e"))
                 data = LoggerJunit.format_cdata(test.exception.backtrace.join('\n'))
                 REXML::CData.new(data, true, status)
               end
@@ -259,7 +256,7 @@ module Beaker
           end
         end
       rescue Exception => e
-        @logger.error "failure in XML output: \n#{e.to_s}" + e.backtrace.join("\n")
+        @logger.error "failure in XML output: \n#{e}" + e.backtrace.join("\n")
       end
     end
 

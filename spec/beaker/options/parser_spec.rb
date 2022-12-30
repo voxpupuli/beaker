@@ -4,12 +4,12 @@ module Beaker
   module Options
 
     describe Parser do
-      let(:parser) { Parser.new }
+      let(:parser) { described_class.new }
       let(:opts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
       let(:hosts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
 
       it "supports usage function" do
-        expect { parser.usage }.to_not raise_error
+        expect { parser.usage }.not_to raise_error
       end
 
       describe 'parse_git_repos' do
@@ -78,7 +78,7 @@ module Beaker
         let(:test_dir) { 'tmp/tests' }
         let(:other_test_dir) { 'tmp/tests2' }
 
-        before :each do
+        before do
           files = [
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
@@ -172,7 +172,7 @@ module Beaker
               }
           }}
 
-          before :each do
+          before do
             expect(parser).to receive(:normalize_args).and_return(true)
           end
 
@@ -340,8 +340,8 @@ module Beaker
       describe '#parse_hosts_options' do
 
         context 'Hosts file exists' do
-          before :each do
-            allow(File).to receive(:exists?).and_return(true)
+          before do
+            allow(File).to receive(:exist?).and_return(true)
           end
 
           it 'returns the parser\'s output' do
@@ -357,8 +357,8 @@ module Beaker
 
         context 'Hosts file does not exist' do
           require 'beaker-hostgenerator'
-          before :each do
-            allow(File).to receive(:exists?).and_return(false)
+          before do
+            allow(File).to receive(:exist?).and_return(false)
           end
 
           it 'calls beaker-hostgenerator to get hosts information' do
@@ -546,7 +546,7 @@ module Beaker
           filename
         end
 
-        shared_examples_for(:a_platform_supporting_only_agents) do |platform, _type|
+        shared_examples_for('a platform supporting only agents') do |platform, _type|
 
           it "restricts #{platform} hosts to agent" do
             args = []
@@ -556,8 +556,8 @@ module Beaker
         end
 
         context "restricts agents" do
-          it_should_behave_like(:a_platform_supporting_only_agents, 'windows-version-arch')
-          it_should_behave_like(:a_platform_supporting_only_agents, 'el-4-arch')
+          it_behaves_like('a platform supporting only agents', 'windows-version-arch')
+          it_behaves_like('a platform supporting only agents', 'el-4-arch')
         end
 
         context "ssh user" do
@@ -586,10 +586,10 @@ module Beaker
       end
 
       describe '#normalize_tags!' do
-        let (:test_tag_and      ) { @test_tag_and     || [] }
-        let (:test_tag_or       ) { @test_tag_or      || [] }
-        let (:test_tag_exclude  ) { @test_tag_exclude || [] }
-        let (:options           ) {
+        let(:test_tag_and      ) { @test_tag_and     || [] }
+        let(:test_tag_or       ) { @test_tag_or      || [] }
+        let(:test_tag_exclude  ) { @test_tag_exclude || [] }
+        let(:options           ) {
           opts                    = Beaker::Options::OptionsHash.new
           opts[:test_tag_and]     = test_tag_and
           opts[:test_tag_or]      = test_tag_or
@@ -644,7 +644,7 @@ module Beaker
       end
 
       describe '#resolve_symlinks' do
-        let (:options) { Beaker::Options::OptionsHash.new }
+        let(:options) { Beaker::Options::OptionsHash.new }
 
         it 'calls File.realpath if hosts_file is set' do
           options[:hosts_file] = opts_path
@@ -658,7 +658,7 @@ module Beaker
           options[:hosts_file] = nil
           parser.instance_variable_set(:@options, options)
 
-          expect { parser.resolve_symlinks! }.to_not raise_error
+          expect { parser.resolve_symlinks! }.not_to raise_error
         end
       end
 
@@ -691,10 +691,10 @@ module Beaker
       end
 
       describe '#check_hypervisor_config' do
-        let (:options) { Beaker::Options::OptionsHash.new }
-        let (:invalid_file) { '/tmp/doesnotexist_visor.yml' }
+        let(:options) { Beaker::Options::OptionsHash.new }
+        let(:invalid_file) { '/tmp/doesnotexist_visor.yml' }
 
-        before :each do
+        before do
           FakeFS.deactivate!
         end
 
@@ -703,7 +703,7 @@ module Beaker
           options[:dot_fog]  = invalid_file
           parser.instance_variable_set(:@options, options)
 
-          expect { parser.check_hypervisor_config('blimpy') }.to_not raise_error
+          expect { parser.check_hypervisor_config('blimpy') }.not_to raise_error
         end
 
         it 'throws an error if ec2_yaml for blimpy is invalid' do
@@ -720,7 +720,7 @@ module Beaker
             options[:dot_fog]  = hosts_path
             parser.instance_variable_set(:@options, options)
 
-            expect { parser.check_hypervisor_config(visor) }.to_not raise_error
+            expect { parser.check_hypervisor_config(visor) }.not_to raise_error
           end
 
           it "throws an error if dot_fog for #{visor} is invalid" do
@@ -733,7 +733,7 @@ module Beaker
         end
 
         it 'does not throw error on unknown visor' do
-          expect { parser.check_hypervisor_config('unknown_visor') }.to_not raise_error
+          expect { parser.check_hypervisor_config('unknown_visor') }.not_to raise_error
         end
       end
     end

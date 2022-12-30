@@ -26,28 +26,28 @@ module Mac
       end
 
       it 'returns two strings that include the passed parameters' do
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
         return1, return2 = host.puppet_agent_dev_package_info( 'pc1', 'pav1', :download_url => '' )
         expect( return1 ).to match( /pc1/ )
         expect( return2 ).to match( /pav1/ )
       end
 
       it 'gets the correct file type' do
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
         _, return2 = host.puppet_agent_dev_package_info( 'pc2', 'pav2', :download_url => '' )
         expect( return2 ).to match( /\.dmg$/ )
       end
 
       it 'adds the version dot correctly if not supplied' do
         @platform = 'osx-10.12-x86_64'
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
         release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC3', 'pav3', :download_url => '' )
         expect( release_path_end ).to match( /10\.12/ )
         expect( release_file ).to match( /10\.12/ )
       end
 
       it 'runs the correct install for osx platforms (newest link format)' do
-        allow( host ).to receive( :link_exists? ) { true }
+        allow( host ).to receive( :link_exists? ).and_return(true)
 
         release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC4', 'pav4', :download_url => '' )
         # verify the mac package name starts the name correctly
@@ -71,7 +71,7 @@ module Mac
       end
 
       it 'runs the correct install for osx platforms (old link format)' do
-        allow( host ).to receive( :link_exists? ) { false }
+        allow( host ).to receive( :link_exists? ).and_return(false)
 
         release_path_end, release_file = host.puppet_agent_dev_package_info( 'PC8', 'pav8', :download_url => '' )
         # verify the mac package name starts the name correctly
@@ -84,7 +84,7 @@ module Mac
     end
 
     describe '#pe_puppet_agent_promoted_package_info' do
-      before :each do
+      before do
         @platform = "osx-10.15-x86_64"
       end
 

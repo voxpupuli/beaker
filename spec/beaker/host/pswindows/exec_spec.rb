@@ -20,9 +20,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { PSWindowsExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { PSWindowsExecTest.new(opts, logger) }
 
     context "rm" do
 
@@ -40,12 +40,12 @@ module Beaker
 
       it 'rm first' do
         expect(instance).to receive(:execute).with("del /s /q \"\\destination\\path\\of\\content\"").and_return(0)
-        expect(instance).to receive(:execute).with("move /y #{origin.gsub(/\//, '\\')} #{destination.gsub(/\//, '\\')}").and_return(0)
+        expect(instance).to receive(:execute).with("move /y #{origin.tr('/', '\\')} #{destination.tr('/', '\\')}").and_return(0)
         expect(instance.mv(origin, destination)).to eq(0)
       end
 
       it 'does not rm' do
-        expect( instance ).to receive(:execute).with("move /y #{origin.gsub(/\//, '\\')} #{destination.gsub(/\//, '\\')}").and_return(0)
+        expect( instance ).to receive(:execute).with("move /y #{origin.tr('/', '\\')} #{destination.tr('/', '\\')}").and_return(0)
         expect( instance.mv(origin, destination, false) ).to be === 0
       end
     end
@@ -57,6 +57,7 @@ module Beaker
 
       context 'file exists' do
         let(:stdout) { 'True' }
+
         it 'sets the modified_at date' do
           file = 'C:\path\to\file'
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
@@ -69,6 +70,7 @@ module Beaker
 
       context 'file does not exist' do
         let(:stdout) { 'False' }
+
         it 'creates it and sets the modified_at date' do
           file = 'C:\path\to\file'
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
@@ -104,6 +106,7 @@ module Beaker
         allow(instance).to receive(:execute)
                                .with(where_command, :accept_all_exit_codes => true).and_return(result)
       end
+
       let(:where_command) { "cmd /C \"where ruby\"" }
 
       context 'when only the environment variable PATH is used' do

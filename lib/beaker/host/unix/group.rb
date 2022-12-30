@@ -1,7 +1,7 @@
 module Unix::Group
   include Beaker::CommandFactory
 
-  def group_list(&block)
+  def group_list()
     execute("getent group") do |result|
       groups = []
       result.stdout.each_line do |line|
@@ -14,9 +14,9 @@ module Unix::Group
     end
   end
 
-  def group_get(name, &block)
+  def group_get(name)
     execute("getent group #{name}") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name}:.*:[0-9]+:/
+      fail_test "failed to get group #{name}" unless /^#{name}:.*:[0-9]+:/.match?(result.stdout)
 
       yield result if block_given?
       result

@@ -37,7 +37,7 @@ module Beaker
       def step step_name, &block
         logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
-        if block_given?
+        if block
           begin
             logger.with_indent do
               yield
@@ -58,7 +58,7 @@ module Beaker
               else
                 logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
                 logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
-                binding.pry
+                binding.pry # rubocop:disable Lint/Debugger
               end
             end
             raise e
@@ -128,7 +128,7 @@ module Beaker
       # @param [String] my_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      def test_name my_name, &block
+      def test_name my_name
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
         if block_given?
@@ -190,17 +190,17 @@ module Beaker
       #                       a {Beaker::Assertions} (i.e., if the assert
       #                       passes)
       # @author Chris Cowell-Shah (<tt>ccs@puppetlabs.com</tt>)
-      def expect_failure(explanation, &block)
+      def expect_failure(explanation)
         begin
           yield if block_given?  # code block should contain an assert that you expect to fail
-        rescue Beaker::DSL::Assertions, Minitest::Assertion => failed_assertion
+        rescue Beaker::DSL::Assertions, Minitest::Assertion => e
           # Yay! The assert in the code block failed, as expected.
           # Swallow the failure so the test passes.
           logger.notify 'An assertion was expected to fail, and did. ' +
                           'This is probably due to a known product bug, ' +
                           'and is probably not a problem. ' +
                           "Additional info: '#{explanation}' " +
-                          "Failed assertion: '#{failed_assertion}'"
+                          "Failed assertion: '#{e}'"
           return
         end
         # Uh-oh! The assert in the code block unexpectedly passed.
@@ -304,7 +304,7 @@ module Beaker
       # TestCase#hosts is reset after block has executed.
       #
       # @see #confine
-      def confine_block(type, criteria, host_array = nil, &block)
+      def confine_block(type, criteria, host_array = nil)
         host_array = Array( host_array || hosts )
         original_hosts = self.hosts.dup
         confine(type, criteria, host_array)
@@ -314,7 +314,7 @@ module Beaker
       rescue Beaker::DSL::Outcomes::SkipTest => e
         # I don't like this much, but adding options to confine is a breaking change
         # to the DSL that would involve a major version bump
-        if e.message !~ /No suitable hosts found/
+        if !/No suitable hosts found/.match?(e.message)
           # a skip generated from the provided block, pass it up the chain
           raise e
         end
@@ -340,7 +340,7 @@ module Beaker
       #   should return true if the host matches this additional criteria.
       #
       # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
-      def select_hosts(criteria, host_array = nil, &block)
+      def select_hosts(criteria, host_array = nil)
         hosts_to_select_from = host_array || hosts
         criteria.each_pair do |property, value|
           hosts_to_select_from = hosts_to_select_from.select do |host|
@@ -364,7 +364,7 @@ module Beaker
           when String
             true_false = host[property.to_s].include? value
           when Regexp
-            true_false = host[property.to_s] =~ value
+            true_false = value.match?(host[property.to_s])
           end
           true_false
         end

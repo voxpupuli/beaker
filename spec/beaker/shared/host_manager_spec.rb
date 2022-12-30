@@ -10,7 +10,7 @@ module Beaker
     describe HostManager do
       # The logger double as nil object doesn't work with marshal.load and marshal.unload needed for run_in_parallel.
       let( :logger )         { double('logger') }
-      let( :host_handler )   { Beaker::Shared::HostManager }
+      let( :host_handler )   { described_class }
       let( :spec_block )     { Proc.new { |arr| arr } }
       let( :platform )       { @platform || 'unix' }
       let( :role0 )          { "role0" }
@@ -22,7 +22,7 @@ module Beaker
                                hosts[2][:roles] = ['agent', role2]
                                hosts }
 
-      context "#hosts_with_name" do
+      describe "#hosts_with_name" do
 
         it "can identify the host by name" do
 
@@ -59,7 +59,7 @@ module Beaker
 
       end
 
-      context "#hosts_with_role" do
+      describe "#hosts_with_role" do
         it "can find the master in a set of hosts" do
 
           expect( host_handler.hosts_with_role( hosts, 'master' ) ).to be === [hosts[1]]
@@ -80,7 +80,7 @@ module Beaker
 
       end
 
-      context "#only_host_with_role" do
+      describe "#only_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.only_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -104,7 +104,7 @@ module Beaker
         end
       end
 
-      context "#find_at_most_one_host_with_role" do
+      describe "#find_at_most_one_host_with_role" do
         it "can find the single master in a set of hosts" do
 
           expect( host_handler.find_at_most_one_host_with_role( hosts, 'master' ) ).to be === hosts[1]
@@ -128,7 +128,7 @@ module Beaker
         end
       end
 
-      context "#run_block_on" do
+      describe "#run_block_on" do
         it "can execute a block against hosts identified by a string" do
           myhosts = host_handler.run_block_on( hosts, role0 ) do |hosts|
             hosts
@@ -165,7 +165,7 @@ module Beaker
 
           # After marshal load and marshal unload, the logger option (an rspec double) is no longer 'equal' to the original.
           # Array of results can be in different order.
-          new_host = myhosts.select{ |host| host.name == hosts[0].name}.first
+          new_host = myhosts.find{ |host| host.name == hosts[0].name}
           hosts[0].options.each { |option|
             expect(option[1]).to eq(new_host.options[option[0]]) unless option[0] == :logger
           }

@@ -15,7 +15,7 @@ module Beaker
       #
       # @return [Boolean]
       def is_pe?
-        self[:type] ? self[:type] =~ /pe/ : true
+        self[:type] ? self[:type].include?('pe') : true
       end
 
       # Determine the puppet type of the ObjectHash
@@ -31,8 +31,6 @@ module Beaker
         case self[:type]
         when /pe/
           :pe
-        when /foss/
-          :foss
         else
           :foss
         end

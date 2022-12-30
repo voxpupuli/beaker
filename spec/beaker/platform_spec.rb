@@ -4,7 +4,7 @@ module Beaker
   describe Platform do
 
     let( :logger )    { double( 'logger' ) }
-    let( :platform )  { Platform.new(@name) }
+    let( :platform )  { described_class.new(@name) }
 
     context 'initialize' do
 
@@ -97,6 +97,7 @@ module Beaker
         expect( platform.with_version_codename ).to be === 'ubuntu-xenial-xxx'
 
       end
+
       it "can convert ubuntu-1310-xxx to ubuntu-saucy-xxx" do
         @name = 'ubuntu-1310-xxx'
         expect( platform.with_version_codename ).to be === 'ubuntu-saucy-xxx'
@@ -160,7 +161,7 @@ module Beaker
         if YAML.respond_to?(:unsafe_load)
           YAML.unsafe_load(YAML.dump(platform))
         else
-          YAML.load(YAML.dump(platform))
+          YAML.load(YAML.dump(platform)) # rubocop:disable Security/YAMLLoad
         end
       end
 

@@ -27,7 +27,7 @@ module Unix::Pkg
     case self['platform']
       when /sles-10/
         result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
-        result.stdout =~ /No packages found/ ? (return false) : (return result.exit_code == 0)
+        /No packages found/.match?(result.stdout) ? (return false) : (return result.exit_code == 0)
       when /opensuse|sles-/
         if !self[:sles_rpmkeys_nightly_pl_imported]
           # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
@@ -64,7 +64,7 @@ module Unix::Pkg
   # If apt has not been updated since the last repo deployment it is
   # updated. Otherwise this is a noop
   def update_apt_if_needed
-    if self['platform'] =~ /debian|ubuntu|cumulus|huaweios/
+    if /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
       if @apt_needs_update
         execute("apt-get update")
         @apt_needs_update = false
@@ -76,7 +76,7 @@ module Unix::Pkg
   # Except for the kernel. An upgrade will purge the modules for the currently running kernel
   # Before upgrading packages, we need to ensure we've the latest keyring
   def update_pacman_if_needed
-    if self['platform'] =~ /archlinux/
+    if /archlinux/.match?(self['platform'])
       if @pacman_needs_update
         execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
         execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
@@ -144,7 +144,7 @@ module Unix::Pkg
               raise ArgumentException
             end
             # If the package advises symlinks to be created, do it
-            command.stdout.split(/\n/).select { |x| x =~ /^\s+ln\s/ }.each do |ln|
+            command.stdout.split("\n").select { |x| /^\s+ln\s/.match?(x) }.each do |ln|
               execute(ln, opts)
             end
           end
@@ -171,7 +171,7 @@ module Unix::Pkg
   # @api public
   def install_package_with_rpm(name, cmdline_args = '', opts = {})
     proxy = ''
-    if name =~ /^http/ and opts[:package_proxy]
+    if name&.start_with?('http') and opts[:package_proxy]
       proxy = extract_rpm_proxy_options(opts[:package_proxy])
     end
     execute("rpm #{cmdline_args} -Uvh #{name} #{proxy}")
@@ -292,7 +292,7 @@ module Unix::Pkg
   # @deprecated no longer used in beaker, beaker-puppet, or beaker-pe
   # @visibility private
   def deploy_package_repo(path, name, version)
-    if not File.exists? path
+    if not File.exist? path
       @logger.warn "Was asked to deploy package repository from #{path}, but it doesn't exist!"
       return
     end
@@ -315,7 +315,7 @@ module Unix::Pkg
   #Examine the host system to determine the architecture
   #@return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    if self[:platform] =~ /solaris/
+    if /solaris/.match?(self[:platform])
       result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
         result.exit_code == 0
     else
@@ -361,7 +361,7 @@ module Unix::Pkg
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
     raise ArgumentError, error_message % "opts[:download_url]" unless opts[:download_url]
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
 
     version = version.split('.')[0] # packages are only published for major versions
 
@@ -425,14 +425,14 @@ module Unix::Pkg
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
     raise ArgumentError, error_message % "puppet_agent_version" unless puppet_agent_version
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
 
     case variant
     when /^(solaris)$/
       release_path_end, release_file = solaris_puppet_agent_dev_package_info(
         puppet_collection, puppet_agent_version, opts )
     when /^(opensuse|sles|aix|el|centos|oracle|redhat|scientific)$/
-      variant = 'el' if variant.match(/(?:el|centos|oracle|redhat|scientific)/)
+      variant = 'el' if variant.match?(/(?:el|centos|oracle|redhat|scientific)/)
       variant = 'sles' if variant == 'opensuse'
 
       if variant == 'aix'
@@ -463,7 +463,7 @@ module Unix::Pkg
   #   {Windows::Pkg#pe_puppet_agent_promoted_package_info} to see usage.
   #   2. release_file Path to the file on release build servers
   #   3. download_file Filename for the package itself
-  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, opts = {} )
+  def pe_puppet_agent_promoted_package_info( puppet_collection = nil, _opts = {} )
     error_message = "Must provide %s argument to get puppet agent dev package information"
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
 
@@ -477,7 +477,7 @@ module Unix::Pkg
       if arch == 'x86_64'
         arch = 'amd64'
       end
-      version = version[0,2] + '.' + version[2,2] if (variant =~ /ubuntu/ && !version.include?("."))
+      version = version[0,2] + '.' + version[2,2] if (variant.include?('ubuntu') && !version.include?("."))
       release_file = "/repos/apt/#{codename}/pool/#{puppet_collection}/p/puppet-agent/puppet-agent*#{arch}.deb"
       download_file = "puppet-agent-#{variant}-#{version}-#{arch}.tar.gz"
     when /^solaris$/
@@ -502,10 +502,10 @@ module Unix::Pkg
   #
   # @return nil
   def pe_puppet_agent_promoted_package_install(
-    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
+    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, _opts
   )
     uncompress_local_tarball( onhost_copied_download, onhost_copy_base, download_file )
-    if self['platform'] =~ /^solaris/
+    if /^solaris/.match?(self['platform'])
       # above uncompresses the install from .tar.gz -> .p5p into the
       # onhost_copied_file directory w/a weird name. We have to read that file
       # name from the filesystem, so that we can provide it to install_local...
@@ -525,7 +525,7 @@ module Unix::Pkg
   #
   # @return nil
   def install_local_package(onhost_package_file, onhost_copy_dir = nil)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
     case variant
     when /^(fedora|el|redhat|centos)$/
       command_name = 'yum'
@@ -555,7 +555,7 @@ module Unix::Pkg
   #
   # @return nil
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
     case variant
     when /^(fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
@@ -587,7 +587,7 @@ module Unix::Pkg
   #
   # @return [Beaker::Result] Result of installation command execution
   def solaris_install_local_package(package_path, noask_directory = nil)
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, _arch, _codename = self['platform'].to_array
 
     version = version.split('.')[0] # packages are only published for major versions
 

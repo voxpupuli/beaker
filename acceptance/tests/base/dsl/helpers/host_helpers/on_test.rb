@@ -15,7 +15,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
   step "#on makes command error output available via `.stderr` on success" do
     output = on(default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]).stderr
-    assert_match /No such file/, output
+    assert_match(/No such file/, output)
   end
 
   step "#on makes exit status available via `.exit_code`" do
@@ -26,7 +26,7 @@ test_name "dsl::helpers::host_helpers #on" do
   step "#on with :acceptable_exit_codes will not fail for named exit codes" do
     result = on default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]
     output = result.stderr
-    assert_match /No such file/, output
+    assert_match(/No such file/, output)
     status = result.exit_code
     assert_equal 127, status
   end
@@ -41,7 +41,7 @@ test_name "dsl::helpers::host_helpers #on" do
     result = on default, "env", { :environment => { 'FOO' => 'bar' } }
     output = result.stdout
 
-    assert_match /\bFOO=bar\b/, output
+    assert_match(/\bFOO=bar\b/, output)
   end
 
   step "#on runs command on all hosts when given a host array" do
@@ -103,7 +103,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
   step "#on allows assertions to be used in the optional block" do
     on hosts, %Q{echo "${RANDOM}:${RANDOM}"} do
-      assert_match /\d+:\d+/, stdout
+      assert_match(/\d+:\d+/, stdout)
     end
   end
 

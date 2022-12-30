@@ -35,12 +35,14 @@ module Unix
     end
 
     def external_copy_base
-      return @external_copy_base if @external_copy_base
-      @external_copy_base = '/root'
-      variant, version, arch, codename = self['platform'].to_array
-      # Solaris 10 uses / as the root user directory. Solaris 11 uses /root (like most).
-      @external_copy_base = '/' if variant == 'solaris' && version == '10'
-      @external_copy_base
+      @external_copy_base ||= begin
+        if self['platform'].variant == 'solaris' && self['platform'].version == '10'
+          # Solaris 10 uses / as the root user directory. Solaris 11 uses /root (like most).
+          '/'
+        else
+          '/root'
+        end
+      end
     end
 
     # Tells you whether a host platform supports beaker's
@@ -49,10 +51,9 @@ module Unix
     # @return [String,nil] Reason message if set_env should be skipped,
     #   nil if it should run.
     def skip_set_env?
-      variant, version, arch, codename = self['platform'].to_array
-      case variant
+      case self['platform'].variant
       when /^(f5|netscaler)$/
-        "no puppet-agent package for network device platform '#{variant}'"
+        "no puppet-agent package for network device platform '#{self['platform'].variant}'"
       else
         nil
       end

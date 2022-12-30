@@ -53,7 +53,7 @@ module Beaker
         #
         # @raise ArgumentError if arguments are missing or incorrect.
         # @return nil
-        def hocon_file_edit_on(hosts, filename, &block)
+        def hocon_file_edit_on(hosts, filename)
           if not block_given?
             msg = 'DSL method `hocon_file_edit_on` provides a given block'
             msg << ' a hocon file to edit. No block was provided.'
@@ -80,7 +80,7 @@ module Beaker
         #     doc.set_value('c.d', '[6, 2, 73, 4, 45]')
         #   end
         #
-        def hocon_file_edit_in_place_on(hosts, filename, &block)
+        def hocon_file_edit_in_place_on(hosts, filename)
           hocon_file_edit_on(hosts, filename) do |host, doc|
             content_doc = yield host, doc
             create_remote_file(host, filename, content_doc.render)

@@ -18,7 +18,7 @@ module Cisco
 
       context 'for cisco_nexus-7' do
 
-        before :each do
+        before do
           @platform = 'cisco_nexus-7-x86_64'
         end
 
@@ -71,7 +71,7 @@ module Cisco
 
       context 'for cisco_ios_xr-6' do
 
-        before :each do
+        before do
           @platform = 'cisco_ios_xr-6-x86_64'
         end
 
@@ -111,7 +111,7 @@ module Cisco
 
       context 'for cisco_nexus-7' do
 
-        before :each do
+        before do
           @platform = 'cisco_nexus-7-x86_64'
           @options = { :user => 'non_root' }
         end
@@ -150,7 +150,7 @@ module Cisco
 
       context 'for cisco_ios_xr-6' do
 
-        before :each do
+        before do
           @platform = 'cisco_ios_xr-6-x86_64'
           @options = { :user => 'non_root' }
         end
@@ -192,7 +192,7 @@ module Cisco
 
       context 'for cisco_nexus-7' do
 
-        before :each do
+        before do
           @platform = 'cisco_nexus-7-x86_64'
         end
 
@@ -220,7 +220,7 @@ module Cisco
       end
 
       context 'for cisco_ios_xr-6' do
-        before :each do
+        before do
           @platform = 'cisco_ios_xr-6-x86_64'
         end
 
@@ -275,7 +275,7 @@ module Cisco
     describe '#validate_setup' do
 
       context 'on the cisco_nexus-7 platform' do
-        before :each do
+        before do
           @platform = 'cisco_nexus-7-x86_64'
         end
 
@@ -306,7 +306,7 @@ module Cisco
       end
 
       context 'on the cisco_ios_xr-6 platform' do
-        before :each do
+        before do
           @platform = 'cisco_ios_xr-6-x86_64'
         end
 

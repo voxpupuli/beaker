@@ -1,7 +1,7 @@
 module Aix::Group
   include Beaker::CommandFactory
 
-  def group_list(&block)
+  def group_list()
     execute("lsgroup -a ALL") do |result|
       yield result if block_given?
 
@@ -9,9 +9,9 @@ module Aix::Group
     end
   end
 
-  def group_get(name, &block)
+  def group_get(name)
     execute("lsgroup #{name}") do |result|
-      fail_test "failed to get group #{name}" unless result.stdout =~ /^#{name} id/
+      fail_test "failed to get group #{name}" unless /^#{name} id/.match?(result.stdout)
 
       yield result if block_given?
       result

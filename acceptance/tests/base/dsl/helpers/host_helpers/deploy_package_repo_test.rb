@@ -13,7 +13,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         version = "9.9.9"
         platform = default['platform']
 
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         assert_nil deploy_package_repo(default, local_dir, name, version)
       end
@@ -29,7 +29,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        _local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         deploy_package_repo default, local_dir, name, version
 
@@ -49,7 +49,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         version = "9.9.9"
         platform = default['platform']
 
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         assert_raises NoMethodError do
           deploy_package_repo hosts, local_dir, name, version
@@ -67,7 +67,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
+        _local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
 
         deploy_package_repo default, local_dir, name, version
 
@@ -88,7 +88,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         codename = default['platform'].codename
 
         FileUtils.mkdir(File.join(local_dir, "deb"))
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
+        create_local_file_from_fixture("simple_text_file", File.join(local_dir, "deb"), "pl-#{name}-#{version}-#{codename}.list")
 
         assert_raises NoMethodError do
           deploy_package_repo hosts, local_dir, name, version
@@ -106,7 +106,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         platform = default['platform']
 
         FileUtils.mkdir(File.join(local_dir, "rpm"))
-        local_filename, contents = create_local_file_from_fixture("#{default["platform"]}.repo", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        create_local_file_from_fixture("#{default["platform"]}.repo", File.join(local_dir, "rpm"), "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         deploy_package_repo default, local_dir, name, version
 
@@ -131,7 +131,7 @@ test_name "dsl::helpers::host_helpers #deploy_package_repo" do
         version = "9.9.9"
         platform = default['platform']
 
-        local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
+        create_local_file_from_fixture("simple_text_file", local_dir, "pl-#{name}-#{version}-repos-pe-#{platform}.repo")
 
         assert_raises RuntimeError do
           deploy_package_repo default, local_dir, name, version

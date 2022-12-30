@@ -3,23 +3,23 @@ confine :except, :platform => %w(osx)
 
 def get_host_pkg(host)
   case
-    when host['platform'] =~ /sles-10/
+    when /sles-10/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::SLES10_PACKAGES
-    when host['platform'] =~ /opensuse|sles-/
+    when /opensuse|sles-/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::SLES_PACKAGES
-    when host['platform'] =~ /debian/
+    when /debian/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
-    when host['platform'] =~ /cumulus/
+    when /cumulus/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
-    when (host['platform'] =~ /windows/ and host.is_cygwin?)
+    when (host['platform'].include?('windows') and host.is_cygwin?)
       Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES
-    when (host['platform'] =~ /windows/ and not host.is_cygwin?)
+    when (host['platform'].include?('windows') and not host.is_cygwin?)
       Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
-    when host['platform'] =~ /freebsd/
+    when /freebsd/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
-    when host['platform'] =~ /openbsd/
+    when /openbsd/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
-    when host['platform'] =~ /solaris-10/
+    when /solaris-10/.match?(host['platform'])
       Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
     else
       Beaker::HostPrebuiltSteps::UNIX_PACKAGES
@@ -50,12 +50,12 @@ hosts.each do |host|
   # this works on Windows as well, althought it pulls in
   # a lot of dependencies.
   # skipping this test for windows since it requires a restart
-  next if host['platform'] =~ /windows/
+  next if /windows/.match?(host['platform'])
   package = 'zsh'
-  package = 'CSWzsh' if host['platform'] =~ /solaris-10/
-  package = 'git' if host['platform'] =~ /opensuse|sles/
+  package = 'CSWzsh' if /solaris-10/.match?(host['platform'])
+  package = 'git' if /opensuse|sles/.match?(host['platform'])
 
-  if host['platform'] =~ /solaris-11/
+  if /solaris-11/.match?(host['platform'])
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
     assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
@@ -66,15 +66,15 @@ hosts.each do |host|
   cmdline_args = ''
   # Newer vmpooler hosts created by Packer templates, and running Cygwin 2.4,
   # must have these switches passed
-  cmdline_args = '--local-install --download' if (host['platform'] =~ /windows/ and host.is_cygwin?)
+  cmdline_args = '--local-install --download' if (host['platform'].include?('windows') and host.is_cygwin?)
   host.install_package(package, cmdline_args)
   assert(host.check_for_package(package), "'#{package}' should be installed")
 
   # windows does not support uninstall_package
-  unless host['platform'] =~ /windows/
+  unless /windows/.match?(host['platform'])
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
-    if host['platform'] =~ /debian/
+    if /debian/.match?(host['platform'])
       assert_equal(false, host.check_for_command(package), "'#{package}' should not be installed or available")
     else
       assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")

@@ -4,49 +4,51 @@ require 'spec_helper'
 module Beaker
   describe Logger do
     let(:my_io)     { StringIO.new                         }
-    let(:logger)    { Logger.new(my_io, :quiet => true)  }
-    let(:basic_logger)    { Logger.new(:quiet => true)  }
+    let(:logger)    { described_class.new(my_io, :quiet => true)  }
+    let(:basic_logger)    { described_class.new(:quiet => true)  }
     let(:test_dir)  { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
-    context '#convert' do
+    describe '#convert' do
       let(:valid_utf8)  { "/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\n" }
       let(:invalid_utf8) {"/etc/puppet/modules\n├── jimmy-appleseed (\e[0;36mv1.1.0\e[0m)\n├── jimmy-crakorn (\e[0;36mv0.4.0\e[0m)\n└── jimmy-thelock (\e[0;36mv1.0.0\e[0m)\xAD\n"}
 
       it 'preserves valid utf-8 strings' do
         expect( logger.convert(valid_utf8) ).to be === valid_utf8
       end
+
       it 'strips out invalid utf-8 characters' do
         expect( logger.convert(invalid_utf8) ).to be === valid_utf8
       end
+
       it 'supports frozen strings' do
         valid_utf8.freeze
         expect( logger.convert(valid_utf8) ).to be === valid_utf8
       end
     end
 
-    context '#generate_dated_log_folder' do
+    describe '#generate_dated_log_folder' do
 
       it 'generates path for a given timestamp' do
         input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
-        expect( Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
+        expect( described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
       end
 
       it 'generates directory for a given timestamp' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, dummy_prefix, input_time) ).to be_truthy
+        expect( File ).to be_directory described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time)
       end
 
       it 'generates nested directories if given as a log_prefix' do
         input_time = Time.new(2011, 6, 10, 13, 7, 55, '-09:00')
         prefix = 'a/man/a/plan/a/canal/panama'
-        expect( File.directory? Logger.generate_dated_log_folder(test_dir, prefix, input_time) ).to be_truthy
+        expect( File ).to be_directory described_class.generate_dated_log_folder(test_dir, prefix, input_time)
       end
 
     end
 
-    context '#prefix_log_line' do
-      around :each do |example|
+    describe '#prefix_log_line' do
+      around do |example|
         logger.line_prefix = ''
         begin
           example.run
@@ -99,7 +101,7 @@ module Beaker
     end
 
     context 'when indenting' do
-      around :each do |example|
+      around do |example|
         logger.line_prefix = ''
         begin
           example.run
@@ -157,29 +159,29 @@ module Beaker
 
     context 'new' do
       it 'does not duplicate STDOUT when directly passed to it' do
-        stdout_logger = Logger.new STDOUT
+        stdout_logger = described_class.new STDOUT
         expect( stdout_logger.destinations.size ).to be === 1
       end
 
       context 'default for' do
-        its(:destinations)  { should include(STDOUT)  }
-        its(:color)         { should be_nil           }
-        its(:log_level)     { should be :verbose      }
+        its(:destinations)  { is_expected.to include(STDOUT)  }
+        its(:color)         { is_expected.to be_nil           }
+        its(:log_level)     { is_expected.to be :verbose      }
       end
 
       context 'log_colors' do
         original_build_number = ENV['BUILD_NUMBER']
 
-        before :each do
+        before do
           ENV['BUILD_NUMBER'] = nil
         end
 
-        after :each do
+        after do
           ENV['BUILD_NUMER'] = original_build_number
         end
 
 
-        it 'should have the default log_colors' do
+        it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
               :error=> Beaker::Logger::RED,
               :warn=> Beaker::Logger::BRIGHT_RED,
@@ -200,28 +202,28 @@ module Beaker
             }
           }
 
-          let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+          let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
-          it 'should override the specified log colors' do
+          it 'overrides the specified log colors' do
             expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
           end
 
-          it 'should leave other colors as the default' do
+          it 'leaves other colors as the default' do
             expect(logger.log_colors[:warn]).to be == Beaker::Logger::BRIGHT_RED
           end
         end
 
         context 'with CI detected' do
-          before :each do
+          before do
             ENV['BUILD_NUMBER'] = 'bob'
           end
 
           context 'when using the default log colors' do
-            it 'should override notify with NORMAL' do
+            it 'overrides notify with NORMAL' do
               expect(logger.log_colors[:notify]).to be == Beaker::Logger::NORMAL
             end
 
-            it 'should override info with NORMAL' do
+            it 'overrides info with NORMAL' do
               expect(logger.log_colors[:info]).to be == Beaker::Logger::NORMAL
             end
           end
@@ -233,17 +235,17 @@ module Beaker
               }
             }
 
-            let(:logger)     { Logger.new(my_io, :quiet => true, :log_colors => log_colors) }
+            let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
-            it 'should override the specified log colors' do
+            it 'overrides the specified log colors' do
               expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
             end
 
-            it 'should not override notify with NORMAL' do
+            it 'does not override notify with NORMAL' do
               expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
             end
 
-            it 'should not override info with NORMAL' do
+            it 'does not override info with NORMAL' do
               expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
             end
           end
@@ -254,10 +256,10 @@ module Beaker
     context 'it can' do
       it 'open/create a file when a string is given to add_destination' do
         logger.add_destination 'my_tmp_file'
-        expect( File.exists?( 'my_tmp_file' ) ).to be_truthy
+        expect( File ).to exist( 'my_tmp_file' )
 
-        io = logger.destinations.select {|d| d.respond_to? :path }.first
-        expect( io.path ).to match /my_tmp_file/
+        io = logger.destinations.find {|d| d.respond_to? :path }
+        expect( io.path ).to match(/my_tmp_file/)
       end
 
       it 'remove destinations with the remove_destinations method' do
@@ -275,7 +277,7 @@ module Beaker
       end
 
       it 'colors strings if @color is set' do
-        colorized_logger = Logger.new my_io, :color => true, :quiet => true
+        colorized_logger = described_class.new my_io, :color => true, :quiet => true
 
         expect( my_io ).to receive( :print ).with "\e[00;30m"
         expect( my_io ).to receive( :print )
@@ -285,15 +287,15 @@ module Beaker
       end
 
       context 'at trace log_level' do
-        subject( :trace_logger )  { Logger.new( my_io,
+        subject( :trace_logger )  { described_class.new( my_io,
                                               :log_level => 'trace',
                                               :quiet => true,
                                               :color => true )
                                   }
 
-        its( :is_debug? ) { should be_truthy }
-        its( :is_trace? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_debug? ) { is_expected.to be_truthy }
+        its( :is_trace? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'but print' do
           before do
@@ -311,16 +313,16 @@ module Beaker
       end
 
       context 'at verbose log_level' do
-        subject( :verbose_logger )  { Logger.new( my_io,
+        subject( :verbose_logger )  { described_class.new( my_io,
                                               :log_level => 'verbose',
                                               :quiet => true,
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_falsy }
-        its( :is_debug? ) { should be_falsy }
-        its( :is_verbose? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_trace? ) { is_expected.to be_falsy }
+        its( :is_debug? ) { is_expected.to be_falsy }
+        its( :is_verbose? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'but print' do
           before do
@@ -337,15 +339,15 @@ module Beaker
       end
 
       context 'at debug log_level' do
-        subject( :debug_logger )  { Logger.new( my_io,
+        subject( :debug_logger )  { described_class.new( my_io,
                                               :log_level => 'debug',
                                               :quiet => true,
                                               :color => true )
                                   }
 
-        its( :is_trace? ) { should be_falsy }
-        its( :is_debug? ) { should be_truthy }
-        its( :is_warn? )  { should be_truthy }
+        its( :is_trace? ) { is_expected.to be_falsy }
+        its( :is_debug? ) { is_expected.to be_truthy }
+        its( :is_warn? )  { is_expected.to be_truthy }
 
         context 'successfully print' do
           before do
@@ -362,20 +364,20 @@ module Beaker
       end
 
       context 'at info log_level' do
-        subject( :info_logger ) { Logger.new( my_io,
+        subject( :info_logger ) { described_class.new( my_io,
                                               :log_level => :info,
                                               :quiet     => true,
                                               :color     => true )
                                   }
 
-        its( :is_debug? ) { should be_falsy }
-        its( :is_trace? ) { should be_falsy }
+        its( :is_debug? ) { is_expected.to be_falsy }
+        its( :is_trace? ) { is_expected.to be_falsy }
 
 
         context 'skip' do
           before do
-            expect( my_io ).to_not receive :puts
-            expect( my_io ).to_not receive :print
+            expect( my_io ).not_to receive :puts
+            expect( my_io ).not_to receive :print
           end
 
           it( 'debugs' )    { info_logger.debug 'NOT DEBUGGING!' }
@@ -398,12 +400,12 @@ module Beaker
       context 'SUT output logging' do
 
         context 'host output logging' do
-          subject( :host_output ) { Logger.new( my_io,
+          subject( :host_output ) { described_class.new( my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
                                               :color     => true )}
 
-          it 'should output GREY when @color is set to true' do
+          it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
 
             expect( my_io ).to receive( :print ).with "\e[01;30m"
@@ -416,7 +418,7 @@ module Beaker
         end
 
         context 'color host output' do
-          subject( :color_host_output ) { Logger.new( my_io,
+          subject( :color_host_output ) { described_class.new( my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
                                               :color     => true )}

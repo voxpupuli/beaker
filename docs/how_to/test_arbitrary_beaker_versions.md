@@ -4,9 +4,9 @@ In order to adjust the beaker version used without commiting a change to a Gemfi
 
 ```ruby
 def location_for(place, fake_version = nil)
-  if place =~ /^(git[:@][^#]*)#(.*)/
+  if /^(git[:@][^#]*)#(.*)/.match?(place)
     [fake_version, { :git => $1, :branch => $2, :require => false }].compact
-  elsif place =~ /^file:\/\/(.*)/
+  elsif /^file:\/\/(.*)/.match?(place)
     ['>= 0', { :path => File.expand_path($1), :require => false }]
   else
     [place, { :require => false }]

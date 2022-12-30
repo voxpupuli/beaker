@@ -24,9 +24,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { FreeBSDPkgTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { FreeBSDPkgTest.new(opts, logger) }
     let(:cond) do
       'TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexist pkg info -x "pkg(-devel)?\\$" > /dev/null 2>&1'
     end
@@ -48,6 +48,7 @@ module Beaker
         expect( instance ).to receive(:exec).with('',{:accept_all_exit_codes => true}).and_return(generate_result("hello", {:exit_code => 0}))
         expect( instance.pkgng_active? ).to be true
       end
+
       it "returns false if pkgng is unavailable" do
         expect( instance ).to receive(:check_pkgng_sh).once.and_return("do you have pkgng?")
         expect( Beaker::Command ).to receive(:new).with("/bin/sh -c 'do you have pkgng?'", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
@@ -65,6 +66,7 @@ module Beaker
           instance.install_package('rsync')
         end
       end
+
       context "with pkgng" do
         it "runs the correct install command" do
           expect( instance ).to receive(:pkgng_active?).once.and_return(true)
@@ -84,6 +86,7 @@ module Beaker
           instance.check_for_package('rsync')
         end
       end
+
       context "with pkgng" do
         it "runs the correct checking command" do
           expect( instance ).to receive(:pkgng_active?).once.and_return(true)

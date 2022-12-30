@@ -21,31 +21,31 @@ Gem::Specification.new do |s|
   s.required_ruby_version = Gem::Requirement.new('>= 2.4')
 
   # Testing dependencies
-  s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'rspec-its'
   s.add_development_dependency 'fakefs', '~> 1.0'
   s.add_development_dependency 'rake', '~> 13.0'
+  s.add_development_dependency 'rspec', '~> 3.0'
+  s.add_development_dependency 'rspec-its'
 
   # Documentation dependencies
   s.add_development_dependency 'yard', '~> 0.9.11'
 
   # Run time dependencies
-  s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'minitar', '~> 0.6'
+  s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'rexml'
 
-  s.add_runtime_dependency 'hocon', '~> 1.0'
-  s.add_runtime_dependency 'net-ssh', '>= 5.0'
   s.add_runtime_dependency 'ed25519', '~> 1.0' # net-ssh compatibility with ed25519 keys
-  s.add_runtime_dependency 'net-scp', '>= 1.2', '< 5.0'
+  s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'inifile', '~> 3.0'
+  s.add_runtime_dependency 'net-scp', '>= 1.2', '< 5.0'
+  s.add_runtime_dependency 'net-ssh', '>= 5.0'
 
-  s.add_runtime_dependency 'rsync', '~> 1.0.9'
-  s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
   s.add_runtime_dependency 'in-parallel', '~> 0.1'
+  s.add_runtime_dependency 'open_uri_redirections', '~> 0.2.1'
+  s.add_runtime_dependency 'rsync', '~> 1.0.9'
   s.add_runtime_dependency 'thor', ['>= 1.0.1', '< 2.0']
 
   # Run time dependencies that are Beaker libraries
-  s.add_runtime_dependency 'stringify-hash', '~> 0.0'
   s.add_runtime_dependency 'beaker-hostgenerator'
+  s.add_runtime_dependency 'stringify-hash', '~> 0.0'
 end

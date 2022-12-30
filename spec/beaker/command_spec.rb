@@ -2,10 +2,12 @@ require 'spec_helper'
 
 module Beaker
   describe Command do
+    subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
-    subject(:cmd) { Command.new( command, args, options ) }
+
     let(:host)    {
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
@@ -74,10 +76,10 @@ module Beaker
       it 'parses things' do
         subject.options = { :v => nil, :test => nil,
                             :server => 'master', :a => 'answers.txt' }
-        expect( subject.options_string ).to match /-v/
-        expect( subject.options_string ).to match /--test/
-        expect( subject.options_string ).to match /--server=master/
-        expect( subject.options_string ).to match /-a=answers\.txt/
+        expect( subject.options_string ).to match(/-v/)
+        expect( subject.options_string ).to match(/--test/)
+        expect( subject.options_string ).to match(/--server=master/)
+        expect( subject.options_string ).to match(/-a=answers\.txt/)
       end
     end
 
@@ -90,27 +92,35 @@ module Beaker
 
 
   end
+
   describe HostCommand do
+    subject(:cmd) { described_class.new( command, args, options ) }
+
     let(:command) { @command || '/bin/ls' }
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
-    subject(:cmd) { HostCommand.new( command, args, options ) }
+
     let(:host)    { Hash.new }
 
     it 'returns a simple string passed in' do
       @command = "pants"
       expect( cmd.cmd_line host ).to be === @command
     end
+
     it 'returns single quoted string correctly' do
       @command = "str_p = 'pants'; str_p"
       expect( cmd.cmd_line host ).to be === @command
     end
+
     it 'returns empty strings when given the escaped version of the same' do
       @command = "\"\""
       expect( cmd.cmd_line host ).to be === ""
     end
   end
+
   describe SedCommand do
+    subject(:cmd)     { described_class.new( platform, expression, filename, options ) }
+
     let(:host)        {
       h = Hash.new
       allow( h ).to receive( :environment_string ).and_return( '' )
@@ -122,7 +132,7 @@ module Beaker
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
     let(:options)     { @options    || Hash.new  }
-    subject(:cmd)     { SedCommand.new( platform, expression, filename, options ) }
+
 
     it 'forms a basic sed command correctly' do
       expect( cmd.cmd_line host ).to be === "sed -i -e \"#{expression}\" #{filename}"

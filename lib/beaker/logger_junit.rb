@@ -21,7 +21,7 @@ module Beaker
     def self.write_xml(xml_file, stylesheet, &block)
       doc, suites = self.get_xml_contents(xml_file, name, stylesheet)
 
-      if block_given?
+      if block
         case block.arity
         when 2
           yield doc, suites
@@ -86,7 +86,7 @@ module Beaker
         suites = REXML::XPath.first(doc, "testsuites")
         #remove old data
         suites.elements.each("testsuite") do |e|
-          if e.name =~ /#{name}/
+          if /#{name}/.match?(e.name)
             suites.delete_element e
           end
         end

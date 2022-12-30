@@ -16,7 +16,7 @@ end
 
 # Returns the contents of a named fixture file, to be found in `fixture_path`.
 def fixture_contents(fixture)
-  fixture_file = Dir.entries(fixture_path).find { |e| /^#{fixture}$|#{fixture}\.[a-z]/ =~ e }
+  fixture_file = Dir.entries(fixture_path).find { |e| /^#{fixture}$|#{fixture}\.[a-z]/.match?(e) }
   File.read("#{fixture_path}/#{fixture_file}")
 end
 
@@ -65,11 +65,11 @@ end
 # Analyzer (or similar), to detect these failures without failing the build.
 #
 # Returns the value of the yielded block.
-def fails_intermittently(issue_link, args = {}, &block)
+def fails_intermittently(issue_link, args = {})
   raise ArgumentError, "provide a Jira ticket link" unless issue_link
   raise ArgumentError, "a block is required" unless block_given?
   yield
-rescue MiniTest::Assertion, StandardError, SignalException => boom # we have a test failure!
+rescue MiniTest::Assertion, StandardError, SignalException # we have a test failure!
   STDERR.puts "\n\nIntermittent test failure! See: #{issue_link}"
 
   if args.empty?

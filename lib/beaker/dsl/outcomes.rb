@@ -19,18 +19,18 @@ module Beaker
       # Raise this class if it is determined that a test case should not
       # be executed because the feature in question is still a
       # "Work in Progress"
-      class PendingTest < Exception; end
+      class PendingTest < RuntimeError; end
 
       # Raise this class if execution should be stopped because the test
       # is not applicable within a given environment.
-      class SkipTest    < Exception; end
+      class SkipTest    < RuntimeError; end
 
       # Raise this class if some criteria has been met that proves a failure.
-      class FailTest    < Exception; end
+      class FailTest    < RuntimeError; end
 
       # Raise this class if execution should stop because enough criteria has
       # shown itself to pass the test.
-      class PassTest    < Exception; end
+      class PassTest    < RuntimeError; end
 
 
       # Raises FailTest Exception and logs an error message

@@ -21,7 +21,7 @@ module PSWindows::Exec
 
   def rm_rf path
     # ensure that we have the right slashes for windows
-    path = path.gsub(/\//, '\\')
+    path = path.tr('/', '\\')
     execute(%(del /s /q "#{path}"))
   end
 
@@ -31,8 +31,8 @@ module PSWindows::Exec
   # @param [Boolean] rm Remove the destination prior to move
   def mv(orig, dest, rm=true)
     # ensure that we have the right slashes for windows
-    orig = orig.gsub(/\//,'\\')
-    dest = dest.gsub(/\//,'\\')
+    orig = orig.tr('/','\\')
+    dest = dest.tr('/','\\')
     rm_rf dest unless !rm
     execute("move /y #{orig} #{dest}")
   end
@@ -104,7 +104,7 @@ module PSWindows::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    normalized_path = dir.gsub('/','\\')
+    normalized_path = dir.tr('/','\\')
     result = exec(powershell("New-Item -Path '#{normalized_path}' -ItemType 'directory'"),
                   :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
@@ -118,7 +118,7 @@ module PSWindows::Exec
   def add_env_var key, val
     key = key.to_s.upcase
     #see if the key/value pair already exists
-    cur_val = subbed_val = get_env_var(key, true)
+    cur_val = get_env_var(key, true)
     subbed_val = cur_val.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
     if cur_val.empty?
       exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', '#{val}', 'Machine')"))
@@ -137,7 +137,7 @@ module PSWindows::Exec
   def delete_env_var key, val
     key = key.to_s.upcase
     #get the current value of the key
-    cur_val = subbed_val = get_env_var(key, true)
+    cur_val = get_env_var(key, true)
     subbed_val = (cur_val.split(';') - [val.gsub(/'|"/, '')]).join(';')
     if subbed_val != cur_val
       #remove the current key value
@@ -159,7 +159,7 @@ module PSWindows::Exec
     if val.empty?
       return ''
     else
-      val = val.split(/\n/)[0] # only take the first result
+      val = val.split("\n")[0] # only take the first result
       if clean
         val.gsub(/#{key}=/i,'')
       else
@@ -185,7 +185,7 @@ module PSWindows::Exec
     env_array = self.environment_variable_string_pair_array( env )
 
     environment_string = ''
-    env_array.each_with_index do |env|
+    env_array.each do |env|
       environment_string += "set \"#{env}\" && "
     end
     environment_string

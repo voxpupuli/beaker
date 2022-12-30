@@ -8,18 +8,18 @@ end
 describe ClassMixedWithDSLStructure do
   include Beaker::DSL::Assertions
 
-  let (:logger) { double }
-  let (:metadata) { @metadata ||= {} }
+  let(:logger) { double }
+  let(:metadata) { @metadata ||= {} }
 
-  before :each do
+  before do
     allow( subject ).to receive(:metadata).and_return(metadata)
   end
 
   describe '#tag' do
-    let ( :test_tag_and     ) { @test_tag_and     || [] }
-    let ( :test_tag_or      ) { @test_tag_or      || [] }
-    let ( :test_tag_exclude ) { @test_tag_exclude || [] }
-    let ( :options          ) {
+    let( :test_tag_and     ) { @test_tag_and     || [] }
+    let( :test_tag_or      ) { @test_tag_or      || [] }
+    let( :test_tag_exclude ) { @test_tag_exclude || [] }
+    let( :options          ) {
       opts                    = Beaker::Options::OptionsHash.new
       opts[:test_tag_and]     = test_tag_and
       opts[:test_tag_or]      = test_tag_or
@@ -27,7 +27,7 @@ describe ClassMixedWithDSLStructure do
       opts
     }
 
-    before :each do
+    before do
       allow( subject ).to receive( :platform_specific_tag_confines )
     end
 
@@ -62,7 +62,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 
@@ -93,7 +93,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 
@@ -113,7 +113,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set(:@options, options)
 
       allow( subject ).to receive( :path )
-      expect( subject ).to receive( :skip_test ).never
+      expect( subject ).not_to receive( :skip_test )
       subject.tag(*test_tags)
     end
 
@@ -131,9 +131,9 @@ describe ClassMixedWithDSLStructure do
 end
 
 describe Beaker::DSL::TestTagging::PlatformTagConfiner do
-  let ( :confines_array ) { @confines_array || [] }
-  let ( :confiner ) {
-    Beaker::DSL::TestTagging::PlatformTagConfiner.new( confines_array )
+  let( :confines_array ) { @confines_array || [] }
+  let( :confiner ) {
+    described_class.new( confines_array )
   }
 
   describe '#initialize' do
@@ -240,7 +240,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       key_combos_to_test << [ 'tag2', 'tag3', 'tag4' ]
       key_combos_to_test << fake_confine_details_hash.keys()
 
-      before :each do
+      before do
         confiner.instance_variable_set(
           :@tag_confine_details_hash, fake_confine_details_hash
         )
@@ -262,7 +262,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
 
           details = confiner.confine_details( key_combo_to_have )
           have_nots.each do |confine_details|
-            expect( details ).to_not include( confine_details )
+            expect( details ).not_to include( confine_details )
           end
           haves.each do |confine_details|
             expect( details ).to     include( confine_details )

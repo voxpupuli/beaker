@@ -26,7 +26,7 @@ CONSOLE
       expect( result ).to receive( :stderr ).and_return( '' )
 
       expect( subject ).to receive( :result ).at_least( :once ).and_return( result )
-      expect { subject.assert_output expectation }.to_not raise_error
+      expect { subject.assert_output expectation }.not_to raise_error
     end
 
     it 'allows specifying stream markers' do
@@ -58,7 +58,7 @@ EXPECT
       expect( result ).to receive( :stderr ).and_return( stderr )
 
       expect( subject ).to receive( :result ).at_least( :once ).and_return( result )
-      expect { subject.assert_output expectation }.to_not raise_error
+      expect { subject.assert_output expectation }.not_to raise_error
     end
 
     it 'raises an approriate error when output does not match expectations' do
@@ -68,15 +68,6 @@ This is on stdout
 Holy Crap, what HAPPENED!?!?!?
 And THIS is again on stdout
 OUTPUT
-
-        stdout = <<STDOUT
-This is on stdout
-And THIS is again on stdout
-STDOUT
-
-        stderr = <<STDERR
-Holy Crap, what HAPPENED!?!?!?
-STDERR
 
         expectation = <<EXPECT
         STDOUT> This is on stdout

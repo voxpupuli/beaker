@@ -11,18 +11,16 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
 
   step "#backup_the_file will fail if the destination directory does not exist" do
     remote_source = default.tmpdir()
-    remote_source_filename = File.join(remote_source, "puppet.conf")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
+    create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
 
     assert_raises Beaker::Host::CommandFailure do
-      result = backup_the_file default, remote_source, "/non/existent/"
+      backup_the_file default, remote_source, "/non/existent/"
     end
   end
 
   step "#backup_the_file copies `puppet.conf` from the source to the destination directory" do
     remote_source = default.tmpdir()
-    remote_source_filename = File.join(remote_source, "puppet.conf")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
+    _remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "puppet.conf")
 
     remote_destination = default.tmpdir()
     remote_destination_filename = File.join(remote_destination, "puppet.conf.bak")
@@ -36,8 +34,7 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
 
   step "#backup_the_file copies a named file from the source to the destination directory" do
     remote_source = default.tmpdir()
-    remote_source_filename = File.join(remote_source, "testfile.txt")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
+    _remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
 
     remote_destination = default.tmpdir()
     remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
@@ -51,14 +48,11 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
 
   step "#backup_the_file CURRENTLY will fail if given a hosts array" do
     remote_source = default.tmpdir()
-    remote_source_filename = File.join(remote_source, "testfile.txt")
-    remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
+    create_remote_file_from_fixture("simple_text_file", default, remote_source, "testfile.txt")
     remote_destination = default.tmpdir()
 
-    remote_destination_filename = File.join(remote_destination, "testfile.txt.bak")
-
     assert_raises NoMethodError do
-      result = backup_the_file hosts, remote_source, remote_destination
+      backup_the_file hosts, remote_source, remote_destination
     end
   end
 end

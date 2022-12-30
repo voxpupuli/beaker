@@ -5,7 +5,7 @@ module Mac::Pkg
     raise "Package #{name} cannot be queried on #{self}"
   end
 
-  def install_package(name, cmdline_args = '', version = nil)
+  def install_package(name, _cmdline_args = '', _version = nil)
     generic_install_dmg("#{name}.dmg", name, "#{name}.pkg")
   end
 
@@ -28,7 +28,7 @@ module Mac::Pkg
     execute("installer -pkg /Volumes/#{pkg_base}/#{pkg_name} -target /")
   end
 
-  def uninstall_package(name, cmdline_args = '')
+  def uninstall_package(name, _cmdline_args = '')
     raise "Package #{name} cannot be uninstalled on #{self}"
   end
 
@@ -37,7 +37,7 @@ module Mac::Pkg
   # @param [String] name          The name of the package to update
   # @param [String] cmdline_args  Additional command line arguments for
   #                               the package manager
-  def upgrade_package(name, cmdline_args = '')
+  def upgrade_package(name, _cmdline_args = '')
       raise "Package #{name} cannot be upgraded on #{self}"
   end
 
@@ -48,7 +48,7 @@ module Mac::Pkg
   #
   # @note See {Beaker::DSL::Helpers::HostHelpers#deploy_package_repo} for info on
   #       params
-  def deploy_package_repo(path, name, version)
+  def deploy_package_repo(_path, _name, _version)
     raise "Package repo cannot be deployed on #{self}; the platform is not supported"
   end
 
@@ -116,7 +116,7 @@ module Mac::Pkg
     error_message = "Must provide %s argument to get puppet agent dev package information"
     raise ArgumentError, error_message % "puppet_collection" unless puppet_collection
 
-    variant, version, arch, codename = self['platform'].to_array
+    variant, version, arch, _codename = self['platform'].to_array
     release_file = "/repos/apple/#{version}/#{puppet_collection}/#{arch}/puppet-agent-*"
 
     # macOS puppet-agent tarballs haven't always included arch
@@ -142,7 +142,7 @@ module Mac::Pkg
   #
   # @return nil
   def pe_puppet_agent_promoted_package_install(
-    onhost_copy_base, onhost_copied_download, onhost_copied_file, download_file, opts
+    onhost_copy_base, onhost_copied_download, onhost_copied_file, _download_file, _opts
   )
     execute("tar -zxvf #{onhost_copied_download} -C #{onhost_copy_base}")
     # move to better location

@@ -116,7 +116,7 @@ module Unix::File
     when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
       variant = 'el' if ['centos', 'redhat'].include?(variant)
 
-      variant = 'redhatfips' if self['packaging_platform'] =~ /redhatfips/
+      variant = 'redhatfips' if /redhatfips/.match?(self['packaging_platform'])
 
       if variant == 'cisco_nexus'
         variant = 'cisco-wrlinux'
@@ -170,8 +170,7 @@ module Unix::File
   #
   # @return [String] the text of the noask file
   def noask_file_text
-    variant, version, arch, codename = self['platform'].to_array
-    if variant == 'solaris' && version == '10'
+    if self['platform'].variant == 'solaris' && self['platform'].version == '10'
       noask = <<NOASK
 # Write the noask file to a temporary directory
 # please see man -s 4 admin for details about this file:
@@ -217,7 +216,7 @@ NOASK
   # @param [String] scp_file_target File path to target SCP location on host
   #
   # @return nil
-  def scp_post_operations(scp_file_actual, scp_file_target)
+  def scp_post_operations(_scp_file_actual, _scp_file_target)
     nil
   end
 end

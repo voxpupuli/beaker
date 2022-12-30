@@ -118,7 +118,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       hosts.each do |host|
         assert_raises Beaker::Host::CommandFailure do
-          results = run_cron_on host, :list, host['user']
+          run_cron_on host, :list, host['user']
         end
       end
     end
@@ -234,7 +234,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       hosts.each do |host|
         assert_raises Beaker::Host::CommandFailure do
-          results = run_cron_on host, :list, host['user']
+          run_cron_on host, :list, host['user']
         end
       end
     end

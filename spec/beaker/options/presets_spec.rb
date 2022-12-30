@@ -4,7 +4,7 @@ module Beaker
   module Options
 
     describe Presets do
-      let(:presets)    { Presets.new }
+      let(:presets)    { described_class.new }
 
       it "returns an env_vars OptionsHash" do
         expect(presets.env_vars).to be_instance_of(Beaker::Options::OptionsHash)
@@ -34,7 +34,7 @@ module Beaker
       end
 
       it 'has empty host_tags' do
-        expect(presets.presets.has_key?(:host_tags)).to be_truthy
+        expect(presets.presets).to have_key(:host_tags)
         expect(presets.presets[:host_tags]).to eq({})
       end
 

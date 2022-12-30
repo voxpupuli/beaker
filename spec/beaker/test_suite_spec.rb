@@ -13,12 +13,12 @@ module Beaker
       let(:sh_test)  { File.expand_path(test_dir + '/my_shell_file.sh')   }
 
       it 'fails without test files' do
-        expect { Beaker::TestSuite.new('name', 'hosts', Hash.new, Time.now, :stop_on_error) }.to raise_error
+        expect { described_class.new('name', 'hosts', Hash.new, Time.now, :stop_on_error) }.to raise_error
       end
 
       it 'includes specific files as test file when explicitly passed' do
         @files = [ rb_test ]
-        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now, :stop_on_error)
+        ts = described_class.new('name', 'hosts', options, Time.now, :stop_on_error)
 
         tfs = ts.instance_variable_get(:@test_files)
         expect(tfs).to include rb_test
@@ -26,14 +26,14 @@ module Beaker
 
       it 'defaults to :slow fail_mode if not provided through parameter or options' do
         @files = [ rb_test ]
-        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now)
+        ts = described_class.new('name', 'hosts', options, Time.now)
         tfm = ts.instance_variable_get(:@fail_mode)
         expect(tfm).to be == :slow
       end
 
       it 'uses provided parameter fail_mode' do
         @files = [ rb_test ]
-        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now, :fast)
+        ts = described_class.new('name', 'hosts', options, Time.now, :fast)
         tfm = ts.instance_variable_get(:@fail_mode)
         expect(tfm).to be == :fast
       end
@@ -41,7 +41,7 @@ module Beaker
       it 'uses options fail_mode if fail_mode parameter is not provided' do
         @files = [ rb_test ]
         options[:fail_mode] = :fast
-        ts = Beaker::TestSuite.new('name', 'hosts', options, Time.now)
+        ts = described_class.new('name', 'hosts', options, Time.now)
         tfm = ts.instance_variable_get(:@fail_mode)
         expect(tfm).to be == :fast
       end
@@ -65,7 +65,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
+        ts = described_class.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
@@ -85,7 +85,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(okay_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop )
+        ts = described_class.new( 'name', hosts, options, Time.now, :stop )
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
@@ -105,7 +105,7 @@ module Beaker
         File.open(pl_test, 'w') { |file| file.write(fail_script) }
         File.open(sh_test, 'w') { |file| file.write(okay_script) }
 
-        ts = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :slow )
+        ts = described_class.new( 'name', hosts, options, Time.now, :slow )
         tsr = ts.instance_variable_get( :@test_suite_results )
         allow( tsr ).to receive(:write_junit_xml).and_return( true )
         allow( tsr ).to receive(:summarize).and_return( true )
@@ -126,7 +126,7 @@ module Beaker
       let( :testcase1 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
       let( :testcase2 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
       let( :testcase3 )         { Beaker::TestCase.new( hosts, options[:logger], options) }
-      let( :test_suite_result ) { TestSuiteResult.new( options, "my_suite") }
+      let( :test_suite_result ) { described_class.new( options, "my_suite") }
 
       it 'supports adding test cases' do
         expect( test_suite_result.test_count ).to be === 0
@@ -232,7 +232,7 @@ module Beaker
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
           expect(test_suite_result.print_test_result(tc)).not_to match(/Test line:/)
-          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+          expect{ test_suite_result.print_test_result(tc) }.not_to raise_error
         end
 
         it 'prints the test result and line number from test case file on failure' do
@@ -242,7 +242,7 @@ module Beaker
           tc.instance_variable_set(:@exception, ex)
           test_suite_result.add_test_case( tc )
           expect(test_suite_result.print_test_result(tc)).to match(/Test line:/)
-          expect{ test_suite_result.print_test_result(tc) }.to_not raise_error
+          expect{ test_suite_result.print_test_result(tc) }.not_to raise_error
         end
       end
 
@@ -253,14 +253,14 @@ module Beaker
                                          :xml_dated_dir => '.'}) }
         let(:rb_test) { 'my_ruby_file.rb' }
 
-        before(:each) do
+        before do
           @files = [ rb_test, rb_test, rb_test]
           @ts    = Beaker::TestSuite.new( 'name', hosts, options, Time.now, :fast )
           @tsr   = @ts.instance_variable_get( :@test_suite_results )
           allow( @tsr ).to receive( :start_time ).and_return(0)
           allow( @tsr ).to receive( :stop_time ).and_return(10)
           @test_cases = []
-          @files.each_with_index do |file, index|
+          @files.each_with_index do |_file, _index|
             tc = Beaker::TestCase.new( hosts, options[:logger], options, rb_test)
             allow( tc ).to receive( :sublog ).and_return( false )
             @test_cases << tc
@@ -271,7 +271,7 @@ module Beaker
         end
 
         it 'doesn\'t re-order test cases themselves on time_sort' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
 
           @test_cases.each_with_index do |tc,index|
             tc.instance_variable_set(:@runtime, 3**index)
@@ -286,7 +286,7 @@ module Beaker
         end
 
         it 'writes @export nested hashes properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           inner_value = {'second' => '2nd'}
           @test_cases.each do |tc|
             tc.instance_variable_set(:@runtime, 0)
@@ -301,7 +301,7 @@ module Beaker
         end
 
         it 'writes @export array of hashes properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           @test_cases.each do |tc|
             tc.instance_variable_set(:@runtime, 0)
             tc.instance_variable_set(:@exports, [{:yes => 'hello'}, {:uh => 'sher'}])
@@ -315,7 +315,7 @@ module Beaker
         end
 
         it 'writes @export hashes per test case properly' do
-          expect( @tsr.instance_variable_get( :@logger ) ).to receive( :error ).never
+          expect( @tsr.instance_variable_get( :@logger ) ).not_to receive( :error )
           @test_cases.each_with_index do |tc,index|
             tc.instance_variable_set(:@runtime, 0)
             tc.instance_variable_set(:@exports, [{"yes_#{index}" => "hello#{index}"}])
@@ -337,7 +337,7 @@ module Beaker
       let( :files     ) { @files ? @files : [sh_test] }
       let( :options   ) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(files) }) }
       let( :hosts     ) { make_hosts() }
-      let( :testsuite ) { Beaker::TestSuite.new( 'name', hosts, options, Time.now, :stop ) }
+      let( :testsuite ) { described_class.new( 'name', hosts, options, Time.now, :stop ) }
 
       it 'returns the simple joining of the log dir & file as required' do
         expect(testsuite.log_path('foo.txt', 'man/date')).to be === 'man/date/foo.txt'
@@ -347,15 +347,15 @@ module Beaker
         # the base directory is where the latest symlink itself should live
 
         it 'in the usual case' do
-          expect( File.symlink?('man/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('man/latest')
           testsuite.log_path('foo.txt', 'man/date')
-          expect( File.symlink?('man/latest') ).to be_truthy
+          expect( File ).to be_symlink('man/latest')
         end
 
         it 'if given a nested directory' do
-          expect( File.symlink?('a/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('a/latest')
           testsuite.log_path('foo.txt', 'a/b/c/d/e/f')
-          expect( File.symlink?('a/latest') ).to be_truthy
+          expect( File ).to be_symlink('a/latest')
         end
       end
 
@@ -363,13 +363,13 @@ module Beaker
         # the symlink directory is where the symlink points to
 
         it 'in the usual case' do
-          expect( File.symlink?('d/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('d/latest')
           testsuite.log_path('foo.txt', 'd/e')
           expect( File.readlink('d/latest') ).to be === 'e'
         end
 
         it 'if given a nested directory' do
-          expect( File.symlink?('f/latest') ).to be_falsy
+          expect( File ).not_to be_symlink('f/latest')
           testsuite.log_path('foo.txt', 'f/g/h/i/j/k')
           expect( File.readlink('f/latest') ).to be === 'g/h/i/j/k'
         end

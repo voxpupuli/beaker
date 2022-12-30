@@ -20,9 +20,9 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { MacExecTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { MacExecTest.new(opts, logger) }
 
     describe '#selinux_enabled?' do
       it 'does not call selinuxenabled' do

@@ -24,17 +24,17 @@ module Beaker
 
     end
 
-    let (:opts)     { @opts || {} }
-    let (:logger)   { double( 'logger' ).as_null_object }
-    let (:instance) { WindowsPkgTest.new(opts, logger) }
+    let(:opts)     { @opts || {} }
+    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:instance) { WindowsPkgTest.new(opts, logger) }
 
     describe '#install_package' do
-      before :each do
+      before do
         allow( instance ).to receive( :identify_windows_architecture )
       end
 
       context 'cygwin does not exist' do
-        before :each do
+        before do
           allow( instance ).to receive( :check_for_command ).and_return( false )
         end
 

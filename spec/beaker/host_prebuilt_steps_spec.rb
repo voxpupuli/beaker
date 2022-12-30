@@ -25,6 +25,7 @@ describe Beaker do
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
     subject { dummy_class.new }
+
     it "can enable root login on #{platform}" do
       hosts = make_hosts( { :platform => platform, :is_cygwin => non_cygwin} )
 
@@ -40,61 +41,61 @@ describe Beaker do
     end
   end
 
-  it_should_behave_like 'enables_root_login', 'f5', []
+  it_behaves_like 'enables_root_login', 'f5', []
   # Non-cygwin Windows
-  it_should_behave_like 'enables_root_login', 'pswindows', [], false
+  it_behaves_like 'enables_root_login', 'pswindows', [], false
 
   # Non-cygwin Windows
-  it_should_behave_like 'enables_root_login', 'windows', [
+  it_behaves_like 'enables_root_login', 'windows', [
     "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"
   ], true
 
   # FreeBSD
-  it_should_behave_like 'enables_root_login', 'freesbd', [
+  it_behaves_like 'enables_root_login', 'freesbd', [
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
   ], true
 
-  it_should_behave_like 'enables_root_login', 'osx-10.10', [
+  it_behaves_like 'enables_root_login', 'osx-10.10', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
   ]
 
-  it_should_behave_like 'enables_root_login', 'osx-10.11', [
+  it_behaves_like 'enables_root_login', 'osx-10.11', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
   ]
 
-  it_should_behave_like 'enables_root_login', 'osx-10.12', [
+  it_behaves_like 'enables_root_login', 'osx-10.12', [
       "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
       "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
   ]
 
-  it_should_behave_like 'enables_root_login', 'osx-10.13', [
+  it_behaves_like 'enables_root_login', 'osx-10.13', [
       "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
       "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
   ]
 
   # Solaris
-  it_should_behave_like 'enables_root_login', 'solaris-10', [
+  it_behaves_like 'enables_root_login', 'solaris-10', [
     "sudo -E svcadm restart network/ssh",
     "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
   ], true
 
-  it_should_behave_like 'enables_root_login', 'solaris-11', [
+  it_behaves_like 'enables_root_login', 'solaris-11', [
     "sudo -E svcadm restart network/ssh",
     "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
     "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"
   ], true
 
   ['debian','ubuntu','cumulus'].each do | deb_like |
-    it_should_behave_like 'enables_root_login', deb_like, [
+    it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\""
     ]
   end
 
   ['centos','el-','redhat','fedora','eos'].each do | redhat_like |
-    it_should_behave_like 'enables_root_login', redhat_like, [
+    it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload"
     ]
@@ -241,7 +242,7 @@ describe Beaker do
     it "does nothing on non debian/ubuntu/cumulus hosts" do
       host = make_host( 'testhost', { :platform => 'windows' } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.apt_get_update( host )
 
@@ -318,7 +319,7 @@ describe Beaker do
       hosts = make_hosts( { :platform => 'solaris-11' } )
 
       expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
-      hosts.each do |host|
+      hosts.each do |_host|
         expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
       end
 
@@ -329,7 +330,7 @@ describe Beaker do
     it "does nothing for non ubuntu/debian/cumulus/solaris-11 hosts" do
       hosts = make_hosts( { :platform => 'windows' } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.proxy_config( hosts, options )
 
@@ -368,10 +369,10 @@ describe Beaker do
 
     end
 
-    it "should do nothing for non el-5/6 hosts" do
+    it "does nothing for non el-5/6 hosts" do
       hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
 
-      expect( Beaker::Command ).to receive( :new ).never
+      expect( Beaker::Command ).not_to receive( :new )
 
       subject.add_el_extras( hosts, options )
 
@@ -513,17 +514,21 @@ describe Beaker do
 
       context "with cygwin" do
         let(:cygwin) { true }
-        before(:each) do
+
+        before do
           expect( Beaker::Command ).to receive( :new ).with( "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" ).once
         end
+
         include_examples 'find domain name'
       end
 
       context "without cygwin" do
         let(:cygwin) { false }
-        before(:each) do
+
+        before do
           expect( Beaker::Command ).to receive( :new ).with( 'type C:\Windows\System32\drivers\etc\hosts' ).once
         end
+
         include_examples 'find domain name'
       end
     end
@@ -535,7 +540,7 @@ describe Beaker do
           :stdout => stdout,
         } ) }
 
-        before(:each) do
+        before do
           expect( Beaker::Command ).to receive( :new ).with( "cat /etc/resolv.conf" ).once
         end
 
@@ -618,6 +623,7 @@ describe Beaker do
   context "package_proxy" do
 
     subject { dummy_class.new }
+
     proxyurl = "http://192.168.2.100:3128"
 
     it "can set proxy config on a debian/ubuntu/cumulus host" do

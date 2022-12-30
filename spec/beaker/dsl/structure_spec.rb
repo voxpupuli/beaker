@@ -9,10 +9,10 @@ end
 describe ClassMixedWithDSLStructure do
   include Beaker::DSL::Assertions
 
-  let (:logger) { double }
-  let (:metadata) { @metadata ||= {} }
+  let(:logger) { double }
+  let(:metadata) { @metadata ||= {} }
 
-  before :each do
+  before do
     allow( subject ).to receive(:metadata).and_return(metadata)
   end
 
@@ -29,9 +29,9 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+      expect( subject ).to receive( :logger ).and_return( logger ).twice
       allow(  subject ).to receive( :set_current_step_name )
-      allow( logger ).to receive(:with_indent) { |&block| block.call }
+      allow( logger ).to receive(:with_indent).and_yield
       expect( logger ).to receive( :notify )
       expect( subject ).to receive( :foo )
       subject.step 'blah' do
@@ -51,6 +51,7 @@ describe ClassMixedWithDSLStructure do
   describe '#manual_step' do
     context 'without exec manual test option' do
       let( :options ) { {} }
+
       it 'throws an error' do
         expect( Readline ).not_to receive( :readline )
         expect { subject.manual_step 'blah' do; end }.to raise_error StandardError
@@ -59,6 +60,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option' do
       let( :options ) { {exec_manual_tests: nil} }
+
       it 'requires a name' do
         expect { subject.manual_step do; end }.to raise_error ArgumentError
       end
@@ -75,6 +77,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option set to true' do
       let( :options ) { {exec_manual_tests: true} }
+
       it 'requires a name' do
         expect { subject.manual_step do; end }.to raise_error ArgumentError
       end
@@ -102,6 +105,7 @@ describe ClassMixedWithDSLStructure do
   describe '#manual_test' do
     context 'without exec manual test option' do
       let( :options ) { {} }
+
       it 'requires a name' do
         expect { subject.manual_test do; end }.to raise_error ArgumentError
       end
@@ -117,6 +121,7 @@ describe ClassMixedWithDSLStructure do
 
     context 'with exec manual test option' do
       let( :options ) { {exec_manual_tests: true} }
+
       it 'requires a name' do
         expect { subject.manual_test do; end }.to raise_error ArgumentError
       end
@@ -130,9 +135,9 @@ describe ClassMixedWithDSLStructure do
 
       it 'yields if a block is given' do
         subject.instance_variable_set(:@options, options)
-        expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+        expect( subject ).to receive( :logger ).and_return( logger ).twice
         expect( logger ).to receive( :notify )
-        allow( logger ).to receive(:with_indent) { |&block| block.call }
+        allow( logger ).to receive(:with_indent).and_yield
         expect( subject ).to receive( :foo )
         subject.manual_test 'blah' do
           subject.foo
@@ -163,9 +168,9 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'yields if a block is given' do
-      expect( subject ).to receive( :logger ).and_return( logger ).exactly(2).times
+      expect( subject ).to receive( :logger ).and_return( logger ).twice
       expect( logger ).to receive( :notify )
-      allow( logger ).to receive(:with_indent) { |&block| block.call }
+      allow( logger ).to receive(:with_indent).and_yield
       expect( subject ).to receive( :foo )
       subject.test_name 'blah' do
         subject.foo
@@ -187,7 +192,7 @@ describe ClassMixedWithDSLStructure do
       subject.instance_variable_set :@teardown_procs, teardown_array
       block = lambda { 'blah' }
       expect( teardown_array ).to receive( :<< ).with( block )
-      subject.teardown &block
+      subject.teardown(&block)
     end
   end
 
@@ -198,14 +203,14 @@ describe ClassMixedWithDSLStructure do
       # We changed this lambda to use the simplest assert possible; using assert_equal
       # caused an error in minitest 5.9.0 trying to write to the file system.
       block = lambda { assert(false, 'this assertion should be caught') }
-      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+      expect{ subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'passes when a Beaker assertion is raised' do
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
       block = lambda { assert_no_match('1', '1', '1 and 1 should not match') }
-      expect{ subject.expect_failure 'this is an expected failure', &block }.to_not raise_error
+      expect{ subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'fails when a non-Beaker, non-MiniTest assertion is raised' do
@@ -221,6 +226,7 @@ describe ClassMixedWithDSLStructure do
 
   describe 'confine' do
     let(:logger) { double.as_null_object }
+
     before do
       allow( subject ).to receive( :logger ).and_return( logger )
     end
@@ -306,7 +312,7 @@ describe ClassMixedWithDSLStructure do
       expect( subject ).to receive( :hosts= ).with( [ host1 ] )
 
       subject.confine :to, :platform => 'solaris' do |host|
-        subject.on( host, '/sbin/zonename' ).stdout =~ /:global/
+        subject.on( host, '/sbin/zonename' ).stdout.include?(':global')
       end
     end
 
@@ -344,11 +350,12 @@ describe ClassMixedWithDSLStructure do
 
   describe '#select_hosts' do
     let(:logger) { double.as_null_object }
+
     before do
       allow( subject ).to receive( :logger ).and_return( logger )
     end
 
-    it 'it returns an empty array if there are no applicable hosts' do
+    it 'returns an empty array if there are no applicable hosts' do
       hosts = [ {'thing' => 'foo'}, {'thing' => 'bar'} ]
 
       expect(subject.select_hosts( {'thing' => 'nope'}, hosts )).to be == []
@@ -375,7 +382,7 @@ describe ClassMixedWithDSLStructure do
       expect( subject ).to receive( :on ).with( host2, '/sbin/zonename' ).once.and_return( ret2 )
 
       selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
-                             subject.on(host, '/sbin/zonename').stdout =~ /:global/
+                             subject.on(host, '/sbin/zonename').stdout.include?(':global')
       end
       expect( selected_hosts ).to be == [ host1 ]
     end

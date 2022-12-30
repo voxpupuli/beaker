@@ -8,6 +8,18 @@ env:
   BUNDLE_WITHOUT: release
 
 jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+      - name: Run Rubocop
+        run: bundle exec rubocop --format github
+
   test:
     runs-on: ubuntu-latest
     strategy:
