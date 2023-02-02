@@ -14,7 +14,7 @@ end
 
 describe ClassMixedWithDSLHelpers do
   let( :logger  ) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
-  let( :url     ) { "http://beaker.tool" }
+  let( :url     ) { "http://example.com" }
   let( :name    ) { "name" }
   let( :destdir ) { "destdir" }
 
@@ -37,7 +37,7 @@ describe ClassMixedWithDSLHelpers do
         concat_path = "#{destdir}/#{name}"
         create_files([concat_path])
         allow(logger).to receive(:notify)
-        allow(subject).to receive(:open)
+        allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
         result = subject.fetch_http_file url, name, destdir
         expect(result).to eq(concat_path)
       end
@@ -45,7 +45,8 @@ describe ClassMixedWithDSLHelpers do
       it 'doesn\'t cache by default' do
         expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
         expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
-        expect( subject ).to receive( :open )
+        allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
+        expect(URI).to receive(:open)
 
         subject.fetch_http_file( url, name, destdir )
       end
@@ -67,7 +68,8 @@ describe ClassMixedWithDSLHelpers do
 
           expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
           expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
-          expect( subject ).to receive( :open )
+          allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
+          expect(URI).to receive(:open)
 
           subject.fetch_http_file( url, name, destdir )
         end
@@ -78,8 +80,9 @@ describe ClassMixedWithDSLHelpers do
     describe 'given invalid arguments' do
 
       it 'chomps correctly when given a URL ending with a / character' do
-        expect( subject ).to receive( :open ).with( "#{url}/#{name}", anything )
-        subject.fetch_http_file( url, name, destdir )
+        allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
+        expect( URI ).to receive( :open ).with( "#{url}/#{name}" )
+        subject.fetch_http_file( "#{url}/", name, destdir )
       end
 
     end
