@@ -400,7 +400,7 @@ module Unix::Exec
       arch = $3
       arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
       add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
-    elsif /solaris-10/.match?(self['platform'])
+    elsif self['platform'].include?('solaris-10')
       add_env_var('PATH', '/opt/csw/bin')
     end
 
@@ -418,7 +418,7 @@ module Unix::Exec
   end
 
   def enable_remote_rsyslog(server = 'rsyslog.ops.puppetlabs.net', port = 514)
-    if !/ubuntu/.match?(self['platform'])
+    if !self['platform'].include?('ubuntu')
       @logger.warn "Enabling rsyslog is only implemented for ubuntu hosts"
       return
     end

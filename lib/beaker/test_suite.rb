@@ -77,10 +77,10 @@ module Beaker
           @logger.warn msg
         when :fail
           @logger.error msg
-          break if !/slow/.match?(@fail_mode.to_s) #all failure modes except slow cause us to kick out early on failure
+          break if !@fail_mode.to_s.include?('slow') #all failure modes except slow cause us to kick out early on failure
         when :error
           @logger.warn msg
-          break if !/slow/.match?(@fail_mode.to_s) #all failure modes except slow cause us to kick out early on failure
+          break if !@fail_mode.to_s.include?('slow') #all failure modes except slow cause us to kick out early on failure
         end
       end
       @test_suite_results.stop_time = Time.now

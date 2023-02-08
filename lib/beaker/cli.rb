@@ -118,7 +118,7 @@ module Beaker
         rescue => e
           #post acceptance on failure
           #run post-suite if we are in fail-slow mode
-          if /slow/.match?(@options[:fail_mode].to_s)
+          if @options[:fail_mode].to_s.include?('slow')
             run_suite(:post_suite)
             @perf.print_perf_info if defined? @perf
           end

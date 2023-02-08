@@ -89,7 +89,7 @@ module Windows::Pkg
 
   # @api private
   def identify_windows_architecture
-    /64/.match?(platform.arch) ? '64' : '32'
+    platform.arch.include?('64') ? '64' : '32'
   end
 
 end

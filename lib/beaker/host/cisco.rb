@@ -34,7 +34,7 @@ module Cisco
     #
     # @return nil
     def scp_post_operations(scp_file_actual, scp_file_target)
-      if /cisco_nexus/.match?(self[:platform])
+      if self[:platform].include?('cisco_nexus')
         execute( "mv #{scp_file_actual} #{scp_file_target}" )
       end
       nil
@@ -47,7 +47,7 @@ module Cisco
     # @return [String] path, changed if needed due to host
     #   constraints
     def scp_path(path)
-      if /cisco_nexus/.match?(self[:platform])
+      if self[:platform].include?('cisco_nexus')
         @home_dir ||= execute( 'pwd' )
         answer = "#{@home_dir}/#{File.basename( path )}"
         answer << '/' if /\/$/.match?(path)
@@ -83,7 +83,7 @@ module Cisco
     # @return [String] Command string as needed for this host
     def prepend_commands(command = '', user_pc = '', _opts = {})
       return user_pc unless command.index('vsh').nil?
-      if /cisco_nexus/.match?(self[:platform])
+      if self[:platform].include?('cisco_nexus')
         return user_pc unless command.index('ntpdate').nil?
       end
 
@@ -128,13 +128,13 @@ module Cisco
       env_array = self.environment_variable_string_pair_array( env )
       environment_string = env_array.join(' ')
 
-      if /cisco_nexus/.match?(self[:platform])
+      if self[:platform].include?('cisco_nexus')
         prestring << " export"
       else
         prestring << " env"
       end
       environment_string = "#{prestring} #{environment_string}"
-      environment_string << ';' if /export/.match?(prestring)
+      environment_string << ';' if prestring.include?('export')
       environment_string
     end
 
@@ -145,7 +145,7 @@ module Cisco
     #   this will be raised with the appropriate message
     def validate_setup
       msg = nil
-      if /cisco_nexus/.match?(self[:platform])
+      if self[:platform].include?('cisco_nexus')
         if !self[:vrf]
           msg = 'Cisco Nexus hosts must be provided with a :vrf value.'
         end
@@ -153,7 +153,7 @@ module Cisco
           msg = 'Cisco hosts must be provided with a :user value'
         end
       end
-      if /cisco_ios_xr/.match?(self[:platform])
+      if self[:platform].include?('cisco_ios_xr')
         if !self[:user]
           msg = 'Cisco hosts must be provided with a :user value'
         end

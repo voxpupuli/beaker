@@ -38,11 +38,11 @@ module Windows
       return @ssh_server if @ssh_server
       @ssh_server = :openssh
       status = execute('cmd.exe /c sc query BvSshServer', :accept_all_exit_codes => true)
-      if /4  RUNNING/.match?(status)
+      if status.include?('4  RUNNING')
         @ssh_server = :bitvise
       else
         status = execute('cmd.exe /c sc qc sshd', :accept_all_exit_codes => true)
-        if /C:\\Windows\\System32\\OpenSSH\\sshd\.exe/.match?(status)
+        if status.include?('C:\\Windows\\System32\\OpenSSH\\sshd.exe')
           @ssh_server = :win32_openssh
         end
       end
