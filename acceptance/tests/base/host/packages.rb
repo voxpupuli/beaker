@@ -2,27 +2,25 @@ test_name 'confirm packages on hosts behave correctly'
 confine :except, :platform => %w(osx)
 
 def get_host_pkg(host)
-  case
-    when host['platform'].include?('sles-10')
-      Beaker::HostPrebuiltSteps::SLES10_PACKAGES
-    when /opensuse|sles-/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::SLES_PACKAGES
-    when host['platform'].include?('debian')
-      Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
-    when host['platform'].include?('cumulus')
-      Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
-    when (host['platform'].include?('windows') and host.is_cygwin?)
-      Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES
-    when (host['platform'].include?('windows') and not host.is_cygwin?)
-      Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
-    when host['platform'].include?('freebsd')
-      Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
-    when host['platform'].include?('openbsd')
-      Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
-    when host['platform'].include?('solaris-10')
-      Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
-    else
-      Beaker::HostPrebuiltSteps::UNIX_PACKAGES
+  case host['platform']
+  when /sles-10/
+    Beaker::HostPrebuiltSteps::SLES10_PACKAGES
+  when /opensuse|sles-/
+    Beaker::HostPrebuiltSteps::SLES_PACKAGES
+  when /debian/
+    Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
+  when /cumulus/
+    Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
+  when /windows/
+    host.is_cygwin? ? Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES : Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
+  when /freebsd/
+    Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
+  when /openbsd/
+    Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
+  when /solaris-10/
+    Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
+  else
+    Beaker::HostPrebuiltSteps::UNIX_PACKAGES
   end
 
 end
