@@ -92,7 +92,7 @@ module Beaker
         # @!visibility private
         def fetch_http_dir(url, dst_dir)
           logger.notify "fetch_http_dir (url: #{url}, dst_dir #{dst_dir})"
-          if !/\//.match?(url[-1, 1])
+          if !url.end_with?('/')
             url += '/'
           end
           url = URI.parse(url)

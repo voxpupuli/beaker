@@ -43,7 +43,7 @@ module Beaker
         arry = []
         if arg.is_a?(Array)
           arry += arg
-        elsif /,/.match?(arg)
+        elsif arg.include?(',')
           arry += arg.split(',')
         else
           arry << arg

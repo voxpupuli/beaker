@@ -2,27 +2,25 @@ test_name 'confirm packages on hosts behave correctly'
 confine :except, :platform => %w(osx)
 
 def get_host_pkg(host)
-  case
-    when /sles-10/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::SLES10_PACKAGES
-    when /opensuse|sles-/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::SLES_PACKAGES
-    when /debian/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
-    when /cumulus/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
-    when (host['platform'].include?('windows') and host.is_cygwin?)
-      Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES
-    when (host['platform'].include?('windows') and not host.is_cygwin?)
-      Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
-    when /freebsd/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
-    when /openbsd/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
-    when /solaris-10/.match?(host['platform'])
-      Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
-    else
-      Beaker::HostPrebuiltSteps::UNIX_PACKAGES
+  case host['platform']
+  when /sles-10/
+    Beaker::HostPrebuiltSteps::SLES10_PACKAGES
+  when /opensuse|sles-/
+    Beaker::HostPrebuiltSteps::SLES_PACKAGES
+  when /debian/
+    Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
+  when /cumulus/
+    Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
+  when /windows/
+    host.is_cygwin? ? Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES : Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
+  when /freebsd/
+    Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
+  when /openbsd/
+    Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
+  when /solaris-10/
+    Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
+  else
+    Beaker::HostPrebuiltSteps::UNIX_PACKAGES
   end
 
 end
@@ -50,12 +48,12 @@ hosts.each do |host|
   # this works on Windows as well, althought it pulls in
   # a lot of dependencies.
   # skipping this test for windows since it requires a restart
-  next if /windows/.match?(host['platform'])
+  next if host['platform'].include?('windows')
   package = 'zsh'
-  package = 'CSWzsh' if /solaris-10/.match?(host['platform'])
+  package = 'CSWzsh' if host['platform'].include?('solaris-10')
   package = 'git' if /opensuse|sles/.match?(host['platform'])
 
-  if /solaris-11/.match?(host['platform'])
+  if host['platform'].include?('solaris-11')
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
     assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
@@ -71,10 +69,10 @@ hosts.each do |host|
   assert(host.check_for_package(package), "'#{package}' should be installed")
 
   # windows does not support uninstall_package
-  unless /windows/.match?(host['platform'])
+  unless host['platform'].include?('windows')
     logger.debug("#{package} should be uninstalled on #{host}")
     host.uninstall_package(package)
-    if /debian/.match?(host['platform'])
+    if host['platform'].include?('debian')
       assert_equal(false, host.check_for_command(package), "'#{package}' should not be installed or available")
     else
       assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")

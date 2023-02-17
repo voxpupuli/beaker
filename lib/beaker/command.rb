@@ -76,7 +76,7 @@ module Beaker
       append_commands = host.append_commands( cmd, ac, :cmd_exe => @cmdexe )
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
-      if /cisco_ios_xr/.match?(host[:platform])
+      if host[:platform]&.include?('cisco_ios_xr')
         cmd_line_array = [prepend_commands, env_string, cmd, options_string, args_string, append_commands]
       else
         cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string, append_commands]

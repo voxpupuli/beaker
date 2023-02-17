@@ -27,7 +27,7 @@ module Unix::Pkg
     case self['platform']
       when /sles-10/
         result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
-        /No packages found/.match?(result.stdout) ? (return false) : (return result.exit_code == 0)
+        result.stdout.include?('No packages found') ? (return false) : (return result.exit_code == 0)
       when /opensuse|sles-/
         if !self[:sles_rpmkeys_nightly_pl_imported]
           # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
@@ -76,7 +76,7 @@ module Unix::Pkg
   # Except for the kernel. An upgrade will purge the modules for the currently running kernel
   # Before upgrading packages, we need to ensure we've the latest keyring
   def update_pacman_if_needed
-    if /archlinux/.match?(self['platform'])
+    if self['platform'].include?('archlinux')
       if @pacman_needs_update
         execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
         execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
@@ -315,7 +315,7 @@ module Unix::Pkg
   #Examine the host system to determine the architecture
   #@return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
-    if /solaris/.match?(self[:platform])
+    if self[:platform].include?('solaris')
       result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
         result.exit_code == 0
     else

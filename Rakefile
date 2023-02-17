@@ -214,7 +214,7 @@ namespace :history do
     Dir.chdir( File.expand_path(File.dirname(__FILE__)) )
     output = `bundle exec ruby history.rb .`
     puts output
-    if !/success/.match?(output)
+    if !output.include?('success')
       raise "History generation failed"
     end
     Dir.chdir( original_dir )

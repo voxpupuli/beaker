@@ -191,7 +191,7 @@ module Beaker
                   'slow (attempt to continue run post test failure)',
                   'stop (DEPRECATED, please use fast)',
                   '(default: slow)'  do |mode|
-            @cmd_options[:fail_mode] = /stop/.match?(mode) ? 'fast' :  mode
+            @cmd_options[:fail_mode] = mode.include?('stop') ? 'fast' :  mode
           end
 
           opts.on '--test-results-file /FILE/TO/SAVE/TO.rb',

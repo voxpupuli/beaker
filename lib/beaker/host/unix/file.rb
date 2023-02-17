@@ -116,7 +116,7 @@ module Unix::File
     when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
       variant = 'el' if ['centos', 'redhat'].include?(variant)
 
-      variant = 'redhatfips' if /redhatfips/.match?(self['packaging_platform'])
+      variant = 'redhatfips' if self['packaging_platform']&.include?('redhatfips')
 
       if variant == 'cisco_nexus'
         variant = 'cisco-wrlinux'
