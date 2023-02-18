@@ -53,7 +53,7 @@ module Beaker
                   logger.exception('Unable to load pry and debug while debug_errors was true')
                 else
                   logger.info("Exception raised during step execution and debug-errors option is set, entering debug. Exception was: #{e.inspect}")
-                  binding.break
+                  binding.break # rubocop:disable Lint/Debugger
                 end
               else
                 logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
