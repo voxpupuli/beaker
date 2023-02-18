@@ -1,39 +1,39 @@
 module Beaker
   module Shared
-    #Methods for managing Hosts.
+    # Methods for managing Hosts.
     #- selecting hosts by role (Symbol or String)
     #- selecting hosts by name (String)
     #- adding additional method definitions for selecting by role
     #- executing blocks of code against selected sets of hosts
     module HostManager
 
-      #Find hosts from a given array of hosts that all have the desired role.
-      #@param [Array<Host>] hosts The hosts to examine
-      #@param [String] desired_role The hosts returned will have this role in their roles list
-      #@return [Array<Host>] The hosts that have the desired role in their roles list
+      # Find hosts from a given array of hosts that all have the desired role.
+      # @param [Array<Host>] hosts The hosts to examine
+      # @param [String] desired_role The hosts returned will have this role in their roles list
+      # @return [Array<Host>] The hosts that have the desired role in their roles list
       def hosts_with_role(hosts, desired_role = nil)
         hosts.select do |host|
           desired_role.nil? or host['roles'].include?(desired_role.to_s)
         end
       end
 
-      #Find hosts from a given array of hosts that all have the desired name, match against host name,
-      #vmhostname and ip (the three valid ways to identify an individual host)
-      #@param [Array<Host>] hosts The hosts to examine
-      #@param [String] name The hosts returned will have this name/vmhostname/ip
-      #@return [Array<Host>] The hosts that have the desired name/vmhostname/ip
+      # Find hosts from a given array of hosts that all have the desired name, match against host name,
+      # vmhostname and ip (the three valid ways to identify an individual host)
+      # @param [Array<Host>] hosts The hosts to examine
+      # @param [String] name The hosts returned will have this name/vmhostname/ip
+      # @return [Array<Host>] The hosts that have the desired name/vmhostname/ip
       def hosts_with_name(hosts, name = nil)
         hosts.select do |host|
           name.nil? or host.name&.start_with?(name) or host[:vmhostname]&.start_with?(name) or host[:ip]&.start_with?(name)
         end
       end
 
-      #Find a single host with the role provided.  Raise an error if more than one host is found to have the
-      #provided role.
-      #@param [Array<Host>] hosts The hosts to examine
-      #@param [String] role The host returned will have this role in its role list
-      #@return [Host] The single host with the desired role in its roles list
-      #@raise [ArgumentError] Raised if more than one host has the given role defined, if no host has the
+      # Find a single host with the role provided.  Raise an error if more than one host is found to have the
+      # provided role.
+      # @param [Array<Host>] hosts The hosts to examine
+      # @param [String] role The host returned will have this role in its role list
+      # @return [Host] The single host with the desired role in its roles list
+      # @raise [ArgumentError] Raised if more than one host has the given role defined, if no host has the
       #                       role defined, or if role = nil since hosts_with_role(nil) returns all hosts.
       def only_host_with_role(hosts, role)
         raise ArgumentError, "role cannot be nil." if role.nil?
@@ -42,7 +42,7 @@ module Beaker
           when a_host.length == 0
             raise ArgumentError, "There should be one host with #{role} defined!"
           when a_host.length > 1
-            host_string = ( a_host.map { |host| host.name } ).join( ', ')
+            host_string = (a_host.map { |host| host.name }).join(', ')
             raise ArgumentError, "There should be only one host with #{role} defined, but I found #{a_host.length} (#{host_string})"
         end
         a_host.first
@@ -65,7 +65,7 @@ module Beaker
         when 1
           role_hosts[0]
         else
-          host_string = ( role_hosts.map { |host| host.name } ).join( ', ')
+          host_string = (role_hosts.map { |host| host.name }).join(', ')
           raise ArgumentError, "There should be only one host with #{role} defined, but I found #{role_hosts.length} (#{host_string})"
         end
       end
@@ -88,14 +88,14 @@ module Beaker
       #   and thus a result object is returned.
       def run_block_on hosts = [], filter = nil, opts = {}, &block
         result = nil
-        block_hosts = hosts #the hosts to apply the block to after any filtering
+        block_hosts = hosts # the hosts to apply the block to after any filtering
         if filter
           if not hosts.empty?
-            block_hosts = hosts_with_role(hosts, filter) #check by role
+            block_hosts = hosts_with_role(hosts, filter) # check by role
             if block_hosts.empty?
-              block_hosts = hosts_with_name(hosts, filter) #check by name
+              block_hosts = hosts_with_name(hosts, filter) # check by name
             end
-            if block_hosts.length == 1  #we only found one matching host, don't need it wrapped in an array
+            if block_hosts.length == 1  # we only found one matching host, don't need it wrapped in an array
               block_hosts = block_hosts.pop
             end
           else
@@ -109,7 +109,7 @@ module Beaker
               result = block_hosts.map.each_in_parallel(caller(2..2).first) do |h|
                 run_block_on h, &block
               end
-              hosts.each{|host| host.close}# For some reason, I have to close the SSH connection
+              hosts.each { |host| host.close } # For some reason, I have to close the SSH connection
               # after spawning a process and running commands on a host,
               # or else it gets into a broken state for the next call.
             else
@@ -121,7 +121,7 @@ module Beaker
             # there are no matching hosts to execute against
             # should warn here
             # check if logger is defined in this context
-            if ( cur_logger = (logger || @logger ) )
+            if (cur_logger = (logger || @logger))
               cur_logger.info "Attempting to execute against an empty array of hosts (#{hosts}, filtered to #{block_hosts}), no execution will occur"
             end
           end

@@ -33,7 +33,7 @@ module Beaker
       def initialize(*args, &task_block)
         @name = args.shift || 'beaker:test'
         if args.empty?
-          args = [:hosts,:type]
+          args = [:hosts, :type]
         end
         @acceptance_root = DEFAULT_ACCEPTANCE_ROOT
         @options_file = nil
@@ -97,7 +97,7 @@ module Beaker
         cmd_parts = []
         cmd_parts << "beaker"
         cmd_parts << "--keyfile #{@keyfile}" if @keyfile
-        cmd_parts << "--hosts #{@hosts}" if (@hosts!=nil && !@hosts.empty?)
+        cmd_parts << "--hosts #{@hosts}" if (@hosts != nil && !@hosts.empty?)
         cmd_parts << "--tests #{tests}" if @tests
         cmd_parts << "--options-file #{@options_file}" if @options_file
         cmd_parts << "--type #{@type}" if @type

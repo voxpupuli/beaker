@@ -3,7 +3,7 @@ require 'spec_helper'
 module Beaker
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
   describe Subcommand do
-    let( :subcommand ) {
+    let(:subcommand) {
       described_class.new
     }
 
@@ -75,7 +75,7 @@ module Beaker
         'debug',
       ] }
 
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
+      let(:yaml_store_mock) { double('yaml_store_mock') }
 
       it 'does not error with valid beaker options' do
         beaker_options_list.each do |option|
@@ -90,7 +90,7 @@ module Beaker
           expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
           expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
 
-          expect {described_class.start(['init', '--hosts', 'centos', "--#{option}"])}.not_to output(/ERROR/).to_stderr
+          expect { described_class.start(['init', '--hosts', 'centos', "--#{option}"]) }.not_to output(/ERROR/).to_stderr
         end
       end
 
@@ -101,14 +101,14 @@ module Beaker
         expect(File).not_to receive(:open)
         expect(SubcommandUtil::SUBCOMMAND_OPTIONS).to receive(:exist?).and_return(true)
         expect(SubcommandUtil::SUBCOMMAND_STATE).to receive(:exist?).and_return(true)
-        expect {described_class.start(['init', '--hosts', 'centos', '--bad-option'])}.to output(/ERROR/).to_stderr
+        expect { described_class.start(['init', '--hosts', 'centos', '--bad-option']) }.to output(/ERROR/).to_stderr
       end
     end
 
     describe '#init' do
-      let( :cli ) { subcommand.cli }
-      let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
+      let(:cli) { subcommand.cli }
+      let(:mock_options) { { :timestamp => 'noon', :other_key => 'cordite' } }
+      let(:yaml_store_mock) { double('yaml_store_mock') }
 
       before do
         allow(cli).to receive(:parse_options)
@@ -125,21 +125,21 @@ module Beaker
       end
 
       it 'requires hosts flag' do
-        expect{subcommand.init}.to raise_error(NotImplementedError)
+        expect { subcommand.init }.to raise_error(NotImplementedError)
       end
     end
 
     describe '#provision' do
-      let( :cli ) { subcommand.cli }
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let( :cleaned_hosts ) {double()}
-      let( :yielded_host_hash ) {double()}
-      let( :yielded_host_name) {double()}
-      let( :network_manager) {double('network_manager')}
-      let( :hosts) {double('hosts')}
-      let( :hypervisors) {double('hypervisors')}
-      let(:options) {double('options')}
+      let(:cli) { subcommand.cli }
+      let(:yaml_store_mock) { double('yaml_store_mock') }
+      let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
+      let(:cleaned_hosts) { double() }
+      let(:yielded_host_hash) { double() }
+      let(:yielded_host_name) { double() }
+      let(:network_manager) { double('network_manager') }
+      let(:hosts) { double('hosts') }
+      let(:hypervisors) { double('hypervisors') }
+      let(:options) { double('options') }
 
       it 'provisions the host and saves the host info' do
         expect(YAML::Store).to receive(:new).with(SubcommandUtil::SUBCOMMAND_STATE).and_return(yaml_store_mock)
@@ -167,8 +167,8 @@ module Beaker
       end
 
       it 'does not allow hosts to be passed' do
-        subcommand.options = {:hosts => "myhost"}
-        expect{subcommand.provision()}.to raise_error(NotImplementedError)
+        subcommand.options = { :hosts => "myhost" }
+        expect { subcommand.provision() }.to raise_error(NotImplementedError)
       end
     end
 
@@ -179,15 +179,15 @@ module Beaker
         allow(subcommand.cli).to receive(:execute!)
       end
 
-      let( :cleaned_hosts ) {double()}
-      let( :host_hash ) { {'mynode.net' => {:name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64')}}}
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
+      let(:cleaned_hosts) { double() }
+      let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
+      let(:yaml_store_mock) { double('yaml_store_mock') }
 
       it 'calls execute! when no resource is given' do
         expect_any_instance_of(Pathname).not_to receive(:directory?)
         expect_any_instance_of(Pathname).not_to receive(:exist?)
         expect(subcommand.cli).to receive(:execute!).once
-        expect{subcommand.exec}.not_to raise_error
+        expect { subcommand.exec }.not_to raise_error
       end
 
       it 'allows hard coded suite names to be specified' do
@@ -204,7 +204,7 @@ module Beaker
 
       it 'errors when a resource is neither a valid file resource or suite name' do
         allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
-        expect{subcommand.exec('blahblahblah')}.to raise_error(ArgumentError)
+        expect { subcommand.exec('blahblahblah') }.to raise_error(ArgumentError)
       end
 
       it 'accepts a tests directory, clearing all other suites' do
@@ -279,10 +279,10 @@ module Beaker
     end
 
     context 'destroy' do
-      let( :cli ) { subcommand.cli }
-      let( :mock_options ) { {:timestamp => 'noon', :other_key => 'cordite'}}
-      let( :yaml_store_mock ) { double('yaml_store_mock') }
-      let( :network_manager) {double('network_manager')}
+      let(:cli) { subcommand.cli }
+      let(:mock_options) { { :timestamp => 'noon', :other_key => 'cordite' } }
+      let(:yaml_store_mock) { double('yaml_store_mock') }
+      let(:network_manager) { double('network_manager') }
 
       it 'calls destroy and updates the yaml store' do
         allow(cli).to receive(:parse_options)

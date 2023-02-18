@@ -1,7 +1,7 @@
 require 'open-uri'
 module Beaker
   module Options
-    #A set of functions to read options files
+    # A set of functions to read options files
     module OptionsFileParser
 
       # Eval the contents of options_file_path, return as an OptionsHash

@@ -157,14 +157,14 @@ module Beaker
       try = 1
       last_wait = 2
       wait = 3
-      command = 'echo echo' #can be run on all platforms (I'm looking at you, windows)
+      command = 'echo echo' # can be run on all platforms (I'm looking at you, windows)
       while try < 11
         result = Result.new(@hostname, command)
         begin
           @logger.notify "Waiting for connection failure on #{@hostname} (attempt #{try}, try again in #{wait} second(s))"
           @logger.debug("\n#{@hostname} #{Time.new.strftime('%H:%M:%S')}$ #{command}")
           @ssh.open_channel do |channel|
-            request_terminal_for( channel, command ) if options[:pty]
+            request_terminal_for(channel, command) if options[:pty]
 
             channel.exec(command) do |terminal, success|
               raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
@@ -172,15 +172,15 @@ module Beaker
               register_stderr_for terminal, result, stderr_callback
               register_exit_code_for terminal, result
 
-              process_stdin_for( terminal, options[:stdin] ) if options[:stdin]
+              process_stdin_for(terminal, options[:stdin]) if options[:stdin]
              end
            end
            loop_tries = 0
-           #loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
-           @ssh.loop { loop_tries += 1 ; loop_tries < 4 }
+           # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
+           @ssh.loop { loop_tries += 1; loop_tries < 4 }
         rescue *RETRYABLE_EXCEPTIONS => e
           @logger.debug "Connection on #{@hostname} failed as expected (#{e.class.name} - #{e.message})"
-          close #this connection is bad, shut it down
+          close # this connection is bad, shut it down
           return true
         end
         slept = 0
@@ -203,7 +203,7 @@ module Beaker
       result = Result.new(@hostname, command)
 
       @ssh.open_channel do |channel|
-        request_terminal_for( channel, command ) if options[:pty]
+        request_terminal_for(channel, command) if options[:pty]
 
         channel.exec(command) do |terminal, success|
           raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
@@ -211,7 +211,7 @@ module Beaker
           register_stderr_for terminal, result, stderr_callback
           register_exit_code_for terminal, result
 
-          process_stdin_for( terminal, options[:stdin] ) if options[:stdin]
+          process_stdin_for(terminal, options[:stdin]) if options[:stdin]
         end
       end
 

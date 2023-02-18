@@ -1,7 +1,7 @@
 module Beaker
   module Options
-    #A class representing the environment variables and preset argument values to be incorporated
-    #into the Beaker options Object.
+    # A class representing the environment variables and preset argument values to be incorporated
+    # into the Beaker options Object.
     class Presets
 
       # This is a constant that describes the variables we want to collect
@@ -44,7 +44,7 @@ module Beaker
       # @return [Hash] Hash of environment variables
       def select_env_by_regex regex
         envs = Beaker::Options::OptionsHash.new
-        ENV.each_pair do | k, v |
+        ENV.each_pair do |k, v|
           if /#{regex}/.match?(k.to_s)
             envs[k] = v
           end
@@ -57,11 +57,11 @@ module Beaker
       # @param [Hash{Symbol=>Array,String}] env_var_spec  the spec of what env vars to search for
       #
       # @return [Hash] Found environment values
-      def collect_env_vars( env_var_spec )
+      def collect_env_vars(env_var_spec)
         env_var_spec.inject({}) do |memo, key_value|
           key, value = key_value[0], key_value[1]
 
-          set_env_var = Array(value).detect {|possible_variable| ENV[possible_variable] }
+          set_env_var = Array(value).detect { |possible_variable| ENV[possible_variable] }
           memo[key] = ENV[set_env_var] if set_env_var
 
           memo
@@ -74,7 +74,7 @@ module Beaker
       # @param [Hash{Symbol=>String}] found_env_vars  Environment variables to munge
       #
       # @return [Hash] Environment config values formatted appropriately
-      def format_found_env_vars( found_env_vars )
+      def format_found_env_vars(found_env_vars)
         found_env_vars[:consoleport] &&= found_env_vars[:consoleport].to_i
 
         if found_env_vars[:is_pe]
@@ -102,10 +102,10 @@ module Beaker
       #                       empty or nil environment variables are removed from the OptionsHash
       def calculate_env_vars
         found = Beaker::Options::OptionsHash.new
-        found = found.merge(format_found_env_vars( collect_env_vars( ENVIRONMENT_SPEC )))
+        found = found.merge(format_found_env_vars(collect_env_vars(ENVIRONMENT_SPEC)))
         found[:answers] = select_env_by_regex('\\Aq_')
 
-        found.delete_if {|_key, value| value.nil? or value.empty? }
+        found.delete_if { |_key, value| value.nil? or value.empty? }
         found
       end
 
@@ -140,7 +140,7 @@ module Beaker
           :configure              => true,
           :log_level              => 'info',
           :trace_limit            => 10,
-          :"master-start-curl-retries"  => 120,
+          :"master-start-curl-retries" => 120,
           :masterless             => false,
           :options_file           => nil,
           :type                   => 'pe',
@@ -189,7 +189,7 @@ module Beaker
           :puppetserver_port      => 8140,
           :nodeclassifier_port    => 4433,
           :cache_files_locally    => false,
-          :aws_keyname_modifier   => rand(10 ** 10).to_s.rjust(10,'0'), # 10 digit random number string
+          :aws_keyname_modifier   => rand(10**10).to_s.rjust(10, '0'), # 10 digit random number string
           :run_in_parallel        => [],
           :use_fog_credentials    => true,
           :ssh                    => {

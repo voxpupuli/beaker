@@ -74,7 +74,7 @@ module Mac::Group
     return if group_exists
 
     gid = gid_next
-    create_cmd  =     "dscl . create /Groups/#{name}"
+    create_cmd = "dscl . create /Groups/#{name}"
     create_cmd << " && dscl . create /Groups/#{name} PrimaryGroupID #{gid}"
     execute(create_cmd)
   end

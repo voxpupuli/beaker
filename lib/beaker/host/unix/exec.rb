@@ -11,7 +11,7 @@ module Unix::Exec
   # @param [Integer] uptime_retries How many times to check to see if the value of the uptime has reset.
   #
   # Will throw an exception RebootFailure if it fails
-  def reboot(wait_time=10, max_connection_tries=9, uptime_retries=18)
+  def reboot(wait_time = 10, max_connection_tries = 9, uptime_retries = 18)
     require 'time'
 
     attempts = 0
@@ -30,7 +30,7 @@ module Unix::Exec
       # Number of seconds to sleep before rebooting.
       reboot_sleep = 1
 
-      original_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true}).stdout
+      original_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), { :max_connection_tries => max_connection_tries, :silent => true }).stdout
       original_boot_time_line = original_boot_time_str.lines.grep(/boot/).first
 
       raise Beaker::Host::RebootWarning, "Could not find system boot time using '#{boot_time_cmd}': '#{original_boot_time_str}'" unless original_boot_time_line
@@ -61,7 +61,7 @@ module Unix::Exec
       raise if attempts > uptime_retries
       @logger.warn("Unexpected Exception: #{e.message}")
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
-      @logger.warn(e.backtrace[0,3].join("\n"))
+      @logger.warn(e.backtrace[0, 3].join("\n"))
       @logger.debug(e.backtrace.join("\n"))
       retry
     end
@@ -75,7 +75,7 @@ module Unix::Exec
       sleep wait_time
 
       # Accept all exit codes because this may fail due to the parallel nature of systemd
-      current_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), {:max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true}).stdout
+      current_boot_time_str = exec(Beaker::Command.new(boot_time_cmd), { :max_connection_tries => max_connection_tries, :silent => true, :accept_all_exit_codes => true }).stdout
       current_boot_time_line = current_boot_time_str.lines.grep(/boot/).first
 
       raise Beaker::Host::RebootWarning, "Could not find system boot time using '#{boot_time_cmd}': '#{current_boot_time_str}'" unless current_boot_time_line
@@ -106,17 +106,17 @@ module Unix::Exec
       raise if attempts > uptime_retries
       @logger.warn("Unexpected Exception: #{e.message}")
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
-      @logger.warn(e.backtrace[0,3].join("\n"))
+      @logger.warn(e.backtrace[0, 3].join("\n"))
       @logger.debug(e.backtrace.join("\n"))
       retry
     end
   end
 
-  def echo(msg, abs=true)
+  def echo(msg, abs = true)
     (abs ? '/bin/echo' : 'echo') + " #{msg}"
   end
 
-  def touch(file, abs=true)
+  def touch(file, abs = true)
     (abs ? '/bin/touch' : 'touch') + " #{file}"
   end
 
@@ -163,7 +163,7 @@ module Unix::Exec
   # @param [String] orig The origin path
   # @param [String] dest the destination path
   # @param [Boolean] rm Remove the destination prior to move
-  def mv orig, dest, rm=true
+  def mv orig, dest, rm = true
     rm_rf dest unless !rm
     execute("mv #{orig} #{dest}")
   end
@@ -172,14 +172,14 @@ module Unix::Exec
   # @param [String] target The hostname to ping
   # @param [Integer] attempts Amount of times to attempt ping before giving up
   # @return [Boolean] true of ping successful, overwise false
-  def ping target, attempts=5
+  def ping target, attempts = 5
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
       if result.exit_code == 0
         return true
       end
-      try+=1
+      try += 1
     end
     result.exit_code == 0
   end
@@ -195,81 +195,81 @@ module Unix::Exec
       cur_env.each_line do |env_line|
         shell_env << "export #{env_line}"
       end
-      #here doc it over
+      # here doc it over
       exec(Beaker::Command.new("cat << EOF > #{self[:profile_d_env_file]}\n#{shell_env}EOF"))
-      #set permissions
+      # set permissions
       exec(Beaker::Command.new("chmod +x #{self[:profile_d_env_file]}"))
-      #keep it current
+      # keep it current
       exec(Beaker::Command.new("source #{self[:profile_d_env_file]}"))
     else
-      #noop
+      # noop
       @logger.debug("will not mirror environment to /etc/profile.d on non-sles platform host")
     end
   end
 
-  #Add the provided key/val to the current ssh environment
-  #@param [String] key The key to add the value to
-  #@param [String] val The value for the key
-  #@example
+  # Add the provided key/val to the current ssh environment
+  # @param [String] key The key to add the value to
+  # @param [String] val The value for the key
+  # @example
   #  host.add_env_var('PATH', '/usr/bin:PATH')
   def add_env_var key, val
     key = key.to_s
     env_file = self[:ssh_env_file]
     escaped_val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-    #see if the key/value pair already exists
-    if exec(Beaker::Command.new("grep ^#{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
-      return #nothing to do here, key value pair already exists
-    #see if the key already exists
-    elsif exec(Beaker::Command.new("grep ^#{key}= #{env_file}"), :accept_all_exit_codes => true ).exit_code == 0
+    # see if the key/value pair already exists
+    if exec(Beaker::Command.new("grep ^#{key}=.*#{escaped_val} #{env_file}"), :accept_all_exit_codes => true).exit_code == 0
+      return # nothing to do here, key value pair already exists
+    # see if the key already exists
+    elsif exec(Beaker::Command.new("grep ^#{key}= #{env_file}"), :accept_all_exit_codes => true).exit_code == 0
       exec(Beaker::SedCommand.new(self['platform'], "s/^#{key}=/#{key}=#{escaped_val}:/", env_file))
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
     end
-    #update the profile.d to current state
-    #match it to the contents of ssh_env_file
+    # update the profile.d to current state
+    # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
   end
 
-  #Delete the provided key/val from the current ssh environment
-  #@param [String] key The key to delete the value from
-  #@param [String] val The value to delete for the key
-  #@example
+  # Delete the provided key/val from the current ssh environment
+  # @param [String] key The key to delete the value from
+  # @param [String] val The value to delete for the key
+  # @example
   #  host.delete_env_var('PATH', '/usr/bin:PATH')
   def delete_env_var key, val
     key = key.to_s
     env_file = self[:ssh_env_file]
     val = Regexp.escape(val).gsub('/', '\/').gsub(';', '\;')
-    #if the key only has that single value remove the entire line
+    # if the key only has that single value remove the entire line
     exec(Beaker::SedCommand.new(self['platform'], "/#{key}=#{val}$/d", env_file))
-    #value in middle of list
+    # value in middle of list
     exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=\\(.*\\)[;:]#{val}/#{key}=\\1/", env_file))
-    #value in start of list
+    # value in start of list
     exec(Beaker::SedCommand.new(self['platform'], "s/#{key}=#{val}[;:]/#{key}=/", env_file))
-    #update the profile.d to current state
-    #match it to the contents of ssh_env_file
+    # update the profile.d to current state
+    # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
   end
 
-  #Return the value of a specific env var
-  #@param [String] key The key to look for
-  #@example
+  # Return the value of a specific env var
+  # @param [String] key The key to look for
+  # @example
   #  host.get_env_var('path')
   def get_env_var key
     key = key.to_s
     exec(Beaker::Command.new("env | grep ^#{key}="), :accept_all_exit_codes => true).stdout.chomp
   end
 
-  #Delete the environment variable from the current ssh environment
-  #@param [String] key The key to delete
-  #@example
+  # Delete the environment variable from the current ssh environment
+  # @param [String] key The key to delete
+  # @example
   #  host.clear_env_var('PATH')
   def clear_env_var key
     key = key.to_s
     env_file = self[:ssh_env_file]
-    #remove entire line
+    # remove entire line
     exec(Beaker::SedCommand.new(self['platform'], "/^#{key}=.*$/d", env_file))
-    #update the profile.d to current state
-    #match it to the contents of ssh_env_file
+    # update the profile.d to current state
+    # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
   end
 
@@ -308,7 +308,7 @@ module Unix::Exec
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if /ubuntu-2(0|2).04/.match?(self['platform'])
     when /(free|open)bsd/
-      exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), {:pty => true} )
+      exec(Beaker::Command.new("sudo perl -pi -e 's/^#?PermitUserEnvironment no/PermitUserEnvironment yes/' /etc/ssh/sshd_config"), { :pty => true })
     else
       raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
     end
@@ -329,7 +329,7 @@ module Unix::Exec
   #                  given host.
   def environment_string env
     return '' if env.empty?
-    env_array = self.environment_variable_string_pair_array( env )
+    env_array = self.environment_variable_string_pair_array(env)
     environment_string = env_array.join(' ')
     "env #{environment_string}"
   end
@@ -387,12 +387,12 @@ module Unix::Exec
   # @api private
   # @return nil
   def ssh_set_user_environment(env)
-    #ensure that ~/.ssh/environment exists
+    # ensure that ~/.ssh/environment exists
     ssh_env_file_dir = Pathname.new(self[:ssh_env_file]).dirname
     mkdir_p(ssh_env_file_dir)
     exec(Beaker::Command.new("chmod 0600 #{ssh_env_file_dir}"))
     exec(Beaker::Command.new("touch #{self[:ssh_env_file]}"))
-    #add the constructed env vars to this host
+    # add the constructed env vars to this host
     add_env_var('PATH', '$PATH')
     # FIXME
     if self['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
@@ -404,13 +404,13 @@ module Unix::Exec
       add_env_var('PATH', '/opt/csw/bin')
     end
 
-    #add the env var set to this test host
+    # add the env var set to this test host
     env.each_pair do |var, value|
       add_env_var(var, value)
     end
   end
 
-  # Checks if selinux is enabled
+  #  Checks if selinux is enabled
   #
   # @return [Boolean] true if selinux is enabled, false otherwise
   def selinux_enabled?()
@@ -432,12 +432,12 @@ module Unix::Exec
     true
   end
 
-  #First path it finds for the command executable
-  #@param [String] command The command executable to search for
+  # First path it finds for the command executable
+  # @param [String] command The command executable to search for
   #
   # @return [String] Path to the searched executable or empty string if not found
   #
-  #@example
+  # @example
   #  host.which('ruby')
   def which(command)
     unless @which_command

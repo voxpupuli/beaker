@@ -2,7 +2,7 @@ require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
 
-  def create_remote_file_with_backups host, remote_filename, contents, opts={}
+  def create_remote_file_with_backups host, remote_filename, contents, opts = {}
     result = nil
     repeat_fibonacci_style_for(10) do
       begin

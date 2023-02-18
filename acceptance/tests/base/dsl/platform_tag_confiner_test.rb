@@ -24,7 +24,7 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     ]
 
     begin
-      tag( 'tag1' )
+      tag('tag1')
     rescue Beaker::DSL::Outcomes::SkipTest => e
       if /^No\ suitable\ hosts\ found/.match?(e.message)
         # SkipTest is raised in the case when there are no hosts leftover for a test

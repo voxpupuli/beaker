@@ -59,7 +59,7 @@ module Beaker
             msg << ' a hocon file to edit. No block was provided.'
             raise ArgumentError, msg
           end
-          block_on hosts, {} do | host |
+          block_on hosts, {} do |host|
             doc = hocon_file_read_on(host, filename)
             yield host, doc
           end

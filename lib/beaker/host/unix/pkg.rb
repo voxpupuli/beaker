@@ -16,14 +16,14 @@ module Unix::Pkg
       # even if the command didn't exist, so it'll return a 0 exit code in
       # either case. Instead we match for the phrase output when a match isn't
       # found: "no #{name} in $PATH", reversing it to match our API
-      !( result.stdout.match(/^no\ #{name}\ in\ /) )
+      !(result.stdout.match(/^no\ #{name}\ in\ /))
     else
       result.exit_code == 0
     end
   end
 
   def check_for_package(name, opts = {})
-    opts = {:accept_all_exit_codes => true}.merge(opts)
+    opts = { :accept_all_exit_codes => true }.merge(opts)
     case self['platform']
       when /sles-10/
         result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
@@ -115,7 +115,7 @@ module Unix::Pkg
         end
         execute("pkg #{cmdline_args} install #{name}", opts)
       when /solaris-10/
-        if ! check_for_command('pkgutil')
+        if !check_for_command('pkgutil')
           # https://www.opencsw.org/package/pkgutil/
           noask_text = self.noask_file_text
           noask_file = File.join(external_copy_base, 'noask')
@@ -136,7 +136,7 @@ module Unix::Pkg
               }.select { |x|
                 # Blacklist Ruby 2.2.0+ for the sake of Puppet 3.x
                 Gem::Version.new(x[1]) < Gem::Version.new('2.2.0')
-              }.sort { |a,b|
+              }.sort { |a, b|
                 Gem::Version.new(b[1]) <=> Gem::Version.new(a[1])
               }.collect { |x|
                 x[0]
@@ -234,8 +234,8 @@ module Unix::Pkg
     end
   end
 
-  #Examine the host system to determine the architecture
-  #@return [Boolean] true if x86_64, false otherwise
+  # Examine the host system to determine the architecture
+  # @return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
     if self[:platform].include?('solaris')
       result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
@@ -256,7 +256,7 @@ module Unix::Pkg
   # @api private
   def extract_rpm_proxy_options(url)
     begin
-      host, port = url.match(/https?:\/\/(.*):(\d*)/)[1,2]
+      host, port = url.match(/https?:\/\/(.*):(\d*)/)[1, 2]
       raise if host.empty? or port.empty?
       "--httpproxy #{host} --httpport #{port}"
     rescue
@@ -284,9 +284,9 @@ module Unix::Pkg
       execute("dpkg -i --force-all #{onhost_package_file}")
       execute("apt-get update")
     when /^solaris$/
-      self.solaris_install_local_package( onhost_package_file, onhost_copy_dir )
+      self.solaris_install_local_package(onhost_package_file, onhost_copy_dir)
     when /^osx$/
-      install_package( onhost_package_file )
+      install_package(onhost_package_file)
     else
       msg = "Platform #{variant} is not supported by the method "
       msg << 'install_local_package'

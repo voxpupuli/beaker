@@ -17,7 +17,7 @@ module Beaker
     module Assertions
       include Minitest::Assertions
 
-      #Why do we need this accessor?
+      # Why do we need this accessor?
       # https://github.com/seattlerb/minitest/blob/master/lib/minitest/assertions.rb#L8-L12
       # Protocol: Nearly everything here boils up to +assert+, which
       # expects to be able to increment an instance accessor named
@@ -71,7 +71,7 @@ module Beaker
       #                         annotated with stream markers.
       # @param [String] msg     An explanatory message about why the test
       #                         failure is relevant.
-      def assert_output(exp_out, msg='Output lines did not match')
+      def assert_output(exp_out, msg = 'Output lines did not match')
         # Remove the minimal consistent indentation from the input;
         # useful for clean HEREDOCs.
         indentation = exp_out.lines.map { |line| line[/^ */].length }.min

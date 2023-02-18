@@ -60,10 +60,10 @@ module Beaker
         # @return [Result]   An object representing the outcome of *command*.
         # @raise  [FailTest] Raises an exception if *command* obviously fails.
         def on(host, command, opts = {}, &block)
-          block_on host, opts do | host |
+          block_on host, opts do |host|
             if command.is_a? String
               cmd_opts = {}
-              #add any additional environment variables to the command
+              # add any additional environment variables to the command
               if opts[:environment]
                 cmd_opts['ENV'] = opts[:environment]
               end
@@ -85,10 +85,10 @@ module Beaker
             # Also, let additional checking be performed by the caller.
             if block
               case block.arity
-                #block with arity of 0, just hand back yourself
+                # block with arity of 0, just hand back yourself
                 when 0
                   yield self
-                #block with arity of 1 or greater, hand back the result object
+                # block with arity of 1 or greater, hand back the result object
                 else
                   yield result
               end
@@ -139,7 +139,7 @@ module Beaker
         #
         # @return [Result] Returns the result of the SCP operation
         def scp_from host, from_path, to_path, opts = {}
-          block_on host do | host |
+          block_on host do |host|
             result = host.do_scp_from(from_path, to_path, opts)
             result.log logger
             result
@@ -162,7 +162,7 @@ module Beaker
         #
         # @return [Result] Returns the result of the SCP operation
         def scp_to host, from_path, to_path, opts = {}
-          block_on host do | host |
+          block_on host do |host|
             if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = on host, "echo #{to_path}"
               to_path = result.raw_output.chomp
@@ -184,7 +184,7 @@ module Beaker
         #
         # @return [Result] Returns the result of the rsync operation
         def rsync_to host, from_path, to_path, opts = {}
-          block_on host do | host |
+          block_on host do |host|
             if host['platform'].include?('windows') && to_path.match('`cygpath')
               result = host.echo "#{to_path}"
               to_path = result.raw_output.chomp
@@ -265,7 +265,7 @@ module Beaker
         # @return [Result] Returns the result of the underlying SCP operation.
         def create_remote_file(hosts, file_path, file_content, opts = {})
           Tempfile.open 'beaker' do |tempfile|
-            File.open(tempfile.path, 'w') {|file| file.puts file_content }
+            File.open(tempfile.path, 'w') { |file| file.puts file_content }
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
@@ -296,7 +296,7 @@ module Beaker
             script_path = "beaker_powershell_script_#{Time.now.to_i}.ps1"
             create_remote_file(host, script_path, powershell_script, opts)
             native_path = script_path.tr('/', "\\")
-            on host, powershell("", {"File" => native_path }), opts
+            on host, powershell("", { "File" => native_path }), opts
           end
 
         end
@@ -401,7 +401,7 @@ module Beaker
           new_location = new_dir + '/' + filename + '.bak'
 
           if host.file_exist? old_location
-            host.exec( Command.new( "cp #{old_location} #{new_location}" ) )
+            host.exec(Command.new("cp #{old_location} #{new_location}"))
             return new_location
           else
             logger.warn "Could not backup file '#{old_location}': no such file"
@@ -453,7 +453,7 @@ module Beaker
             command = %(test -f "#{file_path}")
           end
 
-          return on(host, command, { :accept_all_exit_codes => true}).exit_code.zero?
+          return on(host, command, { :accept_all_exit_codes => true }).exit_code.zero?
         end
 
         # Check whether a directory exists on the host
@@ -568,15 +568,15 @@ module Beaker
           log_prefix = host.log_prefix
           logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{command}"
           logger.debug "  Trying command #{max_retries} times."
-          logger.debug ".", add_newline=false
+          logger.debug ".", add_newline = false
 
-          result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
+          result = on host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &block
           num_retries = 0
           until desired_exit_codes.include?(result.exit_code)
             sleep retry_interval
-            result = on host, command, {:accept_all_exit_codes => true, :silent => !verbose}, &block
+            result = on host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &block
             num_retries += 1
-            logger.debug ".", add_newline=false
+            logger.debug ".", add_newline = false
             if (num_retries > max_retries)
               logger.debug "  Command \`#{command}\` failed."
               fail("Command \`#{command}\` failed.")
@@ -588,17 +588,17 @@ module Beaker
 
         # FIX: this should be moved into host/platform
         # @visibility private
-        def run_cron_on(host, action, user, entry="", &block)
-          block_on host do | host |
+        def run_cron_on(host, action, user, entry = "", &block)
+          block_on host do |host|
             platform = host['platform']
             if platform.include?('solaris') || platform.include?('aix') then
               case action
                 when :list   then args = '-l'
                 when :remove then args = '-r'
                 when :add
-                  on( host,
+                  on(host,
                      "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
-                      &block )
+                      &block)
               end
 
             else # default for GNU/Linux platforms
@@ -606,10 +606,10 @@ module Beaker
                 when :list   then args = '-l -u'
                 when :remove then args = '-r -u'
                 when :add
-                   on( host,
+                   on(host,
                       "echo '#{entry}' > /tmp/#{user}.cron && " +
                       "crontab -u #{user} /tmp/#{user}.cron",
-                       &block )
+                       &block)
               end
             end
 

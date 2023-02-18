@@ -1,14 +1,14 @@
-[ 'hypervisor' ].each do |lib|
+['hypervisor'].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Beaker
-  #Object that holds all the provisioned and non-provisioned virtual machines.
-  #Controls provisioning, configuration, validation and cleanup of those virtual machines.
+  # Object that holds all the provisioned and non-provisioned virtual machines.
+  # Controls provisioning, configuration, validation and cleanup of those virtual machines.
   class NetworkManager
 
-    #Determine if a given host should be provisioned.
-    #Provision if:
+    # Determine if a given host should be provisioned.
+    # Provision if:
     # - only if we are running with ---provision
     # - only if we have a hypervisor
     # - only if either the specific hosts has no specification or has 'provision' in its config
@@ -35,7 +35,7 @@ module Beaker
         if @options[:hosts_file]
           @options[:log_prefix] = File.basename(@options[:hosts_file], '.yml')
         else
-          #here be the default
+          # here be the default
           @options[:log_prefix] = @options[:default_log_prefix]
         end
       end
@@ -45,15 +45,15 @@ module Beaker
       @options[:logger_sut]     = Beaker::Logger.new(File.join(@options[:log_dated_dir], @options[:log_sut_event]), { :quiet => true })
     end
 
-    #Provision all virtual machines.  Provision machines according to their set hypervisor, if no hypervisor
-    #is selected assume that the described hosts are already up and reachable and do no provisioning.
+    # Provision all virtual machines.  Provision machines according to their set hypervisor, if no hypervisor
+    # is selected assume that the described hosts are already up and reachable and do no provisioning.
     def provision
       if @hypervisors
         cleanup
       end
       @hypervisors = {}
-      #sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
-      hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select{ |k,_v| !k.to_s.include?('HOSTS')})
+      # sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
+      hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select { |k, _v| !k.to_s.include?('HOSTS') })
       @options['HOSTS'].each_key do |name|
         host_hash = @options['HOSTS'][name]
         hypervisor = host_hash['hypervisor']
@@ -62,7 +62,7 @@ module Beaker
         end
         @logger.debug "Hypervisor for #{name} is #{hypervisor}"
         @machines[hypervisor] = [] unless @machines[hypervisor]
-        hostless_options[:timesync] = host_hash[:timesync] if host_hash[:timesync]!=nil
+        hostless_options[:timesync] = host_hash[:timesync] if host_hash[:timesync] != nil
         host_itself = Beaker::Host.create(name, host_hash, hostless_options)
         host_itself.validate_setup
         @machines[hypervisor] << host_itself
@@ -79,9 +79,9 @@ module Beaker
       @hosts
     end
 
-    #Validate all provisioned machines, ensure that required packages are installed - if they are missing
-    #attempt to add them.
-    #@raise [Exception] Raise an exception if virtual machines fail to be validated
+    # Validate all provisioned machines, ensure that required packages are installed - if they are missing
+    # attempt to add them.
+    # @raise [Exception] Raise an exception if virtual machines fail to be validated
     def validate
       if @hypervisors
         @hypervisors.each_key do |type|
@@ -90,8 +90,8 @@ module Beaker
       end
     end
 
-    #Configure all provisioned machines, adding any packages or settings required for SUTs
-    #@raise [Exception] Raise an exception if virtual machines fail to be configured
+    # Configure all provisioned machines, adding any packages or settings required for SUTs
+    # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def configure
       if @hypervisors
         @hypervisors.each_key do |type|
@@ -101,7 +101,7 @@ module Beaker
     end
 
     # configure proxy on all provioned machines
-    #@raise [Exception] Raise an exception if virtual machines fail to be configured
+    # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def proxy_package_manager
       if @hypervisors
         @hypervisors.each_key do |type|
@@ -110,10 +110,10 @@ module Beaker
       end
     end
 
-    #Shut down network connections and revert all provisioned virtual machines
+    # Shut down network connections and revert all provisioned virtual machines
     def cleanup
-      #shut down connections
-      @hosts.each {|host| host.close }
+      # shut down connections
+      @hosts.each { |host| host.close }
 
       if @hypervisors
         @hypervisors.each_key do |type|

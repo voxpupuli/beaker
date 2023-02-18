@@ -1,83 +1,83 @@
 # -*- coding: utf-8 -*-
 require 'fileutils'
-[ 'test_case', 'logger' , 'test_suite', 'logger_junit'].each do |lib|
+['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Beaker
-  #Holds the output of a test suite, formats in plain text or xml
+  # Holds the output of a test suite, formats in plain text or xml
   class TestSuiteResult
     attr_accessor :start_time, :stop_time, :total_tests
 
-    #Create a {TestSuiteResult} instance.
-    #@param [Hash{Symbol=>String}] options Options for this object
-    #@option options [Logger] :logger The Logger object to report information to
-    #@param [String] name The name of the {TestSuite} that the results are for
-    def initialize( options, name )
+    # Create a {TestSuiteResult} instance.
+    # @param [Hash{Symbol=>String}] options Options for this object
+    # @option options [Logger] :logger The Logger object to report information to
+    # @param [String] name The name of the {TestSuite} that the results are for
+    def initialize(options, name)
       @options = options
       @logger = options[:logger]
       @name = name
       @test_cases = []
     end
 
-    #Add a {TestCase} to this {TestSuiteResult} instance, used in calculating {TestSuiteResult} data.
-    #@param [TestCase] test_case An individual, completed {TestCase} to be included in this set of {TestSuiteResult}.
-    def add_test_case( test_case )
+    # Add a {TestCase} to this {TestSuiteResult} instance, used in calculating {TestSuiteResult} data.
+    # @param [TestCase] test_case An individual, completed {TestCase} to be included in this set of {TestSuiteResult}.
+    def add_test_case(test_case)
       @test_cases << test_case
     end
 
-    #How many {TestCase} instances are in this {TestSuiteResult}
+    # How many {TestCase} instances are in this {TestSuiteResult}
     def test_count
       @test_cases.length
     end
 
-    #How many passed {TestCase} instances are in this {TestSuiteResult}
+    # How many passed {TestCase} instances are in this {TestSuiteResult}
     def passed_tests
       @test_cases.count { |c| c.test_status == :pass }
     end
 
-    #How many errored {TestCase} instances are in this {TestSuiteResult}
+    # How many errored {TestCase} instances are in this {TestSuiteResult}
     def errored_tests
       @test_cases.count { |c| c.test_status == :error }
     end
 
-    #How many failed {TestCase} instances are in this {TestSuiteResult}
+    # How many failed {TestCase} instances are in this {TestSuiteResult}
     def failed_tests
       @test_cases.count { |c| c.test_status == :fail }
     end
 
-    #How many skipped {TestCase} instances are in this {TestSuiteResult}
+    # How many skipped {TestCase} instances are in this {TestSuiteResult}
     def skipped_tests
       @test_cases.count { |c| c.test_status == :skip }
     end
 
-    #How many pending {TestCase} instances are in this {TestSuiteResult}
+    # How many pending {TestCase} instances are in this {TestSuiteResult}
     def pending_tests
-      @test_cases.count {|c| c.test_status == :pending}
+      @test_cases.count { |c| c.test_status == :pending }
     end
 
-    #How many {TestCase} instances failed in this {TestSuiteResult}
+    # How many {TestCase} instances failed in this {TestSuiteResult}
     def sum_failed
       failed_tests + errored_tests
     end
 
-    #Did all the {TestCase} instances in this {TestSuiteResult} pass?
+    # Did all the {TestCase} instances in this {TestSuiteResult} pass?
     def success?
       sum_failed == 0
     end
 
-    #Did one or more {TestCase} instances in this {TestSuiteResult} fail?
+    # Did one or more {TestCase} instances in this {TestSuiteResult} fail?
     def failed?
       !success?
     end
 
-    #The sum of all {TestCase} runtimes in this {TestSuiteResult}
+    # The sum of all {TestCase} runtimes in this {TestSuiteResult}
     def elapsed_time
-      @test_cases.inject(0.0) {|r, t| r + t.runtime.to_f }
+      @test_cases.inject(0.0) { |r, t| r + t.runtime.to_f }
     end
 
-    #Plain text summay of test suite
-    #@param [Logger] summary_logger The logger we will print the summary to
+    # Plain text summay of test suite
+    # @param [Logger] summary_logger The logger we will print the summary to
     def summarize(summary_logger)
 
       summary_logger.notify <<-HEREDOC
@@ -104,7 +104,7 @@ module Beaker
       - Specific Test Case Status -
         ] % [elapsed_time, average_test_time]
 
-      grouped_summary = @test_cases.group_by{|test_case| test_case.test_status }
+      grouped_summary = @test_cases.group_by { |test_case| test_case.test_status }
 
       summary_logger.notify "Failed Tests Cases:"
       (grouped_summary[:fail] || []).each do |test_case|
@@ -129,8 +129,8 @@ module Beaker
       summary_logger.notify("\n\n")
     end
 
-    #A convenience method for printing the results of a {TestCase}
-    #@param [TestCase] test_case The {TestCase} to examine and print results for
+    # A convenience method for printing the results of a {TestCase}
+    # @param [TestCase] test_case The {TestCase} to examine and print results for
     def print_test_result(test_case)
       if test_case.exception
         test_file_trace = ""
@@ -189,7 +189,7 @@ module Beaker
           suite = suites.add_element(REXML::Element.new('testsuite'))
           suite.add_attributes(
             [
-              ['name' , @name],
+              ['name', @name],
               ['tests', test_count],
               ['errors', errored_tests],
               ['failures', failed_tests],
@@ -199,13 +199,13 @@ module Beaker
               ['time', "%f" % (stop_time - start_time)],
           ])
           properties = suite.add_element(REXML::Element.new('properties'))
-          @options.each_pair do |name,value|
+          @options.each_pair do |name, value|
             property = properties.add_element(REXML::Element.new('property'))
             property.add_attributes([['name', name], ['value', value.to_s || '']])
           end
 
           test_cases_to_report = @test_cases
-          test_cases_to_report = @test_cases.sort { |x,y| y.runtime <=> x.runtime } if time_sort
+          test_cases_to_report = @test_cases.sort { |x, y| y.runtime <=> x.runtime } if time_sort
           test_cases_to_report.each do |test|
             item = suite.add_element(REXML::Element.new('testcase'))
             item.add_attributes(
@@ -221,7 +221,7 @@ module Beaker
               end
             end
 
-            #Report failures
+            # Report failures
             if test.test_status == :fail || test.test_status == :error
               status = item.add_element(REXML::Element.new('failure'))
               status.add_attribute('type', test.test_status.to_s)

@@ -71,9 +71,9 @@ module Beaker
     #
     # @return [String] This returns the fully formed command line invocation.
     def cmd_line host, cmd = @command, env = @environment, pc = @prepend_cmds, ac = @append_cmds
-      env_string = host.environment_string( env )
-      prepend_commands = host.prepend_commands( cmd, pc, :cmd_exe => @cmdexe )
-      append_commands = host.append_commands( cmd, ac, :cmd_exe => @cmdexe )
+      env_string = host.environment_string(env)
+      prepend_commands = host.prepend_commands(cmd, pc, :cmd_exe => @cmdexe)
+      append_commands = host.append_commands(cmd, ac, :cmd_exe => @cmdexe)
 
       # This will cause things like `puppet -t -v agent` which is maybe bad.
       if host[:platform]&.include?('cisco_ios_xr')
@@ -81,7 +81,7 @@ module Beaker
       else
         cmd_line_array = [env_string, prepend_commands, cmd, options_string, args_string, append_commands]
       end
-      cmd_line_array.compact.reject( &:empty? ).join( ' ' )
+      cmd_line_array.compact.reject(&:empty?).join(' ')
     end
 
     # @param [Hash] opts These are the options that the command takes
@@ -99,9 +99,9 @@ module Beaker
         end
       end
 
-      short_flags, long_flags = flags.partition {|flag| flag.to_s.length == 1 }
-      parsed_short_flags = short_flags.map {|f| "-#{f}" }
-      parsed_long_flags = long_flags.map {|f| "--#{f}" }
+      short_flags, long_flags = flags.partition { |flag| flag.to_s.length == 1 }
+      parsed_short_flags = short_flags.map { |f| "-#{f}" }
+      parsed_long_flags = long_flags.map { |f| "--#{f}" }
 
       short_opts, long_opts = {}, {}
       options.each_key do |key|
@@ -111,8 +111,8 @@ module Beaker
           long_opts[key] = options[key]
         end
       end
-      parsed_short_opts = short_opts.map {|k,v| "-#{k}=#{v}" }
-      parsed_long_opts = long_opts.map {|k,v| "--#{k}=#{v}" }
+      parsed_short_opts = short_opts.map { |k, v| "-#{k}=#{v}" }
+      parsed_long_opts = long_opts.map { |k, v| "--#{k}=#{v}" }
 
       return (parsed_short_flags +
               parsed_long_flags +
@@ -136,7 +136,7 @@ module Beaker
       opts = args.last.is_a?(Hash) ? args.pop : Hash.new
       opts['ENV'] ||= Hash.new
       opts[:cmdexe] = true
-      super( command, args, opts )
+      super(command, args, opts)
     end
   end
 
@@ -169,7 +169,7 @@ module Beaker
       end
       args = []
       opts['ENV'] ||= Hash.new
-      super( command, args, opts )
+      super(command, args, opts)
     end
   end
 end

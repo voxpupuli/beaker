@@ -1,4 +1,4 @@
-[ 'host', 'command_factory' ].each do |lib|
+['host', 'command_factory'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -35,7 +35,7 @@ module Cisco
     # @return nil
     def scp_post_operations(scp_file_actual, scp_file_target)
       if self[:platform].include?('cisco_nexus')
-        execute( "mv #{scp_file_actual} #{scp_file_target}" )
+        execute("mv #{scp_file_actual} #{scp_file_target}")
       end
       nil
     end
@@ -48,8 +48,8 @@ module Cisco
     #   constraints
     def scp_path(path)
       if self[:platform].include?('cisco_nexus')
-        @home_dir ||= execute( 'pwd' )
-        answer = "#{@home_dir}/#{File.basename( path )}"
+        @home_dir ||= execute('pwd')
+        answer = "#{@home_dir}/#{File.basename(path)}"
         answer << '/' if /\/$/.match?(path)
         return answer
       end
@@ -106,7 +106,7 @@ module Cisco
     #
     # @return [String] Command string as needed for this host
     def append_commands(command = '', _user_ac = '', _opts = {})
-      command.gsub('"') {'\\"'}
+      command.gsub('"') { '\\"' }
       # vsh commands, ntpdate or when user is root commands do not require an appended `"`
       return '"' unless /ntpdate|\/isan\/bin\/vsh/.match?(command) || self[:user] == 'root'
     end
@@ -125,7 +125,7 @@ module Cisco
     def environment_string env
       prestring = ''
       return prestring if env.empty?
-      env_array = self.environment_variable_string_pair_array( env )
+      env_array = self.environment_variable_string_pair_array(env)
       environment_string = env_array.join(' ')
 
       if self[:platform].include?('cisco_nexus')

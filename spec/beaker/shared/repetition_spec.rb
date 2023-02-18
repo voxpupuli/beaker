@@ -6,23 +6,23 @@ module Beaker
 
       describe '#repeat_for' do
         it "repeats a block for 5 seconds" do
-          allow( Time ).to receive( :now ).and_return( 0, 1, 2, 3, 4, 5, 6 )
+          allow(Time).to receive(:now).and_return(0, 1, 2, 3, 4, 5, 6)
 
-          block = double( 'block' )
-          expect( block ).to receive( :exec ).exactly( 5 ).times.and_return( false )
+          block = double('block')
+          expect(block).to receive(:exec).exactly(5).times.and_return(false)
 
-          subject.repeat_for( 5 ) do
+          subject.repeat_for(5) do
             block.exec
           end
         end
 
         it "shorts circuit if the block is complete" do
-          allow( Time ).to receive( :now ).and_return( 0, 1, 2, 3, 4, 5 )
+          allow(Time).to receive(:now).and_return(0, 1, 2, 3, 4, 5)
 
-          block = double( 'block' )
-          expect( block ).to receive( :exec ).once.and_return( true )
+          block = double('block')
+          expect(block).to receive(:exec).once.and_return(true)
 
-          subject.repeat_for( 5 ) do
+          subject.repeat_for(5) do
             block.exec
           end
 
@@ -34,23 +34,23 @@ module Beaker
         let(:block) { double("block") }
 
         it "sleeps in fibonacci increasing intervals" do
-          expect( block ).to receive( :exec ).exactly( 5 ).times.and_return( false )
-          allow( subject ).to receive( 'sleep' ).and_return( true )
+          expect(block).to receive(:exec).exactly(5).times.and_return(false)
+          allow(subject).to receive('sleep').and_return(true)
 
-          expect( subject ).to receive( :sleep ).with( 1 ).twice
-          expect( subject ).to receive( :sleep ).with( 2 ).once
-          expect( subject ).to receive( :sleep ).with( 3 ).once
-          expect( subject ).to receive( :sleep ).with( 5 ).once
-          expect( subject ).not_to receive( :sleep ).with( 8 )
+          expect(subject).to receive(:sleep).with(1).twice
+          expect(subject).to receive(:sleep).with(2).once
+          expect(subject).to receive(:sleep).with(3).once
+          expect(subject).to receive(:sleep).with(5).once
+          expect(subject).not_to receive(:sleep).with(8)
 
-          subject.repeat_fibonacci_style_for( 5 ) do
+          subject.repeat_fibonacci_style_for(5) do
             block.exec
           end
         end
 
         it "shorts circuit if the block succeeds (returns true)" do
           expect(block).to receive(:exec).and_return(false).ordered.exactly(4).times
-          expect(block).to receive(:exec).and_return( true).ordered.once
+          expect(block).to receive(:exec).and_return(true).ordered.once
 
           expect(subject).to receive(:sleep).with(1).twice
           expect(subject).to receive(:sleep).with(2).once

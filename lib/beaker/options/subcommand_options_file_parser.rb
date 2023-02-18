@@ -1,6 +1,6 @@
 module Beaker
   module Options
-    #A set of functions to read options files
+    # A set of functions to read options files
     module SubcommandOptionsParser
 
       def self.parse_options_file(options_file_path)

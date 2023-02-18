@@ -5,7 +5,7 @@ module Unix::User
     execute("getent passwd") do |result|
       users = []
       result.stdout.each_line do |line|
-        users << (line.match( /^([^:]+)/) or next)[1]
+        users << (line.match(/^([^:]+)/) or next)[1]
       end
 
       yield result if block_given?

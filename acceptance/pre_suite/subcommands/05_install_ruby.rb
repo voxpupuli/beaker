@@ -7,7 +7,7 @@ test_name "Install and configure Ruby #{ruby_version} (from #{ruby_source}) on t
 
   step 'Ensure that the default system is an el-based system' do
     # The pre-suite currently only supports el systems, and we should
-    #fail early if the default platform is not a supported platform
+    # fail early if the default platform is not a supported platform
     assert(default.platform.variant == 'el',
            "Expected the platform variant to be 'el', not #{default.platform.variant}")
   end

@@ -28,10 +28,10 @@ module Windows::Group
   end
 
   def group_present(name, &block)
-    execute("net localgroup /add \"#{name}\"", {:acceptable_exit_codes => [0,2]}, &block)
+    execute("net localgroup /add \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
   end
 
   def group_absent(name, &block)
-    execute("net localgroup /delete \"#{name}\"", {:acceptable_exit_codes => [0,2]}, &block)
+    execute("net localgroup /delete \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
   end
 end

@@ -23,7 +23,7 @@ test_name 'External Resources Test' do
     end
 
     step 'Verify el_version numbers 6,7,8 are found on the epel resource' do
-      [6,7,8].each do |el_version|
+      [6, 7, 8].each do |el_version|
         epel_url_test(el_version)
       end
     end

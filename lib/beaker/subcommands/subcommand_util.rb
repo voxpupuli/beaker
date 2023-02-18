@@ -46,9 +46,9 @@ module Beaker
       end
 
       # Print a message to the console and exit with specified exit code, defaults to 1
-      # @param [String] msg the message to output
+      #  @param [String] msg the message to output
       # @param [Hash<Object>] options to specify exit code or output stack trace
-      def self.error_with(msg, options={})
+      def self.error_with(msg, options = {})
         puts msg
         puts options[:stack_trace] if options[:stack_trace]
         exit_code = options[:exit_code] ? options[:exit_code] : 1

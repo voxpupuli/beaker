@@ -5,10 +5,10 @@ module Beaker
     #
   class Logger
 
-    #The results of the most recently run command
+    # The results of the most recently run command
     attr_accessor :last_result
 
-    #Determines the spacing that happens before an output line
+    # Determines the spacing that happens before an output line
     attr_accessor :line_prefix
 
     NORMAL         = "\e[00;00m"
@@ -80,7 +80,7 @@ module Beaker
 
       @destinations = []
 
-      @log_colors =  {
+      @log_colors = {
         :error => RED,
         :warn => BRIGHT_RED,
         :success => MAGENTA,
@@ -112,16 +112,16 @@ module Beaker
       dests = args
       dests << STDOUT unless options[:quiet]
       dests.uniq!
-      dests.each {|dest| add_destination(dest)}
+      dests.each { |dest| add_destination(dest) }
     end
 
     # Turn on/off STDOUT logging
     # @param [Boolean] off If true, disable STDOUT logging, if false enable STDOUT logging
     def quiet(off = true)
       if off
-        remove_destination(STDOUT) #turn off the noise!
+        remove_destination(STDOUT) # turn off the noise!
       else
-        remove_destination(STDOUT) #in case we are calling this in error and we are already noisy
+        remove_destination(STDOUT) # in case we are calling this in error and we are already noisy
         add_destination(STDOUT)
       end
     end
@@ -146,7 +146,7 @@ module Beaker
       when IO, StringIO
         @destinations.delete(dest)
       when String
-        @destinations.delete_if {|d| d.respond_to?(:path) and d.path == dest}
+        @destinations.delete_if { |d| d.respond_to?(:path) and d.path == dest }
       else
         raise "Unsuitable log destination #{dest.inspect}"
       end
@@ -198,7 +198,7 @@ module Beaker
       else
         # Remove invalid and undefined UTF-8 character encodings
         string = string.to_s.dup.force_encoding('UTF-8')
-        return string.to_s.chars.select{|i| i.valid_encoding?}.join
+        return string.to_s.chars.select { |i| i.valid_encoding? }.join
       end
     end
 
@@ -286,7 +286,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def warn *args
       return unless is_warn?
-      strings = args.map {|msg| "Warning: #{msg}" }
+      strings = args.map { |msg| "Warning: #{msg}" }
       optionally_color @log_colors[:warn], strings
     end
 
@@ -324,7 +324,7 @@ module Beaker
     # @param [String] lines A single or array of lines to removed color codes from
     # @return [Array<String>] An array of strings that do not have color codes
     def strip_colors_from lines
-      Array( lines ).map do |line|
+      Array(lines).map do |line|
         Logger.strip_color_codes(convert(line))
       end
     end
@@ -352,8 +352,8 @@ module Beaker
     # @param [String] backtrace (caller(1)) The backtrace to format
     # @return [String] The formatted backtrace
     def pretty_backtrace backtrace = caller(1)
-      trace = is_debug? ? backtrace : purge_harness_files_from( backtrace )
-      expand_symlinks( trace ).join "\n"
+      trace = is_debug? ? backtrace : purge_harness_files_from(backtrace)
+      expand_symlinks(trace).join "\n"
     end
 
     # Create a new StringIO log to track the current output
@@ -389,9 +389,9 @@ module Beaker
       log_dir
     end
 
-    #Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/.
-    #@param [String] text The string to remove color codes from
-    #@return [String] The text without color codes
+    # Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/.
+    # @param [String] text The string to remove color codes from
+    # @return [String] The text without color codes
     def Logger.strip_color_codes(text)
       text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
     end
@@ -403,8 +403,8 @@ module Beaker
     # @return [String] The backtrace with symlinks expanded
     def expand_symlinks backtrace
       backtrace.collect do |line|
-        file_path, line_num = line.split( ":" )
-        expanded_path = expand_symlink File.expand_path( file_path )
+        file_path, line_num = line.split(":")
+        expanded_path = expand_symlink File.expand_path(file_path)
         expanded_path.to_s + ":" + line_num.to_s
       end
     end
@@ -422,7 +422,7 @@ module Beaker
       end
 
       # And remove lines that contain our program name in them
-      mostly_purged.reject {|line| line.include? $0 }
+      mostly_purged.reject { |line| line.include? $0 }
     end
 
     # Utility method that takes a path as input, checks each component
@@ -431,7 +431,7 @@ module Beaker
     # @param [String] file_path The path to be examined
     # @return [String] The fully expanded file_path
     def expand_symlink file_path
-      file_path.split( "/" ).inject do |full_path, next_dir|
+      file_path.split("/").inject do |full_path, next_dir|
         next_path = full_path + "/" + next_dir
         if File.symlink? next_path
           link = File.readlink next_path
@@ -439,7 +439,7 @@ module Beaker
               case link
                 when /^\// then link
                 else
-                  File.expand_path( full_path + "/" + link )
+                  File.expand_path(full_path + "/" + link)
               end
         end
         next_path

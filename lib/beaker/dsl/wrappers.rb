@@ -36,7 +36,7 @@ module Beaker
       #     powershell("", {'-File' => '/path/to/file'})
       #
       # @return [Command]
-      def powershell(command, args={})
+      def powershell(command, args = {})
         ps_opts = {
           'ExecutionPolicy' => 'Bypass',
           'InputFormat'     => 'None',

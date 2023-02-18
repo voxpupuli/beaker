@@ -3,7 +3,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 1, @in_confine, "#confine_block did not run the supplied block"
@@ -17,7 +17,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 1, @in_confine, "#confine_block did not run the supplied block"
@@ -32,7 +32,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :except, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 0, @in_confine, "#confine_block did not skip the supplied block"
@@ -46,7 +46,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :except, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 0, @in_confine, "#confine_block did not skip the supplied block"
@@ -61,7 +61,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
         skip_test "this block raises a skip"
       end
     rescue Beaker::DSL::Outcomes::SkipTest => e

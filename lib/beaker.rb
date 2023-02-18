@@ -1,7 +1,7 @@
 require 'rubygems' unless defined?(Gem)
 module Beaker
 
-  %w( version platform test_suite test_suite_result result command options network_manager cli perf logger_junit subcommand ).each do |lib|
+  %w(version platform test_suite test_suite_result result command options network_manager cli perf logger_junit subcommand).each do |lib|
     begin
       require "beaker/#{lib}"
     rescue LoadError
@@ -22,13 +22,13 @@ module Beaker
   require 'beaker/hypervisor'
   #
   # How we manage connecting to hosts and hypervisors
-  #require 'beaker/connectivity'
+  # require 'beaker/connectivity'
   #
   # Our test runner, suite, test cases and steps
-  #require 'beaker/runner'
+  # require 'beaker/runner'
   #
   # Common setup and testing steps
-  #require 'beaker/steps'
+  # require 'beaker/steps'
 
   # InParallel, for executing in parallel
   require 'in_parallel'

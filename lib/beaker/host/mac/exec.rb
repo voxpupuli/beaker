@@ -1,7 +1,7 @@
 module Mac::Exec
   include Beaker::CommandFactory
 
-  def touch(file, abs=true)
+  def touch(file, abs = true)
     (abs ? '/usr/bin/touch' : 'touch') + " #{file}"
   end
 
@@ -27,7 +27,7 @@ module Mac::Exec
     ssh_service_restart()
   end
 
-  # Checks if selinux is enabled
+  #  Checks if selinux is enabled
   # selinux is not availble on OS X
   #
   # @return [Boolean] false

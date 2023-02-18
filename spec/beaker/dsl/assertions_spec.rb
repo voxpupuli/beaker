@@ -20,12 +20,12 @@ CONSOLE
 CONSOLE
 
       result = double
-      expect( result ).to receive( :nil? ).at_least( :once ).and_return( false )
-      expect( result ).to receive( :stdout ).and_return( stdout )
-      expect( result ).to receive( :output ).and_return( stdout )
-      expect( result ).to receive( :stderr ).and_return( '' )
+      expect(result).to receive(:nil?).at_least(:once).and_return(false)
+      expect(result).to receive(:stdout).and_return(stdout)
+      expect(result).to receive(:output).and_return(stdout)
+      expect(result).to receive(:stderr).and_return('')
 
-      expect( subject ).to receive( :result ).at_least( :once ).and_return( result )
+      expect(subject).to receive(:result).at_least(:once).and_return(result)
       expect { subject.assert_output expectation }.not_to raise_error
     end
 
@@ -52,12 +52,12 @@ STDERR
 EXPECT
 
       result = double
-      expect( result ).to receive( :nil? ).at_least( :once ).and_return( false )
-      expect( result ).to receive( :stdout ).and_return( stdout )
-      expect( result ).to receive( :output ).and_return( output )
-      expect( result ).to receive( :stderr ).and_return( stderr )
+      expect(result).to receive(:nil?).at_least(:once).and_return(false)
+      expect(result).to receive(:stdout).and_return(stdout)
+      expect(result).to receive(:output).and_return(output)
+      expect(result).to receive(:stderr).and_return(stderr)
 
-      expect( subject ).to receive( :result ).at_least( :once ).and_return( result )
+      expect(subject).to receive(:result).at_least(:once).and_return(result)
       expect { subject.assert_output expectation }.not_to raise_error
     end
 
@@ -75,11 +75,11 @@ OUTPUT
         STDOUT> And THIS is again on stdout
 EXPECT
         result = double
-        expect( result ).to receive( :nil? ).at_least( :once ).and_return( false )
-        expect( result ).to receive( :output ).and_return( output )
+        expect(result).to receive(:nil?).at_least(:once).and_return(false)
+        expect(result).to receive(:output).and_return(output)
 
-        expect( subject ).to receive( :result ).at_least( :once ).and_return( result )
-        expect { subject.assert_output expectation }.to raise_error( MiniTest::Assertion )
+        expect(subject).to receive(:result).at_least(:once).and_return(result)
+        expect { subject.assert_output expectation }.to raise_error(MiniTest::Assertion)
       end
     end
   end

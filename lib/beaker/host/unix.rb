@@ -1,10 +1,10 @@
-[ 'host', 'command_factory', 'command', 'options' ].each do |lib|
+['host', 'command_factory', 'command', 'options'].each do |lib|
       require "beaker/#{lib}"
 end
 
 module Unix
   class Host < Beaker::Host
-    [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
+    ['user', 'group', 'exec', 'pkg', 'file'].each do |lib|
           require "beaker/host/unix/#{lib}"
     end
 

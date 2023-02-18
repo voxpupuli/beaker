@@ -81,10 +81,10 @@ module Beaker
     #
     # @return [Rexml::Element] testsuites
     def self.get_testsuites_from_doc(doc, name, already_existed)
-      #check to see if an output file already exists, if it does add or replace test suite data
+      # check to see if an output file already exists, if it does add or replace test suite data
       if already_existed
         suites = REXML::XPath.first(doc, "testsuites")
-        #remove old data
+        # remove old data
         suites.elements.each("testsuite") do |e|
           if /#{name}/.match?(e.name)
             suites.delete_element e
@@ -107,11 +107,11 @@ module Beaker
       if already_exists
         doc           = REXML::Document.new File.open(filename)
       else
-        #no existing file, create a new one
-        doc           = REXML::Document.new
-        doc << REXML::XMLDecl.new(version="1.0", encoding="UTF-8")
+        # no existing file, create a new one
+        doc = REXML::Document.new
+        doc << REXML::XMLDecl.new(version = "1.0", encoding = "UTF-8")
         instruction_content = "type='text/xsl' href='#{File.basename(stylesheet)}'"
-        doc << REXML::Instruction.new(target="xml-stylesheet", content=instruction_content)
+        doc << REXML::Instruction.new(target = "xml-stylesheet", content = instruction_content)
       end
       return doc
     end
@@ -145,11 +145,11 @@ module Beaker
     # @param [Integer] int The number to check against
     # @return [Boolean] True, if the number corresponds to a valid xml unicode character, otherwise false
     def self.is_valid_xml(int)
-      return ( int == 0x9 or
+      return (int == 0x9 or
         int == 0xA or
-        ( int >= 0x0020 and int <= 0xD7FF ) or
-        ( int >= 0xE000 and int <= 0xFFFD ) or
-        ( int >= 0x100000 and int <= 0x10FFFF )
+        (int >= 0x0020 and int <= 0xD7FF) or
+        (int >= 0xE000 and int <= 0xFFFD) or
+        (int >= 0x100000 and int <= 0x10FFFF)
       )
     end
 

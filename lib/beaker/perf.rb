@@ -15,7 +15,7 @@ module Beaker
     # @param [Array<Host>] hosts All from the configuration
     # @param [Hash] options Options to alter execution
     # @return [void]
-    def initialize( hosts, options )
+    def initialize(hosts, options)
       @hosts = hosts
       @options = options
       @logger = options[:logger]
@@ -44,7 +44,7 @@ module Beaker
         host.exec(Command.new('sed -i s/ENABLED=\"false\"/ENABLED=\"true\"/ /etc/default/sysstat'))
       elsif /opensuse|sles/.match?(host['platform'])
         @logger.perf_output("Creating symlink from /etc/sysstat/sysstat.cron to /etc/cron.d")
-        host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'),:acceptable_exit_codes => [0,1])
+        host.exec(Command.new('ln -s /etc/sysstat/sysstat.cron /etc/cron.d'), :acceptable_exit_codes => [0, 1])
       end
       if @options[:collect_perf_data]&.include?('aggressive')
         @logger.perf_output("Enabling aggressive sysstat polling")
@@ -75,7 +75,7 @@ module Beaker
       @logger.perf_output("Getting perf data for host: " + host)
       if PERF_SUPPORTED_PLATFORMS.match?(host['platform']) # All flavours of Linux
         if not @options[:collect_perf_data]&.include?('aggressive')
-          host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"),:acceptable_exit_codes => [0,1,2])
+          host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"), :acceptable_exit_codes => [0, 1, 2])
         end
         if (defined? @options[:graphite_server] and not @options[:graphite_server].nil?) and
            (defined? @options[:graphite_perf_data] and not @options[:graphite_perf_data].nil?)
@@ -92,7 +92,7 @@ module Beaker
     def export_perf_data_to_graphite(host)
       @logger.perf_output("Sending data to Graphite server: " + @options[:graphite_server])
 
-      data = JSON.parse(host.exec(Command.new("sadf -j -- -A"),:silent => true).stdout)
+      data = JSON.parse(host.exec(Command.new("sadf -j -- -A"), :silent => true).stdout)
       hostname = host['vmhostname'].split('.')[0]
 
       data['sysstat']['hosts'].each do |host|

@@ -5,7 +5,7 @@ describe "my tests" do
   # an example using the beaker DSL
   # use http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL
   it "says hello!" do
-    result = shell( 'echo hello' )
+    result = shell('echo hello')
     expect(result.stdout).to match(/hello/)
   end
 
@@ -16,10 +16,10 @@ describe "my tests" do
   end
 
   it "can create and confirm a file" do
-    shell( 'rm -f demo.txt' )
+    shell('rm -f demo.txt')
     create_remote_file(default, 'demo.txt', 'foo\nfoo\nfoo\n')
-    shell( 'grep foo demo.txt' )
-    shell( 'grep bar demo.txt', :acceptable_exit_codes => [1] )
+    shell('grep foo demo.txt')
+    shell('grep bar demo.txt', :acceptable_exit_codes => [1])
   end
 
   it "is able to apply manifests" do
@@ -29,9 +29,9 @@ describe "my tests" do
           ensure => absent,}"
     manifest_3 = "user {'root':
           ensure => present,}"
-    apply_manifest( manifest_1, :expect_changes => true )
-    apply_manifest( manifest_2, :expect_changes => true )
-    apply_manifest( manifest_3 )
+    apply_manifest(manifest_1, :expect_changes => true)
+    apply_manifest(manifest_2, :expect_changes => true)
+    apply_manifest(manifest_3)
   end
 
   describe service('sshd') do
@@ -49,7 +49,7 @@ describe "my tests" do
   context "can use both serverspec and Beaker DSL" do
 
     it "can create a file" do
-      shell( 'rm -f /tmp/demo.txt' )
+      shell('rm -f /tmp/demo.txt')
       manifest = "file {'demofile':
         path    => '/tmp/demo.txt',
         ensure  => present,

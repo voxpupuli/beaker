@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-[ 'host', 'test', 'web', 'hocon' ].each do |lib|
+['host', 'test', 'web', 'hocon'].each do |lib|
       require "beaker/dsl/helpers/#{lib}_helpers"
 end
 

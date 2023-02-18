@@ -19,28 +19,28 @@ module Beaker
       end
 
       def exec
-        #noop
+        # noop
       end
 
     end
 
     let(:opts)     { @opts || {} }
-    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:logger)   { double('logger').as_null_object }
     let(:instance) { WindowsPkgTest.new(opts, logger) }
 
     describe '#install_package' do
       before do
-        allow( instance ).to receive( :identify_windows_architecture )
+        allow(instance).to receive(:identify_windows_architecture)
       end
 
       context 'cygwin does not exist' do
         before do
-          allow( instance ).to receive( :check_for_command ).and_return( false )
+          allow(instance).to receive(:check_for_command).and_return(false)
         end
 
         it 'curls the SSL URL for cygwin\'s installer' do
-          allow(  instance ).to receive( :execute ).with( /^setup\-x86/     ).ordered
-          instance.install_package( 'curl' )
+          allow(instance).to receive(:execute).with(/^setup\-x86/).ordered
+          instance.install_package('curl')
         end
 
       end

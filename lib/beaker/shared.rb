@@ -1,4 +1,4 @@
-[ 'repetition', 'error_handler', 'host_manager', 'timed', 'semvar', 'options_resolver', 'fog_credentials'].each do |lib|
+['repetition', 'error_handler', 'host_manager', 'timed', 'semvar', 'options_resolver', 'fog_credentials'].each do |lib|
   require "beaker/shared/#{lib}"
 end
 module Beaker

@@ -4,7 +4,7 @@ require 'beaker-hostgenerator'
 require 'beaker'
 HOSTS_PRESERVED  = 'log/latest/hosts_preserved.yml'
 
-task :default => [ 'test:spec' ]
+task :default => ['test:spec']
 
 task :test do
   Rake::Task['test:spec'].invoke
@@ -28,7 +28,7 @@ end
 
 module HarnessOptions
   defaults = {
-      :tests  => ['tests'],
+      :tests => ['tests'],
       :log_level => 'debug',
       :preserve_hosts => 'onfail',
   }
@@ -67,7 +67,7 @@ def hosts_file_env
   ENV['BEAKER_HOSTS']
 end
 
-def hosts_opt(use_preserved_hosts=false)
+def hosts_opt(use_preserved_hosts = false)
   if use_preserved_hosts
     "--hosts=#{HOSTS_PRESERVED}"
   else
@@ -143,8 +143,8 @@ Commandline options set through the above environment variables will override se
     Dir.chdir(__dir__) do
       exit_status = 1
       output = ''
-      Open3.popen3("bundle exec rspec") {|_stdin, stdout, _stderr, wait_thr|
-        while(line = stdout.gets)
+      Open3.popen3("bundle exec rspec") { |_stdin, stdout, _stderr, wait_thr|
+        while (line = stdout.gets)
           puts line
         end
         output = stdout.to_s
@@ -154,7 +154,7 @@ Commandline options set through the above environment variables will override se
         exit_status = wait_thr.value
       }
       if exit_status != /0/
-        #check for deprecation warnings
+        # check for deprecation warnings
         if output.include?('Deprecation Warnings')
           fail "DEPRECATION WARNINGS in spec generation, please fix!"
         end
@@ -166,7 +166,7 @@ Commandline options set through the above environment variables will override se
 Run the base beaker acceptance tests
 #{USAGE}
   EOS
-  task :base  => 'gen_hosts' do
+  task :base => 'gen_hosts' do
     beaker_test(:base)
   end
 
@@ -182,7 +182,7 @@ Run the subcommand beaker acceptance tests
 Run the hypervisor beaker acceptance tests
 #{USAGE}
   EOS
-  task :hypervisor  => 'gen_hosts' do
+  task :hypervisor => 'gen_hosts' do
     beaker_test(:hypervisor)
   end
 
@@ -229,9 +229,9 @@ DOCS_DIR = 'yard_docs'
 DOCS_DAEMON = "yard server --reload --daemon --docroot #{DOCS_DIR}"
 FOREGROUND_SERVER = "bundle exec yard server --reload --verbose lib/beaker --docroot #{DOCS_DIR}"
 
-def running?( cmdline )
+def running?(cmdline)
   ps = `ps -ef`
-  found = ps.lines.grep( /#{Regexp.quote( cmdline )}/ )
+  found = ps.lines.grep(/#{Regexp.quote(cmdline)}/)
   if found.length > 1
     raise StandardError, "Found multiple YARD Servers. Don't know what to do."
   end
@@ -240,7 +240,7 @@ def running?( cmdline )
   return yes, found.first
 end
 
-def pid_from( output )
+def pid_from(output)
   output.squeeze(' ').strip.split(' ')[1]
 end
 
@@ -273,10 +273,10 @@ namespace :docs do
 
   desc 'Run the documentation server in the background, alias `bg`'
   task :background => 'docs:clear' do
-    yes, output = running?( DOCS_DAEMON )
+    yes, output = running?(DOCS_DAEMON)
     if yes
       puts "Not starting a new YARD Server..."
-      puts "Found one running with pid #{pid_from( output )}."
+      puts "Found one running with pid #{pid_from(output)}."
     else
       Dir.chdir(__dir__) do
         sh "bundle exec #{DOCS_DAEMON}"
@@ -288,9 +288,9 @@ namespace :docs do
 
   desc 'Check the status of the documentation server'
   task :status do
-    yes, output = running?( DOCS_DAEMON )
+    yes, output = running?(DOCS_DAEMON)
     if yes
-      pid = pid_from( output )
+      pid = pid_from(output)
       puts "Found a YARD Server running with pid #{pid}"
     else
       puts "Could not find a running YARD Server."
@@ -299,16 +299,16 @@ namespace :docs do
 
   desc "Stop a running YARD Server"
   task :stop do
-    yes, output = running?( DOCS_DAEMON )
+    yes, output = running?(DOCS_DAEMON)
     if yes
-      pid = pid_from( output )
+      pid = pid_from(output)
       puts "Found a YARD Server running with pid #{pid}"
       `kill #{pid}`
       puts "Stopping..."
-      yes, _output = running?( DOCS_DAEMON )
+      yes, _output = running?(DOCS_DAEMON)
       if yes
         `kill -9 #{pid}`
-        yes, _output = running?( DOCS_DAEMON )
+        yes, _output = running?(DOCS_DAEMON)
         if yes
           puts "Could not Stop Server!"
         else

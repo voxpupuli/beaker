@@ -1,10 +1,10 @@
-[ 'host', 'command_factory', 'command', 'options', 'dsl/wrappers' ].each do |lib|
+['host', 'command_factory', 'command', 'options', 'dsl/wrappers'].each do |lib|
   require "beaker/#{lib}"
 end
 
 module PSWindows
   class Host < Windows::Host
-    [ 'user', 'group', 'exec', 'pkg', 'file' ].each do |lib|
+    ['user', 'group', 'exec', 'pkg', 'file'].each do |lib|
       require "beaker/host/pswindows/#{lib}"
     end
 

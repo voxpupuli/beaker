@@ -5,18 +5,18 @@ module Beaker
   describe LocalConnection do
     subject(:connection) { described_class.new(options) }
 
-    let( :options )   { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file'} }
+    let(:options)   { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file' } }
 
 
     before do
-      allow( subject ).to receive(:sleep)
+      allow(subject).to receive(:sleep)
     end
 
     describe '#self.connect' do
       it 'loggs message' do
         expect(options[:logger]).to receive(:debug).with('Local connection, no connection to start')
         connection_constructor = described_class.connect(options)
-        expect( connection_constructor ).to be_a_kind_of described_class
+        expect(connection_constructor).to be_a_kind_of described_class
       end
     end
 
@@ -30,22 +30,22 @@ module Beaker
     describe '#with_env' do
       it 'sets envs temporarily' do
         connection.connect
-        connection.with_env({'my_env' => 'my_env_value'}) do
-          expect(ENV.to_hash).to include({'my_env' => 'my_env_value'})
+        connection.with_env({ 'my_env' => 'my_env_value' }) do
+          expect(ENV.to_hash).to include({ 'my_env' => 'my_env_value' })
         end
-        expect(ENV.to_hash).not_to include({'my_env' => 'my_env_value'})
+        expect(ENV.to_hash).not_to include({ 'my_env' => 'my_env_value' })
       end
     end
 
     describe '#execute' do
       it 'calls open3' do
-        expect( Open3 ).to receive( :capture3 ).with({}, 'my_command')
+        expect(Open3).to receive(:capture3).with({}, 'my_command')
         connection.connect
         expect(connection.execute('my_command')).to be_a_kind_of Result
       end
 
       it 'sets stdout, stderr and exitcode' do
-        allow(Open3).to receive(:capture3).and_return(['stdout', 'stderr', double({exitstatus: 0})])
+        allow(Open3).to receive(:capture3).and_return(['stdout', 'stderr', double({ exitstatus: 0 })])
         connection.connect
         result = connection.execute('my_command')
         expect(result.exit_code).to eq(0)
@@ -54,7 +54,7 @@ module Beaker
       end
 
       it 'sets logger last_result' do
-        allow(Open3).to receive(:capture3).and_return(['stdout', 'stderr', double({exitstatus: 0})])
+        allow(Open3).to receive(:capture3).and_return(['stdout', 'stderr', double({ exitstatus: 0 })])
         expect(options[:logger]).to receive(:last_result=).with(an_instance_of(Result))
         connection.connect
         connection.execute('my_command')

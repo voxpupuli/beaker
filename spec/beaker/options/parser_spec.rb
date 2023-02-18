@@ -137,9 +137,9 @@ module Beaker
         end
 
         describe 'does prioritization correctly' do
-          let(:env) { @env || {:level => 'highest'} }
-          let(:argv) { @argv || {:level => 'second'} }
-          let(:host_file) { @host_file || {:level => 'third'} }
+          let(:env) { @env || { :level => 'highest' } }
+          let(:argv) { @argv || { :level => 'second' } }
+          let(:host_file) { @host_file || { :level => 'third' } }
           let(:opt_file) { @opt_file || {
               :level => 'fourth',
               :ssh => {
@@ -147,14 +147,14 @@ module Beaker
                   :user_known_hosts_file => 'hosts123',
               },
           }}
-          let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
-          let(:homedir_file) {@homedir_file || {
+          let(:subcommand_file) { @subcommand_file || { :level => 'fifth' } }
+          let(:homedir_file) { @homedir_file || {
               :level => 'sixth',
               :ssh => {
                   :auth_methods => 'auth_home_123',
               },
           }}
-          let(:project_file) {@project_file || {
+          let(:project_file) { @project_file || {
               :level => 'seventh',
               :ssh => {
                   :auth_methods => 'auth_project_123',
@@ -290,7 +290,7 @@ module Beaker
             mock_out_parsing
 
             project_file[:options_file] = 'my_options_file.rb'
-            allow(OptionsFileParser).to receive(:parse_options_file).with('my_options_file.rb').and_return(ssh: {config: true})
+            allow(OptionsFileParser).to receive(:parse_options_file).with('my_options_file.rb').and_return(ssh: { config: true })
 
             output = parser.parse_args([])
             attribution = parser.attribution
@@ -345,13 +345,13 @@ module Beaker
           end
 
           it 'returns the parser\'s output' do
-            parser.instance_variable_set( :@options, {} )
+            parser.instance_variable_set(:@options, {})
             test_value = 'blaqwetjijl,emikfuj1235'
-            allow( Beaker::Options::HostsFileParser ).to receive(
+            allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
-            ).and_return( test_value )
+            ).and_return(test_value)
             val1, _ = parser.parse_hosts_options
-            expect( val1 ).to be === test_value
+            expect(val1).to be === test_value
           end
         end
 
@@ -362,26 +362,26 @@ module Beaker
           end
 
           it 'calls beaker-hostgenerator to get hosts information' do
-            parser.instance_variable_set( :@options, {
+            parser.instance_variable_set(:@options, {
               :hosts_file => 'notafile.yml',
-            } )
-            allow( Beaker::Options::HostsFileParser ).to receive(
+            })
+            allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
-            ).and_raise( Errno::ENOENT )
+            ).and_raise(Errno::ENOENT)
 
             mock_beaker_hostgenerator_cli = Object.new
             cli_execute_return = 'job150865'
-            expect( mock_beaker_hostgenerator_cli ).to receive(
+            expect(mock_beaker_hostgenerator_cli).to receive(
               :execute,
-            ).and_return( cli_execute_return )
-            expect( BeakerHostGenerator::CLI ).to receive(
+            ).and_return(cli_execute_return)
+            expect(BeakerHostGenerator::CLI).to receive(
               :new,
             ).with(
-              [ 'notafile.yml' ],
-            ).and_return( mock_beaker_hostgenerator_cli )
-            allow( Beaker::Options::HostsFileParser ).to receive(
+              ['notafile.yml'],
+            ).and_return(mock_beaker_hostgenerator_cli)
+            allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_string,
-            ).with( cli_execute_return )
+            ).with(cli_execute_return)
             parser.parse_hosts_options
           end
 
@@ -390,26 +390,26 @@ module Beaker
             begin
               ENV['BEAKER_HYPERVISOR'] = 'docker'
 
-              parser.instance_variable_set( :@options, {
+              parser.instance_variable_set(:@options, {
                 :hosts_file => 'notafile.yml',
-              } )
-              allow( Beaker::Options::HostsFileParser ).to receive(
+              })
+              allow(Beaker::Options::HostsFileParser).to receive(
                 :parse_hosts_file,
-              ).and_raise( Errno::ENOENT )
+              ).and_raise(Errno::ENOENT)
 
               mock_beaker_hostgenerator_cli = Object.new
               cli_execute_return = 'job150865'
-              expect( mock_beaker_hostgenerator_cli ).to receive(
+              expect(mock_beaker_hostgenerator_cli).to receive(
                 :execute,
-              ).and_return( cli_execute_return )
-              expect( BeakerHostGenerator::CLI ).to receive(
+              ).and_return(cli_execute_return)
+              expect(BeakerHostGenerator::CLI).to receive(
                 :new,
               ).with(
-                [ 'notafile.yml', '--hypervisor', 'docker' ],
-              ).and_return( mock_beaker_hostgenerator_cli )
-              allow( Beaker::Options::HostsFileParser ).to receive(
+                ['notafile.yml', '--hypervisor', 'docker'],
+              ).and_return(mock_beaker_hostgenerator_cli)
+              allow(Beaker::Options::HostsFileParser).to receive(
                 :parse_hosts_string,
-              ).with( cli_execute_return )
+              ).with(cli_execute_return)
               parser.parse_hosts_options
             ensure
               ENV['BEAKER_HYPERVISOR'] = old_beaker_hypervisor
@@ -420,53 +420,53 @@ module Beaker
             options_test = {
               :hosts_file => 'not_a_file.yml',
             }
-            parser.instance_variable_set( :@options, options_test )
-            allow( Beaker::Options::HostsFileParser ).to receive(
+            parser.instance_variable_set(:@options, options_test)
+            allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
-            ).and_raise( Errno::ENOENT )
+            ).and_raise(Errno::ENOENT)
 
             mock_beaker_hostgenerator_cli = Object.new
-            allow( mock_beaker_hostgenerator_cli ).to receive( :execute )
-            allow( BeakerHostGenerator::CLI ).to receive(
+            allow(mock_beaker_hostgenerator_cli).to receive(:execute)
+            allow(BeakerHostGenerator::CLI).to receive(
               :new,
-            ).and_return( mock_beaker_hostgenerator_cli )
-            allow( Beaker::Options::HostsFileParser ).to receive( :parse_hosts_string )
+            ).and_return(mock_beaker_hostgenerator_cli)
+            allow(Beaker::Options::HostsFileParser).to receive(:parse_hosts_string)
             parser.parse_hosts_options
 
-            expect( options_test[:hosts_file_generated] ).to be true
+            expect(options_test[:hosts_file_generated]).to be true
           end
 
           it 'beaker-hostgenerator failures trigger nice prints & a rethrow' do
             options_test = {
               :hosts_file => 'not_a_file.yml',
             }
-            parser.instance_variable_set( :@options, options_test )
-            allow( Beaker::Options::HostsFileParser ).to receive(
+            parser.instance_variable_set(:@options, options_test)
+            allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
-            ).and_raise( Errno::ENOENT )
+            ).and_raise(Errno::ENOENT)
 
             mock_beaker_hostgenerator_cli = Object.new
-            expect( BeakerHostGenerator::CLI ).to receive(
+            expect(BeakerHostGenerator::CLI).to receive(
               :new,
-            ).and_return( mock_beaker_hostgenerator_cli )
-            expect( mock_beaker_hostgenerator_cli ).to receive(
+            ).and_return(mock_beaker_hostgenerator_cli)
+            expect(mock_beaker_hostgenerator_cli).to receive(
               :execute,
-            ).and_raise( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
-            expect( Beaker::Options::HostsFileParser ).not_to receive( :parse_hosts_string )
-            expect( $stdout ).to receive( :puts ).with(
+            ).and_raise(BeakerHostGenerator::Exceptions::InvalidNodeSpecError)
+            expect(Beaker::Options::HostsFileParser).not_to receive(:parse_hosts_string)
+            expect($stdout).to receive(:puts).with(
               /does not exist/,
             ).ordered
-            expect( $stderr ).to receive( :puts ).with(
+            expect($stderr).to receive(:puts).with(
               /Exiting with an Error/,
             ).ordered
 
             expect {
               parser.parse_hosts_options
-            }.to raise_error( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
+            }.to raise_error(BeakerHostGenerator::Exceptions::InvalidNodeSpecError)
           end
 
           it 'can be passed a nil hosts file and get the default hash back' do
-            parser.instance_variable_set( :@options, {} )
+            parser.instance_variable_set(:@options, {})
 
             host_options = parser.parse_hosts_options
             expect(host_options[:HOSTS]).to be === {}
@@ -479,8 +479,8 @@ module Beaker
       context "set_default_host!" do
 
         let(:roles) { @roles || [["master", "agent", "database"], ["agent"]] }
-        let(:node1) { {:node1 => {:roles => roles[0]}} }
-        let(:node2) { {:node2 => {:roles => roles[1]}} }
+        let(:node1) { { :node1 => { :roles => roles[0] } } }
+        let(:node2) { { :node2 => { :roles => roles[1] } } }
         let(:hosts) { node1.merge(node2) }
 
         it "does nothing if the default host is already set" do
@@ -519,13 +519,13 @@ module Beaker
       describe "normalize_args" do
         let(:hosts) do
           Beaker::Options::OptionsHash.new.merge({
-                                                     'HOSTS'          => {
+                                                     'HOSTS' => {
                                                          :master => {
                                                              :roles    => ["master", "agent", "arbitrary_role"],
                                                              :platform => 'el-7-x86_64',
                                                              :user     => 'root',
                                                          },
-                                                         :agent  => {
+                                                         :agent => {
                                                              :roles    => ["agent", "default", "other_abitrary_role"],
                                                              :platform => 'el-7-x86_64',
                                                              :user     => 'root',
@@ -563,14 +563,14 @@ module Beaker
         context "ssh user" do
 
           it 'uses the ssh[:user] if it is provided' do
-            hosts['HOSTS'][:master][:ssh] = {:user => 'hello'}
+            hosts['HOSTS'][:master][:ssh] = { :user => 'hello' }
             parser.instance_variable_set(:@options, hosts)
             parser.normalize_args
             expect(hosts['HOSTS'][:master][:user]).to be == 'hello'
           end
 
           it 'uses default user if there is an ssh hash, but no ssh[:user]' do
-            hosts['HOSTS'][:master][:ssh] = {:hello => 'hello'}
+            hosts['HOSTS'][:master][:ssh] = { :hello => 'hello' }
             parser.instance_variable_set(:@options, hosts)
             parser.normalize_args
             expect(hosts['HOSTS'][:master][:user]).to be == 'root'
@@ -586,10 +586,10 @@ module Beaker
       end
 
       describe '#normalize_tags!' do
-        let(:test_tag_and      ) { @test_tag_and     || [] }
-        let(:test_tag_or       ) { @test_tag_or      || [] }
-        let(:test_tag_exclude  ) { @test_tag_exclude || [] }
-        let(:options           ) {
+        let(:test_tag_and) { @test_tag_and || [] }
+        let(:test_tag_or) { @test_tag_or || [] }
+        let(:test_tag_exclude) { @test_tag_exclude || [] }
+        let(:options) {
           opts                    = Beaker::Options::OptionsHash.new
           opts[:test_tag_and]     = test_tag_and
           opts[:test_tag_or]      = test_tag_or
@@ -613,8 +613,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_test_tags!
-          expect(options[:test_tag_and]    ).to be === ['can', 'tommies', 'potatoes', 'plant']
-          expect(options[:test_tag_or]     ).to be === ['johnny', 'wordsmith', 'zebra']
+          expect(options[:test_tag_and]).to be === ['can', 'tommies', 'potatoes', 'plant']
+          expect(options[:test_tag_or]).to be === ['johnny', 'wordsmith', 'zebra']
           expect(options[:test_tag_exclude]).to be === ['joey', 'long_running', 'pants']
         end
 
@@ -625,8 +625,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_test_tags!
-          expect(options[:test_tag_and]    ).to be === []
-          expect(options[:test_tag_or]     ).to be === []
+          expect(options[:test_tag_and]).to be === []
+          expect(options[:test_tag_or]).to be === []
           expect(options[:test_tag_exclude]).to be === []
         end
 
@@ -637,8 +637,8 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_test_tags!
-          expect(options[:test_tag_and]    ).to be === ['jerry_and_tom', 'parka']
-          expect(options[:test_tag_or]     ).to be === ['clearly_they', 'neva']
+          expect(options[:test_tag_and]).to be === ['jerry_and_tom', 'parka']
+          expect(options[:test_tag_or]).to be === ['clearly_they', 'neva']
           expect(options[:test_tag_exclude]).to be === ['leet_speak', 'poland']
         end
       end
@@ -665,11 +665,11 @@ module Beaker
       describe '#get_hypervisors' do
         it 'returns a unique list' do
           hosts_dupe   = {
-              'vm1' => {hypervisor: 'hi'},
-              'vm2' => {hypervisor: 'hi'},
-              'vm3' => {hypervisor: 'bye'},
+              'vm1' => { hypervisor: 'hi' },
+              'vm2' => { hypervisor: 'hi' },
+              'vm3' => { hypervisor: 'bye' },
           }
-          hosts_single = {'vm1' => {hypervisor: 'hi'}}
+          hosts_single = { 'vm1' => { hypervisor: 'hi' } }
 
           expect(parser.get_hypervisors(hosts_dupe)).to eq(%w(hi bye))
           expect(parser.get_hypervisors(hosts_single)).to eq(%w(hi))
@@ -679,11 +679,11 @@ module Beaker
       describe '#get_roles' do
         it 'returns a unique list' do
           roles_dupe   = {
-              'vm1' => {roles: ['master']},
-              'vm2' => {roles: %w(database dashboard)},
-              'vm3' => {roles: ['bye']},
+              'vm1' => { roles: ['master'] },
+              'vm2' => { roles: %w(database dashboard) },
+              'vm3' => { roles: ['bye'] },
           }
-          roles_single = {'vm1' => {roles: ['hi']}}
+          roles_single = { 'vm1' => { roles: ['hi'] } }
 
           expect(parser.get_roles(roles_dupe)).to eq([['master'], %w(database dashboard), ['bye']])
           expect(parser.get_roles(roles_single)).to eq([['hi']])

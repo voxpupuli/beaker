@@ -71,7 +71,7 @@ module Beaker
           metadata[:case][:tags],
         )
         confines.each do |confine_details|
-          logger.notify( confine_details[:log_message] )
+          logger.notify(confine_details[:log_message])
           confine(
             confine_details[:type],
             :platform => confine_details[:platform_regex],
@@ -143,7 +143,7 @@ module Beaker
             tag_confine_array = @tag_confine_details_hash[tag]
             next if tag_confine_array.nil?
 
-            details.push( *tag_confine_array )
+            details.push(*tag_confine_array)
             # tag_confine_array.each do |confine_details|
             #   details << confine_details
             # end

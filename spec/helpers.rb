@@ -19,7 +19,7 @@ module TestFileHelpers
                     :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
                     :vsphere_server => "vsphere.labs.net",
                     :vsphere_username => "vsphere@labs.com",
-                    :vsphere_password => "supersekritpassword",} }
+                    :vsphere_password => "supersekritpassword",  } }
   end
 
 end
@@ -48,12 +48,12 @@ module HostHelpers
   HOST_PRIVATE_IP = "private.ip.for.%s"
 
   def logger
-    double( 'logger' ).as_null_object
+    double('logger').as_null_object
   end
 
   def make_opts
     opts = Beaker::Options::Presets.new
-    opts.presets.merge( opts.env_vars ).merge( { :logger => logger,
+    opts.presets.merge(opts.env_vars).merge({ :logger => logger,
                                                :host_config => 'sample.config',
                                                :type => nil,
                                                :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
@@ -71,32 +71,32 @@ module HostHelpers
                                                :openstack_network => "testing",
                                                :openstack_keyname => "nopass",
                                                :floating_ip_pool => "my_pool",
-                                               :security_group => ['my_sg', 'default'], } )
+                                               :security_group => ['my_sg', 'default'], })
   end
 
-  def generate_result (name, opts )
-    result = double( 'result' )
+  def generate_result(name, opts)
+    result = double('result')
     stdout = opts.has_key?(:stdout) ? opts[:stdout] : name
     stderr = opts.has_key?(:stderr) ? opts[:stderr] : name
-    exit_code = opts.has_key?(:exit_code) ? opts[:exit_code] :  0
+    exit_code = opts.has_key?(:exit_code) ? opts[:exit_code] : 0
     exit_code = [exit_code].flatten
-    allow( result ).to receive( :stdout ).and_return( stdout )
-    allow( result ).to receive( :stderr ).and_return( stderr )
-    allow( result ).to receive( :exit_code ).and_return( *exit_code )
+    allow(result).to receive(:stdout).and_return(stdout)
+    allow(result).to receive(:stderr).and_return(stderr)
+    allow(result).to receive(:exit_code).and_return(*exit_code)
     result
   end
 
   def make_host_opts name, opts
-    make_opts.merge( { 'HOSTS' => { name => opts } } ).merge( opts )
+    make_opts.merge({ 'HOSTS' => { name => opts } }).merge(opts)
   end
 
   def make_host name, host_hash
     host_hash = Beaker::Options::OptionsHash.new.merge(HOST_DEFAULTS.merge(host_hash))
 
-    host = Beaker::Host.create( name, host_hash, make_opts)
+    host = Beaker::Host.create(name, host_hash, make_opts)
 
-    allow(host).to receive( :exec ).and_return( generate_result( name, host_hash ) )
-    allow(host).to receive( :close )
+    allow(host).to receive(:exec).and_return(generate_result(name, host_hash))
+    allow(host).to receive(:close)
     host
   end
 
@@ -110,7 +110,7 @@ module HostHelpers
                :dns_name => HOST_DNS_NAME % name,
                :template => HOST_TEMPLATE % name,
                :box => HOST_BOX % name,
-               :box_url => HOST_BOX_URL % name, }.merge( preset_opts )
+               :box_url => HOST_BOX_URL % name, }.merge(preset_opts)
       hosts << make_host(name, opts)
     end
     hosts

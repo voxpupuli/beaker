@@ -13,19 +13,19 @@ class ClassMixedWithDSLHelpers
 end
 
 describe ClassMixedWithDSLHelpers do
-  let( :logger  ) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
-  let( :url     ) { "http://example.com" }
-  let( :name    ) { "name" }
-  let( :destdir ) { "destdir" }
+  let(:logger) { double("Beaker::Logger", :notify => nil, :debug => nil) }
+  let(:url) { "http://example.com" }
+  let(:name) { "name" }
+  let(:destdir) { "destdir" }
 
   def fetch_allows
-    allow( subject ).to receive( :logger )  { logger }
-    allow( subject ).to receive( :options ) { options }
+    allow(subject).to receive(:logger)  { logger }
+    allow(subject).to receive(:options) { options }
   end
 
   describe "#fetch_http_file" do
-    let( :presets ) { Beaker::Options::Presets.new }
-    let( :options ) { presets.presets.merge(presets.env_vars) }
+    let(:presets) { Beaker::Options::Presets.new }
+    let(:options) { presets.presets.merge(presets.env_vars) }
 
     before do
       fetch_allows
@@ -43,12 +43,12 @@ describe ClassMixedWithDSLHelpers do
       end
 
       it 'doesn\'t cache by default' do
-        expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
-        expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
+        expect(logger).to receive(:notify).with(/^Fetching/).ordered
+        expect(logger).to receive(:notify).with(/^\ \ and\ saving\ to\ /).ordered
         allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
         expect(URI).to receive(:open)
 
-        subject.fetch_http_file( url, name, destdir )
+        subject.fetch_http_file(url, name, destdir)
       end
 
       context ':cache_files_locally option is set' do
@@ -56,22 +56,22 @@ describe ClassMixedWithDSLHelpers do
           options[:cache_files_locally] = true
           allow(File).to receive(:exist?).and_return(true)
 
-          expect( logger ).to receive( :notify ).with( /^Already\ fetched\ / )
-          expect( subject ).not_to receive( :open )
+          expect(logger).to receive(:notify).with(/^Already\ fetched\ /)
+          expect(subject).not_to receive(:open)
 
-          subject.fetch_http_file( url, name, destdir )
+          subject.fetch_http_file(url, name, destdir)
         end
 
         it 'doesn\'t cache if the file doesn\'t exist locally' do
           options[:cache_files_locally] = true
           allow(File).to receive(:exist?).and_return(false)
 
-          expect( logger ).to receive( :notify ).with( /^Fetching/ ).ordered
-          expect( logger ).to receive( :notify ).with( /^\ \ and\ saving\ to\ / ).ordered
+          expect(logger).to receive(:notify).with(/^Fetching/).ordered
+          expect(logger).to receive(:notify).with(/^\ \ and\ saving\ to\ /).ordered
           allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
           expect(URI).to receive(:open)
 
-          subject.fetch_http_file( url, name, destdir )
+          subject.fetch_http_file(url, name, destdir)
         end
       end
 
@@ -81,8 +81,8 @@ describe ClassMixedWithDSLHelpers do
 
       it 'chomps correctly when given a URL ending with a / character' do
         allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
-        expect( URI ).to receive( :open ).with( "#{url}/#{name}" )
-        subject.fetch_http_file( "#{url}/", name, destdir )
+        expect(URI).to receive(:open).with("#{url}/#{name}")
+        subject.fetch_http_file("#{url}/", name, destdir)
       end
 
     end
@@ -90,9 +90,9 @@ describe ClassMixedWithDSLHelpers do
   end
 
   describe "#fetch_http_dir" do
-    let( :logger) { double("Beaker::Logger", :notify => nil , :debug => nil ) }
-    let( :result) { double(:each_line => []) }
-    let( :status) { double('Process::Status', success?: true) }
+    let(:logger) { double("Beaker::Logger", :notify => nil, :debug => nil) }
+    let(:result) { double(:each_line => []) }
+    let(:status) { double('Process::Status', success?: true) }
 
     before do
       fetch_allows

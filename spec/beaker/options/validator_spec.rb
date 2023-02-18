@@ -178,8 +178,8 @@ module Beaker
       end
 
       describe '#validate_platform' do
-        let(:valid_platform) { {'platform' => 'test1'} }
-        let(:blank_platform) { {'platform' => ''} }
+        let(:valid_platform) { { 'platform' => 'test1' } }
+        let(:blank_platform) { { 'platform' => '' } }
 
         it 'does not throw an error when host has a platform' do
           expect { validator.validate_platform(valid_platform, 'vm1') }.not_to raise_error

@@ -11,4 +11,3 @@ module Beaker
     end
   end
 end
-

@@ -3,12 +3,12 @@ require 'spec_helper'
 module Beaker
   module Options
     describe '#parse_subcommand_options' do
-      let(:home_options_file_path) {ENV['HOME']+'/.beaker/subcommand_options.yaml'}
+      let(:home_options_file_path) { ENV['HOME'] + '/.beaker/subcommand_options.yaml' }
       let(:parser_mod) { Beaker::Options::SubcommandOptionsParser }
-      let( :parser ) {parser_mod.parse_subcommand_options(argv, options_file)}
-      let( :file_parser ){parser_mod.parse_options_file({})}
-      let( :argv ) {[]}
-      let( :options_file ) {""}
+      let(:parser) { parser_mod.parse_subcommand_options(argv, options_file) }
+      let(:file_parser) { parser_mod.parse_options_file({}) }
+      let(:argv) { [] }
+      let(:options_file) { "" }
 
       it 'returns an empty OptionsHash if not executing a subcommand' do
         expect(parser).to be_kind_of(OptionsHash)
@@ -16,7 +16,7 @@ module Beaker
       end
 
       describe 'when the subcommand is init' do
-        let( :argv ) {['init']}
+        let(:argv) { ['init'] }
 
         it 'returns an empty OptionsHash' do
           expect(parser).to be_kind_of(OptionsHash)
@@ -25,8 +25,8 @@ module Beaker
       end
 
       describe 'when the subcommand is not init' do
-        let( :argv ) {['provision']}
-        let( :options_file ) {home_options_file_path}
+        let(:argv) { ['provision'] }
+        let(:options_file) { home_options_file_path }
 
         it 'calls parse_options_file with subcommand options file when home_dir is false' do
           allow(parser_mod).to receive(:execute_subcommand?).with('provision').and_return true

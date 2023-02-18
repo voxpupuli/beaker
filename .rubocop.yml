@@ -25,19 +25,10 @@ Style/TrailingCommaInArguments:
   Enabled: True
   EnforcedStyleForMultiline: comma
 
-Layout/ArgumentAlignment:
-  Enabled: false
-
 Layout/LineLength:
   Exclude:
     - acceptance/**/*.rb
     - spec/**/*.rb
-
-Layout:
-  Enabled: false
-
-Metrics:
-  Enabled: false
 
 Naming/AccessorMethodName:
   Enabled: false

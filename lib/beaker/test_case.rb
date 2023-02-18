@@ -1,4 +1,4 @@
-[ 'host', 'dsl' ].each do |lib|
+['host', 'dsl'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -41,10 +41,10 @@ module Beaker
     # Assumed to be an Array.
     attr_accessor :exports
 
-    #The full log for this test
+    # The full log for this test
     attr_accessor :sublog
 
-    #The result for the last command run
+    # The result for the last command run
     attr_accessor :last_result
 
     # A Hash of 'product name' => 'version installed', only set when
@@ -84,8 +84,8 @@ module Beaker
     #                        {Beaker::Logger}'s interface.
     # @param [Hash{Symbol=>String}] options Parsed command line options.
     # @param [String] path The local path to a test file to be executed.
-    def initialize(these_hosts, logger, options={}, path=nil)
-      @hosts   = these_hosts
+    def initialize(these_hosts, logger, options = {}, path = nil)
+      @hosts = these_hosts
       @logger = logger
       @sublog = ""
       @options = options
@@ -110,17 +110,17 @@ module Beaker
 
           set_current_step_name(nil)
 
-          #add arbitrary role methods
+          # add arbitrary role methods
           roles = []
           @hosts.each do |host|
             roles << host[:roles]
           end
-          add_role_def( roles.flatten.uniq )
+          add_role_def(roles.flatten.uniq)
 
           @runtime = Benchmark.realtime do
             begin
               test = File.read(path)
-              eval test,nil,path,1
+              eval test, nil, path, 1
             rescue FailTest, TEST_EXCEPTION_CLASS => e
               log_and_fail_test(e, :fail)
             rescue PassTest
@@ -158,7 +158,7 @@ module Beaker
         #
         # @param exception [Exception] exception to fail with
         # @param exception [Symbol] the test status
-        def log_and_fail_test(exception, status=:error)
+        def log_and_fail_test(exception, status = :error)
           logger.error("#{exception.class}: #{exception.message}")
           bt = exception.backtrace
           logger.pretty_backtrace(bt).each_line do |line|
