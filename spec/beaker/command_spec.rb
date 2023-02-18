@@ -75,7 +75,7 @@ module Beaker
     describe '#options_string' do
       it 'parses things' do
         subject.options = { :v => nil, :test => nil,
-                            :server => 'master', :a => 'answers.txt' }
+                            :server => 'master', :a => 'answers.txt', }
         expect( subject.options_string ).to match(/-v/)
         expect( subject.options_string ).to match(/--test/)
         expect( subject.options_string ).to match(/--server=master/)

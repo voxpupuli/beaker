@@ -19,7 +19,7 @@ module TestFileHelpers
                     :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
                     :vsphere_server => "vsphere.labs.net",
                     :vsphere_username => "vsphere@labs.com",
-                    :vsphere_password => "supersekritpassword"} }
+                    :vsphere_password => "supersekritpassword",} }
   end
 
 end
@@ -35,7 +35,7 @@ module HostHelpers
                     :box_url => 'http://default.box.url',
                     :image => 'default_image',
                     :flavor => 'm1.large',
-                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"'
+                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"',
   }
 
   HOST_NAME     = "vm%d"
@@ -71,7 +71,7 @@ module HostHelpers
                                                :openstack_network => "testing",
                                                :openstack_keyname => "nopass",
                                                :floating_ip_pool => "my_pool",
-                                               :security_group => ['my_sg', 'default'] } )
+                                               :security_group => ['my_sg', 'default'], } )
   end
 
   def generate_result (name, opts )
@@ -110,7 +110,7 @@ module HostHelpers
                :dns_name => HOST_DNS_NAME % name,
                :template => HOST_TEMPLATE % name,
                :box => HOST_BOX % name,
-               :box_url => HOST_BOX_URL % name }.merge( preset_opts )
+               :box_url => HOST_BOX_URL % name, }.merge( preset_opts )
       hosts << make_host(name, opts)
     end
     hosts
@@ -127,7 +127,7 @@ module PlatformHelpers
   DEBIANPLATFORMS = ['debian',
                      'ubuntu',
                      'cumulus',
-                     'huaweios']
+                     'huaweios',]
 
 
   FEDORASYSTEMD    = (14..39).to_a.collect! { |i| "fedora-#{i}" }
@@ -141,7 +141,7 @@ module PlatformHelpers
                       'el-8',
                       'centos-8',
                       'redhat-8',
-                      'oracle-8'].concat(FEDORASYSTEMD)
+                      'oracle-8',].concat(FEDORASYSTEMD)
 
   FEDORASYSTEMV    = (1..13).to_a.collect! { |i| "fedora-#{i}" }
 
@@ -151,5 +151,5 @@ module PlatformHelpers
                       'redhat',
                       'oracle',
                       'scientific',
-                      'eos'].concat(FEDORASYSTEMV)
+                      'eos',].concat(FEDORASYSTEMV)
 end

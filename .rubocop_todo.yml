@@ -281,3 +281,895 @@ Security/Eval:
 Security/Open:
   Exclude:
     - 'lib/beaker/dsl/helpers/web_helpers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: separated, grouped
+Style/AccessorGrouping:
+  Exclude:
+    - 'lib/beaker/ssh_connection.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: prefer_alias, prefer_alias_method
+Style/Alias:
+  Exclude:
+    - 'lib/beaker/dsl/assertions.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/options/validator.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: always, conditionals
+Style/AndOr:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: percent_q, bare_percent
+Style/BarePercentLiterals:
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/run_cron_on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/scp_from_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/shell_test.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, ProceduralMethods, FunctionalMethods, AllowedMethods, AllowedPatterns, AllowBracesOnProceduralOneLiners, BracesRequiredMethods.
+# SupportedStyles: line_count_based, semantic, braces_for_chaining, always_braces
+# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
+# FunctionalMethods: let, let!, subject, watch
+# AllowedMethods: lambda, proc, it
+Style/BlockDelimiters:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowOnConstant, AllowOnSelfClass.
+Style/CaseEquality:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/CaseLikeIf:
+  Exclude:
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/perf.rb'
+    - 'lib/beaker/tasks/quick_start.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: nested, compact
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: is_a?, kind_of?
+Style/ClassCheck:
+  Exclude:
+    - 'lib/beaker/dsl/roles.rb'
+    - 'lib/beaker/logger.rb'
+    - 'spec/matchers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowedMethods, AllowedPatterns.
+# AllowedMethods: ==, equal?, eql?
+Style/ClassEqualityComparison:
+  Exclude:
+    - 'acceptance/tests/subcommands/init.rb'
+    - 'lib/beaker/host.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/ClassMethods:
+  Exclude:
+    - 'lib/beaker/logger.rb'
+
+Style/CombinableLoops:
+  Exclude:
+    - 'lib/beaker/host_prebuilt_steps.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: Keywords, RequireColon.
+# Keywords: TODO, FIXME, OPTIMIZE, HACK, REVIEW, NOTE
+Style/CommentAnnotation:
+  Exclude:
+    - 'lib/beaker/host/pswindows/pkg.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, SingleLineConditionsOnly, IncludeTernaryExpressions.
+# SupportedStyles: assign_to_condition, assign_inside_condition
+Style/ConditionalAssignment:
+  Exclude:
+    - 'lib/beaker/command.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/dsl/wrappers.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host/cisco.rb'
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/windows/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/logger_junit.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/options/parser.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/DefWithParentheses:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/Dir:
+  Exclude:
+    - 'Rakefile'
+    - 'spec/beaker/options/hosts_file_parser_spec.rb'
+    - 'spec/beaker/options/options_file_parser_spec.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+    - 'spec/beaker/options/validator_spec.rb'
+
+Style/DocumentDynamicEvalDefinition:
+  Exclude:
+    - 'lib/beaker/command.rb'
+
+# Configuration parameters: AllowedConstants.
+Style/Documentation:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/EachWithObject:
+  Exclude:
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/options/presets.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/EmptyCaseCondition:
+  Exclude:
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/shared/host_manager.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, AllowComments.
+# SupportedStyles: empty, nil, both
+Style/EmptyElse:
+  Exclude:
+    - 'acceptance/tests/base/host/packages_unix.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/host/unix.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/EmptyLiteral:
+  Exclude:
+    - 'lib/beaker/command.rb'
+    - 'lib/beaker/host/mac/group.rb'
+    - 'lib/beaker/tasks/quick_start.rb'
+    - 'spec/beaker/command_spec.rb'
+    - 'spec/beaker/dsl/roles_spec.rb'
+    - 'spec/beaker/perf_spec.rb'
+    - 'spec/beaker/test_suite_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: compact, expanded
+Style/EmptyMethod:
+  Exclude:
+    - 'lib/beaker/host/pswindows/exec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/Encoding:
+  Exclude:
+    - 'beaker.gemspec'
+    - 'lib/beaker/dsl/helpers.rb'
+    - 'lib/beaker/dsl/helpers/hocon_helpers.rb'
+    - 'lib/beaker/test_suite.rb'
+    - 'lib/beaker/test_suite_result.rb'
+    - 'spec/beaker/logger_junit_spec.rb'
+    - 'spec/beaker/logger_spec.rb'
+    - 'spec/beaker/network_manager_spec.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/EnvHome:
+  Exclude:
+    - 'acceptance/config/acceptance-options.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'lib/beaker/options/presets.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+    - 'spec/beaker/options/subcommand_options_parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/EvalWithLocation:
+  Exclude:
+    - 'lib/beaker/command.rb'
+    - 'spec/beaker/shared/host_manager_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/ExplicitBlockArgument:
+  Exclude:
+    - 'lib/beaker/dsl/structure.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowedVars.
+Style/FetchEnvVar:
+  Exclude:
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'acceptance/config/acceptance-options.rb'
+    - 'acceptance/pre_suite/subcommands/05_install_ruby.rb'
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'lib/beaker/options/presets.rb'
+    - 'lib/beaker/tasks/rake_task.rb'
+    - 'spec/beaker/logger_spec.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+    - 'spec/beaker/options/subcommand_options_parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/FileWrite:
+  Exclude:
+    - 'lib/beaker/options/options_hash.rb'
+    - 'lib/beaker/subcommand.rb'
+    - 'spec/beaker/test_case_spec.rb'
+    - 'spec/beaker/test_suite_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: format, sprintf, percent
+Style/FormatString:
+  Exclude:
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host/unix/file.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'lib/beaker/test_suite.rb'
+    - 'lib/beaker/test_suite_result.rb'
+    - 'spec/beaker/host_prebuilt_steps_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: MaxUnannotatedPlaceholdersAllowed, AllowedMethods, AllowedPatterns.
+# SupportedStyles: annotated, template, unannotated
+Style/FormatStringToken:
+  EnforcedStyle: unannotated
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: always, always_true, never
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/GlobalStdStream:
+  Exclude:
+    - 'acceptance/lib/helpers/test_helper.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/test_suite.rb'
+    - 'spec/beaker/logger_spec.rb'
+    - 'spec/beaker/perf_spec.rb'
+    - 'spec/beaker/shared/host_manager_spec.rb'
+    - 'spec/beaker/subcommand/subcommand_util_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: MinBodyLength, AllowConsecutiveConditionals.
+Style/GuardClause:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: AllowedReceivers.
+# AllowedReceivers: Thread.current
+Style/HashEachMethods:
+  Exclude:
+    - 'lib/beaker/dsl/test_tagging.rb'
+    - 'lib/beaker/perf.rb'
+    - 'lib/beaker/test_suite_result.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+    - 'spec/beaker/subcommand/subcommand_util_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, EnforcedShorthandSyntax, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
+# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
+# SupportedShorthandSyntax: always, never, either, consistent
+Style/HashSyntax:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/IdenticalConditionalBranches:
+  Exclude:
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'spec/beaker/host_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowIfModifier.
+Style/IfInsideElse:
+  Exclude:
+    - 'Rakefile'
+    - 'lib/beaker/dsl/roles.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/shared/host_manager.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/IfUnlessModifier:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/IfUnlessModifierOfIfUnless:
+  Exclude:
+    - 'lib/beaker/logger.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: AllowedMethods.
+# AllowedMethods: nonzero?
+Style/IfWithBooleanLiteralBranches:
+  Exclude:
+    - 'Rakefile'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: InverseMethods, InverseBlocks.
+Style/InverseMethods:
+  Exclude:
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/options/parser.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: line_count_dependent, lambda, literal
+Style/Lambda:
+  Exclude:
+    - 'spec/beaker/dsl/structure_spec.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/LineEndConcatenation:
+  Exclude:
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'spec/matchers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowedMethods, AllowedPatterns.
+Style/MethodCallWithoutArgsParentheses:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: require_parentheses, require_no_parentheses, require_no_parentheses_except_multiline
+Style/MethodDefParentheses:
+  Enabled: false
+
+Style/MixinUsage:
+  Exclude:
+    - 'lib/beaker/shared.rb'
+
+Style/MultilineBlockChain:
+  Exclude:
+    - 'lib/beaker/host/unix/pkg.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/MultilineIfModifier:
+  Exclude:
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/MultilineIfThen:
+  Exclude:
+    - 'acceptance/fixtures/module/spec/spec_helper_acceptance.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/tasks/quick_start.rb'
+    - 'lib/beaker/test_suite.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/MultilineTernaryOperator:
+  Exclude:
+    - 'lib/beaker/tasks/rake_task.rb'
+    - 'spec/beaker/host/cisco_spec.rb'
+    - 'spec/matchers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowMethodComparison.
+Style/MultipleComparison:
+  Exclude:
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/host/unix/file.rb'
+    - 'spec/beaker/host/unix/pkg_spec.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: literals, strict
+Style/MutableConstant:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: both, prefix, postfix
+Style/NegatedIf:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/NegatedIfElseCondition:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/shared/host_manager.rb'
+    - 'lib/beaker/tasks/quick_start.rb'
+    - 'spec/beaker/host_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: both, prefix, postfix
+Style/NegatedUnless:
+  Exclude:
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/NestedModifier:
+  Exclude:
+    - 'lib/beaker/logger.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowedMethods.
+# AllowedMethods: be, be_a, be_an, be_between, be_falsey, be_kind_of, be_instance_of, be_truthy, be_within, eq, eql, end_with, include, match, raise_error, respond_to, start_with
+Style/NestedParenthesizedCalls:
+  Exclude:
+    - 'acceptance/config/base/acceptance-options.rb'
+    - 'acceptance/config/hypervisor/acceptance-options.rb'
+    - 'acceptance/config/subcommands/acceptance-options.rb'
+    - 'spec/beaker/command_spec.rb'
+    - 'spec/beaker/ssh_connection_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, MinBodyLength.
+# SupportedStyles: skip_modifier_ifs, always
+Style/Next:
+  Exclude:
+    - 'acceptance/tests/base/host/packages.rb'
+    - 'acceptance/tests/base/host/packages_unix.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: predicate, comparison
+Style/NilComparison:
+  Exclude:
+    - 'lib/beaker/command.rb'
+    - 'spec/beaker/options/hosts_file_parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: IncludeSemanticChanges.
+Style/NonNilCheck:
+  Exclude:
+    - 'lib/beaker/host/mac/group.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/tasks/rake_task.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/Not:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: Strict, AllowedNumbers, AllowedPatterns.
+Style/NumericLiterals:
+  MinDigits: 6
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle, AllowedMethods, AllowedPatterns.
+# SupportedStyles: predicate, comparison
+Style/NumericPredicate:
+  Enabled: false
+
+Style/OpenStructUse:
+  Exclude:
+    - 'spec/helpers.rb'
+
+# Configuration parameters: AllowedMethods.
+# AllowedMethods: respond_to_missing?
+Style/OptionalBooleanParameter:
+  Exclude:
+    - 'Rakefile'
+    - 'lib/beaker/host/mac/exec.rb'
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/unix/file.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+    - 'lib/beaker/host/windows/file.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/ParallelAssignment:
+  Exclude:
+    - 'acceptance/pre_suite/subcommands/05_install_ruby.rb'
+    - 'lib/beaker/command.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/options/presets.rb'
+    - 'lib/beaker/shared/repetition.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowSafeAssignment, AllowInMultilineConditions.
+Style/ParenthesesAroundCondition:
+  Exclude:
+    - 'acceptance/tests/base/host/packages.rb'
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/tasks/rake_task.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: PreferredDelimiters.
+Style/PercentLiteralDelimiters:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: lower_case_q, upper_case_q
+Style/PercentQLiterals:
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/run_cron_on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/shell_test.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/PerlBackrefs:
+  Exclude:
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: short, verbose
+Style/PreferredHashMethods:
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/hocon_helpers_test.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/dsl/wrappers.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/options/hosts_file_parser.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'spec/beaker/options/presets_spec.rb'
+    - 'spec/helpers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/Proc:
+  Exclude:
+    - 'spec/beaker/shared/host_manager_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: same_as_string_literals, single_quotes, double_quotes
+Style/QuotedSymbols:
+  Exclude:
+    - 'lib/beaker/options/presets.rb'
+    - 'spec/beaker/options/hosts_file_parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, AllowedCompactTypes.
+# SupportedStyles: compact, exploded
+Style/RaiseArgs:
+  Exclude:
+    - 'lib/beaker/logger_junit.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/ssh_connection.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: Methods.
+Style/RedundantArgument:
+  Exclude:
+    - 'Rakefile'
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/host/aix/user.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantAssignment:
+  Exclude:
+    - 'lib/beaker/host.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantBegin:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantCondition:
+  Exclude:
+    - 'lib/beaker/command.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/subcommands/subcommand_util.rb'
+    - 'spec/beaker/dsl/helpers/test_helpers_spec.rb'
+    - 'spec/beaker/host/aix_spec.rb'
+    - 'spec/beaker/host/cisco_spec.rb'
+    - 'spec/beaker/host/eos_spec.rb'
+    - 'spec/beaker/host/mac_spec.rb'
+    - 'spec/beaker/host/pswindows_spec.rb'
+    - 'spec/beaker/host/unix_spec.rb'
+    - 'spec/beaker/host/windows_spec.rb'
+    - 'spec/beaker/host_spec.rb'
+    - 'spec/beaker/network_manager_spec.rb'
+    - 'spec/beaker/test_suite_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantException:
+  Exclude:
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'spec/matchers.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/RedundantInterpolation:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/host/mac/exec.rb'
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/tasks/quick_start.rb'
+    - 'spec/beaker/host/mac/group_spec.rb'
+    - 'spec/beaker/host/mac/user_spec.rb'
+    - 'spec/beaker/host/unix/pkg_spec.rb'
+    - 'spec/beaker/host/unix_spec.rb'
+    - 'spec/beaker/host_spec.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantParentheses:
+  Exclude:
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'spec/beaker/dsl/structure_spec.rb'
+    - 'spec/beaker/host_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantPercentQ:
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/run_cron_on_test.rb'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/shell_test.rb'
+    - 'beaker.gemspec'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantRegexpEscape:
+  Exclude:
+    - 'lib/beaker/platform.rb'
+    - 'spec/beaker/host/aix_spec.rb'
+    - 'spec/beaker/host/cisco_spec.rb'
+    - 'spec/beaker/host/eos_spec.rb'
+    - 'spec/beaker/host/mac/group_spec.rb'
+    - 'spec/beaker/host/pswindows_spec.rb'
+    - 'spec/beaker/host/unix/file_spec.rb'
+    - 'spec/beaker/host/unix/pkg_spec.rb'
+    - 'spec/beaker/host/unix_spec.rb'
+    - 'spec/beaker/host/windows/pkg_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowMultipleReturnValues.
+Style/RedundantReturn:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantSelf:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/RedundantStringEscape:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'spec/beaker/host/unix/file_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, AllowInnerSlashes.
+# SupportedStyles: slashes, percent_r, mixed
+Style/RegexpLiteral:
+  Exclude:
+    - 'Gemfile'
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/run_cron_on_test.rb'
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/host/cisco.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'spec/beaker/host/windows/exec_spec.rb'
+    - 'spec/beaker/host_spec.rb'
+    - 'spec/beaker/options/validator_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: implicit, explicit
+Style/RescueStandardError:
+  Exclude:
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/dsl/helpers/web_helpers.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/local_connection.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'lib/beaker/test_suite.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods, MaxChainLength.
+# AllowedMethods: present?, blank?, presence, try, try!
+Style/SafeNavigation:
+  Exclude:
+    - 'lib/beaker/cli.rb'
+    - 'lib/beaker/dsl/roles.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/SelectByRegexp:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/SelfAssignment:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowAsExpressionSeparator.
+Style/Semicolon:
+  Exclude:
+    - 'acceptance/fixtures/module/spec/spec_helper_acceptance.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/ssh_connection.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: only_raise, only_fail, semantic
+Style/SignalException:
+  Exclude:
+    - 'Rakefile'
+    - 'acceptance/tests/base/dsl/helpers/hocon_helpers_test.rb'
+    - 'acceptance/tests/base/dsl/platform_tag_confiner_test.rb'
+    - 'acceptance/tests/base/dsl/structure_test.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'spec/beaker/dsl/test_tagging_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowModifier.
+Style/SoleNestedConditional:
+  Exclude:
+    - 'Rakefile'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host/cisco.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/logger.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: RequireEnglish, EnforcedStyle.
+# SupportedStyles: use_perl_names, use_english_names, use_builtin_english_names
+Style/SpecialGlobalVars:
+  Exclude:
+    - 'lib/beaker/dsl/helpers/web_helpers.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/options/command_line_parser.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'lib/beaker/tasks/rake_task.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/StderrPuts:
+  Exclude:
+    - 'acceptance/lib/helpers/test_helper.rb'
+    - 'lib/beaker/options/parser.rb'
+    - 'lib/beaker/tasks/rake_task.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: Mode.
+Style/StringConcatenation:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
+# SupportedStyles: single_quotes, double_quotes
+Style/StringLiterals:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: single_quotes, double_quotes
+Style/StringLiteralsInInterpolation:
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/deploy_package_repo_test.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/perf.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: MinSize.
+# SupportedStyles: percent, brackets
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: AllowMethodsWithArguments, AllowedMethods, AllowedPatterns, AllowComments.
+# AllowedMethods: define_method
+Style/SymbolProc:
+  Exclude:
+    - 'acceptance/tests/base/host/packages_unix.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/network_manager.rb'
+    - 'lib/beaker/result.rb'
+    - 'lib/beaker/shared/host_manager.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, AllowSafeAssignment.
+# SupportedStyles: require_parentheses, require_no_parentheses, require_parentheses_when_complex
+Style/TernaryParentheses:
+  Exclude:
+    - 'lib/beaker/host/unix/file.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowNamedUnderscoreVariables.
+Style/TrailingUnderscoreVariable:
+  Exclude:
+    - 'lib/beaker/host/eos.rb'
+    - 'spec/beaker/host/unix_spec.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, IgnoreClassMethods, AllowedMethods.
+# AllowedMethods: to_ary, to_a, to_c, to_enum, to_h, to_hash, to_i, to_int, to_io, to_open, to_path, to_proc, to_r, to_regexp, to_str, to_s, to_sym
+Style/TrivialAccessors:
+  Exclude:
+    - 'spec/beaker/host/unix/file_spec.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/UnlessElse:
+  Exclude:
+    - 'lib/beaker/ssh_connection.rb'
+    - 'lib/beaker/test_suite_result.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Style/WhileUntilDo:
+  Exclude:
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+    - 'lib/beaker/host_prebuilt_steps.rb'
+    - 'lib/beaker/shared/repetition.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'lib/beaker/test_suite.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, MinSize, WordRegex.
+# SupportedStyles: percent, brackets
+Style/WordArray:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: forbid_for_all_comparison_operators, forbid_for_equality_operators_only, require_for_all_comparison_operators, require_for_equality_operators_only
+Style/YodaCondition:
+  Exclude:
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'acceptance/tests/base/host_prebuilt_steps/ssh_environment_test.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/ZeroLengthPredicate:
+  Exclude:
+    - 'acceptance/tests/base/dsl/platform_tag_confiner_test.rb'
+    - 'lib/beaker/dsl/roles.rb'
+    - 'lib/beaker/dsl/test_tagging.rb'
+    - 'lib/beaker/options/validator.rb'
+    - 'lib/beaker/shared/host_manager.rb'

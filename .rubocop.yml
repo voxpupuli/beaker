@@ -13,6 +13,18 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: false
 
+Style/TrailingCommaInHashLiteral:
+  Enabled: True
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: True
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArguments:
+  Enabled: True
+  EnforcedStyleForMultiline: comma
+
 Layout/ArgumentAlignment:
   Enabled: false
 
@@ -25,9 +37,6 @@ Layout:
   Enabled: false
 
 Metrics:
-  Enabled: false
-
-Style:
   Enabled: false
 
 Naming/AccessorMethodName:

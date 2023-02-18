@@ -45,57 +45,57 @@ describe Beaker do
 
   # Non-cygwin Windows
   it_behaves_like 'enables_root_login', 'windows', [
-    "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"
+    "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config",
   ], true
 
   # FreeBSD
   it_behaves_like 'enables_root_login', 'freesbd', [
-    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""
+    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
   ], true
 
   it_behaves_like 'enables_root_login', 'osx-10.10', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
-    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config"
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config",
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.11', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.12', [
       "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
+      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.13', [
       "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config"
+      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   # Solaris
   it_behaves_like 'enables_root_login', 'solaris-10', [
     "sudo -E svcadm restart network/ssh",
-    "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"
+    "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
   ], true
 
   it_behaves_like 'enables_root_login', 'solaris-11', [
     "sudo -E svcadm restart network/ssh",
     "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
-    "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"
+    "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi",
   ], true
 
   ['debian','ubuntu','cumulus'].each do | deb_like |
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-      "sudo su -c \"service ssh restart\""
+      "sudo su -c \"service ssh restart\"",
     ]
   end
 
   ['centos','el-','redhat','fedora','eos'].each do | redhat_like |
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-      "sudo -E /sbin/service sshd reload"
+      "sudo -E /sbin/service sshd reload",
     ]
   end
 
@@ -572,7 +572,7 @@ describe Beaker do
       } )
       opts = {
         :env1_key => :env1_value,
-        :env2_key => :env2_value
+        :env2_key => :env2_value,
       }
       allow( host ).to receive( :skip_set_env? ).and_return('f5 say NO' )
 
@@ -595,7 +595,7 @@ describe Beaker do
       } )
       opts = {
         :env1_key => :env1_value,
-        :env2_key => :env2_value
+        :env2_key => :env2_value,
       }
       allow( host ).to receive( :skip_set_env? ).and_return('cisco say NO' )
 
@@ -618,7 +618,7 @@ describe Beaker do
         } )
       opts = {
         :env1_key => :env1_value,
-        :env2_key => :env2_value
+        :env2_key => :env2_value,
       }
 
       allow( host ).to receive( :skip_set_env? ).and_return( nil )

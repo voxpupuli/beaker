@@ -62,7 +62,7 @@ module Beaker
           file = 'C:\path\to\file'
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
           expect(instance).to receive(:execute).with(
-            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'"
+            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'",
           )
           instance.modified_at(file, '197001010000')
         end
@@ -76,7 +76,7 @@ module Beaker
           expect(instance).to receive(:execute).with("powershell Test-Path #{file} -PathType Leaf")
           expect(instance).to receive(:execute).with("powershell New-Item -ItemType file #{file}")
           expect(instance).to receive(:execute).with(
-            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'"
+            "powershell (gci C:\\path\\to\\file).LastWriteTime = Get-Date -Year '1970'-Month '1'-Day '1'-Hour '0'-Minute '0'-Second '0'",
           )
           instance.modified_at(file, '197001010000')
         end

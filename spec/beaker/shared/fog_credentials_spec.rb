@@ -49,7 +49,7 @@ module Beaker
         it 'returns the named credential section' do
           data = {
             :default          => { :vmpooler_token => "wrong_token"},
-            :other_credential => { :vmpooler_token => "correct_token" }
+            :other_credential => { :vmpooler_token => "correct_token" },
           }
 
           expect( YAML ).to receive( :load_file ) { data }
@@ -61,7 +61,7 @@ module Beaker
           ENV['FOG_CREDENTIAL'] = 'other_credential'
           data = {
             :default         => { :vmpooler_token => "wrong_token"},
-            :other_credential => { :vmpooler_token => "correct_token" }
+            :other_credential => { :vmpooler_token => "correct_token" },
           }
 
           expect( YAML ).to receive( :load_file ) { data }
@@ -74,7 +74,7 @@ module Beaker
           ENV['FOG_CREDENTIAL'] = 'other_credential'
           data = {
             :default         => { :vmpooler_token => "wrong_token"},
-            :other_credential => { :vmpooler_token => "correct_token" }
+            :other_credential => { :vmpooler_token => "correct_token" },
           }
 
           expect( YAML ).to receive( :load_file ) { data }
@@ -87,7 +87,7 @@ module Beaker
           ENV['FOG_RC'] = '/some/other/path/to/.fog'
           data = {
             :default         => { :vmpooler_token => "correct_token"},
-            :other_credential => { :vmpooler_token => "wrong_token" }
+            :other_credential => { :vmpooler_token => "wrong_token" },
           }
 
           expect( YAML ).to receive( :load_file ).with( '/some/other/path/to/.fog' ) { data }

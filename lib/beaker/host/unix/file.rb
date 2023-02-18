@@ -134,7 +134,7 @@ module Unix::File
         variant,
         fedora_prefix,
         version,
-        arch
+        arch,
       ]
     when /debian|ubuntu|cumulus|huaweios/
       codename = variant if variant == 'cumulus' || variant == 'huaweios'

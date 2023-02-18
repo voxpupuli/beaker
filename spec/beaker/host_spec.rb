@@ -186,7 +186,7 @@ module Beaker
         result.exit_code = 7
         opts = {
           :acceptable_exit_codes => [0, 1],
-          :accept_all_exit_codes => false
+          :accept_all_exit_codes => false,
         }
 
         expect { host.exec(command, opts) }.to raise_error(Beaker::Host::CommandFailure)
@@ -196,7 +196,7 @@ module Beaker
         result.exit_code = 7
         opts = {
           :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true
+          :accept_all_exit_codes  => true,
         }
         allow( host.logger ).to receive( :warn )
 
@@ -207,7 +207,7 @@ module Beaker
         result.exit_code = 1
         opts = {
           :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true
+          :accept_all_exit_codes  => true,
         }
         expect( host.logger ).to receive( :warn ).with( /overrides/ )
 
@@ -291,7 +291,7 @@ module Beaker
                                   "-NoLogo",
                                   "-NoProfile",
                                   "-NonInteractive",
-                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'"])
+                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
         expect( host.mkdir_p('test/test/test') ).to be == true
 
       end
@@ -351,7 +351,7 @@ module Beaker
 
         allow( logger ).to receive(:trace)
         expect( conn ).to receive(:scp_to).ordered.with(
-          *conn_args
+          *conn_args,
         ).and_return(Beaker::Result.new(host, 'output!'))
         allow( conn ).to receive(:ip).and_return(host['ip'])
         allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
@@ -377,7 +377,7 @@ module Beaker
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
               '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',              ]
 
           @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
@@ -447,7 +447,7 @@ module Beaker
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
               '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',              ]
 
           @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
@@ -504,7 +504,7 @@ module Beaker
             '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
             '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
             '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-            '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',              ]
 
           @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
@@ -637,7 +637,7 @@ module Beaker
         @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
         create_files(['source'])
         args = [ 'source', 'target',
-                 {:ignore => ['.bundle']} ]
+                 {:ignore => ['.bundle']}, ]
         # since were using fakefs we need to create the file and directories
         FileUtils.mkdir_p('/var/folders/v0/')
         FileUtils.touch('/var/folders/v0/centos-64-x6420150625-48025-lu3u86')
@@ -650,7 +650,7 @@ module Beaker
         @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
         create_files(['source'])
         args = [ 'source', 'target',
-                 {:ignore => ['.bundle']} ]
+                 {:ignore => ['.bundle']}, ]
         rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
         expect(host.do_rsync_to(*args).success?).to eq(true)

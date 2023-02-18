@@ -104,7 +104,7 @@ EOS
     it 'makes the correct call to dscacheutil' do
       result.stdout = puppet1
       expect( subject ).to receive( :execute ).with(
-        /^dscacheutil\ \-q\ group\ \-a\ name\ /
+        /^dscacheutil\ \-q\ group\ \-a\ name\ /,
       ).once.and_yield(result)
       expect( subject ).not_to receive( :gid_next )
       subject.group_present( 'puppet1' )

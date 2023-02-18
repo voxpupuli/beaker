@@ -191,14 +191,14 @@ module Beaker
               :debug=> Beaker::Logger::WHITE,
               :trace=> Beaker::Logger::BRIGHT_YELLOW,
               :perf=> Beaker::Logger::BRIGHT_MAGENTA,
-              :host=> Beaker::Logger::YELLOW
+              :host=> Beaker::Logger::YELLOW,
           }
         end
 
         context 'when passing in log_color options' do
           let(:log_colors) {
             {
-                :error => "\e[00;30m"
+                :error => "\e[00;30m",
             }
           }
 
@@ -231,7 +231,7 @@ module Beaker
           context 'when overriding default log colors' do
             let(:log_colors) {
               {
-                  :error => "\e[00;30m"
+                  :error => "\e[00;30m",
               }
             }
 

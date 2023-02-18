@@ -418,7 +418,7 @@ module Beaker
         def win_ads_path(file_path)
           ads_path = {
             path: file_path,
-            ads: nil
+            ads: nil,
           }
 
           split_path = file_path.split(':')
@@ -531,7 +531,7 @@ module Beaker
           opts = {
             :desired_exit_codes => desired_exit_codes,
             :max_retries => max_retries,
-            :retry_interval => retry_interval
+            :retry_interval => retry_interval,
           }
           retry_on(host, "curl -m 1 #{url}", opts)
         end

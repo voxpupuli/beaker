@@ -121,7 +121,7 @@ def beaker_test(mode = :base, options = {})
   overriding_options = ENV['OPTIONS'].to_s
 
   args = [options_opt, hosts_opt(preserved_hosts_mode), tests_opt,
-          *overriding_options.split(' ')].compact
+          *overriding_options.split(' '),].compact
 
   sh("beaker", *args)
 end

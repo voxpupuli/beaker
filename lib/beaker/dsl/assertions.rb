@@ -82,7 +82,7 @@ module Beaker
           line !~ /^((STD)?ERR|2)> /
         end
         our_out, our_err, our_output = [
-          out.join, err.join, cleaned_exp
+          out.join, err.join, cleaned_exp,
         ].map do |str|
           str.gsub(/^((STD)?(ERR|OUT)|[12])> /, '')
         end

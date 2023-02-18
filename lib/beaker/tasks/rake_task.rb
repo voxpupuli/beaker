@@ -21,7 +21,7 @@ module Beaker
        :tests,
        :type,
        :acceptance_root,
-       :name]
+       :name,]
       # iterates of acceptable params
       COMMAND_OPTIONS.each do |sym|
         attr_accessor(sym.to_sym)

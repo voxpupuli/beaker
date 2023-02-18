@@ -141,12 +141,12 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       platform_regex = /^ubuntu$/
       tag_reason_hash = {
         'tag1' => 'reason1',
-        'tag2' => 'reason2'
+        'tag2' => 'reason2',
       }
       @confines_array = [ {
                             :platform => platform_regex,
-                            :tag_reason_hash => tag_reason_hash
-                          }
+                            :tag_reason_hash => tag_reason_hash,
+                          },
       ]
 
       internal_hash = confiner.instance_variable_get( :@tag_confine_details_hash )
@@ -170,15 +170,15 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
           :platform => /^el-/,
           :tag_reason_hash => {
             'tag1' => 'reason el 1',
-            'tag2' => 'reason2'
-          }
+            'tag2' => 'reason2',
+          },
         }, {
           :platform => /^cisco-/,
           :tag_reason_hash => {
             'tag1' => 'reason cisco 1',
-            'tag3' => 'reason3'
-          }
-        }
+            'tag3' => 'reason3',
+          },
+        },
       ]
 
       internal_hash = confiner.instance_variable_get( :@tag_confine_details_hash )

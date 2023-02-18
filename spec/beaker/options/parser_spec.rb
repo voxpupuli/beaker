@@ -23,7 +23,7 @@ module Beaker
           projects = [['puppet', 'my_branch', 'PUPPET/my_branch'],
                       ['facter', 'my_branch', 'FACTER/my_branch'],
                       ['hiera', 'my_branch', 'HIERA/my_branch'],
-                      ['hiera-puppet', 'my_branch', 'HIERA-PUPPET/my_branch']]
+                      ['hiera-puppet', 'my_branch', 'HIERA-PUPPET/my_branch'],]
           projects.each do |project, ref, input|
             expect(parser.parse_git_repos([input])).to be === ["#{parser.repo}/#{project}.git##{ref}"]
           end
@@ -83,7 +83,7 @@ module Beaker
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
               '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb']
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
 
           @lone_file = '08_foss.rb'
 
@@ -144,21 +144,21 @@ module Beaker
               :level => 'fourth',
               :ssh => {
                   :auth_methods => 'auth123',
-                  :user_known_hosts_file => 'hosts123'
-              }
+                  :user_known_hosts_file => 'hosts123',
+              },
           }}
           let(:subcommand_file) {@subcommand_file || {:level => 'fifth'}}
           let(:homedir_file) {@homedir_file || {
               :level => 'sixth',
               :ssh => {
-                  :auth_methods => 'auth_home_123'
-              }
+                  :auth_methods => 'auth_home_123',
+              },
           }}
           let(:project_file) {@project_file || {
               :level => 'seventh',
               :ssh => {
-                  :auth_methods => 'auth_project_123'
-              }
+                  :auth_methods => 'auth_project_123',
+              },
           }}
           let(:presets) { {
               :level => 'lowest',
@@ -168,8 +168,8 @@ module Beaker
                   :port => 'port123',
                   :forward_agent => 'forwardagent123',
                   :keys => 'keys123',
-                  :keepalive => 'keepalive123'
-              }
+                  :keepalive => 'keepalive123',
+              },
           }}
 
           before do
@@ -348,7 +348,7 @@ module Beaker
             parser.instance_variable_set( :@options, {} )
             test_value = 'blaqwetjijl,emikfuj1235'
             allow( Beaker::Options::HostsFileParser ).to receive(
-              :parse_hosts_file
+              :parse_hosts_file,
             ).and_return( test_value )
             val1, _ = parser.parse_hosts_options
             expect( val1 ).to be === test_value
@@ -363,24 +363,24 @@ module Beaker
 
           it 'calls beaker-hostgenerator to get hosts information' do
             parser.instance_variable_set( :@options, {
-              :hosts_file => 'notafile.yml'
+              :hosts_file => 'notafile.yml',
             } )
             allow( Beaker::Options::HostsFileParser ).to receive(
-              :parse_hosts_file
+              :parse_hosts_file,
             ).and_raise( Errno::ENOENT )
 
             mock_beaker_hostgenerator_cli = Object.new
             cli_execute_return = 'job150865'
             expect( mock_beaker_hostgenerator_cli ).to receive(
-              :execute
+              :execute,
             ).and_return( cli_execute_return )
             expect( BeakerHostGenerator::CLI ).to receive(
-              :new
+              :new,
             ).with(
-              [ 'notafile.yml' ]
+              [ 'notafile.yml' ],
             ).and_return( mock_beaker_hostgenerator_cli )
             allow( Beaker::Options::HostsFileParser ).to receive(
-              :parse_hosts_string
+              :parse_hosts_string,
             ).with( cli_execute_return )
             parser.parse_hosts_options
           end
@@ -391,24 +391,24 @@ module Beaker
               ENV['BEAKER_HYPERVISOR'] = 'docker'
 
               parser.instance_variable_set( :@options, {
-                :hosts_file => 'notafile.yml'
+                :hosts_file => 'notafile.yml',
               } )
               allow( Beaker::Options::HostsFileParser ).to receive(
-                :parse_hosts_file
+                :parse_hosts_file,
               ).and_raise( Errno::ENOENT )
 
               mock_beaker_hostgenerator_cli = Object.new
               cli_execute_return = 'job150865'
               expect( mock_beaker_hostgenerator_cli ).to receive(
-                :execute
+                :execute,
               ).and_return( cli_execute_return )
               expect( BeakerHostGenerator::CLI ).to receive(
-                :new
+                :new,
               ).with(
-                [ 'notafile.yml', '--hypervisor', 'docker' ]
+                [ 'notafile.yml', '--hypervisor', 'docker' ],
               ).and_return( mock_beaker_hostgenerator_cli )
               allow( Beaker::Options::HostsFileParser ).to receive(
-                :parse_hosts_string
+                :parse_hosts_string,
               ).with( cli_execute_return )
               parser.parse_hosts_options
             ensure
@@ -418,17 +418,17 @@ module Beaker
 
           it 'sets the :hosts_file_generated flag to signal others when needed' do
             options_test = {
-              :hosts_file => 'not_a_file.yml'
+              :hosts_file => 'not_a_file.yml',
             }
             parser.instance_variable_set( :@options, options_test )
             allow( Beaker::Options::HostsFileParser ).to receive(
-              :parse_hosts_file
+              :parse_hosts_file,
             ).and_raise( Errno::ENOENT )
 
             mock_beaker_hostgenerator_cli = Object.new
             allow( mock_beaker_hostgenerator_cli ).to receive( :execute )
             allow( BeakerHostGenerator::CLI ).to receive(
-              :new
+              :new,
             ).and_return( mock_beaker_hostgenerator_cli )
             allow( Beaker::Options::HostsFileParser ).to receive( :parse_hosts_string )
             parser.parse_hosts_options
@@ -438,26 +438,26 @@ module Beaker
 
           it 'beaker-hostgenerator failures trigger nice prints & a rethrow' do
             options_test = {
-              :hosts_file => 'not_a_file.yml'
+              :hosts_file => 'not_a_file.yml',
             }
             parser.instance_variable_set( :@options, options_test )
             allow( Beaker::Options::HostsFileParser ).to receive(
-              :parse_hosts_file
+              :parse_hosts_file,
             ).and_raise( Errno::ENOENT )
 
             mock_beaker_hostgenerator_cli = Object.new
             expect( BeakerHostGenerator::CLI ).to receive(
-              :new
+              :new,
             ).and_return( mock_beaker_hostgenerator_cli )
             expect( mock_beaker_hostgenerator_cli ).to receive(
-              :execute
+              :execute,
             ).and_raise( BeakerHostGenerator::Exceptions::InvalidNodeSpecError )
             expect( Beaker::Options::HostsFileParser ).not_to receive( :parse_hosts_string )
             expect( $stdout ).to receive( :puts ).with(
-              /does not exist/
+              /does not exist/,
             ).ordered
             expect( $stderr ).to receive( :puts ).with(
-              /Exiting with an Error/
+              /Exiting with an Error/,
             ).ordered
 
             expect {
@@ -533,7 +533,7 @@ module Beaker
                                                      },
                                                      'fail_mode'      => 'slow',
                                                      'preserve_hosts' => 'always',
-                                                     'host_tags'      => {}
+                                                     'host_tags'      => {},
                                                  })
         end
 
@@ -667,7 +667,7 @@ module Beaker
           hosts_dupe   = {
               'vm1' => {hypervisor: 'hi'},
               'vm2' => {hypervisor: 'hi'},
-              'vm3' => {hypervisor: 'bye'}
+              'vm3' => {hypervisor: 'bye'},
           }
           hosts_single = {'vm1' => {hypervisor: 'hi'}}
 
@@ -681,7 +681,7 @@ module Beaker
           roles_dupe   = {
               'vm1' => {roles: ['master']},
               'vm2' => {roles: %w(database dashboard)},
-              'vm3' => {roles: ['bye']}
+              'vm3' => {roles: ['bye']},
           }
           roles_single = {'vm1' => {roles: ['hi']}}
 

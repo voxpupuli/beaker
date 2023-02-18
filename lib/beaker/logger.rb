@@ -89,7 +89,7 @@ module Beaker
         :debug => WHITE,
         :trace => BRIGHT_YELLOW,
         :perf => BRIGHT_MAGENTA,
-        :host => YELLOW
+        :host => YELLOW,
       }
 
       @log_colors.merge!(options[:log_colors]) if options[:log_colors]

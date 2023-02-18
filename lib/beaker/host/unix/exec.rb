@@ -424,7 +424,7 @@ module Unix::Exec
     end
     commands = [
       "echo '*.* @#{server}:#{port}' >> /etc/rsyslog.d/51-sendrsyslogs.conf",
-      'systemctl restart rsyslog'
+      'systemctl restart rsyslog',
     ]
     commands.each do |command|
       exec(Beaker::Command.new(command))

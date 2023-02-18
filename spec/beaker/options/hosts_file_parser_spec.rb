@@ -116,7 +116,7 @@ module Beaker
         it 'adds a roles array to a host if not present' do
           host_options = { 'HOSTS' => {
             'host1' => {},
-            'host2' => {}
+            'host2' => {},
           }}
 
           parser.fix_roles_array( host_options )

@@ -225,7 +225,7 @@ module Beaker
           :who => {
             :initial => '      system boot  May 13 03:51',
             :success => '      system boot  May 13 03:52',
-          }
+          },
         },
       }
 

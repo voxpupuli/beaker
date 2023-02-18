@@ -250,7 +250,7 @@ module Beaker
         let(:options) { make_opts.merge({:logger => double().as_null_object,
                                          'name' => create_files(@files),
                                          :log_dated_dir => '.',
-                                         :xml_dated_dir => '.'}) }
+                                         :xml_dated_dir => '.',}) }
         let(:rb_test) { 'my_ruby_file.rb' }
 
         before do

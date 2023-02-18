@@ -391,7 +391,7 @@ module Beaker
         @validator.validate_test_tags(
           @options[:test_tag_and],
           @options[:test_tag_or],
-          @options[:test_tag_exclude]
+          @options[:test_tag_exclude],
         )
         resolve_symlinks!
 

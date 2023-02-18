@@ -368,14 +368,14 @@ module Beaker
         expect {
           instance.uncompress_local_tarball( tar_file, base_dir, download_file )
         }.to raise_error(
-          /^Platform #{platform} .* not supported .* uncompress_local_tarball$/
+          /^Platform #{platform} .* not supported .* uncompress_local_tarball$/,
         )
       end
 
       it 'untars the file given' do
         @platform = 'sles'
         expect( instance ).to receive( :execute ).with(
-          /^tar .* #{tar_file} .* #{base_dir}$/
+          /^tar .* #{tar_file} .* #{base_dir}$/,
         )
         instance.uncompress_local_tarball( tar_file, base_dir, download_file )
       end
@@ -383,7 +383,7 @@ module Beaker
       it 'untars the file given' do
         @platform = 'opensuse'
         expect( instance ).to receive( :execute ).with(
-          /^tar .* #{tar_file} .* #{base_dir}$/
+          /^tar .* #{tar_file} .* #{base_dir}$/,
         )
         instance.uncompress_local_tarball( tar_file, base_dir, download_file )
       end
@@ -399,7 +399,7 @@ module Beaker
           expect {
             instance.uncompress_local_tarball( tar_file, base_dir, download_file )
           }.to raise_error(
-            /^Solaris #{version} .* not supported .* uncompress_local_tarball$/
+            /^Solaris #{version} .* not supported .* uncompress_local_tarball$/,
           )
         end
 

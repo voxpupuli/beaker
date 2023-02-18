@@ -65,16 +65,16 @@ module Beaker
       # @!visibility private
       def platform_specific_tag_confines
         @options[:platform_tag_confines_object] ||= PlatformTagConfiner.new(
-          @options[:platform_tag_confines]
+          @options[:platform_tag_confines],
         )
         confines = @options[:platform_tag_confines_object].confine_details(
-          metadata[:case][:tags]
+          metadata[:case][:tags],
         )
         confines.each do |confine_details|
           logger.notify( confine_details[:log_message] )
           confine(
             confine_details[:type],
-            :platform => confine_details[:platform_regex]
+            :platform => confine_details[:platform_regex],
           )
         end
       end
@@ -122,7 +122,7 @@ module Beaker
               @tag_confine_details_hash[tag] << {
                 :platform_regex => entry[:platform],
                 :log_message => log_msg,
-                :type => :except
+                :type => :except,
               }
             end
           end

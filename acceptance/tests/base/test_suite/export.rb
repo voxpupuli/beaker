@@ -4,8 +4,8 @@ test_name 'ensure tests can export arbitrary data' do
     export({'middle earth' => {
               'Hobbits' => ['Bilbo', 'Frodo'],
               'Elves' => 'Arwen',
-              :total => {'numbers' => 42}
-              }
+              :total => {'numbers' => 42},
+              },
            })
     export({'another' => 'author'})
   end

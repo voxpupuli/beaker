@@ -19,8 +19,8 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     options[:platform_tag_confines] = [
       :platform => /#{default[:platform]}/,
       :tag_reason_hash => {
-        'tag1' => 'reason1'
-      }
+        'tag1' => 'reason1',
+      },
     ]
 
     begin
