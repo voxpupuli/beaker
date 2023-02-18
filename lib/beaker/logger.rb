@@ -4,7 +4,6 @@ module Beaker
     # to a given destination (be it a string or file)
     #
   class Logger
-
     # The results of the most recently run command
     attr_accessor :last_result
 
@@ -241,6 +240,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def host_output *args
       return unless is_verbose?
+
       strings = strip_colors_from args
       string = strings.join
       optionally_color @log_colors[:host], string, false
@@ -252,6 +252,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def color_host_output *args
       return unless is_verbose?
+
       string = args.join
       optionally_color NONE, string, false
     end
@@ -261,6 +262,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def perf_output *args
       return unless is_debug?
+
       optionally_color @log_colors[:perf], *args
     end
 
@@ -269,6 +271,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def trace *args
       return unless is_trace?
+
       optionally_color @log_colors[:trace], *args
     end
 
@@ -277,6 +280,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def debug *args
       return unless is_verbose?
+
       optionally_color @log_colors[:debug], *args
     end
 
@@ -286,6 +290,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def warn *args
       return unless is_warn?
+
       strings = args.map { |msg| "Warning: #{msg}" }
       optionally_color @log_colors[:warn], strings
     end
@@ -295,6 +300,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def info *args
       return unless is_info?
+
       optionally_color @log_colors[:info], *args
     end
 
@@ -310,6 +316,7 @@ module Beaker
     # @param args[Array<String>] Strings to be reported
     def notify *args
       return unless is_notify?
+
       optionally_color @log_colors[:notify], *args
     end
 
@@ -397,6 +404,7 @@ module Beaker
     end
 
     private
+
     # Expand each symlink found to its full path
     # Lines are assumed to be in the format "String : Integer"
     # @param [String] backtrace The string to search and expand symlinks in

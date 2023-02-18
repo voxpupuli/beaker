@@ -7,7 +7,6 @@ module Beaker
   # Here's a list of example usages:
   # - {Beaker::TestSuiteResult#write_junit_xml}
   module LoggerJunit
-
     # writes the xml created in the block to the xml file given
     #
     # Note: Error Recovery should take place in the caller of this
@@ -152,6 +151,5 @@ module Beaker
         (int >= 0x100000 and int <= 0x10FFFF)
       )
     end
-
   end
 end

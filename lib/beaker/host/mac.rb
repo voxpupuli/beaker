@@ -4,7 +4,6 @@ end
 
 module Mac
     class Host < Unix::Host
-
     ['exec', 'user', 'group', 'pkg'].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
@@ -24,11 +23,11 @@ module Mac
     end
 
     attr_reader :external_copy_base
+
     def initialize name, host_hash, options
       super
 
       @external_copy_base = '/var/root'
     end
-
   end
 end

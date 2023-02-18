@@ -32,7 +32,6 @@ module Beaker
     end
 
     context 'ensure that beaker options can be passed through' do
-
       let(:beaker_options_list) { [
         'options-file',
         'helper',
@@ -73,7 +72,8 @@ module Beaker
         'xml',
         'type',
         'debug',
-      ] }
+      ]
+      }
 
       let(:yaml_store_mock) { double('yaml_store_mock') }
 
@@ -252,8 +252,6 @@ module Beaker
           subcommand.exec('pre-suite,tests/whoops')
         }.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
       end
-
-
 
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do
         allow(yaml_store_mock).to receive(:[]).and_return(false)

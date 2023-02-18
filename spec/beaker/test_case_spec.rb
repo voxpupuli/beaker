@@ -153,6 +153,5 @@ module Beaker
         expect(metadata[:step][:name]).to be_nil
       end
     end
-
   end
 end

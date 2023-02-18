@@ -3,7 +3,6 @@ require 'spec_helper'
 module Beaker
   module Shared
     describe Repetition do
-
       describe '#repeat_for' do
         it "repeats a block for 5 seconds" do
           allow(Time).to receive(:now).and_return(0, 1, 2, 3, 4, 5, 6)
@@ -25,9 +24,7 @@ module Beaker
           subject.repeat_for(5) do
             block.exec
           end
-
         end
-
       end
 
       describe '#repeat_fibonacci_style_for' do
@@ -84,11 +81,7 @@ module Beaker
             block.fake01
           end
         end
-
-
       end
-
     end
-
   end
 end

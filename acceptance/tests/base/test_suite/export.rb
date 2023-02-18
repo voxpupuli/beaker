@@ -1,5 +1,4 @@
 test_name 'ensure tests can export arbitrary data' do
-
   step 'export nested hash' do
     export({ 'middle earth' => {
               'Hobbits' => ['Bilbo', 'Frodo'],
@@ -9,5 +8,4 @@ test_name 'ensure tests can export arbitrary data' do
            })
     export({ 'another' => 'author' })
   end
-
 end

@@ -36,6 +36,7 @@ module Beaker
 
         host_options = new_host_options
         return host_options unless hosts_file_path
+
         error_message = "#{hosts_file_path} is not a valid YAML file\n\t"
         host_options = self.merge_hosts_yaml(host_options, error_message) {
           hosts_file_path = File.expand_path(hosts_file_path)
@@ -58,6 +59,7 @@ module Beaker
 
         host_options = new_host_options
         return host_options unless hosts_def_yaml
+
         error_message = "#{hosts_def_yaml}\nis not a valid YAML string\n\t"
         host_options = self.merge_hosts_yaml(host_options, error_message) {
           process_yaml(hosts_def_yaml, binding)

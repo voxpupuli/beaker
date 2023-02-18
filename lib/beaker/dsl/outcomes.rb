@@ -15,7 +15,6 @@ module Beaker
     # designed to allow some degree of freedom from the individual third
     # party test runners that could be used.
     module Outcomes
-
       # Raise this class if it is determined that a test case should not
       # be executed because the feature in question is still a
       # "Work in Progress"
@@ -31,7 +30,6 @@ module Beaker
       # Raise this class if execution should stop because enough criteria has
       # shown itself to pass the test.
       class PassTest    < RuntimeError; end
-
 
       # Raises FailTest Exception and logs an error message
       #

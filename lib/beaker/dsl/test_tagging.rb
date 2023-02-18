@@ -12,7 +12,6 @@ module Beaker
     #   - {Beaker::Options::Validator#validate_tags} ensures test tag CLI params
     #     are valid for use by this module
     module TestTagging
-
       # Sets tags on the current {Beaker::TestCase}, and skips testing
       # if necessary after checking this case's tags against the ones that are
       # being included or excluded.
@@ -80,7 +79,6 @@ module Beaker
       end
 
       class PlatformTagConfiner
-
         # Constructs the PlatformTagConfiner, transforming the user format
         #   into the internal structure for use by Beaker itself.
         #
@@ -151,7 +149,6 @@ module Beaker
           details
         end
       end
-
     end
   end
 end

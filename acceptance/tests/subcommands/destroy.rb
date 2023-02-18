@@ -1,5 +1,4 @@
 test_name 'use the destroy subcommand' do
-
   def delete_root_folder_contents
     on default, 'rm -rf /root/* /root/.beaker'
   end
@@ -45,5 +44,4 @@ test_name 'use the destroy subcommand' do
      end
     delete_root_folder_contents
   end
-
 end

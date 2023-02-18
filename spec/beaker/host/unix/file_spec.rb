@@ -21,7 +21,6 @@ module Beaker
       def logger
         @logger
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -36,7 +35,6 @@ module Beaker
     let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
-
       ['centos', 'redhat'].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
@@ -58,7 +56,6 @@ module Beaker
     end
 
     describe '#package_config_dir' do
-
       ['centos', 'redhat'].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
@@ -90,7 +87,6 @@ module Beaker
     end
 
     describe '#repo_filename' do
-
       ['centos', 'redhat'].each do |platform|
         it "sets the el portion correctly for '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
@@ -169,7 +165,6 @@ module Beaker
     end
 
     describe '#noask_file_text' do
-
       it 'errors on non-solaris platforms' do
         @platform = 'cumulus-4000-x86_64'
         expect {

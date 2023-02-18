@@ -1,7 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #on" do
-
   step "#on raises an exception when remote command fails" do
     assert_raises(Beaker::Host::CommandFailure) do
       on default, "/bin/nonexistent-command"

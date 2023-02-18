@@ -4,7 +4,8 @@ module Cisco
   describe Host do
     let(:options)  { @options ? @options : {
       :user => 'root',
-    } }
+    }
+    }
     let(:platform) {
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
@@ -15,9 +16,7 @@ module Cisco
     let(:host)    { make_host('name', options.merge(platform)) }
 
     describe '#prepend_commands' do
-
       context 'for cisco_nexus-7' do
-
         before do
           @platform = 'cisco_nexus-7-x86_64'
         end
@@ -56,7 +55,6 @@ module Cisco
           expect(answer_test).to be === answer_user_pc
         end
 
-
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
             :vrf  => 'fakevrf',
@@ -70,7 +68,6 @@ module Cisco
       end
 
       context 'for cisco_ios_xr-6' do
-
         before do
           @platform = 'cisco_ios_xr-6-x86_64'
         end
@@ -108,9 +105,7 @@ module Cisco
     end
 
     describe '#append_commands' do
-
       context 'for cisco_nexus-7' do
-
         before do
           @platform = 'cisco_nexus-7-x86_64'
           @options = { :user => 'non_root' }
@@ -149,7 +144,6 @@ module Cisco
       end
 
       context 'for cisco_ios_xr-6' do
-
         before do
           @platform = 'cisco_ios_xr-6-x86_64'
           @options = { :user => 'non_root' }
@@ -189,9 +183,7 @@ module Cisco
     end
 
     describe '#environment_string' do
-
       context 'for cisco_nexus-7' do
-
         before do
           @platform = 'cisco_nexus-7-x86_64'
         end
@@ -257,7 +249,6 @@ module Cisco
     end
 
     describe '#package_config_dir' do
-
       it 'returns correctly for cisco platforms' do
         @platform = 'cisco_nexus-7-x86_64'
         expect(host.package_config_dir).to be === '/etc/yum/repos.d/'
@@ -265,7 +256,6 @@ module Cisco
     end
 
     describe '#repo_type' do
-
       it 'returns correctly for cisco platforms' do
         @platform = 'cisco_nexus-7-x86_64'
         expect(host.repo_type).to be === 'rpm'
@@ -273,7 +263,6 @@ module Cisco
     end
 
     describe '#validate_setup' do
-
       context 'on the cisco_nexus-7 platform' do
         before do
           @platform = 'cisco_nexus-7-x86_64'

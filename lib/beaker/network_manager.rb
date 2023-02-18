@@ -6,7 +6,6 @@ module Beaker
   # Object that holds all the provisioned and non-provisioned virtual machines.
   # Controls provisioning, configuration, validation and cleanup of those virtual machines.
   class NetworkManager
-
     # Determine if a given host should be provisioned.
     # Provision if:
     # - only if we are running with ---provision
@@ -134,6 +133,7 @@ module Beaker
     # @return [String] the log line created for this event
     def log_sut_event host, create
       raise ArgumentError.new "log_sut_event called before sut logger created. skipping #{host}, #{create}" unless @options.has_key?(:logger_sut)
+
       sut_logger = @options[:logger_sut]
       time = Time.new
       stamp = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -142,6 +142,5 @@ module Beaker
       sut_logger.notify line
       line
     end
-
   end
 end

@@ -10,7 +10,6 @@ module Beaker
     # and #to_s available and provide an array when #[]('roles') is called.
     #
     module Patterns
-
       # Execute a block selecting the hosts that match with the provided criteria
       # @param [Array<Host>, Host, String, Symbol] hosts_or_filter A host role as a String or Symbol that can be
       #                                                used to search for a set of Hosts,  a host name
@@ -36,7 +35,6 @@ module Beaker
         end
         run_block_on block_hosts, filter, opts, &block
       end
-
     end
   end
 end

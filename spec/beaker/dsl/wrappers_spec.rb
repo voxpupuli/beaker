@@ -73,7 +73,6 @@ describe ClassMixedWithDSLWrappers do
       expect(command.command).to be === 'powershell.exe'
       expect(command.args).to be === ["-ExecutionPolicy Bypass", "-InputFormat None", "-NoLogo", "-NoProfile", "-NonInteractive", "-File myfile.ps1"]
       expect(command.options).to be === {}
-
     end
   end
 end

@@ -3,7 +3,6 @@ require 'spec_helper'
 module Beaker
   module Subcommands
     describe SubcommandUtil do
-
       let(:cli) {
         double("cli")
       }
@@ -77,7 +76,6 @@ module Beaker
           expect(subject.execute_subcommand?("notasubcommand")).to be == false
         end
       end
-
 
       describe 'error_with' do
         it "the exit value should default to 1" do

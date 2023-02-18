@@ -4,7 +4,6 @@ module Beaker
       # Methods that help you query the state of your tests, these
       # methods do not require puppet to be installed to execute correctly
       module TestHelpers
-
         # Gets the currently executing test's name, which is set in a test
         # using the {Beaker::DSL::Structure#test_name} method.
         #
@@ -65,7 +64,6 @@ module Beaker
           metadata[:step] ||= {}
           metadata[:step][:name] = name
         end
-
       end
     end
   end

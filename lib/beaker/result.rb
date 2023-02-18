@@ -2,6 +2,7 @@ module Beaker
   class Result
     attr_accessor :host, :cmd, :exit_code, :stdout, :stderr, :output,
                   :raw_stdout, :raw_stderr, :raw_output
+
     def initialize(host, cmd)
       @host       = host
       @cmd        = cmd

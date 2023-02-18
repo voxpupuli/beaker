@@ -25,7 +25,6 @@ module Beaker
 
       expect(cmd.args_string).to be == 'to the baz'
       expect(cmd.options_string).to be == '--foo=bar'
-
     end
 
     describe '#:prepend_cmds' do
@@ -89,8 +88,6 @@ module Beaker
         expect(subject.args_string).to be == 'my/command and its args and opts'
       end
     end
-
-
   end
 
   describe HostCommand do
@@ -132,7 +129,6 @@ module Beaker
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
     let(:options)     { @options    || Hash.new  }
-
 
     it 'forms a basic sed command correctly' do
       expect(cmd.cmd_line host).to be === "sed -i -e \"#{expression}\" #{filename}"

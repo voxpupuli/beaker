@@ -29,6 +29,5 @@ module Eos
       command = commands.join("\n")
       execute("Cli -c '#{command}'")
     end
-
   end
 end

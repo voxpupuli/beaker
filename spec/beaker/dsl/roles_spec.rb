@@ -1,13 +1,11 @@
 require 'spec_helper'
 
-
 class ClassMixedWithDSLRoles
   include Beaker::DSL::Roles
   include Beaker::DSL::Outcomes
 end
 
 describe ClassMixedWithDSLRoles do
-
   let(:hosts)      { @hosts || Hash.new }
   let(:options)    { @options || Hash.new }
   let(:agent1)     { make_host('agent1',     { :roles => ['agent'] }) }
@@ -202,7 +200,6 @@ describe ClassMixedWithDSLRoles do
     end
 
     context 'truth table-type testing' do
-
       before do
         @old_pe_ver  = agent1[:pe_ver]
         @old_version = agent1[:version]
@@ -307,9 +304,7 @@ describe ClassMixedWithDSLRoles do
           end
         end
       end
-
     end
-
   end
 
   describe '#aio_agent?' do

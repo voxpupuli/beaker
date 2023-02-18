@@ -13,7 +13,6 @@ module Beaker
     let(:hostname)   { "my_host" }
     let(:name_hash) { { :ip => ip, :vmhostname => vmhostname, :hostname => hostname } }
 
-
     before do
       allow(subject).to receive(:sleep)
     end
@@ -46,11 +45,9 @@ module Beaker
       expect(Net::SSH).to receive(:start).with(vmhostname, user, ssh_opts).and_return(false)
       expect(Net::SSH).to receive(:start).with(hostname, user, ssh_opts).and_return(true).once
       connection.connect
-
     end
 
     describe '#close' do
-
       it 'runs ssh close' do
         mock_ssh = Object.new
         expect(Net::SSH).to receive(:start).with(ip, user, ssh_opts) { mock_ssh }
@@ -84,7 +81,6 @@ module Beaker
         expect { connection.close }.to raise_error(StandardError)
         expect(connection.instance_variable_get(:@ssh)).to be_nil
       end
-
     end
 
     describe '#execute' do
@@ -241,7 +237,6 @@ module Beaker
       it 'returns a result object' do
         expect(connection.scp_to '', '').to be_a_kind_of Beaker::Result
       end
-
     end
 
     describe '#scp_from' do
@@ -268,8 +263,6 @@ module Beaker
       it 'returns a result object' do
         expect(connection.scp_from '', '').to be_a_kind_of Beaker::Result
       end
-
     end
-
   end
 end

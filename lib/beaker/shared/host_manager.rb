@@ -6,7 +6,6 @@ module Beaker
     #- adding additional method definitions for selecting by role
     #- executing blocks of code against selected sets of hosts
     module HostManager
-
       # Find hosts from a given array of hosts that all have the desired role.
       # @param [Array<Host>] hosts The hosts to examine
       # @param [String] desired_role The hosts returned will have this role in their roles list
@@ -37,6 +36,7 @@ module Beaker
       #                       role defined, or if role = nil since hosts_with_role(nil) returns all hosts.
       def only_host_with_role(hosts, role)
         raise ArgumentError, "role cannot be nil." if role.nil?
+
         a_host = hosts_with_role(hosts, role)
         case
           when a_host.length == 0
@@ -58,6 +58,7 @@ module Beaker
       #   or if role = nil since hosts_with_role(nil) returns all hosts.
       def find_at_most_one_host_with_role(hosts, role)
         raise ArgumentError, "role cannot be nil." if role.nil?
+
         role_hosts = hosts_with_role(hosts, role)
         case role_hosts.length
         when 0
@@ -130,7 +131,6 @@ module Beaker
         end
         result
       end
-
     end
   end
 end

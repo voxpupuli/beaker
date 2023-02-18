@@ -12,6 +12,5 @@ module Aix
     include Aix::Group
     include Aix::File
     include Aix::Exec
-
   end
 end

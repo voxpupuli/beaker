@@ -10,6 +10,7 @@ module Beaker
     |   |   | "
 
     attr_reader :logger, :options, :network_manager
+
     def initialize
       @timestamp = Time.now
       # Initialize a logger object prior to parsing; this should be overwritten whence

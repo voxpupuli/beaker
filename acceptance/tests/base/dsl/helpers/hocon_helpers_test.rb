@@ -1,7 +1,6 @@
 require 'hocon/config_value_factory'
 
 test_name 'Hocon Helpers Test' do
-
   hocon_filename = 'hocon.conf'
   step 'setup : create hocon file to play with' do
     hocon_content = <<-END

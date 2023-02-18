@@ -4,7 +4,6 @@ end
 
 module Cisco
   class Host < Unix::Host
-
     # as the cisco hosts tend to have custom
     # ssh configuration, the presets
     # do not apply where verification of the
@@ -83,6 +82,7 @@ module Cisco
     # @return [String] Command string as needed for this host
     def prepend_commands(command = '', user_pc = '', _opts = {})
       return user_pc unless command.index('vsh').nil?
+
       if self[:platform].include?('cisco_nexus')
         return user_pc unless command.index('ntpdate').nil?
       end
@@ -125,6 +125,7 @@ module Cisco
     def environment_string env
       prestring = ''
       return prestring if env.empty?
+
       env_array = self.environment_variable_string_pair_array(env)
       environment_string = env_array.join(' ')
 
@@ -166,6 +167,5 @@ module Cisco
         raise ArgumentError, msg
       end
     end
-
   end
 end

@@ -3,9 +3,7 @@ require 'spec_helper'
 module Beaker
   module Shared
     describe Semvar do
-
       describe 'version_is_less' do
-
         it 'reports 2015.3.0-rc0-8-gf80879a is less than 2016' do
           expect(subject.version_is_less('2015.3.0-rc0-8-gf80879a', '2016')).to be === true
         end
@@ -64,7 +62,6 @@ module Beaker
       end
 
       describe 'max_version' do
-
         it 'returns nil if versions isn\'t defined' do
           expect(subject.max_version(nil)).to be_nil
         end
@@ -91,9 +88,7 @@ module Beaker
         it 'returns 5.8.9 from [5.8.9, 1.2.3, 0.3.5, 5.7.11]' do
           expect(subject.max_version(['5.8.9', '1.2.3', '0.3.5', '5.7.11'])).to be === '5.8.9'
         end
-
       end
     end
-
   end
 end

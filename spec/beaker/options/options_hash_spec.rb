@@ -5,7 +5,6 @@ module Beaker
     describe OptionsHash do
       let(:options)    { described_class.new }
 
-
       it "supports is_pe?, defaults to pe" do
         expect(options).to be_is_pe
       end
@@ -34,6 +33,5 @@ module Beaker
         end
       end
     end
-
   end
 end

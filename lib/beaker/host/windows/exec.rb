@@ -35,8 +35,10 @@ module Windows::Exec
     ips.each_line do |line|
       matches = line.split('=')
       next if matches.length <= 1
+
       matches = matches[1].match(/^{"(.*?)"/)
       next if matches.nil? || matches.captures.nil? || matches.captures.empty?
+
       ip = matches.captures[0] if matches && matches.captures
       break if ip != ''
     end
@@ -55,6 +57,7 @@ module Windows::Exec
       if result.exit_code == 0
         return true
       end
+
       try += 1
     end
     result.exit_code == 0
@@ -143,7 +146,6 @@ module Windows::Exec
     execute("mv \"#{orig}\" \"#{dest}\"")
   end
 
-
   # Determine if cygwin is actually installed on the SUT. Differs from
   # is_cygwin?, which is just a type check for a Windows::Host.
   #
@@ -151,7 +153,7 @@ module Windows::Exec
   def cygwin_installed?
     output = exec(Beaker::Command.new('cygcheck --check-setup cygwin'), :accept_all_exit_codes => true).stdout
     return true if output.include?('cygwin') && output.include?('OK')
+
     false
   end
-
 end

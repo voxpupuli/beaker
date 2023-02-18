@@ -17,7 +17,6 @@ module Beaker
       def to_s
         "me"
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -25,7 +24,6 @@ module Beaker
     let(:instance) { PSWindowsExecTest.new(opts, logger) }
 
     context "rm" do
-
       it "deletes" do
         path = '/path/to/delete'
         corrected_path = '\\path\\to\\delete'

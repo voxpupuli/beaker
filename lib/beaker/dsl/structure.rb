@@ -310,7 +310,6 @@ module Beaker
         confine(type, criteria, host_array)
 
         yield
-
       rescue Beaker::DSL::Outcomes::SkipTest => e
         # I don't like this much, but adding options to confine is a breaking change
         # to the DSL that would involve a major version bump

@@ -1,7 +1,6 @@
 module Beaker
   module Shared
     module ErrorHandler
-
     def report_and_raise(logger, e, msg)
       logger.error "Failed: errored in #{msg}"
       logger.error(e.inspect)
@@ -11,7 +10,6 @@ module Beaker
       end
       raise e
     end
-
     end
   end
 end

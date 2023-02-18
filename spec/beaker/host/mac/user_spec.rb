@@ -40,7 +40,6 @@ EOS
   let(:result) { Beaker::Result.new(host, command) }
 
   describe '#user_list' do
-
     it 'returns user names list correctly' do
       result.stdout = dscacheutil_list
       expect(subject).to receive(:execute).and_yield(result)
@@ -54,11 +53,9 @@ EOS
         expect(result.stdout).to be === dscacheutil_list
       }
     end
-
   end
 
   describe '#user_get' do
-
     it 'fails if a name line isn\'t included' do
       result.stdout = ''
       user_name = 'any_name'
@@ -73,11 +70,9 @@ EOS
         expect(result.stdout).to be === etc_passwd_line
       end
     end
-
   end
 
   describe '#user_present' do
-
     it 'returns user existence without running create command if it already exists' do
       result.stdout = puppet1
       expect(subject).to receive(:execute).once.and_yield(result)
@@ -96,36 +91,29 @@ EOS
       expect(subject).to receive(:execute).once.ordered
       subject.user_present(name)
     end
-
   end
 
   describe '#user_absent' do
-
     it 'calls execute to run logic' do
       name = "main_one"
       expect(subject).to receive(:execute).once.with("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {})
       subject.user_absent(name)
     end
-
   end
 
   describe '#uid_next' do
-
     it 'returns the next ID given' do
       n = 117
       expect(subject).to receive(:execute).and_return("#{n}")
       expect(subject.uid_next).to be === n + 1
     end
-
   end
 
   describe '#gid_next' do
-
     it 'returns the next ID given' do
       n = 843
       expect(subject).to receive(:execute).and_return("#{n}")
       expect(subject.gid_next).to be === n + 1
     end
-
   end
 end

@@ -18,7 +18,8 @@ describe Beaker do
                          hosts[0][:roles] = ['agent']
                          hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
                          hosts[2][:roles] = ['agent']
-                         hosts }
+                         hosts
+  }
   let(:dummy_class)    { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -100,7 +101,6 @@ describe Beaker do
   end
 
   context 'timesync' do
-
     subject { dummy_class.new }
 
     it "can sync time on unix hosts" do
@@ -138,7 +138,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("w32tm /resync").exactly(3).times
 
       subject.timesync(hosts, options)
-
     end
 
     it "can sync time on Sles hosts" do
@@ -147,7 +146,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("sntp #{ntpserver}").exactly(3).times
 
       subject.timesync(hosts, options)
-
     end
 
     it "can sync time on RHEL8 hosts" do
@@ -185,7 +183,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("w32tm /resync").exactly(3).times
 
       subject.timesync(hosts, options_ntp)
-
     end
 
     it "can set time server on Sles hosts" do
@@ -194,7 +191,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("sntp #{ntpserver_set}").exactly(3).times
 
       subject.timesync(hosts, options_ntp)
-
     end
 
     it "can set time server on RHEL8 hosts" do
@@ -216,7 +212,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
       subject.apt_get_update(host)
-
     end
 
     it "can perform apt-get on debian hosts" do
@@ -225,7 +220,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
       subject.apt_get_update(host)
-
     end
 
     it "can perform apt-get on cumulus hosts" do
@@ -234,7 +228,6 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
       subject.apt_get_update(host)
-
     end
 
     it "does nothing on non debian/ubuntu/cumulus hosts" do
@@ -243,9 +236,7 @@ describe Beaker do
       expect(Beaker::Command).not_to receive(:new)
 
       subject.apt_get_update(host)
-
     end
-
   end
 
   context "copy_file_to_remote" do
@@ -266,9 +257,7 @@ describe Beaker do
       expect(host).to receive(:do_scp_to).with(tempfilepath, filepath, subject.instance_variable_get(:@options)).once
 
       subject.copy_file_to_remote(host, filepath, content)
-
     end
-
   end
 
   context "sync_root_keys" do
@@ -280,24 +269,19 @@ describe Beaker do
       expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").exactly(3).times
 
       subject.sync_root_keys(hosts, options)
-
     end
 
     it "can sync keys on a non-solaris host" do
-
       expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").exactly(3).times
 
       subject.sync_root_keys(hosts, options)
-
     end
-
   end
 
   context "validate_host" do
     subject { dummy_class.new }
 
     it "can validate unix hosts" do
-
       hosts.each do |host|
         unix_only_pkgs.each do |pkg|
           expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
@@ -306,7 +290,6 @@ describe Beaker do
       end
 
       subject.validate_host(hosts, options)
-
     end
 
     it "can validate windows hosts" do
@@ -322,7 +305,6 @@ describe Beaker do
       end
 
       subject.validate_host(hosts, options)
-
     end
 
     it "can validate SLES hosts" do
@@ -333,11 +315,9 @@ describe Beaker do
           expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
           expect(host).to receive(:install_package).with(pkg).once
         end
-
       end
 
       subject.validate_host(hosts, options)
-
     end
 
     it "can validate opensuse hosts" do
@@ -348,11 +328,9 @@ describe Beaker do
           expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
           expect(host).to receive(:install_package).with(pkg).once
         end
-
       end
 
       subject.validate_host(hosts, options)
-
     end
 
     it "can validate RHEL8 hosts" do
@@ -402,7 +380,8 @@ describe Beaker do
         :platform => 'windows',
         :is_cygwin => cygwin,
         :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
-      }) }
+      })
+      }
 
       context "with cygwin" do
         let(:cygwin) { true }
@@ -430,7 +409,8 @@ describe Beaker do
         let(:host) { make_host('name', {
           :platform => platform,
           :stdout => stdout,
-        }) }
+        })
+        }
 
         before do
           expect(Beaker::Command).to receive(:new).with("cat /etc/resolv.conf").once
@@ -475,7 +455,6 @@ describe Beaker do
 
       subject.set_etc_hosts(host, etc_hosts)
     end
-
   end
 
   context "copy_ssh_to_root" do
@@ -487,11 +466,9 @@ describe Beaker do
 
       subject.copy_ssh_to_root(host, options)
     end
-
   end
 
   context "package_proxy" do
-
     subject { dummy_class.new }
 
     proxyurl = "http://192.168.2.100:3128"
@@ -629,7 +606,5 @@ describe Beaker do
 
       subject.set_env(host, options.merge(opts))
     end
-
   end
-
 end

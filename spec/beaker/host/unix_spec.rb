@@ -14,7 +14,6 @@ module Unix
     let(:opts)    { { :download_url => 'download_url' } }
 
     describe '#external_copy_base' do
-
       it 'returns /root in general' do
         copy_base = host.external_copy_base
         expect(copy_base).to be === '/root'
@@ -40,7 +39,6 @@ module Unix
     end
 
     describe '#validate_setup' do
-
       it 'does nothing for non cisco_nexus-7 platforms' do
         @platform = 'el-7-x86_64'
         validate_test = host.validate_setup

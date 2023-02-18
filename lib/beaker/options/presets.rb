@@ -3,7 +3,6 @@ module Beaker
     # A class representing the environment variables and preset argument values to be incorporated
     # into the Beaker options Object.
     class Presets
-
       # This is a constant that describes the variables we want to collect
       # from the environment. The keys correspond to the keys in
       # `presets` (flattened) The values are an optional array of

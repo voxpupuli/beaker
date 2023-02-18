@@ -7,7 +7,6 @@ module Beaker
 
     let(:options)   { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file' } }
 
-
     before do
       allow(subject).to receive(:sleep)
     end

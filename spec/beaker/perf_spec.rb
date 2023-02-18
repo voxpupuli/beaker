@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Beaker
   describe Perf do
-
     context "When a Perf object is created" do
       before do
         @options = make_opts
@@ -24,7 +23,6 @@ module Beaker
         perf = described_class.new(hosts, options)
         expect(perf).to be_a_kind_of described_class
       end
-
 
       it 'creates a new Perf object with a single host' do
         hosts = [make_host("myHost", @options)]
@@ -87,6 +85,5 @@ module Beaker
         expect(@my_io.string).to match(/Setup perf on host: myHost\nPerf \(sysstat\) not supported on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nPerf \(sysstat\) not supported on host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
       end
     end
-
   end
 end

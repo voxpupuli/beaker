@@ -22,7 +22,6 @@ def get_host_pkg(host)
   else
     Beaker::HostPrebuiltSteps::UNIX_PACKAGES
   end
-
 end
 
 step '#check_for_command : can determine where a command exists'
@@ -49,6 +48,7 @@ hosts.each do |host|
   # a lot of dependencies.
   # skipping this test for windows since it requires a restart
   next if host['platform'].include?('windows')
+
   package = 'zsh'
   package = 'CSWzsh' if host['platform'].include?('solaris-10')
   package = 'git' if /opensuse|sles/.match?(host['platform'])
@@ -78,5 +78,4 @@ hosts.each do |host|
       assert_equal(false, host.check_for_package(package), "'#{package}' should not be installed")
     end
   end
-
 end

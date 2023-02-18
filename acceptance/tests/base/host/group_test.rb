@@ -14,5 +14,4 @@ test_name 'Group Test' do
       end
     end
   end
-
 end

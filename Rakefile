@@ -14,9 +14,7 @@ task :spec do
   Rake::Task['test:spec'].invoke
 end
 
-
 task :acceptance => ['test:base', 'test:puppetgit', 'test:hypervisor']
-
 
 task :yard do
   Rake::Task['docs:gen'].invoke
@@ -60,7 +58,6 @@ module HarnessOptions
     final_options.merge!(intermediary_options)
     final_options.merge!(local_overrides)
   end
-
 end
 
 def hosts_file_env
@@ -94,7 +91,6 @@ end
 HOSTS_FILE = "#{test_targets}-#{SecureRandom.uuid}.yaml"
 
 def beaker_test(mode = :base, options = {})
-
   preserved_hosts_mode = options[:hosts] == HOSTS_PRESERVED
   final_options = HarnessOptions.final_options(mode, options)
 
@@ -126,7 +122,6 @@ def beaker_test(mode = :base, options = {})
   sh("beaker", *args)
 end
 
-
 namespace :test do
   USAGE = <<-EOS
 You may set BEAKER_HOSTS=config/nodes/foo.yaml or include it in an acceptance-options.rb for Beaker,
@@ -151,6 +146,7 @@ Commandline options set through the above environment variables will override se
         if not wait_thr.value.success?
           fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
         end
+
         exit_status = wait_thr.value
       }
       if exit_status != /0/
@@ -186,12 +182,12 @@ Run the hypervisor beaker acceptance tests
     beaker_test(:hypervisor)
   end
 
-
   desc 'Generate Beaker Host Config File'
   task :gen_hosts do
     if hosts_file_env
       next
     end
+
     cli = BeakerHostGenerator::CLI.new([test_targets])
     FileUtils.mkdir_p('tmp') # -p ignores when dir already exists
     File.open("tmp/#{HOSTS_FILE}", 'w') do |fh|
@@ -199,7 +195,6 @@ Run the hypervisor beaker acceptance tests
     end
   end
 end
-
 
 ###########################################################
 #
@@ -217,7 +212,6 @@ namespace :history do
       end
     end
   end
-
 end
 
 ###########################################################
@@ -252,7 +246,6 @@ task :docs => 'docs:clear' do
 end
 
 namespace :docs do
-
   desc 'Clear the generated documentation cache'
   task :clear do
     Dir.chdir(__dir__) do

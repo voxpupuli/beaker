@@ -3,9 +3,7 @@ require 'spec_helper'
 module Beaker
   module Shared
     describe OptionsResolver do
-
       describe 'run_in_parallel?' do
-
         it 'returns true if :run_in_parallel in opts is true' do
           expect(subject.run_in_parallel?({ :run_in_parallel => true }, nil, nil)).to be === true
         end
@@ -41,7 +39,6 @@ module Beaker
         it 'returns false if opts is false but a matching mode is specified in options' do
           expect(subject.run_in_parallel?({ :run_in_parallel => false }, { :run_in_parallel => ['install'] }, 'install')).to be === false
         end
-
       end
     end
   end

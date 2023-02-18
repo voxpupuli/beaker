@@ -258,6 +258,7 @@ module Unix::Pkg
     begin
       host, port = url.match(/https?:\/\/(.*):(\d*)/)[1, 2]
       raise if host.empty? or port.empty?
+
       "--httpproxy #{host} --httpport #{port}"
     rescue
       raise "Cannot extract host and port from '#{url}'"

@@ -2,7 +2,6 @@ module Beaker
   module Options
     # An object that parses arguments in the format ['--option', 'value', '--option2', 'value2', '--switch']
     class CommandLineParser
-
       # @example Create a CommanLineParser
       #   a = CommandLineParser.new
       #
@@ -292,9 +291,7 @@ module Beaker
                   'Output an additional JUnit XML file, sorted by execution time' do |bool|
             @cmd_options[:xml_time_enabled] = bool
           end
-
         end
-
       end
 
       # Parse an array of arguments into a Hash of options

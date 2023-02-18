@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Beaker
   module Options
-
     describe Validator do
       let(:validator) { described_class.new }
 

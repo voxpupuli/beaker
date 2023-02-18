@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 require 'hocon/parser/config_document_factory'
 require 'hocon/config_value_factory'
 
@@ -11,7 +12,6 @@ module Beaker
       #   - {https://github.com/puppetlabs/beaker/tree/master/docs/how_to/use_hocon_helpers.md Beaker docs}.
       #   - Beaker acceptance tests in +acceptance/tests/base/dsl/helpers/hocon_helpers_test.rb+
       module HoconHelpers
-
         # Reads the given hocon file from a SUT
         #
         # @param [Host] host Host to get hocon file from.
@@ -23,6 +23,7 @@ module Beaker
           if filename.nil? || filename.empty?
             raise ArgumentError, '#hocon_file_edit_on requires a filename'
           end
+
           file_contents = on(host, "cat #{filename}").stdout
           Hocon::Parser::ConfigDocumentFactory.parse_string(file_contents)
         end
@@ -86,7 +87,6 @@ module Beaker
             create_remote_file(host, filename, content_doc.render)
           end
         end
-
       end
     end
   end

@@ -3,7 +3,6 @@ require "spec_helper"
 module Beaker
   module Options
     describe OptionsFileParser do
-
       let(:parser) { described_class }
       let(:simple_opts) { File.join(__dir__, "data", "opts.txt") }
 
@@ -16,8 +15,6 @@ module Beaker
         FakeFS.deactivate!
         expect { parser.parse_options_file("not a valid path") }.to raise_error(ArgumentError)
       end
-
-
     end
   end
 end

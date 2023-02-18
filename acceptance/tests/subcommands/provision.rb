@@ -1,5 +1,4 @@
 test_name 'use the provision subcommand' do
-
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
 
   def delete_root_folder_contents

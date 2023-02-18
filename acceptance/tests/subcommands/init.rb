@@ -1,5 +1,4 @@
 test_name 'use the init subcommand' do
-
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
   def delete_root_folder_contents
     on default, 'rm -rf /root/* /root/.beaker'

@@ -36,7 +36,6 @@ module Beaker
         hypervisor.set_ssh_connection_preference(hosts, hypervisor)
         expect(hosts[0][:ssh_connection_preference]).to eq([:set, :in, :hostfile, :hypervisor, :pref, :ip, :vmhostname, :hostname])
       end
-
     end
 
     describe "#configure" do
@@ -136,8 +135,6 @@ module Beaker
     expect(hypervisor.generate_host_name().length - prefix.length >= 15).to be true
         end
       end
-
     end
-
   end
 end

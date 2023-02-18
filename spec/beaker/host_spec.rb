@@ -54,7 +54,6 @@ module Beaker
         let(:package) { 'foo' }
 
         context "testing osarchitecture" do
-
           context "64 bit" do
             before do
               @platform = Beaker::Platform.new('windows-2008r2-64')
@@ -77,12 +76,10 @@ module Beaker
             end
           end
         end
-
       end
     end
 
     describe "#add_env_var" do
-
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
@@ -115,7 +112,6 @@ module Beaker
         expect(Beaker::SedCommand).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
-
     end
 
     describe "#delete_env_var" do
@@ -125,7 +121,6 @@ module Beaker
         expect(Beaker::SedCommand).to receive(:new).with("unix", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
-
     end
 
     describe "executing commands" do
@@ -253,7 +248,6 @@ module Beaker
     end
 
     describe "#mkdir_p" do
-
       it "does the right thing on a bash host, identified as is_cygwin=true" do
         @options = { :is_cygwin => true }
         @platform = 'windows'
@@ -263,7 +257,6 @@ module Beaker
 
         expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
         expect(host.mkdir_p('test/test/test')).to be == true
-
       end
 
       it "does the right thing on a bash host, identified as is_cygwin=nil" do
@@ -275,7 +268,6 @@ module Beaker
 
         expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
         expect(host.mkdir_p('test/test/test')).to be == true
-
       end
 
       it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
@@ -293,13 +285,10 @@ module Beaker
                                   "-NonInteractive",
                                   "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
         expect(host.mkdir_p('test/test/test')).to be == true
-
       end
-
     end
 
     describe "#touch" do
-
       it "generates the right absolute command for a windows host" do
         @platform = 'windows'
         expect(host.touch('touched_file')).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
@@ -316,7 +305,6 @@ module Beaker
         @platform = 'osx'
         expect(host.touch('touched_file')).to be == "/usr/bin/touch touched_file"
       end
-
     end
 
     context 'do_scp_to' do
@@ -495,7 +483,6 @@ module Beaker
       end
 
       context "using an ignore array" do
-
         before do
           test_dir = 'tmp/tests'
           other_test_dir = 'tmp/tests2'
@@ -742,7 +729,6 @@ module Beaker
         expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
         host.get_public_ip
       end
-
     end
 
     describe '#ip' do

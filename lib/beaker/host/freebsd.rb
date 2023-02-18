@@ -4,7 +4,6 @@ end
 
 module FreeBSD
   class Host < Unix::Host
-
     [
       'exec',
       'pkg',
@@ -23,7 +22,5 @@ module FreeBSD
         'pathseparator'     => ':',
         })
     end
-
   end
-
 end

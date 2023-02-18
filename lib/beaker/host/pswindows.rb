@@ -16,12 +16,14 @@ module PSWindows
 
     def external_copy_base
       return @external_copy_base if @external_copy_base
+
       @external_copy_base = execute('for %I in (%ALLUSERSPROFILE%) do @echo %~I')
       @external_copy_base
     end
 
     # attr_reader :network_separator, :external_copy_base, :system_temp_path
     attr_reader :scp_separator, :system_temp_path
+
     def initialize name, host_hash, options
       super
 
@@ -33,6 +35,5 @@ module PSWindows
       @external_copy_base = nil
       # @external_copy_base = '/programdata'
     end
-
   end
 end

@@ -4,7 +4,6 @@ module Beaker
   #
   # @api public
   class Command
-
     # A string representing the (possibly) incomplete command
     attr_accessor :command
 
@@ -60,7 +59,6 @@ module Beaker
            @environment = @environment.merge(@options.delete(k))
          end
       end
-
     end
 
     # @param [Host]   host An object that implements {Beaker::Host}'s
@@ -125,9 +123,6 @@ module Beaker
     def args_string args = @args
       args.flatten.compact.join(' ')
     end
-
-
-
   end
 
   class PuppetCommand < Command
@@ -147,7 +142,6 @@ module Beaker
   end
 
   class SedCommand < Command
-
     # sets up a SedCommand for a particular platform
     #
     # the purpose is to abstract away platform-dependent details of the sed command

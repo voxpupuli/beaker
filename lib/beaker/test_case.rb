@@ -99,7 +99,6 @@ module Beaker
       @exports  = []
       set_current_test_filename(@path ? File.basename(@path, '.rb') : nil)
 
-
       #
       # We put this on each wrapper (rather than the class) so that methods
       # defined in the tests don't leak out to other tests.
@@ -188,6 +187,5 @@ module Beaker
       end
       hash
     end
-
   end
 end

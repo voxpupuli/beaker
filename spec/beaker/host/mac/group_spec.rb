@@ -29,7 +29,6 @@ EOS
   let(:result) { Beaker::Result.new(host, command) }
 
   describe '#group_list' do
-
     it 'returns group names list correctly' do
       result.stdout = dscacheutil_list
       expect(subject).to receive(:execute).and_yield(result)
@@ -43,11 +42,9 @@ EOS
         expect(result.stdout).to be === dscacheutil_list
       }
     end
-
   end
 
   describe '#group_get' do
-
     it 'fails if a name line isn\'t included' do
       result.stdout = ''
       group_name = 'any_name'
@@ -62,11 +59,9 @@ EOS
         expect(answer).to be === 'puppet1:*:55'
       end
     end
-
   end
 
   describe '#group_gid' do
-
     it 'parses mac dscacheutil output into the gid correctly' do
       result.stdout = puppet1
       expect(subject).to receive(:execute).and_yield(result)
@@ -78,11 +73,9 @@ EOS
       expect(subject).to receive(:execute).and_yield(result)
       expect(subject.group_gid(puppet1)).to be === -1
     end
-
   end
 
   describe '#group_present' do
-
     it 'returns group existence without running create command if it already exists' do
       result.stdout = puppet1
       expect(subject).to receive(:execute).once.and_yield(result)
@@ -109,26 +102,21 @@ EOS
       expect(subject).not_to receive(:gid_next)
       subject.group_present('puppet1')
     end
-
   end
 
   describe '#group_absent' do
-
     it 'calls execute to run logic' do
       name = "main_one"
       expect(subject).to receive(:execute).once.with("if dscl . -list /Groups/#{name}; then dscl . -delete /Groups/#{name}; fi", {})
       subject.group_absent(name)
     end
-
   end
 
   describe '#gid_next' do
-
     it 'returns the next ID given' do
       n = 10
       expect(subject).to receive(:execute).and_return("#{n}")
       expect(subject.gid_next).to be === n + 1
     end
-
   end
 end

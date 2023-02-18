@@ -2,7 +2,6 @@ require "spec_helper"
 
 module Beaker
   module Options
-
     describe Presets do
       let(:presets)    { described_class.new }
 
@@ -37,7 +36,6 @@ module Beaker
         expect(presets.presets).to have_key(:host_tags)
         expect(presets.presets[:host_tags]).to eq({})
       end
-
     end
   end
 end

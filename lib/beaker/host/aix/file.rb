@@ -12,5 +12,4 @@ module Aix::File
   def path_split(paths)
     paths.split(':')
   end
-
 end

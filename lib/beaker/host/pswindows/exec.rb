@@ -75,8 +75,10 @@ module PSWindows::Exec
     ips.each_line do |line|
       matches = line.split('=')
       next if matches.length <= 1
+
       matches = matches[1].match(/^{"(.*?)"/)
       next if matches.nil? || matches.captures.nil? || matches.captures.empty?
+
       ip = matches.captures[0] if matches && matches.captures
       break if ip != ''
     end
@@ -95,6 +97,7 @@ module PSWindows::Exec
       if result.exit_code == 0
         return true
       end
+
       try += 1
     end
     result.exit_code == 0
@@ -182,6 +185,7 @@ module PSWindows::Exec
 
   def environment_string env
     return '' if env.empty?
+
     env_array = self.environment_variable_string_pair_array(env)
 
     environment_string = ''

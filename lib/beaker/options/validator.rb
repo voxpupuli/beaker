@@ -1,6 +1,5 @@
 module Beaker
   module Options
-
     class Validator
       VALID_FAIL_MODES              = /stop|fast|slow/
       VALID_PRESERVE_HOSTS          = /always|onfail|onpass|never/

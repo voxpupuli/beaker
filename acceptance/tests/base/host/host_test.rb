@@ -282,9 +282,7 @@ hosts.each do |host|
 end
 
 step "Ensure scp errors close the ssh connection" do
-
   step 'Attempt to generate a remote file that does not exist' do
-
     # This assert relies on the behavior of the net-scp library to
     # raise an error when #channel.on_close is called, which is called by
     # indirectly called by beaker's own SshConnection #close mehod. View
@@ -301,7 +299,6 @@ step "Ensure scp errors close the ssh connection" do
   end
 
   step 'Attempt to scp from a resource on the SUT that does not exist' do
-
     # This assert relies on the behavior of the net-scp library to
     # use the Dir.mkdir method in the #download_start_state method.
     # See the source for further info:
@@ -327,5 +324,4 @@ step 'Ensure that a long 128+ character string with UTF-8 characters does not br
   on(default, "rm -rf /tmp/#{long_string}")
   result = on(default, 'ls /tmp')
   assert(!result.stdout.include?(long_string), 'Error in folder deletion with long string + UTF-8 characters')
-
 end

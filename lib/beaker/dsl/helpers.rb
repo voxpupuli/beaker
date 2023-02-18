@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+
 ['host', 'test', 'web', 'hocon'].each do |lib|
       require "beaker/dsl/helpers/#{lib}_helpers"
 end
 
 module Beaker
   module DSL
-
     # Contains methods to help you manage and configure your SUTs.
 
     # Extensions, available in separate modules, enable you to configure and interact with puppet, facter

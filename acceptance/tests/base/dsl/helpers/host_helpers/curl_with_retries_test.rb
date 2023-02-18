@@ -1,7 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #curl_with_retries" do
-
   step "#curl_with_retries CURRENTLY fails with a RuntimeError if retries are exhausted without fetching the specified URL" do
     # NOTE: would expect that this would raise Beaker::Host::CommandFailure
 

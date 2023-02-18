@@ -3,7 +3,6 @@ require 'rake/tasklib'
 require 'rake'
 require 'beaker'
 
-
 module Beaker
   module Tasks
     class RakeTask < ::Rake::TaskLib
@@ -41,6 +40,7 @@ module Beaker
       end
 
       private
+
       # Run the task provided, implements the rake task interface
       #
       # @param verbose [bool] Defines wether to run in verbose mode or not

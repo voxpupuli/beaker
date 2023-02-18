@@ -3,7 +3,6 @@ require 'fileutils'
 
 module Beaker
   describe TestSuite do
-
     context 'new' do
       let(:test_dir) { 'tmp/tests' }
 
@@ -48,7 +47,6 @@ module Beaker
     end
 
     context 'run' do
-
       let(:options)     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.' }) }
       let(:broken_script) { "raise RuntimeError" }
       let(:fail_script)   { "raise Beaker::DSL::Outcomes::FailTest" }
@@ -75,7 +73,6 @@ module Beaker
         expect(tsr.failed_tests).to be === 0
         expect(tsr.test_count).to be === 1
         expect(tsr.passed_tests).to be === 0
-
       end
 
       it 'fails fast if fail_mode != :slow and fail test is raised' do
@@ -95,7 +92,6 @@ module Beaker
         expect(tsr.failed_tests).to be === 1
         expect(tsr.test_count).to be === 1
         expect(tsr.passed_tests).to be === 0
-
       end
 
       it 'fails slow if fail_mode = :slow, even if a test fails and there is a runtime error' do
@@ -115,12 +111,10 @@ module Beaker
         expect(tsr.failed_tests).to be === 1
         expect(tsr.test_count).to be === 3
         expect(tsr.passed_tests).to be === 1
-
       end
     end
 
     describe TestSuiteResult do
-
       let(:options)           { make_opts.merge({ :logger => double().as_null_object }) }
       let(:hosts)             { make_hosts() }
       let(:testcase1)         { Beaker::TestCase.new(hosts, options[:logger], options) }
@@ -250,7 +244,8 @@ module Beaker
         let(:options) { make_opts.merge({ :logger => double().as_null_object,
                                          'name' => create_files(@files),
                                          :log_dated_dir => '.',
-                                         :xml_dated_dir => '.',  }) }
+                                         :xml_dated_dir => '.',  })
+        }
         let(:rb_test) { 'my_ruby_file.rb' }
 
         before do
@@ -329,7 +324,6 @@ module Beaker
           end
         end
       end
-
     end
 
     describe '#log_path' do
@@ -374,8 +368,6 @@ module Beaker
           expect(File.readlink('f/latest')).to be === 'g/h/i/j/k'
         end
       end
-
     end
-
   end
 end

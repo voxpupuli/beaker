@@ -50,5 +50,4 @@ test_name "dsl::helpers::host_helpers #scp_to" do
       end
     end
   end
-
 end

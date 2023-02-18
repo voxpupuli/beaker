@@ -8,7 +8,6 @@ module Beaker
     let(:newpath) { '/Foo/Bar' }
     let(:host)    { make_host('name', { :platform => 'windows' }) }
 
-
     describe '#chown' do
       it 'calls cygpath first' do
         expect(host).to receive(:execute).with("cygpath -u #{path}")

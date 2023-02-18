@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 require 'fileutils'
 ['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
   require "beaker/#{lib}"
@@ -79,7 +80,6 @@ module Beaker
     # Plain text summay of test suite
     # @param [Logger] summary_logger The logger we will print the summary to
     def summarize(summary_logger)
-
       summary_logger.notify <<-HEREDOC
       Test Suite: #{@name} @ #{start_time}
 
@@ -176,7 +176,6 @@ module Beaker
 
       begin
         LoggerJunit.write_xml(xml_file, stylesheet) do |_doc, suites|
-
           meta_info = suites.add_element(REXML::Element.new('meta_test_info'))
           unless file_to_link.nil?
             time_sort ? meta_info.add_attribute('page_active', 'performance') : meta_info.add_attribute('page_active', 'execution')
@@ -259,6 +258,5 @@ module Beaker
         @logger.error "failure in XML output: \n#{e}" + e.backtrace.join("\n")
       end
     end
-
   end
 end

@@ -25,7 +25,6 @@ module Beaker
       def exec
         # noop
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -151,9 +150,7 @@ module Beaker
         @opts = { 'platform' => 'nope-is-me' }
         pkg = 'nope_package'
         expect { instance.check_for_package(pkg) }.to raise_error
-
       end
-
     end
 
     describe '#update_apt_if_needed' do
@@ -168,7 +165,6 @@ module Beaker
     end
 
     context "install_package" do
-
       PlatformHelpers::DEBIANPLATFORMS.each do |platform|
         it "uses apt-get for #{platform}" do
           @opts = { 'platform' => platform }
@@ -251,7 +247,6 @@ module Beaker
     end
 
     context "install_package_with_rpm" do
-
       it "accepts a package as a single argument" do
         @opts = { 'platform' => 'el-is-me' }
         pkg = 'redhat_package'
@@ -268,11 +263,9 @@ module Beaker
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
         expect(instance.install_package_with_rpm(pkg, cmdline_args)).to be == "hello"
       end
-
     end
 
     context 'extract_rpm_proxy_options' do
-
       ['http://myproxy.com:3128/',
        'https://myproxy.com:3128/',
        'https://myproxy.com:3128',
@@ -289,7 +282,6 @@ module Beaker
           instance.extract_rpm_proxy_options(url)
         }.to raise_error(RuntimeError, /Cannot extract host and port/)
       end
-
     end
 
     describe '#install_local_package' do
@@ -389,7 +381,6 @@ module Beaker
       end
 
       context 'on solaris' do
-
         before do
           @platform = 'solaris'
         end
@@ -415,7 +406,6 @@ module Beaker
           expect(instance).to receive(:execute).with(/^tar .* #{tar_file}$/)
           instance.uncompress_local_tarball(tar_file, base_dir, download_file)
         end
-
       end
     end
   end

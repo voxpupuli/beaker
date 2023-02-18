@@ -125,6 +125,7 @@ module Beaker
       when /windows/
         if host.is_cygwin?
           raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
+
           WINDOWS_PACKAGES
         else
           PSWINDOWS_PACKAGES
@@ -158,6 +159,7 @@ module Beaker
       package_list.each do |string|
         alternatives = string.split('|')
         next if alternatives.any? { |pkg| host.check_for_package pkg }
+
         install_one_of_packages host, alternatives
       end
     end
@@ -347,6 +349,7 @@ module Beaker
       logger = opts[:logger]
       hosts.each do |host|
         next if host['platform'].include?('netscaler')
+
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
@@ -445,7 +448,6 @@ module Beaker
       end
     end
 
-
     # Merge the two provided hashes so that an array of values is created from collisions
     # @param [Hash] h1 The first hash
     # @param [Hash] h2 The second hash
@@ -521,5 +523,4 @@ module Beaker
       end
     end
   end
-
 end

@@ -2,7 +2,6 @@ require 'open3'
 
 module Beaker
   class LocalConnection
-
     attr_accessor :logger, :hostname, :ip
 
     def initialize options = {}
@@ -68,7 +67,6 @@ module Beaker
     end
 
     def scp_to(source, target, _options = {})
-
       result = Result.new(@hostname, [source, target])
       begin
         FileUtils.cp_r source, target

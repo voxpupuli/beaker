@@ -3,7 +3,6 @@ module Beaker
     module Helpers
       # Convenience methods for checking links and moving web content to hosts
       module WebHelpers
-
         # Blocks until the port is open on the host specified, returns false
         # on failure
         def port_open_within?(host, port = 8140, seconds = 120)
@@ -113,9 +112,9 @@ module Beaker
           unless status.success?
             raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
           end
+
           dst
         end
-
       end
     end
   end

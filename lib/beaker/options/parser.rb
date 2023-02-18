@@ -324,7 +324,6 @@ module Beaker
       #
       # @raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
-
         @options['HOSTS'].each_key do |name|
           @validator.validate_platform(@options['HOSTS'][name], name)
           @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
@@ -397,7 +396,6 @@ module Beaker
 
         # set the default role
         set_default_host!(@options[:HOSTS])
-
       end
 
       # Get an array containing lists of roles by parsing each host in hosts.
@@ -463,7 +461,6 @@ module Beaker
           @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
         end
       end
-
     end
   end
 end

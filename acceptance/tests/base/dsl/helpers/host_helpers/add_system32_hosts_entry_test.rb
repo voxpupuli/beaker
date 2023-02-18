@@ -1,9 +1,7 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #add_system32_hosts_entry" do
-
   confine_block :to, :platform => /windows/ do
-
     step "#add_system32_hosts_entry fails when run on a non-powershell platform" do
       # NOTE: would expect this to be better documented.
       if default.is_powershell?
@@ -36,7 +34,6 @@ test_name "dsl::helpers::host_helpers #add_system32_hosts_entry" do
   end
 
   confine_block :except, :platform => /windows/ do
-
     step "#add_system32_hosts_entry CURRENTLY fails with RuntimeError when run on a non-windows platform" do
       # NOTE: would expect this to behave the same way it does on a windows
       #       non-powershell platform (raises Beaker::Host::CommandFailure), or

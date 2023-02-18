@@ -41,5 +41,4 @@ module Windows::Pkg
   def identify_windows_architecture
     platform.arch.include?('64') ? '64' : '32'
   end
-
 end

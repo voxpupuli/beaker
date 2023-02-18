@@ -45,7 +45,6 @@ module Beaker
           expect(file_parser).not_to be_kind_of(OptionsHash)
         end
 
-
         it 'returns an empty options hash when file does not exist' do
           allow(File).to receive(:exist?).and_return false
           expect(parser).to be_kind_of(OptionsHash)

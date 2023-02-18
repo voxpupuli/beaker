@@ -12,7 +12,6 @@ end
 
 module Beaker
   describe CLI do
-
     let(:cli)      {
       allow(File).to receive(:exist?).and_call_original
       allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
@@ -82,7 +81,6 @@ module Beaker
         end
       end
     end
-
 
     describe '#configured_options' do
       it 'returns a list of options that were not presets' do
@@ -167,7 +165,6 @@ module Beaker
           expect(cli.instance_variable_get(:@attribution)[:logger]).to be == 'runtime'
           expect(cli.instance_variable_get(:@attribution)[:timestamp]).to be == 'runtime'
           expect(cli.instance_variable_get(:@attribution)[:beaker_version]).to be == 'runtime'
-
         end
 
         it 'continues testing after failed test if using slow fail_mode' do
@@ -181,7 +178,6 @@ module Beaker
 
           expect(cli).to receive(:run_suite).exactly(4).times
           expect { cli.execute! }.to raise_error
-
         end
 
         it 'stops testing after failed test if using fast fail_mode' do
@@ -194,7 +190,6 @@ module Beaker
 
           expect(cli).to receive(:run_suite).exactly(3).times
           expect { cli.execute! }.to raise_error
-
         end
       end
 
@@ -213,7 +208,6 @@ module Beaker
           expect(netmanager).to receive(:cleanup).once
 
           expect { cli.execute! }.to raise_error
-
         end
 
         it 'cleans up SUTs post testing if no tests fail and preserve_hosts = never' do
@@ -231,9 +225,7 @@ module Beaker
           expect(netmanager).to receive(:cleanup).once
 
           expect { cli.execute! }.not_to raise_error
-
         end
-
 
         it 'preserves SUTs post testing if no tests fail and preserve_hosts = always' do
           options = cli.instance_variable_get(:@options)
@@ -253,7 +245,6 @@ module Beaker
           expect(netmanager).not_to receive(:cleanup)
 
           expect { cli.execute! }.not_to raise_error
-
         end
 
         it 'preserves SUTs post testing if no tests fail and preserve_hosts = always' do
@@ -288,7 +279,6 @@ module Beaker
           expect(netmanager).to receive(:cleanup).once
 
           expect { cli.execute! }.not_to raise_error
-
         end
 
         it 'preserves SUTs post testing if tests fail and preserve_hosts = onfail' do
@@ -306,7 +296,6 @@ module Beaker
           expect(netmanager).not_to receive(:cleanup)
 
           expect { cli.execute! }.to raise_error
-
         end
 
         it 'cleans up SUTs post testing if tests fail and preserve_hosts = onpass' do
@@ -324,7 +313,6 @@ module Beaker
           expect(netmanager).to receive(:cleanup).once
 
           expect { cli.execute! }.to raise_error
-
         end
 
         it 'preserves SUTs post testing if no tests fail and preserve_hosts = onpass' do
@@ -384,7 +372,6 @@ module Beaker
       end
 
       describe 'hosts file saving when preserve_hosts should happen' do
-
         before do
           options = cli.instance_variable_get(:@options)
           options[:fail_mode] = 'fast'
@@ -405,7 +392,6 @@ module Beaker
           netmanager = double(:netmanager)
           cli.instance_variable_set(:@network_manager, netmanager)
           expect(netmanager).not_to receive(:cleanup)
-
 
           allow(cli).to receive(:print_env_vars_affecting_beaker)
           logger = cli.instance_variable_get(:@logger)
@@ -474,7 +460,6 @@ module Beaker
         end
 
         describe 'output text informing the user that re-use is possible' do
-
           it 'if unsupported, does not output extra text' do
             options = cli.instance_variable_get(:@options)
             Dir.mktmpdir do |dir|
@@ -548,13 +533,10 @@ module Beaker
               cli.execute!
             end
           end
-
-
         end
       end
 
       describe '#build_hosts_preserved_reproducing_command' do
-
         it 'replaces the hosts file' do
           new_hosts_file  = 'john/deer/was/here.txt'
           command_to_sub  = 'p --log-level debug --hosts pants/of/plan.poo jam --jankies --flag-business'
@@ -588,7 +570,6 @@ module Beaker
           expect(answer).to be_start_with(command_correct)
         end
       end
-
     end
   end
 end

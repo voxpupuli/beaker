@@ -8,7 +8,6 @@ module Beaker
     # I find most of these adapters of suspicious value and have deprecated
     # many of them.
     module Wrappers
-
       # @param [String] command_string A string of to be interpolated
       #                                within the context of a host in
       #                                question

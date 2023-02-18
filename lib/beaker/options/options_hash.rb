@@ -2,11 +2,9 @@ require 'stringify-hash'
 
 module Beaker
   module Options
-
     # A hash that treats Symbol and String keys interchangeably
     # and recursively merges hashes
     class OptionsHash < StringifyHash
-
       # Determine if type of ObjectHash is pe, defaults to true
       #
       # @example Use this method to test if the :type setting is pe
@@ -43,7 +41,6 @@ module Beaker
         end
         File.open(output_file, 'w+') { |f| f.write(dump)  }
       end
-
     end
   end
 end

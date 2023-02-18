@@ -4,7 +4,6 @@ require 'net/scp'
 
 module Beaker
   class SshConnection
-
     attr_accessor :logger
     attr_accessor :ip, :vmhostname, :hostname, :ssh_connection_preference
 
@@ -168,6 +167,7 @@ module Beaker
 
             channel.exec(command) do |terminal, success|
               raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
+
               register_stdout_for terminal, result, stdout_callback
               register_stderr_for terminal, result, stderr_callback
               register_exit_code_for terminal, result
@@ -207,6 +207,7 @@ module Beaker
 
         channel.exec(command) do |terminal, success|
           raise Net::SSH::Exception.new("FAILED: to execute command on a new channel on #{@hostname}") unless success
+
           register_stdout_for terminal, result, stdout_callback
           register_stderr_for terminal, result, stderr_callback
           register_exit_code_for terminal, result
@@ -288,7 +289,6 @@ module Beaker
     end
 
     def scp_to source, target, options = {}
-
       local_opts = options.dup
       if local_opts[:recursive].nil?
         local_opts[:recursive] = File.directory?(source)
@@ -312,7 +312,6 @@ module Beaker
         close
       end
 
-
       # Setting these values allows reporting via result.log(test_name)
       result.stdout << "  SCP'ed file #{source} to #{@hostname}:#{target}"
 
@@ -324,7 +323,6 @@ module Beaker
     end
 
     def scp_from source, target, options = {}
-
       local_opts = options.dup
       if local_opts[:recursive].nil?
         local_opts[:recursive] = true

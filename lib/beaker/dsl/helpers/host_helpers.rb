@@ -4,7 +4,6 @@ module Beaker
       # Methods that help you interact and manage the state of your Beaker SUTs, these
       # methods do not require puppet to be installed to execute correctly
       module HostHelpers
-
         # @!macro [new] common_opts
         #   @param [Hash{Symbol=>String}] opts Options to alter execution.
         #   @option opts [Boolean] :silent (false) Do not produce log output
@@ -240,6 +239,7 @@ module Beaker
           if not File.exist?(filename)
             raise IOError, "No such file or directory - #{filename}"
           end
+
           create_tarball(archive_root, archive_name)
         end
 
@@ -298,7 +298,6 @@ module Beaker
             native_path = script_path.tr('/', "\\")
             on host, powershell("", { "File" => native_path }), opts
           end
-
         end
 
         # Move a local script to a remote host and execute it
@@ -396,7 +395,6 @@ module Beaker
         # @return [String, nil] The path to the file if the file exists, nil if it
         #   doesn't exist.
         def backup_the_file host, current_dir, new_dir, filename = 'puppet.conf'
-
           old_location = current_dir + '/' + filename
           new_location = new_dir + '/' + filename + '.bak'
 

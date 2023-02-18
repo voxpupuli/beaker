@@ -84,6 +84,7 @@ module Beaker
     def configure(opts = {})
       begin
         return unless @options[:configure]
+
         run_in_parallel = run_in_parallel? opts, @options, 'configure'
         block_on @hosts, { :run_in_parallel => run_in_parallel } do |host|
           if host[:timesync]
@@ -122,9 +123,9 @@ module Beaker
       if @options[:host_name_prefix]
         return @options[:host_name_prefix] + n
       end
+
       n
     end
-
   end
 end
 

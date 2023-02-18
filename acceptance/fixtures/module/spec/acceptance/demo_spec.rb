@@ -1,7 +1,6 @@
 require 'spec_helper_acceptance'
 
 describe "my tests" do
-
   # an example using the beaker DSL
   # use http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL
   it "says hello!" do
@@ -47,7 +46,6 @@ describe "my tests" do
   end
 
   context "can use both serverspec and Beaker DSL" do
-
     it "can create a file" do
       shell('rm -f /tmp/demo.txt')
       manifest = "file {'demofile':
@@ -64,6 +62,4 @@ describe "my tests" do
       it { is_expected.to contain 'this is my file.' }
     end
   end
-
-
 end

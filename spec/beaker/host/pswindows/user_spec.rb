@@ -6,10 +6,6 @@ end
 
 describe PSWindowsUserTest do
   let(:wmic_output) do <<-EOS
-
-
-
-
 Name=Administrator
 
 
@@ -50,7 +46,6 @@ EOS
   let(:result) { Beaker::Result.new(host, command) }
 
   describe '#user_list' do
-
     it 'returns user names list correctly' do
       result.stdout = wmic_output
       expect(subject).to receive(:execute).with(command).and_yield(result)
@@ -64,7 +59,5 @@ EOS
         expect(result.stdout).to be === wmic_output
       }
     end
-
   end
-
 end

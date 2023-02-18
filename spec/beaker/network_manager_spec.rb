@@ -1,4 +1,5 @@
 # encoding: UTF-8
+
 require 'spec_helper'
 
 module Beaker
@@ -6,7 +7,8 @@ module Beaker
     let(:mock_provisioning_logger) {
       mock_provisioning_logger = Object.new
       allow(mock_provisioning_logger).to receive(:notify)
-      mock_provisioning_logger }
+      mock_provisioning_logger
+    }
     let(:options) {
       make_opts.merge({
         'logger' => double().as_null_object,

@@ -8,7 +8,6 @@ VAGRANT  = ['ubuntu1404-64default.mdcal-ubuntu1404-64af', '--hypervisor=vagrant'
 VMPOOLER = ['redhat7-64default.mdcal-redhat7-64af']
 
 namespace :beaker_quickstart do
-
   desc 'Generate Default Beaker Host Config File, valid options are: vmpooler or vagrant.'
   task :gen_hosts, [:hypervisor] do |_t, args|
     hosts_file = "#{CONFIG_DIR}/default_#{args[:hypervisor]}_hosts.yaml"
@@ -32,7 +31,6 @@ namespace :beaker_quickstart do
       puts "Not overwriting Host Config File: #{hosts_file} - it already exists."
     end
   end
-
 
   desc 'Generate Default Pre-Suite'
   task :gen_pre_suite do
@@ -81,9 +79,7 @@ end")
     puts "About to run - #{beaker_command(system_args)}"
     system(beaker_command(system_args))
   end
-
 end
-
 
 def beaker_command(system_args)
   cmd_parts = []

@@ -9,7 +9,6 @@ class ClassMixedWithDSLHelpers
   def logger
     RSpec::Mocks::Double.new('logger').as_null_object
   end
-
 end
 
 describe ClassMixedWithDSLHelpers do
@@ -32,7 +31,6 @@ describe ClassMixedWithDSLHelpers do
     end
 
     describe "given valid arguments" do
-
       it "returns its second and third arguments concatenated." do
         concat_path = "#{destdir}/#{name}"
         create_files([concat_path])
@@ -74,19 +72,15 @@ describe ClassMixedWithDSLHelpers do
           subject.fetch_http_file(url, name, destdir)
         end
       end
-
     end
 
     describe 'given invalid arguments' do
-
       it 'chomps correctly when given a URL ending with a / character' do
         allow(URI).to receive(:open).with("#{url}/#{name}").and_return(status: 200)
         expect(URI).to receive(:open).with("#{url}/#{name}")
         subject.fetch_http_file("#{url}/", name, destdir)
       end
-
     end
-
   end
 
   describe "#fetch_http_dir" do
@@ -99,14 +93,11 @@ describe ClassMixedWithDSLHelpers do
     end
 
     describe "given valid arguments" do
-
       it "returns basename of first argument concatenated to second." do
         expect(Open3).to receive(:capture2e).with(/^wget.*/).ordered { result }.and_return(['', status])
         result = subject.fetch_http_dir "#{url}/beep", destdir
         expect(result).to eq("#{destdir}/beep")
       end
-
     end
-
   end
 end

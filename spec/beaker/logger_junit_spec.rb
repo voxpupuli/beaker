@@ -1,4 +1,5 @@
 # encoding: UTF-8
+
 require 'spec_helper'
 
 module Beaker
@@ -7,7 +8,6 @@ module Beaker
     let(:stylesheet) { '/fake/file/location2' }
 
     describe '#is_valid_xml' do
-
       it 'rejects all invalid values' do
         invalid_values = [0x8, 0x10, 0xB, 0x0019, 0xD800, 0xDFFF, 0xFFFE, 0x99999, 0x110000]
         invalid_values.each do |value|
@@ -21,11 +21,9 @@ module Beaker
           expect(described_class.is_valid_xml(value)).to be === true
         end
       end
-
     end
 
     describe '#escape_invalid_xml_chars' do
-
       it 'escapes invalid xml characters correctly' do
         testing_string = 'pants'
         testing_string << 0x8
@@ -36,11 +34,9 @@ module Beaker
         testing_string = 'pants man, pants!'
         expect(described_class.escape_invalid_xml_chars(testing_string)).to be === testing_string
       end
-
     end
 
     describe '#copy_stylesheet_into_xml_dir' do
-
       it 'copies the stylesheet into the correct location' do
         allow(File).to receive(:file?).and_return(false)
         correct_location = File.join(File.dirname(xml_file), File.basename(stylesheet))
@@ -53,22 +49,18 @@ module Beaker
         expect(FileUtils).not_to receive(:copy)
         described_class.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
       end
-
     end
 
     describe '#finish' do
-
       it 'opens the given file for writing, and writes the doc to it' do
         mock_doc = Object.new
         allow(mock_doc).to receive(:write).with(File, 2)
         expect(File).to receive(:open).with(xml_file, 'w')
         described_class.finish(mock_doc, xml_file)
       end
-
     end
 
     describe '#write_xml' do
-
       it 'throws an error with 1-arity in the given block' do
         allow(described_class).to receive(:get_xml_contents)
         expect { described_class.write_xml(xml_file, stylesheet) do |hey| end }.to raise_error(ArgumentError)
@@ -84,7 +76,6 @@ module Beaker
         allow(described_class).to receive(:get_xml_contents)
         expect { described_class.write_xml(xml_file, stylesheet) do |hey1, hey2, hey3| end }.to raise_error(ArgumentError)
       end
-
     end
   end
 end

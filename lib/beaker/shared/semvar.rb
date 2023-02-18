@@ -1,7 +1,6 @@
 module Beaker
   module Shared
     module Semvar
-
       # Is semver-ish version a less than semver-ish version b
       # @param [String] a A version of the from '\d.\d.\d.*'
       # @param [String] b A version of the form '\d.\d.\d.*'
@@ -80,10 +79,12 @@ module Beaker
       #   default value if the list is faulty, which can either be set or nil
       def max_version(versions, default = nil)
         return default if !versions || versions.empty?
+
         versions_copy = versions.dup
         highest = versions_copy.shift
         versions_copy.each do |version|
           next if !version
+
           highest = version if version_is_less(highest, version)
         end
         highest

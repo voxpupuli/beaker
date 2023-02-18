@@ -1,7 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #run_script_on" do
-
   step "#run_script_on fails when the local script cannot be found" do
     assert_raises IOError do
       run_script_on default, "/non/existent/testfile.sh"

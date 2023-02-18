@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 require 'fileutils'
 ['test_case', 'logger', 'test_suite_result'].each do |lib|
   require "beaker/#{lib}"
@@ -8,7 +9,6 @@ module Beaker
   # A collection of {TestCase} objects are considered a {TestSuite}.
   # Handles executing the set of {TestCase} instances and reporting results as post summary text and JUnit XML.
   class TestSuite
-
     attr_reader :name, :options, :fail_mode
 
     # Create {TestSuite} instance
@@ -36,7 +36,6 @@ module Beaker
       @timestamp = timestamp
 
       report_and_raise(@logger, RuntimeError.new("#{@name}: no test files found..."), "TestSuite: initialize") if @test_files.empty?
-
     rescue => e
       report_and_raise(@logger, e, "TestSuite: initialize")
     end
@@ -160,6 +159,5 @@ module Beaker
 
       File.join(log_dir, name)
     end
-
   end
 end

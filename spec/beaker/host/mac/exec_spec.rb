@@ -17,7 +17,6 @@ module Beaker
       def to_s
         "me"
       end
-
     end
 
     let(:opts)     { @opts || {} }

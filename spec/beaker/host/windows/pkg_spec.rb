@@ -21,7 +21,6 @@ module Beaker
       def exec
         # noop
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -42,9 +41,7 @@ module Beaker
           allow(instance).to receive(:execute).with(/^setup\-x86/).ordered
           instance.install_package('curl')
         end
-
       end
     end
-
   end
 end

@@ -21,6 +21,7 @@ module Beaker
 
       def self.execute_subcommand?(arg0)
         return false if arg0.nil?
+
         (Beaker::Subcommand.instance_methods(false) << :help).include? arg0.to_sym
       end
 
@@ -68,7 +69,6 @@ module Beaker
           $stderr = old_stderr
         end
       end
-
     end
   end
 end

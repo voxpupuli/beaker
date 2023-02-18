@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 module Beaker
-
   describe Unix::Exec do
     class UnixExecTest
       include Unix::Exec
@@ -18,7 +17,6 @@ module Beaker
       def to_s
         "me"
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -26,7 +24,6 @@ module Beaker
     let(:instance) { UnixExecTest.new(opts, logger) }
 
     context "rm" do
-
       it "deletes" do
         path = '/path/to/delete'
         expect(instance).to receive(:execute).with("rm -rf #{path}").and_return(0)
@@ -42,7 +39,6 @@ module Beaker
         expect(instance).to receive(:execute).with("rm -rf #{destination}").and_return(0)
         expect(instance).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
         expect(instance.mv(origin, destination)).to be === 0
-
       end
 
       it 'does not rm' do
@@ -382,7 +378,6 @@ module Beaker
         expect(Beaker::Command).to receive(:new).with("systemctl restart rsyslog")
         instance.enable_remote_rsyslog
       end
-
     end
 
     describe '#which' do

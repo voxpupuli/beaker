@@ -2,14 +2,11 @@ require 'spec_helper'
 
 module Beaker
   describe Platform do
-
     let(:logger)    { double('logger') }
     let(:platform)  { described_class.new(@name) }
 
     context 'initialize' do
-
       describe "recognizes valid platforms" do
-
         it "accepts correctly formatted platform values" do
           @name = 'oracle-version-arch'
           expect { platform }.not_to raise_error
@@ -29,16 +26,13 @@ module Beaker
           @name = 'o3l-r5-u6-x86'
           expect { platform }.to raise_error(ArgumentError)
         end
-
       end
 
       describe "if platform does not have codename" do
-
         it "sets codename to nil" do
           @name = "centos-6.5-x86_64"
           expect(platform.codename).to be_nil
         end
-
       end
 
       describe "platforms with version and codename" do
@@ -57,16 +51,13 @@ module Beaker
     end
 
     context 'to_array' do
-
       it "converts Beaker::Platform object to array of its attribues" do
         @name = 'debian-7-somethingsomething'
         expect(platform.to_array).to be === ['debian', '7', 'somethingsomething', 'wheezy']
       end
-
     end
 
     context 'with_version_codename' do
-
       it "can convert debian-11-xxx to debian-bullseye-xxx" do
         @name = 'debian-11-xxx'
         expect(platform.with_version_codename).to be === 'debian-bullseye-xxx'
@@ -95,7 +86,6 @@ module Beaker
       it "can convert ubuntu-1604-xxx to ubuntu-xenial-xxx" do
         @name = 'ubuntu-1604-xxx'
         expect(platform.with_version_codename).to be === 'ubuntu-xenial-xxx'
-
       end
 
       it "can convert ubuntu-1310-xxx to ubuntu-saucy-xxx" do
@@ -122,7 +112,6 @@ module Beaker
     end
 
     context 'with_version_number' do
-
       it "can convert debian-wheezy-xxx to debian-7-xxx" do
         @name = 'debian-wheezy-xxx'
         expect(platform.with_version_number).to be === 'debian-7-xxx'

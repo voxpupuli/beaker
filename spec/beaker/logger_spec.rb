@@ -1,4 +1,5 @@
 # encoding: UTF-8
+
 require 'spec_helper'
 
 module Beaker
@@ -28,7 +29,6 @@ module Beaker
     end
 
     describe '#generate_dated_log_folder' do
-
       it 'generates path for a given timestamp' do
         input_time = Time.new(2014, 6, 2, 16, 31, 22, '-07:00')
         expect(described_class.generate_dated_log_folder(test_dir, dummy_prefix, input_time)).to be === File.join(test_dir, dummy_prefix, '2014-06-02_16_31_22')
@@ -44,7 +44,6 @@ module Beaker
         prefix = 'a/man/a/plan/a/canal/panama'
         expect(File).to be_directory described_class.generate_dated_log_folder(test_dir, prefix, input_time)
       end
-
     end
 
     describe '#prefix_log_line' do
@@ -179,7 +178,6 @@ module Beaker
         after do
           ENV['BUILD_NUMER'] = original_build_number
         end
-
 
         it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
@@ -373,7 +371,6 @@ module Beaker
         its(:is_debug?) { is_expected.to be_falsy }
         its(:is_trace?) { is_expected.to be_falsy }
 
-
         context 'skip' do
           before do
             expect(my_io).not_to receive :puts
@@ -383,7 +380,6 @@ module Beaker
           it('debugs')    { info_logger.debug 'NOT DEBUGGING!' }
           it('traces')    { info_logger.debug 'NOT TRACING!'   }
         end
-
 
         context 'but print' do
           before do
@@ -398,12 +394,12 @@ module Beaker
       end
 
       context 'SUT output logging' do
-
         context 'host output logging' do
           subject(:host_output) { described_class.new(my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
-                                              :color     => true)}
+                                              :color     => true)
+}
 
           it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
@@ -414,14 +410,14 @@ module Beaker
 
             colorized_logger.optionally_color "\e[01;30m", 'my string'
           end
-
         end
 
         context 'color host output' do
           subject(:color_host_output) { described_class.new(my_io,
                                               :log_level => :verbose,
                                               :quiet     => true,
-                                              :color     => true)}
+                                              :color     => true)
+}
 
           it 'colors host_output' do
             colorized_logger = color_host_output
@@ -431,11 +427,8 @@ module Beaker
 
             colorized_logger.optionally_color "", 'my string'
           end
-
         end
       end
-
     end
-
   end
 end

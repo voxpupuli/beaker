@@ -14,5 +14,4 @@ test_name 'User Test' do
       end
     end
   end
-
 end

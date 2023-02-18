@@ -1,6 +1,7 @@
 RSpec::Matchers.define :execute_commands_matching do |pattern|
   match do |actual|
     raise(RuntimeError, "Expected #{actual} to be a FakeHost") unless actual.kind_of?(FakeHost::MockedExec)
+
     @found_count = actual.command_strings.grep(pattern).size
     @times.nil? ?
       @found_count > 0 :

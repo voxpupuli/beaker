@@ -3,7 +3,6 @@ require "spec_helper"
 module Beaker
   module Options
     describe HostsFileParser do
-
       let(:parser)      { described_class }
       let(:filepath)    { File.join(__dir__, "data", "hosts.cfg") }
       let(:filepath_yaml) { File.join(__dir__, "data", "hosts_preserved.yml") }
@@ -67,7 +66,6 @@ module Beaker
       end
 
       describe '#parse_hosts_string' do
-
         it 'will return a #new_host_options hash if given no arguments' do
           host_options = parser.parse_hosts_string
           expect(host_options).to be === parser.new_host_options

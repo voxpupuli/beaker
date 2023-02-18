@@ -9,7 +9,6 @@ class ClassMixedWithDSLHelpers
   def logger
     RSpec::Mocks::Double.new('logger').as_null_object
   end
-
 end
 
 describe ClassMixedWithDSLHelpers do
@@ -26,7 +25,6 @@ describe ClassMixedWithDSLHelpers do
   let(:hosts)  { [master, agent, dash, db, custom] }
 
   describe '#on' do
-
     before do
       result.stdout = 'stdout'
       result.stderr = 'stderr'
@@ -58,7 +56,6 @@ describe ClassMixedWithDSLHelpers do
         end
         subject.on(host, command)
       end
-
     end
 
     it 'if the host is a String Object, finds the matching hosts with that String as role' do

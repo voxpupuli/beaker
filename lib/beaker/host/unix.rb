@@ -73,6 +73,5 @@ module Unix
 
       @external_copy_base = nil
     end
-
   end
 end

@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Beaker
   module Shared
-
     config = RSpec::Mocks.configuration
 
     config.patch_marshal_to_support_partial_doubles = true
@@ -20,83 +19,59 @@ module Beaker
                              hosts[0][:roles] = ['agent', role0]
                              hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
                              hosts[2][:roles] = ['agent', role2]
-                             hosts }
+                             hosts
+      }
 
       describe "#hosts_with_name" do
-
         it "can identify the host by name" do
-
             expect(host_handler.hosts_with_name(hosts, 'vm1')).to be === [hosts[0]]
-
         end
 
         it "can identify the host by vmhostname" do
-
             hosts[0][:vmhostname] = 'myname.whatever'
 
             expect(host_handler.hosts_with_name(hosts, 'myname.whatever')).to be === [hosts[0]]
-
         end
 
         it "can identify the host by ip" do
-
             hosts[0][:ip] = '0.0.0.0'
 
             expect(host_handler.hosts_with_name(hosts, '0.0.0.0')).to be === [hosts[0]]
-
         end
 
         it "returns [] when no match is found in a set of hosts" do
-
             hosts[0][:ip] = '0.0.0.0'
             hosts[0][:vmhostname] = 'myname.whatever'
 
             expect(host_handler.hosts_with_name(hosts, 'surprise')).to be === []
-
         end
-
-
-
       end
 
       describe "#hosts_with_role" do
         it "can find the master in a set of hosts" do
-
           expect(host_handler.hosts_with_role(hosts, 'master')).to be === [hosts[1]]
-
         end
 
         it "can find all agents in a set of hosts" do
-
           expect(host_handler.hosts_with_role(hosts, 'agent')).to be === hosts
-
         end
 
         it "returns [] when no match is found in a set of hosts" do
-
           expect(host_handler.hosts_with_role(hosts, 'surprise')).to be === []
-
         end
-
       end
 
       describe "#only_host_with_role" do
         it "can find the single master in a set of hosts" do
-
           expect(host_handler.only_host_with_role(hosts, 'master')).to be === hosts[1]
-
         end
 
         it "throws an error when more than one host with matching role is found" do
-
           expect { host_handler.only_host_with_role(hosts, 'agent') }.to raise_error(ArgumentError)
-
         end
 
         it "throws an error when no host is found matching the role" do
-
           expect { host_handler.only_host_with_role(hosts, 'surprise') }.to raise_error(ArgumentError)
-
         end
 
         it "throws an error when role = nil" do
@@ -106,21 +81,15 @@ module Beaker
 
       describe "#find_at_most_one_host_with_role" do
         it "can find the single master in a set of hosts" do
-
           expect(host_handler.find_at_most_one_host_with_role(hosts, 'master')).to be === hosts[1]
-
         end
 
         it "throws an error when more than one host with matching role is found" do
-
           expect { host_handler.find_at_most_one_host_with_role(hosts, 'agent') }.to raise_error(ArgumentError)
-
         end
 
         it "returns nil when no host is found matching the role" do
-
           expect(host_handler.find_at_most_one_host_with_role(hosts, 'surprise')).to be_nil
-
         end
 
         it "throws an error when role = nil" do
@@ -191,10 +160,7 @@ module Beaker
         it "receives an ArgumentError on empty host" do
           expect { host_handler.run_block_on([], role0) }.to raise_error(ArgumentError)
         end
-
       end
-
     end
-
   end
 end

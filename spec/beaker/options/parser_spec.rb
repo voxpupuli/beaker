@@ -2,7 +2,6 @@ require "spec_helper"
 
 module Beaker
   module Options
-
     describe Parser do
       let(:parser) { described_class.new }
       let(:opts_path) { File.join(__dir__, "data", "opts.txt") }
@@ -13,7 +12,6 @@ module Beaker
       end
 
       describe 'parse_git_repos' do
-
         it "transforms arguments of <PROJECT_NAME>/<REF> to <GIT_BASE_URL>/<lowercased_project_name>#<REF>" do
           opts = ["PUPPET/3.1"]
           expect(parser.parse_git_repos(opts)).to be === ["#{parser.repo}/puppet.git#3.1"]
@@ -31,7 +29,6 @@ module Beaker
       end
 
       describe 'split_arg' do
-
         it "can split comma separated list into an array" do
           arg = "file1,file2,file3"
           expect(parser.split_arg(arg)).to be === ["file1", "file2", "file3"]
@@ -49,7 +46,6 @@ module Beaker
       end
 
       context 'testing path traversing' do
-
         let(:test_dir) { 'tmp/tests' }
         let(:rb_test) { File.expand_path(test_dir + '/my_ruby_file.rb') }
         let(:pl_test) { File.expand_path(test_dir + '/my_perl_file.pl') }
@@ -146,20 +142,23 @@ module Beaker
                   :auth_methods => 'auth123',
                   :user_known_hosts_file => 'hosts123',
               },
-          }}
+          }
+          }
           let(:subcommand_file) { @subcommand_file || { :level => 'fifth' } }
           let(:homedir_file) { @homedir_file || {
               :level => 'sixth',
               :ssh => {
                   :auth_methods => 'auth_home_123',
               },
-          }}
+          }
+          }
           let(:project_file) { @project_file || {
               :level => 'seventh',
               :ssh => {
                   :auth_methods => 'auth_project_123',
               },
-          }}
+          }
+          }
           let(:presets) { {
               :level => 'lowest',
               :ssh => {
@@ -170,7 +169,8 @@ module Beaker
                   :keys => 'keys123',
                   :keepalive => 'keepalive123',
               },
-          }}
+          }
+          }
 
           before do
             expect(parser).to receive(:normalize_args).and_return(true)
@@ -307,7 +307,6 @@ module Beaker
             expect(output[:level]).to eq('seventh')
             expect(attribution[:level]).to eq('project')
           end
-
         end
 
         it "can correctly combine arguments from different sources" do
@@ -338,7 +337,6 @@ module Beaker
       end
 
       describe '#parse_hosts_options' do
-
         context 'Hosts file exists' do
           before do
             allow(File).to receive(:exist?).and_return(true)
@@ -470,14 +468,11 @@ module Beaker
 
             host_options = parser.parse_hosts_options
             expect(host_options[:HOSTS]).to be === {}
-
           end
         end
-
       end
 
       context "set_default_host!" do
-
         let(:roles) { @roles || [["master", "agent", "database"], ["agent"]] }
         let(:node1) { { :node1 => { :roles => roles[0] } } }
         let(:node2) { { :node2 => { :roles => roles[1] } } }
@@ -513,7 +508,6 @@ module Beaker
           @roles = [["master", "default"], ["default"]]
           expect { parser.set_default_host!(hosts) }.to raise_error(ArgumentError)
         end
-
       end
 
       describe "normalize_args" do
@@ -547,7 +541,6 @@ module Beaker
         end
 
         shared_examples_for('a platform supporting only agents') do |platform, _type|
-
           it "restricts #{platform} hosts to agent" do
             args = []
             args << '--hosts' << fake_hosts_file_for_platform(hosts, platform)
@@ -561,7 +554,6 @@ module Beaker
         end
 
         context "ssh user" do
-
           it 'uses the ssh[:user] if it is provided' do
             hosts['HOSTS'][:master][:ssh] = { :user => 'hello' }
             parser.instance_variable_set(:@options, hosts)
@@ -582,7 +574,6 @@ module Beaker
             expect(hosts['HOSTS'][:master][:user]).to be == 'root'
           end
         end
-
       end
 
       describe '#normalize_tags!' do

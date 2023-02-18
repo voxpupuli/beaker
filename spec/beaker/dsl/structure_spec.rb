@@ -156,7 +156,6 @@ describe ClassMixedWithDSLStructure do
   end
 
   describe '#test_name' do
-
     it 'requires a name' do
       expect { subject.test_name do; end }.to raise_error ArgumentError
     end
@@ -387,5 +386,4 @@ describe ClassMixedWithDSLStructure do
       expect(selected_hosts).to be == [host1]
     end
   end
-
 end

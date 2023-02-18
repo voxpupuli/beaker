@@ -68,6 +68,7 @@ module Beaker
 
     attr_accessor :logger
     attr_reader :name, :host_hash, :options
+
     def initialize name, host_hash, options
       @logger = host_hash[:logger] || options[:logger]
       @name, @host_hash, @options = name.to_s, host_hash.dup, options.dup
@@ -341,6 +342,7 @@ module Beaker
             raise CommandFailure, "Host '#{self}' connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
 
           end
+
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
             # wait to see if the connection failure will be generation, otherwise raise error
@@ -411,6 +413,7 @@ module Beaker
       if not File.file?(source) and not File.directory?(source)
         raise IOError, "No such file or directory - #{source}"
       end
+
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
         if has_ignore and ignore_re&.match?(source)
@@ -565,6 +568,7 @@ module Beaker
       @logger.debug("rsync returned #{result.inspect}")
 
       return result if result.success?
+
       raise Beaker::Host::CommandFailure, result.error
     end
   end

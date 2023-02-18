@@ -1,7 +1,6 @@
 module Beaker
   # The Beaker Perf class. A single instance is created per Beaker run.
   class Perf
-
     PERF_PACKAGES = ['sysstat']
     # SLES does not treat sysstat as a service that can be started
     PERF_SUPPORTED_PLATFORMS = /debian|ubuntu|redhat|centos|oracle|scientific|fedora|el|eos|cumulus|opensuse|sles/

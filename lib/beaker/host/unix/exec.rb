@@ -54,11 +54,13 @@ module Unix::Exec
       raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     rescue Beaker::Host::RebootWarning => e
       raise if attempts > uptime_retries
+
       @logger.warn(e.message)
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
       retry
     rescue StandardError => e
       raise if attempts > uptime_retries
+
       @logger.warn("Unexpected Exception: #{e.message}")
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
       @logger.warn(e.backtrace[0, 3].join("\n"))
@@ -99,11 +101,13 @@ module Unix::Exec
       raise
     rescue Beaker::Host::RebootWarning => e
       raise if attempts > uptime_retries
+
       @logger.warn(e.message)
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
       retry
     rescue StandardError => e
       raise if attempts > uptime_retries
+
       @logger.warn("Unexpected Exception: #{e.message}")
       @logger.warn("Retrying #{uptime_retries - attempts} more times.")
       @logger.warn(e.backtrace[0, 3].join("\n"))
@@ -179,6 +183,7 @@ module Unix::Exec
       if result.exit_code == 0
         return true
       end
+
       try += 1
     end
     result.exit_code == 0
@@ -225,6 +230,7 @@ module Unix::Exec
     else
       exec(Beaker::Command.new("echo \"#{key}=#{val}\" >> #{env_file}"))
     end
+
     # update the profile.d to current state
     # match it to the contents of ssh_env_file
     mirror_env_to_profile_d(env_file)
@@ -329,6 +335,7 @@ module Unix::Exec
   #                  given host.
   def environment_string env
     return '' if env.empty?
+
     env_array = self.environment_variable_string_pair_array(env)
     environment_string = env_array.join(' ')
     "env #{environment_string}"

@@ -2,7 +2,6 @@ require 'rspec/mocks'
 
 module MockNet
   class HTTP
-
     class Response
       class ResponseHash
         def []key
@@ -12,13 +11,11 @@ module MockNet
             { 'ok' => true, 'hostname' => 'pool' }
           end
         end
-
       end
 
       def body
         ResponseHash.new
       end
-
     end
 
     class Post
@@ -56,7 +53,6 @@ module MockNet
       Response.new
     end
   end
-
 end
 
 module FakeHost
@@ -71,7 +67,6 @@ module FakeHost
   end
 
   module MockedExec
-
     def self.extended(other)
       other.instance_eval do
         send(:instance_variable_set, :@commands, [])

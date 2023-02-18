@@ -21,7 +21,6 @@ module Beaker
       def exec
         # noop
       end
-
     end
 
     let(:opts)     { @opts || {} }
@@ -96,6 +95,5 @@ module Beaker
         end
       end
     end
-
   end
 end

@@ -15,10 +15,8 @@ def known_installed_package
 end
 
 test_name "dsl::helpers::host_helpers #check_for_package" do
-
   # NOTE: there does not appear to be a way to confine just to cygwin hosts
   confine_block :to, :platform => /windows/ do
-
     # NOTE: check_for_package on windows currently fails as follows:
     #
     #       ArgumentError: wrong number of arguments (3 for 1..2)
@@ -43,7 +41,6 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
   end
 
   confine_block :to, :platform => /solaris/ do
-
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
       assert !result
@@ -70,7 +67,6 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
   end
 
   confine_block :except, :platform => /windows|solaris|osx/ do
-
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
       assert !result

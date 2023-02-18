@@ -25,6 +25,7 @@ module Beaker
       # provided by the thing including Assertions. See Minitest::Runnable
       # for an example.
       attr_writer :assertions
+
       def assertions
         @assertions || 0
       end
