@@ -14,11 +14,10 @@ Gem::Specification.new do |s|
   s.license     = 'Apache-2.0'
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = Gem::Requirement.new('>= 2.4')
+  s.required_ruby_version = Gem::Requirement.new('>= 2.7')
 
   # Testing dependencies
   s.add_development_dependency 'fakefs', '~> 1.0'

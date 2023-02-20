@@ -4,11 +4,10 @@ on:
   - pull_request
   - push
 
-env:
-  BUNDLE_WITHOUT: release
-
 jobs:
   rubocop:
+    env:
+      BUNDLE_WITHOUT: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +17,7 @@ jobs:
           ruby-version: "3.1"
           bundler-cache: true
       - name: Run Rubocop
-        run: bundle exec rubocop --format github
+        run: bundle exec rake rubocop
 
   test:
     runs-on: ubuntu-latest
@@ -26,15 +25,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ruby: "2.4"
-          - ruby: "2.5"
-          - ruby: "2.6"
           - ruby: "2.7"
           - ruby: "3.0"
           - ruby: "3.1"
             coverage: "yes"
     env:
       COVERAGE: ${{ matrix.coverage }}
+      BUNDLE_WITHOUT: release:rubocop
     steps:
       - uses: actions/checkout@v3
       - name: Install Ruby ${{ matrix.ruby }}

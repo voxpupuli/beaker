@@ -109,16 +109,8 @@ module Beaker
       # @param [Binding] b The binding to pass to ERB rendering
       # @api private
       def self.process_yaml(template, b)
-        erb_obj = if RUBY_VERSION >= '2.7'
-                     ERB.new(template, trim_mode: '-')
-                   else
-                     ERB.new(template, nil, '-')
-                   end
-        if RUBY_VERSION >= '2.6'
-          YAML.safe_load(erb_obj.result(b), permitted_classes: PERMITTED_YAML_CLASSES, aliases: true)
-        else
-          YAML.load(erb_obj.result(b)) # rubocop:disable Security/YAMLLoad
-        end
+        erb_obj = ERB.new(template, trim_mode: '-')
+        YAML.safe_load(erb_obj.result(b), permitted_classes: PERMITTED_YAML_CLASSES, aliases: true)
       end
     end
   end
