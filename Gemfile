@@ -21,7 +21,7 @@ if ENV['BEAKER_PE_PR_REPO_URL']
 end
 
 group :rubocop do
-  gem 'rubocop', '~> 1.45.0'
+  gem 'rubocop', '~> 1.46.0'
   gem 'rubocop-performance', '~> 1.16.0'
   gem 'rubocop-rake', '~> 0.6.0'
   gem 'rubocop-rspec', '~> 2.18.1'
