@@ -78,14 +78,6 @@ module Beaker
     # (whether by exception or not).
     attr_reader :teardown_procs
 
-    # @deprecated
-    # Legacy accessor from when test files would only contain one remote
-    # action.  Contains the Result of the last call to utilize
-    # {Beaker::DSL::Helpers#on}.  Do not use as it is not safe
-    # in test files that use multiple calls to
-    # {Beaker::DSL::Helpers#on}.
-    attr_accessor :result
-
     # @param [Hosts,Array<Host>] these_hosts The hosts to execute this test
     #                                        against/on.
     # @param [Logger] logger A logger that implements
