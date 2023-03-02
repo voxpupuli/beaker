@@ -5,8 +5,8 @@ module Beaker
 
     describe Parser do
       let(:parser) { described_class.new }
-      let(:opts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "opts.txt") }
-      let(:hosts_path) { File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg") }
+      let(:opts_path) { File.join(__dir__, "data", "opts.txt") }
+      let(:hosts_path) { File.join(__dir__, "data", "hosts.cfg") }
 
       it "supports usage function" do
         expect { parser.usage }.not_to raise_error

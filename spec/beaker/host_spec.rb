@@ -30,89 +30,20 @@ module Beaker
       it "can be a pe host" do
         options['type'] = 'pe'
         expect(host).to be_is_pe
-        expect(host).to be_use_service_scripts
-        expect(host).to be_is_using_passenger
-        expect(host).not_to be_graceful_restarts
       end
 
       it "can be a foss-source host" do
         expect(host).not_to be_is_pe
-        expect(host).not_to be_use_service_scripts
-        expect(host).not_to be_is_using_passenger
-      end
-
-      it "can be a foss-package host" do
-        options['use-service'] = true
-        expect(host).not_to be_is_pe
-        expect(host).to be_use_service_scripts
-        expect(host).not_to be_is_using_passenger
-        expect(host).not_to be_graceful_restarts
-      end
-
-      it "can be a foss-packaged host using passenger" do
-        host.uses_passenger!
-        expect(host).not_to be_is_pe
-        expect(host).to be_use_service_scripts
-        expect(host).to be_is_using_passenger
-        expect(host).to be_graceful_restarts
       end
 
       it 'can be an AIO host' do
         options['type'] = 'aio'
         expect(host).not_to be_is_pe
-        expect(host).not_to be_use_service_scripts
-        expect(host).not_to be_is_using_passenger
       end
 
       it 'sets the paths correctly for an AIO host' do
         options['type'] = 'aio'
         expect(host['puppetvardir']).to be_nil
-      end
-    end
-
-    describe "uses_passenger!" do
-      it "sets passenger property" do
-        host.uses_passenger!
-        expect(host['passenger']).to be_truthy
-        expect(host).to be_is_using_passenger
-      end
-
-      it "sets puppetservice" do
-        host.uses_passenger!('servicescript')
-        expect(host['puppetservice']).to eq('servicescript')
-      end
-
-      it "sets puppetservice to apache2 by default" do
-        host.uses_passenger!
-        expect(host['puppetservice']).to eq('apache2')
-      end
-    end
-
-    describe "graceful_restarts?" do
-      it "is true if graceful-restarts property is set true" do
-        options['graceful-restarts'] = true
-        expect(host).to be_graceful_restarts
-      end
-
-      it "is false if graceful-restarts property is set false" do
-        options['graceful-restarts'] = false
-        expect(host).not_to be_graceful_restarts
-      end
-
-      it "is false if is_pe and graceful-restarts is nil" do
-        options['type'] = 'pe'
-        expect(host).not_to be_graceful_restarts
-      end
-
-      it "is true if is_pe and graceful-restarts is true" do
-        options['type'] = 'pe'
-        options['graceful-restarts'] = true
-        expect(host).to be_graceful_restarts
-      end
-
-      it "falls back to passenger property if not pe and graceful-restarts is nil" do
-        host.uses_passenger!
-        expect(host).to be_graceful_restarts
       end
     end
 

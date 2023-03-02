@@ -1,5 +1,3 @@
-require 'pathname'
-
 [ 'command', "dsl" ].each do |lib|
   require "beaker/#{lib}"
 end
@@ -32,8 +30,6 @@ module Beaker
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
-    APT_CFG = %q{ Acquire::http::Proxy "http://proxy.puppetlabs.net:3128/"; }
-    IPS_PKG_REPO="http://solaris-11-internal-repo.delivery.puppetlabs.net"
 
     #Run timesync on the provided hosts
     # @param [Host, Array<Host>] host One or more hosts to act upon
@@ -235,67 +231,6 @@ module Beaker
       end
     end
 
-    # On ubuntu, debian, or cumulus host or hosts: alter apt configuration to use
-    # the internal Puppet Labs proxy {HostPrebuiltSteps::APT_CFG} proxy.
-    # On solaris-11 host or hosts: alter pkg to point to
-    # the internal Puppet Labs proxy {HostPrebuiltSteps::IPS_PKG_REPO}.
-    #
-    # Do nothing for other platform host or hosts.
-    #
-    # @param [Host, Array<Host>] host One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def proxy_config( host, opts )
-      logger = opts[:logger]
-      block_on host do |host|
-        case
-        when /ubuntu|debian|cumulus/.match?(host['platform'])
-          host.exec(Command.new("if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi"))
-          copy_file_to_remote(host, '/etc/apt/apt.conf', APT_CFG)
-          apt_get_update(host)
-        when host['platform'].include?('solaris-11')
-          host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-          host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % IPS_PKG_REPO))
-        else
-          logger.debug "#{host}: repo proxy configuration not modified"
-        end
-      end
-    rescue => e
-      report_and_raise(logger, e, "proxy_config")
-    end
-
-    #Install EPEL on host or hosts with platform = /el-(6|7)/.  Do nothing on host or hosts of other platforms.
-    # @param [Host, Array<Host>] host One or more hosts to act upon.  Will use individual host epel_url, epel_arch
-    #                                 and epel_pkg before using defaults provided in opts.
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Boolean] :debug If true, print verbose rpm information when installing EPEL
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    # @option opts [String] :epel_url Link to download from
-    def add_el_extras( host, opts )
-      #add_el_extras
-      #only supports el-* platforms
-      logger = opts[:logger]
-      block_on host do |host|
-        case
-        when el_based?(host) && ['6','7'].include?(host['platform'].version)
-          result = host.exec(Command.new('rpm -qa | grep epel-release'), :acceptable_exit_codes => [0,1])
-          if result.exit_code == 1
-            url_base = opts[:epel_url]
-            host.install_package_with_rpm("#{url_base}/epel-release-latest-#{host['platform'].version}.noarch.rpm", '--replacepkgs', { :package_proxy => opts[:package_proxy] })
-            #update /etc/yum.repos.d/epel.repo for new baseurl
-            host.exec(Command.new("sed -i -e 's;#baseurl.*$;baseurl=#{Regexp.escape("#{url_base}/#{host['platform'].version}")}/\$basearch;' /etc/yum.repos.d/epel.repo"))
-            #remove mirrorlist
-            host.exec(Command.new("sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"))
-            host.exec(Command.new('yum clean all && yum makecache'))
-          end
-        else
-          logger.debug "#{host}: package repo configuration not modified"
-        end
-      end
-    rescue => e
-      report_and_raise(logger, e, "add_repos")
-    end
-
     #Determine the domain name of the provided host from its /etc/resolv.conf
     # @param [Host] host the host to act upon
     def get_domain_name(host)
@@ -485,22 +420,6 @@ module Beaker
       end
     end
 
-    #Disable iptables on centos, does nothing on other platforms
-    # @param [Host, Array<Host>] host One or more hosts to act upon
-    # @param [Hash{Symbol=>String}] opts Options to alter execution.
-    # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
-    def disable_iptables host, opts
-      logger = opts[:logger]
-      block_on host do |host|
-        if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
-          logger.debug("Disabling iptables on #{host.name}")
-          host.exec(Command.new("sudo su -c \"/etc/init.d/iptables stop\""), {:pty => true})
-        else
-          logger.warn("Attempting to disable iptables on non-supported platform: #{host.name}: #{host['platform']}")
-        end
-      end
-    end
-
     # Setup files for enabling requests to pass to a proxy server
     # This works for the APT package manager on debian, ubuntu, and cumulus
     # and YUM package manager on el, centos, fedora and redhat.
@@ -517,6 +436,9 @@ module Beaker
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
           when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
+          when /solaris-11/
+            host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
+            host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -598,17 +520,6 @@ module Beaker
         end
       end
     end
-
-    private
-
-    # A helper to tell whether a host is el-based
-    # @param [Host] host the host to act upon
-    #
-    # @return [Boolean] if the host is el_based
-    def el_based? host
-      ['centos','redhat','scientific','el','oracle'].include?(host['platform'].variant)
-    end
-
   end
 
 end

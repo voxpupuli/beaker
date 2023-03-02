@@ -5,7 +5,7 @@ module Beaker
     begin
       require "beaker/#{lib}"
     rescue LoadError
-      require File.expand_path(File.join(File.dirname(__FILE__), 'beaker', lib))
+      require File.expand_path(File.join(__dir__, 'beaker', lib))
     end
   end
   # These really are our sub-systems that live within the harness today

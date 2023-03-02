@@ -5,8 +5,6 @@ describe Beaker do
   let( :ntpserver_set )  { "ntp_server_set" }
   let( :options_ntp )    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let( :ntpserver )      { Beaker::HostPrebuiltSteps::NTPSERVER }
-  let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
-  let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
   let( :sync_cmd )       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
   let( :windows_pkgs )   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
   let( :unix_only_pkgs ) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
@@ -271,112 +269,6 @@ describe Beaker do
 
     end
 
-  end
-
-  context "proxy_config" do
-    subject { dummy_class.new }
-
-    it "correctly configures ubuntu hosts" do
-      hosts = make_hosts( { :platform => 'ubuntu', :exit_code => 1 } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 )
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures debian hosts" do
-      hosts = make_hosts( { :platform => 'debian' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures cumulus hosts" do
-      hosts = make_hosts( { :platform => 'cumulus' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "if test -f /etc/apt/apt.conf; then mv /etc/apt/apt.conf /etc/apt/apt.conf.bk; fi" ).exactly( 3 ).times
-      hosts.each do |host|
-        expect( subject ).to receive( :copy_file_to_remote ).with( host, '/etc/apt/apt.conf', apt_cfg ).once
-        expect( subject ).to receive( :apt_get_update ).with( host ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "correctly configures solaris-11 hosts" do
-      hosts = make_hosts( { :platform => 'solaris-11' } )
-
-      expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg unset-publisher solaris || :" ).exactly( 3 ).times
-      hosts.each do |_host|
-        expect( Beaker::Command ).to receive( :new ).with( "/usr/bin/pkg set-publisher -g %s solaris" % ips_pkg_repo ).once
-      end
-
-      subject.proxy_config( hosts, options )
-
-    end
-
-    it "does nothing for non ubuntu/debian/cumulus/solaris-11 hosts" do
-      hosts = make_hosts( { :platform => 'windows' } )
-
-      expect( Beaker::Command ).not_to receive( :new )
-
-      subject.proxy_config( hosts, options )
-
-    end
-  end
-
-  context "add_el_extras" do
-    subject { dummy_class.new }
-
-    it 'adds extras for el-6 hosts' do
-
-      hosts = make_hosts( { :platform => Beaker::Platform.new('el-6-arch'), :exit_code => 1 }, 4 )
-      hosts[1][:platform] = Beaker::Platform.new('centos-6-arch')
-      hosts[2][:platform] = Beaker::Platform.new('scientific-6-arch')
-      hosts[3][:platform] = Beaker::Platform.new('redhat-6-arch')
-
-      expect( Beaker::Command ).to receive( :new ).with(
-        "rpm -qa | grep epel-release"
-      ).exactly( hosts.count ).times
-      hosts.each do |host|
-        expect(host).to receive( :install_package_with_rpm ).with(
-          "http://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm", "--replacepkgs", {:package_proxy => false}
-        ).once
-      end
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e 's;#baseurl.*$;baseurl=http://dl\\.fedoraproject\\.org/pub/epel/6/$basearch;' /etc/yum.repos.d/epel.repo"
-      ).exactly( hosts.count ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "sed -i -e '/mirrorlist/d' /etc/yum.repos.d/epel.repo"
-      ).exactly( hosts.count ).times
-      expect( Beaker::Command ).to receive( :new ).with(
-        "yum clean all && yum makecache"
-      ).exactly( hosts.count ).times
-
-      subject.add_el_extras( hosts, options )
-
-    end
-
-    it "does nothing for non el-5/6 hosts" do
-      hosts = make_hosts( { :platform => Beaker::Platform.new('windows-version-arch') } )
-
-      expect( Beaker::Command ).not_to receive( :new )
-
-      subject.add_el_extras( hosts, options )
-
-    end
   end
 
   context "sync_root_keys" do

@@ -88,24 +88,6 @@ module Beaker
         end
       end
 
-      context "if :disable_iptables option set false" do
-        it "does not call disable_iptables" do
-          options[:disable_iptables] = false
-          allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).not_to receive( :disable_iptables )
-          hypervisor.configure
-        end
-      end
-
-      context "if :disable_iptables option set true" do
-        it "calls disable_iptables once" do
-          options[:disable_iptables] = true
-          allow( hypervisor ).to receive( :set_env )
-          expect( hypervisor ).to receive( :disable_iptables ).once
-          hypervisor.configure
-        end
-      end
-
       context "if :disable_updates option set true" do
         it "calls disable_updates" do
           options[:disable_updates] = true
@@ -129,13 +111,9 @@ module Beaker
           options[:configure]         = false
           options[:timesync]          = true
           options[:root_keys]         = true
-          options[:add_el_extras]     = true
-          options[:disable_iptables]  = true
           options[:host_name_prefix]  = "test-"
           expect( hypervisor ).not_to receive( :timesync )
           expect( hypervisor ).not_to receive( :sync_root_keys )
-          expect( hypervisor ).not_to receive( :add_el_extras )
-          expect( hypervisor ).not_to receive( :disable_iptables )
           expect( hypervisor ).not_to receive( :set_env )
           expect( hypervisor ).not_to receive( :host_name_prefix )
           hypervisor.configure

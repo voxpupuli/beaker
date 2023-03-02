@@ -212,12 +212,6 @@ module Beaker
             @cmd_options[:repo_proxy] = true
           end
 
-          opts.on '--add-el-extras',
-                  'Add Extra Packages for Enterprise Linux (EPEL) repository to el-* hosts',
-                  '(default: false)' do
-            @cmd_options[:add_el_extras] = true
-          end
-
           opts.on '--package-proxy URL', 'Set proxy url for package managers (yum and apt)' do |value|
             @cmd_options[:package_proxy] = value
           end

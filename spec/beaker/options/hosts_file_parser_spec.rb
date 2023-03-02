@@ -5,8 +5,8 @@ module Beaker
     describe HostsFileParser do
 
       let(:parser)      {described_class}
-      let(:filepath)    {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts.cfg")}
-      let(:filepath_yaml) {File.join(File.expand_path(File.dirname(__FILE__)), "data", "hosts_preserved.yml")}
+      let(:filepath)    {File.join(__dir__, "data", "hosts.cfg")}
+      let(:filepath_yaml) {File.join(__dir__, "data", "hosts_preserved.yml")}
 
       describe '#parse_hosts_file' do
         it "can correctly read a host file" do

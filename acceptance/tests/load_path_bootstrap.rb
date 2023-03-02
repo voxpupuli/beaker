@@ -5,6 +5,6 @@
 begin
   require 'helpers/test_helper'
 rescue LoadError
-  $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+  $LOAD_PATH << File.expand_path(File.join(__dir__, '..', 'lib'))
   require 'helpers/test_helper'
 end
