@@ -71,9 +71,7 @@ module Beaker
     # The exception that may have stopped this test's execution.
     attr_reader :exception
 
-    # @deprecated
-    # The amount of time taken to execute the test. Unused, probably soon
-    # to be removed or refactored.
+    # The amount of time taken to execute the test
     attr_reader :runtime
 
     # An Array of Procs to be called after test execution has stopped
