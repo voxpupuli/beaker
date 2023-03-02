@@ -209,7 +209,7 @@ describe ClassMixedWithDSLStructure do
     it 'passes when a Beaker assertion is raised' do
       expect( subject ).to receive( :logger ).and_return( logger )
       expect( logger ).to receive( :notify )
-      block = lambda { assert_no_match('1', '1', '1 and 1 should not match') }
+      block = lambda { refute_match('1', '1', '1 and 1 should not match') }
       expect{ subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 

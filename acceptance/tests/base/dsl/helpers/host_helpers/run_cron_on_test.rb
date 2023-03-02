@@ -65,8 +65,8 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       result = run_cron_on default, :list, default['user']
 
-      assert_no_match %r{job :1:}, result.stdout
-      assert_no_match %r{job :2:}, result.stdout
+      refute_match %r{job :1:}, result.stdout
+      refute_match %r{job :2:}, result.stdout
       assert_match %r{job :3:}, result.stdout
     end
 
@@ -181,8 +181,8 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       result = run_cron_on default, :list, default['user']
 
-      assert_no_match %r{job :1:}, result.stdout
-      assert_no_match %r{job :2:}, result.stdout
+      refute_match %r{job :1:}, result.stdout
+      refute_match %r{job :2:}, result.stdout
       assert_match %r{job :3:}, result.stdout
     end
 

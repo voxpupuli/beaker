@@ -24,7 +24,6 @@ To be used for confirming the result of a test is as expected.  Beaker include a
 
 * [Minitest assertions](http://docs.seattlerb.org/minitest/Minitest/Assertions.html)
 * [assert_output](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Assertions#assert_output-instance_method)
-* [assert_no_match](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Assertions#assert_no_match-instance_method)
 
 ## Helpers
 
