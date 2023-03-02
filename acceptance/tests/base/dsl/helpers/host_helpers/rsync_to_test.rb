@@ -12,11 +12,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
         ) # return of block is whether or not we're done repeating
         return result.success? if result.is_a? Rsync::Result
 
-        result.each do |individual_result| 
-          next if individual_result.success?
-          return false
-        end
-        true
+        result.all? { |individual_result| individual_result.success? }
       rescue Beaker::Host::CommandFailure => e
         logger.info("create_remote_file threw command failure, details: ")
         logger.info("  #{e}")

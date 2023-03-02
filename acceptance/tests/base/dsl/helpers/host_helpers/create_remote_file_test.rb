@@ -13,11 +13,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
           return result.success?
         end
 
-        result.each do |individual_result| 
-          next if individual_result.success?
-          return false
-        end
-        true
+        result.all? { |individual_result| individual_result.success? }
       rescue Beaker::Host::CommandFailure => e
         logger.info("create_remote_file threw command failure, details: ")
         logger.info("  #{e}")
