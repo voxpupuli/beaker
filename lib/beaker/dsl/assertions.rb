@@ -94,19 +94,6 @@ module Beaker
         assert_equal our_err,    (result.nil? ? '' : result.stderr),
           'The contents of STDERR did not match expectations'
       end
-
-      # Assert that the provided string does not match the provided regular expression, can pass optional message
-      # @deprecated This is placed her for backwards compatability for tests that used Test::Unit::Assertions,
-      #             http://apidock.com/ruby/Test/Unit/Assertions/assert_no_match
-      #
-      def assert_no_match(regexp, string, msg=nil)
-        assert_instance_of(Regexp, regexp, "The first argument to assert_no_match should be a Regexp.")
-        msg = message(msg) { "<#{mu_pp(regexp)}> expected to not match\n<#{mu_pp(string)}>" }
-        assert(regexp !~ string, msg)
-      end
-
-      alias_method :assert_not_match, :assert_no_match
-
     end
   end
 end

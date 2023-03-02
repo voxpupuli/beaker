@@ -267,18 +267,18 @@ Now try `beaker run -t test.rb --debug-errors` This will enter a pry or debug co
         39:   logger.notify "\n* #{step_name}\n"
         40:   set_current_step_name(step_name)
         41:   if block_given?
-        42:     logger.step_in()
-        43:     begin
-        44:       yield
-        45:     rescue Exception => e
-        46:       if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
-        47:         logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
-        48:         logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
-        49:         binding.pry
-        50:       end
-     => 51:       raise e
-        52:     end
-        53:     logger.step_out()
+        42:     logger.with_indent do
+        43:       begin
+        44:         yield
+        45:       rescue Exception => e
+        46:         if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
+        47:           logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
+        48:           logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
+        49:           binding.pry
+        50:         end
+     => 51:         raise e
+        52:       end
+        53:     end
         54:   end
         55: end
 
