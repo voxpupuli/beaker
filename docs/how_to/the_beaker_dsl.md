@@ -42,7 +42,6 @@ DSL methods for host manipulation.
 * [scp_from](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#scp_from-instance_method)
 * [scp_to](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#scp_to-instance_method)
 * [rsync_to](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#rsync_to-instance_method)
-* [deploy_package_repo](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#deploy_package_repo-instance_method)
 * [create_remote_file](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#create_remote_file-instance_method)
 * [run_script_on](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#run_script_on-instance_method)
 * [run_script](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/Helpers/HostHelpers#run_script-instance_method)
