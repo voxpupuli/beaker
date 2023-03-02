@@ -35,21 +35,3 @@ For our different Open Source variants, check out the sections just below, which
 ### Released Open Source Puppet Agents
 
 To install a released version of Puppet Agent, beaker provides the [`install_puppet_agent_on`](http://www.rubydoc.info/gems/beaker/Beaker/DSL/InstallUtils/FOSSUtils#install_puppet_agent_on-instance_method) method. Please checkout the Rubydocs for more info on this method.
-
-### Development Open Source Puppet Agents
-
-To install a development build of Puppet Agent, beaker provides the [`install_puppet_agent_dev_repo_on`](http://www.rubydoc.info/gems/beaker/Beaker/DSL/InstallUtils/FOSSUtils#install_puppet_agent_dev_repo_on-instance_method) method. Please checkout the Rubydocs for more info on this method.
-
-### PE Promoted Agent Installs
-
-If you're using this method, then you're going to be downloading the installer from a URL configured like so:
-
-```ruby
-http://pm.puppetlabs.com/puppet-agent/#{ pe_version }/#{ puppet_agent_version }/repos
-```
-
-`pe_version` is a variable that you can provide using either the host or global property `:pe_ver`. This is usually done in the hosts file, and will default to `4.0.0-rc1` if nothing is specified.
-
-`puppet_agent_version` is a variable you can provide the value of through the same methods as `pe_version` above. It will default to `latest`.
-
-Beaker's DSL method to install from this location is [`install_puppet_agent_pe_promoted_repo_on`](http://www.rubydoc.info/github/puppetlabs/beaker/Beaker/DSL/InstallUtils/FOSSUtils#install_puppet_agent_pe_promoted_repo_on-instance_method). Follow the link to get API-level docs on this method for more info.
