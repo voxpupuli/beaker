@@ -1,5 +1,4 @@
-['install_utils', 'roles', 'outcomes', 'assertions', 'patterns',
- 'structure', 'helpers', 'wrappers', 'test_tagging',].each do |lib|
+['install_utils', 'roles', 'outcomes', 'assertions', 'patterns', 'structure', 'helpers', 'wrappers', 'test_tagging'].each do |lib|
   require "beaker/dsl/#{lib}"
 end
 
