@@ -80,7 +80,7 @@ module Beaker
               msg << " object as the command parameter, not #{command.class}."
               raise ArgumentError, msg
             end
-            @result = host.exec(command_object, opts)
+            result = host.exec(command_object, opts)
 
             # Also, let additional checking be performed by the caller.
             if block
@@ -90,10 +90,10 @@ module Beaker
                   yield self
                 #block with arity of 1 or greater, hand back the result object
                 else
-                  yield @result
+                  yield result
               end
             end
-            @result
+            result
           end
         end
 
@@ -125,36 +125,6 @@ module Beaker
           on(default, command, opts, &block)
         end
 
-        # @deprecated
-        # An proxy for the last {Beaker::Result#stdout} returned by
-        # a method that makes remote calls.  Use the {Beaker::Result}
-        # object returned by the method directly instead. For Usage see
-        # {Beaker::Result}.
-        def stdout
-          return nil if @result.nil?
-          @result.stdout
-        end
-
-        # @deprecated
-        # An proxy for the last {Beaker::Result#stderr} returned by
-        # a method that makes remote calls.  Use the {Beaker::Result}
-        # object returned by the method directly instead. For Usage see
-        # {Beaker::Result}.
-        def stderr
-          return nil if @result.nil?
-          @result.stderr
-        end
-
-        # @deprecated
-        # An proxy for the last {Beaker::Result#exit_code} returned by
-        # a method that makes remote calls.  Use the {Beaker::Result}
-        # object returned by the method directly instead. For Usage see
-        # {Beaker::Result}.
-        def exit_code
-          return nil if @result.nil?
-          @result.exit_code
-        end
-
         # Move a file from a remote to a local path
         # @note If using {Beaker::Host} for the hosts *scp* is not
         #   required on the system as it uses Ruby's net/scp library.  The
@@ -170,9 +140,9 @@ module Beaker
         # @return [Result] Returns the result of the SCP operation
         def scp_from host, from_path, to_path, opts = {}
           block_on host do | host |
-            @result = host.do_scp_from(from_path, to_path, opts)
-            @result.log logger
-            @result
+            result = host.do_scp_from(from_path, to_path, opts)
+            result.log logger
+            result
           end
         end
 
@@ -197,9 +167,9 @@ module Beaker
               result = on host, "echo #{to_path}"
               to_path = result.raw_output.chomp
             end
-            @result = host.do_scp_to(from_path, to_path, opts)
-            @result.log logger
-            @result
+            result = host.do_scp_to(from_path, to_path, opts)
+            result.log logger
+            result
           end
         end
 
@@ -219,8 +189,7 @@ module Beaker
               result = host.echo "#{to_path}"
               to_path = result.raw_output.chomp
             end
-            @result = host.do_rsync_to(from_path, to_path, opts)
-            @result
+            host.do_rsync_to(from_path, to_path, opts)
           end
         end
 

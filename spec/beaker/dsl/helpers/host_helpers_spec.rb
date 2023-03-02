@@ -173,24 +173,6 @@ describe ClassMixedWithDSLHelpers do
             to be_an_instance_of( described_class )
         end
       end
-
-      it 'provides access to stdout' do
-        subject.on host, command do
-          expect( subject.stdout ).to be == 'stdout'
-        end
-      end
-
-      it 'provides access to stderr' do
-        subject.on host, command do
-          expect( subject.stderr ).to be == 'stderr'
-        end
-      end
-
-      it 'provides access to exit_code' do
-        subject.on host, command do
-          expect( subject.exit_code ).to be == 0
-        end
-      end
     end
 
     it 'errors if command is not a String or Beaker::Command' do
