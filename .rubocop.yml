@@ -67,3 +67,6 @@ RSpec/NestedGroups:
 
 Metrics:
   Enabled: false
+
+Style:
+  Enabled: false
