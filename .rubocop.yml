@@ -64,3 +64,6 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 4
+
+Metrics:
+  Enabled: false

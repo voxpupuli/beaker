@@ -201,7 +201,6 @@ Layout/MultilineArrayBraceLayout:
   Exclude:
     - 'spec/beaker/dsl/test_tagging_spec.rb'
     - 'spec/beaker/host/unix/pkg_spec.rb'
-    - 'spec/beaker/host/unix_spec.rb'
     - 'spec/beaker/host_spec.rb'
     - 'spec/beaker/options/parser_spec.rb'
 
@@ -229,7 +228,6 @@ Layout/MultilineHashBraceLayout:
   Exclude:
     - 'acceptance/tests/base/test_suite/export.rb'
     - 'lib/beaker/platform.rb'
-    - 'spec/beaker/host/unix/pkg_spec.rb'
     - 'spec/helpers.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
@@ -240,9 +238,7 @@ Layout/MultilineMethodCallBraceLayout:
     - 'acceptance/tests/base/dsl/helpers/host_helpers/create_remote_file_test.rb'
     - 'acceptance/tests/base/dsl/helpers/host_helpers/rsync_to_test.rb'
     - 'lib/beaker/host/pswindows/exec.rb'
-    - 'lib/beaker/host/unix/pkg.rb'
     - 'lib/beaker/test_suite_result.rb'
-    - 'spec/beaker/host/unix_spec.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle, IndentationWidth.
@@ -274,7 +270,6 @@ Lint/AmbiguousOperatorPrecedence:
   Exclude:
     - 'acceptance/tests/base/host/host_test.rb'
     - 'lib/beaker/host/unix/file.rb'
-    - 'lib/beaker/host/unix/pkg.rb'
     - 'lib/beaker/ssh_connection.rb'
 
 # Configuration parameters: AllowedMethods.
@@ -337,44 +332,6 @@ Lint/UselessAssignment:
     - 'lib/beaker/cli.rb'
     - 'lib/beaker/dsl/helpers/host_helpers.rb'
     - 'lib/beaker/logger_junit.rb'
-
-# Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
-Metrics/AbcSize:
-  Max: 136
-
-# Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns, inherit_mode.
-# AllowedMethods: refine
-Metrics/BlockLength:
-  Max: 240
-
-# Configuration parameters: CountBlocks.
-Metrics/BlockNesting:
-  Max: 5
-
-# Configuration parameters: CountComments, CountAsOne.
-Metrics/ClassLength:
-  Max: 393
-
-# Configuration parameters: AllowedMethods, AllowedPatterns.
-Metrics/CyclomaticComplexity:
-  Max: 24
-
-# Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns.
-Metrics/MethodLength:
-  Max: 243
-
-# Configuration parameters: CountComments, CountAsOne.
-Metrics/ModuleLength:
-  Max: 706
-
-# Configuration parameters: CountKeywordArgs.
-Metrics/ParameterLists:
-  MaxOptionalParameters: 4
-  Max: 6
-
-# Configuration parameters: AllowedMethods, AllowedPatterns.
-Metrics/PerceivedComplexity:
-  Max: 27
 
 # Configuration parameters: ForbiddenDelimiters.
 # ForbiddenDelimiters: (?i-mx:(^|\s)(EO[A-Z]{1}|END)(\s|$))
@@ -683,7 +640,6 @@ Style/ConditionalAssignment:
     - 'lib/beaker/host/cisco.rb'
     - 'lib/beaker/host/pswindows/exec.rb'
     - 'lib/beaker/host/unix/exec.rb'
-    - 'lib/beaker/host/windows/pkg.rb'
     - 'lib/beaker/host_prebuilt_steps.rb'
     - 'lib/beaker/logger.rb'
     - 'lib/beaker/logger_junit.rb'
@@ -965,7 +921,6 @@ Style/MultipleComparison:
   Exclude:
     - 'lib/beaker/cli.rb'
     - 'lib/beaker/host/unix/file.rb'
-    - 'spec/beaker/host/unix/pkg_spec.rb'
 
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: EnforcedStyle.
@@ -1089,7 +1044,6 @@ Style/ParenthesesAroundCondition:
     - 'acceptance/tests/base/host/packages.rb'
     - 'lib/beaker/cli.rb'
     - 'lib/beaker/dsl/helpers/host_helpers.rb'
-    - 'lib/beaker/host/unix/pkg.rb'
     - 'lib/beaker/host_prebuilt_steps.rb'
     - 'lib/beaker/tasks/rake_task.rb'
 
@@ -1180,7 +1134,6 @@ Style/RedundantCondition:
     - 'spec/beaker/host/aix_spec.rb'
     - 'spec/beaker/host/cisco_spec.rb'
     - 'spec/beaker/host/eos_spec.rb'
-    - 'spec/beaker/host/mac_spec.rb'
     - 'spec/beaker/host/pswindows_spec.rb'
     - 'spec/beaker/host/unix_spec.rb'
     - 'spec/beaker/host/windows_spec.rb'
@@ -1206,8 +1159,6 @@ Style/RedundantInterpolation:
     - 'lib/beaker/tasks/quick_start.rb'
     - 'spec/beaker/host/mac/group_spec.rb'
     - 'spec/beaker/host/mac/user_spec.rb'
-    - 'spec/beaker/host/unix/pkg_spec.rb'
-    - 'spec/beaker/host/unix_spec.rb'
     - 'spec/beaker/host_spec.rb'
     - 'spec/beaker/options/parser_spec.rb'
 
@@ -1240,8 +1191,6 @@ Style/RedundantRegexpEscape:
     - 'spec/beaker/host/mac/group_spec.rb'
     - 'spec/beaker/host/pswindows_spec.rb'
     - 'spec/beaker/host/unix/file_spec.rb'
-    - 'spec/beaker/host/unix/pkg_spec.rb'
-    - 'spec/beaker/host/unix_spec.rb'
     - 'spec/beaker/host/windows/pkg_spec.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
@@ -1251,7 +1200,22 @@ Style/RedundantReturn:
 
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantSelf:
-  Enabled: false
+  Exclude:
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/dsl/test_tagging.rb'
+    - 'lib/beaker/host.rb'
+    - 'lib/beaker/host/cisco.rb'
+    - 'lib/beaker/host/pswindows/exec.rb'
+    - 'lib/beaker/host/unix/exec.rb'
+    - 'lib/beaker/host/unix/pkg.rb'
+    - 'lib/beaker/host/windows/exec.rb'
+    - 'lib/beaker/hypervisor.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/logger_junit.rb'
+    - 'lib/beaker/options/hosts_file_parser.rb'
+    - 'lib/beaker/platform.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'lib/beaker/subcommands/subcommand_util.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantStringEscape:
@@ -1368,7 +1332,21 @@ Style/StderrPuts:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: Mode.
 Style/StringConcatenation:
-  Enabled: false
+  Exclude:
+    - 'acceptance/tests/base/dsl/helpers/host_helpers/archive_file_from_test.rb'
+    - 'acceptance/tests/base/host/host_test.rb'
+    - 'lib/beaker/dsl/helpers/host_helpers.rb'
+    - 'lib/beaker/dsl/structure.rb'
+    - 'lib/beaker/host/windows/file.rb'
+    - 'lib/beaker/logger.rb'
+    - 'lib/beaker/perf.rb'
+    - 'lib/beaker/result.rb'
+    - 'lib/beaker/ssh_connection.rb'
+    - 'spec/beaker/host_spec.rb'
+    - 'spec/beaker/logger_spec.rb'
+    - 'spec/beaker/options/parser_spec.rb'
+    - 'spec/beaker/options/subcommand_options_parser_spec.rb'
+    - 'spec/beaker/test_suite_spec.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
@@ -1409,15 +1387,12 @@ Style/SymbolProc:
 Style/TernaryParentheses:
   Exclude:
     - 'lib/beaker/host/unix/file.rb'
-    - 'lib/beaker/host/unix/pkg.rb'
     - 'lib/beaker/host/windows/exec.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: AllowNamedUnderscoreVariables.
 Style/TrailingUnderscoreVariable:
   Exclude:
-    - 'lib/beaker/host/eos.rb'
-    - 'spec/beaker/host/unix_spec.rb'
     - 'spec/beaker/options/parser_spec.rb'
 
 # This cop supports safe autocorrection (--autocorrect).
