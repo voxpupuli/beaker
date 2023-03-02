@@ -325,13 +325,6 @@ module Beaker
       end
     end
 
-    #Determine the ip address of the provided host
-    # @param [Host] host the host to act upon
-    # @deprecated use {Host#get_ip}
-    def get_ip(host)
-      host.get_ip
-    end
-
     #Append the provided string to the /etc/hosts file of the provided host
     # @param [Host] host the host to act upon
     # @param [String] etc_hosts The string to append to the /etc/hosts file
