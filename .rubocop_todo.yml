@@ -120,11 +120,6 @@ RSpec/ContextWording:
 RSpec/ExampleLength:
   Max: 44
 
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/ExcessiveDocstringSpacing:
-  Exclude:
-    - 'spec/beaker/logger_spec.rb'
-
 RSpec/ExpectInHook:
   Exclude:
     - 'spec/beaker/cli_spec.rb'

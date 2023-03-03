@@ -115,7 +115,7 @@ module Beaker
         end
       end
 
-      it 'sets length correctly in mixed scenario ' do
+      it 'sets length correctly in mixed scenario' do
         logger.with_indent do
           logger.with_indent {}
           logger.with_indent do
