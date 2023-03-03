@@ -11,11 +11,11 @@ module Windows::Exec
   ABS_CMD = 'c:\\\\windows\\\\system32\\\\cmd.exe'
   CMD = 'cmd.exe'
 
-  def echo(msg, abs=true)
+  def echo(msg, abs = true)
     (abs ? ABS_CMD : CMD) + " /c echo #{msg}"
   end
 
-  def touch(file, abs=true)
+  def touch(file, abs = true)
     (abs ? ABS_CMD : CMD) + " /c echo. 2> #{file}"
   end
 
@@ -35,8 +35,10 @@ module Windows::Exec
     ips.each_line do |line|
       matches = line.split('=')
       next if matches.length <= 1
+
       matches = matches[1].match(/^{"(.*?)"/)
       next if matches.nil? || matches.captures.nil? || matches.captures.empty?
+
       ip = matches.captures[0] if matches && matches.captures
       break if ip != ''
     end
@@ -48,14 +50,15 @@ module Windows::Exec
   # @param [String] target The hostname to ping
   # @param [Integer] attempts Amount of times to attempt ping before giving up
   # @return [Boolean] true of ping successful, overwise false
-  def ping target, attempts=5
+  def ping target, attempts = 5
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
       if result.exit_code == 0
         return true
       end
-      try+=1
+
+      try += 1
     end
     result.exit_code == 0
   end
@@ -67,10 +70,10 @@ module Windows::Exec
     command_result = nil
     # we get periodic failures to restart the service, so looping these with re-attempts
     repeat_fibonacci_style_for(5) do
-      0 == exec(Beaker::Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1] ).exit_code
+      0 == exec(Beaker::Command.new("cygrunsrv -E sshd"), :acceptable_exit_codes => [0, 1]).exit_code
     end
     repeat_fibonacci_style_for(5) do
-      command_result = exec(Beaker::Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1] )
+      command_result = exec(Beaker::Command.new("cygrunsrv -S sshd"), :acceptable_exit_codes => [0, 1])
       0 == command_result.exit_code
     end
     command_result
@@ -111,7 +114,7 @@ module Windows::Exec
     user_ac
   end
 
-  # Checks if selinux is enabled
+  #  Checks if selinux is enabled
   # selinux is not available on Windows
   #
   # @return [Boolean] false
@@ -138,11 +141,10 @@ module Windows::Exec
   # @param [String] orig The origin path
   # @param [String] dest the destination path
   # @param [Boolean] rm Remove the destination prior to move
-  def mv orig, dest, rm=true
+  def mv orig, dest, rm = true
     rm_rf dest unless !rm
     execute("mv \"#{orig}\" \"#{dest}\"")
   end
-
 
   # Determine if cygwin is actually installed on the SUT. Differs from
   # is_cygwin?, which is just a type check for a Windows::Host.
@@ -151,7 +153,7 @@ module Windows::Exec
   def cygwin_installed?
     output = exec(Beaker::Command.new('cygcheck --check-setup cygwin'), :accept_all_exit_codes => true).stdout
     return true if output.include?('cygwin') && output.include?('OK')
+
     false
   end
-
 end

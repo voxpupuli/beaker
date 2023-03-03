@@ -1,6 +1,6 @@
 module Beaker
   module Options
-    #A set of functions to parse hosts files
+    # A set of functions to parse hosts files
     module HostsFileParser
       PERMITTED_YAML_CLASSES = [
         'Beaker',
@@ -36,15 +36,16 @@ module Beaker
 
         host_options = new_host_options
         return host_options unless hosts_file_path
+
         error_message = "#{hosts_file_path} is not a valid YAML file\n\t"
-        host_options = self.merge_hosts_yaml( host_options, error_message ) {
-          hosts_file_path = File.expand_path( hosts_file_path )
+        host_options = self.merge_hosts_yaml(host_options, error_message) {
+          hosts_file_path = File.expand_path(hosts_file_path)
 
           raise "#{hosts_file_path} is not a valid path" unless File.exist?(hosts_file_path)
 
           process_yaml(File.read(hosts_file_path), binding)
         }
-        fix_roles_array( host_options )
+        fix_roles_array(host_options)
       end
 
       # Read the contents of a host definition as a string into an OptionsHash
@@ -58,11 +59,12 @@ module Beaker
 
         host_options = new_host_options
         return host_options unless hosts_def_yaml
+
         error_message = "#{hosts_def_yaml}\nis not a valid YAML string\n\t"
-        host_options = self.merge_hosts_yaml( host_options, error_message ) {
+        host_options = self.merge_hosts_yaml(host_options, error_message) {
           process_yaml(hosts_def_yaml, binding)
         }
-        fix_roles_array( host_options )
+        fix_roles_array(host_options)
       end
 
       # Convenience method to create new OptionsHashes with a HOSTS section
@@ -76,7 +78,7 @@ module Beaker
 
       # Make sure the roles array is present for all hosts
       #
-      def self.fix_roles_array( host_options )
+      def self.fix_roles_array(host_options)
         host_options['HOSTS'].each_key do |host|
           host_options['HOSTS'][host]['roles'] ||= []
         end
@@ -92,7 +94,7 @@ module Beaker
       # @param [String] error_message Message to print if {::Psych::SyntaxError}
       #   is raised during block execution
       # @return [OptionsHash] Updated host_options with host info merged
-      def self.merge_hosts_yaml( host_options, error_message )
+      def self.merge_hosts_yaml(host_options, error_message)
         begin
           loaded_host_options = yield
         rescue Psych::SyntaxError => e
@@ -100,7 +102,7 @@ module Beaker
           raise ArgumentError, error_message
         end
 
-        host_options.merge( loaded_host_options )
+        host_options.merge(loaded_host_options)
       end
 
       # A helper to parse the YAML file and apply ERB templating

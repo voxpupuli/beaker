@@ -1,10 +1,9 @@
-[ 'host', 'command_factory' ].each do |lib|
+['host', 'command_factory'].each do |lib|
   require "beaker/#{lib}"
 end
 
 module FreeBSD
   class Host < Unix::Host
-
     [
       'exec',
       'pkg',
@@ -23,7 +22,5 @@ module FreeBSD
         'pathseparator'     => ':',
         })
     end
-
   end
-
 end

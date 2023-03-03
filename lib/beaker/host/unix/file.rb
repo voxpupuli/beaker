@@ -26,11 +26,11 @@ module Unix::File
   # @param [Boolean] recursive Whether to pass the recursive flag
   #
   # @return [Beaker::Result] result of command execution
-  def chown(user, path, recursive=false)
+  def chown(user, path, recursive = false)
     execute("chown #{recursive ? '-R ' : ''}#{user} #{path}")
   end
 
-  def chmod(mod, path, recursive=false)
+  def chmod(mod, path, recursive = false)
     execute("chmod #{recursive ? '-R ' : ''}#{mod} #{path}")
   end
 
@@ -43,7 +43,7 @@ module Unix::File
   # @param [Boolean] recursive Whether to pass the recursive flag
   #
   # @return [Beaker::Result] result of command execution
-  def chgrp(group, path, recursive=false)
+  def chgrp(group, path, recursive = false)
     execute("chgrp #{recursive ? '-R ' : ''}#{group} #{path}")
   end
 
@@ -110,7 +110,7 @@ module Unix::File
   # @return [String] Filename of the repo
   def repo_filename(package_name, build_version)
     variant, version, arch, codename = self['platform'].to_array
-    repo_filename = "pl-%s-%s-" % [ package_name, build_version ]
+    repo_filename = "pl-%s-%s-" % [package_name, build_version]
 
     case variant
     when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
@@ -134,11 +134,11 @@ module Unix::File
         variant,
         fedora_prefix,
         version,
-        arch
+        arch,
       ]
     when /debian|ubuntu|cumulus|huaweios/
       codename = variant if variant == 'cumulus' || variant == 'huaweios'
-      repo_filename << "%s.list" % [ codename ]
+      repo_filename << "%s.list" % [codename]
     else
       msg = "#repo_filename: repo filename pattern not known for platform '#{self['platform']}'"
       raise ArgumentError, msg

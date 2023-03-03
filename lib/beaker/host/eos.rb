@@ -1,4 +1,4 @@
-[ 'host', 'command_factory' ].each do |lib|
+['host', 'command_factory'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -13,7 +13,7 @@ module Eos
     #   about location, so that parameter is ignored
     #
     # @return [Result] The result of copying that file to the host
-    def get_remote_file( remote_url, _host_directory = '' )
+    def get_remote_file(remote_url, _host_directory = '')
       commands = ['enable', "copy #{remote_url} extension:"]
       command = commands.join("\n")
       execute("Cli -c '#{command}'")
@@ -24,11 +24,10 @@ module Eos
     # @param [String] filename Name of the file to install, including file extension
     #
     # @return [Result] The result of running the install command on the host
-    def install_from_file( filename )
+    def install_from_file(filename)
       commands = ['enable', "extension #{filename}"]
       command = commands.join("\n")
       execute("Cli -c '#{command}'")
     end
-
   end
 end

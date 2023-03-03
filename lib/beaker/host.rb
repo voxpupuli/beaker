@@ -6,7 +6,7 @@ require 'rsync'
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
 
-[ 'command', 'ssh_connection', 'local_connection' ].each do |lib|
+['command', 'ssh_connection', 'local_connection'].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -68,6 +68,7 @@ module Beaker
 
     attr_accessor :logger
     attr_reader :name, :host_hash, :options
+
     def initialize name, host_hash, options
       @logger = host_hash[:logger] || options[:logger]
       @name, @host_hash, @options = name.to_s, host_hash.dup, options.dup
@@ -103,7 +104,7 @@ module Beaker
     # Wait for a port on the host.  Useful for those occasions when you've called
     # host.reboot and want to avoid spam from subsequent SSH connections retrying
     # to connect from say retry_on()
-    def wait_for_port(port, attempts=15)
+    def wait_for_port(port, attempts = 15)
       @logger.debug("  Waiting for port #{port} ... ", false)
       start = Time.now
       done = repeat_fibonacci_style_for(attempts) { port_open?(port) }
@@ -117,7 +118,7 @@ module Beaker
 
     def up?
       begin
-        Socket.getaddrinfo( reachable_name, nil )
+        Socket.getaddrinfo(reachable_name, nil)
         return true
       rescue SocketError
         return false
@@ -133,7 +134,7 @@ module Beaker
     # class to do things like `host.puppet['vardir']` to query the
     # 'main' section or, if they want the configuration for a
     # particular run type, `host.puppet('agent')['vardir']`
-    def puppet_configprint(command='agent')
+    def puppet_configprint(command = 'agent')
       PuppetConfigReader.new(self, command)
     end
     alias_method :puppet, :puppet_configprint
@@ -213,7 +214,7 @@ module Beaker
       end
     end
 
-    #Determine the ip address of this host
+    # Determine the ip address of this host
     def get_ip
       @logger.warn("Uh oh, this should be handled by sub-classes but hasn't been")
     end
@@ -240,13 +241,13 @@ module Beaker
       end
     end
 
-    #Return the ip address of this host
-    #Always pull fresh, because this can sometimes change
+    # Return the ip address of this host
+    # Always pull fresh, because this can sometimes change
     def ip
       self['ip'] = get_public_ip || get_ip
     end
 
-    #@return [Boolean] true if x86_64, false otherwise
+    # @return [Boolean] true if x86_64, false otherwise
     def is_x86_64?
       @x86_64 ||= determine_if_x86_64
     end
@@ -254,13 +255,13 @@ module Beaker
     def connection
       # create new connection object if necessary
       if self['hypervisor'] == 'none' && @name == 'localhost'
-        @connection ||= LocalConnection.connect( { :ssh_env_file => self['ssh_env_file'], :logger => @logger })
+        @connection ||= LocalConnection.connect({ :ssh_env_file => self['ssh_env_file'], :logger => @logger })
         return @connection
       end
 
-      @connection ||= SshConnection.connect( { :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
-                                             self['user'],
-                                             self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference]} )
+      @connection ||= SshConnection.connect({ :ip => self['ip'], :vmhostname => self['vmhostname'], :hostname => @name },
+                                            self['user'],
+                                            self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference] })
       # update connection information
       if self['ip'] && (@connection.ip != self['ip'])
         @connection.ip = self['ip']
@@ -285,7 +286,7 @@ module Beaker
       @connection = nil
     end
 
-    def exec command, options={}
+    def exec command, options = {}
       result = nil
       # I've always found this confusing
       cmdline = command.cmd_line(self)
@@ -341,6 +342,7 @@ module Beaker
             raise CommandFailure, "Host '#{self}' connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
 
           end
+
           if options[:expect_connection_failure] && result.exit_code
             # should have had a connection failure, but didn't
             # wait to see if the connection failure will be generation, otherwise raise error
@@ -381,7 +383,7 @@ module Beaker
     #   do_scp_to('source/file.rb', 'target', { :ignore => 'file.rb' }
     #   -> will result in not files copyed to the host, all are ignored
     def do_scp_to source, target_path, options
-      target = self.scp_path( target_path )
+      target = self.scp_path(target_path)
 
       # use the value of :dry_run passed to the method unless
       # undefined, then use parsed @options hash.
@@ -411,6 +413,7 @@ module Beaker
       if not File.file?(source) and not File.directory?(source)
         raise IOError, "No such file or directory - #{source}"
       end
+
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
         if has_ignore and ignore_re&.match?(source)
@@ -425,21 +428,21 @@ module Beaker
         end
       else # a directory with ignores
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
-          ignore_re&.match?(f.gsub(/\A#{Regexp.escape(source)}/, '')) #only match against subdirs, not full path
+          ignore_re&.match?(f.gsub(/\A#{Regexp.escape(source)}/, '')) # only match against subdirs, not full path
         end
         @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
 
         # create necessary directory structure on host
         # run this quietly (no STDOUT)
         @logger.quiet(true)
-        required_dirs = (dir_source.map{ | dir | File.dirname(dir) }).uniq
+        required_dirs = (dir_source.map { |dir| File.dirname(dir) }).uniq
         require 'pathname'
         required_dirs.each do |dir|
           dir_path = Pathname.new(dir)
           if dir_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
             mkdir_p(File.join(target, dir.gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, '')))
           else
-            mkdir_p( File.join(target, dir) )
+            mkdir_p(File.join(target, dir))
           end
         end
         @logger.quiet(false)
@@ -451,7 +454,7 @@ module Beaker
 
           s_path = Pathname.new(s)
           if s_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
-            file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/,''))
+            file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, ''))
           else
             file_path = File.join(target, File.dirname(s))
           end
@@ -460,7 +463,7 @@ module Beaker
         end
       end
 
-      self.scp_post_operations( target, target_path )
+      self.scp_post_operations(target, target_path)
       return result
     end
 
@@ -565,6 +568,7 @@ module Beaker
       @logger.debug("rsync returned #{result.inspect}")
 
       return result if result.success?
+
       raise Beaker::Host::CommandFailure, result.error
     end
   end

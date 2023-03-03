@@ -1,7 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #archive_file_from" do
-
   step "archiveroot parameter defaults to `archive/sut-files`" do
     # Create a remote file to archive
     filepath = default.tmpfile('archive-file-test')

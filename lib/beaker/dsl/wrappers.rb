@@ -8,7 +8,6 @@ module Beaker
     # I find most of these adapters of suspicious value and have deprecated
     # many of them.
     module Wrappers
-
       # @param [String] command_string A string of to be interpolated
       #                                within the context of a host in
       #                                question
@@ -36,13 +35,13 @@ module Beaker
       #     powershell("", {'-File' => '/path/to/file'})
       #
       # @return [Command]
-      def powershell(command, args={})
+      def powershell(command, args = {})
         ps_opts = {
           'ExecutionPolicy' => 'Bypass',
           'InputFormat'     => 'None',
           'NoLogo'          => '',
           'NoProfile'       => '',
-          'NonInteractive'  => ''
+          'NonInteractive'  => '',
         }
         encoded = false
         ps_opts.merge!(args)

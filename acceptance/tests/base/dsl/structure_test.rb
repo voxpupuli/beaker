@@ -3,11 +3,10 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 1, @in_confine, "#confine_block did not run the supplied block"
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       fail "#confine_block raised unexpected SkipTest exception: #{e}"
     end
@@ -17,12 +16,11 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 1, @in_confine, "#confine_block did not run the supplied block"
       assert_equal hosts.dup, hosts, "#confine_block did not preserve the hosts array"
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       fail "#confine_block raised unexpected SkipTest exception: #{e}"
     end
@@ -32,11 +30,10 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :except, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 0, @in_confine, "#confine_block did not skip the supplied block"
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       fail "#confine_block raised unexpected SkipTest exception: #{e}"
     end
@@ -46,12 +43,11 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :except, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
       end
 
       assert_equal 0, @in_confine, "#confine_block did not skip the supplied block"
       assert_equal hosts.dup, hosts, "#confine_block did not preserve the hosts array"
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       fail "#confine_block raised unexpected SkipTest exception: #{e}"
     end
@@ -61,7 +57,7 @@ test_name "dsl::structure" do
     begin
       @in_confine = 0
       confine_block :to, :platform => default["platform"] do
-        @in_confine +=1
+        @in_confine += 1
         skip_test "this block raises a skip"
       end
     rescue Beaker::DSL::Outcomes::SkipTest => e
@@ -76,7 +72,6 @@ test_name "dsl::structure" do
       confine :to, { :platform => 'test' }
 
       fail "#confine did not skip test but should have."
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       assert_match(/No suitable hosts found with {:platform=>"test"}/, e.message, "#confine raised an unexpected skip_test")
     end
@@ -87,7 +82,6 @@ test_name "dsl::structure" do
       confine :except, { :platform => default['platform'] }
 
       fail "#confine did not skip test but should have."
-
     rescue Beaker::DSL::Outcomes::SkipTest => e
       assert_match(/No suitable hosts found without {:platform=>"#{default['platform']}"}/, e.message, "#confine raised an unexpected
       # skip_test")

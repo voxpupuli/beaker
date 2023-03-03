@@ -1,6 +1,5 @@
 module Beaker
   class Noop < Beaker::Hypervisor
-
     def initialize(new_hosts, options)
       @options = options
       @logger = options[:logger]
@@ -26,6 +25,5 @@ module Beaker
     def cleanup
       # noop
     end
-
   end
 end

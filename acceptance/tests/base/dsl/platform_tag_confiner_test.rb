@@ -19,12 +19,12 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     options[:platform_tag_confines] = [
       :platform => /#{default[:platform]}/,
       :tag_reason_hash => {
-        'tag1' => 'reason1'
-      }
+        'tag1' => 'reason1',
+      },
     ]
 
     begin
-      tag( 'tag1' )
+      tag('tag1')
     rescue Beaker::DSL::Outcomes::SkipTest => e
       if /^No\ suitable\ hosts\ found/.match?(e.message)
         # SkipTest is raised in the case when there are no hosts leftover for a test

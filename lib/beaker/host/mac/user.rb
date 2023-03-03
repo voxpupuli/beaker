@@ -54,7 +54,7 @@ module Mac::User
 
     uid = uid_next
     gid = gid_next
-    create_cmd  =     "dscl . create /Users/#{name}"
+    create_cmd = "dscl . create /Users/#{name}"
     create_cmd << " && dscl . create /Users/#{name} NFSHomeDirectory /Users/#{name}"
     create_cmd << " && dscl . create /Users/#{name} UserShell /bin/bash"
     create_cmd << " && dscl . create /Users/#{name} UniqueID #{uid}"

@@ -1,5 +1,4 @@
 test_name 'Install beaker and checkout branch if necessary' do
-
   step 'Download the beaker git repo' do
    on default, 'git clone https://github.com/puppetlabs/beaker.git /opt/beaker/'
   end

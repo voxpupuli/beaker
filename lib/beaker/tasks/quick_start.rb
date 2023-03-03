@@ -3,12 +3,11 @@ require 'beaker-hostgenerator'
 CONFIG_DIR = 'acceptance/config'
 
 VAGRANT  = ['ubuntu1404-64default.mdcal-ubuntu1404-64af', '--hypervisor=vagrant',
-            '--global-config={box_url=https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm,box=puppetlabs/ubuntu-14.04-64-nocm}']
+            '--global-config={box_url=https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-nocm,box=puppetlabs/ubuntu-14.04-64-nocm}',]
 
 VMPOOLER = ['redhat7-64default.mdcal-redhat7-64af']
 
 namespace :beaker_quickstart do
-
   desc 'Generate Default Beaker Host Config File, valid options are: vmpooler or vagrant.'
   task :gen_hosts, [:hypervisor] do |_t, args|
     hosts_file = "#{CONFIG_DIR}/default_#{args[:hypervisor]}_hosts.yaml"
@@ -32,7 +31,6 @@ namespace :beaker_quickstart do
       puts "Not overwriting Host Config File: #{hosts_file} - it already exists."
     end
   end
-
 
   desc 'Generate Default Pre-Suite'
   task :gen_pre_suite do
@@ -71,9 +69,9 @@ end")
 
   desc 'Run Default Smoke Test, after generating default host config and test files, valid options are: vmpooler or vagrant.'
   task :run_test, [:hypervisor] => ["beaker_quickstart:gen_hosts", 'beaker_quickstart:gen_pre_suite',
-                                     'beaker_quickstart:gen_smoke_test'] do
+                                     'beaker_quickstart:gen_smoke_test',] do
   |_t, args|
-    hypervisor             = args[:hypervisor] ||='vagrant'
+    hypervisor = args[:hypervisor] ||= 'vagrant'
     system_args             = Hash.new
     system_args[:hosts]     = "acceptance/config/default_#{hypervisor}_hosts.yaml"
     system_args[:pre_suite] = 'acceptance/setup/default_pre_suite.rb'
@@ -81,9 +79,7 @@ end")
     puts "About to run - #{beaker_command(system_args)}"
     system(beaker_command(system_args))
   end
-
 end
-
 
 def beaker_command(system_args)
   cmd_parts = []

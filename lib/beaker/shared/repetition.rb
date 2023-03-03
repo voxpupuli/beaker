@@ -1,7 +1,6 @@
 module Beaker
   module Shared
     module Repetition
-
       def repeat_for seconds, &block
         # do not peg CPU if &block takes less than 1 second
         repeat_for_and_wait seconds, 1, &block
@@ -32,4 +31,3 @@ module Beaker
     end
   end
 end
-

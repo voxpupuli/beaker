@@ -14,7 +14,6 @@ module Beaker
     # in error conditions
     #
     module Roles
-
       # The hosts for which ['roles'] include 'agent'
       #
       # @return [Array<Host>] May be empty
@@ -140,6 +139,7 @@ module Beaker
         end
         return true if host[:roles] && host[:roles].include?('aio')
         return true if host[:type] && /(\A|-)aio(\Z|-)/.match(host[:type])
+
         false
       end
 
@@ -160,9 +160,9 @@ module Beaker
         host[:roles] = host[:roles] | [role]
       end
 
-      #Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
-      #commands without having to refer to role by String or Symbol.  Will not add a new method
-      #definition if the name is already in use.
+      # Create a new role method for a given arbitrary role name.  Makes it possible to be able to run
+      # commands without having to refer to role by String or Symbol.  Will not add a new method
+      # definition if the name is already in use.
       # @param [String, Symbol, Array[String,Symbol]] role The role that you wish to create a definition for, either a String
       # Symbol or an Array of Strings or Symbols.
       # @example Basic usage
@@ -178,6 +178,7 @@ module Beaker
             if !/\A[[:alpha:]]+[a-zA-Z0-9_]*[!?=]?\Z/.match?(role)
               raise ArgumentError, "Role name format error for '#{role}'.  Allowed characters are: \na-Z\n0-9 (as long as not at the beginning of name)\n'_'\n'?', '!' and '=' (only as individual last character at end of name)"
             end
+
             self.class.send :define_method, role.to_s do
               hosts_with_role = hosts_as role.to_sym
               if hosts_with_role.length == 1

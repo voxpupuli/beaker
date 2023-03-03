@@ -1,7 +1,6 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #on" do
-
   step "#on raises an exception when remote command fails" do
     assert_raises(Beaker::Host::CommandFailure) do
       on default, "/bin/nonexistent-command"
@@ -109,7 +108,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
   step "#on executes in parallel with :run_in_parallel => true" do
     parent_pid = Process.pid
-    results = on( hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
+    results = on(hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
       assert(Process.pid != parent_pid)
     }
 
@@ -131,7 +130,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     tmp = nil
     assert_raises NoMethodError do
-      on( hosts, %Q{echo "blah"}, :run_in_parallel => true) {
+      on(hosts, %Q{echo "blah"}, :run_in_parallel => true) {
         sleep(1)
         tmp.blah
       }

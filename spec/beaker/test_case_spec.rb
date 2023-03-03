@@ -13,7 +13,7 @@ module Beaker
           f.write ""
         end
         @path = path
-        expect( testcase ).not_to receive( :log_and_fail_test )
+        expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
         expect(testcase.test_status).to be === :pass
       end
@@ -24,7 +24,7 @@ module Beaker
           f.write "raise SkipTest"
         end
         @path = path
-        expect( testcase ).not_to receive( :log_and_fail_test )
+        expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
         expect(testcase.test_status).to be === :skip
       end
@@ -35,7 +35,7 @@ module Beaker
           f.write "raise PendingTest"
         end
         @path = path
-        expect( testcase ).not_to receive( :log_and_fail_test )
+        expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
         expect(testcase.test_status).to be === :pending
       end
@@ -46,7 +46,7 @@ module Beaker
           f.write "raise FailTest"
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
         testcase.run_test
         expect(testcase.test_status).to be === :fail
       end
@@ -57,7 +57,7 @@ module Beaker
           f.write "raise RuntimeError"
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(RuntimeError))
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(RuntimeError))
         testcase.run_test
       end
 
@@ -67,7 +67,7 @@ module Beaker
           f.write "raise ScriptError"
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(ScriptError))
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(ScriptError))
         testcase.run_test
       end
 
@@ -77,7 +77,7 @@ module Beaker
           f.write "raise Timeout::Error"
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Timeout::Error))
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Timeout::Error))
         testcase.run_test
       end
 
@@ -87,7 +87,7 @@ module Beaker
           f.write "raise Host::CommandFailure"
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Host::CommandFailure))
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Host::CommandFailure))
         testcase.run_test
       end
 
@@ -101,7 +101,7 @@ module Beaker
           EOF
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
         expect(testcase.test_status).to eq(:error)
       end
@@ -117,8 +117,8 @@ module Beaker
           EOF
         end
         @path = path
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :fail).and_call_original
-        expect( testcase ).to receive( :log_and_fail_test ).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :fail).and_call_original
+        expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
         expect(testcase.test_status).to eq(:fail)
       end
@@ -153,6 +153,5 @@ module Beaker
         expect(metadata[:step][:name]).to be_nil
       end
     end
-
   end
 end

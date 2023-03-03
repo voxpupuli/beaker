@@ -1,9 +1,9 @@
-[ 'command', "dsl" ].each do |lib|
+['command', "dsl"].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Beaker
-  #Provides convienience methods for commonly run actions on hosts
+  # Provides convienience methods for commonly run actions on hosts
   module HostPrebuiltSteps
     include Beaker::DSL::Patterns
 
@@ -31,7 +31,7 @@ module Beaker
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
 
-    #Run timesync on the provided hosts
+    # Run timesync on the provided hosts
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -43,8 +43,8 @@ module Beaker
         if host['platform'].include? 'windows'
           # The exit code of 5 is for Windows 2008 systems where the w32tm /register command
           # is not actually necessary.
-          host.exec(Command.new("w32tm /register"), :acceptable_exit_codes => [0,5])
-          host.exec(Command.new("net start w32time"), :acceptable_exit_codes => [0,2])
+          host.exec(Command.new("w32tm /register"), :acceptable_exit_codes => [0, 5])
+          host.exec(Command.new("net start w32time"), :acceptable_exit_codes => [0, 2])
           host.exec(Command.new("w32tm /config /manualpeerlist:#{ntp_server} /syncfromflags:manual /update"))
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
@@ -60,12 +60,12 @@ module Beaker
           else
             ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
-          success=false
+          success = false
           try = 0
           until try >= TRIES do
             try += 1
             if host.exec(Command.new(ntp_command), :accept_all_exit_codes => true).exit_code == 0
-              success=true
+              success = true
               break
             end
             sleep SLEEPWAIT
@@ -125,6 +125,7 @@ module Beaker
       when /windows/
         if host.is_cygwin?
           raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
+
           WINDOWS_PACKAGES
         else
           PSWINDOWS_PACKAGES
@@ -158,6 +159,7 @@ module Beaker
       package_list.each do |string|
         alternatives = string.split('|')
         next if alternatives.any? { |pkg| host.check_for_package pkg }
+
         install_one_of_packages host, alternatives
       end
     end
@@ -178,9 +180,9 @@ module Beaker
       raise error
     end
 
-    #Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
-    #convenience method to allow for easy login to hosts after they have been provisioned with
-    #Beaker.
+    # Install a set of authorized keys using {HostPrebuiltSteps::ROOT_KEYS_SCRIPT}.  This is a
+    # convenience method to allow for easy login to hosts after they have been provisioned with
+    # Beaker.
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -217,21 +219,21 @@ module Beaker
       end
     end
 
-    #Create a file on host or hosts at the provided file path with the provided file contents.
+    # Create a file on host or hosts at the provided file path with the provided file contents.
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [String] file_path The path at which the new file will be created on the host or hosts.
     # @param [String] file_content The contents of the file to be created on the host or hosts.
     def copy_file_to_remote(host, file_path, file_content)
       block_on host do |host|
         Tempfile.open 'beaker' do |tempfile|
-          File.open(tempfile.path, 'w') {|file| file.puts file_content }
+          File.open(tempfile.path, 'w') { |file| file.puts file_content }
 
           host.do_scp_to(tempfile.path, file_path, @options)
         end
       end
     end
 
-    #Determine the domain name of the provided host from its /etc/resolv.conf
+    # Determine the domain name of the provided host from its /etc/resolv.conf
     # @param [Host] host the host to act upon
     def get_domain_name(host)
       domain = nil
@@ -260,7 +262,7 @@ module Beaker
       end
     end
 
-    #Append the provided string to the /etc/hosts file of the provided host
+    # Append the provided string to the /etc/hosts file of the provided host
     # @param [Host] host the host to act upon
     # @param [String] etc_hosts The string to append to the /etc/hosts file
     def set_etc_hosts(host, etc_hosts)
@@ -281,7 +283,7 @@ module Beaker
       end
     end
 
-    #Make it possible to log in as root by copying the current users ssh keys to the root account
+    # Make it possible to log in as root by copying the current users ssh keys to the root account
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -304,13 +306,13 @@ module Beaker
           #      existing destination file.
           host.exec(Command.new("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)"))
         elsif host['platform'].include?('osx')
-          host.exec(Command.new('sudo cp -r .ssh /var/root/.'), {:pty => true})
+          host.exec(Command.new('sudo cp -r .ssh /var/root/.'), { :pty => true })
         elsif /(free|open)bsd/.match?(host['platform']) || host['platform'].include?('solaris-11')
-          host.exec(Command.new('sudo cp -r .ssh /root/.'), {:pty => true})
+          host.exec(Command.new('sudo cp -r .ssh /root/.'), { :pty => true })
         elsif host['platform'].include?('solaris-10')
-          host.exec(Command.new('sudo cp -r .ssh /.'), {:pty => true})
+          host.exec(Command.new('sudo cp -r .ssh /.'), { :pty => true })
         else
-          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), {:pty => true})
+          host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), { :pty => true })
         end
 
         if host.selinux_enabled?
@@ -347,6 +349,7 @@ module Beaker
       logger = opts[:logger]
       hosts.each do |host|
         next if host['platform'].include?('netscaler')
+
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
@@ -371,40 +374,40 @@ module Beaker
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' #{ssh_config_file}"))
           host.exec(Command.new("sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' #{ssh_config_file}"))
         elsif host['platform'].include?('freebsd')
-          host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+          host.exec(Command.new("sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
         elsif host['platform'].include?('openbsd')
-          host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), {:pty => true} )
+          host.exec(Command.new("sudo perl -pi -e 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config"), { :pty => true })
         elsif host['platform'].include?('solaris-10')
-          host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+          host.exec(Command.new("sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
         elsif host['platform'].include?('solaris-11')
-          host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), {:pty => true} )
-          host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), {:pty => true} )
+          host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), { :pty => true })
+          host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
         elsif host['platform'].include?('f5') || host.is_powershell?
-          #interacting with f5 should using tmsh
+          # interacting with f5 should using tmsh
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
-          host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), {:pty => true})
+          host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), { :pty => true })
         else
-          host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), {:pty => true})
+          host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), { :pty => true })
         end
-        #restart sshd
+        # restart sshd
         if /debian|ubuntu|cumulus/.match?(host['platform'])
-          host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
+          host.exec(Command.new("sudo su -c \"service ssh restart\""), { :pty => true })
         elsif /arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
-          host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
+          host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
         elsif /centos|el-|redhat|fedora|eos/.match?(host['platform'])
-          host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
+          host.exec(Command.new("sudo -E /sbin/service sshd reload"), { :pty => true })
         elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
         elsif host['platform'].include?('solaris')
-          host.exec(Command.new("sudo -E svcadm restart network/ssh"), {:pty => true} )
+          host.exec(Command.new("sudo -E svcadm restart network/ssh"), { :pty => true })
         else
           logger.warn("Attempting to update ssh on non-supported platform: #{host.name}: #{host['platform']}")
         end
       end
     end
 
-    #Disable SELinux on centos, does nothing on other platforms
+    # Disable SELinux on centos, does nothing on other platforms
     # @param [Host, Array<Host>] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -413,7 +416,7 @@ module Beaker
       block_on host do |host|
         if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
           logger.debug("Disabling se_linux on #{host.name}")
-          host.exec(Command.new("sudo su -c \"setenforce 0\""), {:pty => true})
+          host.exec(Command.new("sudo su -c \"setenforce 0\""), { :pty => true })
         else
           logger.warn("Attempting to disable SELinux on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -445,7 +448,6 @@ module Beaker
       end
     end
 
-
     # Merge the two provided hashes so that an array of values is created from collisions
     # @param [Hash] h1 The first hash
     # @param [Hash] h2 The second hash
@@ -462,7 +464,7 @@ module Beaker
         normalized_key = key.to_s.upcase
         if normalized_h2.has_key?(normalized_key)
           merged_hash[key] = [h1[key], normalized_h2[normalized_key]]
-          merged_hash[key] = merged_hash[key].uniq #remove dupes
+          merged_hash[key] = merged_hash[key].uniq # remove dupes
         end
       end
       merged_hash
@@ -494,7 +496,7 @@ module Beaker
       block_on host do |host|
         skip_msg = host.skip_set_env?
         unless skip_msg.nil?
-          logger.debug( skip_msg )
+          logger.debug(skip_msg)
           next
         end
 
@@ -509,7 +511,7 @@ module Beaker
         host.ssh_permit_user_environment
         host.ssh_set_user_environment(env)
 
-        #close the host to re-establish the connection with the new sshd settings
+        # close the host to re-establish the connection with the new sshd settings
         host.close
 
         # print out the working env
@@ -521,5 +523,4 @@ module Beaker
       end
     end
   end
-
 end

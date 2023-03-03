@@ -43,7 +43,7 @@ module Beaker
               yield
             end
           rescue Exception => e
-            if(@options.has_key?(:debug_errors) && @options[:debug_errors] == true)
+            if @options.has_key?(:debug_errors) && @options[:debug_errors] == true
               begin
                 require 'pry'
               rescue LoadError
@@ -72,7 +72,7 @@ module Beaker
       def manual_step step_name
         require 'readline'
         logger.notify "\n* #{step_name}\n"
-        if(!@options.has_key?(:exec_manual_tests))
+        if !@options.has_key?(:exec_manual_tests)
           # if the option -exec-manual-tests is not set then this has executed outside of a manual tests
           # so we raise an error to avoid issues
           raise('--exec-manual-tests option not set, this means a manual_step was used outside a manual_test')
@@ -112,14 +112,14 @@ module Beaker
       # @param [Proc] block The actions to be performed during this test.
       #
       def manual_test manual_test_name, &block
-        if(@options.has_key?(:exec_manual_tests) && @options[:exec_manual_tests] == true)
+        if @options.has_key?(:exec_manual_tests) && @options[:exec_manual_tests] == true
           # here the option is set so we run the test as normal
           test_name manual_test_name, &block
         else
           # here no option was set so we log the test name and skip it
           test_name manual_test_name
-          raise( Beaker::DSL::SkipTest,
-                 '--exec-manual-tests option not set, so skipping manual test' )
+          raise(Beaker::DSL::SkipTest,
+                '--exec-manual-tests option not set, so skipping manual test')
         end
       end
 
@@ -268,11 +268,11 @@ module Beaker
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
       #   this test case after confinement.
       def confine(type, criteria, host_array = nil, &block)
-        hosts_to_modify = Array( host_array || hosts )
-        hosts_not_modified = hosts - hosts_to_modify #we aren't examining these hosts
+        hosts_to_modify = Array(host_array || hosts)
+        hosts_not_modified = hosts - hosts_to_modify # we aren't examining these hosts
         case type
         when :except
-          if criteria and ( not criteria.empty? )
+          if criteria and (not criteria.empty?)
             hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to all hosts *except* provided array of hosts
@@ -283,7 +283,7 @@ module Beaker
             skip_test "No suitable hosts found without #{criteria.inspect}"
           end
         when :to
-          if criteria and ( not criteria.empty? )
+          if criteria and (not criteria.empty?)
             hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
           else
             # confining to only hosts in provided array of hosts
@@ -305,12 +305,11 @@ module Beaker
       #
       # @see #confine
       def confine_block(type, criteria, host_array = nil)
-        host_array = Array( host_array || hosts )
+        host_array = Array(host_array || hosts)
         original_hosts = self.hosts.dup
         confine(type, criteria, host_array)
 
         yield
-
       rescue Beaker::DSL::Outcomes::SkipTest => e
         # I don't like this much, but adding options to confine is a breaking change
         # to the DSL that would involve a major version bump
@@ -322,7 +321,7 @@ module Beaker
         self.hosts = original_hosts
       end
 
-      #Return a set of hosts that meet the given criteria
+      # Return a set of hosts that meet the given criteria
       # @param [Hash{Symbol,String=>String,Regexp,Array<String,Regexp>}]
       #   criteria Specify the criteria with which a host should be
       #   considered for inclusion.  The key is any attribute

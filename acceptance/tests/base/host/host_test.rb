@@ -34,7 +34,7 @@ hosts.each do |host|
   env_value1 = "#{env_prefix}_v1"
 
   host.clear_env_var(env_param1)
-  host.add_env_var(env_param1,env_value1)
+  host.add_env_var(env_param1, env_value1)
 
   val = host.get_env_var(env_param1)
 
@@ -57,12 +57,12 @@ hosts.each do |host|
   host.clear_env_var(env_param1)
   host.clear_env_var(env_param2)
   host.clear_env_var(env_param3)
-  host.add_env_var(env_param1,env_value1)
-  host.add_env_var(env_param1,env_value2)
-  host.add_env_var(env_param1,env_value3)
+  host.add_env_var(env_param1, env_value1)
+  host.add_env_var(env_param1, env_value2)
+  host.add_env_var(env_param1, env_value3)
 
   val = host.get_env_var(env_id)
-  assert('' == val,'get_env_var should not match a partial env key name')
+  assert('' == val, 'get_env_var should not match a partial env key name')
 end
 
 step "#get_env_var : should not return a match from a key\'s value"
@@ -72,10 +72,10 @@ hosts.each do |host|
   env_value1 = "#{env_prefix}_v1"
 
   host.clear_env_var(env_param1)
-  host.add_env_var(env_param1,env_value1)
+  host.add_env_var(env_param1, env_value1)
 
   val = host.get_env_var(env_value1)
-  assert('' == val,'get_env_var should not return a match from a key\'s value')
+  assert('' == val, 'get_env_var should not return a match from a key\'s value')
 end
 
 step "#clear_env_var : should only remove the specified key"
@@ -92,9 +92,9 @@ hosts.each do |host|
   env_param3 = "#{env_id}"
   env_value3 = "#{env_id}"
 
-  host.add_env_var(env_param1,env_value1)
-  host.add_env_var(env_param2,env_value2)
-  host.add_env_var(env_param3,env_value3)
+  host.add_env_var(env_param1, env_value1)
+  host.add_env_var(env_param2, env_value2)
+  host.add_env_var(env_param3, env_value3)
 
   host.clear_env_var(env_param3)
 
@@ -103,7 +103,7 @@ hosts.each do |host|
   val = host.get_env_var(env_param2)
   assert_match(/^#{env_param2}=#{env_value2}$/, val, "#{env_param2} should exist after calling clear_env_var")
   val = host.get_env_var(env_param3)
-  assert('' == val,"#{env_param3} should not exist after calling clear_env_var")
+  assert('' == val, "#{env_param3} should not exist after calling clear_env_var")
 end
 
 step "#add_env_var : can add a unique environment variable"
@@ -121,9 +121,9 @@ hosts.each do |host|
   host.clear_env_var(env_param1)
   host.clear_env_var(env_param2)
   host.clear_env_var(env_param3)
-  host.add_env_var(env_param1,env_value1)
-  host.add_env_var(env_param2,env_value2)
-  host.add_env_var(env_param3,env_value3)
+  host.add_env_var(env_param1, env_value1)
+  host.add_env_var(env_param2, env_value2)
+  host.add_env_var(env_param3, env_value3)
 
   val = host.get_env_var(env_param1)
   assert_match(/^#{env_param1}=#{env_value1}$/, val, "#{env_param1} should exist")
@@ -187,9 +187,9 @@ end
 
 step "#mkdir_p : can recursively create a directory structure on a host"
 hosts.each do |host|
-  #clean up first!
+  # clean up first!
   host.rm_rf("test1")
-  #test dir construction
+  # test dir construction
   logger.debug("create test1/test2/test3/test4")
   assert_equal(true, host.mkdir_p("test1/test2/test3/test4"), "can create directory structure")
   logger.debug("should be able to create a file in the new dir")
@@ -201,19 +201,19 @@ current_dir = __dir__
 module_fixture = File.join(current_dir, "../../../fixtures/module")
 hosts.each do |host|
   logger.debug("can recursively copy a module over")
-  #make sure that we are clean on the test host
+  # make sure that we are clean on the test host
   host.rm_rf("module")
   host.do_scp_to(module_fixture, ".", {})
   Dir.mktmpdir do |tmp_dir|
-    #grab copy from host
+    # grab copy from host
     host.do_scp_from("module", tmp_dir, {})
-    #compare to local copy
+    # compare to local copy
     local_paths = Dir.glob(File.join(module_fixture, "**/*")).select { |f| File.file?(f) }
     host_paths  = Dir.glob(File.join(File.join(tmp_dir, "module"), "**/*")).select { |f| File.file?(f) }
-    #each local file should have a single match on the host
+    # each local file should have a single match on the host
     local_paths.each do |path|
-      search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
-      matched = host_paths.select{ |check| /#{Regexp.escape(search_name)}$/.match?(check) }
+      search_name = path.gsub(/^.*fixtures\//, '') # reduce down to the path that should match
+      matched = host_paths.select { |check| /#{Regexp.escape(search_name)}$/.match?(check) }
       assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       host_paths = host_paths - matched
     end
@@ -226,20 +226,20 @@ current_dir = __dir__
 module_fixture = File.expand_path(File.join(current_dir, "../../../fixtures/module"))
 hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some files/dirs")
-  #make sure that we are clean on the test host
+  # make sure that we are clean on the test host
   host.rm_rf("module")
-  host.do_scp_to(module_fixture, ".", {:ignore => ['tests', 'Gemfile']})
+  host.do_scp_to(module_fixture, ".", { :ignore => ['tests', 'Gemfile'] })
   Dir.mktmpdir do |tmp_dir|
-    #grab copy from host
+    # grab copy from host
     host.do_scp_from("module", tmp_dir, {})
-    #compare to local copy
+    # compare to local copy
     local_paths = Dir.glob(File.join(module_fixture, "**/*")).select { |f| File.file?(f) }
     host_paths  = Dir.glob(File.join(File.join(tmp_dir, "module"), "**/*")).select { |f| File.file?(f) }
-    #each local file should have a single match on the host
+    # each local file should have a single match on the host
     local_paths.each do |path|
-      search_name = path.gsub(/^.*fixtures\//, '') #reduce down to the path that should match
-      matched = host_paths.select{ |check| /#{Regexp.escape(search_name)}$/.match?(check) }
-      re =  /((\/|\A)tests(\/|\z))|((\/|\A)Gemfile(\/|\z))/
+      search_name = path.gsub(/^.*fixtures\//, '') # reduce down to the path that should match
+      matched = host_paths.select { |check| /#{Regexp.escape(search_name)}$/.match?(check) }
+      re = /((\/|\A)tests(\/|\z))|((\/|\A)Gemfile(\/|\z))/
       if !path&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       else
@@ -256,20 +256,20 @@ current_dir = __dir__
 module_fixture = File.expand_path(File.join(current_dir, "../../../fixtures/module"))
 hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some sub-files/sub-dirs that also appear in the absolute path")
-  #make sure that we are clean on the test host
+  # make sure that we are clean on the test host
   host.rm_rf("module")
-  host.do_scp_to(module_fixture, ".", {:ignore => ['module', 'Gemfile']})
+  host.do_scp_to(module_fixture, ".", { :ignore => ['module', 'Gemfile'] })
   Dir.mktmpdir do |tmp_dir|
-    #grab copy from host
+    # grab copy from host
     host.do_scp_from("module", tmp_dir, {})
-    #compare to local copy
+    # compare to local copy
     local_paths = Dir.glob(File.join(module_fixture, "**/*")).select { |f| File.file?(f) }
     host_paths  = Dir.glob(File.join(File.join(tmp_dir, "module"), "**/*")).select { |f| File.file?(f) }
-    #each local file should have a single match on the host
+    # each local file should have a single match on the host
     local_paths.each do |path|
-      search_name = path.gsub(/^.*fixtures\/module\//, '') #reduce down to the path that should match
-      matched = host_paths.select{ |check| check =~ /#{Regexp.escape(search_name)}$/ }
-      re =  /((\/|\A)module(\/|\z))|((\/|\A)Gemfile(\/|\z))/
+      search_name = path.gsub(/^.*fixtures\/module\//, '') # reduce down to the path that should match
+      matched = host_paths.select { |check| check =~ /#{Regexp.escape(search_name)}$/ }
+      re = /((\/|\A)module(\/|\z))|((\/|\A)Gemfile(\/|\z))/
       if !path.gsub(/^.*module\//, '')&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       else
@@ -282,9 +282,7 @@ hosts.each do |host|
 end
 
 step "Ensure scp errors close the ssh connection" do
-
   step 'Attempt to generate a remote file that does not exist' do
-
     # This assert relies on the behavior of the net-scp library to
     # raise an error when #channel.on_close is called, which is called by
     # indirectly called by beaker's own SshConnection #close mehod. View
@@ -301,7 +299,6 @@ step "Ensure scp errors close the ssh connection" do
   end
 
   step 'Attempt to scp from a resource on the SUT that does not exist' do
-
     # This assert relies on the behavior of the net-scp library to
     # use the Dir.mkdir method in the #download_start_state method.
     # See the source for further info:
@@ -327,6 +324,4 @@ step 'Ensure that a long 128+ character string with UTF-8 characters does not br
   on(default, "rm -rf /tmp/#{long_string}")
   result = on(default, 'ls /tmp')
   assert(!result.stdout.include?(long_string), 'Error in folder deletion with long string + UTF-8 characters')
-
 end
-

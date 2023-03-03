@@ -44,6 +44,7 @@ module Beaker
         if fog == false # YAML.load => false for empty file
           raise fog_credential_error fog_file_path, from_env, "is empty."
         end
+
         # transparently support symbols or strings for keys
         fog = StringifyHash.new.merge!(fog)
         # respect credential from env
@@ -54,6 +55,7 @@ module Beaker
         if not fog[credential_group]
           raise fog_credential_error fog_file_path, from_env, "could not load the specified credential group '#{credential_group}'."
         end
+
         fog[credential_group]
       end
     end

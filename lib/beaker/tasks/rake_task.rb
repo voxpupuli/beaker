@@ -3,7 +3,6 @@ require 'rake/tasklib'
 require 'rake'
 require 'beaker'
 
-
 module Beaker
   module Tasks
     class RakeTask < ::Rake::TaskLib
@@ -21,7 +20,7 @@ module Beaker
        :tests,
        :type,
        :acceptance_root,
-       :name]
+       :name,]
       # iterates of acceptable params
       COMMAND_OPTIONS.each do |sym|
         attr_accessor(sym.to_sym)
@@ -33,7 +32,7 @@ module Beaker
       def initialize(*args, &task_block)
         @name = args.shift || 'beaker:test'
         if args.empty?
-          args = [:hosts,:type]
+          args = [:hosts, :type]
         end
         @acceptance_root = DEFAULT_ACCEPTANCE_ROOT
         @options_file = nil
@@ -41,6 +40,7 @@ module Beaker
       end
 
       private
+
       # Run the task provided, implements the rake task interface
       #
       # @param verbose [bool] Defines wether to run in verbose mode or not
@@ -97,7 +97,7 @@ module Beaker
         cmd_parts = []
         cmd_parts << "beaker"
         cmd_parts << "--keyfile #{@keyfile}" if @keyfile
-        cmd_parts << "--hosts #{@hosts}" if (@hosts!=nil && !@hosts.empty?)
+        cmd_parts << "--hosts #{@hosts}" if (@hosts != nil && !@hosts.empty?)
         cmd_parts << "--tests #{tests}" if @tests
         cmd_parts << "--options-file #{@options_file}" if @options_file
         cmd_parts << "--type #{@type}" if @type

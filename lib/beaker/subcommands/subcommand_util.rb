@@ -21,6 +21,7 @@ module Beaker
 
       def self.execute_subcommand?(arg0)
         return false if arg0.nil?
+
         (Beaker::Subcommand.instance_methods(false) << :help).include? arg0.to_sym
       end
 
@@ -46,9 +47,9 @@ module Beaker
       end
 
       # Print a message to the console and exit with specified exit code, defaults to 1
-      # @param [String] msg the message to output
+      #  @param [String] msg the message to output
       # @param [Hash<Object>] options to specify exit code or output stack trace
-      def self.error_with(msg, options={})
+      def self.error_with(msg, options = {})
         puts msg
         puts options[:stack_trace] if options[:stack_trace]
         exit_code = options[:exit_code] ? options[:exit_code] : 1
@@ -68,7 +69,6 @@ module Beaker
           $stderr = old_stderr
         end
       end
-
     end
   end
 end

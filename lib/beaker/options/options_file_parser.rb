@@ -1,9 +1,8 @@
 require 'open-uri'
 module Beaker
   module Options
-    #A set of functions to read options files
+    # A set of functions to read options files
     module OptionsFileParser
-
       # Eval the contents of options_file_path, return as an OptionsHash
       #
       # Options file is assumed to contain extra options stored in a Hash
@@ -31,6 +30,7 @@ module Beaker
           unless File.exist?(options_file_path)
             raise ArgumentError, "Specified options file '#{options_file_path}' does not exist!"
           end
+
           # This eval will allow the specified options file to have access to our
           #  scope.  It is important that the variable 'options_file_path' is
           #  accessible, because some existing options files (e.g. puppetdb) rely on
@@ -39,7 +39,6 @@ module Beaker
         end
         result
       end
-
     end
   end
 end

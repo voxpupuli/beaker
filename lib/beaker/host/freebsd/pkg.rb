@@ -12,7 +12,7 @@ module FreeBSD::Pkg
   end
 
   def pkgng_active?(opts = {})
-    opts = {:accept_all_exit_codes => true}.merge(opts)
+    opts = { :accept_all_exit_codes => true }.merge(opts)
     execute("/bin/sh -c '#{check_pkgng_sh}'", opts) { |r| r }.exit_code == 0
   end
 
@@ -35,7 +35,7 @@ module FreeBSD::Pkg
   end
 
   def check_for_package(package, opts = {})
-    opts = {:accept_all_exit_codes => true}.merge(opts)
+    opts = { :accept_all_exit_codes => true }.merge(opts)
     cmd = if pkgng_active?
             "pkg info #{package}"
           else

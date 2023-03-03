@@ -17,7 +17,7 @@ module Windows::Pkg
     if arch == '64'
       rootdir = "c:\\\\cygwin64"
       cygwin = "setup-x86_64.exe"
-    else #32 bit version
+    else # 32 bit version
       rootdir = "c:\\\\cygwin"
       cygwin = "setup-x86.exe"
     end
@@ -29,8 +29,8 @@ module Windows::Pkg
     raise "Package #{name} cannot be uninstalled on #{self}"
   end
 
-  #Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
-  #@return [Boolean] true if x86_64, false otherwise
+  # Examine the host system to determine the architecture, overrides default host determine_if_x86_64 so that wmic is used
+  # @return [Boolean] true if x86_64, false otherwise
   def determine_if_x86_64
     identify_windows_architecture.include?('64')
   end
@@ -41,5 +41,4 @@ module Windows::Pkg
   def identify_windows_architecture
     platform.arch.include?('64') ? '64' : '32'
   end
-
 end

@@ -1,9 +1,7 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #run_cron_on" do
-
   confine_block :to, :platform => /windows/ do
-
     step "#run_cron_on fails on windows platforms when listing cron jobs for a user on a host" do
       assert_raises Beaker::Host::CommandFailure do
         run_cron_on default, :list, default['user']
@@ -12,7 +10,6 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
   end
 
   confine_block :to, :platform => /solaris/ do
-
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
 
@@ -125,7 +122,6 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
   end
 
   confine_block :except, :platform => /windows|solaris/ do
-
     step "#run_cron_on CURRENTLY does nothing and returns `nil` when an unknown command is provided" do
       # NOTE: would have expected this to raise Beaker::Host::CommandFailure instead
 

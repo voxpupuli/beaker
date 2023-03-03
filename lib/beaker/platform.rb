@@ -38,7 +38,7 @@ module Beaker
                      "elcapitan"  => "1011",
                      "yosemite"   => "1010",
                      "mavericks"  => "109",
-                   }
+                   },
       }
 
     # A string with the name of the platform.

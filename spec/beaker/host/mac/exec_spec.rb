@@ -17,11 +17,10 @@ module Beaker
       def to_s
         "me"
       end
-
     end
 
     let(:opts)     { @opts || {} }
-    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:logger)   { double('logger').as_null_object }
     let(:instance) { MacExecTest.new(opts, logger) }
 
     describe '#selinux_enabled?' do
@@ -36,7 +35,7 @@ module Beaker
       it 'calls execute with touch and timestamp' do
         time = '190101010000'
         path = '/path/to/file'
-        expect( instance ).to receive(:execute).with("touch -mt #{time} #{path}").and_return(0)
+        expect(instance).to receive(:execute).with("touch -mt #{time} #{path}").and_return(0)
 
         instance.modified_at(path, time)
       end

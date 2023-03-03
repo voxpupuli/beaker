@@ -10,6 +10,7 @@ module Beaker
     |   |   | "
 
     attr_reader :logger, :options, :network_manager
+
     def initialize
       @timestamp = Time.now
       # Initialize a logger object prior to parsing; this should be overwritten whence
@@ -44,7 +45,7 @@ module Beaker
         exit(0)
       end
 
-      #add additional paths to the LOAD_PATH
+      # add additional paths to the LOAD_PATH
       if not @options[:load_path].empty?
         @options[:load_path].each do |path|
           $LOAD_PATH << File.expand_path(path)
@@ -67,7 +68,7 @@ module Beaker
     # Provision, validate and configure all hosts as defined in the hosts file
     def provision
       begin
-        @hosts =  []
+        @hosts = []
         initialize_network_manager
         @network_manager.proxy_package_manager
         @network_manager.validate
@@ -78,7 +79,7 @@ module Beaker
       self
     end
 
-    #Initialize the network manager so it can initialize hosts for testing for subcommands
+    # Initialize the network manager so it can initialize hosts for testing for subcommands
     def initialize_network_manager
       begin
         @network_manager = Beaker::NetworkManager.new(@options, @logger)
@@ -105,30 +106,30 @@ module Beaker
 
         # Setup perf monitoring if needed
         if /(aggressive)|(normal)/.match?(@options[:collect_perf_data].to_s)
-          @perf = Beaker::Perf.new( @hosts, @options )
+          @perf = Beaker::Perf.new(@hosts, @options)
         end
 
-        #pre acceptance  phase
+        # pre acceptance  phase
         run_suite(:pre_suite, :fast)
 
-        #testing phase
+        # testing phase
         begin
           run_suite(:tests, @options[:fail_mode])
-        #post acceptance phase
+        # post acceptance phase
         rescue => e
-          #post acceptance on failure
-          #run post-suite if we are in fail-slow mode
+          # post acceptance on failure
+          # run post-suite if we are in fail-slow mode
           if @options[:fail_mode].to_s.include?('slow')
             run_suite(:post_suite)
             @perf.print_perf_info if defined? @perf
           end
           raise e
         else
-          #post acceptance on success
+          # post acceptance on success
           run_suite(:post_suite)
           @perf.print_perf_info if defined? @perf
         end
-      #cleanup phase
+      # cleanup phase
       rescue => e
         begin
           run_suite(:pre_cleanup)
@@ -137,7 +138,7 @@ module Beaker
           @logger.error "Failed running the pre-cleanup suite."
         end
 
-        #cleanup on error
+        # cleanup on error
         if /(never)|(onpass)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after failed run"
           if @network_manager
@@ -147,7 +148,7 @@ module Beaker
           preserve_hosts_file
         end
 
-        print_reproduction_info( :error )
+        print_reproduction_info(:error)
 
         @logger.error "Failed running the test suite."
         puts ''
@@ -160,7 +161,7 @@ module Beaker
           @logger.error "Failed running the pre-cleanup suite."
         end
 
-        #cleanup on success
+        # cleanup on success
         if /(never)|(onfail)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after successful run"
           if @network_manager
@@ -171,14 +172,14 @@ module Beaker
         end
 
         if @logger.is_debug?
-          print_reproduction_info( :debug )
+          print_reproduction_info(:debug)
         end
       end
     end
 
-    #Run the provided test suite
-    #@param [Symbol] suite_name The test suite to execute
-    #@param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
+    # Run the provided test suite
+    # @param [Symbol] suite_name The test suite to execute
+    # @param [String] failure_strategy How to proceed after a test failure, 'fast' = stop running tests immediately, 'slow' =
     #                                 continue to execute tests.
     def run_suite(suite_name, failure_strategy = nil)
       if (@options[suite_name].empty?)
@@ -223,7 +224,7 @@ module Beaker
       hosts_yaml['HOSTS'] = combined_instance_and_options_hosts
       hosts_yaml['CONFIG'] = Beaker::Options::OptionsHash.new.merge(hosts_yaml['CONFIG'] || {})
       # save the rest of the options, excepting the HOSTS that we have already processed
-      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject{ |k,_v| dontpreserve.match?(k) })
+      hosts_yaml['CONFIG'] = hosts_yaml['CONFIG'].merge(@options.reject { |k, _v| dontpreserve.match?(k) })
       # remove copy of HOSTS information
       hosts_yaml['CONFIG']['provision'] = false
       File.open(preserved_hosts_filename, 'w') do |file|
@@ -255,9 +256,9 @@ module Beaker
     # @see #print_command_line
     #
     # @return nil
-    def print_reproduction_info( log_level = :debug )
-      print_command_line( log_level )
-      print_env_vars_affecting_beaker( log_level )
+    def print_reproduction_info(log_level = :debug)
+      print_command_line(log_level)
+      print_env_vars_affecting_beaker(log_level)
     end
 
     # Prints Environment variables affecting the beaker run (those that
@@ -267,24 +268,24 @@ module Beaker
     #     print_env_vars_affecting_beaker :error
     #
     # @return nil
-    def print_env_vars_affecting_beaker( log_level )
-      non_beaker_env_vars =  [ 'BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
+    def print_env_vars_affecting_beaker(log_level)
+      non_beaker_env_vars = ['BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
       env_var_map = non_beaker_env_vars.inject({}) do |memo, possibly_set_vars|
-        set_var = Array(possibly_set_vars).detect {|possible_var| ENV[possible_var] }
+        set_var = Array(possibly_set_vars).detect { |possible_var| ENV[possible_var] }
         memo[set_var] = ENV[set_var] if set_var
         memo
       end
 
       env_var_map = env_var_map.merge(Beaker::Options::Presets.new.env_vars)
 
-      @logger.send( log_level, "\nImportant ENV variables that may have affected your run:" )
+      @logger.send(log_level, "\nImportant ENV variables that may have affected your run:")
       env_var_map.each_pair do |var, value|
         if value.is_a?(Hash)
-          value.each_pair do | subvar, subvalue |
-            @logger.send( log_level, "    #{subvar}\t\t#{subvalue}" )
+          value.each_pair do |subvar, subvalue|
+            @logger.send(log_level, "    #{subvar}\t\t#{subvalue}")
           end
         else
-          @logger.send( log_level, "    #{var}\t\t#{value}" )
+          @logger.send(log_level, "    #{var}\t\t#{value}")
         end
       end
     end
@@ -300,7 +301,7 @@ module Beaker
     #     Please contact @electrical or the Puppet QE Team for more info, or for requests to support this.
     #
     # @return nil
-    def print_command_line( log_level = :debug )
+    def print_command_line(log_level = :debug)
       @logger.send(log_level, "\nYou can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
       if @options[:hosts_preserved_yaml_file]

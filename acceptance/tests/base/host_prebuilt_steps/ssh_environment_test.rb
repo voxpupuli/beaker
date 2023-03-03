@@ -1,5 +1,4 @@
 test_name "confirm host prebuilt steps behave correctly" do
-
   confine_block :except, :platform => /f5|windows/ do
     step "confirm ssh environment file existence" do
       hosts.each do |host|

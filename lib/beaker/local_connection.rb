@@ -2,7 +2,6 @@ require 'open3'
 
 module Beaker
   class LocalConnection
-
     attr_accessor :logger, :hostname, :ip
 
     def initialize options = {}
@@ -46,7 +45,7 @@ module Beaker
       end
 
       begin
-        clean_env = ENV.reject{ |k| /^BUNDLE|^RUBY|^GEM/.match?(k) }
+        clean_env = ENV.reject { |k| /^BUNDLE|^RUBY|^GEM/.match?(k) }
 
         with_env(clean_env) do
           std_out, std_err, status = Open3.capture3(envs, command)
@@ -68,7 +67,6 @@ module Beaker
     end
 
     def scp_to(source, target, _options = {})
-
       result = Result.new(@hostname, [source, target])
       begin
         FileUtils.cp_r source, target

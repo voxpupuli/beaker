@@ -2,18 +2,18 @@ require 'yaml'
 
 module Beaker
   module Options
-    #An Object that parses, merges and normalizes all supported Beaker options and arguments
+    # An Object that parses, merges and normalizes all supported Beaker options and arguments
     class Parser
       GITREPO      = 'git://github.com/puppetlabs'
-      #These options can have the form of arg1,arg2 or [arg] or just arg,
-      #should default to []
+      # These options can have the form of arg1,arg2 or [arg] or just arg,
+      # should default to []
       LONG_OPTS    = [:helper, :load_path, :tests, :pre_suite, :post_suite, :install, :pre_cleanup, :modules]
-      #These options expand out into an array of .rb files
+      # These options expand out into an array of .rb files
       RB_FILE_OPTS = [:tests, :pre_suite, :post_suite, :pre_cleanup]
 
       PARSE_ERROR = Psych::SyntaxError
 
-      #The OptionsHash of all parsed options
+      # The OptionsHash of all parsed options
       attr_accessor :options
       attr_reader :attribution
 
@@ -68,7 +68,7 @@ module Beaker
             path_files = []
             if File.file?(root)
               path_files << root
-            elsif File.directory?(root) #expand and explore
+            elsif File.directory?(root) # expand and explore
               path_files = Dir.glob(File.join(root, '**/*.rb'))
                                .select { |f| File.file?(f) }
                                .sort_by { |file| [file.count('/'), file] }
@@ -96,18 +96,18 @@ module Beaker
         end
       end
 
-      #Converts array of paths into array of fully qualified git repo URLS with expanded keywords
+      # Converts array of paths into array of fully qualified git repo URLS with expanded keywords
       #
-      #Supports the following keywords
+      # Supports the following keywords
       #  PUPPET
       #  FACTER
       #  HIERA
       #  HIERA-PUPPET
-      #@example
+      # @example
       #  opts = ["PUPPET/3.1"]
       #  parse_git_repos(opts) == ["#{GITREPO}/puppet.git#3.1"]
-      #@param [Array] git_opts An array of paths
-      #@return [Array] An array of fully qualified git repo URLs with expanded keywords
+      # @param [Array] git_opts An array of paths
+      # @return [Array] An array of fully qualified git repo URLs with expanded keywords
       def parse_git_repos(git_opts)
         git_opts.map! { |opt|
           case opt
@@ -125,17 +125,17 @@ module Beaker
         git_opts
       end
 
-      #Add the 'default' role to the host determined to be the default.  If a host already has the role default then
-      #do nothing.  If more than a single host has the role 'default', raise error.
-      #Default host determined to be 1) the only host in a single host configuration, 2) the host with the role 'master'
-      #defined.
-      #@param [Hash] hosts A hash of hosts, each identified by a String name.  Each named host will have an Array of roles
+      # Add the 'default' role to the host determined to be the default.  If a host already has the role default then
+      # do nothing.  If more than a single host has the role 'default', raise error.
+      # Default host determined to be 1) the only host in a single host configuration, 2) the host with the role 'master'
+      # defined.
+      # @param [Hash] hosts A hash of hosts, each identified by a String name.  Each named host will have an Array of roles
       def set_default_host!(hosts)
         default           = []
         master            = []
         default_host_name = nil
 
-        #look through the hosts and find any hosts with role 'default' and any hosts with role 'master'
+        # look through the hosts and find any hosts with role 'default' and any hosts with role 'master'
         hosts.each_key do |name|
           host = hosts[name]
           if host[:roles].include?('default')
@@ -148,7 +148,7 @@ module Beaker
         # default_set? will throw an error if length > 1
         # and return false if no default is set.
         if !@validator.default_set?(default)
-          #no default set, let's make one
+          # no default set, let's make one
           if not master.empty? and master.length == 1
             default_host_name = master[0]
           elsif hosts.length == 1
@@ -160,7 +160,7 @@ module Beaker
         end
       end
 
-      #Constructor for Parser
+      # Constructor for Parser
       #
       def initialize
         @command_line_parser = Beaker::Options::CommandLineParser.new
@@ -186,7 +186,7 @@ module Beaker
         hash
       end
 
-      # Update the @option hash with a value and the @attribution hash with a source
+      #  Update the @option hash with a value and the @attribution hash with a source
       #
       # @param [String] key The key to update in both hashes
       # @param [Object] value The value to set in the @options hash
@@ -212,7 +212,7 @@ module Beaker
       # @param [Array] args ARGV or a provided arguments array
       # @raise [ArgumentError] Raises error on bad input
       def parse_args(args = ARGV)
-        @options                        = @presets.presets
+        @options = @presets.presets
         @attribution = @attribution.merge(tag_sources(@presets.presets, "preset"))
         cmd_line_options                = @command_line_parser.parse(args)
         cmd_line_options[:command_line] = ([$0] + args).join(' ')
@@ -236,7 +236,7 @@ module Beaker
           @options.merge!(opts)
         end
 
-        file_options                    = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file] || options[:options_file])
+        file_options = Beaker::Options::OptionsFileParser.parse_options_file(cmd_line_options[:options_file] || options[:options_file])
         @attribution = @attribution.merge(tag_sources(file_options, "options_file"))
 
         # merge together command line and file_options
@@ -252,12 +252,12 @@ module Beaker
 
           # merge in host file vars
           #   overwrite options (default, file options, command line) with host file options
-          @options      = @options.merge(hosts_options)
+          @options = @options.merge(hosts_options)
           @attribution = @attribution.merge(tag_sources(hosts_options, "host_file"))
 
           # re-merge the command line options
           #   overwrite options (default, file options, hosts file ) with command line arguments
-          @options      = @options.merge(cmd_line_options)
+          @options = @options.merge(cmd_line_options)
           @attribution = @attribution.merge(tag_sources(cmd_line_options, "cmd"))
 
           # merge in env vars
@@ -282,7 +282,7 @@ module Beaker
       #   be read by the HostsFileParser
       def parse_hosts_options
         if @options[:hosts_file].nil? || File.exist?(@options[:hosts_file])
-          #read the hosts file that contains the node configuration and hypervisor info
+          # read the hosts file that contains the node configuration and hypervisor info
           return Beaker::Options::HostsFileParser.parse_hosts_file(@options[:hosts_file])
         end
 
@@ -291,8 +291,8 @@ module Beaker
         $stdout.puts dne_message
         require 'beaker-hostgenerator'
 
-        host_generator_options = [ @options[:hosts_file] ]
-        host_generator_options += [ '--hypervisor', ENV['BEAKER_HYPERVISOR'] ] if ENV['BEAKER_HYPERVISOR']
+        host_generator_options = [@options[:hosts_file]]
+        host_generator_options += ['--hypervisor', ENV['BEAKER_HYPERVISOR']] if ENV['BEAKER_HYPERVISOR']
 
         hosts_file_content = begin
           bhg_cli = BeakerHostGenerator::CLI.new(host_generator_options)
@@ -305,12 +305,12 @@ module Beaker
         end
 
         @options[:hosts_file_generated] = true
-        Beaker::Options::HostsFileParser.parse_hosts_string( hosts_file_content )
+        Beaker::Options::HostsFileParser.parse_hosts_string(hosts_file_content)
       end
 
-      #Validate all merged options values for correctness
+      # Validate all merged options values for correctness
       #
-      #Currently checks:
+      # Currently checks:
       #  - each host has a valid platform
       #  - if a keyfile is provided then use it
       #  - paths provided to --test, --pre-suite, --post-suite provided lists of .rb files for testing
@@ -322,21 +322,20 @@ module Beaker
       #  - sets the default host based upon machine definitions
       #  - if an ssh user has been defined make it the host user
       #
-      #@raise [ArgumentError] Raise if argument/options values are invalid
+      # @raise [ArgumentError] Raise if argument/options values are invalid
       def normalize_args
-
         @options['HOSTS'].each_key do |name|
           @validator.validate_platform(@options['HOSTS'][name], name)
           @options['HOSTS'][name]['platform'] = Platform.new(@options['HOSTS'][name]['platform'])
         end
 
-        #use the keyfile if present
+        # use the keyfile if present
         if @options.has_key?(:keyfile)
           @options[:ssh][:keys] = [@options[:keyfile]]
         end
 
-        #split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
-        #will end up being normalized into an array
+        # split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
+        # will end up being normalized into an array
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
             update_option(opt, split_arg(@options[opt]), 'runtime')
@@ -354,13 +353,13 @@ module Beaker
         @validator.validate_fail_mode(@options[:fail_mode])
         @validator.validate_preserve_hosts(@options[:preserve_hosts])
 
-        #check for config files necessary for different hypervisors
+        # check for config files necessary for different hypervisors
         hypervisors = get_hypervisors(@options[:HOSTS])
         hypervisors.each do |visor|
           check_hypervisor_config(visor)
         end
 
-        #check that roles of hosts make sense
+        # check that roles of hosts make sense
         # - must be one and only one master
         master = 0
         roles  = get_roles(@options[:HOSTS])
@@ -371,14 +370,14 @@ module Beaker
 
         @validator.validate_master_count(master)
 
-        #check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
+        # check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
           if /windows|el-4/.match?(host[:platform])
             test_host_roles(name, host)
           end
 
-          #check to see if a custom user account has been provided, if so use it
+          # check to see if a custom user account has been provided, if so use it
           if host[:ssh] && host[:ssh][:user]
             host[:user] = host[:ssh][:user]
           end
@@ -391,13 +390,12 @@ module Beaker
         @validator.validate_test_tags(
           @options[:test_tag_and],
           @options[:test_tag_or],
-          @options[:test_tag_exclude]
+          @options[:test_tag_exclude],
         )
         resolve_symlinks!
 
-        #set the default role
+        # set the default role
         set_default_host!(@options[:HOSTS])
-
       end
 
       # Get an array containing lists of roles by parsing each host in hosts.
@@ -463,7 +461,6 @@ module Beaker
           @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
         end
       end
-
     end
   end
 end

@@ -11,11 +11,11 @@ module PSWindows::Exec
   ABS_CMD = 'c:\\\\windows\\\\system32\\\\cmd.exe'
   CMD = 'cmd.exe'
 
-  def echo(msg, abs=true)
+  def echo(msg, abs = true)
     (abs ? ABS_CMD : CMD) + " /c echo #{msg}"
   end
 
-  def touch(file, abs=true)
+  def touch(file, abs = true)
     (abs ? ABS_CMD : CMD) + " /c echo. 2> #{file}"
   end
 
@@ -29,10 +29,10 @@ module PSWindows::Exec
   # @param [String] orig The origin path
   # @param [String] dest the destination path
   # @param [Boolean] rm Remove the destination prior to move
-  def mv(orig, dest, rm=true)
+  def mv(orig, dest, rm = true)
     # ensure that we have the right slashes for windows
-    orig = orig.tr('/','\\')
-    dest = dest.tr('/','\\')
+    orig = orig.tr('/', '\\')
+    dest = dest.tr('/', '\\')
     rm_rf dest unless !rm
     execute("move /y #{orig} #{dest}")
   end
@@ -55,7 +55,7 @@ module PSWindows::Exec
       "-Day '#{time.day}'" \
       "-Hour '#{time.hour}'" \
       "-Minute '#{time.minute}'" \
-      "-Second '#{time.second}'"
+      "-Second '#{time.second}'",
     )
   end
 
@@ -75,8 +75,10 @@ module PSWindows::Exec
     ips.each_line do |line|
       matches = line.split('=')
       next if matches.length <= 1
+
       matches = matches[1].match(/^{"(.*?)"/)
       next if matches.nil? || matches.captures.nil? || matches.captures.empty?
+
       ip = matches.captures[0] if matches && matches.captures
       break if ip != ''
     end
@@ -88,14 +90,15 @@ module PSWindows::Exec
   # @param [String] target The hostname to ping
   # @param [Integer] attempts Amount of times to attempt ping before giving up
   # @return [Boolean] true of ping successful, overwise false
-  def ping target, attempts=5
+  def ping target, attempts = 5
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
       if result.exit_code == 0
         return true
       end
-      try+=1
+
+      try += 1
     end
     result.exit_code == 0
   end
@@ -104,56 +107,56 @@ module PSWindows::Exec
   # @param [String] dir The directory structure to create on the host
   # @return [Boolean] True, if directory construction succeeded, otherwise False
   def mkdir_p dir
-    normalized_path = dir.tr('/','\\')
+    normalized_path = dir.tr('/', '\\')
     result = exec(powershell("New-Item -Path '#{normalized_path}' -ItemType 'directory'"),
                   :acceptable_exit_codes => [0, 1])
     result.exit_code == 0
   end
 
-  #Add the provided key/val to the current ssh environment
-  #@param [String] key The key to add the value to
-  #@param [String] val The value for the key
-  #@example
+  # Add the provided key/val to the current ssh environment
+  # @param [String] key The key to add the value to
+  # @param [String] val The value for the key
+  # @example
   #  host.add_env_var('PATH', '/usr/bin:PATH')
   def add_env_var key, val
     key = key.to_s.upcase
-    #see if the key/value pair already exists
+    # see if the key/value pair already exists
     cur_val = get_env_var(key, true)
     subbed_val = cur_val.gsub(/#{Regexp.escape(val.gsub(/'|"/, ''))}/, '')
     if cur_val.empty?
       exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', '#{val}', 'Machine')"))
-      self.close #refresh the state
-    elsif subbed_val == cur_val #not present, add it
+      self.close # refresh the state
+    elsif subbed_val == cur_val # not present, add it
       exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', '#{val};#{cur_val}', 'Machine')"))
-      self.close #refresh the state
+      self.close # refresh the state
     end
   end
 
-  #Delete the provided key/val from the current ssh environment
-  #@param [String] key The key to delete the value from
-  #@param [String] val The value to delete for the key
-  #@example
+  # Delete the provided key/val from the current ssh environment
+  # @param [String] key The key to delete the value from
+  # @param [String] val The value to delete for the key
+  # @example
   #  host.delete_env_var('PATH', '/usr/bin:PATH')
   def delete_env_var key, val
     key = key.to_s.upcase
-    #get the current value of the key
+    # get the current value of the key
     cur_val = get_env_var(key, true)
     subbed_val = (cur_val.split(';') - [val.gsub(/'|"/, '')]).join(';')
     if subbed_val != cur_val
-      #remove the current key value
+      # remove the current key value
       self.clear_env_var(key)
-      #set to the truncated value
+      # set to the truncated value
       self.add_env_var(key, subbed_val)
     end
   end
 
-  #Return the value of a specific env var
-  #@param [String] key The key to look for
-  #@param [Boolean] clean Remove the 'KEY=' and only return the value of the env var
-  #@example
+  # Return the value of a specific env var
+  # @param [String] key The key to look for
+  # @param [Boolean] clean Remove the 'KEY=' and only return the value of the env var
+  # @example
   #  host.get_env_var('path')
   def get_env_var key, clean = false
-    self.close #refresh the state
+    self.close # refresh the state
     key = key.to_s.upcase
     val = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true).stdout.chomp
     if val.empty?
@@ -161,28 +164,29 @@ module PSWindows::Exec
     else
       val = val.split("\n")[0] # only take the first result
       if clean
-        val.gsub(/#{key}=/i,'')
+        val.gsub(/#{key}=/i, '')
       else
         val
       end
     end
   end
 
-  #Delete the environment variable from the current ssh environment
-  #@param [String] key The key to delete
-  #@example
+  # Delete the environment variable from the current ssh environment
+  # @param [String] key The key to delete
+  # @example
   #  host.clear_env_var('PATH')
   def clear_env_var key
     key = key.to_s.upcase
     exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', $null, 'Machine')"))
     exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', $null, 'User')"))
     exec(powershell("[Environment]::SetEnvironmentVariable('#{key}', $null, 'Process')"))
-    self.close #refresh the state
+    self.close # refresh the state
   end
 
   def environment_string env
     return '' if env.empty?
-    env_array = self.environment_variable_string_pair_array( env )
+
+    env_array = self.environment_variable_string_pair_array(env)
 
     environment_string = ''
     env_array.each do |env|
@@ -231,18 +235,18 @@ module PSWindows::Exec
   # @api private
   # @return nil
   def ssh_set_user_environment(env)
-    #add the env var set to this test host
+    # add the env var set to this test host
     env.each_pair do |var, value|
       add_env_var(var, value)
     end
   end
 
-  #First path it finds for the command executable
-  #@param [String] command The command executable to search for
+  # First path it finds for the command executable
+  # @param [String] command The command executable to search for
   #
   # @return [String] Path to the searched executable or empty string if not found
   #
-  #@example
+  # @example
   #  host.which('ruby')
   def which(command)
     where_command = "cmd /C \"where #{command}\""

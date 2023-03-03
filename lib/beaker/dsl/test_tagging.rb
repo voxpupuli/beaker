@@ -12,7 +12,6 @@ module Beaker
     #   - {Beaker::Options::Validator#validate_tags} ensures test tag CLI params
     #     are valid for use by this module
     module TestTagging
-
       # Sets tags on the current {Beaker::TestCase}, and skips testing
       # if necessary after checking this case's tags against the ones that are
       # being included or excluded.
@@ -65,22 +64,21 @@ module Beaker
       # @!visibility private
       def platform_specific_tag_confines
         @options[:platform_tag_confines_object] ||= PlatformTagConfiner.new(
-          @options[:platform_tag_confines]
+          @options[:platform_tag_confines],
         )
         confines = @options[:platform_tag_confines_object].confine_details(
-          metadata[:case][:tags]
+          metadata[:case][:tags],
         )
         confines.each do |confine_details|
-          logger.notify( confine_details[:log_message] )
+          logger.notify(confine_details[:log_message])
           confine(
             confine_details[:type],
-            :platform => confine_details[:platform_regex]
+            :platform => confine_details[:platform_regex],
           )
         end
       end
 
       class PlatformTagConfiner
-
         # Constructs the PlatformTagConfiner, transforming the user format
         #   into the internal structure for use by Beaker itself.
         #
@@ -122,7 +120,7 @@ module Beaker
               @tag_confine_details_hash[tag] << {
                 :platform_regex => entry[:platform],
                 :log_message => log_msg,
-                :type => :except
+                :type => :except,
               }
             end
           end
@@ -143,7 +141,7 @@ module Beaker
             tag_confine_array = @tag_confine_details_hash[tag]
             next if tag_confine_array.nil?
 
-            details.push( *tag_confine_array )
+            details.push(*tag_confine_array)
             # tag_confine_array.each do |confine_details|
             #   details << confine_details
             # end
@@ -151,7 +149,6 @@ module Beaker
           details
         end
       end
-
     end
   end
 end

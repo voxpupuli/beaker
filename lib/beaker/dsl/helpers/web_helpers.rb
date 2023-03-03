@@ -3,22 +3,21 @@ module Beaker
     module Helpers
       # Convenience methods for checking links and moving web content to hosts
       module WebHelpers
-
         # Blocks until the port is open on the host specified, returns false
         # on failure
-        def port_open_within?( host, port = 8140, seconds = 120 )
-          repeat_for( seconds ) do
-            host.port_open?( port )
+        def port_open_within?(host, port = 8140, seconds = 120)
+          repeat_for(seconds) do
+            host.port_open?(port)
           end
         end
 
-        #Determine is a given URL is accessible
-        #@param [String] link The URL to examine
-        #@param [Integer] limit redirect limit, will follow redirects that many times
-        #@return [Boolean] true if the ultimate URL after following redirects (301&302) has a '200' HTTP response code, false otherwise
-        #@example
+        # Determine is a given URL is accessible
+        # @param [String] link The URL to examine
+        # @param [Integer] limit redirect limit, will follow redirects that many times
+        # @return [Boolean] true if the ultimate URL after following redirects (301&302) has a '200' HTTP response code, false otherwise
+        # @example
         #  extension = link_exists?("#{URL}.tar.gz") ? ".tar.gz" : ".tar"
-        def link_exists?(link, limit=10)
+        def link_exists?(link, limit = 10)
           begin
             require "net/http"
             require "net/https"
@@ -97,8 +96,8 @@ module Beaker
           url = URI.parse(url)
           chunks = url.path.split('/')
           dst = File.join(dst_dir, chunks.last)
-          #determine directory structure to cut
-          #only want to keep the last directory, thus cut total number of dirs - 2 (hostname + last dir name)
+          # determine directory structure to cut
+          # only want to keep the last directory, thus cut total number of dirs - 2 (hostname + last dir name)
           cut = chunks.length - 2
           wget_command = "wget -nv -P #{dst_dir} --reject \"index.html*\",\"*.gif\" --cut-dirs=#{cut} -np -nH --no-check-certificate -r #{url}"
 
@@ -113,9 +112,9 @@ module Beaker
           unless status.success?
             raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
           end
+
           dst
         end
-
       end
     end
   end

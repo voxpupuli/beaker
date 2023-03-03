@@ -9,8 +9,6 @@ module Beaker
     let(:instance) { WindowsGroupTest.new }
     let(:result) { double(:result, :stdout => group_list_output) }
     let(:group_list_output) do <<-EOS
-
-
 Name=Foo
 
 
@@ -29,7 +27,7 @@ Name=#{group_name}
     end
 
     before do
-      expect( instance ).to receive(:execute).with(/wmic group where/).and_yield(result)
+      expect(instance).to receive(:execute).with(/wmic group where/).and_yield(result)
     end
 
     it "gets a group_list" do
@@ -40,7 +38,6 @@ Name=#{group_name}
       add_group("With Spaces")
       expect(instance.group_list).to eql(["Foo", "Bar6", "With Spaces"])
     end
-
 
     it "gets groups with dashes" do
       add_group("With-Dashes")

@@ -15,7 +15,6 @@ module Beaker
     # designed to allow some degree of freedom from the individual third
     # party test runners that could be used.
     module Outcomes
-
       # Raise this class if it is determined that a test case should not
       # be executed because the feature in question is still a
       # "Work in Progress"
@@ -32,16 +31,15 @@ module Beaker
       # shown itself to pass the test.
       class PassTest    < RuntimeError; end
 
-
       # Raises FailTest Exception and logs an error message
       #
       # @param [String] msg An optional message to log
       # @raise [FailTest]
       def fail_test msg = nil
-        message = formatted_message( msg, 'Failed' )
-        logger.warn( [message, logger.pretty_backtrace].join("\n") )
+        message = formatted_message(msg, 'Failed')
+        logger.warn([message, logger.pretty_backtrace].join("\n"))
 
-        raise( FailTest, message )
+        raise(FailTest, message)
       end
 
       # Raises PassTest Exception and logs a message
@@ -49,10 +47,10 @@ module Beaker
       # @param [String] msg An optional message to log
       # @raise [PassTest]
       def pass_test msg = nil
-        message = formatted_message( msg, 'Passed' )
-        logger.notify( message )
+        message = formatted_message(msg, 'Passed')
+        logger.notify(message)
 
-        raise( PassTest, message )
+        raise(PassTest, message)
       end
 
       # Raises PendingTest Exception and logs an error message
@@ -60,10 +58,10 @@ module Beaker
       # @param [String] msg An optional message to log
       # @raise [PendingTest]
       def pending_test msg = nil
-        message = formatted_message( msg, 'is Pending' )
-        logger.warn( message )
+        message = formatted_message(msg, 'is Pending')
+        logger.warn(message)
 
-        raise( PendingTest, message )
+        raise(PendingTest, message)
       end
 
       # Raises SkipTest Exception and logs a message
@@ -71,10 +69,10 @@ module Beaker
       # @param [String] msg An optional message to log
       # @raise [SkipTest]
       def skip_test msg = nil
-        message = formatted_message( msg, 'was Skipped' )
-        logger.notify( message )
+        message = formatted_message(msg, 'was Skipped')
+        logger.notify(message)
 
-        raise( SkipTest, message )
+        raise(SkipTest, message)
       end
 
       # populate a TestCase's @exports[] with structured_data
@@ -93,7 +91,7 @@ module Beaker
       #
       # @return [String] A prettier string with helpful info
       # @!visibility private
-      def formatted_message(message, default_str )
+      def formatted_message(message, default_str)
         msg = message ? "\n#{message}\n" : "\n#{self} #{default_str}.\n"
         return msg
       end

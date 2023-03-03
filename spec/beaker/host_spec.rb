@@ -4,24 +4,24 @@ module Beaker
   describe Host do
     let(:options)  { @options ? @options : {} }
     let(:platform) { @platform ? { :platform => @platform } : {} }
-    let(:host)    { make_host( 'name', options.merge(platform) ) }
+    let(:host)    { make_host('name', options.merge(platform)) }
 
     it 'creates a windows host given a windows config' do
       @platform = 'windows'
-      expect( host ).to be_a_kind_of Windows::Host
+      expect(host).to be_a_kind_of Windows::Host
     end
 
     it 'defaults to a unix host' do
-      expect( host ).to be_a_kind_of Unix::Host
+      expect(host).to be_a_kind_of Unix::Host
     end
 
     it 'can be read like a hash' do
-      expect{ host['value'] }.not_to raise_error
+      expect { host['value'] }.not_to raise_error
     end
 
     it 'can be written like a hash' do
       host['value'] = 'blarg'
-      expect( host['value'] ).to be === 'blarg'
+      expect(host['value']).to be === 'blarg'
     end
 
     describe "host types" do
@@ -54,14 +54,13 @@ module Beaker
         let(:package) { 'foo' }
 
         context "testing osarchitecture" do
-
           context "64 bit" do
             before do
               @platform = Beaker::Platform.new('windows-2008r2-64')
             end
 
             it "uses 64 bit cygwin" do
-              expect( host ).to receive(:execute).with(/#{cygwin64}.*#{package}/)
+              expect(host).to receive(:execute).with(/#{cygwin64}.*#{package}/)
               host.install_package(package)
             end
           end
@@ -72,22 +71,20 @@ module Beaker
             end
 
             it "uses 32 bit cygwin" do
-              expect( host ).to receive(:execute).with(/#{cygwin}.*#{package}/)
+              expect(host).to receive(:execute).with(/#{cygwin}.*#{package}/)
               host.install_package(package)
             end
           end
         end
-
       end
     end
 
     describe "#add_env_var" do
-
       it "does nothing if the key/value pair already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
-        expect( host ).to receive(:exec).once.and_return(result)
+        expect(Beaker::Command).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect(host).to receive(:exec).once.and_return(result)
 
         host.add_env_var('key', '/my/first/value')
       end
@@ -95,37 +92,35 @@ module Beaker
       it "adds new line to environment file if no env var of that name already exists" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
-        expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
-        expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::Command ).to receive(:new).with("echo \"key=/my/first/value\" >> ~/.ssh/environment")
+        expect(Beaker::Command).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect(host).to receive(:exec).and_return(result)
+        expect(Beaker::Command).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
+        expect(host).to receive(:exec).and_return(result)
+        expect(Beaker::Command).to receive(:new).with("echo \"key=/my/first/value\" >> ~/.ssh/environment")
         host.add_env_var('key', '/my/first/value')
       end
 
       it "updates existing line in environment file when adding additional value to existing variable" do
         result = Beaker::Result.new(host, '')
         result.exit_code = 1
-        expect( Beaker::Command ).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
-        expect( host ).to receive(:exec).and_return(result)
+        expect(Beaker::Command).to receive(:new).with("grep ^key=.*\\/my\\/first\\/value ~/.ssh/environment")
+        expect(host).to receive(:exec).and_return(result)
         result = Beaker::Result.new(host, '')
         result.exit_code = 0
-        expect( Beaker::Command ).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
-        expect( host ).to receive(:exec).and_return(result)
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
+        expect(Beaker::Command).to receive(:new).with(/grep \^key= ~\/\.ssh\/environment/)
+        expect(host).to receive(:exec).and_return(result)
+        expect(Beaker::SedCommand).to receive(:new).with('unix', 's/^key=/key=\\/my\\/first\\/value:/', '~/.ssh/environment')
         host.add_env_var('key', '/my/first/value')
       end
-
     end
 
     describe "#delete_env_var" do
       it "deletes env var" do
-        expect( Beaker::SedCommand ).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
-        expect( Beaker::SedCommand ).to receive(:new).with("unix", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
+        expect(Beaker::SedCommand).to receive(:new).with('unix', '/key=\\/my\\/first\\/value$/d', '~/.ssh/environment')
+        expect(Beaker::SedCommand).to receive(:new).with("unix", "s/key=\\(.*\\)[;:]\\/my\\/first\\/value/key=\\1/", "~/.ssh/environment")
+        expect(Beaker::SedCommand).to receive(:new).with("unix", "s/key=\\/my\\/first\\/value[;:]/key=/", "~/.ssh/environment")
         host.delete_env_var('key', '/my/first/value')
       end
-
     end
 
     describe "executing commands" do
@@ -138,33 +133,33 @@ module Beaker
         result.stderr = 'stderr'
 
         logger = double(:logger)
-        allow( logger ).to receive(:host_output)
-        allow( logger ).to receive(:debug)
-        allow( logger ).to receive(:with_indent).and_yield
+        allow(logger).to receive(:host_output)
+        allow(logger).to receive(:debug)
+        allow(logger).to receive(:with_indent).and_yield
         host.instance_variable_set :@logger, logger
         conn = double(:connection)
-        allow( conn ).to receive(:execute).and_return(result)
-        allow( conn ).to receive(:ip).and_return(host['ip'])
-        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-        allow( conn ).to receive(:hostname).and_return(host.name)
+        allow(conn).to receive(:execute).and_return(result)
+        allow(conn).to receive(:ip).and_return(host['ip'])
+        allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow(conn).to receive(:hostname).and_return(host.name)
         host.instance_variable_set :@connection, conn
       end
 
       it 'takes a command object and a hash of options' do
         result.exit_code = 0
-        expect{ host.exec(command, {}) }.not_to raise_error
+        expect { host.exec(command, {}) }.not_to raise_error
       end
 
       it 'acts on the host\'s logger and connection object' do
         result.exit_code = 0
-        expect( host.instance_variable_get(:@logger) ).to receive(:debug).at_least(:once)
-        expect( host.instance_variable_get(:@connection) ).to receive(:execute).once
+        expect(host.instance_variable_get(:@logger)).to receive(:debug).at_least(:once)
+        expect(host.instance_variable_get(:@connection)).to receive(:execute).once
         host.exec(command)
       end
 
       it 'returns the result object' do
         result.exit_code = 0
-        expect( host.exec(command) ).to be === result
+        expect(host.exec(command)).to be === result
       end
 
       it 'logs the amount of time spent executing the command' do
@@ -172,7 +167,7 @@ module Beaker
 
         expect(host.logger).to receive(:debug).with(/executed in \d\.\d{2} seconds/)
 
-        host.exec(command,{})
+        host.exec(command, {})
       end
 
       it 'raises a CommandFailure when an unacceptable exit code is returned' do
@@ -186,7 +181,7 @@ module Beaker
         result.exit_code = 7
         opts = {
           :acceptable_exit_codes => [0, 1],
-          :accept_all_exit_codes => false
+          :accept_all_exit_codes => false,
         }
 
         expect { host.exec(command, opts) }.to raise_error(Beaker::Host::CommandFailure)
@@ -196,9 +191,9 @@ module Beaker
         result.exit_code = 7
         opts = {
           :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true
+          :accept_all_exit_codes  => true,
         }
-        allow( host.logger ).to receive( :warn )
+        allow(host.logger).to receive(:warn)
 
         expect { host.exec(command, opts) }.to raise_error
       end
@@ -207,116 +202,109 @@ module Beaker
         result.exit_code = 1
         opts = {
           :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true
+          :accept_all_exit_codes  => true,
         }
-        expect( host.logger ).to receive( :warn ).with( /overrides/ )
+        expect(host.logger).to receive(:warn).with(/overrides/)
 
         expect { host.exec(command, opts) }.not_to raise_error
       end
 
       it 'explicitly closes the connection when :reset_connection is set' do
-        expect( host ).to receive( :close )
+        expect(host).to receive(:close)
         expect { host.exec(command, :reset_connection => true) }.not_to raise_error
       end
 
       context "controls the result objects logging" do
         it "and passes a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 0
-          expect{ host.exec(command,{}) }.not_to raise_error
+          expect { host.exec(command, {}) }.not_to raise_error
         end
 
         it "and fails a test if the exit_code doesn't match the default :acceptable_exit_codes of 0" do
           result.exit_code = 1
-          expect{ host.exec(command,{}) }.to raise_error
+          expect { host.exec(command, {}) }.to raise_error
         end
 
         it "and passes a test if the exit_code matches :acceptable_exit_codes" do
           result.exit_code = 0
-          expect{ host.exec(command,{:acceptable_exit_codes => 0}) }.not_to raise_error
+          expect { host.exec(command, { :acceptable_exit_codes => 0 }) }.not_to raise_error
         end
 
         it "and fails a test if the exit_code doesn't match :acceptable_exit_codes" do
           result.exit_code = 0
-          expect{ host.exec(command,{:acceptable_exit_codes => 1}) }.to raise_error
+          expect { host.exec(command, { :acceptable_exit_codes => 1 }) }.to raise_error
         end
 
         it "and passes a test if the exit_code matches one of the :acceptable_exit_codes" do
           result.exit_code = 127
-          expect{ host.exec(command,{:acceptable_exit_codes => [1,127]}) }.not_to raise_error
+          expect { host.exec(command, { :acceptable_exit_codes => [1, 127] }) }.not_to raise_error
         end
 
         it "and passes a test if the exit_code matches one of the range of :acceptable_exit_codes" do
           result.exit_code = 1
-          expect{ host.exec(command,{:acceptable_exit_codes => (0..127)}) }.not_to raise_error
+          expect { host.exec(command, { :acceptable_exit_codes => (0..127) }) }.not_to raise_error
         end
       end
     end
 
     describe "#mkdir_p" do
-
       it "does the right thing on a bash host, identified as is_cygwin=true" do
-        @options = {:is_cygwin => true}
+        @options = { :is_cygwin => true }
         @platform = 'windows'
         result = double
-        allow( result ).to receive( :exit_code ).and_return( 0 )
-        allow( host ).to receive( :exec ).and_return( result )
+        allow(result).to receive(:exit_code).and_return(0)
+        allow(host).to receive(:exec).and_return(result)
 
-        expect( Beaker::Command ).to receive(:new).with("mkdir -p \"test/test/test\"")
-        expect( host.mkdir_p('test/test/test') ).to be == true
-
+        expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
+        expect(host.mkdir_p('test/test/test')).to be == true
       end
 
       it "does the right thing on a bash host, identified as is_cygwin=nil" do
-        @options = {:is_cygwin => nil}
+        @options = { :is_cygwin => nil }
         @platform = 'windows'
         result = double
-        allow( result ).to receive( :exit_code ).and_return( 0 )
-        allow( host ).to receive( :exec ).and_return( result )
+        allow(result).to receive(:exit_code).and_return(0)
+        allow(host).to receive(:exec).and_return(result)
 
-        expect( Beaker::Command ).to receive(:new).with("mkdir -p \"test/test/test\"")
-        expect( host.mkdir_p('test/test/test') ).to be == true
-
+        expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
+        expect(host.mkdir_p('test/test/test')).to be == true
       end
 
       it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
-        @options = {:is_cygwin => false}
+        @options = { :is_cygwin => false }
         @platform = 'windows'
         result = double
-        allow( result ).to receive( :exit_code ).and_return( 0 )
-        allow( host ).to receive( :exec ).and_return( result )
+        allow(result).to receive(:exit_code).and_return(0)
+        allow(host).to receive(:exec).and_return(result)
 
-        expect( Beaker::Command ).to receive(:new).
+        expect(Beaker::Command).to receive(:new).
           with("powershell.exe", ["-ExecutionPolicy Bypass",
                                   "-InputFormat None",
                                   "-NoLogo",
                                   "-NoProfile",
                                   "-NonInteractive",
-                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'"])
-        expect( host.mkdir_p('test/test/test') ).to be == true
-
+                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
+        expect(host.mkdir_p('test/test/test')).to be == true
       end
-
     end
 
     describe "#touch" do
-
       it "generates the right absolute command for a windows host" do
         @platform = 'windows'
-        expect( host.touch('touched_file') ).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
+        expect(host.touch('touched_file')).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
       end
 
-      ['centos','redhat'].each do |platform|
+      ['centos', 'redhat'].each do |platform|
         it "generates the right absolute command for a #{platform} host" do
           @platform = platform
-          expect( host.touch('touched_file') ).to be == "/bin/touch touched_file"
+          expect(host.touch('touched_file')).to be == "/bin/touch touched_file"
         end
       end
 
       it "generates the right absolute command for an osx host" do
         @platform = 'osx'
-        expect( host.touch('touched_file') ).to be == "/usr/bin/touch touched_file"
+        expect(host.touch('touched_file')).to be == "/usr/bin/touch touched_file"
       end
-
     end
 
     context 'do_scp_to' do
@@ -328,14 +316,14 @@ module Beaker
         conn = double(:connection)
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
-        args = [ '/source', 'target', {} ]
+        args = ['/source', 'target', {}]
         conn_args = args
 
-        expect( logger ).to receive(:trace)
-        expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
-        allow( conn ).to receive(:ip).and_return(host['ip'])
-        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-        allow( conn ).to receive(:hostname).and_return(host.name)
+        expect(logger).to receive(:trace)
+        expect(conn).to receive(:scp_to).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
+        allow(conn).to receive(:ip).and_return(host['ip'])
+        allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow(conn).to receive(:hostname).and_return(host.name)
 
         host.do_scp_to(*args)
       end
@@ -346,17 +334,17 @@ module Beaker
         conn = double(:connection)
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
-        args = [ '/source', 'target', {} ]
+        args = ['/source', 'target', {}]
         conn_args = args
 
-        allow( logger ).to receive(:trace)
-        expect( conn ).to receive(:scp_to).ordered.with(
-          *conn_args
+        allow(logger).to receive(:trace)
+        expect(conn).to receive(:scp_to).ordered.with(
+          *conn_args,
         ).and_return(Beaker::Result.new(host, 'output!'))
-        allow( conn ).to receive(:ip).and_return(host['ip'])
-        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-        allow( conn ).to receive(:hostname).and_return(host.name)
-        expect( host ).to receive( :scp_post_operations ).ordered
+        allow(conn).to receive(:ip).and_return(host['ip'])
+        allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow(conn).to receive(:hostname).and_return(host.name)
+        expect(host).to receive(:scp_post_operations).ordered
 
         host.do_scp_to(*args)
       end
@@ -366,8 +354,8 @@ module Beaker
       end
 
       context "using an ignore array with an absolute source path" do
-        let( :source_path ) { '/repos/puppetlabs-inifile' }
-        let( :target_path ) { '/etc/puppetlabs/modules/inifile' }
+        let(:source_path) { '/repos/puppetlabs-inifile' }
+        let(:target_path) { '/etc/puppetlabs/modules/inifile' }
 
         before do
           test_dir = "#{source_path}/tests"
@@ -376,14 +364,14 @@ module Beaker
           files = [
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
 
-          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
-          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
+          @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }
 
-          create_files( @fileset1 )
-          create_files( @fileset2 )
+          create_files(@fileset1)
+          create_files(@fileset2)
         end
 
         it 'can take an ignore list that excludes all files and not call scp_to' do
@@ -391,11 +379,11 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ source_path, target_path, {:ignore => ['tests', 'tests2']} ]
+          args = [source_path, target_path, { :ignore => ['tests', 'tests2'] }]
 
-          expect( logger ).to receive(:trace)
-          expect( host ).to receive( :mkdir_p ).exactly(0).times
-          expect( conn ).to receive(:scp_to).exactly(0).times
+          expect(logger).to receive(:trace)
+          expect(host).to receive(:mkdir_p).exactly(0).times
+          expect(conn).to receive(:scp_to).exactly(0).times
 
           host.do_scp_to(*args)
         end
@@ -407,36 +395,36 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ source_path, target_path, {:ignore => [exclude_file], :dry_run => false} ]
+          args = [source_path, target_path, { :ignore => [exclude_file], :dry_run => false }]
 
-          allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
+          allow(Dir).to receive(:glob).and_return(@fileset1 + @fileset2)
 
-          expect( logger ).to receive(:trace)
-          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests")
-          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests2")
+          expect(logger).to receive(:trace)
+          expect(host).to receive(:mkdir_p).with("#{created_target_path}/tests")
+          expect(host).to receive(:mkdir_p).with("#{created_target_path}/tests2")
 
           (@fileset1 + @fileset2).each do |file|
             if !/#{exclude_file}/.match?(file)
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join(created_target_path, File.dirname(file).gsub(source_path, '')), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+              expect(conn).to receive(:scp_to).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join(created_target_path, File.dirname(file).gsub(source_path, '')), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).not_to receive(:scp_to).with( *conn_args )
+              expect(conn).not_to receive(:scp_to).with(*conn_args)
             end
           end
-          allow( conn ).to receive(:ip).and_return(host['ip'])
-          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-          allow( conn ).to receive(:hostname).and_return(host.name)
+          allow(conn).to receive(:ip).and_return(host['ip'])
+          allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow(conn).to receive(:hostname).and_return(host.name)
 
           host.do_scp_to(*args)
         end
       end
 
       context "using an ignore array with an absolute source path in host root" do
-        let( :source_path ) { '/puppetlabs-inifile' }
-        let( :target_path ) { '/etc/puppetlabs/modules/inifile' }
+        let(:source_path) { '/puppetlabs-inifile' }
+        let(:target_path) { '/etc/puppetlabs/modules/inifile' }
 
         before do
           test_dir = "#{source_path}/tests"
@@ -446,16 +434,16 @@ module Beaker
           files = [
               '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
               '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
 
-          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
-          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
-          @fileset3 = files.shuffle.map {|file| another_test_dir + '/' + file }
+          @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }
+          @fileset3 = files.shuffle.map { |file| another_test_dir + '/' + file }
 
-          create_files( @fileset1 )
-          create_files( @fileset2 )
-          create_files( @fileset3 )
+          create_files(@fileset1)
+          create_files(@fileset2)
+          create_files(@fileset3)
         end
 
         it "creates target dirs with correct path seperator" do
@@ -465,37 +453,36 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ source_path, target_path, {:ignore => [exclude_file]} ]
+          args = [source_path, target_path, { :ignore => [exclude_file] }]
           conn_args = args
 
-          allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 + @fileset3)
+          allow(Dir).to receive(:glob).and_return(@fileset1 + @fileset2 + @fileset3)
 
           created_target_path = File.join(target_path, File.basename(source_path))
-          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests")
-          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests/tests2")
-          expect( host ).to receive( :mkdir_p ).with("#{created_target_path}/tests/tests3")
+          expect(host).to receive(:mkdir_p).with("#{created_target_path}/tests")
+          expect(host).to receive(:mkdir_p).with("#{created_target_path}/tests/tests2")
+          expect(host).to receive(:mkdir_p).with("#{created_target_path}/tests/tests3")
 
           (@fileset1 + @fileset2 + @fileset3).each do |file|
             if !/#{exclude_file}/.match?(file)
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join(created_target_path, File.dirname(file).gsub(source_path, '')), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+              expect(conn).to receive(:scp_to).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join(created_target_path, File.dirname(file).gsub(source_path,'')), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join(created_target_path, File.dirname(file).gsub(source_path, '')), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).not_to receive(:scp_to).with( *conn_args )
+              expect(conn).not_to receive(:scp_to).with(*conn_args)
             end
           end
-          allow( conn ).to receive(:ip).and_return(host['ip'])
-          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-          allow( conn ).to receive(:hostname).and_return(host.name)
+          allow(conn).to receive(:ip).and_return(host['ip'])
+          allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow(conn).to receive(:hostname).and_return(host.name)
 
           host.do_scp_to(*args)
         end
       end
 
       context "using an ignore array" do
-
         before do
           test_dir = 'tmp/tests'
           other_test_dir = 'tmp/tests2'
@@ -503,14 +490,14 @@ module Beaker
           files = [
             '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
             '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-            '06_InstallModules.rb','02_PuppetUserAndGroup.rb',
-            '04_ValidateSignCert.rb', '07_InstallCACerts.rb'              ]
+            '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
 
-          @fileset1 = files.shuffle.map {|file| test_dir + '/' + file }
-          @fileset2 = files.shuffle.map {|file| other_test_dir + '/' + file }
+          @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
+          @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }
 
-          create_files( @fileset1 )
-          create_files( @fileset2 )
+          create_files(@fileset1)
+          create_files(@fileset2)
         end
 
         it 'can take an ignore list that excludes all files and not call scp_to' do
@@ -518,11 +505,11 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => ['tests', 'tests2']} ]
+          args = ['tmp', 'target', { :ignore => ['tests', 'tests2'] }]
 
-          expect( logger ).to receive(:trace)
-          expect( host ).to receive( :mkdir_p ).exactly(0).times
-          expect( conn ).to receive(:scp_to).exactly(0).times
+          expect(logger).to receive(:trace)
+          expect(host).to receive(:mkdir_p).exactly(0).times
+          expect(conn).to receive(:scp_to).exactly(0).times
 
           host.do_scp_to(*args)
         end
@@ -533,27 +520,27 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
+          args = ['tmp', 'target', { :ignore => [exclude_file], :dry_run => false }]
 
-          allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
+          allow(Dir).to receive(:glob).and_return(@fileset1 + @fileset2)
 
-          expect( logger ).to receive(:trace)
-          expect( host ).to receive( :mkdir_p ).with('target/tmp/tests')
-          expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
+          expect(logger).to receive(:trace)
+          expect(host).to receive(:mkdir_p).with('target/tmp/tests')
+          expect(host).to receive(:mkdir_p).with('target/tmp/tests2')
           (@fileset1 + @fileset2).each do |file|
             if !/#{exclude_file}/.match?(file)
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join('target', File.dirname(file)), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+              expect(conn).to receive(:scp_to).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
             else
-              file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+              file_args = [file, File.join('target', File.dirname(file)), { :ignore => [exclude_file], :dry_run => false }]
               conn_args = file_args
-              expect( conn ).not_to receive(:scp_to).with( *conn_args )
+              expect(conn).not_to receive(:scp_to).with(*conn_args)
             end
           end
-          allow( conn ).to receive(:ip).and_return(host['ip'])
-          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-          allow( conn ).to receive(:hostname).and_return(host.name)
+          allow(conn).to receive(:ip).and_return(host['ip'])
+          allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow(conn).to receive(:hostname).and_return(host.name)
           host.do_scp_to(*args)
         end
 
@@ -563,27 +550,27 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [ 'tmp', 'target', {:ignore => [exclude_file], :dry_run => false} ]
+          args = ['tmp', 'target', { :ignore => [exclude_file], :dry_run => false }]
 
-          allow( Dir ).to receive( :glob ).and_return( @fileset1 + @fileset2 )
+          allow(Dir).to receive(:glob).and_return(@fileset1 + @fileset2)
 
-          expect( logger ).to receive(:trace)
-          expect( host ).not_to receive( :mkdir_p ).with('target/tmp/tests')
-          expect( host ).to receive( :mkdir_p ).with('target/tmp/tests2')
+          expect(logger).to receive(:trace)
+          expect(host).not_to receive(:mkdir_p).with('target/tmp/tests')
+          expect(host).to receive(:mkdir_p).with('target/tmp/tests2')
           (@fileset1).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            file_args = [file, File.join('target', File.dirname(file)), { :ignore => [exclude_file], :dry_run => false }]
             conn_args = file_args
-            expect( conn ).not_to receive(:scp_to).with( *conn_args )
+            expect(conn).not_to receive(:scp_to).with(*conn_args)
           end
           (@fileset2).each do |file|
-            file_args = [ file, File.join('target', File.dirname(file)), {:ignore => [exclude_file], :dry_run => false} ]
+            file_args = [file, File.join('target', File.dirname(file)), { :ignore => [exclude_file], :dry_run => false }]
             conn_args = file_args
-            expect( conn ).to receive(:scp_to).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+            expect(conn).to receive(:scp_to).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
           end
 
-          allow( conn ).to receive(:ip).and_return(host['ip'])
-          allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-          allow( conn ).to receive(:hostname).and_return(host.name)
+          allow(conn).to receive(:ip).and_return(host['ip'])
+          allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+          allow(conn).to receive(:hostname).and_return(host.name)
           host.do_scp_to(*args)
         end
       end
@@ -595,15 +582,15 @@ module Beaker
         conn = double(:connection)
         @options = { :logger => logger }
         host.instance_variable_set :@connection, conn
-        args = [ 'source', 'target', {} ]
+        args = ['source', 'target', {}]
         conn_args = args
 
-        expect( logger ).to receive(:debug)
-        expect( conn ).to receive(:scp_from).with( *conn_args ).and_return(Beaker::Result.new(host, 'output!'))
+        expect(logger).to receive(:debug)
+        expect(conn).to receive(:scp_from).with(*conn_args).and_return(Beaker::Result.new(host, 'output!'))
 
-        allow( conn ).to receive(:ip).and_return(host['ip'])
-        allow( conn ).to receive(:vmhostname).and_return(host['vmhostname'])
-        allow( conn ).to receive(:hostname).and_return(host.name)
+        allow(conn).to receive(:ip).and_return(host['ip'])
+        allow(conn).to receive(:vmhostname).and_return(host['vmhostname'])
+        allow(conn).to receive(:hostname).and_return(host.name)
         host.do_scp_from(*args)
       end
     end
@@ -613,16 +600,16 @@ module Beaker
         create_files(['source'])
         logger = host[:logger]
         @options = { :logger => logger }
-        args = [ 'source', 'target', {:ignore => ['.bundle']} ]
+        args = ['source', 'target', { :ignore => ['.bundle'] }]
 
         key = host['ssh']['keys'].first
-        expect( File ).to receive( :exist? ).with( key ).and_return true
+        expect(File).to receive(:exist?).with(key).and_return true
 
-        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
 
-        expect( host ).to receive(:reachable_name).and_return('default.ip.address')
+        expect(host).to receive(:reachable_name).and_return('default.ip.address')
 
-        expect( Rsync ).to receive(:run).with( *rsync_args ).and_return(Rsync::Result.new('raw rsync output', 0))
+        expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
 
         host.do_rsync_to(*args)
 
@@ -634,24 +621,24 @@ module Beaker
       end
 
       it 'uses the ssh config file' do
-        @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
+        @options = { 'ssh' => { :config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86' } }
         create_files(['source'])
-        args = [ 'source', 'target',
-                 {:ignore => ['.bundle']} ]
+        args = ['source', 'target',
+                { :ignore => ['.bundle'] },]
         # since were using fakefs we need to create the file and directories
         FileUtils.mkdir_p('/var/folders/v0/')
         FileUtils.touch('/var/folders/v0/centos-64-x6420150625-48025-lu3u86')
-        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -F /var/folders/v0/centos-64-x6420150625-48025-lu3u86 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -F /var/folders/v0/centos-64-x6420150625-48025-lu3u86 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
         expect(host.do_rsync_to(*args).success?).to eq(true)
       end
 
       it 'does not use the ssh config file when config does not exist' do
-        @options = {'ssh' => {:config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86'}}
+        @options = { 'ssh' => { :config => '/var/folders/v0/centos-64-x6420150625-48025-lu3u86' } }
         create_files(['source'])
-        args = [ 'source', 'target',
-                 {:ignore => ['.bundle']} ]
-        rsync_args = [ 'source', 'target', ['-az', "-e \"ssh -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"] ]
+        args = ['source', 'target',
+                { :ignore => ['.bundle'] },]
+        rsync_args = ['source', 'target', ['-az', "-e \"ssh -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
         expect(host.do_rsync_to(*args).success?).to eq(true)
       end
@@ -660,10 +647,10 @@ module Beaker
         create_files(['source'])
 
         ignore_list = ['.bundle']
-        args = ['source', 'target', {:ignore => ignore_list}]
+        args = ['source', 'target', { :ignore => ignore_list }]
 
         key = host['ssh']['keys'].first
-        expect( File ).to receive( :exist? ).with( key ).twice.and_return true
+        expect(File).to receive(:exist?).with(key).twice.and_return true
 
         rsync_args = ['source', 'target', ['-az', "-e \"ssh -i #{key} -p 22 -o 'StrictHostKeyChecking no'\"", "--exclude '.bundle'"]]
         expect(Rsync).to receive(:run).twice.with(*rsync_args).and_return(Rsync::Result.new('raw rsync output', 0))
@@ -674,7 +661,7 @@ module Beaker
     end
 
     it 'interpolates to its "name"' do
-      expect( "#{host}" ).to be === 'name'
+      expect("#{host}").to be === 'name'
     end
 
     describe 'host close' do
@@ -692,7 +679,7 @@ module Beaker
     end
 
     describe '#get_public_ip' do
-      let(:aws) { double('AWSmock')}
+      let(:aws) { double('AWSmock') }
 
       it 'calls upon the ec2 instance to get the ip address' do
         host.host_hash[:hypervisor] = 'ec2'
@@ -742,18 +729,17 @@ module Beaker
         expect(host).to receive(:execute).with("wget http://169.254.169.254/latest/meta-data/public-ipv4").and_return('127.0.0.1')
         host.get_public_ip
       end
-
     end
 
     describe '#ip' do
       it 'calls #get_ip when get_public_ip returns nil' do
-        allow( host ).to receive(:get_public_ip).and_return(nil)
+        allow(host).to receive(:get_public_ip).and_return(nil)
         expect(host).to receive(:get_ip).and_return('127.0.0.2')
         expect(host.ip).to eq('127.0.0.2')
       end
 
       it 'does not call get_ip when #get_public_ip returns an address' do
-        allow( host ).to receive(:get_public_ip).and_return('127.0.0.1')
+        allow(host).to receive(:get_public_ip).and_return('127.0.0.1')
         expect(host).not_to receive(:get_ip)
         expect(host.ip).to eq('127.0.0.1')
       end

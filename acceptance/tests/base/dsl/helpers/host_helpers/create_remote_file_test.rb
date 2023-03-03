@@ -1,8 +1,7 @@
 require "helpers/test_helper"
 
 test_name "dsl::helpers::host_helpers #create_remote_file" do
-
-  def create_remote_file_with_backups host, remote_filename, contents, opts={}
+  def create_remote_file_with_backups host, remote_filename, contents, opts = {}
     result = nil
     repeat_fibonacci_style_for(10) do
       begin
@@ -98,7 +97,6 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     end
   end
 
-
   confine_block :except, :platform => /windows/ do
     # these tests exercise the rsync backend
     # NOTE: rsync works fine on Windows as long as you use POSIX-style paths.
@@ -143,7 +141,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
         "remote_tmpdir" => remote_tmpdir,
         "remote_filename" => remote_filename,
         "contents" => contents,
-        "result" => result
+        "result" => result,
         ) do
           remote_contents = on(default, "cat #{remote_filename}").stdout
           assert_equal contents, remote_contents
@@ -171,7 +169,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
           "remote_tmpdir" => remote_tmpdir,
           "remote_filename" => remote_filename,
           "contents" => contents,
-          "result" => result
+          "result" => result,
           ) do
           remote_contents = on(host, "cat #{remote_filename}").stdout
           assert_equal contents, remote_contents

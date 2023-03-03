@@ -3,7 +3,7 @@ require 'minitest/test'
 module Beaker
   module CommandFactory
     include Minitest::Assertions
-    #Why do we need this accessor?
+    # Why do we need this accessor?
     # https://github.com/seattlerb/minitest/blob/master/lib/minitest/assertions.rb#L8-L12
     # Protocol: Nearly everything here boils up to +assert+, which
     # expects to be able to increment an instance accessor named
@@ -11,6 +11,7 @@ module Beaker
     # provided by the thing including Assertions. See Minitest::Runnable
     # for an example.
     attr_writer :assertions
+
     def assertions
       @assertions || 0
     end
@@ -27,7 +28,7 @@ module Beaker
     #
     # @api private
     # @return [String] Stdout from command execution
-    def execute(command, options={})
+    def execute(command, options = {})
       cmd_create_options = {}
       exec_opts = options.dup
       cmd_create_options[:prepend_cmds] = exec_opts.delete(:prepend_cmds) || nil

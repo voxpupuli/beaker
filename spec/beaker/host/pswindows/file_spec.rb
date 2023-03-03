@@ -21,7 +21,7 @@ module Beaker
     end
 
     let(:opts)     { @opts || {} }
-    let(:logger)   { double( 'logger' ).as_null_object }
+    let(:logger)   { double('logger').as_null_object }
     let(:instance) { PSWindowsFileTest.new(opts, logger) }
 
     describe '#cat' do

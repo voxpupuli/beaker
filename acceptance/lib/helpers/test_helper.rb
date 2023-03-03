@@ -27,7 +27,7 @@ def create_remote_file_from_fixture(fixture, host, remote_path, filename)
   full_filename = File.join(remote_path, filename)
   contents = fixture_contents fixture
   create_remote_file host, full_filename, contents
-  [ full_filename, contents ]
+  [full_filename, contents]
 end
 
 # Create a file locally, in the `local_path`, with file name `filename`,
@@ -43,7 +43,7 @@ def create_local_file_from_fixture(fixture, local_path, filename, perms = nil)
   end
   FileUtils.chmod perms, full_filename if perms
 
-  [ full_filename, contents ]
+  [full_filename, contents]
 end
 
 # Provide debugging information for tests which are known to fail intermittently
@@ -68,6 +68,7 @@ end
 def fails_intermittently(issue_link, args = {})
   raise ArgumentError, "provide a Jira ticket link" unless issue_link
   raise ArgumentError, "a block is required" unless block_given?
+
   yield
 rescue MiniTest::Assertion, StandardError, SignalException # we have a test failure!
   STDERR.puts "\n\nIntermittent test failure! See: #{issue_link}"

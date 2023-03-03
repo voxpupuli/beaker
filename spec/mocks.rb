@@ -2,7 +2,6 @@ require 'rspec/mocks'
 
 module MockNet
   class HTTP
-
     class Response
       class ResponseHash
         def []key
@@ -12,13 +11,11 @@ module MockNet
             { 'ok' => true, 'hostname' => 'pool' }
           end
         end
-
       end
 
       def body
         ResponseHash.new
       end
-
     end
 
     class Post
@@ -56,7 +53,6 @@ module MockNet
       Response.new
     end
   end
-
 end
 
 module FakeHost
@@ -65,13 +61,12 @@ module FakeHost
   def self.create(name = 'fakevm', platform = 'redhat-version-arch', options = {})
     options_hash = Beaker::Options::OptionsHash.new.merge(options)
     options_hash[:logger] = RSpec::Mocks::Double.new('logger').as_null_object
-    host = Beaker::Host.create(name, { 'platform' => Beaker::Platform.new(platform) } , options_hash)
+    host = Beaker::Host.create(name, { 'platform' => Beaker::Platform.new(platform) }, options_hash)
     host.extend(MockedExec)
     host
   end
 
   module MockedExec
-
     def self.extended(other)
       other.instance_eval do
         send(:instance_variable_set, :@commands, [])

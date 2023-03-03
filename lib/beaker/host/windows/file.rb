@@ -20,7 +20,7 @@ module Windows::File
   #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.
   #   This method simply wraps the normal Host#chown call with
   #   a call to cygpath to sanitize input.
-  def chown(user, path, recursive=false)
+  def chown(user, path, recursive = false)
     cygpath = execute("cygpath -u #{path}")
     super(user, cygpath, recursive)
   end
@@ -30,13 +30,13 @@ module Windows::File
   #   windows-, DOS-, or mixed-style paths, only UNIX/POSIX-style.
   #   This method simply wraps the normal Host#chgrp call with
   #   a call to cygpath to sanitize input.
-  def chgrp(group, path, recursive=false)
+  def chgrp(group, path, recursive = false)
     cygpath = execute("cygpath -u #{path}")
     super(group, cygpath, recursive)
   end
 
   # Not needed on windows
-  def chmod(mod, path, recursive=false); end
+  def chmod(mod, path, recursive = false); end
 
   # (see {Beaker::Host::Unix::File#ls_ld})
   # @note Cygwin's `ls_ld` implementation does not support

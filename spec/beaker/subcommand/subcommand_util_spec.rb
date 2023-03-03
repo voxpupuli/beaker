@@ -3,7 +3,6 @@ require 'spec_helper'
 module Beaker
   module Subcommands
     describe SubcommandUtil do
-
       let(:cli) {
         double("cli")
       }
@@ -40,19 +39,19 @@ module Beaker
         double("hosts_object")
       }
 
-      let(:network_manager){
+      let(:network_manager) {
         double("network_manager")
       }
 
-      let(:save_object){
+      let(:save_object) {
         double("save_object")
       }
 
-      let(:load_object){
+      let(:load_object) {
         double("load_object")
       }
 
-      let(:yaml_object){
+      let(:yaml_object) {
         double("yaml_object")
       }
 
@@ -78,13 +77,12 @@ module Beaker
         end
       end
 
-
       describe 'error_with' do
         it "the exit value should default to 1" do
           expect(STDOUT).to receive(:puts).with("exiting").once
           begin
             subject.error_with("exiting")
-          rescue SystemExit=>e
+          rescue SystemExit => e
             expect(e.status).to eq(1)
           end
         end
@@ -92,8 +90,8 @@ module Beaker
         it "the exit value should return specified value" do
           expect(STDOUT).to receive(:puts).with("exiting").once
           begin
-            subject.error_with("exiting", {exit_code: 3})
-          rescue SystemExit=>e
+            subject.error_with("exiting", { exit_code: 3 })
+          rescue SystemExit => e
             expect(e.status).to eq(3)
           end
         end
@@ -102,8 +100,8 @@ module Beaker
           expect(STDOUT).to receive(:puts).with("exiting").once
           expect(STDOUT).to receive(:puts).with("testing").once
           begin
-            subject.error_with("exiting", {stack_trace: "testing"})
-          rescue SystemExit=>e
+            subject.error_with("exiting", { stack_trace: "testing" })
+          rescue SystemExit => e
             expect(e.status).to eq(1)
           end
         end

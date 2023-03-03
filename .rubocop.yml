@@ -13,22 +13,22 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: false
 
-Layout/ArgumentAlignment:
-  Enabled: false
+Style/TrailingCommaInHashLiteral:
+  Enabled: True
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: True
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArguments:
+  Enabled: True
+  EnforcedStyleForMultiline: comma
 
 Layout/LineLength:
   Exclude:
     - acceptance/**/*.rb
     - spec/**/*.rb
-
-Layout:
-  Enabled: false
-
-Metrics:
-  Enabled: false
-
-Style:
-  Enabled: false
 
 Naming/AccessorMethodName:
   Enabled: false
@@ -64,3 +64,12 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 4
+
+Metrics:
+  Enabled: false
+
+Style:
+  Enabled: false
+
+Layout:
+  Enabled: false

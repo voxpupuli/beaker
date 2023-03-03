@@ -2,6 +2,7 @@ module Beaker
   class Result
     attr_accessor :host, :cmd, :exit_code, :stdout, :stderr, :output,
                   :raw_stdout, :raw_stderr, :raw_output
+
     def initialize(host, cmd)
       @host       = host
       @cmd        = cmd
@@ -19,11 +20,11 @@ module Beaker
     # This is also the lowest overhead place to normalize line endings, IIRC
     def finalize!
       @raw_stdout = @stdout
-      @stdout     = normalize_line_endings( convert( @stdout ) )
+      @stdout     = normalize_line_endings(convert(@stdout))
       @raw_stderr = @stderr
-      @stderr     = normalize_line_endings( convert( @stderr ) )
+      @stderr     = normalize_line_endings(convert(@stderr))
       @raw_output = @output
-      @output     = normalize_line_endings( convert( @output ) )
+      @output     = normalize_line_endings(convert(@output))
     end
 
     def normalize_line_endings string
@@ -33,15 +34,15 @@ module Beaker
     def convert string
       # Remove invalid and undefined UTF-8 character encodings
       string.to_s.force_encoding('UTF-8')
-      string.to_s.chars.select{|i| i.valid_encoding?}.join
+      string.to_s.chars.select { |i| i.valid_encoding? }.join
     end
 
     def log(logger)
       logger.debug "Exited: #{exit_code}" unless exit_code == 0 or !exit_code
     end
 
-    def formatted_output(limit=10)
-      @output.split("\n").last(limit).collect {|x| "\t" + x}.join("\n")
+    def formatted_output(limit = 10)
+      @output.split("\n").last(limit).collect { |x| "\t" + x }.join("\n")
     end
 
     def exit_code_in?(range)
