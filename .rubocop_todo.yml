@@ -13,13 +13,6 @@ Gemspec/DevelopmentDependencies:
   Exclude:
     - 'beaker.gemspec'
 
-# This cop supports safe autocorrection (--autocorrect).
-Lint/AmbiguousOperatorPrecedence:
-  Exclude:
-    - 'acceptance/tests/base/host/host_test.rb'
-    - 'lib/beaker/host/unix/file.rb'
-    - 'lib/beaker/ssh_connection.rb'
-
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: enums
 Lint/ConstantDefinitionInBlock:
