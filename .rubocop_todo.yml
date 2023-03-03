@@ -182,11 +182,6 @@ RSpec/NoExpectationExample:
     - 'spec/beaker/logger_spec.rb'
     - 'spec/beaker/options/subcommand_options_parser_spec.rb'
 
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/Rails/MinitestAssertions:
-  Exclude:
-    - 'spec/beaker/dsl/structure_spec.rb'
-
 RSpec/RepeatedDescription:
   Exclude:
     - 'spec/beaker/cli_spec.rb'
