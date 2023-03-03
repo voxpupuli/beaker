@@ -260,7 +260,7 @@ module Beaker
                 # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive(:exec).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
-                expect(instance.reboot).to be(nil)
+                expect(instance.reboot).to be_nil
               end
 
               it 'passes with wait_time_parameter' do
@@ -271,7 +271,7 @@ module Beaker
                 # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive(:exec).with(:boot_time_command_stub, anything).and_return(boot_time_success_response).once
 
-                expect(instance.reboot(10)).to be(nil)
+                expect(instance.reboot(10)).to be_nil
               end
 
               it 'passes with max_connection_tries parameter' do
@@ -282,7 +282,7 @@ module Beaker
                 # allow the second boot_time and the hash arguments in exec
                 expect(instance).to receive(:exec).with(:boot_time_command_stub, hash_including(:max_connection_tries => 20)).and_return(boot_time_success_response).once
 
-                expect(instance.reboot(sleep_time, 20)).to be(nil)
+                expect(instance.reboot(sleep_time, 20)).to be_nil
               end
 
               context 'command errors' do

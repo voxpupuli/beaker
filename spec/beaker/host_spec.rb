@@ -695,7 +695,7 @@ module Beaker
 
       it 'returns nil when no matching hypervisor is found' do
         host.host_hash[:hypervisor] = 'vmpooler'
-        expect(host.get_public_ip).to be(nil)
+        expect(host.get_public_ip).to be_nil
       end
 
       it 'calls execute with curl if the host_hash[:instance] is not defined for ec2 and the host is not an instance of Windows::Host' do

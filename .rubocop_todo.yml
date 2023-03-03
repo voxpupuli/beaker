@@ -113,14 +113,6 @@ RSpec/BeEq:
 
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: EnforcedStyle.
-# SupportedStyles: be, be_nil
-RSpec/BeNil:
-  Exclude:
-    - 'spec/beaker/host/unix/exec_spec.rb'
-    - 'spec/beaker/host_spec.rb'
-
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
 # SupportedStyles: be_a, be_kind_of
 RSpec/ClassCheck:
   Exclude:
