@@ -15,7 +15,7 @@ Name=Foo
 Name=Bar6
 
 
-      EOS
+    EOS
     end
 
     def add_group(group_name)

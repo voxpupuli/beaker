@@ -84,7 +84,7 @@ module Beaker
       Test Suite: #{@name} @ #{start_time}
 
       - Host Configuration Summary -
-        HEREDOC
+      HEREDOC
 
       average_test_time = elapsed_time / test_count
 

@@ -10,19 +10,19 @@ name: puppet1
 password: *
 gid: 55
 
-EOS
+  EOS
   end
   let(:puppet2) do <<-EOS
 name: puppet2
 password: *
 gid: 56
 
-EOS
+  EOS
   end
   let(:dscacheutil_list) do <<-EOS
 #{puppet1}
 #{puppet2}
-EOS
+  EOS
   end
   let(:command)  { 'ls' }
   let(:host) { double.as_null_object }
