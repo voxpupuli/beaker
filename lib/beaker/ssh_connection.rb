@@ -66,18 +66,18 @@ module Beaker
       wait = 3
       max_connection_tries = options[:max_connection_tries] || 11
       begin
-         @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
+        @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
 
-         # Work around net-ssh 6+ incompatibilities
-         if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
-           strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
+        # Work around net-ssh 6+ incompatibilities
+        if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
+          strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
 
-           unless ssh_opts[:verify_host_key].is_a?(Symbol)
-             ssh_opts[:verify_host_key] ||= strict_host_key_checking ? :always : :never
-           end
-         end
+          unless ssh_opts[:verify_host_key].is_a?(Symbol)
+            ssh_opts[:verify_host_key] ||= strict_host_key_checking ? :always : :never
+          end
+        end
 
-         Net::SSH.start(host, user, ssh_opts)
+        Net::SSH.start(host, user, ssh_opts)
       rescue *RETRYABLE_EXCEPTIONS => e
         if try <= max_connection_tries
           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
@@ -308,7 +308,7 @@ module Beaker
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
-          "raise an error."
+                    "raise an error."
         close
       end
 
@@ -342,7 +342,7 @@ module Beaker
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
-          "raise an error."
+                    "raise an error."
         close
       end
 

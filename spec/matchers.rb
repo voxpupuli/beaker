@@ -21,11 +21,11 @@ RSpec::Matchers.define :execute_commands_matching do |pattern|
   end
 
   def message(actual, pattern, times, found_count)
-      msg = times == 1 ?
-        "#{pattern} once" :
-        "#{pattern} #{times} times"
-      msg += " but instead found a count of #{found_count}" if found_count != times
-      msg + " in:\n #{actual.command_strings.pretty_inspect}"
+    msg = times == 1 ?
+      "#{pattern} once" :
+      "#{pattern} #{times} times"
+    msg += " but instead found a count of #{found_count}" if found_count != times
+    msg + " in:\n #{actual.command_strings.pretty_inspect}"
   end
 
   failure_message do |actual|

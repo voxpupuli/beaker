@@ -3,7 +3,7 @@
 end
 
 module Mac
-    class Host < Unix::Host
+  class Host < Unix::Host
     ['exec', 'user', 'group', 'pkg'].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
@@ -29,5 +29,5 @@ module Mac
 
       @external_copy_base = '/var/root'
     end
-    end
+  end
 end

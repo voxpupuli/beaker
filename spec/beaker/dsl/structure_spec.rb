@@ -381,7 +381,7 @@ describe ClassMixedWithDSLStructure do
       expect(subject).to receive(:on).with(host2, '/sbin/zonename').once.and_return(ret2)
 
       selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
-                             subject.on(host, '/sbin/zonename').stdout.include?(':global')
+        subject.on(host, '/sbin/zonename').stdout.include?(':global')
       end
       expect(selected_hosts).to be == [host1]
     end

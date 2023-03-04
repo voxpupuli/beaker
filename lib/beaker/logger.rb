@@ -1,8 +1,8 @@
 module Beaker
-    # The Beaker Logger class
-    # This class handles message reporting for Beaker, it reports based upon a provided log level
-    # to a given destination (be it a string or file)
-    #
+  # The Beaker Logger class
+  # This class handles message reporting for Beaker, it reports based upon a provided log level
+  # to a given destination (be it a string or file)
+  #
   class Logger
     # The results of the most recently run command
     attr_accessor :last_result
@@ -447,7 +447,7 @@ module Beaker
             case link
             when /^\// then link
             else
-                File.expand_path(full_path + "/" + link)
+              File.expand_path(full_path + "/" + link)
             end
         end
         next_path

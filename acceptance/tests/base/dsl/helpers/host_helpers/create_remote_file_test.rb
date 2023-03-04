@@ -143,8 +143,8 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
                            "contents" => contents,
                            "result" => result,
                           ) do
-          remote_contents = on(default, "cat #{remote_filename}").stdout
-          assert_equal contents, remote_contents
+        remote_contents = on(default, "cat #{remote_filename}").stdout
+        assert_equal contents, remote_contents
       end
     end
 

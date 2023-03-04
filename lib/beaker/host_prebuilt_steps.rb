@@ -193,15 +193,15 @@ module Beaker
       # when reality dictates otherwise"
       logger = opts[:logger]
       block_on host do |host|
-      logger.notify "Sync root authorized_keys from github on #{host.name}"
-      # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-      if /solaris|eos/.match?(host['platform'])
-        host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
-      elsif host['platform'].include?('aix')
-        host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
-      else
-        host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
-      end
+        logger.notify "Sync root authorized_keys from github on #{host.name}"
+        # Allow all exit code, as this operation is unlikely to cause problems if it fails.
+        if /solaris|eos/.match?(host['platform'])
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
+        elsif host['platform'].include?('aix')
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
+        else
+          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
+        end
       end
     rescue => e
       report_and_raise(logger, e, "sync_root_keys")
@@ -436,12 +436,12 @@ module Beaker
         logger.debug("enabling proxy support on #{host.name}")
         case host['platform']
         when /ubuntu/, /debian/, /cumulus/
-            host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
+          host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
         when /^el-/, /centos/, /fedora/, /redhat/, /eos/
-            host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
+          host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
         when /solaris-11/
-            host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-            host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
+          host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
+          host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
         end
@@ -505,7 +505,7 @@ module Beaker
         logger.debug("setting local environment on #{host.name}")
 
         if host['platform'].include?('windows') && host.is_cygwin?
-         env['CYGWIN'] = 'nodosfilewarning'
+          env['CYGWIN'] = 'nodosfilewarning'
         end
 
         host.ssh_permit_user_environment

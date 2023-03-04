@@ -70,8 +70,8 @@ module Beaker
               path_files << root
             elsif File.directory?(root) # expand and explore
               path_files = Dir.glob(File.join(root, '**/*.rb'))
-                               .select { |f| File.file?(f) }
-                               .sort_by { |file| [file.count('/'), file] }
+                              .select { |f| File.file?(f) }
+                              .sort_by { |file| [file.count('/'), file] }
             end
 
             @validator.validate_files(path_files, root)
@@ -112,13 +112,13 @@ module Beaker
         git_opts.map! { |opt|
           case opt
           when /^PUPPET\//
-              opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
+            opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
           when /^FACTER\//
-              opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
+            opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
           when /^HIERA\//
-              opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
+            opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
           when /^HIERA-PUPPET\//
-              opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+            opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
           end
           opt
         }

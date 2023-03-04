@@ -23,13 +23,13 @@ module Beaker
 
       hyper_class = case type
                     when /^noop$/
-          Beaker::Noop
+                      Beaker::Noop
                     when /^(default)|(none)$/
-          Beaker::Hypervisor
+                      Beaker::Hypervisor
                     else
-          # Custom hypervisor
-          require "beaker/hypervisor/#{type}"
-          Beaker.const_get(type.split('_').collect(&:capitalize).join)
+                      # Custom hypervisor
+                      require "beaker/hypervisor/#{type}"
+                      Beaker.const_get(type.split('_').collect(&:capitalize).join)
                     end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)

@@ -8,7 +8,7 @@ module FreeBSD
       'exec',
       'pkg',
     ].each do |lib|
-        require "beaker/host/freebsd/#{lib}"
+      require "beaker/host/freebsd/#{lib}"
     end
 
     include FreeBSD::Exec

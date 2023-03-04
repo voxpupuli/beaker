@@ -197,10 +197,10 @@ module Beaker
           # Yay! The assert in the code block failed, as expected.
           # Swallow the failure so the test passes.
           logger.notify 'An assertion was expected to fail, and did. ' +
-                          'This is probably due to a known product bug, ' +
-                          'and is probably not a problem. ' +
-                          "Additional info: '#{explanation}' " +
-                          "Failed assertion: '#{e}'"
+                        'This is probably due to a known product bug, ' +
+                        'and is probably not a problem. ' +
+                        "Additional info: '#{explanation}' " +
+                        "Failed assertion: '#{e}'"
           return
         end
         # Uh-oh! The assert in the code block unexpectedly passed.

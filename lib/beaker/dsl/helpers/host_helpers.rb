@@ -86,10 +86,10 @@ module Beaker
               case block.arity
                 # block with arity of 0, just hand back yourself
               when 0
-                  yield self
+                yield self
                 # block with arity of 1 or greater, hand back the result object
               else
-                  yield result
+                yield result
               end
             end
             result
@@ -270,12 +270,12 @@ module Beaker
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
             when 'scp'
-                scp_to hosts, tempfile.path, file_path, opts
+              scp_to hosts, tempfile.path, file_path, opts
             when 'rsync'
-                rsync_to hosts, tempfile.path, file_path, opts
+              rsync_to hosts, tempfile.path, file_path, opts
             else
-                logger.debug "Unsupported transfer protocol, returning nil"
-                nil
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
             end
           end
         end
@@ -594,9 +594,9 @@ module Beaker
               when :list   then args = '-l'
               when :remove then args = '-r'
               when :add
-                  on(host,
-                     "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
-                     &block)
+                on(host,
+                   "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
+                   &block)
               end
 
             else # default for GNU/Linux platforms
@@ -604,10 +604,10 @@ module Beaker
               when :list   then args = '-l -u'
               when :remove then args = '-r -u'
               when :add
-                   on(host,
-                      "echo '#{entry}' > /tmp/#{user}.cron && " +
-                      "crontab -u #{user} /tmp/#{user}.cron",
-                      &block)
+                on(host,
+                   "echo '#{entry}' > /tmp/#{user}.cron && " +
+                   "crontab -u #{user} /tmp/#{user}.cron",
+                   &block)
               end
             end
 

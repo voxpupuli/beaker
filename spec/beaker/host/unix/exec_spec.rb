@@ -42,8 +42,8 @@ module Beaker
       end
 
       it 'does not rm' do
-         expect(instance).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
-         expect(instance.mv(origin, destination, false)).to be === 0
+        expect(instance).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
+        expect(instance.mv(origin, destination, false)).to be === 0
       end
     end
 
@@ -387,7 +387,7 @@ module Beaker
             .with('type -P true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
           allow(instance).to receive(:execute)
-                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+            .with(where_command, :accept_all_exit_codes => true).and_return(result)
         end
 
         context 'when only the environment variable PATH is used' do
@@ -422,7 +422,7 @@ module Beaker
             .with('which true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
           allow(instance).to receive(:execute)
-                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+            .with(where_command, :accept_all_exit_codes => true).and_return(result)
         end
 
         context 'when only the environment variable PATH is used' do

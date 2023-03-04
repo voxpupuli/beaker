@@ -72,7 +72,7 @@ module Beaker
         FileUtils.cp_r source, target
       rescue Errno::ENOENT => e
         @logger.warn "#{e.class} error in cp'ing. Forcing the connection to close, which should " \
-                        "raise an error."
+                     "raise an error."
       end
 
       result.stdout << "  CP'ed file #{source} to #{target}"

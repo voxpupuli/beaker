@@ -50,12 +50,12 @@ module PSWindows::Exec
       execute("powershell New-Item -ItemType file #{file}")
     end
     execute("powershell (gci #{file}).LastWriteTime = Get-Date " \
-      "-Year '#{time.year}'" \
-      "-Month '#{time.month}'" \
-      "-Day '#{time.day}'" \
-      "-Hour '#{time.hour}'" \
-      "-Minute '#{time.minute}'" \
-      "-Second '#{time.second}'",
+            "-Year '#{time.year}'" \
+            "-Month '#{time.month}'" \
+            "-Day '#{time.day}'" \
+            "-Hour '#{time.hour}'" \
+            "-Minute '#{time.minute}'" \
+            "-Second '#{time.second}'",
            )
   end
 
