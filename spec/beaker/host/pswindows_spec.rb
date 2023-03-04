@@ -10,7 +10,7 @@ module PSWindows
         { :platform => Beaker::Platform.new('windows-vers-arch-extra') }
       end
     }
-    let(:host)    {
+    let(:host) {
       opts = options.merge(platform)
       opts[:is_cygwin] = false
       make_host('name', opts)

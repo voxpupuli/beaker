@@ -262,7 +262,7 @@ module Beaker
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
-          env_vars      = @presets.env_vars
+          env_vars = @presets.env_vars
 
           @options = @options.merge(env_vars)
           @attribution = @attribution.merge(tag_sources(env_vars, "env"))

@@ -41,7 +41,7 @@ Name=cyg_server
 
   EOS
   end
-  let(:command)  { 'cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value' }
+  let(:command) { 'cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value' }
   let(:host) { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }
 

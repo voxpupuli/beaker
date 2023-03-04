@@ -3,7 +3,7 @@ require "spec_helper"
 module Beaker
   module Options
     describe OptionsHash do
-      let(:options)    { described_class.new }
+      let(:options) { described_class.new }
 
       it "supports is_pe?, defaults to pe" do
         expect(options).to be_is_pe

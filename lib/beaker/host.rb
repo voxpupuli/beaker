@@ -347,7 +347,7 @@ module Beaker
             # should have had a connection failure, but didn't
             # wait to see if the connection failure will be generation, otherwise raise error
             if not connection.wait_for_connection_failure(options, output_callback)
-              raise CommandFailure,  "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+              raise CommandFailure, "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
             end
           end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
@@ -475,7 +475,7 @@ module Beaker
       if options[:dry_run]
         scp_cmd = "scp #{@name}:#{source} #{target}"
         @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
-        return  NullResult.new(self, scp_cmd)
+        return NullResult.new(self, scp_cmd)
       end
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"

@@ -12,7 +12,7 @@ class ClassMixedWithDSLHelpers
 end
 
 describe ClassMixedWithDSLHelpers do
-  let(:opts)   { Beaker::Options::Presets.env_vars }
+  let(:opts) { Beaker::Options::Presets.env_vars }
   let(:command) { 'ls' }
   let(:host)   { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }

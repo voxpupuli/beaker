@@ -35,7 +35,7 @@ gecos: puppet
   let(:etc_passwd_line) do
     "puppet1:*:67:234::0:0:puppet1:/Users/puppet1:/bin/sh"
   end
-  let(:command)  { 'ls' }
+  let(:command) { 'ls' }
   let(:host) { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }
 

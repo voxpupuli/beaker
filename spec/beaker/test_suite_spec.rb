@@ -47,7 +47,7 @@ module Beaker
     end
 
     context 'run' do
-      let(:options)     { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.' }) }
+      let(:options) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.' }) }
       let(:broken_script) { "raise RuntimeError" }
       let(:fail_script)   { "raise Beaker::DSL::Outcomes::FailTest" }
       let(:okay_script)   { "true" }
@@ -244,7 +244,7 @@ module Beaker
         let(:options) { make_opts.merge({ :logger => double().as_null_object,
                                          'name' => create_files(@files),
                                          :log_dated_dir => '.',
-                                         :xml_dated_dir => '.',  })
+                                         :xml_dated_dir => '.', })
         }
         let(:rb_test) { 'my_ruby_file.rb' }
 
@@ -327,7 +327,7 @@ module Beaker
     end
 
     describe '#log_path' do
-      let(:sh_test) { '/my_shell_file.sh'   }
+      let(:sh_test) { '/my_shell_file.sh' }
       let(:files) { @files ? @files : [sh_test] }
       let(:options) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(files) }) }
       let(:hosts) { make_hosts() }

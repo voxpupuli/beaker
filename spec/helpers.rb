@@ -19,7 +19,7 @@ module TestFileHelpers
                     :solaris_hypervisor_snappaths => ["rpoooool/USER/z0"],
                     :vsphere_server => "vsphere.labs.net",
                     :vsphere_username => "vsphere@labs.com",
-                    :vsphere_password => "supersekritpassword",  } }
+                    :vsphere_password => "supersekritpassword", } }
   end
 end
 

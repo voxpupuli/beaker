@@ -559,7 +559,7 @@ module Beaker
           option_retry_interval = opts[:retry_interval].to_f
           desired_exit_codes    = option_exit_codes ? [option_exit_codes].flatten : [0]
           desired_exit_codes    = [0] if desired_exit_codes.empty?
-          max_retries           = option_max_retries == 0 ? 60 : option_max_retries  # nil & "" both return 0
+          max_retries           = option_max_retries == 0 ? 60 : option_max_retries # nil & "" both return 0
           retry_interval        = option_retry_interval == 0 ? 1 : option_retry_interval
           verbose               = true.to_s == opts[:verbose]
 

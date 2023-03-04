@@ -26,7 +26,7 @@ module Beaker
                   'Read options from FILE',
                   'This should evaluate to a ruby hash.',
                   'CLI optons are given precedence.' do |file|
-            @cmd_options[:options_file] =  file
+            @cmd_options[:options_file] = file
           end
 
           opts.on '--helper PATH/TO/SCRIPT',
@@ -91,7 +91,7 @@ module Beaker
                   'onfail (keep SUTs alive if failures occur during testing)',
                   'onpass (keep SUTs alive if no failures occur during testing)',
                   'never (cleanup SUTs - shutdown and destroy any changes made during testing)',
-                  '(default: never)'  do |mode|
+                  '(default: never)' do |mode|
             @cmd_options[:preserve_hosts] = mode || 'always'
           end
 

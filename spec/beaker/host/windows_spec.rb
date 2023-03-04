@@ -33,7 +33,7 @@ module Windows
         { :platform => Beaker::Platform.new('windows-vers-arch-extra') }
       end
     }
-    let(:host)    { make_host('name', options.merge(platform)) }
+    let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#determine_ssh_server' do
       it 'does not care about return codes from the execute call' do

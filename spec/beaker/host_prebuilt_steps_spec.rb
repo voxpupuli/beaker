@@ -13,14 +13,14 @@ describe Beaker do
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
-  let(:stdout)          { @stdout || ip }
-  let(:hosts)          { hosts = make_hosts({ :stdout => stdout, :platform => platform })
-                         hosts[0][:roles] = ['agent']
-                         hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                         hosts[2][:roles] = ['agent']
-                         hosts
+  let(:stdout) { @stdout || ip }
+  let(:hosts) { hosts = make_hosts({ :stdout => stdout, :platform => platform })
+                hosts[0][:roles] = ['agent']
+                hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+                hosts[2][:roles] = ['agent']
+                hosts
   }
-  let(:dummy_class)    { Class.new { include Beaker::HostPrebuiltSteps } }
+  let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
     subject { dummy_class.new }

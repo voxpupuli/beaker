@@ -128,7 +128,7 @@ module Beaker
     let(:platform)    { @platform   || 'unix' }
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
-    let(:options)     { @options    || Hash.new  }
+    let(:options)     { @options    || Hash.new }
 
     it 'forms a basic sed command correctly' do
       expect(cmd.cmd_line host).to be === "sed -i -e \"#{expression}\" #{filename}"

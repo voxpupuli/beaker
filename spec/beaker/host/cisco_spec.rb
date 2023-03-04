@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Cisco
   describe Host do
-    let(:options)  { @options ? @options : {
+    let(:options) { @options ? @options : {
       :user => 'root',
     }
     }
@@ -13,7 +13,7 @@ module Cisco
         { :platform => Beaker::Platform.new('cisco_nexus-vers-arch-extra') }
       end
     }
-    let(:host)    { make_host('name', options.merge(platform)) }
+    let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#prepend_commands' do
       context 'for cisco_nexus-7' do

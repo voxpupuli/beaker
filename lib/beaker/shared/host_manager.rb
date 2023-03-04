@@ -96,7 +96,7 @@ module Beaker
             if block_hosts.empty?
               block_hosts = hosts_with_name(hosts, filter) # check by name
             end
-            if block_hosts.length == 1  # we only found one matching host, don't need it wrapped in an array
+            if block_hosts.length == 1 # we only found one matching host, don't need it wrapped in an array
               block_hosts = block_hosts.pop
             end
           else

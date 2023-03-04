@@ -5,9 +5,9 @@ require 'spec_helper'
 module Beaker
   describe Logger do
     let(:my_io)     { StringIO.new                         }
-    let(:logger)    { described_class.new(my_io, :quiet => true)  }
-    let(:basic_logger)    { described_class.new(:quiet => true)  }
-    let(:test_dir)  { 'tmp/tests' }
+    let(:logger)    { described_class.new(my_io, :quiet => true) }
+    let(:basic_logger) { described_class.new(:quiet => true) }
+    let(:test_dir) { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
     describe '#convert' do
@@ -204,7 +204,7 @@ module Beaker
             }
           }
 
-          let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
+          let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
           it 'overrides the specified log colors' do
             expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -237,7 +237,7 @@ module Beaker
               }
             }
 
-            let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
+            let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
             it 'overrides the specified log colors' do
               expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -289,10 +289,10 @@ module Beaker
       end
 
       context 'at trace log_level' do
-        subject(:trace_logger)  { described_class.new(my_io,
-                                                      :log_level => 'trace',
-                                                      :quiet => true,
-                                                      :color => true)
+        subject(:trace_logger) { described_class.new(my_io,
+                                                     :log_level => 'trace',
+                                                     :quiet => true,
+                                                     :color => true)
         }
 
         it do
@@ -319,10 +319,10 @@ module Beaker
       end
 
       context 'at verbose log_level' do
-        subject(:verbose_logger)  { described_class.new(my_io,
-                                                        :log_level => 'verbose',
-                                                        :quiet => true,
-                                                        :color => true)
+        subject(:verbose_logger) { described_class.new(my_io,
+                                                       :log_level => 'verbose',
+                                                       :quiet => true,
+                                                       :color => true)
         }
 
         it do
@@ -349,10 +349,10 @@ module Beaker
       end
 
       context 'at debug log_level' do
-        subject(:debug_logger)  { described_class.new(my_io,
-                                                      :log_level => 'debug',
-                                                      :quiet => true,
-                                                      :color => true)
+        subject(:debug_logger) { described_class.new(my_io,
+                                                     :log_level => 'debug',
+                                                     :quiet => true,
+                                                     :color => true)
         }
 
         it do

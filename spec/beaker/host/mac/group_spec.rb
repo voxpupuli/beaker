@@ -24,7 +24,7 @@ gid: 56
 #{puppet2}
   EOS
   end
-  let(:command)  { 'ls' }
+  let(:command) { 'ls' }
   let(:host) { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }
 

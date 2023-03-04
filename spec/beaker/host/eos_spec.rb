@@ -10,7 +10,7 @@ module Eos
         { :platform => Beaker::Platform.new('eos-vers-arch-extra') }
       end
     }
-    let(:host)    { make_host('name', options.merge(platform)) }
+    let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#get_remote_file' do
       it 'calls enable first' do

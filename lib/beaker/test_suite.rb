@@ -89,7 +89,7 @@ module Beaker
       # has not studied the implementation in detail. --daniel 2011-03-14
       @test_suite_results.summarize(Logger.new(log_path("#{name}-summary.txt", @options[:log_dated_dir]), STDOUT))
 
-      junit_file_log  = log_path(@options[:xml_file], @options[:xml_dated_dir])
+      junit_file_log = log_path(@options[:xml_file], @options[:xml_dated_dir])
       if @options[:xml_time_enabled]
         junit_file_time = log_path(@options[:xml_time], @options[:xml_dated_dir])
         @test_suite_results.write_junit_xml(junit_file_log, @options[:xml_time])
