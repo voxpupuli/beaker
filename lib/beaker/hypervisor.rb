@@ -30,7 +30,7 @@ module Beaker
           # Custom hypervisor
           require "beaker/hypervisor/#{type}"
           Beaker.const_get(type.split('_').collect(&:capitalize).join)
-        end
+                    end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
       self.set_ssh_connection_preference(hosts_to_provision, hypervisor)

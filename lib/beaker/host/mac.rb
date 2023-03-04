@@ -29,5 +29,5 @@ module Mac
 
       @external_copy_base = '/var/root'
     end
-  end
+    end
 end

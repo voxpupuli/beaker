@@ -40,7 +40,7 @@ module PSWindows::Pkg
         result.stdout.include?('64') ? '64' : '32'
              else
         identify_windows_architecture_from_os_name_for_win2003
-      end
+             end
     end
     arch
   end
