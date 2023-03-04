@@ -4,11 +4,11 @@ def bitvise_check_output which
   case which
   when :failure
     # Windows2003r2 failure output:
-    <<DOC
-[SC] EnumQueryServicesStatus:OpenService FAILED 1060:
+    <<~DOC
+      [SC] EnumQueryServicesStatus:OpenService FAILED 1060:
 
-The specified service does not exist as an installed service.
-DOC
+      The specified service does not exist as an installed service.
+    DOC
   when :success
     <<DOC
   SERVICE_NAME: BvSshServer
@@ -58,19 +58,19 @@ module Windows
           .with('cmd.exe /c sc query BvSshServer', anything).and_return(bitvise_check_output(:failure))
         allow(host).to receive(:execute)
           .with('cmd.exe /c sc qc sshd', anything).and_return(<<~END)
-        [SC] QueryServiceConfig SUCCESS
+            [SC] QueryServiceConfig SUCCESS
 
-        SERVICE_NAME: sshd
-                TYPE               : 10  WIN32_OWN_PROCESS#{' '}
-                START_TYPE         : 2   AUTO_START
-                ERROR_CONTROL      : 1   NORMAL
-                BINARY_PATH_NAME   : C:\\Windows\\System32\\OpenSSH\\sshd.exe
-                LOAD_ORDER_GROUP   :#{' '}
-                TAG                : 0
-                DISPLAY_NAME       : OpenSSH SSH Server
-                DEPENDENCIES       :#{' '}
-                SERVICE_START_NAME : LocalSystem
-        END
+            SERVICE_NAME: sshd
+                    TYPE               : 10  WIN32_OWN_PROCESS#{' '}
+                    START_TYPE         : 2   AUTO_START
+                    ERROR_CONTROL      : 1   NORMAL
+                    BINARY_PATH_NAME   : C:\\Windows\\System32\\OpenSSH\\sshd.exe
+                    LOAD_ORDER_GROUP   :#{' '}
+                    TAG                : 0
+                    DISPLAY_NAME       : OpenSSH SSH Server
+                    DEPENDENCIES       :#{' '}
+                    SERVICE_START_NAME : LocalSystem
+          END
 
         expect(host.determine_ssh_server).to eq :win32_openssh
       end

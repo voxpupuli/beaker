@@ -94,7 +94,7 @@ def beaker_test(mode = :base, options = {})
   preserved_hosts_mode = options[:hosts] == HOSTS_PRESERVED
   final_options = HarnessOptions.final_options(mode, options)
 
-  options_opt  = ""
+  options_opt = ""
   # preserved hosts can not be used with an options file (BKR-670)
   #   one can still use OPTIONS
 
@@ -102,9 +102,9 @@ def beaker_test(mode = :base, options = {})
     options_file = 'merged_options.rb'
     options_opt  = "--options-file=#{options_file}"
     File.open(options_file, 'w') do |merged|
-      merged.puts <<-EOS
-# Copy this file to local_options.rb and adjust as needed if you wish to run
-# with some local overrides.
+      merged.puts <<~EOS
+        # Copy this file to local_options.rb and adjust as needed if you wish to run
+        # with some local overrides.
       EOS
       merged.puts(final_options)
     end
@@ -122,14 +122,14 @@ def beaker_test(mode = :base, options = {})
 end
 
 namespace :test do
-  USAGE = <<-EOS
-You may set BEAKER_HOSTS=config/nodes/foo.yaml or include it in an acceptance-options.rb for Beaker,
-or specify TEST_TARGET in a form beaker-hostgenerator accepts, e.g. ubuntu1504-64a.
-You may override the default master test target by specifying MASTER_TEST_TARGET.
-You may set TESTS=path/to/test,and/more/tests.
-You may set additional Beaker OPTIONS='--more --options'
-If there is a Beaker options hash in a ./acceptance/local_options.rb, it will be included.
-Commandline options set through the above environment variables will override settings in this file.
+  USAGE = <<~EOS
+    You may set BEAKER_HOSTS=config/nodes/foo.yaml or include it in an acceptance-options.rb for Beaker,
+    or specify TEST_TARGET in a form beaker-hostgenerator accepts, e.g. ubuntu1504-64a.
+    You may override the default master test target by specifying MASTER_TEST_TARGET.
+    You may set TESTS=path/to/test,and/more/tests.
+    You may set additional Beaker OPTIONS='--more --options'
+    If there is a Beaker options hash in a ./acceptance/local_options.rb, it will be included.
+    Commandline options set through the above environment variables will override settings in this file.
   EOS
 
   desc 'Run specs and check for deprecation warnings'
@@ -157,25 +157,25 @@ Commandline options set through the above environment variables will override se
     end
   end
 
-  desc <<-EOS
-Run the base beaker acceptance tests
-#{USAGE}
+  desc <<~EOS
+    Run the base beaker acceptance tests
+    #{USAGE}
   EOS
   task :base => 'gen_hosts' do
     beaker_test(:base)
   end
 
-  desc <<-EOS
-Run the subcommand beaker acceptance tests
-#{USAGE}
+  desc <<~EOS
+    Run the subcommand beaker acceptance tests
+    #{USAGE}
   EOS
   task :subcommands => 'gen_hosts' do
     beaker_test(:subcommands)
   end
 
-  desc <<-EOS
-Run the hypervisor beaker acceptance tests
-#{USAGE}
+  desc <<~EOS
+    Run the hypervisor beaker acceptance tests
+    #{USAGE}
   EOS
   task :hypervisor => 'gen_hosts' do
     beaker_test(:hypervisor)

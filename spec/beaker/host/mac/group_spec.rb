@@ -5,23 +5,23 @@ class MacGroupTest
 end
 
 describe MacGroupTest do
-  let(:puppet1) do <<-EOS
-name: puppet1
-password: *
-gid: 55
+  let(:puppet1) do <<~EOS
+    name: puppet1
+    password: *
+    gid: 55
 
   EOS
   end
-  let(:puppet2) do <<-EOS
-name: puppet2
-password: *
-gid: 56
+  let(:puppet2) do <<~EOS
+    name: puppet2
+    password: *
+    gid: 56
 
   EOS
   end
-  let(:dscacheutil_list) do <<-EOS
-#{puppet1}
-#{puppet2}
+  let(:dscacheutil_list) do <<~EOS
+    #{puppet1}
+    #{puppet2}
   EOS
   end
   let(:command) { 'ls' }

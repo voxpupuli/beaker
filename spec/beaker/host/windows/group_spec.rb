@@ -8,19 +8,19 @@ module Beaker
 
     let(:instance) { WindowsGroupTest.new }
     let(:result) { double(:result, :stdout => group_list_output) }
-    let(:group_list_output) do <<-EOS
-Name=Foo
+    let(:group_list_output) do <<~EOS
+      Name=Foo
 
 
-Name=Bar6
+      Name=Bar6
 
 
     EOS
     end
 
     def add_group(group_name)
-      group_list_output << <<-EOS
-Name=#{group_name}
+      group_list_output << <<~EOS
+        Name=#{group_name}
 
 
       EOS

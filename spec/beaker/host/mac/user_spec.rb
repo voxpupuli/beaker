@@ -5,31 +5,31 @@ class MacUserTest
 end
 
 describe MacUserTest do
-  let(:puppet1) do <<-EOS
-name: puppet1
-password: *
-uid: 67
-gid: 234
-dir: /Users/puppet1
-shell: /bin/bash
-gecos: Unprivileged User
+  let(:puppet1) do <<~EOS
+    name: puppet1
+    password: *
+    uid: 67
+    gid: 234
+    dir: /Users/puppet1
+    shell: /bin/bash
+    gecos: Unprivileged User
 
   EOS
   end
-  let(:puppet2) do <<-EOS
-name: puppet2
-password: *
-uid: 68
-gid: 235
-dir: /Users/puppet2
-shell: /bin/sh
-gecos: puppet
+  let(:puppet2) do <<~EOS
+    name: puppet2
+    password: *
+    uid: 68
+    gid: 235
+    dir: /Users/puppet2
+    shell: /bin/sh
+    gecos: puppet
 
   EOS
   end
-  let(:dscacheutil_list) do <<-EOS
-#{puppet1}
-#{puppet2}
+  let(:dscacheutil_list) do <<~EOS
+    #{puppet1}
+    #{puppet2}
   EOS
   end
   let(:etc_passwd_line) do
