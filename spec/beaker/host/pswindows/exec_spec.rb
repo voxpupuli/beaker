@@ -89,13 +89,13 @@ module Beaker
       end
 
       it 'takes an env hash with var_name/value pairs' do
-        expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' })).
-          to be == 'set "HOME=/" && set "http_proxy=http://foo" && set "HTTP_PROXY=http://foo" && '
+        expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' }))
+          .to be == 'set "HOME=/" && set "http_proxy=http://foo" && set "HTTP_PROXY=http://foo" && '
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
-        expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] })).
-          to be == "set \"LD_PATH=/:/tmp\" && "
+        expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] }))
+          .to be == "set \"LD_PATH=/:/tmp\" && "
       end
     end
 
@@ -136,8 +136,8 @@ module Beaker
         let(:result) { instance_spy(Beaker::Result) }
 
         before do
-          allow(Beaker::Command).to receive(:new).
-              with('powershell.exe', array_including(command)).and_return(beaker_command)
+          allow(Beaker::Command).to receive(:new)
+              .with('powershell.exe', array_including(command)).and_return(beaker_command)
           allow(instance).to receive(:exec).with(beaker_command, :acceptable_exit_codes => [0, 1]).and_return(result)
         end
 

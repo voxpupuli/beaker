@@ -277,13 +277,13 @@ module Beaker
         allow(result).to receive(:exit_code).and_return(0)
         allow(host).to receive(:exec).and_return(result)
 
-        expect(Beaker::Command).to receive(:new).
-          with("powershell.exe", ["-ExecutionPolicy Bypass",
-                                  "-InputFormat None",
-                                  "-NoLogo",
-                                  "-NoProfile",
-                                  "-NonInteractive",
-                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
+        expect(Beaker::Command).to receive(:new)
+          .with("powershell.exe", ["-ExecutionPolicy Bypass",
+                                   "-InputFormat None",
+                                   "-NoLogo",
+                                   "-NoProfile",
+                                   "-NonInteractive",
+                                   "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
         expect(host.mkdir_p('test/test/test')).to be == true
       end
     end
