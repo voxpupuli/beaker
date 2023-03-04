@@ -269,8 +269,7 @@ module Beaker
       ['http://myproxy.com:3128/',
        'https://myproxy.com:3128/',
        'https://myproxy.com:3128',
-       'http://myproxy.com:3128',
-].each do |url|
+       'http://myproxy.com:3128',].each do |url|
         it "correctly extracts rpm proxy options for #{url}" do
           expect(instance.extract_rpm_proxy_options(url)).to be == '--httpproxy myproxy.com --httpport 3128'
         end
