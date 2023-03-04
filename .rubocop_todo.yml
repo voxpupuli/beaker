@@ -231,3 +231,9 @@ Security/Eval:
 Security/Open:
   Exclude:
     - 'lib/beaker/dsl/helpers/web_helpers.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, AllowedPatterns.
+# URISchemes: http, https
+Layout/LineLength:
+  Max: 226
