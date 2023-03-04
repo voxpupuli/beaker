@@ -149,7 +149,7 @@ module Beaker
         (int >= 0x0020 and int <= 0xD7FF) or
         (int >= 0xE000 and int <= 0xFFFD) or
         (int >= 0x100000 and int <= 0x10FFFF)
-      )
+             )
     end
   end
 end

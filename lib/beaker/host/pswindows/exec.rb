@@ -56,7 +56,7 @@ module PSWindows::Exec
       "-Hour '#{time.hour}'" \
       "-Minute '#{time.minute}'" \
       "-Second '#{time.second}'",
-    )
+           )
   end
 
   def path
