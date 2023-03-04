@@ -218,7 +218,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'fails when no assertion is raised' do
-      block = lambda { assert_equal('1', '1', '1 should equal 1') }
+      block = lambda { expect('1').to(eq('1'), '1 should equal 1') }
       expect { subject.expect_failure 'this has no failure', &block }.to raise_error(RuntimeError, /An assertion was expected to fail, but passed/)
     end
   end

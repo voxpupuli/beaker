@@ -20,7 +20,7 @@ module Beaker
     it 'self.connect creates connects and returns a proxy for that connection' do
       expect(Net::SSH).to receive(:start).with("default.ip.address", user, ssh_opts).and_return(true)
       connection_constructor = described_class.connect name_hash, user, ssh_opts, options
-      expect(connection_constructor).to be_a_kind_of described_class
+      expect(connection_constructor).to be_a described_class
     end
 
     it 'connect creates a new connection' do
@@ -235,7 +235,7 @@ module Beaker
       end
 
       it 'returns a result object' do
-        expect(connection.scp_to '', '').to be_a_kind_of Beaker::Result
+        expect(connection.scp_to '', '').to be_a Beaker::Result
       end
     end
 
@@ -261,7 +261,7 @@ module Beaker
       end
 
       it 'returns a result object' do
-        expect(connection.scp_from '', '').to be_a_kind_of Beaker::Result
+        expect(connection.scp_from '', '').to be_a Beaker::Result
       end
     end
   end

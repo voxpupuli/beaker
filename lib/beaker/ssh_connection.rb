@@ -304,7 +304,7 @@ module Beaker
         target = self.execute(%{echo "#{target}"}).output.strip.delete('"') if target.include?('%')
 
         @ssh.scp.upload! source, target, local_opts do |_ch, name, sent, total|
-          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+          result.stdout << ("\tcopying %s: %10d/%d\n" % [name, sent, total])
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
@@ -338,7 +338,7 @@ module Beaker
         source = self.execute(%{echo "#{source}"}).output.strip.delete('"') if source.include?('%')
 
         @ssh.scp.download! source, target, local_opts do |_ch, name, sent, total|
-          result.stdout << "\tcopying %s: %10d/%d\n" % [name, sent, total]
+          result.stdout << ("\tcopying %s: %10d/%d\n" % [name, sent, total])
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<

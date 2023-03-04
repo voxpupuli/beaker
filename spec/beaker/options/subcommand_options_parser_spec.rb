@@ -11,7 +11,7 @@ module Beaker
       let(:options_file) { "" }
 
       it 'returns an empty OptionsHash if not executing a subcommand' do
-        expect(parser).to be_kind_of(OptionsHash)
+        expect(parser).to be_a(OptionsHash)
         expect(parser).to be_empty
       end
 
@@ -19,7 +19,7 @@ module Beaker
         let(:argv) { ['init'] }
 
         it 'returns an empty OptionsHash' do
-          expect(parser).to be_kind_of(OptionsHash)
+          expect(parser).to be_a(OptionsHash)
           expect(parser).to be_empty
         end
       end
@@ -41,13 +41,13 @@ module Beaker
         it 'checks for file existence and loads the YAML file' do
           allow(File).to receive(:exist?).and_return true
           allow(YAML).to receive(:load_file).and_return({})
-          expect(file_parser).to be_kind_of(Hash)
-          expect(file_parser).not_to be_kind_of(OptionsHash)
+          expect(file_parser).to be_a(Hash)
+          expect(file_parser).not_to be_a(OptionsHash)
         end
 
         it 'returns an empty options hash when file does not exist' do
           allow(File).to receive(:exist?).and_return false
-          expect(parser).to be_kind_of(OptionsHash)
+          expect(parser).to be_a(OptionsHash)
           expect(parser).to be_empty
         end
       end

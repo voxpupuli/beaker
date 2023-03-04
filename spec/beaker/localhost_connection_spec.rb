@@ -15,7 +15,7 @@ module Beaker
       it 'loggs message' do
         expect(options[:logger]).to receive(:debug).with('Local connection, no connection to start')
         connection_constructor = described_class.connect(options)
-        expect(connection_constructor).to be_a_kind_of described_class
+        expect(connection_constructor).to be_a described_class
       end
     end
 
@@ -40,7 +40,7 @@ module Beaker
       it 'calls open3' do
         expect(Open3).to receive(:capture3).with({}, 'my_command')
         connection.connect
-        expect(connection.execute('my_command')).to be_a_kind_of Result
+        expect(connection.execute('my_command')).to be_a Result
       end
 
       it 'sets stdout, stderr and exitcode' do

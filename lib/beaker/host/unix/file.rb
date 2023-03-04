@@ -130,15 +130,15 @@ module Unix::File
 
       pattern = "%s-%s%s-%s.repo"
 
-      repo_filename << pattern % [
+      repo_filename << (pattern % [
         variant,
         fedora_prefix,
         version,
         arch,
-      ]
+      ])
     when /debian|ubuntu|cumulus|huaweios/
       codename = variant if variant == 'cumulus' || variant == 'huaweios'
-      repo_filename << "%s.list" % [codename]
+      repo_filename << ("%s.list" % [codename])
     else
       msg = "#repo_filename: repo filename pattern not known for platform '#{self['platform']}'"
       raise ArgumentError, msg

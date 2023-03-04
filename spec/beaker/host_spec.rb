@@ -8,11 +8,11 @@ module Beaker
 
     it 'creates a windows host given a windows config' do
       @platform = 'windows'
-      expect(host).to be_a_kind_of Windows::Host
+      expect(host).to be_a Windows::Host
     end
 
     it 'defaults to a unix host' do
-      expect(host).to be_a_kind_of Unix::Host
+      expect(host).to be_a Unix::Host
     end
 
     it 'can be read like a hash' do
@@ -695,7 +695,7 @@ module Beaker
 
       it 'returns nil when no matching hypervisor is found' do
         host.host_hash[:hypervisor] = 'vmpooler'
-        expect(host.get_public_ip).to be(nil)
+        expect(host.get_public_ip).to be_nil
       end
 
       it 'calls execute with curl if the host_hash[:instance] is not defined for ec2 and the host is not an instance of Windows::Host' do

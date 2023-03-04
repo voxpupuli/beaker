@@ -13,13 +13,6 @@ Gemspec/DevelopmentDependencies:
   Exclude:
     - 'beaker.gemspec'
 
-# This cop supports safe autocorrection (--autocorrect).
-Lint/AmbiguousOperatorPrecedence:
-  Exclude:
-    - 'acceptance/tests/base/host/host_test.rb'
-    - 'lib/beaker/host/unix/file.rb'
-    - 'lib/beaker/ssh_connection.rb'
-
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: enums
 Lint/ConstantDefinitionInBlock:
@@ -118,25 +111,6 @@ RSpec/BeEq:
     - 'spec/beaker/host/windows/exec_spec.rb'
     - 'spec/beaker/host_spec.rb'
 
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: be, be_nil
-RSpec/BeNil:
-  Exclude:
-    - 'spec/beaker/host/unix/exec_spec.rb'
-    - 'spec/beaker/host_spec.rb'
-
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: be_a, be_kind_of
-RSpec/ClassCheck:
-  Exclude:
-    - 'spec/beaker/host_spec.rb'
-    - 'spec/beaker/localhost_connection_spec.rb'
-    - 'spec/beaker/options/subcommand_options_parser_spec.rb'
-    - 'spec/beaker/perf_spec.rb'
-    - 'spec/beaker/ssh_connection_spec.rb'
-
 # Configuration parameters: Prefixes, AllowedPatterns.
 # Prefixes: when, with, without
 RSpec/ContextWording:
@@ -145,11 +119,6 @@ RSpec/ContextWording:
 # Configuration parameters: CountAsOne.
 RSpec/ExampleLength:
   Max: 44
-
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/ExcessiveDocstringSpacing:
-  Exclude:
-    - 'spec/beaker/logger_spec.rb'
 
 RSpec/ExpectInHook:
   Exclude:
@@ -212,11 +181,6 @@ RSpec/NoExpectationExample:
     - 'spec/beaker/host_prebuilt_steps_spec.rb'
     - 'spec/beaker/logger_spec.rb'
     - 'spec/beaker/options/subcommand_options_parser_spec.rb'
-
-# This cop supports safe autocorrection (--autocorrect).
-RSpec/Rails/MinitestAssertions:
-  Exclude:
-    - 'spec/beaker/dsl/structure_spec.rb'
 
 RSpec/RepeatedDescription:
   Exclude:
