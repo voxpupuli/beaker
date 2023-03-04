@@ -196,7 +196,7 @@ module Beaker
               ['pending', pending_tests],
               ['total', @total_tests],
               ['time', "%f" % (stop_time - start_time)],
-          ])
+            ])
           properties = suite.add_element(REXML::Element.new('properties'))
           @options.each_pair do |name, value|
             property = properties.add_element(REXML::Element.new('property'))

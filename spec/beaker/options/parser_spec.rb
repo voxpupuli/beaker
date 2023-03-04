@@ -76,10 +76,10 @@ module Beaker
 
         before do
           files = [
-              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
-              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
+            '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+            '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+            '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
 
           @lone_file = '08_foss.rb'
 

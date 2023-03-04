@@ -65,13 +65,13 @@ describe Beaker do
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.12', [
-      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.13', [
-      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   # Solaris
