@@ -85,10 +85,10 @@ module Beaker
             if block
               case block.arity
                 # block with arity of 0, just hand back yourself
-                when 0
+              when 0
                   yield self
                 # block with arity of 1 or greater, hand back the result object
-                else
+              else
                   yield result
               end
             end
@@ -269,11 +269,11 @@ module Beaker
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
-              when 'scp'
+            when 'scp'
                 scp_to hosts, tempfile.path, file_path, opts
-              when 'rsync'
+            when 'rsync'
                 rsync_to hosts, tempfile.path, file_path, opts
-              else
+            else
                 logger.debug "Unsupported transfer protocol, returning nil"
                 nil
             end
@@ -591,9 +591,9 @@ module Beaker
             platform = host['platform']
             if platform.include?('solaris') || platform.include?('aix') then
               case action
-                when :list   then args = '-l'
-                when :remove then args = '-r'
-                when :add
+              when :list   then args = '-l'
+              when :remove then args = '-r'
+              when :add
                   on(host,
                      "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
                      &block)
@@ -601,9 +601,9 @@ module Beaker
 
             else # default for GNU/Linux platforms
               case action
-                when :list   then args = '-l -u'
-                when :remove then args = '-r -u'
-                when :add
+              when :list   then args = '-l -u'
+              when :remove then args = '-r -u'
+              when :add
                    on(host,
                       "echo '#{entry}' > /tmp/#{user}.cron && " +
                       "crontab -u #{user} /tmp/#{user}.cron",
@@ -613,7 +613,7 @@ module Beaker
 
             if args
               case action
-                when :list, :remove then on(host, "crontab #{args} #{user}", &block)
+              when :list, :remove then on(host, "crontab #{args} #{user}", &block)
               end
             end
           end

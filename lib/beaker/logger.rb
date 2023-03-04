@@ -445,8 +445,8 @@ module Beaker
           link = File.readlink next_path
           next_path =
             case link
-              when /^\// then link
-              else
+            when /^\// then link
+            else
                 File.expand_path(full_path + "/" + link)
             end
         end

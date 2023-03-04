@@ -111,13 +111,13 @@ module Beaker
       def parse_git_repos(git_opts)
         git_opts.map! { |opt|
           case opt
-            when /^PUPPET\//
+          when /^PUPPET\//
               opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
-            when /^FACTER\//
+          when /^FACTER\//
               opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
-            when /^HIERA\//
+          when /^HIERA\//
               opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
-            when /^HIERA-PUPPET\//
+          when /^HIERA-PUPPET\//
               opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
           end
           opt

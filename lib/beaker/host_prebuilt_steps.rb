@@ -435,11 +435,11 @@ module Beaker
       block_on host do |host|
         logger.debug("enabling proxy support on #{host.name}")
         case host['platform']
-          when /ubuntu/, /debian/, /cumulus/
+        when /ubuntu/, /debian/, /cumulus/
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
-          when /^el-/, /centos/, /fedora/, /redhat/, /eos/
+        when /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
-          when /solaris-11/
+        when /solaris-11/
             host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
             host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else

@@ -22,11 +22,11 @@ module Beaker
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
 
       hyper_class = case type
-        when /^noop$/
+                    when /^noop$/
           Beaker::Noop
-        when /^(default)|(none)$/
+                    when /^(default)|(none)$/
           Beaker::Hypervisor
-        else
+                    else
           # Custom hypervisor
           require "beaker/hypervisor/#{type}"
           Beaker.const_get(type.split('_').collect(&:capitalize).join)
