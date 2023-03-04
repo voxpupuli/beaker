@@ -240,7 +240,7 @@ module Unix::Pkg
   def determine_if_x86_64
     if self[:platform].include?('solaris')
       result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
-        result.exit_code == 0
+      result.exit_code == 0
     else
       result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
       result.exit_code == 0

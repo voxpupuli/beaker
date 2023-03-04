@@ -175,9 +175,9 @@ module Beaker
               process_stdin_for(terminal, options[:stdin]) if options[:stdin]
             end
           end
-           loop_tries = 0
-           # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
-           @ssh.loop { loop_tries += 1; loop_tries < 4 }
+          loop_tries = 0
+          # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
+          @ssh.loop { loop_tries += 1; loop_tries < 4 }
         rescue *RETRYABLE_EXCEPTIONS => e
           @logger.debug "Connection on #{@hostname} failed as expected (#{e.class.name} - #{e.message})"
           close # this connection is bad, shut it down

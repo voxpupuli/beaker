@@ -75,7 +75,7 @@ module Beaker
 
       it "can convert ubuntu-2204-xxx to ubuntu-jammy-xxx" do
         @name = 'ubuntu-2204-xxx'
-	expect(platform.with_version_codename).to be === 'ubuntu-jammy-xxx'
+	       expect(platform.with_version_codename).to be === 'ubuntu-jammy-xxx'
       end
 
       it "can convert ubuntu-2004-xxx to ubuntu-focal-xxx" do

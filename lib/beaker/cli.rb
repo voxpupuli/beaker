@@ -248,7 +248,7 @@ module Beaker
           end
         end
       end
-     newly_keyed_hosts_entries
+      newly_keyed_hosts_entries
     end
 
     # Prints all information required to reproduce the current run & results to the log

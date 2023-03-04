@@ -137,17 +137,17 @@ module Beaker
     context 'execute!' do
       before do
        stub_const("Beaker::Logger", double().as_null_object)
-        File.open("sample.cfg", "w+") do |file|
-          file.write("HOSTS:\n")
-          file.write("  myhost:\n")
-          file.write("    roles:\n")
-          file.write("      - master\n")
-          file.write("    platform: ubuntu-x-x\n")
-          file.write("CONFIG:\n")
-        end
-        allow(cli).to receive(:setup).and_return(true)
-        allow(cli).to receive(:validate).and_return(true)
-        allow(cli).to receive(:provision).and_return(true)
+       File.open("sample.cfg", "w+") do |file|
+         file.write("HOSTS:\n")
+         file.write("  myhost:\n")
+         file.write("    roles:\n")
+         file.write("      - master\n")
+         file.write("    platform: ubuntu-x-x\n")
+         file.write("CONFIG:\n")
+       end
+       allow(cli).to receive(:setup).and_return(true)
+       allow(cli).to receive(:validate).and_return(true)
+       allow(cli).to receive(:provision).and_return(true)
       end
 
       describe "test fail mode" do

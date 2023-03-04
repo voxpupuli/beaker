@@ -42,6 +42,6 @@ test_name 'use the destroy subcommand' do
        assert_match(/Handing/, result.stdout)
        assert_equal(0, result.exit_code, "`beaker destroy` should return a zero exit code")
      end
-    delete_root_folder_contents
+     delete_root_folder_contents
   end
 end

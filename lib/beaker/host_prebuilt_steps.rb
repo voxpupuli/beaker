@@ -194,14 +194,14 @@ module Beaker
       logger = opts[:logger]
       block_on host do |host|
       logger.notify "Sync root authorized_keys from github on #{host.name}"
-        # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if /solaris|eos/.match?(host['platform'])
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
-        elsif host['platform'].include?('aix')
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
-        else
-          host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
-        end
+      # Allow all exit code, as this operation is unlikely to cause problems if it fails.
+      if /solaris|eos/.match?(host['platform'])
+        host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
+      elsif host['platform'].include?('aix')
+        host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
+      else
+        host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "env PATH=\"/usr/gnu/bin:$PATH\" bash"), :accept_all_exit_codes => true)
+      end
       end
     rescue => e
       report_and_raise(logger, e, "sync_root_keys")
