@@ -241,7 +241,8 @@ module Beaker
       end
 
       describe '#write_junit_xml' do
-        let(:options) { make_opts.merge({ :logger => double().as_null_object,
+        let(:options) {
+          make_opts.merge({ :logger => double().as_null_object,
                                          'name' => create_files(@files),
                                          :log_dated_dir => '.',
                                          :xml_dated_dir => '.', })

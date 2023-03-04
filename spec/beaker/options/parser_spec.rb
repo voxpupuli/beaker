@@ -137,31 +137,35 @@ module Beaker
           let(:env) { @env || { :level => 'highest' } }
           let(:argv) { @argv || { :level => 'second' } }
           let(:host_file) { @host_file || { :level => 'third' } }
-          let(:opt_file) { @opt_file || {
-            :level => 'fourth',
+          let(:opt_file) {
+            @opt_file || {
+              :level => 'fourth',
               :ssh => {
                 :auth_methods => 'auth123',
                   :user_known_hosts_file => 'hosts123',
               },
-          }
+            }
           }
           let(:subcommand_file) { @subcommand_file || { :level => 'fifth' } }
-          let(:homedir_file) { @homedir_file || {
-            :level => 'sixth',
+          let(:homedir_file) {
+            @homedir_file || {
+              :level => 'sixth',
               :ssh => {
                 :auth_methods => 'auth_home_123',
               },
+            }
           }
-          }
-          let(:project_file) { @project_file || {
-            :level => 'seventh',
+          let(:project_file) {
+            @project_file || {
+              :level => 'seventh',
               :ssh => {
                 :auth_methods => 'auth_project_123',
               },
+            }
           }
-          }
-          let(:presets) { {
-            :level => 'lowest',
+          let(:presets) {
+            {
+              :level => 'lowest',
               :ssh => {
                 :config => 'config123',
                   :verify_host_key => 'verify123',
@@ -170,7 +174,7 @@ module Beaker
                   :keys => 'keys123',
                   :keepalive => 'keepalive123',
               },
-          }
+            }
           }
 
           before do

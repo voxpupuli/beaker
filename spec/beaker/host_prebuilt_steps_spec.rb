@@ -14,11 +14,12 @@ describe Beaker do
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
-  let(:hosts) { hosts = make_hosts({ :stdout => stdout, :platform => platform })
-                hosts[0][:roles] = ['agent']
-                hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                hosts[2][:roles] = ['agent']
-                hosts
+  let(:hosts) {
+    hosts = make_hosts({ :stdout => stdout, :platform => platform })
+    hosts[0][:roles] = ['agent']
+    hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+    hosts[2][:roles] = ['agent']
+    hosts
   }
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
@@ -376,11 +377,12 @@ describe Beaker do
     end
 
     context "on windows" do
-      let(:host) { make_host('name', {
-                               :platform => 'windows',
+      let(:host) {
+        make_host('name', {
+                    :platform => 'windows',
         :is_cygwin => cygwin,
         :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
-                             })
+                  })
       }
 
       context "with cygwin" do
@@ -406,10 +408,11 @@ describe Beaker do
 
     ['centos', 'redhat'].each do |platform|
       context "on platform '#{platform}'" do
-        let(:host) { make_host('name', {
-                                 :platform => platform,
+        let(:host) {
+          make_host('name', {
+                      :platform => platform,
           :stdout => stdout,
-                               })
+                    })
         }
 
         before do

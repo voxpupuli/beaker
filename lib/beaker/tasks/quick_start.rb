@@ -69,8 +69,7 @@ end")
 
   desc 'Run Default Smoke Test, after generating default host config and test files, valid options are: vmpooler or vagrant.'
   task :run_test, [:hypervisor] => ["beaker_quickstart:gen_hosts", 'beaker_quickstart:gen_pre_suite',
-                                    'beaker_quickstart:gen_smoke_test',] do
-  |_t, args|
+                                    'beaker_quickstart:gen_smoke_test',] do |_t, args|
     hypervisor = args[:hypervisor] ||= 'vagrant'
     system_args             = Hash.new
     system_args[:hosts]     = "acceptance/config/default_#{hypervisor}_hosts.yaml"

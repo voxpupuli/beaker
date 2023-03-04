@@ -2,9 +2,10 @@ require 'spec_helper'
 
 module Cisco
   describe Host do
-    let(:options) { @options ? @options : {
-      :user => 'root',
-    }
+    let(:options) {
+      @options ? @options : {
+        :user => 'root',
+      }
     }
     let(:platform) {
       if @platform

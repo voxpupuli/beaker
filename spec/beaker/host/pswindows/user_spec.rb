@@ -5,32 +5,33 @@ class PSWindowsUserTest
 end
 
 describe PSWindowsUserTest do
-  let(:wmic_output) do <<~EOS
-    Name=Administrator
+  let(:wmic_output) do
+    <<~EOS
+      Name=Administrator
 
 
 
 
 
-    Name=bob foo
+      Name=bob foo
 
 
 
 
 
-    Name=bob-dash
+      Name=bob-dash
 
 
 
 
 
-    Name=bob.foo
+      Name=bob.foo
 
 
 
 
 
-    Name=cyg_server
+      Name=cyg_server
 
 
 
@@ -39,7 +40,7 @@ describe PSWindowsUserTest do
 
 
 
-  EOS
+    EOS
   end
   let(:command) { 'cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value' }
   let(:host) { double.as_null_object }

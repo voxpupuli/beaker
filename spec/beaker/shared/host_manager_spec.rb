@@ -15,11 +15,12 @@ module Beaker
       let(:role0)          { "role0" }
       let(:role1)          { :role1 }
       let(:role2)          { :role2 }
-      let(:hosts)          { hosts = make_hosts({ :platform => platform })
-                             hosts[0][:roles] = ['agent', role0]
-                             hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
-                             hosts[2][:roles] = ['agent', role2]
-                             hosts
+      let(:hosts)          {
+        hosts = make_hosts({ :platform => platform })
+        hosts[0][:roles] = ['agent', role0]
+        hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
+        hosts[2][:roles] = ['agent', role2]
+        hosts
       }
 
       describe "#hosts_with_name" do
