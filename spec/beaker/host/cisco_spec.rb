@@ -301,7 +301,7 @@ module Cisco
 
         it 'does nothing if no :vrf value is provided' do
           @options = {
-              :user => 'notroot',
+            :user => 'notroot',
           }
           validate_test = host.validate_setup
           expect(validate_test).to be_nil

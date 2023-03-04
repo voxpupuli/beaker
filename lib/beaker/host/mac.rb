@@ -16,10 +16,10 @@ module Mac
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'             => 'root',
+                'user' => 'root',
         'group'            => 'root',
         'pathseparator'    => ':',
-      })
+              })
     end
 
     attr_reader :external_copy_base

@@ -17,10 +17,10 @@ module FreeBSD
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'              => 'root',
+                'user' => 'root',
         'group'             => 'root',
         'pathseparator'     => ':',
-        })
+              })
     end
   end
 end

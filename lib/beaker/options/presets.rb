@@ -122,7 +122,7 @@ module Beaker
       def presets
         h = Beaker::Options::OptionsHash.new
         h.merge({
-          :project                => 'Beaker',
+                  :project => 'Beaker',
           :department             => 'unknown',
           :created_by             => ENV['USER'] || ENV['USERNAME'] || 'unknown',
           :host_tags              => {},
@@ -192,7 +192,7 @@ module Beaker
           :run_in_parallel        => [],
           :use_fog_credentials    => true,
           :ssh                    => {
-                                     :config                => false,
+            :config => false,
                                      :verify_host_key       => false,
                                      :auth_methods          => ["publickey"],
                                      :port                  => 22,
@@ -201,7 +201,7 @@ module Beaker
                                      :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
                                      :keepalive             => true,
           },
-        })
+                })
       end
     end
   end

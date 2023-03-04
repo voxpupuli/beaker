@@ -17,10 +17,10 @@ module Unix
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'             => 'root',
+                'user' => 'root',
         'group'            => 'root',
         'pathseparator'    => ':',
-      })
+              })
     end
 
     # Determines which SSH Server is in use on this host

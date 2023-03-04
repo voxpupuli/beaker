@@ -377,10 +377,10 @@ describe Beaker do
 
     context "on windows" do
       let(:host) { make_host('name', {
-        :platform => 'windows',
+                               :platform => 'windows',
         :is_cygwin => cygwin,
         :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
-      })
+                             })
       }
 
       context "with cygwin" do
@@ -407,9 +407,9 @@ describe Beaker do
     ['centos', 'redhat'].each do |platform|
       context "on platform '#{platform}'" do
         let(:host) { make_host('name', {
-          :platform => platform,
+                                 :platform => platform,
           :stdout => stdout,
-        })
+                               })
         }
 
         before do
@@ -543,10 +543,10 @@ describe Beaker do
 
     it "skips an f5 host correctly" do
       host = make_host('name', {
-         :platform     => 'f5-stuff',
+                         :platform     => 'f5-stuff',
          :ssh_env_file => 'ssh_env_file',
          :is_cygwin => true,
-      })
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,
@@ -566,10 +566,10 @@ describe Beaker do
 
     it 'skips a cisco host correctly' do
       host = make_host('name', {
-        :platform     => 'cisco_nexus-7-x86_64',
+                         :platform     => 'cisco_nexus-7-x86_64',
         :ssh_env_file => 'ssh_env_file',
         :is_cygwin => true,
-      })
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,
@@ -589,10 +589,10 @@ describe Beaker do
 
     def test_host_ssh_calls(platform_name)
       host = make_host('name', {
-          :platform     => platform_name,
+                         :platform     => platform_name,
           :ssh_env_file => 'ssh_env_file',
           :is_cygwin => true,
-        })
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,

@@ -18,10 +18,10 @@ module Windows
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'          => 'Administrator',
+                'user' => 'Administrator',
         'group'         => 'Administrators',
         'pathseparator' => ';',
-      })
+              })
     end
 
     def external_copy_base

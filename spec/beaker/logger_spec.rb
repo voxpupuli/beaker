@@ -185,7 +185,7 @@ module Beaker
 
         it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
-              :error => Beaker::Logger::RED,
+            :error => Beaker::Logger::RED,
               :warn => Beaker::Logger::BRIGHT_RED,
               :success => Beaker::Logger::MAGENTA,
               :notify => Beaker::Logger::BLUE,
@@ -200,7 +200,7 @@ module Beaker
         context 'when passing in log_color options' do
           let(:log_colors) {
             {
-                :error => "\e[00;30m",
+              :error => "\e[00;30m",
             }
           }
 
@@ -233,7 +233,7 @@ module Beaker
           context 'when overriding default log colors' do
             let(:log_colors) {
               {
-                  :error => "\e[00;30m",
+                :error => "\e[00;30m",
               }
             }
 

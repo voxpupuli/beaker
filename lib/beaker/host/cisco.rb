@@ -11,10 +11,10 @@ module Cisco
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'ssh' => {
-          :verify_host_key => false,
-        },
-      })
+                'ssh' => {
+                  :verify_host_key => false,
+                },
+              })
     end
 
     # Tells you whether a host platform supports beaker's
