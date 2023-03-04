@@ -1,7 +1,7 @@
 module Beaker
   class CLI
     VERSION_STRING =
-"      wWWWw
+      "      wWWWw
       |o o|
       | O |  %s!
       |(\")|

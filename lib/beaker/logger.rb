@@ -444,11 +444,11 @@ module Beaker
         if File.symlink? next_path
           link = File.readlink next_path
           next_path =
-              case link
-                when /^\// then link
-                else
-                  File.expand_path(full_path + "/" + link)
-              end
+            case link
+              when /^\// then link
+              else
+                File.expand_path(full_path + "/" + link)
+            end
         end
         next_path
       end
