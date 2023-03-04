@@ -11,8 +11,7 @@ module Beaker
                      "stretch" => "9",
                      "jessie" => "8",
                      "wheezy" => "7",
-                     "squeeze" => "6",
-                   },
+                     "squeeze" => "6", },
         :ubuntu => { "jammy" => "2204",
                      "focal" => "2004",
                      "eoan" => "1910",
@@ -31,15 +30,12 @@ module Beaker
                      "raring" => "1304",
                      "quantal" => "1210",
                      "precise" => "1204",
-                     "lucid" => "1004",
-                   },
+                     "lucid" => "1004", },
         :osx => { "highsierra" => "1013",
                   "sierra" => "1012",
                   "elcapitan" => "1011",
                   "yosemite" => "1010",
-                  "mavericks" => "109",
-                   },
-      }
+                  "mavericks" => "109", }, }
 
     # A string with the name of the platform.
     attr_reader :variant

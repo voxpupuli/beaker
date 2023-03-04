@@ -34,8 +34,7 @@ module HostHelpers
                     :box_url => 'http://default.box.url',
                     :image => 'default_image',
                     :flavor => 'm1.large',
-                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"',
-  }
+                    :user_data => '#cloud-config\nmanage_etc_hosts: true\nfinal_message: "The host is finally up!"', }
 
   HOST_NAME     = "vm%d"
   HOST_SNAPSHOT = "snapshot%d"
