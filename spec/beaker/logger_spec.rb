@@ -290,9 +290,9 @@ module Beaker
 
       context 'at trace log_level' do
         subject(:trace_logger)  { described_class.new(my_io,
-                                              :log_level => 'trace',
-                                              :quiet => true,
-                                              :color => true)
+                                                      :log_level => 'trace',
+                                                      :quiet => true,
+                                                      :color => true)
                                   }
 
         it do
@@ -320,9 +320,9 @@ module Beaker
 
       context 'at verbose log_level' do
         subject(:verbose_logger)  { described_class.new(my_io,
-                                              :log_level => 'verbose',
-                                              :quiet => true,
-                                              :color => true)
+                                                        :log_level => 'verbose',
+                                                        :quiet => true,
+                                                        :color => true)
                                   }
 
         it do
@@ -350,9 +350,9 @@ module Beaker
 
       context 'at debug log_level' do
         subject(:debug_logger)  { described_class.new(my_io,
-                                              :log_level => 'debug',
-                                              :quiet => true,
-                                              :color => true)
+                                                      :log_level => 'debug',
+                                                      :quiet => true,
+                                                      :color => true)
                                   }
 
         it do
@@ -379,9 +379,9 @@ module Beaker
 
       context 'at info log_level' do
         subject(:info_logger) { described_class.new(my_io,
-                                              :log_level => :info,
-                                              :quiet     => true,
-                                              :color     => true)
+                                                    :log_level => :info,
+                                                    :quiet     => true,
+                                                    :color     => true)
                                   }
 
         it do
@@ -416,9 +416,9 @@ module Beaker
       context 'SUT output logging' do
         context 'host output logging' do
           subject(:host_output) { described_class.new(my_io,
-                                              :log_level => :verbose,
-                                              :quiet     => true,
-                                              :color     => true)
+                                                      :log_level => :verbose,
+                                                      :quiet     => true,
+                                                      :color     => true)
 }
 
           it 'outputs GREY when @color is set to true' do
@@ -434,9 +434,9 @@ module Beaker
 
         context 'color host output' do
           subject(:color_host_output) { described_class.new(my_io,
-                                              :log_level => :verbose,
-                                              :quiet     => true,
-                                              :color     => true)
+                                                            :log_level => :verbose,
+                                                            :quiet     => true,
+                                                            :color     => true)
 }
 
           it 'colors host_output' do

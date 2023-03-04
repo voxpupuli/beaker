@@ -596,7 +596,7 @@ module Beaker
                 when :add
                   on(host,
                      "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
-                      &block)
+                     &block)
               end
 
             else # default for GNU/Linux platforms
@@ -607,7 +607,7 @@ module Beaker
                    on(host,
                       "echo '#{entry}' > /tmp/#{user}.cron && " +
                       "crontab -u #{user} /tmp/#{user}.cron",
-                       &block)
+                      &block)
               end
             end
 

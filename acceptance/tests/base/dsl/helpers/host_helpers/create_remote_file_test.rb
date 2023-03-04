@@ -137,11 +137,11 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       )
 
       fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
-        "default" => default,
-        "remote_tmpdir" => remote_tmpdir,
-        "remote_filename" => remote_filename,
-        "contents" => contents,
-        "result" => result,
+                           "default" => default,
+                           "remote_tmpdir" => remote_tmpdir,
+                           "remote_filename" => remote_filename,
+                           "contents" => contents,
+                           "result" => result,
         ) do
           remote_contents = on(default, "cat #{remote_filename}").stdout
           assert_equal contents, remote_contents
@@ -165,11 +165,11 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
       hosts.each do |host|
         fails_intermittently("https://tickets.puppetlabs.com/browse/BKR-612",
-          "host" => host,
-          "remote_tmpdir" => remote_tmpdir,
-          "remote_filename" => remote_filename,
-          "contents" => contents,
-          "result" => result,
+                             "host" => host,
+                             "remote_tmpdir" => remote_tmpdir,
+                             "remote_filename" => remote_filename,
+                             "contents" => contents,
+                             "result" => result,
           ) do
           remote_contents = on(host, "cat #{remote_filename}").stdout
           assert_equal contents, remote_contents
