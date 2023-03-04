@@ -293,7 +293,7 @@ module Beaker
                                                       :log_level => 'trace',
                                                       :quiet => true,
                                                       :color => true)
-                                  }
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -323,7 +323,7 @@ module Beaker
                                                         :log_level => 'verbose',
                                                         :quiet => true,
                                                         :color => true)
-                                  }
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -353,7 +353,7 @@ module Beaker
                                                       :log_level => 'debug',
                                                       :quiet => true,
                                                       :color => true)
-                                  }
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -382,7 +382,7 @@ module Beaker
                                                     :log_level => :info,
                                                     :quiet     => true,
                                                     :color     => true)
-                                  }
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -419,7 +419,7 @@ module Beaker
                                                       :log_level => :verbose,
                                                       :quiet     => true,
                                                       :color     => true)
-}
+          }
 
           it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
@@ -437,7 +437,7 @@ module Beaker
                                                             :log_level => :verbose,
                                                             :quiet     => true,
                                                             :color     => true)
-}
+          }
 
           it 'colors host_output' do
             colorized_logger = color_host_output

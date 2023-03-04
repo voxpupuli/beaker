@@ -173,8 +173,8 @@ module Beaker
               register_exit_code_for terminal, result
 
               process_stdin_for(terminal, options[:stdin]) if options[:stdin]
-             end
-           end
+            end
+          end
            loop_tries = 0
            # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
            @ssh.loop { loop_tries += 1; loop_tries < 4 }

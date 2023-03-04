@@ -152,6 +152,6 @@ module Beaker
 
           expect(instance.mkdir_p(dir_path)).to be(false)
         end
-      end
+    end
   end
 end
