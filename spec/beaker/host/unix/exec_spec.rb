@@ -178,10 +178,10 @@ module Beaker
               reboot   system boot  2.6.32-754.29.1. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
               reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
             LAST_F
-              :success => <<~LAST_F,
-                reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
-                reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
+            :success => <<~LAST_F,
+              reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
+              reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
+            LAST_F
           },
         },
         :centos7 => {
@@ -194,10 +194,10 @@ module Beaker
               reboot   system boot  3.10.0-1127.el7. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
               reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
             LAST_F
-              :success => <<~LAST_F,
-                reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
-                reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
+            :success => <<~LAST_F,
+              reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
+              reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
+            LAST_F
           },
         },
         :centos8 => {
@@ -210,10 +210,10 @@ module Beaker
               reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:52 #{year} still running
               reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
             LAST_F
-              :success => <<~LAST_F,
-                reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 #{year} still running
-                reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
-              LAST_F
+            :success => <<~LAST_F,
+              reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 #{year} still running
+              reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
+            LAST_F
           },
         },
         :freebsd => {

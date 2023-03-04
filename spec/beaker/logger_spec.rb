@@ -186,14 +186,14 @@ module Beaker
         it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
             :error => Beaker::Logger::RED,
-              :warn => Beaker::Logger::BRIGHT_RED,
-              :success => Beaker::Logger::MAGENTA,
-              :notify => Beaker::Logger::BLUE,
-              :info => Beaker::Logger::GREEN,
-              :debug => Beaker::Logger::WHITE,
-              :trace => Beaker::Logger::BRIGHT_YELLOW,
-              :perf => Beaker::Logger::BRIGHT_MAGENTA,
-              :host => Beaker::Logger::YELLOW,
+            :warn => Beaker::Logger::BRIGHT_RED,
+            :success => Beaker::Logger::MAGENTA,
+            :notify => Beaker::Logger::BLUE,
+            :info => Beaker::Logger::GREEN,
+            :debug => Beaker::Logger::WHITE,
+            :trace => Beaker::Logger::BRIGHT_YELLOW,
+            :perf => Beaker::Logger::BRIGHT_MAGENTA,
+            :host => Beaker::Logger::YELLOW,
           }
         end
 
@@ -384,8 +384,8 @@ module Beaker
         subject(:info_logger) {
           described_class.new(my_io,
                               :log_level => :info,
-                              :quiet     => true,
-                              :color     => true)
+                              :quiet => true,
+                              :color => true)
         }
 
         it do
@@ -422,8 +422,8 @@ module Beaker
           subject(:host_output) {
             described_class.new(my_io,
                                 :log_level => :verbose,
-                                :quiet     => true,
-                                :color     => true)
+                                :quiet => true,
+                                :color => true)
           }
 
           it 'outputs GREY when @color is set to true' do
@@ -441,8 +441,8 @@ module Beaker
           subject(:color_host_output) {
             described_class.new(my_io,
                                 :log_level => :verbose,
-                                :quiet     => true,
-                                :color     => true)
+                                :quiet => true,
+                                :color => true)
           }
 
           it 'colors host_output' do

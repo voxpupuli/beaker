@@ -198,7 +198,7 @@ module Beaker
     end
 
     def try_to_execute command, options = {}, stdout_callback = nil,
-                stderr_callback = stdout_callback
+                       stderr_callback = stdout_callback
 
       result = Result.new(@hostname, command)
 

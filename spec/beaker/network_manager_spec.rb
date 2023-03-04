@@ -12,10 +12,10 @@ module Beaker
     let(:options) {
       make_opts.merge({
                         'logger' => double().as_null_object,
-        :logger_sut => mock_provisioning_logger,
-        :log_prefix => @log_prefix,
-        :hosts_file => @hosts_file,
-        :default_log_prefix => 'hello_default',
+                        :logger_sut => mock_provisioning_logger,
+                        :log_prefix => @log_prefix,
+                        :hosts_file => @hosts_file,
+                        :default_log_prefix => 'hello_default',
                       })
     }
     let(:network_manager) { described_class.new(options, options[:logger]) }

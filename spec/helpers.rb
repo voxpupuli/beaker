@@ -53,24 +53,24 @@ module HostHelpers
   def make_opts
     opts = Beaker::Options::Presets.new
     opts.presets.merge(opts.env_vars).merge({ :logger => logger,
-                                               :host_config => 'sample.config',
-                                               :type => nil,
-                                               :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
-                                               :datastore => 'instance0',
-                                               :folder => 'Delivery/Quality Assurance/Staging/Dynamic',
-                                               :resourcepool => 'delivery/Quality Assurance/Staging/Dynamic',
-                                               :gce_project => 'beaker-compute',
-                                               :gce_keyfile => '/path/to/keyfile.p12',
-                                               :gce_password => 'notasecret',
-                                               :gce_email => '12345678910@developer.gserviceaccount.com',
-                                               :openstack_api_key => "P1as$w0rd",
-                                               :openstack_username => "user",
-                                               :openstack_auth_url => "http://openstack_hypervisor.labs.net:5000/v2.0/tokens",
-                                               :openstack_tenant => "testing",
-                                               :openstack_network => "testing",
-                                               :openstack_keyname => "nopass",
-                                               :floating_ip_pool => "my_pool",
-                                               :security_group => ['my_sg', 'default'], })
+                                              :host_config => 'sample.config',
+                                              :type => nil,
+                                              :pooling_api => 'http://vcloud.delivery.puppetlabs.net/',
+                                              :datastore => 'instance0',
+                                              :folder => 'Delivery/Quality Assurance/Staging/Dynamic',
+                                              :resourcepool => 'delivery/Quality Assurance/Staging/Dynamic',
+                                              :gce_project => 'beaker-compute',
+                                              :gce_keyfile => '/path/to/keyfile.p12',
+                                              :gce_password => 'notasecret',
+                                              :gce_email => '12345678910@developer.gserviceaccount.com',
+                                              :openstack_api_key => "P1as$w0rd",
+                                              :openstack_username => "user",
+                                              :openstack_auth_url => "http://openstack_hypervisor.labs.net:5000/v2.0/tokens",
+                                              :openstack_tenant => "testing",
+                                              :openstack_network => "testing",
+                                              :openstack_keyname => "nopass",
+                                              :floating_ip_pool => "my_pool",
+                                              :security_group => ['my_sg', 'default'], })
   end
 
   def generate_result(name, opts)

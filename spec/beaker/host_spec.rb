@@ -190,8 +190,8 @@ module Beaker
       it 'does throw an error when an unacceptable exit code is returned and the accept_all_exit_codes flag is set' do
         result.exit_code = 7
         opts = {
-          :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true,
+          :acceptable_exit_codes => [0, 1],
+          :accept_all_exit_codes => true,
         }
         allow(host.logger).to receive(:warn)
 
@@ -201,8 +201,8 @@ module Beaker
       it 'sends a warning when both :acceptable_exit_codes & :accept_all_exit_codes are set' do
         result.exit_code = 1
         opts = {
-          :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true,
+          :acceptable_exit_codes => [0, 1],
+          :accept_all_exit_codes => true,
         }
         expect(host.logger).to receive(:warn).with(/overrides/)
 

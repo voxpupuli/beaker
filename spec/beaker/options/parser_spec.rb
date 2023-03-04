@@ -142,7 +142,7 @@ module Beaker
               :level => 'fourth',
               :ssh => {
                 :auth_methods => 'auth123',
-                  :user_known_hosts_file => 'hosts123',
+                :user_known_hosts_file => 'hosts123',
               },
             }
           }
@@ -168,11 +168,11 @@ module Beaker
               :level => 'lowest',
               :ssh => {
                 :config => 'config123',
-                  :verify_host_key => 'verify123',
-                  :port => 'port123',
-                  :forward_agent => 'forwardagent123',
-                  :keys => 'keys123',
-                  :keepalive => 'keepalive123',
+                :verify_host_key => 'verify123',
+                :port => 'port123',
+                :forward_agent => 'forwardagent123',
+                :keys => 'keys123',
+                :keepalive => 'keepalive123',
               },
             }
           }
@@ -521,18 +521,18 @@ module Beaker
                                                    'HOSTS' => {
                                                      :master => {
                                                        :roles => ["master", "agent", "arbitrary_role"],
-                                                           :platform => 'el-7-x86_64',
-                                                           :user     => 'root',
+                                                       :platform => 'el-7-x86_64',
+                                                       :user => 'root',
                                                      },
-                                                       :agent => {
-                                                         :roles => ["agent", "default", "other_abitrary_role"],
-                                                           :platform => 'el-7-x86_64',
-                                                           :user     => 'root',
-                                                       },
+                                                     :agent => {
+                                                       :roles => ["agent", "default", "other_abitrary_role"],
+                                                       :platform => 'el-7-x86_64',
+                                                       :user => 'root',
+                                                     },
                                                    },
-                                                     'fail_mode'      => 'slow',
-                                                     'preserve_hosts' => 'always',
-                                                     'host_tags'      => {},
+                                                   'fail_mode' => 'slow',
+                                                   'preserve_hosts' => 'always',
+                                                   'host_tags' => {},
                                                  })
         end
 
@@ -662,8 +662,8 @@ module Beaker
         it 'returns a unique list' do
           hosts_dupe   = {
             'vm1' => { hypervisor: 'hi' },
-              'vm2' => { hypervisor: 'hi' },
-              'vm3' => { hypervisor: 'bye' },
+            'vm2' => { hypervisor: 'hi' },
+            'vm3' => { hypervisor: 'bye' },
           }
           hosts_single = { 'vm1' => { hypervisor: 'hi' } }
 
@@ -676,8 +676,8 @@ module Beaker
         it 'returns a unique list' do
           roles_dupe   = {
             'vm1' => { roles: ['master'] },
-              'vm2' => { roles: %w(database dashboard) },
-              'vm3' => { roles: ['bye'] },
+            'vm2' => { roles: %w(database dashboard) },
+            'vm3' => { roles: ['bye'] },
           }
           roles_single = { 'vm1' => { roles: ['hi'] } }
 

@@ -32,12 +32,12 @@ module Beaker
 
     # The defined log levels.  Each log level also reports messages at levels lower than itself
     LOG_LEVELS = {
-      :trace   => 6,
-      :debug   => 5,
+      :trace => 6,
+      :debug => 5,
       :verbose => 3,
-      :info    => 2,
-      :notify  => 1,
-      :warn    => 0,
+      :info => 2,
+      :notify => 1,
+      :warn => 0,
     }
 
     attr_accessor :color, :log_level, :destinations, :log_colors

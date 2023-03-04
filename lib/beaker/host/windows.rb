@@ -19,8 +19,8 @@ module Windows
       h = Beaker::Options::OptionsHash.new
       h.merge({
                 'user' => 'Administrator',
-        'group'         => 'Administrators',
-        'pathseparator' => ';',
+                'group' => 'Administrators',
+                'pathseparator' => ';',
               })
     end
 

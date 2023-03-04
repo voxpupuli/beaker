@@ -38,7 +38,7 @@ module Cisco
         it 'ends with the :vrf host parameter' do
           vrf_answer = 'vrf_answer_135246'
           @options = {
-            :vrf  => vrf_answer,
+            :vrf => vrf_answer,
           }
           answer_test = host.prepend_commands('fake_command')
           expect(answer_test).to match(/ip netns exec #{vrf_answer}$/)
@@ -58,7 +58,7 @@ module Cisco
 
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
-            :vrf  => 'fakevrf',
+            :vrf => 'fakevrf',
             :user => 'root',
           }
           answer_prepend_commands = 'prepend'
@@ -94,7 +94,7 @@ module Cisco
 
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
-            :vrf  => 'fakevrf',
+            :vrf => 'fakevrf',
             :user => 'root',
           }
           answer_prepend_commands = 'prepend'
@@ -277,7 +277,7 @@ module Cisco
 
         it 'errors when no :user value is provided' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => nil,
           }
           expect {
@@ -287,7 +287,7 @@ module Cisco
 
         it 'does nothing if the host is setup correctly' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => 'notroot',
           }
           validate_test = host.validate_setup
@@ -310,7 +310,7 @@ module Cisco
 
         it 'errors when no user is provided' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => nil,
           }
           expect {
@@ -320,7 +320,7 @@ module Cisco
 
         it 'does nothing if the host is setup correctly' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => 'notroot',
           }
           validate_test = host.validate_setup

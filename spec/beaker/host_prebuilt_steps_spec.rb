@@ -380,8 +380,8 @@ describe Beaker do
       let(:host) {
         make_host('name', {
                     :platform => 'windows',
-        :is_cygwin => cygwin,
-        :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
+                    :is_cygwin => cygwin,
+                    :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
       }
 
@@ -411,7 +411,7 @@ describe Beaker do
         let(:host) {
           make_host('name', {
                       :platform => platform,
-          :stdout => stdout,
+                      :stdout => stdout,
                     })
         }
 
@@ -546,9 +546,9 @@ describe Beaker do
 
     it "skips an f5 host correctly" do
       host = make_host('name', {
-                         :platform     => 'f5-stuff',
-         :ssh_env_file => 'ssh_env_file',
-         :is_cygwin => true,
+                         :platform => 'f5-stuff',
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
                        })
       opts = {
         :env1_key => :env1_value,
@@ -569,9 +569,9 @@ describe Beaker do
 
     it 'skips a cisco host correctly' do
       host = make_host('name', {
-                         :platform     => 'cisco_nexus-7-x86_64',
-        :ssh_env_file => 'ssh_env_file',
-        :is_cygwin => true,
+                         :platform => 'cisco_nexus-7-x86_64',
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
                        })
       opts = {
         :env1_key => :env1_value,
@@ -592,9 +592,9 @@ describe Beaker do
 
     def test_host_ssh_calls(platform_name)
       host = make_host('name', {
-                         :platform     => platform_name,
-          :ssh_env_file => 'ssh_env_file',
-          :is_cygwin => true,
+                         :platform => platform_name,
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
                        })
       opts = {
         :env1_key => :env1_value,

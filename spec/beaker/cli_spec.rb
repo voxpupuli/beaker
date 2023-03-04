@@ -116,7 +116,7 @@ module Beaker
       context 'when hosts share IP addresses' do
         let(:options_host) do
           { 'HOSTS' => { 'host1' => { :options_attribute => 'options' },
-                       'host2' => { :options_attribute => 'options' }, } }
+                         'host2' => { :options_attribute => 'options' }, } }
         end
         let(:instance_host) do
           [Beaker::Host.create('host1',

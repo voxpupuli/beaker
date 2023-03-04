@@ -27,8 +27,8 @@ end
 module HarnessOptions
   defaults = {
     :tests => ['tests'],
-      :log_level => 'debug',
-      :preserve_hosts => 'onfail',
+    :log_level => 'debug',
+    :preserve_hosts => 'onfail',
   }
 
   DEFAULTS = defaults

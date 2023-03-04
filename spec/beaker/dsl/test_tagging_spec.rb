@@ -145,7 +145,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       }
       @confines_array = [{
         :platform => platform_regex,
-                            :tag_reason_hash => tag_reason_hash,
+        :tag_reason_hash => tag_reason_hash,
       }]
 
       internal_hash = confiner.instance_variable_get(:@tag_confine_details_hash)

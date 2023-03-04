@@ -18,8 +18,8 @@ module Unix
       h = Beaker::Options::OptionsHash.new
       h.merge({
                 'user' => 'root',
-        'group'            => 'root',
-        'pathseparator'    => ':',
+                'group' => 'root',
+                'pathseparator' => ':',
               })
     end
 

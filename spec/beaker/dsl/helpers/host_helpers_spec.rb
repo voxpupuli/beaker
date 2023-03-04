@@ -194,7 +194,7 @@ describe ClassMixedWithDSLHelpers do
       retries = 5
 
       opts = {
-        :max_retries    => retries,
+        :max_retries => retries,
         :retry_interval => 0.0001,
       }
 
@@ -209,7 +209,7 @@ describe ClassMixedWithDSLHelpers do
       result.exit_code = 0
 
       opts = {
-        :max_retries    => 5,
+        :max_retries => 5,
         :retry_interval => 0.0001,
       }
 
@@ -225,7 +225,7 @@ describe ClassMixedWithDSLHelpers do
       result.stderr = 'stderr'
 
       opts = {
-        :max_retries    => 10,
+        :max_retries => 10,
         :retry_interval => 0.1,
       }
 
