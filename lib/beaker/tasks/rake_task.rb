@@ -30,6 +30,8 @@ module Beaker
       # @param args [Array] First argument is always the name of the task
       # if no additonal arguments are defined such as parameters it will default to [:hosts,:type]
       def initialize(*args, &task_block)
+        super
+
         @name = args.shift || 'beaker:test'
         if args.empty?
           args = [:hosts, :type]

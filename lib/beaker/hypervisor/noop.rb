@@ -1,9 +1,9 @@
 module Beaker
   class Noop < Beaker::Hypervisor
-    def initialize(new_hosts, options)
-      @options = options
+    def initialize(hosts, options)
+      super
+
       @logger = options[:logger]
-      @hosts = new_hosts
     end
 
     def validate
