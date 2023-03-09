@@ -121,6 +121,9 @@ def beaker_test(mode = :base, options = {})
   sh("beaker", *args)
 end
 
+
+
+
 namespace :test do
   USAGE = <<-EOS
 You may set BEAKER_HOSTS=config/nodes/foo.yaml or include it in an acceptance-options.rb for Beaker,
