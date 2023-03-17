@@ -13,6 +13,9 @@ AllCops:
 Gemspec/RequireMFA:
   Enabled: false
 
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
 Style/TrailingCommaInHashLiteral:
   Enabled: True
   EnforcedStyleForMultiline: consistent_comma
