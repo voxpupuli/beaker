@@ -16,7 +16,7 @@ jobs:
         with:
           ruby-version: '3.0'
         env:
-          BUNDLE_WITHOUT: release
+          BUNDLE_WITHOUT: release:development:rubocop
       - name: Build gem
         run: gem build *.gemspec
       - name: Publish gem to rubygems.org
