@@ -14,7 +14,7 @@ task :spec do
   Rake::Task['test:spec'].invoke
 end
 
-task :acceptance => ['test:base', 'test:puppetgit', 'test:hypervisor']
+task :acceptance => ['test:base', 'test:hypervisor']
 
 task :yard do
   Rake::Task['docs:gen'].invoke
