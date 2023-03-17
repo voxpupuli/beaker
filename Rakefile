@@ -77,11 +77,11 @@ def hosts_opt(use_preserved_hosts = false)
 end
 
 def agent_target
-  ENV['TEST_TARGET'] || 'redhat7-64af'
+  ENV['TEST_TARGET'] || 'centos7-64af'
 end
 
 def master_target
-  ENV['MASTER_TEST_TARGET'] || 'redhat7-64default.mdcal'
+  ENV['MASTER_TEST_TARGET'] || 'centos7-64default.mdcal'
 end
 
 def test_targets
