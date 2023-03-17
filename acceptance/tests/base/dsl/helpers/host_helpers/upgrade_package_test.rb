@@ -27,6 +27,9 @@ test_name "dsl::helpers::host_helpers #upgrade_package" do
   end
 
   confine_block :except, :platform => /windows|osx/ do
+    # rsync is broken on beaker-docker
+    confine :except, :hypervisor => 'docker'
+
     confine_block :to, :platform => /centos|el-\d/ do
       step "#upgrade_package CURRENTLY does not fail on CentOS if unknown package is specified" do
         # NOTE: I would expect this to fail with an Beaker::Host::CommandFailure,

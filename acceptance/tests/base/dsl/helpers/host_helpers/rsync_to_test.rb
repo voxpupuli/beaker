@@ -50,6 +50,9 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     # However, these tests use Host#tmpdir which outputs mixed-style paths
     # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
+    # rsync is broken on beaker-docker
+    confine :except, :hypervisor => 'docker'
+
     step "#rsync_to fails if the local file cannot be found" do
       remote_tmpdir = default.tmpdir()
       assert_raises IOError do

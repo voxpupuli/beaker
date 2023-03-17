@@ -107,6 +107,9 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on executes in parallel with :run_in_parallel => true" do
+    # beaker-docker can't deal with closing the connection
+    confine :except, :hypervisor => 'docker'
+
     parent_pid = Process.pid
     results = on(hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
       assert(Process.pid != parent_pid)
@@ -126,6 +129,9 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on in parallel exits after all processes complete if an exception is raised in one process" do
+    # beaker-docker can't deal with closing the connection
+    confine :except, :hypervisor => 'docker'
+
     start = Time.now
 
     tmp = nil

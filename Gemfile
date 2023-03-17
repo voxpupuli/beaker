@@ -20,6 +20,11 @@ if ENV['BEAKER_PE_PR_REPO_URL']
   gem lib, :git => "git@github.com:#{author}/#{lib}.git", :branch => ref
 end
 
+if ENV['BEAKER_HYPERVISOR']
+  # vagrant_libvirt -> vagrant
+  gem "beaker-#{ENV['BEAKER_HYPERVISOR'].split('_').first}"
+end
+
 group :rubocop do
   gem 'rubocop', '~> 1.48.0'
   gem 'rubocop-performance', '~> 1.16.0'
