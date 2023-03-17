@@ -187,7 +187,9 @@ Run the hypervisor beaker acceptance tests
       next
     end
 
-    cli = BeakerHostGenerator::CLI.new([test_targets])
+    arguments = [test_targets]
+    arguments += ['--hypervisor', ENV['BEAKER_HYPERVISOR']] if ENV['BEAKER_HYPERVISOR']
+    cli = BeakerHostGenerator::CLI.new(arguments)
     FileUtils.mkdir_p('tmp') # -p ignores when dir already exists
     File.open("tmp/#{HOSTS_FILE}", 'w') do |fh|
       fh.print(cli.execute)
