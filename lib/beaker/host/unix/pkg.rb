@@ -129,8 +129,9 @@ module Unix::Pkg
         begin
           execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
             # Handles where there are multiple rubies, installs the latest one
-            if command.stderr =~ /^Ambiguous: #{name} could be (.+)$/
-              name = $1.chomp.split(' ').collect { |x|
+            if (match = /^Ambiguous: #{name} could be (.+)$/.match(command.stderr))
+              name = match[1].chomp.split(' ').collect { |x|
+                # FIXME Ruby 3.2 compatibility?
                 x =~ /-(\d[^-p]+)/
                 [x, $1]
               }.select { |x|

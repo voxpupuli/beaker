@@ -401,12 +401,10 @@ module Unix::Exec
     exec(Beaker::Command.new("touch #{self[:ssh_env_file]}"))
     # add the constructed env vars to this host
     add_env_var('PATH', '$PATH')
-    # FIXME
-    if self['platform'] =~ /openbsd-(\d)\.?(\d)-(.+)/
-      version = "#{$1}.#{$2}"
-      arch = $3
+    if self['platform'].variant == 'openbsd'
+      arch = self['platform'].arch
       arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
-      add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{version}/packages/#{arch}/")
+      add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{self['platform'].version}/packages/#{arch}/")
     elsif self['platform'].include?('solaris-10')
       add_env_var('PATH', '/opt/csw/bin')
     end
