@@ -360,6 +360,8 @@ module Beaker
           end
 
           it 'calls beaker-hostgenerator to get hosts information' do
+            old_beaker_hypervisor = ENV.delete('BEAKER_HYPERVISOR')
+
             parser.instance_variable_set(:@options, {
               :hosts_file => 'notafile.yml',
             })
@@ -381,6 +383,8 @@ module Beaker
               :parse_hosts_string,
             ).with(cli_execute_return)
             parser.parse_hosts_options
+          ensure
+            ENV['BEAKER_HYPERVISOR'] = old_beaker_hypervisor if old_beaker_hypervisor
           end
 
           it 'calls beaker-hostgenerator to get hosts information with a default hypervisor' do
