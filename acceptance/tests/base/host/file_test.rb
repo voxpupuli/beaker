@@ -21,7 +21,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       # ensure we have a user to chown to
       host.chgrp('testgroup', tmpdir)
-      assert_match(/testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output: #{stdout}")
+      assert_match(/testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output")
     end
   end
 

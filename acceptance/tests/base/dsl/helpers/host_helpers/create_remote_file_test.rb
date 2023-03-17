@@ -132,7 +132,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file_with_backups(
+      result = create_remote_file_with_backups(
         default, remote_filename, contents, { :protocol => "rsync" }
       )
 

@@ -101,8 +101,8 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on allows assertions to be used in the optional block" do
-    on hosts, %Q{echo "${RANDOM}:${RANDOM}"} do
-      assert_match(/\d+:\d+/, stdout)
+    on hosts, %Q{echo "${RANDOM}:${RANDOM}"} do |result|
+      assert_match(/\d+:\d+/, result.stdout)
     end
   end
 

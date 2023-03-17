@@ -40,9 +40,9 @@ test_name "dsl::helpers::host_helpers #run_script_on" do
     Dir.mktmpdir do |local_dir|
       local_filename, _contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
-      run_script_on default, local_filename do
-        assert_equal 0, exit_code
-        assert_equal "output\n", stdout
+      run_script_on default, local_filename do |result|
+        assert_equal 0, result.exit_code
+        assert_equal "output\n", result.stdout
       end
     end
   end
