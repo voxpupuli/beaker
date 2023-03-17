@@ -269,7 +269,7 @@ hosts.each do |host|
     local_paths.each do |path|
       search_name = path.gsub(/^.*fixtures\/module\//, '') # reduce down to the path that should match
       search_name_regex = /#{Regexp.escape(search_name)}$/
-      matched = host_paths.select{ |check| search_name_regex.match?(check) }
+      matched = host_paths.select { |check| search_name_regex.match?(check) }
       re = /((\/|\A)module(\/|\z))|((\/|\A)Gemfile(\/|\z))/
       if !path.gsub(/^.*module\//, '')&.match?(re)
         assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
