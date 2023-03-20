@@ -27,7 +27,6 @@ require 'fakefs/spec_helpers'
 require 'mocks'
 require 'helpers'
 require 'matchers'
-require 'rspec/its'
 
 RSpec.configure do |config|
   config.include FakeFS::SpecHelpers

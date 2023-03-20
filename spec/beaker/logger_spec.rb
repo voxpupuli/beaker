@@ -163,9 +163,13 @@ module Beaker
       end
 
       context 'default for' do
-        its(:destinations)  { is_expected.to include(STDOUT)  }
-        its(:color)         { is_expected.to be_nil           }
-        its(:log_level)     { is_expected.to be :verbose      }
+        it do
+          expect(subject).to have_attributes(
+            destinations: include(STDOUT),
+            color: be_nil,
+            log_level: :verbose,
+          )
+        end
       end
 
       context 'log_colors' do
@@ -291,9 +295,13 @@ module Beaker
                                               :color => true)
                                   }
 
-        its(:is_debug?) { is_expected.to be_truthy }
-        its(:is_trace?) { is_expected.to be_truthy }
-        its(:is_warn?)  { is_expected.to be_truthy }
+        it do
+          expect(subject).to have_attributes(
+            :is_debug? => be_truthy,
+            :is_trace? => be_truthy,
+            :is_warn? => be_truthy,
+          )
+        end
 
         context 'but print' do
           before do
@@ -317,10 +325,14 @@ module Beaker
                                               :color => true)
                                   }
 
-        its(:is_trace?) { is_expected.to be_falsy }
-        its(:is_debug?) { is_expected.to be_falsy }
-        its(:is_verbose?) { is_expected.to be_truthy }
-        its(:is_warn?)  { is_expected.to be_truthy }
+        it do
+          expect(subject).to have_attributes(
+            :is_trace? => be_falsy,
+            :is_debug? => be_falsy,
+            :is_verbose? => be_truthy,
+            :is_warn? => be_truthy,
+          )
+        end
 
         context 'but print' do
           before do
@@ -343,9 +355,13 @@ module Beaker
                                               :color => true)
                                   }
 
-        its(:is_trace?) { is_expected.to be_falsy }
-        its(:is_debug?) { is_expected.to be_truthy }
-        its(:is_warn?)  { is_expected.to be_truthy }
+        it do
+          expect(subject).to have_attributes(
+            :is_trace? => be_falsy,
+            :is_debug? => be_truthy,
+            :is_warn? => be_truthy,
+          )
+        end
 
         context 'successfully print' do
           before do
@@ -368,8 +384,12 @@ module Beaker
                                               :color     => true)
                                   }
 
-        its(:is_debug?) { is_expected.to be_falsy }
-        its(:is_trace?) { is_expected.to be_falsy }
+        it do
+          expect(subject).to have_attributes(
+            :is_debug? => be_falsy,
+            :is_trace? => be_falsy,
+          )
+        end
 
         context 'skip' do
           before do
