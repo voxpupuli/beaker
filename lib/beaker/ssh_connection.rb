@@ -6,7 +6,7 @@ module Beaker
   class SshConnection
     attr_accessor :logger, :ip, :vmhostname, :hostname, :ssh_connection_preference
 
-    SUPPORTED_CONNECTION_METHODS = [:ip, :vmhostname, :hostname]
+    SUPPORTED_CONNECTION_METHODS = %i[ip vmhostname hostname]
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,
@@ -103,16 +103,14 @@ module Beaker
       # Try three ways to connect to host (vmhostname, ip, hostname)
       # Try each method in turn until we succeed
       methods = @ssh_connection_preference.dup
-      while (not @ssh) && (not methods.empty?) do
-        unless instance_variable_get("@#{methods[0]}").nil?
-          if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
-          else
-            @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
-            @ssh_connection_preference.delete(methods[0])
-          end
-        else
+      while (not @ssh) && (not methods.empty?)
+        if instance_variable_get("@#{methods[0]}").nil?
           @logger.warn "Skipping #{methods[0]} method to ssh to host as its value is not set. Refer to https://github.com/puppetlabs/beaker/tree/master/docs/how_to/ssh_connection_preference.md to remove this warning"
+        elsif SUPPORTED_CONNECTION_METHODS.include?(methods[0])
+          @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
+        else
+          @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
+          @ssh_connection_preference.delete(methods[0])
         end
         methods.shift
       end

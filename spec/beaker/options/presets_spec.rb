@@ -20,7 +20,7 @@ module Beaker
       it "correctly parses the run_in_parallel array" do
         ENV['BEAKER_RUN_IN_PARALLEL'] = "install,configure"
         env = presets.env_vars
-        expect(env[:run_in_parallel]).to eq(['install', 'configure'])
+        expect(env[:run_in_parallel]).to eq(%w[install configure])
       end
 
       it "removes all empty/nil entries in env_vars" do

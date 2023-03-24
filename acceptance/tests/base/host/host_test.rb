@@ -232,7 +232,7 @@ hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some files/dirs")
   # make sure that we are clean on the test host
   host.rm_rf("module")
-  host.do_scp_to(module_fixture, ".", { :ignore => ['tests', 'Gemfile'] })
+  host.do_scp_to(module_fixture, ".", { :ignore => %w[tests Gemfile] })
   Dir.mktmpdir do |tmp_dir|
     # grab copy from host
     host.do_scp_from("module", tmp_dir, {})
@@ -262,7 +262,7 @@ hosts.each do |host|
   logger.debug("can recursively copy a module over, ignoring some sub-files/sub-dirs that also appear in the absolute path")
   # make sure that we are clean on the test host
   host.rm_rf("module")
-  host.do_scp_to(module_fixture, ".", { :ignore => ['module', 'Gemfile'] })
+  host.do_scp_to(module_fixture, ".", { :ignore => %w[module Gemfile] })
   Dir.mktmpdir do |tmp_dir|
     # grab copy from host
     host.do_scp_from("module", tmp_dir, {})

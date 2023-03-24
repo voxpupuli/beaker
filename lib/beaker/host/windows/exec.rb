@@ -52,7 +52,7 @@ module Windows::Exec
   # @return [Boolean] true of ping successful, overwise false
   def ping target, attempts = 5
     try = 0
-    while try < attempts do
+    while try < attempts
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
       return true if result.exit_code == 0
 
@@ -97,7 +97,7 @@ module Windows::Exec
   # @return [String] Command string as needed for this host
   def prepend_commands(_command = '', user_pc = nil, opts = {})
     cygwin_prefix = (self.is_cygwin? and opts[:cmd_exe]) ? 'cmd.exe /c' : ''
-    spacing = (user_pc && !cygwin_prefix.empty?) ? ' ' : ''
+    spacing = user_pc && !cygwin_prefix.empty? ? ' ' : ''
     "#{cygwin_prefix}#{spacing}#{user_pc}"
   end
 

@@ -1,12 +1,12 @@
-['host', 'command_factory'].each do |lib|
+%w[host command_factory].each do |lib|
   require "beaker/#{lib}"
 end
 
 module FreeBSD
   class Host < Unix::Host
-    [
-      'exec',
-      'pkg',
+    %w[
+      exec
+      pkg
     ].each do |lib|
       require "beaker/host/freebsd/#{lib}"
     end

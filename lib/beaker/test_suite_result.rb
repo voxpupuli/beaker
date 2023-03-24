@@ -1,5 +1,5 @@
 require 'fileutils'
-['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
+%w[test_case logger test_suite logger_junit].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -152,7 +152,7 @@ module Beaker
     def persist_test_results(filepath)
       return if filepath.empty?
 
-      results = @test_cases.select { |c| [:fail, :error].include? c.test_status }.map(&:path)
+      results = @test_cases.select { |c| %i[fail error].include? c.test_status }.map(&:path)
       File.open(filepath, 'w') { |file| file.puts JSON.dump(results) }
     end
 
@@ -175,12 +175,12 @@ module Beaker
       begin
         LoggerJunit.write_xml(xml_file, stylesheet) do |_doc, suites|
           meta_info = suites.add_element(REXML::Element.new('meta_test_info'))
-          unless file_to_link.nil?
-            time_sort ? meta_info.add_attribute('page_active', 'performance') : meta_info.add_attribute('page_active', 'execution')
-            meta_info.add_attribute('link_url', file_to_link)
-          else
+          if file_to_link.nil?
             meta_info.add_attribute('page_active', 'no-links')
             meta_info.add_attribute('link_url', '')
+          else
+            time_sort ? meta_info.add_attribute('page_active', 'performance') : meta_info.add_attribute('page_active', 'execution')
+            meta_info.add_attribute('link_url', file_to_link)
           end
 
           suite = suites.add_element(REXML::Element.new('testsuite'))

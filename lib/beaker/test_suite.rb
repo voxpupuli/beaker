@@ -1,5 +1,5 @@
 require 'fileutils'
-['test_case', 'logger', 'test_suite_result'].each do |lib|
+%w[test_case logger test_suite_result].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -144,7 +144,7 @@ module Beaker
 
       base_dir = log_dir
       link_dir = ''
-      while File.dirname(base_dir) != '.' do
+      while File.dirname(base_dir) != '.'
         link_dir = link_dir == '' ? File.basename(base_dir) : File.join(File.basename(base_dir), link_dir)
         base_dir = File.dirname(base_dir)
       end

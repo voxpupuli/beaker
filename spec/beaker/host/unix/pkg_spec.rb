@@ -58,7 +58,7 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      ['centos', 'redhat'].each do |platform|
+      %w[centos redhat].each do |platform|
         it "checks correctly on #{platform}" do
           @opts = { 'platform' => "#{platform}-is-me" }
           pkg = "#{platform}_package"
@@ -311,7 +311,7 @@ module Beaker
 
       it 'Centos & EL: uses yum' do
         package_file = 'testing_789.yay'
-        ['centos', 'redhat'].each do |platform|
+        %w[centos redhat].each do |platform|
           @platform = platform
           expect(instance).to receive(:execute).with(/^yum.*#{package_file}$/)
           instance.install_local_package(package_file)
@@ -320,7 +320,7 @@ module Beaker
 
       it 'Debian, Ubuntu, Cumulus: uses dpkg' do
         package_file = 'testing_012.yay'
-        ['debian', 'ubuntu', 'cumulus'].each do |platform|
+        %w[debian ubuntu cumulus].each do |platform|
           @platform = platform
           expect(instance).to receive(:execute).with(/^dpkg.*#{package_file}$/)
           expect(instance).to receive(:execute).with('apt-get update')

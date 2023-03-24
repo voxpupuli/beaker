@@ -27,7 +27,7 @@ module Beaker
             http.use_ssl = (url.scheme == 'https')
             http.verify_mode = (OpenSSL::SSL::VERIFY_NONE)
             response = http.start { |http| http.head(url.request_uri) }
-            if (['301', '302'].include? response.code) && limit > 0
+            if (%w[301 302].include? response.code) && limit > 0
               logger.debug("#{__method__} following #{response.code} to #{response['location']}")
               link_exists?(response['location'], limit - 1)
             else

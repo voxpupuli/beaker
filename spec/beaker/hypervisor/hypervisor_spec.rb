@@ -14,27 +14,27 @@ module Beaker
 
       it "sets ssh connection preference if connection_preference method is not overwritten" do
         hypervisor.create('none', hosts, make_opts)
-        expect(hosts[0][:ssh_connection_preference]).to eq([:ip, :vmhostname, :hostname])
+        expect(hosts[0][:ssh_connection_preference]).to eq(%i[ip vmhostname hostname])
       end
 
       it "concats overriding connection_preference array with the default connection_preference" do
-        allow(hypervisor).to receive(:connection_preference).and_return([:my, :invalid, :method_name])
+        allow(hypervisor).to receive(:connection_preference).and_return(%i[my invalid method_name])
         hypervisor.set_ssh_connection_preference(hosts, hypervisor)
-        expect(hosts[0][:ssh_connection_preference]).to eq([:my, :invalid, :method_name, :ip, :vmhostname, :hostname])
+        expect(hosts[0][:ssh_connection_preference]).to eq(%i[my invalid method_name ip vmhostname hostname])
       end
 
       it "removes unique elements from concated array while preserving order of overriding methods" do
-        allow(hypervisor).to receive(:connection_preference).and_return([:my, :ip, :vmhostname, :method_name])
+        allow(hypervisor).to receive(:connection_preference).and_return(%i[my ip vmhostname method_name])
         hypervisor.set_ssh_connection_preference(hosts, hypervisor)
-        expect(hosts[0][:ssh_connection_preference]).to eq([:my, :ip, :vmhostname, :method_name, :hostname])
+        expect(hosts[0][:ssh_connection_preference]).to eq(%i[my ip vmhostname method_name hostname])
       end
 
       it "gives highest precedence to preference specified in host file followed by hypervisor" do
-        hosts[0].options[:ssh_preference] = [:set, :in, :hostfile]
+        hosts[0].options[:ssh_preference] = %i[set in hostfile]
         hypervisor.create('none', hosts, make_opts)
-        allow(hypervisor).to receive(:connection_preference).and_return([:hypervisor, :pref])
+        allow(hypervisor).to receive(:connection_preference).and_return(%i[hypervisor pref])
         hypervisor.set_ssh_connection_preference(hosts, hypervisor)
-        expect(hosts[0][:ssh_connection_preference]).to eq([:set, :in, :hostfile, :hypervisor, :pref, :ip, :vmhostname, :hostname])
+        expect(hosts[0][:ssh_connection_preference]).to eq(%i[set in hostfile hypervisor pref ip vmhostname hostname])
       end
     end
 

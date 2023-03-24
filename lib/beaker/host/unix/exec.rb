@@ -174,7 +174,7 @@ module Unix::Exec
   # @return [Boolean] true of ping successful, overwise false
   def ping target, attempts = 5
     try = 0
-    while try < attempts do
+    while try < attempts
       result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
       return true if result.exit_code == 0
 
@@ -397,7 +397,7 @@ module Unix::Exec
     add_env_var('PATH', '$PATH')
     if self['platform'].variant == 'openbsd'
       arch = self['platform'].arch
-      arch = 'amd64' if ['x64', 'x86_64'].include?(arch)
+      arch = 'amd64' if %w[x64 x86_64].include?(arch)
       add_env_var('PKG_PATH', "http://ftp.openbsd.org/pub/OpenBSD/#{self['platform'].version}/packages/#{arch}/")
     elsif self['platform'].include?('solaris-10')
       add_env_var('PATH', '/opt/csw/bin')

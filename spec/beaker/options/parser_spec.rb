@@ -31,12 +31,12 @@ module Beaker
       describe 'split_arg' do
         it "can split comma separated list into an array" do
           arg = "file1,file2,file3"
-          expect(parser.split_arg(arg)).to be === ["file1", "file2", "file3"]
+          expect(parser.split_arg(arg)).to be === %w[file1 file2 file3]
         end
 
         it "can use an existing Array as an acceptable argument" do
-          arg = ["file1", "file2", "file3"]
-          expect(parser.split_arg(arg)).to be === ["file1", "file2", "file3"]
+          arg = %w[file1 file2 file3]
+          expect(parser.split_arg(arg)).to be === %w[file1 file2 file3]
         end
 
         it "can generate an array from a single value" do
@@ -353,7 +353,7 @@ module Beaker
             allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
             ).and_return(test_value)
-            val1, _ = parser.parse_hosts_options
+            val1, = parser.parse_hosts_options
             expect(val1).to be === test_value
           end
         end
@@ -482,13 +482,13 @@ module Beaker
       end
 
       context "set_default_host!" do
-        let(:roles) { @roles || [["master", "agent", "database"], ["agent"]] }
+        let(:roles) { @roles || [%w[master agent database], ["agent"]] }
         let(:node1) { { :node1 => { :roles => roles[0] } } }
         let(:node2) { { :node2 => { :roles => roles[1] } } }
         let(:hosts) { node1.merge(node2) }
 
         it "does nothing if the default host is already set" do
-          @roles = [["master"], ["agent", "default"]]
+          @roles = [["master"], %w[agent default]]
           parser.set_default_host!(hosts)
           expect(hosts[:node1][:roles].include?('default')).to be === false
           expect(hosts[:node2][:roles].include?('default')).to be === true
@@ -502,19 +502,19 @@ module Beaker
         end
 
         it "makes a single node default" do
-          @roles = [["master", "database", "dashboard", "agent"]]
+          @roles = [%w[master database dashboard agent]]
           parser.set_default_host!(node1)
           expect(hosts[:node1][:roles].include?('default')).to be === true
         end
 
         it "makes a single non-master node default" do
-          @roles = [["database", "dashboard", "agent"]]
+          @roles = [%w[database dashboard agent]]
           parser.set_default_host!(node1)
           expect(hosts[:node1][:roles].include?('default')).to be === true
         end
 
         it "raises an error if two nodes are defined as default" do
-          @roles = [["master", "default"], ["default"]]
+          @roles = [%w[master default], ["default"]]
           expect { parser.set_default_host!(hosts) }.to raise_error(ArgumentError)
         end
       end
@@ -524,12 +524,12 @@ module Beaker
           Beaker::Options::OptionsHash.new.merge({
                                                    'HOSTS' => {
                                                      :master => {
-                                                       :roles => ["master", "agent", "arbitrary_role"],
+                                                       :roles => %w[master agent arbitrary_role],
                                                        :platform => 'el-7-x86_64',
                                                        :user => 'root',
                                                      },
                                                      :agent => {
-                                                       :roles => ["agent", "default", "other_abitrary_role"],
+                                                       :roles => %w[agent default other_abitrary_role],
                                                        :platform => 'el-7-x86_64',
                                                        :user => 'root',
                                                      },
@@ -613,9 +613,9 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_test_tags!
-          expect(options[:test_tag_and]).to be === ['can', 'tommies', 'potatoes', 'plant']
-          expect(options[:test_tag_or]).to be === ['johnny', 'wordsmith', 'zebra']
-          expect(options[:test_tag_exclude]).to be === ['joey', 'long_running', 'pants']
+          expect(options[:test_tag_and]).to be === %w[can tommies potatoes plant]
+          expect(options[:test_tag_or]).to be === %w[johnny wordsmith zebra]
+          expect(options[:test_tag_exclude]).to be === %w[joey long_running pants]
         end
 
         it 'returns empty arrays for empty strings' do
@@ -637,9 +637,9 @@ module Beaker
           parser.instance_variable_set(:@options, options)
 
           parser.normalize_test_tags!
-          expect(options[:test_tag_and]).to be === ['jerry_and_tom', 'parka']
-          expect(options[:test_tag_or]).to be === ['clearly_they', 'neva']
-          expect(options[:test_tag_exclude]).to be === ['leet_speak', 'poland']
+          expect(options[:test_tag_and]).to be === %w[jerry_and_tom parka]
+          expect(options[:test_tag_or]).to be === %w[clearly_they neva]
+          expect(options[:test_tag_exclude]).to be === %w[leet_speak poland]
         end
       end
 

@@ -1,4 +1,4 @@
-['command', "dsl"].each do |lib|
+%w[command dsl].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -10,21 +10,21 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    RHEL8_PACKAGES = ['curl', 'chrony']
+    RHEL8_PACKAGES = %w[curl chrony]
     RHEL9_PACKAGES = ['chrony']
-    FEDORA_PACKAGES = ['curl', 'chrony']
-    UNIX_PACKAGES = ['curl', 'ntpdate']
+    FEDORA_PACKAGES = %w[curl chrony]
+    UNIX_PACKAGES = %w[curl ntpdate]
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
-    ARCHLINUX_PACKAGES = ['curl', 'ntp', 'net-tools', 'openssh']
+    ARCHLINUX_PACKAGES = %w[curl ntp net-tools openssh]
     WINDOWS_PACKAGES = ['curl']
     PSWINDOWS_PACKAGES = []
     SLES10_PACKAGES = ['curl']
-    SLES_PACKAGES = ['curl', 'ntp']
-    DEBIAN_PACKAGES = ['curl', 'ntpdate', 'lsb-release', 'apt-transport-https']
-    CUMULUS_PACKAGES = ['curl', 'ntpdate']
-    SOLARIS10_PACKAGES = ['CSWcurl', 'CSWntp', 'wget']
-    SOLARIS11_PACKAGES = ['curl', 'ntp']
+    SLES_PACKAGES = %w[curl ntp]
+    DEBIAN_PACKAGES = %w[curl ntpdate lsb-release apt-transport-https]
+    CUMULUS_PACKAGES = %w[curl ntpdate]
+    SOLARIS10_PACKAGES = %w[CSWcurl CSWntp wget]
+    SOLARIS11_PACKAGES = %w[curl ntp]
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -61,7 +61,7 @@ module Beaker
           end
           success = false
           try = 0
-          until try >= TRIES do
+          until try >= TRIES
             try += 1
             if host.exec(Command.new(ntp_command), :accept_all_exit_codes => true).exit_code == 0
               success = true

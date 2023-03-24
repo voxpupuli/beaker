@@ -99,7 +99,7 @@ module Beaker
       #     end
       #
       def not_controller(host)
-        controllers = ['dashboard', 'database', 'master', 'console']
+        controllers = %w[dashboard database master console]
         matched_roles = host['roles'].select { |v| controllers.include?(v) }
         matched_roles.length == 0
       end
@@ -133,7 +133,7 @@ module Beaker
       #
       # @return [Boolean] whether or not a host is AIO-capable
       def aio_version?(host)
-        [:pe_ver, :version].each do |key|
+        %i[pe_ver version].each do |key|
           version = host[key]
           return !version_is_less(version, '4.0') if version && !version.empty?
         end

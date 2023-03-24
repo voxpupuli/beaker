@@ -294,7 +294,7 @@ module Beaker
         expect(host.touch('touched_file')).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
       end
 
-      ['centos', 'redhat'].each do |platform|
+      %w[centos redhat].each do |platform|
         it "generates the right absolute command for a #{platform} host" do
           @platform = platform
           expect(host.touch('touched_file')).to be == "/bin/touch touched_file"
@@ -380,7 +380,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = [source_path, target_path, { :ignore => ['tests', 'tests2'] }]
+          args = [source_path, target_path, { :ignore => %w[tests tests2] }]
 
           expect(logger).to receive(:trace)
           expect(host).to receive(:mkdir_p).exactly(0).times
@@ -508,7 +508,7 @@ module Beaker
           conn = double(:connection)
           @options = { :logger => logger }
           host.instance_variable_set :@connection, conn
-          args = ['tmp', 'target', { :ignore => ['tests', 'tests2'] }]
+          args = ['tmp', 'target', { :ignore => %w[tests tests2] }]
 
           expect(logger).to receive(:trace)
           expect(host).to receive(:mkdir_p).exactly(0).times
@@ -767,7 +767,7 @@ module Beaker
         expect(host.fips_mode?).to be false
       end
 
-      platforms = ['el-7', 'el-8', 'centos']
+      platforms = %w[el-7 el-8 centos]
 
       platforms.each do |platform|
         context "on #{platform}" do

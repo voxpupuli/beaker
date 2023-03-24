@@ -1,4 +1,4 @@
-['host', 'dsl'].each do |lib|
+%w[host dsl].each do |lib|
   require "beaker/#{lib}"
 end
 

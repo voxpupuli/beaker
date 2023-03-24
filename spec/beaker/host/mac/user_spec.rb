@@ -46,7 +46,7 @@ describe MacUserTest do
     it 'returns user names list correctly' do
       result.stdout = dscacheutil_list
       expect(subject).to receive(:execute).and_yield(result)
-      expect(subject.user_list).to be === ['puppet1', 'puppet2']
+      expect(subject.user_list).to be === %w[puppet1 puppet2]
     end
 
     it 'yields correctly with the result object' do

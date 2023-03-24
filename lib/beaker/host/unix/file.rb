@@ -114,7 +114,7 @@ module Unix::File
 
     case variant
     when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
-      variant = 'el' if ['centos', 'redhat'].include?(variant)
+      variant = 'el' if %w[centos redhat].include?(variant)
 
       variant = 'redhatfips' if self['packaging_platform']&.include?('redhatfips')
 
@@ -126,7 +126,7 @@ module Unix::File
         variant = 'cisco-wrlinux'
         version = '7'
       end
-      fedora_prefix = ((variant == 'fedora') ? 'f' : '')
+      fedora_prefix = (variant == 'fedora' ? 'f' : '')
 
       pattern = "%s-%s%s-%s.repo"
 

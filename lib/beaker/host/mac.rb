@@ -1,10 +1,10 @@
-['host', 'command_factory', 'command', 'options'].each do |lib|
+%w[host command_factory command options].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Mac
   class Host < Unix::Host
-    ['exec', 'user', 'group', 'pkg'].each do |lib|
+    %w[exec user group pkg].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
 

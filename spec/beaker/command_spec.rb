@@ -16,7 +16,7 @@ module Beaker
 
     it 'creates a new Command object' do
       @command = '/usr/bin/blah'
-      @args    = ['to', 'the', 'baz']
+      @args    = %w[to the baz]
       @options = { :foo => 'bar' }
 
       expect(cmd.options).to be == @options
@@ -30,7 +30,7 @@ module Beaker
     describe '#:prepend_cmds' do
       it 'can prepend commands' do
         @command = '/usr/bin/blah'
-        @args    = ['to', 'the', 'baz']
+        @args    = %w[to the baz]
         @options = { :foo => 'bar' }
         allow(host).to receive(:prepend_commands).and_return('aloha!')
         allow(host).to receive(:append_commands).and_return('')
@@ -40,7 +40,7 @@ module Beaker
 
       it 'can handle no prepend_cmds' do
         @command = '/usr/bin/blah'
-        @args    = ['to', 'the', 'baz']
+        @args    = %w[to the baz]
         @options = { :foo => 'bar' }
         allow(host).to receive(:prepend_commands).and_return('')
         allow(host).to receive(:append_commands).and_return('')
@@ -52,7 +52,7 @@ module Beaker
     describe '#:append_commands' do
       it 'can append commands' do
         @command = '/usr/bin/blah'
-        @args    = ['to', 'the', 'baz']
+        @args    = %w[to the baz]
         @options = { :foo => 'bar' }
         allow(host).to receive(:prepend_commands).and_return('aloha!')
         allow(host).to receive(:append_commands).and_return('moo cow')
@@ -62,7 +62,7 @@ module Beaker
 
       it 'can handle no append_cmds' do
         @command = '/usr/bin/blah'
-        @args    = ['to', 'the', 'baz']
+        @args    = %w[to the baz]
         @options = { :foo => 'bar' }
         allow(host).to receive(:prepend_commands).and_return('')
         allow(host).to receive(:append_commands).and_return('')

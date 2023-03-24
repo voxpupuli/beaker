@@ -29,7 +29,7 @@ module Beaker
         end
 
         it 'returns true if opts is nil and a matching mode and a non matching mode is specified in options' do
-          expect(subject.run_in_parallel?(nil, { :run_in_parallel => ['configure', 'install'] }, 'install')).to be === true
+          expect(subject.run_in_parallel?(nil, { :run_in_parallel => %w[configure install] }, 'install')).to be === true
         end
 
         it 'returns false if opts is nil and no mode is specified in options' do

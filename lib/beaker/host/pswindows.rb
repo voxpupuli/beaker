@@ -4,7 +4,7 @@ end
 
 module PSWindows
   class Host < Windows::Host
-    ['user', 'group', 'exec', 'pkg', 'file'].each do |lib|
+    %w[user group exec pkg file].each do |lib|
       require "beaker/host/pswindows/#{lib}"
     end
 

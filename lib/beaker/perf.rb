@@ -71,7 +71,7 @@ module Beaker
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
       if PERF_SUPPORTED_PLATFORMS.match?(host['platform']) # All flavours of Linux
-        host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"), :acceptable_exit_codes => [0, 1, 2]) if not @options[:collect_perf_data]&.include?('aggressive')
+        host.exec(Command.new("sar -A -s #{perf_start.strftime('%H:%M:%S')} -e #{perf_end.strftime('%H:%M:%S')}"), :acceptable_exit_codes => [0, 1, 2]) if not @options[:collect_perf_data]&.include?('aggressive')
         if (defined? @options[:graphite_server] and not @options[:graphite_server].nil?) and
            (defined? @options[:graphite_perf_data] and not @options[:graphite_perf_data].nil?)
           export_perf_data_to_graphite(host)

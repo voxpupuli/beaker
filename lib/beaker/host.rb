@@ -6,7 +6,7 @@ require 'rsync'
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
 
-['command', 'ssh_connection', 'local_connection'].each do |lib|
+%w[command ssh_connection local_connection].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -418,7 +418,7 @@ module Beaker
         dir_source = Dir.glob("#{source}/**/*").reject do |f|
           ignore_re&.match?(f.gsub(/\A#{Regexp.escape(source)}/, '')) # only match against subdirs, not full path
         end
-        @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(", ")}]"
+        @logger.trace "After rejecting ignored files/dirs, going to scp [#{dir_source.join(', ')}]"
 
         # create necessary directory structure on host
         # run this quietly (no STDOUT)
@@ -549,15 +549,15 @@ module Beaker
     end
   end
 
-  [
-    'unix',
-    'aix',
-    'mac',
-    'freebsd',
-    'windows',
-    'pswindows',
-    'eos',
-    'cisco',
+  %w[
+    unix
+    aix
+    mac
+    freebsd
+    windows
+    pswindows
+    eos
+    cisco
   ].each do |lib|
     require "beaker/host/#{lib}"
   end

@@ -18,9 +18,7 @@ module Beaker
         "me"
       end
 
-      def logger
-        @logger
-      end
+      attr_reader :logger
     end
 
     let(:opts)     { @opts || {} }
@@ -35,7 +33,7 @@ module Beaker
     let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
-      ['centos', 'redhat'].each do |platform|
+      %w[centos redhat].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
           expect(instance.repo_type).to be === 'rpm'
@@ -56,7 +54,7 @@ module Beaker
     end
 
     describe '#package_config_dir' do
-      ['centos', 'redhat'].each do |platform|
+      %w[centos redhat].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
           expect(instance.package_config_dir).to be === '/etc/yum.repos.d/'
@@ -87,7 +85,7 @@ module Beaker
     end
 
     describe '#repo_filename' do
-      ['centos', 'redhat'].each do |platform|
+      %w[centos redhat].each do |platform|
         it "sets the el portion correctly for '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
           allow(instance).to receive(:is_pe?).and_return(false)

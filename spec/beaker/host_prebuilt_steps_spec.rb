@@ -17,7 +17,7 @@ describe Beaker do
   let(:hosts) do
     hosts = make_hosts({ :stdout => stdout, :platform => platform })
     hosts[0][:roles] = ['agent']
-    hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+    hosts[1][:roles] = %w[master dashboard agent database]
     hosts[2][:roles] = ['agent']
     hosts
   end
@@ -85,7 +85,7 @@ describe Beaker do
     "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi",
   ], true
 
-  ['debian', 'ubuntu', 'cumulus'].each do |deb_like|
+  %w[debian ubuntu cumulus].each do |deb_like|
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\"",
@@ -404,7 +404,7 @@ describe Beaker do
       end
     end
 
-    ['centos', 'redhat'].each do |platform|
+    %w[centos redhat].each do |platform|
       context "on platform '#{platform}'" do
         let(:host) do
           make_host('name', {
@@ -483,7 +483,7 @@ describe Beaker do
       subject.package_proxy(host, options.merge({ 'package_proxy' => proxyurl }))
     end
 
-    ['centos', 'redhat'].each do |platform|
+    %w[centos redhat].each do |platform|
       it "can set proxy config on a '#{platform}' host" do
         host = make_host('name', { :platform => platform })
 

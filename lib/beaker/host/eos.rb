@@ -1,4 +1,4 @@
-['host', 'command_factory'].each do |lib|
+%w[host command_factory].each do |lib|
   require "beaker/#{lib}"
 end
 
