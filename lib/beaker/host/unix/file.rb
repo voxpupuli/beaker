@@ -126,7 +126,7 @@ module Unix::File
         variant = 'cisco-wrlinux'
         version = '7'
       end
-      fedora_prefix = ((variant == 'fedora') ? 'f' : '')
+      fedora_prefix = (variant == 'fedora' ? 'f' : '')
 
       pattern = "%s-%s%s-%s.repo"
 
