@@ -128,8 +128,7 @@ module Beaker
 
           myhosts = host_handler.run_block_on(hosts, nil, { :run_in_parallel => true }) do |host|
             # kind of hacky workaround to remove logger which contains a singleton method injected by rspec
-
-            host.instance_eval("remove_instance_variable(:@logger)", __FILE__, __LINE__)
+            host.send(:remove_instance_variable, :@logger)
             host
           end
 
