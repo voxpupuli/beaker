@@ -1,4 +1,4 @@
-ruby_version, ruby_source = ENV['RUBY_VER'], "job parameter"
+ruby_version, ruby_source = ENV.fetch('RUBY_VER', nil), "job parameter"
 unless ruby_version
   ruby_version = "2.4.1"
   ruby_source = "default"

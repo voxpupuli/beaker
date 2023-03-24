@@ -224,7 +224,7 @@ module Beaker
         subcommand_options_file = Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS
         {
           "project" => ".beaker.yml",
-          "homedir" => "#{ENV['HOME']}/#{subcommand_options_file}",
+          "homedir" => "#{ENV.fetch('HOME', nil)}/#{subcommand_options_file}",
           "subcommand" => subcommand_options_file,
         }.each_pair do |src, path|
           opts = if src == "project"

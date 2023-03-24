@@ -61,7 +61,7 @@ module HarnessOptions
 end
 
 def hosts_file_env
-  ENV['BEAKER_HOSTS']
+  ENV.fetch('BEAKER_HOSTS', nil)
 end
 
 def hosts_opt(use_preserved_hosts = false)
@@ -110,7 +110,7 @@ def beaker_test(mode = :base, options = {})
     end
   end
 
-  tests = ENV['TESTS'] || ENV['TEST']
+  tests = ENV['TESTS'] || ENV.fetch('TEST', nil)
   tests_opt = ""
   tests_opt = "--tests=#{tests}" if tests
 

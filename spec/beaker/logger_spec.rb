@@ -171,7 +171,7 @@ module Beaker
       end
 
       context 'log_colors' do
-        original_build_number = ENV['BUILD_NUMBER']
+        original_build_number = ENV.fetch('BUILD_NUMBER', nil)
 
         before do
           ENV['BUILD_NUMBER'] = nil

@@ -89,7 +89,7 @@ module Beaker
         if File.exist?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
           @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests')
         end
-        @tests = ENV['TESTS'] || ENV['TEST'] if !@tests
+        @tests = ENV['TESTS'] || ENV.fetch('TEST', nil) if !@tests
       end
 
       #

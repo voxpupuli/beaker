@@ -195,7 +195,7 @@ module Beaker
             allow(parser).to receive(:parse_hosts_options).and_return(host_file)
 
             allow(SubcommandOptionsParser).to receive(:parse_options_file).with(".beaker.yml").and_return(project_file)
-            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).with(anything, "#{ENV['HOME']}/.beaker/subcommand_options.yaml").and_return(homedir_file)
+            allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).with(anything, "#{ENV.fetch('HOME', nil)}/.beaker/subcommand_options.yaml").and_return(homedir_file)
             allow(SubcommandOptionsParser).to receive(:parse_subcommand_options).with(anything, Pathname(".beaker/subcommand_options.yaml")).and_return(subcommand_file)
           end
 
@@ -319,7 +319,7 @@ module Beaker
           type      = 'git'
           log_level = 'debug'
 
-          old_build_url    = ENV["BUILD_URL"]
+          old_build_url    = ENV.fetch("BUILD_URL", nil)
           ENV["BUILD_URL"] = build_url
 
           args   = ["-h", hosts_path, "--log-level", log_level, "--type", type, "--install", "PUPPET/1.0,HIERA/hello"]
@@ -393,7 +393,7 @@ module Beaker
           end
 
           it 'calls beaker-hostgenerator to get hosts information with a default hypervisor' do
-            old_beaker_hypervisor = ENV['BEAKER_HYPERVISOR']
+            old_beaker_hypervisor = ENV.fetch('BEAKER_HYPERVISOR', nil)
             begin
               ENV['BEAKER_HYPERVISOR'] = 'docker'
 

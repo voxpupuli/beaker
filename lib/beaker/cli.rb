@@ -272,8 +272,8 @@ module Beaker
     def print_env_vars_affecting_beaker(log_level)
       non_beaker_env_vars = ['BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
       env_var_map = non_beaker_env_vars.each_with_object({}) do |possibly_set_vars, memo|
-        set_var = Array(possibly_set_vars).detect { |possible_var| ENV[possible_var] }
-        memo[set_var] = ENV[set_var] if set_var
+        set_var = Array(possibly_set_vars).detect { |possible_var| ENV.fetch(possible_var, nil) }
+        memo[set_var] = ENV.fetch(set_var, nil) if set_var
       end
 
       env_var_map = env_var_map.merge(Beaker::Options::Presets.new.env_vars)
