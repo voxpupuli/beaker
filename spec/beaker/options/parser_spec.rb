@@ -353,7 +353,7 @@ module Beaker
             allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
             ).and_return(test_value)
-            val1, _ = parser.parse_hosts_options
+            val1, = parser.parse_hosts_options
             expect(val1).to be === test_value
           end
         end
