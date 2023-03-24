@@ -390,7 +390,7 @@ module Beaker
     # @note since this uses 'mkdir -p', log_prefix can be a number of nested directories
     #
     # @return [String] the path of the dated log folder generated
-    def Logger.generate_dated_log_folder(base_dir, log_prefix, timestamp)
+    def self.generate_dated_log_folder(base_dir, log_prefix, timestamp)
       log_dir = File.join(base_dir, log_prefix, timestamp.strftime("%F_%H_%M_%S"))
       FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
       log_dir
@@ -399,7 +399,7 @@ module Beaker
     # Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/.
     # @param [String] text The string to remove color codes from
     # @return [String] The text without color codes
-    def Logger.strip_color_codes(text)
+    def self.strip_color_codes(text)
       text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
     end
 
