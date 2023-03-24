@@ -15,8 +15,8 @@ module Beaker
       end
 
       it 'creates a new Perf object' do
-        hosts = Array.new
-        options = Hash.new
+        hosts = []
+        options = {}
         options[:log_level] = :debug
         my_logger = Beaker::Logger.new(options)
         options[:logger] = my_logger

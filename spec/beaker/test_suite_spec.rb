@@ -12,7 +12,7 @@ module Beaker
       let(:sh_test)  { File.expand_path(test_dir + '/my_shell_file.sh')   }
 
       it 'fails without test files' do
-        expect { described_class.new('name', 'hosts', Hash.new, Time.now, :stop_on_error) }.to raise_error
+        expect { described_class.new('name', 'hosts', {}, Time.now, :stop_on_error) }.to raise_error
       end
 
       it 'includes specific files as test file when explicitly passed' do

@@ -128,8 +128,8 @@ module Beaker
   class PuppetCommand < Command
     def initialize *args
       command = "puppet #{args.shift}"
-      opts = args.last.is_a?(Hash) ? args.pop : Hash.new
-      opts['ENV'] ||= Hash.new
+      opts = args.last.is_a?(Hash) ? args.pop : {}
+      opts['ENV'] ||= {}
       opts[:cmdexe] = true
       super(command, args, opts)
     end
@@ -162,7 +162,7 @@ module Beaker
         command << " > #{temp_file} && mv #{temp_file} #{filename} && rm -f #{temp_file}"
       end
       args = []
-      opts['ENV'] ||= Hash.new
+      opts['ENV'] ||= {}
       super(command, args, opts)
     end
   end
