@@ -88,7 +88,7 @@ module Beaker
 
       average_test_time = elapsed_time / test_count
 
-      summary_logger.notify %Q[
+      summary_logger.notify %[
 
               - Test Case Summary for suite '#{@name}' -
        Total Suite Time: %.2f seconds

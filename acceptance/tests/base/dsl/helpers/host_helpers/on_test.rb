@@ -8,7 +8,7 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on makes command output available via `.stdout` on success" do
-    output = on(default, %Q{echo "echo via on"}).stdout
+    output = on(default, %{echo "echo via on"}).stdout
     assert_equal "echo via on\n", output
   end
 
@@ -18,7 +18,7 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on makes exit status available via `.exit_code`" do
-    status = on(default, %Q{echo "echo via on"}).exit_code
+    status = on(default, %{echo "echo via on"}).exit_code
     assert_equal 0, status
   end
 
@@ -32,7 +32,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
   step "#on with :acceptable_exit_codes will fail for other exit codes" do
     assert_raises(Beaker::Host::CommandFailure) do
-      on default, %Q{echo "echo via on"}, :acceptable_exit_codes => [127]
+      on default, %{echo "echo via on"}, :acceptable_exit_codes => [127]
     end
   end
 
@@ -47,7 +47,7 @@ test_name "dsl::helpers::host_helpers #on" do
     # Run a command which is (basically) guaranteed to have distinct output
     # on every host, and only requires bash to be present to run on any of
     # our platforms.
-    results = on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
+    results = on hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
 
     # assert that we got results back for every host
     assert_equal hosts.size, results.size
@@ -66,7 +66,7 @@ test_name "dsl::helpers::host_helpers #on" do
     # Run a command which is (basically) guaranteed to have distinct output
     # on every host, and only requires bash to be present to run on any of
     # our platforms.
-    results = on :agent, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
+    results = on :agent, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
 
     # assert that we got results back for every host
     assert_equal hosts.size, results.size
@@ -85,7 +85,7 @@ test_name "dsl::helpers::host_helpers #on" do
     # Run a command which is (basically) guaranteed to have distinct output
     # on every host, and only requires bash to be present to run on any of
     # our platforms.
-    results = on "agent", %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
+    results = on "agent", %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}
 
     # assert that we got results back for every host
     assert_equal hosts.size, results.size
@@ -101,7 +101,7 @@ test_name "dsl::helpers::host_helpers #on" do
   end
 
   step "#on allows assertions to be used in the optional block" do
-    on hosts, %Q{echo "${RANDOM}:${RANDOM}"} do |result|
+    on hosts, %{echo "${RANDOM}:${RANDOM}"} do |result|
       assert_match(/\d+:\d+/, result.stdout)
     end
   end
@@ -111,7 +111,7 @@ test_name "dsl::helpers::host_helpers #on" do
     confine :except, :hypervisor => 'docker'
 
     parent_pid = Process.pid
-    results = on(hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
+    results = on(hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
       assert(Process.pid != parent_pid)
     }
 
@@ -136,7 +136,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     tmp = nil
     assert_raises NoMethodError do
-      on(hosts, %Q{echo "blah"}, :run_in_parallel => true) {
+      on(hosts, %{echo "blah"}, :run_in_parallel => true) {
         sleep(1)
         tmp.blah
       }

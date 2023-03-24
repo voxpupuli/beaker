@@ -40,7 +40,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
       remote_tmpdir = default.tmpdir()
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       on hosts, "mkdir -p #{remote_tmpdir}"
-      on hosts, %Q{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
+      on hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}" > #{remote_filename}}
 
       scp_from hosts, remote_filename, local_dir
       remote_contents = on(hosts.last, "cat #{remote_filename}").stdout

@@ -8,7 +8,7 @@ test_name "dsl::helpers::host_helpers #shell" do
   end
 
   step "#shell makes command output available via `.stdout` on success" do
-    output = shell(%Q{echo "echo via on"}).stdout
+    output = shell(%{echo "echo via on"}).stdout
     assert_equal "echo via on\n", output
   end
 
@@ -18,7 +18,7 @@ test_name "dsl::helpers::host_helpers #shell" do
   end
 
   step "#shell makes exit status available via `.exit_code`" do
-    status = shell(%Q{echo "echo via on"}).exit_code
+    status = shell(%{echo "echo via on"}).exit_code
     assert_equal 0, status
   end
 
@@ -32,7 +32,7 @@ test_name "dsl::helpers::host_helpers #shell" do
 
   step "#shell with :acceptable_exit_codes will fail for other exit codes" do
     assert_raises(Beaker::Host::CommandFailure) do
-      shell %Q{echo "echo via on"}, :acceptable_exit_codes => [127]
+      shell %{echo "echo via on"}, :acceptable_exit_codes => [127]
     end
   end
 
@@ -44,7 +44,7 @@ test_name "dsl::helpers::host_helpers #shell" do
   end
 
   step "#shell allows assertions to be used in the optional block" do
-    shell %Q{echo "${RANDOM}:${RANDOM}"} do |result|
+    shell %{echo "${RANDOM}:${RANDOM}"} do |result|
       assert_match(/\d+:\d+/, result.stdout)
     end
   end
