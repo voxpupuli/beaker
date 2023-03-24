@@ -84,10 +84,10 @@ module Beaker
           host_options = {}
           yield_to_merge = { :pants => 'truth to the face' }
           block_count = 0
-          answer = parser.merge_hosts_yaml(host_options, 'err_msg') {
+          answer = parser.merge_hosts_yaml(host_options, 'err_msg') do
             block_count += 1
             yield_to_merge
-          }
+          end
 
           expect(block_count).to be === 1
           expect(answer).to be === host_options.merge(yield_to_merge)
@@ -102,11 +102,11 @@ module Beaker
         it 'raises an ArgumentError if can\'t process YAML' do
           # allow( parser ).to receive( :merge_hosts_yaml )
           err_value = 'err_msg8797'
-          expect {
-            parser.merge_hosts_yaml({}, err_value) {
+          expect do
+            parser.merge_hosts_yaml({}, err_value) do
               raise MockSyntaxError
-            }
-          }.to raise_error(ArgumentError, /#{err_value}/)
+            end
+          end.to raise_error(ArgumentError, /#{err_value}/)
         end
       end
 

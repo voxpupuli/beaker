@@ -130,18 +130,18 @@ module Unix::Pkg
         execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
           # Handles where there are multiple rubies, installs the latest one
           if (match = /^Ambiguous: #{name} could be (.+)$/.match(command.stderr))
-            name = match[1].chomp.split(' ').collect { |x|
-              # FIXME Ruby 3.2 compatibility?
+            name = match[1].chomp.split(' ').collect do |x|
+              # FIXME: Ruby 3.2 compatibility?
               x =~ /-(\d[^-p]+)/
               [x, $1]
-            }.select { |x|
+            end.select do |x|
               # Blacklist Ruby 2.2.0+ for the sake of Puppet 3.x
               Gem::Version.new(x[1]) < Gem::Version.new('2.2.0')
-            }.sort { |a, b|
+            end.sort do |a, b|
               Gem::Version.new(b[1]) <=> Gem::Version.new(a[1])
-            }.collect { |x|
+            end.collect do |x|
               x[0]
-            }.first
+            end.first
             raise ArgumentException
           end
           # If the package advises symlinks to be created, do it

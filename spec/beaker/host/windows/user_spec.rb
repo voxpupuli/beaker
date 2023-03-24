@@ -56,9 +56,9 @@ describe WindowsUserTest do
     it 'yields correctly with the result object' do
       result.stdout = wmic_output
       expect(subject).to receive(:execute).and_yield(result)
-      subject.user_list { |result|
+      subject.user_list do |result|
         expect(result.stdout).to be === wmic_output
-      }
+      end
     end
   end
 end

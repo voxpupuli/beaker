@@ -7,19 +7,19 @@ module PSWindows::Pkg
   end
 
   def check_for_package(_name)
-    # HACK NOOP
+    # HACK: NOOP
     # raise "Cannot check for package #{name} on #{self}"
     0
   end
 
   def install_package(_name, _cmdline_args = '')
-    # HACK NOOP
+    # HACK: NOOP
     # raise "Package #{name} cannot be installed on #{self}"
     0
   end
 
   def uninstall_package(_name, _cmdline_args = '')
-    # HACK NOOP
+    # HACK: NOOP
     # raise "Package #{name} cannot be uninstalled on #{self}"
     0
   end

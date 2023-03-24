@@ -19,13 +19,13 @@ describe ClassMixedWithDSLStructure do
     let(:test_tag_and) { @test_tag_and || [] }
     let(:test_tag_or) { @test_tag_or || [] }
     let(:test_tag_exclude) { @test_tag_exclude || [] }
-    let(:options) {
+    let(:options) do
       opts                    = Beaker::Options::OptionsHash.new
       opts[:test_tag_and]     = test_tag_and
       opts[:test_tag_or]      = test_tag_or
       opts[:test_tag_exclude] = test_tag_exclude
       opts
-    }
+    end
 
     before do
       allow(subject).to receive(:platform_specific_tag_confines)
@@ -132,9 +132,9 @@ end
 
 describe Beaker::DSL::TestTagging::PlatformTagConfiner do
   let(:confines_array) { @confines_array || [] }
-  let(:confiner) {
+  let(:confiner) do
     described_class.new(confines_array)
-  }
+  end
 
   describe '#initialize' do
     it 'transforms one entry' do
@@ -251,9 +251,9 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
           key_combo_to_have.each do |key_to_have|
             haves += fake_confine_details_hash[key_to_have]
           end
-          keys_not_to_have = fake_confine_details_hash.keys.reject { |key_trial|
+          keys_not_to_have = fake_confine_details_hash.keys.reject do |key_trial|
             key_combo_to_have.include?(key_trial)
-          }
+          end
           have_nots = []
           keys_not_to_have.each do |key_not_to_have|
             have_nots += fake_confine_details_hash[key_not_to_have]

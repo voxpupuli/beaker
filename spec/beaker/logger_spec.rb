@@ -198,11 +198,11 @@ module Beaker
         end
 
         context 'when passing in log_color options' do
-          let(:log_colors) {
+          let(:log_colors) do
             {
               :error => "\e[00;30m",
             }
-          }
+          end
 
           let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
@@ -231,11 +231,11 @@ module Beaker
           end
 
           context 'when overriding default log colors' do
-            let(:log_colors) {
+            let(:log_colors) do
               {
                 :error => "\e[00;30m",
               }
-            }
+            end
 
             let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
@@ -289,12 +289,12 @@ module Beaker
       end
 
       context 'at trace log_level' do
-        subject(:trace_logger) {
+        subject(:trace_logger) do
           described_class.new(my_io,
                               :log_level => 'trace',
                               :quiet => true,
                               :color => true)
-        }
+        end
 
         it do
           expect(subject).to have_attributes(
@@ -320,12 +320,12 @@ module Beaker
       end
 
       context 'at verbose log_level' do
-        subject(:verbose_logger) {
+        subject(:verbose_logger) do
           described_class.new(my_io,
                               :log_level => 'verbose',
                               :quiet => true,
                               :color => true)
-        }
+        end
 
         it do
           expect(subject).to have_attributes(
@@ -351,12 +351,12 @@ module Beaker
       end
 
       context 'at debug log_level' do
-        subject(:debug_logger) {
+        subject(:debug_logger) do
           described_class.new(my_io,
                               :log_level => 'debug',
                               :quiet => true,
                               :color => true)
-        }
+        end
 
         it do
           expect(subject).to have_attributes(
@@ -381,12 +381,12 @@ module Beaker
       end
 
       context 'at info log_level' do
-        subject(:info_logger) {
+        subject(:info_logger) do
           described_class.new(my_io,
                               :log_level => :info,
                               :quiet => true,
                               :color => true)
-        }
+        end
 
         it do
           expect(subject).to have_attributes(
@@ -419,12 +419,12 @@ module Beaker
 
       context 'SUT output logging' do
         context 'host output logging' do
-          subject(:host_output) {
+          subject(:host_output) do
             described_class.new(my_io,
                                 :log_level => :verbose,
                                 :quiet => true,
                                 :color => true)
-          }
+          end
 
           it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
@@ -438,12 +438,12 @@ module Beaker
         end
 
         context 'color host output' do
-          subject(:color_host_output) {
+          subject(:color_host_output) do
             described_class.new(my_io,
                                 :log_level => :verbose,
                                 :quiet => true,
                                 :color => true)
-          }
+          end
 
           it 'colors host_output' do
             colorized_logger = color_host_output

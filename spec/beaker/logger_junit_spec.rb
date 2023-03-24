@@ -63,18 +63,18 @@ module Beaker
     describe '#write_xml' do
       it 'throws an error with 1-arity in the given block' do
         allow(described_class).to receive(:get_xml_contents)
-        expect { described_class.write_xml(xml_file, stylesheet) do |hey| end }.to raise_error(ArgumentError)
+        expect { described_class.write_xml(xml_file, stylesheet) { |hey| } }.to raise_error(ArgumentError)
       end
 
       it 'doesn\'t throw an error with 2-arity in the given block' do
         allow(described_class).to receive(:get_xml_contents)
         allow(described_class).to receive(:finish)
-        expect { described_class.write_xml(xml_file, stylesheet) do |hey1, hey2| end }.not_to raise_error
+        expect { described_class.write_xml(xml_file, stylesheet) { |hey1, hey2| } }.not_to raise_error
       end
 
       it 'throws an error with 3-arity in the given block' do
         allow(described_class).to receive(:get_xml_contents)
-        expect { described_class.write_xml(xml_file, stylesheet) do |hey1, hey2, hey3| end }.to raise_error(ArgumentError)
+        expect { described_class.write_xml(xml_file, stylesheet) { |hey1, hey2, hey3| } }.to raise_error(ArgumentError)
       end
     end
   end

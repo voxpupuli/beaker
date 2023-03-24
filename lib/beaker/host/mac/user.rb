@@ -6,7 +6,7 @@ module Mac::User
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of user names on the system
-  def user_list()
+  def user_list
     execute('dscacheutil -q user') do |result|
       users = []
       result.stdout.each_line do |line|

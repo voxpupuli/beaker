@@ -1,7 +1,7 @@
 module PSWindows::User
   include Beaker::CommandFactory
 
-  def user_list()
+  def user_list
     execute('cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value') do |result|
       users = []
       result.stdout.each_line do |line|

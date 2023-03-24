@@ -77,9 +77,9 @@ module Beaker
 
       it 'raises if the server can not be recognized' do
         allow(host).to receive(:determine_ssh_server).and_return(:unknown)
-        expect {
+        expect do
           host.scp_path(path)
-        }.to raise_error(ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: 'unknown'")
+        end.to raise_error(ArgumentError, "windows/file.rb:scp_path: ssh server not recognized: 'unknown'")
       end
     end
   end

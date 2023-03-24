@@ -49,12 +49,11 @@ module Beaker
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
         else
-          case
-          when /el-[89]|fedora/.match?(host['platform'])
+          if /el-[89]|fedora/.match?(host['platform'])
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
-          when /opensuse-|sles-/.match?(host['platform'])
+          elsif /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
-          when host['platform'].include?('cisco_nexus')
+          elsif host['platform'].include?('cisco_nexus')
             ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
             ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
           else
@@ -238,22 +237,22 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      if host['platform'].include?('windows')
-        if host.is_cygwin?
-          resolv_conf = host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
-        else
-          resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
-        end
-      else
-        resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
-      end
-      resolv_conf.each_line { |line|
+      resolv_conf = if host['platform'].include?('windows')
+                      if host.is_cygwin?
+                        host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
+                      else
+                        host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+                      end
+                    else
+                      host.exec(Command.new("cat /etc/resolv.conf")).stdout
+                    end
+      resolv_conf.each_line do |line|
         if (match = /^\s*domain\s+(\S+)/.match(line))
           domain = match[1]
         elsif (match = /^\s*search\s+(\S+)/.match(line))
           search = match[1]
         end
-      }
+      end
       return_value ||= domain
       return_value ||= search
 
@@ -459,7 +458,7 @@ module Beaker
     #   => {:PATH=>["/1st/path", "/2nd/path"]}
     def additive_hash_merge h1, h2
       merged_hash = {}
-      normalized_h2 = h2.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v; h }
+      normalized_h2 = h2.each_with_object({}) { |(k, v), h| h[k.to_s.upcase] = v; }
       h1.each_pair do |key, _val|
         normalized_key = key.to_s.upcase
         if normalized_h2.has_key?(normalized_key)

@@ -130,11 +130,11 @@ module Beaker
       escaped_string = ""
       string.chars.each do |i|
         char_as_codestring = i.unpack("U*").join
-        if self.is_valid_xml(char_as_codestring.to_i)
-          escaped_string << i
-        else
-          escaped_string << "\\#{char_as_codestring}"
-        end
+        escaped_string << if self.is_valid_xml(char_as_codestring.to_i)
+                            i
+                          else
+                            "\\#{char_as_codestring}"
+                          end
       end
       escaped_string
     end

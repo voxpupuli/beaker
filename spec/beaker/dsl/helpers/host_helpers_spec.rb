@@ -173,9 +173,9 @@ describe ClassMixedWithDSLHelpers do
     end
 
     it 'errors if command is not a String or Beaker::Command' do
-      expect {
+      expect do
         subject.on(host, Object.new)
-      }.to raise_error(ArgumentError, /called\ with\ a\ String\ or\ Beaker/)
+      end.to raise_error(ArgumentError, /called\ with\ a\ String\ or\ Beaker/)
     end
 
     it 'executes the passed Beaker::Command if given as command argument' do

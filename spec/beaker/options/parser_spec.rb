@@ -137,7 +137,7 @@ module Beaker
           let(:env) { @env || { :level => 'highest' } }
           let(:argv) { @argv || { :level => 'second' } }
           let(:host_file) { @host_file || { :level => 'third' } }
-          let(:opt_file) {
+          let(:opt_file) do
             @opt_file || {
               :level => 'fourth',
               :ssh => {
@@ -145,25 +145,25 @@ module Beaker
                 :user_known_hosts_file => 'hosts123',
               },
             }
-          }
+          end
           let(:subcommand_file) { @subcommand_file || { :level => 'fifth' } }
-          let(:homedir_file) {
+          let(:homedir_file) do
             @homedir_file || {
               :level => 'sixth',
               :ssh => {
                 :auth_methods => 'auth_home_123',
               },
             }
-          }
-          let(:project_file) {
+          end
+          let(:project_file) do
             @project_file || {
               :level => 'seventh',
               :ssh => {
                 :auth_methods => 'auth_project_123',
               },
             }
-          }
-          let(:presets) {
+          end
+          let(:presets) do
             {
               :level => 'lowest',
               :ssh => {
@@ -175,7 +175,7 @@ module Beaker
                 :keepalive => 'keepalive123',
               },
             }
-          }
+          end
 
           before do
             expect(parser).to receive(:normalize_args).and_return(true)
@@ -467,9 +467,9 @@ module Beaker
               /Exiting with an Error/,
             ).ordered
 
-            expect {
+            expect do
               parser.parse_hosts_options
-            }.to raise_error(BeakerHostGenerator::Exceptions::InvalidNodeSpecError)
+            end.to raise_error(BeakerHostGenerator::Exceptions::InvalidNodeSpecError)
           end
 
           it 'can be passed a nil hosts file and get the default hash back' do
@@ -589,13 +589,13 @@ module Beaker
         let(:test_tag_and) { @test_tag_and || [] }
         let(:test_tag_or) { @test_tag_or || [] }
         let(:test_tag_exclude) { @test_tag_exclude || [] }
-        let(:options) {
+        let(:options) do
           opts                    = Beaker::Options::OptionsHash.new
           opts[:test_tag_and]     = test_tag_and
           opts[:test_tag_or]      = test_tag_or
           opts[:test_tag_exclude] = test_tag_exclude
           opts
-        }
+        end
 
         it 'does not error if no tags overlap' do
           @test_tag_and     = 'can,tommies,potatoes,plant'

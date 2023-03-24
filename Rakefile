@@ -137,7 +137,7 @@ namespace :test do
     Dir.chdir(__dir__) do
       exit_status = 1
       output = ''
-      Open3.popen3("bundle exec rspec") { |_stdin, stdout, _stderr, wait_thr|
+      Open3.popen3("bundle exec rspec") do |_stdin, stdout, _stderr, wait_thr|
         while (line = stdout.gets)
           puts line
         end
@@ -147,7 +147,7 @@ namespace :test do
         end
 
         exit_status = wait_thr.value
-      }
+      end
       if exit_status != /0/
         # check for deprecation warnings
         if output.include?('Deprecation Warnings')

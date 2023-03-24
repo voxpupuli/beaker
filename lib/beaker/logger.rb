@@ -59,20 +59,20 @@ module Beaker
       options = args.last.is_a?(Hash) ? args.pop : {}
       @color = options[:color]
       @sublog = nil
-      case options[:log_level]
-      when /trace/i, :trace
-        @log_level = :trace
-      when /debug/i, :debug
-        @log_level = :debug
-      when /info/i, :info
-        @log_level = :info
-      when /notify/i, :notify
-        @log_level = :notify
-      when /warn/i, :warn
-        @log_level = :warn
-      else
-        @log_level = :verbose
-      end
+      @log_level = case options[:log_level]
+                   when /trace/i, :trace
+                     :trace
+                   when /debug/i, :debug
+                     :debug
+                   when /info/i, :info
+                     :info
+                   when /notify/i, :notify
+                     :notify
+                   when /warn/i, :warn
+                     :warn
+                   else
+                     :verbose
+                   end
 
       @last_result = nil
       @line_prefix = ''
@@ -190,7 +190,7 @@ module Beaker
     # Remove invalid UTF-8 codes from provided string(s)
     # @param [String, Array<String>] string The string(s) to remove invalid codes from
     def convert string
-      if string.kind_of?(Array)
+      if string.is_a?(Array)
         string.map do |s|
           convert s
         end
@@ -208,7 +208,7 @@ module Beaker
     #
     # @return [String] the prefixed line
     def prefix_log_line line
-      if line.kind_of?(Array)
+      if line.is_a?(Array)
         line.map do |s|
           prefix_log_line s
         end
@@ -226,7 +226,7 @@ module Beaker
     end
 
     # Indent the step level for the duration of block.
-    def with_indent()
+    def with_indent
       old_line_prefix = self.line_prefix.dup
       self.line_prefix << '  '
       yield
@@ -390,7 +390,7 @@ module Beaker
     # @note since this uses 'mkdir -p', log_prefix can be a number of nested directories
     #
     # @return [String] the path of the dated log folder generated
-    def Logger.generate_dated_log_folder(base_dir, log_prefix, timestamp)
+    def self.generate_dated_log_folder(base_dir, log_prefix, timestamp)
       log_dir = File.join(base_dir, log_prefix, timestamp.strftime("%F_%H_%M_%S"))
       FileUtils.mkdir_p(log_dir) unless File.directory?(log_dir)
       log_dir
@@ -399,7 +399,7 @@ module Beaker
     # Remove color codes from provided string.  Color codes are of the format /(\e\[\d\d;\d\dm)+/.
     # @param [String] text The string to remove color codes from
     # @return [String] The text without color codes
-    def Logger.strip_color_codes(text)
+    def self.strip_color_codes(text)
       text.gsub(/(\e|\^\[)\[(\d*;)*\d*m/, '')
     end
 

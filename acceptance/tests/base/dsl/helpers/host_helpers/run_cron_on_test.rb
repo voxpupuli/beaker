@@ -36,7 +36,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
     end
 
     step "#run_cron_on CURRENTLY does not fail, but returns nil, when adding cron jobs for an unknown user" do
-      result = run_cron_on default, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
+      result = run_cron_on default, :add, "nonexistentuser", %{* * * * * /bin/echo "hello" >/dev/null}
       assert_nil result
     end
 
@@ -46,7 +46,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
     end
 
     step "#run_cron_on can add a cron job for a user on a host" do
-      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
+      run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "hello" >/dev/null}
       result = run_cron_on default, :list, default['user']
       assert_equal 0, result.exit_code
       assert_match %r{/bin/echo}, result.stdout
@@ -57,7 +57,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
 
       1.upto(3) do |job_number|
-        run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
+        run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
       end
 
       result = run_cron_on default, :list, default['user']
@@ -71,7 +71,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       # NOTE: would have expected a more granular approach to removing cron jobs
       #       for a user on a host.  This should otherwise be better documented.
 
-      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
+      run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "quality: job 1" >/dev/null}
       result = run_cron_on default, :list, default['user']
       assert_match %r{quality: job 1}, result.stdout
 
@@ -150,7 +150,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
     step "#run_cron_on fails when adding cron jobs for an unknown user" do
       assert_raises Beaker::Host::CommandFailure do
-        run_cron_on default, :add, "nonexistentuser", %Q{* * * * * /bin/echo "hello" >/dev/null}
+        run_cron_on default, :add, "nonexistentuser", %{* * * * * /bin/echo "hello" >/dev/null}
       end
     end
 
@@ -161,7 +161,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
     end
 
     step "#run_cron_on can add a cron job for a user on a host" do
-      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "hello" >/dev/null}
+      run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "hello" >/dev/null}
       result = run_cron_on default, :list, default['user']
       assert_equal 0, result.exit_code
       assert_match %r{/bin/echo}, result.stdout
@@ -172,7 +172,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       #       cron entries.  See also: https://github.com/puppetlabs/beaker/pull/937#discussion_r38338494
 
       1.upto(3) do |job_number|
-        run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
+        run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "job :#{job_number}:" >/dev/null}
       end
 
       result = run_cron_on default, :list, default['user']
@@ -186,7 +186,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       # NOTE: would have expected a more granular approach to removing cron jobs
       #       for a user on a host.  This should otherwise be better documented.
 
-      run_cron_on default, :add, default['user'], %Q{* * * * * /bin/echo "quality: job 1" >/dev/null}
+      run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "quality: job 1" >/dev/null}
       result = run_cron_on default, :list, default['user']
       assert_match %r{quality: job 1}, result.stdout
 

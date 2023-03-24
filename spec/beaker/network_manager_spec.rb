@@ -4,12 +4,12 @@ require 'spec_helper'
 
 module Beaker
   describe NetworkManager do
-    let(:mock_provisioning_logger) {
+    let(:mock_provisioning_logger) do
       mock_provisioning_logger = Object.new
       allow(mock_provisioning_logger).to receive(:notify)
       mock_provisioning_logger
-    }
-    let(:options) {
+    end
+    let(:options) do
       make_opts.merge({
                         'logger' => double().as_null_object,
                         :logger_sut => mock_provisioning_logger,
@@ -17,7 +17,7 @@ module Beaker
                         :hosts_file => @hosts_file,
                         :default_log_prefix => 'hello_default',
                       })
-    }
+    end
     let(:network_manager) { described_class.new(options, options[:logger]) }
     let(:hosts) { make_hosts }
     let(:host) { hosts[0] }

@@ -3,57 +3,57 @@ require 'spec_helper'
 module Beaker
   module Subcommands
     describe SubcommandUtil do
-      let(:cli) {
+      let(:cli) do
         double("cli")
-      }
+      end
 
-      let(:rake) {
+      let(:rake) do
         double("rake")
-      }
+      end
 
-      let(:file) {
+      let(:file) do
         double("file")
-      }
+      end
 
-      let(:store) {
+      let(:store) do
         double("store")
-      }
+      end
 
-      let(:host) {
+      let(:host) do
         double("host")
-      }
+      end
 
-      let(:hypervisors) {
+      let(:hypervisors) do
         double("hypervisors")
-      }
+      end
 
-      let(:hosts) {
+      let(:hosts) do
         double("hosts")
-      }
+      end
 
-      let(:hypervisors_object) {
+      let(:hypervisors_object) do
         double("hypervisors_object")
-      }
+      end
 
-      let(:hosts_object) {
+      let(:hosts_object) do
         double("hosts_object")
-      }
+      end
 
-      let(:network_manager) {
+      let(:network_manager) do
         double("network_manager")
-      }
+      end
 
-      let(:save_object) {
+      let(:save_object) do
         double("save_object")
-      }
+      end
 
-      let(:load_object) {
+      let(:load_object) do
         double("load_object")
-      }
+      end
 
-      let(:yaml_object) {
+      let(:yaml_object) do
         double("yaml_object")
-      }
+      end
 
       describe 'execute_subcommand' do
         it "determines if we should execute the init subcommand" do

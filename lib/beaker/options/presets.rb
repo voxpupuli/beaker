@@ -57,13 +57,11 @@ module Beaker
       #
       # @return [Hash] Found environment values
       def collect_env_vars(env_var_spec)
-        env_var_spec.inject({}) do |memo, key_value|
+        env_var_spec.each_with_object({}) do |key_value, memo|
           key, value = key_value[0], key_value[1]
 
           set_env_var = Array(value).detect { |possible_variable| ENV[possible_variable] }
           memo[key] = ENV[set_env_var] if set_env_var
-
-          memo
         end
       end
 

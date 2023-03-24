@@ -31,7 +31,7 @@ module Mac::Exec
   # selinux is not availble on OS X
   #
   # @return [Boolean] false
-  def selinux_enabled?()
+  def selinux_enabled?
     false
   end
 

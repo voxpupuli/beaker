@@ -1,7 +1,7 @@
 module Unix::User
   include Beaker::CommandFactory
 
-  def user_list()
+  def user_list
     execute("getent passwd") do |result|
       users = []
       result.stdout.each_line do |line|

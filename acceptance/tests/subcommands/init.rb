@@ -16,8 +16,8 @@ test_name 'use the init subcommand' do
     subcommand_state = on(default, "cat #{SubcommandUtil::SUBCOMMAND_STATE}").stdout
     parsed_options = YAML.parse(subcommand_options).to_ruby
     assert(parsed_options["HOSTS"].count == 1)
-    assert(parsed_options.class == Hash)
-    assert(YAML.parse(subcommand_state).to_ruby.class == Hash)
+    assert(parsed_options.instance_of?(Hash))
+    assert(YAML.parse(subcommand_state).to_ruby.instance_of?(Hash))
   end
 
   step 'ensure beaker init saves beaker-run arguments to the subcommand_options.yaml' do

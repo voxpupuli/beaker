@@ -118,7 +118,7 @@ module Windows::Exec
   # selinux is not available on Windows
   #
   # @return [Boolean] false
-  def selinux_enabled?()
+  def selinux_enabled?
     false
   end
 

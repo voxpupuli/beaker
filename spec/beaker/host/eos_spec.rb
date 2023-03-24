@@ -3,13 +3,13 @@ require 'spec_helper'
 module Eos
   describe Host do
     let(:options)  { @options ? @options : {} }
-    let(:platform) {
+    let(:platform) do
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
       else
         { :platform => Beaker::Platform.new('eos-vers-arch-extra') }
       end
-    }
+    end
     let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#get_remote_file' do

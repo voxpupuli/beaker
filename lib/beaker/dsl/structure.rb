@@ -272,12 +272,12 @@ module Beaker
         hosts_not_modified = hosts - hosts_to_modify # we aren't examining these hosts
         case type
         when :except
-          if criteria and (not criteria.empty?)
-            hosts_to_modify = hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
-          else
-            # confining to all hosts *except* provided array of hosts
-            hosts_to_modify = hosts_not_modified
-          end
+          hosts_to_modify = if criteria and (not criteria.empty?)
+                              hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
+                            else
+                              # confining to all hosts *except* provided array of hosts
+                              hosts_not_modified
+                            end
           if hosts_to_modify.empty?
             logger.warn "No suitable hosts without: #{criteria.inspect}"
             skip_test "No suitable hosts found without #{criteria.inspect}"

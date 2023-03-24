@@ -1,7 +1,7 @@
 module Aix::User
   include Beaker::CommandFactory
 
-  def user_list()
+  def user_list
     execute("lsuser ALL") do |result|
       users = []
       result.stdout.each_line do |line|

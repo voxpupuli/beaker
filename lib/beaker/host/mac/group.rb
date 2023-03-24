@@ -6,7 +6,7 @@ module Mac::Group
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of group names on the system
-  def group_list()
+  def group_list
     execute('dscacheutil -q group') do |result|
       groups = []
       result.stdout.each_line do |line|
@@ -32,10 +32,10 @@ module Mac::Group
     execute("dscacheutil -q group -a name #{name}") do |result|
       fail_test "failed to get group #{name}" unless /^name: #{name}/.match?(result.stdout)
       gi = Hash.new # group info
-      result.stdout.each_line { |line|
+      result.stdout.each_line do |line|
         pieces = line.split(': ')
         gi[pieces[0].to_sym] = pieces[1].strip if pieces[1] != nil
-      }
+      end
       answer = "#{gi[:name]}:#{gi[:password]}:#{gi[:gid]}"
 
       yield answer if block_given?
@@ -51,12 +51,12 @@ module Mac::Group
   def group_gid(name)
     gid = -1
     execute("dscacheutil -q group -a name #{name}") do |result|
-      result.stdout.each_line { |line|
+      result.stdout.each_line do |line|
         if /^gid:/.match?(line)
           gid = (line[5, line.length - 5]).chomp
           break
         end
-      }
+      end
       gid
     end
   end

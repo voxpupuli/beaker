@@ -277,9 +277,9 @@ module Beaker
 
       url = 'http:/myproxy.com:3128'
       it "fails to extract rpm proxy options for #{url}" do
-        expect {
+        expect do
           instance.extract_rpm_proxy_options(url)
-        }.to raise_error(RuntimeError, /Cannot extract host and port/)
+        end.to raise_error(RuntimeError, /Cannot extract host and port/)
       end
     end
 
@@ -356,9 +356,9 @@ module Beaker
 
       it 'rejects unsupported platforms' do
         @platform = 'cisco_nexus'
-        expect {
+        expect do
           instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-        }.to raise_error(
+        end.to raise_error(
           /^Platform #{platform} .* not supported .* uncompress_local_tarball$/,
         )
       end
@@ -386,9 +386,9 @@ module Beaker
 
         it 'rejects unsupported versions' do
           @version = '12'
-          expect {
+          expect do
             instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-          }.to raise_error(
+          end.to raise_error(
             /^Solaris #{version} .* not supported .* uncompress_local_tarball$/,
           )
         end
