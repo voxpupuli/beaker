@@ -104,15 +104,13 @@ module Beaker
       # Try each method in turn until we succeed
       methods = @ssh_connection_preference.dup
       while (not @ssh) && (not methods.empty?)
-        unless instance_variable_get("@#{methods[0]}").nil?
-          if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
-            @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
-          else
-            @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
-            @ssh_connection_preference.delete(methods[0])
-          end
-        else
+        if instance_variable_get("@#{methods[0]}").nil?
           @logger.warn "Skipping #{methods[0]} method to ssh to host as its value is not set. Refer to https://github.com/puppetlabs/beaker/tree/master/docs/how_to/ssh_connection_preference.md to remove this warning"
+        elsif SUPPORTED_CONNECTION_METHODS.include?(methods[0])
+          @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)
+        else
+          @logger.warn "Beaker does not support #{methods[0]} to SSH to host, trying next available method."
+          @ssh_connection_preference.delete(methods[0])
         end
         methods.shift
       end
