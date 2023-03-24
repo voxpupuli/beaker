@@ -155,7 +155,6 @@ step "#add_env_var : can preserve an environment between ssh connections" do
   confine :except, :hypervisor => 'docker'
 
   hosts.each do |host|
-
     host.clear_env_var("TEST")
     logger.debug("add TEST=1")
     host.add_env_var("TEST", "1")
