@@ -131,7 +131,7 @@ module Unix::Pkg
           # Handles where there are multiple rubies, installs the latest one
           if (match = /^Ambiguous: #{name} could be (.+)$/.match(command.stderr))
             name = match[1].chomp.split(' ').collect do |x|
-              # FIXME Ruby 3.2 compatibility?
+              # FIXME: Ruby 3.2 compatibility?
               x =~ /-(\d[^-p]+)/
               [x, $1]
             end.select do |x|
