@@ -1,7 +1,7 @@
 module Aix::Group
   include Beaker::CommandFactory
 
-  def group_list()
+  def group_list
     execute("lsgroup -a ALL") do |result|
       yield result if block_given?
 

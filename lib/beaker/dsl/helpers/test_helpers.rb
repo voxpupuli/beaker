@@ -8,7 +8,7 @@ module Beaker
         # using the {Beaker::DSL::Structure#test_name} method.
         #
         # @return [String] Test name, or nil if it hasn't been set
-        def current_test_name()
+        def current_test_name
           metadata[:case] && metadata[:case][:name] ? metadata[:case][:name] : nil
         end
 
@@ -20,7 +20,7 @@ module Beaker
         #   canal
         #
         # @return [String] Test filename, or nil if it hasn't been set
-        def current_test_filename()
+        def current_test_filename
           metadata[:case] && metadata[:case][:file_name] ? metadata[:case][:file_name] : nil
         end
 
@@ -28,7 +28,7 @@ module Beaker
         # This is set using the {Beaker::DSL::Structure#step} method.
         #
         # @return [String] Step name, or nil if it hasn't been set
-        def current_step_name()
+        def current_step_name
           metadata[:step] && metadata[:step][:name] ? metadata[:step][:name] : nil
         end
 

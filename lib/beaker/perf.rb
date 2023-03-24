@@ -60,7 +60,7 @@ module Beaker
 
     # Iterate over all hosts, calling get_perf_data
     # @return [void]
-    def print_perf_info()
+    def print_perf_info
       @perf_end_timestamp = Time.now
       @hosts.map { |h| get_perf_data(h, @perf_timestamp, @perf_end_timestamp) }
     end

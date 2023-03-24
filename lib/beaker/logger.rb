@@ -226,7 +226,7 @@ module Beaker
     end
 
     # Indent the step level for the duration of block.
-    def with_indent()
+    def with_indent
       old_line_prefix = self.line_prefix.dup
       self.line_prefix << '  '
       yield

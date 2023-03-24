@@ -1,7 +1,7 @@
 module Unix::Group
   include Beaker::CommandFactory
 
-  def group_list()
+  def group_list
     execute("getent group") do |result|
       groups = []
       result.stdout.each_line do |line|

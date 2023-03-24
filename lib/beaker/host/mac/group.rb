@@ -6,7 +6,7 @@ module Mac::Group
   # @param [Proc] block Additional actions or insertions
   #
   # @return [Array<String>] The list of group names on the system
-  def group_list()
+  def group_list
     execute('dscacheutil -q group') do |result|
       groups = []
       result.stdout.each_line do |line|

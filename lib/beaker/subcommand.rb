@@ -75,7 +75,7 @@ module Beaker
     LONGDESC
     option :help, :type => :boolean, :hide => true
     method_option :hosts, :aliases => '-h', :type => :string, :required => true
-    def init()
+    def init
       if options[:help]
         invoke :help, [], ["init"]
         return
@@ -104,7 +104,7 @@ module Beaker
     flag here to override.
     LONGDESC
     option :help, :type => :boolean, :hide => true
-    def provision()
+    def provision
       if options[:help]
         invoke :help, [], ["provision"]
         return
@@ -212,7 +212,7 @@ module Beaker
     Destroys the currently provisioned VMs
     LONG_DESC
     option :help, :type => :boolean, :hide => true
-    def destroy()
+    def destroy
       if options[:help]
         invoke :help, [], ["destroy"]
         return

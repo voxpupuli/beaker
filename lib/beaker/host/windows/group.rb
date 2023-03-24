@@ -1,7 +1,7 @@
 module Windows::Group
   include Beaker::CommandFactory
 
-  def group_list()
+  def group_list
     execute('cmd /c echo "" | wmic group where localaccount="true" get name /format:value') do |result|
       groups = []
       result.stdout.each_line do |line|
