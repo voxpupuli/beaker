@@ -38,13 +38,13 @@ module Beaker
         raise ArgumentError, "role cannot be nil." if role.nil?
 
         a_host = hosts_with_role(hosts, role)
-        case
-        when a_host.length == 0
+        if a_host.length == 0
           raise ArgumentError, "There should be one host with #{role} defined!"
-        when a_host.length > 1
+        elsif a_host.length > 1
           host_string = (a_host.map { |host| host.name }).join(', ')
           raise ArgumentError, "There should be only one host with #{role} defined, but I found #{a_host.length} (#{host_string})"
         end
+
         a_host.first
       end
 

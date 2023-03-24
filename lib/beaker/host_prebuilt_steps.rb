@@ -49,12 +49,11 @@ module Beaker
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
         else
-          case
-          when /el-[89]|fedora/.match?(host['platform'])
+          if /el-[89]|fedora/.match?(host['platform'])
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
-          when /opensuse-|sles-/.match?(host['platform'])
+          elsif /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
-          when host['platform'].include?('cisco_nexus')
+          elsif host['platform'].include?('cisco_nexus')
             ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
             ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
           else
