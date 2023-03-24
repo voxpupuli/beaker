@@ -67,12 +67,10 @@ end
 def hosts_opt(use_preserved_hosts = false)
   if use_preserved_hosts
     "--hosts=#{HOSTS_PRESERVED}"
+  elsif hosts_file_env
+    "--hosts=#{hosts_file_env}"
   else
-    if hosts_file_env
-      "--hosts=#{hosts_file_env}"
-    else
-      "--hosts=tmp/#{HOSTS_FILE}"
-    end
+    "--hosts=tmp/#{HOSTS_FILE}"
   end
 end
 

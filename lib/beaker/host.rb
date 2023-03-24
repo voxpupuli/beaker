@@ -227,16 +227,14 @@ module Beaker
           return self[:instance].ip_address
         elsif self[:hypervisor] == 'openstack' && self[:ip]
           return self[:ip]
-        else
+        elsif self.instance_of?(Windows::Host)
           # In the case of using ec2 instances with the --no-provision flag, the ec2
           # instance object does not exist and we should just use the curl endpoint
           # specified here:
           # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
-          if self.instance_of?(Windows::Host)
-            execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
-          else
-            execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
-          end
+          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+        else
+          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
         end
       end
     end
@@ -525,21 +523,19 @@ module Beaker
 
       if filesystem_ssh_config
         ssh_args << "-F #{filesystem_ssh_config}"
-      else
-        if ssh_opts.has_key?('keys') and
-           ssh_opts.has_key?('auth_methods') and
-           ssh_opts['auth_methods'].include?('publickey')
-
-          # find the first SSH key that exists
-          key = Array(ssh_opts['keys']).find do |k|
-            File.exist?(k)
-          end
-
-          if key
-            # rsync doesn't always play nice with tilde, so be sure to expand first
-            ssh_args << "-i #{File.expand_path(key)}"
-          end
+      elsif ssh_opts.has_key?('keys') and
+            ssh_opts.has_key?('auth_methods') and
+            ssh_opts['auth_methods'].include?('publickey')
+        key = Array(ssh_opts['keys']).find do |k|
+          File.exist?(k)
         end
+
+        if key
+          # rsync doesn't always play nice with tilde, so be sure to expand first
+          ssh_args << "-i #{File.expand_path(key)}"
+        end
+
+        # find the first SSH key that exists
       end
 
       if ssh_opts.has_key?(:port)

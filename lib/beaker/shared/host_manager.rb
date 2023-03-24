@@ -117,13 +117,11 @@ module Beaker
                 run_block_on h, &block
               end
             end
-          else
+          elsif (cur_logger = (logger || @logger))
             # there are no matching hosts to execute against
             # should warn here
             # check if logger is defined in this context
-            if (cur_logger = (logger || @logger))
-              cur_logger.info "Attempting to execute against an empty array of hosts (#{hosts}, filtered to #{block_hosts}), no execution will occur"
-            end
+            cur_logger.info "Attempting to execute against an empty array of hosts (#{hosts}, filtered to #{block_hosts}), no execution will occur"
           end
         else
           result = yield block_hosts
