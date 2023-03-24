@@ -50,3 +50,12 @@ jobs:
         run: bundle exec rake spec
       - name: Run acceptance tests
         run: bundle exec rake acceptance
+
+  tests:
+    needs:
+      - rubocop
+      - test
+    runs-on: ubuntu-latest
+    name: Test suite
+    steps:
+      - run: echo Test suite completed
