@@ -33,9 +33,7 @@ module Cisco
     #
     # @return nil
     def scp_post_operations(scp_file_actual, scp_file_target)
-      if self[:platform].include?('cisco_nexus')
-        execute("mv #{scp_file_actual} #{scp_file_target}")
-      end
+      execute("mv #{scp_file_actual} #{scp_file_target}") if self[:platform].include?('cisco_nexus')
       nil
     end
 
@@ -89,12 +87,8 @@ module Cisco
 
       prepend_cmds = 'source /etc/profile;'
       prepend_cmds << " sudo -E sh -c \"" if self[:user] != 'root'
-      if self[:vrf]
-        prepend_cmds << "ip netns exec #{self[:vrf]} "
-      end
-      if user_pc && !user_pc.empty?
-        prepend_cmds << "#{user_pc} "
-      end
+      prepend_cmds << "ip netns exec #{self[:vrf]} " if self[:vrf]
+      prepend_cmds << "#{user_pc} " if user_pc && !user_pc.empty?
       prepend_cmds.strip
     end
 
@@ -147,17 +141,11 @@ module Cisco
     def validate_setup
       msg = nil
       if self[:platform].include?('cisco_nexus')
-        if !self[:vrf]
-          msg = 'Cisco Nexus hosts must be provided with a :vrf value.'
-        end
-        if !self[:user]
-          msg = 'Cisco hosts must be provided with a :user value'
-        end
+        msg = 'Cisco Nexus hosts must be provided with a :vrf value.' if !self[:vrf]
+        msg = 'Cisco hosts must be provided with a :user value' if !self[:user]
       end
       if self[:platform].include?('cisco_ios_xr')
-        if !self[:user]
-          msg = 'Cisco hosts must be provided with a :user value'
-        end
+        msg = 'Cisco hosts must be provided with a :user value' if !self[:user]
       end
 
       return unless msg

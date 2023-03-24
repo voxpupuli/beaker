@@ -365,9 +365,7 @@ module Beaker
 
     # Create a new StringIO log to track the current output
     def start_sublog
-      if @sublog
-        remove_destination(@sublog)
-      end
+      remove_destination(@sublog) if @sublog
       @sublog = StringIO.new
       add_destination(@sublog)
     end

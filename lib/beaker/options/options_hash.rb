@@ -36,9 +36,7 @@ module Beaker
 
       def dump_to_file(output_file)
         dirname = File.dirname(output_file)
-        unless File.directory?(dirname)
-          FileUtils.mkdir_p(dirname)
-        end
+        FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
         File.write(output_file, dump)
       end
     end

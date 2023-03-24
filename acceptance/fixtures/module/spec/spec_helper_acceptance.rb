@@ -12,9 +12,7 @@ unless ENV['RS_PROVISION'] == 'no' or ENV['BEAKER_provision'] == 'no'
   end
 
   hosts.each do |host|
-    unless host.is_pe?
-      on host, "/bin/echo '' > #{host.puppet('hiera_config')}"
-    end
+    on host, "/bin/echo '' > #{host.puppet('hiera_config')}" unless host.is_pe?
     on host, "mkdir -p #{host['distmoduledir']}"
   end
 end

@@ -44,9 +44,7 @@ module Beaker
       def select_env_by_regex regex
         envs = Beaker::Options::OptionsHash.new
         ENV.each_pair do |k, v|
-          if /#{regex}/.match?(k.to_s)
-            envs[k] = v
-          end
+          envs[k] = v if /#{regex}/.match?(k.to_s)
         end
         envs
       end
@@ -85,9 +83,7 @@ module Beaker
 
           found_env_vars[:type] = type
         end
-        if found_env_vars[:run_in_parallel]
-          found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',')
-        end
+        found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',') if found_env_vars[:run_in_parallel]
 
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
         found_env_vars

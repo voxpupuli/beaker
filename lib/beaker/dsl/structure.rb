@@ -340,9 +340,7 @@ module Beaker
             inspect_host host, property, value
           end
         end
-        if block
-          hosts_to_select_from = hosts_to_select_from.select(&block)
-        end
+        hosts_to_select_from = hosts_to_select_from.select(&block) if block
         hosts_to_select_from
       end
 

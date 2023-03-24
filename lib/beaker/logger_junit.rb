@@ -85,9 +85,7 @@ module Beaker
         suites = REXML::XPath.first(doc, "testsuites")
         # remove old data
         suites.elements.each("testsuite") do |e|
-          if /#{name}/.match?(e.name)
-            suites.delete_element e
-          end
+          suites.delete_element e if /#{name}/.match?(e.name)
         end
       else
         suites = doc.add_element(REXML::Element.new('testsuites'))

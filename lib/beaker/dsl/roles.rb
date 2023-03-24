@@ -180,9 +180,7 @@ module Beaker
 
           self.class.send :define_method, role.to_s do
             hosts_with_role = hosts_as role.to_sym
-            if hosts_with_role.length == 1
-              hosts_with_role = hosts_with_role.pop
-            end
+            hosts_with_role = hosts_with_role.pop if hosts_with_role.length == 1
             hosts_with_role
           end
         end

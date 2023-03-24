@@ -13,8 +13,6 @@ end
 
 step 'install arbitrary dmg via url' do
   hosts.each do |host|
-    if host['platform'].include?('osx')
-      host.generic_install_dmg('https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.dmg', 'Vagrant', 'Vagrant.pkg')
-    end
+    host.generic_install_dmg('https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.dmg', 'Vagrant', 'Vagrant.pkg') if host['platform'].include?('osx')
   end
 end

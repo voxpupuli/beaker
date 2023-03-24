@@ -46,9 +46,7 @@ module PSWindows::Exec
 
     result = execute("powershell Test-Path #{file} -PathType Leaf")
 
-    if result.include? 'False'
-      execute("powershell New-Item -ItemType file #{file}")
-    end
+    execute("powershell New-Item -ItemType file #{file}") if result.include? 'False'
     execute("powershell (gci #{file}).LastWriteTime = Get-Date " \
             "-Year '#{time.year}'" \
             "-Month '#{time.month}'" \
@@ -93,9 +91,7 @@ module PSWindows::Exec
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
-      if result.exit_code == 0
-        return true
-      end
+      return true if result.exit_code == 0
 
       try += 1
     end

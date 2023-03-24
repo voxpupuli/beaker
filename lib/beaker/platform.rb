@@ -78,9 +78,7 @@ module Beaker
     # * netscaler
     # * archlinux
     def initialize(name)
-      if !PLATFORMS.match?(name)
-        raise ArgumentError, "Unsupported platform name #{name}"
-      end
+      raise ArgumentError, "Unsupported platform name #{name}" if !PLATFORMS.match?(name)
 
       super
 
@@ -114,9 +112,7 @@ module Beaker
     # @return [String] the platform string with the platform version represented as a codename
     def with_version_codename
       version_array = [@variant, @version, @arch]
-      if @codename
-        version_array = [@variant, @codename, @arch]
-      end
+      version_array = [@variant, @codename, @arch] if @codename
       return version_array.join('-')
     end
 

@@ -87,23 +87,13 @@ module Beaker
 
         run_in_parallel = run_in_parallel? opts, @options, 'configure'
         block_on @hosts, { :run_in_parallel => run_in_parallel } do |host|
-          if host[:timesync]
-            timesync(host, @options)
-          end
+          timesync(host, @options) if host[:timesync]
         end
-        if @options[:root_keys]
-          sync_root_keys(@hosts, @options)
-        end
-        if @options[:set_env]
-          set_env(@hosts, @options)
-        end
-        if @options[:disable_updates]
-          disable_updates(@hosts, @options)
-        end
+        sync_root_keys(@hosts, @options) if @options[:root_keys]
+        set_env(@hosts, @options) if @options[:set_env]
+        disable_updates(@hosts, @options) if @options[:disable_updates]
       rescue SignalException => e
-        if e.signo == 15 # SIGTERM
-          report_and_raise(@logger, e, "configure")
-        end
+        report_and_raise(@logger, e, "configure") if e.signo == 15 # SIGTERM
         raise
       end
     end
@@ -120,9 +110,7 @@ module Beaker
     # prefixed with value of {Beaker::Hypervisor::create} option :host_name_prefix
     def generate_host_name
       n = CHARMAP[rand(25)] + (0...14).map { CHARMAP[rand(CHARMAP.length)] }.join
-      if @options[:host_name_prefix]
-        return @options[:host_name_prefix] + n
-      end
+      return @options[:host_name_prefix] + n if @options[:host_name_prefix]
 
       n
     end

@@ -261,15 +261,9 @@ module Beaker
                                             self['user'],
                                             self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference] })
       # update connection information
-      if self['ip'] && (@connection.ip != self['ip'])
-        @connection.ip = self['ip']
-      end
-      if self['vmhostname'] && (@connection.vmhostname != self['vmhostname'])
-        @connection.vmhostname = self['vmhostname']
-      end
-      if @name && (@connection.hostname != @name)
-        @connection.hostname = @name
-      end
+      @connection.ip = self['ip'] if self['ip'] && (@connection.ip != self['ip'])
+      @connection.vmhostname = self['vmhostname'] if self['vmhostname'] && (@connection.vmhostname != self['vmhostname'])
+      @connection.hostname = @name if @name && (@connection.hostname != @name)
       @connection
     end
 
@@ -321,9 +315,7 @@ module Beaker
           end
         end
 
-        if not options[:silent]
-          @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
-        end
+        @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds if not options[:silent]
 
         if options[:reset_connection]
           # Expect the connection to fail hard and possibly take a long time timeout.
@@ -408,9 +400,7 @@ module Beaker
       end
 
       # either a single file, or a directory with no ignores
-      if not File.file?(source) and not File.directory?(source)
-        raise IOError, "No such file or directory - #{source}"
-      end
+      raise IOError, "No such file or directory - #{source}" if not File.file?(source) and not File.directory?(source)
 
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
@@ -494,9 +484,7 @@ module Beaker
       rsync_args = []
       ssh_args = []
 
-      if not File.file?(from_path) and not File.directory?(from_path)
-        raise IOError, "No such file or directory - #{from_path}"
-      end
+      raise IOError, "No such file or directory - #{from_path}" if not File.file?(from_path) and not File.directory?(from_path)
 
       # We enable achieve mode and compression
       rsync_args << "-az"
@@ -538,26 +526,18 @@ module Beaker
         # find the first SSH key that exists
       end
 
-      if ssh_opts.has_key?(:port)
-        ssh_args << "-p #{ssh_opts[:port]}"
-      end
+      ssh_args << "-p #{ssh_opts[:port]}" if ssh_opts.has_key?(:port)
 
       # We disable prompt when host isn't known
       ssh_args << "-o 'StrictHostKeyChecking no'"
 
-      if not ssh_args.empty?
-        rsync_args << "-e \"ssh #{ssh_args.join(' ')}\""
-      end
+      rsync_args << "-e \"ssh #{ssh_args.join(' ')}\"" if not ssh_args.empty?
 
-      if opts.has_key?(:ignore) and not opts[:ignore].empty?
-        rsync_args << opts[:ignore].map { |value| "--exclude '#{value}'" }.join(' ')
-      end
+      rsync_args << opts[:ignore].map { |value| "--exclude '#{value}'" }.join(' ') if opts.has_key?(:ignore) and not opts[:ignore].empty?
 
       # We assume that the *contents* of the directory 'from_path' needs to be
       # copied into the directory 'to_path'
-      if File.directory?(from_path) and not from_path.end_with?('/')
-        from_path += '/'
-      end
+      from_path += '/' if File.directory?(from_path) and not from_path.end_with?('/')
 
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
       result = Rsync.run(from_path, to_path, rsync_args)

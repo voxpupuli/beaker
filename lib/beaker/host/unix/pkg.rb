@@ -48,9 +48,7 @@ module Unix::Pkg
       result = execute("pkg info #{name}", opts) { |result| result }
     when /solaris-10/
       result = execute("pkginfo #{name}", opts) { |result| result }
-      if result.exit_code == 1
-        result = execute("pkginfo CSW#{name}", opts) { |result| result }
-      end
+      result = execute("pkginfo CSW#{name}", opts) { |result| result } if result.exit_code == 1
     when /openbsd/
       result = execute("pkg_info #{name}", opts) { |result| result }
     when /archlinux/
@@ -90,19 +88,13 @@ module Unix::Pkg
     when /el-4/
       @logger.debug("Package installation not supported on rhel4")
     when /fedora-(2[2-9]|3[0-9])/
-      if version
-        name = "#{name}-#{version}"
-      end
+      name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
     when /cisco|fedora|centos|redhat|eos|el-/
-      if version
-        name = "#{name}-#{version}"
-      end
+      name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
     when /ubuntu|debian|cumulus|huaweios/
-      if version
-        name = "#{name}=#{version}"
-      end
+      name = "#{name}=#{version}" if version
       update_apt_if_needed
       execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
     when /solaris-11/
@@ -170,9 +162,7 @@ module Unix::Pkg
   # @api public
   def install_package_with_rpm(name, cmdline_args = '', opts = {})
     proxy = ''
-    if name&.start_with?('http') and opts[:package_proxy]
-      proxy = extract_rpm_proxy_options(opts[:package_proxy])
-    end
+    proxy = extract_rpm_proxy_options(opts[:package_proxy]) if name&.start_with?('http') and opts[:package_proxy]
     execute("rpm #{cmdline_args} -Uvh #{name} #{proxy}")
   end
 

@@ -109,9 +109,7 @@ module Beaker
       end
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
-      if state.transaction { state['provisioned'] }
-        SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.')
-      end
+      SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.') if state.transaction { state['provisioned'] }
 
       @cli.parse_options
       @cli.provision
@@ -217,9 +215,7 @@ module Beaker
       end
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
-      unless state.transaction { state['provisioned'] }
-        SubcommandUtil.error_with('Please provision an environment')
-      end
+      SubcommandUtil.error_with('Please provision an environment') unless state.transaction { state['provisioned'] }
 
       @cli.parse_options
       @cli.options[:provision] = false

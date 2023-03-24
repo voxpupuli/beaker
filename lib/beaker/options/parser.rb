@@ -330,21 +330,15 @@ module Beaker
         end
 
         # use the keyfile if present
-        if @options.has_key?(:keyfile)
-          @options[:ssh][:keys] = [@options[:keyfile]]
-        end
+        @options[:ssh][:keys] = [@options[:keyfile]] if @options.has_key?(:keyfile)
 
         # split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
         # will end up being normalized into an array
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
             update_option(opt, split_arg(@options[opt]), 'runtime')
-            if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
-              update_option(opt, file_list(@options[opt]), 'runtime')
-            end
-            if opt == :install
-              update_option(:install, parse_git_repos(@options[:install]), 'runtime')
-            end
+            update_option(opt, file_list(@options[opt]), 'runtime') if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
+            update_option(:install, parse_git_repos(@options[:install]), 'runtime') if opt == :install
           else
             update_option(opt, [], 'runtime')
           end
@@ -373,14 +367,10 @@ module Beaker
         # check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          if /windows|el-4/.match?(host[:platform])
-            test_host_roles(name, host)
-          end
+          test_host_roles(name, host) if /windows|el-4/.match?(host[:platform])
 
           # check to see if a custom user account has been provided, if so use it
-          if host[:ssh] && host[:ssh][:user]
-            host[:user] = host[:ssh][:user]
-          end
+          host[:user] = host[:ssh][:user] if host[:ssh] && host[:ssh][:user]
 
           # merge host tags for this host with the global/preset host tags
           host[:host_tags] = @options[:host_tags].merge(host[:host_tags] || {})
@@ -426,9 +416,7 @@ module Beaker
       # @return [nil] no return
       # @raise [ArgumentError] Raises error if config file does not exist or is not valid YAML
       def check_hypervisor_config(visor)
-        if ['blimpy'].include?(visor)
-          @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
-        end
+        @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}") if ['blimpy'].include?(visor)
 
         return unless %w(aix solaris vcloud).include?(visor)
 

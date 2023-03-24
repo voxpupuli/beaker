@@ -41,9 +41,7 @@ module Unix::Exec
 
       original_boot_time = Time.parse(original_boot_time_matches.first)
 
-      unless original_boot_time_matches.last
-        reboot_sleep = (61 - Time.now.strftime("%S").to_i)
-      end
+      reboot_sleep = (61 - Time.now.strftime("%S").to_i) unless original_boot_time_matches.last
 
       @logger.notify("Sleeping #{reboot_sleep} seconds before rebooting")
 
@@ -92,9 +90,7 @@ module Unix::Exec
       @logger.debug("Current Boot Time: #{current_boot_time}")
 
       # If this is *exactly* the same then there is really no good way to detect a reboot
-      if current_boot_time == original_boot_time
-        raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed."
-      end
+      raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed." if current_boot_time == original_boot_time
     rescue ArgumentError => e
       raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     rescue Beaker::Host::RebootFailure => e
@@ -180,9 +176,7 @@ module Unix::Exec
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
-      if result.exit_code == 0
-        return true
-      end
+      return true if result.exit_code == 0
 
       try += 1
     end

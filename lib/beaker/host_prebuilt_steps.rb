@@ -211,9 +211,7 @@ module Beaker
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        if /ubuntu|debian|cumulus/.match?(host[:platform])
-          host.exec(Command.new("apt-get update"))
-        end
+        host.exec(Command.new("apt-get update")) if /ubuntu|debian|cumulus/.match?(host[:platform])
       end
     end
 
@@ -313,9 +311,7 @@ module Beaker
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), { :pty => true })
         end
 
-        if host.selinux_enabled?
-          host.exec(Command.new('sudo fixfiles restore /root'))
-        end
+        host.exec(Command.new('sudo fixfiles restore /root')) if host.selinux_enabled?
       end
     end
 
@@ -477,9 +473,7 @@ module Beaker
 
       env.each_key do |key|
         separator = host['pathseparator']
-        if key == 'PATH' && (not host.is_powershell?)
-          separator = ':'
-        end
+        separator = ':' if key == 'PATH' && (not host.is_powershell?)
         env[key] = env[key].join(separator)
       end
       env
@@ -502,9 +496,7 @@ module Beaker
 
         logger.debug("setting local environment on #{host.name}")
 
-        if host['platform'].include?('windows') && host.is_cygwin?
-          env['CYGWIN'] = 'nodosfilewarning'
-        end
+        env['CYGWIN'] = 'nodosfilewarning' if host['platform'].include?('windows') && host.is_cygwin?
 
         host.ssh_permit_user_environment
         host.ssh_set_user_environment(env)

@@ -63,9 +63,7 @@ module Beaker
             if command.is_a? String
               cmd_opts = {}
               # add any additional environment variables to the command
-              if opts[:environment]
-                cmd_opts['ENV'] = opts[:environment]
-              end
+              cmd_opts['ENV'] = opts[:environment] if opts[:environment]
               command_object = Command.new(command.to_s, [], cmd_opts)
             elsif command.is_a? Command
               if opts[:environment]
@@ -236,9 +234,7 @@ module Beaker
           FileUtils.mkdir_p(targetdir)
           scp_from(host, from_path, targetdir, opts)
           # scp_from does succeed on a non-existant file, checking if the file/folder actually exists
-          if not File.exist?(filename)
-            raise IOError, "No such file or directory - #{filename}"
-          end
+          raise IOError, "No such file or directory - #{filename}" if not File.exist?(filename)
 
           create_tarball(archive_root, archive_name)
         end

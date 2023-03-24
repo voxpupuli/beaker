@@ -18,9 +18,7 @@ module Beaker
         # @raise ArgumentError if arguments are missing or incorrect
         # @return [Hocon::ConfigValueFactory] parsed hocon file
         def hocon_file_read_on(host, filename)
-          if filename.nil? || filename.empty?
-            raise ArgumentError, '#hocon_file_edit_on requires a filename'
-          end
+          raise ArgumentError, '#hocon_file_edit_on requires a filename' if filename.nil? || filename.empty?
 
           file_contents = on(host, "cat #{filename}").stdout
           Hocon::Parser::ConfigDocumentFactory.parse_string(file_contents)

@@ -55,9 +55,7 @@ module Beaker
       # this is deprecated and will not allow you to use a command line
       # option of `--environment`, please use ENV instead.
       [:ENV, :environment, 'environment', 'ENV'].each do |k|
-        if @options[k].is_a?(Hash)
-          @environment = @environment.merge(@options.delete(k))
-        end
+        @environment = @environment.merge(@options.delete(k)) if @options[k].is_a?(Hash)
       end
     end
 

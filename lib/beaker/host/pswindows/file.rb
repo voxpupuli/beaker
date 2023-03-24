@@ -9,9 +9,7 @@ module PSWindows::File
   def tmpdir(name = '')
     tmp_path = exec(powershell('[System.IO.Path]::GetTempPath()')).stdout.chomp()
 
-    if name == ''
-      name = exec(powershell('[System.IO.Path]::GetRandomFileName()')).stdout.chomp()
-    end
+    name = exec(powershell('[System.IO.Path]::GetRandomFileName()')).stdout.chomp() if name == ''
     exec(powershell("New-Item -Path '#{tmp_path}' -Force -Name '#{name}' -ItemType 'directory'"))
     File.join(tmp_path, name)
   end

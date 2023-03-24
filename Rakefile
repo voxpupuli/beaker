@@ -140,17 +140,13 @@ namespace :test do
           puts line
         end
         output = stdout.to_s
-        if not wait_thr.value.success?
-          fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})"
-        end
+        fail "Failed to 'bundle exec rspec' (exit status: #{wait_thr.value})" if not wait_thr.value.success?
 
         exit_status = wait_thr.value
       end
       if exit_status != /0/
         # check for deprecation warnings
-        if output.include?('Deprecation Warnings')
-          fail "DEPRECATION WARNINGS in spec generation, please fix!"
-        end
+        fail "DEPRECATION WARNINGS in spec generation, please fix!" if output.include?('Deprecation Warnings')
       end
     end
   end
@@ -181,9 +177,7 @@ namespace :test do
 
   desc 'Generate Beaker Host Config File'
   task :gen_hosts do
-    if hosts_file_env
-      next
-    end
+    next if hosts_file_env
 
     arguments = [test_targets]
     arguments += ['--hypervisor', ENV['BEAKER_HYPERVISOR']] if ENV['BEAKER_HYPERVISOR']
@@ -206,9 +200,7 @@ namespace :history do
     Dir.chdir(__dir__) do
       output = `bundle exec ruby history.rb .`
       puts output
-      if !output.include?('success')
-        raise "History generation failed"
-      end
+      raise "History generation failed" if !output.include?('success')
     end
   end
 end
@@ -225,9 +217,7 @@ FOREGROUND_SERVER = "bundle exec yard server --reload --verbose lib/beaker --doc
 def running?(cmdline)
   ps = `ps -ef`
   found = ps.lines.grep(/#{Regexp.quote(cmdline)}/)
-  if found.length > 1
-    raise StandardError, "Found multiple YARD Servers. Don't know what to do."
-  end
+  raise StandardError, "Found multiple YARD Servers. Don't know what to do." if found.length > 1
 
   yes = found.empty? ? false : true
   return yes, found.first
@@ -257,9 +247,7 @@ namespace :docs do
     Dir.chdir(__dir__) do
       output = `bundle exec yard doc -o #{DOCS_DIR}`
       puts output
-      if /\[warn\]|\[error\]/.match?(output)
-        fail "Errors/Warnings during yard documentation generation"
-      end
+      fail "Errors/Warnings during yard documentation generation" if /\[warn\]|\[error\]/.match?(output)
     end
   end
 
@@ -340,8 +328,6 @@ else
     task.options = ['--display-cop-names', '--display-style-guide', '--extra-details']
 
     # Use Rubocop's Github Actions formatter if possible
-    if ENV['GITHUB_ACTIONS'] == 'true'
-      task.formatters << 'github'
-    end
+    task.formatters << 'github' if ENV['GITHUB_ACTIONS'] == 'true'
   end
 end
