@@ -103,6 +103,9 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     # However, these tests use Host#tmpdir which outputs mixed-style paths
     # e.g. C:/cygwin64/tmp/beaker.Rp9G6L - Fix me with BKR-1503
 
+    # rsync is broken on beaker-docker
+    confine :except, :hypervisor => 'docker'
+
     confine_block :except, :platform => /osx/ do
       # packages are unsupported on OSX
       step "installing rsync on hosts if needed" do
@@ -132,7 +135,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       contents = fixture_contents("simple_text_file")
 
-      create_remote_file_with_backups(
+      result = create_remote_file_with_backups(
         default, remote_filename, contents, { :protocol => "rsync" }
       )
 

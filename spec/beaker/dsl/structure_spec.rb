@@ -223,7 +223,7 @@ describe ClassMixedWithDSLStructure do
     end
   end
 
-  describe 'confine' do
+  describe '#confine' do
     let(:logger) { double.as_null_object }
 
     before do
@@ -344,6 +344,19 @@ describe ClassMixedWithDSLStructure do
       expect(subject).to receive(:hosts=).with([host4, host5, host1])
       hosts = subject.confine :to, { :platform => 'fedora' }, agents
       expect(hosts).to be === [host4, host5, host1]
+    end
+
+    it 'can apply confine with multiple arguments' do
+      host1 = { 'platform' => 'solaris', 'hypervisor' => 'vmpooler' }
+      host2 = { 'platform' => 'windows', 'hypervisor' => 'vmpooler' }
+      host3 = { 'platform' => 'fedora', 'hypervisor' => 'vmpooler' }
+      host4 = { 'platform' => 'fedora', 'hypervisor' => 'docker' }
+      hosts = [host1, host2, host3, host4]
+
+      expect(subject).to receive(:hosts).and_return(hosts).twice
+      expect(subject).to receive(:hosts=).with([host1, host2, host3])
+      result = subject.confine :except, { :platform => 'fedora', :hypervisor => 'docker' }
+      expect(result).to eq([host1, host2, host3])
     end
   end
 

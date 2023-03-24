@@ -44,8 +44,8 @@ test_name "dsl::helpers::host_helpers #shell" do
   end
 
   step "#shell allows assertions to be used in the optional block" do
-    shell %Q{echo "${RANDOM}:${RANDOM}"} do
-      assert_match(/\d+:\d+/, stdout)
+    shell %Q{echo "${RANDOM}:${RANDOM}"} do |result|
+      assert_match(/\d+:\d+/, result.stdout)
     end
   end
 end

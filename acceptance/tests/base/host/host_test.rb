@@ -150,23 +150,28 @@ hosts.each do |host|
   assert_match(/TEST=3(;|:)2(;|:)1$/, val, "add_env_var can correctly add env vars")
 end
 
-step "#add_env_var : can preserve an environment between ssh connections"
-hosts.each do |host|
-  host.clear_env_var("TEST")
-  logger.debug("add TEST=1")
-  host.add_env_var("TEST", "1")
-  logger.debug("add TEST=1 again (shouldn't create duplicate entry)")
-  host.add_env_var("TEST", "1")
-  logger.debug("add TEST=2")
-  host.add_env_var("TEST", "2")
-  logger.debug("ensure that TEST env var has correct setting")
-  logger.debug("add TEST=3")
-  host.add_env_var("TEST", "3")
-  logger.debug("close the connection")
-  host.close
-  logger.debug("ensure that TEST env var has correct setting")
-  val = host.get_env_var("TEST")
-  assert_match(/TEST=3(;|:)2(;|:)1$/, val, "can preserve an environment between ssh connections")
+step "#add_env_var : can preserve an environment between ssh connections" do
+  # beaker-docker can't deal with closing the connection
+  confine :except, :hypervisor => 'docker'
+
+  hosts.each do |host|
+
+    host.clear_env_var("TEST")
+    logger.debug("add TEST=1")
+    host.add_env_var("TEST", "1")
+    logger.debug("add TEST=1 again (shouldn't create duplicate entry)")
+    host.add_env_var("TEST", "1")
+    logger.debug("add TEST=2")
+    host.add_env_var("TEST", "2")
+    logger.debug("ensure that TEST env var has correct setting")
+    logger.debug("add TEST=3")
+    host.add_env_var("TEST", "3")
+    logger.debug("close the connection")
+    host.close
+    logger.debug("ensure that TEST env var has correct setting")
+    val = host.get_env_var("TEST")
+    assert_match(/TEST=3(;|:)2(;|:)1$/, val, "can preserve an environment between ssh connections")
+  end
 end
 
 step "#delete_env_var : can delete an environment"
@@ -283,6 +288,9 @@ hosts.each do |host|
 end
 
 step "Ensure scp errors close the ssh connection" do
+  # beaker-docker can't deal with closing the connection
+  confine :except, :hypervisor => 'docker'
+
   step 'Attempt to generate a remote file that does not exist' do
     # This assert relies on the behavior of the net-scp library to
     # raise an error when #channel.on_close is called, which is called by

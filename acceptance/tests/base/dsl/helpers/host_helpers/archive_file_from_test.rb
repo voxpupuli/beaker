@@ -19,6 +19,9 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
   end
 
   step "fails archive_file_from when from_path is non-existant" do
+    # beaker-docker can't deal with closing the connection
+    confine :except, :hypervisor => 'docker'
+
     filepath = "foo-filepath-should-not-exist"
     assert_raises IOError do
       archive_file_from(default, filepath)

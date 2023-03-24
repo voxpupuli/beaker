@@ -22,7 +22,8 @@ jobs:
         run: bundle exec rake rubocop
 
   test:
-    runs-on: ubuntu-latest
+    # CentOS 7 testing is broken on Ubuntu 22.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -35,6 +36,7 @@ jobs:
     env:
       COVERAGE: ${{ matrix.coverage }}
       BUNDLE_WITHOUT: release:rubocop
+      BEAKER_HYPERVISOR: docker
     steps:
       - uses: actions/checkout@v3
       - name: Install Ruby ${{ matrix.ruby }}
@@ -44,5 +46,7 @@ jobs:
           bundler-cache: true
       - name: Build gem
         run: gem build *.gemspec
-      - name: Run tests
+      - name: Run unit tests
         run: bundle exec rake spec
+      - name: Run acceptance tests
+        run: bundle exec rake acceptance

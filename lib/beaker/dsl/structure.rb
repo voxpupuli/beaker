@@ -356,16 +356,15 @@ module Beaker
 
       # @!visibility private
       def inspect_host(host, property, one_or_more_values)
-        values = Array(one_or_more_values)
-        return values.any? do |value|
-          true_false = false
+        Array(one_or_more_values).any? do |value|
           case value
           when String
-            true_false = host[property.to_s].include? value
+            host[property.to_s].include? value
           when Regexp
-            true_false = value.match?(host[property.to_s])
+            value.match?(host[property.to_s])
+          else
+            false
           end
-          true_false
         end
       end
     end

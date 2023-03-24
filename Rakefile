@@ -14,7 +14,7 @@ task :spec do
   Rake::Task['test:spec'].invoke
 end
 
-task :acceptance => ['test:base', 'test:puppetgit', 'test:hypervisor']
+task :acceptance => ['test:base', 'test:hypervisor']
 
 task :yard do
   Rake::Task['docs:gen'].invoke
@@ -77,11 +77,11 @@ def hosts_opt(use_preserved_hosts = false)
 end
 
 def agent_target
-  ENV['TEST_TARGET'] || 'redhat7-64af'
+  ENV['TEST_TARGET'] || 'centos7-64af'
 end
 
 def master_target
-  ENV['MASTER_TEST_TARGET'] || 'redhat7-64default.mdcal'
+  ENV['MASTER_TEST_TARGET'] || 'centos7-64default.mdcal'
 end
 
 def test_targets
@@ -187,7 +187,9 @@ Run the hypervisor beaker acceptance tests
       next
     end
 
-    cli = BeakerHostGenerator::CLI.new([test_targets])
+    arguments = [test_targets]
+    arguments += ['--hypervisor', ENV['BEAKER_HYPERVISOR']] if ENV['BEAKER_HYPERVISOR']
+    cli = BeakerHostGenerator::CLI.new(arguments)
     FileUtils.mkdir_p('tmp') # -p ignores when dir already exists
     File.open("tmp/#{HOSTS_FILE}", 'w') do |fh|
       fh.print(cli.execute)
