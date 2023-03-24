@@ -39,9 +39,7 @@ module Beaker
         set_current_step_name(step_name)
         if block
           begin
-            logger.with_indent do
-              yield
-            end
+            logger.with_indent(&block)
           rescue Exception => e
             if @options.has_key?(:debug_errors) && @options[:debug_errors] == true
               begin
@@ -128,13 +126,11 @@ module Beaker
       # @param [String] my_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      def test_name my_name
+      def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
-        if block_given?
-          logger.with_indent do
-            yield
-          end
+        if block
+          logger.with_indent(&block)
         end
       end
 
@@ -339,17 +335,15 @@ module Beaker
       #   should return true if the host matches this additional criteria.
       #
       # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
-      def select_hosts(criteria, host_array = nil)
+      def select_hosts(criteria, host_array = nil, &block)
         hosts_to_select_from = host_array || hosts
         criteria.each_pair do |property, value|
           hosts_to_select_from = hosts_to_select_from.select do |host|
             inspect_host host, property, value
           end
         end
-        if block_given?
-          hosts_to_select_from = hosts_to_select_from.select do |host|
-            yield host
-          end
+        if block
+          hosts_to_select_from = hosts_to_select_from.select(&block)
         end
         hosts_to_select_from
       end
