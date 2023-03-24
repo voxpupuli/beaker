@@ -347,7 +347,9 @@ module Beaker
       @destinations.each do |to|
         to.print color_code if @color
         to.send print_statement, msg
-        to.print NORMAL if @color unless color_code == NONE
+        unless color_code == NONE
+          to.print NORMAL if @color
+        end
         to.flush
       end
     end
