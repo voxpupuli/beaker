@@ -303,7 +303,7 @@ module Unix::Exec
   def ssh_permit_user_environment
     case self['platform']
     when /debian|ubuntu|cumulus|huaweios|archlinux|el-|centos|fedora|redhat|oracle|scientific|eos|opensuse|sles|solaris/
-      directory = tmpdir()
+      directory = tmpdir
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if /ubuntu-2(0|2).04/.match?(self['platform'])
@@ -313,7 +313,7 @@ module Unix::Exec
       raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
     end
 
-    ssh_service_restart()
+    ssh_service_restart
   end
 
   # Construct the environment string for this command

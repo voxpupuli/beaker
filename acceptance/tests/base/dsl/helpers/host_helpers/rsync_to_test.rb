@@ -31,7 +31,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     step "#rsync_to CURRENTLY fails on windows systems" do
       Dir.mktmpdir do |local_dir|
         local_filename, _contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
-        remote_tmpdir = default.tmpdir()
+        remote_tmpdir = default.tmpdir
 
         assert_raises Beaker::Host::CommandFailure do
           rsync_to default, local_filename, remote_tmpdir
@@ -54,7 +54,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     confine :except, :hypervisor => 'docker'
 
     step "#rsync_to fails if the local file cannot be found" do
-      remote_tmpdir = default.tmpdir()
+      remote_tmpdir = default.tmpdir
       assert_raises IOError do
         rsync_to default, "/non/existent/file.txt", remote_tmpdir
       end
@@ -116,7 +116,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     step "#rsync_to creates the file on the remote system" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
-        remote_tmpdir = default.tmpdir()
+        remote_tmpdir = default.tmpdir
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 
         result = rsync_to_with_backups default, local_filename, remote_tmpdir
@@ -138,7 +138,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
     step "#rsync_to creates the file on all remote systems when a host array is provided" do
       Dir.mktmpdir do |local_dir|
         local_filename, contents = create_local_file_from_fixture("simple_text_file", local_dir, "testfile.txt")
-        remote_tmpdir = default.tmpdir()
+        remote_tmpdir = default.tmpdir
         on hosts, "mkdir -p #{remote_tmpdir}"
         remote_filename = File.join(remote_tmpdir, "testfile.txt")
 

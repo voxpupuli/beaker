@@ -23,7 +23,7 @@ module Beaker
 
         it "returns empty configuration when no file provided" do
           FakeFS.deactivate!
-          expect(parser.parse_hosts_file()).to be === { :HOSTS => {} }
+          expect(parser.parse_hosts_file).to be === { :HOSTS => {} }
         end
 
         it "raises an error on no file found" do

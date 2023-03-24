@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Beaker do
-  let(:options)        { make_opts.merge({ 'logger' => double().as_null_object }) }
+  let(:options)        { make_opts.merge({ 'logger' => double.as_null_object }) }
   let(:ntpserver_set)  { "ntp_server_set" }
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }

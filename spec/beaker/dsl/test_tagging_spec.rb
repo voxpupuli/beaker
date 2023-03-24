@@ -149,13 +149,13 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       }]
 
       internal_hash = confiner.instance_variable_get(:@tag_confine_details_hash)
-      expect(internal_hash.keys()).to include('tag1')
-      expect(internal_hash.keys()).to include('tag2')
-      expect(internal_hash.keys().length()).to be === 2
+      expect(internal_hash.keys).to include('tag1')
+      expect(internal_hash.keys).to include('tag2')
+      expect(internal_hash.keys.length).to be === 2
 
       tag_reason_hash.each do |tag, reason|
         tag_array = internal_hash[tag]
-        expect(tag_array.length()).to be === 1
+        expect(tag_array.length).to be === 1
         tag_hash = tag_array[0]
         expect(tag_hash[:platform_regex]).to eql(platform_regex)
         expect(tag_hash[:log_message]).to match(/#{reason}/)
@@ -181,13 +181,13 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       ]
 
       internal_hash = confiner.instance_variable_get(:@tag_confine_details_hash)
-      expect(internal_hash.keys()).to include('tag1')
-      expect(internal_hash.keys()).to include('tag2')
-      expect(internal_hash.keys()).to include('tag3')
-      expect(internal_hash.keys().length()).to be === 3
+      expect(internal_hash.keys).to include('tag1')
+      expect(internal_hash.keys).to include('tag2')
+      expect(internal_hash.keys).to include('tag3')
+      expect(internal_hash.keys.length).to be === 3
 
       shared_tag_array = internal_hash['tag1']
-      expect(shared_tag_array.length()).to be === 2
+      expect(shared_tag_array.length).to be === 2
 
       platform_el_found = false
       platform_cisco_found = false
@@ -237,7 +237,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       key_combos_to_test << ['tag0', 'tag2']
       key_combos_to_test << ['tag1', 'tag4']
       key_combos_to_test << ['tag2', 'tag3', 'tag4']
-      key_combos_to_test << fake_confine_details_hash.keys()
+      key_combos_to_test << fake_confine_details_hash.keys
 
       before do
         confiner.instance_variable_set(

@@ -182,12 +182,12 @@ module Beaker
           end
 
           def mock_out_parsing
-            presets_obj = double()
+            presets_obj = double
             allow(presets_obj).to receive(:presets).and_return(presets)
             allow(presets_obj).to receive(:env_vars).and_return(env)
             parser.instance_variable_set(:@presets, presets_obj)
 
-            command_line_parser_obj = double()
+            command_line_parser_obj = double
             allow(command_line_parser_obj).to receive(:parse).and_return(argv)
             parser.instance_variable_set(:@command_line_parser, command_line_parser_obj)
 

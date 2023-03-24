@@ -17,7 +17,7 @@ test_name "dsl::helpers::host_helpers #curl_on" do
   end
 
   step "#curl_on can retrieve the contents of a URL, using standard curl options" do
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir
     remote_filename, contents = create_remote_file_from_fixture("simple_text_file", default, remote_tmpdir, "testfile.txt")
     remote_targetfilename = File.join remote_tmpdir, "outfile.txt"
 
@@ -29,7 +29,7 @@ test_name "dsl::helpers::host_helpers #curl_on" do
   end
 
   step "#curl_on can retrieve the contents of a URL, when given a hosts array" do
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir
     on hosts, "mkdir -p #{remote_tmpdir}"
 
     remote_filename = contents = nil

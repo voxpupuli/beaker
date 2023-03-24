@@ -134,9 +134,9 @@ module Beaker
       let(:cli) { subcommand.cli }
       let(:yaml_store_mock) { double('yaml_store_mock') }
       let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
-      let(:cleaned_hosts) { double() }
-      let(:yielded_host_hash) { double() }
-      let(:yielded_host_name) { double() }
+      let(:cleaned_hosts) { double }
+      let(:yielded_host_hash) { double }
+      let(:yielded_host_name) { double }
       let(:network_manager) { double('network_manager') }
       let(:hosts) { double('hosts') }
       let(:hypervisors) { double('hypervisors') }
@@ -169,7 +169,7 @@ module Beaker
 
       it 'does not allow hosts to be passed' do
         subcommand.options = { :hosts => "myhost" }
-        expect { subcommand.provision() }.to raise_error(NotImplementedError)
+        expect { subcommand.provision }.to raise_error(NotImplementedError)
       end
     end
 
@@ -180,7 +180,7 @@ module Beaker
         allow(subcommand.cli).to receive(:execute!)
       end
 
-      let(:cleaned_hosts) { double() }
+      let(:cleaned_hosts) { double }
       let(:host_hash) { { 'mynode.net' => { :name => 'mynode', :platform => Beaker::Platform.new('centos-6-x86_64') } } }
       let(:yaml_store_mock) { double('yaml_store_mock') }
 

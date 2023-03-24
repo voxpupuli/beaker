@@ -84,7 +84,7 @@ module Windows::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-    ssh_service_restart()
+    ssh_service_restart
   end
 
   # Gets the specific prepend commands as needed for this host

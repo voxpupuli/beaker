@@ -13,7 +13,7 @@ test_name "DSL::Structure::PlatformTagConfiner" do
   end
 
   step "#{pstc_method_name} can remove hosts from a test, or be skipped if empty" do
-    assert hosts.length() > 0, "#{pstc_method_name} did not have enough hosts to test"
+    assert hosts.length > 0, "#{pstc_method_name} did not have enough hosts to test"
     previous_hosts = hosts.dup
 
     options[:platform_tag_confines] = [
@@ -35,7 +35,7 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     # is being raised confirms that a lower number of hosts are coming out of
     # the confine (0) than came in (>0, according to our pre-condition assertion)
     else
-      assert hosts.length() < previous_hosts.length(), "#{pstc_method_name} did not change hosts array"
+      assert hosts.length < previous_hosts.length, "#{pstc_method_name} did not change hosts array"
     end
 
     # cleanup

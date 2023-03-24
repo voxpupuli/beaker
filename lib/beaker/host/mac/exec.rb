@@ -24,7 +24,7 @@ module Mac::Exec
     ssh_config_file = '/private/etc/ssh/sshd_config' if /^osx-/.match?(self['platform'])
 
     exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> #{ssh_config_file}"))
-    ssh_service_restart()
+    ssh_service_restart
   end
 
   #  Checks if selinux is enabled

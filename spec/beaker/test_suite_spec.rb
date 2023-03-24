@@ -47,14 +47,14 @@ module Beaker
     end
 
     context 'run' do
-      let(:options) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.' }) }
+      let(:options) { make_opts.merge({ :logger => double.as_null_object, 'name' => create_files(@files), :log_dated_dir => '.', :xml_dated_dir => '.' }) }
       let(:broken_script) { "raise RuntimeError" }
       let(:fail_script)   { "raise Beaker::DSL::Outcomes::FailTest" }
       let(:okay_script)   { "true" }
       let(:rb_test)       { 'my_ruby_file.rb'     }
       let(:pl_test)       { '/my_perl_file.pl'    }
       let(:sh_test)       { '/my_shell_file.sh'   }
-      let(:hosts)         { make_hosts() }
+      let(:hosts)         { make_hosts }
 
       it 'fails fast if fail_mode != :slow and runtime error is raised' do
         allow(Logger).to receive('new')
@@ -115,8 +115,8 @@ module Beaker
     end
 
     describe TestSuiteResult do
-      let(:options)           { make_opts.merge({ :logger => double().as_null_object }) }
-      let(:hosts)             { make_hosts() }
+      let(:options)           { make_opts.merge({ :logger => double.as_null_object }) }
+      let(:hosts)             { make_hosts }
       let(:testcase1)         { Beaker::TestCase.new(hosts, options[:logger], options) }
       let(:testcase2)         { Beaker::TestCase.new(hosts, options[:logger], options) }
       let(:testcase3)         { Beaker::TestCase.new(hosts, options[:logger], options) }
@@ -242,7 +242,7 @@ module Beaker
 
       describe '#write_junit_xml' do
         let(:options) do
-          make_opts.merge({ :logger => double().as_null_object,
+          make_opts.merge({ :logger => double.as_null_object,
                             'name' => create_files(@files),
                             :log_dated_dir => '.',
                             :xml_dated_dir => '.', })
@@ -330,8 +330,8 @@ module Beaker
     describe '#log_path' do
       let(:sh_test) { '/my_shell_file.sh' }
       let(:files) { @files ? @files : [sh_test] }
-      let(:options) { make_opts.merge({ :logger => double().as_null_object, 'name' => create_files(files) }) }
-      let(:hosts) { make_hosts() }
+      let(:options) { make_opts.merge({ :logger => double.as_null_object, 'name' => create_files(files) }) }
+      let(:hosts) { make_hosts }
       let(:testsuite) { described_class.new('name', hosts, options, Time.now, :stop) }
 
       it 'returns the simple joining of the log dir & file as required' do

@@ -24,6 +24,6 @@ module Aix::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/ssh/sshd_config"))
-    ssh_service_restart()
+    ssh_service_restart
   end
 end

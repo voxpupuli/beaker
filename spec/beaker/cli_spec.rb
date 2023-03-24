@@ -134,7 +134,7 @@ module Beaker
 
     context 'execute!' do
       before do
-        stub_const("Beaker::Logger", double().as_null_object)
+        stub_const("Beaker::Logger", double.as_null_object)
         File.open("sample.cfg", "w+") do |file|
           file.write("HOSTS:\n")
           file.write("  myhost:\n")
