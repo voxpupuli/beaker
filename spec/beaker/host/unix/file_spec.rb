@@ -18,9 +18,7 @@ module Beaker
         "me"
       end
 
-      def logger
-        @logger
-      end
+      attr_reader :logger
     end
 
     let(:opts)     { @opts || {} }
