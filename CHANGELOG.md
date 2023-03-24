@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-02-09)
+
+**Breaking changes:**
+
+- Drop Ruby 2.4/2.5/2.6 support [\#1767](https://github.com/voxpupuli/beaker/pull/1767) ([bastelfreak](https://github.com/bastelfreak))
+- Removes open_uri_redirections [\#1764](https://github.com/voxpupuli/beaker/pull/1764) ([mhashizume](https://github.com/mhashizume))
+- Drop deprecated methods [\#1769](https://github.com/voxpupuli/beaker/pull/1769) ([ekohl](https://github.com/ekohl))
+- Remove add-el-extras, passenger, proxy_config, disable_iptables and clean up code [\#1731](https://github.com/voxpupuli/beaker/pull/1731) ([ekohl](https://github.com/ekohl))
+- Remove install_puppet_agent_* methods [\#1775](https://github.com/voxpupuli/beaker/pull/1775) ([ekohl](https://github.com/ekohl))
+
+**Implemented enhancements:**
+
+- Fix many RuboCop violations: [\#1768](https://github.com/voxpupuli/beaker/pull/1768), [\#1777](https://github.com/voxpupuli/beaker/pull/1777), [\#1787](https://github.com/voxpupuli/beaker/pull/1787), [\#1778](https://github.com/voxpupuli/beaker/pull/1778), [\#1790](https://github.com/voxpupuli/beaker/pull/1790), [\#1791](https://github.com/voxpupuli/beaker/pull/1791), [\#1792](https://github.com/voxpupuli/beaker/pull/1792)
+- Add Ruby 3.2 support [\#1762](https://github.com/voxpupuli/beaker/pull/1762) ([ekohl](https://github.com/ekohl))
+- Drop rspec-its dependency in favor of have_attributes [\#1788](https://github.com/voxpupuli/beaker/pull/1788)
+
 ## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-09)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.1...4.39.0)
