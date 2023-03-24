@@ -48,9 +48,7 @@ module Unix::Pkg
       result = execute("pkg info #{name}", opts) { |result| result }
     when /solaris-10/
       result = execute("pkginfo #{name}", opts) { |result| result }
-      if result.exit_code == 1
-        result = execute("pkginfo CSW#{name}", opts) { |result| result }
-      end
+      result = execute("pkginfo CSW#{name}", opts) { |result| result } if result.exit_code == 1
     when /openbsd/
       result = execute("pkg_info #{name}", opts) { |result| result }
     when /archlinux/
@@ -64,25 +62,23 @@ module Unix::Pkg
   # If apt has not been updated since the last repo deployment it is
   # updated. Otherwise this is a noop
   def update_apt_if_needed
-    if /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
-      if @apt_needs_update
-        execute("apt-get update")
-        @apt_needs_update = false
-      end
-    end
+    return unless /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
+    return unless @apt_needs_update
+
+    execute("apt-get update")
+    @apt_needs_update = false
   end
 
   # Arch Linux is a rolling release distribution. We need to ensure that it is up2date
   # Except for the kernel. An upgrade will purge the modules for the currently running kernel
   # Before upgrading packages, we need to ensure we've the latest keyring
   def update_pacman_if_needed
-    if self['platform'].include?('archlinux')
-      if @pacman_needs_update
-        execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
-        execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
-        @pacman_needs_update = false
-      end
-    end
+    return unless self['platform'].include?('archlinux')
+    return unless @pacman_needs_update
+
+    execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
+    execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
+    @pacman_needs_update = false
   end
 
   def install_package(name, cmdline_args = '', version = nil, opts = {})
@@ -92,19 +88,13 @@ module Unix::Pkg
     when /el-4/
       @logger.debug("Package installation not supported on rhel4")
     when /fedora-(2[2-9]|3[0-9])/
-      if version
-        name = "#{name}-#{version}"
-      end
+      name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
     when /cisco|fedora|centos|redhat|eos|el-/
-      if version
-        name = "#{name}-#{version}"
-      end
+      name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
     when /ubuntu|debian|cumulus|huaweios/
-      if version
-        name = "#{name}=#{version}"
-      end
+      name = "#{name}=#{version}" if version
       update_apt_if_needed
       execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
     when /solaris-11/
@@ -172,9 +162,7 @@ module Unix::Pkg
   # @api public
   def install_package_with_rpm(name, cmdline_args = '', opts = {})
     proxy = ''
-    if name&.start_with?('http') and opts[:package_proxy]
-      proxy = extract_rpm_proxy_options(opts[:package_proxy])
-    end
+    proxy = extract_rpm_proxy_options(opts[:package_proxy]) if name&.start_with?('http') and opts[:package_proxy]
     execute("rpm #{cmdline_args} -Uvh #{name} #{proxy}")
   end
 

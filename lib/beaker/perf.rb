@@ -30,9 +30,7 @@ module Beaker
       # Install sysstat if required
       if PERF_SUPPORTED_PLATFORMS.match?(host['platform'])
         PERF_PACKAGES.each do |pkg|
-          if not host.check_for_package pkg
-            host.install_package pkg
-          end
+          host.install_package pkg if not host.check_for_package pkg
         end
       else
         @logger.perf_output("Perf (sysstat) not supported on host: " + host)
@@ -53,9 +51,9 @@ module Beaker
           host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
         end
       end
-      if PERF_START_PLATFORMS.match?(host['platform']) # SLES doesn't need this step
-        host.exec(Command.new('service sysstat start'))
-      end
+      return unless PERF_START_PLATFORMS.match?(host['platform']) # SLES doesn't need this step
+
+      host.exec(Command.new('service sysstat start'))
     end
 
     # Iterate over all hosts, calling get_perf_data
@@ -73,9 +71,7 @@ module Beaker
     def get_perf_data(host, perf_start, perf_end)
       @logger.perf_output("Getting perf data for host: " + host)
       if PERF_SUPPORTED_PLATFORMS.match?(host['platform']) # All flavours of Linux
-        if not @options[:collect_perf_data]&.include?('aggressive')
-          host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"), :acceptable_exit_codes => [0, 1, 2])
-        end
+        host.exec(Command.new("sar -A -s #{perf_start.strftime("%H:%M:%S")} -e #{perf_end.strftime("%H:%M:%S")}"), :acceptable_exit_codes => [0, 1, 2]) if not @options[:collect_perf_data]&.include?('aggressive')
         if (defined? @options[:graphite_server] and not @options[:graphite_server].nil?) and
            (defined? @options[:graphite_perf_data] and not @options[:graphite_perf_data].nil?)
           export_perf_data_to_graphite(host)

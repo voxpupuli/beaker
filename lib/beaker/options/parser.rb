@@ -91,9 +91,9 @@ module Beaker
       # @return nil
       # @api public
       def resolve_symlinks!
-        if @options[:hosts_file] && !@options[:hosts_file_generated]
-          @options[:hosts_file] = File.realpath(@options[:hosts_file])
-        end
+        return unless @options[:hosts_file] && !@options[:hosts_file_generated]
+
+        @options[:hosts_file] = File.realpath(@options[:hosts_file])
       end
 
       # Converts array of paths into array of fully qualified git repo URLS with expanded keywords
@@ -147,17 +147,17 @@ module Beaker
 
         # default_set? will throw an error if length > 1
         # and return false if no default is set.
-        if !@validator.default_set?(default)
-          # no default set, let's make one
-          if not master.empty? and master.length == 1
-            default_host_name = master[0]
-          elsif hosts.length == 1
-            default_host_name = hosts.keys[0]
-          end
-          if default_host_name
-            hosts[default_host_name][:roles] << 'default'
-          end
+        return if @validator.default_set?(default)
+
+        # no default set, let's make one
+        if not master.empty? and master.length == 1
+          default_host_name = master[0]
+        elsif hosts.length == 1
+          default_host_name = hosts.keys[0]
         end
+        return unless default_host_name
+
+        hosts[default_host_name][:roles] << 'default'
       end
 
       # Constructor for Parser
@@ -224,7 +224,7 @@ module Beaker
         subcommand_options_file = Beaker::Subcommands::SubcommandUtil::SUBCOMMAND_OPTIONS
         {
           "project" => ".beaker.yml",
-          "homedir" => "#{ENV['HOME']}/#{subcommand_options_file}",
+          "homedir" => "#{ENV.fetch('HOME', nil)}/#{subcommand_options_file}",
           "subcommand" => subcommand_options_file,
         }.each_pair do |src, path|
           opts = if src == "project"
@@ -330,21 +330,15 @@ module Beaker
         end
 
         # use the keyfile if present
-        if @options.has_key?(:keyfile)
-          @options[:ssh][:keys] = [@options[:keyfile]]
-        end
+        @options[:ssh][:keys] = [@options[:keyfile]] if @options.has_key?(:keyfile)
 
         # split out arguments - these arguments can have the form of arg1,arg2 or [arg] or just arg
         # will end up being normalized into an array
         LONG_OPTS.each do |opt|
           if @options.has_key?(opt)
             update_option(opt, split_arg(@options[opt]), 'runtime')
-            if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
-              update_option(opt, file_list(@options[opt]), 'runtime')
-            end
-            if opt == :install
-              update_option(:install, parse_git_repos(@options[:install]), 'runtime')
-            end
+            update_option(opt, file_list(@options[opt]), 'runtime') if RB_FILE_OPTS.include?(opt) && (not @options[opt] == [])
+            update_option(:install, parse_git_repos(@options[:install]), 'runtime') if opt == :install
           else
             update_option(opt, [], 'runtime')
           end
@@ -373,14 +367,10 @@ module Beaker
         # check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          if /windows|el-4/.match?(host[:platform])
-            test_host_roles(name, host)
-          end
+          test_host_roles(name, host) if /windows|el-4/.match?(host[:platform])
 
           # check to see if a custom user account has been provided, if so use it
-          if host[:ssh] && host[:ssh][:user]
-            host[:user] = host[:ssh][:user]
-          end
+          host[:user] = host[:ssh][:user] if host[:ssh] && host[:ssh][:user]
 
           # merge host tags for this host with the global/preset host tags
           host[:host_tags] = @options[:host_tags].merge(host[:host_tags] || {})
@@ -426,13 +416,11 @@ module Beaker
       # @return [nil] no return
       # @raise [ArgumentError] Raises error if config file does not exist or is not valid YAML
       def check_hypervisor_config(visor)
-        if ['blimpy'].include?(visor)
-          @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
-        end
+        @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}") if ['blimpy'].include?(visor)
 
-        if %w(aix solaris vcloud).include?(visor)
-          @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
-        end
+        return unless %w(aix solaris vcloud).include?(visor)
+
+        @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
       end
 
       # Normalize include and exclude tags. This modifies @options.
@@ -457,9 +445,9 @@ module Beaker
       def test_host_roles(host_name, host_hash)
         exclude_roles = %w(master database dashboard)
         host_roles    = host_hash[:roles]
-        unless (host_roles & exclude_roles).empty?
-          @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
-        end
+        return if (host_roles & exclude_roles).empty?
+
+        @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
       end
     end
   end

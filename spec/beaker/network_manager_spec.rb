@@ -1,5 +1,3 @@
-# encoding: UTF-8
-
 require 'spec_helper'
 
 module Beaker
@@ -11,7 +9,7 @@ module Beaker
     end
     let(:options) do
       make_opts.merge({
-                        'logger' => double().as_null_object,
+                        'logger' => double.as_null_object,
                         :logger_sut => mock_provisioning_logger,
                         :log_prefix => @log_prefix,
                         :hosts_file => @hosts_file,

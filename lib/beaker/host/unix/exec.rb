@@ -41,9 +41,7 @@ module Unix::Exec
 
       original_boot_time = Time.parse(original_boot_time_matches.first)
 
-      unless original_boot_time_matches.last
-        reboot_sleep = (61 - Time.now.strftime("%S").to_i)
-      end
+      reboot_sleep = (61 - Time.now.strftime("%S").to_i) unless original_boot_time_matches.last
 
       @logger.notify("Sleeping #{reboot_sleep} seconds before rebooting")
 
@@ -92,9 +90,7 @@ module Unix::Exec
       @logger.debug("Current Boot Time: #{current_boot_time}")
 
       # If this is *exactly* the same then there is really no good way to detect a reboot
-      if current_boot_time == original_boot_time
-        raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed."
-      end
+      raise Beaker::Host::RebootFailure, "Boot time did not reset. Reboot appears to have failed." if current_boot_time == original_boot_time
     rescue ArgumentError => e
       raise Beaker::Host::RebootFailure, "Unable to parse time: #{e.message}"
     rescue Beaker::Host::RebootFailure => e
@@ -180,9 +176,7 @@ module Unix::Exec
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
-      if result.exit_code == 0
-        return true
-      end
+      return true if result.exit_code == 0
 
       try += 1
     end
@@ -309,7 +303,7 @@ module Unix::Exec
   def ssh_permit_user_environment
     case self['platform']
     when /debian|ubuntu|cumulus|huaweios|archlinux|el-|centos|fedora|redhat|oracle|scientific|eos|opensuse|sles|solaris/
-      directory = tmpdir()
+      directory = tmpdir
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
       exec(Beaker::Command.new("echo '' >/etc/environment")) if /ubuntu-2(0|2).04/.match?(self['platform'])
@@ -319,7 +313,7 @@ module Unix::Exec
       raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
     end
 
-    ssh_service_restart()
+    ssh_service_restart
   end
 
   # Construct the environment string for this command
@@ -447,11 +441,10 @@ module Unix::Exec
   def which(command)
     unless @which_command
       if execute('type -P true', :accept_all_exit_codes => true).empty?
-        if execute('which true', :accept_all_exit_codes => true).empty?
-          raise ArgumentError, "Could not find suitable 'which' command"
-        else
-          @which_command = 'which'
-        end
+        raise ArgumentError, "Could not find suitable 'which' command" if execute('which true', :accept_all_exit_codes => true).empty?
+
+        @which_command = 'which'
+
       else
         @which_command = 'type -P'
       end

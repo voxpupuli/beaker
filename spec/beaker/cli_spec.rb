@@ -86,9 +86,7 @@ module Beaker
       it 'returns a list of options that were not presets' do
         attribution = cli.instance_variable_get(:@attribution)
         attribution.each do |attribute, setter|
-          if setter == 'preset'
-            expect(cli.configured_options[attribute]).to be_nil
-          end
+          expect(cli.configured_options[attribute]).to be_nil if setter == 'preset'
         end
       end
     end
@@ -136,7 +134,7 @@ module Beaker
 
     context 'execute!' do
       before do
-        stub_const("Beaker::Logger", double().as_null_object)
+        stub_const("Beaker::Logger", double.as_null_object)
         File.open("sample.cfg", "w+") do |file|
           file.write("HOSTS:\n")
           file.write("  myhost:\n")

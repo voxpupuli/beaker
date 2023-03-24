@@ -54,8 +54,6 @@ module Unix
       case self['platform'].variant
       when /^(f5|netscaler)$/
         "no puppet-agent package for network device platform '#{self['platform'].variant}'"
-      else
-        nil
       end
     end
 

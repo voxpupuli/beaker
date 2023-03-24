@@ -67,11 +67,9 @@ module Beaker
                 end
               end
             rescue OpenURI::HTTPError => e
-              if /404.*/.match?(e.message)
-                raise "Failed to fetch_remote_file '#{src}' (#{e.message})"
-              else
-                raise e
-              end
+              raise "Failed to fetch_remote_file '#{src}' (#{e.message})" if /404.*/.match?(e.message)
+
+              raise e
             end
           end
           return dst
@@ -90,9 +88,7 @@ module Beaker
         # @!visibility private
         def fetch_http_dir(url, dst_dir)
           logger.notify "fetch_http_dir (url: #{url}, dst_dir #{dst_dir})"
-          if !url.end_with?('/')
-            url += '/'
-          end
+          url += '/' if !url.end_with?('/')
           url = URI.parse(url)
           chunks = url.path.split('/')
           dst = File.join(dst_dir, chunks.last)
@@ -109,9 +105,7 @@ module Beaker
           stdout_and_stderr_str.each_line do |line|
             logger.debug(line)
           end
-          unless status.success?
-            raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})"
-          end
+          raise "Failed to fetch_remote_dir '#{url}' (exit code #{$?})" unless status.success?
 
           dst
         end

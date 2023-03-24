@@ -46,9 +46,7 @@ module PSWindows::Exec
 
     result = execute("powershell Test-Path #{file} -PathType Leaf")
 
-    if result.include? 'False'
-      execute("powershell New-Item -ItemType file #{file}")
-    end
+    execute("powershell New-Item -ItemType file #{file}") if result.include? 'False'
     execute("powershell (gci #{file}).LastWriteTime = Get-Date " \
             "-Year '#{time.year}'" \
             "-Month '#{time.month}'" \
@@ -93,9 +91,7 @@ module PSWindows::Exec
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
-      if result.exit_code == 0
-        return true
-      end
+      return true if result.exit_code == 0
 
       try += 1
     end
@@ -141,12 +137,12 @@ module PSWindows::Exec
     # get the current value of the key
     cur_val = get_env_var(key, true)
     subbed_val = (cur_val.split(';') - [val.gsub(/'|"/, '')]).join(';')
-    if subbed_val != cur_val
-      # remove the current key value
-      self.clear_env_var(key)
-      # set to the truncated value
-      self.add_env_var(key, subbed_val)
-    end
+    return unless subbed_val != cur_val
+
+    # remove the current key value
+    self.clear_env_var(key)
+    # set to the truncated value
+    self.add_env_var(key, subbed_val)
   end
 
   # Return the value of a specific env var
@@ -158,15 +154,13 @@ module PSWindows::Exec
     self.close # refresh the state
     key = key.to_s.upcase
     val = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true).stdout.chomp
-    if val.empty?
-      return ''
+    return '' if val.empty?
+
+    val = val.split("\n")[0] # only take the first result
+    if clean
+      val.gsub(/#{key}=/i, '')
     else
-      val = val.split("\n")[0] # only take the first result
-      if clean
-        val.gsub(/#{key}=/i, '')
-      else
-        val
-      end
+      val
     end
   end
 
@@ -219,8 +213,7 @@ module PSWindows::Exec
   # Overrides the {Windows::Exec#ssh_permit_user_environment} method,
   # since no steps are needed in this setup to allow user ssh environments
   # to work.
-  def ssh_permit_user_environment
-  end
+  def ssh_permit_user_environment; end
 
   # Sets the user SSH environment.
   #

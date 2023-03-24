@@ -33,9 +33,7 @@ module Beaker
         super
 
         @name = args.shift || 'beaker:test'
-        if args.empty?
-          args = [:hosts, :type]
-        end
+        args = [:hosts, :type] if args.empty?
         @acceptance_root = DEFAULT_ACCEPTANCE_ROOT
         @options_file = nil
         define(args, &task_block)
@@ -53,10 +51,10 @@ module Beaker
         command = beaker_command
         puts command if verbose
         success = system(command)
-        if fail_mode == "fast" && !success
-          $stderr.puts "#{command} failed"
-          exit $?.exitstatus
-        end
+        return unless fail_mode == "fast" && !success
+
+        $stderr.puts "#{command} failed"
+        exit $?.exitstatus
       end
 
       # @private
@@ -77,19 +75,17 @@ module Beaker
       #   if no other options file is provided
       #
       def check_for_beaker_type_config
-        if !@options_file && File.exist?("#{@acceptance_root}/.beaker-#{@type}.cfg")
-          @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
-        end
+        return unless !@options_file && File.exist?("#{@acceptance_root}/.beaker-#{@type}.cfg")
+
+        @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
       end
 
       #
       # Check for existence of ENV variables for test if !@tests is undef
       #
       def check_env_variables
-        if File.exist?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
-          @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests')
-        end
-        @tests = ENV['TESTS'] || ENV['TEST'] if !@tests
+        @tests = File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests') if File.exist?(File.join(DEFAULT_ACCEPTANCE_ROOT, 'tests'))
+        @tests = ENV['TESTS'] || ENV.fetch('TEST', nil) if !@tests
       end
 
       #

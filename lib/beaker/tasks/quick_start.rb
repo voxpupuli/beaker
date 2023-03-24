@@ -71,7 +71,7 @@ end")
   task :run_test, [:hypervisor] => ["beaker_quickstart:gen_hosts", 'beaker_quickstart:gen_pre_suite',
                                     'beaker_quickstart:gen_smoke_test',] do |_t, args|
     hypervisor = args[:hypervisor] ||= 'vagrant'
-    system_args             = Hash.new
+    system_args             = {}
     system_args[:hosts]     = "acceptance/config/default_#{hypervisor}_hosts.yaml"
     system_args[:pre_suite] = 'acceptance/setup/default_pre_suite.rb'
     system_args[:tests]     = 'acceptance/tests/default_smoke_test.rb'

@@ -54,9 +54,7 @@ module Windows::Exec
     try = 0
     while try < attempts do
       result = exec(Beaker::Command.new("ping -n 1 #{target}"), :accept_all_exit_codes => true)
-      if result.exit_code == 0
-        return true
-      end
+      return true if result.exit_code == 0
 
       try += 1
     end
@@ -86,7 +84,7 @@ module Windows::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     exec(Beaker::Command.new("echo '\nPermitUserEnvironment yes' >> /etc/sshd_config"))
-    ssh_service_restart()
+    ssh_service_restart
   end
 
   # Gets the specific prepend commands as needed for this host

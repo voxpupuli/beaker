@@ -9,9 +9,7 @@ module Beaker
     context 'run_test' do
       it 'defaults to test_status :pass on success' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write ""
-        end
+        File.write(path, "")
         @path = path
         expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
@@ -20,9 +18,7 @@ module Beaker
 
       it 'updates test_status to :skip on SkipTest' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise SkipTest"
-        end
+        File.write(path, "raise SkipTest")
         @path = path
         expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
@@ -31,9 +27,7 @@ module Beaker
 
       it 'updates test_status to :pending on PendingTest' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise PendingTest"
-        end
+        File.write(path, "raise PendingTest")
         @path = path
         expect(testcase).not_to receive(:log_and_fail_test)
         testcase.run_test
@@ -42,9 +36,7 @@ module Beaker
 
       it 'updates test_status to :fail on FailTest' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise FailTest"
-        end
+        File.write(path, "raise FailTest")
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Beaker::DSL::FailTest), :fail).and_call_original
         testcase.run_test
@@ -53,9 +45,7 @@ module Beaker
 
       it 'correctly handles RuntimeError' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise RuntimeError"
-        end
+        File.write(path, "raise RuntimeError")
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(RuntimeError))
         testcase.run_test
@@ -63,9 +53,7 @@ module Beaker
 
       it 'correctly handles ScriptError' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise ScriptError"
-        end
+        File.write(path, "raise ScriptError")
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(ScriptError))
         testcase.run_test
@@ -73,9 +61,7 @@ module Beaker
 
       it 'correctly handles Timeout::Error' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise Timeout::Error"
-        end
+        File.write(path, "raise Timeout::Error")
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Timeout::Error))
         testcase.run_test
@@ -83,9 +69,7 @@ module Beaker
 
       it 'correctly handles CommandFailure' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write "raise Host::CommandFailure"
-        end
+        File.write(path, "raise Host::CommandFailure")
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Host::CommandFailure))
         testcase.run_test
@@ -93,13 +77,11 @@ module Beaker
 
       it 'records a test failure if an assertion fails in a teardown block' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write <<-EOF
+        File.write(path, <<-EOF)
             teardown do
               assert_equal(1, 2, 'Oh noes!')
             end
-          EOF
-        end
+        EOF
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
         testcase.run_test
@@ -108,14 +90,12 @@ module Beaker
 
       it 'does not overwrite a test failure if an assertion also happens in a teardown block' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write <<-EOF
+        File.write(path, <<-EOF)
             teardown do
               assert_equal(1, 2, 'Oh noes!')
             end
             assert_equal(true, false, 'failed test')
-          EOF
-        end
+        EOF
         @path = path
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :fail).and_call_original
         expect(testcase).to receive(:log_and_fail_test).once.with(kind_of(Minitest::Assertion), :teardown_error).and_call_original
@@ -128,9 +108,7 @@ module Beaker
       it 'sets the filename correctly from the path' do
         answer = 'jacket'
         path = "#{answer}.rb"
-        File.open(path, 'w') do |f|
-          f.write ""
-        end
+        File.write(path, "")
         @path = path
         testcase.run_test
         metadata = testcase.instance_variable_get(:@metadata)
@@ -139,9 +117,7 @@ module Beaker
 
       it 'resets the step name' do
         path = 'test.rb'
-        File.open(path, 'w') do |f|
-          f.write ""
-        end
+        File.write(path, "")
         @path = path
         # we have to create a TestCase by hand, so that we can set old
         tc = described_class.new({}, logger, {}, path)

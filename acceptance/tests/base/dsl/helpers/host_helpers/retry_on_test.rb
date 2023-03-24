@@ -4,7 +4,7 @@ test_name "dsl::helpers::host_helpers #retry_on" do
   step "#retry_on CURRENTLY fails with a RuntimeError if command does not pass after all retries" do
     # NOTE: would have expected this to fail with Beaker::Hosts::CommandFailure
 
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
 
@@ -14,7 +14,7 @@ test_name "dsl::helpers::host_helpers #retry_on" do
   end
 
   step "#retry_on succeeds if command passes before retries are exhausted" do
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir
     remote_script_file = File.join(remote_tmpdir, "test.sh")
     create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
 
@@ -27,7 +27,7 @@ test_name "dsl::helpers::host_helpers #retry_on" do
     # NOTE: would expect this to work across hosts, or be better documented and
     #       to raise Beaker::Host::CommandFailure
 
-    remote_tmpdir = default.tmpdir()
+    remote_tmpdir = default.tmpdir
     remote_script_file = File.join(remote_tmpdir, "test.sh")
 
     hosts.each do |host|

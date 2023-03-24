@@ -63,9 +63,7 @@ module Beaker
             if command.is_a? String
               cmd_opts = {}
               # add any additional environment variables to the command
-              if opts[:environment]
-                cmd_opts['ENV'] = opts[:environment]
-              end
+              cmd_opts['ENV'] = opts[:environment] if opts[:environment]
               command_object = Command.new(command.to_s, [], cmd_opts)
             elsif command.is_a? Command
               if opts[:environment]
@@ -236,9 +234,7 @@ module Beaker
           FileUtils.mkdir_p(targetdir)
           scp_from(host, from_path, targetdir, opts)
           # scp_from does succeed on a non-existant file, checking if the file/folder actually exists
-          if not File.exist?(filename)
-            raise IOError, "No such file or directory - #{filename}"
-          end
+          raise IOError, "No such file or directory - #{filename}" if not File.exist?(filename)
 
           create_tarball(archive_root, archive_name)
         end
@@ -376,13 +372,11 @@ module Beaker
         #
         # @return nil
         def add_system32_hosts_entry(host, opts = {})
-          if host.is_powershell?
-            hosts_file = 'C:\Windows\System32\Drivers\etc\hosts'
-            host_entry = "#{opts['ip']}`t`t#{opts['name']}"
-            on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
-          else
-            raise "nothing to do for #{host.name} on #{host['platform']}"
-          end
+          raise "nothing to do for #{host.name} on #{host['platform']}" unless host.is_powershell?
+
+          hosts_file = 'C:\Windows\System32\Drivers\etc\hosts'
+          host_entry = "#{opts['ip']}`t`t#{opts['name']}"
+          on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         end
 
         # Back up the given file in the current_dir to the new_dir

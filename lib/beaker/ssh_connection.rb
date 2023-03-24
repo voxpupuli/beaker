@@ -289,9 +289,7 @@ module Beaker
 
     def scp_to source, target, options = {}
       local_opts = options.dup
-      if local_opts[:recursive].nil?
-        local_opts[:recursive] = File.directory?(source)
-      end
+      local_opts[:recursive] = File.directory?(source) if local_opts[:recursive].nil?
       local_opts[:chunk_size] ||= 16384
 
       result = Result.new(@hostname, [source, target])
@@ -303,7 +301,7 @@ module Beaker
         target = self.execute(%{echo "#{target}"}).output.strip.delete('"') if target.include?('%')
 
         @ssh.scp.upload! source, target, local_opts do |_ch, name, sent, total|
-          result.stdout << ("\tcopying %s: %10d/%d\n" % [name, sent, total])
+          result.stdout << (format("\tcopying %s: %10d/%d\n", name, sent, total))
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
@@ -323,9 +321,7 @@ module Beaker
 
     def scp_from source, target, options = {}
       local_opts = options.dup
-      if local_opts[:recursive].nil?
-        local_opts[:recursive] = true
-      end
+      local_opts[:recursive] = true if local_opts[:recursive].nil?
       local_opts[:chunk_size] ||= 16384
 
       result = Result.new(@hostname, [source, target])
@@ -337,7 +333,7 @@ module Beaker
         source = self.execute(%{echo "#{source}"}).output.strip.delete('"') if source.include?('%')
 
         @ssh.scp.download! source, target, local_opts do |_ch, name, sent, total|
-          result.stdout << ("\tcopying %s: %10d/%d\n" % [name, sent, total])
+          result.stdout << (format("\tcopying %s: %10d/%d\n", name, sent, total))
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<

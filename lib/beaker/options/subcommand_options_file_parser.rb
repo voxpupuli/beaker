@@ -4,9 +4,7 @@ module Beaker
     module SubcommandOptionsParser
       def self.parse_options_file(options_file_path)
         result = OptionsHash.new
-        if File.exist?(options_file_path)
-          result = YAML.load_file(options_file_path)
-        end
+        result = YAML.load_file(options_file_path) if File.exist?(options_file_path)
         result
       end
 

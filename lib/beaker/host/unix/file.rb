@@ -110,7 +110,7 @@ module Unix::File
   # @return [String] Filename of the repo
   def repo_filename(package_name, build_version)
     variant, version, arch, codename = self['platform'].to_array
-    repo_filename = "pl-%s-%s-" % [package_name, build_version]
+    repo_filename = format("pl-%s-%s-", package_name, build_version)
 
     case variant
     when /fedora|el|redhat|centos|cisco_nexus|cisco_ios_xr|opensuse|sles/
@@ -130,15 +130,10 @@ module Unix::File
 
       pattern = "%s-%s%s-%s.repo"
 
-      repo_filename << (pattern % [
-        variant,
-        fedora_prefix,
-        version,
-        arch,
-      ])
+      repo_filename << (format(pattern, variant, fedora_prefix, version, arch))
     when /debian|ubuntu|cumulus|huaweios/
       codename = variant if variant == 'cumulus' || variant == 'huaweios'
-      repo_filename << ("%s.list" % [codename])
+      repo_filename << (format("%s.list", codename))
     else
       msg = "#repo_filename: repo filename pattern not known for platform '#{self['platform']}'"
       raise ArgumentError, msg

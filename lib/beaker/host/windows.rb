@@ -44,9 +44,7 @@ module Windows
         @ssh_server = :bitvise
       else
         status = execute('cmd.exe /c sc qc sshd', :accept_all_exit_codes => true)
-        if status&.include?('C:\\Windows\\System32\\OpenSSH\\sshd.exe')
-          @ssh_server = :win32_openssh
-        end
+        @ssh_server = :win32_openssh if status&.include?('C:\\Windows\\System32\\OpenSSH\\sshd.exe')
       end
       @ssh_server
     end

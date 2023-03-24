@@ -109,7 +109,7 @@ module Beaker
       start = Time.now
       done = repeat_fibonacci_style_for(attempts) { port_open?(port) }
       if done
-        @logger.debug('connected in %0.2f seconds' % (Time.now - start))
+        @logger.debug(format('connected in %0.2f seconds', (Time.now - start)))
       else
         @logger.debug('timeout')
       end
@@ -227,16 +227,14 @@ module Beaker
           return self[:instance].ip_address
         elsif self[:hypervisor] == 'openstack' && self[:ip]
           return self[:ip]
-        else
+        elsif self.instance_of?(Windows::Host)
           # In the case of using ec2 instances with the --no-provision flag, the ec2
           # instance object does not exist and we should just use the curl endpoint
           # specified here:
           # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
-          if self.instance_of?(Windows::Host)
-            execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
-          else
-            execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
-          end
+          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+        else
+          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
         end
       end
     end
@@ -263,15 +261,9 @@ module Beaker
                                             self['user'],
                                             self['ssh'], { :logger => @logger, :ssh_connection_preference => self[:ssh_connection_preference] })
       # update connection information
-      if self['ip'] && (@connection.ip != self['ip'])
-        @connection.ip = self['ip']
-      end
-      if self['vmhostname'] && (@connection.vmhostname != self['vmhostname'])
-        @connection.vmhostname = self['vmhostname']
-      end
-      if @name && (@connection.hostname != @name)
-        @connection.hostname = @name
-      end
+      @connection.ip = self['ip'] if self['ip'] && (@connection.ip != self['ip'])
+      @connection.vmhostname = self['vmhostname'] if self['vmhostname'] && (@connection.vmhostname != self['vmhostname'])
+      @connection.hostname = @name if @name && (@connection.hostname != @name)
       @connection
     end
 
@@ -323,9 +315,7 @@ module Beaker
           end
         end
 
-        if not options[:silent]
-          @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds
-        end
+        @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds if not options[:silent]
 
         if options[:reset_connection]
           # Expect the connection to fail hard and possibly take a long time timeout.
@@ -410,9 +400,7 @@ module Beaker
       end
 
       # either a single file, or a directory with no ignores
-      if not File.file?(source) and not File.directory?(source)
-        raise IOError, "No such file or directory - #{source}"
-      end
+      raise IOError, "No such file or directory - #{source}" if not File.file?(source) and not File.directory?(source)
 
       if File.file?(source) or (File.directory?(source) and not has_ignore)
         source_file = source
@@ -496,9 +484,7 @@ module Beaker
       rsync_args = []
       ssh_args = []
 
-      if not File.file?(from_path) and not File.directory?(from_path)
-        raise IOError, "No such file or directory - #{from_path}"
-      end
+      raise IOError, "No such file or directory - #{from_path}" if not File.file?(from_path) and not File.directory?(from_path)
 
       # We enable achieve mode and compression
       rsync_args << "-az"
@@ -525,43 +511,33 @@ module Beaker
 
       if filesystem_ssh_config
         ssh_args << "-F #{filesystem_ssh_config}"
-      else
-        if ssh_opts.has_key?('keys') and
-           ssh_opts.has_key?('auth_methods') and
-           ssh_opts['auth_methods'].include?('publickey')
-
-          # find the first SSH key that exists
-          key = Array(ssh_opts['keys']).find do |k|
-            File.exist?(k)
-          end
-
-          if key
-            # rsync doesn't always play nice with tilde, so be sure to expand first
-            ssh_args << "-i #{File.expand_path(key)}"
-          end
+      elsif ssh_opts.has_key?('keys') and
+            ssh_opts.has_key?('auth_methods') and
+            ssh_opts['auth_methods'].include?('publickey')
+        key = Array(ssh_opts['keys']).find do |k|
+          File.exist?(k)
         end
+
+        if key
+          # rsync doesn't always play nice with tilde, so be sure to expand first
+          ssh_args << "-i #{File.expand_path(key)}"
+        end
+
+        # find the first SSH key that exists
       end
 
-      if ssh_opts.has_key?(:port)
-        ssh_args << "-p #{ssh_opts[:port]}"
-      end
+      ssh_args << "-p #{ssh_opts[:port]}" if ssh_opts.has_key?(:port)
 
       # We disable prompt when host isn't known
       ssh_args << "-o 'StrictHostKeyChecking no'"
 
-      if not ssh_args.empty?
-        rsync_args << "-e \"ssh #{ssh_args.join(' ')}\""
-      end
+      rsync_args << "-e \"ssh #{ssh_args.join(' ')}\"" if not ssh_args.empty?
 
-      if opts.has_key?(:ignore) and not opts[:ignore].empty?
-        rsync_args << opts[:ignore].map { |value| "--exclude '#{value}'" }.join(' ')
-      end
+      rsync_args << opts[:ignore].map { |value| "--exclude '#{value}'" }.join(' ') if opts.has_key?(:ignore) and not opts[:ignore].empty?
 
       # We assume that the *contents* of the directory 'from_path' needs to be
       # copied into the directory 'to_path'
-      if File.directory?(from_path) and not from_path.end_with?('/')
-        from_path += '/'
-      end
+      from_path += '/' if File.directory?(from_path) and not from_path.end_with?('/')
 
       @logger.notify "rsync: localhost:#{from_path} to #{hostname_with_user}:#{to_path} {:ignore => #{opts[:ignore]}}"
       result = Rsync.run(from_path, to_path, rsync_args)

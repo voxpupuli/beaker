@@ -26,13 +26,9 @@ module Beaker
       def run_in_parallel?(local_options = nil, global_options = nil, mode = nil)
         run_in_parallel = local_options[:run_in_parallel] unless local_options.nil?
 
-        if !run_in_parallel.nil? && run_in_parallel.is_a?(Array)
-          run_in_parallel = false
-        end
+        run_in_parallel = false if !run_in_parallel.nil? && run_in_parallel.is_a?(Array)
 
-        if run_in_parallel.nil? && global_options && global_options[:run_in_parallel].is_a?(Array)
-          run_in_parallel = global_options[:run_in_parallel].include?(mode)
-        end
+        run_in_parallel = global_options[:run_in_parallel].include?(mode) if run_in_parallel.nil? && global_options && global_options[:run_in_parallel].is_a?(Array)
 
         run_in_parallel
       end

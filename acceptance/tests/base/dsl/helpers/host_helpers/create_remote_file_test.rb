@@ -8,9 +8,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
         result = create_remote_file(
           host, remote_filename, contents, opts
         ) # return of block is whether or not we're done repeating
-        if result.is_a?(Rsync::Result) || result.is_a?(Beaker::Result)
-          return result.success?
-        end
+        return result.success? if result.is_a?(Rsync::Result) || result.is_a?(Beaker::Result)
 
         result.all? { |individual_result| individual_result.success? }
       rescue Beaker::Host::CommandFailure => e

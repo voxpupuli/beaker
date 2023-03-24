@@ -47,9 +47,7 @@ module Beaker
     # Provision all virtual machines.  Provision machines according to their set hypervisor, if no hypervisor
     # is selected assume that the described hosts are already up and reachable and do no provisioning.
     def provision
-      if @hypervisors
-        cleanup
-      end
+      cleanup if @hypervisors
       @hypervisors = {}
       # sort hosts by their hypervisor, use hypervisor 'none' if no hypervisor is specified
       hostless_options = Beaker::Options::OptionsHash.new.merge(@options.select { |k, _v| !k.to_s.include?('HOSTS') })
@@ -82,30 +80,30 @@ module Beaker
     # attempt to add them.
     # @raise [Exception] Raise an exception if virtual machines fail to be validated
     def validate
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].validate
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].validate
       end
     end
 
     # Configure all provisioned machines, adding any packages or settings required for SUTs
     # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def configure
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].configure
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].configure
       end
     end
 
     # configure proxy on all provioned machines
     # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def proxy_package_manager
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].proxy_package_manager
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].proxy_package_manager
       end
     end
 

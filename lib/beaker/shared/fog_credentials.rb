@@ -41,20 +41,14 @@ module Beaker
         rescue Psych::SyntaxError, Errno::ENOENT => e
           raise fog_credential_error fog_file_path, from_env, "(#{e.class}) #{e.message}"
         end
-        if fog == false # YAML.load => false for empty file
-          raise fog_credential_error fog_file_path, from_env, "is empty."
-        end
+        raise fog_credential_error fog_file_path, from_env, "is empty." if fog == false # YAML.load => false for empty file
 
         # transparently support symbols or strings for keys
         fog = StringifyHash.new.merge!(fog)
         # respect credential from env
         # @note ENV must be a string, e.g. "default" not ":default"
-        if ENV["FOG_CREDENTIAL"]
-          credential_group = ENV["FOG_CREDENTIAL"].to_sym
-        end
-        if not fog[credential_group]
-          raise fog_credential_error fog_file_path, from_env, "could not load the specified credential group '#{credential_group}'."
-        end
+        credential_group = ENV["FOG_CREDENTIAL"].to_sym if ENV["FOG_CREDENTIAL"]
+        raise fog_credential_error fog_file_path, from_env, "could not load the specified credential group '#{credential_group}'." if not fog[credential_group]
 
         fog[credential_group]
       end

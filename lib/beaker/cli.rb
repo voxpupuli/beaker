@@ -106,9 +106,7 @@ module Beaker
         end
 
         # Setup perf monitoring if needed
-        if /(aggressive)|(normal)/.match?(@options[:collect_perf_data].to_s)
-          @perf = Beaker::Perf.new(@hosts, @options)
-        end
+        @perf = Beaker::Perf.new(@hosts, @options) if /(aggressive)|(normal)/.match?(@options[:collect_perf_data].to_s)
 
         # pre acceptance  phase
         run_suite(:pre_suite, :fast)
@@ -142,9 +140,7 @@ module Beaker
         # cleanup on error
         if /(never)|(onpass)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after failed run"
-          if @network_manager
-            @network_manager.cleanup
-          end
+          @network_manager.cleanup if @network_manager
         else
           preserve_hosts_file
         end
@@ -165,16 +161,12 @@ module Beaker
         # cleanup on success
         if /(never)|(onfail)/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after successful run"
-          if @network_manager
-            @network_manager.cleanup
-          end
+          @network_manager.cleanup if @network_manager
         else
           preserve_hosts_file
         end
 
-        if @logger.is_debug?
-          print_reproduction_info(:debug)
-        end
+        print_reproduction_info(:debug) if @logger.is_debug?
       end
     end
 
@@ -197,9 +189,7 @@ module Beaker
     def configured_options
       result = Beaker::Options::OptionsHash.new
       @attribution.each do |attribute, setter|
-        if setter != 'preset'
-          result[attribute] = @options[attribute]
-        end
+        result[attribute] = @options[attribute] if setter != 'preset'
       end
       result
     end
@@ -272,8 +262,8 @@ module Beaker
     def print_env_vars_affecting_beaker(log_level)
       non_beaker_env_vars = ['BUNDLE_PATH', 'BUNDLE_BIN', 'GEM_HOME', 'GEM_PATH', 'RUBYLIB', 'PATH']
       env_var_map = non_beaker_env_vars.each_with_object({}) do |possibly_set_vars, memo|
-        set_var = Array(possibly_set_vars).detect { |possible_var| ENV[possible_var] }
-        memo[set_var] = ENV[set_var] if set_var
+        set_var = Array(possibly_set_vars).detect { |possible_var| ENV.fetch(possible_var, nil) }
+        memo[set_var] = ENV.fetch(set_var, nil) if set_var
       end
 
       env_var_map = env_var_map.merge(Beaker::Options::Presets.new.env_vars)
@@ -304,24 +294,24 @@ module Beaker
     def print_command_line(log_level = :debug)
       @logger.send(log_level, "\nYou can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
-      if @options[:hosts_preserved_yaml_file]
-        set_docker_warning = false
-        has_supported_hypervisor = false
-        @hosts.each do |host|
-          case host[:hypervisor]
-          when /vagrant|fusion|vmpooler|vcloud/
-            has_supported_hypervisor = true
-          when /docker/
-            set_docker_warning = true
-          end
-        end
-        if has_supported_hypervisor
-          reproducing_command = build_hosts_preserved_reproducing_command(@options[:command_line], @options[:hosts_preserved_yaml_file])
-          @logger.send(log_level, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
-          @logger.send(log_level, '(docker support is untested for this feature. please reference the docs for more info)') if set_docker_warning
-          @logger.send(log_level, reproducing_command)
+      return unless @options[:hosts_preserved_yaml_file]
+
+      set_docker_warning = false
+      has_supported_hypervisor = false
+      @hosts.each do |host|
+        case host[:hypervisor]
+        when /vagrant|fusion|vmpooler|vcloud/
+          has_supported_hypervisor = true
+        when /docker/
+          set_docker_warning = true
         end
       end
+      return unless has_supported_hypervisor
+
+      reproducing_command = build_hosts_preserved_reproducing_command(@options[:command_line], @options[:hosts_preserved_yaml_file])
+      @logger.send(log_level, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
+      @logger.send(log_level, '(docker support is untested for this feature. please reference the docs for more info)') if set_docker_warning
+      @logger.send(log_level, reproducing_command)
     end
 
     # provides a new version of the command given, edited for re-use with a

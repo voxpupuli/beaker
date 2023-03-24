@@ -173,19 +173,15 @@ module Beaker
           role.each do |r|
             add_role_def r
           end
-        else
-          if not respond_to? role
-            if !/\A[[:alpha:]]+[a-zA-Z0-9_]*[!?=]?\Z/.match?(role)
-              raise ArgumentError, "Role name format error for '#{role}'.  Allowed characters are: \na-Z\n0-9 (as long as not at the beginning of name)\n'_'\n'?', '!' and '=' (only as individual last character at end of name)"
-            end
+        elsif not respond_to? role
+          if !/\A[[:alpha:]]+[a-zA-Z0-9_]*[!?=]?\Z/.match?(role)
+            raise ArgumentError, "Role name format error for '#{role}'.  Allowed characters are: \na-Z\n0-9 (as long as not at the beginning of name)\n'_'\n'?', '!' and '=' (only as individual last character at end of name)"
+          end
 
-            self.class.send :define_method, role.to_s do
-              hosts_with_role = hosts_as role.to_sym
-              if hosts_with_role.length == 1
-                hosts_with_role = hosts_with_role.pop
-              end
-              hosts_with_role
-            end
+          self.class.send :define_method, role.to_s do
+            hosts_with_role = hosts_as role.to_sym
+            hosts_with_role = hosts_with_role.pop if hosts_with_role.length == 1
+            hosts_with_role
           end
         end
       end

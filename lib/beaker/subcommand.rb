@@ -86,9 +86,7 @@ module Beaker
       options_to_write = SubcommandUtil.sanitize_options_for_save(@cli.configured_options)
 
       @cli.logger.notify 'Writing configured options to disk'
-      File.open(SubcommandUtil::SUBCOMMAND_OPTIONS, 'w') do |f|
-        f.write(options_to_write.to_yaml)
-      end
+      File.write(SubcommandUtil::SUBCOMMAND_OPTIONS, options_to_write.to_yaml)
       @cli.logger.notify "Options written to #{SubcommandUtil::SUBCOMMAND_OPTIONS}"
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
@@ -111,9 +109,7 @@ module Beaker
       end
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
-      if state.transaction { state['provisioned'] }
-        SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.')
-      end
+      SubcommandUtil.error_with('Provisioned SUTs detected. Please destroy and reprovision.') if state.transaction { state['provisioned'] }
 
       @cli.parse_options
       @cli.provision
@@ -197,13 +193,13 @@ module Beaker
 
       @cli.execute!
 
-      if options['preserve-state']
-        @cli.logger.notify 'updating HOSTS key in subcommand_options'
-        hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
-        options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
-        options_storage.transaction do
-          options_storage['HOSTS'] = hosts
-        end
+      return unless options['preserve-state']
+
+      @cli.logger.notify 'updating HOSTS key in subcommand_options'
+      hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
+      options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
+      options_storage.transaction do
+        options_storage['HOSTS'] = hosts
       end
     end
 
@@ -219,9 +215,7 @@ module Beaker
       end
 
       state = YAML::Store.new(SubcommandUtil::SUBCOMMAND_STATE)
-      unless state.transaction { state['provisioned'] }
-        SubcommandUtil.error_with('Please provision an environment')
-      end
+      SubcommandUtil.error_with('Please provision an environment') unless state.transaction { state['provisioned'] }
 
       @cli.parse_options
       @cli.options[:provision] = false

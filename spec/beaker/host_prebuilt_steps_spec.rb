@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Beaker do
-  let(:options)        { make_opts.merge({ 'logger' => double().as_null_object }) }
+  let(:options)        { make_opts.merge({ 'logger' => double.as_null_object }) }
   let(:ntpserver_set)  { "ntp_server_set" }
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
@@ -29,9 +29,7 @@ describe Beaker do
     it "can enable root login on #{platform}" do
       hosts = make_hosts({ :platform => platform, :is_cygwin => non_cygwin })
 
-      if commands.empty?
-        expect(Beaker::Command).to receive(:new).exactly(0).times
-      end
+      expect(Beaker::Command).to receive(:new).exactly(0).times if commands.empty?
 
       commands.each do |command|
         expect(Beaker::Command).to receive(:new).with(command).exactly(3).times

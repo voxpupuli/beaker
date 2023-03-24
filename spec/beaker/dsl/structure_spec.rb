@@ -189,7 +189,7 @@ describe ClassMixedWithDSLStructure do
     it 'append a block to the @teardown var' do
       teardown_array = double
       subject.instance_variable_set :@teardown_procs, teardown_array
-      block = lambda { 'blah' }
+      block = -> { 'blah' }
       expect(teardown_array).to receive(:<<).with(block)
       subject.teardown(&block)
     end
@@ -201,24 +201,24 @@ describe ClassMixedWithDSLStructure do
       expect(logger).to receive(:notify)
       # We changed this lambda to use the simplest assert possible; using assert_equal
       # caused an error in minitest 5.9.0 trying to write to the file system.
-      block = lambda { assert(false, 'this assertion should be caught') }
+      block = -> { assert(false, 'this assertion should be caught') }
       expect { subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'passes when a Beaker assertion is raised' do
       expect(subject).to receive(:logger).and_return(logger)
       expect(logger).to receive(:notify)
-      block = lambda { refute_match('1', '1', '1 and 1 should not match') }
+      block = -> { refute_match('1', '1', '1 and 1 should not match') }
       expect { subject.expect_failure 'this is an expected failure', &block }.not_to raise_error
     end
 
     it 'fails when a non-Beaker, non-MiniTest assertion is raised' do
-      block = lambda { raise 'not a Beaker or MiniTest error' }
+      block = -> { raise 'not a Beaker or MiniTest error' }
       expect { subject.expect_failure 'this has a non-Beaker, non-MiniTest exception', &block }.to raise_error(RuntimeError, /not a Beaker or MiniTest error/)
     end
 
     it 'fails when no assertion is raised' do
-      block = lambda { expect('1').to(eq('1'), '1 should equal 1') }
+      block = -> { expect('1').to(eq('1'), '1 should equal 1') }
       expect { subject.expect_failure 'this has no failure', &block }.to raise_error(RuntimeError, /An assertion was expected to fail, but passed/)
     end
   end

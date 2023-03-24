@@ -67,9 +67,9 @@ module Beaker
     #
     # @return nil
     def self.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
-      if not File.file?(File.join(File.dirname(xml_file), File.basename(stylesheet)))
-        FileUtils.copy(stylesheet, File.join(File.dirname(xml_file), File.basename(stylesheet)))
-      end
+      return if File.file?(File.join(File.dirname(xml_file), File.basename(stylesheet)))
+
+      FileUtils.copy(stylesheet, File.join(File.dirname(xml_file), File.basename(stylesheet)))
     end
 
     # sets up doc & gives us the suites for the testsuite named
@@ -85,9 +85,7 @@ module Beaker
         suites = REXML::XPath.first(doc, "testsuites")
         # remove old data
         suites.elements.each("testsuite") do |e|
-          if /#{name}/.match?(e.name)
-            suites.delete_element e
-          end
+          suites.delete_element e if /#{name}/.match?(e.name)
         end
       else
         suites = doc.add_element(REXML::Element.new('testsuites'))

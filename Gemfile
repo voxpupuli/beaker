@@ -15,8 +15,8 @@ gemspec
 
 if ENV['BEAKER_PE_PR_REPO_URL']
   lib = ENV['BEAKER_PE_PR_REPO_URL'].match(/\/([^\/]+)\.git$/)[1]
-  author = ENV['BEAKER_PE_PR_AUTHOR']
-  ref = ENV['BEAKER_PE_PR_COMMIT']
+  author = ENV.fetch('BEAKER_PE_PR_AUTHOR', nil)
+  ref = ENV.fetch('BEAKER_PE_PR_COMMIT', nil)
   gem lib, :git => "git@github.com:#{author}/#{lib}.git", :branch => ref
 end
 

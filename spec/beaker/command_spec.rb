@@ -5,11 +5,11 @@ module Beaker
     subject(:cmd) { described_class.new(command, args, options) }
 
     let(:command) { @command || '/bin/ls' }
-    let(:args)    { @args    || Array.new }
-    let(:options) { @options || Hash.new  }
+    let(:args)    { @args    || [] }
+    let(:options) { @options || {} }
 
     let(:host)    do
-      h = Hash.new
+      h = {}
       allow(h).to receive(:environment_string).and_return('')
       h
     end
@@ -94,10 +94,10 @@ module Beaker
     subject(:cmd) { described_class.new(command, args, options) }
 
     let(:command) { @command || '/bin/ls' }
-    let(:args)    { @args    || Array.new }
-    let(:options) { @options || Hash.new  }
+    let(:args)    { @args    || [] }
+    let(:options) { @options || {} }
 
-    let(:host)    { Hash.new }
+    let(:host)    { {} }
 
     it 'returns a simple string passed in' do
       @command = "pants"
@@ -119,7 +119,7 @@ module Beaker
     subject(:cmd)     { described_class.new(platform, expression, filename, options) }
 
     let(:host)        do
-      h = Hash.new
+      h = {}
       allow(h).to receive(:environment_string).and_return('')
       allow(h).to receive(:prepend_commands).and_return('')
       allow(h).to receive(:append_commands).and_return('')
@@ -128,7 +128,7 @@ module Beaker
     let(:platform)    { @platform   || 'unix' }
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
-    let(:options)     { @options    || Hash.new }
+    let(:options)     { @options    || {} }
 
     it 'forms a basic sed command correctly' do
       expect(cmd.cmd_line host).to be === "sed -i -e \"#{expression}\" #{filename}"

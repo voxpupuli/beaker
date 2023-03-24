@@ -6,8 +6,8 @@ class ClassMixedWithDSLRoles
 end
 
 describe ClassMixedWithDSLRoles do
-  let(:hosts)      { @hosts || Hash.new }
-  let(:options)    { @options || Hash.new }
+  let(:hosts)      { @hosts || {} }
+  let(:options)    { @options || {} }
   let(:agent1)     { make_host('agent1',     { :roles => ['agent'] }) }
   let(:agent2)     { make_host('agent2',     { :roles => ['agent'] }) }
   let(:a_and_dash) { make_host('a_and_dash', { :roles => ['agent', 'dashboard'] }) }

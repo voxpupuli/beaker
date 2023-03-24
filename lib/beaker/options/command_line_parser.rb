@@ -152,9 +152,7 @@ module Beaker
                   'Ensure SUT colored output is preserved',
                   '(default: false)' do |bool|
             @cmd_options[:color_host_output] = bool
-            if bool
-              @cmd_options[:color_host_output] = true
-            end
+            @cmd_options[:color_host_output] = true if bool
           end
 
           opts.on '--log-level LEVEL',

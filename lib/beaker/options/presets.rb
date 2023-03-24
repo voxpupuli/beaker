@@ -44,9 +44,7 @@ module Beaker
       def select_env_by_regex regex
         envs = Beaker::Options::OptionsHash.new
         ENV.each_pair do |k, v|
-          if /#{regex}/.match?(k.to_s)
-            envs[k] = v
-          end
+          envs[k] = v if /#{regex}/.match?(k.to_s)
         end
         envs
       end
@@ -60,8 +58,8 @@ module Beaker
         env_var_spec.each_with_object({}) do |key_value, memo|
           key, value = key_value[0], key_value[1]
 
-          set_env_var = Array(value).detect { |possible_variable| ENV[possible_variable] }
-          memo[key] = ENV[set_env_var] if set_env_var
+          set_env_var = Array(value).detect { |possible_variable| ENV.fetch(possible_variable, nil) }
+          memo[key] = ENV.fetch(set_env_var, nil) if set_env_var
         end
       end
 
@@ -85,9 +83,7 @@ module Beaker
 
           found_env_vars[:type] = type
         end
-        if found_env_vars[:run_in_parallel]
-          found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',')
-        end
+        found_env_vars[:run_in_parallel] = found_env_vars[:run_in_parallel].split(',') if found_env_vars[:run_in_parallel]
 
         found_env_vars[:pe_version_file_win] = found_env_vars[:pe_version_file]
         found_env_vars
@@ -124,13 +120,13 @@ module Beaker
                   :department => 'unknown',
                   :created_by => ENV['USER'] || ENV['USERNAME'] || 'unknown',
                   :host_tags => {},
-                  :openstack_api_key => ENV['OS_PASSWORD'],
-                  :openstack_username => ENV['OS_USERNAME'],
-                  :openstack_auth_url => "#{ENV['OS_AUTH_URL']}/tokens",
-                  :openstack_tenant => ENV['OS_TENANT_NAME'],
-                  :openstack_keyname => ENV['OS_KEYNAME'],
-                  :openstack_network => ENV['OS_NETWORK'],
-                  :openstack_region => ENV['OS_REGION'],
+                  :openstack_api_key => ENV.fetch('OS_PASSWORD', nil),
+                  :openstack_username => ENV.fetch('OS_USERNAME', nil),
+                  :openstack_auth_url => "#{ENV.fetch('OS_AUTH_URL', nil)}/tokens",
+                  :openstack_tenant => ENV.fetch('OS_TENANT_NAME', nil),
+                  :openstack_keyname => ENV.fetch('OS_KEYNAME', nil),
+                  :openstack_network => ENV.fetch('OS_NETWORK', nil),
+                  :openstack_region => ENV.fetch('OS_REGION', nil),
                   :openstack_volume_support => ENV['OS_VOLUME_SUPPORT'] || true,
                   :jenkins_build_url => nil,
                   :validate => true,
@@ -177,7 +173,7 @@ module Beaker
                   :host_name_prefix => nil,
                   :ssh_env_file => '~/.ssh/environment',
                   :profile_d_env_file => '/etc/profile.d/beaker_env.sh',
-                  :dot_fog => File.join(ENV['HOME'], '.fog'),
+                  :dot_fog => File.join(ENV.fetch('HOME', nil), '.fog'),
                   :ec2_yaml => 'config/image_templates/ec2.yaml',
                   :help => false,
                   :collect_perf_data => 'none',
@@ -195,8 +191,8 @@ module Beaker
                     :auth_methods => ["publickey"],
                     :port => 22,
                     :forward_agent => true,
-                    :keys => ["#{ENV['HOME']}/.ssh/id_rsa"],
-                    :user_known_hosts_file => "#{ENV['HOME']}/.ssh/known_hosts",
+                    :keys => ["#{ENV.fetch('HOME', nil)}/.ssh/id_rsa"],
+                    :user_known_hosts_file => "#{ENV.fetch('HOME', nil)}/.ssh/known_hosts",
                     :keepalive => true,
                   },
                 })

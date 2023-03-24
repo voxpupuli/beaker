@@ -82,9 +82,7 @@ module Beaker
         host_options['HOSTS'].each_key do |host|
           host_options['HOSTS'][host]['roles'] ||= []
         end
-        if host_options.has_key?('CONFIG')
-          host_options = host_options.merge(host_options.delete('CONFIG'))
-        end
+        host_options = host_options.merge(host_options.delete('CONFIG')) if host_options.has_key?('CONFIG')
         host_options
       end
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 require 'fileutils'
 ['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
   require "beaker/#{lib}"
@@ -88,7 +86,7 @@ module Beaker
 
       average_test_time = elapsed_time / test_count
 
-      summary_logger.notify %[
+      summary_logger.notify format(%[
 
               - Test Case Summary for suite '#{@name}' -
        Total Suite Time: %.2f seconds
@@ -102,7 +100,7 @@ module Beaker
                   Total: #{@total_tests}
 
       - Specific Test Case Status -
-        ] % [elapsed_time, average_test_time]
+        ], elapsed_time, average_test_time)
 
       grouped_summary = @test_cases.group_by { |test_case| test_case.test_status }
 
@@ -195,7 +193,7 @@ module Beaker
               ['skipped', skipped_tests],
               ['pending', pending_tests],
               ['total', @total_tests],
-              ['time', "%f" % (stop_time - start_time)],
+              ['time', format("%f", (stop_time - start_time))],
             ],
           )
           properties = suite.add_element(REXML::Element.new('properties'))

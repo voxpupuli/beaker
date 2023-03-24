@@ -69,11 +69,10 @@ module Beaker
             end
             sleep SLEEPWAIT
           end
-          if success
-            logger.notify "NTP date succeeded on #{host} after #{try} tries"
-          else
-            raise "NTP date was not successful after #{try} tries"
-          end
+          raise "NTP date was not successful after #{try} tries" unless success
+
+          logger.notify "NTP date succeeded on #{host} after #{try} tries"
+
         end
       end
       nil
@@ -212,9 +211,7 @@ module Beaker
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        if /ubuntu|debian|cumulus/.match?(host[:platform])
-          host.exec(Command.new("apt-get update"))
-        end
+        host.exec(Command.new("apt-get update")) if /ubuntu|debian|cumulus/.match?(host[:platform])
       end
     end
 
@@ -256,9 +253,9 @@ module Beaker
       return_value ||= domain
       return_value ||= search
 
-      if return_value
-        return_value.gsub(/\.$/, '')
-      end
+      return unless return_value
+
+      return_value.gsub(/\.$/, '')
     end
 
     # Append the provided string to the /etc/hosts file of the provided host
@@ -273,13 +270,13 @@ module Beaker
         host.exec(Command.new("echo '#{etc_hosts}' >> /etc/hosts"))
       end
       # AIX must be configured to prefer local DNS over external
-      if host['platform'].include?('aix')
-        aix_netsvc = '/etc/netsvc.conf'
-        aix_local_resolv = 'hosts = local, bind'
-        unless host.exec(Command.new("grep '#{aix_local_resolv}' #{aix_netsvc}"), :accept_all_exit_codes => true).exit_code == 0
-          host.exec(Command.new("echo '#{aix_local_resolv}' >> #{aix_netsvc}"))
-        end
-      end
+      return unless host['platform'].include?('aix')
+
+      aix_netsvc = '/etc/netsvc.conf'
+      aix_local_resolv = 'hosts = local, bind'
+      return if host.exec(Command.new("grep '#{aix_local_resolv}' #{aix_netsvc}"), :accept_all_exit_codes => true).exit_code == 0
+
+      host.exec(Command.new("echo '#{aix_local_resolv}' >> #{aix_netsvc}"))
     end
 
     # Make it possible to log in as root by copying the current users ssh keys to the root account
@@ -314,9 +311,7 @@ module Beaker
           host.exec(Command.new('sudo su -c "cp -r .ssh /root/."'), { :pty => true })
         end
 
-        if host.selinux_enabled?
-          host.exec(Command.new('sudo fixfiles restore /root'))
-        end
+        host.exec(Command.new('sudo fixfiles restore /root')) if host.selinux_enabled?
       end
     end
 
@@ -478,9 +473,7 @@ module Beaker
 
       env.each_key do |key|
         separator = host['pathseparator']
-        if key == 'PATH' && (not host.is_powershell?)
-          separator = ':'
-        end
+        separator = ':' if key == 'PATH' && (not host.is_powershell?)
         env[key] = env[key].join(separator)
       end
       env
@@ -503,9 +496,7 @@ module Beaker
 
         logger.debug("setting local environment on #{host.name}")
 
-        if host['platform'].include?('windows') && host.is_cygwin?
-          env['CYGWIN'] = 'nodosfilewarning'
-        end
+        env['CYGWIN'] = 'nodosfilewarning' if host['platform'].include?('windows') && host.is_cygwin?
 
         host.ssh_permit_user_environment
         host.ssh_set_user_environment(env)

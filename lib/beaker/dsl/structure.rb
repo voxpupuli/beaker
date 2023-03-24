@@ -37,32 +37,30 @@ module Beaker
       def step step_name, &block
         logger.notify "\n* #{step_name}\n"
         set_current_step_name(step_name)
-        if block
-          begin
-            logger.with_indent do
-              yield
-            end
-          rescue Exception => e
-            if @options.has_key?(:debug_errors) && @options[:debug_errors] == true
+        return unless block
+
+        begin
+          logger.with_indent(&block)
+        rescue Exception => e
+          if @options.has_key?(:debug_errors) && @options[:debug_errors] == true
+            begin
+              require 'pry'
+            rescue LoadError
               begin
-                require 'pry'
+                require 'debug'
               rescue LoadError
-                begin
-                  require 'debug'
-                rescue LoadError
-                  logger.exception('Unable to load pry and debug while debug_errors was true')
-                else
-                  logger.info("Exception raised during step execution and debug-errors option is set, entering debug. Exception was: #{e.inspect}")
-                  binding.break # rubocop:disable Lint/Debugger
-                end
+                logger.exception('Unable to load pry and debug while debug_errors was true')
               else
-                logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
-                logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
-                binding.pry # rubocop:disable Lint/Debugger
+                logger.info("Exception raised during step execution and debug-errors option is set, entering debug. Exception was: #{e.inspect}")
+                binding.break # rubocop:disable Lint/Debugger
               end
+            else
+              logger.info("Exception raised during step execution and debug-errors option is set, entering pry. Exception was: #{e.inspect}")
+              logger.info("HINT: Use the pry 'backtrace' and 'up' commands to navigate to the test code")
+              binding.pry # rubocop:disable Lint/Debugger
             end
-            raise e
           end
+          raise e
         end
       end
 
@@ -90,12 +88,10 @@ module Beaker
             fail_message = ''
             loop do
               fail_message = Readline.readline('What was the reason for failure? ', true).squeeze(" ").strip
-              if fail_message == ''
-                # if nothing is entered we tell the user to enter something
-                puts "No reason for failure given, please enter reason for failure."
-              else
-                break
-              end
+              break unless fail_message == ''
+
+              # if nothing is entered we tell the user to enter something
+              puts "No reason for failure given, please enter reason for failure."
             end
             raise Beaker::DSL::FailTest, fail_message
           else
@@ -128,14 +124,12 @@ module Beaker
       # @param [String] my_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      def test_name my_name
+      def test_name my_name, &block
         logger.notify "\n#{my_name}\n"
         set_current_test_name(my_name)
-        if block_given?
-          logger.with_indent do
-            yield
-          end
-        end
+        return unless block
+
+        logger.with_indent(&block)
       end
 
       # Declare a teardown process that will be called after a test case is
@@ -339,18 +333,14 @@ module Beaker
       #   should return true if the host matches this additional criteria.
       #
       # @return [Array<Host>] Returns an array of hosts that meet the provided criteria
-      def select_hosts(criteria, host_array = nil)
+      def select_hosts(criteria, host_array = nil, &block)
         hosts_to_select_from = host_array || hosts
         criteria.each_pair do |property, value|
           hosts_to_select_from = hosts_to_select_from.select do |host|
             inspect_host host, property, value
           end
         end
-        if block_given?
-          hosts_to_select_from = hosts_to_select_from.select do |host|
-            yield host
-          end
-        end
+        hosts_to_select_from = hosts_to_select_from.select(&block) if block
         hosts_to_select_from
       end
 

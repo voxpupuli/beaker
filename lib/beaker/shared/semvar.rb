@@ -15,13 +15,10 @@ module Beaker
         a_nums = a.split('-')[0].split('.')
         b_nums = b.split('-')[0].split('.')
         (0...a_nums.length).each do |i|
-          if i < b_nums.length
-            if a_nums[i].to_i < b_nums[i].to_i
-              return true
-            elsif a_nums[i].to_i > b_nums[i].to_i
-              return false
-            end
-          else
+          return false unless i < b_nums.length
+          if a_nums[i].to_i < b_nums[i].to_i
+            return true
+          elsif a_nums[i].to_i > b_nums[i].to_i
             return false
           end
         end
@@ -39,29 +36,28 @@ module Beaker
         elsif !a_is_release && !b_is_release
           a_next = a_rest.shift
           b_next = b_rest.shift
-          if a_is_rc && b_is_rc
-            a_rc = a_next.gsub('rc', '').to_i
-            b_rc = b_next.gsub('rc', '').to_i
-            if a_rc < b_rc
-              return true
-            elsif a_rc > b_rc
-              return false
-            else
-              a_next = a_rest.shift
-              b_next = b_rest.shift
-              if a_next && b_next
-                return a_next.to_i < b_next.to_i
-              else
-                # If a has nothing after -rc#, it is a tagged RC and
-                # b must be a later build after this tag.
-                return a_next.nil?
-              end
-            end
+          return a_is_rc unless a_is_rc && b_is_rc
+
+          a_rc = a_next.gsub('rc', '').to_i
+          b_rc = b_next.gsub('rc', '').to_i
+          if a_rc < b_rc
+            return true
+          elsif a_rc > b_rc
+            return false
           else
-            # If one of them is not an rc (and also not a release),
-            # that one is a post-release build. So if a is the RC, it is less.
-            return a_is_rc
+            a_next = a_rest.shift
+            b_next = b_rest.shift
+            return a_next.to_i < b_next.to_i if a_next && b_next
+
+            # If a has nothing after -rc#, it is a tagged RC and
+            # b must be a later build after this tag.
+            return a_next.nil?
+
           end
+
+        # If one of them is not an rc (and also not a release),
+        # that one is a post-release build. So if a is the RC, it is less.
+
         else
           return (b_is_release && a_is_rc) || (a_is_release && !b_is_rc)
         end

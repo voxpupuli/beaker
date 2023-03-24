@@ -27,9 +27,7 @@ module Beaker
         result = Beaker::Options::OptionsHash.new
         if options_file_path
           options_file_path = File.expand_path(options_file_path)
-          unless File.exist?(options_file_path)
-            raise ArgumentError, "Specified options file '#{options_file_path}' does not exist!"
-          end
+          raise ArgumentError, "Specified options file '#{options_file_path}' does not exist!" unless File.exist?(options_file_path)
 
           # This eval will allow the specified options file to have access to our
           #  scope.  It is important that the variable 'options_file_path' is

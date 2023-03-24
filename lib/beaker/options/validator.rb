@@ -51,9 +51,9 @@ module Beaker
       # @return [nil] Does not return anything
       def validate_fail_mode(fail_mode)
         # check for valid fail mode
-        unless fail_mode.is_a?(String) && VALID_FAIL_MODES.match?(fail_mode)
-          validator_error "--fail-mode must be one of fast or slow, not '#{fail_mode}'"
-        end
+        return if fail_mode.is_a?(String) && VALID_FAIL_MODES.match?(fail_mode)
+
+        validator_error "--fail-mode must be one of fast or slow, not '#{fail_mode}'"
       end
 
       # Raises an error if hosts_setting is not a supported preserve hosts value.
@@ -62,9 +62,9 @@ module Beaker
       # @return [nil] Does not return anything
       def validate_preserve_hosts(hosts_setting)
         # check for valid preserve_hosts option
-        unless hosts_setting.is_a?(String) && VALID_PRESERVE_HOSTS.match?(hosts_setting)
-          validator_error("--preserve_hosts must be one of always, onfail, onpass or never, not '#{hosts_setting}'")
-        end
+        return if hosts_setting.is_a?(String) && VALID_PRESERVE_HOSTS.match?(hosts_setting)
+
+        validator_error("--preserve_hosts must be one of always, onfail, onpass or never, not '#{hosts_setting}'")
       end
 
       # Raise an error if host does not have a platform defined.
@@ -73,9 +73,9 @@ module Beaker
       # @param [String] name Host name
       # @return [nil] Does not return anything
       def validate_platform(host, name)
-        if !host['platform'] || host['platform'].empty?
-          validator_error "Host #{name} does not have a platform specified"
-        end
+        return unless !host['platform'] || host['platform'].empty?
+
+        validator_error "Host #{name} does not have a platform specified"
       end
 
       # Raise an error if an item exists in both the include and exclude lists.
@@ -86,16 +86,12 @@ module Beaker
       # @param [Array] tags_exclude excluded items
       # @return [nil] Does not return anything
       def validate_test_tags(tags_and, tags_or, tags_exclude)
-        if tags_and.length > 0 && tags_or.length > 0
-          validator_error "cannot have values for both test tagging operands (AND and OR)"
-        end
+        validator_error "cannot have values for both test tagging operands (AND and OR)" if tags_and.length > 0 && tags_or.length > 0
 
         tags_and.each do |included_tag|
           # select items from exclude set that match included_tag
           # no match is an empty list/array/[]
-          if tags_exclude.select { |ex| ex == included_tag } != []
-            validator_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets"
-          end
+          validator_error "tag '#{included_tag}' cannot be in both the included and excluded tag sets" if tags_exclude.select { |ex| ex == included_tag } != []
         end
       end
 
@@ -104,9 +100,9 @@ module Beaker
       # @param [Array<String>] role_array List of roles
       # @raise [ArgumentError] Raises if role_array contains conflicting roles
       def validate_frictionless_roles(role_array)
-        if role_array.include?(FRICTIONLESS_ROLE) and !(role_array & FRICTIONLESS_ADDITIONAL_ROLES).empty?
-          validator_error "Only agent nodes may have the role 'frictionless'."
-        end
+        return unless role_array.include?(FRICTIONLESS_ROLE) and !(role_array & FRICTIONLESS_ADDITIONAL_ROLES).empty?
+
+        validator_error "Only agent nodes may have the role 'frictionless'."
       end
 
       # Raise an error if the master count is incorrect.
@@ -115,9 +111,9 @@ module Beaker
       # @return [nil] Nothing is returned
       # @raise [ArgumentError] Raises if master count is greater than 1
       def validate_master_count(count)
-        if count > 1
-          validator_error("Only one host/node may have the role 'master'.")
-        end
+        return unless count > 1
+
+        validator_error("Only one host/node may have the role 'master'.")
       end
 
       # Raise an error if file_list is empty
@@ -126,9 +122,9 @@ module Beaker
       # @param [String] path file path to report in error
       # @raise [ArgumentError] Raises if file_list is empty
       def validate_files(file_list, path)
-        if file_list.empty?
-          validator_error("No files found for path: '#{path}'")
-        end
+        return unless file_list.empty?
+
+        validator_error("No files found for path: '#{path}'")
       end
 
       # Raise an error if path is not a valid file or directory
@@ -136,9 +132,9 @@ module Beaker
       # @param [String] path File path
       # @raise [ArgumentError] Raises if path is not a valid file or directory
       def validate_path(path)
-        if !File.file?(path) && !File.directory?(path)
-          validator_error("#{path} used as a file option but is not a file or directory!")
-        end
+        return unless !File.file?(path) && !File.directory?(path)
+
+        validator_error("#{path} used as a file option but is not a file or directory!")
       end
     end
   end

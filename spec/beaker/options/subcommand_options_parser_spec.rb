@@ -3,7 +3,7 @@ require 'spec_helper'
 module Beaker
   module Options
     describe '#parse_subcommand_options' do
-      let(:home_options_file_path) { ENV['HOME'] + '/.beaker/subcommand_options.yaml' }
+      let(:home_options_file_path) { ENV.fetch('HOME', nil) + '/.beaker/subcommand_options.yaml' }
       let(:parser_mod) { Beaker::Options::SubcommandOptionsParser }
       let(:parser) { parser_mod.parse_subcommand_options(argv, options_file) }
       let(:file_parser) { parser_mod.parse_options_file({}) }
