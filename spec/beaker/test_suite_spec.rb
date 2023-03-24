@@ -59,9 +59,9 @@ module Beaker
       it 'fails fast if fail_mode != :slow and runtime error is raised' do
         allow(Logger).to receive('new')
         @files = [rb_test, pl_test, sh_test]
-        File.open(rb_test, 'w') { |file| file.write(broken_script) }
-        File.open(pl_test, 'w') { |file| file.write(okay_script) }
-        File.open(sh_test, 'w') { |file| file.write(okay_script) }
+        File.write(rb_test, broken_script)
+        File.write(pl_test, okay_script)
+        File.write(sh_test, okay_script)
 
         ts = described_class.new('name', hosts, options, Time.now, :stop)
         tsr = ts.instance_variable_get(:@test_suite_results)
@@ -78,9 +78,9 @@ module Beaker
       it 'fails fast if fail_mode != :slow and fail test is raised' do
         allow(Logger).to receive('new')
         @files = [rb_test, pl_test, sh_test]
-        File.open(rb_test, 'w') { |file| file.write(fail_script) }
-        File.open(pl_test, 'w') { |file| file.write(okay_script) }
-        File.open(sh_test, 'w') { |file| file.write(okay_script) }
+        File.write(rb_test, fail_script)
+        File.write(pl_test, okay_script)
+        File.write(sh_test, okay_script)
 
         ts = described_class.new('name', hosts, options, Time.now, :stop)
         tsr = ts.instance_variable_get(:@test_suite_results)
@@ -97,9 +97,9 @@ module Beaker
       it 'fails slow if fail_mode = :slow, even if a test fails and there is a runtime error' do
         allow(Logger).to receive('new')
         @files = [rb_test, pl_test, sh_test]
-        File.open(rb_test, 'w') { |file| file.write(broken_script) }
-        File.open(pl_test, 'w') { |file| file.write(fail_script) }
-        File.open(sh_test, 'w') { |file| file.write(okay_script) }
+        File.write(rb_test, broken_script)
+        File.write(pl_test, fail_script)
+        File.write(sh_test, okay_script)
 
         ts = described_class.new('name', hosts, options, Time.now, :slow)
         tsr = ts.instance_variable_get(:@test_suite_results)
