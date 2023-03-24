@@ -109,7 +109,7 @@ module Beaker
       # @param [Array] git_opts An array of paths
       # @return [Array] An array of fully qualified git repo URLs with expanded keywords
       def parse_git_repos(git_opts)
-        git_opts.map! { |opt|
+        git_opts.map! do |opt|
           case opt
           when /^PUPPET\//
             opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
@@ -121,7 +121,7 @@ module Beaker
             opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
           end
           opt
-        }
+        end
         git_opts
       end
 

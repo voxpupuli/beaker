@@ -14,13 +14,13 @@ describe Beaker do
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
-  let(:hosts) {
+  let(:hosts) do
     hosts = make_hosts({ :stdout => stdout, :platform => platform })
     hosts[0][:roles] = ['agent']
     hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
     hosts[2][:roles] = ['agent']
     hosts
-  }
+  end
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -377,13 +377,13 @@ describe Beaker do
     end
 
     context "on windows" do
-      let(:host) {
+      let(:host) do
         make_host('name', {
                     :platform => 'windows',
                     :is_cygwin => cygwin,
                     :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
-      }
+      end
 
       context "with cygwin" do
         let(:cygwin) { true }
@@ -408,12 +408,12 @@ describe Beaker do
 
     ['centos', 'redhat'].each do |platform|
       context "on platform '#{platform}'" do
-        let(:host) {
+        let(:host) do
           make_host('name', {
                       :platform => platform,
                       :stdout => stdout,
                     })
-        }
+        end
 
         before do
           expect(Beaker::Command).to receive(:new).with("cat /etc/resolv.conf").once

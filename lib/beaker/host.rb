@@ -317,11 +317,11 @@ module Beaker
         # the options should come at the end of the method signature (rubyism)
         # and they shouldn't be ssh specific
 
-        seconds = Benchmark.realtime {
+        seconds = Benchmark.realtime do
           @logger.with_indent do
             result = connection.execute(cmdline, options, output_callback)
           end
-        }
+        end
 
         if not options[:silent]
           @logger.debug "\n#{log_prefix} executed in %0.2f seconds" % seconds

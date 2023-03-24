@@ -228,9 +228,9 @@ module Beaker
       @cli.initialize_network_manager
       @cli.network_manager.cleanup
 
-      state.transaction {
+      state.transaction do
         state.delete('provisioned')
-      }
+      end
     end
   end
 end

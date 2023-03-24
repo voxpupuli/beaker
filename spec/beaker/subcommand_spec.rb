@@ -3,9 +3,9 @@ require 'spec_helper'
 module Beaker
   SubcommandUtil = Beaker::Subcommands::SubcommandUtil
   describe Subcommand do
-    let(:subcommand) {
+    let(:subcommand) do
       described_class.new
-    }
+    end
 
     describe '#initialize' do
       it 'creates a cli object' do
@@ -32,7 +32,7 @@ module Beaker
     end
 
     context 'ensure that beaker options can be passed through' do
-      let(:beaker_options_list) {
+      let(:beaker_options_list) do
         [
           'options-file',
           'helper',
@@ -74,7 +74,7 @@ module Beaker
           'type',
           'debug',
         ]
-      }
+      end
 
       let(:yaml_store_mock) { double('yaml_store_mock') }
 
@@ -249,9 +249,9 @@ module Beaker
       it 'rejects comma-separated file and suite name' do
         allow_any_instance_of(Pathname).to receive(:exist?).and_return(false)
 
-        expect {
+        expect do
           subcommand.exec('pre-suite,tests/whoops')
-        }.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
+        end.to raise_error(ArgumentError, %r{Unable to parse pre-suite,tests/whoops})
       end
 
       it 'updates the subcommand_options file with new host info if `preserve-state` is set' do

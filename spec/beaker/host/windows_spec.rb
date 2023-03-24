@@ -26,13 +26,13 @@ end
 module Windows
   describe Host do
     let(:options)  { @options ? @options : {} }
-    let(:platform) {
+    let(:platform) do
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
       else
         { :platform => Beaker::Platform.new('windows-vers-arch-extra') }
       end
-    }
+    end
     let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#determine_ssh_server' do

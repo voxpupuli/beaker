@@ -12,16 +12,16 @@ end
 
 module Beaker
   describe CLI do
-    let(:cli) {
+    let(:cli) do
       allow(File).to receive(:exist?).and_call_original
       allow(File).to receive(:exist?).with('.beaker.yml').and_return(false)
       described_class.new.parse_options
-    }
+    end
 
     context 'initializing and parsing' do
-      let(:cli) {
+      let(:cli) do
         described_class.new
-      }
+      end
 
       describe 'instance variable initialization' do
         it 'creates a logger for use before parse is called' do
@@ -95,9 +95,9 @@ module Beaker
 
     describe '#combined_instance_and_options_hosts' do
       let(:options_host) { { 'HOSTS' => { 'ubuntu' => { :options_attribute => 'options' } } } }
-      let(:instance_host) {
+      let(:instance_host) do
         [Beaker::Host.create('ubuntu', { :platform => 'host' }, {})]
-      }
+      end
 
       before do
         cli.instance_variable_set(:@options, options_host)

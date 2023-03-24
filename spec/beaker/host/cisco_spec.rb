@@ -2,18 +2,18 @@ require 'spec_helper'
 
 module Cisco
   describe Host do
-    let(:options) {
+    let(:options) do
       @options ? @options : {
         :user => 'root',
       }
-    }
-    let(:platform) {
+    end
+    let(:platform) do
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
       else
         { :platform => Beaker::Platform.new('cisco_nexus-vers-arch-extra') }
       end
-    }
+    end
     let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#prepend_commands' do
@@ -270,9 +270,9 @@ module Cisco
         end
 
         it 'errors when no :vrf value is provided' do
-          expect {
+          expect do
             host.validate_setup
-          }.to raise_error(ArgumentError, /provided\ with\ a\ \:vrf\ value/)
+          end.to raise_error(ArgumentError, /provided\ with\ a\ \:vrf\ value/)
         end
 
         it 'errors when no :user value is provided' do
@@ -280,9 +280,9 @@ module Cisco
             :vrf => 'fake_vrf',
             :user => nil,
           }
-          expect {
+          expect do
             host.validate_setup
-          }.to raise_error(ArgumentError, /provided\ with\ a\ \:user\ value/)
+          end.to raise_error(ArgumentError, /provided\ with\ a\ \:user\ value/)
         end
 
         it 'does nothing if the host is setup correctly' do
@@ -313,9 +313,9 @@ module Cisco
             :vrf => 'fake_vrf',
             :user => nil,
           }
-          expect {
+          expect do
             host.validate_setup
-          }.to raise_error(ArgumentError, /provided\ with\ a\ \:user\ value/)
+          end.to raise_error(ArgumentError, /provided\ with\ a\ \:user\ value/)
         end
 
         it 'does nothing if the host is setup correctly' do

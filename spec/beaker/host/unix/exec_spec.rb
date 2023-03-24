@@ -99,9 +99,9 @@ module Beaker
 
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing01-parts-arch'
-        expect {
+        expect do
           instance.ssh_permit_user_environment
-        }.to raise_error(ArgumentError, /#{opts['platform']}/)
+        end.to raise_error(ArgumentError, /#{opts['platform']}/)
       end
     end
 
@@ -135,9 +135,9 @@ module Beaker
 
       it 'raises an error on unsupported platforms' do
         opts['platform'] = 'notarealthing02-parts-arch'
-        expect {
+        expect do
           instance.ssh_service_restart
-        }.to raise_error(ArgumentError, /#{opts['platform']}/)
+        end.to raise_error(ArgumentError, /#{opts['platform']}/)
       end
     end
 

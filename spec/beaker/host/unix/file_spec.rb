@@ -25,13 +25,13 @@ module Beaker
 
     let(:opts)     { @opts || {} }
     let(:logger)   { double('logger').as_null_object }
-    let(:platform) {
+    let(:platform) do
       if @platform
         { 'platform' => Beaker::Platform.new(@platform) }
       else
         { 'platform' => Beaker::Platform.new('osx-10.9-x86_64') }
       end
-    }
+    end
     let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
@@ -49,9 +49,9 @@ module Beaker
 
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
-        expect {
+        expect do
           instance.repo_type
-        }.to raise_error(ArgumentError, /repo\ type\ not\ known/)
+        end.to raise_error(ArgumentError, /repo\ type\ not\ known/)
       end
     end
 
@@ -80,9 +80,9 @@ module Beaker
 
       it 'errors for all other platform types' do
         @platform = 'eos-4-x86_64'
-        expect {
+        expect do
           instance.package_config_dir
-        }.to raise_error(ArgumentError, /package\ config\ dir\ unknown/)
+        end.to raise_error(ArgumentError, /package\ config\ dir\ unknown/)
       end
     end
 
@@ -158,25 +158,25 @@ module Beaker
 
       it 'errors for non-el or debian-based platforms' do
         @platform = 'freebsd-22-x86_64'
-        expect {
+        expect do
           instance.repo_filename('pkg_name', 'pkg_version')
-        }.to raise_error(ArgumentError, /repo\ filename\ pattern\ not\ known/)
+        end.to raise_error(ArgumentError, /repo\ filename\ pattern\ not\ known/)
       end
     end
 
     describe '#noask_file_text' do
       it 'errors on non-solaris platforms' do
         @platform = 'cumulus-4000-x86_64'
-        expect {
+        expect do
           instance.noask_file_text
-        }.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
+        end.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
       end
 
       it 'errors on solaris versions other than 10' do
         @platform = 'solaris-11-x86_64'
-        expect {
+        expect do
           instance.noask_file_text
-        }.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
+        end.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
       end
 
       it 'returns the noask file correctly for solaris 10' do

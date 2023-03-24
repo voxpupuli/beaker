@@ -18,7 +18,7 @@ describe ClassMixedWithDSLStructure do
 
   describe '#step' do
     it 'requires a name' do
-      expect { subject.step do; end }.to raise_error ArgumentError
+      expect { subject.step { ; } }.to raise_error ArgumentError
     end
 
     it 'notifies the logger' do
@@ -62,7 +62,7 @@ describe ClassMixedWithDSLStructure do
       let(:options) { { exec_manual_tests: nil } }
 
       it 'requires a name' do
-        expect { subject.manual_step do; end }.to raise_error ArgumentError
+        expect { subject.manual_step { ; } }.to raise_error ArgumentError
       end
 
       it 'notifies the logger' do
@@ -79,7 +79,7 @@ describe ClassMixedWithDSLStructure do
       let(:options) { { exec_manual_tests: true } }
 
       it 'requires a name' do
-        expect { subject.manual_step do; end }.to raise_error ArgumentError
+        expect { subject.manual_step { ; } }.to raise_error ArgumentError
       end
 
       it 'pass when user enters Y' do
@@ -107,7 +107,7 @@ describe ClassMixedWithDSLStructure do
       let(:options) { {} }
 
       it 'requires a name' do
-        expect { subject.manual_test do; end }.to raise_error ArgumentError
+        expect { subject.manual_test { ; } }.to raise_error ArgumentError
       end
 
       it 'raises a skip test' do
@@ -123,7 +123,7 @@ describe ClassMixedWithDSLStructure do
       let(:options) { { exec_manual_tests: true } }
 
       it 'requires a name' do
-        expect { subject.manual_test do; end }.to raise_error ArgumentError
+        expect { subject.manual_test { ; } }.to raise_error ArgumentError
       end
 
       it 'notifies the logger' do
@@ -157,7 +157,7 @@ describe ClassMixedWithDSLStructure do
 
   describe '#test_name' do
     it 'requires a name' do
-      expect { subject.test_name do; end }.to raise_error ArgumentError
+      expect { subject.test_name { ; } }.to raise_error ArgumentError
     end
 
     it 'notifies the logger' do
@@ -267,9 +267,9 @@ describe ClassMixedWithDSLStructure do
       allow(subject).to receive(:hosts).and_return(hosts)
       allow(subject).to receive(:hosts=)
 
-      expect {
+      expect do
         subject.confine(:regardless, { :thing => 'value' })
-      }.to raise_error('Unknown option regardless')
+      end.to raise_error('Unknown option regardless')
     end
 
     it 'rejects hosts that do not meet simple hash criteria' do

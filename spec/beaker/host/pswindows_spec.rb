@@ -3,18 +3,18 @@ require 'spec_helper'
 module PSWindows
   describe Host do
     let(:options)  { @options ? @options : {} }
-    let(:platform) {
+    let(:platform) do
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
       else
         { :platform => Beaker::Platform.new('windows-vers-arch-extra') }
       end
-    }
-    let(:host) {
+    end
+    let(:host) do
       opts = options.merge(platform)
       opts[:is_cygwin] = false
       make_host('name', opts)
-    }
+    end
 
     describe '#external_copy_base' do
       it 'returns previously calculated value if set' do

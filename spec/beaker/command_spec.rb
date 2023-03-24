@@ -8,11 +8,11 @@ module Beaker
     let(:args)    { @args    || Array.new }
     let(:options) { @options || Hash.new  }
 
-    let(:host)    {
+    let(:host)    do
       h = Hash.new
       allow(h).to receive(:environment_string).and_return('')
       h
-    }
+    end
 
     it 'creates a new Command object' do
       @command = '/usr/bin/blah'
@@ -118,13 +118,13 @@ module Beaker
   describe SedCommand do
     subject(:cmd)     { described_class.new(platform, expression, filename, options) }
 
-    let(:host)        {
+    let(:host)        do
       h = Hash.new
       allow(h).to receive(:environment_string).and_return('')
       allow(h).to receive(:prepend_commands).and_return('')
       allow(h).to receive(:append_commands).and_return('')
       h
-    }
+    end
     let(:platform)    { @platform   || 'unix' }
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }

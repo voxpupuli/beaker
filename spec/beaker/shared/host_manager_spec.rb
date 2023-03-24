@@ -15,13 +15,13 @@ module Beaker
       let(:role0)          { "role0" }
       let(:role1)          { :role1 }
       let(:role2)          { :role2 }
-      let(:hosts)          {
+      let(:hosts)          do
         hosts = make_hosts({ :platform => platform })
         hosts[0][:roles] = ['agent', role0]
         hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
         hosts[2][:roles] = ['agent', role2]
         hosts
-      }
+      end
 
       describe "#hosts_with_name" do
         it "can identify the host by name" do
@@ -136,9 +136,9 @@ module Beaker
           # After marshal load and marshal unload, the logger option (an rspec double) is no longer 'equal' to the original.
           # Array of results can be in different order.
           new_host = myhosts.find { |host| host.name == hosts[0].name }
-          hosts[0].options.each { |option|
+          hosts[0].options.each do |option|
             expect(option[1]).to eq(new_host.options[option[0]]) unless option[0] == :logger
-          }
+          end
         end
 
         it "will ignore run_in_parallel global option" do

@@ -3,13 +3,13 @@ require 'spec_helper'
 module Aix
   describe Host do
     let(:options)  { @options ? @options : {} }
-    let(:platform) {
+    let(:platform) do
       if @platform
         { :platform => Beaker::Platform.new(@platform) }
       else
         { :platform => Beaker::Platform.new('aix-vers-arch-extra') }
       end
-    }
+    end
     let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#ssh_service_restart' do

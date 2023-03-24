@@ -41,9 +41,9 @@ describe MacGroupTest do
     it 'yields correctly with the result object' do
       result.stdout = dscacheutil_list
       expect(subject).to receive(:execute).and_yield(result)
-      subject.group_list { |result|
+      subject.group_list do |result|
         expect(result.stdout).to be === dscacheutil_list
-      }
+      end
     end
   end
 

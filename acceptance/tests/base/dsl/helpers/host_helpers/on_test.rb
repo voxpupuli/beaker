@@ -111,9 +111,9 @@ test_name "dsl::helpers::host_helpers #on" do
     confine :except, :hypervisor => 'docker'
 
     parent_pid = Process.pid
-    results = on(hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) {
+    results = on(hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) do
       assert(Process.pid != parent_pid)
-    }
+    end
 
     # assert that we got results back for every host
     assert_equal hosts.size, results.size
@@ -136,10 +136,10 @@ test_name "dsl::helpers::host_helpers #on" do
 
     tmp = nil
     assert_raises NoMethodError do
-      on(hosts, %{echo "blah"}, :run_in_parallel => true) {
+      on(hosts, %{echo "blah"}, :run_in_parallel => true) do
         sleep(1)
         tmp.blah
-      }
+      end
     end
     assert(Time.now > start + 1)
   end
