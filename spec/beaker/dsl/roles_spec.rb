@@ -10,12 +10,12 @@ describe ClassMixedWithDSLRoles do
   let(:options)    { @options || {} }
   let(:agent1)     { make_host('agent1',     { :roles => ['agent'] }) }
   let(:agent2)     { make_host('agent2',     { :roles => ['agent'] }) }
-  let(:a_and_dash) { make_host('a_and_dash', { :roles => ['agent', 'dashboard'] }) }
+  let(:a_and_dash) { make_host('a_and_dash', { :roles => %w[agent dashboard] }) }
   let(:custom)     { make_host('custom',     { :roles => ['custom_role'] }) }
   let(:db)         { make_host('db',         { :roles => ['database'] }) }
-  let(:master)     { make_host('master',     { :roles => ['master', 'agent'] }) }
+  let(:master)     { make_host('master',     { :roles => %w[master agent] }) }
   let(:default)    { make_host('default',    { :roles => ['default'] }) }
-  let(:monolith)   { make_host('monolith',   { :roles => ['agent', 'dashboard', 'database', 'master', 'custom_role'] }) }
+  let(:monolith)   { make_host('monolith',   { :roles => %w[agent dashboard database master custom_role] }) }
 
   describe '#agents' do
     it 'returns an array of hosts that are agents' do
@@ -265,8 +265,8 @@ describe ClassMixedWithDSLRoles do
           [[],            false],
           [['aio'],       true],
           [['gun'],       false],
-          [['a', 'b'],    false],
-          [['c', 'aio'],  true],
+          [%w[a b],    false],
+          [%w[c aio],  true],
         ]
 
         roles_table.each do |answers_row|
@@ -309,7 +309,7 @@ describe ClassMixedWithDSLRoles do
 
   describe '#aio_agent?' do
     it 'returns false if agent_only check doesn\'t pass' do
-      agent1[:roles] = ['agent', 'headless']
+      agent1[:roles] = %w[agent headless]
       expect(subject.aio_agent?(agent1)).to be === false
     end
 

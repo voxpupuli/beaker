@@ -1,4 +1,4 @@
-['host', 'test', 'web', 'hocon'].each do |lib|
+%w[host test web hocon].each do |lib|
   require "beaker/dsl/helpers/#{lib}_helpers"
 end
 

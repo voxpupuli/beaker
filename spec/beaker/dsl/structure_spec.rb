@@ -247,7 +247,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it ':to - uses a provided host subset when no criteria is provided' do
-      subset = ['host1', 'host2']
+      subset = %w[host1 host2]
       hosts = subset.dup << 'host3'
       allow(subject).to receive(:hosts).and_return(hosts).twice
       expect(subject).to receive(:hosts=).with(subset)
@@ -255,7 +255,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it ':except - excludes provided host subset when no criteria is provided' do
-      subset = ['host1', 'host2']
+      subset = %w[host1 host2]
       hosts = subset.dup << 'host3'
       allow(subject).to receive(:hosts).and_return(hosts).twice
       expect(subject).to receive(:hosts=).with(hosts - subset)
@@ -263,7 +263,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'raises when given mode is not :to or :except' do
-      hosts = ['host1', 'host2']
+      hosts = %w[host1 host2]
       allow(subject).to receive(:hosts).and_return(hosts)
       allow(subject).to receive(:hosts=)
 
@@ -289,7 +289,7 @@ describe ClassMixedWithDSLStructure do
       expect(subject).to receive(:hosts=)
         .with([{ 'thing' => 'bar' }])
 
-      subject.confine :except, :thing => ['foo', 'baz']
+      subject.confine :except, :thing => %w[foo baz]
     end
 
     it 'rejects hosts when a passed block returns true' do
@@ -376,7 +376,7 @@ describe ClassMixedWithDSLStructure do
     it 'selects hosts that match a list of criteria' do
       hosts = [{ 'thing' => 'foo' }, { 'thing' => 'bar' }, { 'thing' => 'baz' }]
 
-      expect(subject.select_hosts({ :thing => ['foo', 'baz'] }, hosts)).to be == [{ 'thing' => 'foo' }, { 'thing' => 'baz' }]
+      expect(subject.select_hosts({ :thing => %w[foo baz] }, hosts)).to be == [{ 'thing' => 'foo' }, { 'thing' => 'baz' }]
     end
 
     it 'selects hosts when a passed block returns true' do

@@ -1,5 +1,5 @@
 require 'fileutils'
-['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
+%w[test_case logger test_suite logger_junit].each do |lib|
   require "beaker/#{lib}"
 end
 

@@ -32,7 +32,7 @@ module Beaker
     end
 
     it "gets a group_list" do
-      expect(instance.group_list).to eql(["Foo", "Bar6"])
+      expect(instance.group_list).to eql(%w[Foo Bar6])
     end
 
     it "gets groups with spaces" do
@@ -42,12 +42,12 @@ module Beaker
 
     it "gets groups with dashes" do
       add_group("With-Dashes")
-      expect(instance.group_list).to eql(["Foo", "Bar6", "With-Dashes"])
+      expect(instance.group_list).to eql(%w[Foo Bar6 With-Dashes])
     end
 
     it "gets groups with underscores" do
       add_group("With_Underscores")
-      expect(instance.group_list).to eql(["Foo", "Bar6", "With_Underscores"])
+      expect(instance.group_list).to eql(%w[Foo Bar6 With_Underscores])
     end
   end
 end

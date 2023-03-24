@@ -33,21 +33,21 @@ describe ClassMixedWithDSLStructure do
 
     it 'sets tags on the TestCase\'s metadata object' do
       subject.instance_variable_set(:@options, options)
-      tags = ['pants', 'jayjay', 'moguely']
+      tags = %w[pants jayjay moguely]
       subject.tag(*tags)
       expect(metadata[:case][:tags]).to be === tags
     end
 
     it 'lowercases the tags' do
       subject.instance_variable_set(:@options, options)
-      tags_upper = ['pANTs', 'jAYJAy', 'moGUYly']
+      tags_upper = %w[pANTs jAYJAy moGUYly]
       tags_lower = tags_upper.map(&:downcase)
       subject.tag(*tags_upper)
       expect(metadata[:case][:tags]).to be === tags_lower
     end
 
     it 'skips the test if any of the requested tags isn\'t included in this test' do
-      test_tags     = ['pants', 'jayjay', 'moguely']
+      test_tags     = %w[pants jayjay moguely]
       @test_tag_and = test_tags.compact.push('needed_tag_not_in_test')
       subject.instance_variable_set(:@options, options)
 
@@ -57,7 +57,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'runs the test if all requested tags are included in this test' do
-      @test_tag_and = ['pants_on_head', 'jayjay_jayjay', 'mo']
+      @test_tag_and = %w[pants_on_head jayjay_jayjay mo]
       test_tags     = @test_tag_and.compact.push('extra_asdf')
       subject.instance_variable_set(:@options, options)
 
@@ -67,7 +67,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if any of the excluded tags are included in this test' do
-      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      test_tags         = %w[ports jay_john_mary mog_the_dog]
       @test_tag_exclude = [test_tags[0]]
       subject.instance_variable_set(:@options, options)
 
@@ -77,7 +77,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if an and-included & excluded tag are in this test' do
-      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      test_tags         = %w[ports jay_john_mary mog_the_dog]
       @test_tag_and     = [test_tags[1]]
       @test_tag_exclude = [test_tags[0]]
       subject.instance_variable_set(:@options, options)
@@ -88,8 +88,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'runs the test if none of the excluded tags are included in this test' do
-      @test_tag_exclude = ['pants_on_head', 'jayjay_jayjay', 'mo']
-      test_tags         = ['pants_at_head', 'jayj00_jayjay', 'motly_crew']
+      @test_tag_exclude = %w[pants_on_head jayjay_jayjay mo]
+      test_tags         = %w[pants_at_head jayj00_jayjay motly_crew]
       subject.instance_variable_set(:@options, options)
 
       allow(subject).to receive(:path)
@@ -98,8 +98,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if none of the OR tags are included in this test' do
-      test_tags = ['portmanteau', 'foolios']
-      @test_tag_or = ['fish', 'crayons', 'parkas']
+      test_tags = %w[portmanteau foolios]
+      @test_tag_or = %w[fish crayons parkas]
       subject.instance_variable_set(:@options, options)
 
       allow(subject).to receive(:path)
@@ -108,8 +108,8 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'runs the test if only one of the OR tags are included in this test' do
-      test_tags = ['portmanteau', 'foolios']
-      @test_tag_or = ['foolios', 'crayons', 'parkas']
+      test_tags = %w[portmanteau foolios]
+      @test_tag_or = %w[foolios crayons parkas]
       subject.instance_variable_set(:@options, options)
 
       allow(subject).to receive(:path)
@@ -118,7 +118,7 @@ describe ClassMixedWithDSLStructure do
     end
 
     it 'skips the test if an or-included & excluded tag are included in this test' do
-      test_tags         = ['ports', 'jay_john_mary', 'mog_the_dog']
+      test_tags         = %w[ports jay_john_mary mog_the_dog]
       @test_tag_or      = [test_tags[1]]
       @test_tag_exclude = [test_tags[0]]
       subject.instance_variable_set(:@options, options)
@@ -221,7 +221,7 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       confiner.instance_variable_set(
         :@tag_confine_details_hash, fake_confine_details_hash
       )
-      expect(confiner.confine_details(['tag2', 'tag3'])).to be === []
+      expect(confiner.confine_details(%w[tag2 tag3])).to be === []
     end
 
     context 'descriminates on tag name' do
@@ -234,9 +234,9 @@ describe Beaker::DSL::TestTagging::PlatformTagConfiner do
       }
 
       key_combos_to_test = fake_confine_details_hash.keys.map { |key| [key] }
-      key_combos_to_test << ['tag0', 'tag2']
-      key_combos_to_test << ['tag1', 'tag4']
-      key_combos_to_test << ['tag2', 'tag3', 'tag4']
+      key_combos_to_test << %w[tag0 tag2]
+      key_combos_to_test << %w[tag1 tag4]
+      key_combos_to_test << %w[tag2 tag3 tag4]
       key_combos_to_test << fake_confine_details_hash.keys
 
       before do

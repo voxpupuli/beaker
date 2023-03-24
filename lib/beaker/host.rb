@@ -6,7 +6,7 @@ require 'rsync'
 require 'beaker/dsl/helpers'
 require 'beaker/dsl/patterns'
 
-['command', 'ssh_connection', 'local_connection'].each do |lib|
+%w[command ssh_connection local_connection].each do |lib|
   require "beaker/#{lib}"
 end
 
@@ -549,15 +549,15 @@ module Beaker
     end
   end
 
-  [
-    'unix',
-    'aix',
-    'mac',
-    'freebsd',
-    'windows',
-    'pswindows',
-    'eos',
-    'cisco',
+  %w[
+    unix
+    aix
+    mac
+    freebsd
+    windows
+    pswindows
+    eos
+    cisco
   ].each do |lib|
     require "beaker/host/#{lib}"
   end

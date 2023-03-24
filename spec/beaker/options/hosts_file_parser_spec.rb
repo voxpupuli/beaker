@@ -11,7 +11,7 @@ module Beaker
         it "can correctly read a host file" do
           FakeFS.deactivate!
           config = parser.parse_hosts_file(filepath)
-          expect(config).to be === { :HOSTS => { :"pe-ubuntu-lucid" => { :roles => ["agent", "dashboard", "database", "master"], :vmname => "pe-ubuntu-lucid", :platform => "ubuntu-10.04-i386", :snapshot => "clean-w-keys", :hypervisor => "fusion" }, :"pe-centos6" => { :roles => ["agent"], :vmname => "pe-centos6", :platform => "el-6-i386", :hypervisor => "fusion", :snapshot => "clean-w-keys" } }, :nfs_server => "none", :consoleport => 443 }
+          expect(config).to be === { :HOSTS => { :"pe-ubuntu-lucid" => { :roles => %w[agent dashboard database master], :vmname => "pe-ubuntu-lucid", :platform => "ubuntu-10.04-i386", :snapshot => "clean-w-keys", :hypervisor => "fusion" }, :"pe-centos6" => { :roles => ["agent"], :vmname => "pe-centos6", :platform => "el-6-i386", :hypervisor => "fusion", :snapshot => "clean-w-keys" } }, :nfs_server => "none", :consoleport => 443 }
         end
 
         it "can merge CONFIG section into overall hash" do

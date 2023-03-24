@@ -1,11 +1,11 @@
-['host', 'command_factory', 'command', 'options'].each do |lib|
+%w[host command_factory command options].each do |lib|
   require "beaker/#{lib}"
 end
 
 module Windows
   # A windows host with cygwin tools installed
   class Host < Unix::Host
-    ['user', 'group', 'exec', 'pkg', 'file'].each do |lib|
+    %w[user group exec pkg file].each do |lib|
       require "beaker/host/windows/#{lib}"
     end
 

@@ -352,10 +352,10 @@ module Beaker
             file.write("CONFIG:\n")
           end
           options[:hosts_file] = 'sample.cfg'
-          options[:pre_suite] = ['pre1', 'pre2', 'pre3']
+          options[:pre_suite] = %w[pre1 pre2 pre3]
           options[:post_suite] = ['post1']
           options[:pre_cleanup] = ['preclean1']
-          options[:tests] = ['test1', 'test2']
+          options[:tests] = %w[test1 test2]
 
           cli.instance_variable_set(:@options, options)
           cli.instance_variable_set(:@hosts, hosts)

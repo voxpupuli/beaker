@@ -53,7 +53,7 @@ module Beaker
     context 'to_array' do
       it "converts Beaker::Platform object to array of its attribues" do
         @name = 'debian-7-somethingsomething'
-        expect(platform.to_array).to be === ['debian', '7', 'somethingsomething', 'wheezy']
+        expect(platform.to_array).to be === %w[debian 7 somethingsomething wheezy]
       end
     end
 
@@ -103,7 +103,7 @@ module Beaker
         expect(platform.with_version_codename).to be === 'ubuntu-lucid-xxx'
       end
 
-      ['centos', 'redhat'].each do |p|
+      %w[centos redhat].each do |p|
         it "leaves #{p}-7-xxx alone" do
           @name = "#{p}-7-xxx"
           expect(platform.with_version_codename).to be === "#{p}-7-xxx"
@@ -132,7 +132,7 @@ module Beaker
         expect(platform.with_version_number).to be === 'ubuntu-1210-xxx'
       end
 
-      ['centos', 'redhat'].each do |p|
+      %w[centos redhat].each do |p|
         it "leaves #{p}-7-xxx alone" do
           @name = "#{p}-7-xxx"
           expect(platform.with_version_number).to be === "#{p}-7-xxx"
