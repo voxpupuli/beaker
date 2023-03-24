@@ -269,8 +269,7 @@ module Beaker
       ['http://myproxy.com:3128/',
        'https://myproxy.com:3128/',
        'https://myproxy.com:3128',
-       'http://myproxy.com:3128',
-].each do |url|
+       'http://myproxy.com:3128',].each do |url|
         it "correctly extracts rpm proxy options for #{url}" do
           expect(instance.extract_rpm_proxy_options(url)).to be == '--httpproxy myproxy.com --httpport 3128'
         end
@@ -286,7 +285,7 @@ module Beaker
 
     describe '#install_local_package' do
       let(:platform) { @platform || 'fedora' }
-      let(:version) { @version || 6        }
+      let(:version) { @version || 6 }
 
       before do
         allow(instance).to receive(:[]).with('platform') { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
@@ -346,13 +345,13 @@ module Beaker
 
     describe '#uncompress_local_tarball' do
       let(:platform) { @platform || 'fedora' }
-      let(:version) { @version || 6        }
+      let(:version) { @version || 6 }
       let(:tar_file) { 'test.tar.gz'         }
       let(:base_dir) { '/base/dir/fake'      }
-      let(:download_file) { 'download_file.txt'   }
+      let(:download_file) { 'download_file.txt' }
 
       before do
-        allow(instance).to receive(:[]).with('platform') {  Beaker::Platform.new("#{platform}-#{version}-x86_64")  }
+        allow(instance).to receive(:[]).with('platform') { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
       end
 
       it 'rejects unsupported platforms' do

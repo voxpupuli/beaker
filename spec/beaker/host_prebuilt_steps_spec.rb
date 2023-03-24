@@ -13,14 +13,15 @@ describe Beaker do
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
-  let(:stdout)          { @stdout || ip }
-  let(:hosts)          { hosts = make_hosts({ :stdout => stdout, :platform => platform })
-                         hosts[0][:roles] = ['agent']
-                         hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                         hosts[2][:roles] = ['agent']
-                         hosts
+  let(:stdout) { @stdout || ip }
+  let(:hosts) {
+    hosts = make_hosts({ :stdout => stdout, :platform => platform })
+    hosts[0][:roles] = ['agent']
+    hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
+    hosts[2][:roles] = ['agent']
+    hosts
   }
-  let(:dummy_class)    { Class.new { include Beaker::HostPrebuiltSteps } }
+  let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
     subject { dummy_class.new }
@@ -65,13 +66,13 @@ describe Beaker do
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.12', [
-      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   it_behaves_like 'enables_root_login', 'osx-10.13', [
-      "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
-      "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
+    "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   # Solaris
@@ -376,11 +377,12 @@ describe Beaker do
     end
 
     context "on windows" do
-      let(:host) { make_host('name', {
-        :platform => 'windows',
-        :is_cygwin => cygwin,
-        :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
-      })
+      let(:host) {
+        make_host('name', {
+                    :platform => 'windows',
+                    :is_cygwin => cygwin,
+                    :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
+                  })
       }
 
       context "with cygwin" do
@@ -406,10 +408,11 @@ describe Beaker do
 
     ['centos', 'redhat'].each do |platform|
       context "on platform '#{platform}'" do
-        let(:host) { make_host('name', {
-          :platform => platform,
-          :stdout => stdout,
-        })
+        let(:host) {
+          make_host('name', {
+                      :platform => platform,
+                      :stdout => stdout,
+                    })
         }
 
         before do
@@ -543,10 +546,10 @@ describe Beaker do
 
     it "skips an f5 host correctly" do
       host = make_host('name', {
-         :platform     => 'f5-stuff',
-         :ssh_env_file => 'ssh_env_file',
-         :is_cygwin => true,
-      })
+                         :platform => 'f5-stuff',
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,
@@ -566,10 +569,10 @@ describe Beaker do
 
     it 'skips a cisco host correctly' do
       host = make_host('name', {
-        :platform     => 'cisco_nexus-7-x86_64',
-        :ssh_env_file => 'ssh_env_file',
-        :is_cygwin => true,
-      })
+                         :platform => 'cisco_nexus-7-x86_64',
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,
@@ -589,10 +592,10 @@ describe Beaker do
 
     def test_host_ssh_calls(platform_name)
       host = make_host('name', {
-          :platform     => platform_name,
-          :ssh_env_file => 'ssh_env_file',
-          :is_cygwin => true,
-        })
+                         :platform => platform_name,
+                         :ssh_env_file => 'ssh_env_file',
+                         :is_cygwin => true,
+                       })
       opts = {
         :env1_key => :env1_value,
         :env2_key => :env2_value,

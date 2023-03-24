@@ -66,18 +66,18 @@ module Beaker
       wait = 3
       max_connection_tries = options[:max_connection_tries] || 11
       begin
-         @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
+        @logger.debug "Attempting ssh connection to #{host}, user: #{user}, opts: #{ssh_opts}"
 
-         # Work around net-ssh 6+ incompatibilities
-         if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
-           strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
+        # Work around net-ssh 6+ incompatibilities
+        if ssh_opts.include?(:strict_host_key_checking) && (Net::SSH::Version::CURRENT.major > 5)
+          strict_host_key_checking = ssh_opts.delete(:strict_host_key_checking)
 
-           unless ssh_opts[:verify_host_key].is_a?(Symbol)
-             ssh_opts[:verify_host_key] ||= strict_host_key_checking ? :always : :never
-           end
-         end
+          unless ssh_opts[:verify_host_key].is_a?(Symbol)
+            ssh_opts[:verify_host_key] ||= strict_host_key_checking ? :always : :never
+          end
+        end
 
-         Net::SSH.start(host, user, ssh_opts)
+        Net::SSH.start(host, user, ssh_opts)
       rescue *RETRYABLE_EXCEPTIONS => e
         if try <= max_connection_tries
           @logger.warn "Try #{try} -- Host #{host} unreachable: #{e.class.name} - #{e.message}" unless options[:silent]
@@ -173,11 +173,11 @@ module Beaker
               register_exit_code_for terminal, result
 
               process_stdin_for(terminal, options[:stdin]) if options[:stdin]
-             end
-           end
-           loop_tries = 0
-           # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
-           @ssh.loop { loop_tries += 1; loop_tries < 4 }
+            end
+          end
+          loop_tries = 0
+          # loop is actually loop_forever, so let it try 3 times and then quit instead of endless blocking
+          @ssh.loop { loop_tries += 1; loop_tries < 4 }
         rescue *RETRYABLE_EXCEPTIONS => e
           @logger.debug "Connection on #{@hostname} failed as expected (#{e.class.name} - #{e.message})"
           close # this connection is bad, shut it down
@@ -198,7 +198,7 @@ module Beaker
     end
 
     def try_to_execute command, options = {}, stdout_callback = nil,
-                stderr_callback = stdout_callback
+                       stderr_callback = stdout_callback
 
       result = Result.new(@hostname, command)
 
@@ -308,7 +308,7 @@ module Beaker
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
-          "raise an error."
+                    "raise an error."
         close
       end
 
@@ -342,7 +342,7 @@ module Beaker
         end
       rescue => e
         logger.warn "#{e.class} error in scp'ing. Forcing the connection to close, which should " <<
-          "raise an error."
+                    "raise an error."
         close
       end
 

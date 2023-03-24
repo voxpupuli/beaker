@@ -1,8 +1,8 @@
 module Beaker
-    # The Beaker Logger class
-    # This class handles message reporting for Beaker, it reports based upon a provided log level
-    # to a given destination (be it a string or file)
-    #
+  # The Beaker Logger class
+  # This class handles message reporting for Beaker, it reports based upon a provided log level
+  # to a given destination (be it a string or file)
+  #
   class Logger
     # The results of the most recently run command
     attr_accessor :last_result
@@ -20,7 +20,7 @@ module Beaker
     MAGENTA        = "\e[00;35m"
     CYAN           = "\e[00;36m"
     WHITE          = "\e[00;37m"
-    GREY           = "\e[00;00m"  # Some terms can't handle grey, use normal
+    GREY           = "\e[00;00m" # Some terms can't handle grey, use normal
     BRIGHT_RED     = "\e[01;31m"
     BRIGHT_GREEN   = "\e[01;32m"
     BRIGHT_YELLOW  = "\e[01;33m"
@@ -31,13 +31,13 @@ module Beaker
     NONE           = ""
 
     # The defined log levels.  Each log level also reports messages at levels lower than itself
-    LOG_LEVELS      = {
-      :trace   => 6,
-      :debug   => 5,
+    LOG_LEVELS = {
+      :trace => 6,
+      :debug => 5,
       :verbose => 3,
-      :info    => 2,
-      :notify  => 1,
-      :warn    => 0,
+      :info => 2,
+      :notify => 1,
+      :warn => 0,
     }
 
     attr_accessor :color, :log_level, :destinations, :log_colors
@@ -444,11 +444,11 @@ module Beaker
         if File.symlink? next_path
           link = File.readlink next_path
           next_path =
-              case link
-                when /^\// then link
-                else
-                  File.expand_path(full_path + "/" + link)
-              end
+            case link
+            when /^\// then link
+            else
+              File.expand_path(full_path + "/" + link)
+            end
         end
         next_path
       end

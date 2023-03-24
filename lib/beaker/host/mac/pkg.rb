@@ -38,7 +38,7 @@ module Mac::Pkg
   # @param [String] cmdline_args  Additional command line arguments for
   #                               the package manager
   def upgrade_package(name, _cmdline_args = '')
-      raise "Package #{name} cannot be upgraded on #{self}"
+    raise "Package #{name} cannot be upgraded on #{self}"
   end
 
   # Examine the host system to determine the architecture

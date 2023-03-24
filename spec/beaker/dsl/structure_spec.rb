@@ -276,8 +276,8 @@ describe ClassMixedWithDSLStructure do
       hosts = [{ 'thing' => 'foo' }, { 'thing' => 'bar' }]
 
       expect(subject).to receive(:hosts).and_return(hosts).twice
-      expect(subject).to receive(:hosts=).
-        with([{ 'thing' => 'foo' }])
+      expect(subject).to receive(:hosts=)
+        .with([{ 'thing' => 'foo' }])
 
       subject.confine :to, :thing => 'foo'
     end
@@ -286,8 +286,8 @@ describe ClassMixedWithDSLStructure do
       hosts = [{ 'thing' => 'foo' }, { 'thing' => 'bar' }, { 'thing' => 'baz' }]
 
       expect(subject).to receive(:hosts).and_return(hosts).twice
-      expect(subject).to receive(:hosts=).
-        with([{ 'thing' => 'bar' }])
+      expect(subject).to receive(:hosts=)
+        .with([{ 'thing' => 'bar' }])
 
       subject.confine :except, :thing => ['foo', 'baz']
     end
@@ -301,12 +301,12 @@ describe ClassMixedWithDSLStructure do
       hosts = [host1, host2, host3]
 
       expect(subject).to receive(:hosts).and_return(hosts).twice
-      expect(subject).to receive(:on).
-        with(host1, '/sbin/zonename').
-        and_return(ret1)
-      expect(subject).to receive(:on).
-        with(host1, '/sbin/zonename').
-        and_return(ret2)
+      expect(subject).to receive(:on)
+        .with(host1, '/sbin/zonename')
+        .and_return(ret1)
+      expect(subject).to receive(:on)
+        .with(host1, '/sbin/zonename')
+        .and_return(ret2)
 
       expect(subject).to receive(:hosts=).with([host1])
 
@@ -394,7 +394,7 @@ describe ClassMixedWithDSLStructure do
       expect(subject).to receive(:on).with(host2, '/sbin/zonename').once.and_return(ret2)
 
       selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
-                             subject.on(host, '/sbin/zonename').stdout.include?(':global')
+        subject.on(host, '/sbin/zonename').stdout.include?(':global')
       end
       expect(selected_hosts).to be == [host1]
     end

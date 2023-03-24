@@ -70,8 +70,8 @@ module Beaker
               path_files << root
             elsif File.directory?(root) # expand and explore
               path_files = Dir.glob(File.join(root, '**/*.rb'))
-                               .select { |f| File.file?(f) }
-                               .sort_by { |file| [file.count('/'), file] }
+                              .select { |f| File.file?(f) }
+                              .sort_by { |file| [file.count('/'), file] }
             end
 
             @validator.validate_files(path_files, root)
@@ -111,14 +111,14 @@ module Beaker
       def parse_git_repos(git_opts)
         git_opts.map! { |opt|
           case opt
-            when /^PUPPET\//
-              opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
-            when /^FACTER\//
-              opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
-            when /^HIERA\//
-              opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
-            when /^HIERA-PUPPET\//
-              opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
+          when /^PUPPET\//
+            opt = "#{repo}/puppet.git##{opt.split('/', 2)[1]}"
+          when /^FACTER\//
+            opt = "#{repo}/facter.git##{opt.split('/', 2)[1]}"
+          when /^HIERA\//
+            opt = "#{repo}/hiera.git##{opt.split('/', 2)[1]}"
+          when /^HIERA-PUPPET\//
+            opt = "#{repo}/hiera-puppet.git##{opt.split('/', 2)[1]}"
           end
           opt
         }
@@ -262,7 +262,7 @@ module Beaker
 
           # merge in env vars
           #   overwrite options (default, file options, command line, hosts file) with env
-          env_vars      = @presets.env_vars
+          env_vars = @presets.env_vars
 
           @options = @options.merge(env_vars)
           @attribution = @attribution.merge(tag_sources(env_vars, "env"))

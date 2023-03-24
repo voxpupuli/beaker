@@ -5,7 +5,7 @@ end
 module Aix
   class Host < Unix::Host
     ['user', 'group', 'file', 'exec'].each do |lib|
-        require "beaker/host/aix/#{lib}"
+      require "beaker/host/aix/#{lib}"
     end
 
     include Aix::User

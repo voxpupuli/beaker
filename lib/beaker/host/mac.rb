@@ -3,7 +3,7 @@
 end
 
 module Mac
-    class Host < Unix::Host
+  class Host < Unix::Host
     ['exec', 'user', 'group', 'pkg'].each do |lib|
       require "beaker/host/mac/#{lib}"
     end
@@ -16,10 +16,10 @@ module Mac
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'             => 'root',
-        'group'            => 'root',
-        'pathseparator'    => ':',
-      })
+                'user' => 'root',
+                'group' => 'root',
+                'pathseparator' => ':',
+              })
     end
 
     attr_reader :external_copy_base

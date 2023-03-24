@@ -42,8 +42,8 @@ module Beaker
       end
 
       it 'does not rm' do
-         expect(instance).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
-         expect(instance.mv(origin, destination, false)).to be === 0
+        expect(instance).to receive(:execute).with("mv #{origin} #{destination}").and_return(0)
+        expect(instance.mv(origin, destination, false)).to be === 0
       end
     end
 
@@ -66,13 +66,13 @@ module Beaker
       end
 
       it 'takes an env hash with var_name/value pairs' do
-        expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' })).
-          to be == 'env HOME="/" http_proxy="http://foo" HTTP_PROXY="http://foo"'
+        expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' }))
+          .to be == 'env HOME="/" http_proxy="http://foo" HTTP_PROXY="http://foo"'
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
-        expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] })).
-          to be == "env LD_PATH=\"/:/tmp\""
+        expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] }))
+          .to be == "env LD_PATH=\"/:/tmp\""
       end
     end
 
@@ -174,14 +174,14 @@ module Beaker
             :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
-              :initial => <<~LAST_F,
+            :initial => <<~LAST_F,
               reboot   system boot  2.6.32-754.29.1. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
               reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
-              :success => <<~LAST_F,
+            LAST_F
+            :success => <<~LAST_F,
               reboot   system boot  2.6.32-754.29.1. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
               reboot   system boot  2.6.32-754.29.1. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
+            LAST_F
           },
         },
         :centos7 => {
@@ -190,14 +190,14 @@ module Beaker
             :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
-              :initial => <<~LAST_F,
+            :initial => <<~LAST_F,
               reboot   system boot  3.10.0-1127.el7. Tue May 5 17:34:52 #{year} - Tue May 5 17:52:48 #{year}  (00:17)
               reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
-              :success => <<~LAST_F,
+            LAST_F
+            :success => <<~LAST_F,
               reboot   system boot  3.10.0-1127.el7. Tue May 5 17:52:48 #{year} - Tue May 5 17:52:49 #{year}  (00:17)
               reboot   system boot  3.10.0-1127.el7. Mon May 4 18:45:43 #{year} - Mon May 5 05:35:44 #{year} (4+01:50)
-              LAST_F
+            LAST_F
           },
         },
         :centos8 => {
@@ -206,14 +206,14 @@ module Beaker
             :success => "      system boot  #{year}-05-13 03:52",
           },
           :last => {
-              :initial => <<~LAST_F,
+            :initial => <<~LAST_F,
               reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:52 #{year} still running
               reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
-              LAST_F
-              :success => <<~LAST_F,
+            LAST_F
+            :success => <<~LAST_F,
               reboot   system boot  4.18.0-147.8.1.e Tue May 5 17:34:53 #{year} still running
               reboot   system boot  4.18.0-147.8.1.e Mon May 4 17:41:27 #{year} - Tue May 5 17:00:00 #{year} (5+00:11)
-              LAST_F
+            LAST_F
           },
         },
         :freebsd => {
@@ -387,7 +387,7 @@ module Beaker
             .with('type -P true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
           allow(instance).to receive(:execute)
-                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+            .with(where_command, :accept_all_exit_codes => true).and_return(result)
         end
 
         context 'when only the environment variable PATH is used' do
@@ -422,7 +422,7 @@ module Beaker
             .with('which true', :accept_all_exit_codes => true).and_return('/bin/true').once
 
           allow(instance).to receive(:execute)
-                                 .with(where_command, :accept_all_exit_codes => true).and_return(result)
+            .with(where_command, :accept_all_exit_codes => true).and_return(result)
         end
 
         context 'when only the environment variable PATH is used' do

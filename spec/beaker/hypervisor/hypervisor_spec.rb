@@ -131,8 +131,8 @@ module Beaker
         it "generates hostname with prefix" do
           prefix = "testing-prefix-to-test-"
           options[:host_name_prefix] = prefix
-    expect(hypervisor.generate_host_name().start_with?(prefix)).to be true
-    expect(hypervisor.generate_host_name().length - prefix.length >= 15).to be true
+          expect(hypervisor.generate_host_name().start_with?(prefix)).to be true
+          expect(hypervisor.generate_host_name().length - prefix.length >= 15).to be true
         end
       end
     end

@@ -7,11 +7,11 @@ end
 describe ClassMixedWithDSLAssertions do
   describe '#assert_output' do
     it 'defaults to checking stdout' do
-      stdout = <<CONSOLE
-This should not have space infront of it
-  While this should have two spaces infront of it
-    And this 3, all lines should be to stdout
-CONSOLE
+      stdout = <<~CONSOLE
+        This should not have space infront of it
+          While this should have two spaces infront of it
+            And this 3, all lines should be to stdout
+      CONSOLE
 
       expectation = <<CONSOLE
         This should not have space infront of it
@@ -30,20 +30,20 @@ CONSOLE
     end
 
     it 'allows specifying stream markers' do
-      output = <<OUTPUT
-This is on stdout
-While this is on stderr
-And THIS is again on stdout
-OUTPUT
+      output = <<~OUTPUT
+        This is on stdout
+        While this is on stderr
+        And THIS is again on stdout
+      OUTPUT
 
-      stdout = <<STDOUT
-This is on stdout
-And THIS is again on stdout
-STDOUT
+      stdout = <<~STDOUT
+        This is on stdout
+        And THIS is again on stdout
+      STDOUT
 
-      stderr = <<STDERR
-While this is on stderr
-STDERR
+      stderr = <<~STDERR
+        While this is on stderr
+      STDERR
 
       expectation = <<EXPECT
         STDOUT> This is on stdout
@@ -63,11 +63,11 @@ EXPECT
 
     it 'raises an approriate error when output does not match expectations' do
       FakeFS.without do
-        output = <<OUTPUT
-This is on stdout
-Holy Crap, what HAPPENED!?!?!?
-And THIS is again on stdout
-OUTPUT
+        output = <<~OUTPUT
+          This is on stdout
+          Holy Crap, what HAPPENED!?!?!?
+          And THIS is again on stdout
+        OUTPUT
 
         expectation = <<EXPECT
         STDOUT> This is on stdout

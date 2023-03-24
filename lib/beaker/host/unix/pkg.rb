@@ -25,38 +25,38 @@ module Unix::Pkg
   def check_for_package(name, opts = {})
     opts = { :accept_all_exit_codes => true }.merge(opts)
     case self['platform']
-      when /sles-10/
-        result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
-        result.stdout.include?('No packages found') ? (return false) : (return result.exit_code == 0)
-      when /opensuse|sles-/
-        if !self[:sles_rpmkeys_nightly_pl_imported]
-          # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
-          # time. It's just to make sure that we only do the key import once, &
-          # isn't for setting or use outside of beaker.
-          execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
-          self[:sles_rpmkeys_nightly_pl_imported] = true
-        end
-        result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
-      when /el-4/
-        @logger.debug("Package query not supported on rhel4")
-        return false
-      when /cisco|fedora|centos|redhat|eos|el-/
-        result = execute("rpm -q #{name}", opts) { |result| result }
-      when /ubuntu|debian|cumulus|huaweios/
-        result = execute("dpkg -s #{name}", opts) { |result| result }
-      when /solaris-11/
-        result = execute("pkg info #{name}", opts) { |result| result }
-      when /solaris-10/
-        result = execute("pkginfo #{name}", opts) { |result| result }
-        if result.exit_code == 1
-          result = execute("pkginfo CSW#{name}", opts) { |result| result }
-        end
-      when /openbsd/
-        result = execute("pkg_info #{name}", opts) { |result| result }
-      when /archlinux/
-        result = execute("pacman -Q #{name}", opts) { |result| result }
-      else
-        raise "Package #{name} cannot be queried on #{self}"
+    when /sles-10/
+      result = execute("zypper se -i --match-exact #{name}", opts) { |result| result }
+      result.stdout.include?('No packages found') ? (return false) : (return result.exit_code == 0)
+    when /opensuse|sles-/
+      if !self[:sles_rpmkeys_nightly_pl_imported]
+        # The `:sles_rpmkeys_nightly_pl_imported` key is only read here at this
+        # time. It's just to make sure that we only do the key import once, &
+        # isn't for setting or use outside of beaker.
+        execute('rpmkeys --import http://nightlies.puppetlabs.com/07BB6C57', opts)
+        self[:sles_rpmkeys_nightly_pl_imported] = true
+      end
+      result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
+    when /el-4/
+      @logger.debug("Package query not supported on rhel4")
+      return false
+    when /cisco|fedora|centos|redhat|eos|el-/
+      result = execute("rpm -q #{name}", opts) { |result| result }
+    when /ubuntu|debian|cumulus|huaweios/
+      result = execute("dpkg -s #{name}", opts) { |result| result }
+    when /solaris-11/
+      result = execute("pkg info #{name}", opts) { |result| result }
+    when /solaris-10/
+      result = execute("pkginfo #{name}", opts) { |result| result }
+      if result.exit_code == 1
+        result = execute("pkginfo CSW#{name}", opts) { |result| result }
+      end
+    when /openbsd/
+      result = execute("pkg_info #{name}", opts) { |result| result }
+    when /archlinux/
+      result = execute("pacman -Q #{name}", opts) { |result| result }
+    else
+      raise "Package #{name} cannot be queried on #{self}"
     end
     result.exit_code == 0
   end
@@ -87,76 +87,76 @@ module Unix::Pkg
 
   def install_package(name, cmdline_args = '', version = nil, opts = {})
     case self['platform']
-      when /opensuse|sles-/
-        execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
-      when /el-4/
-        @logger.debug("Package installation not supported on rhel4")
-      when /fedora-(2[2-9]|3[0-9])/
-        if version
-          name = "#{name}-#{version}"
-        end
-        execute("dnf -y #{cmdline_args} install #{name}", opts)
-      when /cisco|fedora|centos|redhat|eos|el-/
-        if version
-          name = "#{name}-#{version}"
-        end
-        execute("yum -y #{cmdline_args} install #{name}", opts)
-      when /ubuntu|debian|cumulus|huaweios/
-        if version
-          name = "#{name}=#{version}"
-        end
-        update_apt_if_needed
-        execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
-      when /solaris-11/
-        if opts[:acceptable_exit_codes]
-          opts[:acceptable_exit_codes] << 4
-        else
-          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
-        end
-        execute("pkg #{cmdline_args} install #{name}", opts)
-      when /solaris-10/
-        if !check_for_command('pkgutil')
-          # https://www.opencsw.org/package/pkgutil/
-          noask_text = self.noask_file_text
-          noask_file = File.join(external_copy_base, 'noask')
-          create_remote_file(self, noask_file, noask_text)
-          execute("pkgadd -d http://get.opencsw.org/now -a #{noask_file} -n all", opts)
-          execute('/opt/csw/bin/pkgutil -U', opts)
-          execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
-        end
-        execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
-      when /openbsd/
-        begin
-          execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
-            # Handles where there are multiple rubies, installs the latest one
-            if (match = /^Ambiguous: #{name} could be (.+)$/.match(command.stderr))
-              name = match[1].chomp.split(' ').collect { |x|
-                # FIXME Ruby 3.2 compatibility?
-                x =~ /-(\d[^-p]+)/
-                [x, $1]
-              }.select { |x|
-                # Blacklist Ruby 2.2.0+ for the sake of Puppet 3.x
-                Gem::Version.new(x[1]) < Gem::Version.new('2.2.0')
-              }.sort { |a, b|
-                Gem::Version.new(b[1]) <=> Gem::Version.new(a[1])
-              }.collect { |x|
-                x[0]
-              }.first
-              raise ArgumentException
-            end
-            # If the package advises symlinks to be created, do it
-            command.stdout.split("\n").select { |x| /^\s+ln\s/.match?(x) }.each do |ln|
-              execute(ln, opts)
-            end
-          end
-        rescue
-          retry
-        end
-      when /archlinux/
-        update_pacman_if_needed
-        execute("pacman -S --noconfirm #{cmdline_args} #{name}", opts)
+    when /opensuse|sles-/
+      execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
+    when /el-4/
+      @logger.debug("Package installation not supported on rhel4")
+    when /fedora-(2[2-9]|3[0-9])/
+      if version
+        name = "#{name}-#{version}"
+      end
+      execute("dnf -y #{cmdline_args} install #{name}", opts)
+    when /cisco|fedora|centos|redhat|eos|el-/
+      if version
+        name = "#{name}-#{version}"
+      end
+      execute("yum -y #{cmdline_args} install #{name}", opts)
+    when /ubuntu|debian|cumulus|huaweios/
+      if version
+        name = "#{name}=#{version}"
+      end
+      update_apt_if_needed
+      execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
+    when /solaris-11/
+      if opts[:acceptable_exit_codes]
+        opts[:acceptable_exit_codes] << 4
       else
-        raise "Package #{name} cannot be installed on #{self}"
+        opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+      end
+      execute("pkg #{cmdline_args} install #{name}", opts)
+    when /solaris-10/
+      if !check_for_command('pkgutil')
+        # https://www.opencsw.org/package/pkgutil/
+        noask_text = self.noask_file_text
+        noask_file = File.join(external_copy_base, 'noask')
+        create_remote_file(self, noask_file, noask_text)
+        execute("pkgadd -d http://get.opencsw.org/now -a #{noask_file} -n all", opts)
+        execute('/opt/csw/bin/pkgutil -U', opts)
+        execute('/opt/csw/bin/pkgutil -y -i pkgutil', opts)
+      end
+      execute("pkgutil -i -y #{cmdline_args} #{name}", opts)
+    when /openbsd/
+      begin
+        execute("pkg_add -I #{cmdline_args} #{name}", opts) do |command|
+          # Handles where there are multiple rubies, installs the latest one
+          if (match = /^Ambiguous: #{name} could be (.+)$/.match(command.stderr))
+            name = match[1].chomp.split(' ').collect { |x|
+              # FIXME Ruby 3.2 compatibility?
+              x =~ /-(\d[^-p]+)/
+              [x, $1]
+            }.select { |x|
+              # Blacklist Ruby 2.2.0+ for the sake of Puppet 3.x
+              Gem::Version.new(x[1]) < Gem::Version.new('2.2.0')
+            }.sort { |a, b|
+              Gem::Version.new(b[1]) <=> Gem::Version.new(a[1])
+            }.collect { |x|
+              x[0]
+            }.first
+            raise ArgumentException
+          end
+          # If the package advises symlinks to be created, do it
+          command.stdout.split("\n").select { |x| /^\s+ln\s/.match?(x) }.each do |ln|
+            execute(ln, opts)
+          end
+        end
+      rescue
+        retry
+      end
+    when /archlinux/
+      update_pacman_if_needed
+      execute("pacman -S --noconfirm #{cmdline_args} #{name}", opts)
+    else
+      raise "Package #{name} cannot be installed on #{self}"
     end
   end
 
@@ -180,26 +180,26 @@ module Unix::Pkg
 
   def uninstall_package(name, cmdline_args = '', opts = {})
     case self['platform']
-      when /opensuse|sles-/
-        execute("zypper --non-interactive rm #{name}", opts)
-      when /el-4/
-        @logger.debug("Package uninstallation not supported on rhel4")
-      when /edora-(2[2-9]|3[0-9])/
-        execute("dnf -y #{cmdline_args} remove #{name}", opts)
-      when /cisco|fedora|centos|redhat|eos|el-/
-        execute("yum -y #{cmdline_args} remove #{name}", opts)
-      when /ubuntu|debian|cumulus|huaweios/
-        execute("apt-get purge #{cmdline_args} -y #{name}", opts)
-      when /solaris-11/
-        execute("pkg #{cmdline_args} uninstall #{name}", opts)
-      when /solaris-10/
-        execute("pkgrm -n #{cmdline_args} #{name}", opts)
-      when /aix/
-        execute("rpm #{cmdline_args} -e #{name}", opts)
-      when /archlinux/
-        execute("pacman -R --noconfirm #{cmdline_args} #{name}", opts)
-      else
-        raise "Package #{name} cannot be installed on #{self}"
+    when /opensuse|sles-/
+      execute("zypper --non-interactive rm #{name}", opts)
+    when /el-4/
+      @logger.debug("Package uninstallation not supported on rhel4")
+    when /edora-(2[2-9]|3[0-9])/
+      execute("dnf -y #{cmdline_args} remove #{name}", opts)
+    when /cisco|fedora|centos|redhat|eos|el-/
+      execute("yum -y #{cmdline_args} remove #{name}", opts)
+    when /ubuntu|debian|cumulus|huaweios/
+      execute("apt-get purge #{cmdline_args} -y #{name}", opts)
+    when /solaris-11/
+      execute("pkg #{cmdline_args} uninstall #{name}", opts)
+    when /solaris-10/
+      execute("pkgrm -n #{cmdline_args} #{name}", opts)
+    when /aix/
+      execute("rpm #{cmdline_args} -e #{name}", opts)
+    when /archlinux/
+      execute("pacman -R --noconfirm #{cmdline_args} #{name}", opts)
+    else
+      raise "Package #{name} cannot be installed on #{self}"
     end
   end
 
@@ -210,28 +210,28 @@ module Unix::Pkg
   #                               the package manager
   def upgrade_package(name, cmdline_args = '', opts = {})
     case self['platform']
-      when /opensuse|sles-/
-        execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
-      when /el-4/
-        @logger.debug("Package upgrade is not supported on rhel4")
-      when /fedora-(2[2-9]|3[0-9])/
-        execute("dnf -y #{cmdline_args} update #{name}", opts)
-      when /cisco|fedora|centos|redhat|eos|el-/
-        execute("yum -y #{cmdline_args} update #{name}", opts)
-      when /ubuntu|debian|cumulus|huaweios/
-        update_apt_if_needed
-        execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
-      when /solaris-11/
-        if opts[:acceptable_exit_codes]
-          opts[:acceptable_exit_codes] << 4
-        else
-          opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
-        end
-        execute("pkg #{cmdline_args} update #{name}", opts)
-      when /solaris-10/
-        execute("pkgutil -u -y #{cmdline_args} #{name}", opts)
+    when /opensuse|sles-/
+      execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
+    when /el-4/
+      @logger.debug("Package upgrade is not supported on rhel4")
+    when /fedora-(2[2-9]|3[0-9])/
+      execute("dnf -y #{cmdline_args} update #{name}", opts)
+    when /cisco|fedora|centos|redhat|eos|el-/
+      execute("yum -y #{cmdline_args} update #{name}", opts)
+    when /ubuntu|debian|cumulus|huaweios/
+      update_apt_if_needed
+      execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
+    when /solaris-11/
+      if opts[:acceptable_exit_codes]
+        opts[:acceptable_exit_codes] << 4
       else
-        raise "Package #{name} cannot be upgraded on #{self}"
+        opts[:acceptable_exit_codes] = [0, 4] unless opts[:accept_all_exit_codes]
+      end
+      execute("pkg #{cmdline_args} update #{name}", opts)
+    when /solaris-10/
+      execute("pkgutil -u -y #{cmdline_args} #{name}", opts)
+    else
+      raise "Package #{name} cannot be upgraded on #{self}"
     end
   end
 
@@ -240,7 +240,7 @@ module Unix::Pkg
   def determine_if_x86_64
     if self[:platform].include?('solaris')
       result = exec(Beaker::Command.new("uname -a | grep x86_64"), :accept_all_exit_codes => true)
-        result.exit_code == 0
+      result.exit_code == 0
     else
       result = exec(Beaker::Command.new("arch | grep x86_64"), :accept_all_exit_codes => true)
       result.exit_code == 0

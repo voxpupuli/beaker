@@ -1,13 +1,14 @@
 module Beaker
   class CLI
-    VERSION_STRING =
-"      wWWWw
+    VERSION_STRING = <<-'ART'
+      wWWWw
       |o o|
       | O |  %s!
-      |(\")|
-     / \\X/ \\
+      |(")|
+     / \X/ \
     |   V   |
-    |   |   | "
+    |   |   |
+    ART
 
     attr_reader :logger, :options, :network_manager
 
@@ -248,7 +249,7 @@ module Beaker
           end
         end
       end
-     newly_keyed_hosts_entries
+      newly_keyed_hosts_entries
     end
 
     # Prints all information required to reproduce the current run & results to the log

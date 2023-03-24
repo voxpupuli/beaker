@@ -115,7 +115,7 @@ module Beaker
       #
       # @return [Boolean]      True if agent-only, false otherwise
       def agent_only(host)
-          host['roles'].length == 1 && host['roles'].include?('agent')
+        host['roles'].length == 1 && host['roles'].include?('agent')
       end
 
       # Determine whether a host has an AIO version or not. If a host :pe_ver or

@@ -31,7 +31,7 @@ module Mac::Group
   def group_get(name)
     execute("dscacheutil -q group -a name #{name}") do |result|
       fail_test "failed to get group #{name}" unless /^name: #{name}/.match?(result.stdout)
-      gi = Hash.new  # group info
+      gi = Hash.new # group info
       result.stdout.each_line { |line|
         pieces = line.split(': ')
         gi[pieces[0].to_sym] = pieces[1].strip if pieces[1] != nil

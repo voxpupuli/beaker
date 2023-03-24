@@ -12,7 +12,7 @@ class ClassMixedWithDSLHelpers
 end
 
 describe ClassMixedWithDSLHelpers do
-  let(:opts)   { Beaker::Options::Presets.env_vars }
+  let(:opts) { Beaker::Options::Presets.env_vars }
   let(:command) { 'ls' }
   let(:host)   { double.as_null_object }
   let(:result) { Beaker::Result.new(host, command) }
@@ -34,8 +34,8 @@ describe ClassMixedWithDSLHelpers do
     it 'allows the environment the command is run within to be specified' do
       allow(subject).to receive(:hosts).and_return(hosts)
 
-      expect(Beaker::Command).to receive(:new).
-        with('ls ~/.bin', [], { 'ENV' => { :HOME => '/tmp/test_home' } })
+      expect(Beaker::Command).to receive(:new)
+        .with('ls ~/.bin', [], { 'ENV' => { :HOME => '/tmp/test_home' } })
 
       subject.on(host, 'ls ~/.bin', :environment => { :HOME => '/tmp/test_home' })
     end
@@ -134,8 +134,8 @@ describe ClassMixedWithDSLHelpers do
 
       it 'yields result' do
         subject.on host, command do |containing_class|
-          expect(containing_class).
-            to be_an_instance_of(Beaker::Result)
+          expect(containing_class)
+            .to be_an_instance_of(Beaker::Result)
         end
       end
 
@@ -166,8 +166,8 @@ describe ClassMixedWithDSLHelpers do
 
       it 'yields self' do
         subject.on host, command do
-          expect(subject).
-            to be_an_instance_of(described_class)
+          expect(subject)
+            .to be_an_instance_of(described_class)
         end
       end
     end
@@ -194,7 +194,7 @@ describe ClassMixedWithDSLHelpers do
       retries = 5
 
       opts = {
-        :max_retries    => retries,
+        :max_retries => retries,
         :retry_interval => 0.0001,
       }
 
@@ -209,7 +209,7 @@ describe ClassMixedWithDSLHelpers do
       result.exit_code = 0
 
       opts = {
-        :max_retries    => 5,
+        :max_retries => 5,
         :retry_interval => 0.0001,
       }
 
@@ -225,7 +225,7 @@ describe ClassMixedWithDSLHelpers do
       result.stderr = 'stderr'
 
       opts = {
-        :max_retries    => 10,
+        :max_retries => 10,
         :retry_interval => 0.1,
       }
 
@@ -298,15 +298,15 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true }
       tmpfile = double
 
-      expect(tmpfile).to receive(:path).twice.
-        and_return('/local/path/to/blah')
+      expect(tmpfile).to receive(:path).twice
+                                       .and_return('/local/path/to/blah')
 
       expect(Tempfile).to receive(:open).and_yield(tmpfile)
 
       expect(File).to receive(:open)
 
-      expect(subject).to receive(:scp_to).
-        with(hosts, '/local/path/to/blah', '/remote/path', my_opts)
+      expect(subject).to receive(:scp_to)
+        .with(hosts, '/local/path/to/blah', '/remote/path', my_opts)
 
       subject.create_remote_file(hosts, '/remote/path', 'blah', my_opts)
     end
@@ -317,15 +317,15 @@ describe ClassMixedWithDSLHelpers do
       my_opts = { :silent => true, :protocol => 'rsync' }
       tmpfile = double
 
-      expect(tmpfile).to receive(:path).twice.
-        and_return('/local/path/to/blah')
+      expect(tmpfile).to receive(:path).twice
+                                       .and_return('/local/path/to/blah')
 
       expect(Tempfile).to receive(:open).and_yield(tmpfile)
 
       expect(File).to receive(:open)
 
-      expect(subject).to receive(:rsync_to).
-        with(hosts, '/local/path/to/blah', '/remote/path', my_opts)
+      expect(subject).to receive(:rsync_to)
+        .with(hosts, '/local/path/to/blah', '/remote/path', my_opts)
 
       subject.create_remote_file(hosts, '/remote/path', 'blah', my_opts)
     end

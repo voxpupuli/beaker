@@ -1,11 +1,11 @@
 ['host', 'command_factory', 'command', 'options'].each do |lib|
-      require "beaker/#{lib}"
+  require "beaker/#{lib}"
 end
 
 module Unix
   class Host < Beaker::Host
     ['user', 'group', 'exec', 'pkg', 'file'].each do |lib|
-          require "beaker/host/unix/#{lib}"
+      require "beaker/host/unix/#{lib}"
     end
 
     include Unix::User
@@ -17,10 +17,10 @@ module Unix
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'             => 'root',
-        'group'            => 'root',
-        'pathseparator'    => ':',
-      })
+                'user' => 'root',
+                'group' => 'root',
+                'pathseparator' => ':',
+              })
     end
 
     # Determines which SSH Server is in use on this host

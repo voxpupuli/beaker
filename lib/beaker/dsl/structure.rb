@@ -192,15 +192,15 @@ module Beaker
       # @author Chris Cowell-Shah (<tt>ccs@puppetlabs.com</tt>)
       def expect_failure(explanation)
         begin
-          yield if block_given?  # code block should contain an assert that you expect to fail
+          yield if block_given? # code block should contain an assert that you expect to fail
         rescue Beaker::DSL::Assertions, Minitest::Assertion => e
           # Yay! The assert in the code block failed, as expected.
           # Swallow the failure so the test passes.
           logger.notify 'An assertion was expected to fail, and did. ' +
-                          'This is probably due to a known product bug, ' +
-                          'and is probably not a problem. ' +
-                          "Additional info: '#{explanation}' " +
-                          "Failed assertion: '#{e}'"
+                        'This is probably due to a known product bug, ' +
+                        'and is probably not a problem. ' +
+                        "Additional info: '#{explanation}' " +
+                        "Failed assertion: '#{e}'"
           return
         end
         # Uh-oh! The assert in the code block unexpectedly passed.

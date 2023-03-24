@@ -104,7 +104,7 @@ module Beaker
     # @return [REXML::Document] Doc that you want to write in
     def self.get_doc_for_filename(filename, stylesheet, already_exists)
       if already_exists
-        doc           = REXML::Document.new File.open(filename)
+        doc = REXML::Document.new File.open(filename)
       else
         # no existing file, create a new one
         doc = REXML::Document.new
@@ -149,7 +149,7 @@ module Beaker
         (int >= 0x0020 and int <= 0xD7FF) or
         (int >= 0xE000 and int <= 0xFFFD) or
         (int >= 0x100000 and int <= 0x10FFFF)
-      )
+             )
     end
   end
 end

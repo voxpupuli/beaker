@@ -5,9 +5,9 @@ require 'spec_helper'
 module Beaker
   describe Logger do
     let(:my_io)     { StringIO.new                         }
-    let(:logger)    { described_class.new(my_io, :quiet => true)  }
-    let(:basic_logger)    { described_class.new(:quiet => true)  }
-    let(:test_dir)  { 'tmp/tests' }
+    let(:logger)    { described_class.new(my_io, :quiet => true) }
+    let(:basic_logger) { described_class.new(:quiet => true) }
+    let(:test_dir) { 'tmp/tests' }
     let(:dummy_prefix)  { 'dummy' }
 
     describe '#convert' do
@@ -185,26 +185,26 @@ module Beaker
 
         it 'has the default log_colors' do
           expect(logger.log_colors).to be == {
-              :error => Beaker::Logger::RED,
-              :warn => Beaker::Logger::BRIGHT_RED,
-              :success => Beaker::Logger::MAGENTA,
-              :notify => Beaker::Logger::BLUE,
-              :info => Beaker::Logger::GREEN,
-              :debug => Beaker::Logger::WHITE,
-              :trace => Beaker::Logger::BRIGHT_YELLOW,
-              :perf => Beaker::Logger::BRIGHT_MAGENTA,
-              :host => Beaker::Logger::YELLOW,
+            :error => Beaker::Logger::RED,
+            :warn => Beaker::Logger::BRIGHT_RED,
+            :success => Beaker::Logger::MAGENTA,
+            :notify => Beaker::Logger::BLUE,
+            :info => Beaker::Logger::GREEN,
+            :debug => Beaker::Logger::WHITE,
+            :trace => Beaker::Logger::BRIGHT_YELLOW,
+            :perf => Beaker::Logger::BRIGHT_MAGENTA,
+            :host => Beaker::Logger::YELLOW,
           }
         end
 
         context 'when passing in log_color options' do
           let(:log_colors) {
             {
-                :error => "\e[00;30m",
+              :error => "\e[00;30m",
             }
           }
 
-          let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
+          let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
           it 'overrides the specified log colors' do
             expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -233,11 +233,11 @@ module Beaker
           context 'when overriding default log colors' do
             let(:log_colors) {
               {
-                  :error => "\e[00;30m",
+                :error => "\e[00;30m",
               }
             }
 
-            let(:logger)     { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
+            let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
             it 'overrides the specified log colors' do
               expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
@@ -289,11 +289,12 @@ module Beaker
       end
 
       context 'at trace log_level' do
-        subject(:trace_logger)  { described_class.new(my_io,
-                                              :log_level => 'trace',
-                                              :quiet => true,
-                                              :color => true)
-                                  }
+        subject(:trace_logger) {
+          described_class.new(my_io,
+                              :log_level => 'trace',
+                              :quiet => true,
+                              :color => true)
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -319,11 +320,12 @@ module Beaker
       end
 
       context 'at verbose log_level' do
-        subject(:verbose_logger)  { described_class.new(my_io,
-                                              :log_level => 'verbose',
-                                              :quiet => true,
-                                              :color => true)
-                                  }
+        subject(:verbose_logger) {
+          described_class.new(my_io,
+                              :log_level => 'verbose',
+                              :quiet => true,
+                              :color => true)
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -349,11 +351,12 @@ module Beaker
       end
 
       context 'at debug log_level' do
-        subject(:debug_logger)  { described_class.new(my_io,
-                                              :log_level => 'debug',
-                                              :quiet => true,
-                                              :color => true)
-                                  }
+        subject(:debug_logger) {
+          described_class.new(my_io,
+                              :log_level => 'debug',
+                              :quiet => true,
+                              :color => true)
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -378,11 +381,12 @@ module Beaker
       end
 
       context 'at info log_level' do
-        subject(:info_logger) { described_class.new(my_io,
-                                              :log_level => :info,
-                                              :quiet     => true,
-                                              :color     => true)
-                                  }
+        subject(:info_logger) {
+          described_class.new(my_io,
+                              :log_level => :info,
+                              :quiet => true,
+                              :color => true)
+        }
 
         it do
           expect(subject).to have_attributes(
@@ -415,11 +419,12 @@ module Beaker
 
       context 'SUT output logging' do
         context 'host output logging' do
-          subject(:host_output) { described_class.new(my_io,
-                                              :log_level => :verbose,
-                                              :quiet     => true,
-                                              :color     => true)
-}
+          subject(:host_output) {
+            described_class.new(my_io,
+                                :log_level => :verbose,
+                                :quiet => true,
+                                :color => true)
+          }
 
           it 'outputs GREY when @color is set to true' do
             colorized_logger = host_output
@@ -433,11 +438,12 @@ module Beaker
         end
 
         context 'color host output' do
-          subject(:color_host_output) { described_class.new(my_io,
-                                              :log_level => :verbose,
-                                              :quiet     => true,
-                                              :color     => true)
-}
+          subject(:color_host_output) {
+            described_class.new(my_io,
+                                :log_level => :verbose,
+                                :quiet => true,
+                                :color => true)
+          }
 
           it 'colors host_output' do
             colorized_logger = color_host_output

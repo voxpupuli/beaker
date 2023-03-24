@@ -8,7 +8,7 @@ module FreeBSD::Pkg
 
   def check_pkgng_sh
     'TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexist ' \
-    'pkg info -x "pkg(-devel)?\\$" > /dev/null 2>&1'
+      'pkg info -x "pkg(-devel)?\\$" > /dev/null 2>&1'
   end
 
   def pkgng_active?(opts = {})

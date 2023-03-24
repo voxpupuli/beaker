@@ -85,11 +85,11 @@ module Beaker
             if block
               case block.arity
                 # block with arity of 0, just hand back yourself
-                when 0
-                  yield self
+              when 0
+                yield self
                 # block with arity of 1 or greater, hand back the result object
-                else
-                  yield result
+              else
+                yield result
               end
             end
             result
@@ -269,13 +269,13 @@ module Beaker
 
             opts[:protocol] ||= 'scp'
             case opts[:protocol]
-              when 'scp'
-                scp_to hosts, tempfile.path, file_path, opts
-              when 'rsync'
-                rsync_to hosts, tempfile.path, file_path, opts
-              else
-                logger.debug "Unsupported transfer protocol, returning nil"
-                nil
+            when 'scp'
+              scp_to hosts, tempfile.path, file_path, opts
+            when 'rsync'
+              rsync_to hosts, tempfile.path, file_path, opts
+            else
+              logger.debug "Unsupported transfer protocol, returning nil"
+              nil
             end
           end
         end
@@ -559,7 +559,7 @@ module Beaker
           option_retry_interval = opts[:retry_interval].to_f
           desired_exit_codes    = option_exit_codes ? [option_exit_codes].flatten : [0]
           desired_exit_codes    = [0] if desired_exit_codes.empty?
-          max_retries           = option_max_retries == 0 ? 60 : option_max_retries  # nil & "" both return 0
+          max_retries           = option_max_retries == 0 ? 60 : option_max_retries # nil & "" both return 0
           retry_interval        = option_retry_interval == 0 ? 1 : option_retry_interval
           verbose               = true.to_s == opts[:verbose]
 
@@ -591,29 +591,29 @@ module Beaker
             platform = host['platform']
             if platform.include?('solaris') || platform.include?('aix') then
               case action
-                when :list   then args = '-l'
-                when :remove then args = '-r'
-                when :add
-                  on(host,
-                     "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
-                      &block)
+              when :list   then args = '-l'
+              when :remove then args = '-r'
+              when :add
+                on(host,
+                   "echo '#{entry}' > /var/spool/cron/crontabs/#{user}",
+                   &block)
               end
 
             else # default for GNU/Linux platforms
               case action
-                when :list   then args = '-l -u'
-                when :remove then args = '-r -u'
-                when :add
-                   on(host,
-                      "echo '#{entry}' > /tmp/#{user}.cron && " +
-                      "crontab -u #{user} /tmp/#{user}.cron",
-                       &block)
+              when :list   then args = '-l -u'
+              when :remove then args = '-r -u'
+              when :add
+                on(host,
+                   "echo '#{entry}' > /tmp/#{user}.cron && " +
+                   "crontab -u #{user} /tmp/#{user}.cron",
+                   &block)
               end
             end
 
             if args
               case action
-                when :list, :remove then on(host, "crontab #{args} #{user}", &block)
+              when :list, :remove then on(host, "crontab #{args} #{user}", &block)
               end
             end
           end

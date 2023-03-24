@@ -217,32 +217,32 @@ describe ClassMixedWithDSLRoles do
       context 'version values table' do
         # pe_ver, version, answer
         versions_table = [
-          [nil,      nil, false],
-          [nil,       '', false],
+          [nil, nil, false],
+          [nil, '', false],
           [nil,    '3.9', false],
           [nil,    '4.0', true],
           [nil, '2015.1', true],
  \
-          ['',      nil, false],
-          ['',       '', false],
+          ['', nil, false],
+          ['', '', false],
           ['',    '3.9', false],
           ['',    '4.0', true],
           ['', '2015.1', true],
  \
-          ['3.9',      nil, false],
-          ['3.9',       '', false],
+          ['3.9', nil, false],
+          ['3.9', '', false],
           ['3.9',    '3.9', false],
           ['3.9',    '4.0', false],
           ['3.9', '2015.1', false],
  \
-          ['4.0',      nil, true],
-          ['4.0',       '', true],
+          ['4.0', nil, true],
+          ['4.0', '', true],
           ['4.0',    '3.9', true],
           ['4.0',    '4.0', true],
           ['4.0', '2015.1', true],
  \
-          ['2015.1',      nil, true],
-          ['2015.1',       '', true],
+          ['2015.1', nil, true],
+          ['2015.1', '', true],
           ['2015.1',    '3.9', true],
           ['2015.1',    '4.0', true],
           ['2015.1', '2015.1', true],

@@ -15,35 +15,36 @@ module Beaker
       let(:role0)          { "role0" }
       let(:role1)          { :role1 }
       let(:role2)          { :role2 }
-      let(:hosts)          { hosts = make_hosts({ :platform => platform })
-                             hosts[0][:roles] = ['agent', role0]
-                             hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
-                             hosts[2][:roles] = ['agent', role2]
-                             hosts
+      let(:hosts)          {
+        hosts = make_hosts({ :platform => platform })
+        hosts[0][:roles] = ['agent', role0]
+        hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database', role1]
+        hosts[2][:roles] = ['agent', role2]
+        hosts
       }
 
       describe "#hosts_with_name" do
         it "can identify the host by name" do
-            expect(host_handler.hosts_with_name(hosts, 'vm1')).to be === [hosts[0]]
+          expect(host_handler.hosts_with_name(hosts, 'vm1')).to be === [hosts[0]]
         end
 
         it "can identify the host by vmhostname" do
-            hosts[0][:vmhostname] = 'myname.whatever'
+          hosts[0][:vmhostname] = 'myname.whatever'
 
-            expect(host_handler.hosts_with_name(hosts, 'myname.whatever')).to be === [hosts[0]]
+          expect(host_handler.hosts_with_name(hosts, 'myname.whatever')).to be === [hosts[0]]
         end
 
         it "can identify the host by ip" do
-            hosts[0][:ip] = '0.0.0.0'
+          hosts[0][:ip] = '0.0.0.0'
 
-            expect(host_handler.hosts_with_name(hosts, '0.0.0.0')).to be === [hosts[0]]
+          expect(host_handler.hosts_with_name(hosts, '0.0.0.0')).to be === [hosts[0]]
         end
 
         it "returns [] when no match is found in a set of hosts" do
-            hosts[0][:ip] = '0.0.0.0'
-            hosts[0][:vmhostname] = 'myname.whatever'
+          hosts[0][:ip] = '0.0.0.0'
+          hosts[0][:vmhostname] = 'myname.whatever'
 
-            expect(host_handler.hosts_with_name(hosts, 'surprise')).to be === []
+          expect(host_handler.hosts_with_name(hosts, 'surprise')).to be === []
         end
       end
 

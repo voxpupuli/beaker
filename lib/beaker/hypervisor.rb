@@ -22,15 +22,15 @@ module Beaker
       @logger.notify("Beaker::Hypervisor, found some #{type} boxes to create")
 
       hyper_class = case type
-        when /^noop$/
-          Beaker::Noop
-        when /^(default)|(none)$/
-          Beaker::Hypervisor
-        else
-          # Custom hypervisor
-          require "beaker/hypervisor/#{type}"
-          Beaker.const_get(type.split('_').collect(&:capitalize).join)
-        end
+                    when /^noop$/
+                      Beaker::Noop
+                    when /^(default)|(none)$/
+                      Beaker::Hypervisor
+                    else
+                      # Custom hypervisor
+                      require "beaker/hypervisor/#{type}"
+                      Beaker.const_get(type.split('_').collect(&:capitalize).join)
+                    end
 
       hypervisor = hyper_class.new(hosts_to_provision, options)
       self.set_ssh_connection_preference(hosts_to_provision, hypervisor)

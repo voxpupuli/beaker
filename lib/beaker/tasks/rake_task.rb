@@ -11,16 +11,16 @@ module Beaker
       DEFAULT_ACCEPTANCE_ROOT = "./acceptance"
 
       COMMAND_OPTIONS = [:fail_mode,
-       :hosts,
-       :helper,
-       :keyfile,
-       :log_level,
-       :options_file,
-       :preserve_hosts,
-       :tests,
-       :type,
-       :acceptance_root,
-       :name,]
+                         :hosts,
+                         :helper,
+                         :keyfile,
+                         :log_level,
+                         :options_file,
+                         :preserve_hosts,
+                         :tests,
+                         :type,
+                         :acceptance_root,
+                         :name,]
       # iterates of acceptable params
       COMMAND_OPTIONS.each do |sym|
         attr_accessor(sym.to_sym)

@@ -233,9 +233,9 @@ module Beaker
           # specified here:
           # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
           if self.instance_of?(Windows::Host)
-          execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
+            execute("wget http://169.254.169.254/latest/meta-data/public-ipv4").strip
           else
-          execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
+            execute("curl http://169.254.169.254/latest/meta-data/public-ipv4").strip
           end
         end
       end
@@ -347,7 +347,7 @@ module Beaker
             # should have had a connection failure, but didn't
             # wait to see if the connection failure will be generation, otherwise raise error
             if not connection.wait_for_connection_failure(options, output_callback)
-              raise CommandFailure,  "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
+              raise CommandFailure, "Host '#{self}' should have resulted in a connection failure running:\n #{cmdline}\nLast #{@options[:trace_limit]} lines of output were:\n#{result.formatted_output(@options[:trace_limit])}"
             end
           end
           # No, TestCase has the knowledge about whether its failed, checking acceptable
@@ -475,7 +475,7 @@ module Beaker
       if options[:dry_run]
         scp_cmd = "scp #{@name}:#{source} #{target}"
         @logger.debug "\n Running in :dry_run mode. localhost $ #{scp_cmd} not executed."
-        return  NullResult.new(self, scp_cmd)
+        return NullResult.new(self, scp_cmd)
       end
 
       @logger.debug "localhost $ scp #{@name}:#{source} #{target}"
@@ -527,12 +527,12 @@ module Beaker
         ssh_args << "-F #{filesystem_ssh_config}"
       else
         if ssh_opts.has_key?('keys') and
-            ssh_opts.has_key?('auth_methods') and
-            ssh_opts['auth_methods'].include?('publickey')
+           ssh_opts.has_key?('auth_methods') and
+           ssh_opts['auth_methods'].include?('publickey')
 
           # find the first SSH key that exists
           key = Array(ssh_opts['keys']).find do |k|
-              File.exist?(k)
+            File.exist?(k)
           end
 
           if key

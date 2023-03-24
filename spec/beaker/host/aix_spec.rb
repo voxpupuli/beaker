@@ -10,7 +10,7 @@ module Aix
         { :platform => Beaker::Platform.new('aix-vers-arch-extra') }
       end
     }
-    let(:host)    { make_host('name', options.merge(platform)) }
+    let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#ssh_service_restart' do
       it 'invokes the correct commands on the host' do

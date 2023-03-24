@@ -8,7 +8,7 @@ module FreeBSD
       'exec',
       'pkg',
     ].each do |lib|
-        require "beaker/host/freebsd/#{lib}"
+      require "beaker/host/freebsd/#{lib}"
     end
 
     include FreeBSD::Exec
@@ -17,10 +17,10 @@ module FreeBSD
     def platform_defaults
       h = Beaker::Options::OptionsHash.new
       h.merge({
-        'user'              => 'root',
-        'group'             => 'root',
-        'pathseparator'     => ':',
-        })
+                'user' => 'root',
+                'group' => 'root',
+                'pathseparator' => ':',
+              })
     end
   end
 end

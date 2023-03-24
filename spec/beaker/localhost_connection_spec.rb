@@ -5,7 +5,7 @@ module Beaker
   describe LocalConnection do
     subject(:connection) { described_class.new(options) }
 
-    let(:options)   { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file' } }
+    let(:options) { { :logger => double('logger').as_null_object, :ssh_env_file => '/path/to/ssh/file' } }
 
     before do
       allow(subject).to receive(:sleep)

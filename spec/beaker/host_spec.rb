@@ -190,8 +190,8 @@ module Beaker
       it 'does throw an error when an unacceptable exit code is returned and the accept_all_exit_codes flag is set' do
         result.exit_code = 7
         opts = {
-          :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true,
+          :acceptable_exit_codes => [0, 1],
+          :accept_all_exit_codes => true,
         }
         allow(host.logger).to receive(:warn)
 
@@ -201,8 +201,8 @@ module Beaker
       it 'sends a warning when both :acceptable_exit_codes & :accept_all_exit_codes are set' do
         result.exit_code = 1
         opts = {
-          :acceptable_exit_codes  => [0, 1],
-          :accept_all_exit_codes  => true,
+          :acceptable_exit_codes => [0, 1],
+          :accept_all_exit_codes => true,
         }
         expect(host.logger).to receive(:warn).with(/overrides/)
 
@@ -277,13 +277,13 @@ module Beaker
         allow(result).to receive(:exit_code).and_return(0)
         allow(host).to receive(:exec).and_return(result)
 
-        expect(Beaker::Command).to receive(:new).
-          with("powershell.exe", ["-ExecutionPolicy Bypass",
-                                  "-InputFormat None",
-                                  "-NoLogo",
-                                  "-NoProfile",
-                                  "-NonInteractive",
-                                  "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
+        expect(Beaker::Command).to receive(:new)
+          .with("powershell.exe", ["-ExecutionPolicy Bypass",
+                                   "-InputFormat None",
+                                   "-NoLogo",
+                                   "-NoProfile",
+                                   "-NonInteractive",
+                                   "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
         expect(host.mkdir_p('test/test/test')).to be == true
       end
     end
@@ -362,10 +362,11 @@ module Beaker
           other_test_dir = "#{source_path}/tests2"
 
           files = [
-              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
-              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
+            '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+            '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+            '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+          ]
 
           @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }
@@ -432,10 +433,11 @@ module Beaker
           another_test_dir = "#{source_path}/tests/tests3"
 
           files = [
-              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
-              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
+            '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+            '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+            '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+          ]
 
           @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }
@@ -491,7 +493,8 @@ module Beaker
             '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
             '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
             '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+          ]
 
           @fileset1 = files.shuffle.map { |file| test_dir + '/' + file }
           @fileset2 = files.shuffle.map { |file| other_test_dir + '/' + file }

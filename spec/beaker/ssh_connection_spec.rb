@@ -5,7 +5,7 @@ module Beaker
   describe SshConnection do
     subject(:connection) { described_class.new name_hash, user, ssh_opts, options }
 
-    let(:user)      { 'root'    }
+    let(:user)      { 'root' }
     let(:ssh_opts)  { { keepalive: true, keepalive_interval: 2 } }
     let(:options)   { { :logger => double('logger').as_null_object, :ssh_connection_preference => [:ip, :vmhostname, :hostname] } }
     let(:ip)        { "default.ip.address" }

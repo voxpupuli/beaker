@@ -2,9 +2,10 @@ require 'spec_helper'
 
 module Cisco
   describe Host do
-    let(:options)  { @options ? @options : {
-      :user => 'root',
-    }
+    let(:options) {
+      @options ? @options : {
+        :user => 'root',
+      }
     }
     let(:platform) {
       if @platform
@@ -13,7 +14,7 @@ module Cisco
         { :platform => Beaker::Platform.new('cisco_nexus-vers-arch-extra') }
       end
     }
-    let(:host)    { make_host('name', options.merge(platform)) }
+    let(:host) { make_host('name', options.merge(platform)) }
 
     describe '#prepend_commands' do
       context 'for cisco_nexus-7' do
@@ -37,7 +38,7 @@ module Cisco
         it 'ends with the :vrf host parameter' do
           vrf_answer = 'vrf_answer_135246'
           @options = {
-            :vrf  => vrf_answer,
+            :vrf => vrf_answer,
           }
           answer_test = host.prepend_commands('fake_command')
           expect(answer_test).to match(/ip netns exec #{vrf_answer}$/)
@@ -57,7 +58,7 @@ module Cisco
 
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
-            :vrf  => 'fakevrf',
+            :vrf => 'fakevrf',
             :user => 'root',
           }
           answer_prepend_commands = 'prepend'
@@ -93,7 +94,7 @@ module Cisco
 
         it 'retains user-specified prepend commands when adding vrf' do
           @options = {
-            :vrf  => 'fakevrf',
+            :vrf => 'fakevrf',
             :user => 'root',
           }
           answer_prepend_commands = 'prepend'
@@ -276,7 +277,7 @@ module Cisco
 
         it 'errors when no :user value is provided' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => nil,
           }
           expect {
@@ -286,7 +287,7 @@ module Cisco
 
         it 'does nothing if the host is setup correctly' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => 'notroot',
           }
           validate_test = host.validate_setup
@@ -301,7 +302,7 @@ module Cisco
 
         it 'does nothing if no :vrf value is provided' do
           @options = {
-              :user => 'notroot',
+            :user => 'notroot',
           }
           validate_test = host.validate_setup
           expect(validate_test).to be_nil
@@ -309,7 +310,7 @@ module Cisco
 
         it 'errors when no user is provided' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => nil,
           }
           expect {
@@ -319,7 +320,7 @@ module Cisco
 
         it 'does nothing if the host is setup correctly' do
           @options = {
-            :vrf  => 'fake_vrf',
+            :vrf => 'fake_vrf',
             :user => 'notroot',
           }
           validate_test = host.validate_setup

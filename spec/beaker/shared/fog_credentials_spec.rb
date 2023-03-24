@@ -48,7 +48,7 @@ module Beaker
 
         it 'returns the named credential section' do
           data = {
-            :default          => { :vmpooler_token => "wrong_token" },
+            :default => { :vmpooler_token => "wrong_token" },
             :other_credential => { :vmpooler_token => "correct_token" },
           }
 

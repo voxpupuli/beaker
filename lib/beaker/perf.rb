@@ -100,23 +100,23 @@ module Beaker
 
           poll.keys.each do |stat|
             case stat
-              when 'cpu-load-all'
-                poll[stat].each do |s|
-                  s.keys.each do |k|
-                    next if k == 'cpu'
+            when 'cpu-load-all'
+              poll[stat].each do |s|
+                s.keys.each do |k|
+                  next if k == 'cpu'
 
-                    socket = TCPSocket.new(@options[:graphite_server], 2003)
-                    socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.cpu.#{s['cpu']}.#{k} #{s[k]} #{timestamp}"
-                    socket.close
-                  end
-                end
-
-              when 'memory'
-                poll[stat].keys.each do |s|
                   socket = TCPSocket.new(@options[:graphite_server], 2003)
-                  socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.memory.#{s} #{poll[stat][s]} #{timestamp}"
+                  socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.cpu.#{s['cpu']}.#{k} #{s[k]} #{timestamp}"
                   socket.close
                 end
+              end
+
+            when 'memory'
+              poll[stat].keys.each do |s|
+                socket = TCPSocket.new(@options[:graphite_server], 2003)
+                socket.puts "#{@options[:graphite_perf_data]}.#{hostname}.memory.#{s} #{poll[stat][s]} #{timestamp}"
+                socket.close
+              end
             end
           end
         end

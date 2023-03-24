@@ -76,10 +76,11 @@ module Beaker
 
         before do
           files = [
-              '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
-              '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
-              '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
-              '04_ValidateSignCert.rb', '07_InstallCACerts.rb',]
+            '00_EnvSetup.rb', '035_StopFirewall.rb', '05_HieraSetup.rb',
+            '01_TestSetup.rb', '03_PuppetMasterSanity.rb',
+            '06_InstallModules.rb', '02_PuppetUserAndGroup.rb',
+            '04_ValidateSignCert.rb', '07_InstallCACerts.rb',
+          ]
 
           @lone_file = '08_foss.rb'
 
@@ -136,40 +137,44 @@ module Beaker
           let(:env) { @env || { :level => 'highest' } }
           let(:argv) { @argv || { :level => 'second' } }
           let(:host_file) { @host_file || { :level => 'third' } }
-          let(:opt_file) { @opt_file || {
+          let(:opt_file) {
+            @opt_file || {
               :level => 'fourth',
               :ssh => {
-                  :auth_methods => 'auth123',
-                  :user_known_hosts_file => 'hosts123',
+                :auth_methods => 'auth123',
+                :user_known_hosts_file => 'hosts123',
               },
-          }
+            }
           }
           let(:subcommand_file) { @subcommand_file || { :level => 'fifth' } }
-          let(:homedir_file) { @homedir_file || {
+          let(:homedir_file) {
+            @homedir_file || {
               :level => 'sixth',
               :ssh => {
-                  :auth_methods => 'auth_home_123',
+                :auth_methods => 'auth_home_123',
               },
+            }
           }
-          }
-          let(:project_file) { @project_file || {
+          let(:project_file) {
+            @project_file || {
               :level => 'seventh',
               :ssh => {
-                  :auth_methods => 'auth_project_123',
+                :auth_methods => 'auth_project_123',
               },
+            }
           }
-          }
-          let(:presets) { {
+          let(:presets) {
+            {
               :level => 'lowest',
               :ssh => {
-                  :config => 'config123',
-                  :verify_host_key => 'verify123',
-                  :port => 'port123',
-                  :forward_agent => 'forwardagent123',
-                  :keys => 'keys123',
-                  :keepalive => 'keepalive123',
+                :config => 'config123',
+                :verify_host_key => 'verify123',
+                :port => 'port123',
+                :forward_agent => 'forwardagent123',
+                :keys => 'keys123',
+                :keepalive => 'keepalive123',
               },
-          }
+            }
           }
 
           before do
@@ -363,8 +368,8 @@ module Beaker
             old_beaker_hypervisor = ENV.delete('BEAKER_HYPERVISOR')
 
             parser.instance_variable_set(:@options, {
-              :hosts_file => 'notafile.yml',
-            })
+                                           :hosts_file => 'notafile.yml',
+                                         })
             allow(Beaker::Options::HostsFileParser).to receive(
               :parse_hosts_file,
             ).and_raise(Errno::ENOENT)
@@ -393,8 +398,8 @@ module Beaker
               ENV['BEAKER_HYPERVISOR'] = 'docker'
 
               parser.instance_variable_set(:@options, {
-                :hosts_file => 'notafile.yml',
-              })
+                                             :hosts_file => 'notafile.yml',
+                                           })
               allow(Beaker::Options::HostsFileParser).to receive(
                 :parse_hosts_file,
               ).and_raise(Errno::ENOENT)
@@ -517,21 +522,21 @@ module Beaker
       describe "normalize_args" do
         let(:hosts) do
           Beaker::Options::OptionsHash.new.merge({
-                                                     'HOSTS' => {
-                                                         :master => {
-                                                             :roles    => ["master", "agent", "arbitrary_role"],
-                                                             :platform => 'el-7-x86_64',
-                                                             :user     => 'root',
-                                                         },
-                                                         :agent => {
-                                                             :roles    => ["agent", "default", "other_abitrary_role"],
-                                                             :platform => 'el-7-x86_64',
-                                                             :user     => 'root',
-                                                         },
+                                                   'HOSTS' => {
+                                                     :master => {
+                                                       :roles => ["master", "agent", "arbitrary_role"],
+                                                       :platform => 'el-7-x86_64',
+                                                       :user => 'root',
                                                      },
-                                                     'fail_mode'      => 'slow',
-                                                     'preserve_hosts' => 'always',
-                                                     'host_tags'      => {},
+                                                     :agent => {
+                                                       :roles => ["agent", "default", "other_abitrary_role"],
+                                                       :platform => 'el-7-x86_64',
+                                                       :user => 'root',
+                                                     },
+                                                   },
+                                                   'fail_mode' => 'slow',
+                                                   'preserve_hosts' => 'always',
+                                                   'host_tags' => {},
                                                  })
         end
 
@@ -660,9 +665,9 @@ module Beaker
       describe '#get_hypervisors' do
         it 'returns a unique list' do
           hosts_dupe   = {
-              'vm1' => { hypervisor: 'hi' },
-              'vm2' => { hypervisor: 'hi' },
-              'vm3' => { hypervisor: 'bye' },
+            'vm1' => { hypervisor: 'hi' },
+            'vm2' => { hypervisor: 'hi' },
+            'vm3' => { hypervisor: 'bye' },
           }
           hosts_single = { 'vm1' => { hypervisor: 'hi' } }
 
@@ -674,9 +679,9 @@ module Beaker
       describe '#get_roles' do
         it 'returns a unique list' do
           roles_dupe   = {
-              'vm1' => { roles: ['master'] },
-              'vm2' => { roles: %w(database dashboard) },
-              'vm3' => { roles: ['bye'] },
+            'vm1' => { roles: ['master'] },
+            'vm2' => { roles: %w(database dashboard) },
+            'vm3' => { roles: ['bye'] },
           }
           roles_single = { 'vm1' => { roles: ['hi'] } }
 

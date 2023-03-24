@@ -39,7 +39,7 @@ module Beaker
         unless File.directory?(dirname)
           FileUtils.mkdir_p(dirname)
         end
-        File.open(output_file, 'w+') { |f| f.write(dump)  }
+        File.open(output_file, 'w+') { |f| f.write(dump) }
       end
     end
   end
