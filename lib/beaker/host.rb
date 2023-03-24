@@ -182,11 +182,11 @@ module Beaker
     end
 
     def is_cygwin?
-      self.class == Windows::Host
+      self.instance_of?(Windows::Host)
     end
 
     def is_powershell?
-      self.class == PSWindows::Host
+      self.instance_of?(PSWindows::Host)
     end
 
     def platform
