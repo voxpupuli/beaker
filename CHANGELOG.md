@@ -1,6 +1,6 @@
 # Changelog
 
-## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-02-09)
+## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-03-24)
 
 **Breaking changes:**
 
