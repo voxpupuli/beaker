@@ -163,7 +163,7 @@ module Beaker
         return
       end
 
-      beaker_suites = [:pre_suite, :tests, :post_suite, :pre_cleanup]
+      beaker_suites = %i[pre_suite tests post_suite pre_cleanup]
       resources = resource.split(',')
       paths = resources.map { |r| Pathname(r) }
       if paths.all?(&:exist?)

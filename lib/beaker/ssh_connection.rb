@@ -6,7 +6,7 @@ module Beaker
   class SshConnection
     attr_accessor :logger, :ip, :vmhostname, :hostname, :ssh_connection_preference
 
-    SUPPORTED_CONNECTION_METHODS = [:ip, :vmhostname, :hostname]
+    SUPPORTED_CONNECTION_METHODS = %i[ip vmhostname hostname]
 
     RETRYABLE_EXCEPTIONS = [
       SocketError,

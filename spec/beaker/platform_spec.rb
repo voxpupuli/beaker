@@ -154,7 +154,7 @@ module Beaker
         end
       end
 
-      [:variant, :arch, :version, :codename].each do |field|
+      %i[variant arch version codename].each do |field|
         it "deserializes the '#{field}' field" do
           expect(round_tripped.send(field)).to eq platform.send(field)
         end

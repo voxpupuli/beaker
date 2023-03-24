@@ -54,7 +54,7 @@ module Beaker
       nil
     end
 
-    DEFAULT_CONNECTION_PREFERENCE = [:ip, :vmhostname, :hostname]
+    DEFAULT_CONNECTION_PREFERENCE = %i[ip vmhostname hostname]
     # SSH connection method preference. Can be overwritten by hypervisor to change the order
     def connection_preference(_host)
       DEFAULT_CONNECTION_PREFERENCE

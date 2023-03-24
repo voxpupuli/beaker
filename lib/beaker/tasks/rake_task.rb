@@ -10,17 +10,17 @@ module Beaker
 
       DEFAULT_ACCEPTANCE_ROOT = "./acceptance"
 
-      COMMAND_OPTIONS = [:fail_mode,
-                         :hosts,
-                         :helper,
-                         :keyfile,
-                         :log_level,
-                         :options_file,
-                         :preserve_hosts,
-                         :tests,
-                         :type,
-                         :acceptance_root,
-                         :name,]
+      COMMAND_OPTIONS = %i[fail_mode
+                           hosts
+                           helper
+                           keyfile
+                           log_level
+                           options_file
+                           preserve_hosts
+                           tests
+                           type
+                           acceptance_root
+                           name]
       # iterates of acceptable params
       COMMAND_OPTIONS.each do |sym|
         attr_accessor(sym.to_sym)
@@ -33,7 +33,7 @@ module Beaker
         super
 
         @name = args.shift || 'beaker:test'
-        args = [:hosts, :type] if args.empty?
+        args = %i[hosts type] if args.empty?
         @acceptance_root = DEFAULT_ACCEPTANCE_ROOT
         @options_file = nil
         define(args, &task_block)

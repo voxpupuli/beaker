@@ -17,7 +17,7 @@ module Beaker
       PERSISTED_HOSTS = Pathname("#{CONFIG_DIR}/.hosts.yaml")
       PERSISTED_HYPERVISORS = Pathname("#{CONFIG_DIR}/.hypervisors.yaml")
       # These options should not be part of persisted subcommand state
-      UNPERSISTED_OPTIONS = [:beaker_version, :command_line, :hosts_file, :logger, :password_prompt, :timestamp]
+      UNPERSISTED_OPTIONS = %i[beaker_version command_line hosts_file logger password_prompt timestamp]
 
       def self.execute_subcommand?(arg0)
         return false if arg0.nil?

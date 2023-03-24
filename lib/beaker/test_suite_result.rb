@@ -152,7 +152,7 @@ module Beaker
     def persist_test_results(filepath)
       return if filepath.empty?
 
-      results = @test_cases.select { |c| [:fail, :error].include? c.test_status }.map(&:path)
+      results = @test_cases.select { |c| %i[fail error].include? c.test_status }.map(&:path)
       File.open(filepath, 'w') { |file| file.puts JSON.dump(results) }
     end
 

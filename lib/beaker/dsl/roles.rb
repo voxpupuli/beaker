@@ -133,7 +133,7 @@ module Beaker
       #
       # @return [Boolean] whether or not a host is AIO-capable
       def aio_version?(host)
-        [:pe_ver, :version].each do |key|
+        %i[pe_ver version].each do |key|
           version = host[key]
           return !version_is_less(version, '4.0') if version && !version.empty?
         end
