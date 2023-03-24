@@ -9,7 +9,7 @@ module Beaker
       def repeat_for_and_wait seconds, wait
         timeout = Time.now + seconds
         done = false
-        until done or timeout < Time.now do
+        until done or timeout < Time.now
           done = yield
           sleep wait unless done
         end
@@ -20,7 +20,7 @@ module Beaker
         done = false
         attempt = 1
         last_wait, wait = 0, 1
-        while not done and attempt <= attempts do
+        while not done and attempt <= attempts
           done = yield
           attempt += 1
           sleep wait unless done

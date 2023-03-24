@@ -103,7 +103,7 @@ module Beaker
       # Try three ways to connect to host (vmhostname, ip, hostname)
       # Try each method in turn until we succeed
       methods = @ssh_connection_preference.dup
-      while (not @ssh) && (not methods.empty?) do
+      while (not @ssh) && (not methods.empty?)
         unless instance_variable_get("@#{methods[0]}").nil?
           if SUPPORTED_CONNECTION_METHODS.include?(methods[0])
             @ssh = connect_block(instance_variable_get("@#{methods[0]}"), @user, @ssh_opts, options)

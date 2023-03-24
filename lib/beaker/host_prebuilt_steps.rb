@@ -61,7 +61,7 @@ module Beaker
           end
           success = false
           try = 0
-          until try >= TRIES do
+          until try >= TRIES
             try += 1
             if host.exec(Command.new(ntp_command), :accept_all_exit_codes => true).exit_code == 0
               success = true

@@ -174,7 +174,7 @@ module Unix::Exec
   # @return [Boolean] true of ping successful, overwise false
   def ping target, attempts = 5
     try = 0
-    while try < attempts do
+    while try < attempts
       result = exec(Beaker::Command.new("ping -c 1 #{target}"), :accept_all_exit_codes => true)
       return true if result.exit_code == 0
 
