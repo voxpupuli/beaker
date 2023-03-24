@@ -376,13 +376,11 @@ module Beaker
         #
         # @return nil
         def add_system32_hosts_entry(host, opts = {})
-          if host.is_powershell?
-            hosts_file = 'C:\Windows\System32\Drivers\etc\hosts'
-            host_entry = "#{opts['ip']}`t`t#{opts['name']}"
-            on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
-          else
-            raise "nothing to do for #{host.name} on #{host['platform']}"
-          end
+          raise "nothing to do for #{host.name} on #{host['platform']}" unless host.is_powershell?
+
+          hosts_file = 'C:\Windows\System32\Drivers\etc\hosts'
+          host_entry = "#{opts['ip']}`t`t#{opts['name']}"
+          on host, powershell("\$text = \\\"#{host_entry}\\\"; Add-Content -path '#{hosts_file}' -value \$text")
         end
 
         # Back up the given file in the current_dir to the new_dir

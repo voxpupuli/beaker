@@ -26,17 +26,14 @@ test_name "DSL::Structure::PlatformTagConfiner" do
     begin
       tag('tag1')
     rescue Beaker::DSL::Outcomes::SkipTest => e
-      if /^No\ suitable\ hosts\ found/.match?(e.message)
-        # SkipTest is raised in the case when there are no hosts leftover for a test
-        # after confining. It's a very common acceptance test case where all of the
-        # hosts involved are of the same platform, and are thus all confined
-        # away by the code being run here. In this case, the hosts object will not
-        # be altered, but should be considered a pass, since the fact that SkipTest
-        # is being raised confirms that a lower number of hosts are coming out of
-        # the confine (0) than came in (>0, according to our pre-condition assertion)
-      else
-        fail "#{pstc_method_name} raised unexpected SkipTest exception: #{e}"
-      end
+      fail "#{pstc_method_name} raised unexpected SkipTest exception: #{e}" unless /^No\ suitable\ hosts\ found/.match?(e.message)
+    # SkipTest is raised in the case when there are no hosts leftover for a test
+    # after confining. It's a very common acceptance test case where all of the
+    # hosts involved are of the same platform, and are thus all confined
+    # away by the code being run here. In this case, the hosts object will not
+    # be altered, but should be considered a pass, since the fact that SkipTest
+    # is being raised confirms that a lower number of hosts are coming out of
+    # the confine (0) than came in (>0, according to our pre-condition assertion)
     else
       assert hosts.length() < previous_hosts.length(), "#{pstc_method_name} did not change hosts array"
     end

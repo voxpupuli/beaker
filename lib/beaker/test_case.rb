@@ -164,11 +164,11 @@ module Beaker
             logger.error(line)
           end
           # If the status is already a test failure or error, don't overwrite with the teardown failure.
-          unless status == :teardown_error && (@test_status == :error || @test_status == :fail)
-            status = :error if status == :teardown_error
-            @test_status = status
-            @exception   = exception
-          end
+          return if status == :teardown_error && (@test_status == :error || @test_status == :fail)
+
+          status = :error if status == :teardown_error
+          @test_status = status
+          @exception   = exception
         end
       end
     end

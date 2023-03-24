@@ -195,13 +195,13 @@ module Beaker
 
       @cli.execute!
 
-      if options['preserve-state']
-        @cli.logger.notify 'updating HOSTS key in subcommand_options'
-        hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
-        options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
-        options_storage.transaction do
-          options_storage['HOSTS'] = hosts
-        end
+      return unless options['preserve-state']
+
+      @cli.logger.notify 'updating HOSTS key in subcommand_options'
+      hosts = SubcommandUtil.sanitize_options_for_save(@cli.combined_instance_and_options_hosts)
+      options_storage = YAML::Store.new(SubcommandUtil::SUBCOMMAND_OPTIONS)
+      options_storage.transaction do
+        options_storage['HOSTS'] = hosts
       end
     end
 

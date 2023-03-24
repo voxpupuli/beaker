@@ -74,9 +74,9 @@ module Beaker
 
     # Proxy package managers on tests hosts created by this hypervisor, runs before validation and configuration.
     def proxy_package_manager
-      if @options[:package_proxy]
-        package_proxy(@hosts, @options)
-      end
+      return unless @options[:package_proxy]
+
+      package_proxy(@hosts, @options)
     end
 
     # Default configuration steps to be run for a given hypervisor.  Any additional configuration to be done
@@ -111,9 +111,9 @@ module Beaker
     # Default validation steps to be run for a given hypervisor.  Ensures that SUTs meet requirements to be
     # beaker test nodes.
     def validate
-      if @options[:validate]
-        validate_host(@hosts, @options)
-      end
+      return unless @options[:validate]
+
+      validate_host(@hosts, @options)
     end
 
     # Generate a random string composted of letter and numbers

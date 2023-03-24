@@ -82,30 +82,30 @@ module Beaker
     # attempt to add them.
     # @raise [Exception] Raise an exception if virtual machines fail to be validated
     def validate
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].validate
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].validate
       end
     end
 
     # Configure all provisioned machines, adding any packages or settings required for SUTs
     # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def configure
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].configure
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].configure
       end
     end
 
     # configure proxy on all provioned machines
     # @raise [Exception] Raise an exception if virtual machines fail to be configured
     def proxy_package_manager
-      if @hypervisors
-        @hypervisors.each_key do |type|
-          @hypervisors[type].proxy_package_manager
-        end
+      return unless @hypervisors
+
+      @hypervisors.each_key do |type|
+        @hypervisors[type].proxy_package_manager
       end
     end
 

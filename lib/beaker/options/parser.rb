@@ -91,9 +91,9 @@ module Beaker
       # @return nil
       # @api public
       def resolve_symlinks!
-        if @options[:hosts_file] && !@options[:hosts_file_generated]
-          @options[:hosts_file] = File.realpath(@options[:hosts_file])
-        end
+        return unless @options[:hosts_file] && !@options[:hosts_file_generated]
+
+        @options[:hosts_file] = File.realpath(@options[:hosts_file])
       end
 
       # Converts array of paths into array of fully qualified git repo URLS with expanded keywords
@@ -147,17 +147,17 @@ module Beaker
 
         # default_set? will throw an error if length > 1
         # and return false if no default is set.
-        if !@validator.default_set?(default)
-          # no default set, let's make one
-          if not master.empty? and master.length == 1
-            default_host_name = master[0]
-          elsif hosts.length == 1
-            default_host_name = hosts.keys[0]
-          end
-          if default_host_name
-            hosts[default_host_name][:roles] << 'default'
-          end
+        return if @validator.default_set?(default)
+
+        # no default set, let's make one
+        if not master.empty? and master.length == 1
+          default_host_name = master[0]
+        elsif hosts.length == 1
+          default_host_name = hosts.keys[0]
         end
+        return unless default_host_name
+
+        hosts[default_host_name][:roles] << 'default'
       end
 
       # Constructor for Parser
@@ -430,9 +430,9 @@ module Beaker
           @validator.check_yaml_file(@options[:ec2_yaml], "required by #{visor}")
         end
 
-        if %w(aix solaris vcloud).include?(visor)
-          @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
-        end
+        return unless %w(aix solaris vcloud).include?(visor)
+
+        @validator.check_yaml_file(@options[:dot_fog], "required by #{visor}")
       end
 
       # Normalize include and exclude tags. This modifies @options.
@@ -457,9 +457,9 @@ module Beaker
       def test_host_roles(host_name, host_hash)
         exclude_roles = %w(master database dashboard)
         host_roles    = host_hash[:roles]
-        unless (host_roles & exclude_roles).empty?
-          @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
-        end
+        return if (host_roles & exclude_roles).empty?
+
+        @validator.parser_error "#{host_hash[:platform]} box '#{host_name}' may not have roles: #{exclude_roles.join(', ')}."
       end
     end
   end

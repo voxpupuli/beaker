@@ -91,17 +91,16 @@ module Beaker
         result = nil
         block_hosts = hosts # the hosts to apply the block to after any filtering
         if filter
-          if not hosts.empty?
-            block_hosts = hosts_with_role(hosts, filter) # check by role
-            if block_hosts.empty?
-              block_hosts = hosts_with_name(hosts, filter) # check by name
-            end
-            if block_hosts.length == 1 # we only found one matching host, don't need it wrapped in an array
-              block_hosts = block_hosts.pop
-            end
-          else
-            raise ArgumentError, "Unable to sort for #{filter} type hosts when provided with [] as Hosts"
+          raise ArgumentError, "Unable to sort for #{filter} type hosts when provided with [] as Hosts" if hosts.empty?
+
+          block_hosts = hosts_with_role(hosts, filter) # check by role
+          if block_hosts.empty?
+            block_hosts = hosts_with_name(hosts, filter) # check by name
           end
+          if block_hosts.length == 1 # we only found one matching host, don't need it wrapped in an array
+            block_hosts = block_hosts.pop
+          end
+
         end
         if block_hosts.is_a? Array
           if block_hosts.length > 0

@@ -53,9 +53,9 @@ module Beaker
           host.exec(Command.new('sed -i s/*\\\/10/*/ /etc/cron.d/sysstat'))
         end
       end
-      if PERF_START_PLATFORMS.match?(host['platform']) # SLES doesn't need this step
-        host.exec(Command.new('service sysstat start'))
-      end
+      return unless PERF_START_PLATFORMS.match?(host['platform']) # SLES doesn't need this step
+
+      host.exec(Command.new('service sysstat start'))
     end
 
     # Iterate over all hosts, calling get_perf_data

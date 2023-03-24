@@ -64,25 +64,23 @@ module Unix::Pkg
   # If apt has not been updated since the last repo deployment it is
   # updated. Otherwise this is a noop
   def update_apt_if_needed
-    if /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
-      if @apt_needs_update
-        execute("apt-get update")
-        @apt_needs_update = false
-      end
-    end
+    return unless /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
+    return unless @apt_needs_update
+
+    execute("apt-get update")
+    @apt_needs_update = false
   end
 
   # Arch Linux is a rolling release distribution. We need to ensure that it is up2date
   # Except for the kernel. An upgrade will purge the modules for the currently running kernel
   # Before upgrading packages, we need to ensure we've the latest keyring
   def update_pacman_if_needed
-    if self['platform'].include?('archlinux')
-      if @pacman_needs_update
-        execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
-        execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
-        @pacman_needs_update = false
-      end
-    end
+    return unless self['platform'].include?('archlinux')
+    return unless @pacman_needs_update
+
+    execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
+    execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
+    @pacman_needs_update = false
   end
 
   def install_package(name, cmdline_args = '', version = nil, opts = {})

@@ -90,15 +90,15 @@ module Beaker
       @version = version
       @codename = nil
 
-      if codename_version_hash
-        if codename_version_hash[version]
-          @codename = version
-          @version = codename_version_hash[version]
-        else
-          version = version.delete('.')
-          version_codename_hash = codename_version_hash.invert
-          @codename = version_codename_hash[version]
-        end
+      return unless codename_version_hash
+
+      if codename_version_hash[version]
+        @codename = version
+        @version = codename_version_hash[version]
+      else
+        version = version.delete('.')
+        version_codename_hash = codename_version_hash.invert
+        @codename = version_codename_hash[version]
       end
     end
 

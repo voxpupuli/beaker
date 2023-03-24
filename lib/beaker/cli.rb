@@ -304,24 +304,24 @@ module Beaker
     def print_command_line(log_level = :debug)
       @logger.send(log_level, "\nYou can reproduce this run with:\n")
       @logger.send(log_level, @options[:command_line])
-      if @options[:hosts_preserved_yaml_file]
-        set_docker_warning = false
-        has_supported_hypervisor = false
-        @hosts.each do |host|
-          case host[:hypervisor]
-          when /vagrant|fusion|vmpooler|vcloud/
-            has_supported_hypervisor = true
-          when /docker/
-            set_docker_warning = true
-          end
-        end
-        if has_supported_hypervisor
-          reproducing_command = build_hosts_preserved_reproducing_command(@options[:command_line], @options[:hosts_preserved_yaml_file])
-          @logger.send(log_level, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
-          @logger.send(log_level, '(docker support is untested for this feature. please reference the docs for more info)') if set_docker_warning
-          @logger.send(log_level, reproducing_command)
+      return unless @options[:hosts_preserved_yaml_file]
+
+      set_docker_warning = false
+      has_supported_hypervisor = false
+      @hosts.each do |host|
+        case host[:hypervisor]
+        when /vagrant|fusion|vmpooler|vcloud/
+          has_supported_hypervisor = true
+        when /docker/
+          set_docker_warning = true
         end
       end
+      return unless has_supported_hypervisor
+
+      reproducing_command = build_hosts_preserved_reproducing_command(@options[:command_line], @options[:hosts_preserved_yaml_file])
+      @logger.send(log_level, "\nYou can re-run commands against the already provisioned SUT(s) with:\n")
+      @logger.send(log_level, '(docker support is untested for this feature. please reference the docs for more info)') if set_docker_warning
+      @logger.send(log_level, reproducing_command)
     end
 
     # provides a new version of the command given, edited for re-use with a

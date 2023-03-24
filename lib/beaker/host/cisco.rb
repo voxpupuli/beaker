@@ -160,12 +160,12 @@ module Cisco
         end
       end
 
-      if msg
-        msg << <<-EOF
+      return unless msg
+
+      msg << <<-EOF
           Check https://github.com/puppetlabs/beaker/blob/master/docs/hosts/cisco.md for more info.'
-        EOF
-        raise ArgumentError, msg
-      end
+      EOF
+      raise ArgumentError, msg
     end
   end
 end

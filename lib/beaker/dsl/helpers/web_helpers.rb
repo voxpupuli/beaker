@@ -67,11 +67,9 @@ module Beaker
                 end
               end
             rescue OpenURI::HTTPError => e
-              if /404.*/.match?(e.message)
-                raise "Failed to fetch_remote_file '#{src}' (#{e.message})"
-              else
-                raise e
-              end
+              raise "Failed to fetch_remote_file '#{src}' (#{e.message})" if /404.*/.match?(e.message)
+
+              raise e
             end
           end
           return dst

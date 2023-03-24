@@ -53,10 +53,10 @@ module Beaker
         command = beaker_command
         puts command if verbose
         success = system(command)
-        if fail_mode == "fast" && !success
-          $stderr.puts "#{command} failed"
-          exit $?.exitstatus
-        end
+        return unless fail_mode == "fast" && !success
+
+        $stderr.puts "#{command} failed"
+        exit $?.exitstatus
       end
 
       # @private
@@ -77,9 +77,9 @@ module Beaker
       #   if no other options file is provided
       #
       def check_for_beaker_type_config
-        if !@options_file && File.exist?("#{@acceptance_root}/.beaker-#{@type}.cfg")
-          @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
-        end
+        return unless !@options_file && File.exist?("#{@acceptance_root}/.beaker-#{@type}.cfg")
+
+        @options_file = File.join(@acceptance_root, ".beaker-#{@type}.cfg")
       end
 
       #

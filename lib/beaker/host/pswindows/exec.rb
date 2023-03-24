@@ -141,12 +141,12 @@ module PSWindows::Exec
     # get the current value of the key
     cur_val = get_env_var(key, true)
     subbed_val = (cur_val.split(';') - [val.gsub(/'|"/, '')]).join(';')
-    if subbed_val != cur_val
-      # remove the current key value
-      self.clear_env_var(key)
-      # set to the truncated value
-      self.add_env_var(key, subbed_val)
-    end
+    return unless subbed_val != cur_val
+
+    # remove the current key value
+    self.clear_env_var(key)
+    # set to the truncated value
+    self.add_env_var(key, subbed_val)
   end
 
   # Return the value of a specific env var
@@ -158,15 +158,13 @@ module PSWindows::Exec
     self.close # refresh the state
     key = key.to_s.upcase
     val = exec(Beaker::Command.new("set #{key}"), :accept_all_exit_codes => true).stdout.chomp
-    if val.empty?
-      return ''
+    return '' if val.empty?
+
+    val = val.split("\n")[0] # only take the first result
+    if clean
+      val.gsub(/#{key}=/i, '')
     else
-      val = val.split("\n")[0] # only take the first result
-      if clean
-        val.gsub(/#{key}=/i, '')
-      else
-        val
-      end
+      val
     end
   end
 

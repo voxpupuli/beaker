@@ -67,9 +67,9 @@ module Beaker
     #
     # @return nil
     def self.copy_stylesheet_into_xml_dir(stylesheet, xml_file)
-      if not File.file?(File.join(File.dirname(xml_file), File.basename(stylesheet)))
-        FileUtils.copy(stylesheet, File.join(File.dirname(xml_file), File.basename(stylesheet)))
-      end
+      return if File.file?(File.join(File.dirname(xml_file), File.basename(stylesheet)))
+
+      FileUtils.copy(stylesheet, File.join(File.dirname(xml_file), File.basename(stylesheet)))
     end
 
     # sets up doc & gives us the suites for the testsuite named

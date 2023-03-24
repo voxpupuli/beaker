@@ -447,11 +447,10 @@ module Unix::Exec
   def which(command)
     unless @which_command
       if execute('type -P true', :accept_all_exit_codes => true).empty?
-        if execute('which true', :accept_all_exit_codes => true).empty?
-          raise ArgumentError, "Could not find suitable 'which' command"
-        else
-          @which_command = 'which'
-        end
+        raise ArgumentError, "Could not find suitable 'which' command" if execute('which true', :accept_all_exit_codes => true).empty?
+
+        @which_command = 'which'
+
       else
         @which_command = 'type -P'
       end
