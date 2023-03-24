@@ -177,11 +177,11 @@ module Beaker
       def tag_sources(options_hash, source)
         hash = Beaker::Options::OptionsHash.new
         options_hash.each do |key, value|
-          if value.is_a?(Hash)
-            hash[key] = tag_sources(value, source)
-          else
-            hash[key] = source
-          end
+          hash[key] = if value.is_a?(Hash)
+                        tag_sources(value, source)
+                      else
+                        source
+                      end
         end
         hash
       end

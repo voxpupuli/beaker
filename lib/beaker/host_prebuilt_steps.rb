@@ -238,15 +238,15 @@ module Beaker
     def get_domain_name(host)
       domain = nil
       search = nil
-      if host['platform'].include?('windows')
-        if host.is_cygwin?
-          resolv_conf = host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
-        else
-          resolv_conf = host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
-        end
-      else
-        resolv_conf = host.exec(Command.new("cat /etc/resolv.conf")).stdout
-      end
+      resolv_conf = if host['platform'].include?('windows')
+                      if host.is_cygwin?
+                        host.exec(Command.new("cat /cygdrive/c/Windows/System32/drivers/etc/hosts")).stdout
+                      else
+                        host.exec(Command.new('type C:\Windows\System32\drivers\etc\hosts')).stdout
+                      end
+                    else
+                      host.exec(Command.new("cat /etc/resolv.conf")).stdout
+                    end
       resolv_conf.each_line do |line|
         if (match = /^\s*domain\s+(\S+)/.match(line))
           domain = match[1]

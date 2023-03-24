@@ -129,11 +129,11 @@ module Cisco
       env_array = self.environment_variable_string_pair_array(env)
       environment_string = env_array.join(' ')
 
-      if self[:platform].include?('cisco_nexus')
-        prestring << " export"
-      else
-        prestring << " env"
-      end
+      prestring << if self[:platform].include?('cisco_nexus')
+                     " export"
+                   else
+                     " env"
+                   end
       environment_string = "#{prestring} #{environment_string}"
       environment_string << ';' if prestring.include?('export')
       environment_string

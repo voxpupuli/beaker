@@ -345,11 +345,11 @@ module Unix::Exec
     env_array = []
     env.each_key do |key|
       val = env[key]
-      if val.is_a?(Array)
-        val = val.join(':')
-      else
-        val = val.to_s
-      end
+      val = if val.is_a?(Array)
+              val.join(':')
+            else
+              val.to_s
+            end
       # doing this for the key itself & the upcase'd version allows us to remain
       # backwards compatible
       # TODO: (Next Major Version) get rid of upcase'd version

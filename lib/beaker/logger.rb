@@ -59,20 +59,20 @@ module Beaker
       options = args.last.is_a?(Hash) ? args.pop : {}
       @color = options[:color]
       @sublog = nil
-      case options[:log_level]
-      when /trace/i, :trace
-        @log_level = :trace
-      when /debug/i, :debug
-        @log_level = :debug
-      when /info/i, :info
-        @log_level = :info
-      when /notify/i, :notify
-        @log_level = :notify
-      when /warn/i, :warn
-        @log_level = :warn
-      else
-        @log_level = :verbose
-      end
+      @log_level = case options[:log_level]
+                   when /trace/i, :trace
+                     :trace
+                   when /debug/i, :debug
+                     :debug
+                   when /info/i, :info
+                     :info
+                   when /notify/i, :notify
+                     :notify
+                   when /warn/i, :warn
+                     :warn
+                   else
+                     :verbose
+                   end
 
       @last_result = nil
       @line_prefix = ''

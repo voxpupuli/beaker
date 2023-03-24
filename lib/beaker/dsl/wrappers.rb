@@ -55,20 +55,20 @@ module Beaker
         end
 
         ps_opts.each do |k, v|
-          if v.eql?('') or v.nil?
-            ps_args << "-#{k}"
-          else
-            ps_args << "-#{k} #{v}"
-          end
+          ps_args << if v.eql?('') or v.nil?
+                       "-#{k}"
+                     else
+                       "-#{k} #{v}"
+                     end
         end
 
         # may not have a command if executing a file
         if command && !command.empty?
-          if encoded
-            ps_args << "-EncodedCommand #{encode_command(command)}"
-          else
-            ps_args << "-Command #{command}"
-          end
+          ps_args << if encoded
+                       "-EncodedCommand #{encode_command(command)}"
+                     else
+                       "-Command #{command}"
+                     end
         end
 
         Command.new("powershell.exe", ps_args)

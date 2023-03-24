@@ -305,11 +305,11 @@ module Beaker
         output_callback = nil
       else
         @logger.debug "\n#{log_prefix} #{Time.new.strftime('%H:%M:%S')}$ #{cmdline}"
-        if @options[:color_host_output]
-          output_callback = logger.method(:color_host_output)
-        else
-          output_callback = logger.method(:host_output)
-        end
+        output_callback = if @options[:color_host_output]
+                            logger.method(:color_host_output)
+                          else
+                            logger.method(:host_output)
+                          end
       end
 
       unless options[:dry_run]
@@ -453,11 +453,11 @@ module Beaker
           next if File.directory?(s)
 
           s_path = Pathname.new(s)
-          if s_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
-            file_path = File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, ''))
-          else
-            file_path = File.join(target, File.dirname(s))
-          end
+          file_path = if s_path.absolute? and (File.dirname(File.absolute_path(source)).to_s != '/')
+                        File.join(target, File.dirname(s).gsub(/#{Regexp.escape(File.dirname(File.absolute_path(source)))}/, ''))
+                      else
+                        File.join(target, File.dirname(s))
+                      end
           result = connection.scp_to(s, file_path, options)
           @logger.trace result.stdout
         end
@@ -503,11 +503,11 @@ module Beaker
       # We enable achieve mode and compression
       rsync_args << "-az"
 
-      if not self['user']
-        user = "root"
-      else
-        user = self['user']
-      end
+      user = if not self['user']
+               "root"
+             else
+               self['user']
+             end
       hostname_with_user = "#{user}@#{reachable_name}"
 
       Rsync.host = hostname_with_user
