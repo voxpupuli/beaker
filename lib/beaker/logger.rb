@@ -190,7 +190,7 @@ module Beaker
     # Remove invalid UTF-8 codes from provided string(s)
     # @param [String, Array<String>] string The string(s) to remove invalid codes from
     def convert string
-      if string.kind_of?(Array)
+      if string.is_a?(Array)
         string.map do |s|
           convert s
         end
@@ -208,7 +208,7 @@ module Beaker
     #
     # @return [String] the prefixed line
     def prefix_log_line line
-      if line.kind_of?(Array)
+      if line.is_a?(Array)
         line.map do |s|
           prefix_log_line s
         end

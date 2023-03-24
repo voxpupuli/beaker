@@ -169,7 +169,7 @@ module Beaker
       #  add_role_def('myrole')
       #  on myrole, "run command"
       def add_role_def role
-        if role.kind_of?(Array)
+        if role.is_a?(Array)
           role.each do |r|
             add_role_def r
           end
