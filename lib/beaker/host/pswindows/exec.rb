@@ -219,8 +219,7 @@ module PSWindows::Exec
   # Overrides the {Windows::Exec#ssh_permit_user_environment} method,
   # since no steps are needed in this setup to allow user ssh environments
   # to work.
-  def ssh_permit_user_environment
-  end
+  def ssh_permit_user_environment; end
 
   # Sets the user SSH environment.
   #
