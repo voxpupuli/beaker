@@ -459,7 +459,7 @@ module Beaker
     #   => {:PATH=>["/1st/path", "/2nd/path"]}
     def additive_hash_merge h1, h2
       merged_hash = {}
-      normalized_h2 = h2.inject({}) { |h, (k, v)| h[k.to_s.upcase] = v; h }
+      normalized_h2 = h2.each_with_object({}) { |(k, v), h| h[k.to_s.upcase] = v; }
       h1.each_pair do |key, _val|
         normalized_key = key.to_s.upcase
         if normalized_h2.has_key?(normalized_key)
