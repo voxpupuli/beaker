@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 require 'fileutils'
 ['test_case', 'logger', 'test_suite', 'logger_junit'].each do |lib|
   require "beaker/#{lib}"

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 require 'hocon/parser/config_document_factory'
 require 'hocon/config_value_factory'
 
