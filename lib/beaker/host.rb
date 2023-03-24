@@ -109,7 +109,7 @@ module Beaker
       start = Time.now
       done = repeat_fibonacci_style_for(attempts) { port_open?(port) }
       if done
-        @logger.debug('connected in %0.2f seconds' % (Time.now - start))
+        @logger.debug(format('connected in %0.2f seconds', (Time.now - start)))
       else
         @logger.debug('timeout')
       end
