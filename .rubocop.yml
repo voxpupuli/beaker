@@ -1,32 +1,7 @@
 ---
-inherit_from: .rubocop_todo.yml
-
-require:
-  - rubocop-performance
-  - rubocop-rake
-  - rubocop-rspec
-
-AllCops:
-  TargetRubyVersion: 2.7
-  NewCops: enable
-
-Gemspec/RequireMFA:
-  Enabled: false
-
-Gemspec/DevelopmentDependencies:
-  Enabled: false
-
-Style/TrailingCommaInHashLiteral:
-  Enabled: True
-  EnforcedStyleForMultiline: consistent_comma
-
-Style/TrailingCommaInArrayLiteral:
-  Enabled: True
-  EnforcedStyleForMultiline: consistent_comma
-
-Style/TrailingCommaInArguments:
-  Enabled: True
-  EnforcedStyleForMultiline: comma
+inherit_from:
+  - rubocop.yml
+  - .rubocop_todo.yml
 
 Layout/LineLength:
   Exclude:
@@ -67,9 +42,6 @@ RSpec/MultipleExpectations:
 
 RSpec/NestedGroups:
   Max: 4
-
-Metrics:
-  Enabled: false
 
 Style:
   Enabled: false
