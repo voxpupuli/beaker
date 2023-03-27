@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.1.0](https://github.com/voxpupuli/beaker/tree/5.1.0) (2023-03-27)
+
+**Implemented enhancements:**
+
+- Introduce shareable rubocop config [\#1795](https://github.com/voxpupuli/beaker/pull/1795) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-03-24)
 
 **Breaking changes:**
