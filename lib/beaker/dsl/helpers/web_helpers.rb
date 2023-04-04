@@ -62,7 +62,7 @@ module Beaker
             logger.notify "Fetching: #{src}"
             logger.notify "  and saving to #{dst}"
             begin
-              URI.open(src) do |remote|
+              uri_open(src) do |remote|
                 File.open(dst, "w") do |file|
                   FileUtils.copy_stream(remote, file)
                 end
@@ -77,6 +77,19 @@ module Beaker
           end
           return dst
         end
+
+        def uri_open(src)
+          if RUBY_VERSION.to_f < 2.5
+            URI.send(:open, src) do |remote|
+              yield remote
+            end
+          else
+            URI.open(src) do |remote|
+              yield remote
+            end
+          end
+        end
+        private :uri_open
 
         # Recursively fetch the contents of the given http url, ignoring
         # `index.html` and `*.gif` files.
