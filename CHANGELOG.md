@@ -1,6 +1,14 @@
 # Changelog
 
-## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-09)
+## [4.40.0](https://github.com/voxpupuli/beaker/tree/4.40.0) (2023-04-04)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.39.0...4.40.0)
+
+**Implemented enhancements:**
+
+- \(maint\) Backport 'Removes open\_uri\_redirections' [\#1798](https://github.com/voxpupuli/beaker/pull/1798) ([joshcooper](https://github.com/joshcooper))
+
+## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-18)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.1...4.39.0)
 
@@ -10,9 +18,9 @@
 
 **Implemented enhancements:**
 
-- Add RuboCop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
+- Add Rubocop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
 - Update net-scp requirement from >= 1.2, < 4.0 to >= 1.2, < 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757)
-- (maint) StringInclude Rubocop corrections [\1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
+- \(maint\) StringInclude Rubocop corrections [\#1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
 
 **Closed issues:**
 
