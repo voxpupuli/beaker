@@ -45,6 +45,7 @@ To properly define a host you must provide:
 
 * name: The string identifying this host.
 * platform: One of the Beaker supported platforms.
+* roles: The 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string. At least one host needs a role of `default`.
 
 ## Optional Host Settings
 
@@ -54,7 +55,6 @@ Additionally, Beaker supports the following host options:
 * hypervisor: One of `docker`, `solaris`, `ec2`, `vsphere`, `fusion`, `aix`, `vcloud` or `vagrant`.
   * Additional settings may be required depending on the selected hypervisor (ie, template, box, box_url, etc).  Check the documentation below for your hypervisor for details.
 * snapshot: The name of the snapshot to revert to before testing.
-* roles: The 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string.
 * pe_dir: The directory where PE builds are located, may be local directory or a URL.
 * pe_ver: The version number of PE to install.
 * vagrant_memsize: The memory size (in MB) for this host
