@@ -45,7 +45,7 @@ To properly define a host you must provide:
 
 * name: The string identifying this host.
 * platform: One of the Beaker supported platforms.
-* roles: The 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string. At least one host needs a role of `default`.
+* roles: The 'job' of this host, an array of `master`, `agent`, `frictionless`, `dashboard`, `database`, `default` or any user-defined string. One host needs the role of `default`.
 
 ## Optional Host Settings
 
