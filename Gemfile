@@ -26,7 +26,7 @@ if ENV['BEAKER_HYPERVISOR']
 end
 
 group :rubocop do
-  gem 'rubocop', '~> 1.48.0'
+  gem 'rubocop', '~> 1.50.0'
   gem 'rubocop-performance', '~> 1.16.0'
   gem 'rubocop-rake', '~> 0.6.0'
   gem 'rubocop-rspec', '~> 2.19.0'
