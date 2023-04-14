@@ -16,14 +16,6 @@ end
 
 task :acceptance => ['test:base', 'test:hypervisor']
 
-task :yard do
-  Rake::Task['docs:gen'].invoke
-end
-
-task :history do
-  Rake::Task['history:gen'].invoke
-end
-
 module HarnessOptions
   defaults = {
     :tests => ['tests'],
@@ -185,120 +177,6 @@ namespace :test do
     FileUtils.mkdir_p('tmp') # -p ignores when dir already exists
     File.open("tmp/#{HOSTS_FILE}", 'w') do |fh|
       fh.print(cli.execute)
-    end
-  end
-end
-
-###########################################################
-#
-#   History Tasks
-#
-###########################################################
-namespace :history do
-  desc 'Generate HISTORY.md'
-  task :gen do
-    Dir.chdir(__dir__) do
-      output = `bundle exec ruby history.rb .`
-      puts output
-      raise "History generation failed" if !output.include?('success')
-    end
-  end
-end
-
-###########################################################
-#
-#   Documentation Tasks
-#
-###########################################################
-DOCS_DIR = 'yard_docs'
-DOCS_DAEMON = "yard server --reload --daemon --docroot #{DOCS_DIR}"
-FOREGROUND_SERVER = "bundle exec yard server --reload --verbose lib/beaker --docroot #{DOCS_DIR}"
-
-def running?(cmdline)
-  ps = `ps -ef`
-  found = ps.lines.grep(/#{Regexp.quote(cmdline)}/)
-  raise StandardError, "Found multiple YARD Servers. Don't know what to do." if found.length > 1
-
-  yes = found.empty? ? false : true
-  return yes, found.first
-end
-
-def pid_from(output)
-  output.squeeze(' ').strip.split(' ')[1]
-end
-
-desc 'Start the documentation server in the foreground'
-task :docs => 'docs:clear' do
-  Dir.chdir(__dir__) do
-    sh FOREGROUND_SERVER
-  end
-end
-
-namespace :docs do
-  desc 'Clear the generated documentation cache'
-  task :clear do
-    Dir.chdir(__dir__) do
-      sh "rm -rf #{DOCS_DIR}"
-    end
-  end
-
-  desc 'Generate static documentation'
-  task :gen => 'docs:clear' do
-    Dir.chdir(__dir__) do
-      output = `bundle exec yard doc -o #{DOCS_DIR}`
-      puts output
-      fail "Errors/Warnings during yard documentation generation" if /\[warn\]|\[error\]/.match?(output)
-    end
-  end
-
-  desc 'Run the documentation server in the background, alias `bg`'
-  task :background => 'docs:clear' do
-    yes, output = running?(DOCS_DAEMON)
-    if yes
-      puts "Not starting a new YARD Server..."
-      puts "Found one running with pid #{pid_from(output)}."
-    else
-      Dir.chdir(__dir__) do
-        sh "bundle exec #{DOCS_DAEMON}"
-      end
-    end
-  end
-
-  task(:bg) { Rake::Task['docs:background'].invoke }
-
-  desc 'Check the status of the documentation server'
-  task :status do
-    yes, output = running?(DOCS_DAEMON)
-    if yes
-      pid = pid_from(output)
-      puts "Found a YARD Server running with pid #{pid}"
-    else
-      puts "Could not find a running YARD Server."
-    end
-  end
-
-  desc "Stop a running YARD Server"
-  task :stop do
-    yes, output = running?(DOCS_DAEMON)
-    if yes
-      pid = pid_from(output)
-      puts "Found a YARD Server running with pid #{pid}"
-      `kill #{pid}`
-      puts "Stopping..."
-      yes, _output = running?(DOCS_DAEMON)
-      if yes
-        `kill -9 #{pid}`
-        yes, _output = running?(DOCS_DAEMON)
-        if yes
-          puts "Could not Stop Server!"
-        else
-          puts "Server stopped."
-        end
-      else
-        puts "Server stopped."
-      end
-    else
-      puts "Could not find a running YARD Server"
     end
   end
 end
