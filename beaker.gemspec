@@ -23,9 +23,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.0'
 
-  # Documentation dependencies
-  s.add_development_dependency 'yard', '~> 0.9.11'
-
   # Run time dependencies
   s.add_runtime_dependency 'minitar', '~> 0.6'
   s.add_runtime_dependency 'minitest', '~> 5.4'
