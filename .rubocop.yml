@@ -1,7 +1,9 @@
 ---
 inherit_from:
-  - rubocop.yml
   - .rubocop_todo.yml
+
+inherit_gem:
+  voxpupuli-rubocop: rubocop.yml
 
 Layout/LineLength:
   Exclude:

@@ -25,13 +25,6 @@ if ENV['BEAKER_HYPERVISOR']
   gem "beaker-#{ENV['BEAKER_HYPERVISOR'].split('_').first}"
 end
 
-group :rubocop do
-  gem 'rubocop', '~> 1.48.0'
-  gem 'rubocop-performance', '~> 1.16.0'
-  gem 'rubocop-rake', '~> 0.6.0'
-  gem 'rubocop-rspec', '~> 2.19.0'
-end
-
 group :release do
   gem 'github_changelog_generator', require: false
 end
