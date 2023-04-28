@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.2.0](https://github.com/voxpupuli/beaker/tree/5.2.0) (2023-04-28)
+
+**Implemented enhancements:**
+
+- Enhance documentation about roles [\#1800](https://github.com/voxpupuli/beaker/pull/1800) ([rwaffen](https://github.com/rwaffen))
+- Declare API interface on Beaker::Host [\#1806](https://github.com/voxpupuli/beaker/pull/1806) ([ekohl](https://github.com/ekohl))
+- Support an extension to tmpfile [\#1735](https://github.com/voxpupuli/beaker/pull/1735) ([ekohl](https://github.com/ekohl))
+
+**Fixed bugs:**
+
+- Use systemctl to restat SSH on EL9 [\#1808](https://github.com/voxpupuli/beaker/pull/1808) ([ekohl](https://github.com/ekohl))
+
+**Merged changes:**
+
+- Drop legacy yard tasks [\#1805](https://github.com/voxpupuli/beaker/pull/1805) ([bastelfreak](https://github.com/bastelfreak))
+- Switch to voxpupuli-rubocop [\#1804](https://github.com/voxpupuli/beaker/pull/1804) ([bastelfreak](https://github.com/bastelfreak))
+- Disable RSpec/IndexedLet [\#1807](https://github.com/voxpupuli/beaker/pull/1807) ([ekohl](https://github.com/ekohl))
+
 ## [5.1.0](https://github.com/voxpupuli/beaker/tree/5.1.0) (2023-03-27)
 
 **Implemented enhancements:**
