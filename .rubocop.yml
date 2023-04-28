@@ -42,6 +42,9 @@ RSpec/StubbedMock:
 RSpec/MultipleExpectations:
   Enabled: false
 
+RSpec/IndexedLet:
+  Enabled: false
+
 RSpec/NestedGroups:
   Max: 4
 
