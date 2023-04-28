@@ -18,7 +18,7 @@ jobs:
         env:
           BUNDLE_WITHOUT: release:development:rubocop
       - name: Build gem
-        run: gem build *.gemspec
+        run: gem build --strict --verbose *.gemspec
       - name: Publish gem to rubygems.org
         run: gem push *.gem
         env:
