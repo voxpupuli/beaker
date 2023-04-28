@@ -29,7 +29,10 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'rexml'
 
-  s.add_runtime_dependency 'ed25519', '~> 1.0' # net-ssh compatibility with ed25519 keys
+  # net-ssh compatibility with ed25519 keys
+  s.add_runtime_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
+  s.add_runtime_dependency 'ed25519', '>= 1.2', '<2.0'
+
   s.add_runtime_dependency 'hocon', '~> 1.0'
   s.add_runtime_dependency 'inifile', '~> 3.0'
   s.add_runtime_dependency 'net-scp', '>= 1.2', '< 5.0'
