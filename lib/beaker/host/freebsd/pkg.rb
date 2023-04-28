@@ -16,7 +16,7 @@ module FreeBSD::Pkg
     execute("/bin/sh -c '#{check_pkgng_sh}'", opts) { |r| r }.exit_code == 0
   end
 
-  def install_package(package, cmdline_args = nil, opts = {})
+  def install_package(package, cmdline_args = nil, _version = nil, opts = {})
     cmd = if pkgng_active?
             "pkg install #{cmdline_args || '-y'} #{package}"
           else

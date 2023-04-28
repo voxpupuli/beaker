@@ -547,6 +547,30 @@ module Beaker
 
       raise Beaker::Host::CommandFailure, result.error
     end
+
+    def tmpfile(name = '')
+      raise NotImplementedError
+    end
+
+    def tmpdir(name = '')
+      raise NotImplementedError
+    end
+
+    def path_split(paths)
+      raise NotImplementedError
+    end
+
+    def rm_rf(path)
+      raise NotImplementedError
+    end
+
+    def install_package(package, cmdline_args = nil, _version = nil, opts = {})
+      raise NotImplementedError
+    end
+
+    def add_env_var(key, val)
+      raise NotImplementedError
+    end
   end
 
   %w[
