@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.40.1](https://github.com/voxpupuli/beaker/tree/4.40.1) (2023-05-05)
+
+**Merged Changes:**
+
+- in-parallel: Allow 1.x [\#1813](https://github.com/voxpupuli/beaker/pull/1813) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [4.40.0](https://github.com/voxpupuli/beaker/tree/4.40.0) (2023-04-04)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.39.0...4.40.0)
