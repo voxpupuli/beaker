@@ -11,6 +11,7 @@ test_name 'File Test' do
       tmpfile = host.tmpfile('beaker')
       # ensure we have a user to chown to
       host.chown('testuser', tmpfile)
+
       assert_match(/testuser/, host.ls_ld(tmpfile), "Should have found testuser in `ls -ld` output")
     end
   end
@@ -21,6 +22,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       # ensure we have a user to chown to
       host.chgrp('testgroup', tmpdir)
+
       assert_match(/testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output")
     end
   end
@@ -31,6 +33,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       on host, host.touch("#{tmpdir}/somefile.txt", false)
       host.chown('testuser', tmpdir, true)
+
       assert_match(/testuser/, host.ls_ld("#{tmpdir}/somefile.txt"), "Should have found testuser in `ls -ld` output for sub-file")
     end
   end
@@ -41,6 +44,7 @@ test_name 'File Test' do
       tmpfile = host.tmpfile('beaker')
       # ensure we have a group to chgrp to
       host.chgrp('testgroup', tmpfile)
+
       assert_match(/testgroup/, host.ls_ld(tmpfile), "Should have found testgroup in `ls -ld` output")
     end
   end
@@ -51,6 +55,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       # ensure we have a group to chgrp to
       host.chgrp('testgroup', tmpdir)
+
       assert_match(/testgroup/, host.ls_ld(tmpdir), "Should have found testgroup in `ls -ld` output")
     end
   end
@@ -61,6 +66,7 @@ test_name 'File Test' do
       tmpdir = host.tmpdir('beaker')
       on host, host.touch("#{tmpdir}/somefile.txt", false)
       host.chgrp('testgroup', tmpdir, true)
+
       assert_match(/testgroup/, host.ls_ld("#{tmpdir}/somefile.txt"), "Should have found testgroup in `ls -ld` output for sub-file")
     end
   end
@@ -69,6 +75,7 @@ test_name 'File Test' do
     hosts.each do |host|
       # create a tmp file to mangle
       tmpdir = host.tmpdir('beaker')
+
       assert_match(/beaker/, host.ls_ld(tmpdir), "Should have found beaker in `ls -ld` output")
     end
   end

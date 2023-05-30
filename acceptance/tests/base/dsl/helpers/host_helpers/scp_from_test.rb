@@ -28,6 +28,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
       scp_from default, remote_filename, local_dir
 
       local_filename = File.join(local_dir, "testfile.txt")
+
       assert_equal contents, File.read(local_filename)
     end
   end
@@ -47,6 +48,7 @@ test_name "dsl::helpers::host_helpers #scp_from" do
 
       local_filename = File.join(local_dir, "testfile.txt")
       local_contents = File.read(local_filename)
+
       assert_equal remote_contents, local_contents
     end
   end

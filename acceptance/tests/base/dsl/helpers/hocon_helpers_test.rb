@@ -15,6 +15,7 @@ test_name 'Hocon Helpers Test' do
 
   step '#hocon_file_read : reads doc' do
     doc = hocon_file_read_on(hosts[0], hocon_filename)
+
     assert(doc.has_value?('setting2'))
   end
 
@@ -34,7 +35,7 @@ test_name 'Hocon Helpers Test' do
         end
         fail('execution should not continue in failure mode')
       rescue ArgumentError => e
-        assert(e.to_s.include?('requires a filename'))
+        assert_includes(e.to_s, 'requires a filename')
       else
         fail('No exception raised in failure mode')
       end
@@ -53,7 +54,7 @@ test_name 'Hocon Helpers Test' do
         hocon_file_edit_on(hosts, hocon_filename)
         fail('execution should not continue in failure mode')
       rescue ArgumentError => e
-        assert(e.to_s.include?('No block was provided'))
+        assert_includes(e.to_s, 'No block was provided')
       else
         fail('No exception raised in failure mode')
       end
@@ -71,6 +72,7 @@ test_name 'Hocon Helpers Test' do
     step '#hocon_file_edit_on : independently read value to verify save' do
       hocon_file_edit_on(hosts, hocon_filename) do |_host, doc|
         msg_fail = 'Should have saved "a.b" value inserted in previous step'
+
         assert(doc.has_value?('a.b'), msg_fail)
       end
     end
@@ -86,6 +88,7 @@ test_name 'Hocon Helpers Test' do
     step '#hocon_file_edit_in_place_on : verify save' do
       hocon_file_edit_on(hosts, hocon_filename) do |_host, doc|
         msg_fail = 'Should have saved "c.d" value inserted in previous step'
+
         assert(doc.has_value?('c.d'), msg_fail)
       end
     end

@@ -5,8 +5,10 @@ test_name "confirm host object behave correctly"
 step "#port_open? : can determine if a port is open on hosts"
 hosts.each do |host|
   logger.debug "port 22 (ssh) should be open on #{host}"
+
   assert_equal(true, host.port_open?(22), "port 22 on #{host} should be open")
   logger.debug "port 65535 should be closed on #{host}"
+
   assert_equal(false, host.port_open?(65535), "port 65535 on #{host} should be closed")
 end
 
@@ -15,6 +17,7 @@ hosts.each do |host|
   ip = host.ip
   # confirm ip format
   logger.debug("format of #{ip} for #{host} should be correct")
+
   assert_match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/, ip, "#{ip} on #{host} isn't correct format")
 end
 
@@ -62,7 +65,8 @@ hosts.each do |host|
   host.add_env_var(env_param1, env_value3)
 
   val = host.get_env_var(env_id)
-  assert('' == val, 'get_env_var should not match a partial env key name')
+
+  assert_equal('', val, 'get_env_var should not match a partial env key name')
 end
 
 step "#get_env_var : should not return a match from a key\'s value"
@@ -75,7 +79,8 @@ hosts.each do |host|
   host.add_env_var(env_param1, env_value1)
 
   val = host.get_env_var(env_value1)
-  assert('' == val, 'get_env_var should not return a match from a key\'s value')
+
+  assert_equal('', val, 'get_env_var should not return a match from a key\'s value')
 end
 
 step "#clear_env_var : should only remove the specified key"
@@ -99,11 +104,14 @@ hosts.each do |host|
   host.clear_env_var(env_param3)
 
   val = host.get_env_var(env_param1)
+
   assert_match(/^#{env_param1}=#{env_value1}$/, val, "#{env_param1} should exist after calling clear_env_var")
   val = host.get_env_var(env_param2)
+
   assert_match(/^#{env_param2}=#{env_value2}$/, val, "#{env_param2} should exist after calling clear_env_var")
   val = host.get_env_var(env_param3)
-  assert('' == val, "#{env_param3} should not exist after calling clear_env_var")
+
+  assert_equal('', val, "#{env_param3} should not exist after calling clear_env_var")
 end
 
 step "#add_env_var : can add a unique environment variable"
@@ -126,10 +134,13 @@ hosts.each do |host|
   host.add_env_var(env_param3, env_value3)
 
   val = host.get_env_var(env_param1)
+
   assert_match(/^#{env_param1}=#{env_value1}$/, val, "#{env_param1} should exist")
   val = host.get_env_var(env_param2)
+
   assert_match(/^#{env_param2}=#{env_value2}$/, val, "#{env_param2} should exist")
   val = host.get_env_var(env_param3)
+
   assert_match(/^#{env_param3}=#{env_value3}$/, val, "#{env_param3} should exist")
 end
 
@@ -147,6 +158,7 @@ hosts.each do |host|
   host.add_env_var("TEST", "3")
   logger.debug("ensure that TEST env var has correct setting")
   val = host.get_env_var("TEST")
+
   assert_match(/TEST=3(;|:)2(;|:)1$/, val, "add_env_var can correctly add env vars")
 end
 
@@ -169,6 +181,7 @@ step "#add_env_var : can preserve an environment between ssh connections" do
     host.close
     logger.debug("ensure that TEST env var has correct setting")
     val = host.get_env_var("TEST")
+
     assert_match(/TEST=3(;|:)2(;|:)1$/, val, "can preserve an environment between ssh connections")
   end
 end
@@ -178,14 +191,17 @@ hosts.each do |host|
   logger.debug("remove TEST=3")
   host.delete_env_var("TEST", "3")
   val = host.get_env_var("TEST")
+
   assert_match(/TEST=2(;|:)1$/, val, "delete_env_var can correctly delete part of a chained env var")
   logger.debug("remove TEST=1")
   host.delete_env_var("TEST", "1")
   val = host.get_env_var("TEST")
+
   assert_match(/TEST=2$/, val, "delete_env_var can correctly delete part of a chained env var")
   logger.debug("remove TEST=2")
   host.delete_env_var("TEST", "2")
   val = host.get_env_var("TEST")
+
   assert_equal("", val, "delete_env_var fully removes empty env var")
 end
 
@@ -195,6 +211,7 @@ hosts.each do |host|
   host.rm_rf("test1")
   # test dir construction
   logger.debug("create test1/test2/test3/test4")
+
   assert_equal(true, host.mkdir_p("test1/test2/test3/test4"), "can create directory structure")
   logger.debug("should be able to create a file in the new dir")
   on host, host.touch("test1/test2/test3/test4/test.txt", false)
@@ -218,9 +235,11 @@ hosts.each do |host|
     local_paths.each do |path|
       search_name = path.gsub(/^.*fixtures\//, '') # reduce down to the path that should match
       matched = host_paths.select { |check| /#{Regexp.escape(search_name)}$/.match?(check) }
+
       assert_equal(1, matched.length, "should have found a single instance of path #{search_name}, found #{matched.length}: \n #{matched}")
       host_paths = host_paths - matched
     end
+
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
 end
@@ -251,6 +270,7 @@ hosts.each do |host|
       end
       host_paths = host_paths - matched
     end
+
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
 end
@@ -282,6 +302,7 @@ hosts.each do |host|
       end
       host_paths = host_paths - matched
     end
+
     assert_equal(0, host_paths.length, "there are extra paths on #{host} (#{host_paths})")
   end
 end
@@ -326,10 +347,12 @@ step 'Ensure that a long 128+ character string with UTF-8 characters does not br
   long_string = ('a' * 128) + "\u06FF"
   on(default, "mkdir /tmp/#{long_string}")
   result = on(default, 'ls /tmp')
-  assert(result.stdout.include?(long_string), 'Error in folder creation with long string + UTF-8 characters')
+
+  assert_includes(result.stdout, long_string, 'Error in folder creation with long string + UTF-8 characters')
 
   # remove the folder
   on(default, "rm -rf /tmp/#{long_string}")
   result = on(default, 'ls /tmp')
+
   assert(!result.stdout.include?(long_string), 'Error in folder deletion with long string + UTF-8 characters')
 end

@@ -25,11 +25,13 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
 
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
+
       assert !result
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
       result = check_for_package default, known_installed_package
+
       assert result
     end
 
@@ -43,11 +45,13 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
   confine_block :to, :platform => /solaris/ do
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
+
       assert !result
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
       result = check_for_package default, known_installed_package
+
       assert result
     end
 
@@ -69,12 +73,14 @@ test_name "dsl::helpers::host_helpers #check_for_package" do
   confine_block :except, :platform => /windows|solaris|osx/ do
     step "#check_for_package will return false if the specified package is not installed on the remote host" do
       result = check_for_package default, "non-existent-package-name"
+
       assert !result
     end
 
     step "#check_for_package will return true if the specified package is installed on the remote host" do
       install_package default, known_installed_package
       result = check_for_package default, known_installed_package
+
       assert result
     end
 

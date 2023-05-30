@@ -6,6 +6,7 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
     remote_source = default.tmpdir
     remote_destination = default.tmpdir
     result = backup_the_file default, remote_source, remote_destination
+
     assert_nil result
   end
 
@@ -29,6 +30,7 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
 
     assert_equal remote_destination_filename, result
     remote_contents = on(default, "cat #{remote_destination_filename}").stdout
+
     assert_equal contents, remote_contents
   end
 
@@ -43,6 +45,7 @@ test_name "dsl::helpers::host_helpers #backup_the_file" do
 
     assert_equal remote_destination_filename, result
     remote_contents = on(default, "cat #{remote_destination_filename}").stdout
+
     assert_equal contents, remote_contents
   end
 
