@@ -25,6 +25,7 @@ test_name "dsl::helpers::host_helpers #curl_on" do
 
     assert_equal 0, result.exit_code
     remote_contents = on(default, "cat #{remote_targetfilename}").stdout
+
     assert_equal contents, remote_contents
   end
 
@@ -42,6 +43,7 @@ test_name "dsl::helpers::host_helpers #curl_on" do
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_targetfilename}").stdout
+
       assert_equal contents, remote_contents
     end
   end

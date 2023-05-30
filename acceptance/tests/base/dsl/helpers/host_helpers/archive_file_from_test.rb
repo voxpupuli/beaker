@@ -15,6 +15,7 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
     assert_equal(false, Dir.exist?('archive'))
     assert_equal(false, Dir.exist?('archive/sut-files'))
     archive_file_from(default, filepath)
+
     assert_equal(true, Dir.exist?('archive/sut-files'))
   end
 
@@ -32,17 +33,20 @@ test_name "dsl::helpers::host_helpers #archive_file_from" do
     # Create a remote file to archive
     filepath = default.tmpfile('archive-file-test')
     create_remote_file(default, filepath, 'number of the beast')
+
     assert_equal(false, Dir.exist?(filepath))
 
     # Test that the file is copied locally to <archiveroot>/<hostname>/<filepath>
     Dir.mktmpdir do |tmpdir|
       tar_path = File.join(tmpdir, default, filepath + '.tgz')
       archive_file_from(default, filepath, {}, tmpdir, tar_path)
-      assert(File.exist?(tar_path))
+
+      assert_path_exists(tar_path)
       expected_path = File.join(tmpdir, default)
 
       tgz = Zlib::GzipReader.new(File.open(tar_path, 'rb'))
       Minitar.unpack(tgz, expected_path)
+
       assert_equal('number of the beast', File.read(expected_path + '/' + filepath).strip)
     end
   end

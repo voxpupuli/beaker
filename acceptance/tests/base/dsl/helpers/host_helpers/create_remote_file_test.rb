@@ -43,6 +43,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     create_remote_file_with_backups default, remote_filename, contents
 
     remote_contents = on(default, "cat #{remote_filename}").stdout
+
     assert_equal contents, remote_contents
   end
 
@@ -54,6 +55,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
     create_remote_file_with_backups default, remote_filename, contents, { :protocol => "scp" }
 
     remote_contents = on(default, "cat #{remote_filename}").stdout
+
     assert_equal contents, remote_contents
   end
 
@@ -72,6 +74,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
+
       assert_equal contents, remote_contents
     end
   end
@@ -91,6 +94,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
 
     hosts.each do |host|
       remote_contents = on(host, "cat #{remote_filename}").stdout
+
       assert_equal contents, remote_contents
     end
   end
@@ -144,6 +148,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
                            "contents" => contents,
                            "result" => result) do
         remote_contents = on(default, "cat #{remote_filename}").stdout
+
         assert_equal contents, remote_contents
       end
     end
@@ -171,6 +176,7 @@ test_name "dsl::helpers::host_helpers #create_remote_file" do
                              "contents" => contents,
                              "result" => result) do
           remote_contents = on(host, "cat #{remote_filename}").stdout
+
           assert_equal contents, remote_contents
         end
       end

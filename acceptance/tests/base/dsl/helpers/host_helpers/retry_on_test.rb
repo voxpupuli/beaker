@@ -19,6 +19,7 @@ test_name "dsl::helpers::host_helpers #retry_on" do
     create_remote_file_from_fixture("retry_script", default, remote_tmpdir, "test.sh")
 
     result = retry_on default, "bash #{remote_script_file} #{remote_tmpdir} 2", { :max_retries => 4, :retry_interval => 0.1 }
+
     assert_equal 0, result.exit_code
     assert_equal "", result.stdout
   end

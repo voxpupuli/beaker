@@ -24,6 +24,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
     step "#run_cron_on CURRENTLY does not fail when listing cron jobs for a user with no cron entries" do
       result = run_cron_on default, :list, default['user']
+
       assert_equal 0, result.exit_code
     end
 
@@ -31,23 +32,27 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       # this basically requires us to add a cron entry to make this work
       run_cron_on default, :add, default['user'], "* * * * * /bin/ls >/dev/null"
       result = run_cron_on default, :list, default['user']
+
       assert_equal 0, result.exit_code
       assert_match %r{/bin/ls}, result.stdout
     end
 
     step "#run_cron_on CURRENTLY does not fail, but returns nil, when adding cron jobs for an unknown user" do
       result = run_cron_on default, :add, "nonexistentuser", %{* * * * * /bin/echo "hello" >/dev/null}
+
       assert_nil result
     end
 
     step "#run_cron_on CURRENTLY does not fail, but returns nil, when attempting to add a bad cron entry" do
       result = run_cron_on default, :add, default['user'], "* * * * /bin/ls >/dev/null"
+
       assert_nil result
     end
 
     step "#run_cron_on can add a cron job for a user on a host" do
       run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "hello" >/dev/null}
       result = run_cron_on default, :list, default['user']
+
       assert_equal 0, result.exit_code
       assert_match %r{/bin/echo}, result.stdout
     end
@@ -73,6 +78,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "quality: job 1" >/dev/null}
       result = run_cron_on default, :list, default['user']
+
       assert_match %r{quality: job 1}, result.stdout
 
       run_cron_on default, :remove, default['user']
@@ -95,6 +101,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       end
 
       results = run_cron_on hosts, :list, default['user']
+
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end
@@ -104,6 +111,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
 
       results = run_cron_on hosts, :list, default['user']
+
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end
@@ -144,6 +152,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       # this basically requires us to add a cron entry to make this work
       run_cron_on default, :add, default['user'], "* * * * * /bin/ls >/dev/null"
       result = run_cron_on default, :list, default['user']
+
       assert_equal 0, result.exit_code
       assert_match %r{/bin/ls}, result.stdout
     end
@@ -163,6 +172,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
     step "#run_cron_on can add a cron job for a user on a host" do
       run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "hello" >/dev/null}
       result = run_cron_on default, :list, default['user']
+
       assert_equal 0, result.exit_code
       assert_match %r{/bin/echo}, result.stdout
     end
@@ -188,6 +198,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
 
       run_cron_on default, :add, default['user'], %{* * * * * /bin/echo "quality: job 1" >/dev/null}
       result = run_cron_on default, :list, default['user']
+
       assert_match %r{quality: job 1}, result.stdout
 
       run_cron_on default, :remove, default['user']
@@ -210,6 +221,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       end
 
       results = run_cron_on hosts, :list, default['user']
+
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end
@@ -219,6 +231,7 @@ test_name "dsl::helpers::host_helpers #run_cron_on" do
       run_cron_on hosts, :add, default['user'], "* * * * * /bin/ls >/dev/null"
 
       results = run_cron_on hosts, :list, default['user']
+
       results.each do |result|
         assert_match %r{/bin/ls}, result.stdout
       end

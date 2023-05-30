@@ -9,24 +9,29 @@ test_name "dsl::helpers::host_helpers #on" do
 
   step "#on makes command output available via `.stdout` on success" do
     output = on(default, %{echo "echo via on"}).stdout
+
     assert_equal "echo via on\n", output
   end
 
   step "#on makes command error output available via `.stderr` on success" do
     output = on(default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]).stderr
+
     assert_match(/No such file/, output)
   end
 
   step "#on makes exit status available via `.exit_code`" do
     status = on(default, %{echo "echo via on"}).exit_code
+
     assert_equal 0, status
   end
 
   step "#on with :acceptable_exit_codes will not fail for named exit codes" do
     result = on default, "/bin/nonexistent-command", :acceptable_exit_codes => [0, 127]
     output = result.stderr
+
     assert_match(/No such file/, output)
     status = result.exit_code
+
     assert_equal 127, status
   end
 
@@ -59,6 +64,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     # and that we have |hosts| distinct outputs
     unique_outputs = results.map(&:output).uniq
+
     assert_equal hosts.size, unique_outputs.size
   end
 
@@ -78,6 +84,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     # and that we have |hosts| distinct outputs
     unique_outputs = results.map(&:output).uniq
+
     assert_equal hosts.size, unique_outputs.size
   end
 
@@ -97,6 +104,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     # and that we have |hosts| distinct outputs
     unique_outputs = results.map(&:output).uniq
+
     assert_equal hosts.size, unique_outputs.size
   end
 
@@ -112,7 +120,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     parent_pid = Process.pid
     results = on(hosts, %{echo "${RANDOM}:${RANDOM}:${RANDOM}"}, :run_in_parallel => true) do
-      assert(Process.pid != parent_pid)
+      refute_equal(Process.pid, parent_pid)
     end
 
     # assert that we got results back for every host
@@ -125,6 +133,7 @@ test_name "dsl::helpers::host_helpers #on" do
 
     # and that we have |hosts| distinct outputs
     unique_outputs = results.map(&:output).uniq
+
     assert_equal hosts.size, unique_outputs.size
   end
 

@@ -30,6 +30,7 @@ test_name "dsl::helpers::host_helpers #scp_to" do
 
       remote_filename = File.join(remote_tmpdir, "testfile.txt")
       remote_contents = on(default, "cat #{remote_filename}").stdout
+
       assert_equal contents, remote_contents
     end
   end
@@ -46,6 +47,7 @@ test_name "dsl::helpers::host_helpers #scp_to" do
 
       hosts.each do |host|
         remote_contents = on(host, "cat #{remote_filename}").stdout
+
         assert_equal contents, remote_contents
       end
     end

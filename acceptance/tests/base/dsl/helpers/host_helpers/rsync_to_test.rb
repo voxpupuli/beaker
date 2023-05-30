@@ -130,6 +130,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
                              "remote_tmdir" => remote_tmpdir,
                              "result" => result.inspect) do
           remote_contents = on(default, "cat #{remote_filename}").stdout
+
           assert_equal contents, remote_contents
         end
       end
@@ -154,6 +155,7 @@ test_name "dsl::helpers::host_helpers #rsync_to" do
                                "remote_tmdir" => remote_tmpdir,
                                "result" => result.inspect) do
             remote_contents = on(host, "cat #{remote_filename}").stdout
+
             assert_equal contents, remote_contents
           end
         end

@@ -2,6 +2,6 @@
 step "hosts can ping each other"
 hosts.each do |one|
   hosts.each do |two|
-    assert_equal(one.ping(two), true)
+    assert_equal(true, one.ping(two))
   end
 end

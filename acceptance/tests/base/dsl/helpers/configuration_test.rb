@@ -8,6 +8,7 @@ test_name "dsl::helpers::host_helpers test configuration validation" do
            "dsl::helpers::host_helpers acceptance tests require at least two hosts"
 
     agents = select_hosts(:roles => "agent")
+
     assert (agents.size > 1),
            "dsl::helpers::host_helpers acceptance tests require at least two hosts with the :agent role"
 

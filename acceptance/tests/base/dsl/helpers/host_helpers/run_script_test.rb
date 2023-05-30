@@ -22,6 +22,7 @@ test_name "dsl::helpers::host_helpers #run_script" do
       local_filename, _contents = create_local_file_from_fixture("failing_shell_script", local_dir, "testfile.sh", "a+x")
 
       result = run_script local_filename, { :accept_all_exit_codes => true }
+
       assert_equal 1, result.exit_code
     end
   end
@@ -31,6 +32,7 @@ test_name "dsl::helpers::host_helpers #run_script" do
       local_filename, _contents = create_local_file_from_fixture("shell_script_with_output", local_dir, "testfile.sh", "a+x")
 
       results = run_script local_filename
+
       assert_equal 0, results.exit_code
       assert_equal "output\n", results.stdout
     end
