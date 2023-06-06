@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.3.0] (https://github.com/voxpupuli/beaker/tree/5.3.0) (2023-06-06)
+
+**Implemented enhancements:**
+
+- Add bcrypt_pbkdf to fix ed25519 ssh keys support [\#1810](https://github.com/voxpupuli/beaker/pull/1810) ([jay7x](https://github.com/jay7x))
+
+**Merged changes:**
+
+- Build gems with verbosity and strictness [\#1811](https://github.com/voxpupuli/beaker/pull/1811) ([bastelfreak](https://github.com/bastelfreak))
+- rubocop: autofix [\#1816](https://github.com/voxpupuli/beaker/pull/1816) ([bastelfreak](https://github.com/bastelfreak))
+- GCG: Add missing faraday dependency [\#1815](https://github.com/voxpupuli/beaker/pull/1815) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [5.2.0](https://github.com/voxpupuli/beaker/tree/5.2.0) (2023-04-28)
 
 **Implemented enhancements:**
