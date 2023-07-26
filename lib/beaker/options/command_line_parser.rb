@@ -248,7 +248,7 @@ module Beaker
 
           opts.on '--[no-]debug',
                   'DEPRECATED, use --log-level' do |bool|
-            @cmd_options[:log_level] =  bool ? 'debug' : 'info'
+            @cmd_options[:log_level] = bool ? 'debug' : 'info'
           end
 
           opts.on '-x', '--[no-]xml',
