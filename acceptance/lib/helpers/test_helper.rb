@@ -59,7 +59,7 @@ end
 #      assert_equal expected, user
 #    end
 #
-# Absorbs any MiniTest::Assertion from a failing test assertion in the block.
+# Absorbs any Minitest::Assertion from a failing test assertion in the block.
 # This implies that the intermittent failure is caught and the suite will not
 # go red for this failure. Intended to be used with the Jenkins Build Failure
 # Analyzer (or similar), to detect these failures without failing the build.
@@ -70,7 +70,7 @@ def fails_intermittently(issue_link, args = {})
   raise ArgumentError, "a block is required" unless block_given?
 
   yield
-rescue MiniTest::Assertion, StandardError, SignalException # we have a test failure!
+rescue Minitest::Assertion, StandardError, SignalException # we have a test failure!
   STDERR.puts "\n\nIntermittent test failure! See: #{issue_link}"
 
   if args.empty?

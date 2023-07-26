@@ -35,6 +35,6 @@ module Beaker
   # Shared methods and helpers
   require 'beaker/shared'
 
-  # MiniTest, for including MiniTest::Assertions
+  # Minitest, for including Minitest::Assertions
   require 'minitest/test'
 end
