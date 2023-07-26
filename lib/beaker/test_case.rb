@@ -22,7 +22,7 @@ module Beaker
     include Beaker::DSL
 
     # The Exception raised by Ruby's STDLIB's test framework (Ruby 1.9)
-    TEST_EXCEPTION_CLASS = ::MiniTest::Assertion
+    TEST_EXCEPTION_CLASS = ::Minitest::Assertion
 
     # Necessary for implementing {Beaker::DSL::Helpers#confine}.
     # Assumed to be an array of valid {Beaker::Host} objects for
