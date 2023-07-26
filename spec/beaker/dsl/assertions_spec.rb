@@ -79,7 +79,7 @@ EXPECT
         expect(result).to receive(:output).and_return(output)
 
         expect(subject).to receive(:result).at_least(:once).and_return(result)
-        expect { subject.assert_output expectation }.to raise_error(MiniTest::Assertion)
+        expect { subject.assert_output expectation }.to raise_error(Minitest::Assertion)
       end
     end
   end

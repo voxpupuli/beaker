@@ -52,7 +52,7 @@ describe MacGroupTest do
       result.stdout = ''
       group_name = 'any_name'
       expect(subject).to receive(:execute).and_yield(result)
-      expect { subject.group_get(group_name) }.to raise_error(MiniTest::Assertion, "failed to get group #{group_name}")
+      expect { subject.group_get(group_name) }.to raise_error(Minitest::Assertion, "failed to get group #{group_name}")
     end
 
     it 'parses mac dscacheutil output into /etc/group format correctly' do
