@@ -1,36 +1,55 @@
 # Changelog
 
-## [5.3.0] (https://github.com/voxpupuli/beaker/tree/5.3.0) (2023-06-06)
+## [5.3.1](https://github.com/voxpupuli/beaker/tree/5.3.1) (2023-07-26)
+
+**Fixed bugs:**
+
+- Fix Minitest capitalization [\#1819](https://github.com/voxpupuli/beaker/pull/1819) ([mhashizume](https://github.com/mhashizume))
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.3.0...5.3.1)
+
+## [5.3.0](https://github.com/voxpupuli/beaker/tree/5.3.0) (2023-06-06)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.2.0...5.3.0)
 
 **Implemented enhancements:**
 
-- Add bcrypt_pbkdf to fix ed25519 ssh keys support [\#1810](https://github.com/voxpupuli/beaker/pull/1810) ([jay7x](https://github.com/jay7x))
+- Add bcrypt\_pbkdf to fix ed25519 ssh keys support [\#1810](https://github.com/voxpupuli/beaker/pull/1810) ([jay7x](https://github.com/jay7x))
 
-**Merged changes:**
+**Merged pull requests:**
 
-- Build gems with verbosity and strictness [\#1811](https://github.com/voxpupuli/beaker/pull/1811) ([bastelfreak](https://github.com/bastelfreak))
 - rubocop: autofix [\#1816](https://github.com/voxpupuli/beaker/pull/1816) ([bastelfreak](https://github.com/bastelfreak))
 - GCG: Add missing faraday dependency [\#1815](https://github.com/voxpupuli/beaker/pull/1815) ([bastelfreak](https://github.com/bastelfreak))
+- Build gems with verbosity and strictness [\#1811](https://github.com/voxpupuli/beaker/pull/1811) ([bastelfreak](https://github.com/bastelfreak))
 
 ## [5.2.0](https://github.com/voxpupuli/beaker/tree/5.2.0) (2023-04-28)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.1.0...5.2.0)
+
 **Implemented enhancements:**
 
-- Enhance documentation about roles [\#1800](https://github.com/voxpupuli/beaker/pull/1800) ([rwaffen](https://github.com/rwaffen))
 - Declare API interface on Beaker::Host [\#1806](https://github.com/voxpupuli/beaker/pull/1806) ([ekohl](https://github.com/ekohl))
+- Switch to voxpupuli-rubocop [\#1804](https://github.com/voxpupuli/beaker/pull/1804) ([bastelfreak](https://github.com/bastelfreak))
 - Support an extension to tmpfile [\#1735](https://github.com/voxpupuli/beaker/pull/1735) ([ekohl](https://github.com/ekohl))
 
 **Fixed bugs:**
 
-- Use systemctl to restat SSH on EL9 [\#1808](https://github.com/voxpupuli/beaker/pull/1808) ([ekohl](https://github.com/ekohl))
+- Use systemctl to restart SSH on EL9 [\#1808](https://github.com/voxpupuli/beaker/pull/1808) ([ekohl](https://github.com/ekohl))
 
-**Merged changes:**
+**Closed issues:**
 
-- Drop legacy yard tasks [\#1805](https://github.com/voxpupuli/beaker/pull/1805) ([bastelfreak](https://github.com/bastelfreak))
-- Switch to voxpupuli-rubocop [\#1804](https://github.com/voxpupuli/beaker/pull/1804) ([bastelfreak](https://github.com/bastelfreak))
+- Failed to exec 'vagrant up' \(rbenv, ruby 2.7.6, bundler 2.3.19, virtualbox\) [\#1752](https://github.com/voxpupuli/beaker/issues/1752)
+- EL 9 error - /sbin/service: No such file or directory [\#1751](https://github.com/voxpupuli/beaker/issues/1751)
+
+**Merged pull requests:**
+
 - Disable RSpec/IndexedLet [\#1807](https://github.com/voxpupuli/beaker/pull/1807) ([ekohl](https://github.com/ekohl))
+- Drop legacy yard tasks [\#1805](https://github.com/voxpupuli/beaker/pull/1805) ([bastelfreak](https://github.com/bastelfreak))
+- Enhance documentation about roles [\#1800](https://github.com/voxpupuli/beaker/pull/1800) ([rwaffen](https://github.com/rwaffen))
 
 ## [5.1.0](https://github.com/voxpupuli/beaker/tree/5.1.0) (2023-03-27)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.0.0...5.1.0)
 
 **Implemented enhancements:**
 
@@ -38,37 +57,69 @@
 
 ## [5.0.0](https://github.com/voxpupuli/beaker/tree/5.0.0) (2023-03-24)
 
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.39.0...5.0.0)
+
 **Breaking changes:**
 
-- Drop Ruby 2.4/2.5/2.6 support [\#1767](https://github.com/voxpupuli/beaker/pull/1767) ([bastelfreak](https://github.com/bastelfreak))
-- Removes open_uri_redirections [\#1764](https://github.com/voxpupuli/beaker/pull/1764) ([mhashizume](https://github.com/mhashizume))
+- Remove install\_puppet\_agent\_\* methods [\#1775](https://github.com/voxpupuli/beaker/pull/1775) ([ekohl](https://github.com/ekohl))
+- Update fakefs requirement from ~\> 1.0 to ~\> 2.4 [\#1770](https://github.com/voxpupuli/beaker/pull/1770) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Drop deprecated methods [\#1769](https://github.com/voxpupuli/beaker/pull/1769) ([ekohl](https://github.com/ekohl))
-- Remove add-el-extras, passenger, proxy_config, disable_iptables and clean up code [\#1731](https://github.com/voxpupuli/beaker/pull/1731) ([ekohl](https://github.com/ekohl))
-- Remove install_puppet_agent_* methods [\#1775](https://github.com/voxpupuli/beaker/pull/1775) ([ekohl](https://github.com/ekohl))
+- Drop Ruby 2.4/2.5/2.6 support [\#1767](https://github.com/voxpupuli/beaker/pull/1767) ([bastelfreak](https://github.com/bastelfreak))
+- \(maint\) Removes open\_uri\_redirections [\#1764](https://github.com/voxpupuli/beaker/pull/1764) ([mhashizume](https://github.com/mhashizume))
+- Remove add-el-extras, passenger, proxy\_config, disable\_iptables and clean up code [\#1731](https://github.com/voxpupuli/beaker/pull/1731) ([ekohl](https://github.com/ekohl))
 
 **Implemented enhancements:**
 
-- Fix many RuboCop violations: [\#1768](https://github.com/voxpupuli/beaker/pull/1768), [\#1777](https://github.com/voxpupuli/beaker/pull/1777), [\#1787](https://github.com/voxpupuli/beaker/pull/1787), [\#1778](https://github.com/voxpupuli/beaker/pull/1778), [\#1790](https://github.com/voxpupuli/beaker/pull/1790), [\#1791](https://github.com/voxpupuli/beaker/pull/1791), [\#1792](https://github.com/voxpupuli/beaker/pull/1792)
+- Drop rspec-its dependency in favor of have\_attributes [\#1788](https://github.com/voxpupuli/beaker/pull/1788) ([ekohl](https://github.com/ekohl))
 - Add Ruby 3.2 support [\#1762](https://github.com/voxpupuli/beaker/pull/1762) ([ekohl](https://github.com/ekohl))
-- Drop rspec-its dependency in favor of have_attributes [\#1788](https://github.com/voxpupuli/beaker/pull/1788)
 
-## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-09)
+**Fixed bugs:**
+
+- 4.39.0 breaks beaker-puppet tests [\#1772](https://github.com/voxpupuli/beaker/issues/1772)
+
+**Merged pull requests:**
+
+- Use send instead of instance\_eval [\#1793](https://github.com/voxpupuli/beaker/pull/1793) ([ekohl](https://github.com/ekohl))
+- rubocop: Fix more Style cops [\#1792](https://github.com/voxpupuli/beaker/pull/1792) ([bastelfreak](https://github.com/bastelfreak))
+- Rubocop: Fix more Style cops [\#1791](https://github.com/voxpupuli/beaker/pull/1791) ([bastelfreak](https://github.com/bastelfreak))
+- Rubocop: Fix multiple Layout cops [\#1790](https://github.com/voxpupuli/beaker/pull/1790) ([bastelfreak](https://github.com/bastelfreak))
+- Add a CI job we can enforce in branch protection [\#1789](https://github.com/voxpupuli/beaker/pull/1789) ([bastelfreak](https://github.com/bastelfreak))
+- rubocop: disable Gemspec/DevelopmentDependencies [\#1787](https://github.com/voxpupuli/beaker/pull/1787) ([bastelfreak](https://github.com/bastelfreak))
+- Release pipeline: Dont install optional gems [\#1786](https://github.com/voxpupuli/beaker/pull/1786) ([bastelfreak](https://github.com/bastelfreak))
+- CI: Run on merges to master [\#1785](https://github.com/voxpupuli/beaker/pull/1785) ([bastelfreak](https://github.com/bastelfreak))
+- Run acceptance tests in CI [\#1784](https://github.com/voxpupuli/beaker/pull/1784) ([ekohl](https://github.com/ekohl))
+- Update in-parallel requirement from ~\> 0.1 to \>= 0.1, \< 2.0 [\#1783](https://github.com/voxpupuli/beaker/pull/1783) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update rubocop-rspec requirement from ~\> 2.18.1 to ~\> 2.19.0 [\#1781](https://github.com/voxpupuli/beaker/pull/1781) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update rubocop requirement from ~\> 1.47.0 to ~\> 1.48.0 [\#1780](https://github.com/voxpupuli/beaker/pull/1780) ([dependabot[bot]](https://github.com/apps/dependabot))
+- dependabot: check for github actions as well [\#1779](https://github.com/voxpupuli/beaker/pull/1779) ([bastelfreak](https://github.com/bastelfreak))
+- RuboCop: Fix Layout cops [\#1778](https://github.com/voxpupuli/beaker/pull/1778) ([bastelfreak](https://github.com/bastelfreak))
+- Fix more rubocop violations [\#1777](https://github.com/voxpupuli/beaker/pull/1777) ([bastelfreak](https://github.com/bastelfreak))
+- Use Enumerable\#all? [\#1776](https://github.com/voxpupuli/beaker/pull/1776) ([ekohl](https://github.com/ekohl))
+- Do not include Unix::Exec on Windows::Exec tests [\#1774](https://github.com/voxpupuli/beaker/pull/1774) ([ekohl](https://github.com/ekohl))
+- Update rubocop requirement from ~\> 1.45.0 to ~\> 1.47.0 [\#1773](https://github.com/voxpupuli/beaker/pull/1773) ([dependabot[bot]](https://github.com/apps/dependabot))
+- rubocop: Fix commas and whitespace and newlines [\#1768](https://github.com/voxpupuli/beaker/pull/1768) ([bastelfreak](https://github.com/bastelfreak))
+- CI: Use latest actions/checkout version [\#1766](https://github.com/voxpupuli/beaker/pull/1766) ([bastelfreak](https://github.com/bastelfreak))
+
+## [4.39.0](https://github.com/voxpupuli/beaker/tree/4.39.0) (2023-02-18)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.1...4.39.0)
+
+**Implemented enhancements:**
+
+- \(maint\) StringInclude Rubocop corrections [\#1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
+- Add Rubocop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
 
 **Fixed bugs:**
 
 - Extend list of permitted classes for YAML safe load and allow aliases [\#1758](https://github.com/voxpupuli/beaker/pull/1758) ([nmburgan](https://github.com/nmburgan))
 
-**Implemented enhancements:**
-
-- Add RuboCop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
-- Update net-scp requirement from >= 1.2, < 4.0 to >= 1.2, < 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757)
-- (maint) StringInclude Rubocop corrections [\1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
-
 **Closed issues:**
 
 - Ruby 3.1/Psych 4 compatibility issues [\#1753](https://github.com/voxpupuli/beaker/issues/1753)
+
+**Merged pull requests:**
+
+- Update net-scp requirement from \>= 1.2, \< 4.0 to \>= 1.2, \< 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [4.38.1](https://github.com/voxpupuli/beaker/tree/4.38.1) (2022-09-21)
 
