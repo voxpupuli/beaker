@@ -1,6 +1,16 @@
 # Changelog
 
+## [4.40.2](https://github.com/voxpupuli/beaker/tree/4.40.2) (2023-07-26)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.40.1...4.40.2)
+
+**Fixed bugs:**
+
+- Fix Minitest capitalization [\#1818](https://github.com/voxpupuli/beaker/pull/1818) ([mhashizume](https://github.com/mhashizume))
+
 ## [4.40.1](https://github.com/voxpupuli/beaker/tree/4.40.1) (2023-05-05)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.40.0...4.40.1)
 
 **Merged Changes:**
 
@@ -18,19 +28,22 @@
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.38.1...4.39.0)
 
+**Implemented enhancements:**
+
+- \(maint\) StringInclude Rubocop corrections [\#1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
+- Add Rubocop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
+
 **Fixed bugs:**
 
 - Extend list of permitted classes for YAML safe load and allow aliases [\#1758](https://github.com/voxpupuli/beaker/pull/1758) ([nmburgan](https://github.com/nmburgan))
 
-**Implemented enhancements:**
-
-- Add Rubocop [\#1761](https://github.com/voxpupuli/beaker/pull/1761) ([ekohl](https://github.com/ekohl))
-- Update net-scp requirement from >= 1.2, < 4.0 to >= 1.2, < 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757)
-- \(maint\) StringInclude Rubocop corrections [\#1765](https://github.com/voxpupuli/beaker/pull/1765) ([mhashizume](https://github.com/mhashizume))
-
 **Closed issues:**
 
 - Ruby 3.1/Psych 4 compatibility issues [\#1753](https://github.com/voxpupuli/beaker/issues/1753)
+
+**Merged pull requests:**
+
+- Update net-scp requirement from \>= 1.2, \< 4.0 to \>= 1.2, \< 5.0 [\#1757](https://github.com/voxpupuli/beaker/pull/1757) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [4.38.1](https://github.com/voxpupuli/beaker/tree/4.38.1) (2022-09-21)
 
