@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.4.0](https://github.com/voxpupuli/beaker/tree/5.4.0) (2023-09-12)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.3.0...5.4.0)
+
+**Implemented enhancements:**
+
+- \(RE-15540\) Add Debian 12\/13\/14 support [\#1822](https://github.com/voxpupuli/beaker/pull/1822) ([yachub](https://github.com/yachub))
+
 ## [5.3.1](https://github.com/voxpupuli/beaker/tree/5.3.1) (2023-07-26)
 
 **Fixed bugs:**
