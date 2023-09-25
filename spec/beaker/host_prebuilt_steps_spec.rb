@@ -1,27 +1,28 @@
 require 'spec_helper'
 
 describe Beaker do
-  let( :options )        { make_opts.merge({ 'logger' => double().as_null_object }) }
-  let( :ntpserver_set )  { "ntp_server_set" }
-  let( :options_ntp )    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
-  let( :ntpserver )      { Beaker::HostPrebuiltSteps::NTPSERVER }
-  let( :apt_cfg )        { Beaker::HostPrebuiltSteps::APT_CFG }
-  let( :ips_pkg_repo )   { Beaker::HostPrebuiltSteps::IPS_PKG_REPO }
-  let( :sync_cmd )       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
-  let( :windows_pkgs )   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
-  let( :unix_only_pkgs ) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
-  let( :sles_only_pkgs ) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
-  let( :rhel8_packages ) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
-  let( :fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
-  let( :platform )       { @platform || 'unix' }
-  let( :ip )             { "ip.address.0.0" }
-  let( :stdout)          { @stdout || ip }
-  let( :hosts )          { hosts = make_hosts( { :stdout => stdout, :platform => platform } )
-                           hosts[0][:roles] = ['agent']
-                           hosts[1][:roles] = ['master', 'dashboard', 'agent', 'database']
-                           hosts[2][:roles] = ['agent']
-                           hosts }
-  let( :dummy_class )    { Class.new { include Beaker::HostPrebuiltSteps } }
+  let(:options)        { make_opts.merge({ 'logger' => double.as_null_object }) }
+  let(:ntpserver_set)  { "ntp_server_set" }
+  let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
+  let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
+  let(:sync_cmd)       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
+  let(:windows_pkgs)   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
+  let(:unix_only_pkgs) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
+  let(:sles_only_pkgs) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
+  let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
+  let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
+  let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
+  let(:platform)       { @platform || 'unix' }
+  let(:ip)             { "ip.address.0.0" }
+  let(:stdout) { @stdout || ip }
+  let(:hosts) do
+    hosts = make_hosts({ :stdout => stdout, :platform => platform })
+    hosts[0][:roles] = ['agent']
+    hosts[1][:roles] = %w[master dashboard agent database]
+    hosts[2][:roles] = ['agent']
+    hosts
+  end
+  let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
     subject { dummy_class.new }
@@ -87,7 +88,12 @@ describe Beaker do
     "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"
   ], true
 
-  ['debian','ubuntu','cumulus'].each do | deb_like |
+  it_behaves_like 'enables_root_login', 'amazon-2023', [
+    "sudo -E systemctl restart sshd.service",
+    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+  ]
+
+  %w[debian ubuntu cumulus].each do |deb_like|
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\""
@@ -144,12 +150,20 @@ describe Beaker do
     end
 
     it "can sync time on Sles hosts" do
-      hosts = make_hosts( { :platform => 'sles-13.1-x64' } )
+      hosts = make_hosts({ :platform => 'sles-13.1-x64' })
 
-      expect( Beaker::Command ).to receive( :new ).with("sntp #{ntpserver}").exactly( 3 ).times
+      expect(Beaker::Command).to receive(:new).with("sntp #{ntpserver}").exactly(3).times
 
-      subject.timesync( hosts, options )
+      subject.timesync(hosts, options)
+    end
 
+    it "can sync time on amazon2023 hosts" do
+      hosts = make_hosts(:platform => 'amazon-2023-x86_64')
+      expect(Beaker::Command).to receive(:new)
+        .with("chronyc add server #{ntpserver} prefer trust;chronyc makestep;chronyc burst 1/2")
+        .exactly(3)
+        .times
+      subject.timesync(hosts, options)
     end
 
     it "can sync time on RHEL8 hosts" do
@@ -489,6 +503,19 @@ describe Beaker do
       subject.validate_host(hosts, options)
     end
 
+    it "can validate Amazon hosts" do
+      @platform = 'amazon-2023-x86_64'
+
+      hosts.each do |host|
+        amazon2023_packages.each do |pkg|
+          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+          expect(host).to receive(:install_package).with(pkg).once
+        end
+      end
+
+      subject.validate_host(hosts, options)
+    end
+
     it 'skips validation on cisco hosts' do
       host = make_host('cisco-7', { stdout: stdout, platform: 'cisco_nexus-7-x86_64' })
       expect( subject ).to receive( :check_and_install_packages_if_needed ).with(host, []).once
@@ -533,7 +560,7 @@ describe Beaker do
       end
     end
 
-    ['centos','redhat'].each do |platform|
+    %w[amazon centos redhat].each do |platform|
       context "on platform '#{platform}'" do
         let(:host) { make_host( 'name', {
           :platform => platform,
@@ -635,7 +662,7 @@ describe Beaker do
       subject.package_proxy(host, options.merge( {'package_proxy' => proxyurl}) )
     end
 
-    ['centos','redhat'].each do |platform|
+    %w[amazon centos redhat].each do |platform|
       it "can set proxy config on a '#{platform}' host" do
         host = make_host('name', { :platform => platform } )
 

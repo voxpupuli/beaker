@@ -151,7 +151,7 @@ RSpec/MultipleDescribes:
 
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:
-  Max: 19
+  Max: 18
 
 # Configuration parameters: IgnoreSharedExamples.
 RSpec/NamedSubject:
