@@ -3,7 +3,9 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(alpine|huaweios|cisco_nexus|cisco_ios_xr|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el|eos|cumulus|f5|netscaler)\-.+\-.+$/
+    # rubocop:disable Layout/LineLength
+    PLATFORMS = /^(alpine|amazon|huaweios|cisco_nexus|cisco_ios_xr|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el|eos|cumulus|f5|netscaler)\-.+\-.+$/
+    # rubocop:enable Layout/LineLength
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
       { :debian => { "forky" => "14",
@@ -56,6 +58,7 @@ module Beaker
     # Creates the Platform object.  Checks to ensure that the platform String
     # provided meets the platform formatting rules.  Platforms name must be of
     # the format /^OSFAMILY-VERSION-ARCH.*$/ where OSFAMILY is one of:
+    # * amazon
     # * huaweios
     # * cisco_nexus
     # * cisco_ios_xr

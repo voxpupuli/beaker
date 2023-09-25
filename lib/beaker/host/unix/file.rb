@@ -88,7 +88,7 @@ module Unix::File
   # @return [String] Path to package config dir
   def package_config_dir
     case self['platform']
-    when /fedora|el-|redhat|centos/
+    when /amazon|fedora|el-|redhat|centos/
       '/etc/yum.repos.d/'
     when /opensuse|sles/
       '/etc/zypp/repos.d/'
@@ -149,7 +149,7 @@ module Unix::File
   # @return [String] Type of repo (rpm|deb)
   def repo_type
     case self['platform']
-    when /fedora|el-|redhat|centos|opensuse|sles/
+    when /amazon|fedora|el-|redhat|centos|opensuse|sles/
       'rpm'
     when /debian|ubuntu|cumulus|huaweios/
       'deb'

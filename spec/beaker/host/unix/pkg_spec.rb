@@ -58,7 +58,7 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      %w[centos redhat].each do |platform|
+      %w[amazon centos redhat].each do |platform|
         it "checks correctly on #{platform}" do
           @opts = { 'platform' => "#{platform}-is-me" }
           pkg = "#{platform}_package"
@@ -195,6 +195,14 @@ module Beaker
         end
       end
 
+      it "uses dnf on amazon-2023" do
+        @opts = { 'platform' => "amazon-2023-is-me" }
+        pkg = 'amazon_package'
+        expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+        expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
+        expect(instance.install_package(pkg)).to be == "hello"
+      end
+
       it "uses pacman on archlinux" do
         @opts = { 'platform' => 'archlinux-is-me' }
         pkg = 'archlinux_package'
@@ -289,6 +297,14 @@ module Beaker
 
       before do
         allow(instance).to receive(:[]).with('platform') { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
+      end
+
+      it 'amazon-2023: uses dnf' do
+        @platform = platform
+        @version = '2023'
+        package_file = 'test_123.yay'
+        expect(instance).to receive(:execute).with(/^dnf.*#{package_file}$/)
+        instance.install_local_package(package_file)
       end
 
       it 'Fedora 22-39: uses dnf' do
