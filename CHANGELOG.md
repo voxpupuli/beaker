@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.5.0](https://github.com/voxpupuli/beaker/tree/5.5.0) (2023-10-02)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/5.4.0...5.5.0)
+
+**Implemented enhancements:**
+
+- Allow amazon as a platform [\#1824](https://github.com/voxpupuli/beaker/pull/1824) ([yachub](https://github.com/yachub))
+
 ## [5.4.0](https://github.com/voxpupuli/beaker/tree/5.4.0) (2023-09-12)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/5.3.0...5.4.0)
