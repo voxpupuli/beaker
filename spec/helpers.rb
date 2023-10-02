@@ -127,7 +127,8 @@ module PlatformHelpers
 
   FEDORASYSTEMD    = (14..39).to_a.collect! { |i| "fedora-#{i}" }
 
-  SYSTEMDPLATFORMS = %w[el-7
+  SYSTEMDPLATFORMS = %w[amazon-2023
+                        el-7
                         centos-7
                         redhat-7
                         oracle-7

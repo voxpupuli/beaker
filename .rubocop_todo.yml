@@ -199,7 +199,7 @@ RSpec/MultipleDescribes:
 # Offense count: 134
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:
-  Max: 17
+  Max: 18
 
 # Offense count: 500
 # Configuration parameters: EnforcedStyle, IgnoreSharedExamples.

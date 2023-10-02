@@ -33,7 +33,7 @@ module Beaker
     let(:instance) { UnixFileTest.new(opts.merge(platform), logger) }
 
     describe '#repo_type' do
-      %w[centos redhat].each do |platform|
+      %w[amazon centos redhat].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
           expect(instance.repo_type).to be === 'rpm'
@@ -54,7 +54,7 @@ module Beaker
     end
 
     describe '#package_config_dir' do
-      %w[centos redhat].each do |platform|
+      %w[amazon centos redhat].each do |platform|
         it "returns correctly for platform '#{platform}'" do
           @platform = "#{platform}-5-x86_64"
           expect(instance.package_config_dir).to be === '/etc/yum.repos.d/'
