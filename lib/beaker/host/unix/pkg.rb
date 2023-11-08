@@ -40,7 +40,7 @@ module Unix::Pkg
       when /el-4/
         @logger.debug("Package query not supported on rhel4")
         return false
-      when /cisco|fedora|centos|redhat|eos|el-/
+      when /amazon|cisco|fedora|centos|redhat|eos|el-/
         result = execute("rpm -q #{name}", opts) { |result| result }
       when /ubuntu|debian|cumulus|huaweios/
         result = execute("dpkg -s #{name}", opts) { |result| result }
@@ -91,7 +91,7 @@ module Unix::Pkg
         execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora-(2[2-9]|3[0-9])/
+      when /amazon|fedora-(2[2-9]|3[0-9])/
         if version
           name = "#{name}-#{version}"
         end
@@ -183,7 +183,7 @@ module Unix::Pkg
         execute("zypper --non-interactive rm #{name}", opts)
       when /el-4/
         @logger.debug("Package uninstallation not supported on rhel4")
-      when /edora-(2[2-9]|3[0-9])/
+      when /amazon|edora-(2[2-9]|3[0-9])/
         execute("dnf -y #{cmdline_args} remove #{name}", opts)
       when /cisco|fedora|centos|redhat|eos|el-/
         execute("yum -y #{cmdline_args} remove #{name}", opts)
@@ -527,9 +527,9 @@ module Unix::Pkg
   def install_local_package(onhost_package_file, onhost_copy_dir = nil)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|redhat|centos)$/
+    when /^(amazon|fedora|el|redhat|centos)$/
       command_name = 'yum'
-      command_name = 'dnf' if variant == 'fedora' && version.to_i > 21
+      command_name = 'dnf' if (variant == 'fedora' && version.to_i > 21) || (variant == 'amazon' && version.to_i >= 2023)
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(opensuse|sles)$/
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
@@ -557,7 +557,7 @@ module Unix::Pkg
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
-    when /^(fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
+    when /^(amazon|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball

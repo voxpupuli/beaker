@@ -12,7 +12,8 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    RHEL8_PACKAGES = ['curl', 'chrony']
+    AMAZON2023_PACKAGES = %w[curl-minimal chrony]
+    RHEL8_PACKAGES = %w[curl chrony]
     RHEL9_PACKAGES = ['chrony']
     FEDORA_PACKAGES = ['curl', 'chrony']
     UNIX_PACKAGES = ['curl', 'ntpdate']
@@ -54,7 +55,7 @@ module Beaker
           logger.notify "NTP date succeeded on #{host}"
         else
           case
-          when /el-[89]|fedora/.match?(host['platform'])
+          when /amazon|el-[89]|fedora/.match?(host['platform'])
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           when /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
@@ -114,6 +115,8 @@ module Beaker
     # @return [Array<String>] A list of packages to install
     def host_packages(host)
       case host['platform']
+      when /amazon/
+        AMAZON2023_PACKAGES
       when /el-8/
         RHEL8_PACKAGES
       when /el-9/
@@ -462,7 +465,7 @@ module Beaker
         #restart sshd
         if /debian|ubuntu|cumulus/.match?(host['platform'])
           host.exec(Command.new("sudo su -c \"service ssh restart\""), {:pty => true})
-        elsif /arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
+        elsif /amazon|arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), {:pty => true})
         elsif /centos|el-|redhat|fedora|eos/.match?(host['platform'])
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), {:pty => true})
@@ -522,7 +525,7 @@ module Beaker
         case host['platform']
           when /ubuntu/, /debian/, /cumulus/
             host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
-          when /^el-/, /centos/, /fedora/, /redhat/, /eos/
+          when /amazon/, /^el-/, /centos/, /fedora/, /redhat/, /eos/
             host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
