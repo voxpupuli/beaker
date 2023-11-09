@@ -280,7 +280,7 @@ module Unix::Exec
     case self['platform']
     when /debian|ubuntu|cumulus|huaweios/
       exec(Beaker::Command.new("service ssh restart"))
-    when /amazon|(el|centos|redhat|oracle|scientific)-[7-9]|eos-7|fedora-(1[4-9]|2[0-9]|3[0-9])|archlinux-/
+    when /amazon|el-7|centos-7|redhat-7|oracle-7|scientific-7|eos-7|el-8|centos-8|redhat-8|oracle-8|fedora-(1[4-9]|2[0-9]|3[0-9])|archlinux-/
       exec(Beaker::Command.new("systemctl restart sshd.service"))
     when /el-|centos|fedora|redhat|oracle|scientific|eos/
       exec(Beaker::Command.new("/sbin/service sshd restart"))

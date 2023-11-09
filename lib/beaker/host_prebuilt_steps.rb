@@ -527,9 +527,6 @@ module Beaker
           host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
         when /amazon/, /^el-/, /centos/, /fedora/, /redhat/, /eos/
           host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
-        when /solaris-11/
-          host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
-          host.exec(Command.new("/usr/bin/pkg set-publisher -g %s solaris" % opts[:package_proxy]))
         else
           logger.debug("Attempting to enable package manager proxy support on non-supported platform: #{host.name}: #{host['platform']}")
         end
