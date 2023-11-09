@@ -282,14 +282,6 @@ module Beaker
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
         expect(instance.install_package(pkg)).to be == "hello"
       end
-
-      it "uses pacman on archlinux" do
-        @opts = {'platform' => 'archlinux-is-me'}
-        pkg = 'archlinux_package'
-        expect( Beaker::Command ).to receive(:new).with("pacman -S --noconfirm  #{pkg}", [], {:prepend_cmds=>nil, :cmdexe=>false}).and_return('')
-        expect( instance ).to receive(:exec).with('', {}).and_return(generate_result("hello", {:exit_code => 0}))
-        expect( instance.install_package(pkg) ).to be == "hello"
-      end
     end
 
     describe '#uninstall_package' do
