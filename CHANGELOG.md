@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.41.0](https://github.com/voxpupuli/beaker/tree/4.41.0) (2023-11-15)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.40.2...4.41.0)
+
+**Implemented enhancements:**
+
+- \[PA-5938\] Add support for debian & amazon linux in beaker 4.x [\#1828](https://github.com/voxpupuli/beaker/pull/1828) ([span786](https://github.com/span786))
+
 ## [4.40.2](https://github.com/voxpupuli/beaker/tree/4.40.2) (2023-07-26)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.40.1...4.40.2)
