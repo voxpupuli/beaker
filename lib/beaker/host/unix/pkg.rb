@@ -96,7 +96,7 @@ module Unix::Pkg
           name = "#{name}-#{version}"
         end
         execute("dnf -y #{cmdline_args} install #{name}", opts)
-      when /amazon|cisco|fedora|centos|redhat|eos|el-/
+      when /amazon-2023|cisco|fedora|centos|redhat|eos|el-/
         if version
           name = "#{name}-#{version}"
         end
@@ -183,7 +183,7 @@ module Unix::Pkg
       execute("zypper --non-interactive rm #{name}", opts)
     when /el-4/
       @logger.debug("Package uninstallation not supported on rhel4")
-    when /amazon|fedora-(2[2-9]|3[0-9])/
+    when /amazon-2023|fedora-(2[2-9]|3[0-9])/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
     when /cisco|fedora|centos|redhat|eos|el-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
