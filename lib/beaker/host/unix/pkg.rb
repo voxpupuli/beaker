@@ -91,12 +91,12 @@ module Unix::Pkg
         execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
       when /el-4/
         @logger.debug("Package installation not supported on rhel4")
-      when /fedora-(2[2-9]|3[0-9])/
+      when /amazon-2023|fedora-(2[2-9]|3[0-9])/
         if version
           name = "#{name}-#{version}"
         end
         execute("dnf -y #{cmdline_args} install #{name}", opts)
-      when /amazon-2023|cisco|fedora|centos|redhat|eos|el-/
+      when /cisco|fedora|centos|redhat|eos|el-/
         if version
           name = "#{name}-#{version}"
         end
