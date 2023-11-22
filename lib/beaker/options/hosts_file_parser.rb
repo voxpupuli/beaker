@@ -4,6 +4,7 @@ module Beaker
     module HostsFileParser
       PERMITTED_YAML_CLASSES = [
         'Beaker',
+        'Beaker::DSL::TestTagging::PlatformTagConfiner',
         'Beaker::Logger',
         'Beaker::Options::OptionsHash',
         'Beaker::Platform',
