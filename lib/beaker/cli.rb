@@ -106,7 +106,7 @@ module Beaker
         end
 
         # Setup perf monitoring if needed
-        @perf = Beaker::Perf.new(@hosts, @options) if /(aggressive)|(normal)/.match?(@options[:collect_perf_data].to_s)
+        @perf = Beaker::Perf.new(@hosts, @options) if /aggressive|normal/.match?(@options[:collect_perf_data].to_s)
 
         # pre acceptance  phase
         run_suite(:pre_suite, :fast)
@@ -138,7 +138,7 @@ module Beaker
         end
 
         # cleanup on error
-        if /(never)|(onpass)/.match?(@options[:preserve_hosts].to_s)
+        if /never|onpass/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after failed run"
           @network_manager.cleanup if @network_manager
         else
@@ -159,7 +159,7 @@ module Beaker
         end
 
         # cleanup on success
-        if /(never)|(onfail)/.match?(@options[:preserve_hosts].to_s)
+        if /never|onfail/.match?(@options[:preserve_hosts].to_s)
           @logger.notify "Cleanup: cleaning up after successful run"
           @network_manager.cleanup if @network_manager
         else
