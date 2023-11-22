@@ -489,11 +489,7 @@ module Beaker
       # We enable achieve mode and compression
       rsync_args << "-az"
 
-      user = if not self['user']
-               "root"
-             else
-               self['user']
-             end
+      user = self['user'] || 'root'
       hostname_with_user = "#{user}@#{reachable_name}"
 
       Rsync.host = hostname_with_user
