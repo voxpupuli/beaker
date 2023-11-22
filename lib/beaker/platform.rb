@@ -117,9 +117,7 @@ module Beaker
     # @example Platform.new('debian-7-xxx').with_version_codename == 'debian-wheezy-xxx'
     # @return [String] the platform string with the platform version represented as a codename
     def with_version_codename
-      version_array = [@variant, @version, @arch]
-      version_array = [@variant, @codename, @arch] if @codename
-      return version_array.join('-')
+      [@variant, @codename || @version, @arch].join('-')
     end
 
     # Returns the platform string with the platform version as a number.  If no conversion is necessary
