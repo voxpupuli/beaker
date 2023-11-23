@@ -87,10 +87,10 @@ module Unix::Pkg
       execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
     when /el-4/
       @logger.debug("Package installation not supported on rhel4")
-    when /amazon-2023|fedora-(2[2-9]|3[0-9])/
+    when /amazon-2023|el-(8|9|1[0-9])|fedora/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
-    when /cisco|fedora|centos|redhat|eos|el-/
+    when /cisco|centos|redhat|eos|el-[1-7]-/
       name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
     when /ubuntu|debian|cumulus|huaweios/
@@ -172,9 +172,9 @@ module Unix::Pkg
       execute("zypper --non-interactive rm #{name}", opts)
     when /el-4/
       @logger.debug("Package uninstallation not supported on rhel4")
-    when /amazon-2023|fedora-(2[2-9]|3[0-9])/
+    when /amazon-2023|el-(8|9|1[0-9])|fedora/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
-    when /cisco|fedora|centos|redhat|eos|el-/
+    when /cisco|centos|redhat|eos|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
     when /ubuntu|debian|cumulus|huaweios/
       execute("apt-get purge #{cmdline_args} -y #{name}", opts)

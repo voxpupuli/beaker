@@ -175,24 +175,12 @@ module Beaker
         end
       end
 
-      (1..21).to_a.each do |fedora_release|
-        it "uses yum on fedora-#{fedora_release}" do
-          @opts = { 'platform' => "fedora-#{fedora_release}-is-me" }
-          pkg = 'fedora_package'
-          expect(Beaker::Command).to receive(:new).with("yum -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-          expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.install_package(pkg)).to be == "hello"
-        end
-      end
-
-      (22..39).to_a.each do |fedora_release|
-        it "uses dnf on fedora-#{fedora_release}" do
-          @opts = { 'platform' => "fedora-#{fedora_release}-is-me" }
-          pkg = 'fedora_package'
-          expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-          expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.install_package(pkg)).to be == "hello"
-        end
+      it "uses dnf on fedora" do
+        @opts = { 'platform' => "fedora-is-me" }
+        pkg = 'fedora_package'
+        expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+        expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
+        expect(instance.install_package(pkg)).to be == "hello"
       end
 
       it "uses dnf on amazon-2023" do
@@ -221,24 +209,12 @@ module Beaker
           expect(instance.uninstall_package('pkg')).to be == "hello"
         end
 
-        (1..21).to_a.each do |fedora_release|
-          it "uses yum on fedora-#{fedora_release}" do
-            @opts = { 'platform' => "fedora-#{fedora_release}-is-me" }
-            pkg = 'fedora_package'
-            expect(Beaker::Command).to receive(:new).with("yum -y  remove #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-            expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-            expect(instance.uninstall_package(pkg)).to be == "hello"
-          end
-        end
-
-        (22..39).to_a.each do |fedora_release|
-          it "uses dnf on fedora-#{fedora_release}" do
-            @opts = { 'platform' => "fedora-#{fedora_release}-is-me" }
-            pkg = 'fedora_package'
-            expect(Beaker::Command).to receive(:new).with("dnf -y  remove #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-            expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-            expect(instance.uninstall_package(pkg)).to be == "hello"
-          end
+        it "uses dnf on fedora" do
+          @opts = { 'platform' => "fedora-is-me" }
+          pkg = 'fedora_package'
+          expect(Beaker::Command).to receive(:new).with("dnf -y  remove #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+          expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
+          expect(instance.uninstall_package(pkg)).to be == "hello"
         end
       end
     end
