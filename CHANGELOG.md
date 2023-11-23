@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.6.0](https://github.com/voxpupuli/beaker/tree/5.6.0) (2023-11-23)
+
+**Implemented enhancements:**
+
+- Use DNF for Amazon Linux 2023 [\#1832](https://github.com/voxpupuli/beaker/pull/1832) ([mhashizume](https://github.com/mhashizume))
+- Use DNF for Fedora, newer Enterprise Linux [\#1835](https://github.com/voxpupuli/beaker/pull/1835) ([mhashizume](https://github.com/mhashizume))
+
+**Fixed bugs:**
+
+- Permit PlatformTagContainer class for beaker hosts [\#1833](https://github.com/voxpupuli/beaker/pull/1833) ([tlehman](https://github.com/tlehman))
+
 ## [5.5.0](https://github.com/voxpupuli/beaker/tree/5.5.0) (2023-10-02)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/5.4.0...5.5.0)
