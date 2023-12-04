@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.41.1](https://github.com/voxpupuli/beaker/tree/4.41.1) (2023-12-04)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.41.0...4.41.1)
+
+**Fixed bugs:**
+
+- (maint) Use DNF as Amazon Linux 2023 package manager [\#1831](https://github.com/voxpupuli/beaker/pull/1831) ([mhashizume](https://github.com/mhashizume))
+
 ## [4.41.0](https://github.com/voxpupuli/beaker/tree/4.41.0) (2023-11-15)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.40.2...4.41.0)
