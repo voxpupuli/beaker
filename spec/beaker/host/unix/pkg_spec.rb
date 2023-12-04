@@ -270,7 +270,7 @@ module Beaker
       it "uses dnf on amazon-2023" do
         @opts = { 'platform' => "amazon-2023-is-me" }
         pkg = 'amazon_package'
-        expect(Beaker::Command).to receive(:new).with("yum -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+        expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
         expect(instance.install_package(pkg)).to be == "hello"
       end
