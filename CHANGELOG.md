@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.41.2](https://github.com/voxpupuli/beaker/tree/4.41.2) (2023-12-18)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.41.1...4.41.2)
+
+**Fixed bugs:**
+
+- (maint) permit PlatformTagContainer class [\#1839](https://github.com/voxpupuli/beaker/pull/1839) ([steveax](https://github.com/steveax))
+
+
 ## [4.41.1](https://github.com/voxpupuli/beaker/tree/4.41.1) (2023-12-04)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.41.0...4.41.1)
