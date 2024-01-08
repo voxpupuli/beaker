@@ -85,17 +85,17 @@ module Beaker
       let(:host) { { 'pathseparator' => ':' } }
 
       it 'returns a blank string if theres no env' do
-        expect(instance.environment_string({})).to be == ''
+        expect(instance.environment_string({})).to eq ''
       end
 
       it 'takes an env hash with var_name/value pairs' do
         expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' }))
-          .to be == 'set "HOME=/" && set "http_proxy=http://foo" && set "HTTP_PROXY=http://foo" && '
+          .to eq 'set "HOME=/" && set "http_proxy=http://foo" && set "HTTP_PROXY=http://foo" && '
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
         expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] }))
-          .to be == "set \"LD_PATH=/:/tmp\" && "
+          .to eq "set \"LD_PATH=/:/tmp\" && "
       end
     end
 

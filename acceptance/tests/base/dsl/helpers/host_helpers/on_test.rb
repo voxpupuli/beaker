@@ -150,6 +150,6 @@ test_name "dsl::helpers::host_helpers #on" do
         tmp.blah
       end
     end
-    assert(Time.now > start + 1)
+    assert_operator(Time.now, :>, start + 1)
   end
 end

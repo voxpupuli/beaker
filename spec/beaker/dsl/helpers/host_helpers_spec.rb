@@ -87,7 +87,7 @@ describe ClassMixedWithDSLHelpers do
       # This will only get hit if forking processes is supported and at least 2 items are being submitted to run in parallel
       expect(InParallel::InParallelExecutor).to receive(:_execute_in_parallel).with(any_args).and_call_original.exactly(5).times
       results = subject.on(hosts, command, { :run_in_parallel => true })
-      expect(results).to be == expected
+      expect(results).to eq expected
     end
 
     it 'delegates to itself for each host passed' do
@@ -99,7 +99,7 @@ describe ClassMixedWithDSLHelpers do
       end
 
       results = subject.on(hosts, command)
-      expect(results).to be == expected
+      expect(results).to eq expected
     end
 
     context 'upon command completion' do
@@ -110,19 +110,19 @@ describe ClassMixedWithDSLHelpers do
       end
 
       it 'returns the result of the action' do
-        expect(@res).to be == result
+        expect(@res).to eq result
       end
 
       it 'provides access to stdout' do
-        expect(@res.stdout).to be == 'stdout'
+        expect(@res.stdout).to eq 'stdout'
       end
 
       it 'provides access to stderr' do
-        expect(@res.stderr).to be == 'stderr'
+        expect(@res.stderr).to eq 'stderr'
       end
 
       it 'provides access to exit_code' do
-        expect(@res.exit_code).to be == 0
+        expect(@res.exit_code).to eq 0
       end
     end
 
@@ -141,19 +141,19 @@ describe ClassMixedWithDSLHelpers do
 
       it 'provides access to stdout' do
         subject.on host, command do |containing_class|
-          expect(containing_class.stdout).to be == 'stdout'
+          expect(containing_class.stdout).to eq 'stdout'
         end
       end
 
       it 'provides access to stderr' do
         subject.on host, command do |containing_class|
-          expect(containing_class.stderr).to be == 'stderr'
+          expect(containing_class.stderr).to eq 'stderr'
         end
       end
 
       it 'provides access to exit_code' do
         subject.on host, command do |containing_class|
-          expect(containing_class.exit_code).to be == 0
+          expect(containing_class.exit_code).to eq 0
         end
       end
     end
@@ -203,7 +203,7 @@ describe ClassMixedWithDSLHelpers do
       expect { subject.retry_on(host, command, opts) }.to raise_error(RuntimeError)
     end
 
-    it 'will return success correctly if it succeeds the first time' do
+    it 'returns success correctly if it succeeds the first time' do
       result.stdout = 'stdout'
       result.stderr = 'stderr'
       result.exit_code = 0
@@ -220,7 +220,7 @@ describe ClassMixedWithDSLHelpers do
       expect(result_given.exit_code).to be === 0
     end
 
-    it 'will return success correctly if it succeeds after failing a few times' do
+    it 'returns success correctly if it succeeds after failing a few times' do
       result.stdout = 'stdout'
       result.stderr = 'stderr'
 

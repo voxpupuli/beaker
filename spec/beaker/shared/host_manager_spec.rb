@@ -140,7 +140,7 @@ module Beaker
           end
         end
 
-        it "will ignore run_in_parallel global option" do
+        it "ignores run_in_parallel global option" do
           myhosts = host_handler.run_block_on(hosts, nil, { :run_in_parallel => [] }) do |host|
             host
           end

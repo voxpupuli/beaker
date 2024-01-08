@@ -57,7 +57,7 @@ module Beaker
         end
 
         it 'reports that 2015.3.0 is not less than 2015.3.0' do
-          expect(subject.version_is_less('2015.3.0', '2015.3.0')).to be == false
+          expect(subject.version_is_less('2015.3.0', '2015.3.0')).to eq false
         end
       end
 
