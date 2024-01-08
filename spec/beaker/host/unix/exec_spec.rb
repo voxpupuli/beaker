@@ -62,17 +62,17 @@ module Beaker
 
       it 'returns a blank string if theres no env' do
         expect(instance).not_to receive(:is_powershell?)
-        expect(instance.environment_string({})).to be == ''
+        expect(instance.environment_string({})).to eq ''
       end
 
       it 'takes an env hash with var_name/value pairs' do
         expect(instance.environment_string({ :HOME => '/', :http_proxy => 'http://foo' }))
-          .to be == 'env HOME="/" http_proxy="http://foo" HTTP_PROXY="http://foo"'
+          .to eq 'env HOME="/" http_proxy="http://foo" HTTP_PROXY="http://foo"'
       end
 
       it 'takes an env hash with var_name/value[Array] pairs' do
         expect(instance.environment_string({ :LD_PATH => ['/', '/tmp'] }))
-          .to be == "env LD_PATH=\"/:/tmp\""
+          .to eq "env LD_PATH=\"/:/tmp\""
       end
     end
 

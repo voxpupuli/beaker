@@ -19,12 +19,12 @@ module Beaker
       @args    = %w[to the baz]
       @options = { :foo => 'bar' }
 
-      expect(cmd.options).to be == @options
-      expect(cmd.args).to be == @args
-      expect(cmd.command).to be == @command
+      expect(cmd.options).to eq @options
+      expect(cmd.args).to eq @args
+      expect(cmd.command).to eq @command
 
-      expect(cmd.args_string).to be == 'to the baz'
-      expect(cmd.options_string).to be == '--foo=bar'
+      expect(cmd.args_string).to eq 'to the baz'
+      expect(cmd.options_string).to eq '--foo=bar'
     end
 
     describe '#:prepend_cmds' do
@@ -35,7 +35,7 @@ module Beaker
         allow(host).to receive(:prepend_commands).and_return('aloha!')
         allow(host).to receive(:append_commands).and_return('')
 
-        expect(cmd.cmd_line(host)).to be == "aloha! /usr/bin/blah --foo=bar to the baz"
+        expect(cmd.cmd_line(host)).to eq "aloha! /usr/bin/blah --foo=bar to the baz"
       end
 
       it 'can handle no prepend_cmds' do
@@ -45,7 +45,7 @@ module Beaker
         allow(host).to receive(:prepend_commands).and_return('')
         allow(host).to receive(:append_commands).and_return('')
 
-        expect(cmd.cmd_line(host)).to be == "/usr/bin/blah --foo=bar to the baz"
+        expect(cmd.cmd_line(host)).to eq "/usr/bin/blah --foo=bar to the baz"
       end
     end
 
@@ -57,7 +57,7 @@ module Beaker
         allow(host).to receive(:prepend_commands).and_return('aloha!')
         allow(host).to receive(:append_commands).and_return('moo cow')
 
-        expect(cmd.cmd_line(host)).to be == "aloha! /usr/bin/blah --foo=bar to the baz moo cow"
+        expect(cmd.cmd_line(host)).to eq "aloha! /usr/bin/blah --foo=bar to the baz moo cow"
       end
 
       it 'can handle no append_cmds' do
@@ -67,7 +67,7 @@ module Beaker
         allow(host).to receive(:prepend_commands).and_return('')
         allow(host).to receive(:append_commands).and_return('')
 
-        expect(cmd.cmd_line(host)).to be == "/usr/bin/blah --foo=bar to the baz"
+        expect(cmd.cmd_line(host)).to eq "/usr/bin/blah --foo=bar to the baz"
       end
     end
 
@@ -85,7 +85,7 @@ module Beaker
     describe '#args_string' do
       it 'joins an array' do
         subject.args = ['my/command and', nil, 'its args and opts']
-        expect(subject.args_string).to be == 'my/command and its args and opts'
+        expect(subject.args_string).to eq 'my/command and its args and opts'
       end
     end
   end

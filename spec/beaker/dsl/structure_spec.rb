@@ -370,13 +370,13 @@ describe ClassMixedWithDSLStructure do
     it 'returns an empty array if there are no applicable hosts' do
       hosts = [{ 'thing' => 'foo' }, { 'thing' => 'bar' }]
 
-      expect(subject.select_hosts({ 'thing' => 'nope' }, hosts)).to be == []
+      expect(subject.select_hosts({ 'thing' => 'nope' }, hosts)).to eq []
     end
 
     it 'selects hosts that match a list of criteria' do
       hosts = [{ 'thing' => 'foo' }, { 'thing' => 'bar' }, { 'thing' => 'baz' }]
 
-      expect(subject.select_hosts({ :thing => %w[foo baz] }, hosts)).to be == [{ 'thing' => 'foo' }, { 'thing' => 'baz' }]
+      expect(subject.select_hosts({ :thing => %w[foo baz] }, hosts)).to eq [{ 'thing' => 'foo' }, { 'thing' => 'baz' }]
     end
 
     it 'selects hosts when a passed block returns true' do
@@ -396,7 +396,7 @@ describe ClassMixedWithDSLStructure do
       selected_hosts = subject.select_hosts 'platform' => 'solaris' do |host|
         subject.on(host, '/sbin/zonename').stdout.include?(':global')
       end
-      expect(selected_hosts).to be == [host1]
+      expect(selected_hosts).to eq [host1]
     end
   end
 end

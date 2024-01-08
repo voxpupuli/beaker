@@ -66,7 +66,7 @@ module Beaker
       end
 
       describe '#parse_hosts_string' do
-        it 'will return a #new_host_options hash if given no arguments' do
+        it 'returns a #new_host_options hash if given no arguments' do
           host_options = parser.parse_hosts_string
           expect(host_options).to be === parser.new_host_options
         end

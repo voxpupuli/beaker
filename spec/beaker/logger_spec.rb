@@ -205,11 +205,11 @@ module Beaker
           let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
           it 'overrides the specified log colors' do
-            expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
+            expect(logger.log_colors[:error]).to eq Beaker::Logger::BLACK
           end
 
           it 'leaves other colors as the default' do
-            expect(logger.log_colors[:warn]).to be == Beaker::Logger::BRIGHT_RED
+            expect(logger.log_colors[:warn]).to eq Beaker::Logger::BRIGHT_RED
           end
         end
 
@@ -220,11 +220,11 @@ module Beaker
 
           context 'when using the default log colors' do
             it 'overrides notify with NORMAL' do
-              expect(logger.log_colors[:notify]).to be == Beaker::Logger::NORMAL
+              expect(logger.log_colors[:notify]).to eq Beaker::Logger::NORMAL
             end
 
             it 'overrides info with NORMAL' do
-              expect(logger.log_colors[:info]).to be == Beaker::Logger::NORMAL
+              expect(logger.log_colors[:info]).to eq Beaker::Logger::NORMAL
             end
           end
 
@@ -238,15 +238,15 @@ module Beaker
             let(:logger) { described_class.new(my_io, :quiet => true, :log_colors => log_colors) }
 
             it 'overrides the specified log colors' do
-              expect(logger.log_colors[:error]).to be == Beaker::Logger::BLACK
+              expect(logger.log_colors[:error]).to eq Beaker::Logger::BLACK
             end
 
             it 'does not override notify with NORMAL' do
-              expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
+              expect(logger.log_colors[:notify]).not_to eq Beaker::Logger::NORMAL
             end
 
             it 'does not override info with NORMAL' do
-              expect(logger.log_colors[:notify]).not_to be == Beaker::Logger::NORMAL
+              expect(logger.log_colors[:notify]).not_to eq Beaker::Logger::NORMAL
             end
           end
         end

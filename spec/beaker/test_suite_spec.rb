@@ -27,14 +27,14 @@ module Beaker
         @files = [rb_test]
         ts = described_class.new('name', 'hosts', options, Time.now)
         tfm = ts.instance_variable_get(:@fail_mode)
-        expect(tfm).to be == :slow
+        expect(tfm).to eq :slow
       end
 
       it 'uses provided parameter fail_mode' do
         @files = [rb_test]
         ts = described_class.new('name', 'hosts', options, Time.now, :fast)
         tfm = ts.instance_variable_get(:@fail_mode)
-        expect(tfm).to be == :fast
+        expect(tfm).to eq :fast
       end
 
       it 'uses options fail_mode if fail_mode parameter is not provided' do
@@ -42,7 +42,7 @@ module Beaker
         options[:fail_mode] = :fast
         ts = described_class.new('name', 'hosts', options, Time.now)
         tfm = ts.instance_variable_get(:@fail_mode)
-        expect(tfm).to be == :fast
+        expect(tfm).to eq :fast
       end
     end
 
@@ -135,7 +135,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.passed_tests).to be == 2
+        expect(test_suite_result.passed_tests).to eq 2
       end
 
       it 'calculates failed tests' do
@@ -145,7 +145,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.failed_tests).to be == 1
+        expect(test_suite_result.failed_tests).to eq 1
       end
 
       it 'calculates errored tests' do
@@ -155,7 +155,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.errored_tests).to be == 1
+        expect(test_suite_result.errored_tests).to eq 1
       end
 
       it 'calculates skipped tests' do
@@ -165,7 +165,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.skipped_tests).to be == 1
+        expect(test_suite_result.skipped_tests).to eq 1
       end
 
       it 'calculates pending tests' do
@@ -175,7 +175,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.pending_tests).to be == 1
+        expect(test_suite_result.pending_tests).to eq 1
       end
 
       it 'calculates sum_failed as a sum of errored and failed TestCases' do
@@ -185,7 +185,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.sum_failed).to be == 2
+        expect(test_suite_result.sum_failed).to eq 2
       end
 
       it 'reports success with no errors/failures' do
@@ -195,7 +195,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.success?).to be == false
+        expect(test_suite_result.success?).to eq false
       end
 
       it 'reports failed if any tests error/fail' do
@@ -205,7 +205,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.failed?).to be == true
+        expect(test_suite_result.failed?).to eq true
       end
 
       it 'can calculate the sum of all TestCase runtimes' do
@@ -215,7 +215,7 @@ module Beaker
         test_suite_result.add_test_case(testcase1)
         test_suite_result.add_test_case(testcase2)
         test_suite_result.add_test_case(testcase3)
-        expect(test_suite_result.elapsed_time).to be == 111
+        expect(test_suite_result.elapsed_time).to eq 111
       end
 
       describe '#print_test_result' do

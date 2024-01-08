@@ -127,10 +127,10 @@ module Beaker
           my_args = ['--log-level', 'debug', '-h', hosts_path]
 
           expect(parser.parse_args(my_args)[:command_line]).to include(my_args.join(' '))
-          expect(parser.attribution[:command_line]).to be == 'cmd'
-          expect(parser.attribution[:hosts_file]).to be == 'cmd'
-          expect(parser.attribution[:log_level]).to be == 'cmd'
-          expect(parser.attribution[:pe_dir]).to be == 'preset'
+          expect(parser.attribution[:command_line]).to eq 'cmd'
+          expect(parser.attribution[:hosts_file]).to eq 'cmd'
+          expect(parser.attribution[:log_level]).to eq 'cmd'
+          expect(parser.attribution[:pe_dir]).to eq 'preset'
         end
 
         describe 'does prioritization correctly' do
@@ -205,8 +205,8 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:level]).to be == 'lowest'
-            expect(attribution[:level]).to be == 'preset'
+            expect(opts[:level]).to eq 'lowest'
+            expect(attribution[:level]).to eq 'preset'
           end
 
           it 'project options should have seventh priority' do
@@ -215,10 +215,10 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:ssh][:auth_methods]).to be == 'auth_project_123'
-            expect(attribution[:ssh][:auth_methods]).to be == 'project'
-            expect(opts[:level]).to be == 'seventh'
-            expect(attribution[:level]).to be == 'project'
+            expect(opts[:ssh][:auth_methods]).to eq 'auth_project_123'
+            expect(attribution[:ssh][:auth_methods]).to eq 'project'
+            expect(opts[:level]).to eq 'seventh'
+            expect(attribution[:level]).to eq 'project'
           end
 
           it 'home directory options should have sixth priority' do
@@ -227,10 +227,10 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:ssh][:auth_methods]).to be == 'auth_home_123'
-            expect(attribution[:ssh][:auth_methods]).to be == 'homedir'
-            expect(opts[:level]).to be == 'sixth'
-            expect(attribution[:level]).to be == 'homedir'
+            expect(opts[:ssh][:auth_methods]).to eq 'auth_home_123'
+            expect(attribution[:ssh][:auth_methods]).to eq 'homedir'
+            expect(opts[:level]).to eq 'sixth'
+            expect(attribution[:level]).to eq 'homedir'
           end
 
           it 'subcommand_options should have fifth priority' do
@@ -239,8 +239,8 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:level]).to be == 'fifth'
-            expect(attribution[:level]).to be == 'subcommand'
+            expect(opts[:level]).to eq 'fifth'
+            expect(attribution[:level]).to eq 'subcommand'
           end
 
           it 'options file has fourth priority' do
@@ -250,16 +250,16 @@ module Beaker
             opts = parser.parse_args([])
             attribution = parser.attribution
             expect(attribution[:ssh]).to be_a(Hash)
-            expect(attribution[:ssh][:auth_methods]).to be == 'options_file'
-            expect(attribution[:ssh][:user_known_hosts_file]).to be == 'options_file'
-            expect(attribution[:ssh][:config]).to be == 'preset'
-            expect(attribution[:ssh][:verify_host_key]).to be == 'preset'
-            expect(attribution[:ssh][:port]).to be == 'preset'
-            expect(attribution[:ssh][:forward_agent]).to be == 'preset'
-            expect(attribution[:ssh][:keys]).to be == 'preset'
-            expect(attribution[:ssh][:keepalive]).to be == 'preset'
-            expect(opts[:level]).to be == 'fourth'
-            expect(attribution[:level]).to be == 'options_file'
+            expect(attribution[:ssh][:auth_methods]).to eq 'options_file'
+            expect(attribution[:ssh][:user_known_hosts_file]).to eq 'options_file'
+            expect(attribution[:ssh][:config]).to eq 'preset'
+            expect(attribution[:ssh][:verify_host_key]).to eq 'preset'
+            expect(attribution[:ssh][:port]).to eq 'preset'
+            expect(attribution[:ssh][:forward_agent]).to eq 'preset'
+            expect(attribution[:ssh][:keys]).to eq 'preset'
+            expect(attribution[:ssh][:keepalive]).to eq 'preset'
+            expect(opts[:level]).to eq 'fourth'
+            expect(attribution[:level]).to eq 'options_file'
           end
 
           it 'host file CONFIG section has third priority' do
@@ -268,8 +268,8 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:level]).to be == 'third'
-            expect(attribution[:level]).to be == 'host_file'
+            expect(opts[:level]).to eq 'third'
+            expect(attribution[:level]).to eq 'host_file'
           end
 
           it 'command line arguments have second priority' do
@@ -278,8 +278,8 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:level]).to be == 'second'
-            expect(attribution[:level]).to be == 'cmd'
+            expect(opts[:level]).to eq 'second'
+            expect(attribution[:level]).to eq 'cmd'
           end
 
           it 'env vars have highest priority' do
@@ -287,8 +287,8 @@ module Beaker
 
             opts = parser.parse_args([])
             attribution = parser.attribution
-            expect(opts[:level]).to be == 'highest'
-            expect(attribution[:level]).to be == 'env'
+            expect(opts[:level]).to eq 'highest'
+            expect(attribution[:level]).to eq 'env'
           end
 
           it "loads the options file from a project file" do
@@ -325,12 +325,12 @@ module Beaker
           args   = ["-h", hosts_path, "--log-level", log_level, "--type", type, "--install", "PUPPET/1.0,HIERA/hello"]
           output = parser.parse_args(args)
           attribution = parser.attribution
-          expect(output[:hosts_file]).to be == hosts_path
-          expect(attribution[:hosts_file]).to be == 'cmd'
-          expect(output[:jenkins_build_url]).to be == build_url
-          expect(attribution[:jenkins_build_url]).to be == 'env'
+          expect(output[:hosts_file]).to eq hosts_path
+          expect(attribution[:hosts_file]).to eq 'cmd'
+          expect(output[:jenkins_build_url]).to eq build_url
+          expect(attribution[:jenkins_build_url]).to eq 'env'
           expect(output[:install]).to include('git://github.com/puppetlabs/hiera.git#hello')
-          expect(attribution[:install]).to be == 'runtime'
+          expect(attribution[:install]).to eq 'runtime'
 
           ENV["BUILD_URL"] = old_build_url
         end
@@ -567,20 +567,20 @@ module Beaker
             hosts['HOSTS'][:master][:ssh] = { :user => 'hello' }
             parser.instance_variable_set(:@options, hosts)
             parser.normalize_args
-            expect(hosts['HOSTS'][:master][:user]).to be == 'hello'
+            expect(hosts['HOSTS'][:master][:user]).to eq 'hello'
           end
 
           it 'uses default user if there is an ssh hash, but no ssh[:user]' do
             hosts['HOSTS'][:master][:ssh] = { :hello => 'hello' }
             parser.instance_variable_set(:@options, hosts)
             parser.normalize_args
-            expect(hosts['HOSTS'][:master][:user]).to be == 'root'
+            expect(hosts['HOSTS'][:master][:user]).to eq 'root'
           end
 
           it 'uses default user if no ssh hash' do
             parser.instance_variable_set(:@options, hosts)
             parser.normalize_args
-            expect(hosts['HOSTS'][:master][:user]).to be == 'root'
+            expect(hosts['HOSTS'][:master][:user]).to eq 'root'
           end
         end
       end

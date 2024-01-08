@@ -57,23 +57,23 @@ module Beaker
 
       describe 'execute_subcommand' do
         it "determines if we should execute the init subcommand" do
-          expect(subject.execute_subcommand?("init")).to be == true
+          expect(subject.execute_subcommand?("init")).to eq true
         end
 
         it "does not attempt to execute intialize as a subcommand" do
-          expect(subject.execute_subcommand?("initialize")).to be == false
+          expect(subject.execute_subcommand?("initialize")).to eq false
         end
 
         it "determines if we should execute the help subcommand" do
-          expect(subject.execute_subcommand?("help")).to be == true
+          expect(subject.execute_subcommand?("help")).to eq true
         end
 
         it "determines if we should execute the provision subcommand" do
-          expect(subject.execute_subcommand?("provision")).to be == true
+          expect(subject.execute_subcommand?("provision")).to eq true
         end
 
         it "determines that a subcommand should not be executed" do
-          expect(subject.execute_subcommand?("notasubcommand")).to be == false
+          expect(subject.execute_subcommand?("notasubcommand")).to eq false
         end
       end
 

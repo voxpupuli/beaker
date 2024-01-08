@@ -21,13 +21,13 @@ describe ClassMixedWithDSLRoles do
     it 'returns an array of hosts that are agents' do
       @hosts = [agent1, agent2, master]
       expect(subject).to receive(:hosts).and_return(hosts)
-      expect(subject.agents).to be == [agent1, agent2, master]
+      expect(subject.agents).to eq [agent1, agent2, master]
     end
 
     it 'and an empty array when none match' do
       @hosts = [db, custom]
       expect(subject).to receive(:hosts).and_return(hosts)
-      expect(subject.agents).to be == []
+      expect(subject.agents).to eq []
     end
   end
 
@@ -35,7 +35,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns the master if there is one' do
       @hosts = [master, agent1]
       expect(subject).to receive(:hosts).and_return(hosts)
-      expect(subject.master).to be == master
+      expect(subject.master).to eq master
     end
 
     it 'raises an error if there is more than one master' do
@@ -56,7 +56,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns the dashboard if there is one' do
       @hosts = [a_and_dash, agent1]
       expect(subject).to receive(:hosts).and_return(hosts)
-      expect(subject.dashboard).to be == a_and_dash
+      expect(subject.dashboard).to eq a_and_dash
     end
 
     it 'raises an error if there is more than one dashboard' do
@@ -83,7 +83,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns the database if there is one' do
       @hosts = [db, agent1]
       expect(subject).to receive(:hosts).and_return(hosts)
-      expect(subject.database).to be == db
+      expect(subject.database).to eq db
     end
 
     it 'raises an error if there is more than one database' do
@@ -108,25 +108,25 @@ describe ClassMixedWithDSLRoles do
 
   describe '#not_controller' do
     it 'returns true when a host does not have the roles master/database/dashboard' do
-      expect(subject.not_controller(agent1)).to be == true
+      expect(subject.not_controller(agent1)).to eq true
     end
 
     it 'returns false when a host has one of the roles master/database/dashboard' do
-      expect(subject.not_controller(a_and_dash)).to be == false
+      expect(subject.not_controller(a_and_dash)).to eq false
     end
   end
 
   describe '#agent_only' do
     it 'returns true when a host has the single role agent' do
-      expect(subject.agent_only(agent1)).to be == true
+      expect(subject.agent_only(agent1)).to eq true
     end
 
     it 'returns false when a host has more than a single role' do
-      expect(subject.agent_only(a_and_dash)).to be == false
+      expect(subject.agent_only(a_and_dash)).to eq false
     end
 
     it 'returns false when a host has the role master' do
-      expect(subject.agent_only(master)).to be == false
+      expect(subject.agent_only(master)).to eq false
     end
   end
 
@@ -328,7 +328,7 @@ describe ClassMixedWithDSLRoles do
     it 'returns the default host when one is specified' do
       @hosts = [db, agent1, agent2, default, master]
       expect(subject).to receive(:hosts).once.and_return(hosts)
-      expect(subject.default).to be == default
+      expect(subject.default).to eq default
     end
 
     it 'raises an error if there is more than one default' do
@@ -377,7 +377,7 @@ describe ClassMixedWithDSLRoles do
       test_role = "custom_role"
       subject.add_role_def(test_role)
       expect(subject).to respond_to test_role
-      expect(subject.send(test_role)).to be == @hosts[2]
+      expect(subject.send(test_role)).to eq @hosts[2]
       subject.class.send(:undef_method, test_role)
     end
 
@@ -387,7 +387,7 @@ describe ClassMixedWithDSLRoles do
       test_role = "custom_role"
       subject.add_role_def(test_role)
       expect(subject).to respond_to test_role
-      expect(subject.send(test_role)).to be == [@hosts[2], @hosts[3]]
+      expect(subject.send(test_role)).to eq [@hosts[2], @hosts[3]]
       subject.class.send(:undef_method, test_role)
     end
   end
@@ -397,8 +397,8 @@ describe ClassMixedWithDSLRoles do
       @hosts = [agent1, agent2]
       # expect( subject ).to receive( :hosts ).and_return( hosts )
       expect(subject).to receive(:hosts).twice.and_return(hosts)
-      expect(subject.any_hosts_as?("agent")).to be == true
-      expect(subject.any_hosts_as?("custom_role")).to be == false
+      expect(subject.any_hosts_as?("agent")).to eq true
+      expect(subject.any_hosts_as?("custom_role")).to eq false
     end
   end
 end

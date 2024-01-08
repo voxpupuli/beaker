@@ -1,10 +1,10 @@
 module Beaker
   module Shared
     # Methods for managing Hosts.
-    #- selecting hosts by role (Symbol or String)
-    #- selecting hosts by name (String)
-    #- adding additional method definitions for selecting by role
-    #- executing blocks of code against selected sets of hosts
+    # - selecting hosts by role (Symbol or String)
+    # - selecting hosts by name (String)
+    # - adding additional method definitions for selecting by role
+    # - executing blocks of code against selected sets of hosts
     module HostManager
       # Find hosts from a given array of hosts that all have the desired role.
       # @param [Array<Host>] hosts The hosts to examine

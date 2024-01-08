@@ -256,7 +256,7 @@ module Beaker
         allow(host).to receive(:exec).and_return(result)
 
         expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
-        expect(host.mkdir_p('test/test/test')).to be == true
+        expect(host.mkdir_p('test/test/test')).to eq true
       end
 
       it "does the right thing on a bash host, identified as is_cygwin=nil" do
@@ -267,7 +267,7 @@ module Beaker
         allow(host).to receive(:exec).and_return(result)
 
         expect(Beaker::Command).to receive(:new).with("mkdir -p \"test/test/test\"")
-        expect(host.mkdir_p('test/test/test')).to be == true
+        expect(host.mkdir_p('test/test/test')).to eq true
       end
 
       it "does the right thing on a non-bash host, identified as is_cygwin=false (powershell)" do
@@ -284,26 +284,26 @@ module Beaker
                                    "-NoProfile",
                                    "-NonInteractive",
                                    "-Command New-Item -Path 'test\\test\\test' -ItemType 'directory'",])
-        expect(host.mkdir_p('test/test/test')).to be == true
+        expect(host.mkdir_p('test/test/test')).to eq true
       end
     end
 
     describe "#touch" do
       it "generates the right absolute command for a windows host" do
         @platform = 'windows'
-        expect(host.touch('touched_file')).to be == "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
+        expect(host.touch('touched_file')).to eq "c:\\\\windows\\\\system32\\\\cmd.exe /c echo. 2> touched_file"
       end
 
       %w[centos redhat].each do |platform|
         it "generates the right absolute command for a #{platform} host" do
           @platform = platform
-          expect(host.touch('touched_file')).to be == "/bin/touch touched_file"
+          expect(host.touch('touched_file')).to eq "/bin/touch touched_file"
         end
       end
 
       it "generates the right absolute command for an osx host" do
         @platform = 'osx'
-        expect(host.touch('touched_file')).to be == "/usr/bin/touch touched_file"
+        expect(host.touch('touched_file')).to eq "/usr/bin/touch touched_file"
       end
     end
 

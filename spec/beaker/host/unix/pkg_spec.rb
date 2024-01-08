@@ -171,7 +171,7 @@ module Beaker
           pkg = 'pkg'
           expect(Beaker::Command).to receive(:new).with("apt-get install --force-yes  -y #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.install_package(pkg)).to be == "hello"
+          expect(instance.install_package(pkg)).to eq "hello"
         end
       end
 
@@ -180,7 +180,7 @@ module Beaker
         pkg = 'fedora_package'
         expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.install_package(pkg)).to be == "hello"
+        expect(instance.install_package(pkg)).to eq "hello"
       end
 
       it "uses dnf on amazon-2023" do
@@ -188,7 +188,7 @@ module Beaker
         pkg = 'amazon_package'
         expect(Beaker::Command).to receive(:new).with("dnf -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.install_package(pkg)).to be == "hello"
+        expect(instance.install_package(pkg)).to eq "hello"
       end
 
       it "uses pacman on archlinux" do
@@ -196,7 +196,7 @@ module Beaker
         pkg = 'archlinux_package'
         expect(Beaker::Command).to receive(:new).with("pacman -S --noconfirm  #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.install_package(pkg)).to be == "hello"
+        expect(instance.install_package(pkg)).to eq "hello"
       end
     end
 
@@ -206,7 +206,7 @@ module Beaker
           @opts = { 'platform' => platform }
           expect(Beaker::Command).to receive(:new).with("apt-get purge  -y pkg", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.uninstall_package('pkg')).to be == "hello"
+          expect(instance.uninstall_package('pkg')).to eq "hello"
         end
 
         it "uses dnf on fedora" do
@@ -214,7 +214,7 @@ module Beaker
           pkg = 'fedora_package'
           expect(Beaker::Command).to receive(:new).with("dnf -y  remove #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.uninstall_package(pkg)).to be == "hello"
+          expect(instance.uninstall_package(pkg)).to eq "hello"
         end
       end
     end
@@ -225,7 +225,7 @@ module Beaker
           @opts = { 'platform' => platform }
           expect(Beaker::Command).to receive(:new).with("apt-get install -o Dpkg::Options::='--force-confold'  -y --force-yes pkg", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
           expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-          expect(instance.upgrade_package('pkg')).to be == "hello"
+          expect(instance.upgrade_package('pkg')).to eq "hello"
         end
       end
     end
@@ -236,7 +236,7 @@ module Beaker
         pkg = 'redhat_package'
         expect(Beaker::Command).to receive(:new).with("rpm  -Uvh #{pkg} ", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.install_package_with_rpm(pkg)).to be == "hello"
+        expect(instance.install_package_with_rpm(pkg)).to eq "hello"
       end
 
       it "accepts a package and additional options" do
@@ -245,7 +245,7 @@ module Beaker
         cmdline_args = '--foo'
         expect(Beaker::Command).to receive(:new).with("rpm #{cmdline_args} -Uvh #{pkg} ", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.install_package_with_rpm(pkg, cmdline_args)).to be == "hello"
+        expect(instance.install_package_with_rpm(pkg, cmdline_args)).to eq "hello"
       end
     end
 
@@ -255,7 +255,7 @@ module Beaker
        'https://myproxy.com:3128',
        'http://myproxy.com:3128',].each do |url|
         it "correctly extracts rpm proxy options for #{url}" do
-          expect(instance.extract_rpm_proxy_options(url)).to be == '--httpproxy myproxy.com --httpport 3128'
+          expect(instance.extract_rpm_proxy_options(url)).to eq '--httpproxy myproxy.com --httpport 3128'
         end
       end
 

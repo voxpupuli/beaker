@@ -160,9 +160,9 @@ module Beaker
 
           expect(cli).to receive(:run_suite).twice
           expect { cli.execute! }.to raise_error
-          expect(cli.instance_variable_get(:@attribution)[:logger]).to be == 'runtime'
-          expect(cli.instance_variable_get(:@attribution)[:timestamp]).to be == 'runtime'
-          expect(cli.instance_variable_get(:@attribution)[:beaker_version]).to be == 'runtime'
+          expect(cli.instance_variable_get(:@attribution)[:logger]).to eq 'runtime'
+          expect(cli.instance_variable_get(:@attribution)[:timestamp]).to eq 'runtime'
+          expect(cli.instance_variable_get(:@attribution)[:beaker_version]).to eq 'runtime'
         end
 
         it 'continues testing after failed test if using slow fail_mode' do
@@ -362,10 +362,10 @@ module Beaker
 
           preserved_file = cli.preserve_hosts_file
           hosts_yaml = load_yaml_file(preserved_file)
-          expect(hosts_yaml['CONFIG'][:tests]).to be == []
-          expect(hosts_yaml['CONFIG'][:pre_suite]).to be == []
-          expect(hosts_yaml['CONFIG'][:post_suite]).to be == []
-          expect(hosts_yaml['CONFIG'][:pre_cleanup]).to be == []
+          expect(hosts_yaml['CONFIG'][:tests]).to eq []
+          expect(hosts_yaml['CONFIG'][:pre_suite]).to eq []
+          expect(hosts_yaml['CONFIG'][:post_suite]).to eq []
+          expect(hosts_yaml['CONFIG'][:pre_cleanup]).to eq []
         end
       end
 
@@ -541,7 +541,7 @@ module Beaker
           command_correct = "p --log-level debug --hosts #{new_hosts_file} jam --jankies --flag-business"
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, new_hosts_file)
-          expect(answer).to be_start_with(command_correct)
+          expect(answer).to start_with(command_correct)
         end
 
         it 'doesn\'t replace an entry if no --hosts key is found' do
@@ -549,7 +549,7 @@ module Beaker
           command_correct = 'p --log-level debug johnnypantaloons7 --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'john/deer/plans.txt')
-          expect(answer).to be_start_with(command_correct)
+          expect(answer).to start_with(command_correct)
         end
 
         it 'removes any old --provision flags' do
@@ -557,7 +557,7 @@ module Beaker
           command_correct = 'jam --jankies --flag-business'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/pigs.yml')
-          expect(answer).to be_start_with(command_correct)
+          expect(answer).to start_with(command_correct)
         end
 
         it 'removes any old --no-provision flags' do
@@ -565,7 +565,7 @@ module Beaker
           command_correct = 'jam --jankoos --flag-businesses'
 
           answer = cli.build_hosts_preserved_reproducing_command(command_to_sub, 'can/talk/to/bears.yml')
-          expect(answer).to be_start_with(command_correct)
+          expect(answer).to start_with(command_correct)
         end
       end
     end
