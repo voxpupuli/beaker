@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.7.0](https://github.com/voxpupuli/beaker/tree/5.7.0) (2024-02-13)
+
+**Implemented enhancements:**
+
+- Add Ubuntu 24.04 noble codename [\#1847](https://github.com/voxpupuli/beaker/pull/1847) ([h0tw1r3](https://github.com/h0tw1r3))
+
 ## [5.6.0](https://github.com/voxpupuli/beaker/tree/5.6.0) (2023-11-23)
 
 **Implemented enhancements:**
