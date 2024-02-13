@@ -88,6 +88,11 @@ module Beaker
         expect(platform.with_version_codename).to be === 'debian-squeeze-xxx'
       end
 
+      it "can convert ubuntu-2404-xxx to ubuntu-noble-xxx" do
+        @name = 'ubuntu-2404-xxx'
+        expect(platform.with_version_codename).to be === 'ubuntu-noble-xxx'
+      end
+
       it "can convert ubuntu-2204-xxx to ubuntu-jammy-xxx" do
         @name = 'ubuntu-2204-xxx'
         expect(platform.with_version_codename).to be === 'ubuntu-jammy-xxx'
