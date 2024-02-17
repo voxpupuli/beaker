@@ -89,7 +89,7 @@ Usage: beaker [options...]
                                      (default sample.cfg)
     -o, --options-file FILE          Read options from FILE
                                      This should evaluate to a ruby hash.
-                                     CLI optons are given precedence.
+                                     CLI options are given precedence.
         --type TYPE                  one of git, foss, or pe
                                      used to determine underlying path structure of puppet install
                                      (default pe)
