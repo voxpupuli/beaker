@@ -25,7 +25,7 @@ module Beaker
           opts.on '-o', '--options-file FILE',
                   'Read options from FILE',
                   'This should evaluate to a ruby hash.',
-                  'CLI optons are given precedence.' do |file|
+                  'CLI options are given precedence.' do |file|
             @cmd_options[:options_file] = file
           end
 
