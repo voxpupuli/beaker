@@ -12,11 +12,13 @@ describe Beaker do
   let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
+  let(:timesync_packages) { Beaker::HostPrebuiltSteps::TIMESYNC_PACKAGES }
   let(:platform)       { @platform || 'unix' }
+  let(:timesync)       { @timesync || false }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
   let(:hosts) do
-    hosts = make_hosts({ :stdout => stdout, :platform => platform })
+    hosts = make_hosts({ :stdout => stdout, :platform => platform, :timesync => timesync })
     hosts[0][:roles] = ['agent']
     hosts[1][:roles] = %w[master dashboard agent database]
     hosts[2][:roles] = ['agent']
@@ -294,6 +296,7 @@ describe Beaker do
 
   context "validate_host" do
     subject { dummy_class.new }
+    let(:timesync) { true }
 
     it "can validate unix hosts" do
       hosts.each do |host|
@@ -390,6 +393,16 @@ describe Beaker do
       host = make_host('cisco-7', { stdout: stdout, platform: 'cisco_nexus-7-x86_64' })
       expect(subject).to receive(:check_and_install_packages_if_needed).with(host, []).once
       subject.validate_host(host, options)
+    end
+  end
+
+  context 'host_packages' do
+    subject { dummy_class.new }
+
+    it "filters timesync packages" do
+      hosts.each do |host|
+        expect(subject.host_packages(host)).not_to include(*timesync_packages)
+      end
     end
   end
 

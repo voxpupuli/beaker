@@ -31,6 +31,7 @@ module Beaker
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
     ROOT_KEYS_SYNC_CMD = "curl -k -o - -L #{ROOT_KEYS_SCRIPT} | %s"
     ROOT_KEYS_SYNC_CMD_AIX = "curl --tlsv1 -o - -L #{ROOT_KEYS_SCRIPT} | %s"
+    TIMESYNC_PACKAGES = ['CSWntp', 'ntp', 'ntpdate', 'chrony']
 
     # Run timesync on the provided hosts
     # @param [Host, Array<Host>] host One or more hosts to act upon
@@ -108,48 +109,50 @@ module Beaker
     # @param [Host] host A host return the packages for
     # @return [Array<String>] A list of packages to install
     def host_packages(host)
-      case host['platform']
-      when /amazon/
-        AMAZON2023_PACKAGES
-      when /el-8/
-        RHEL8_PACKAGES
-      when /el-9/
-        RHEL9_PACKAGES
-      when /sles-10/
-        SLES10_PACKAGES
-      when /opensuse|sles-/
-        SLES_PACKAGES
-      when /debian/
-        DEBIAN_PACKAGES
-      when /cumulus/
-        CUMULUS_PACKAGES
-      when /windows/
-        if host.is_cygwin?
-          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
+      packages = case host['platform']
+                 when /amazon/
+                   AMAZON2023_PACKAGES
+                 when /el-8/
+                   RHEL8_PACKAGES
+                 when /el-9/
+                   RHEL9_PACKAGES
+                 when /sles-10/
+                   SLES10_PACKAGES
+                 when /opensuse|sles-/
+                   SLES_PACKAGES
+                 when /debian/
+                   DEBIAN_PACKAGES
+                 when /cumulus/
+                   CUMULUS_PACKAGES
+                 when /windows/
+                   if host.is_cygwin?
+                     raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
 
-          WINDOWS_PACKAGES
-        else
-          PSWINDOWS_PACKAGES
-        end
-      when /freebsd/
-        FREEBSD_PACKAGES
-      when /openbsd/
-        OPENBSD_PACKAGES
-      when /solaris-10/
-        SOLARIS10_PACKAGES
-      when /solaris-1[1-9]/
-        SOLARIS11_PACKAGES
-      when /archlinux/
-        ARCHLINUX_PACKAGES
-      when /fedora/
-        FEDORA_PACKAGES
-      else
-        if !/aix|solaris|osx-|f5-|netscaler|cisco_/.match?(host['platform'])
-          UNIX_PACKAGES
-        else
-          []
-        end
-      end
+                     WINDOWS_PACKAGES
+                   else
+                     PSWINDOWS_PACKAGES
+                   end
+                 when /freebsd/
+                   FREEBSD_PACKAGES
+                 when /openbsd/
+                   OPENBSD_PACKAGES
+                 when /solaris-10/
+                   SOLARIS10_PACKAGES
+                 when /solaris-1[1-9]/
+                   SOLARIS11_PACKAGES
+                 when /archlinux/
+                   ARCHLINUX_PACKAGES
+                 when /fedora/
+                   FEDORA_PACKAGES
+                 else
+                   if !/aix|solaris|osx-|f5-|netscaler|cisco_/.match?(host['platform'])
+                     UNIX_PACKAGES
+                   else
+                     []
+                   end
+                 end
+      packages.select! { |pkg| !TIMESYNC_PACKAGES.include?(pkg) } unless host['timesync']
+      packages
     end
 
     # Installs the given packages if they aren't already on a host
