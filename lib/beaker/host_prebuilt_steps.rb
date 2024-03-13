@@ -10,10 +10,9 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    AMAZON2023_PACKAGES = %w[curl-minimal chrony]
-    RHEL8_PACKAGES = %w[curl chrony]
-    RHEL9_PACKAGES = ['chrony']
-    FEDORA_PACKAGES = %w[curl chrony]
+    AMAZON2023_PACKAGES = %w[chrony]
+    RHEL8_PACKAGES = %w[chrony]
+    FEDORA_PACKAGES = %w[chrony]
     UNIX_PACKAGES = %w[curl ntpdate]
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
@@ -111,10 +110,8 @@ module Beaker
       case host['platform']
       when /amazon/
         AMAZON2023_PACKAGES
-      when /el-8/
+      when /el-[89]/
         RHEL8_PACKAGES
-      when /el-9/
-        RHEL9_PACKAGES
       when /sles-10/
         SLES10_PACKAGES
       when /opensuse|sles-/
