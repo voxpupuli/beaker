@@ -100,5 +100,60 @@ module Beaker
     def with_version_number
       [@variant, @version, @arch].join('-')
     end
+
+    def uses_chrony?
+      case @variant
+      when 'amazon', 'fedora'
+        true
+      when 'el'
+        @version.to_i >= 8
+      else
+        false
+      end
+    end
+
+    # Return a list of packages that should always be present.
+    #
+    # @return [Array<String>] A list of packages to install
+    def base_packages
+      case @variant
+      when 'el'
+        @version.to_i >= 8 ? ['curl-minimal', 'iputils'] : %w[curl]
+      when 'debian'
+        %w[curl lsb-release apt-transport-https]
+      when 'freebsd'
+        %w[curl perl5|perl]
+      when 'solaris'
+        @version.to_i >= 11 ? %w[curl] : %w[CSWcurl wget]
+      when 'archlinux'
+        %w[curl net-tools openssh]
+      when 'amazon', 'fedora'
+        ['curl-minimal', 'iputils']
+      when 'aix', 'osx', 'windows'
+        []
+      else
+        %w[curl]
+      end
+    end
+
+    # Return a list of packages that are needed for timesync
+    #
+    # @return [Array<String>] A list of packages to install for timesync
+    def timesync_packages
+      return ['chrony'] if uses_chrony?
+
+      case @variant
+      when 'freebsd', 'openbsd', 'windows', 'aix', 'osx'
+        []
+      when 'archlinux', 'opensuse'
+        ['ntp']
+      when 'sles'
+        @version.to_i >= 11 ? %w[ntp] : []
+      when 'solaris'
+        @version.to_i >= 11 ? %w[ntp] : %w[CSWntp]
+      else
+        %w[ntpdate]
+      end
+    end
   end
 end

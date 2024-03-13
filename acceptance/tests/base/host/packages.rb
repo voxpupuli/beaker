@@ -1,29 +1,6 @@
 test_name 'confirm packages on hosts behave correctly'
 confine :except, :platform => %w(osx)
 
-def get_host_pkg(host)
-  case host['platform']
-  when /sles-10/
-    Beaker::HostPrebuiltSteps::SLES10_PACKAGES
-  when /opensuse|sles-/
-    Beaker::HostPrebuiltSteps::SLES_PACKAGES
-  when /debian/
-    Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
-  when /windows/
-    host.is_cygwin? ? Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES : Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
-  when /freebsd/
-    Beaker::HostPrebuiltSteps::FREEBSD_PACKAGES
-  when /openbsd/
-    Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
-  when /solaris-10/
-    Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
-  when /el-[89]/
-    Beaker::HostPrebuiltSteps::RHEL8_PACKAGES
-  else
-    Beaker::HostPrebuiltSteps::UNIX_PACKAGES
-  end
-end
-
 step '#check_for_command : can determine where a command exists'
 hosts.each do |host|
   logger.debug "echo package should be installed on #{host}"
@@ -34,7 +11,7 @@ end
 
 step '#check_for_package : can determine if a package is installed'
 hosts.each do |host|
-  package = get_host_pkg(host)[0]
+  package = 'bash'
 
   logger.debug "#{package} package should be installed on #{host}"
   assert(host.check_for_package(package), "'#{package}' should be installed")

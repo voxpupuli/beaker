@@ -6,11 +6,6 @@ describe Beaker do
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
   let(:sync_cmd)       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
-  let(:windows_pkgs)   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
-  let(:sles_only_pkgs) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
-  let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
-  let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
-  let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -281,7 +276,7 @@ describe Beaker do
     it "can validate el-9 hosts" do
       host = make_host('host', { :platform => 'el-9-64' })
 
-      rhel8_packages.each do |pkg|
+      ['curl-minimal', 'iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -293,7 +288,7 @@ describe Beaker do
       host = make_host('host', { :platform => 'windows-11-64', :is_cygwin => true })
       allow(host).to receive(:cygwin_installed?).and_return(true)
 
-      windows_pkgs.each do |pkg|
+      ['curl'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -304,7 +299,7 @@ describe Beaker do
     it "can validate SLES hosts" do
       host = make_host('host', { :platform => 'sles-13.1-x86_64' })
 
-      sles_only_pkgs.each do |pkg|
+      ['curl'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -315,7 +310,7 @@ describe Beaker do
     it "can validate opensuse hosts" do
       host = make_host('host', { :platform => 'opensuse-15-x86_x64' })
 
-      sles_only_pkgs.each do |pkg|
+      ['curl'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -326,7 +321,7 @@ describe Beaker do
     it "can validate RHEL8 hosts" do
       host = make_host('host', { :platform => 'el-8-64' })
 
-      rhel8_packages.each do |pkg|
+      ['curl-minimal', 'iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -337,7 +332,7 @@ describe Beaker do
     it "can validate Fedora hosts" do
       host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      fedora_packages.each do |pkg|
+      ['curl-minimal', 'iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -348,7 +343,7 @@ describe Beaker do
     it "can validate Amazon hosts" do
       host = make_host('host', { :platform => 'amazon-2023-x86_64' })
 
-      amazon2023_packages.each do |pkg|
+      ['curl-minimal', 'iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
