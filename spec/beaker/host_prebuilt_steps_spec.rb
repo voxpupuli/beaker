@@ -12,6 +12,7 @@ describe Beaker do
   let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
+  # TODO: unix is unsupported
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
@@ -40,18 +41,17 @@ describe Beaker do
     end
   end
 
-  it_behaves_like 'enables_root_login', 'f5', []
-  # Non-cygwin Windows
-  it_behaves_like 'enables_root_login', 'pswindows', [], false
+  it_behaves_like 'enables_root_login', 'f5-stuff-64', []
 
   # Non-cygwin Windows
-  it_behaves_like 'enables_root_login', 'windows', [
+  it_behaves_like 'enables_root_login', 'windows-11-64', [
     "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config",
   ], true
 
   # FreeBSD
-  it_behaves_like 'enables_root_login', 'freesbd', [
-    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+  it_behaves_like 'enables_root_login', 'freebsd-14-64', [
+    "sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
+    "sudo /etc/rc.d/sshd restart",
   ], true
 
   it_behaves_like 'enables_root_login', 'osx-10.10', [
@@ -91,14 +91,14 @@ describe Beaker do
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
   ]
 
-  %w[debian ubuntu cumulus].each do |deb_like|
+  %w[debian-12-64 ubuntu-2204-64 cumulus-x-64].each do |deb_like|
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\"",
     ]
   end
 
-  ['centos', 'el-', 'redhat', 'fedora', 'eos'].each do |redhat_like|
+  ['centos-9-64', 'el-9-64', 'redhat-9-64', 'fedora-39-64', 'eos-x-64'].each do |redhat_like|
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload",
@@ -135,7 +135,7 @@ describe Beaker do
     end
 
     it "can sync time on windows hosts" do
-      hosts = make_hosts({ :platform => 'windows' })
+      hosts = make_hosts({ :platform => 'windows-11-64' })
 
       expect(Beaker::Command).to receive(:new).with("w32tm /register").exactly(3).times
       expect(Beaker::Command).to receive(:new).with("net start w32time").exactly(3).times
@@ -221,7 +221,7 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can perform apt-get on ubuntu hosts" do
-      host = make_host('testhost', { :platform => 'ubuntu' })
+      host = make_host('testhost', { :platform => 'ubuntu-2204-64' })
 
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
@@ -229,7 +229,7 @@ describe Beaker do
     end
 
     it "can perform apt-get on debian hosts" do
-      host = make_host('testhost', { :platform => 'debian' })
+      host = make_host('testhost', { :platform => 'debian-12-64' })
 
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
@@ -237,7 +237,7 @@ describe Beaker do
     end
 
     it "can perform apt-get on cumulus hosts" do
-      host = make_host('testhost', { :platform => 'cumulus' })
+      host = make_host('testhost', { :platform => 'cumulus-x-64' })
 
       expect(Beaker::Command).to receive(:new).with("apt-get update").once
 
@@ -245,7 +245,7 @@ describe Beaker do
     end
 
     it "does nothing on non debian/ubuntu/cumulus hosts" do
-      host = make_host('testhost', { :platform => 'windows' })
+      host = make_host('testhost', { :platform => 'windows-11-64' })
 
       expect(Beaker::Command).not_to receive(:new)
 
@@ -307,7 +307,7 @@ describe Beaker do
     end
 
     it "can validate windows hosts" do
-      @platform = 'windows'
+      @platform = 'windows-11-64'
 
       hosts.each do |host|
         windows_pkgs.each do |pkg|
@@ -405,7 +405,7 @@ describe Beaker do
     context "on windows" do
       let(:host) do
         make_host('name', {
-                    :platform => 'windows',
+                    :platform => 'windows-11-64',
                     :is_cygwin => cygwin,
                     :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
@@ -432,7 +432,7 @@ describe Beaker do
       end
     end
 
-    %w[amazon centos redhat].each do |platform|
+    %w[amazon-2023-64 centos-9-64 redhat-9-64].each do |platform|
       context "on platform '#{platform}'" do
         let(:host) do
           make_host('name', {
@@ -490,7 +490,7 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can copy ssh to root in windows hosts with no cygwin" do
-      host = make_host('testhost', { :platform => 'windows', :is_cygwin => false })
+      host = make_host('testhost', { :platform => 'windows-11-64', :is_cygwin => false })
       expect(Beaker::Command).to receive(:new).with("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)").once
 
       subject.copy_ssh_to_root(host, options)
@@ -503,7 +503,7 @@ describe Beaker do
     proxyurl = "http://192.168.2.100:3128"
 
     it "can set proxy config on a debian/ubuntu/cumulus host" do
-      host = make_host('name', { :platform => 'cumulus' })
+      host = make_host('name', { :platform => 'debian-12-64' })
 
       expect(Beaker::Command).to receive(:new).with("echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy").once
       expect(host).to receive(:exec).once
@@ -511,7 +511,7 @@ describe Beaker do
       subject.package_proxy(host, options.merge({ 'package_proxy' => proxyurl }))
     end
 
-    %w[amazon centos redhat].each do |platform|
+    %w[amazon-2023-64 el-9-64].each do |platform|
       it "can set proxy config on a '#{platform}' host" do
         host = make_host('name', { :platform => platform })
 
@@ -527,52 +527,52 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "sets user ssh environment on an OS X 10.10 host" do
-      test_host_ssh_calls('osx-10.10')
+      test_host_ssh_calls('osx-10.10-64')
     end
 
     it "sets user ssh environment on an OS X 10.11 host" do
-      test_host_ssh_calls('osx-10.11')
+      test_host_ssh_calls('osx-10.11-64')
     end
 
     it "sets user ssh environment on an OS X 10.12 host" do
-      test_host_ssh_calls('osx-10.12')
+      test_host_ssh_calls('osx-10.12-64')
     end
 
     it "sets user ssh environment on an OS X 10.13 host" do
-      test_host_ssh_calls('osx-10.13')
+      test_host_ssh_calls('osx-10.13-64')
     end
 
     it "sets user ssh environment on an ssh-based linux host" do
-      test_host_ssh_calls('ubuntu')
+      test_host_ssh_calls('ubuntu-2204-64')
     end
 
     it "sets user ssh environment on an sshd-based linux host" do
-      test_host_ssh_calls('eos')
+      test_host_ssh_calls('eos-x-64')
     end
 
     it "sets user ssh environment on an sles host" do
-      test_host_ssh_calls('sles')
+      test_host_ssh_calls('sles-15-64')
     end
 
     it "sets user ssh environment on a solaris host" do
-      test_host_ssh_calls('solaris')
+      test_host_ssh_calls('solaris-11-64')
     end
 
     it "sets user ssh environment on an aix host" do
-      test_host_ssh_calls('aix')
+      test_host_ssh_calls('aix-7.2-power')
     end
 
     it "sets user ssh environment on a FreeBSD host" do
-      test_host_ssh_calls('freebsd')
+      test_host_ssh_calls('freebsd-14-64')
     end
 
     it "sets user ssh environment on a windows host" do
-      test_host_ssh_calls('windows')
+      test_host_ssh_calls('windows-11-64')
     end
 
     it "skips an f5 host correctly" do
       host = make_host('name', {
-                         :platform => 'f5-stuff',
+                         :platform => 'f5-stuff-64',
                          :ssh_env_file => 'ssh_env_file',
                          :is_cygwin => true,
                        })
