@@ -6,7 +6,7 @@ module Beaker
     let(:group) { 'somegroup' }
     let(:path) { 'C:\Foo\Bar' }
     let(:newpath) { '/Foo/Bar' }
-    let(:host)    { make_host('name', { :platform => 'windows' }) }
+    let(:host)    { make_host('name', { :platform => 'windows-11-64' }) }
 
     describe '#chown' do
       it 'calls cygpath first' do
@@ -60,7 +60,7 @@ module Beaker
       end
 
       it 'replaces backslashes with forward slashes when using BitVise and powershell' do
-        host = make_host('name', platform: 'windows', is_cygwin: false)
+        host = make_host('name', platform: 'windows-11-64', is_cygwin: false)
         allow(host).to receive(:determine_ssh_server).and_return(:bitvise)
         expect(host.scp_path(path)).to eq('C:/Windows')
       end
