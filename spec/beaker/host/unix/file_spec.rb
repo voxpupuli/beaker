@@ -137,6 +137,14 @@ module Beaker
         expect( filename ).to be === correct
       end
 
+      it 'builds the filename correctly for amazon-based platforms' do
+        @platform = 'amazon-2023-x86_64'
+        allow( instance ).to receive( :is_pe? ).and_return(true)
+        filename = instance.repo_filename( 'pkg_name', 'pkg_version' )
+        correct = 'pl-pkg_name-pkg_version-amazon-2023-x86_64.repo'
+        expect( filename ).to be === correct
+      end
+
       it 'builds the filename correctly for debian-based platforms' do
         @platform = 'debian-8-x86_64'
         filename = instance.repo_filename( 'pkg_name', 'pkg_version10' )
