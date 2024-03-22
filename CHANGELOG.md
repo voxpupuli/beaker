@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.8.0](https://github.com/voxpupuli/beaker/tree/5.8.0) (2024-03-23)
+
+**Implemented enhancements:**
+
+- Add Ruby 3.3 support [\#1859](https://github.com/voxpupuli/beaker/pull/1859) ([bastelfreak](https://github.com/bastelfreak))
+- Do not attempt to install curl on DNF-based distros [\#1854](https://github.com/voxpupuli/beaker/pull/1854) ([ekohl](https://github.com/ekohl))
+- PE-37978: Add 'amazon' to #repo-filename method [\#1858](https://github.com/voxpupuli/beaker/pull/1858) ([span786](https://github.com/span786))
+
+**Fixed bugs:**
+
+- CLI: Fix typo: opton->option [\#1849](https://github.com/voxpupuli/beaker/pull/1849) ([bastelfreak](https://github.com/bastelfreak))
+
+**Others:**
+
+- build(deps-dev): update voxpupuli-rubocop requirement from ~> 2.4.0 to ~> 2.6.0 [\#1850](https://github.com/voxpupuli/beaker/pull/1850) (dependabot)
+
 ## [5.7.0](https://github.com/voxpupuli/beaker/tree/5.7.0) (2024-02-13)
 
 **Implemented enhancements:**
