@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.42.0](https://github.com/voxpupuli/beaker/tree/4.42.0) (2024-03-27)
+
+[Full Changelog](https://github.com/voxpupuli/beaker/compare/4.41.2...4.42.0)
+
+**Implemented enhancements:**
+
+- \[PE-37978\] Add 'amazon' to repo_filename method with tests [\#1861](https://github.com/voxpupuli/beaker/pull/1861) ([span786](https://github.com/span786))
+- Add Ubuntu 24.04 noble codename [\#1851](https://github.com/voxpupuli/beaker/pull/1851) ([h0tw1r3](https://github.com/h0tw1r3))
+
 ## [4.41.2](https://github.com/voxpupuli/beaker/tree/4.41.2) (2023-12-18)
 
 [Full Changelog](https://github.com/voxpupuli/beaker/compare/4.41.1...4.41.2)
