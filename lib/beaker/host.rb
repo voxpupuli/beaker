@@ -544,7 +544,7 @@ module Beaker
       raise Beaker::Host::CommandFailure, result.error
     end
 
-    def tmpfile(name = '')
+    def tmpfile(name = '', extension = nil)
       raise NotImplementedError
     end
 
