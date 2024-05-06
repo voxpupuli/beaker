@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.8.1](https://github.com/voxpupuli/beaker/tree/5.8.1) (2024-05-06)
+
+**Fixed bugs:**
+
+- Add extension parameter to parent tmpfile method signature [\#1863](https://github.com/voxpupuli/beaker/pull/1854) ([ekohl](https://github.com/ekohl))
+
 ## [5.8.0](https://github.com/voxpupuli/beaker/tree/5.8.0) (2024-03-23)
 
 **Implemented enhancements:**
