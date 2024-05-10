@@ -122,7 +122,6 @@ end
 module PlatformHelpers
   DEBIANPLATFORMS = %w[debian
                        ubuntu
-                       cumulus
                        huaweios]
 
   FEDORASYSTEMD    = (14..39).to_a.collect! { |i| "fedora-#{i}" }

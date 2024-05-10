@@ -22,7 +22,6 @@ module Beaker
     SLES10_PACKAGES = ['curl']
     SLES_PACKAGES = %w[curl ntp]
     DEBIAN_PACKAGES = %w[curl ntpdate lsb-release apt-transport-https]
-    CUMULUS_PACKAGES = %w[curl ntpdate]
     SOLARIS10_PACKAGES = %w[CSWcurl CSWntp wget]
     SOLARIS11_PACKAGES = %w[curl ntp]
     ETC_HOSTS_PATH = "/etc/hosts"
@@ -86,7 +85,6 @@ module Beaker
     # Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
     # {HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts,
     # {HostPrebuiltSteps::DEBIAN_PACKAGES} on debian platform hosts,
-    # {HostPrebuiltSteps::CUMULUS_PACKAGES} on cumulus platform hosts,
     # {HostPrebuiltSteps::WINDOWS_PACKAGES} on cygwin-installed windows platform hosts,
     # and {HostPrebuiltSteps::PSWINDOWS_PACKAGES} on non-cygwin windows platform hosts.
     #
@@ -118,8 +116,6 @@ module Beaker
         SLES_PACKAGES
       when /debian/
         DEBIAN_PACKAGES
-      when /cumulus/
-        CUMULUS_PACKAGES
       when /windows/
         if host.is_cygwin?
           raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
@@ -206,12 +202,12 @@ module Beaker
     end
 
     # Run 'apt-get update' on the provided host or hosts.
-    # If the platform of the provided host is not ubuntu, debian or cumulus: do nothing.
+    # If the platform of the provided host is not ubuntu or debian: do nothing.
     #
     # @param [Host, Array<Host>] hosts One or more hosts to act upon
     def apt_get_update hosts
       block_on hosts do |host|
-        host.exec(Command.new("apt-get update")) if /ubuntu|debian|cumulus/.match?(host[:platform])
+        host.exec(Command.new("apt-get update")) if /ubuntu|debian/.match?(host[:platform])
       end
     end
 
@@ -349,7 +345,7 @@ module Beaker
       end
     end
 
-    # Update sshd_config on debian, ubuntu, centos, el, redhat, cumulus, and fedora boxes to allow for root login
+    # Update sshd_config on debian, ubuntu, centos, el, redhat and fedora boxes to allow for root login
     #
     # Does nothing on other platfoms.
     #
@@ -384,7 +380,7 @@ module Beaker
           host.exec(Command.new("sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\""), { :pty => true })
         end
         # restart sshd
-        if /debian|ubuntu|cumulus/.match?(host['platform'])
+        if /debian|ubuntu/.match?(host['platform'])
           host.exec(Command.new("sudo su -c \"service ssh restart\""), { :pty => true })
         elsif /amazon|arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
@@ -417,7 +413,7 @@ module Beaker
     end
 
     # Setup files for enabling requests to pass to a proxy server
-    # This works for the APT package manager on debian, ubuntu, and cumulus
+    # This works for the APT package manager on debian and ubuntu
     # and YUM package manager on el, centos, fedora and redhat.
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
@@ -428,7 +424,7 @@ module Beaker
       block_on host do |host|
         logger.debug("enabling proxy support on #{host.name}")
         case host['platform']
-        when /ubuntu/, /debian/, /cumulus/
+        when /ubuntu/, /debian/
           host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
         when /amazon/, /^el-/, /centos/, /fedora/, /redhat/, /eos/
           host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))

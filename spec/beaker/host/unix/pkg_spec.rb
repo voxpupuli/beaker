@@ -108,14 +108,6 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      it "checks correctly on cumulus" do
-        @opts = { 'platform' => 'cumulus-is-me' }
-        pkg = 'cumulus_package'
-        expect(Beaker::Command).to receive(:new).with("dpkg -s #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-        expect(instance).to receive(:exec).with('', { :accept_all_exit_codes => true }).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.check_for_package(pkg)).to be === true
-      end
-
       it "checks correctly on solaris-11" do
         @opts = { 'platform' => 'solaris-11-is-me' }
         pkg = 'solaris-11_package'
@@ -310,9 +302,9 @@ module Beaker
         end
       end
 
-      it 'Debian, Ubuntu, Cumulus: uses dpkg' do
+      it 'Debian, Ubuntu: uses dpkg' do
         package_file = 'testing_012.yay'
-        %w[debian ubuntu cumulus].each do |platform|
+        %w[debian ubuntu].each do |platform|
           @platform = platform
           expect(instance).to receive(:execute).with(/^dpkg.*#{package_file}$/)
           expect(instance).to receive(:execute).with('apt-get update')

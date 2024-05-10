@@ -9,8 +9,6 @@ def get_host_pkg(host)
     Beaker::HostPrebuiltSteps::SLES_PACKAGES
   when /debian/
     Beaker::HostPrebuiltSteps::DEBIAN_PACKAGES
-  when /cumulus/
-    Beaker::HostPrebuiltSteps::CUMULUS_PACKAGES
   when /windows/
     host.is_cygwin? ? Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES : Beaker::HostPrebuiltSteps::PSWINDOWS_PACKAGES
   when /freebsd/

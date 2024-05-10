@@ -42,7 +42,7 @@ module Unix::Pkg
       return false
     when /amazon|cisco|fedora|centos|redhat|eos|el-/
       result = execute("rpm -q #{name}", opts) { |result| result }
-    when /ubuntu|debian|cumulus|huaweios/
+    when /ubuntu|debian|huaweios/
       result = execute("dpkg -s #{name}", opts) { |result| result }
     when /solaris-11/
       result = execute("pkg info #{name}", opts) { |result| result }
@@ -62,7 +62,7 @@ module Unix::Pkg
   # If apt has not been updated since the last repo deployment it is
   # updated. Otherwise this is a noop
   def update_apt_if_needed
-    return unless /debian|ubuntu|cumulus|huaweios/.match?(self['platform'])
+    return unless /debian|ubuntu|huaweios/.match?(self['platform'])
     return unless @apt_needs_update
 
     execute("apt-get update")
@@ -93,7 +93,7 @@ module Unix::Pkg
     when /cisco|centos|redhat|eos|el-[1-7]-/
       name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
-    when /ubuntu|debian|cumulus|huaweios/
+    when /ubuntu|debian|huaweios/
       name = "#{name}=#{version}" if version
       update_apt_if_needed
       execute("apt-get install --force-yes #{cmdline_args} -y #{name}", opts)
@@ -176,7 +176,7 @@ module Unix::Pkg
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
     when /cisco|centos|redhat|eos|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
-    when /ubuntu|debian|cumulus|huaweios/
+    when /ubuntu|debian|huaweios/
       execute("apt-get purge #{cmdline_args} -y #{name}", opts)
     when /solaris-11/
       execute("pkg #{cmdline_args} uninstall #{name}", opts)
@@ -206,7 +206,7 @@ module Unix::Pkg
       execute("dnf -y #{cmdline_args} update #{name}", opts)
     when /cisco|fedora|centos|redhat|eos|el-/
       execute("yum -y #{cmdline_args} update #{name}", opts)
-    when /ubuntu|debian|cumulus|huaweios/
+    when /ubuntu|debian|huaweios/
       update_apt_if_needed
       execute("apt-get install -o Dpkg::Options::='--force-confold' #{cmdline_args} -y --force-yes #{name}", opts)
     when /solaris-11/
@@ -270,7 +270,7 @@ module Unix::Pkg
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
     when /^(opensuse|sles)$/
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
-    when /^(debian|ubuntu|cumulus)$/
+    when /^(debian|ubuntu)$/
       execute("dpkg -i --force-all #{onhost_package_file}")
       execute("apt-get update")
     when /^solaris$/
@@ -294,7 +294,7 @@ module Unix::Pkg
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
-    when /^(amazon|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu|cumulus)$/
+    when /^(amazon|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball
