@@ -134,7 +134,7 @@ module Beaker
       when /fedora/
         FEDORA_PACKAGES
       else
-        if !/aix|solaris|osx-|netscaler/.match?(host['platform'])
+        if !/aix|solaris|osx-/.match?(host['platform'])
           UNIX_PACKAGES
         else
           []
@@ -335,8 +335,6 @@ module Beaker
     def disable_updates hosts, opts
       logger = opts[:logger]
       hosts.each do |host|
-        next if host['platform'].include?('netscaler')
-
         logger.notify "Disabling updates.puppetlabs.com by modifying hosts file to resolve updates to 127.0.0.1 on #{host}"
         set_etc_hosts(host, "127.0.0.1\tupdates.puppetlabs.com\n")
       end
