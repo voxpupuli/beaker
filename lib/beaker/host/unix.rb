@@ -52,7 +52,7 @@ module Unix
     #   nil if it should run.
     def skip_set_env?
       case self['platform'].variant
-      when /^(f5|netscaler)$/
+      when 'netscaler'
         "no puppet-agent package for network device platform '#{self['platform'].variant}'"
       end
     end

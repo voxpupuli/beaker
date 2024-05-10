@@ -40,7 +40,6 @@ describe Beaker do
     end
   end
 
-  it_behaves_like 'enables_root_login', 'f5', []
   # Non-cygwin Windows
   it_behaves_like 'enables_root_login', 'pswindows', [], false
 
@@ -568,29 +567,6 @@ describe Beaker do
 
     it "sets user ssh environment on a windows host" do
       test_host_ssh_calls('windows')
-    end
-
-    it "skips an f5 host correctly" do
-      host = make_host('name', {
-                         :platform => 'f5-stuff',
-                         :ssh_env_file => 'ssh_env_file',
-                         :is_cygwin => true,
-                       })
-      opts = {
-        :env1_key => :env1_value,
-        :env2_key => :env2_value,
-      }
-      allow(host).to receive(:skip_set_env?).and_return('f5 say NO')
-
-      expect(subject).to receive(:construct_env).exactly(0).times
-      expect(Beaker::Command).to receive(:new).exactly(0).times
-      expect(host).to receive(:add_env_var).exactly(0).times
-      opts.each_pair do |key, value|
-        expect(host).to receive(:add_env_var).with(key, value).exactly(0).times
-      end
-      expect(host).to receive(:exec).exactly(0).times
-
-      subject.set_env(host, options.merge(opts))
     end
 
     it 'skips a cisco host correctly' do

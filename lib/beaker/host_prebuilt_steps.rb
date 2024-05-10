@@ -141,7 +141,7 @@ module Beaker
       when /fedora/
         FEDORA_PACKAGES
       else
-        if !/aix|solaris|osx-|f5-|netscaler|cisco_/.match?(host['platform'])
+        if !/aix|solaris|osx-|netscaler|cisco_/.match?(host['platform'])
           UNIX_PACKAGES
         else
           []
@@ -376,8 +376,7 @@ module Beaker
         elsif host['platform'].include?('solaris-11')
           host.exec(Command.new("if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi"), { :pty => true })
           host.exec(Command.new("sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config"), { :pty => true })
-        elsif host['platform'].include?('f5') || host.is_powershell?
-          # interacting with f5 should using tmsh
+        elsif host.is_powershell?
           logger.warn("Attempting to enable root login non-supported platform: #{host.name}: #{host['platform']}")
         elsif host.is_cygwin?
           host.exec(Command.new("sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config"), { :pty => true })
