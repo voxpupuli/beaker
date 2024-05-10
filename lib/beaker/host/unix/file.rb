@@ -92,7 +92,7 @@ module Unix::File
       '/etc/yum.repos.d/'
     when /opensuse|sles/
       '/etc/zypp/repos.d/'
-    when /debian|ubuntu|huaweios/
+    when /debian|ubuntu/
       '/etc/apt/sources.list.d'
     else
       msg = "package config dir unknown for platform '#{self['platform']}'"
@@ -131,8 +131,7 @@ module Unix::File
       pattern = "%s-%s%s-%s.repo"
 
       repo_filename << (format(pattern, variant, fedora_prefix, version, arch))
-    when /debian|ubuntu|huaweios/
-      codename = variant if variant == 'huaweios'
+    when /debian|ubuntu/
       repo_filename << (format("%s.list", codename))
     else
       msg = "#repo_filename: repo filename pattern not known for platform '#{self['platform']}'"
@@ -151,7 +150,7 @@ module Unix::File
     case self['platform']
     when /amazon|fedora|el-|redhat|centos|opensuse|sles/
       'rpm'
-    when /debian|ubuntu|huaweios/
+    when /debian|ubuntu/
       'deb'
     else
       msg = "#repo_type: repo type not known for platform '#{self['platform']}'"

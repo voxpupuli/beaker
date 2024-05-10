@@ -278,7 +278,7 @@ module Unix::Exec
   # @return [Result] result of restarting the SSH service
   def ssh_service_restart
     case self['platform']
-    when /debian|ubuntu|huaweios/
+    when /debian|ubuntu/
       exec(Beaker::Command.new("service ssh restart"))
     when /amazon|(el|centos|redhat|oracle|scientific)-[7-9]|eos-7|fedora-(1[4-9]|2[0-9]|3[0-9])|archlinux-/
       exec(Beaker::Command.new("systemctl restart sshd.service"))
@@ -302,7 +302,7 @@ module Unix::Exec
   #   (from {#ssh_service_restart}).
   def ssh_permit_user_environment
     case self['platform']
-    when /amazon|debian|ubuntu|huaweios|archlinux|el-|centos|fedora|redhat|oracle|scientific|eos|opensuse|sles|solaris/
+    when /amazon|debian|ubuntu|archlinux|el-|centos|fedora|redhat|oracle|scientific|eos|opensuse|sles|solaris/
       directory = tmpdir
       exec(Beaker::Command.new("echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit"))
       exec(Beaker::Command.new("mv #{directory}/sshd_config.permit /etc/ssh/sshd_config"))
