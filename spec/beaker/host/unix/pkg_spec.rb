@@ -84,14 +84,6 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      it "checks correctly on huaweios" do
-        @opts = { 'platform' => 'huaweios-is-me' }
-        pkg = 'debian_package'
-        expect(Beaker::Command).to receive(:new).with("dpkg -s #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
-        expect(instance).to receive(:exec).with('', { :accept_all_exit_codes => true }).and_return(generate_result("hello", { :exit_code => 0 }))
-        expect(instance.check_for_package(pkg)).to be === true
-      end
-
       it "checks correctly on debian" do
         @opts = { 'platform' => 'debian-is-me' }
         pkg = 'debian_package'
