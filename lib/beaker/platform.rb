@@ -3,9 +3,7 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    # rubocop:disable Layout/LineLength
     PLATFORMS = /^(alpine|amazon|huaweios|cisco_nexus|cisco_ios_xr|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el|eos|netscaler)\-.+\-.+$/
-    # rubocop:enable Layout/LineLength
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
       { :debian => { "forky" => "14",
