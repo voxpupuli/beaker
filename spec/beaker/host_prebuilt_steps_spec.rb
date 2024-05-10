@@ -376,12 +376,6 @@ describe Beaker do
 
       subject.validate_host(hosts, options)
     end
-
-    it 'skips validation on cisco hosts' do
-      host = make_host('cisco-7', { stdout: stdout, platform: 'cisco_nexus-7-x86_64' })
-      expect(subject).to receive(:check_and_install_packages_if_needed).with(host, []).once
-      subject.validate_host(host, options)
-    end
   end
 
   context 'get_domain_name' do
@@ -555,29 +549,6 @@ describe Beaker do
 
     it "sets user ssh environment on a windows host" do
       test_host_ssh_calls('windows')
-    end
-
-    it 'skips a cisco host correctly' do
-      host = make_host('name', {
-                         :platform => 'cisco_nexus-7-x86_64',
-                         :ssh_env_file => 'ssh_env_file',
-                         :is_cygwin => true,
-                       })
-      opts = {
-        :env1_key => :env1_value,
-        :env2_key => :env2_value,
-      }
-      allow(host).to receive(:skip_set_env?).and_return('cisco say NO')
-
-      expect(subject).to receive(:construct_env).exactly(0).times
-      expect(Beaker::Command).to receive(:new).exactly(0).times
-      expect(host).to receive(:add_env_var).exactly(0).times
-      opts.each_pair do |key, value|
-        expect(host).to receive(:add_env_var).with(key, value).exactly(0).times
-      end
-      expect(host).to receive(:exec).exactly(0).times
-
-      subject.set_env(host, options.merge(opts))
     end
 
     def test_host_ssh_calls(platform_name)

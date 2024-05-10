@@ -142,8 +142,8 @@ module Beaker
     end
 
     describe '#prepend_commands' do
-      it 'returns the pc parameter unchanged for non-cisco platforms' do
-        allow(instance).to receive(:[]).with(:platform).and_return('notcisco')
+      it 'returns the pc parameter unchanged for all platforms' do
+        allow(instance).to receive(:[]).with(:platform).and_return('unix')
         answer_prepend_commands = 'pc_param_unchanged_13579'
         answer_test = instance.prepend_commands('fake_cmd', answer_prepend_commands)
         expect(answer_test).to be === answer_prepend_commands

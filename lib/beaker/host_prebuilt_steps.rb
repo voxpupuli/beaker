@@ -52,9 +52,6 @@ module Beaker
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           elsif /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
-          elsif host['platform'].include?('cisco_nexus')
-            ntp_server = host.exec(Command.new("getent hosts #{NTPSERVER} | head -n1 |cut -d \" \" -f1"), :acceptable_exit_codes => [0]).stdout
-            ntp_command = "sudo -E sh -c 'export DCOS_CONTEXT=2;/isan/bin/ntpdate -u -t 20 #{ntp_server}'"
           else
             ntp_command = "ntpdate -u -t 20 #{ntp_server}"
           end
@@ -137,7 +134,7 @@ module Beaker
       when /fedora/
         FEDORA_PACKAGES
       else
-        if !/aix|solaris|osx-|netscaler|cisco_/.match?(host['platform'])
+        if !/aix|solaris|osx-|netscaler/.match?(host['platform'])
           UNIX_PACKAGES
         else
           []

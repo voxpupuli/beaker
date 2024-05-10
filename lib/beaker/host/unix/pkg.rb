@@ -37,7 +37,7 @@ module Unix::Pkg
         self[:sles_rpmkeys_nightly_pl_imported] = true
       end
       result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
-    when /amazon|cisco|fedora|centos|redhat|el-/
+    when /amazon|fedora|centos|redhat|el-/
       result = execute("rpm -q #{name}", opts) { |result| result }
     when /ubuntu|debian/
       result = execute("dpkg -s #{name}", opts) { |result| result }
@@ -85,7 +85,7 @@ module Unix::Pkg
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
-    when /cisco|centos|redhat|el-[1-7]-/
+    when /centos|redhat|el-[1-7]-/
       name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
     when /ubuntu|debian/
@@ -167,7 +167,7 @@ module Unix::Pkg
       execute("zypper --non-interactive rm #{name}", opts)
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
-    when /cisco|centos|redhat|el-[1-7]-/
+    when /centos|redhat|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
     when /ubuntu|debian/
       execute("apt-get purge #{cmdline_args} -y #{name}", opts)
@@ -195,7 +195,7 @@ module Unix::Pkg
       execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
     when /fedora-(2[2-9]|3[0-9])/
       execute("dnf -y #{cmdline_args} update #{name}", opts)
-    when /cisco|fedora|centos|redhat|el-/
+    when /fedora|centos|redhat|el-/
       execute("yum -y #{cmdline_args} update #{name}", opts)
     when /ubuntu|debian/
       update_apt_if_needed
