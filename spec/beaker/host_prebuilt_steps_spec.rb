@@ -90,7 +90,7 @@ describe Beaker do
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
   ]
 
-  %w[debian ubuntu cumulus].each do |deb_like|
+  %w[debian ubuntu].each do |deb_like|
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\"",
@@ -235,15 +235,7 @@ describe Beaker do
       subject.apt_get_update(host)
     end
 
-    it "can perform apt-get on cumulus hosts" do
-      host = make_host('testhost', { :platform => 'cumulus' })
-
-      expect(Beaker::Command).to receive(:new).with("apt-get update").once
-
-      subject.apt_get_update(host)
-    end
-
-    it "does nothing on non debian/ubuntu/cumulus hosts" do
+    it "does nothing on non debian/ubuntu hosts" do
       host = make_host('testhost', { :platform => 'windows' })
 
       expect(Beaker::Command).not_to receive(:new)
@@ -501,8 +493,8 @@ describe Beaker do
 
     proxyurl = "http://192.168.2.100:3128"
 
-    it "can set proxy config on a debian/ubuntu/cumulus host" do
-      host = make_host('name', { :platform => 'cumulus' })
+    it "can set proxy config on a debian/ubuntu host" do
+      host = make_host('name', { :platform => 'debian' })
 
       expect(Beaker::Command).to receive(:new).with("echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy").once
       expect(host).to receive(:exec).once

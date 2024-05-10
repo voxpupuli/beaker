@@ -148,13 +148,6 @@ module Beaker
         expect(filename).to be === correct
       end
 
-      it 'uses the variant for the codename on the cumulus platform' do
-        @platform = 'cumulus-2.5-x86_64'
-        filename = instance.repo_filename('pkg_name', 'pkg_version11')
-        correct = 'pl-pkg_name-pkg_version11-cumulus.list'
-        expect(filename).to be === correct
-      end
-
       it 'adds wrlinux to variant on cisco platforms' do
         @platform = 'cisco_nexus-7-x86_64'
         allow(instance).to receive(:is_pe?).and_return(false)
@@ -172,7 +165,7 @@ module Beaker
 
     describe '#noask_file_text' do
       it 'errors on non-solaris platforms' do
-        @platform = 'cumulus-4000-x86_64'
+        @platform = 'debian-12-x86_64'
         expect do
           instance.noask_file_text
         end.to raise_error(ArgumentError, /^noask\ file\ text\ unknown/)
