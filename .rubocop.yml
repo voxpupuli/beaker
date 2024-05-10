@@ -22,9 +22,6 @@ Naming/MethodParameterName:
 Naming/PredicateName:
   Enabled: false
 
-Naming/VariableNumber:
-  Enabled: false
-
 RSpec/DescribeClass:
   Exclude:
     - acceptance/fixtures/module/spec/**/*.rb
@@ -49,3 +46,6 @@ RSpec/NestedGroups:
 
 Style:
   Enabled: false
+
+Naming/VariableNumber:
+  AllowedPatterns: ['x86_64']
