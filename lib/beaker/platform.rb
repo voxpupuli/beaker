@@ -3,7 +3,7 @@ module Beaker
   # all String methods while adding several platform-specific use cases.
   class Platform < String
     # Supported platforms
-    PLATFORMS = /^(alpine|amazon|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el|netscaler)\-.+\-.+$/
+    PLATFORMS = /^(alpine|amazon|(free|open)bsd|osx|centos|fedora|debian|oracle|redhat|redhatfips|scientific|opensuse|sles|ubuntu|windows|solaris|aix|archlinux|el)\-.+\-.+$/
     # Platform version numbers vs. codenames conversion hash
     PLATFORM_VERSION_CODES =
       { :debian => { "forky" => "14",
@@ -75,7 +75,6 @@ module Beaker
     # * solaris
     # * aix
     # * el
-    # * netscaler
     # * archlinux
     def initialize(name)
       raise ArgumentError, "Unsupported platform name #{name}" if !PLATFORMS.match?(name)

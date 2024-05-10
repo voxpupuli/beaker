@@ -51,10 +51,7 @@ module Unix
     # @return [String,nil] Reason message if set_env should be skipped,
     #   nil if it should run.
     def skip_set_env?
-      case self['platform'].variant
-      when 'netscaler'
-        "no puppet-agent package for network device platform '#{self['platform'].variant}'"
-      end
+      nil
     end
 
     def initialize name, host_hash, options
