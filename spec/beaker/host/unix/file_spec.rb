@@ -44,13 +44,6 @@ module Beaker
         @platform = 'debian-6-x86_64'
         expect(instance.repo_type).to be === 'deb'
       end
-
-      it 'errors for all other platform types' do
-        @platform = 'eos-4-x86_64'
-        expect do
-          instance.repo_type
-        end.to raise_error(ArgumentError, /repo\ type\ not\ known/)
-      end
     end
 
     describe '#package_config_dir' do
@@ -74,13 +67,6 @@ module Beaker
       it 'returns correctly for opensuse-based platforms' do
         @platform = 'opensuse-15-x86_64'
         expect(instance.package_config_dir).to be === '/etc/zypp/repos.d/'
-      end
-
-      it 'errors for all other platform types' do
-        @platform = 'eos-4-x86_64'
-        expect do
-          instance.package_config_dir
-        end.to raise_error(ArgumentError, /package\ config\ dir\ unknown/)
       end
     end
 

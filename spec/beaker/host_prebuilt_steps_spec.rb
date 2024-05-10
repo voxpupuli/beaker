@@ -97,7 +97,7 @@ describe Beaker do
     ]
   end
 
-  ['centos', 'el-', 'redhat', 'fedora', 'eos'].each do |redhat_like|
+  ['centos', 'el-', 'redhat', 'fedora'].each do |redhat_like|
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload",
@@ -268,7 +268,7 @@ describe Beaker do
   context "sync_root_keys" do
     subject { dummy_class.new }
 
-    it "can sync keys on a solaris/eos host" do
+    it "can sync keys on a solaris host" do
       @platform = 'solaris'
 
       expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").exactly(3).times
@@ -535,10 +535,6 @@ describe Beaker do
 
     it "sets user ssh environment on an ssh-based linux host" do
       test_host_ssh_calls('ubuntu')
-    end
-
-    it "sets user ssh environment on an sshd-based linux host" do
-      test_host_ssh_calls('eos')
     end
 
     it "sets user ssh environment on an sles host" do
