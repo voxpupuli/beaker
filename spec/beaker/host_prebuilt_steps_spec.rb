@@ -97,12 +97,17 @@ describe Beaker do
     ]
   end
 
-  ['centos', 'el-', 'redhat', 'fedora'].each do |redhat_like|
+  ['centos', 'el-', 'redhat'].each do |redhat_like|
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo -E /sbin/service sshd reload",
     ]
   end
+
+  it_behaves_like 'enables_root_login', 'fedora', [
+    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+    "sudo -E systemctl restart sshd.service",
+  ]
 
   context 'timesync' do
     subject { dummy_class.new }

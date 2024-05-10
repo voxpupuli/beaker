@@ -122,9 +122,8 @@ end
 module PlatformHelpers
   DEBIANPLATFORMS = %w[debian ubuntu]
 
-  FEDORASYSTEMD    = (14..39).to_a.collect! { |i| "fedora-#{i}" }
-
   SYSTEMDPLATFORMS = %w[amazon-2023
+                        fedora
                         el-7
                         centos-7
                         redhat-7
@@ -133,14 +132,11 @@ module PlatformHelpers
                         el-8
                         centos-8
                         redhat-8
-                        oracle-8].concat(FEDORASYSTEMD)
-
-  FEDORASYSTEMV    = (1..13).to_a.collect! { |i| "fedora-#{i}" }
+                        oracle-8]
 
   SYSTEMVPLATFORMS = ['el-',
                       'centos',
-                      'fedora',
                       'redhat',
                       'oracle',
-                      'scientific',].concat(FEDORASYSTEMV)
+                      'scientific',]
 end
