@@ -6,12 +6,6 @@ describe Beaker do
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
   let(:sync_cmd)       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
-  let(:windows_pkgs)   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
-  let(:unix_only_pkgs) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
-  let(:sles_only_pkgs) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
-  let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
-  let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
-  let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
   let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
@@ -296,12 +290,12 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can validate unix hosts" do
+      # rubocop:disable RSpec/IteratedExpectation
       hosts.each do |host|
-        unix_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).to receive(:check_for_package).with('curl').once.and_return(false)
+        expect(host).to receive(:install_package).with('curl').once
       end
+      # rubocop:enable RSpec/IteratedExpectation
 
       subject.validate_host(hosts, options)
     end
@@ -310,12 +304,11 @@ describe Beaker do
       @platform = 'windows'
 
       hosts.each do |host|
-        windows_pkgs.each do |pkg|
-          allow(host).to receive(:cygwin_installed?).and_return(true)
-          allow(host).to receive(:is_cygwin?).and_return(true)
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        pkg = 'curl'
+        allow(host).to receive(:cygwin_installed?).and_return(true)
+        allow(host).to receive(:is_cygwin?).and_return(true)
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
       subject.validate_host(hosts, options)
@@ -324,12 +317,12 @@ describe Beaker do
     it "can validate SLES hosts" do
       @platform = 'sles-13.1-x64'
 
+      # rubocop:disable RSpec/IteratedExpectation
       hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).to receive(:check_for_package).with('curl').once.and_return(false)
+        expect(host).to receive(:install_package).with('curl').once
       end
+      # rubocop:enable RSpec/IteratedExpectation
 
       subject.validate_host(hosts, options)
     end
@@ -337,12 +330,12 @@ describe Beaker do
     it "can validate opensuse hosts" do
       @platform = 'opensuse-15-x86_x64'
 
+      # rubocop:disable RSpec/IteratedExpectation
       hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).to receive(:check_for_package).with('curl').once.and_return(false)
+        expect(host).to receive(:install_package).with('curl').once
       end
+      # rubocop:enable RSpec/IteratedExpectation
 
       subject.validate_host(hosts, options)
     end
@@ -351,10 +344,8 @@ describe Beaker do
       @platform = 'el-8-x86_x64'
 
       hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).not_to receive(:check_for_package)
+        expect(host).not_to receive(:install_package)
       end
 
       subject.validate_host(hosts, options)
@@ -364,10 +355,8 @@ describe Beaker do
       @platform = 'fedora-32-x86_64'
 
       hosts.each do |host|
-        fedora_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).not_to receive(:check_for_package)
+        expect(host).not_to receive(:install_package)
       end
 
       subject.validate_host(hosts, options)
@@ -377,10 +366,8 @@ describe Beaker do
       @platform = 'amazon-2023-x86_64'
 
       hosts.each do |host|
-        amazon2023_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+        expect(host).not_to receive(:check_for_package)
+        expect(host).not_to receive(:install_package)
       end
 
       subject.validate_host(hosts, options)
