@@ -364,10 +364,10 @@ module Beaker
 
         @validator.validate_master_count(master)
 
-        # check that windows/el-4 boxes are only agents (solaris can be a master in foss cases)
+        # check that windows boxes are only agents (solaris can be a master in foss cases)
         @options[:HOSTS].each_key do |name|
           host = @options[:HOSTS][name]
-          test_host_roles(name, host) if /windows|el-4/.match?(host[:platform])
+          test_host_roles(name, host) if host[:platform].include?('windows')
 
           # check to see if a custom user account has been provided, if so use it
           host[:user] = host[:ssh][:user] if host[:ssh] && host[:ssh][:user]

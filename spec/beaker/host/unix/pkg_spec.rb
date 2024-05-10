@@ -124,12 +124,6 @@ module Beaker
         expect(instance.check_for_package(pkg)).to be === true
       end
 
-      it "returns false for el-4" do
-        @opts = { 'platform' => 'el-4-is-me' }
-        pkg = 'el-4_package'
-        expect(instance.check_for_package(pkg)).to be === false
-      end
-
       it "raises on unknown platform" do
         @opts = { 'platform' => 'nope-is-me' }
         pkg = 'nope_package'
