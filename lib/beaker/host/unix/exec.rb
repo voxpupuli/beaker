@@ -278,20 +278,12 @@ module Unix::Exec
   # @return [Result] result of restarting the SSH service
   def ssh_service_restart
     case self['platform']
-    when /debian|ubuntu/
-      exec(Beaker::Command.new("service ssh restart"))
-    when /amazon|(el|centos|redhat|oracle|scientific)-[7-9]|fedora|archlinux-/
-      exec(Beaker::Command.new("systemctl restart sshd.service"))
-    when /el-|centos|redhat|oracle|scientific/
-      exec(Beaker::Command.new("/sbin/service sshd restart"))
-    when /opensuse|sles/
-      exec(Beaker::Command.new("/usr/sbin/rcsshd restart"))
     when /solaris/
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
     else
-      raise ArgumentError, "Unsupported Platform: '#{self['platform']}'"
+      exec(Beaker::Command.new("systemctl restart sshd.service"))
     end
   end
 
