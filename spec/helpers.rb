@@ -130,7 +130,6 @@ module PlatformHelpers
                         redhat-7
                         oracle-7
                         scientific-7
-                        eos-7
                         el-8
                         centos-8
                         redhat-8
@@ -143,6 +142,5 @@ module PlatformHelpers
                       'fedora',
                       'redhat',
                       'oracle',
-                      'scientific',
-                      'eos',].concat(FEDORASYSTEMV)
+                      'scientific',].concat(FEDORASYSTEMV)
 end

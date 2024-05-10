@@ -189,7 +189,7 @@ module Beaker
       block_on host do |host|
         logger.notify "Sync root authorized_keys from github on #{host.name}"
         # Allow all exit code, as this operation is unlikely to cause problems if it fails.
-        if /solaris|eos/.match?(host['platform'])
+        if host['platform'].include?('solaris')
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD % "bash"), :accept_all_exit_codes => true)
         elsif host['platform'].include?('aix')
           host.exec(Command.new(ROOT_KEYS_SYNC_CMD_AIX % "env PATH=/usr/gnu/bin:$PATH bash"), :accept_all_exit_codes => true)
@@ -384,7 +384,7 @@ module Beaker
           host.exec(Command.new("sudo su -c \"service ssh restart\""), { :pty => true })
         elsif /amazon|arch|(centos|el|redhat)-[789]|fedora-(1[4-9]|2[0-9]|3[0-9])/.match?(host['platform'])
           host.exec(Command.new("sudo -E systemctl restart sshd.service"), { :pty => true })
-        elsif /centos|el-|redhat|fedora|eos/.match?(host['platform'])
+        elsif /centos|el-|redhat|fedora/.match?(host['platform'])
           host.exec(Command.new("sudo -E /sbin/service sshd reload"), { :pty => true })
         elsif /(free|open)bsd/.match?(host['platform'])
           host.exec(Command.new("sudo /etc/rc.d/sshd restart"))
@@ -403,7 +403,7 @@ module Beaker
     def disable_se_linux host, opts
       logger = opts[:logger]
       block_on host do |host|
-        if /centos|el-|redhat|fedora|eos/.match?(host['platform'])
+        if /centos|el-|redhat|fedora/.match?(host['platform'])
           logger.debug("Disabling se_linux on #{host.name}")
           host.exec(Command.new("sudo su -c \"setenforce 0\""), { :pty => true })
         else
@@ -426,7 +426,7 @@ module Beaker
         case host['platform']
         when /ubuntu/, /debian/
           host.exec(Command.new("echo 'Acquire::http::Proxy \"#{opts[:package_proxy]}/\";' >> /etc/apt/apt.conf.d/10proxy"))
-        when /amazon/, /^el-/, /centos/, /fedora/, /redhat/, /eos/
+        when /amazon/, /^el-/, /centos/, /fedora/, /redhat/
           host.exec(Command.new("echo 'proxy=#{opts[:package_proxy]}/' >> /etc/yum.conf"))
         when /solaris-11/
           host.exec(Command.new("/usr/bin/pkg unset-publisher solaris || :"))
