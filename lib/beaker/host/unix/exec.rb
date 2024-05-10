@@ -278,6 +278,8 @@ module Unix::Exec
   # @return [Result] result of restarting the SSH service
   def ssh_service_restart
     case self['platform']
+    when /(el|centos|redhat|oracle|scientific)-[0-6]/
+      exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /solaris/
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/

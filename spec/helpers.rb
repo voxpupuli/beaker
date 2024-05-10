@@ -124,19 +124,9 @@ module PlatformHelpers
 
   SYSTEMDPLATFORMS = %w[amazon-2023
                         fedora
-                        el-7
-                        centos-7
-                        redhat-7
-                        oracle-7
-                        scientific-7
-                        el-8
-                        centos-8
-                        redhat-8
-                        oracle-8]
-
-  SYSTEMVPLATFORMS = ['el-',
-                      'centos',
-                      'redhat',
-                      'oracle',
-                      'scientific',]
+                        el-
+                        centos
+                        redhat
+                        oracle
+                        scientific].concat(DEBIANPLATFORMS)
 end
