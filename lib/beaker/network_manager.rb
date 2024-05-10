@@ -61,7 +61,6 @@ module Beaker
         @machines[hypervisor] = [] unless @machines[hypervisor]
         hostless_options[:timesync] = host_hash[:timesync] if host_hash[:timesync] != nil
         host_itself = Beaker::Host.create(name, host_hash, hostless_options)
-        host_itself.validate_setup
         @machines[hypervisor] << host_itself
       end
 

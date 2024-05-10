@@ -57,15 +57,6 @@ module Unix
       end
     end
 
-    # Validates that the host was setup correctly
-    #
-    # @return nil
-    # @raise [ArgumentError] If the host is setup incorrectly,
-    #   this will be raised with the appropriate message
-    def validate_setup
-      nil
-    end
-
     def initialize name, host_hash, options
       super
 
