@@ -37,9 +37,6 @@ module Unix::Pkg
         self[:sles_rpmkeys_nightly_pl_imported] = true
       end
       result = execute("zypper --gpg-auto-import-keys se -i --match-exact #{name}", opts) { |result| result }
-    when /el-4/
-      @logger.debug("Package query not supported on rhel4")
-      return false
     when /amazon|cisco|fedora|centos|redhat|eos|el-/
       result = execute("rpm -q #{name}", opts) { |result| result }
     when /ubuntu|debian/
@@ -85,8 +82,6 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
-    when /el-4/
-      @logger.debug("Package installation not supported on rhel4")
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
@@ -170,8 +165,6 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive rm #{name}", opts)
-    when /el-4/
-      @logger.debug("Package uninstallation not supported on rhel4")
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
     when /cisco|centos|redhat|eos|el-[1-7]-/
@@ -200,8 +193,6 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
-    when /el-4/
-      @logger.debug("Package upgrade is not supported on rhel4")
     when /fedora-(2[2-9]|3[0-9])/
       execute("dnf -y #{cmdline_args} update #{name}", opts)
     when /cisco|fedora|centos|redhat|eos|el-/

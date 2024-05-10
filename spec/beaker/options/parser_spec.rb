@@ -559,7 +559,6 @@ module Beaker
 
         context "restricts agents" do
           it_behaves_like('a platform supporting only agents', 'windows-version-arch')
-          it_behaves_like('a platform supporting only agents', 'el-4-arch')
         end
 
         context "ssh user" do
