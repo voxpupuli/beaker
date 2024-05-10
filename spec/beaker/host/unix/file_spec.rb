@@ -134,13 +134,6 @@ module Beaker
         expect(filename).to be === correct
       end
 
-      it 'adds wrlinux to variant on cisco platforms' do
-        @platform = 'cisco_nexus-7-x86_64'
-        allow(instance).to receive(:is_pe?).and_return(false)
-        filename = instance.repo_filename('pkg_name', 'pkg_version12')
-        expect(filename).to match(/sion12\-cisco\-wrlinux\-/)
-      end
-
       it 'errors for non-el or debian-based platforms' do
         @platform = 'freebsd-22-x86_64'
         expect do

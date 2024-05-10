@@ -316,15 +316,6 @@ module Beaker
         allow(instance).to receive(:[]).with('platform') { Beaker::Platform.new("#{platform}-#{version}-x86_64") }
       end
 
-      it 'rejects unsupported platforms' do
-        @platform = 'cisco_nexus'
-        expect do
-          instance.uncompress_local_tarball(tar_file, base_dir, download_file)
-        end.to raise_error(
-          /^Platform #{platform} .* not supported .* uncompress_local_tarball$/,
-        )
-      end
-
       it 'untars the file given' do
         @platform = 'sles'
         expect(instance).to receive(:execute).with(
