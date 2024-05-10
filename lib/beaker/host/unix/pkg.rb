@@ -193,9 +193,9 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --no-gpg-checks up #{name}", opts)
-    when /fedora-(2[2-9]|3[0-9])/
+    when /fedora/
       execute("dnf -y #{cmdline_args} update #{name}", opts)
-    when /fedora|centos|redhat|el-/
+    when /centos|redhat|el-/
       execute("yum -y #{cmdline_args} update #{name}", opts)
     when /ubuntu|debian/
       update_apt_if_needed
