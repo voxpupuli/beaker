@@ -17,7 +17,7 @@ Naming/FileName:
     - acceptance/**/acceptance-options.rb
 
 Naming/MethodParameterName:
-  Enabled: false
+  MinNameLength: 1
 
 Naming/PredicateName:
   Enabled: false
