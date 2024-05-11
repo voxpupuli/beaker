@@ -128,9 +128,9 @@ module Beaker
       end
 
       it 'builds the filename correctly for debian-based platforms' do
-        @platform = 'debian-8-x86_64'
+        @platform = 'debian-12-x86_64'
         filename = instance.repo_filename('pkg_name', 'pkg_version10')
-        correct = 'pl-pkg_name-pkg_version10-jessie.list'
+        correct = 'pl-pkg_name-pkg_version10-bookworm.list'
         expect(filename).to be === correct
       end
 

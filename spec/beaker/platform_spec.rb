@@ -37,23 +37,23 @@ module Beaker
 
       describe "platforms with version and codename" do
         it "intializes both version and codename if given version" do
-          @name = "debian-7-x86_64"
-          expect(platform.version).to eq('7')
-          expect(platform.codename).to eq('wheezy')
+          @name = "debian-12-x86_64"
+          expect(platform.version).to eq('12')
+          expect(platform.codename).to eq('bookworm')
         end
 
         it "intializes both version and codename if given codename" do
-          @name = "debian-wheezy-x86_64"
-          expect(platform.version).to eq('7')
-          expect(platform.codename).to eq('wheezy')
+          @name = "debian-bookworm-x86_64"
+          expect(platform.version).to eq('12')
+          expect(platform.codename).to eq('bookworm')
         end
       end
     end
 
     context 'to_array' do
       it "converts Beaker::Platform object to array of its attribues" do
-        @name = 'debian-7-somethingsomething'
-        expect(platform.to_array).to be === %w[debian 7 somethingsomething wheezy]
+        @name = 'debian-12-somethingsomething'
+        expect(platform.to_array).to be === %w[debian 12 somethingsomething bookworm]
       end
     end
 
@@ -78,16 +78,6 @@ module Beaker
         expect(platform.with_version_codename).to be === 'debian-bullseye-xxx'
       end
 
-      it "can convert debian-7-xxx to debian-wheezy-xxx" do
-        @name = 'debian-7-xxx'
-        expect(platform.with_version_codename).to be === 'debian-wheezy-xxx'
-      end
-
-      it "can convert debian-6-xxx to debian-squeeze-xxx" do
-        @name = 'debian-6-xxx'
-        expect(platform.with_version_codename).to be === 'debian-squeeze-xxx'
-      end
-
       it "can convert ubuntu-2404-xxx to ubuntu-noble-xxx" do
         @name = 'ubuntu-2404-xxx'
         expect(platform.with_version_codename).to be === 'ubuntu-noble-xxx'
@@ -103,26 +93,6 @@ module Beaker
         expect(platform.with_version_codename).to be === 'ubuntu-focal-xxx'
       end
 
-      it "can convert ubuntu-1604-xxx to ubuntu-xenial-xxx" do
-        @name = 'ubuntu-1604-xxx'
-        expect(platform.with_version_codename).to be === 'ubuntu-xenial-xxx'
-      end
-
-      it "can convert ubuntu-1310-xxx to ubuntu-saucy-xxx" do
-        @name = 'ubuntu-1310-xxx'
-        expect(platform.with_version_codename).to be === 'ubuntu-saucy-xxx'
-      end
-
-      it "can convert ubuntu-12.10-xxx to ubuntu-quantal-xxx" do
-        @name = 'ubuntu-12.10-xxx'
-        expect(platform.with_version_codename).to be === 'ubuntu-quantal-xxx'
-      end
-
-      it "can convert ubuntu-10.04-xxx to ubuntu-lucid-xxx" do
-        @name = 'ubuntu-10.04-xxx'
-        expect(platform.with_version_codename).to be === 'ubuntu-lucid-xxx'
-      end
-
       %w[centos redhat].each do |p|
         it "leaves #{p}-7-xxx alone" do
           @name = "#{p}-7-xxx"
@@ -132,24 +102,24 @@ module Beaker
     end
 
     context 'with_version_number' do
-      it "can convert debian-wheezy-xxx to debian-7-xxx" do
-        @name = 'debian-wheezy-xxx'
-        expect(platform.with_version_number).to be === 'debian-7-xxx'
+      it "can convert debian-bookworm-xxx to debian-12-xxx" do
+        @name = 'debian-bookworm-xxx'
+        expect(platform.with_version_number).to be === 'debian-12-xxx'
       end
 
-      it "can convert debian-squeeze-xxx to debian-6-xxx" do
-        @name = 'debian-squeeze-xxx'
-        expect(platform.with_version_number).to be === 'debian-6-xxx'
+      it "can convert debian-bullseye-xxx to debian-11-xxx" do
+        @name = 'debian-bullseye-xxx'
+        expect(platform.with_version_number).to be === 'debian-11-xxx'
       end
 
-      it "can convert ubuntu-saucy-xxx to ubuntu-1310-xxx" do
-        @name = 'ubuntu-saucy-xxx'
-        expect(platform.with_version_number).to be === 'ubuntu-1310-xxx'
+      it "can convert ubuntu-focal-xxx to ubuntu-2004-xxx" do
+        @name = 'ubuntu-focal-xxx'
+        expect(platform.with_version_number).to be === 'ubuntu-2004-xxx'
       end
 
-      it "can convert ubuntu-quantal-xxx to ubuntu-1210-xxx" do
-        @name = 'ubuntu-quantal-xxx'
-        expect(platform.with_version_number).to be === 'ubuntu-1210-xxx'
+      it "can convert ubuntu-jammy-xxx to ubuntu-2204-xxx" do
+        @name = 'ubuntu-jammy-xxx'
+        expect(platform.with_version_number).to be === 'ubuntu-2204-xxx'
       end
 
       %w[centos redhat].each do |p|
