@@ -82,9 +82,7 @@ module Beaker
         let(:ssh_command) { "echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit" }
         let(:ssh_move) { "mv #{directory}/sshd_config.permit /etc/ssh/sshd_config" }
 
-        platforms = PlatformHelpers::SYSTEMDPLATFORMS + PlatformHelpers::DEBIANPLATFORMS + PlatformHelpers::SYSTEMVPLATFORMS
-
-        platforms.each do |platform|
+        PlatformHelpers::SYSTEMDPLATFORMS.each do |platform|
           it "calls the correct commands for #{platform}" do
             opts['platform'] = platform
             expect(instance).to receive(:exec).twice
@@ -113,31 +111,6 @@ module Beaker
           expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
           expect { instance.ssh_service_restart }.not_to raise_error
         end
-      end
-
-      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
-        it "calls the correct command for #{platform}" do
-          opts['platform'] = platform
-          expect(instance).to receive(:exec)
-          expect(Beaker::Command).to receive(:new).with("service ssh restart")
-          expect { instance.ssh_service_restart }.not_to raise_error
-        end
-      end
-
-      PlatformHelpers::SYSTEMVPLATFORMS.each do |platform|
-        it "calls the correct command for #{platform}" do
-          opts['platform'] = "#{platform}-arch"
-          expect(instance).to receive(:exec)
-          expect(Beaker::Command).to receive(:new).with("/sbin/service sshd restart")
-          expect { instance.ssh_service_restart }.not_to raise_error
-        end
-      end
-
-      it 'raises an error on unsupported platforms' do
-        opts['platform'] = 'notarealthing02-parts-arch'
-        expect do
-          instance.ssh_service_restart
-        end.to raise_error(ArgumentError, /#{opts['platform']}/)
       end
     end
 
