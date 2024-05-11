@@ -22,15 +22,15 @@ describe "my tests" do
   end
 
   it "is able to apply manifests" do
-    manifest_1 = "user {'foo':
+    manifest1 = "user {'foo':
           ensure => present,}"
-    manifest_2 = "user {'foo':
+    manifest2 = "user {'foo':
           ensure => absent,}"
-    manifest_3 = "user {'root':
+    manifest3 = "user {'root':
           ensure => present,}"
-    apply_manifest(manifest_1, :expect_changes => true)
-    apply_manifest(manifest_2, :expect_changes => true)
-    apply_manifest(manifest_3)
+    apply_manifest(manifest1, :expect_changes => true)
+    apply_manifest(manifest2, :expect_changes => true)
+    apply_manifest(manifest3)
   end
 
   describe service('sshd') do
