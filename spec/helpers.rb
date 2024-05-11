@@ -128,5 +128,6 @@ module PlatformHelpers
                         centos
                         redhat
                         oracle
-                        scientific].concat(DEBIANPLATFORMS)
+                        scientific
+                        archlinux].concat(DEBIANPLATFORMS)
 end
