@@ -284,6 +284,8 @@ module Unix::Exec
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))
     when /(free|open)bsd/
       exec(Beaker::Command.new("sudo /etc/rc.d/sshd restart"))
+    when /opensuse|sles/
+      exec(Beaker::Command.new("/usr/sbin/rcsshd restart"))
     else
       exec(Beaker::Command.new("systemctl restart sshd.service"))
     end
