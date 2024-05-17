@@ -82,7 +82,9 @@ module Beaker
         let(:ssh_command) { "echo 'PermitUserEnvironment yes' | cat - /etc/ssh/sshd_config > #{directory}/sshd_config.permit" }
         let(:ssh_move) { "mv #{directory}/sshd_config.permit /etc/ssh/sshd_config" }
 
-        PlatformHelpers::SYSTEMDPLATFORMS.each do |platform|
+        platforms = PlatformHelpers::REDHATPLATFORMS + PlatformHelpers::DEBIANPLATFORMS
+
+        platforms.each do |platform|
           it "calls the correct commands for #{platform}" do
             opts['platform'] = platform
             expect(instance).to receive(:exec).twice
@@ -104,11 +106,20 @@ module Beaker
     end
 
     describe '#ssh_service_restart' do
-      PlatformHelpers::SYSTEMDPLATFORMS.each do |platform|
+      PlatformHelpers::REDHATPLATFORMS.each do |platform|
         it "calls the correct command for #{platform}" do
           opts['platform'] = platform
           expect(instance).to receive(:exec)
           expect(Beaker::Command).to receive(:new).with("systemctl restart sshd.service")
+          expect { instance.ssh_service_restart }.not_to raise_error
+        end
+      end
+
+      PlatformHelpers::DEBIANPLATFORMS.each do |platform|
+        it "calls the ssh service restart command for #{platform}" do
+          opts['platform'] = platform
+          expect(instance).to receive(:exec)
+          expect(Beaker::Command).to receive(:new).with("systemctl restart ssh")
           expect { instance.ssh_service_restart }.not_to raise_error
         end
       end
