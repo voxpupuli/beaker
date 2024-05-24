@@ -1,5 +1,29 @@
 # Changelog
 
+## [6.0.0](https://github.com/voxpupuli/beaker/tree/6.0.0) (2024-05-24)
+
+**Breaking changes:**
+
+- Drop EoL F5 support [\#1866](https://github.com/voxpupuli/beaker/pull/1866) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL cumulus support [\#1867](https://github.com/voxpupuli/beaker/pull/1867) ([bastelfreak](https://github.com/bastelfreak))
+- drop sys-v leftovers; assume systemctl is available for unknown platforms [\#1868](https://github.com/voxpupuli/beaker/pull/1868) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL huaweios support [\#1869](https://github.com/voxpupuli/beaker/pull/1869) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL EL4 support [\#1870](https://github.com/voxpupuli/beaker/pull/1870) ([bastelfreak](https://github.com/bastelfreak))
+- Drop support for EoL Debian/Ubuntu versions [\#1871](https://github.com/voxpupuli/beaker/pull/1871) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL cisco support [\#1872](https://github.com/voxpupuli/beaker/pull/1872) ([bastelfreak](https://github.com/bastelfreak))
+- Drop Fedora < 22 support [\#1873](https://github.com/voxpupuli/beaker/pull/1873) ([ekohl](https://github.com/ekohl))
+- Drop EoL Arista EOS support [\#1874](https://github.com/voxpupuli/beaker/pull/1874) ([bastelfreak](https://github.com/bastelfreak))
+- drop validate_setup method [\#1875](https://github.com/voxpupuli/beaker/pull/1875) ([bastelfreak](https://github.com/bastelfreak))
+- Drop EoL netscaler support [\#1876](https://github.com/voxpupuli/beaker/pull/1876) ([bastelfreak](https://github.com/bastelfreak))
+
+**Implemented enhancements:**
+
+- Add package logic for Amazon Linux 2 [\#1884](https://github.com/voxpupuli/beaker/pull/1884) ([mhashizume](https://github.com/mhashizume))
+
+**Fixed bugs:**
+
+- Add ssh restart for Ubuntu [\#1885](https://github.com/voxpupuli/beaker/pull/1885) ([skyamgarp](https://github.com/skyamgarp))
+
 ## [5.8.1](https://github.com/voxpupuli/beaker/tree/5.8.1) (2024-05-06)
 
 **Fixed bugs:**
