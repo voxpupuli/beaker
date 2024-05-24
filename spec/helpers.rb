@@ -122,12 +122,14 @@ end
 module PlatformHelpers
   DEBIANPLATFORMS = %w[debian ubuntu]
 
-  SYSTEMDPLATFORMS = %w[amazon-2023
-                        fedora
-                        el-
-                        centos
-                        redhat
-                        oracle
-                        scientific
-                        archlinux].concat(DEBIANPLATFORMS)
+  REDHATPLATFORMS = %w[
+    amazon-2023
+    fedora
+    el-
+    centos
+    redhat
+    oracle
+    scientific
+    archlinux
+  ]
 end
