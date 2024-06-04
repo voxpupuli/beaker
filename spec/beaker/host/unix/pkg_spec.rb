@@ -161,8 +161,16 @@ module Beaker
         expect(instance.install_package(pkg)).to eq "hello"
       end
 
-      it "uses yum on amazon linux 2" do
+      it "uses yum on misnamed amazon linux 7" do
         @opts = { 'platform' => "amazon-7-is-me" }
+        pkg = 'amazon_package'
+        expect(Beaker::Command).to receive(:new).with("yum -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
+        expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
+        expect(instance.install_package(pkg)).to eq "hello"
+      end
+
+      it "uses yum on amazon linux 2" do
+        @opts = { 'platform' => "amazon-2-is-me" }
         pkg = 'amazon_package'
         expect(Beaker::Command).to receive(:new).with("yum -y  install #{pkg}", [], { :prepend_cmds => nil, :cmdexe => false }).and_return('')
         expect(instance).to receive(:exec).with('', {}).and_return(generate_result("hello", { :exit_code => 0 }))
@@ -281,7 +289,7 @@ module Beaker
 
       it 'Amazon Linux 2 uses yum' do
         @platform = platform
-        @version = '7'
+        @version = '2'
         package_file = 'test_123.yay'
         expect(instance).to receive(:execute).with(/^yum.*#{package_file}$/)
         instance.install_local_package(package_file)

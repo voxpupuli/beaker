@@ -85,7 +85,7 @@ module Unix::Pkg
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
-    when /amazon-7|centos|redhat|el-[1-7]-/
+    when /amazon-(2|7)|centos|redhat|el-[1-7]-/
       name = "#{name}-#{version}" if version
       execute("yum -y #{cmdline_args} install #{name}", opts)
     when /ubuntu|debian/
@@ -167,7 +167,7 @@ module Unix::Pkg
       execute("zypper --non-interactive rm #{name}", opts)
     when /amazon-2023|el-(8|9|1[0-9])|fedora/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
-    when /amazon-7|centos|redhat|el-[1-7]-/
+    when /amazon-(2|7)|centos|redhat|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
     when /ubuntu|debian/
       execute("apt-get purge #{cmdline_args} -y #{name}", opts)

@@ -124,6 +124,7 @@ module PlatformHelpers
 
   REDHATPLATFORMS = %w[
     amazon-2023
+    amazon-2
     fedora
     el-
     centos
