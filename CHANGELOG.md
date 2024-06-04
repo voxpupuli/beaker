@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.1.0](https://github.com/voxpupuli/beaker/tree/6.1.0) (2024-06-04)
+
+**Implemented enhancements:**
+
+- Add package logic for Amazon Linux 2 [\#1887](https://github.com/voxpupuli/beaker/pull/1884) ([mhashizume](https://github.com/joshcooper))
+
 ## [6.0.0](https://github.com/voxpupuli/beaker/tree/6.0.0) (2024-05-24)
 
 **Breaking changes:**
