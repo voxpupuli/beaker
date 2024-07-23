@@ -62,7 +62,8 @@ module Unix::Pkg
     return unless /debian|ubuntu/.match?(self['platform'])
     return unless @apt_needs_update
 
-    execute("apt-get update")
+    # -qq: Only output errors to stdout
+    execute("apt-get update -qq")
     @apt_needs_update = false
   end
 
@@ -263,7 +264,8 @@ module Unix::Pkg
       execute("zypper --non-interactive --no-gpg-checks in #{onhost_package_file}")
     when /^(debian|ubuntu)$/
       execute("dpkg -i --force-all #{onhost_package_file}")
-      execute("apt-get update")
+      # -qq: Only output errors to stdout
+      execute("apt-get update -qq")
     when /^solaris$/
       self.solaris_install_local_package(onhost_package_file, onhost_copy_dir)
     when /^osx$/

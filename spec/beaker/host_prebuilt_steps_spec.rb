@@ -227,7 +227,7 @@ describe Beaker do
     it "can perform apt-get on ubuntu hosts" do
       host = make_host('testhost', { :platform => 'ubuntu' })
 
-      expect(Beaker::Command).to receive(:new).with("apt-get update").once
+      expect(Beaker::Command).to receive(:new).with("apt-get update -qq").once
 
       subject.apt_get_update(host)
     end
@@ -235,7 +235,7 @@ describe Beaker do
     it "can perform apt-get on debian hosts" do
       host = make_host('testhost', { :platform => 'debian' })
 
-      expect(Beaker::Command).to receive(:new).with("apt-get update").once
+      expect(Beaker::Command).to receive(:new).with("apt-get update -qq").once
 
       subject.apt_get_update(host)
     end

@@ -128,7 +128,7 @@ module Beaker
         it "calls update for #{platform}" do
           @opts = { 'platform' => platform }
           instance.instance_variable_set(:@apt_needs_update, true)
-          expect(instance).to receive('execute').with("apt-get update")
+          expect(instance).to receive('execute').with("apt-get update -qq")
           expect { instance.update_apt_if_needed }.not_to raise_error
         end
       end
@@ -309,7 +309,7 @@ module Beaker
         %w[debian ubuntu].each do |platform|
           @platform = platform
           expect(instance).to receive(:execute).with(/^dpkg.*#{package_file}$/)
-          expect(instance).to receive(:execute).with('apt-get update')
+          expect(instance).to receive(:execute).with('apt-get update -qq')
           instance.install_local_package(package_file)
         end
       end
