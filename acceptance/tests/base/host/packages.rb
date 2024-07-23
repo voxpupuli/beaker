@@ -17,6 +17,8 @@ def get_host_pkg(host)
     Beaker::HostPrebuiltSteps::OPENBSD_PACKAGES
   when /solaris-10/
     Beaker::HostPrebuiltSteps::SOLARIS10_PACKAGES
+  when /el-[89]/
+    Beaker::HostPrebuiltSteps::RHEL8_PACKAGES
   else
     Beaker::HostPrebuiltSteps::UNIX_PACKAGES
   end
