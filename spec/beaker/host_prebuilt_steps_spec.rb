@@ -11,14 +11,6 @@ describe Beaker do
   let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
-  let(:platform)       { @platform || 'el-9-64' }
-  let(:hosts) do
-    hosts = make_hosts({ :platform => platform })
-    hosts[0][:roles] = ['agent']
-    hosts[1][:roles] = %w[master dashboard agent database]
-    hosts[2][:roles] = ['agent']
-    hosts
-  end
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -267,17 +259,19 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can sync keys on a solaris host" do
-      @platform = 'solaris-11-64'
+      host = make_host('host', { 'platform' => 'solaris-11-64' })
 
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").exactly(3).times
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").once
 
-      subject.sync_root_keys(hosts, options)
+      subject.sync_root_keys(host, options)
     end
 
     it "can sync keys on a non-solaris host" do
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").exactly(3).times
+      host = make_host('host', { 'platform' => 'el-9-64' })
 
-      subject.sync_root_keys(hosts, options)
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").once
+
+      subject.sync_root_keys(host, options)
     end
   end
 
@@ -285,94 +279,81 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can validate el-9 hosts" do
-      hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      host = make_host('host', { :platform => 'el-9-64' })
+
+      rhel8_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate windows hosts" do
-      @platform = 'windows-11-64'
+      host = make_host('host', { :platform => 'windows-11-64', :is_cygwin => true })
+      allow(host).to receive(:cygwin_installed?).and_return(true)
 
-      hosts.each do |host|
-        windows_pkgs.each do |pkg|
-          allow(host).to receive(:cygwin_installed?).and_return(true)
-          allow(host).to receive(:is_cygwin?).and_return(true)
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      windows_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate SLES hosts" do
-      @platform = 'sles-13.1-x64'
+      host = make_host('host', { :platform => 'sles-13.1-x86_64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      sles_only_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate opensuse hosts" do
-      @platform = 'opensuse-15-x86_x64'
+      host = make_host('host', { :platform => 'opensuse-15-x86_x64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      sles_only_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate RHEL8 hosts" do
-      @platform = 'el-8-x86_x64'
+      host = make_host('host', { :platform => 'el-8-64' })
 
-      hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      rhel8_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Fedora hosts" do
-      @platform = 'fedora-32-x86_64'
+      host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      hosts.each do |host|
-        fedora_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      fedora_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Amazon hosts" do
-      @platform = 'amazon-2023-x86_64'
+      host = make_host('host', { :platform => 'amazon-2023-x86_64' })
 
-      hosts.each do |host|
-        amazon2023_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      amazon2023_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
   end
 
