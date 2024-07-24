@@ -22,8 +22,7 @@ jobs:
         run: bundle exec rake rubocop
 
   test:
-    # CentOS 7 testing is broken on Ubuntu 22.04
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

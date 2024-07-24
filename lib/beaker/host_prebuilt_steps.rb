@@ -11,8 +11,8 @@ module Beaker
     SLEEPWAIT = 5
     TRIES = 5
     AMAZON2023_PACKAGES = %w[chrony]
-    RHEL8_PACKAGES = %w[chrony]
-    FEDORA_PACKAGES = %w[chrony]
+    RHEL8_PACKAGES = %w[chrony iputils] # iputils provides ping. beaker assumes that's present
+    FEDORA_PACKAGES = %w[chrony iputils]
     UNIX_PACKAGES = %w[curl ntpdate]
     FREEBSD_PACKAGES = ['curl', 'perl5|perl']
     OPENBSD_PACKAGES = ['curl']
