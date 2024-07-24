@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.2.0](https://github.com/voxpupuli/beaker/tree/6.2.0) (2024-07-24)
+
+**Implemented enhancements:**
+
+- Debian: Replace apt-get with apt for updates [\#1890](https://github.com/voxpupuli/beaker/pull/1890) ([bastelfreak](https://github.com/bastelfreak))
+
+**Fixed bugs:**
+
+- EL8/9 & Fedora: Install iputils [\#1893](https://github.com/voxpupuli/beaker/pull/1893) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [6.1.0](https://github.com/voxpupuli/beaker/tree/6.1.0) (2024-06-04)
 
 **Implemented enhancements:**
