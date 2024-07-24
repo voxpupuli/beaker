@@ -6,22 +6,8 @@ describe Beaker do
   let(:options_ntp)    { make_opts.merge({ 'ntp_server' => ntpserver_set }) }
   let(:ntpserver)      { Beaker::HostPrebuiltSteps::NTPSERVER }
   let(:sync_cmd)       { Beaker::HostPrebuiltSteps::ROOT_KEYS_SYNC_CMD }
-  let(:windows_pkgs)   { Beaker::HostPrebuiltSteps::WINDOWS_PACKAGES }
-  let(:unix_only_pkgs) { Beaker::HostPrebuiltSteps::UNIX_PACKAGES }
-  let(:sles_only_pkgs) { Beaker::HostPrebuiltSteps::SLES_PACKAGES }
-  let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
-  let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
-  let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
-  let(:platform)       { @platform || 'unix' }
   let(:ip)             { "ip.address.0.0" }
   let(:stdout) { @stdout || ip }
-  let(:hosts) do
-    hosts = make_hosts({ :stdout => stdout, :platform => platform })
-    hosts[0][:roles] = ['agent']
-    hosts[1][:roles] = %w[master dashboard agent database]
-    hosts[2][:roles] = ['agent']
-    hosts
-  end
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -41,79 +27,75 @@ describe Beaker do
   end
 
   # Non-cygwin Windows
-  it_behaves_like 'enables_root_login', 'pswindows', [], false
+  it_behaves_like 'enables_root_login', 'windows-11-64', [], false
 
-  # Non-cygwin Windows
-  it_behaves_like 'enables_root_login', 'windows', [
+  # cygwin Windows
+  it_behaves_like 'enables_root_login', 'windows-11-64', [
     "sed -ri 's/^#?PermitRootLogin /PermitRootLogin yes/' /etc/sshd_config",
   ], true
 
   # FreeBSD
-  it_behaves_like 'enables_root_login', 'freesbd', [
-    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+  it_behaves_like 'enables_root_login', 'freebsd-14-64', [
+    "sudo sed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
+    "sudo /etc/rc.d/sshd restart",
   ], true
 
-  it_behaves_like 'enables_root_login', 'osx-10.10', [
+  it_behaves_like 'enables_root_login', 'osx-10.10-64', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /etc/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /etc/sshd_config",
   ]
 
-  it_behaves_like 'enables_root_login', 'osx-10.11', [
+  it_behaves_like 'enables_root_login', 'osx-10.11-64', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
-  it_behaves_like 'enables_root_login', 'osx-10.12', [
+  it_behaves_like 'enables_root_login', 'osx-10.12-64', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
-  it_behaves_like 'enables_root_login', 'osx-10.13', [
+  it_behaves_like 'enables_root_login', 'osx-10.13-64', [
     "sudo sed -i '' 's/#PermitRootLogin yes/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
     "sudo sed -i '' 's/#PermitRootLogin no/PermitRootLogin Yes/g' /private/etc/ssh/sshd_config",
   ]
 
   # Solaris
-  it_behaves_like 'enables_root_login', 'solaris-10', [
+  it_behaves_like 'enables_root_login', 'solaris-10-64', [
     "sudo -E svcadm restart network/ssh",
     "sudo gsed -i -e 's/#PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
   ], true
 
-  it_behaves_like 'enables_root_login', 'solaris-11', [
+  it_behaves_like 'enables_root_login', 'solaris-11-64', [
     "sudo -E svcadm restart network/ssh",
     "sudo gsed -i -e 's/PermitRootLogin no/PermitRootLogin yes/g' /etc/ssh/sshd_config",
     "if grep \"root::::type=role\" /etc/user_attr; then sudo rolemod -K type=normal root; else echo \"root user already type=normal\"; fi",
   ], true
 
-  it_behaves_like 'enables_root_login', 'amazon-2023', [
-    "sudo -E systemctl restart sshd.service",
+  it_behaves_like 'enables_root_login', 'amazon-2023-64', [
     "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
+    "sudo -E systemctl restart sshd.service",
   ]
 
-  %w[debian ubuntu].each do |deb_like|
+  %w[debian-12-64 ubuntu-2204-64].each do |deb_like|
     it_behaves_like 'enables_root_login', deb_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
       "sudo su -c \"service ssh restart\"",
     ]
   end
 
-  ['centos', 'el-', 'redhat'].each do |redhat_like|
+  ['centos-9-64', 'el-9-64', 'redhat-9-64', 'fedora-39-64'].each do |redhat_like|
     it_behaves_like 'enables_root_login', redhat_like, [
       "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-      "sudo -E /sbin/service sshd reload",
+      "sudo -E systemctl restart sshd.service",
     ]
   end
-
-  it_behaves_like 'enables_root_login', 'fedora', [
-    "sudo su -c \"sed -ri 's/^#?PermitRootLogin no|^#?PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config\"",
-    "sudo -E systemctl restart sshd.service",
-  ]
 
   context 'timesync' do
     subject { dummy_class.new }
 
-    it "can sync time on unix hosts" do
-      hosts = make_hosts({ :platform => 'unix' })
+    it "can sync time on el-7 hosts" do
+      hosts = make_hosts({ :platform => 'el-7-64' })
 
       expect(Beaker::Command).to receive(:new).with("ntpdate -u -t 20 #{ntpserver}").exactly(3).times
 
@@ -121,7 +103,7 @@ describe Beaker do
     end
 
     it "can retry on failure on unix hosts" do
-      hosts = make_hosts({ :platform => 'unix', :exit_code => [1, 0] })
+      hosts = make_hosts({ :platform => 'el-7-64', :exit_code => [1, 0] })
       allow(subject).to receive(:sleep).and_return(true)
 
       expect(Beaker::Command).to receive(:new).with("ntpdate -u -t 20 #{ntpserver}").exactly(6).times
@@ -130,7 +112,7 @@ describe Beaker do
     end
 
     it "eventually gives up and raises an error when unix hosts can't be synched" do
-      hosts = make_hosts({ :platform => 'unix', :exit_code => 1 })
+      hosts = make_hosts({ :platform => 'el-7-64', :exit_code => 1 })
       allow(subject).to receive(:sleep).and_return(true)
 
       expect(Beaker::Command).to receive(:new).with("ntpdate -u -t 20 #{ntpserver}").exactly(5).times
@@ -139,7 +121,7 @@ describe Beaker do
     end
 
     it "can sync time on windows hosts" do
-      hosts = make_hosts({ :platform => 'windows' })
+      hosts = make_hosts({ :platform => 'windows-11-64' })
 
       expect(Beaker::Command).to receive(:new).with("w32tm /register").exactly(3).times
       expect(Beaker::Command).to receive(:new).with("net start w32time").exactly(3).times
@@ -184,8 +166,8 @@ describe Beaker do
       subject.timesync(hosts, options)
     end
 
-    it "can set time server on unix hosts" do
-      hosts = make_hosts({ :platform => 'unix' })
+    it "can set time server on el-7 hosts" do
+      hosts = make_hosts({ :platform => 'el-7-64' })
 
       expect(Beaker::Command).to receive(:new).with("ntpdate -u -t 20 #{ntpserver_set}").exactly(3).times
 
@@ -193,7 +175,7 @@ describe Beaker do
     end
 
     it "can set time server on windows hosts" do
-      hosts = make_hosts({ :platform => 'windows' })
+      hosts = make_hosts({ :platform => 'windows-11-64' })
 
       expect(Beaker::Command).to receive(:new).with("w32tm /register").exactly(3).times
       expect(Beaker::Command).to receive(:new).with("net start w32time").exactly(3).times
@@ -225,7 +207,7 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can perform apt-get on ubuntu hosts" do
-      host = make_host('testhost', { :platform => 'ubuntu' })
+      host = make_host('testhost', { :platform => 'ubuntu-2204-64' })
 
       expect(Beaker::Command).to receive(:new).with("apt-get update -qq").once
 
@@ -233,7 +215,7 @@ describe Beaker do
     end
 
     it "can perform apt-get on debian hosts" do
-      host = make_host('testhost', { :platform => 'debian' })
+      host = make_host('testhost', { :platform => 'debian-12-64' })
 
       expect(Beaker::Command).to receive(:new).with("apt-get update -qq").once
 
@@ -241,7 +223,7 @@ describe Beaker do
     end
 
     it "does nothing on non debian/ubuntu hosts" do
-      host = make_host('testhost', { :platform => 'windows' })
+      host = make_host('testhost', { :platform => 'windows-11-64' })
 
       expect(Beaker::Command).not_to receive(:new)
 
@@ -256,7 +238,7 @@ describe Beaker do
       content = "this is the content"
       tempfilepath = "/path/to/tempfile"
       filepath = "/path/to/file"
-      host = make_host('testhost', { :platform => 'windows' })
+      host = make_host('testhost', { :platform => 'windows-11-64' })
       tempfile = double('tempfile')
       allow(tempfile).to receive(:path).and_return(tempfilepath)
       allow(Tempfile).to receive(:open).and_yield(tempfile)
@@ -274,112 +256,101 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can sync keys on a solaris host" do
-      @platform = 'solaris'
+      host = make_host('host', { 'platform' => 'solaris-11-64' })
 
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").exactly(3).times
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").once
 
-      subject.sync_root_keys(hosts, options)
+      subject.sync_root_keys(host, options)
     end
 
     it "can sync keys on a non-solaris host" do
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").exactly(3).times
+      host = make_host('host', { 'platform' => 'el-9-64' })
 
-      subject.sync_root_keys(hosts, options)
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").once
+
+      subject.sync_root_keys(host, options)
     end
   end
 
   context "validate_host" do
     subject { dummy_class.new }
 
-    it "can validate unix hosts" do
-      hosts.each do |host|
-        unix_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+    it "can validate el-9 hosts" do
+      host = make_host('host', { :stdout => stdout, :platform => 'el-9-64' })
+
+      ['curl-minimal', 'iputils'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate windows hosts" do
-      @platform = 'windows'
+      host = make_host('host', { :stdout => stdout, :platform => 'windows-11-64', :is_cygwin => true })
+      allow(host).to receive(:cygwin_installed?).and_return(true)
 
-      hosts.each do |host|
-        windows_pkgs.each do |pkg|
-          allow(host).to receive(:cygwin_installed?).and_return(true)
-          allow(host).to receive(:is_cygwin?).and_return(true)
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate SLES hosts" do
-      @platform = 'sles-13.1-x64'
+      host = make_host('host', { :stdout => stdout, :platform => 'sles-13.1-x86_64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate opensuse hosts" do
-      @platform = 'opensuse-15-x86_x64'
+      host = make_host('host', { :stdout => stdout, :platform => 'opensuse-15-x86_x64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate RHEL8 hosts" do
-      @platform = 'el-8-x86_x64'
+      host = make_host('host', { :stdout => stdout, :platform => 'el-8-64' })
 
-      hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl-minimal', 'iputils'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Fedora hosts" do
-      @platform = 'fedora-32-x86_64'
+      host = make_host('host', { :stdout => stdout, :platform => 'fedora-32-x86_64'})
 
-      hosts.each do |host|
-        fedora_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl-minimal', 'iputils'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Amazon hosts" do
-      @platform = 'amazon-2023-x86_64'
+      host = make_host('host', { :stdout => stdout, :platform => 'amazon-2023-x86_64'})
 
-      hosts.each do |host|
-        amazon2023_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      ['curl-minimal', 'iputils'].each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
   end
 
@@ -395,7 +366,7 @@ describe Beaker do
     context "on windows" do
       let(:host) do
         make_host('name', {
-                    :platform => 'windows',
+                    :platform => 'windows-11-64',
                     :is_cygwin => cygwin,
                     :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
@@ -422,7 +393,7 @@ describe Beaker do
       end
     end
 
-    %w[amazon centos redhat].each do |platform|
+    %w[amazon-2023-64 centos-9-64 redhat-9-64].each do |platform|
       context "on platform '#{platform}'" do
         let(:host) do
           make_host('name', {
@@ -480,7 +451,7 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can copy ssh to root in windows hosts with no cygwin" do
-      host = make_host('testhost', { :platform => 'windows', :is_cygwin => false })
+      host = make_host('testhost', { :platform => 'windows-11-64', :is_cygwin => false })
       expect(Beaker::Command).to receive(:new).with("if exist .ssh (xcopy .ssh C:\\Users\\Administrator\\.ssh /s /e /y /i)").once
 
       subject.copy_ssh_to_root(host, options)
@@ -493,7 +464,7 @@ describe Beaker do
     proxyurl = "http://192.168.2.100:3128"
 
     it "can set proxy config on a debian/ubuntu host" do
-      host = make_host('name', { :platform => 'debian' })
+      host = make_host('name', { :platform => 'debian-12-64' })
 
       expect(Beaker::Command).to receive(:new).with("echo 'Acquire::http::Proxy \"#{proxyurl}/\";' >> /etc/apt/apt.conf.d/10proxy").once
       expect(host).to receive(:exec).once
@@ -501,7 +472,7 @@ describe Beaker do
       subject.package_proxy(host, options.merge({ 'package_proxy' => proxyurl }))
     end
 
-    %w[amazon centos redhat].each do |platform|
+    %w[amazon-2023-64 el-9-64].each do |platform|
       it "can set proxy config on a '#{platform}' host" do
         host = make_host('name', { :platform => platform })
 
@@ -517,43 +488,43 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "sets user ssh environment on an OS X 10.10 host" do
-      test_host_ssh_calls('osx-10.10')
+      test_host_ssh_calls('osx-10.10-64')
     end
 
     it "sets user ssh environment on an OS X 10.11 host" do
-      test_host_ssh_calls('osx-10.11')
+      test_host_ssh_calls('osx-10.11-64')
     end
 
     it "sets user ssh environment on an OS X 10.12 host" do
-      test_host_ssh_calls('osx-10.12')
+      test_host_ssh_calls('osx-10.12-64')
     end
 
     it "sets user ssh environment on an OS X 10.13 host" do
-      test_host_ssh_calls('osx-10.13')
+      test_host_ssh_calls('osx-10.13-64')
     end
 
     it "sets user ssh environment on an ssh-based linux host" do
-      test_host_ssh_calls('ubuntu')
+      test_host_ssh_calls('ubuntu-2204-64')
     end
 
     it "sets user ssh environment on an sles host" do
-      test_host_ssh_calls('sles')
+      test_host_ssh_calls('sles-15-64')
     end
 
     it "sets user ssh environment on a solaris host" do
-      test_host_ssh_calls('solaris')
+      test_host_ssh_calls('solaris-11-64')
     end
 
     it "sets user ssh environment on an aix host" do
-      test_host_ssh_calls('aix')
+      test_host_ssh_calls('aix-7.2-power')
     end
 
     it "sets user ssh environment on a FreeBSD host" do
-      test_host_ssh_calls('freebsd')
+      test_host_ssh_calls('freebsd-14-64')
     end
 
     it "sets user ssh environment on a windows host" do
-      test_host_ssh_calls('windows')
+      test_host_ssh_calls('windows-11-64')
     end
 
     def test_host_ssh_calls(platform_name)

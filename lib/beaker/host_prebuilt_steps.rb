@@ -10,20 +10,6 @@ module Beaker
     NTPSERVER = 'pool.ntp.org'
     SLEEPWAIT = 5
     TRIES = 5
-    AMAZON2023_PACKAGES = %w[chrony]
-    RHEL8_PACKAGES = %w[chrony iputils] # iputils provides ping. beaker assumes that's present
-    FEDORA_PACKAGES = %w[chrony iputils]
-    UNIX_PACKAGES = %w[curl ntpdate]
-    FREEBSD_PACKAGES = ['curl', 'perl5|perl']
-    OPENBSD_PACKAGES = ['curl']
-    ARCHLINUX_PACKAGES = %w[curl ntp net-tools openssh]
-    WINDOWS_PACKAGES = ['curl']
-    PSWINDOWS_PACKAGES = []
-    SLES10_PACKAGES = ['curl']
-    SLES_PACKAGES = %w[curl ntp]
-    DEBIAN_PACKAGES = %w[curl ntpdate lsb-release apt-transport-https]
-    SOLARIS10_PACKAGES = %w[CSWcurl CSWntp wget]
-    SOLARIS11_PACKAGES = %w[curl ntp]
     ETC_HOSTS_PATH = "/etc/hosts"
     ETC_HOSTS_PATH_SOLARIS = "/etc/inet/hosts"
     ROOT_KEYS_SCRIPT = "https://raw.githubusercontent.com/puppetlabs/puppetlabs-sshkeys/master/templates/scripts/manage_root_authorized_keys"
@@ -48,7 +34,7 @@ module Beaker
           host.exec(Command.new("w32tm /resync"))
           logger.notify "NTP date succeeded on #{host}"
         else
-          if /amazon|el-[89]|fedora/.match?(host['platform'])
+          if host['platform'].uses_chrony?
             ntp_command = "chronyc add server #{ntp_server} prefer trust;chronyc makestep;chronyc burst 1/2"
           elsif /opensuse-|sles-/.match?(host['platform'])
             ntp_command = "sntp #{ntp_server}"
@@ -79,12 +65,6 @@ module Beaker
     # Validate that hosts are prepared to be used as SUTs, if packages are missing attempt to
     # install them.
     #
-    # Verifies the presence of #{HostPrebuiltSteps::UNIX_PACKAGES} on unix platform hosts,
-    # {HostPrebuiltSteps::SLES_PACKAGES} on SUSE platform hosts,
-    # {HostPrebuiltSteps::DEBIAN_PACKAGES} on debian platform hosts,
-    # {HostPrebuiltSteps::WINDOWS_PACKAGES} on cygwin-installed windows platform hosts,
-    # and {HostPrebuiltSteps::PSWINDOWS_PACKAGES} on non-cygwin windows platform hosts.
-    #
     # @param [Host, Array<Host>, String, Symbol] host One or more hosts to act upon
     # @param [Hash{Symbol=>String}] opts Options to alter execution.
     # @option opts [Beaker::Logger] :logger A {Beaker::Logger} object
@@ -102,44 +82,14 @@ module Beaker
     # @param [Host] host A host return the packages for
     # @return [Array<String>] A list of packages to install
     def host_packages(host)
-      case host['platform']
-      when /amazon/
-        AMAZON2023_PACKAGES
-      when /el-[89]/
-        RHEL8_PACKAGES
-      when /sles-10/
-        SLES10_PACKAGES
-      when /opensuse|sles-/
-        SLES_PACKAGES
-      when /debian/
-        DEBIAN_PACKAGES
-      when /windows/
-        if host.is_cygwin?
-          raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
+      packages = host['platform'].base_packages
+      if host.is_cygwin?
+        raise RuntimeError, "cygwin is not installed on #{host}" if !host.cygwin_installed?
 
-          WINDOWS_PACKAGES
-        else
-          PSWINDOWS_PACKAGES
-        end
-      when /freebsd/
-        FREEBSD_PACKAGES
-      when /openbsd/
-        OPENBSD_PACKAGES
-      when /solaris-10/
-        SOLARIS10_PACKAGES
-      when /solaris-1[1-9]/
-        SOLARIS11_PACKAGES
-      when /archlinux/
-        ARCHLINUX_PACKAGES
-      when /fedora/
-        FEDORA_PACKAGES
-      else
-        if !/aix|solaris|osx-/.match?(host['platform'])
-          UNIX_PACKAGES
-        else
-          []
-        end
+        packages << 'curl'
       end
+      packages += host['platform'].timesync_packages if host[:timesync]
+      packages
     end
 
     # Installs the given packages if they aren't already on a host
