@@ -24,7 +24,7 @@ module TestFileHelpers
 end
 
 module HostHelpers
-  HOST_DEFAULTS = { :platform => 'unix',
+  HOST_DEFAULTS = { :platform => 'el-9-64',
                     :roles => ['agent'],
                     :snapshot => 'snap',
                     :ip => 'default.ip.address',
@@ -90,6 +90,8 @@ module HostHelpers
 
   def make_host name, host_hash
     host_hash = Beaker::Options::OptionsHash.new.merge(HOST_DEFAULTS.merge(host_hash))
+
+    host_hash['platform'] = Beaker::Platform.new(host_hash['platform']) unless host_hash['platform'].is_a?(Beaker::Platform)
 
     host = Beaker::Host.create(name, host_hash, make_opts)
 
