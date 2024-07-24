@@ -30,7 +30,7 @@ module Beaker
         @my_logger.remove_destination(STDOUT)
         perf = described_class.new(hosts, @options)
         expect(perf).to be_a described_class
-        expect(@my_io.string).to match(/Setup perf on host: myHost/)
+        expect(@my_io.string).to eq("Setup perf on host: myHost\n")
       end
 
       it 'creates a new Perf object with multiple hosts' do
@@ -39,7 +39,7 @@ module Beaker
         @my_logger.remove_destination(STDOUT)
         perf = described_class.new(hosts, @options)
         expect(perf).to be_a described_class
-        expect(@my_io.string).to match(/Setup perf on host: myHost*\nSetup perf on host: myOtherHost/)
+        expect(@my_io.string).to eq("Setup perf on host: myHost\nSetup perf on host: myOtherHost\n")
       end
 
       it 'creates a new Perf object with multiple hosts, SLES' do
@@ -50,7 +50,7 @@ module Beaker
         @my_logger.remove_destination(STDOUT)
         perf = described_class.new(hosts, @options)
         expect(perf).to be_a described_class
-        expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost/)
+        expect(@my_io.string).to include("Setup perf on host: myHost\nSetup perf on host: myOtherHost\n")
       end
     end
 
@@ -73,7 +73,7 @@ module Beaker
         perf = described_class.new(@hosts, @options)
         expect(perf).to be_a described_class
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
+        expect(@my_io.string).to eq("Setup perf on host: myHost\nSetup perf on host: myOtherHost\nPerf (sysstat) not supported on host: myOtherHost\nGetting perf data for host: myHost\nGetting perf data for host: myOtherHost\nPerf (sysstat) not supported on host: myOtherHost\n")
       end
 
       it "Does the Right Thing on non-Linux hosts" do
@@ -82,7 +82,7 @@ module Beaker
         perf = described_class.new(@hosts, @options)
         expect(perf).to be_a described_class
         perf.print_perf_info
-        expect(@my_io.string).to match(/Setup perf on host: myHost\nPerf \(sysstat\) not supported on host: myHost\nSetup perf on host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost\nGetting perf data for host: myHost\nPerf \(sysstat\) not supported on host: myHost\nGetting perf data for host: myOtherHost\nPerf \(sysstat\) not supported on host: myOtherHost/)
+        expect(@my_io.string).to eq("Setup perf on host: myHost\nPerf (sysstat) not supported on host: myHost\nSetup perf on host: myOtherHost\nPerf (sysstat) not supported on host: myOtherHost\nGetting perf data for host: myHost\nPerf (sysstat) not supported on host: myHost\nGetting perf data for host: myOtherHost\nPerf (sysstat) not supported on host: myOtherHost\n")
       end
     end
   end
