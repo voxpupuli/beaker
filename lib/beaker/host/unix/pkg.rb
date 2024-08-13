@@ -74,6 +74,10 @@ module Unix::Pkg
     return unless self['platform'].include?('archlinux')
     return unless @pacman_needs_update
 
+    # creates a GPG key + local keyring
+    execute("pacman-key --init")
+    # `archlinux-keyring` contains GPG keys that will be imported into the local keyring
+    # used to verify package signatures
     execute("pacman --sync --noconfirm --noprogressbar --refresh archlinux-keyring")
     execute("pacman --sync --noconfirm --noprogressbar --refresh --sysupgrade --ignore linux --ignore linux-docs --ignore linux-headers")
     @pacman_needs_update = false
