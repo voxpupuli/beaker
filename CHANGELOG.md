@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.3.0](https://github.com/voxpupuli/beaker/tree/6.3.0) (2024-08-13)
+
+**Implemented enhancements:**
+
+- build(deps): update minitar requirement from ~> 0.6 to ~> 0.12 [\#1895](https://github.com/voxpupuli/beaker/pull/1895)
+
+**Fixed bugs:**
+
+- Arch Linux: Generate keyring before installing packages [\#1897](https://github.com/voxpupuli/beaker/pull/1897) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [6.2.0](https://github.com/voxpupuli/beaker/tree/6.2.0) (2024-07-24)
 
 **Implemented enhancements:**
