@@ -120,7 +120,7 @@ module Beaker
       when 'el'
         @version.to_i >= 8 ? ['curl-minimal', 'iputils'] : %w[curl]
       when 'debian'
-        %w[curl lsb-release apt-transport-https]
+        %w[curl lsb-release]
       when 'freebsd'
         %w[curl perl5|perl]
       when 'solaris'
