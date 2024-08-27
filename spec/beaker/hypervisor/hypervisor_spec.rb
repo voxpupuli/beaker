@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Beaker
   describe Hypervisor do
-    let(:hosts) { make_hosts({ :platform => 'el-5' }) }
+    let(:hosts) { make_hosts({ :platform => 'el-9-64' }) }
 
     describe "#create" do
       let(:hypervisor) { described_class }

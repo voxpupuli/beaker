@@ -11,7 +11,7 @@ module Beaker
       let(:logger)         { double('logger') }
       let(:host_handler)   { described_class }
       let(:spec_block)     { Proc.new { |arr| arr } }
-      let(:platform)       { @platform || 'unix' }
+      let(:platform)       { @platform || 'el-9-64' }
       let(:role0)          { "role0" }
       let(:role1)          { :role1 }
       let(:role2)          { :role2 }

@@ -125,7 +125,7 @@ module Beaker
       allow(h).to receive(:append_commands).and_return('')
       h
     end
-    let(:platform)    { @platform   || 'unix' }
+    let(:platform)    { @platform   || 'el-9-64' }
     let(:expression)  { @expression || 's/b/s/' }
     let(:filename)    { @filename   || '/fakefile' }
     let(:options)     { @options    || {} }
