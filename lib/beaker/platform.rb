@@ -118,7 +118,7 @@ module Beaker
     def base_packages
       case @variant
       when 'el'
-        @version.to_i >= 8 ? ['curl-minimal', 'iputils'] : %w[curl]
+        @version.to_i >= 8 ? ['iputils'] : %w[curl]
       when 'debian'
         %w[curl lsb-release]
       when 'freebsd'
@@ -128,7 +128,7 @@ module Beaker
       when 'archlinux'
         %w[curl net-tools openssh]
       when 'amazon', 'fedora'
-        ['curl-minimal', 'iputils']
+        ['iputils']
       when 'aix', 'osx', 'windows'
         []
       else

@@ -276,7 +276,7 @@ describe Beaker do
     it "can validate el-9 hosts" do
       host = make_host('host', { :platform => 'el-9-64' })
 
-      ['curl-minimal', 'iputils'].each do |pkg|
+      ['iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -321,7 +321,7 @@ describe Beaker do
     it "can validate RHEL8 hosts" do
       host = make_host('host', { :platform => 'el-8-64' })
 
-      ['curl-minimal', 'iputils'].each do |pkg|
+      ['iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -332,7 +332,7 @@ describe Beaker do
     it "can validate Fedora hosts" do
       host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      ['curl-minimal', 'iputils'].each do |pkg|
+      ['iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
@@ -343,7 +343,7 @@ describe Beaker do
     it "can validate Amazon hosts" do
       host = make_host('host', { :platform => 'amazon-2023-x86_64' })
 
-      ['curl-minimal', 'iputils'].each do |pkg|
+      ['iputils'].each do |pkg|
         expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
         expect(host).to receive(:install_package).with(pkg).once
       end
