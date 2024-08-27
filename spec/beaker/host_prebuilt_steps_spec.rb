@@ -12,10 +12,8 @@ describe Beaker do
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
   let(:platform)       { @platform || 'el-9-64' }
-  let(:ip)             { "ip.address.0.0" }
-  let(:stdout) { @stdout || ip }
   let(:hosts) do
-    hosts = make_hosts({ :stdout => stdout, :platform => platform })
+    hosts = make_hosts({ :platform => platform })
     hosts[0][:roles] = ['agent']
     hosts[1][:roles] = %w[master dashboard agent database]
     hosts[2][:roles] = ['agent']
@@ -383,6 +381,11 @@ describe Beaker do
 
     shared_examples 'find domain name' do
       it "finds the domain name" do
+        cmd = instance_double(Beaker::Command)
+        expect(Beaker::Command).to receive(:new).with(cat).once.and_return(cmd)
+        result = instance_double(Beaker::Result)
+        expect(host).to receive(:exec).with(cmd).and_return(result)
+        expect(result).to receive(:stdout).and_return(stdout)
         expect(subject.get_domain_name(host)).to be === "labs.lan"
       end
     end
@@ -392,26 +395,21 @@ describe Beaker do
         make_host('name', {
                     :platform => 'windows-11-64',
                     :is_cygwin => cygwin,
-                    :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
       end
 
+      let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
       context "with cygwin" do
         let(:cygwin) { true }
-
-        before do
-          expect(Beaker::Command).to receive(:new).with("cat /cygdrive/c/Windows/System32/drivers/etc/hosts").once
-        end
+        let(:cat) { "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" }
 
         include_examples 'find domain name'
       end
 
       context "without cygwin" do
         let(:cygwin) { false }
-
-        before do
-          expect(Beaker::Command).to receive(:new).with('type C:\Windows\System32\drivers\etc\hosts').once
-        end
+        let(:cat) { 'type C:\Windows\System32\drivers\etc\hosts' }
 
         include_examples 'find domain name'
       end
@@ -419,16 +417,8 @@ describe Beaker do
 
     %w[amazon-2023-64 centos-9-64 redhat-9-64].each do |platform|
       context "on platform '#{platform}'" do
-        let(:host) do
-          make_host('name', {
-                      :platform => platform,
-                      :stdout => stdout,
-                    })
-        end
-
-        before do
-          expect(Beaker::Command).to receive(:new).with("cat /etc/resolv.conf").once
-        end
+        let(:host) { make_host('name', { :platform => platform }) }
+        let(:cat) { "cat /etc/resolv.conf" }
 
         context "with a domain entry" do
           let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
