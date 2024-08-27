@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.4.0](https://github.com/voxpupuli/beaker/tree/6.4.0) (2024-08-27)
+
+**Implemented enhancements:**
+
+- Only install timesync packages if needed [\#1853](https://github.com/voxpupuli/beaker/pull/1853)
+- Ensure platform is Beaker::Platform in tests [\#1855](https://github.com/voxpupuli/beaker/pull/1855)
+- Avoid mocking stdout on host and use explicit hosts in host_prebuilt_steps_spec.rb [\#1900](https://github.com/voxpupuli/beaker/pull/1900)
+
 ## [6.3.0](https://github.com/voxpupuli/beaker/tree/6.3.0) (2024-08-13)
 
 **Implemented enhancements:**
