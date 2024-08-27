@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.4.1](https://github.com/voxpupuli/beaker/tree/6.4.1) (2024-08-27)
+
+**Fixed bugs:**
+
+- platform: don't install curl-minimal on EL family [\#1902](https://github.com/voxpupuli/beaker/pull/1902)
+
 ## [6.4.0](https://github.com/voxpupuli/beaker/tree/6.4.0) (2024-08-27)
 
 **Implemented enhancements:**
