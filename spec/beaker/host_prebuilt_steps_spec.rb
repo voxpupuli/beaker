@@ -11,16 +11,6 @@ describe Beaker do
   let(:rhel8_packages) { Beaker::HostPrebuiltSteps::RHEL8_PACKAGES }
   let(:fedora_packages) { Beaker::HostPrebuiltSteps::FEDORA_PACKAGES }
   let(:amazon2023_packages) { Beaker::HostPrebuiltSteps::AMAZON2023_PACKAGES }
-  let(:platform)       { @platform || 'el-9-64' }
-  let(:ip)             { "ip.address.0.0" }
-  let(:stdout) { @stdout || ip }
-  let(:hosts) do
-    hosts = make_hosts({ :stdout => stdout, :platform => platform })
-    hosts[0][:roles] = ['agent']
-    hosts[1][:roles] = %w[master dashboard agent database]
-    hosts[2][:roles] = ['agent']
-    hosts
-  end
   let(:dummy_class) { Class.new { include Beaker::HostPrebuiltSteps } }
 
   shared_examples 'enables_root_login' do |platform, commands, non_cygwin|
@@ -269,17 +259,19 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can sync keys on a solaris host" do
-      @platform = 'solaris-11-64'
+      host = make_host('host', { 'platform' => 'solaris-11-64' })
 
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").exactly(3).times
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "bash").once
 
-      subject.sync_root_keys(hosts, options)
+      subject.sync_root_keys(host, options)
     end
 
     it "can sync keys on a non-solaris host" do
-      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").exactly(3).times
+      host = make_host('host', { 'platform' => 'el-9-64' })
 
-      subject.sync_root_keys(hosts, options)
+      expect(Beaker::Command).to receive(:new).with(sync_cmd % "env PATH=\"/usr/gnu/bin:$PATH\" bash").once
+
+      subject.sync_root_keys(host, options)
     end
   end
 
@@ -287,94 +279,81 @@ describe Beaker do
     subject { dummy_class.new }
 
     it "can validate el-9 hosts" do
-      hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      host = make_host('host', { :platform => 'el-9-64' })
+
+      rhel8_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate windows hosts" do
-      @platform = 'windows-11-64'
+      host = make_host('host', { :platform => 'windows-11-64', :is_cygwin => true })
+      allow(host).to receive(:cygwin_installed?).and_return(true)
 
-      hosts.each do |host|
-        windows_pkgs.each do |pkg|
-          allow(host).to receive(:cygwin_installed?).and_return(true)
-          allow(host).to receive(:is_cygwin?).and_return(true)
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      windows_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate SLES hosts" do
-      @platform = 'sles-13.1-x64'
+      host = make_host('host', { :platform => 'sles-13.1-x86_64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      sles_only_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate opensuse hosts" do
-      @platform = 'opensuse-15-x86_x64'
+      host = make_host('host', { :platform => 'opensuse-15-x86_x64' })
 
-      hosts.each do |host|
-        sles_only_pkgs.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      sles_only_pkgs.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate RHEL8 hosts" do
-      @platform = 'el-8-x86_x64'
+      host = make_host('host', { :platform => 'el-8-64' })
 
-      hosts.each do |host|
-        rhel8_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      rhel8_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Fedora hosts" do
-      @platform = 'fedora-32-x86_64'
+      host = make_host('host', { :platform => 'fedora-32-x86_64' })
 
-      hosts.each do |host|
-        fedora_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      fedora_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
 
     it "can validate Amazon hosts" do
-      @platform = 'amazon-2023-x86_64'
+      host = make_host('host', { :platform => 'amazon-2023-x86_64' })
 
-      hosts.each do |host|
-        amazon2023_packages.each do |pkg|
-          expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
-          expect(host).to receive(:install_package).with(pkg).once
-        end
+      amazon2023_packages.each do |pkg|
+        expect(host).to receive(:check_for_package).with(pkg).once.and_return(false)
+        expect(host).to receive(:install_package).with(pkg).once
       end
 
-      subject.validate_host(hosts, options)
+      subject.validate_host(host, options)
     end
   end
 
@@ -383,6 +362,11 @@ describe Beaker do
 
     shared_examples 'find domain name' do
       it "finds the domain name" do
+        cmd = instance_double(Beaker::Command)
+        expect(Beaker::Command).to receive(:new).with(cat).once.and_return(cmd)
+        result = instance_double(Beaker::Result)
+        expect(host).to receive(:exec).with(cmd).and_return(result)
+        expect(result).to receive(:stdout).and_return(stdout)
         expect(subject.get_domain_name(host)).to be === "labs.lan"
       end
     end
@@ -392,26 +376,21 @@ describe Beaker do
         make_host('name', {
                     :platform => 'windows-11-64',
                     :is_cygwin => cygwin,
-                    :stdout => "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11",
                   })
       end
 
+      let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
+
       context "with cygwin" do
         let(:cygwin) { true }
-
-        before do
-          expect(Beaker::Command).to receive(:new).with("cat /cygdrive/c/Windows/System32/drivers/etc/hosts").once
-        end
+        let(:cat) { "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" }
 
         include_examples 'find domain name'
       end
 
       context "without cygwin" do
         let(:cygwin) { false }
-
-        before do
-          expect(Beaker::Command).to receive(:new).with('type C:\Windows\System32\drivers\etc\hosts').once
-        end
+        let(:cat) { 'type C:\Windows\System32\drivers\etc\hosts' }
 
         include_examples 'find domain name'
       end
@@ -419,16 +398,8 @@ describe Beaker do
 
     %w[amazon-2023-64 centos-9-64 redhat-9-64].each do |platform|
       context "on platform '#{platform}'" do
-        let(:host) do
-          make_host('name', {
-                      :platform => platform,
-                      :stdout => stdout,
-                    })
-        end
-
-        before do
-          expect(Beaker::Command).to receive(:new).with("cat /etc/resolv.conf").once
-        end
+        let(:host) { make_host('name', { :platform => platform }) }
+        let(:cat) { "cat /etc/resolv.conf" }
 
         context "with a domain entry" do
           let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
