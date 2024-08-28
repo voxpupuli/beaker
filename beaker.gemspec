@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'voxpupuli-rubocop', '~> 2.8.0'
 
   # Run time dependencies
-  s.add_runtime_dependency 'minitar', '~> 0.12' # newer versions require Ruby 3.1
+  s.add_runtime_dependency 'minitar', '>= 0.12', '< 2.0' # newer versions require Ruby 3.1
   s.add_runtime_dependency 'minitest', '~> 5.4'
   s.add_runtime_dependency 'rexml', '~> 3.2', '>= 3.2.5'
 
