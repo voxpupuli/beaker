@@ -107,10 +107,10 @@ module Beaker
       # @param [String] manual_test_name The name of the test to be logged.
       # @param [Proc] block The actions to be performed during this test.
       #
-      def manual_test manual_test_name, &block
+      def manual_test(manual_test_name, &)
         if @options.has_key?(:exec_manual_tests) && @options[:exec_manual_tests] == true
           # here the option is set so we run the test as normal
-          test_name manual_test_name, &block
+          test_name(manual_test_name, &)
         else
           # here no option was set so we log the test name and skip it
           test_name manual_test_name
@@ -261,13 +261,13 @@ module Beaker
       #   targets for this tests case.
       # @raise [SkipTest] Raises skip test if there are no valid hosts for
       #   this test case after confinement.
-      def confine(type, criteria, host_array = nil, &block)
+      def confine(type, criteria, host_array = nil, &)
         hosts_to_modify = Array(host_array || hosts)
         hosts_not_modified = hosts - hosts_to_modify # we aren't examining these hosts
         case type
         when :except
           hosts_to_modify = if criteria and (not criteria.empty?)
-                              hosts_to_modify - select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
+                              hosts_to_modify - select_hosts(criteria, hosts_to_modify, &) + hosts_not_modified
                             else
                               # confining to all hosts *except* provided array of hosts
                               hosts_not_modified
@@ -278,7 +278,7 @@ module Beaker
           end
         when :to
           if criteria and (not criteria.empty?)
-            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &block) + hosts_not_modified
+            hosts_to_modify = select_hosts(criteria, hosts_to_modify, &) + hosts_not_modified
           else
             # confining to only hosts in provided array of hosts
           end
