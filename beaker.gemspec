@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.required_ruby_version = Gem::Requirement.new('>= 2.7')
+  s.required_ruby_version = Gem::Requirement.new('>= 3.1')
 
   # Testing dependencies
   s.add_development_dependency 'fakefs', '~> 2.4'
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'voxpupuli-rubocop', '~> 3.0.0'
 
   # Run time dependencies
-  s.add_dependency 'minitar', '~> 0.12' # newer versions require Ruby 3.1
+  s.add_dependency 'minitar', '~> 0.12' # newer versions require Ruby 3.1 and code adjustments
   s.add_dependency 'minitest', '~> 5.4'
   s.add_dependency 'rexml', '~> 3.2', '>= 3.2.5'
 
