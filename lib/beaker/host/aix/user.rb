@@ -23,11 +23,11 @@ module Aix::User
     end
   end
 
-  def user_present(name, &block)
-    execute("if ! lsuser #{name}; then mkuser #{name}; fi", {}, &block)
+  def user_present(name, &)
+    execute("if ! lsuser #{name}; then mkuser #{name}; fi", {}, &)
   end
 
-  def user_absent(name, &block)
-    execute("if lsuser #{name}; then rmuser #{name}; fi", {}, &block)
+  def user_absent(name, &)
+    execute("if lsuser #{name}; then rmuser #{name}; fi", {}, &)
   end
 end
