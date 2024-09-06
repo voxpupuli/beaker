@@ -37,11 +37,11 @@ module Windows::User
     end
   end
 
-  def user_present(name, &block)
-    execute("net user /add \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
+  def user_present(name, &)
+    execute("net user /add \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &)
   end
 
-  def user_absent(name, &block)
-    execute("net user /delete \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
+  def user_absent(name, &)
+    execute("net user /delete \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &)
   end
 end

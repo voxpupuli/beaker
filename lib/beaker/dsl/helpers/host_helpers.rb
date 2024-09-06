@@ -118,8 +118,8 @@ module Beaker
         #
         # @return [Result]   An object representing the outcome of *command*.
         # @raise  [FailTest] Raises an exception if *command* obviously fails.
-        def shell(command, opts = {}, &block)
-          on(default, command, opts, &block)
+        def shell(command, opts = {}, &)
+          on(default, command, opts, &)
         end
 
         # Move a file from a remote to a local path
@@ -307,7 +307,7 @@ module Beaker
         # @param [Proc] block Additional tests to run after script has executed
         #
         # @return [Result] Returns the result of the underlying SCP operation.
-        def run_script_on(host, script, opts = {}, &block)
+        def run_script_on(host, script, opts = {}, &)
           # this is unsafe as it uses the File::SEPARATOR will be set to that
           # of the coordinator node.  This works for us because we use cygwin
           # which will properly convert the paths.  Otherwise this would not
@@ -317,13 +317,13 @@ module Beaker
           remote_path = File.join("", "tmp", File.basename(script))
 
           scp_to host, script, remote_path
-          on host, remote_path, opts, &block
+          on(host, remote_path, opts, &)
         end
 
         # Move a local script to default host and execute it
         # @see #run_script_on
-        def run_script(script, opts = {}, &block)
-          run_script_on(default, script, opts, &block)
+        def run_script(script, opts = {}, &)
+          run_script_on(default, script, opts, &)
         end
 
         # Install a package on a host
@@ -515,8 +515,8 @@ module Beaker
         # @param [Proc]              block   Additional actions or assertions.
         # @!macro common_opts
         #
-        def curl_on(host, cmd, opts = {}, &block)
-          on host, "curl --tlsv1 %s" % cmd, opts, &block
+        def curl_on(host, cmd, opts = {}, &)
+          on(host, "curl --tlsv1 %s" % cmd, opts, &)
         end
 
         def curl_with_retries(_desc, host, url, desired_exit_codes, max_retries = 60, retry_interval = 1)
@@ -547,7 +547,7 @@ module Beaker
         # @option opts [Boolean] :verbose (false)
         #
         # @return [Result] Result object of the last command execution
-        def retry_on(host, command, opts = {}, &block)
+        def retry_on(host, command, opts = {}, &)
           option_exit_codes     = opts[:desired_exit_codes]
           option_max_retries    = opts[:max_retries].to_i
           option_retry_interval = opts[:retry_interval].to_f
@@ -562,11 +562,11 @@ module Beaker
           logger.debug "  Trying command #{max_retries} times."
           logger.debug ".", add_newline: false
 
-          result = on host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &block
+          result = on(host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
           num_retries = 0
           until desired_exit_codes.include?(result.exit_code)
             sleep retry_interval
-            result = on host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &block
+            result = on(host, command, { :accept_all_exit_codes => true, :silent => !verbose }, &)
             num_retries += 1
             logger.debug ".", add_newline: false
             if (num_retries > max_retries)

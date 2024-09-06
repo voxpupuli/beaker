@@ -23,11 +23,11 @@ module Unix::User
     end
   end
 
-  def user_present(name, &block)
-    execute("if ! getent passwd #{name}; then useradd #{name}; fi", {}, &block)
+  def user_present(name, &)
+    execute("if ! getent passwd #{name}; then useradd #{name}; fi", {}, &)
   end
 
-  def user_absent(name, &block)
-    execute("if getent passwd #{name}; then userdel #{name}; fi", {}, &block)
+  def user_absent(name, &)
+    execute("if getent passwd #{name}; then userdel #{name}; fi", {}, &)
   end
 end

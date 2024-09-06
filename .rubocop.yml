@@ -5,7 +5,7 @@ inherit_gem:
   voxpupuli-rubocop: rubocop.yml
 
 AllCops:
-  TargetRubyVersion: 3.1
+  TargetRubyVersion: 3.2
 
 Layout/LineLength:
   Exclude:

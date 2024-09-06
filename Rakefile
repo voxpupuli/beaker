@@ -6,10 +6,12 @@ HOSTS_PRESERVED  = 'log/latest/hosts_preserved.yml'
 
 task :default => ['test:spec']
 
+desc 'Run unit tests'
 task :test do
   Rake::Task['test:spec'].invoke
 end
 
+desc 'run unit tests'
 task :spec do
   Rake::Task['test:spec'].invoke
 end

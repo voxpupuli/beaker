@@ -380,14 +380,14 @@ describe Beaker do
         let(:cygwin) { true }
         let(:cat) { "cat /cygdrive/c/Windows/System32/drivers/etc/hosts" }
 
-        include_examples 'find domain name'
+        it_behaves_like 'find domain name'
       end
 
       context "without cygwin" do
         let(:cygwin) { false }
         let(:cat) { 'type C:\Windows\System32\drivers\etc\hosts' }
 
-        include_examples 'find domain name'
+        it_behaves_like 'find domain name'
       end
     end
 
@@ -399,25 +399,25 @@ describe Beaker do
         context "with a domain entry" do
           let(:stdout) { "domain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-          include_examples 'find domain name'
+          it_behaves_like 'find domain name'
         end
 
         context "with a search entry" do
           let(:stdout) { "search labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-          include_examples 'find domain name'
+          it_behaves_like 'find domain name'
         end
 
         context "with a both a domain and a search entry" do
           let(:stdout) { "domain labs.lan\nsearch d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-          include_examples 'find domain name'
+          it_behaves_like 'find domain name'
         end
 
         context "with a both a domain and a search entry, the search entry first" do
           let(:stdout) { "search foo.example.net\ndomain labs.lan d.labs.net dc1.labs.net labs.com\nnameserver 10.16.22.10\nnameserver 10.16.22.11" }
 
-          include_examples 'find domain name'
+          it_behaves_like 'find domain name'
         end
       end
     end
