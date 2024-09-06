@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakefs', '~> 2.4'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'voxpupuli-rubocop', '~> 3.0.0'
+  s.add_development_dependency 'voxpupuli-rubocop', '~> 4.0.0'
 
   # Run time dependencies
   s.add_dependency 'base64', '~> 0.2.0'

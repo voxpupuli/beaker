@@ -31,11 +31,11 @@ module Unix::Group
     end
   end
 
-  def group_present(name, &block)
-    execute("if ! getent group #{name}; then groupadd #{name}; fi", {}, &block)
+  def group_present(name, &)
+    execute("if ! getent group #{name}; then groupadd #{name}; fi", {}, &)
   end
 
-  def group_absent(name, &block)
-    execute("if getent group #{name}; then groupdel #{name}; fi", {}, &block)
+  def group_absent(name, &)
+    execute("if getent group #{name}; then groupdel #{name}; fi", {}, &)
   end
 end

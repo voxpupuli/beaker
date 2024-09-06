@@ -41,11 +41,11 @@ module Windows::Group
     raise NotImplementedError, "Can't retrieve group gid on a Windows host"
   end
 
-  def group_present(name, &block)
-    execute("net localgroup /add \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
+  def group_present(name, &)
+    execute("net localgroup /add \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &)
   end
 
-  def group_absent(name, &block)
-    execute("net localgroup /delete \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &block)
+  def group_absent(name, &)
+    execute("net localgroup /delete \"#{name}\"", { :acceptable_exit_codes => [0, 2] }, &)
   end
 end

@@ -29,14 +29,14 @@ module Beaker
       # Sets up the predefine task checking
       # @param args [Array] First argument is always the name of the task
       # if no additonal arguments are defined such as parameters it will default to [:hosts,:type]
-      def initialize(*args, &task_block)
+      def initialize(*args, &)
         super
 
         @name = args.shift || 'beaker:test'
         args = %i[hosts type] if args.empty?
         @acceptance_root = DEFAULT_ACCEPTANCE_ROOT
         @options_file = nil
-        define(args, &task_block)
+        define(args, &)
       end
 
       private
