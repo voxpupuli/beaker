@@ -14,6 +14,20 @@ module Windows::User
     end
   end
 
+  # using powershell commands as wmic is deprecated in windows 2025
+  def user_list_using_powershell
+    execute('cmd /c echo "" | powershell.exe "Get-LocalUser | Select-Object -ExpandProperty Name"') do |result|
+      users = []
+      result.stdout.each_line do |line|
+        users << line.strip or next
+      end
+
+      yield result if block_given?
+
+      users
+    end
+  end
+
   def user_get(name)
     execute("net user \"#{name}\"") do |result|
       fail_test "failed to get user #{name}" if result.exit_code != 0
