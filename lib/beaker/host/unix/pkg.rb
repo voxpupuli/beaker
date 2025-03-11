@@ -87,7 +87,7 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive --gpg-auto-import-keys in #{name}", opts)
-    when /amazon-2023|el-(8|9|1[0-9])|fedora/
+    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora/
       name = "#{name}-#{version}" if version
       execute("dnf -y #{cmdline_args} install #{name}", opts)
     when /amazon-(2|7)|centos|redhat|el-[1-7]-/
@@ -170,7 +170,7 @@ module Unix::Pkg
     case self['platform']
     when /opensuse|sles-/
       execute("zypper --non-interactive rm #{name}", opts)
-    when /amazon-2023|el-(8|9|1[0-9])|fedora/
+    when /amazon(fips)?-2023|el-(8|9|1[0-9])|fedora/
       execute("dnf -y #{cmdline_args} remove #{name}", opts)
     when /amazon-(2|7)|centos|redhat|el-[1-7]-/
       execute("yum -y #{cmdline_args} remove #{name}", opts)
@@ -260,7 +260,7 @@ module Unix::Pkg
   def install_local_package(onhost_package_file, onhost_copy_dir = nil)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
-    when /^(amazon|fedora|el|redhat|centos)$/
+    when /^(amazon(fips)?|fedora|el|redhat|centos)$/
       command_name = 'yum'
       command_name = 'dnf' if (variant == 'fedora' && version.to_i > 21) || (variant == 'amazon' && version.to_i >= 2023)
       execute("#{command_name} --nogpgcheck localinstall -y #{onhost_package_file}")
@@ -291,7 +291,7 @@ module Unix::Pkg
   def uncompress_local_tarball(onhost_tar_file, onhost_base_dir, download_file)
     variant, version, _arch, _codename = self['platform'].to_array
     case variant
-    when /^(amazon|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu)$/
+    when /^(amazon(fips)?|fedora|el|centos|redhat|opensuse|sles|debian|ubuntu)$/
       execute("tar -zxvf #{onhost_tar_file} -C #{onhost_base_dir}")
     when /^solaris$/
       # uncompress PE puppet-agent tarball
