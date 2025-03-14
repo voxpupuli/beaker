@@ -22,27 +22,27 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fakefs', '~> 2.4'
   s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'voxpupuli-rubocop', '~> 2.8.0'
+  s.add_development_dependency 'voxpupuli-rubocop', '~> 3.0.0'
 
   # Run time dependencies
-  s.add_runtime_dependency 'minitar', '~> 0.12' # newer versions require Ruby 3.1
-  s.add_runtime_dependency 'minitest', '~> 5.4'
-  s.add_runtime_dependency 'rexml', '~> 3.2', '>= 3.2.5'
+  s.add_dependency 'minitar', '~> 0.12' # newer versions require Ruby 3.1
+  s.add_dependency 'minitest', '~> 5.4'
+  s.add_dependency 'rexml', '~> 3.2', '>= 3.2.5'
 
   # net-ssh compatibility with ed25519 keys
-  s.add_runtime_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
-  s.add_runtime_dependency 'ed25519', '>= 1.2', '<2.0'
+  s.add_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
+  s.add_dependency 'ed25519', '>= 1.2', '<2.0'
 
-  s.add_runtime_dependency 'hocon', '~> 1.0'
-  s.add_runtime_dependency 'inifile', '~> 3.0'
-  s.add_runtime_dependency 'net-scp', '>= 1.2', '< 5.0'
-  s.add_runtime_dependency 'net-ssh', '~> 7.1'
+  s.add_dependency 'hocon', '~> 1.0'
+  s.add_dependency 'inifile', '~> 3.0'
+  s.add_dependency 'net-scp', '>= 1.2', '< 5.0'
+  s.add_dependency 'net-ssh', '~> 7.1'
 
-  s.add_runtime_dependency 'in-parallel', '>= 0.1', '< 2.0'
-  s.add_runtime_dependency 'rsync', '~> 1.0.9'
-  s.add_runtime_dependency 'thor', ['>= 1.0.1', '< 2.0']
+  s.add_dependency 'in-parallel', '>= 0.1', '< 2.0'
+  s.add_dependency 'rsync', '~> 1.0.9'
+  s.add_dependency 'thor', ['>= 1.0.1', '< 2.0']
 
   # Run time dependencies that are Beaker libraries
-  s.add_runtime_dependency 'beaker-hostgenerator', '~> 2.0'
-  s.add_runtime_dependency 'stringify-hash', '~> 0.0'
+  s.add_dependency 'beaker-hostgenerator', '~> 2.0'
+  s.add_dependency 'stringify-hash', '~> 0.0'
 end

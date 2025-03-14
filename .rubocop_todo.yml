@@ -306,12 +306,6 @@ RSpec/UnspecifiedException:
 RSpec/VerifiedDoubles:
   Enabled: false
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-RSpecRails/MinitestAssertions:
-  Exclude:
-    - 'spec/beaker/dsl/structure_spec.rb'
-
 # Offense count: 2
 # This cop supports safe autocorrection (--autocorrect).
 Rake/Desc:

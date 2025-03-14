@@ -26,9 +26,6 @@ RSpec/DescribeClass:
   Exclude:
     - acceptance/fixtures/module/spec/**/*.rb
 
-RSpec/FilePath:
-  Enabled: false
-
 RSpec/MessageSpies:
   Enabled: false
 
