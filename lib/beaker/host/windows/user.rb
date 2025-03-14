@@ -1,5 +1,6 @@
 module Windows::User
   include Beaker::CommandFactory
+  include Beaker::DSL::Wrappers
 
   def user_list
     execute('cmd /c echo "" | wmic useraccount where localaccount="true" get name /format:value') do |result|
@@ -12,6 +13,17 @@ module Windows::User
 
       users
     end
+  end
+
+  # using powershell commands as wmic is deprecated in windows 2025
+  def user_list_using_powershell
+    result = exec(powershell('"Get-LocalUser | Select-Object -ExpandProperty Name"'))
+    users = []
+    result.stdout.each_line do |line|
+      users << line.strip or next
+    end
+
+    users
   end
 
   def user_get(name)
