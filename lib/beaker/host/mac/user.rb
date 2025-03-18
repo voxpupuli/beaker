@@ -66,8 +66,8 @@ module Mac::User
   #
   # @param [String] name Name of the user
   # @param [Proc] block Additional actions or insertions
-  def user_absent(name, &block)
-    execute("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {}, &block)
+  def user_absent(name, &)
+    execute("if dscl . -list /Users/#{name}; then dscl . -delete /Users/#{name}; fi", {}, &)
   end
 
   # Gives the next uid not used on the system

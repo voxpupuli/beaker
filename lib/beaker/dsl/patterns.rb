@@ -22,7 +22,7 @@ module Beaker
       #
       # @return [Array<Result>, Result, nil] An array of results, a result object, or nil.
       #   Check {Beaker::Shared::HostManager#run_block_on} for more details on this.
-      def block_on hosts_or_filter, opts = {}, &block
+      def block_on(hosts_or_filter, opts = {}, &)
         block_hosts = nil
         if defined? hosts
           block_hosts = hosts
@@ -33,7 +33,7 @@ module Beaker
         else
           block_hosts = hosts_or_filter
         end
-        run_block_on block_hosts, filter, opts, &block
+        run_block_on(block_hosts, filter, opts, &)
       end
     end
   end
