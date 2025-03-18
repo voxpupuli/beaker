@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.0](https://github.com/voxpupuli/beaker/tree/6.5.0) (2025-03-18)
+
+**Implemented enhancements:**
+
+* Add support for amazonfips [\#1908](https://github.com/voxpupuli/beaker/pull/1908)
+* Allow minitar 1.x [\#1910](https://github.com/voxpupuli/beaker/pull/1910)
+
 ## [6.4.1](https://github.com/voxpupuli/beaker/tree/6.4.1) (2024-08-27)
 
 **Fixed bugs:**
