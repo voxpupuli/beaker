@@ -14,6 +14,20 @@ module Windows::Group
     end
   end
 
+  # using powershell commands as wmic is deprecated in windows 2025
+  def group_list_using_powershell
+    execute('cmd /c echo "" | powershell.exe "Get-LocalGroup | Select-Object -ExpandProperty Name"') do |result|
+      groups = []
+      result.stdout.each_line do |line|
+        groups << line.strip or next
+      end
+
+      yield result if block_given?
+
+      groups
+    end
+  end
+
   def group_get(name)
     execute("net localgroup \"#{name}\"") do |result|
       fail_test "failed to get group #{name}" if result.exit_code != 0
