@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.5.1](https://github.com/voxpupuli/beaker/tree/6.5.1) (2025-03-24)
+
+**Implemented enhancements:**
+
+- Changes to add powershell commands as wmic is deprecated in windows [\#1907](https://github.com/voxpupuli/beaker/pull/1907)
+
 ## [6.5.0](https://github.com/voxpupuli/beaker/tree/6.5.0) (2025-03-18)
 
 **Implemented enhancements:**
