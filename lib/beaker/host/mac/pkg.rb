@@ -6,6 +6,8 @@ module Mac::Pkg
   end
 
   def install_package(name, _cmdline_args = '', _version = nil)
+    # strip off any .dmg extension, if it exists
+    name = File.basename(name, '.dmg')
     generic_install_dmg("#{name}.dmg", name, "#{name}.pkg")
   end
 
@@ -25,7 +27,35 @@ module Mac::Pkg
     end
     dmg_name = File.basename(dmg_file, '.dmg')
     execute("hdiutil attach #{dmg_name}.dmg")
-    execute("installer -pkg /Volumes/#{pkg_base}/#{pkg_name} -target /")
+
+    # First check if the specific package exists, otherwise use wildcard
+    specific_pkg_path = "/Volumes/#{pkg_base}/#{pkg_name}"
+    execute("test -f #{specific_pkg_path}", :accept_all_exit_codes => true) do |result|
+      if result.exit_code == 0
+        # $pkg_name package found so install it
+        execute("installer -pkg #{specific_pkg_path} -target /")
+      else
+        # else find and install the first *.pkg file in the volume
+        execute(<<~SCRIPT
+          found=0
+          for pkg in /Volumes/#{pkg_base}/*.pkg; do
+            if [ -f "$pkg" ]; then
+              echo "Installing $pkg"
+              installer -pkg "$pkg" -target /
+              found=1
+              break  # Only install the first package found
+            fi
+          done
+
+          # Return non-zero exit code if no packages were found
+          if [ $found -eq 0 ]; then
+            echo "ERROR: No .pkg files found in /Volumes/#{pkg_base}/"
+            exit 1
+          fi
+        SCRIPT
+               )
+      end
+    end
   end
 
   def uninstall_package(name, _cmdline_args = '')
