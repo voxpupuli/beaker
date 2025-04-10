@@ -18,7 +18,10 @@ module Mac::Pkg
   # @param [String] pkg_base      The base name of the directory that the dmg
   #                               attaches to under `/Volumes`
   # @param [String] pkg_name      The name of the package file that should be
-  #                               used by the installer
+  #                               used by the installer. If the specified
+  #                               package is not found, a wildcard search will be
+  #                               performed to locate and install the first `.pkg`
+  #                               file in the volume.
   # @example: Install vagrant from URL
   #   mymachost.generic_install_dmg('https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.dmg', 'Vagrant', 'Vagrant.pkg')
   def generic_install_dmg(dmg_file, pkg_base, pkg_name)
@@ -36,7 +39,7 @@ module Mac::Pkg
         execute("installer -pkg #{specific_pkg_path} -target /")
       else
         # else find and install the first *.pkg file in the volume
-        execute(<<~SCRIPT
+        execute <<~SCRIPT
           found=0
           for pkg in /Volumes/#{pkg_base}/*.pkg; do
             if [ -f "$pkg" ]; then
@@ -53,7 +56,6 @@ module Mac::Pkg
             exit 1
           fi
         SCRIPT
-               )
       end
     end
   end
