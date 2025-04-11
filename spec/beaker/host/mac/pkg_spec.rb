@@ -64,7 +64,7 @@ describe MacPkgTest do
 
         # This is a bit complex as we're testing the heredoc script execution
         # We're expecting the script to be executed and are not validating its exact content
-        expect(host).to receive(:execute).with(a_string_including("for pkg in /Volumes/#{pkg_base}/*.pkg"))
+        expect(host).to receive(:execute).with(a_string_including("find /Volumes/#{pkg_base} -name \"*.pkg\" -type f -print -quit"))
 
         host.generic_install_dmg(dmg_file, pkg_base, pkg_name)
       end
