@@ -40,18 +40,12 @@ module Mac::Pkg
       else
         # else find and install the first *.pkg file in the volume
         execute <<~SCRIPT
-          found=0
-          for pkg in /Volumes/#{pkg_base}/*.pkg; do
-            if [ -f "$pkg" ]; then
-              echo "Installing $pkg"
-              installer -pkg "$pkg" -target /
-              found=1
-              break  # Only install the first package found
-            fi
-          done
-
-          # Return non-zero exit code if no packages were found
-          if [ $found -eq 0 ]; then
+          # find the first .pkg file in the mounted volume
+          pkg=$(find /Volumes/#{pkg_base} -name "*.pkg" -type f -print -quit)
+          if [ -n "$pkg" ]; then
+            echo "Installing $pkg"
+            installer -pkg "$pkg" -target /
+          else
             echo "ERROR: No .pkg files found in /Volumes/#{pkg_base}/"
             exit 1
           fi
