@@ -272,6 +272,7 @@ RSpec/SpecFilePathFormat:
     - 'spec/beaker/dsl/wrappers_spec.rb'
     - 'spec/beaker/host/mac/group_spec.rb'
     - 'spec/beaker/host/mac/user_spec.rb'
+    - 'spec/beaker/host/mac/pkg_spec.rb'
     - 'spec/beaker/host/pswindows/user_spec.rb'
     - 'spec/beaker/host/windows/user_spec.rb'
     - 'spec/beaker/host_prebuilt_steps_spec.rb'
