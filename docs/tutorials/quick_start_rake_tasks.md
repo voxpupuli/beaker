@@ -27,8 +27,7 @@ You should see them listed along with any rake tasks you have defined in your lo
     rake beaker_quickstart:gen_hosts[hypervisor]  # Generate Default Beaker Host Config File, valid options are: vmpooler or vagrant
     rake beaker_quickstart:gen_pre_suite           # Generate Default Pre-Suite
     rake beaker_quickstart:gen_smoke_test          # Generate Default Smoke Test
-    rake beaker_quickstart:run_test[hypervisor]   # Run Default Smoke Test, after generating default host config and test files, valid
-    options are: vmpooler or vagrant
+    rake beaker_quickstart:run_test[hypervisor]   # Run Default Smoke Test, after generating default host config and test files, valid options are: vmpooler or vagrant
 ```
 
 ## Tasks
