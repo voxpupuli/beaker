@@ -12,7 +12,7 @@ In most cases, beaker is running on a system separate from the SUT; we will comm
 On a Debian or Ubuntu system you can install these using the command
 
 ```console
-  $ sudo apt-get install ruby-dev libxml2-dev libxslt1-dev g++ zlib1g-dev
+  $ sudo apt-get install ruby-dev libxml2-dev libxslt1-dev make g++ zlib1g-dev
 ```
 
 On an EL or Fedora system use:
