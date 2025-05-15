@@ -8,10 +8,12 @@ on:
       - master
 
 jobs:
-  rubocop:
+  rubocop_and_matrix:
     env:
       BUNDLE_WITHOUT: release
     runs-on: ubuntu-24.04
+    outputs:
+      ruby: ${{ steps.ruby.outputs.versions }}
     steps:
       - uses: actions/checkout@v4
       - name: Install Ruby ${{ matrix.ruby }}
@@ -21,22 +23,18 @@ jobs:
           bundler-cache: true
       - name: Run Rubocop
         run: bundle exec rake rubocop
+      - id: ruby
+        uses: voxpupuli/ruby-version@v1
 
   test:
+    name: "Ruby ${{ matrix.ruby }}"
     runs-on: ubuntu-24.04
+    needs: rubocop_and_matrix
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - ruby: "2.7"
-          - ruby: "3.0"
-          - ruby: "3.1"
-          - ruby: "3.2"
-          - ruby: "3.3"
-          - ruby: "3.4"
-            coverage: "yes"
+        ruby: ${{ fromJSON(needs.rubocop_and_matrix.outputs.ruby) }}
     env:
-      COVERAGE: ${{ matrix.coverage }}
       BUNDLE_WITHOUT: release:rubocop
       BEAKER_HYPERVISOR: docker
     steps:
@@ -55,7 +53,7 @@ jobs:
 
   tests:
     needs:
-      - rubocop
+      - rubocop_and_matrix
       - test
     runs-on: ubuntu-24.04
     name: Test suite
