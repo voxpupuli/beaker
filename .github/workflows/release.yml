@@ -12,10 +12,10 @@ jobs:
     if: github.repository_owner == 'voxpupuli'
     steps:
       - uses: actions/checkout@v4
-      - name: Install Ruby 3.0
+      - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.4'
         env:
           BUNDLE_WITHOUT: release:development:rubocop
       - name: Build gem

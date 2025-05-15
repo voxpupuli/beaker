@@ -73,7 +73,7 @@ test_name "dsl::structure" do
 
       fail "#confine did not skip test but should have."
     rescue Beaker::DSL::Outcomes::SkipTest => e
-      assert_match(/No suitable hosts found with {:platform=>"test"}/, e.message, "#confine raised an unexpected skip_test")
+      assert_match(/No suitable hosts found with {(:platform=>|platform: )"test"}/, e.message, "#confine raised an unexpected skip_test")
     end
   end
 
@@ -83,7 +83,7 @@ test_name "dsl::structure" do
 
       fail "#confine did not skip test but should have."
     rescue Beaker::DSL::Outcomes::SkipTest => e
-      assert_match(/No suitable hosts found without {:platform=>"#{default['platform']}"}/, e.message, "#confine raised an unexpected
+      assert_match(/No suitable hosts found without {(:platform=>|platform: )"#{default['platform']}"}/, e.message, "#confine raised an unexpected
       # skip_test")
     end
   end
