@@ -11,7 +11,7 @@ jobs:
   rubocop:
     env:
       BUNDLE_WITHOUT: release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install Ruby ${{ matrix.ruby }}
@@ -23,7 +23,7 @@ jobs:
         run: bundle exec rake rubocop
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +56,7 @@ jobs:
     needs:
       - rubocop
       - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Test suite
     steps:
       - run: echo Test suite completed
