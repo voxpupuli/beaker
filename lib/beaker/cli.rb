@@ -129,10 +129,10 @@ module Beaker
           @perf.print_perf_info if defined? @perf
         end
       # cleanup phase
-      rescue => e
+      rescue
         begin
           run_suite(:pre_cleanup)
-        rescue => e
+        rescue
           # pre-cleanup failed
           @logger.error "Failed running the pre-cleanup suite."
         end
@@ -153,7 +153,7 @@ module Beaker
       else
         begin
           run_suite(:pre_cleanup)
-        rescue => e
+        rescue
           # pre-cleanup failed
           @logger.error "Failed running the pre-cleanup suite."
         end
