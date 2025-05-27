@@ -37,11 +37,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
   s.add_dependency 'ed25519', '>= 1.2', '<2.0'
 
-  # 1.2.6 is broken
-  # We need to pin to 1.2.5 until the issue is solved
-  # https://github.com/excon/excon/issues/884
-  s.add_dependency 'excon', '1.2.5'
-
   s.add_dependency 'hocon', '~> 1.0'
   s.add_dependency 'inifile', '~> 3.0'
   s.add_dependency 'net-scp', '>= 1.2', '< 5.0'
