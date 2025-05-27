@@ -26,11 +26,11 @@ module Aix::Group
     end
   end
 
-  def group_present(name, &block)
-    execute("if ! lsgroup #{name}; then mkgroup #{name}; fi", {}, &block)
+  def group_present(name, &)
+    execute("if ! lsgroup #{name}; then mkgroup #{name}; fi", {}, &)
   end
 
-  def group_absent(name, &block)
-    execute("if lsgroup #{name}; then rmgroup #{name}; fi", {}, &block)
+  def group_absent(name, &)
+    execute("if lsgroup #{name}; then rmgroup #{name}; fi", {}, &)
   end
 end
