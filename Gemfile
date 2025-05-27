@@ -2,6 +2,9 @@ source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gemspec
 gem 'stringio'
+
+# test for https://github.com/excon/excon/issues/884#issuecomment-2913073825
+gem 'excon', github: 'excon/excon', branch: 'master' if RUBY_VERSION >= '3.1.0'
 # This section of the gemspec is for Puppet CI; it will pull in
 # a supported beaker library for testing to overwrite the gemspec if
 # a corresponding ENV var is found. Currently, the only supported lib
