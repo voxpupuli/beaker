@@ -35,10 +35,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
   s.add_dependency 'ed25519', '>= 1.2', '<2.0'
 
-  # 1.2.6 is broken
-  # We need to pin to 1.2.5 until the issue is solved
+  # excon is a dependency of docker-api
+  # 1.2.6 is broken and needs to be excluded
+  # we need to allow 1.2.5 because newer versions require Ruby 3.1
   # https://github.com/excon/excon/issues/884
-  s.add_dependency 'excon', '1.2.5'
+  s.add_dependency 'excon', '>= 1.2.5', '< 2', '!= 1.2.6'
 
   s.add_dependency 'hocon', '~> 1.0'
   s.add_dependency 'inifile', '~> 3.0'
