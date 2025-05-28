@@ -41,7 +41,7 @@ module Beaker
 
         begin
           logger.with_indent(&block)
-        rescue Exception => e
+        rescue StandardError => e
           if @options.has_key?(:debug_errors) && @options[:debug_errors] == true
             begin
               require 'pry'

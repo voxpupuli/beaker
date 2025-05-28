@@ -254,7 +254,7 @@ module Beaker
             end
           end
         end
-      rescue Exception => e
+      rescue StandardError => e
         @logger.error "failure in XML output: \n#{e}" + e.backtrace.join("\n")
       end
     end

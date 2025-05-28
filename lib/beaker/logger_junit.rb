@@ -106,9 +106,9 @@ module Beaker
       else
         # no existing file, create a new one
         doc = REXML::Document.new
-        doc << REXML::XMLDecl.new(version = "1.0", encoding = "UTF-8")
+        doc << REXML::XMLDecl.new("1.0", "UTF-8")
         instruction_content = "type='text/xsl' href='#{File.basename(stylesheet)}'"
-        doc << REXML::Instruction.new(target = "xml-stylesheet", content = instruction_content)
+        doc << REXML::Instruction.new("xml-stylesheet", instruction_content)
       end
       return doc
     end
