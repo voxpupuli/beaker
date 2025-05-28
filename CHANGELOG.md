@@ -1,5 +1,20 @@
 # Changelog
 
+## [6.7.0](https://github.com/voxpupuli/beaker/tree/6.6.0) (2025-05-28)
+
+**Implemented enhancements:**
+
+- Fix some doc issues [\#1916](https://github.com/voxpupuli/beaker/pull/1916)
+- Add Ruby 3.4 support [\#1917](https://github.com/voxpupuli/beaker/pull/1917)
+- Add benchmark dependency for Ruby 3.5 suppor [\#1920](https://github.com/voxpupuli/beaker/pull/1920)
+- fakefs: Allow 3.x [\#1918](https://github.com/voxpupuli/beaker/pull/1918)
+- voxpupuli-rubocop: Update 3.0.0->3.1.0 [\#1921](https://github.com/voxpupuli/beaker/pull/1921)
+
+**Fixed bugs:**
+
+- Fix macOS package installation when DMG content differs from filename [\#1915](https://github.com/voxpupuli/beaker/pull/1915)
+- Fix wrong parameter assignment in multiple places [\#1926](https://github.com/voxpupuli/beaker/pull/1926)
+
 ## [6.6.0](https://github.com/voxpupuli/beaker/tree/6.6.0) (2025-03-27)
 
 **Implemented enhancements:**
