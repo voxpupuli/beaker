@@ -6,7 +6,7 @@
 
 - Fix some doc issues [\#1916](https://github.com/voxpupuli/beaker/pull/1916)
 - Add Ruby 3.4 support [\#1917](https://github.com/voxpupuli/beaker/pull/1917)
-- Add benchmark dependency for Ruby 3.5 suppor [\#1920](https://github.com/voxpupuli/beaker/pull/1920)
+- Add benchmark dependency for Ruby 3.5 support [\#1920](https://github.com/voxpupuli/beaker/pull/1920)
 - fakefs: Allow 3.x [\#1918](https://github.com/voxpupuli/beaker/pull/1918)
 - voxpupuli-rubocop: Update 3.0.0->3.1.0 [\#1921](https://github.com/voxpupuli/beaker/pull/1921)
 
