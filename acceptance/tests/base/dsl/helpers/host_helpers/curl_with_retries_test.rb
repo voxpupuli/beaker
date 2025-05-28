@@ -9,9 +9,9 @@ test_name "dsl::helpers::host_helpers #curl_with_retries" do
         "description",
         default,
         "file:///non/existent.html",
-        desired_exit_codes = [0],
-        max_retries = 2,
-        retry_interval = 0.01
+        desired_exit_codes: [0],
+        max_retries: 2,
+        retry_interval: 0.01
     end
   end
 
