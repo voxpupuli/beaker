@@ -280,7 +280,7 @@ module Unix::Exec
     case self['platform']
     when /debian|ubuntu/
       exec(Beaker::Command.new("systemctl restart ssh"))
-    when /(el|centos|redhat|oracle|scientific)-[0-6]/
+    when /(el|centos|redhat|oracle|scientific)-[0-6]\b/
       exec(Beaker::Command.new("/sbin/service sshd restart"))
     when /solaris/
       exec(Beaker::Command.new("svcadm restart svc:/network/ssh:default"))

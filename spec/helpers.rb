@@ -131,6 +131,7 @@ module PlatformHelpers
     el-
     centos
     redhat
+    redhat-10
     oracle
     scientific
     archlinux

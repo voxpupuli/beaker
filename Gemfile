@@ -31,3 +31,5 @@ group :release do
 end
 
 gem 'rdoc' if RUBY_VERSION >= '3.1'
+
+gem "irb", "~> 1.15"
