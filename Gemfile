@@ -1,7 +1,7 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gemspec
-gem 'stringio'
+
 # This section of the gemspec is for Puppet CI; it will pull in
 # a supported beaker library for testing to overwrite the gemspec if
 # a corresponding ENV var is found. Currently, the only supported lib
@@ -29,7 +29,3 @@ group :release do
   gem 'faraday-retry', require: false
   gem 'github_changelog_generator', require: false
 end
-
-gem 'rdoc' if RUBY_VERSION >= '3.1'
-
-gem "irb", "~> 1.15"
