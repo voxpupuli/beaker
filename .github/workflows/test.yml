@@ -9,8 +9,6 @@ on:
 
 jobs:
   rubocop_and_matrix:
-    env:
-      BUNDLE_WITHOUT: release
     runs-on: ubuntu-24.04
     outputs:
       ruby: ${{ steps.ruby.outputs.versions }}
@@ -35,7 +33,6 @@ jobs:
       matrix:
         ruby: ${{ fromJSON(needs.rubocop_and_matrix.outputs.ruby) }}
     env:
-      BUNDLE_WITHOUT: release:rubocop
       BEAKER_HYPERVISOR: docker
     steps:
       - uses: actions/checkout@v4
